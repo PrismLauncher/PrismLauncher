@@ -44,9 +44,9 @@
 
 #include <QDir>
 #include <QFlags>
+#include <QLocalServer>
 #include <QObject>
 #include <QThread>
-#include <QLocalServer>
 
 namespace FS {
 
@@ -84,7 +84,7 @@ bool ensureFolderPathExists(QString filenamepath);
 
 /**
  * @brief Copies a directory and it's contents from src to dest
- */ 
+ */
 class copy : public QObject {
     Q_OBJECT
    public:
@@ -167,17 +167,14 @@ class ExternalLinkFileProcess : public QThread {
 
 /**
  * @brief links (a file / a directory and it's contents) from src to dest
- */ 
+ */
 class create_link : public QObject {
     Q_OBJECT
    public:
-    create_link(const QList<LinkPair> path_pairs, QObject* parent = nullptr) : QObject(parent)
-    {
-        m_path_pairs.append(path_pairs);
-    }
+    create_link(const QList<LinkPair> path_pairs, QObject* parent = nullptr) : QObject(parent) { m_path_pairs.append(path_pairs); }
     create_link(const QString& src, const QString& dst, QObject* parent = nullptr) : QObject(parent)
     {
-        LinkPair pair = {src, dst};
+        LinkPair pair = { src, dst };
         m_path_pairs.append(pair);
     }
     create_link& useHardLinks(const bool useHard)
@@ -211,27 +208,22 @@ class create_link : public QObject {
         return *this;
     }
 
-    std::error_code getOSError() {
-        return m_os_err;
-    }
+    std::error_code getOSError() { return m_os_err; }
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
     int totalLinked() { return m_linked; }
-
 
     void runPrivileged() { runPrivileged(QString()); }
     void runPrivileged(const QString& offset);
 
     QList<LinkResult> getResults() { return m_path_results; }
 
-
    signals:
     void fileLinked(const QString& srcName, const QString& dstName);
     void linkFailed(const QString& srcName, const QString& dstName, const QString& err_msg, int err_value);
     void finished();
     void finishedPrivileged(bool gotResults);
-
 
    private:
     bool operator()(const QString& offset, bool dryRun = false);
@@ -262,9 +254,9 @@ class create_link : public QObject {
  * @brief moves a file by renaming it
  * @param source source file path
  * @param dest destination filepath
- * 
+ *
  */
-bool move(const QString&  source, const QString& dest);
+bool move(const QString& source, const QString& dest);
 
 /**
  * Delete a folder recursively
@@ -274,7 +266,7 @@ bool deletePath(QString path);
 /**
  * Trash a folder / file
  */
-bool trash(QString path, QString *pathInTrash = nullptr);
+bool trash(QString path, QString* pathInTrash = nullptr);
 
 QString PathCombine(const QString& path1, const QString& path2);
 QString PathCombine(const QString& path1, const QString& path2, const QString& path3);
@@ -284,16 +276,15 @@ QString AbsolutePath(const QString& path);
 
 /**
  * @brief depth of path. "foo.txt" -> 0 , "bar/foo.txt" -> 1, /baz/bar/foo.txt -> 2, etc.
- * 
+ *
  * @param path path to measure
- * @return int number of componants before base path
+ * @return int number of components before base path
  */
 int PathDepth(const QString& path);
 
-
 /**
- * @brief  cut off segments of path untill it is a max of length depth
- * 
+ * @brief  cut off segments of path until it is a max of length depth
+ *
  * @param path path to truncate
  * @param depth max depth of new path
  * @return QString truncated path
@@ -363,124 +354,118 @@ enum class FilesystemType {
 
 /**
  * @brief Ordered Mapping of enum types to reported filesystem names
- * this maping is non exsaustive, it just attempts to capture the filesystems which could be reasonalbly be in use .
+ * this mapping is non exsaustive, it just attempts to capture the filesystems which could be reasonalbly be in use .
  * all string values are in uppercase, use `QString.toUpper()` or equivalent during lookup.
- * 
+ *
  * QMap is ordered
- * 
+ *
  */
-static const QMap<FilesystemType, QString> s_filesystem_type_names = {
-    {FilesystemType::FAT,    QString("FAT")},
-    {FilesystemType::NTFS,   QString("NTFS")},
-    {FilesystemType::REFS,   QString("REFS")},
-    {FilesystemType::EXT,    QString("EXT")},
-    {FilesystemType::EXT_2_OLD,    QString("EXT_2_OLD")},
-    {FilesystemType::EXT_2_3_4,    QString("EXT2/3/4")},
-    {FilesystemType::XFS,    QString("XFS")},
-    {FilesystemType::BTRFS,  QString("BTRFS")},
-    {FilesystemType::NFS,    QString("NFS")},
-    {FilesystemType::ZFS,    QString("ZFS")},
-    {FilesystemType::APFS,   QString("APFS")},
-    {FilesystemType::HFS,    QString("HFS")},
-    {FilesystemType::HFSPLUS, QString("HFSPLUS")},
-    {FilesystemType::HFSX,    QString("HFSX")},
-    {FilesystemType::FUSEBLK, QString("FUSEBLK")},
-    {FilesystemType::F2FS, QString("F2FS")},
-    {FilesystemType::UNKNOWN, QString("UNKNOWN")}
-};
-
+static const QMap<FilesystemType, QString> s_filesystem_type_names = { { FilesystemType::FAT, QString("FAT") },
+                                                                       { FilesystemType::NTFS, QString("NTFS") },
+                                                                       { FilesystemType::REFS, QString("REFS") },
+                                                                       { FilesystemType::EXT, QString("EXT") },
+                                                                       { FilesystemType::EXT_2_OLD, QString("EXT_2_OLD") },
+                                                                       { FilesystemType::EXT_2_3_4, QString("EXT2/3/4") },
+                                                                       { FilesystemType::XFS, QString("XFS") },
+                                                                       { FilesystemType::BTRFS, QString("BTRFS") },
+                                                                       { FilesystemType::NFS, QString("NFS") },
+                                                                       { FilesystemType::ZFS, QString("ZFS") },
+                                                                       { FilesystemType::APFS, QString("APFS") },
+                                                                       { FilesystemType::HFS, QString("HFS") },
+                                                                       { FilesystemType::HFSPLUS, QString("HFSPLUS") },
+                                                                       { FilesystemType::HFSX, QString("HFSX") },
+                                                                       { FilesystemType::FUSEBLK, QString("FUSEBLK") },
+                                                                       { FilesystemType::F2FS, QString("F2FS") },
+                                                                       { FilesystemType::UNKNOWN, QString("UNKNOWN") } };
 
 /**
  * @brief Ordered Mapping of reported filesystem names to enum types
- * this maping is non exsaustive, it just attempts to capture the many way these filesystems could be reported.
+ * this mapping is non exsaustive, it just attempts to capture the many way these filesystems could be reported.
  * all keys are in uppercase, use `QString.toUpper()` or equivalent during lookup.
- * 
+ *
  * QMap is ordered
- * 
+ *
  */
 static const QMap<QString, FilesystemType> s_filesystem_type_names_inverse = {
-    {QString("FAT"), FilesystemType::FAT},
-    {QString("NTFS"), FilesystemType::NTFS},
-    {QString("REFS"), FilesystemType::REFS},
-    {QString("EXT2_OLD"), FilesystemType::EXT_2_OLD},
-    {QString("EXT_2_OLD"), FilesystemType::EXT_2_OLD},
-    {QString("EXT2"), FilesystemType::EXT_2_3_4},
-    {QString("EXT3"), FilesystemType::EXT_2_3_4},
-    {QString("EXT4"), FilesystemType::EXT_2_3_4},
-    {QString("EXT2/3/4"), FilesystemType::EXT_2_3_4},
-    {QString("EXT_2_3_4"), FilesystemType::EXT_2_3_4},
-    {QString("EXT"), FilesystemType::EXT}, // must come after all other EXT variants to prevent greedy detection
-    {QString("XFS"), FilesystemType::XFS},
-    {QString("BTRFS"), FilesystemType::BTRFS},
-    {QString("NFS"), FilesystemType::NFS},
-    {QString("ZFS"), FilesystemType::ZFS},
-    {QString("APFS"), FilesystemType::APFS},
-    {QString("HFSPLUS"), FilesystemType::HFSPLUS},
-    {QString("HFSX"), FilesystemType::HFSX},
-    {QString("HFS"), FilesystemType::HFS},
-    {QString("FUSEBLK"), FilesystemType::FUSEBLK},
-    {QString("F2FS"), FilesystemType::F2FS},
-    {QString("UNKNOWN"), FilesystemType::UNKNOWN}
+    { QString("FAT"), FilesystemType::FAT },
+    { QString("NTFS"), FilesystemType::NTFS },
+    { QString("REFS"), FilesystemType::REFS },
+    { QString("EXT2_OLD"), FilesystemType::EXT_2_OLD },
+    { QString("EXT_2_OLD"), FilesystemType::EXT_2_OLD },
+    { QString("EXT2"), FilesystemType::EXT_2_3_4 },
+    { QString("EXT3"), FilesystemType::EXT_2_3_4 },
+    { QString("EXT4"), FilesystemType::EXT_2_3_4 },
+    { QString("EXT2/3/4"), FilesystemType::EXT_2_3_4 },
+    { QString("EXT_2_3_4"), FilesystemType::EXT_2_3_4 },
+    { QString("EXT"), FilesystemType::EXT },  // must come after all other EXT variants to prevent greedy detection
+    { QString("XFS"), FilesystemType::XFS },
+    { QString("BTRFS"), FilesystemType::BTRFS },
+    { QString("NFS"), FilesystemType::NFS },
+    { QString("ZFS"), FilesystemType::ZFS },
+    { QString("APFS"), FilesystemType::APFS },
+    { QString("HFSPLUS"), FilesystemType::HFSPLUS },
+    { QString("HFSX"), FilesystemType::HFSX },
+    { QString("HFS"), FilesystemType::HFS },
+    { QString("FUSEBLK"), FilesystemType::FUSEBLK },
+    { QString("F2FS"), FilesystemType::F2FS },
+    { QString("UNKNOWN"), FilesystemType::UNKNOWN }
 };
 
 /**
  * @brief Get the string name of Filesystem enum object
- * 
- * @param type 
- * @return QString 
+ *
+ * @param type
+ * @return QString
  */
 QString getFilesystemTypeName(FilesystemType type);
 
 /**
  * @brief Get the Filesystem enum object from a name
- *  Does a lookup of the type name and returns an exact match  
+ *  Does a lookup of the type name and returns an exact match
  *
- * @param name 
- * @return FilesystemType 
+ * @param name
+ * @return FilesystemType
  */
 FilesystemType getFilesystemType(const QString& name);
 
 /**
  * @brief Get the Filesystem enum object from a name
  *  Does a fuzzy lookup of the type name and returns an apropreate match
- * 
- * @param name 
- * @return FilesystemType 
+ *
+ * @param name
+ * @return FilesystemType
  */
 FilesystemType getFilesystemTypeFuzzy(const QString& name);
-
 
 struct FilesystemInfo {
     FilesystemType fsType = FilesystemType::UNKNOWN;
     QString fsTypeName;
-    int     blockSize;
-    qint64 	bytesAvailable;
-    qint64 	bytesFree;
-    qint64 	bytesTotal;
+    int blockSize;
+    qint64 bytesAvailable;
+    qint64 bytesFree;
+    qint64 bytesTotal;
     QString name;
     QString rootPath;
 };
 
 /**
- * @brief path to the near ancestor that exsists
- * 
+ * @brief path to the near ancestor that exists
+ *
  */
 QString NearestExistentAncestor(const QString& path);
 
 /**
  * @brief colect information about the filesystem under a file
- * 
+ *
  */
 FilesystemInfo statFS(const QString& path);
 
-static const QList<FilesystemType> s_clone_filesystems = { 
-    FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS,
-    FilesystemType::XFS, FilesystemType::REFS 
-};
+static const QList<FilesystemType> s_clone_filesystems = { FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS,
+                                                           FilesystemType::XFS, FilesystemType::REFS };
 
 /**
- * @brief if the Filesystem is reflink/clone capable 
- * 
+ * @brief if the Filesystem is reflink/clone capable
+ *
  */
 bool canCloneOnFS(const QString& path);
 bool canCloneOnFS(const FilesystemInfo& info);
@@ -488,13 +473,13 @@ bool canCloneOnFS(FilesystemType type);
 
 /**
  * @brief if the Filesystems are reflink/clone capable and both are on the same device
- * 
+ *
  */
 bool canClone(const QString& src, const QString& dst);
 
 /**
  * @brief Copies a directory and it's contents from src to dest
- */ 
+ */
 class clone : public QObject {
     Q_OBJECT
    public:
@@ -535,7 +520,7 @@ class clone : public QObject {
 
 /**
  * @brief clone/reflink file from src to dst
- * 
+ *
  */
 bool clone_file(const QString& src, const QString& dst, std::error_code& ec);
 
@@ -552,8 +537,8 @@ static const QList<FilesystemType> s_non_link_filesystems = {
 };
 
 /**
- * @brief if the Filesystem is symlink capable 
- * 
+ * @brief if the Filesystem is symlink capable
+ *
  */
 bool canLinkOnFS(const QString& path);
 bool canLinkOnFS(const FilesystemInfo& info);
@@ -561,10 +546,10 @@ bool canLinkOnFS(FilesystemType type);
 
 /**
  * @brief if the Filesystem is symlink capable on both ends
- * 
+ *
  */
 bool canLink(const QString& src, const QString& dst);
 
 uintmax_t hardLinkCount(const QString& path);
 
-}
+}  // namespace FS

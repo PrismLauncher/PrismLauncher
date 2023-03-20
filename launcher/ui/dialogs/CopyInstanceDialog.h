@@ -22,17 +22,15 @@
 
 class BaseInstance;
 
-namespace Ui
-{
+namespace Ui {
 class CopyInstanceDialog;
 }
 
-class CopyInstanceDialog : public QDialog
-{
+class CopyInstanceDialog : public QDialog {
     Q_OBJECT
 
-public:
-    explicit CopyInstanceDialog(InstancePtr original, QWidget *parent = 0);
+   public:
+    explicit CopyInstanceDialog(InstancePtr original, QWidget* parent = 0);
     ~CopyInstanceDialog();
 
     void updateDialogState();
@@ -42,13 +40,12 @@ public:
     QString iconKey() const;
     const InstanceCopyPrefs& getChosenOptions() const;
 
-public slots:
+   public slots:
     void help();
 
-private
-slots:
+   private slots:
     void on_iconButton_clicked();
-    void on_instNameTextBox_textChanged(const QString &arg1);
+    void on_instNameTextBox_textChanged(const QString& arg1);
     // Checkboxes
     void on_selectAllCheckbox_stateChanged(int state);
     void on_copySavesCheckbox_stateChanged(int state);
@@ -65,14 +62,14 @@ slots:
     void on_dontLinkSavesCheckbox_stateChanged(int state);
     void on_useCloneCheckbox_stateChanged(int state);
 
-private:
+   private:
     void checkAllCheckboxes(const bool& b);
     void updateSelectAllCheckbox();
     void updateUseCloneCheckbox();
     void updateLinkOptions();
 
     /* data */
-    Ui::CopyInstanceDialog *ui;
+    Ui::CopyInstanceDialog* ui;
     QString InstIconKey;
     InstancePtr m_original;
     InstanceCopyPrefs m_selectedOptions;

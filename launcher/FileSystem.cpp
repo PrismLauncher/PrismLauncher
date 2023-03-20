@@ -328,7 +328,7 @@ bool create_link::operator()(const QString& offset, bool dryRun)
 }
 
 /**
- * @brief make a list off all the  links ot make
+ * @brief make a list off all the  links to
  * @param offset subdirectory form src to link to dest
  * @return if there was an error during the attempt to link
  */
@@ -363,7 +363,7 @@ void create_link::make_link_list(const QString& offset)
             link_file(src, "");
         } else {
             if (m_debug)
-                qDebug() << "linking recursivly:" << src << "to" << dst << "max_depth:" << m_max_depth;
+                qDebug() << "linking recursively:" << src << "to" << dst << "max_depth:" << m_max_depth;
             QDir src_dir(src);
             QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
 
@@ -414,7 +414,7 @@ bool create_link::make_links()
             qWarning() << "Failed to link files:" << QString::fromStdString(m_os_err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
-            qDebug() << "Error catagory:" << m_os_err.category().name();
+            qDebug() << "Error category:" << m_os_err.category().name();
             qDebug() << "Error code:" << m_os_err.value();
             emit linkFailed(src_path, dst_path, QString::fromStdString(m_os_err.message()), m_os_err.value());
         } else {
@@ -469,7 +469,7 @@ void create_link::runPrivileged(const QString& offset)
             in.setDevice(clientConnection);
             in.setVersion(QDataStream::Qt_5_0);
             qDebug() << "Reading path results from client";
-            qDebug() << "bytes avalible" << clientConnection->bytesAvailable();
+            qDebug() << "bytes available" << clientConnection->bytesAvailable();
 
             // Relies on the fact that QDataStream serializes a quint32 into
             // sizeof(quint32) bytes
@@ -479,7 +479,7 @@ void create_link::runPrivileged(const QString& offset)
             in >> blockSize;
 
             qDebug() << "blocksize is" << blockSize;
-            qDebug() << "bytes avalible" << clientConnection->bytesAvailable();
+            qDebug() << "bytes available" << clientConnection->bytesAvailable();
             if (clientConnection->bytesAvailable() < blockSize || in.atEnd())
                 return;
 
@@ -506,7 +506,7 @@ void create_link::runPrivileged(const QString& offset)
                 m_path_results.append(result);
             }
             gotResults = true;
-            qDebug() << "results recieved, closing connection";
+            qDebug() << "results received, closing connection";
             clientConnection->close();
         });
 
@@ -981,7 +981,7 @@ FilesystemType getFilesystemType(const QString& name)
 }
 
 /**
- * @brief path to the near ancestor that exsists
+ * @brief path to the near ancestor that exists
  *
  */
 QString NearestExistentAncestor(const QString& path)

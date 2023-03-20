@@ -43,15 +43,15 @@
 
 #include "ui/dialogs/IconPickerDialog.h"
 
-#include "BaseVersion.h"
-#include "icons/IconList.h"
 #include "BaseInstance.h"
-#include "InstanceList.h"
-#include "FileSystem.h"
+#include "BaseVersion.h"
 #include "DesktopServices.h"
+#include "FileSystem.h"
+#include "InstanceList.h"
+#include "icons/IconList.h"
 
-CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
-    :QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
+CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget* parent)
+    : QDialog(parent), ui(new Ui::CopyInstanceDialog), m_original(original)
 {
     ui->setupUi(this);
     resize(minimumSizeHint());
@@ -74,8 +74,7 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
     groupList.push_front("");
     ui->groupBox->addItems(groupList);
     int index = groupList.indexOf(APPLICATION->instances()->getInstanceGroup(m_original->id()));
-    if(index == -1)
-    {
+    if (index == -1) {
         index = 0;
     }
     ui->groupBox->setCurrentIndex(index);
@@ -108,10 +107,8 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 
 #if defined(Q_OS_WIN)
     ui->symbolicLinksCheckbox->setIcon(style()->standardIcon(QStyle::SP_VistaShield));
-    ui->symbolicLinksCheckbox->setToolTip(
-        tr("Use symbolic links instead of copying files.") +
-        tr("\nOn windows symbolic links may require admin permision to create.")
-    );
+    ui->symbolicLinksCheckbox->setToolTip(tr("Use symbolic links instead of copying files.") +
+                                          tr("\nOn windows symbolic links may require admin permission to create."));
 #endif
 
     updateLinkOptions();
@@ -119,7 +116,6 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget *parent)
 
     auto HelpButton = ui->buttonBox->button(QDialogButtonBox::Help);
     connect(HelpButton, &QPushButton::clicked, this, &CopyInstanceDialog::help);
-    
 }
 
 CopyInstanceDialog::~CopyInstanceDialog()
@@ -131,8 +127,7 @@ void CopyInstanceDialog::updateDialogState()
 {
     auto allowOK = !instName().isEmpty();
     auto OkButton = ui->buttonBox->button(QDialogButtonBox::Ok);
-    if(OkButton->isEnabled() != allowOK)
-    {
+    if (OkButton->isEnabled() != allowOK) {
         OkButton->setEnabled(allowOK);
     }
 }
@@ -140,8 +135,7 @@ void CopyInstanceDialog::updateDialogState()
 QString CopyInstanceDialog::instName() const
 {
     auto result = ui->instNameTextBox->text().trimmed();
-    if(result.size())
-    {
+    if (result.size()) {
         return result;
     }
     return QString();
@@ -161,7 +155,6 @@ const InstanceCopyPrefs& CopyInstanceDialog::getChosenOptions() const
 {
     return m_selectedOptions;
 }
-
 
 void CopyInstanceDialog::help()
 {
@@ -200,7 +193,8 @@ void CopyInstanceDialog::updateLinkOptions()
     ui->symbolicLinksCheckbox->setEnabled(m_linkSupported && !ui->hardLinksCheckbox->isChecked() && !ui->useCloneCheckbox->isChecked());
     ui->hardLinksCheckbox->setEnabled(m_linkSupported && !ui->symbolicLinksCheckbox->isChecked() && !ui->useCloneCheckbox->isChecked());
 
-    ui->symbolicLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseSymLinksEnabled() && !ui->useCloneCheckbox->isChecked());
+    ui->symbolicLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseSymLinksEnabled() &&
+                                          !ui->useCloneCheckbox->isChecked());
     ui->hardLinksCheckbox->setChecked(m_linkSupported && m_selectedOptions.isUseHardLinksEnabled() && !ui->useCloneCheckbox->isChecked());
 
     bool linksInUse = (ui->symbolicLinksCheckbox->isChecked() || ui->hardLinksCheckbox->isChecked());
@@ -220,15 +214,13 @@ void CopyInstanceDialog::on_iconButton_clicked()
     IconPickerDialog dlg(this);
     dlg.execWithSelection(InstIconKey);
 
-    if (dlg.result() == QDialog::Accepted)
-    {
+    if (dlg.result() == QDialog::Accepted) {
         InstIconKey = dlg.selectedIconKey;
         ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
     }
 }
 
-
-void CopyInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
+void CopyInstanceDialog::on_instNameTextBox_textChanged(const QString& arg1)
 {
     updateDialogState();
 }
@@ -246,7 +238,6 @@ void CopyInstanceDialog::on_copySavesCheckbox_stateChanged(int state)
     ui->dontLinkSavesCheckbox->setChecked((state == Qt::Checked) && ui->dontLinkSavesCheckbox->isChecked());
     updateSelectAllCheckbox();
 }
-
 
 void CopyInstanceDialog::on_keepPlaytimeCheckbox_stateChanged(int state)
 {
@@ -311,7 +302,6 @@ void CopyInstanceDialog::on_recursiveLinkCheckbox_stateChanged(int state)
 {
     m_selectedOptions.enableLinkRecursively(state == Qt::Checked);
     updateLinkOptions();
-
 }
 
 void CopyInstanceDialog::on_dontLinkSavesCheckbox_stateChanged(int state)

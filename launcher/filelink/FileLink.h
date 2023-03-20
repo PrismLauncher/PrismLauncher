@@ -25,30 +25,26 @@
 #include <QtCore>
 
 #include <QApplication>
-#include <memory>
+#include <QDataStream>
+#include <QDateTime>
 #include <QDebug>
 #include <QFlag>
 #include <QIcon>
-#include <QDateTime>
-#include <QUrl>
-#include <QDateTime>
-#include <QDataStream>
 #include <QLocalSocket>
+#include <QUrl>
+#include <memory>
 
 #define PRISM_EXTERNAL_EXE
 #include "FileSystem.h"
 
-class FileLinkApp : public QCoreApplication
-{
+class FileLinkApp : public QCoreApplication {
     // friends for the purpose of limiting access to deprecated stuff
     Q_OBJECT
-public:
-
-    FileLinkApp(int &argc, char **argv);
+   public:
+    FileLinkApp(int& argc, char** argv);
     virtual ~FileLinkApp();
 
-private:
-
+   private:
     void joinServer(QString server);
     void readPathPairs();
     void runLink();

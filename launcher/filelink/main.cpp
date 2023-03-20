@@ -22,10 +22,9 @@
 
 #include "FileLink.h"
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
-
     FileLinkApp ldh(argc, argv);
- 
+
     return ldh.exec();
 }
