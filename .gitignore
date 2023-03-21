@@ -24,10 +24,6 @@ Debug
 build
 /build-*
 
-# direnv / Nix
-.direnv/
-.pre-commit-config.yaml
-
 # Install dirs
 install
 /install-*
@@ -48,7 +44,9 @@ run/
 .cache/
 
 # Nix/NixOS
-result/
+.direnv/
+.pre-commit-config.yaml
+result
 
 # Flatpak
 .flatpak-builder
