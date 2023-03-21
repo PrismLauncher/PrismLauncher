@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022,2023 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 flowln <flowlnlnln@gmail.com> 
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -60,14 +61,26 @@ LoggedProcess::~LoggedProcess()
     }
 }
 
+static QString m_leftover_line;
+
 QStringList reprocess(const QByteArray& data, QTextDecoder& decoder)
 {
     auto str = decoder.toUnicode(data);
+
+    // FIXME: Flush this out when process exits
+    if (!m_leftover_line.isEmpty()) {
+        str.prepend(m_leftover_line);
+        m_leftover_line = "";
+    }
+
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, QString::SkipEmptyParts);
 #else
     auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, Qt::SkipEmptyParts);
 #endif
+
+    if (!str.endsWith(QChar::LineFeed))
+        m_leftover_line = lines.takeLast();
     return lines;
 }
 
