@@ -39,7 +39,6 @@
 #include <QFileInfo>
 #include <QMimeData>
 #include <QPushButton>
-#include <QMimeData>
 #include <QStandardPaths>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
@@ -89,11 +88,11 @@ void BlockedModsDialog::dragEnterEvent(QDragEnterEvent* e)
 void BlockedModsDialog::dropEvent(QDropEvent* e)
 {
     for (QUrl& url : e->mimeData()->urls()) {
-        if (url.scheme().isEmpty()) { // ensure isLocalFile() works correctly
+        if (url.scheme().isEmpty()) {  // ensure isLocalFile() works correctly
             url.setScheme("file");
         }
 
-        if (!url.isLocalFile()) { // can't drop external files here.
+        if (!url.isLocalFile()) {  // can't drop external files here.
             continue;
         }
 
@@ -172,7 +171,7 @@ void BlockedModsDialog::update()
     }
 }
 
-/// @brief Signal fired when a watched direcotry has changed
+/// @brief Signal fired when a watched directory has changed
 /// @param path the path to the changed directory
 void BlockedModsDialog::directoryChanged(QString path)
 {
@@ -186,8 +185,22 @@ void BlockedModsDialog::setupWatch()
 {
     const QString downloadsFolder = APPLICATION->settings()->get("DownloadsDir").toString();
     const QString modsFolder = APPLICATION->settings()->get("CentralModsDir").toString();
-    m_watcher.addPath(downloadsFolder);
-    m_watcher.addPath(modsFolder);
+    watchPath(downloadsFolder, true);
+    watchPath(modsFolder, true);
+}
+
+void BlockedModsDialog::watchPath(QString path, bool watch_subdirectories)
+{
+    m_watcher.addPath(path);
+
+    if (!watch_subdirectories)
+        return;
+
+    QDirIterator it(path, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        QString dir = it.next();
+        watchPath(it.next(), watch_subdirectories);
+    }
 }
 
 /// @brief scan all watched folder
@@ -221,7 +234,7 @@ void BlockedModsDialog::scanPath(QString path, bool start_task)
     }
 }
 
-/// @brief add a hashing task for the file located at path, add the path to the pending set if the hasing task is already running
+/// @brief add a hashing task for the file located at path, add the path to the pending set if the hashing task is already running
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::addHashTask(QString path)
 {
@@ -328,7 +341,7 @@ void BlockedModsDialog::validateMatchedMods()
     }
 }
 
-/// @brief run hash task or mark a pending run if it is already runing
+/// @brief run hash task or mark a pending run if it is already running
 void BlockedModsDialog::runHashTask()
 {
     if (!m_hashing_task->isRunning()) {
