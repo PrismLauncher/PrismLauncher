@@ -61,13 +61,10 @@ LoggedProcess::~LoggedProcess()
     }
 }
 
-static QString m_leftover_line;
-
-QStringList reprocess(const QByteArray& data, QTextDecoder& decoder)
+QStringList LoggedProcess::reprocess(const QByteArray& data, QTextDecoder& decoder)
 {
     auto str = decoder.toUnicode(data);
 
-    // FIXME: Flush this out when process exits
     if (!m_leftover_line.isEmpty()) {
         str.prepend(m_leftover_line);
         m_leftover_line = "";
