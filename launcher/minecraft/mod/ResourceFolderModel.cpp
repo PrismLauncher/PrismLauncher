@@ -12,9 +12,11 @@
 
 #include "tasks/Task.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent) : QAbstractListModel(parent), m_dir(dir), m_watcher(this)
+ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent, bool create_dir) : QAbstractListModel(parent), m_dir(dir), m_watcher(this)
 {
-    FS::ensureFolderPathExists(m_dir.absolutePath());
+    if (create_dir) {
+        FS::ensureFolderPathExists(m_dir.absolutePath());
+    }
 
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
     m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);

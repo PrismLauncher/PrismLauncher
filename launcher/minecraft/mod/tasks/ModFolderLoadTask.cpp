@@ -72,14 +72,14 @@ void ModFolderLoadTask::executeTask()
                 delete mod;
             }
             else {
-                m_result->mods[mod->internal_id()] = mod;
+                m_result->mods[mod->internal_id()].reset(std::move(mod));
                 m_result->mods[mod->internal_id()]->setStatus(ModStatus::NoMetadata);
             }
         }
         else { 
             QString chopped_id = mod->internal_id().chopped(9);
             if (m_result->mods.contains(chopped_id)) {
-                m_result->mods[mod->internal_id()] = mod;
+                m_result->mods[mod->internal_id()].reset(std::move(mod));
 
                 auto metadata = m_result->mods[chopped_id]->metadata();
                 if (metadata) {
@@ -90,7 +90,7 @@ void ModFolderLoadTask::executeTask()
                 }
             }
             else {
-                m_result->mods[mod->internal_id()] = mod;
+                m_result->mods[mod->internal_id()].reset(std::move(mod));
                 m_result->mods[mod->internal_id()]->setStatus(ModStatus::NoMetadata);
             }
         }
@@ -130,6 +130,6 @@ void ModFolderLoadTask::getFromMetadata()
 
         auto* mod = new Mod(m_mods_dir, metadata);
         mod->setStatus(ModStatus::NotInstalled);
-        m_result->mods[mod->internal_id()] = mod;
+        m_result->mods[mod->internal_id()].reset(std::move(mod));
     }
 }

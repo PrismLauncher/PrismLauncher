@@ -161,6 +161,7 @@ void LauncherPage::on_iconsDirBrowseBtn_clicked()
         ui->iconsDirTextBox->setText(cooked_dir);
     }
 }
+
 void LauncherPage::on_modsDirBrowseBtn_clicked()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Folder"), ui->modsDirTextBox->text());
@@ -170,6 +171,17 @@ void LauncherPage::on_modsDirBrowseBtn_clicked()
     {
         QString cooked_dir = FS::NormalizePath(raw_dir);
         ui->modsDirTextBox->setText(cooked_dir);
+    }
+}
+
+void LauncherPage::on_downloadsDirBrowseBtn_clicked()
+{
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Downloads Folder"), ui->downloadsDirTextBox->text());
+
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists())
+    {
+        QString cooked_dir = FS::NormalizePath(raw_dir);
+        ui->downloadsDirTextBox->setText(cooked_dir);
     }
 }
 
@@ -205,6 +217,7 @@ void LauncherPage::applySettings()
     s->set("InstanceDir", ui->instDirTextBox->text());
     s->set("CentralModsDir", ui->modsDirTextBox->text());
     s->set("IconsDir", ui->iconsDirTextBox->text());
+    s->set("DownloadsDir", ui->downloadsDirTextBox->text());
 
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
     switch (sortMode)
@@ -261,6 +274,7 @@ void LauncherPage::loadSettings()
     ui->instDirTextBox->setText(s->get("InstanceDir").toString());
     ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
     ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
+    ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
 
     QString sortMode = s->get("InstSortMode").toString();
 

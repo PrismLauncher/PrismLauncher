@@ -70,7 +70,7 @@ void Technic::SolderPackInstallTask::executeTask()
 {
     setStatus(tr("Resolving modpack files"));
 
-    m_filesNetJob = new NetJob(tr("Resolving modpack files"), m_network);
+    m_filesNetJob.reset(new NetJob(tr("Resolving modpack files"), m_network));
     auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
     m_filesNetJob->addNetAction(Net::Download::makeByteArray(sourceUrl, &m_response));
 
@@ -107,7 +107,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     if (!build.minecraft.isEmpty())
         m_minecraftVersion = build.minecraft;
 
-    m_filesNetJob = new NetJob(tr("Downloading modpack"), m_network);
+    m_filesNetJob.reset(new NetJob(tr("Downloading modpack"), m_network));
 
     int i = 0;
     for (const auto &mod : build.mods) {
@@ -219,7 +219,7 @@ void Technic::SolderPackInstallTask::extractFinished()
         }
     }
 
-    shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor = new Technic::TechnicPackProcessor();
+    auto packProcessor = makeShared<Technic::TechnicPackProcessor>();
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &Technic::SolderPackInstallTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &Technic::SolderPackInstallTask::emitFailed);
     packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath, m_minecraftVersion, true);

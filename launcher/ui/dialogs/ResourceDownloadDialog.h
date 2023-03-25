@@ -35,6 +35,9 @@ class QVBoxLayout;
 class QDialogButtonBox;
 class ResourceDownloadTask;
 class ResourceFolderModel;
+class ResourcePackFolderModel;
+class TexturePackFolderModel;
+class ShaderPackFolderModel;
 
 namespace ResourceDownload {
 
@@ -101,6 +104,63 @@ class ModDownloadDialog final : public ResourceDownloadDialog {
     //: String that gets appended to the mod download dialog title ("Download " + resourcesString())
     [[nodiscard]] QString resourcesString() const override { return tr("mods"); }
     [[nodiscard]] QString geometrySaveKey() const override { return "ModDownloadGeometry"; }
+
+    QList<BasePage*> getPages() override;
+
+   private:
+    BaseInstance* m_instance;
+};
+
+class ResourcePackDownloadDialog final : public ResourceDownloadDialog {
+    Q_OBJECT
+
+   public:
+    explicit ResourcePackDownloadDialog(QWidget* parent,
+                                        const std::shared_ptr<ResourcePackFolderModel>& resource_packs,
+                                        BaseInstance* instance);
+    ~ResourcePackDownloadDialog() override = default;
+
+    //: String that gets appended to the resource pack download dialog title ("Download " + resourcesString())
+    [[nodiscard]] QString resourcesString() const override { return tr("resource packs"); }
+    [[nodiscard]] QString geometrySaveKey() const override { return "RPDownloadGeometry"; }
+
+    QList<BasePage*> getPages() override;
+
+   private:
+    BaseInstance* m_instance;
+};
+
+class TexturePackDownloadDialog final : public ResourceDownloadDialog {
+    Q_OBJECT
+
+   public:
+    explicit TexturePackDownloadDialog(QWidget* parent,
+                                        const std::shared_ptr<TexturePackFolderModel>& resource_packs,
+                                        BaseInstance* instance);
+    ~TexturePackDownloadDialog() override = default;
+
+    //: String that gets appended to the texture pack download dialog title ("Download " + resourcesString())
+    [[nodiscard]] QString resourcesString() const override { return tr("texture packs"); }
+    [[nodiscard]] QString geometrySaveKey() const override { return "TPDownloadGeometry"; }
+
+    QList<BasePage*> getPages() override;
+
+   private:
+    BaseInstance* m_instance;
+};
+
+class ShaderPackDownloadDialog final : public ResourceDownloadDialog {
+    Q_OBJECT
+
+   public:
+    explicit ShaderPackDownloadDialog(QWidget* parent,
+                                      const std::shared_ptr<ShaderPackFolderModel>& shader_packs,
+                                      BaseInstance* instance);
+    ~ShaderPackDownloadDialog() override = default;
+
+    //: String that gets appended to the shader pack download dialog title ("Download " + resourcesString())
+    [[nodiscard]] QString resourcesString() const override { return tr("shader packs"); }
+    [[nodiscard]] QString geometrySaveKey() const override { return "ShaderDownloadGeometry"; }
 
     QList<BasePage*> getPages() override;
 

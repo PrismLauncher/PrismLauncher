@@ -572,7 +572,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
         // add stuff...
         for(auto &add: toAdd)
         {
-            ComponentPtr component = new Component(d->m_list, add.uid);
+            auto component = makeShared<Component>(d->m_list, add.uid);
             if(!add.equalsVersion.isEmpty())
             {
                 // exact version

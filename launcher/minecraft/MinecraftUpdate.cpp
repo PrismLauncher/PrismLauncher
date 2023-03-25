@@ -43,7 +43,7 @@ void MinecraftUpdate::executeTask()
     m_tasks.clear();
     // create folders
     {
-        m_tasks.append(new FoldersTask(m_inst));
+        m_tasks.append(makeShared<FoldersTask>(m_inst));
     }
 
     // add metadata update task if necessary
@@ -59,17 +59,17 @@ void MinecraftUpdate::executeTask()
 
     // libraries download
     {
-        m_tasks.append(new LibrariesTask(m_inst));
+        m_tasks.append(makeShared<LibrariesTask>(m_inst));
     }
 
     // FML libraries download and copy into the instance
     {
-        m_tasks.append(new FMLLibrariesTask(m_inst));
+        m_tasks.append(makeShared<FMLLibrariesTask>(m_inst));
     }
 
     // assets update
     {
-        m_tasks.append(new AssetUpdateTask(m_inst));
+        m_tasks.append(makeShared<AssetUpdateTask>(m_inst));
     }
 
     if(!m_preFailure.isEmpty())

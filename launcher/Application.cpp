@@ -7,7 +7,7 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *  Copyright (C) 2022 Tayou <tayou@gmx.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -78,7 +78,9 @@
 #include "ApplicationMessage.h"
 
 #include <iostream>
+#include <mutex>
 
+#include <QFileOpenEvent>
 #include <QAccessible>
 #include <QCommandLineParser>
 #include <QDir>
@@ -151,6 +153,9 @@ namespace {
 /** This is used so that we can output to the log file in addition to the CLI. */
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    static std::mutex loggerMutex;
+    const std::lock_guard<std::mutex> lock(loggerMutex); // synchronized, QFile logFile is not thread-safe
+
     QString out = qFormatLogMessage(type, context, msg);
     out += QChar::LineFeed;
 
@@ -221,7 +226,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_serverToJoin = parser.value("server");
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
-    
+
     m_instanceIdToShowWindowOf = parser.value("show");
 
     for (auto zip_path : parser.values("import")){
@@ -342,7 +347,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                         import.command = "import";
                         import.args.insert("path", zip_url.toString());
                         m_peerInstance->sendMessage(import.serialize(), timeout);
-                    } 
+                    }
                 }
             }
             else
@@ -511,6 +516,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("InstanceDir", "instances");
         m_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
         m_settings->registerSetting("IconsDir", "icons");
+        m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
 
         // Editors
         m_settings->registerSetting("JsonEditor", QString());
@@ -608,6 +614,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
         m_settings->registerSetting("ModDownloadGeometry", "");
+        m_settings->registerSetting("RPDownloadGeometry", "");
+        m_settings->registerSetting("TPDownloadGeometry", "");
+        m_settings->registerSetting("ShaderDownloadGeometry", "");
 
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {
@@ -654,6 +663,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 m_settings->set("FlameKeyOverride", flameKey);
             m_settings->reset("CFKeyOverride");
         }
+        m_settings->registerSetting("ModrinthToken", "");
         m_settings->registerSetting("UserAgentOverride", "");
 
         // Init page provider
@@ -681,7 +691,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // initialize network access and proxy setup
     {
-        m_network = new QNetworkAccessManager();
+        m_network.reset(new QNetworkAccessManager());
         QString proxyTypeStr = settings()->get("ProxyType").toString();
         QString addr = settings()->get("ProxyAddr").toString();
         int port = settings()->get("ProxyPort").value<qint16>();
@@ -1540,6 +1550,15 @@ QString Application::getFlameAPIKey()
     }
 
     return BuildConfig.FLAME_API_KEY;
+}
+
+QString Application::getModrinthAPIToken()
+{
+    QString tokenOverride = m_settings->get("ModrinthToken").toString();
+    if (!tokenOverride.isEmpty())
+        return tokenOverride;
+
+    return QString();
 }
 
 QString Application::getUserAgent()

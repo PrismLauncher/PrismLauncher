@@ -88,15 +88,15 @@ void ModUpdateDialog::checkCandidates()
     SequentialTask check_task(m_parent, tr("Checking for updates"));
 
     if (!m_modrinth_to_update.empty()) {
-        m_modrinth_check_task = new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model);
-        connect(m_modrinth_check_task, &CheckUpdateTask::checkFailed, this,
+        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model));
+        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this,
                 [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
         check_task.addTask(m_modrinth_check_task);
     }
 
     if (!m_flame_to_update.empty()) {
-        m_flame_check_task = new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model);
-        connect(m_flame_check_task, &CheckUpdateTask::checkFailed, this,
+        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model));
+        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this,
                 [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
         check_task.addTask(m_flame_check_task);
     }
@@ -266,9 +266,9 @@ auto ModUpdateDialog::ensureMetadata() -> bool
     }
 
     if (!modrinth_tmp.empty()) {
-        auto* modrinth_task = new EnsureMetadataTask(modrinth_tmp, index_dir, ModPlatform::ResourceProvider::MODRINTH);
-        connect(modrinth_task, &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
-        connect(modrinth_task, &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
+        auto modrinth_task = makeShared<EnsureMetadataTask>(modrinth_tmp, index_dir, ModPlatform::ResourceProvider::MODRINTH);
+        connect(modrinth_task.get(), &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
+        connect(modrinth_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });
 
@@ -279,9 +279,9 @@ auto ModUpdateDialog::ensureMetadata() -> bool
     }
 
     if (!flame_tmp.empty()) {
-        auto* flame_task = new EnsureMetadataTask(flame_tmp, index_dir, ModPlatform::ResourceProvider::FLAME);
-        connect(flame_task, &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
-        connect(flame_task, &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
+        auto flame_task = makeShared<EnsureMetadataTask>(flame_tmp, index_dir, ModPlatform::ResourceProvider::FLAME);
+        connect(flame_task.get(), &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
+        connect(flame_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::FLAME);
         });
 
@@ -334,9 +334,9 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
     if (try_others) {
         auto index_dir = indexDir();
 
-        auto* task = new EnsureMetadataTask(mod, index_dir, next(first_choice));
-        connect(task, &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
-        connect(task, &EnsureMetadataTask::metadataFailed, [this](Mod* candidate) { onMetadataFailed(candidate, false); });
+        auto task = makeShared<EnsureMetadataTask>(mod, index_dir, next(first_choice));
+        connect(task.get(), &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
+        connect(task.get(), &EnsureMetadataTask::metadataFailed, [this](Mod* candidate) { onMetadataFailed(candidate, false); });
 
         m_second_try_metadata->addTask(task);
     } else {
@@ -388,9 +388,9 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     ui->modTreeWidget->addTopLevelItem(item_top);
 }
 
-auto ModUpdateDialog::getTasks() -> const QList<ResourceDownloadTask*>
+auto ModUpdateDialog::getTasks() -> const QList<ResourceDownloadTask::Ptr>
 {
-    QList<ResourceDownloadTask*> list;
+    QList<ResourceDownloadTask::Ptr> list;
 
     auto* item = ui->modTreeWidget->topLevelItem(0);
 

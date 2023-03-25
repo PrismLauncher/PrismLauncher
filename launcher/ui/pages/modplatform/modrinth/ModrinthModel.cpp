@@ -127,7 +127,7 @@ bool ModpackListModel::setData(const QModelIndex &index, const QVariant &value, 
 void ModpackListModel::performPaginatedSearch()
 {
     // TODO: Move to standalone API
-    NetJob* netJob = new NetJob("Modrinth::SearchModpack", APPLICATION->network());
+    auto netJob = makeShared<NetJob>("Modrinth::SearchModpack", APPLICATION->network());
     auto searchAllUrl = QString(BuildConfig.MODRINTH_PROD_URL +
                             "/search?"
                             "offset=%1&"
@@ -142,7 +142,7 @@ void ModpackListModel::performPaginatedSearch()
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), &m_all_response));
 
-    QObject::connect(netJob, &NetJob::succeeded, this, [this] {
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, [this] {
         QJsonParseError parse_error_all{};
 
         QJsonDocument doc_all = QJsonDocument::fromJson(m_all_response, &parse_error_all);
@@ -155,7 +155,7 @@ void ModpackListModel::performPaginatedSearch()
 
         searchRequestFinished(doc_all);
     });
-    QObject::connect(netJob, &NetJob::failed, this, &ModpackListModel::searchRequestFailed);
+    QObject::connect(netJob.get(), &NetJob::failed, this, &ModpackListModel::searchRequestFailed);
 
     jobPtr = netJob;
     jobPtr->start();

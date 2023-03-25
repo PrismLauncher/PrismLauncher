@@ -67,7 +67,7 @@ void JavaInstallList::load()
     if(m_status != Status::InProgress)
     {
         m_status = Status::InProgress;
-        m_loadTask = new JavaListLoadTask(this);
+        m_loadTask.reset(new JavaListLoadTask(this));
         m_loadTask->start();
     }
 }
@@ -167,7 +167,7 @@ void JavaListLoadTask::executeTask()
     JavaUtils ju;
     QList<QString> candidate_paths = ju.FindJavaPaths();
 
-    m_job = new JavaCheckerJob("Java detection");
+    m_job.reset(new JavaCheckerJob("Java detection"));
     connect(m_job.get(), &Task::finished, this, &JavaListLoadTask::javaCheckerFinished);
     connect(m_job.get(), &Task::progress, this, &Task::setProgress);
 

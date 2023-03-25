@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022,2023 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -88,9 +88,12 @@ private slots:
 private:
     void changeState(LoggedProcess::State state);
 
+    QStringList reprocess(const QByteArray& data, QTextDecoder& decoder);
+
 private:
     QTextDecoder m_err_decoder = QTextDecoder(QTextCodec::codecForLocale());
     QTextDecoder m_out_decoder = QTextDecoder(QTextCodec::codecForLocale());
+    QString m_leftover_line;
     bool m_killed = false;
     State m_state = NotRunning;
     int m_exit_code = 0;

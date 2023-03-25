@@ -174,7 +174,7 @@ set(Launcher_SUBREDDIT_URL "https://www.reddit.com/r/PrismLauncher/" CACHE STRIN
 
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
-set(Launcher_QT_VERSION_MAJOR "5" CACHE STRING "Major Qt version to build against")
+set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
 
 # API Keys
 # NOTE: These API keys are here for convenience. If you rebrand this software or intend to break the terms of service
@@ -442,12 +442,11 @@ add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 if (NOT ghc_filesystem_FOUND)
     message(STATUS "Using bundled ghc_filesystem")
-    set(GHC_FILESYSTEM_WITH_INSTALL OFF) # Workaround ghc::filesystem bug
     add_subdirectory(libraries/filesystem) # Implementation of std::filesystem for old C++, for usage in old macOS
-    add_library(ghcFilesystem::ghc_filesystem ALIAS ghc_filesystem)
 else()
     message(STATUS "Using system ghc_filesystem")
 endif()
+add_subdirectory(libraries/qdcss) # css parser
 
 ############################### Built Artifacts ###############################
 

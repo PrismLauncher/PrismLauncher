@@ -1,7 +1,10 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -51,6 +54,7 @@
 #include "minecraft/OneSixVersionFormat.h"
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/ProfileUtils.h"
 #include "Json.h"
 
 #include "PackProfile.h"
@@ -134,7 +138,7 @@ static ComponentPtr componentFromJsonV1(PackProfile * parent, const QString & co
     // critical
     auto uid = Json::requireString(obj.value("uid"));
     auto filePath = componentJsonPattern.arg(uid);
-    auto component = new Component(parent, uid);
+    auto component = makeShared<Component>(parent, uid);
     component->m_version = Json::ensureString(obj.value("version"));
     component->m_dependencyOnly = Json::ensureBoolean(obj.value("dependencyOnly"), false);
     component->m_important = Json::ensureBoolean(obj.value("important"), false);
@@ -522,23 +526,23 @@ bool PackProfile::revertToBase(int index)
     return true;
 }
 
-Component * PackProfile::getComponent(const QString &id)
+ComponentPtr PackProfile::getComponent(const QString &id)
 {
     auto iter = d->componentIndex.find(id);
     if (iter == d->componentIndex.end())
     {
         return nullptr;
     }
-    return (*iter).get();
+    return (*iter);
 }
 
-Component * PackProfile::getComponent(int index)
+ComponentPtr PackProfile::getComponent(int index)
 {
     if(index < 0 || index >= d->components.size())
     {
         return nullptr;
     }
-    return d->components[index].get();
+    return d->components[index];
 }
 
 QVariant PackProfile::data(const QModelIndex &index, int role) const
@@ -734,16 +738,47 @@ void PackProfile::invalidateLaunchProfile()
 
 void PackProfile::installJarMods(QStringList selectedFiles)
 {
+    // FIXME: get rid of _internal
     installJarMods_internal(selectedFiles);
 }
 
 void PackProfile::installCustomJar(QString selectedFile)
 {
+    // FIXME: get rid of _internal
     installCustomJar_internal(selectedFile);
+}
+
+bool PackProfile::installComponents(QStringList selectedFiles)
+{
+    const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    if (!FS::ensureFolderPathExists(patchDir))
+        return false;
+
+    bool result = true;
+    for (const QString& source : selectedFiles) {
+        const QFileInfo sourceInfo(source);
+
+        auto versionFile = ProfileUtils::parseJsonFile(sourceInfo, false);
+        const QString target = FS::PathCombine(patchDir, versionFile->uid + ".json");
+
+        if (!QFile::copy(source, target)) {
+            qWarning() << "Component" << source << "could not be copied to target" << target;
+            result = false;
+            continue;
+        }
+
+        appendComponent(makeShared<Component>(this, versionFile->uid, versionFile));
+    }
+
+    scheduleSave();
+    invalidateLaunchProfile();
+
+    return result;
 }
 
 void PackProfile::installAgents(QStringList selectedFiles)
 {
+    // FIXME: get rid of _internal
     installAgents_internal(selectedFiles);
 }
 
@@ -769,7 +804,7 @@ bool PackProfile::installEmpty(const QString& uid, const QString& name)
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    appendComponent(new Component(this, f->uid, f));
+    appendComponent(makeShared<Component>(this, f->uid, f));
     scheduleSave();
     invalidateLaunchProfile();
     return true;
@@ -876,7 +911,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
         file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
         file.close();
 
-        appendComponent(new Component(this, f->uid, f));
+        appendComponent(makeShared<Component>(this, f->uid, f));
     }
     scheduleSave();
     invalidateLaunchProfile();
@@ -937,7 +972,7 @@ bool PackProfile::installCustomJar_internal(QString filepath)
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    appendComponent(new Component(this, f->uid, f));
+    appendComponent(makeShared<Component>(this, f->uid, f));
 
     scheduleSave();
     invalidateLaunchProfile();
@@ -993,7 +1028,7 @@ bool PackProfile::installAgents_internal(QStringList filepaths)
         patchFile.write(OneSixVersionFormat::versionFileToJson(versionFile).toJson());
         patchFile.close();
 
-        appendComponent(new Component(this, versionFile->uid, versionFile));
+        appendComponent(makeShared<Component>(this, versionFile->uid, versionFile));
     }
 
     scheduleSave();
@@ -1042,7 +1077,7 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
     else
     {
         // add new
-        auto component = new Component(this, uid);
+        auto component = makeShared<Component>(this, uid);
         component->m_version = version;
         component->m_important = important;
         appendComponent(component);

@@ -8,6 +8,8 @@
 class ConcurrentTask : public Task {
     Q_OBJECT
 public:
+    using Ptr = shared_qobject_ptr<ConcurrentTask>;
+
     explicit ConcurrentTask(QObject* parent = nullptr, QString task_name = "", int max_concurrent = 6);
     ~ConcurrentTask() override;
 

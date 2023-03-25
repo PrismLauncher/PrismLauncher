@@ -28,7 +28,7 @@ Prebuilt Development builds are provided for **Linux**, **Windows** and **macOS*
 
 For **Arch**, **Debian**, **Fedora**, **OpenSUSE (Tumbleweed)** and **Gentoo**, respectively, you can use these packages for the latest development versions:
 
-[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-1793D1?label=AUR&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-git) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-1793D1?label=AUR&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-qt5-git) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-A80030?label=MPR&logo=debian&logoColor=white)](https://mpr.makedeb.org/packages/prismlauncher-git)<br />[![prismlauncher-nightly](https://img.shields.io/badge/copr-prismlauncher--nightly-51A2DA?label=CORP&logo=fedora&logoColor=white)](https://copr.fedorainfracloud.org/coprs/g3tchoo/prismlauncher/) [![prismlauncher-nightly](https://img.shields.io/badge/OBS-prismlauncher--nightly-3AB6A9?logo=opensuse&logoColor=white)](https://build.opensuse.org/project/show/home:getchoo) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-4D4270?label=Gentoo&logo=gentoo&logoColor=white)](https://packages.gentoo.org/packages/games-action/prismlauncher)
+[![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--git-1793D1?label=AUR&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-git) [![prismlauncher-git](https://img.shields.io/badge/aur-prismlauncher--qt5--git-1793D1?label=AUR&logo=archlinux&logoColor=white)](https://aur.archlinux.org/packages/prismlauncher-qt5-git) [![prismlauncher-git](https://img.shields.io/badge/mpr-prismlauncher--git-A80030?label=MPR&logo=debian&logoColor=white)](https://mpr.makedeb.org/packages/prismlauncher-git)<br />[![prismlauncher-nightly](https://img.shields.io/badge/copr-prismlauncher--nightly-51A2DA?label=COPR&logo=fedora&logoColor=white)](https://copr.fedorainfracloud.org/coprs/g3tchoo/prismlauncher/) [![prismlauncher-nightly](https://img.shields.io/badge/OBS-prismlauncher--nightly-3AB6A9?logo=opensuse&logoColor=white)](https://build.opensuse.org/project/show/home:getchoo) [![prismlauncher-9999](https://img.shields.io/badge/gentoo-prismlauncher--9999-4D4270?label=Gentoo&logo=gentoo&logoColor=white)](https://packages.gentoo.org/packages/games-action/prismlauncher)
 
 These packages are also availiable to all the distributions based on the ones mentioned above.
 
@@ -96,7 +96,7 @@ Be aware that if you build this software without removing the provided API keys 
 
 If you do not agree with these terms and conditions, then remove the associated API keys from the [CMakeLists.txt](CMakeLists.txt) file by setting them to an empty string (`""`).
 
-## License ![https://github.com/PrismLauncher/PrismLauncher/blob/develop/LICENSE](https://img.shields.io/github/license/PrismLauncher/PrismLauncher?label=License&logo=gnu&color=C4282D)
+## License [![https://github.com/PrismLauncher/PrismLauncher/blob/develop/LICENSE](https://img.shields.io/github/license/PrismLauncher/PrismLauncher?label=License&logo=gnu&color=C4282D)](LICENSE)
 
 All launcher code is available under the GPL-3.0-only license.
 

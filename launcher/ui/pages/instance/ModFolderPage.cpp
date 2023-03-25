@@ -273,3 +273,12 @@ bool CoreModFolderPage::shouldDisplay() const
     }
     return false;
 }
+
+NilModFolderPage::NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
+    : ModFolderPage(inst, mods, parent)
+{}
+
+bool NilModFolderPage::shouldDisplay() const
+{
+    return m_model->dir().exists();
+}

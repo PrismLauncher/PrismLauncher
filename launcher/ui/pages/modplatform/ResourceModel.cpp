@@ -265,7 +265,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
         return { pixmap };
 
     if (!m_current_icon_job)
-        m_current_icon_job = new NetJob("IconJob", APPLICATION->network());
+        m_current_icon_job.reset(new NetJob("IconJob", APPLICATION->network()));
 
     if (m_currently_running_icon_actions.contains(url))
         return {};

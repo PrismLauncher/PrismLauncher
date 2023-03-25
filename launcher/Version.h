@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2023 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,17 +36,17 @@
 
 #pragma once
 
+#include <QDebug>
+#include <QList>
 #include <QString>
 #include <QStringView>
-#include <QList>
 
 class QUrl;
 
-class Version
-{
-public:
-    Version(const QString &str);
-    Version() {}
+class Version {
+   public:
+    Version(QString str);
+    Version() = default;
 
     bool operator<(const Version &other) const;
     bool operator<=(const Version &other) const;
@@ -54,96 +55,116 @@ public:
     bool operator==(const Version &other) const;
     bool operator!=(const Version &other) const;
 
-    QString toString() const
-    {
-        return m_string;
-    }
+    QString toString() const { return m_string; }
 
-private:
-    QString m_string;
-    struct Section
-    {
-        explicit Section(const QString &fullString)
+    friend QDebug operator<<(QDebug debug, const Version& v);
+
+   private:
+    struct Section {
+        explicit Section(QString fullString) : m_fullString(std::move(fullString))
         {
-            m_fullString = fullString;
             int cutoff = m_fullString.size();
-            for(int i = 0; i < m_fullString.size(); i++)
-            {
-                if(!m_fullString[i].isDigit())
-                {
+            for (int i = 0; i < m_fullString.size(); i++) {
+                if (!m_fullString[i].isDigit()) {
                     cutoff = i;
                     break;
                 }
             }
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             auto numPart = QStringView{m_fullString}.left(cutoff);
 #else
             auto numPart = m_fullString.leftRef(cutoff);
 #endif
-            if(numPart.size())
-            {
-                numValid = true;
+
+            if (!numPart.isEmpty()) {
+                m_isNull = false;
                 m_numPart = numPart.toInt();
             }
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
             auto stringPart = QStringView{m_fullString}.mid(cutoff);
 #else
             auto stringPart = m_fullString.midRef(cutoff);
 #endif
-            if(stringPart.size())
-            {
+
+            if (!stringPart.isEmpty()) {
+                m_isNull = false;
                 m_stringPart = stringPart.toString();
             }
         }
-        explicit Section() {}
-        bool numValid = false;
+
+        explicit Section() = default;
+
+        bool m_isNull = true;
+
         int m_numPart = 0;
         QString m_stringPart;
+
         QString m_fullString;
 
-        inline bool operator!=(const Section &other) const
+        [[nodiscard]] inline bool isAppendix() const { return m_stringPart.startsWith('+'); }
+        [[nodiscard]] inline bool isPreRelease() const { return m_stringPart.startsWith('-') && m_stringPart.length() > 1; }
+
+        inline bool operator==(const Section& other) const
         {
-            if(numValid && other.numValid)
-            {
-                return m_numPart != other.m_numPart || m_stringPart != other.m_stringPart;
+            if (m_isNull && !other.m_isNull)
+                return false;
+            if (!m_isNull && other.m_isNull)
+                return false;
+
+            if (!m_isNull && !other.m_isNull) {
+                return (m_numPart == other.m_numPart) && (m_stringPart == other.m_stringPart);
             }
-            else
-            {
-                return m_fullString != other.m_fullString;
-            }
+
+            return true;
         }
-        inline bool operator<(const Section &other) const
-        {
-            if(numValid && other.numValid)
-            {
-                if(m_numPart < other.m_numPart)
+
+        inline bool operator<(const Section& other) const
+        {   
+            static auto unequal_is_less = [](Section const& non_null) -> bool {
+                if (non_null.m_stringPart.isEmpty())
+                    return non_null.m_numPart == 0;
+                return (non_null.m_stringPart != QLatin1Char('.')) && non_null.isPreRelease();
+            };
+
+            if (!m_isNull && other.m_isNull)
+                return unequal_is_less(*this);
+            if (m_isNull && !other.m_isNull)
+                return !unequal_is_less(other);
+
+            if (!m_isNull && !other.m_isNull) {
+                if (m_numPart < other.m_numPart)
                     return true;
-                if(m_numPart == other.m_numPart && m_stringPart < other.m_stringPart)
+                if (m_numPart == other.m_numPart && m_stringPart < other.m_stringPart)
                     return true;
+
+                if (!m_stringPart.isEmpty() && other.m_stringPart.isEmpty())
+                    return false;
+                if (m_stringPart.isEmpty() && !other.m_stringPart.isEmpty())
+                    return true;
+
                 return false;
             }
-            else
-            {
-                return m_fullString < other.m_fullString;
-            }
+
+            return m_fullString < other.m_fullString;
+        }
+
+        inline bool operator!=(const Section& other) const
+        {
+            return !(*this == other);
         }
         inline bool operator>(const Section &other) const
         {
-            if(numValid && other.numValid)
-            {
-                if(m_numPart > other.m_numPart)
-                    return true;
-                if(m_numPart == other.m_numPart && m_stringPart > other.m_stringPart)
-                    return true;
-                return false;
-            }
-            else
-            {
-                return m_fullString > other.m_fullString;
-            }
+            return !(*this < other || *this == other);
         }
     };
+
+   private:
+    QString m_string;
     QList<Section> m_sections;
 
     void parse();
 };
+
+

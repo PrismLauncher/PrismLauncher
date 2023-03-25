@@ -6,12 +6,12 @@ OfflineRefresh::OfflineRefresh(
     AccountData *data,
     QObject *parent
 ) : AuthFlow(data, parent) {
-    m_steps.append(new OfflineStep(m_data));
+    m_steps.append(makeShared<OfflineStep>(m_data));
 }
 
 OfflineLogin::OfflineLogin(
     AccountData *data,
     QObject *parent
 ) : AuthFlow(data, parent) {
-    m_steps.append(new OfflineStep(m_data));
+    m_steps.append(makeShared<OfflineStep>(m_data));
 }

@@ -99,6 +99,11 @@ QString Meta::Version::localFilename() const
     return m_uid + '/' + m_version + ".json";
 }
 
+::Version Meta::Version::toComparableVersion() const
+{
+    return { const_cast<Meta::Version*>(this)->descriptor() };
+}
+
 void Meta::Version::setType(const QString &type)
 {
     m_type = type;

@@ -66,7 +66,12 @@ bool InstanceImportTask::abort()
 
     if (m_filesNetJob)
         m_filesNetJob->abort();
-    m_extractFuture.cancel();
+    if (m_extractFuture.isRunning()) {
+        // NOTE: The tasks created by QtConcurrent::run() can't actually get cancelled,
+        // but we can use this call to check the state when the extraction finishes.
+        m_extractFuture.cancel();
+        m_extractFuture.waitForFinished();
+    }
 
     return Task::abort();
 }
@@ -88,7 +93,7 @@ void InstanceImportTask::executeTask()
         entry->setStale(true);
         m_archivePath = entry->getFullPath();
 
-        m_filesNetJob = new NetJob(tr("Modpack download"), APPLICATION->network());
+        m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
         m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
 
         connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
@@ -185,18 +190,20 @@ void InstanceImportTask::processZipPack()
     // make sure we extract just the pack
     m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, m_packZip.get(), root, extractDir.absolutePath());
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &InstanceImportTask::extractFinished);
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &InstanceImportTask::extractAborted);
     m_extractFutureWatcher.setFuture(m_extractFuture);
 }
 
 void InstanceImportTask::extractFinished()
 {
     m_packZip.reset();
-    if (!m_extractFuture.result())
-    {
+
+    if (m_extractFuture.isCanceled())
+        return;
+    if (!m_extractFuture.result().has_value()) {
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
+
     QDir extractDir(m_stagingPath);
 
     qDebug() << "Fixing permissions for extracted pack files...";
@@ -250,11 +257,6 @@ void InstanceImportTask::extractFinished()
     }
 }
 
-void InstanceImportTask::extractAborted()
-{
-    emitAborted();
-}
-
 void InstanceImportTask::processFlame()
 {
     FlameCreationTask* inst_creation_task = nullptr;
@@ -301,7 +303,7 @@ void InstanceImportTask::processFlame()
 
 void InstanceImportTask::processTechnic()
 {
-    shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor = new Technic::TechnicPackProcessor();
+    shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor{ new Technic::TechnicPackProcessor };
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &InstanceImportTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &InstanceImportTask::emitFailed);
     packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath);
@@ -361,7 +363,7 @@ void InstanceImportTask::processModrinth()
     } else {
         QString pack_id;
         if (!m_sourceUrl.isEmpty()) {
-            QRegularExpression regex(R"(data\/(.*)\/versions)");
+            QRegularExpression regex(R"(data\/([^\/]*)\/versions)");
             pack_id = regex.match(m_sourceUrl.toString()).captured(1);
         }
 

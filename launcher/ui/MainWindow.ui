@@ -1,0 +1,690 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="windowTitle">
+    <string>Main Toolbar</string>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::BottomToolBarArea|Qt::TopToolBarArea</set>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAddInstance"/>
+   <addaction name="separator"/>
+   <addaction name="actionFoldersButton"/>
+   <addaction name="actionSettings"/>
+   <addaction name="actionHelpButton"/>
+   <addaction name="actionCheckUpdate"/>
+   <addaction name="separator"/>
+   <addaction name="actionCAT"/>
+   <addaction name="actionAccountsButton"/>
+  </widget>
+  <widget class="QToolBar" name="newsToolBar">
+   <property name="windowTitle">
+    <string>News Toolbar</string>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::BottomToolBarArea|Qt::TopToolBarArea</set>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>BottomToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionMoreNews"/>
+  </widget>
+  <widget class="WideBar" name="instanceToolBar">
+   <property name="windowTitle">
+    <string>Instance Toolbar</string>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonTextBesideIcon</enum>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <property name="useDefaultAction" stdset="0">
+    <bool>true</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>RightToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionLaunchInstance"/>
+   <addaction name="actionKillInstance"/>
+   <addaction name="separator"/>
+   <addaction name="actionEditInstance"/>
+   <addaction name="actionChangeInstGroup"/>
+   <addaction name="actionViewSelectedInstFolder"/>
+   <addaction name="actionExportInstance"/>
+   <addaction name="actionCopyInstance"/>
+   <addaction name="actionDeleteInstance"/>
+   <addaction name="actionCreateInstanceShortcut"/>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="fileMenu">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
+    <addaction name="actionAddInstance"/>
+    <addaction name="separator"/>
+    <addaction name="actionLaunchInstance"/>
+    <addaction name="actionKillInstance"/>
+    <addaction name="separator"/>
+    <addaction name="actionEditInstance"/>
+    <addaction name="actionChangeInstGroup"/>
+    <addaction name="actionViewSelectedInstFolder"/>
+    <addaction name="actionExportInstance"/>
+    <addaction name="actionCopyInstance"/>
+    <addaction name="actionDeleteInstance"/>
+    <addaction name="actionCreateInstanceShortcut"/>
+    <addaction name="separator"/>
+    <addaction name="actionSettings"/>
+    <addaction name="actionCloseWindow"/>
+   </widget>
+   <widget class="QMenu" name="editMenu">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
+    <addaction name="actionUndoTrashInstance"/>
+   </widget>
+   <widget class="QMenu" name="viewMenu">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
+    <addaction name="actionChangeTheme"/>
+    <addaction name="separator"/>
+    <addaction name="actionCAT"/>
+    <addaction name="actionLockToolbars"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="foldersMenu">
+    <property name="title">
+     <string>F&amp;olders</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
+    <addaction name="actionViewInstanceFolder"/>
+    <addaction name="actionViewCentralModsFolder"/>
+   </widget>
+   <widget class="QMenu" name="accountsMenu">
+    <property name="title">
+     <string>&amp;Accounts</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="helpMenu">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
+    <addaction name="actionClearMetadata"/>
+    <addaction name="actionReportBug"/>
+    <addaction name="actionAddToPATH"/>
+    <addaction name="separator"/>
+    <addaction name="actionMATRIX"/>
+    <addaction name="actionDISCORD"/>
+    <addaction name="actionREDDIT"/>
+    <addaction name="separator"/>
+    <addaction name="actionMoreNews"/>
+    <addaction name="actionCheckUpdate"/>
+    <addaction name="actionOpenWiki"/>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="fileMenu"/>
+   <addaction name="editMenu"/>
+   <addaction name="viewMenu"/>
+   <addaction name="foldersMenu"/>
+   <addaction name="accountsMenu"/>
+   <addaction name="helpMenu"/>
+  </widget>
+  <action name="actionMoreNews">
+   <property name="icon">
+    <iconset theme="news">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>More news...</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the development blog to read more news about %1.</string>
+   </property>
+  </action>
+  <action name="actionCAT">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="cat">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Meow</string>
+   </property>
+   <property name="toolTip">
+    <string>It's a fluffy kitty :3</string>
+   </property>
+  </action>
+  <action name="actionLockToolbars">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Lock Toolbars</string>
+   </property>
+  </action>
+  <action name="actionUndoTrashInstance">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Undo Last Instance Deletion</string>
+   </property>
+  </action>
+  <action name="actionAddInstance">
+   <property name="icon">
+    <iconset theme="new">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Add Instanc&amp;e...</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new instance.</string>
+   </property>
+  </action>
+  <action name="actionCheckUpdate">
+   <property name="icon">
+    <iconset theme="checkupdate">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Update...</string>
+   </property>
+   <property name="toolTip">
+    <string>Check for new updates for %1.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::ApplicationSpecificRole</enum>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset theme="settings">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Setti&amp;ngs...</string>
+   </property>
+   <property name="toolTip">
+    <string>Change settings.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::PreferencesRole</enum>
+   </property>
+  </action>
+  <action name="actionManageAccounts">
+   <property name="icon">
+    <iconset theme="accounts">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Manage Accounts...</string>
+   </property>
+  </action>
+  <action name="actionLaunchInstance">
+   <property name="icon">
+    <iconset theme="launch">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Launch</string>
+   </property>
+   <property name="toolTip">
+    <string>Launch the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionKillInstance">
+   <property name="icon">
+    <iconset theme="status-bad">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Kill</string>
+   </property>
+   <property name="toolTip">
+    <string>Kill the running instance.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
+   </property>
+  </action>
+  <action name="actionRenameInstance">
+   <property name="icon">
+    <iconset theme="rename">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Rename</string>
+   </property>
+   <property name="toolTip">
+    <string>Rename the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionChangeInstGroup">
+   <property name="icon">
+    <iconset theme="tag">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Change Group...</string>
+   </property>
+   <property name="toolTip">
+    <string>Change the selected instance's group.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionChangeInstIcon">
+   <property name="text">
+    <string>Change Icon</string>
+   </property>
+   <property name="toolTip">
+    <string>Change the selected instance's icon.</string>
+   </property>
+  </action>
+  <action name="actionEditInstance">
+   <property name="icon">
+    <iconset theme="settings">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Edit...</string>
+   </property>
+   <property name="toolTip">
+    <string>Change the instance settings, mods and versions.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionViewSelectedInstFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the selected instance's root folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionDeleteInstance">
+   <property name="icon">
+    <iconset theme="delete">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Dele&amp;te</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete the selected instance.</string>
+   </property>
+   <property name="autoRepeat">
+    <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionCopyInstance">
+   <property name="icon">
+    <iconset theme="copy">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Cop&amp;y...</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy the selected instance.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionLaunchInstanceOffline">
+   <property name="text">
+    <string>Launch &amp;Offline</string>
+   </property>
+   <property name="toolTip">
+    <string>Launch the selected instance in offline mode.</string>
+   </property>
+  </action>
+  <action name="actionLaunchInstanceDemo">
+   <property name="text">
+    <string>Launch &amp;Demo</string>
+   </property>
+   <property name="toolTip">
+    <string>Launch the selected instance in demo mode.</string>
+   </property>
+  </action>
+  <action name="actionExportInstance">
+   <property name="icon">
+    <iconset theme="export">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>E&amp;xport...</string>
+   </property>
+   <property name="toolTip">
+    <string>Export the selected instance as a zip file.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionCreateInstanceShortcut">
+   <property name="icon">
+    <iconset theme="shortcut">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Create Shortcut</string>
+   </property>
+   <property name="toolTip">
+    <string>Creates a shortcut on your desktop to launch the selected instance.</string>
+   </property>
+  </action>
+  <action name="actionNoAccountsAdded">
+   <property name="icon">
+    <iconset theme="noaccount">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>No accounts added!</string>
+   </property>
+  </action>
+  <action name="actionNoDefaultAccount">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="noaccount">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>No Default Account</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+0</string>
+   </property>
+  </action>
+  <action name="actionCloseWindow">
+   <property name="icon">
+    <iconset theme="status-bad">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Close &amp;Window</string>
+   </property>
+   <property name="toolTip">
+    <string>Close the current window</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
+  <action name="actionViewInstanceFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;View Instance Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the instance folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewCentralModsFolder">
+   <property name="icon">
+    <iconset theme="centralmods">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>View &amp;Central Mods Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the central mods folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionChangeTheme">
+   <property name="text">
+    <string>Themes</string>
+   </property>
+  </action>
+  <action name="actionReportBug">
+   <property name="icon">
+    <iconset theme="bug">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Report a &amp;Bug...</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the bug tracker to report a bug with %1.</string>
+   </property>
+  </action>
+  <action name="actionDISCORD">
+   <property name="icon">
+    <iconset theme="discord">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Discord Guild</string>
+   </property>
+   <property name="toolTip">
+    <string>Open %1 Discord guild.</string>
+   </property>
+  </action>
+  <action name="actionMATRIX">
+   <property name="icon">
+    <iconset theme="matrix">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Matrix Space</string>
+   </property>
+   <property name="toolTip">
+    <string>Open %1 Matrix space.</string>
+   </property>
+  </action>
+  <action name="actionREDDIT">
+   <property name="icon">
+    <iconset theme="reddit-alien">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Sub&amp;reddit</string>
+   </property>
+   <property name="toolTip">
+    <string>Open %1 subreddit.</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset theme="about">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;About %1</string>
+   </property>
+   <property name="toolTip">
+    <string>View information about %1.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::AboutRole</enum>
+   </property>
+  </action>
+  <action name="actionClearMetadata">
+   <property name="icon">
+    <iconset theme="refresh">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Clear Metadata Cache</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear cached metadata</string>
+   </property>
+  </action>
+  <action name="actionAddToPATH">
+   <property name="icon">
+    <iconset theme="custom-commands">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Install to &amp;PATH</string>
+   </property>
+   <property name="toolTip">
+    <string>Install a %1 symlink to /usr/local/bin</string>
+   </property>
+  </action>
+  <action name="actionFoldersButton">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Folders</string>
+   </property>
+   <property name="toolTip">
+    <string>Open one of the folders shared between instances.</string>
+   </property>
+  </action>
+  <action name="actionHelpButton">
+   <property name="icon">
+    <iconset theme="help">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Get help with %1 or Minecraft.</string>
+   </property>
+  </action>
+  <action name="actionAccountsButton">
+   <property name="icon">
+    <iconset theme="noaccount">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Accounts</string>
+   </property>
+  </action>
+  <action name="actionOpenWiki">
+   <property name="icon">
+    <iconset theme="help">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>%1 &amp;Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the %1 wiki</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>WideBar</class>
+   <extends>QToolBar</extends>
+   <header>ui/widgets/WideBar.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

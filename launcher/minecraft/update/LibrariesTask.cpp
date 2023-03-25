@@ -20,7 +20,7 @@ void LibrariesTask::executeTask()
     auto components = inst->getPackProfile();
     auto profile = components->getProfile();
 
-    auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()), APPLICATION->network());
+    NetJob::Ptr job{ new NetJob(tr("Libraries for instance %1").arg(inst->name()), APPLICATION->network()) };
     downloadJob.reset(job);
 
     auto metacache = APPLICATION->metacache();

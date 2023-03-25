@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -49,14 +50,9 @@
 
 namespace Net {
 
-Download::Download() : NetAction()
-{
-    m_state = State::Inactive;
-}
-
 auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
-    auto* dl = new Download();
+    auto dl = makeShared<Download>();
     dl->m_url = url;
     dl->m_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
@@ -67,7 +63,7 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
 
 auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
 {
-    auto* dl = new Download();
+    auto dl = makeShared<Download>();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new ByteArraySink(output));
@@ -76,7 +72,7 @@ auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> D
 
 auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
 {
-    auto* dl = new Download();
+    auto dl = makeShared<Download>();
     dl->m_url = url;
     dl->m_options = options;
     dl->m_sink.reset(new FileSink(path));
@@ -118,10 +114,15 @@ void Download::executeTask()
     }
 
     request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
-    if (APPLICATION->capabilities() & Application::SupportsFlame
-            && request.url().host().contains("api.curseforge.com")) {
+    // TODO remove duplication
+    if (APPLICATION->capabilities() & Application::SupportsFlame && request.url().host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {
         request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
-    };
+    } else if (request.url().host() == QUrl(BuildConfig.MODRINTH_PROD_URL).host() ||
+               request.url().host() == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
+        QString token = APPLICATION->getModrinthAPIToken();
+        if (!token.isNull())
+            request.setRawHeader("Authorization", token.toUtf8());
+    }
 
     QNetworkReply* rep = m_network->get(request);
 

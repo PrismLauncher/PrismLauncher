@@ -8,10 +8,10 @@
 > Redistribution and use in source and binary forms, with or without
 > modification, are permitted provided that the following conditions are met:
 >
->  * Redistributions of source code must retain the above copyright notice, this
+> * Redistributions of source code must retain the above copyright notice, this
 > list of conditions and the following disclaimer.
 >
->  * Redistributions in binary form must reproduce the above copyright notice,
+> * Redistributions in binary form must reproduce the above copyright notice,
 > this list of conditions and the following disclaimer in the documentation
 > and/or other materials provided with the distribution.
 >
@@ -36,12 +36,12 @@ Cryptographic methods for Qt.
 > Redistribution and use in source and binary forms, with or without
 > modification, are permitted provided that the following conditions are met:
 >
->    * Redistributions of source code must retain the above copyright
+> * Redistributions of source code must retain the above copyright
 >      notice, this list of conditions and the following disclaimer.
->    * Redistributions in binary form must reproduce the above copyright
+> * Redistributions in binary form must reproduce the above copyright
 >      notice, this list of conditions and the following disclaimer in the
 >      documentation and/or other materials provided with the distribution.
->    * Neither the name of the Rathenau Instituut, Andre Somers nor the
+> * Neither the name of the Rathenau Instituut, Andre Somers nor the
 >      names of its contributors may be used to endorse or promote products
 >      derived from this software without specific prior written permission.
 >
@@ -62,7 +62,7 @@ Configurable settings storage, Twitter XAuth specialization, new demos, cleanups
 
 > "Hi Akos,
 >
-> I'm writing this mail to confirm that my contributions to the O2 library, available here https://github.com/pipacs/o2, can be freely distributed according to the project's license (as shown in the LICENSE file).
+> I'm writing this mail to confirm that my contributions to the O2 library, available here <https://github.com/pipacs/o2>, can be freely distributed according to the project's license (as shown in the LICENSE file).
 >
 > Regards,
 > -mandeep"

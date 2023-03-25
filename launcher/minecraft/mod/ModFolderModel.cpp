@@ -50,7 +50,7 @@
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
 #include "modplatform/ModIndex.h"
 
-ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : ResourceFolderModel(QDir(dir)), m_is_indexed(is_indexed)
+ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed, bool create_dir) : ResourceFolderModel(QDir(dir), nullptr, create_dir), m_is_indexed(is_indexed)
 {
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
 }

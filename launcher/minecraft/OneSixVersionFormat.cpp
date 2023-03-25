@@ -39,6 +39,8 @@
 #include "minecraft/ParseUtils.h"
 #include <minecraft/MojangVersionFormat.h>
 
+#include <QRegularExpression>
+
 using namespace Json;
 
 static void readString(const QJsonObject &root, const QString &key, QString &variable)
@@ -119,6 +121,15 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
     else
     {
         out->uid = root.value("fileId").toString();
+    }
+
+    const QRegularExpression valid_uid_regex{ QRegularExpression::anchoredPattern(QStringLiteral(R"([a-zA-Z0-9-_]+(?:\.[a-zA-Z0-9-_]+)*)")) };
+    if (!valid_uid_regex.match(out->uid).hasMatch()) {
+        qCritical() << "The component's 'uid' contains illegal characters! UID:" << out->uid;
+        out->addProblem(
+            ProblemSeverity::Error,
+            QObject::tr("The component's 'uid' contains illegal characters! This can cause security issues.")
+        );
     }
 
     out->version = root.value("version").toString();
