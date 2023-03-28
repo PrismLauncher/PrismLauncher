@@ -46,11 +46,15 @@ void ModrinthPackExportTask::executeTask()
     setProgress(0, 0);
     collectFiles();
 
-    QByteArray* response = new QByteArray;
-    task = api.currentVersions(pendingHashes.values(), "sha512", response);
-    connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
-    connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
-    task->start();
+    if (pendingHashes.isEmpty())
+        buildZip();
+    else {
+        QByteArray* response = new QByteArray;
+        task = api.currentVersions(pendingHashes.values(), "sha512", response);
+        connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
+        connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
+        task->start();
+    }
 }
 
 bool ModrinthPackExportTask::abort()
@@ -176,8 +180,12 @@ void ModrinthPackExportTask::buildZip()
 
             setProgress(i, files.length());
             QString relative = mc.relativeFilePath(file.absoluteFilePath());
-            if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative))
-                qWarning() << "Could not compress" << file;
+            if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative)) {
+                QFile::remove(output);
+                QMetaObject::invokeMethod(
+                    this, [this, relative]() { emitFailed(tr("Could not compress %1").arg(relative)); }, Qt::QueuedConnection);
+                return;
+            }
             i++;
         }
 

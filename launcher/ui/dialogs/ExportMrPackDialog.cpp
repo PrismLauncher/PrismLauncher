@@ -87,12 +87,6 @@ void ExportMrPackDialog::done(int result)
 
         connect(&task, &Task::failed,
                 [this](const QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-
-        connect(&task, &Task::succeeded, [this, &task]() {
-            QStringList warnings = task.warnings();
-            if (warnings.count() > 0)
-                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
-        });
         connect(&task, &Task::aborted, [this] {
             CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
                 ->show();
