@@ -198,12 +198,9 @@ void BlockedModsDialog::watchPath(QString path, bool watch_subdirectories)
     if (!watch_subdirectories)
         return;
 
-    QDirIterator it(path, QDir::Filter::Dirs, QDirIterator::NoIteratorFlags);
+    QDirIterator it(path, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
     while (it.hasNext()) {
         QString dir_path = it.next();
-        QDir to_watch_dir(dir_path);
-        if (to_watch_dir.dirName() == "." || to_watch_dir.dirName() == "..")
-            continue;
         watchPath(dir_path, watch_subdirectories);
     }
 }
