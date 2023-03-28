@@ -90,6 +90,7 @@ slots:
     void on_iconsDirBrowseBtn_clicked();
     void on_downloadsDirBrowseBtn_clicked();
     void on_metadataDisableBtn_clicked();
+    void on_downloadsDirWatchRecursiveCheckBox_clicked();
 
     /*!
      * Updates the font preview

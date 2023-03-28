@@ -185,7 +185,8 @@ void BlockedModsDialog::setupWatch()
 {
     const QString downloadsFolder = APPLICATION->settings()->get("DownloadsDir").toString();
     const QString modsFolder = APPLICATION->settings()->get("CentralModsDir").toString();
-    watchPath(downloadsFolder, true);
+    const bool downloadsFolderWatchRecursive = APPLICATION->settings()->get("DownloadsDirWatchRecursive").toBool();
+    watchPath(downloadsFolder, downloadsFolderWatchRecursive);
     watchPath(modsFolder, true);
 }
 
