@@ -22,6 +22,7 @@
  *      Copyright 2013-2021 MultiMC Contributors
  *
  *      Licensed under the Apache License, Version 2.0 (the "License");
+
  *      you may not use this file except in compliance with the License.
  *      You may obtain a copy of the License at
  *
@@ -35,6 +36,8 @@
  */
 
 #pragma once
+
+#include <chrono>
 
 #include "HttpMetaCache.h"
 #include "NetAction.h"
@@ -63,6 +66,7 @@ class Download : public NetAction {
     void addValidator(Validator* v);
     auto abort() -> bool override;
     auto canAbort() const -> bool override { return true; };
+    auto getDetails() const -> QString override {return m_details; };
 
    private:
     auto handleRedirect() -> bool;
@@ -80,6 +84,12 @@ class Download : public NetAction {
    private:
     std::unique_ptr<Sink> m_sink;
     Options m_options;
+
+    std::chrono::steady_clock m_clock;
+    std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;
+    qint64 m_last_progress_bytes;
+
+    QString m_details;
 };
 }  // namespace Net
 

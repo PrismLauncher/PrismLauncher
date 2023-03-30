@@ -909,6 +909,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/VariableSizedImageObject.cpp
     ui/widgets/ProjectItem.h
     ui/widgets/ProjectItem.cpp
+    ui/widgets/SubTaskProgressBar.h
+    ui/widgets/SubTaskProgressBar.cpp
     ui/widgets/VersionListView.cpp
     ui/widgets/VersionListView.h
     ui/widgets/VersionSelectWidget.cpp
@@ -969,6 +971,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/widgets/CustomCommands.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
+    ui/widgets/SubTaskProgressBar.ui
     ui/widgets/ThemeCustomizationWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui

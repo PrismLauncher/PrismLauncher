@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  PrismLauncher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,8 +37,28 @@
 #pragma once
 
 #include <QRunnable>
+#include <QUuid>
+#include <QLoggingCategory>
 
 #include "QObjectPtr.h"
+
+enum class TaskState {
+    Waiting,
+    Running,
+    Failed,
+    Succeeded,
+    Finished
+};
+
+struct TaskStepProgress {
+    QUuid uid; 
+    qint64 current;
+    qint64 total;
+    QString status;
+    QString details;
+    TaskState state = TaskState::Waiting;
+    bool isDone() { return (state == TaskState::Failed) || (state == TaskState::Succeeded) || (state == TaskState::Finished); }
+};
 
 class Task : public QObject, public QRunnable {
     Q_OBJECT
@@ -73,12 +94,14 @@ class Task : public QObject, public QRunnable {
     auto getState() const -> State { return m_state; }
 
     QString getStatus() { return m_status; }
-    virtual auto getStepStatus() const -> QString { return m_status; }
 
     qint64 getProgress() { return m_progress; }
     qint64 getTotalProgress() { return m_progressTotal; }
-    virtual auto getStepProgress() const -> qint64 { return 0; }
-    virtual auto getStepTotalProgress() const -> qint64 { return 100; }
+    virtual auto getStepProgress() const -> QList<TaskStepProgress> { return {}; }
+
+    virtual auto getDetails() const -> QString { return ""; } 
+
+    QUuid getUid() { return m_uid; }
 
    protected:
     void logWarning(const QString& line);
@@ -94,7 +117,7 @@ class Task : public QObject, public QRunnable {
     void aborted();
     void failed(QString reason);
     void status(QString status);
-    void stepStatus(QString status);
+    void stepProgress(QList<TaskStepProgress> task_progress); // 
 
     /** Emitted when the canAbort() status has changed.
      */
@@ -135,4 +158,6 @@ class Task : public QObject, public QRunnable {
    private:
     // Change using setAbortStatus
     bool m_can_abort = false;
+    QUuid m_uid;
+
 };

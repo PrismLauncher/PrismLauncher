@@ -35,18 +35,39 @@
 
 #pragma once
 
+#include <cmath>
+
 #include <QNetworkReply>
 #include <QUrl>
 
 #include "QObjectPtr.h"
 #include "tasks/Task.h"
 
+static const QStringList s_units_si  {"kb", "MB", "GB", "TB"};
+static const QStringList s_units_kibi {"kiB", "MiB", "Gib", "TiB"};
+
+inline QString humanReadableFileSize(qint64 bytes, bool use_si = false, int decimal_points = 1) {
+    const QStringList units = use_si ? s_units_si : s_units_kibi;
+    const int scale = use_si ? 1000 : 1024;
+    double size = bytes;
+
+    int u = -1;
+    double r = pow(10,  decimal_points);
+
+    do {
+        size /= scale;
+        u++;
+    } while (round(abs(size) * r) / r >= scale && u < units.length() - 1);
+
+    return QString::number(size, 'f', 2) + " " + units[u];
+}
+
 class NetAction : public Task {
     Q_OBJECT
-   protected:
+protected:
     explicit NetAction() : Task() {};
 
-   public:
+public:
     using Ptr = shared_qobject_ptr<NetAction>;
 
     virtual ~NetAction() = default;
@@ -55,23 +76,23 @@ class NetAction : public Task {
 
     void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
 
-   protected slots:
+protected slots:
     virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) = 0;
     virtual void downloadError(QNetworkReply::NetworkError error) = 0;
     virtual void downloadFinished() = 0;
     virtual void downloadReadyRead() = 0;
 
-   public slots:
+public slots:
     void startAction(shared_qobject_ptr<QNetworkAccessManager> network)
     {
         m_network = network;
         executeTask();
     }
 
-   protected:
+protected:
     void executeTask() override {};
 
-   public:
+public:
     shared_qobject_ptr<QNetworkAccessManager> m_network;
 
     /// the network reply

@@ -1,7 +1,10 @@
 #pragma once
 
+#include <QUuid>
+#include <QHash>
 #include <QQueue>
 #include <QSet>
+#include <memory>
 
 #include "tasks/Task.h"
 
@@ -16,10 +19,7 @@ public:
     bool canAbort() const override { return true; }
 
     inline auto isMultiStep() const -> bool override { return m_queue.size() > 1; };
-    auto getStepProgress() const -> qint64 override;
-    auto getStepTotalProgress() const -> qint64 override;
-
-    inline auto getStepStatus() const -> QString override { return m_step_status; }
+    auto getStepProgress() const -> QList<TaskStepProgress> override;
 
     void addTask(Task::Ptr task);
 
@@ -39,14 +39,15 @@ slots:
 
     void subTaskSucceeded(Task::Ptr);
     void subTaskFailed(Task::Ptr, const QString &msg);
-    void subTaskStatus(const QString &msg);
-    void subTaskProgress(qint64 current, qint64 total);
+    void subTaskStatus(Task::Ptr task, const QString &msg);
+    void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
+    void subTaskStepProgress(Task::Ptr task, QList<TaskStepProgress> task_step_progress);
 
 protected:
     // NOTE: This is not thread-safe.
     [[nodiscard]] unsigned int totalSize() const { return m_queue.size() + m_doing.size() + m_done.size(); }
 
-    void setStepStatus(QString status) { m_step_status = status; emit stepStatus(status); };
+    void updateStepProgress();
 
     virtual void updateState();
 
@@ -56,9 +57,12 @@ protected:
 
     QQueue<Task::Ptr> m_queue;
 
-    QHash<Task*, Task::Ptr> m_doing;
+    QHash<Task*, Task::Ptr> m_doing; 
     QHash<Task*, Task::Ptr> m_done;
     QHash<Task*, Task::Ptr> m_failed;
+    QHash<Task*, Task::Ptr> m_succeeded;
+
+    QHash<QUuid, std::shared_ptr<TaskStepProgress>> m_task_progress;
 
     int m_total_max_size;
 

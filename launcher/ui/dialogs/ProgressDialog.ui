@@ -2,6 +2,20 @@
 <ui version="4.0">
  <class>ProgressDialog</class>
  <widget class="QDialog" name="ProgressDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>109</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>400</width>
@@ -18,6 +32,16 @@
    <string>Please wait...</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="2" column="0">
+    <widget class="QProgressBar" name="globalProgressBar">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="value">
+      <number>24</number>
+     </property>
+    </widget>
+   </item>
    <item row="4" column="0">
     <widget class="QPushButton" name="skipButton">
      <property name="sizePolicy">
@@ -31,15 +55,11 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="globalStatusLabel">
-     <property name="text">
-      <string>Global Task Status...</string>
-     </property>
-    </widget>
+   <item row="3" column="0">
+    <layout class="QVBoxLayout" name="taskProgressLayout"/>
    </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="statusLabel">
+   <item row="1" column="0">
+    <widget class="QLabel" name="globalStatusLabel">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
@@ -47,30 +67,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Task Status...</string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QProgressBar" name="taskProgressBar">
-     <property name="value">
-      <number>24</number>
-     </property>
-     <property name="textVisible">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QProgressBar" name="globalProgressBar">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="value">
-      <number>24</number>
+      <string>Global Task Status...</string>
      </property>
     </widget>
    </item>

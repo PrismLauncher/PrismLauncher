@@ -1,25 +1,65 @@
-/* Copyright 2013-2021 MultiMC Contributors
+/// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  PrismLaucher - Minecraft Launcher
+ *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #include "ProgressDialog.h"
 #include "ui_ProgressDialog.h"
 
+#include <limits>
 #include <QDebug>
 #include <QKeyEvent>
 
 #include "tasks/Task.h"
+
+#include "ui/widgets/SubTaskProgressBar.h"
+
+
+template<typename T> 
+int map_int_range(T value)
+{
+    auto type_min = std::numeric_limits<T>::min();
+    auto type_max = std::numeric_limits<T>::max();
+
+    auto int_min = std::numeric_limits<int>::min();
+    auto int_max = std::numeric_limits<int>::max();
+
+    auto type_range = type_max - type_min;
+    auto int_range = int_max - int_min;
+
+    return static_cast<int>((value - type_min) * int_range / type_range + int_min);
+}
+
 
 ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ProgressDialog)
 {
@@ -79,7 +119,7 @@ int ProgressDialog::execWithTask(Task* task)
     connect(task, &Task::failed, this, &ProgressDialog::onTaskFailed);
     connect(task, &Task::succeeded, this, &ProgressDialog::onTaskSucceeded);
     connect(task, &Task::status, this, &ProgressDialog::changeStatus);
-    connect(task, &Task::stepStatus, this, &ProgressDialog::changeStatus);
+    connect(task, &Task::stepProgress, this, &ProgressDialog::changeStepProgress);
     connect(task, &Task::progress, this, &ProgressDialog::changeProgress);
 
     connect(task, &Task::aborted, this, &ProgressDialog::hide);
@@ -149,9 +189,40 @@ void ProgressDialog::onTaskSucceeded()
 void ProgressDialog::changeStatus(const QString& status)
 {
     ui->globalStatusLabel->setText(task->getStatus());
-    ui->statusLabel->setText(task->getStepStatus());
+    // ui->statusLabel->setText(task->getStepStatus());
 
     updateSize();
+}
+
+void ProgressDialog::addTaskProgress(TaskStepProgress progress)
+{
+    SubTaskProgressBar* task_bar = new SubTaskProgressBar(this);
+    taskProgress.insert(progress.uid, task_bar);
+    ui->taskProgressLayout->addWidget(task_bar);
+}
+
+void ProgressDialog::changeStepProgress(QList<TaskStepProgress> task_progress)
+{
+    for (auto tp : task_progress) {
+        if (!taskProgress.contains(tp.uid))
+            addTaskProgress(tp);
+        auto task_bar = taskProgress.value(tp.uid);
+
+        if (tp.total < 0) {
+            task_bar->setRange(0, 0);
+        } else {
+            task_bar->setRange(0, map_int_range<qint64>(tp.total));
+        }
+
+        task_bar->setValue(map_int_range<qint64>(tp.current));
+        task_bar->setStatus(tp.status);
+        task_bar->setDetails(tp.details);
+
+        if (tp.isDone()) {
+            task_bar->setVisible(false);
+        }
+
+    }
 }
 
 void ProgressDialog::changeProgress(qint64 current, qint64 total)
@@ -159,13 +230,13 @@ void ProgressDialog::changeProgress(qint64 current, qint64 total)
     ui->globalProgressBar->setMaximum(total);
     ui->globalProgressBar->setValue(current);
 
-    if (!m_is_multi_step) {
-        ui->taskProgressBar->setMaximum(total);
-        ui->taskProgressBar->setValue(current);
-    } else {
-        ui->taskProgressBar->setMaximum(task->getStepProgress());
-        ui->taskProgressBar->setValue(task->getStepTotalProgress());
-    }
+    // if (!m_is_multi_step) {
+    //     ui->taskProgressBar->setMaximum(total);
+    //     ui->taskProgressBar->setValue(current);
+    // } else {
+    //     ui->taskProgressBar->setMaximum(task->getStepProgress());
+    //     ui->taskProgressBar->setValue(task->getStepTotalProgress());
+    // }
 }
 
 void ProgressDialog::keyPressEvent(QKeyEvent* e)
