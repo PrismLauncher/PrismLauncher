@@ -148,6 +148,11 @@ void Task::emitSucceeded()
     emit finished();
 }
 
+void Task::propogateStepProgress(TaskStepProgressList task_progress)
+{
+    emit stepProgress(task_progress);
+}
+
 QString Task::describe()
 {
     QString outStr;

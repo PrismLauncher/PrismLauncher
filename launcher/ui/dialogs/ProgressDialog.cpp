@@ -48,10 +48,12 @@
 template<typename T> 
 int map_int_range(T value)
 {
-    auto type_min = std::numeric_limits<T>::min();
+    // auto type_min = std::numeric_limits<T>::min();
+    auto type_min = 0;
     auto type_max = std::numeric_limits<T>::max();
 
-    auto int_min = std::numeric_limits<int>::min();
+    // auto int_min = std::numeric_limits<int>::min();
+    auto int_min = 0;
     auto int_max = std::numeric_limits<int>::max();
 
     auto type_range = type_max - type_min;
@@ -64,6 +66,7 @@ int map_int_range(T value)
 ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ProgressDialog)
 {
     ui->setupUi(this);
+    ui->taskProgressScrollArea->setHidden(true);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setAttribute(Qt::WidgetAttribute::WA_QuitOnClose, true);
     setSkipButton(false);
@@ -94,10 +97,17 @@ ProgressDialog::~ProgressDialog()
 }
 
 void ProgressDialog::updateSize()
-{
+{   
+    QSize lastSize = this->size();
     QSize qSize = QSize(480, minimumSizeHint().height());
     resize(qSize);
     setFixedSize(qSize);
+    // keep the dialog in the center after a resize
+    if (lastSize != qSize)
+        this->move(
+            this->parentWidget()->x() + (this->parentWidget()->width() - this->width()) / 2,
+            this->parentWidget()->y() + (this->parentWidget()->height() - this->height()) / 2
+        );
 }
 
 int ProgressDialog::execWithTask(Task* task)
@@ -126,10 +136,8 @@ int ProgressDialog::execWithTask(Task* task)
     connect(task, &Task::abortStatusChanged, ui->skipButton, &QPushButton::setEnabled);
 
     m_is_multi_step = task->isMultiStep();
-    if (!m_is_multi_step) {
-        ui->globalStatusLabel->setHidden(true);
-        ui->globalProgressBar->setHidden(true);
-    }
+    ui->taskProgressScrollArea->setHidden(!m_is_multi_step);
+    updateSize();
 
     // It's a good idea to start the task after we entered the dialog's event loop :^)
     if (!task->isRunning()) {
@@ -138,6 +146,9 @@ int ProgressDialog::execWithTask(Task* task)
         changeStatus(task->getStatus());
         changeProgress(task->getProgress(), task->getTotalProgress());
     }
+
+    // auto size_hint = ui->verticalLayout->sizeHint();
+    // resize(size_hint.width(), size_hint.height());
 
     return QDialog::exec();
 }
@@ -189,40 +200,45 @@ void ProgressDialog::onTaskSucceeded()
 void ProgressDialog::changeStatus(const QString& status)
 {
     ui->globalStatusLabel->setText(task->getStatus());
-    // ui->statusLabel->setText(task->getStepStatus());
+    ui->globalStatusDetailsLabel->setText(task->getDetails());
 
     updateSize();
 }
 
-void ProgressDialog::addTaskProgress(TaskStepProgress progress)
+void ProgressDialog::addTaskProgress(TaskStepProgress* progress)
 {
     SubTaskProgressBar* task_bar = new SubTaskProgressBar(this);
-    taskProgress.insert(progress.uid, task_bar);
-    ui->taskProgressLayout->addWidget(task_bar);
+    taskProgress.insert(progress->uid, task_bar);
+    ui->taskProgressLayout->insertWidget(0, task_bar);
 }
 
-void ProgressDialog::changeStepProgress(QList<TaskStepProgress> task_progress)
+void ProgressDialog::changeStepProgress(TaskStepProgressList task_progress)
 {
+    m_is_multi_step = true;
+    ui->taskProgressScrollArea->setHidden(false);
+    
     for (auto tp : task_progress) {
-        if (!taskProgress.contains(tp.uid))
-            addTaskProgress(tp);
-        auto task_bar = taskProgress.value(tp.uid);
+        if (!taskProgress.contains(tp->uid))
+            addTaskProgress(tp.get());
+        auto task_bar = taskProgress.value(tp->uid);
 
-        if (tp.total < 0) {
+        if (tp->total < 0) {
             task_bar->setRange(0, 0);
         } else {
-            task_bar->setRange(0, map_int_range<qint64>(tp.total));
+            task_bar->setRange(0, map_int_range<qint64>(tp->total));
         }
 
-        task_bar->setValue(map_int_range<qint64>(tp.current));
-        task_bar->setStatus(tp.status);
-        task_bar->setDetails(tp.details);
+        task_bar->setValue(map_int_range<qint64>(tp->current));
+        task_bar->setStatus(tp->status);
+        task_bar->setDetails(tp->details);
 
-        if (tp.isDone()) {
+        if (tp->isDone()) {
             task_bar->setVisible(false);
         }
 
     }
+
+    updateSize();
 }
 
 void ProgressDialog::changeProgress(qint64 current, qint64 total)
@@ -230,13 +246,6 @@ void ProgressDialog::changeProgress(qint64 current, qint64 total)
     ui->globalProgressBar->setMaximum(total);
     ui->globalProgressBar->setValue(current);
 
-    // if (!m_is_multi_step) {
-    //     ui->taskProgressBar->setMaximum(total);
-    //     ui->taskProgressBar->setValue(current);
-    // } else {
-    //     ui->taskProgressBar->setMaximum(task->getStepProgress());
-    //     ui->taskProgressBar->setValue(task->getStepTotalProgress());
-    // }
 }
 
 void ProgressDialog::keyPressEvent(QKeyEvent* e)

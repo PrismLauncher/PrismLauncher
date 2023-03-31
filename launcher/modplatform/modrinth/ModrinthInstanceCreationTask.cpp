@@ -11,6 +11,7 @@
 
 #include "net/ChecksumValidator.h"
 
+#include "net/NetJob.h"
 #include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
@@ -263,6 +264,7 @@ bool ModrinthCreationTask::createInstance()
     });
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
     connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
+    connect(m_files_job.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propogateStepProgress);
 
     setStatus(tr("Downloading mods..."));
     m_files_job->start();

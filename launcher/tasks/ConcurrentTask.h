@@ -18,8 +18,8 @@ public:
 
     bool canAbort() const override { return true; }
 
-    inline auto isMultiStep() const -> bool override { return m_queue.size() > 1; };
-    auto getStepProgress() const -> QList<TaskStepProgress> override;
+    inline auto isMultiStep() const -> bool override { return totalSize() > 1; };
+    auto getStepProgress() const -> TaskStepProgressList override;
 
     void addTask(Task::Ptr task);
 
@@ -41,7 +41,7 @@ slots:
     void subTaskFailed(Task::Ptr, const QString &msg);
     void subTaskStatus(Task::Ptr task, const QString &msg);
     void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
-    void subTaskStepProgress(Task::Ptr task, QList<TaskStepProgress> task_step_progress);
+    void subTaskStepProgress(Task::Ptr task, TaskStepProgressList task_step_progress);
 
 protected:
     // NOTE: This is not thread-safe.

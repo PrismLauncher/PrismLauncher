@@ -36,6 +36,8 @@
  */
 
 #include "Download.h"
+#include <QRegularExpression>
+#include <QUrl>
 
 #include <QDateTime>
 #include <QFileInfo>
@@ -51,6 +53,33 @@
 Q_LOGGING_CATEGORY(DownloadLogC, "Task.Net.Download")
 
 namespace Net {
+
+QString truncateUrlHumanFriendly(QUrl &url, int max_len, bool hard_limit = false)
+{   
+    auto display_options = QUrl::RemoveUserInfo | QUrl::RemoveFragment | QUrl::NormalizePathSegments;
+    auto str_url = url.toDisplayString(display_options);
+    if (str_url.length() <= max_len)
+        return str_url;
+
+    QRegularExpression re(R"(^([\w]+:\/\/)([\w._-]+\/)([\w._-]+\/).*(\/[^]+[^]+)$)");
+    
+    auto url_compact = QString(str_url);
+    url_compact.replace(re, "\\1\\2\\3...\\4");
+    if (url_compact.length() >= max_len) {
+        auto url_compact = QString(str_url);
+        url_compact.replace(re, "\\1\\2...\\4");
+    }
+
+
+    if ((url_compact.length() >= max_len) && hard_limit) {
+        auto to_remove = url_compact.length() - max_len + 3;
+        url_compact.remove(url_compact.length() - to_remove - 1, to_remove);
+        url_compact.append("...");
+    }
+
+    return url_compact;
+
+}
 
 auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
@@ -91,7 +120,7 @@ void Download::addValidator(Validator* v)
 
 void Download::executeTask()
 {
-    setStatus(tr("Downloading %1").arg(m_url.toString()));
+    setStatus(tr("Downloading %1").arg(truncateUrlHumanFriendly(m_url, 60)));
 
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(DownloadLogC) << getUid().toString() << "Attempt to start an aborted Download:" << m_url.toString();
@@ -152,9 +181,11 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     auto elapsed = now - m_last_progress_time;
     auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
     auto bytes_recived_since = bytesReceived - m_last_progress_bytes;
-
-    auto speed = humanReadableFileSize(bytes_recived_since / elapsed_ms * 1000) + "/s";
-    m_details = speed;    
+    if (elapsed_ms > 0) {
+        m_details = humanReadableFileSize(bytes_recived_since / elapsed_ms * 1000) + "/s";
+    } else {
+        m_details = "0 b/s";
+    }  
 
     setProgress(bytesReceived, bytesTotal);
 }

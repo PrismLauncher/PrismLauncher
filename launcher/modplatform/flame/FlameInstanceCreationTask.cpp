@@ -35,6 +35,7 @@
 
 #include "FlameInstanceCreationTask.h"
 
+#include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/PackManifest.h"
 
@@ -382,7 +383,7 @@ bool FlameCreationTask::createInstance()
     });
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::progress, this, &FlameCreationTask::setProgress);
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::status, this, &FlameCreationTask::setStatus);
-
+    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::stepProgress, this, &FlameCreationTask::propogateStepProgress);
     m_mod_id_resolver->start();
 
     loop.exec();
@@ -497,6 +498,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         setError(reason);
     });
     connect(m_files_job.get(), &NetJob::progress, this, &FlameCreationTask::setProgress);
+    connect(m_files_job.get(), &NetJob::stepProgress, this, &FlameCreationTask::propogateStepProgress);
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));

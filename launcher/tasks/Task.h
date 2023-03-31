@@ -42,7 +42,7 @@
 
 #include "QObjectPtr.h"
 
-enum class TaskState {
+enum class TaskStepState {
     Waiting,
     Running,
     Failed,
@@ -50,15 +50,21 @@ enum class TaskState {
     Finished
 };
 
+Q_DECLARE_METATYPE(TaskStepState)
+
 struct TaskStepProgress {
     QUuid uid; 
-    qint64 current;
-    qint64 total;
-    QString status;
-    QString details;
-    TaskState state = TaskState::Waiting;
-    bool isDone() { return (state == TaskState::Failed) || (state == TaskState::Succeeded) || (state == TaskState::Finished); }
+    qint64 current = 0;
+    qint64 total = -1;
+    QString status = "";
+    QString details = "";
+    TaskStepState state = TaskStepState::Waiting;
+    bool isDone() { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded) || (state == TaskStepState::Finished); }
 };
+
+Q_DECLARE_METATYPE(TaskStepProgress)
+
+typedef QList<std::shared_ptr<TaskStepProgress>> TaskStepProgressList;
 
 class Task : public QObject, public QRunnable {
     Q_OBJECT
@@ -97,7 +103,7 @@ class Task : public QObject, public QRunnable {
 
     qint64 getProgress() { return m_progress; }
     qint64 getTotalProgress() { return m_progressTotal; }
-    virtual auto getStepProgress() const -> QList<TaskStepProgress> { return {}; }
+    virtual auto getStepProgress() const -> TaskStepProgressList { return {}; }
 
     virtual auto getDetails() const -> QString { return ""; } 
 
@@ -117,7 +123,7 @@ class Task : public QObject, public QRunnable {
     void aborted();
     void failed(QString reason);
     void status(QString status);
-    void stepProgress(QList<TaskStepProgress> task_progress); // 
+    void stepProgress(TaskStepProgressList task_progress); // 
 
     /** Emitted when the canAbort() status has changed.
      */
@@ -139,6 +145,8 @@ class Task : public QObject, public QRunnable {
     virtual void emitSucceeded();
     virtual void emitAborted();
     virtual void emitFailed(QString reason = "");
+
+    virtual void propogateStepProgress(TaskStepProgressList task_progress);
 
    public slots:
     void setStatus(const QString& status);
