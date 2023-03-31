@@ -61,13 +61,23 @@ QString truncateUrlHumanFriendly(QUrl &url, int max_len, bool hard_limit = false
     if (str_url.length() <= max_len)
         return str_url;
 
-    QRegularExpression re(R"(^([\w]+:\/\/)([\w._-]+\/)([\w._-]+\/).*(\/[^]+[^]+)$)");
+    /* this is a PCRE regular expression that splits a URL (given by the display rules above) into 5 capture groups
+     * the scheme (ie https://) is group 1
+     * the host (with trailing /) is group 2
+     * the first part of the path (with trailing /) is group 3
+     * the last part of the path (with leading /) is group 5
+     * the remainder of the URL is in the .* and in group 4
+     *
+     * See: https://regex101.com/r/inHkek/1
+     * for an interactive breakdown
+     */ 
+    QRegularExpression re(R"(^([\w]+:\/\/)([\w._-]+\/)([\w._-]+\/)(.*)(\/[^]+[^]+)$)");
     
     auto url_compact = QString(str_url);
-    url_compact.replace(re, "\\1\\2\\3...\\4");
+    url_compact.replace(re, "\\1\\2\\3...\\5");
     if (url_compact.length() >= max_len) {
-        auto url_compact = QString(str_url);
-        url_compact.replace(re, "\\1\\2...\\4");
+        url_compact = QString(str_url);
+        url_compact.replace(re, "\\1\\2...\\5");
     }
 
 
@@ -120,7 +130,7 @@ void Download::addValidator(Validator* v)
 
 void Download::executeTask()
 {
-    setStatus(tr("Downloading %1").arg(truncateUrlHumanFriendly(m_url, 60)));
+    setStatus(tr("Downloading %1").arg(truncateUrlHumanFriendly(m_url, 100)));
 
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(DownloadLogC) << getUid().toString() << "Attempt to start an aborted Download:" << m_url.toString();

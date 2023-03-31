@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>260</height>
+    <width>480</width>
+    <height>210</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,18 +18,15 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>600</width>
-    <height>260</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>600</width>
-    <height>16777215</height>
+    <width>480</width>
+    <height>210</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>Please wait...</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0">
    <item>
@@ -112,8 +109,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>584</width>
-        <height>146</height>
+        <width>464</width>
+        <height>96</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="taskProgressLayout">

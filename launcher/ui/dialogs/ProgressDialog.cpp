@@ -45,21 +45,18 @@
 #include "ui/widgets/SubTaskProgressBar.h"
 
 
-template<typename T> 
-int map_int_range(T value)
+// map a value in a numaric range of an arbatray type to between 0 and INT_MAX
+// for getting the best percision out of the qt progress bar
+template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type> 
+std::tuple<int, int> map_int_zero_max(T current, T range_max, T range_min)
 {
-    // auto type_min = std::numeric_limits<T>::min();
-    auto type_min = 0;
-    auto type_max = std::numeric_limits<T>::max();
+    int int_max = std::numeric_limits<int>::max();
 
-    // auto int_min = std::numeric_limits<int>::min();
-    auto int_min = 0;
-    auto int_max = std::numeric_limits<int>::max();
+    auto type_range = range_max - range_min;
+    double percentage = static_cast<double>(current - range_min) / static_cast<double>(type_range);
+    int mapped_current = percentage * int_max;
 
-    auto type_range = type_max - type_min;
-    auto int_range = int_max - int_min;
-
-    return static_cast<int>((value - type_min) * int_range / type_range + int_min);
+    return {mapped_current, int_max};
 }
 
 
@@ -100,14 +97,21 @@ void ProgressDialog::updateSize()
 {   
     QSize lastSize = this->size();
     QSize qSize = QSize(480, minimumSizeHint().height());
-    resize(qSize);
-    setFixedSize(qSize);
-    // keep the dialog in the center after a resize
-    if (lastSize != qSize)
+
+    // if the current window is too small
+    if ((lastSize != qSize) && (lastSize.height() < qSize.height()))
+    {
+        resize(qSize);
+        
+        // keep the dialog in the center after a resize
         this->move(
             this->parentWidget()->x() + (this->parentWidget()->width() - this->width()) / 2,
             this->parentWidget()->y() + (this->parentWidget()->height() - this->height()) / 2
         );
+    }
+
+    setMinimumSize(qSize);
+
 }
 
 int ProgressDialog::execWithTask(Task* task)
@@ -146,9 +150,6 @@ int ProgressDialog::execWithTask(Task* task)
         changeStatus(task->getStatus());
         changeProgress(task->getProgress(), task->getTotalProgress());
     }
-
-    // auto size_hint = ui->verticalLayout->sizeHint();
-    // resize(size_hint.width(), size_hint.height());
 
     return QDialog::exec();
 }
@@ -209,26 +210,31 @@ void ProgressDialog::addTaskProgress(TaskStepProgress* progress)
 {
     SubTaskProgressBar* task_bar = new SubTaskProgressBar(this);
     taskProgress.insert(progress->uid, task_bar);
-    ui->taskProgressLayout->insertWidget(0, task_bar);
+    ui->taskProgressLayout->addWidget(task_bar);
 }
 
 void ProgressDialog::changeStepProgress(TaskStepProgressList task_progress)
 {
     m_is_multi_step = true;
-    ui->taskProgressScrollArea->setHidden(false);
+    if(ui->taskProgressScrollArea->isHidden()) {
+        ui->taskProgressScrollArea->setHidden(false);
+        updateSize();
+    }
     
     for (auto tp : task_progress) {
         if (!taskProgress.contains(tp->uid))
             addTaskProgress(tp.get());
         auto task_bar = taskProgress.value(tp->uid);
 
-        if (tp->total < 0) {
+
+        auto const [mapped_current, mapped_total] = map_int_zero_max<qint64>(tp->current, tp->total, 0);
+        if (tp->total <= 0) {
             task_bar->setRange(0, 0);
         } else {
-            task_bar->setRange(0, map_int_range<qint64>(tp->total));
+            task_bar->setRange(0, mapped_total);
         }
 
-        task_bar->setValue(map_int_range<qint64>(tp->current));
+        task_bar->setValue(mapped_current);
         task_bar->setStatus(tp->status);
         task_bar->setDetails(tp->details);
 
@@ -237,8 +243,6 @@ void ProgressDialog::changeStepProgress(TaskStepProgressList task_progress)
         }
 
     }
-
-    updateSize();
 }
 
 void ProgressDialog::changeProgress(qint64 current, qint64 total)

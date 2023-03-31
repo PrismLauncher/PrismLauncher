@@ -28,12 +28,7 @@ void ConcurrentTask::addTask(Task::Ptr task)
 
 void ConcurrentTask::executeTask()
 {
-    // Start the least amount of tasks needed, but at least one
-    // int num_starts = qMax(1, qMin(m_total_max_size, m_queue.size()));
-    // for (int i = 0; i < num_starts; i++) {
-    //     QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
-    // }
-    // Start One task, startNext hadles starting the up to the m_total_max_size
+    // Start One task, startNext hadels starting the up to the m_total_max_size
     // while tracking the number currently being done
     QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
 }
