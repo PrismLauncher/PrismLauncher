@@ -75,9 +75,23 @@ QString getLibraryString()
     }
 
     for (QString vkLayer : vkLayerList) {
-        QString filePath = FS::PathCombine(vkLayer, "MangoHud.json");
-        if (!QFile::exists(filePath))
-            continue;
+        QStringList vkArchitectures = { "x86_64", "aarch64" };
+
+        QString filePath = "";
+        // prefer to use architecture specific vulkan layers
+        for (QString arch: vkArchitectures) {
+            QString tryPath = FS::PathCombine(vkLayer, QString("MangoHud.%1.json").arg(arch));
+            if (QFile::exists(tryPath)) {
+              filePath = tryPath;
+            }
+        }
+
+        if (filePath.isEmpty()) {
+            filePath = FS::PathCombine(vkLayer, "MangoHud.json");
+            // bail out if no mangohud layers are found
+            if (!QFile::exists(filePath))
+                continue;
+        }
 
         auto conf = Json::requireDocument(filePath, vkLayer);
         auto confObject = Json::requireObject(conf, vkLayer);
