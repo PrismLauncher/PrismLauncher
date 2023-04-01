@@ -1341,10 +1341,10 @@ void MainWindow::on_actionDeleteInstance_triggered()
     if (!linkedInstances.empty()) {
         response = CustomMessageBox::selectable(
                 this, tr("There are linked instances"),
-                tr("The folowing Instance(s) might reference files in this instance:\n\n"
+                tr("The folowing instance(s) might reference files in this instance:\n\n"
                 "%1\n\n"
                 "Deleting it could break the other instance(s), \n\n"
-                "Are you sure?").arg(linkedInstances.join("\n")), 
+                "Do you wish to proceed?").arg(linkedInstances.join("\n")), 
                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No
             )->exec();
         if (response != QMessageBox::Yes)
