@@ -123,6 +123,8 @@ set(NET_SOURCES
     net/HttpMetaCache.h
     net/MetaCacheSink.cpp
     net/MetaCacheSink.h
+    net/logging.h
+    net/logging.cpp
     net/NetAction.h
     net/NetJob.cpp
     net/NetJob.h
@@ -560,6 +562,37 @@ ecm_qt_declare_logging_category(CORE_SOURCES
     CATEGORY_NAME "launcher.auth.credentials"
     DEFAULT_SEVERITY Warning
     DESCRIPTION "Secrets and credentials for debugging purposes"
+    EXPORT "${Launcher_Name}"
+)
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskLogC
+    CATEGORY_NAME "launcher.task"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "Task actions"
+    EXPORT "${Launcher_Name}"
+)
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskNetLogC
+    CATEGORY_NAME "launcher.task.net"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network action"
+    EXPORT "${Launcher_Name}"
+)
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskDownloadLogC
+    CATEGORY_NAME "launcher.task.net.download"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network download actions"
+    EXPORT "${Launcher_Name}"
+)
+ecm_qt_export_logging_category(
+    IDENTIFIER taskUploadLogC
+    CATEGORY_NAME "launcher.task.net.upload"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network upload actions"
     EXPORT "${Launcher_Name}"
 )
 

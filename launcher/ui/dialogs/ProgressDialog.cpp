@@ -133,9 +133,9 @@ int ProgressDialog::execWithTask(Task* task)
     connect(task, &Task::failed, this, &ProgressDialog::onTaskFailed);
     connect(task, &Task::succeeded, this, &ProgressDialog::onTaskSucceeded);
     connect(task, &Task::status, this, &ProgressDialog::changeStatus);
+    connect(task, &Task::details, this, &ProgressDialog::changeStatus);
     connect(task, &Task::stepProgress, this, &ProgressDialog::changeStepProgress);
     connect(task, &Task::progress, this, &ProgressDialog::changeProgress);
-
     connect(task, &Task::aborted, this, &ProgressDialog::hide);
     connect(task, &Task::abortStatusChanged, ui->skipButton, &QPushButton::setEnabled);
 

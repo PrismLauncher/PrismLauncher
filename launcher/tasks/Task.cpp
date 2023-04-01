@@ -37,7 +37,7 @@
 
 #include <QDebug>
 
-Q_LOGGING_CATEGORY(TaskLogC, "Task")
+Q_LOGGING_CATEGORY(taskLogC, "launcher.task")
 
 Task::Task(QObject *parent, bool show_debug) : QObject(parent), m_show_debug(show_debug)
 {
@@ -54,11 +54,23 @@ void Task::setStatus(const QString &new_status)
     }
 }
 
+void Task::setDetails(const QString& new_details)
+{
+    if (m_details != new_details)
+    {
+        m_details = new_details;
+        emit details(m_details);
+    }
+}
+
 void Task::setProgress(qint64 current, qint64 total)
 {
-    m_progress = current;
-    m_progressTotal = total;
-    emit progress(m_progress, m_progressTotal);
+    if ((m_progress != current) || (m_progressTotal != total)) {
+        m_progress = current;
+        m_progressTotal = total;
+        
+        emit progress(m_progress, m_progressTotal);
+    } 
 }
 
 void Task::start()
@@ -68,31 +80,31 @@ void Task::start()
         case State::Inactive:
         {
             if (m_show_debug)
-                qCDebug(TaskLogC) << "Task" << describe() << "starting for the first time";
+                qCDebug(taskLogC) << "Task" << describe() << "starting for the first time";
             break;
         }
         case State::AbortedByUser:
         {
             if (m_show_debug)
-                qCDebug(TaskLogC) << "Task" << describe() << "restarting for after being aborted by user";
+                qCDebug(taskLogC) << "Task" << describe() << "restarting for after being aborted by user";
             break;
         }
         case State::Failed:
         {
             if (m_show_debug)
-                qCDebug(TaskLogC) << "Task" << describe() << "restarting for after failing at first";
+                qCDebug(taskLogC) << "Task" << describe() << "restarting for after failing at first";
             break;
         }
         case State::Succeeded:
         {
             if (m_show_debug)
-                qCDebug(TaskLogC) << "Task" << describe() << "restarting for after succeeding at first";
+                qCDebug(taskLogC) << "Task" << describe() << "restarting for after succeeding at first";
             break;
         }
         case State::Running:
         {
             if (m_show_debug)
-                qCWarning(TaskLogC) << "The launcher tried to start task" << describe() << "while it was already running!";
+                qCWarning(taskLogC) << "The launcher tried to start task" << describe() << "while it was already running!";
             return;
         }
     }
@@ -107,12 +119,12 @@ void Task::emitFailed(QString reason)
     // Don't fail twice.
     if (!isRunning())
     {
-        qCCritical(TaskLogC) << "Task" << describe() << "failed while not running!!!!: " << reason;
+        qCCritical(taskLogC) << "Task" << describe() << "failed while not running!!!!: " << reason;
         return;
     }
     m_state = State::Failed;
     m_failReason = reason;
-    qCCritical(TaskLogC) << "Task" << describe() << "failed: " << reason;
+    qCCritical(taskLogC) << "Task" << describe() << "failed: " << reason;
     emit failed(reason);
     emit finished();
 }
@@ -122,13 +134,13 @@ void Task::emitAborted()
     // Don't abort twice.
     if (!isRunning())
     {
-        qCCritical(TaskLogC) << "Task" << describe() << "aborted while not running!!!!";
+        qCCritical(taskLogC) << "Task" << describe() << "aborted while not running!!!!";
         return;
     }
     m_state = State::AbortedByUser;
     m_failReason = "Aborted.";
     if (m_show_debug)
-        qCDebug(TaskLogC) << "Task" << describe() << "aborted.";
+        qCDebug(taskLogC) << "Task" << describe() << "aborted.";
     emit aborted();
     emit finished();
 }
@@ -138,12 +150,12 @@ void Task::emitSucceeded()
     // Don't succeed twice.
     if (!isRunning())
     {
-        qCCritical(TaskLogC) << "Task" << describe() << "succeeded while not running!!!!";
+        qCCritical(taskLogC) << "Task" << describe() << "succeeded while not running!!!!";
         return;
     }
     m_state = State::Succeeded;
     if (m_show_debug)
-        qCDebug(TaskLogC) << "Task" << describe() << "succeeded";
+        qCDebug(taskLogC) << "Task" << describe() << "succeeded";
     emit succeeded();
     emit finished();
 }

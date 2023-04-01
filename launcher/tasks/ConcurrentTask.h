@@ -40,6 +40,7 @@ slots:
     void subTaskSucceeded(Task::Ptr);
     void subTaskFailed(Task::Ptr, const QString &msg);
     void subTaskStatus(Task::Ptr task, const QString &msg);
+    void subTaskDetails(Task::Ptr task, const QString &msg);
     void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
     void subTaskStepProgress(Task::Ptr task, TaskStepProgressList task_step_progress);
 

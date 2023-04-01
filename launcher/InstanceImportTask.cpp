@@ -294,6 +294,7 @@ void InstanceImportTask::processFlame()
     connect(inst_creation_task, &Task::progress, this, &InstanceImportTask::setProgress);
     connect(inst_creation_task, &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
     connect(inst_creation_task, &Task::status, this, &InstanceImportTask::setStatus);
+    connect(inst_creation_task, &Task::details, this, &InstanceImportTask::setDetails);
     connect(inst_creation_task, &Task::finished, inst_creation_task, &InstanceCreationTask::deleteLater);
 
     connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);
@@ -386,6 +387,7 @@ void InstanceImportTask::processModrinth()
     connect(inst_creation_task, &Task::progress, this, &InstanceImportTask::setProgress);
     connect(inst_creation_task, &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
     connect(inst_creation_task, &Task::status, this, &InstanceImportTask::setStatus);
+    connect(inst_creation_task, &Task::details, this, &InstanceImportTask::setDetails);
     connect(inst_creation_task, &Task::finished, inst_creation_task, &InstanceCreationTask::deleteLater);
 
     connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);

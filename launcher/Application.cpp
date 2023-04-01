@@ -46,6 +46,7 @@
 #include "net/PasteUpload.h"
 #include "pathmatcher/MultiMatcher.h"
 #include "pathmatcher/SimplePrefixMatcher.h"
+#include "settings/INIFile.h"
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
 
@@ -410,6 +411,24 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 " " "|" " "
                 "%{if-category}[%{category}]: %{endif}"
                 "%{message}");
+        
+        if(QFile::exists("logging.ini")) {
+            // load and set logging rules
+            qDebug() << "Loading logging rules from:" << QString("%1/logging.ini").arg(dataPath);
+            INIFile loggingRules;
+            bool rulesLoaded = loggingRules.loadFile(QString("logging.ini"));
+            if (rulesLoaded) {
+                QStringList rules;
+                qDebug() << "Setting log rules:";
+                for (auto it = loggingRules.begin(); it != loggingRules.end(); ++it) {
+                    auto rule = it.key() + "=" + it.value().toString();
+                    rules.append(rule);
+                    qDebug() << "    " << rule;
+                }
+                auto rules_str = rules.join("\n");
+                QLoggingCategory::setFilterRules(rules_str);
+            }
+        }
 
         qDebug() << "<> Log initialized.";
     }

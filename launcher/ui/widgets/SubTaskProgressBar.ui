@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>597</width>
-    <height>61</height>
+    <width>312</width>
+    <height>86</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,6 +25,9 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
+     <property name="spacing">
+      <number>8</number>
+     </property>
      <item>
       <widget class="QLabel" name="statusLabel">
        <property name="sizePolicy">

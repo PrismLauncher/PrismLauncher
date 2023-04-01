@@ -42,6 +42,8 @@
 
 #include "QObjectPtr.h"
 
+Q_DECLARE_LOGGING_CATEGORY(taskLogC)
+
 enum class TaskStepState {
     Waiting,
     Running,
@@ -100,12 +102,13 @@ class Task : public QObject, public QRunnable {
     auto getState() const -> State { return m_state; }
 
     QString getStatus() { return m_status; }
+    QString getDetails() { return m_details; }
 
     qint64 getProgress() { return m_progress; }
     qint64 getTotalProgress() { return m_progressTotal; }
     virtual auto getStepProgress() const -> TaskStepProgressList { return {}; }
 
-    virtual auto getDetails() const -> QString { return ""; } 
+     
 
     QUuid getUid() { return m_uid; }
 
@@ -123,6 +126,7 @@ class Task : public QObject, public QRunnable {
     void aborted();
     void failed(QString reason);
     void status(QString status);
+    void details(QString details);
     void stepProgress(TaskStepProgressList task_progress); // 
 
     /** Emitted when the canAbort() status has changed.
@@ -150,6 +154,7 @@ class Task : public QObject, public QRunnable {
 
    public slots:
     void setStatus(const QString& status);
+    void setDetails(const QString& details);
     void setProgress(qint64 current, qint64 total);
 
    protected:
@@ -157,6 +162,7 @@ class Task : public QObject, public QRunnable {
     QStringList m_Warnings;
     QString m_failReason = "";
     QString m_status;
+    QString m_details;
     int m_progress = 0;
     int m_progressTotal = 100;
 

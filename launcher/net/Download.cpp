@@ -4,6 +4,7 @@
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,7 +51,7 @@
 #include "BuildConfig.h"
 #include "Application.h"
 
-Q_LOGGING_CATEGORY(DownloadLogC, "Task.Net.Download")
+#include "logging.h"
 
 namespace Net {
 
@@ -133,7 +134,7 @@ void Download::executeTask()
     setStatus(tr("Downloading %1").arg(truncateUrlHumanFriendly(m_url, 100)));
 
     if (getState() == Task::State::AbortedByUser) {
-        qCWarning(DownloadLogC) << getUid().toString() << "Attempt to start an aborted Download:" << m_url.toString();
+        qCWarning(taskDownloadLogC) << getUid().toString() << "Attempt to start an aborted Download:" << m_url.toString();
         emitAborted();
         return;
     }
@@ -143,10 +144,10 @@ void Download::executeTask()
     switch (m_state) {
         case State::Succeeded:
             emit succeeded();
-            qCDebug(DownloadLogC) << getUid().toString() << "Download cache hit " << m_url.toString();
+            qCDebug(taskDownloadLogC) << getUid().toString() << "Download cache hit " << m_url.toString();
             return;
         case State::Running:
-            qCDebug(DownloadLogC) << getUid().toString() << "Downloading " << m_url.toString();
+            qCDebug(taskDownloadLogC) << getUid().toString() << "Downloading " << m_url.toString();
             break;
         case State::Inactive:
         case State::Failed:
@@ -192,9 +193,9 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
     auto bytes_recived_since = bytesReceived - m_last_progress_bytes;
     if (elapsed_ms > 0) {
-        m_details = humanReadableFileSize(bytes_recived_since / elapsed_ms * 1000) + "/s";
+        setDetails(humanReadableFileSize(bytes_recived_since / elapsed_ms * 1000) + "/s");
     } else {
-        m_details = "0 b/s";
+        setDetails("0 b/s");
     }  
 
     setProgress(bytesReceived, bytesTotal);
@@ -203,7 +204,7 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 void Download::downloadError(QNetworkReply::NetworkError error)
 {
     if (error == QNetworkReply::OperationCanceledError) {
-        qCCritical(DownloadLogC) << getUid().toString() << "Aborted " << m_url.toString();
+        qCCritical(taskDownloadLogC) << getUid().toString() << "Aborted " << m_url.toString();
         m_state = State::AbortedByUser;
     } else {
         if (m_options & Option::AcceptLocalFiles) {
@@ -213,7 +214,7 @@ void Download::downloadError(QNetworkReply::NetworkError error)
             }
         }
         // error happened during download.
-        qCCritical(DownloadLogC) << getUid().toString() << "Failed " << m_url.toString() << " with reason " << error;
+        qCCritical(taskDownloadLogC) << getUid().toString() << "Failed " << m_url.toString() << " with reason " << error;
         m_state = State::Failed;
     }
 }
@@ -222,9 +223,9 @@ void Download::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
     for (auto error : errors) {
-        qCCritical(DownloadLogC) << getUid().toString() << "Download" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
+        qCCritical(taskDownloadLogC) << getUid().toString() << "Download" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
         auto cert = error.certificate();
-        qCCritical(DownloadLogC) << getUid().toString() << "Certificate in question:\n" << cert.toText();
+        qCCritical(taskDownloadLogC) << getUid().toString() << "Certificate in question:\n" << cert.toText();
         i++;
     }
 }
@@ -267,17 +268,17 @@ auto Download::handleRedirect() -> bool
          */
         redirect = QUrl(redirectStr, QUrl::TolerantMode);
         if (!redirect.isValid()) {
-            qCWarning(DownloadLogC) << getUid().toString() << "Failed to parse redirect URL:" << redirectStr;
+            qCWarning(taskDownloadLogC) << getUid().toString() << "Failed to parse redirect URL:" << redirectStr;
             downloadError(QNetworkReply::ProtocolFailure);
             return false;
         }
-        qCDebug(DownloadLogC) << getUid().toString() << "Fixed location header:" << redirect;
+        qCDebug(taskDownloadLogC) << getUid().toString() << "Fixed location header:" << redirect;
     } else {
-        qCDebug(DownloadLogC) << getUid().toString() << "Location header:" << redirect;
+        qCDebug(taskDownloadLogC) << getUid().toString() << "Location header:" << redirect;
     }
 
     m_url = QUrl(redirect.toString());
-    qCDebug(DownloadLogC) << getUid().toString() << "Following redirect to " << m_url.toString();
+    qCDebug(taskDownloadLogC) << getUid().toString() << "Following redirect to " << m_url.toString();
     startAction(m_network);
 
     return true;
@@ -287,26 +288,26 @@ void Download::downloadFinished()
 {
     // handle HTTP redirection first
     if (handleRedirect()) {
-        qCDebug(DownloadLogC) << getUid().toString() << "Download redirected:" << m_url.toString();
+        qCDebug(taskDownloadLogC) << getUid().toString() << "Download redirected:" << m_url.toString();
         return;
     }
 
     // if the download failed before this point ...
     if (m_state == State::Succeeded)  // pretend to succeed so we continue processing :)
     {
-        qCDebug(DownloadLogC) << getUid().toString() << "Download failed but we are allowed to proceed:" << m_url.toString();
+        qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit succeeded();
         return;
     } else if (m_state == State::Failed) {
-        qCDebug(DownloadLogC) << getUid().toString() << "Download failed in previous step:" << m_url.toString();
+        qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit failed("");
         return;
     } else if (m_state == State::AbortedByUser) {
-        qCDebug(DownloadLogC) << getUid().toString() << "Download aborted in previous step:" << m_url.toString();
+        qCDebug(taskDownloadLogC) << getUid().toString() << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit aborted();
@@ -316,14 +317,14 @@ void Download::downloadFinished()
     // make sure we got all the remaining data, if any
     auto data = m_reply->readAll();
     if (data.size()) {
-        qCDebug(DownloadLogC) << getUid().toString() << "Writing extra" << data.size() << "bytes";
+        qCDebug(taskDownloadLogC) << getUid().toString() << "Writing extra" << data.size() << "bytes";
         m_state = m_sink->write(data);
     }
 
     // otherwise, finalize the whole graph
     m_state = m_sink->finalize(*m_reply.get());
     if (m_state != State::Succeeded) {
-        qCDebug(DownloadLogC) << getUid().toString() << "Download failed to finalize:" << m_url.toString();
+        qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit failed("");
@@ -331,7 +332,7 @@ void Download::downloadFinished()
     }
 
     m_reply.reset();
-    qCDebug(DownloadLogC) << getUid().toString() << "Download succeeded:" << m_url.toString();
+    qCDebug(taskDownloadLogC) << getUid().toString() << "Download succeeded:" << m_url.toString();
     emit succeeded();
 }
 
@@ -341,11 +342,11 @@ void Download::downloadReadyRead()
         auto data = m_reply->readAll();
         m_state = m_sink->write(data);
         if (m_state == State::Failed) {
-            qCCritical(DownloadLogC) << getUid().toString() << "Failed to process response chunk";
+            qCCritical(taskDownloadLogC) << getUid().toString() << "Failed to process response chunk";
         }
         // qDebug() << "Download" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {
-        qCCritical(DownloadLogC) << getUid().toString() << "Cannot write download data! illegal status " << m_status;
+        qCCritical(taskDownloadLogC) << getUid().toString() << "Cannot write download data! illegal status " << m_status;
     }
 }
 

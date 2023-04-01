@@ -102,6 +102,7 @@ void MinecraftUpdate::next()
         disconnect(task.get(), &Task::progress, this, &MinecraftUpdate::progress);
         disconnect(task.get(), &Task::stepProgress, this, &MinecraftUpdate::propogateStepProgress);
         disconnect(task.get(), &Task::status, this, &MinecraftUpdate::setStatus);
+        disconnect(task.get(), &Task::details, this, &MinecraftUpdate::setDetails);
     }
     if(m_currentTask == m_tasks.size())
     {
@@ -121,6 +122,7 @@ void MinecraftUpdate::next()
     connect(task.get(), &Task::progress, this, &MinecraftUpdate::progress);
     connect(task.get(), &Task::stepProgress, this, &MinecraftUpdate::propogateStepProgress);
     connect(task.get(), &Task::status, this, &MinecraftUpdate::setStatus);
+    connect(task.get(), &Task::details, this, &MinecraftUpdate::setDetails);
     // if the task is already running, do not start it again
     if(!task->isRunning())
     {

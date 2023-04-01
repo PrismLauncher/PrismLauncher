@@ -95,6 +95,7 @@ void ConcurrentTask::startNext()
     connect(next.get(), &Task::failed, this, [this, next](QString msg) { subTaskFailed(next, msg); });
 
     connect(next.get(), &Task::status, this, [this, next](QString msg){ subTaskStatus(next, msg); });
+    connect(next.get(), &Task::details, this, [this, next](QString msg){ subTaskDetails(next, msg); });
     connect(next.get(), &Task::stepProgress, this, [this, next](TaskStepProgressList tp){ subTaskStepProgress(next, tp); });
 
     connect(next.get(), &Task::progress, this, [this, next](qint64 current, qint64 total){ subTaskProgress(next, current, total); });
@@ -151,7 +152,14 @@ void ConcurrentTask::subTaskStatus(Task::Ptr task, const QString& msg)
     auto taskProgress = m_task_progress.value(task->getUid());
     taskProgress->status = msg; 
     taskProgress->state = TaskStepState::Running;
-    updateState();
+    updateStepProgress();
+}
+
+void ConcurrentTask::subTaskDetails(Task::Ptr task, const QString& msg)
+{
+    auto taskProgress = m_task_progress.value(task->getUid());
+    taskProgress->details = msg; 
+    taskProgress->state = TaskStepState::Running;
     updateStepProgress();
 }
 
@@ -162,7 +170,6 @@ void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 tota
     taskProgress->current = current;
     taskProgress->total = total;
     taskProgress->state = TaskStepState::Running;
-    taskProgress->details = task->getDetails(); 
 
     updateStepProgress();
     updateState();

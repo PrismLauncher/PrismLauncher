@@ -66,7 +66,6 @@ class Download : public NetAction {
     void addValidator(Validator* v);
     auto abort() -> bool override;
     auto canAbort() const -> bool override { return true; };
-    auto getDetails() const -> QString override {return m_details; };
 
    private:
     auto handleRedirect() -> bool;
@@ -88,8 +87,6 @@ class Download : public NetAction {
     std::chrono::steady_clock m_clock;
     std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;
     qint64 m_last_progress_bytes;
-
-    QString m_details;
 };
 }  // namespace Net
 

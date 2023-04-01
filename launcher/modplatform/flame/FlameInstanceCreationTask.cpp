@@ -453,7 +453,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 {
-    m_files_job.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
+    m_files_job.reset(new NetJob(tr("Mod Download Flame"), APPLICATION->network()));
     for (const auto& result : m_mod_id_resolver->getResults().files) {
         QString filename = result.fileName;
         if (!result.required) {
@@ -497,7 +497,10 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         m_files_job.reset();
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::progress, this, &FlameCreationTask::setProgress);
+    connect(m_files_job.get(), &NetJob::progress, this, [this](qint64 current, qint64 total){
+        setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
+        setProgress(current, total);
+    });
     connect(m_files_job.get(), &NetJob::stepProgress, this, &FlameCreationTask::propogateStepProgress);
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
