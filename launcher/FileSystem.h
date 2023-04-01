@@ -280,7 +280,7 @@ QString AbsolutePath(const QString& path);
  * @param path path to measure
  * @return int number of components before base path
  */
-int PathDepth(const QString& path);
+int pathDepth(const QString& path);
 
 /**
  * @brief  cut off segments of path until it is a max of length depth
@@ -289,7 +289,7 @@ int PathDepth(const QString& path);
  * @param depth max depth of new path
  * @return QString truncated path
  */
-QString PathTruncate(const QString& path, int depth);
+QString pathTruncate(const QString& path, int depth);
 
 /**
  * Resolve an executable
@@ -360,23 +360,26 @@ enum class FilesystemType {
  * QMap is ordered
  *
  */
-static const QMap<FilesystemType, QString> s_filesystem_type_names = { { FilesystemType::FAT, QString("FAT") },
-                                                                       { FilesystemType::NTFS, QString("NTFS") },
-                                                                       { FilesystemType::REFS, QString("REFS") },
-                                                                       { FilesystemType::EXT, QString("EXT") },
-                                                                       { FilesystemType::EXT_2_OLD, QString("EXT_2_OLD") },
-                                                                       { FilesystemType::EXT_2_3_4, QString("EXT2/3/4") },
-                                                                       { FilesystemType::XFS, QString("XFS") },
-                                                                       { FilesystemType::BTRFS, QString("BTRFS") },
-                                                                       { FilesystemType::NFS, QString("NFS") },
-                                                                       { FilesystemType::ZFS, QString("ZFS") },
-                                                                       { FilesystemType::APFS, QString("APFS") },
-                                                                       { FilesystemType::HFS, QString("HFS") },
-                                                                       { FilesystemType::HFSPLUS, QString("HFSPLUS") },
-                                                                       { FilesystemType::HFSX, QString("HFSX") },
-                                                                       { FilesystemType::FUSEBLK, QString("FUSEBLK") },
-                                                                       { FilesystemType::F2FS, QString("F2FS") },
-                                                                       { FilesystemType::UNKNOWN, QString("UNKNOWN") } };
+static const QMap<FilesystemType, QString> s_filesystem_type_names = {
+    {FilesystemType::FAT,        QStringLiteral("FAT")},
+    {FilesystemType::NTFS,       QStringLiteral("NTFS")},
+    {FilesystemType::REFS,       QStringLiteral("REFS")},
+    {FilesystemType::EXT,        QStringLiteral("EXT")},
+    {FilesystemType::EXT_2_OLD,  QStringLiteral("EXT_2_OLD")},
+    {FilesystemType::EXT_2_3_4,  QStringLiteral("EXT2/3/4")},
+    {FilesystemType::XFS,        QStringLiteral("XFS")},
+    {FilesystemType::BTRFS,      QStringLiteral("BTRFS")},
+    {FilesystemType::NFS,        QStringLiteral("NFS")},
+    {FilesystemType::ZFS,        QStringLiteral("ZFS")},
+    {FilesystemType::APFS,       QStringLiteral("APFS")},
+    {FilesystemType::HFS,        QStringLiteral("HFS")},
+    {FilesystemType::HFSPLUS,    QStringLiteral("HFSPLUS")},
+    {FilesystemType::HFSX,       QStringLiteral("HFSX")},
+    {FilesystemType::FUSEBLK,    QStringLiteral("FUSEBLK")},
+    {FilesystemType::F2FS,       QStringLiteral("F2FS")},
+    {FilesystemType::UNKNOWN,    QStringLiteral("UNKNOWN")}
+};
+
 
 /**
  * @brief Ordered Mapping of reported filesystem names to enum types
@@ -387,28 +390,28 @@ static const QMap<FilesystemType, QString> s_filesystem_type_names = { { Filesys
  *
  */
 static const QMap<QString, FilesystemType> s_filesystem_type_names_inverse = {
-    { QString("FAT"), FilesystemType::FAT },
-    { QString("NTFS"), FilesystemType::NTFS },
-    { QString("REFS"), FilesystemType::REFS },
-    { QString("EXT2_OLD"), FilesystemType::EXT_2_OLD },
-    { QString("EXT_2_OLD"), FilesystemType::EXT_2_OLD },
-    { QString("EXT2"), FilesystemType::EXT_2_3_4 },
-    { QString("EXT3"), FilesystemType::EXT_2_3_4 },
-    { QString("EXT4"), FilesystemType::EXT_2_3_4 },
-    { QString("EXT2/3/4"), FilesystemType::EXT_2_3_4 },
-    { QString("EXT_2_3_4"), FilesystemType::EXT_2_3_4 },
-    { QString("EXT"), FilesystemType::EXT },  // must come after all other EXT variants to prevent greedy detection
-    { QString("XFS"), FilesystemType::XFS },
-    { QString("BTRFS"), FilesystemType::BTRFS },
-    { QString("NFS"), FilesystemType::NFS },
-    { QString("ZFS"), FilesystemType::ZFS },
-    { QString("APFS"), FilesystemType::APFS },
-    { QString("HFSPLUS"), FilesystemType::HFSPLUS },
-    { QString("HFSX"), FilesystemType::HFSX },
-    { QString("HFS"), FilesystemType::HFS },
-    { QString("FUSEBLK"), FilesystemType::FUSEBLK },
-    { QString("F2FS"), FilesystemType::F2FS },
-    { QString("UNKNOWN"), FilesystemType::UNKNOWN }
+    {QStringLiteral("FAT"),         FilesystemType::FAT},
+    {QStringLiteral("NTFS"),        FilesystemType::NTFS},
+    {QStringLiteral("REFS"),        FilesystemType::REFS},
+    {QStringLiteral("EXT2_OLD"),    FilesystemType::EXT_2_OLD},
+    {QStringLiteral("EXT_2_OLD"),   FilesystemType::EXT_2_OLD},
+    {QStringLiteral("EXT2"),        FilesystemType::EXT_2_3_4},
+    {QStringLiteral("EXT3"),        FilesystemType::EXT_2_3_4},
+    {QStringLiteral("EXT4"),        FilesystemType::EXT_2_3_4},
+    {QStringLiteral("EXT2/3/4"),    FilesystemType::EXT_2_3_4},
+    {QStringLiteral("EXT_2_3_4"),   FilesystemType::EXT_2_3_4},
+    {QStringLiteral("EXT"),         FilesystemType::EXT}, // must come after all other EXT variants to prevent greedy detection
+    {QStringLiteral("XFS"),         FilesystemType::XFS},
+    {QStringLiteral("BTRFS"),       FilesystemType::BTRFS},
+    {QStringLiteral("NFS"),         FilesystemType::NFS},
+    {QStringLiteral("ZFS"),         FilesystemType::ZFS},
+    {QStringLiteral("APFS"),        FilesystemType::APFS},
+    {QStringLiteral("HFSPLUS"),     FilesystemType::HFSPLUS},
+    {QStringLiteral("HFSX"),        FilesystemType::HFSX},
+    {QStringLiteral("HFS"),         FilesystemType::HFS},
+    {QStringLiteral("FUSEBLK"),     FilesystemType::FUSEBLK},
+    {QStringLiteral("F2FS"),        FilesystemType::F2FS},
+    {QStringLiteral("UNKNOWN"),     FilesystemType::UNKNOWN}
 };
 
 /**
@@ -452,7 +455,7 @@ struct FilesystemInfo {
  * @brief path to the near ancestor that exists
  *
  */
-QString NearestExistentAncestor(const QString& path);
+QString nearestExistentAncestor(const QString& path);
 
 /**
  * @brief colect information about the filesystem under a file

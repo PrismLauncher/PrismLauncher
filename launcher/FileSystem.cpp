@@ -328,7 +328,7 @@ bool create_link::operator()(const QString& offset, bool dryRun)
 }
 
 /**
- * @brief make a list off all the  links to
+ * @brief Make a list of all the links to make
  * @param offset subdirectory form src to link to dest
  * @return if there was an error during the attempt to link
  */
@@ -363,7 +363,7 @@ void create_link::make_link_list(const QString& offset)
             link_file(src, "");
         } else {
             if (m_debug)
-                qDebug() << "linking recursively:" << src << "to" << dst << "max_depth:" << m_max_depth;
+                qDebug() << "linking recursively:" << src << "to" << dst << ", max_depth:" << m_max_depth;
             QDir src_dir(src);
             QDirIterator source_it(src, QDir::Filter::Files | QDir::Filter::Hidden, QDirIterator::Subdirectories);
 
@@ -373,8 +373,8 @@ void create_link::make_link_list(const QString& offset)
                 auto src_path = source_it.next();
                 auto relative_path = src_dir.relativeFilePath(src_path);
 
-                if (m_max_depth >= 0 && PathDepth(relative_path) > m_max_depth) {
-                    relative_path = PathTruncate(relative_path, m_max_depth);
+                if (m_max_depth >= 0 && pathDepth(relative_path) > m_max_depth){
+                    relative_path = pathTruncate(relative_path, m_max_depth);
                     src_path = src_dir.filePath(relative_path);
                     if (linkedPaths.contains(src_path)) {
                         continue;
@@ -394,20 +394,22 @@ bool create_link::make_links()
     for (auto link : m_links_to_make) {
         QString src_path = link.src;
         QString dst_path = link.dst;
+        auto src_path_std = StringUtils::toStdString(link.src);
+        auto dst_path_std = StringUtils::toStdString(link.dst);
 
         ensureFilePathExists(dst_path);
         if (m_useHardLinks) {
             if (m_debug)
                 qDebug() << "making hard link:" << src_path << "to" << dst_path;
-            fs::create_hard_link(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), m_os_err);
-        } else if (fs::is_directory(StringUtils::toStdString(src_path))) {
+            fs::create_hard_link(src_path_std, dst_path_std, m_os_err);
+        } else if (fs::is_directory(src_path_std)) {
             if (m_debug)
                 qDebug() << "making directory_symlink:" << src_path << "to" << dst_path;
-            fs::create_directory_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), m_os_err);
+            fs::create_directory_symlink(src_path_std, dst_path_std, m_os_err);
         } else {
             if (m_debug)
                 qDebug() << "making symlink:" << src_path << "to" << dst_path;
-            fs::create_symlink(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), m_os_err);
+            fs::create_symlink(src_path_std, dst_path_std, m_os_err);
         }
 
         if (m_os_err) {
@@ -636,7 +638,7 @@ QString AbsolutePath(const QString& path)
     return QFileInfo(path).absolutePath();
 }
 
-int PathDepth(const QString& path)
+int pathDepth(const QString& path)
 {
     if (path.isEmpty())
         return 0;
@@ -656,15 +658,15 @@ int PathDepth(const QString& path)
     return numParts;
 }
 
-QString PathTruncate(const QString& path, int depth)
+QString pathTruncate(const QString& path, int depth)
 {
     if (path.isEmpty() || (depth < 0))
         return "";
 
     QString trunc = QFileInfo(path).path();
 
-    if (PathDepth(trunc) > depth) {
-        return PathTruncate(trunc, depth);
+    if (pathDepth(trunc) > depth ) {
+        return pathTruncate(trunc, depth);
     }
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
@@ -984,7 +986,7 @@ FilesystemType getFilesystemType(const QString& name)
  * @brief path to the near ancestor that exists
  *
  */
-QString NearestExistentAncestor(const QString& path)
+QString nearestExistentAncestor(const QString& path)
 {
     if (QFileInfo::exists(path))
         return path;
@@ -1007,7 +1009,7 @@ FilesystemInfo statFS(const QString& path)
 {
     FilesystemInfo info;
 
-    QStorageInfo storage_info(NearestExistentAncestor(path));
+    QStorageInfo storage_info(nearestExistentAncestor(path));
 
     info.fsTypeName = storage_info.fileSystemType();
 

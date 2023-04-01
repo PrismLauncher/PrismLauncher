@@ -756,30 +756,30 @@ slots:
     }
 
     void test_path_depth() {
-        QCOMPARE(FS::PathDepth(""), 0);
-        QCOMPARE(FS::PathDepth("."), 0);
-        QCOMPARE(FS::PathDepth("foo.txt"), 0);
-        QCOMPARE(FS::PathDepth("./foo.txt"), 0);
-        QCOMPARE(FS::PathDepth("./bar/foo.txt"), 1);
-        QCOMPARE(FS::PathDepth("../bar/foo.txt"), 0);
-        QCOMPARE(FS::PathDepth("/bar/foo.txt"), 1);
-        QCOMPARE(FS::PathDepth("baz/bar/foo.txt"), 2);
-        QCOMPARE(FS::PathDepth("/baz/bar/foo.txt"), 2);
-        QCOMPARE(FS::PathDepth("./baz/bar/foo.txt"), 2);
-        QCOMPARE(FS::PathDepth("/baz/../bar/foo.txt"), 1);
+        QCOMPARE(FS::pathDepth(""), 0);
+        QCOMPARE(FS::pathDepth("."), 0);
+        QCOMPARE(FS::pathDepth("foo.txt"), 0);
+        QCOMPARE(FS::pathDepth("./foo.txt"), 0);
+        QCOMPARE(FS::pathDepth("./bar/foo.txt"), 1);
+        QCOMPARE(FS::pathDepth("../bar/foo.txt"), 0);
+        QCOMPARE(FS::pathDepth("/bar/foo.txt"), 1);
+        QCOMPARE(FS::pathDepth("baz/bar/foo.txt"), 2);
+        QCOMPARE(FS::pathDepth("/baz/bar/foo.txt"), 2);
+        QCOMPARE(FS::pathDepth("./baz/bar/foo.txt"), 2);
+        QCOMPARE(FS::pathDepth("/baz/../bar/foo.txt"), 1);
     }
 
     void test_path_trunc() {
-        QCOMPARE(FS::PathTruncate("", 0), QDir::toNativeSeparators(""));
-        QCOMPARE(FS::PathTruncate("foo.txt", 0), QDir::toNativeSeparators(""));
-        QCOMPARE(FS::PathTruncate("foo.txt", 1), QDir::toNativeSeparators(""));
-        QCOMPARE(FS::PathTruncate("./bar/foo.txt", 0), QDir::toNativeSeparators("./bar"));
-        QCOMPARE(FS::PathTruncate("./bar/foo.txt", 1), QDir::toNativeSeparators("./bar"));
-        QCOMPARE(FS::PathTruncate("/bar/foo.txt", 1), QDir::toNativeSeparators("/bar"));
-        QCOMPARE(FS::PathTruncate("bar/foo.txt", 1), QDir::toNativeSeparators("bar"));
-        QCOMPARE(FS::PathTruncate("baz/bar/foo.txt", 2), QDir::toNativeSeparators("baz/bar"));
+        QCOMPARE(FS::pathTruncate("", 0), QDir::toNativeSeparators(""));
+        QCOMPARE(FS::pathTruncate("foo.txt", 0), QDir::toNativeSeparators(""));
+        QCOMPARE(FS::pathTruncate("foo.txt", 1), QDir::toNativeSeparators(""));
+        QCOMPARE(FS::pathTruncate("./bar/foo.txt", 0), QDir::toNativeSeparators("./bar"));
+        QCOMPARE(FS::pathTruncate("./bar/foo.txt", 1), QDir::toNativeSeparators("./bar"));
+        QCOMPARE(FS::pathTruncate("/bar/foo.txt", 1), QDir::toNativeSeparators("/bar"));
+        QCOMPARE(FS::pathTruncate("bar/foo.txt", 1), QDir::toNativeSeparators("bar"));
+        QCOMPARE(FS::pathTruncate("baz/bar/foo.txt", 2), QDir::toNativeSeparators("baz/bar"));
 #if defined(Q_OS_WIN)
-        QCOMPARE(FS::PathTruncate("C:\\bar\\foo.txt", 1), QDir::toNativeSeparators("C:\\bar"));
+        QCOMPARE(FS::pathTruncate("C:\\bar\\foo.txt", 1), QDir::toNativeSeparators("C:\\bar"));
 #endif
     }
 };
