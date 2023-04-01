@@ -19,6 +19,7 @@
 #include <QStringList>
 #include <QDir>
 #include <QString>
+#include <QSysInfo>
 #include <QtGlobal>
 
 #include "MangoHud.h"
@@ -76,7 +77,13 @@ QString getLibraryString()
 
     for (QString vkLayer : vkLayerList) {
         // prefer to use architecture specific vulkan layers
-        QStringList manifestNames = { "MangoHud.x86_64.json", "MangoHud.aarch64.json", "MangoHud.json" };
+        QString currentArch = QSysInfo::currentCpuArchitecture();
+
+        if (currentArch == "arm64") {
+            currentArch = "aarch64";
+        }
+
+        QStringList manifestNames = { QString("MangoHud.%1.json").arg(currentArch), "MangoHud.json" };
 
         QString filePath = "";
         for (QString manifestName : manifestNames) {
@@ -87,8 +94,9 @@ QString getLibraryString()
             }
         }
 
-        if (filePath.isEmpty())
+        if (filePath.isEmpty()) {
             continue;
+        }
 
         auto conf = Json::requireDocument(filePath, vkLayer);
         auto confObject = Json::requireObject(conf, vkLayer);
