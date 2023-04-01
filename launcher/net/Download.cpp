@@ -52,6 +52,7 @@
 #include "Application.h"
 
 #include "logging.h"
+#include "net/NetAction.h"
 
 namespace Net {
 
@@ -190,13 +191,23 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     auto now = m_clock.now();
     auto elapsed = now - m_last_progress_time;
+
+    // use milliseconds for speed precision
     auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
     auto bytes_recived_since = bytesReceived - m_last_progress_bytes;
+
+    // current bytes out of total bytes
+    QString dl_progress = tr("%1  / %2").arg(humanReadableFileSize(bytesReceived)).arg(humanReadableFileSize(bytesTotal));
+    
+    QString dl_speed;
     if (elapsed_ms > 0) {
-        setDetails(humanReadableFileSize(bytes_recived_since / elapsed_ms * 1000) + "/s");
+        // bytes per second
+        dl_speed = tr("%1/s").arg(humanReadableFileSize(bytes_recived_since / elapsed_ms * 1000));
     } else {
-        setDetails("0 b/s");
-    }  
+        dl_speed = tr("0 b/s");
+    } 
+
+    setDetails(dl_progress + "\n" + dl_speed);
 
     setProgress(bytesReceived, bytesTotal);
 }
