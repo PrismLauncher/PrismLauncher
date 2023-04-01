@@ -62,11 +62,11 @@ namespace Net {
 
     void Upload::downloadError(QNetworkReply::NetworkError error) {
         if (error == QNetworkReply::OperationCanceledError) {
-            qCCritical(taskUploadLogC) << "Aborted " << m_url.toString();
+            qCCritical(taskUploadLogC) << getUid().toString() << "Aborted " << m_url.toString();
             m_state = State::AbortedByUser;
         } else {
             // error happened during download.
-            qCCritical(taskUploadLogC) << "Failed " << m_url.toString() << " with reason " << error;
+            qCCritical(taskUploadLogC) << getUid().toString() << "Failed " << m_url.toString() << " with reason " << error;
             m_state = State::Failed;
         }
     }
@@ -74,9 +74,9 @@ namespace Net {
     void Upload::sslErrors(const QList<QSslError> &errors) {
         int i = 1;
         for (const auto& error : errors) {
-            qCCritical(taskUploadLogC) << "Upload" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
+            qCCritical(taskUploadLogC) << getUid().toString() << "Upload" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
             auto cert = error.certificate();
-            qCCritical(taskUploadLogC) << "Certificate in question:\n" << cert.toText();
+            qCCritical(taskUploadLogC) << getUid().toString() << "Certificate in question:\n" << cert.toText();
             i++;
         }
     }
@@ -119,17 +119,17 @@ namespace Net {
              */
             redirect = QUrl(redirectStr, QUrl::TolerantMode);
             if (!redirect.isValid()) {
-                qCWarning(taskUploadLogC) << "Failed to parse redirect URL:" << redirectStr;
+                qCWarning(taskUploadLogC) << getUid().toString() << "Failed to parse redirect URL:" << redirectStr;
                 downloadError(QNetworkReply::ProtocolFailure);
                 return false;
             }
-            qCDebug(taskUploadLogC) << "Fixed location header:" << redirect;
+            qCDebug(taskUploadLogC) << getUid().toString() << "Fixed location header:" << redirect;
         } else {
-            qCDebug(taskUploadLogC) << "Location header:" << redirect;
+            qCDebug(taskUploadLogC) << getUid().toString() << "Location header:" << redirect;
         }
 
         m_url = QUrl(redirect.toString());
-        qCDebug(taskUploadLogC) << "Following redirect to " << m_url.toString();
+        qCDebug(taskUploadLogC) << getUid().toString() << "Following redirect to " << m_url.toString();
         startAction(m_network);
         return true;
     }
@@ -138,25 +138,25 @@ namespace Net {
         // handle HTTP redirection first
         // very unlikely for post requests, still can happen
         if (handleRedirect()) {
-            qCDebug(taskUploadLogC) << "Upload redirected:" << m_url.toString();
+            qCDebug(taskUploadLogC) << getUid().toString() << "Upload redirected:" << m_url.toString();
             return;
         }
 
         // if the download failed before this point ...
         if (m_state == State::Succeeded) {
-            qCDebug(taskUploadLogC) << "Upload failed but we are allowed to proceed:" << m_url.toString();
+            qCDebug(taskUploadLogC) << getUid().toString() << "Upload failed but we are allowed to proceed:" << m_url.toString();
             m_sink->abort();
             m_reply.reset();
             emit succeeded();
             return;
         } else if (m_state == State::Failed) {
-            qCDebug(taskUploadLogC) << "Upload failed in previous step:" << m_url.toString();
+            qCDebug(taskUploadLogC) << getUid().toString() << "Upload failed in previous step:" << m_url.toString();
             m_sink->abort();
             m_reply.reset();
             emit failed("");
             return;
         } else if (m_state == State::AbortedByUser) {
-            qCDebug(taskUploadLogC) << "Upload aborted in previous step:" << m_url.toString();
+            qCDebug(taskUploadLogC) << getUid().toString() << "Upload aborted in previous step:" << m_url.toString();
             m_sink->abort();
             m_reply.reset();
             emit aborted();
@@ -166,21 +166,21 @@ namespace Net {
         // make sure we got all the remaining data, if any
         auto data = m_reply->readAll();
         if (data.size()) {
-            qCDebug(taskUploadLogC) << "Writing extra" << data.size() << "bytes";
+            qCDebug(taskUploadLogC) << getUid().toString() << "Writing extra" << data.size() << "bytes";
             m_state = m_sink->write(data);
         }
 
         // otherwise, finalize the whole graph
         m_state = m_sink->finalize(*m_reply.get());
         if (m_state != State::Succeeded) {
-            qCDebug(taskUploadLogC) << "Upload failed to finalize:" << m_url.toString();
+            qCDebug(taskUploadLogC) << getUid().toString() << "Upload failed to finalize:" << m_url.toString();
             m_sink->abort();
             m_reply.reset();
             emit failed("");
             return;
         }
         m_reply.reset();
-        qCDebug(taskUploadLogC) << "Upload succeeded:" << m_url.toString();
+        qCDebug(taskUploadLogC) << getUid().toString() << "Upload succeeded:" << m_url.toString();
         emit succeeded();
     }
 
@@ -195,7 +195,7 @@ namespace Net {
         setStatus(tr("Uploading %1").arg(m_url.toString()));
 
         if (m_state == State::AbortedByUser) {
-            qCWarning(taskUploadLogC) << "Attempt to start an aborted Upload:" << m_url.toString();
+            qCWarning(taskUploadLogC) << getUid().toString() << "Attempt to start an aborted Upload:" << m_url.toString();
             emit aborted();
             return;
         }
@@ -204,10 +204,10 @@ namespace Net {
         switch (m_state) {
             case State::Succeeded:
                 emitSucceeded();
-                qCDebug(taskUploadLogC) << "Upload cache hit " << m_url.toString();
+                qCDebug(taskUploadLogC) << getUid().toString() << "Upload cache hit " << m_url.toString();
                 return;
             case State::Running:
-                qCDebug(taskUploadLogC) << "Uploading " << m_url.toString();
+                qCDebug(taskUploadLogC) << getUid().toString() << "Uploading " << m_url.toString();
                 break;
             case State::Inactive:
             case State::Failed:

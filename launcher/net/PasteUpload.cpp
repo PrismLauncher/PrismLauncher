@@ -149,7 +149,7 @@ void PasteUpload::executeTask()
 void PasteUpload::downloadError(QNetworkReply::NetworkError error)
 {
     // error happened during download.
-    qCCritical(taskUploadLogC) << "Network error: " << error;
+    qCCritical(taskUploadLogC) << getUid().toString() << "Network error: " << error;
     emitFailed(m_reply->errorString());
 }
 
@@ -168,7 +168,7 @@ void PasteUpload::downloadFinished()
     {
         QString reasonPhrase = m_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
         emitFailed(tr("Error: %1 returned unexpected status code %2 %3").arg(m_uploadUrl).arg(statusCode).arg(reasonPhrase));
-        qCCritical(taskUploadLogC) << m_uploadUrl << " returned unexpected status code " << statusCode << " with body: " << data;
+        qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned unexpected status code " << statusCode << " with body: " << data;
         m_reply.reset();
         return;
     }
@@ -189,7 +189,7 @@ void PasteUpload::downloadFinished()
         else
         {
             emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
-            qCCritical(taskUploadLogC) << m_uploadUrl << " returned malformed response body: " << data;
+            qCCritical(taskUploadLogC) << getUid().toString() << getUid().toString() << m_uploadUrl << " returned malformed response body: " << data;
             return;
         }
         break;
@@ -208,15 +208,15 @@ void PasteUpload::downloadFinished()
             {
                 QString error = jsonObj["error"].toString();
                 emitFailed(tr("Error: %1 returned an error: %2").arg(m_uploadUrl, error));
-                qCCritical(taskUploadLogC) << m_uploadUrl << " returned error: " << error;
-                qCCritical(taskUploadLogC) << "Response body: " << data;
+                qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned error: " << error;
+                qCCritical(taskUploadLogC) << getUid().toString() << "Response body: " << data;
                 return;
             }
         }
         else
         {
             emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
-            qCCritical(taskUploadLogC) << m_uploadUrl << " returned malformed response body: " << data;
+            qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned malformed response body: " << data;
             return;
         }
         break;
@@ -236,16 +236,16 @@ void PasteUpload::downloadFinished()
                 QString error = jsonObj["error"].toString();
                 QString message = (jsonObj.contains("message") && jsonObj["message"].isString()) ? jsonObj["message"].toString() : "none";
                 emitFailed(tr("Error: %1 returned an error code: %2\nError message: %3").arg(m_uploadUrl, error, message));
-                qCCritical(taskUploadLogC) << m_uploadUrl << " returned error: " << error;
-                qCCritical(taskUploadLogC) << "Error message: " << message;
-                qCCritical(taskUploadLogC) << "Response body: " << data;
+                qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned error: " << error;
+                qCCritical(taskUploadLogC) << getUid().toString() << "Error message: " << message;
+                qCCritical(taskUploadLogC) << getUid().toString() << "Response body: " << data;
                 return;
             }
         }
         else
         {
             emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
-            qCCritical(taskUploadLogC) << m_uploadUrl << " returned malformed response body: " << data;
+            qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned malformed response body: " << data;
             return;
         }
         break;
