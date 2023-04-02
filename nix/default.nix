@@ -2,6 +2,7 @@
   lib,
   stdenv,
   cmake,
+  ninja,
   jdk8,
   jdk17,
   zlib,
@@ -33,7 +34,7 @@ stdenv.mkDerivation rec {
 
   src = lib.cleanSource self;
 
-  nativeBuildInputs = [extra-cmake-modules cmake file jdk17 wrapQtAppsHook];
+  nativeBuildInputs = [extra-cmake-modules cmake file jdk17 ninja wrapQtAppsHook];
   buildInputs =
     [
       qtbase
