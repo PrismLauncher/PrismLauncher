@@ -147,10 +147,10 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
+          <item row="4" column="1" colspan="2">
            <widget class="QCheckBox" name="downloadsDirWatchRecursiveCheckBox">
             <property name="toolTip">
-             <string>when looking for mods in places like the blocked mods dialog Prismlauncher will check in sub folders of your downloads folder too.</string>
+             <string>When enabled, in addition to the downloads folder, its sub folders will also be searched when looking for resources (e.g. when looking for blocked mods on CurseForge).</string>
             </property>
             <property name="text">
              <string>Check downloads folder recursively</string>
