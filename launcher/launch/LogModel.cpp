@@ -1,5 +1,7 @@
 #include "LogModel.h"
 
+#include <QDebug>
+
 LogModel::LogModel(QObject *parent)
     : QAbstractListModel(parent)
 {
