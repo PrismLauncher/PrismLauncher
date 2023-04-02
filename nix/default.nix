@@ -23,6 +23,8 @@
   cmark,
   msaClientID ? "",
   jdks ? [jdk17 jdk8],
+  gamemodeSupport ? true,
+  gamemode,
   # flake
   self,
   version,
@@ -45,7 +47,8 @@ stdenv.mkDerivation rec {
       tomlplusplus
       cmark
     ]
-    ++ lib.optional (lib.versionAtLeast qtbase.version "6") qtwayland;
+    ++ lib.optional (lib.versionAtLeast qtbase.version "6") qtwayland
+    ++ lib.optional gamemodeSupport gamemode.dev;
 
   cmakeFlags =
     lib.optionals (msaClientID != "") ["-DLauncher_MSA_CLIENT_ID=${msaClientID}"]
@@ -61,18 +64,19 @@ stdenv.mkDerivation rec {
 
   qtWrapperArgs = let
     libpath = with xorg;
-      lib.makeLibraryPath [
-        libX11
-        libXext
-        libXcursor
-        libXrandr
-        libXxf86vm
-        libpulseaudio
-        libGL
-        glfw
-        openal
-        stdenv.cc.cc.lib
-      ];
+      lib.makeLibraryPath ([
+          libX11
+          libXext
+          libXcursor
+          libXrandr
+          libXxf86vm
+          libpulseaudio
+          libGL
+          glfw
+          openal
+          stdenv.cc.cc.lib
+        ]
+        ++ lib.optional gamemodeSupport gamemode.lib);
   in [
     "--set LD_LIBRARY_PATH /run/opengl-driver/lib:${libpath}"
     "--prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}"
