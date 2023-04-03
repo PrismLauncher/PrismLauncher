@@ -192,16 +192,19 @@ void BlockedModsDialog::setupWatch()
 
 void BlockedModsDialog::watchPath(QString path, bool watch_subdirectories)
 {
-    if (m_watcher.directories().contains(path))
+    auto to_watch = QFileInfo(path);
+    auto to_watch_path = to_watch.canonicalPath();
+    if (m_watcher.directories().contains(to_watch_path))
         return; // don't watch the same path twice (no loops!)
 
     qDebug() << "[Blocked Mods Dialog] Adding Watch Path:" << path;
-    m_watcher.addPath(path);
+    m_watcher.addPath(to_watch_path);
 
-    if (!watch_subdirectories)
+    if (!to_watch.isDir() || !watch_subdirectories)
         return;
 
-    QDirIterator it(path, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+
+    QDirIterator it(to_watch_path, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
     while (it.hasNext()) {
         QString watch_dir = QDir(it.next()).canonicalPath(); // resolve symlinks and relative paths
         watchPath(watch_dir, watch_subdirectories);
