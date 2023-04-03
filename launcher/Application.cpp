@@ -287,6 +287,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
             dataPath = m_rootPath;
             adjustedBy = "Portable data path";
+            m_portable = true;
         }
 #endif
     }
@@ -411,23 +412,46 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 " " "|" " "
                 "%{if-category}[%{category}]: %{endif}"
                 "%{message}");
+      
+        bool foundLoggingRules = false;
         
-        if(QFile::exists("logging.ini")) {
-            // load and set logging rules
-            qDebug() << "Loading logging rules from:" << QString("%1/logging.ini").arg(dataPath);
-            INIFile loggingRules;
-            bool rulesLoaded = loggingRules.loadFile(QString("logging.ini"));
-            if (rulesLoaded) {
-                QStringList rules;
-                qDebug() << "Setting log rules:";
-                for (auto it = loggingRules.begin(); it != loggingRules.end(); ++it) {
-                    auto rule = it.key() + "=" + it.value().toString();
-                    rules.append(rule);
-                    qDebug() << "    " << rule;
-                }
-                auto rules_str = rules.join("\n");
-                QLoggingCategory::setFilterRules(rules_str);
+        auto logRulesFile = QStringLiteral("qtlogging.ini");
+        auto logRulesPath = FS::PathCombine(dataPath, logRulesFile);
+        
+        qDebug() << "Testing" << logRulesPath << "...";              
+        foundLoggingRules = QFile::exists(logRulesPath);
+
+        // search the dataPath()
+        
+        if(!foundLoggingRules && ! isPortable()) {
+            logRulesPath = QStandardPaths::locate(QStandardPaths::AppDataLocation, logRulesFile);
+            if(!logRulesPath.isEmpty()) {
+                qDebug() << "Found" << logRulesPath << "...";
+                foundLoggingRules = true;
             }
+        }
+
+        if(!QFile::exists(logRulesPath)) {
+           logRulesPath = FS::PathCombine(m_rootPath, logRulesFile); 
+            qDebug() << "Testing" << logRulesPath << "...";
+            foundLoggingRules = QFile::exists(logRulesPath);
+        }
+        
+        if(foundLoggingRules) {
+            // load and set logging rules
+            qDebug() << "Loading logging rules from:" << logRulesPath;
+            QSettings loggingRules(logRulesPath, QSettings::IniFormat); 
+            loggingRules.beginGroup("Rules");
+            QStringList rule_names = loggingRules.childKeys();
+            QStringList rules;
+            qDebug() << "Setting log rules:";
+            for (auto rule_name : rule_names) {
+                auto rule = QString("%1=%2").arg(rule_name).arg(loggingRules.value(rule_name).toString());
+                rules.append(rule);
+                qDebug() << "    " << rule;
+            }
+            auto rules_str = rules.join("\n");
+            QLoggingCategory::setFilterRules(rules_str);
         }
 
         qDebug() << "<> Log initialized.";

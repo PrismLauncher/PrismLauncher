@@ -345,6 +345,8 @@ elseif(UNIX)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION "${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps")
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_mrpack_MIMEInfo} DESTINATION ${KDE_INSTALL_MIMEDIR})
 
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/launcher/qtlogging.ini" DESTINATION "${KDE_INSTALL_DATADIR}/${Launcher_Name}")
+    
     if(Launcher_ManPage)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION "${KDE_INSTALL_MANDIR}/man6")
     endif()
@@ -371,6 +373,8 @@ elseif(WIN32)
 else()
     message(FATAL_ERROR "Platform not supported")
 endif()
+
+
 
 ################################ Included Libs ################################
 

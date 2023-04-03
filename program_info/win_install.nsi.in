@@ -282,6 +282,7 @@ Section "@Launcher_DisplayName@"
 
   File "@Launcher_APP_BINARY_NAME@.exe"
   File "qt.conf"
+  File "qtlogging.ini"
   File *.dll
   File /r "iconengines"
   File /r "imageformats"

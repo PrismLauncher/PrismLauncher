@@ -1161,6 +1161,12 @@ if(INSTALL_BUNDLE STREQUAL "full")
         CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \" \")"
         COMPONENT Runtime
     )
+    # add qtlogging.ini as a config file
+    install(
+        FILES "qtlogging.ini"
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}
+        COMPONENT Runtime
+    )
     # Bundle plugins
     # Image formats
     install(
