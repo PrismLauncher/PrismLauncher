@@ -46,8 +46,8 @@
 
 
 // map a value in a numaric range of an arbatray type to between 0 and INT_MAX
-// for getting the best percision out of the qt progress bar
-template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type> 
+// for getting the best precision out of the qt progress bar
+template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
 std::tuple<int, int> map_int_zero_max(T current, T range_max, T range_min)
 {
     int int_max = std::numeric_limits<int>::max();
@@ -213,7 +213,7 @@ void ProgressDialog::addTaskProgress(TaskStepProgress* progress)
     ui->taskProgressLayout->addWidget(task_bar);
 }
 
-void ProgressDialog::changeStepProgress(TaskStepProgressList task_progress)
+void ProgressDialog::changeStepProgress(TaskStepProgress task_progress)
 {
     m_is_multi_step = true;
     if(ui->taskProgressScrollArea->isHidden()) {
@@ -221,28 +221,26 @@ void ProgressDialog::changeStepProgress(TaskStepProgressList task_progress)
         updateSize();
     }
     
-    for (auto tp : task_progress) {
-        if (!taskProgress.contains(tp->uid))
-            addTaskProgress(tp.get());
-        auto task_bar = taskProgress.value(tp->uid);
+    if (!taskProgress.contains(task_progress.uid))
+        addTaskProgress(&task_progress);
+    auto task_bar = taskProgress.value(task_progress.uid);
 
 
-        auto const [mapped_current, mapped_total] = map_int_zero_max<qint64>(tp->current, tp->total, 0);
-        if (tp->total <= 0) {
-            task_bar->setRange(0, 0);
-        } else {
-            task_bar->setRange(0, mapped_total);
-        }
-
-        task_bar->setValue(mapped_current);
-        task_bar->setStatus(tp->status);
-        task_bar->setDetails(tp->details);
-
-        if (tp->isDone()) {
-            task_bar->setVisible(false);
-        }
-
+    auto const [mapped_current, mapped_total] = map_int_zero_max<qint64>(task_progress.current, task_progress.total, 0);
+    if (task_progress.total <= 0) {
+        task_bar->setRange(0, 0);
+    } else {
+        task_bar->setRange(0, mapped_total);
     }
+
+    task_bar->setValue(mapped_current);
+    task_bar->setStatus(task_progress.status);
+    task_bar->setDetails(task_progress.details);
+
+    if (task_progress.isDone()) {
+        task_bar->setVisible(false);
+    }
+
 }
 
 void ProgressDialog::changeProgress(qint64 current, qint64 total)

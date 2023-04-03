@@ -48,8 +48,7 @@ enum class TaskStepState {
     Waiting,
     Running,
     Failed,
-    Succeeded,
-    Finished
+    Succeeded
 };
 
 Q_DECLARE_METATYPE(TaskStepState)
@@ -61,7 +60,7 @@ struct TaskStepProgress {
     QString status = "";
     QString details = "";
     TaskStepState state = TaskStepState::Waiting;
-    bool isDone() { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded) || (state == TaskStepState::Finished); }
+    bool isDone() { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
 };
 
 Q_DECLARE_METATYPE(TaskStepProgress)
@@ -127,7 +126,7 @@ class Task : public QObject, public QRunnable {
     void failed(QString reason);
     void status(QString status);
     void details(QString details);
-    void stepProgress(TaskStepProgressList task_progress); // 
+    void stepProgress(TaskStepProgress task_progress); // 
 
     /** Emitted when the canAbort() status has changed.
      */
@@ -150,7 +149,7 @@ class Task : public QObject, public QRunnable {
     virtual void emitAborted();
     virtual void emitFailed(QString reason = "");
 
-    virtual void propogateStepProgress(TaskStepProgressList task_progress);
+    virtual void propogateStepProgress(TaskStepProgress task_progress);
 
    public slots:
     void setStatus(const QString& status);

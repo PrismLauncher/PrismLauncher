@@ -35,13 +35,15 @@
  */
 #include "ConcurrentTask.h"
 
-#include <QDebug>
 #include <QCoreApplication>
+#include <QDebug>
 #include "tasks/Task.h"
 
 ConcurrentTask::ConcurrentTask(QObject* parent, QString task_name, int max_concurrent)
     : Task(parent), m_name(task_name), m_total_max_size(max_concurrent)
-{ setObjectName(task_name); }
+{
+    setObjectName(task_name);
+}
 
 ConcurrentTask::~ConcurrentTask()
 {
@@ -126,18 +128,17 @@ void ConcurrentTask::startNext()
 
     Task::Ptr next = m_queue.dequeue();
 
-    connect(next.get(), &Task::succeeded, this, [this, next](){ subTaskSucceeded(next); });
+    connect(next.get(), &Task::succeeded, this, [this, next]() { subTaskSucceeded(next); });
     connect(next.get(), &Task::failed, this, [this, next](QString msg) { subTaskFailed(next, msg); });
 
-    connect(next.get(), &Task::status, this, [this, next](QString msg){ subTaskStatus(next, msg); });
-    connect(next.get(), &Task::details, this, [this, next](QString msg){ subTaskDetails(next, msg); });
-    connect(next.get(), &Task::stepProgress, this, [this, next](TaskStepProgressList tp){ subTaskStepProgress(next, tp); });
+    connect(next.get(), &Task::status, this, [this, next](QString msg) { subTaskStatus(next, msg); });
+    connect(next.get(), &Task::details, this, [this, next](QString msg) { subTaskDetails(next, msg); });
+    connect(next.get(), &Task::stepProgress, this, [this, next](TaskStepProgress tp) { subTaskStepProgress(next, tp); });
 
-    connect(next.get(), &Task::progress, this, [this, next](qint64 current, qint64 total){ subTaskProgress(next, current, total); });
+    connect(next.get(), &Task::progress, this, [this, next](qint64 current, qint64 total) { subTaskProgress(next, current, total); });
 
     m_doing.insert(next.get(), next);
-    m_task_progress.insert(next->getUid(), std::make_shared<TaskStepProgress>(TaskStepProgress({next->getUid()}))); 
-
+    m_task_progress.insert(next->getUid(), std::make_shared<TaskStepProgress>(TaskStepProgress({ next->getUid() })));
 
     updateState();
     updateStepProgress();
@@ -158,10 +159,12 @@ void ConcurrentTask::subTaskSucceeded(Task::Ptr task)
     m_succeeded.insert(task.get(), task);
 
     m_doing.remove(task.get());
-    m_task_progress.value(task->getUid())->state = TaskStepState::Succeeded;
+    auto task_progress = m_task_progress.value(task->getUid());
+    task_progress->state = TaskStepState::Succeeded;
 
     disconnect(task.get(), 0, this, 0);
 
+    emit stepProgress(*task_progress.get());
     updateState();
     updateStepProgress();
     startNext();
@@ -173,10 +176,13 @@ void ConcurrentTask::subTaskFailed(Task::Ptr task, const QString& msg)
     m_failed.insert(task.get(), task);
 
     m_doing.remove(task.get());
-    m_task_progress.value(task->getUid())->state = TaskStepState::Failed;
+
+    auto task_progress = m_task_progress.value(task->getUid());
+    task_progress->state = TaskStepState::Failed;
 
     disconnect(task.get(), 0, this, 0);
 
+    emit stepProgress(*task_progress.get());
     updateState();
     updateStepProgress();
     startNext();
@@ -184,68 +190,71 @@ void ConcurrentTask::subTaskFailed(Task::Ptr task, const QString& msg)
 
 void ConcurrentTask::subTaskStatus(Task::Ptr task, const QString& msg)
 {
-    auto taskProgress = m_task_progress.value(task->getUid());
-    taskProgress->status = msg; 
-    taskProgress->state = TaskStepState::Running;
+    auto task_progress = m_task_progress.value(task->getUid());
+    task_progress->status = msg;
+    task_progress->state = TaskStepState::Running;
+    
+    emit stepProgress(*task_progress.get());
     updateStepProgress();
 }
 
 void ConcurrentTask::subTaskDetails(Task::Ptr task, const QString& msg)
 {
-    auto taskProgress = m_task_progress.value(task->getUid());
-    taskProgress->details = msg; 
-    taskProgress->state = TaskStepState::Running;
+    auto task_progress = m_task_progress.value(task->getUid());
+    task_progress->details = msg;
+    task_progress->state = TaskStepState::Running;
+    
+    emit stepProgress(*task_progress.get());
     updateStepProgress();
 }
 
 void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 total)
 {
-    auto taskProgress = m_task_progress.value(task->getUid());
-    
-    taskProgress->current = current;
-    taskProgress->total = total;
-    taskProgress->state = TaskStepState::Running;
+    auto task_progress = m_task_progress.value(task->getUid());
 
+    task_progress->current = current;
+    task_progress->total = total;
+    task_progress->state = TaskStepState::Running;
+    
+    emit stepProgress(*task_progress.get());
     updateStepProgress();
     updateState();
 }
 
-void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgressList task_step_progress)
+void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgress task_progress)
 {
-    for (auto progress : task_step_progress) {
-        if (!m_task_progress.contains(progress->uid)) {
-            m_task_progress.insert(progress->uid, progress);
-        } else {
-            auto tp = m_task_progress.value(progress->uid);
-            tp->current = progress->current;
-            tp->total = progress->total;
-            tp->status = progress->status;
-            tp->details = progress->details;
-        }           
+    if (!m_task_progress.contains(task_progress.uid)) {
+        m_task_progress.insert(task_progress.uid, std::make_shared<TaskStepProgress>(task_progress));
+    } else {
+        auto tp = m_task_progress.value(task_progress.uid);
+        tp->current = task_progress.current;
+        tp->total = task_progress.total;
+        tp->status = task_progress.status;
+        tp->details = task_progress.details;
     }
-
-    updateStepProgress();
     
+    emit stepProgress(task_progress);
+    updateStepProgress();
 }
 
 void ConcurrentTask::updateStepProgress()
 {
-   qint64 current = 0, total = 0;
-   for ( auto taskProgress : m_task_progress ) {
-       current += taskProgress->current;
-       total += taskProgress->total;
-   }
+    qint64 current = 0, total = 0;
+    for (auto taskProgress : m_task_progress) {
+        current += taskProgress->current;
+        total += taskProgress->total;
+    }
 
-   m_stepProgress = current;
-   m_stepTotalProgress = total;
-   emit stepProgress(m_task_progress.values());
+    m_stepProgress = current;
+    m_stepTotalProgress = total;
 }
 
 void ConcurrentTask::updateState()
 {
     if (totalSize() > 1) {
         setProgress(m_done.count(), totalSize());
-        setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)").arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
+        setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
+                      .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
     } else {
         setProgress(m_stepProgress, m_stepTotalProgress);
         QString status = tr("Please wait ...");

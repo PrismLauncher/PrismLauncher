@@ -80,7 +80,7 @@ slots:
 
     void changeStatus(const QString &status);
     void changeProgress(qint64 current, qint64 total);
-    void changeStepProgress(TaskStepProgressList task_progress);
+    void changeStepProgress(TaskStepProgress task_progress);
 
 
 private
