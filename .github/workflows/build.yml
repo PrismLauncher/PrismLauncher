@@ -90,7 +90,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
-            qt_version: '6.4.3'
+            qt_version: '6.5.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -208,6 +208,8 @@ jobs:
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         uses: jurplel/install-qt-action@v3
         with:
+           aqtversion: '==3.1.*'
+           py7zrversion: '>=0.20.2'
            version: ${{ matrix.qt_version }}
            host: 'windows'
            target: 'desktop'
@@ -223,6 +225,8 @@ jobs:
         if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
+           aqtversion: '==3.1.*'
+           py7zrversion: '>=0.20.2'
            version: ${{ matrix.qt_version }}
            host: ${{ matrix.qt_host }}
            target: 'desktop'
