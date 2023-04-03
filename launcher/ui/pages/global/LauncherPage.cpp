@@ -184,11 +184,6 @@ void LauncherPage::on_downloadsDirBrowseBtn_clicked()
     }
 }
 
-void LauncherPage::on_downloadsDirWatchRecursiveCheckBox_clicked()
-{
-  // incase anything needs to be done here
-}
-
 void LauncherPage::on_metadataDisableBtn_clicked()
 {
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
