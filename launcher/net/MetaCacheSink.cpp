@@ -39,7 +39,7 @@
 #include <QRegularExpression>
 #include "Application.h"
 
-#include "logging.h"
+#include "net/Logging.h"
 
 namespace Net {
 
@@ -99,11 +99,11 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
 
     { // Cache lifetime
         if (m_is_eternal) {
-            qCDebug(taskNetLogC) << "[MetaCache] Adding eternal cache entry:" << m_entry->getFullPath();
+            qCDebug(taskMetaCacheLogC) << "Adding eternal cache entry:" << m_entry->getFullPath();
             m_entry->makeEternal(true);
         } else if (reply.hasRawHeader("Cache-Control")) {
             auto cache_control_header = reply.rawHeader("Cache-Control");
-            // qCDebug(taskNetLogC) << "[MetaCache] Parsing 'Cache-Control' header with" << cache_control_header;
+            qCDebug(taskMetaCacheLogC) << "Parsing 'Cache-Control' header with" << cache_control_header;
 
             QRegularExpression max_age_expr("max-age=([0-9]+)");
             qint64 max_age = max_age_expr.match(cache_control_header).captured(1).toLongLong();
@@ -111,7 +111,7 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
 
         } else if (reply.hasRawHeader("Expires")) {
             auto expires_header = reply.rawHeader("Expires");
-            // qCDebug(taskNetLogC) << "[MetaCache] Parsing 'Expires' header with" << expires_header;
+            qCDebug(taskMetaCacheLogC) << "Parsing 'Expires' header with" << expires_header;
 
             qint64 max_age = QDateTime::fromString(expires_header).toSecsSinceEpoch() - QDateTime::currentSecsSinceEpoch();
             m_entry->setMaximumAge(max_age);
@@ -121,7 +121,7 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
 
         if (reply.hasRawHeader("Age")) {
             auto age_header = reply.rawHeader("Age");
-            // qCDebug(taskNetLogC) << "[MetaCache] Parsing 'Age' header with" << age_header;
+            qCDebug(taskMetaCacheLogC) << "Parsing 'Age' header with" << age_header;
 
             qint64 current_age = age_header.toLongLong();
             m_entry->setCurrentAge(current_age);

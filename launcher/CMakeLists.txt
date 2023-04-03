@@ -123,8 +123,8 @@ set(NET_SOURCES
     net/HttpMetaCache.h
     net/MetaCacheSink.cpp
     net/MetaCacheSink.h
-    net/logging.h
-    net/logging.cpp
+    net/Logging.h
+    net/Logging.cpp
     net/NetAction.h
     net/NetJob.cpp
     net/NetJob.h
@@ -595,6 +595,24 @@ ecm_qt_export_logging_category(
     DESCRIPTION "task network upload actions"
     EXPORT "${Launcher_Name}"
 )
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskMetaCacheLogC
+    CATEGORY_NAME "launcher.task.net.metacache"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network meta-cache actions"
+    EXPORT "${Launcher_Name}"
+)
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskHttpMetaCacheLogC
+    CATEGORY_NAME "launcher.task.net.metacache.http"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network http meta-cache actions"
+    EXPORT "${Launcher_Name}"
+)
+
+
 
 if(KDE_INSTALL_LOGGINGCATEGORIESDIR)  # only install if there is a standard path for this
     ecm_qt_install_logging_categories(

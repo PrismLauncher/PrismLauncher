@@ -51,7 +51,7 @@
 #include "BuildConfig.h"
 #include "Application.h"
 
-#include "logging.h"
+#include "net/Logging.h"
 #include "net/NetAction.h"
 
 namespace Net {

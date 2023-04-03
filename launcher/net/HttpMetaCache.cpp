@@ -44,7 +44,7 @@
 
 #include <QDebug>
 
-#include "logging.h"
+#include "net/Logging.h"
 
 auto MetaEntry::getFullPath() -> QString
 {
@@ -139,12 +139,12 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
 auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
 {
     if (!m_entries.contains(stale_entry->m_baseId)) {
-        qCCritical(taskNetLogC) << "[HttpMetaCache]" << "Cannot add entry with unknown base: " << stale_entry->m_baseId.toLocal8Bit();
+        qCCritical(taskHttpMetaCacheLogC) << "Cannot add entry with unknown base: " << stale_entry->m_baseId.toLocal8Bit();
         return false;
     }
 
     if (stale_entry->m_stale) {
-        qCCritical(taskNetLogC) << "[HttpMetaCache]" << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
+        qCCritical(taskHttpMetaCacheLogC) << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
         return false;
     }
 
@@ -168,10 +168,10 @@ void HttpMetaCache::evictAll()
 {
     for (QString& base : m_entries.keys()) {
         EntryMap& map = m_entries[base];
-        qCDebug(taskNetLogC) << "[HttpMetaCache]" << "Evicting base" << base;
+        qCDebug(taskHttpMetaCacheLogC) << "Evicting base" << base;
         for (MetaEntryPtr entry : map.entry_list) {
             if (!evictEntry(entry))
-                qCWarning(taskNetLogC) << "[HttpMetaCache]" << "Unexpected missing cache entry" << entry->m_basePath;
+                qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
         }
     }
 }
@@ -269,7 +269,7 @@ void HttpMetaCache::SaveNow()
     if (m_index_file.isNull())
         return;
 
-    qCDebug(taskNetLogC) << "[HttpMetaCache]" << "Saving metacache with" << m_entries.size() << "entries";
+    qCDebug(taskHttpMetaCacheLogC) << "Saving metacache with" << m_entries.size() << "entries";
 
     QJsonObject toplevel;
     Json::writeString(toplevel, "version", "1");
@@ -304,6 +304,6 @@ void HttpMetaCache::SaveNow()
     try {
         Json::write(toplevel, m_index_file);
     } catch (const Exception& e) {
-        qCWarning(taskNetLogC) << "[HttpMetaCache]" << e.what();
+        qCWarning(taskHttpMetaCacheLogC) << "Error writing cache:" << e.what();
     }
 }

@@ -37,7 +37,7 @@
 
 #include "FileSystem.h"
 
-#include "logging.h"
+#include "net/Logging.h"
 
 namespace Net {
 

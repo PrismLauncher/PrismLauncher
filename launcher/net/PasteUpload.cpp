@@ -47,7 +47,7 @@
 #include <QFile>
 #include <QUrlQuery>
 
-#include "logging.h"
+#include "net/Logging.h"
 
 std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = {
     {{"0x0.st", "https://0x0.st", ""},
