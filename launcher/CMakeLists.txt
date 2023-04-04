@@ -1125,7 +1125,7 @@ if(WIN32)
     target_link_libraries(filelink_logic
         # systeminfo
         BuildConfig
-        # Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Widgets
         ghcFilesystem::ghc_filesystem
     )
     target_link_libraries(filelink_logic
@@ -1133,7 +1133,7 @@ if(WIN32)
         # Qt${QT_VERSION_MAJOR}::Xml
         # Qt${QT_VERSION_MAJOR}::Network
         # Qt${QT_VERSION_MAJOR}::Concurrent
-        # ${Launcher_QT_LIBS}
+        ${Launcher_QT_LIBS}
     )
 
     add_executable("${Launcher_Name}_filelink" WIN32 filelink/main.cpp)
