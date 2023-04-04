@@ -955,29 +955,29 @@ QString getFilesystemTypeName(FilesystemType type)
 {
     auto iter = s_filesystem_type_names.constFind(type);
     if (iter != s_filesystem_type_names.constEnd()) {
-        return iter.value();
+        return iter.value().constFirst();
     }
     return getFilesystemTypeName(FilesystemType::UNKNOWN);
 }
 
 FilesystemType getFilesystemTypeFuzzy(const QString& name)
 {
-    auto iter = s_filesystem_type_names_inverse.constFind(name.toUpper());
-    if (iter != s_filesystem_type_names_inverse.constEnd()) {
-        return iter.value();
+    for (auto iter = s_filesystem_type_names.constBegin(); iter != s_filesystem_type_names.constEnd(); ++iter) {
+        auto fs_names = iter.value();
+        for (auto fs_name : fs_names) {
+            if (name.toUpper().contains(fs_name.toUpper()))
+                return iter.key();
+        }
     }
     return FilesystemType::UNKNOWN;
 }
 
 FilesystemType getFilesystemType(const QString& name)
 {
-    for (auto fs_type_pair : s_filesystem_type_names_inverse.toStdMap()) {
-        auto fs_type_name = fs_type_pair.first;
-        auto fs_type = fs_type_pair.second;
-
-        if (name.toUpper().contains(fs_type_name.toUpper())) {
-            return fs_type;
-        }
+    for (auto iter = s_filesystem_type_names.constBegin(); iter != s_filesystem_type_names.constEnd(); ++iter) {
+        auto fs_names = iter.value();
+        if(fs_names.contains(name.toUpper())) 
+            return iter.key();
     }
     return FilesystemType::UNKNOWN;
 }

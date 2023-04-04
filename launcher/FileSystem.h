@@ -360,58 +360,24 @@ enum class FilesystemType {
  * QMap is ordered
  *
  */
-static const QMap<FilesystemType, QString> s_filesystem_type_names = {
-    {FilesystemType::FAT,        QStringLiteral("FAT")},
-    {FilesystemType::NTFS,       QStringLiteral("NTFS")},
-    {FilesystemType::REFS,       QStringLiteral("REFS")},
-    {FilesystemType::EXT,        QStringLiteral("EXT")},
-    {FilesystemType::EXT_2_OLD,  QStringLiteral("EXT_2_OLD")},
-    {FilesystemType::EXT_2_3_4,  QStringLiteral("EXT2/3/4")},
-    {FilesystemType::XFS,        QStringLiteral("XFS")},
-    {FilesystemType::BTRFS,      QStringLiteral("BTRFS")},
-    {FilesystemType::NFS,        QStringLiteral("NFS")},
-    {FilesystemType::ZFS,        QStringLiteral("ZFS")},
-    {FilesystemType::APFS,       QStringLiteral("APFS")},
-    {FilesystemType::HFS,        QStringLiteral("HFS")},
-    {FilesystemType::HFSPLUS,    QStringLiteral("HFSPLUS")},
-    {FilesystemType::HFSX,       QStringLiteral("HFSX")},
-    {FilesystemType::FUSEBLK,    QStringLiteral("FUSEBLK")},
-    {FilesystemType::F2FS,       QStringLiteral("F2FS")},
-    {FilesystemType::UNKNOWN,    QStringLiteral("UNKNOWN")}
-};
-
-
-/**
- * @brief Ordered Mapping of reported filesystem names to enum types
- * this mapping is non exsaustive, it just attempts to capture the many way these filesystems could be reported.
- * all keys are in uppercase, use `QString.toUpper()` or equivalent during lookup.
- *
- * QMap is ordered
- *
- */
-static const QMap<QString, FilesystemType> s_filesystem_type_names_inverse = {
-    {QStringLiteral("FAT"),         FilesystemType::FAT},
-    {QStringLiteral("NTFS"),        FilesystemType::NTFS},
-    {QStringLiteral("REFS"),        FilesystemType::REFS},
-    {QStringLiteral("EXT2_OLD"),    FilesystemType::EXT_2_OLD},
-    {QStringLiteral("EXT_2_OLD"),   FilesystemType::EXT_2_OLD},
-    {QStringLiteral("EXT2"),        FilesystemType::EXT_2_3_4},
-    {QStringLiteral("EXT3"),        FilesystemType::EXT_2_3_4},
-    {QStringLiteral("EXT4"),        FilesystemType::EXT_2_3_4},
-    {QStringLiteral("EXT2/3/4"),    FilesystemType::EXT_2_3_4},
-    {QStringLiteral("EXT_2_3_4"),   FilesystemType::EXT_2_3_4},
-    {QStringLiteral("EXT"),         FilesystemType::EXT}, // must come after all other EXT variants to prevent greedy detection
-    {QStringLiteral("XFS"),         FilesystemType::XFS},
-    {QStringLiteral("BTRFS"),       FilesystemType::BTRFS},
-    {QStringLiteral("NFS"),         FilesystemType::NFS},
-    {QStringLiteral("ZFS"),         FilesystemType::ZFS},
-    {QStringLiteral("APFS"),        FilesystemType::APFS},
-    {QStringLiteral("HFSPLUS"),     FilesystemType::HFSPLUS},
-    {QStringLiteral("HFSX"),        FilesystemType::HFSX},
-    {QStringLiteral("HFS"),         FilesystemType::HFS},
-    {QStringLiteral("FUSEBLK"),     FilesystemType::FUSEBLK},
-    {QStringLiteral("F2FS"),        FilesystemType::F2FS},
-    {QStringLiteral("UNKNOWN"),     FilesystemType::UNKNOWN}
+static const QMap<FilesystemType, QStringList> s_filesystem_type_names = {
+    {FilesystemType::FAT,        { "FAT" }},
+    {FilesystemType::NTFS,       { "NTFS" }},
+    {FilesystemType::REFS,       { "REFS" }},
+    {FilesystemType::EXT_2_OLD,  { "EXT_2_OLD", "EXT2_OLD" }},
+    {FilesystemType::EXT_2_3_4,  { "EXT2/3/4", "EXT_2_3_4", "EXT2", "EXT3", "EXT4" }},
+    {FilesystemType::EXT,        { "EXT" }},
+    {FilesystemType::XFS,        { "XFS" }},
+    {FilesystemType::BTRFS,      { "BTRFS" }},
+    {FilesystemType::NFS,        { "NFS" }},
+    {FilesystemType::ZFS,        { "ZFS" }},
+    {FilesystemType::APFS,       { "APFS" }},
+    {FilesystemType::HFS,        { "HFS" }},
+    {FilesystemType::HFSPLUS,    { "HFSPLUS" }},
+    {FilesystemType::HFSX,       { "HFSX" }},
+    {FilesystemType::FUSEBLK,    { "FUSEBLK" }},
+    {FilesystemType::F2FS,       { "F2FS" }},
+    {FilesystemType::UNKNOWN,    { "UNKNOWN" }}
 };
 
 /**
