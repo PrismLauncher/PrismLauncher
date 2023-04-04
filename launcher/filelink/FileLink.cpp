@@ -120,7 +120,6 @@ void FileLinkApp::joinServer(QString server)
     blockSize = 0;
 
     in.setDevice(&socket);
-    in.setVersion(QDataStream::Qt_5_0);
 
     connect(&socket, &QLocalSocket::connected, this, [&]() { qDebug() << "connected to server"; });
 
@@ -203,7 +202,6 @@ void FileLinkApp::sendResults()
     // construct block of data to send
     QByteArray block;
     QDataStream out(&block, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_0);
 
     qint32 blocksize = quint32(sizeof(quint32));
     for (auto result : m_path_results) {

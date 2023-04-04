@@ -446,7 +446,6 @@ void create_link::runPrivileged(const QString& offset)
         // construct block of data to send
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_0);  // choose correct version better?
 
         qint32 blocksize = quint32(sizeof(quint32));
         for (auto link : m_links_to_make) {
@@ -469,7 +468,7 @@ void create_link::runPrivileged(const QString& offset)
             QDataStream in;
             quint32 blockSize = 0;
             in.setDevice(clientConnection);
-            in.setVersion(QDataStream::Qt_5_0);
+
             qDebug() << "Reading path results from client";
             qDebug() << "bytes available" << clientConnection->bytesAvailable();
 
