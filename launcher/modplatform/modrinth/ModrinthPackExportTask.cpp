@@ -70,7 +70,7 @@ void ModrinthPackExportTask::collectFiles()
 {
     files.clear();
     if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, filter)) {
-        emitFailed(tr("Could not collect list of files"));
+        emitFailed(tr("Could not search for files"));
         return;
     }
 
