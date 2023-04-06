@@ -37,7 +37,13 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                InstancePtr instance,
                                                const QString& output,
                                                MMCZip::FilterFunction filter)
-    : name(name), version(version), summary(summary), instance(instance), output(output), filter(filter)
+    : name(name)
+    , version(version)
+    , summary(summary)
+    , instance(instance)
+    , mcInstance(dynamic_cast<const MinecraftInstance*>(instance.get()))
+    , output(output)
+    , filter(filter)
 {}
 
 void ModrinthPackExportTask::executeTask()
@@ -73,17 +79,15 @@ void ModrinthPackExportTask::collectFiles()
     pendingHashes.clear();
     resolvedFiles.clear();
 
-    const MinecraftInstance* mcInstance = dynamic_cast<const MinecraftInstance*>(instance.get());
-    auto mods = mcInstance->loaderModList();
-    mods->update();
-    connect(mods.get(), &ModFolderModel::updateFinished, this, &ModrinthPackExportTask::collectHashes);
+    if (mcInstance) {
+        mcInstance->loaderModList()->update();
+        connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, &ModrinthPackExportTask::collectHashes);
+    } else
+        collectHashes();
 }
 
 void ModrinthPackExportTask::collectHashes()
 {
-    const MinecraftInstance* mcInstance = dynamic_cast<const MinecraftInstance*>(instance.get());
-    auto mods = mcInstance->loaderModList();
-
     QDir mc(instance->gameRoot());
     for (QFileInfo file : files) {
         QString relative = mc.relativeFilePath(file.absoluteFilePath());
@@ -110,7 +114,7 @@ void ModrinthPackExportTask::collectHashes()
         }
         hash.addData(data);
 
-        auto allMods = mods->allMods();
+        auto allMods = mcInstance->loaderModList()->allMods();
         if (auto modIter = std::find_if(allMods.begin(), allMods.end(), [&file](Mod* mod) { return mod->fileinfo() == file; });
             modIter != allMods.end()) {
             Mod* mod = *modIter;

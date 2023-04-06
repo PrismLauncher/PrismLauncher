@@ -20,6 +20,7 @@
 
 #include "BaseInstance.h"
 #include "MMCZip.h"
+#include "minecraft/MinecraftInstance.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
@@ -48,6 +49,7 @@ class ModrinthPackExportTask : public Task {
     // inputs
     const QString name, version, summary;
     const InstancePtr instance;
+    const MinecraftInstance* mcInstance;
     const QString output;
     const MMCZip::FilterFunction filter;
 
