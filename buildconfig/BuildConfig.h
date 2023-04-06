@@ -36,6 +36,7 @@
 
 #pragma once
 #include <QString>
+#include <QList>
 
 /**
  * \brief The Config class holds all the build-time information passed from the build system.
@@ -160,6 +161,7 @@ class Config {
 
     QString MODRINTH_STAGING_URL = "https://staging-api.modrinth.com/v2";
     QString MODRINTH_PROD_URL = "https://api.modrinth.com/v2";
+    QStringList MODRINTH_MRPACK_HOSTS{"cdn.modrinth.com", "github.com", "raw.githubusercontent.com", "gitlab.com"};
 
     QString FLAME_BASE_URL = "https://api.curseforge.com/v1";
 

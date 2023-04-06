@@ -22,14 +22,15 @@
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QMessageBox>
-#include <QtConcurrent>
 #include "Json.h"
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
-const QStringList ModrinthPackExportTask::PREFIXES = QStringList({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
+const QStringList ModrinthPackExportTask::PREFIXES({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
+const QStringList ModrinthPackExportTask::ALLOWED_HOSTS({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
 
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
@@ -45,16 +46,6 @@ void ModrinthPackExportTask::executeTask()
     setStatus(tr("Searching for files..."));
     setProgress(0, 0);
     collectFiles();
-
-    if (pendingHashes.isEmpty())
-        buildZip();
-    else {
-        QByteArray* response = new QByteArray;
-        task = api.currentVersions(pendingHashes.values(), "sha512", response);
-        connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
-        connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
-        task->start();
-    }
 }
 
 bool ModrinthPackExportTask::abort()
@@ -83,6 +74,17 @@ void ModrinthPackExportTask::collectFiles()
     pendingHashes.clear();
     resolvedFiles.clear();
 
+    const MinecraftInstance* mcInstance = dynamic_cast<const MinecraftInstance*>(instance.get());
+    auto mods = mcInstance->loaderModList();
+    mods->update();
+    connect(mods.get(), &ModFolderModel::updateFinished, this, &ModrinthPackExportTask::collectHashes);
+}
+
+void ModrinthPackExportTask::collectHashes()
+{
+    const MinecraftInstance* mcInstance = dynamic_cast<const MinecraftInstance*>(instance.get());
+    auto mods = mcInstance->loaderModList();
+
     QDir mc(instance->gameRoot());
     for (QFileInfo file : files) {
         QString relative = mc.relativeFilePath(file.absoluteFilePath());
@@ -102,12 +104,57 @@ void ModrinthPackExportTask::collectFiles()
             continue;
         }
 
-        if (!hash.addData(&openFile)) {
-            qWarning() << "Could not add hash data for" << file;
+        QByteArray data = openFile.readAll();
+        if (openFile.error() != QFileDevice::NoError) {
+            qWarning() << "Could not read" << file;
             continue;
         }
+        hash.addData(data);
 
+        auto allMods = mods->allMods();
+        if (auto modIter = std::find_if(allMods.begin(), allMods.end(), [&file](Mod* mod) { return mod->fileinfo() == file; });
+            modIter != allMods.end()) {
+            Mod* mod = *modIter;
+            if (mod->metadata() != nullptr) {
+                QUrl& url = mod->metadata()->url;
+                // most likely some of these may be from curseforge
+                if (!url.isEmpty() && BuildConfig.MODRINTH_MRPACK_HOSTS.contains(url.host())) {
+                    qDebug() << "Resolving" << relative << "from index";
+
+                    // we've already read it
+                    // let's go back!
+                    openFile.seek(openFile.size());
+
+                    QCryptographicHash hash2(QCryptographicHash::Algorithm::Sha1);
+                    hash2.addData(data);
+
+                    ResolvedFile file{ hash2.result().toHex(), hash.result().toHex(), url.toString(), openFile.size() };
+                    resolvedFiles[relative] = file;
+
+                    // nice! we've managed to resolve based on local metadata!
+                    // no need to enqueue it
+                    continue;
+                }
+            }
+        }
+
+        qDebug() << "Enqueueing" << relative << "for Modrinth query";
         pendingHashes[relative] = hash.result().toHex();
+    }
+
+    makeApiRequest();
+}
+
+void ModrinthPackExportTask::makeApiRequest()
+{
+    if (pendingHashes.isEmpty())
+        buildZip();
+    else {
+        QByteArray* response = new QByteArray;
+        task = api.currentVersions(pendingHashes.values(), "sha512", response);
+        connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
+        connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
+        task->start();
     }
 }
 
@@ -146,7 +193,7 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
 
 void ModrinthPackExportTask::buildZip()
 {
-    QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
+    QThreadPool::globalInstance()->start([this]() {
         setStatus("Adding files...");
         QuaZip zip(output);
         if (!zip.open(QuaZip::mdCreate)) {
@@ -183,7 +230,7 @@ void ModrinthPackExportTask::buildZip()
             if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative)) {
                 QFile::remove(output);
                 QMetaObject::invokeMethod(
-                    this, [this, relative]() { emitFailed(tr("Could not compress %1").arg(relative)); }, Qt::QueuedConnection);
+                    this, [this, relative]() { emitFailed(tr("Could not read and compress %1").arg(relative)); }, Qt::QueuedConnection);
                 return;
             }
             i++;
@@ -216,10 +263,10 @@ QByteArray ModrinthPackExportTask::generateIndex()
     if (mc) {
         auto profile = mc->getPackProfile();
         // collect all supported components
-        auto minecraft = profile->getComponent("net.minecraft");
-        auto quilt = profile->getComponent("org.quiltmc.quilt-loader");
-        auto fabric = profile->getComponent("net.fabricmc.fabric-loader");
-        auto forge = profile->getComponent("net.minecraftforge");
+        ComponentPtr minecraft = profile->getComponent("net.minecraft");
+        ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
+        ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
+        ComponentPtr forge = profile->getComponent("net.minecraftforge");
 
         // convert all available components to mrpack dependencies
         QJsonObject dependencies;

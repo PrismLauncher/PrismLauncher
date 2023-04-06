@@ -39,10 +39,11 @@ class ModrinthPackExportTask : public Task {
    private:
     struct ResolvedFile {
         QString sha1, sha512, url;
-        int size;
+        qint64 size;
     };
 
     static const QStringList PREFIXES;
+    static const QStringList ALLOWED_HOSTS;
 
     // inputs
     const QString name, version, summary;
@@ -58,6 +59,8 @@ class ModrinthPackExportTask : public Task {
     bool pendingAbort = false;
 
     void collectFiles();
+    void collectHashes();
+    void makeApiRequest();
     void parseApiResponse(QByteArray* response);
     void buildZip();
 
