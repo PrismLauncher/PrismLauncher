@@ -30,7 +30,6 @@
 #include "modplatform/modrinth/ModrinthAPI.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
-const QStringList ModrinthPackExportTask::ALLOWED_HOSTS({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
 
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
