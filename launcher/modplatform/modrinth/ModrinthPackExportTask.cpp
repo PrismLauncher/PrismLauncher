@@ -20,14 +20,12 @@
 
 #include <QCryptographicHash>
 #include <QFileInfo>
-#include <QFileInfoList>
 #include <QMessageBox>
+#include <QtConcurrentRun>
 #include "Json.h"
 #include "MMCZip.h"
-#include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
 
@@ -190,13 +188,11 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
         qWarning() << "Failed to parse versions response" << e.what();
     }
     pendingHashes.clear();
-
-    buildZip();
 }
 
 void ModrinthPackExportTask::buildZip()
 {
-    QThreadPool::globalInstance()->start([this]() {
+    static_cast<void>(QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
         setStatus("Adding files...");
         QuaZip zip(output);
         if (!zip.open(QuaZip::mdCreate)) {
@@ -249,7 +245,7 @@ void ModrinthPackExportTask::buildZip()
         }
 
         QMetaObject::invokeMethod(this, &ModrinthPackExportTask::emitSucceeded, Qt::QueuedConnection);
-    });
+    }));
 }
 
 QByteArray ModrinthPackExportTask::generateIndex()
@@ -301,6 +297,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
         QJsonObject hashes;
         hashes["sha1"] = value.sha1;
         hashes["sha512"] = value.sha512;
+
         file["hashes"] = hashes;
         file["fileSize"] = value.size;
 
