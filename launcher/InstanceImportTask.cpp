@@ -51,6 +51,7 @@
 #include "Json.h"
 
 #include "settings/INISettingsObject.h"
+#include "tasks/Task.h"
 
 #include <QtConcurrentRun>
 #include <algorithm>
@@ -89,46 +90,7 @@ void InstanceImportTask::executeTask()
         setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
         m_downloadRequired = true;
 
-        if (m_sourceUrl.scheme() == "curseforge") {
-            // need to find the download link for the modpack
-            // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
-            QUrlQuery query(m_sourceUrl);
-            auto addonId = query.allQueryItemValues("addonId")[0];
-            auto fileId = query.allQueryItemValues("fileId")[0];
-            auto array = new QByteArray();
-            auto req = new NetJob("Curseforge Meta", APPLICATION->network());
-            req->addNetAction(
-                Net::Download::makeByteArray(QUrl(QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(addonId, fileId)), array));
-            connect(req, &NetJob::finished, [array, req] {
-                req->deleteLater();
-                delete array;
-            });
-            connect(req, &NetJob::failed, this, &InstanceImportTask::downloadFailed);
-            connect(req, &NetJob::succeeded, [array, this] {
-                auto doc = Json::requireDocument(*array);
-                // No way to find out if it's a mod or a modpack before here
-                // And also we need to check if it ends with .zip, instead of any better way
-                auto fileName = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "fileName");
-                if (fileName.endsWith(".zip")) {
-                    // Have to use ensureString then use QUrl to get proper url encoding
-                    m_sourceUrl = QUrl(
-                        Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl", "", "downloadUrl"));
-                    if (!m_sourceUrl.isValid()) {
-                        emitFailed(tr("The modpack is blocked ! Please download it manually"));
-                        return;
-                    }
-                    downloadFromUrl();
-                } else {
-                    emitFailed(tr("This url isn't a valid modpack !"));
-                }
-            });
-            connect(req, &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
-            connect(req, &NetJob::stepProgress, this, &InstanceImportTask::propogateStepProgress);            
-            connect(req, &NetJob::aborted, this, &InstanceImportTask::downloadAborted);
-            req->start();
-        } else {
             downloadFromUrl();
-        }
     }
 }
 

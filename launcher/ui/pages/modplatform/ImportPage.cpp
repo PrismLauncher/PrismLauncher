@@ -35,12 +35,16 @@
  */
 
 #include "ImportPage.h"
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui_ImportPage.h"
 
 #include <QFileDialog>
 #include <QValidator>
 
 #include "ui/dialogs/NewInstanceDialog.h"
+#include "ui/dialogs/CustomMessageBox.h"
+
+#include "Json.h"
 
 #include "InstanceImportTask.h"
 
@@ -123,8 +127,62 @@ void ImportPage::updateState()
                 dialog->setSuggestedIcon("default");
             }
         }
+        else if (url.scheme() == "curseforge")
+        {
+            // need to find the download link for the modpack
+            // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
+            QUrlQuery query(url);
+            auto addonId = query.allQueryItemValues("addonId")[0];
+            auto fileId = query.allQueryItemValues("fileId")[0];
+            auto array = new QByteArray();
+            auto req = unique_qobject_ptr<NetJob>(new NetJob("Curseforge Meta", APPLICATION->network()));
+            req->addNetAction(
+                Net::Download::makeByteArray(QUrl(QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(addonId, fileId)), array));
+
+            connect(req.get(), &NetJob::finished, [array] {
+                delete array;
+            });
+            connect(req.get(), &NetJob::failed, this, [this](QString reason){
+                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+            });
+            connect(req.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
+                qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
+                auto doc = Json::requireDocument(*array);
+                // No way to find out if it's a mod or a modpack before here
+                // And also we need to check if it ends with .zip, instead of any better way
+                auto fileName = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "fileName");
+                if (fileName.endsWith(".zip")) {
+                    // Have to use ensureString then use QUrl to get proper url encoding
+                    auto dl_url = QUrl(
+                        Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl", "", "downloadUrl"));
+                    if (!dl_url.isValid()) {
+                        CustomMessageBox::selectable(this, tr("Error"), tr("The modpack is blocked ! Please download it manually"), QMessageBox::Critical)->show();
+                        return;
+                    }
+
+                    QFileInfo dl_file(dl_url.fileName());
+                    QString pack_name = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "displayName", dl_file.completeBaseName(), "displayName");
+
+                    QMap<QString, QString> extra_info;
+                    extra_info.insert("pack_id", addonId);
+                    extra_info.insert("pack_version_id", fileId);
+
+                    dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, this, std::move(extra_info)));
+                    dialog->setSuggestedIcon("default");
+                    
+                } else {
+                    CustomMessageBox::selectable(this, tr("Error"), tr("This url isn't a valid modpack !"), QMessageBox::Critical)->show();
+                }
+            });
+            ProgressDialog dlUrlDialod(this);
+            dlUrlDialod.setSkipButton(true, tr("Abort"));
+            dlUrlDialod.execWithTask(req.get());
+            return;
+        }
         else
         {
+            
+
             if(input.endsWith("?client=y")) {
                 input.chop(9);
                 input.append("/file");

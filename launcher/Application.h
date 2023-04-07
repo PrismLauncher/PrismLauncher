@@ -211,6 +211,8 @@ public:
 
     int suitableMaxMem();
 
+    void addImportUrl(QString const& url);
+
 signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
@@ -314,7 +316,7 @@ public:
     QString m_serverToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
-    QList<QUrl> m_zipsToImport;
+    QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };

@@ -216,11 +216,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {{"s", "server"}, "Join the specified server on launch (only valid in combination with --launch)", "address"},
         {{"a", "profile"}, "Use the account specified by its profile name (only valid in combination with --launch)", "profile"},
         {"alive", "Write a small '" + liveCheckFile + "' file after the launcher starts"},
-        {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"},
+        {{"I", "import"}, "Import instance or resource from specified local path or URL", "url"},
         {"show", "Opens the window for the specified instance (by instance ID)", "show"}
     });
     // Has to be positional for some OS to handle that properly
-    parser.addPositionalArgument("urls","import the resource at the given url(s) (URL to modpack Zip / local Zip / curseforge:// modpack link)","[urls...]");
+    parser.addPositionalArgument("urls","import the resource at the given url(s) (same as -I / --import)","[urls...]");
     
     parser.addHelpOption();
     parser.addVersionOption();
@@ -234,13 +234,13 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     m_instanceIdToShowWindowOf = parser.value("show");
 
-    for (auto zip_path : parser.values("import")){
-        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
+    for (auto url : parser.values("import")){
+        addImportUrl(url);
     }
 
     // treat unspecified positional arguments as import urls
-    for (auto zip_path : parser.positionalArguments()) {
-        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
+    for (auto url : parser.positionalArguments()) {
+        addImportUrl(url);
     }
 
     // error if --launch is missing with --server or --profile
@@ -345,12 +345,12 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 activate.command = "activate";
                 m_peerInstance->sendMessage(activate.serialize(), timeout);
 
-                if(!m_zipsToImport.isEmpty())
+                if(!m_urlsToImport.isEmpty())
                 {
-                    for (auto zip_url : m_zipsToImport) {
+                    for (auto url : m_urlsToImport) {
                         ApplicationMessage import;
                         import.command = "import";
-                        import.args.insert("path", zip_url.toString());
+                        import.args.insert("path", url.toString());
                         m_peerInstance->sendMessage(import.serialize(), timeout);
                     }
                 }
@@ -1027,10 +1027,10 @@ void Application::performMainStartupAction()
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
-    if(!m_zipsToImport.isEmpty())
+    if(!m_urlsToImport.isEmpty())
     {
-        qDebug() << "<> Importing from zip:" << m_zipsToImport;
-        m_mainWindow->processURLs( m_zipsToImport );
+        qDebug() << "<> Importing from url:" << m_urlsToImport;
+        m_mainWindow->processURLs( m_urlsToImport );
     }
 }
 
@@ -1083,7 +1083,12 @@ void Application::messageReceived(const QByteArray& message)
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        m_mainWindow->processURLs({ QUrl::fromLocalFile(QFileInfo(path).absoluteFilePath()) });
+        auto local_file = QFileInfo(path);
+        if (local_file.exists()) {
+            m_mainWindow->processURLs({ QUrl::fromLocalFile(local_file.absoluteFilePath()) });        
+        } else {
+            m_mainWindow->processURLs({ QUrl::fromUserInput(path) });
+        }
     }
     else if(command == "launch")
     {
@@ -1735,3 +1740,14 @@ void Application::triggerUpdateCheck()
         qDebug() << "Updater not available.";
     }
 }
+
+void Application::addImportUrl(QString const& url)
+{
+    auto local_file = QFileInfo(url);
+    if (local_file.exists()){
+        m_urlsToImport.append(QUrl::fromLocalFile(local_file.absoluteFilePath()));
+    } else {
+        m_urlsToImport.append(QUrl::fromUserInput(url));
+    }
+}
+
