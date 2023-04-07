@@ -23,6 +23,8 @@
   cmark,
   msaClientID ? "",
   jdks ? [jdk17 jdk8],
+  gamemodeSupport ? true,
+  gamemode,
   # flake
   self,
   version,
@@ -45,12 +47,12 @@ stdenv.mkDerivation rec {
       tomlplusplus
       cmark
     ]
-    ++ lib.optional (lib.versionAtLeast qtbase.version "6") qtwayland;
+    ++ lib.optional (lib.versionAtLeast qtbase.version "6") qtwayland
+    ++ lib.optional gamemodeSupport gamemode.dev;
 
   cmakeFlags =
     lib.optionals (msaClientID != "") ["-DLauncher_MSA_CLIENT_ID=${msaClientID}"]
     ++ lib.optionals (lib.versionOlder qtbase.version "6") ["-DLauncher_QT_VERSION_MAJOR=5"];
-  dontWrapQtApps = true;
 
   postUnpack = ''
     rm -rf source/libraries/libnbtplusplus
@@ -60,27 +62,27 @@ stdenv.mkDerivation rec {
     chown -R $USER: source/libraries/libnbtplusplus
   '';
 
-  postInstall = let
+  qtWrapperArgs = let
     libpath = with xorg;
-      lib.makeLibraryPath [
-        libX11
-        libXext
-        libXcursor
-        libXrandr
-        libXxf86vm
-        libpulseaudio
-        libGL
-        glfw
-        openal
-        stdenv.cc.cc.lib
-      ];
-  in ''
+      lib.makeLibraryPath ([
+          libX11
+          libXext
+          libXcursor
+          libXrandr
+          libXxf86vm
+          libpulseaudio
+          libGL
+          glfw
+          openal
+          stdenv.cc.cc.lib
+        ]
+        ++ lib.optional gamemodeSupport gamemode.lib);
+  in [
+    "--set LD_LIBRARY_PATH /run/opengl-driver/lib:${libpath}"
+    "--prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}"
     # xorg.xrandr needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
-    wrapQtApp $out/bin/prismlauncher \
-      --set LD_LIBRARY_PATH /run/opengl-driver/lib:${libpath} \
-      --prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks} \
-      --prefix PATH : ${lib.makeBinPath [xorg.xrandr]}
-  '';
+    "--prefix PATH : ${lib.makeBinPath [xorg.xrandr]}"
+  ];
 
   meta = with lib; {
     homepage = "https://prismlauncher.org/";
