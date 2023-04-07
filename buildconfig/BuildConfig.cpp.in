@@ -106,6 +106,7 @@ Config::Config()
     HELP_URL = "@Launcher_HELP_URL@";
     IMGUR_CLIENT_ID = "@Launcher_IMGUR_CLIENT_ID@";
     MSA_CLIENT_ID = "@Launcher_MSA_CLIENT_ID@";
+    ALLOW_OFFLINE_MODE = "@Launcher_ALLOW_OFFLINE_MODE@";
     FLAME_API_KEY = "@Launcher_CURSEFORGE_API_KEY@";
     META_URL = "@Launcher_META_URL@";
 

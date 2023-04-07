@@ -193,6 +193,8 @@ set(Launcher_MSA_CLIENT_ID "c36a9fb6-4f2a-41ff-90bd-ae7cc92031eb" CACHE STRING "
 # This key was issued specifically for Prism Launcher
 set(Launcher_CURSEFORGE_API_KEY "$2a$10$wuAJuNZuted3NORVmpgUC.m8sI.pv1tOPKZyBgLFGjxFp/br0lZCC" CACHE STRING "API key for the CurseForge platform")
 
+# Development Mode
+set(Launcher_ALLOW_OFFLINE_MODE OFF CACHE BOOL "Allow testing the Launcher during development without having to log in to a valid account. Disabled by default to prevent piracy.")
 
 #### Check the current Git commit and branch
 include(GetGitRevisionDescription)

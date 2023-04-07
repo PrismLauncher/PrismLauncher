@@ -123,6 +123,11 @@ class Config {
     QString MSA_CLIENT_ID;
 
     /**
+     * Whether to allow using the Launcher without logging in to a valid account
+     */
+    bool ALLOW_OFFLINE_MODE;
+
+    /**
      * Client API key for CurseForge
      */
     QString FLAME_API_KEY;
