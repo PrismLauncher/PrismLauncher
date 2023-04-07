@@ -164,7 +164,7 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
     task = nullptr;
 
     try {
-        QJsonDocument doc = Json::requireDocument(*response);
+        const QJsonDocument doc = Json::requireDocument(*response);
 
         QMapIterator<QString, QString> iterator(pendingHashes);
         while (iterator.hasNext()) {
@@ -188,6 +188,7 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
         qWarning() << "Failed to parse versions response" << e.what();
     }
     pendingHashes.clear();
+    buildZip();
 }
 
 void ModrinthPackExportTask::buildZip()
