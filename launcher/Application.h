@@ -187,7 +187,7 @@ public:
         return m_rootPath;
     }
 
-    const bool isPortable() {
+    bool isPortable() {
         return m_portable;
     }
 
