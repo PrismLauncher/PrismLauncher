@@ -83,7 +83,8 @@ protected:
     // NOTE: This is not thread-safe.
     [[nodiscard]] unsigned int totalSize() const { return m_queue.size() + m_doing.size() + m_done.size(); }
 
-    void updateStepProgress();
+    enum class Operation { ADDED, REMOVED, CHANGED };
+    void updateStepProgress(TaskStepProgress const& changed_progress, Operation);
 
     virtual void updateState();
 

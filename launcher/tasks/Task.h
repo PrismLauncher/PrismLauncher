@@ -57,6 +57,10 @@ struct TaskStepProgress {
     QUuid uid; 
     qint64 current = 0;
     qint64 total = -1;
+
+    qint64 old_current = 0;
+    qint64 old_total = -1;
+
     QString status = "";
     QString details = "";
     TaskStepState state = TaskStepState::Waiting;
