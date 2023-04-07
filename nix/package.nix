@@ -6,6 +6,7 @@
   jdk17,
   zlib,
   qtbase,
+  qtquickcontrols2 ? null,
   quazip,
   extra-cmake-modules,
   tomlplusplus,
@@ -34,6 +35,7 @@ stdenv.mkDerivation rec {
       tomlplusplus
       cmark
     ]
+    ++ lib.optional (lib.versionOlder qtbase.version "6") qtquickcontrols2
     ++ lib.optional gamemodeSupport gamemode;
 
   hardeningEnable = ["pie"];
