@@ -41,7 +41,7 @@ class QStyle;
 class ITheme {
    public:
     virtual ~ITheme() {}
-    virtual void apply();
+    virtual void apply(bool initial);
     virtual QString id() = 0;
     virtual QString name() = 0;
     virtual bool hasStyleSheet() = 0;

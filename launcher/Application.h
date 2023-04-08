@@ -120,7 +120,7 @@ public:
 
     void setIconTheme(const QString& name);
 
-    void applyCurrentlySelectedTheme();
+    void applyCurrentlySelectedTheme(bool initial = false);
 
     QList<ITheme*> getValidApplicationThemes();
 

@@ -830,9 +830,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
     });
 
-    {
-        applyCurrentlySelectedTheme();
-    }
+    applyCurrentlySelectedTheme(true);
 
     updateCapabilities();
 
@@ -1107,9 +1105,9 @@ QList<ITheme*> Application::getValidApplicationThemes()
     return m_themeManager->getValidApplicationThemes();
 }
 
-void Application::applyCurrentlySelectedTheme()
+void Application::applyCurrentlySelectedTheme(bool initial)
 {
-    m_themeManager->applyCurrentlySelectedTheme();
+    m_themeManager->applyCurrentlySelectedTheme(initial);
 }
 
 void Application::setApplicationTheme(const QString& name)

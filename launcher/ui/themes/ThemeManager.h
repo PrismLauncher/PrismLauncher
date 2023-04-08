@@ -37,8 +37,8 @@ class ThemeManager {
 
     QList<ITheme*> getValidApplicationThemes();
     void setIconTheme(const QString& name);
-    void applyCurrentlySelectedTheme();
-    void setApplicationTheme(const QString& name);
+    void applyCurrentlySelectedTheme(bool initial = false);
+    void setApplicationTheme(const QString& name, bool initial = false);
 
     /// <summary>
     /// Returns the cat based on selected cat and with events (Birthday, XMas, etc.)
