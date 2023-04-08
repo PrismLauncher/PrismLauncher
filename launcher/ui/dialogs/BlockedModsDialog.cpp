@@ -193,7 +193,7 @@ void BlockedModsDialog::setupWatch()
 void BlockedModsDialog::watchPath(QString path, bool watch_subdirectories)
 {
     auto to_watch = QFileInfo(path);
-    auto to_watch_path = to_watch.canonicalPath();
+    auto to_watch_path = to_watch.canonicalFilePath();
     if (m_watcher.directories().contains(to_watch_path))
         return; // don't watch the same path twice (no loops!)
 
