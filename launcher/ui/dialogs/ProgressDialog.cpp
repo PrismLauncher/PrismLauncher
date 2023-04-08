@@ -206,14 +206,14 @@ void ProgressDialog::changeStatus(const QString& status)
     updateSize();
 }
 
-void ProgressDialog::addTaskProgress(TaskStepProgress* progress)
+void ProgressDialog::addTaskProgress(TaskStepProgress const& progress)
 {
     SubTaskProgressBar* task_bar = new SubTaskProgressBar(this);
-    taskProgress.insert(progress->uid, task_bar);
+    taskProgress.insert(progress.uid, task_bar);
     ui->taskProgressLayout->addWidget(task_bar);
 }
 
-void ProgressDialog::changeStepProgress(TaskStepProgress task_progress)
+void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
 {
     m_is_multi_step = true;
     if(ui->taskProgressScrollArea->isHidden()) {
@@ -222,7 +222,7 @@ void ProgressDialog::changeStepProgress(TaskStepProgress task_progress)
     }
     
     if (!taskProgress.contains(task_progress.uid))
-        addTaskProgress(&task_progress);
+        addTaskProgress(task_progress);
     auto task_bar = taskProgress.value(task_progress.uid);
 
 

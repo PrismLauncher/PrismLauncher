@@ -77,7 +77,7 @@ slots:
     void subTaskStatus(Task::Ptr task, const QString &msg);
     void subTaskDetails(Task::Ptr task, const QString &msg);
     void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
-    void subTaskStepProgress(Task::Ptr task, TaskStepProgress task_step_progress);
+    void subTaskStepProgress(Task::Ptr task, TaskStepProgress const& task_step_progress);
 
 protected:
     // NOTE: This is not thread-safe.

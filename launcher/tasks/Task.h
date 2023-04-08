@@ -64,7 +64,7 @@ struct TaskStepProgress {
     QString status = "";
     QString details = "";
     TaskStepState state = TaskStepState::Waiting;
-    bool isDone() { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
+    bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
 };
 
 Q_DECLARE_METATYPE(TaskStepProgress)
@@ -130,7 +130,7 @@ class Task : public QObject, public QRunnable {
     void failed(QString reason);
     void status(QString status);
     void details(QString details);
-    void stepProgress(TaskStepProgress task_progress); // 
+    void stepProgress(TaskStepProgress const& task_progress); // 
 
     /** Emitted when the canAbort() status has changed.
      */
@@ -153,7 +153,7 @@ class Task : public QObject, public QRunnable {
     virtual void emitAborted();
     virtual void emitFailed(QString reason = "");
 
-    virtual void propogateStepProgress(TaskStepProgress task_progress);
+    virtual void propogateStepProgress(TaskStepProgress const& task_progress);
 
    public slots:
     void setStatus(const QString& status);

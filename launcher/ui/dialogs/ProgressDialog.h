@@ -80,7 +80,7 @@ slots:
 
     void changeStatus(const QString &status);
     void changeProgress(qint64 current, qint64 total);
-    void changeStepProgress(TaskStepProgress task_progress);
+    void changeStepProgress(TaskStepProgress const& task_progress);
 
 
 private
@@ -93,7 +93,7 @@ protected:
 
 private:
     bool handleImmediateResult(QDialog::DialogCode &result);
-    void addTaskProgress(TaskStepProgress* progress);
+    void addTaskProgress(TaskStepProgress const& progress);
 
 private:
     Ui::ProgressDialog *ui;

@@ -133,7 +133,7 @@ void ConcurrentTask::startNext()
 
     connect(next.get(), &Task::status, this, [this, next](QString msg) { subTaskStatus(next, msg); });
     connect(next.get(), &Task::details, this, [this, next](QString msg) { subTaskDetails(next, msg); });
-    connect(next.get(), &Task::stepProgress, this, [this, next](TaskStepProgress tp) { subTaskStepProgress(next, tp); });
+    connect(next.get(), &Task::stepProgress, this, [this, next](TaskStepProgress const& tp) { subTaskStepProgress(next, tp); });
 
     connect(next.get(), &Task::progress, this, [this, next](qint64 current, qint64 total) { subTaskProgress(next, current, total); });
 
@@ -224,13 +224,15 @@ void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 tota
     updateState();
 }
 
-void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgress task_progress)
+void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgress const& task_progress)
 {
     Operation op = Operation::ADDED;
     
     if (!m_task_progress.contains(task_progress.uid)) {
         m_task_progress.insert(task_progress.uid, std::make_shared<TaskStepProgress>(task_progress));
         op = Operation::ADDED;
+        emit stepProgress(task_progress);
+        updateStepProgress(task_progress, op);
     } else {
         auto tp = m_task_progress.value(task_progress.uid);
 
@@ -243,10 +245,10 @@ void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgress task_p
         tp->details = task_progress.details;
 
         op = Operation::CHANGED;
+        emit stepProgress(*tp.get());
+        updateStepProgress(*tp.get(), op);
     }
 
-    emit stepProgress(task_progress);
-    updateStepProgress(task_progress, op);
 }
 
 void ConcurrentTask::updateStepProgress(TaskStepProgress const& changed_progress, Operation op)
