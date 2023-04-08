@@ -275,6 +275,7 @@ void LauncherPage::loadSettings()
     ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
     ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
     ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
+    ui->downloadsDirWatchRecursiveCheckBox->setChecked(s->get("DownloadsDirWatchRecursive").toBool());
 
     QString sortMode = s->get("InstSortMode").toString();
 
