@@ -68,7 +68,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.4.3'
+            qt_version: '6.5.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -80,7 +80,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.4.3'
+            qt_version: '6.5.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
