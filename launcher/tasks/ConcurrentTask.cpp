@@ -197,6 +197,10 @@ void ConcurrentTask::subTaskStatus(Task::Ptr task, const QString& msg)
     task_progress->state = TaskStepState::Running;
     
     emit stepProgress(*task_progress.get());
+
+    if (totalSize() == 1) {
+        setStatus(msg);
+    }
 }
 
 void ConcurrentTask::subTaskDetails(Task::Ptr task, const QString& msg)
@@ -206,6 +210,10 @@ void ConcurrentTask::subTaskDetails(Task::Ptr task, const QString& msg)
     task_progress->state = TaskStepState::Running;
     
     emit stepProgress(*task_progress.get());
+
+    if (totalSize() == 1) {
+        setDetails(msg);
+    }
 }
 
 void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 total)
@@ -222,6 +230,10 @@ void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 tota
     emit stepProgress(*task_progress.get());
     updateStepProgress(*task_progress.get(), Operation::CHANGED);
     updateState();
+
+    if (totalSize() == 1) {
+        setProgress(task_progress->current, task_progress->total);
+    }
 }
 
 void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgress const& task_progress)

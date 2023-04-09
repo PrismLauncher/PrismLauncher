@@ -47,20 +47,19 @@
 static const QStringList s_units_si  {"kb", "MB", "GB", "TB"};
 static const QStringList s_units_kibi {"kiB", "MiB", "Gib", "TiB"};
 
-inline QString humanReadableFileSize(qint64 bytes, bool use_si = false, int decimal_points = 1) {
+inline QString humanReadableFileSize(double bytes, bool use_si = false, int decimal_points = 1) {
     const QStringList units = use_si ? s_units_si : s_units_kibi;
     const int scale = use_si ? 1000 : 1024;
-    double size = bytes;
 
     int u = -1;
     double r = pow(10,  decimal_points);
 
     do {
-        size /= scale;
+        bytes /= scale;
         u++;
-    } while (round(abs(size) * r) / r >= scale && u < units.length() - 1);
+    } while (round(abs(bytes) * r) / r >= scale && u < units.length() - 1);
 
-    return QString::number(size, 'f', 2) + " " + units[u];
+    return QString::number(bytes, 'f', 2) + " " + units[u];
 }
 
 class NetAction : public Task {

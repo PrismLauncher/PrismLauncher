@@ -93,6 +93,59 @@ QString truncateUrlHumanFriendly(QUrl &url, int max_len, bool hard_limit = false
 
 }
 
+QString humanReadableDuration(double duration, int precision = 0) {
+
+    using days = std::chrono::duration<int, std::ratio<86400>>;
+
+    QString outStr;
+    QTextStream os(&outStr);
+
+    auto std_duration = std::chrono::duration<double>(duration);
+    auto d = std::chrono::duration_cast<days>(std_duration);
+    std_duration -= d;
+    auto h = std::chrono::duration_cast<std::chrono::hours>(std_duration);
+    std_duration -= h;
+    auto m = std::chrono::duration_cast<std::chrono::minutes>(std_duration);
+    std_duration -= m;
+    auto s = std::chrono::duration_cast<std::chrono::seconds>(std_duration);
+    std_duration -= s;
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std_duration);
+
+    auto dc = d.count();
+    auto hc = h.count();
+    auto mc = m.count();
+    auto sc = s.count();
+    auto msc = ms.count();
+
+    if (dc) {
+        os << dc << "days";
+    }
+    if (hc) {
+        if (dc)
+            os << " ";
+        os << qSetFieldWidth(2) << hc << "h";
+    }
+    if (mc) {
+        if (dc || hc)
+            os << " ";
+        os << qSetFieldWidth(2) << mc << "m";
+    }
+    if (dc || hc || mc || sc) {
+        if (dc || hc || mc)
+            os << " ";
+        os << qSetFieldWidth(2) << sc << "s";
+    }
+    if ((msc && (precision > 0)) || !(dc || hc || mc || sc)) {
+        if (dc || hc || mc || sc)
+            os << " ";
+        os << qSetFieldWidth(0) << qSetRealNumberPrecision(precision) << msc << "ms";
+    }
+
+    os.flush();
+
+    return outStr;
+}
+
 auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
@@ -193,21 +246,23 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     auto elapsed = now - m_last_progress_time;
 
     // use milliseconds for speed precision
-    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
     auto bytes_recived_since = bytesReceived - m_last_progress_bytes;
+    auto dl_speed_bps = (double)bytes_recived_since / elapsed_ms.count() * 1000;
+    auto remaing_time_s = (bytesTotal - bytesReceived) / dl_speed_bps;
 
     // current bytes out of total bytes
     QString dl_progress = tr("%1  / %2").arg(humanReadableFileSize(bytesReceived)).arg(humanReadableFileSize(bytesTotal));
     
-    QString dl_speed;
-    if (elapsed_ms > 0) {
+    QString dl_speed_str;
+    if (elapsed_ms.count() > 0) {
         // bytes per second
-        dl_speed = tr("%1/s").arg(humanReadableFileSize(bytes_recived_since / elapsed_ms * 1000));
+        dl_speed_str = tr("%1/s (%2)").arg(humanReadableFileSize(dl_speed_bps)).arg(humanReadableDuration(remaing_time_s));
     } else {
-        dl_speed = tr("0 b/s");
+        dl_speed_str = tr("0 b/s");
     } 
 
-    setDetails(dl_progress + "\n" + dl_speed);
+    setDetails(dl_progress + "\n" + dl_speed_str);
 
     setProgress(bytesReceived, bytesTotal);
 }
