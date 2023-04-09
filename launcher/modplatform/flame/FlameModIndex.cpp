@@ -136,7 +136,35 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         }
     }
 
-    if(load_changelog)
+    auto dependencies = Json::ensureArray(obj, "dependencies");
+    for (auto d : dependencies) {
+        auto dep = Json::ensureObject(d);
+        ModPlatform::Dependency dependency;
+        dependency.addonId = Json::requireInteger(dep, "modId");
+        switch (Json::requireInteger(dep, "relationType")) {
+            case 1:  // EmbeddedLibrary
+                dependency.type = ModPlatform::DependencyType::EMBEDDED;
+                break;
+            case 2:  // OptionalDependency
+                dependency.type = ModPlatform::DependencyType::OPTIONAL;
+                break;
+            case 3:  // RequiredDependency
+                dependency.type = ModPlatform::DependencyType::REQUIRED;
+                break;
+            case 4:  // Tool
+                dependency.type = ModPlatform::DependencyType::TOOL;
+                break;
+            case 5:  // Incompatible
+                dependency.type = ModPlatform::DependencyType::INCOMPATIBLE;
+                break;
+            case 6:  // Include
+                dependency.type = ModPlatform::DependencyType::INCLUDE;
+                break;
+        }
+        file.dependencies.append(dependency);
+    }
+
+    if (load_changelog)
         file.changelog = api.getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
 
     return file;

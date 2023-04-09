@@ -32,6 +32,8 @@ enum class ResourceProvider { MODRINTH, FLAME };
 
 enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
 
+enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE };
+
 class ProviderCapabilities {
    public:
     auto name(ResourceProvider) -> const char*;
@@ -51,6 +53,12 @@ struct DonationData {
     QString url;
 };
 
+struct Dependency {
+    QVariant addonId;
+    DependencyType type;
+    QString version;
+};
+
 struct IndexedVersion {
     QVariant addonId;
     QVariant fileId;
@@ -65,6 +73,7 @@ struct IndexedVersion {
     QString hash;
     bool is_preferred = true;
     QString changelog;
+    QList<Dependency> dependencies;
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;

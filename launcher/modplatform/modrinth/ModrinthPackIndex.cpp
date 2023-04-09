@@ -22,7 +22,6 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "net/NetJob.h"
 
 static ModrinthAPI api;
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -139,6 +138,26 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     file.version = Json::requireString(obj, "name");
     file.version_number = Json::requireString(obj, "version_number");
     file.changelog = Json::requireString(obj, "changelog");
+
+    auto dependencies = Json::ensureArray(obj, "dependencies");
+    for (auto d : dependencies) {
+        auto dep = Json::ensureObject(d);
+        ModPlatform::Dependency dependency;
+        dependency.addonId = Json::requireString(dep, "project_id");
+        dependency.version = Json::requireString(dep, "version_id");
+        auto depType = Json::requireString(dep, "dependency_type");
+
+        if (depType == "required")
+            dependency.type = ModPlatform::DependencyType::REQUIRED;
+        else if (depType == "optional")
+            dependency.type = ModPlatform::DependencyType::OPTIONAL;
+        else if (depType == "incompatible")
+            dependency.type = ModPlatform::DependencyType::INCOMPATIBLE;
+        else if (depType == "embedded")
+            dependency.type = ModPlatform::DependencyType::EMBEDDED;
+
+        file.dependencies.append(dependency);
+    }
 
     auto files = Json::requireArray(obj, "files");
     int i = 0;
