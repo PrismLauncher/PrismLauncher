@@ -122,10 +122,6 @@ void ModrinthPackExportTask::collectHashes()
                 if (!url.isEmpty() && BuildConfig.MODRINTH_MRPACK_HOSTS.contains(url.host())) {
                     qDebug() << "Resolving" << relative << "from index";
 
-                    // we've already read it
-                    // let's go back!
-                    openFile.seek(openFile.size());
-
                     QCryptographicHash hash2(QCryptographicHash::Algorithm::Sha1);
                     hash2.addData(data);
 
