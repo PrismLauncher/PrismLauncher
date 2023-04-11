@@ -23,12 +23,12 @@
 #include "minecraft/mod/MetadataHandler.h"
 #include "tasks/Task.h"
 
-class LocalModGetTask : public Task {
+class LocalModGetAllTask : public Task {
     Q_OBJECT
    public:
-    using Ptr = shared_qobject_ptr<LocalModGetTask>;
+    using Ptr = shared_qobject_ptr<LocalModGetAllTask>;
 
-    explicit LocalModGetTask(QDir index_dir, QVariant addonId);
+    explicit LocalModGetAllTask(QDir index_dir);
 
     auto canAbort() const -> bool override { return true; }
     auto abort() -> bool override;
@@ -38,9 +38,8 @@ class LocalModGetTask : public Task {
     void executeTask() override;
 
    signals:
-    void getMod(Metadata::ModStruct);
+    void getAllMod(QList<Metadata::ModStruct>);
 
    private:
     QDir m_index_dir;
-    QVariant m_addonId;
 };

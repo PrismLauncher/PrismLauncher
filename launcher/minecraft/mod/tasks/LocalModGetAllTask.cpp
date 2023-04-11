@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "LocalModGetTask.h"
+#include "LocalModGetAllTask.h"
 
 #include "FileSystem.h"
 #include "minecraft/mod/MetadataHandler.h"
@@ -26,11 +26,11 @@
 #include <windows.h>
 #endif
 
-LocalModGetTask::LocalModGetTask(QDir index_dir, QVariant addonId) : m_index_dir(index_dir), m_addonId(addonId)
+LocalModGetAllTask::LocalModGetAllTask(QDir index_dir) : m_index_dir(index_dir)
 {
     // Ensure a '.index' folder exists in the mods folder, and create it if it does not
     if (!FS::ensureFolderPathExists(index_dir.path())) {
-        emitFailed(QString("Unable to create index for modId %1!").arg(m_addonId.toString()));
+        emitFailed(QString("Unable to create index for all mods!"));
     }
 
 #ifdef Q_OS_WIN32
@@ -38,13 +38,14 @@ LocalModGetTask::LocalModGetTask(QDir index_dir, QVariant addonId) : m_index_dir
 #endif
 }
 
-void LocalModGetTask::executeTask()
+void LocalModGetAllTask::executeTask()
 {
-    setStatus(tr("Updating index for modId:\n%1").arg(m_addonId.toString()));
-    emit getMod(Metadata::get(m_index_dir, m_addonId));
+    setStatus(tr("Geting all mods"));
+    emit getAllMod(Metadata::getAll(m_index_dir));
+    emitSucceeded();
 }
 
-auto LocalModGetTask::abort() -> bool
+auto LocalModGetAllTask::abort() -> bool
 {
     emitAborted();
     return true;
