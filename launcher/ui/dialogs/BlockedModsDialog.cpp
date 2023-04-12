@@ -190,7 +190,7 @@ void BlockedModsDialog::setupWatch()
     watchPath(modsFolder, true);
 }
 
-void BlockedModsDialog::watchPath(QString path, bool watch_subdirectories)
+void BlockedModsDialog::watchPath(QString path, bool watch_recursive)
 {
     auto to_watch = QFileInfo(path);
     auto to_watch_path = to_watch.canonicalFilePath();
@@ -200,14 +200,14 @@ void BlockedModsDialog::watchPath(QString path, bool watch_subdirectories)
     qDebug() << "[Blocked Mods Dialog] Adding Watch Path:" << path;
     m_watcher.addPath(to_watch_path);
 
-    if (!to_watch.isDir() || !watch_subdirectories)
+    if (!to_watch.isDir() || !watch_recursive)
         return;
 
 
     QDirIterator it(to_watch_path, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
     while (it.hasNext()) {
         QString watch_dir = QDir(it.next()).canonicalPath(); // resolve symlinks and relative paths
-        watchPath(watch_dir, watch_subdirectories);
+        watchPath(watch_dir, watch_recursive);
     }
 }
 
