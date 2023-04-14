@@ -18,9 +18,8 @@
 
 #pragma once
 
-#include <qcoreevent.h>
-#include <qeventloop.h>
 #include <QDir>
+#include <QEventLoop>
 #include <functional>
 
 #include "minecraft/mod/MetadataHandler.h"

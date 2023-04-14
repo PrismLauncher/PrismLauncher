@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ResourceModel.h"
-#include <qdir.h>
-#include <qlist.h>
+#include <QDir>
+#include <QList>
 
 #include <QCryptographicHash>
 #include <QIcon>

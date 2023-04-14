@@ -19,6 +19,7 @@
 
 #include "GetModDependenciesTask.h"
 
+#include <QDebug>
 #include "QObjectPtr.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/tasks/LocalModGetAllTask.h"

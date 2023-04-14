@@ -4,12 +4,11 @@
 
 #pragma once
 
-#include <qdir.h>
+#include <QDir>
 #include <QTimer>
 #include <QWidget>
 
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/BasePage.h"
 #include "ui/widgets/ProgressWidget.h"

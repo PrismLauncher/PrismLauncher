@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <qdir.h>
+#include <QDir>
 #include <optional>
 
 #include <QAbstractListModel>
