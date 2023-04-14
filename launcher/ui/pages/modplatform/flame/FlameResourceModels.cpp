@@ -29,6 +29,11 @@ void FlameModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonAr
     FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
+auto FlameModModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    return FlameMod::loadDependencyVersions(m, arr);
+};
+
 auto FlameModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return Json::ensureArray(obj.object(), "data");
@@ -51,6 +56,11 @@ void FlameResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m
 {
     FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
+
+auto FlameResourcePackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    return FlameMod::loadDependencyVersions(m, arr);
+};
 
 auto FlameResourcePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
@@ -81,12 +91,17 @@ void FlameTexturePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m,
         auto const& mc_versions = version.mcVersion;
 
         if (std::any_of(mc_versions.constBegin(), mc_versions.constEnd(),
-                        [this](auto const& mc_version){ return Version(mc_version) <= maximumTexturePackVersion(); }))
+                        [this](auto const& mc_version) { return Version(mc_version) <= maximumTexturePackVersion(); }))
             filtered_versions.push_back(version);
     }
 
     m.versions = filtered_versions;
 }
+
+auto FlameTexturePackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    return FlameMod::loadDependencyVersions(m, arr);
+};
 
 ResourceAPI::SearchArgs FlameTexturePackModel::createSearchArguments()
 {

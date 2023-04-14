@@ -4,12 +4,14 @@
 
 #pragma once
 
+#include <qdir.h>
 #include <optional>
 
 #include <QAbstractListModel>
 
 #include "QObjectPtr.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "tasks/ConcurrentTask.h"
@@ -68,6 +70,9 @@ class ResourceModel : public QAbstractListModel {
     virtual ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) = 0;
     virtual ResourceAPI::ProjectInfoCallbacks createInfoCallbacks(QModelIndex&) { return {}; }
 
+    virtual ResourceAPI::DependencySearchArgs createDependecyArguments(ModPlatform::Dependency&) { return {}; };
+    virtual ResourceAPI::DependencySearchCallbacks createDependecyCallbacks() { return {}; }
+
     /** Requests the API for more entries. */
     virtual void search();
 
@@ -79,6 +84,8 @@ class ResourceModel : public QAbstractListModel {
 
     /** Gets the icon at the URL for the given index. If it's not fetched yet, fetch it and update when fisinhed. */
     std::optional<QIcon> getIcon(QModelIndex&, const QUrl&);
+
+    QList<ModPlatform::IndexedVersion> getDependecies(QDir& dir, QList<ModPlatform::IndexedVersion> m_selected);
 
    protected:
     /** Resets the model's data. */
@@ -104,6 +111,7 @@ class ResourceModel : public QAbstractListModel {
     virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&);
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&);
     virtual void loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&);
+    virtual ModPlatform::IndexedVersion loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr);
 
    protected:
     /* Basic search parameters */

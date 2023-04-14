@@ -408,4 +408,9 @@ void ResourcePage::openUrl(const QUrl& url)
     QDesktopServices::openUrl(url);
 }
 
+QList<ModPlatform::IndexedVersion> ResourcePage::getDependecies(QDir& dir, QList<ModPlatform::IndexedVersion> selected)
+{
+    return m_model->getDependecies(dir, selected);
+};
+
 }  // namespace ResourceDownload

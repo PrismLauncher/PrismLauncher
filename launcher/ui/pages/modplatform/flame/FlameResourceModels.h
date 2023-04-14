@@ -24,6 +24,7 @@ class FlameModModel : public ModModel {
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
+    auto loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
 
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };
@@ -42,6 +43,7 @@ class FlameResourcePackModel : public ResourcePackResourceModel {
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
+    auto loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
 
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };
@@ -60,6 +62,7 @@ class FlameTexturePackModel : public TexturePackResourceModel {
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
+    auto loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
 
     ResourceAPI::SearchArgs createSearchArguments() override;
     ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override;

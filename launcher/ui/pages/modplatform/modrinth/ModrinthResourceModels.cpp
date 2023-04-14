@@ -42,12 +42,17 @@ void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJso
     ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
+auto ModrinthModModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    return ::Modrinth::loadDependencyVersions(m, arr);
+};
+
 auto ModrinthModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return obj.object().value("hits").toArray();
 }
 
-ModrinthResourcePackModel::ModrinthResourcePackModel(const BaseInstance& base)  : ResourcePackResourceModel(base, new ModrinthAPI){}
+ModrinthResourcePackModel::ModrinthResourcePackModel(const BaseInstance& base) : ResourcePackResourceModel(base, new ModrinthAPI) {}
 
 void ModrinthResourcePackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
@@ -64,12 +69,17 @@ void ModrinthResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack
     ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
+auto ModrinthResourcePackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    return ::Modrinth::loadDependencyVersions(m, arr);
+};
+
 auto ModrinthResourcePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return obj.object().value("hits").toArray();
 }
 
-ModrinthTexturePackModel::ModrinthTexturePackModel(const BaseInstance& base)  : TexturePackResourceModel(base, new ModrinthAPI){}
+ModrinthTexturePackModel::ModrinthTexturePackModel(const BaseInstance& base) : TexturePackResourceModel(base, new ModrinthAPI) {}
 
 void ModrinthTexturePackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
@@ -86,12 +96,17 @@ void ModrinthTexturePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack&
     ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
+auto ModrinthTexturePackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    return ::Modrinth::loadDependencyVersions(m, arr);
+};
+
 auto ModrinthTexturePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return obj.object().value("hits").toArray();
 }
 
-ModrinthShaderPackModel::ModrinthShaderPackModel(const BaseInstance& base)  : ShaderPackResourceModel(base, new ModrinthAPI){}
+ModrinthShaderPackModel::ModrinthShaderPackModel(const BaseInstance& base) : ShaderPackResourceModel(base, new ModrinthAPI) {}
 
 void ModrinthShaderPackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
@@ -107,6 +122,11 @@ void ModrinthShaderPackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& 
 {
     ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
+
+auto ModrinthShaderPackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    return ::Modrinth::loadDependencyVersions(m, arr);
+};
 
 auto ModrinthShaderPackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {

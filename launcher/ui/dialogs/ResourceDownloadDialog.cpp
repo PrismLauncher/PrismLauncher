@@ -18,17 +18,22 @@
  */
 
 #include "ResourceDownloadDialog.h"
+#include <qeventloop.h>
+#include <qlist.h>
 
 #include <QPushButton>
+#include <algorithm>
+#include <cstddef>
 
 #include "Application.h"
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourcePackFolderModel.h"
-#include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 
+#include "modplatform/ModIndex.h"
 #include "ui/dialogs/ReviewMessageBox.h"
 
 #include "ui/pages/modplatform/ResourcePage.h"
@@ -41,7 +46,10 @@
 namespace ResourceDownload {
 
 ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, const std::shared_ptr<ResourceFolderModel> base_model)
-    : QDialog(parent), m_base_model(base_model), m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel), m_vertical_layout(this)
+    : QDialog(parent)
+    , m_base_model(base_model)
+    , m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel)
+    , m_vertical_layout(this)
 {
     setObjectName(QStringLiteral("ResourceDownloadDialog"));
 
@@ -102,7 +110,8 @@ void ResourceDownloadDialog::initializeContainer()
 void ResourceDownloadDialog::connectButtons()
 {
     auto OkButton = m_buttons.button(QDialogButtonBox::Ok);
-    OkButton->setToolTip(tr("Opens a new popup to review your selected %1 and confirm your selection. Shortcut: Ctrl+Return").arg(resourcesString()));
+    OkButton->setToolTip(
+        tr("Opens a new popup to review your selected %1 and confirm your selection. Shortcut: Ctrl+Return").arg(resourcesString()));
     connect(OkButton, &QPushButton::clicked, this, &ResourceDownloadDialog::confirm);
 
     auto CancelButton = m_buttons.button(QDialogButtonBox::Cancel);
@@ -120,6 +129,26 @@ void ResourceDownloadDialog::confirm()
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
     confirm_dialog->retranslateUi(resourcesString());
 
+    if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
+        QList<ModPlatform::IndexedVersion> selectedVers;
+        for (auto& task : keys) {
+            auto selected = m_selected.constFind(task).value();
+            selectedVers.append(selected->getVersion());
+        }
+
+        auto dir = model->indexDir();
+        auto dependencies = m_selectedPage->getDependecies(dir, selectedVers);
+
+        for (auto dep : dependencies) {
+            dep.is_currently_selected = true;
+            auto pack = ModPlatform::IndexedPack{
+                .addonId = dep.addonId, .provider = ModPlatform::ResourceProvider::FLAME, .name = dep.fileName, .slug = dep.fileName
+            };
+            m_selected.insert(dep.fileName, makeShared<ResourceDownloadTask>(pack, dep, getBaseModel(), true));
+        }
+
+        keys = m_selected.keys();
+    }
     for (auto& task : keys) {
         auto selected = m_selected.constFind(task).value();
         confirm_dialog->appendResource({ task, selected->getFilename(), selected->getCustomPath() });
@@ -205,8 +234,6 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
 }
 
-
-
 ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
     : ResourceDownloadDialog(parent, mods), m_instance(instance)
 {
@@ -231,7 +258,6 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
     return pages;
 }
-
 
 ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
                                                        const std::shared_ptr<ResourcePackFolderModel>& resource_packs,
@@ -258,7 +284,6 @@ QList<BasePage*> ResourcePackDownloadDialog::getPages()
     return pages;
 }
 
-
 TexturePackDownloadDialog::TexturePackDownloadDialog(QWidget* parent,
                                                      const std::shared_ptr<TexturePackFolderModel>& resource_packs,
                                                      BaseInstance* instance)
@@ -283,7 +308,6 @@ QList<BasePage*> TexturePackDownloadDialog::getPages()
 
     return pages;
 }
-
 
 ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent,
                                                    const std::shared_ptr<ShaderPackFolderModel>& shaders,

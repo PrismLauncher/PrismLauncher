@@ -359,6 +359,10 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/LocalWorldSaveParseTask.cpp
     minecraft/mod/tasks/LocalResourceParse.h
     minecraft/mod/tasks/LocalResourceParse.cpp
+    minecraft/mod/tasks/GetModDependenciesTask.h
+    minecraft/mod/tasks/GetModDependenciesTask.cpp
+    minecraft/mod/tasks/LocalModGetAllTask.h
+    minecraft/mod/tasks/LocalModGetAllTask.cpp
 
     # Assets
     minecraft/AssetsUtils.h

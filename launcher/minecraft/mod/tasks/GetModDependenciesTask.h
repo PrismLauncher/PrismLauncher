@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <qcoreevent.h>
+#include <qeventloop.h>
 #include <QDir>
 #include <functional>
 
@@ -33,24 +35,23 @@ class GetModDependenciesTask : public Task {
     using Ptr = shared_qobject_ptr<GetModDependenciesTask>;
     using LocalModGetAllTaskPtr = shared_qobject_ptr<LocalModGetAllTask>;
 
-    using NewDependecyVersionAPITask =
-        std::function<Task::Ptr(ModPlatform::Dependency, int, std::function<void(QList<ModPlatform::IndexedVersion>, int)>)>;
+    using NewDependecyVersionAPITask = std::function<Task::Ptr(ModPlatform::Dependency, std::function<void(ModPlatform::IndexedVersion)>)>;
 
-    explicit GetModDependenciesTask(QDir index_dir, QList<ModPlatform::IndexedVersion> selected, NewDependecyVersionAPITask& api);
+    explicit GetModDependenciesTask(QDir index_dir, QList<ModPlatform::IndexedVersion> selected, NewDependecyVersionAPITask api);
 
     auto canAbort() const -> bool override { return true; }
     auto abort() -> bool override;
+
+    auto getDependecies() const -> QList<ModPlatform::IndexedVersion> { return m_dependencies; }
 
    protected slots:
     //! Entry point for tasks.
     void executeTask() override;
 
     void prepareDependecies();
-    void addDependecies(QList<ModPlatform::IndexedVersion>, int);
+    void addDependecies(ModPlatform::IndexedVersion, int);
     QList<ModPlatform::Dependency> getDependenciesForVersions(QList<ModPlatform::IndexedVersion>);
-
-   signals:
-    void getAllMod(QList<Metadata::ModStruct>);
+    QList<ModPlatform::Dependency> getDependenciesForVersion(ModPlatform::IndexedVersion);
 
    private:
     QList<ModPlatform::IndexedVersion> m_selected;
@@ -60,4 +61,5 @@ class GetModDependenciesTask : public Task {
     LocalModGetAllTaskPtr m_getAllMods = nullptr;
     NewDependecyVersionAPITask m_getDependenciesVersionAPI;
     SequentialTask::Ptr m_getNetworkDep;
+    QEventLoop loop;
 };

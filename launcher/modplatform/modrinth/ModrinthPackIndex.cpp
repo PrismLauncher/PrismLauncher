@@ -214,3 +214,22 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
 
     return {};
 }
+
+auto Modrinth::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    QVector<ModPlatform::IndexedVersion> unsortedVersions;
+
+    for (auto versionIter : arr) {
+        auto obj = versionIter.toObject();
+        auto file = loadIndexedPackVersion(obj);
+
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+            unsortedVersions.append(file);
+    }
+    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        // dates are in RFC 3339 format
+        return a.date > b.date;
+    };
+    std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
+    return unsortedVersions.front();
+}

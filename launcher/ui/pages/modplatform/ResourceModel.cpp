@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ResourceModel.h"
+#include <qdir.h>
+#include <qlist.h>
 
 #include <QCryptographicHash>
 #include <QIcon>
@@ -14,6 +16,7 @@
 #include "BuildConfig.h"
 #include "Json.h"
 
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "net/Download.h"
 #include "net/NetJob.h"
 
@@ -321,6 +324,11 @@ void ResourceModel::loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArra
 {
     NEED_FOR_CALLBACK_ASSERT("loadIndexedPackVersions");
 }
+ModPlatform::IndexedVersion ResourceModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr)
+{
+    NEED_FOR_CALLBACK_ASSERT("loadDependencyVersions");
+    return {};
+}
 
 /* Default callbacks */
 
@@ -440,5 +448,36 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
 
     emit projectInfoUpdated();
 }
+
+QList<ModPlatform::IndexedVersion> ResourceModel::getDependecies(QDir& dir, QList<ModPlatform::IndexedVersion> selected)
+{
+    auto task = new GetModDependenciesTask(
+        dir, selected, [this](ModPlatform::Dependency dependency, std::function<void(ModPlatform::IndexedVersion)> succeeded) -> Task::Ptr {
+            auto args{ createDependecyArguments(dependency) };
+            auto callbacks{ createDependecyCallbacks() };
+
+            // Use default if no callbacks are set
+            if (!callbacks.on_succeed)
+                callbacks.on_succeed = [this, dependency, succeeded](auto& doc, auto pack) {
+                    ModPlatform::IndexedVersion ver;
+                    try {
+                        auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
+                        ver = loadDependencyVersions(dependency, arr);
+                    } catch (const JSONValidationError& e) {
+                        qDebug() << doc;
+                        qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
+                        return;
+                    }
+
+                    succeeded(ver);
+                };
+
+            return m_api->getDependencyVersion(std::move(args), std::move(callbacks));
+        });
+
+    task->start();
+
+    return task->getDependecies();
+};
 
 }  // namespace ResourceDownload

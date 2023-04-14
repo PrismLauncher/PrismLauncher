@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <qdir.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -75,9 +76,11 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
     virtual void removeResourceFromDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
 
+    QList<ModPlatform::IndexedVersion> getDependecies(QDir& dir, QList<ModPlatform::IndexedVersion> m_selected);
+
    protected slots:
     virtual void triggerSearch() {}
-   
+
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
     void onResourceSelected();
