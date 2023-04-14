@@ -67,18 +67,15 @@
           <string>Folders</string>
          </property>
          <layout class="QGridLayout" name="foldersBoxLayout">
-          <item row="0" column="2">
-           <widget class="QToolButton" name="instDirBrowseBtn">
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelDownloadsDir">
             <property name="text">
-             <string notr="true">...</string>
+             <string>&amp;Downloads:</string>
+            </property>
+            <property name="buddy">
+             <cstring>downloadsDirTextBox</cstring>
             </property>
            </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="modsDirTextBox"/>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="instDirTextBox"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelInstDir">
@@ -90,15 +87,24 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="instDirTextBox"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="downloadsDirTextBox"/>
+          </item>
           <item row="2" column="1">
            <widget class="QLineEdit" name="iconsDirTextBox"/>
           </item>
-          <item row="2" column="2">
-           <widget class="QToolButton" name="iconsDirBrowseBtn">
+          <item row="3" column="2">
+           <widget class="QToolButton" name="downloadsDirBrowseBtn">
             <property name="text">
              <string notr="true">...</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="modsDirTextBox"/>
           </item>
           <item row="1" column="2">
            <widget class="QToolButton" name="modsDirBrowseBtn">
@@ -117,6 +123,20 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="instDirBrowseBtn">
+            <property name="text">
+             <string notr="true">...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QToolButton" name="iconsDirBrowseBtn">
+            <property name="text">
+             <string notr="true">...</string>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="labelIconsDir">
             <property name="text">
@@ -127,23 +147,13 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="labelDownloadsDir">
-            <property name="text">
-             <string>&amp;Downloads:</string>
+          <item row="4" column="1" colspan="2">
+           <widget class="QCheckBox" name="downloadsDirWatchRecursiveCheckBox">
+            <property name="toolTip">
+             <string>When enabled, in addition to the downloads folder, its sub folders will also be searched when looking for resources (e.g. when looking for blocked mods on CurseForge).</string>
             </property>
-            <property name="buddy">
-             <cstring>downloadsDirTextBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="downloadsDirTextBox"/>
-          </item>
-          <item row="3" column="2">
-           <widget class="QToolButton" name="downloadsDirBrowseBtn">
             <property name="text">
-             <string>...</string>
+             <string>Check downloads folder recursively</string>
             </property>
            </widget>
           </item>
