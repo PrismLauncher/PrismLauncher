@@ -34,7 +34,8 @@ class GetModDependenciesTask : public Task {
     using Ptr = shared_qobject_ptr<GetModDependenciesTask>;
     using LocalModGetAllTaskPtr = shared_qobject_ptr<LocalModGetAllTask>;
 
-    using NewDependecyVersionAPITask = std::function<Task::Ptr(ModPlatform::Dependency, std::function<void(ModPlatform::IndexedVersion)>)>;
+    using NewDependecyVersionAPITask =
+        std::function<Task::Ptr(const ModPlatform::Dependency&, std::function<void(const ModPlatform::IndexedVersion&)>)>;
 
     explicit GetModDependenciesTask(QDir index_dir, QList<ModPlatform::IndexedVersion> selected, NewDependecyVersionAPITask api);
 
@@ -48,9 +49,9 @@ class GetModDependenciesTask : public Task {
     void executeTask() override;
 
     void prepareDependecies();
-    void addDependecies(ModPlatform::IndexedVersion, int);
-    QList<ModPlatform::Dependency> getDependenciesForVersions(QList<ModPlatform::IndexedVersion>);
-    QList<ModPlatform::Dependency> getDependenciesForVersion(ModPlatform::IndexedVersion);
+    void addDependecies(const ModPlatform::IndexedVersion&, int);
+    QList<ModPlatform::Dependency> getDependenciesForVersions(const QList<ModPlatform::IndexedVersion>&);
+    QList<ModPlatform::Dependency> getDependenciesForVersion(const ModPlatform::IndexedVersion&);
 
    private:
     QList<ModPlatform::IndexedVersion> m_selected;

@@ -49,7 +49,7 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& en
     return { pack, versions, profile->getModLoaders() };
 }
 
-ResourceAPI::DependencySearchArgs ModModel::createDependecyArguments(ModPlatform::Dependency& dep)
+ResourceAPI::DependencySearchArgs ModModel::createDependecyArguments(const ModPlatform::Dependency& dep)
 {
     auto profile = static_cast<MinecraftInstance const&>(m_base_instance).getPackProfile();
 

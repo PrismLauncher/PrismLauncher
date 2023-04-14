@@ -40,7 +40,7 @@ class ModModel : public ResourceModel {
     ResourceAPI::SearchArgs createSearchArguments() override;
     ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override;
     ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) override;
-    ResourceAPI::DependencySearchArgs createDependecyArguments(ModPlatform::Dependency&) override;
+    ResourceAPI::DependencySearchArgs createDependecyArguments(const ModPlatform::Dependency&) override;
 
    protected:
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override = 0;

@@ -70,7 +70,7 @@ class ResourceModel : public QAbstractListModel {
     virtual ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) = 0;
     virtual ResourceAPI::ProjectInfoCallbacks createInfoCallbacks(QModelIndex&) { return {}; }
 
-    virtual ResourceAPI::DependencySearchArgs createDependecyArguments(ModPlatform::Dependency&) { return {}; };
+    virtual ResourceAPI::DependencySearchArgs createDependecyArguments(const ModPlatform::Dependency&) { return {}; };
     virtual ResourceAPI::DependencySearchCallbacks createDependecyCallbacks() { return {}; }
 
     /** Requests the API for more entries. */

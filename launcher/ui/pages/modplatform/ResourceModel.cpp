@@ -452,7 +452,8 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
 QList<ModPlatform::IndexedVersion> ResourceModel::getDependecies(QDir& dir, QList<ModPlatform::IndexedVersion> selected)
 {
     auto task = new GetModDependenciesTask(
-        dir, selected, [this](ModPlatform::Dependency dependency, std::function<void(ModPlatform::IndexedVersion)> succeeded) -> Task::Ptr {
+        dir, selected,
+        [this](const ModPlatform::Dependency& dependency, std::function<void(const ModPlatform::IndexedVersion&)> succeeded) -> Task::Ptr {
             auto args{ createDependecyArguments(dependency) };
             auto callbacks{ createDependecyCallbacks() };
 
