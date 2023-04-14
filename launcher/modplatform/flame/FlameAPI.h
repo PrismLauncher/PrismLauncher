@@ -41,14 +41,15 @@ class FlameAPI : public NetworkResourceAPI {
             return 4;
         // TODO: remove this once Quilt drops official Fabric support
         if (loaders & Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
-            return 4;  // Quilt would probably be 5
+            return 4;         // Quilt would probably be 5
         return 0;
     }
 
    private:
     [[nodiscard]] std::optional<QString> getSearchURL(SearchArgs const& args) const override
     {
-        auto gameVersionStr = args.versions.has_value() ? QString("gameVersion=%1").arg(args.versions.value().front().toString()) : QString();
+        auto gameVersionStr =
+            args.versions.has_value() ? QString("gameVersion=%1").arg(args.versions.value().front().toString()) : QString();
 
         QStringList get_arguments;
         get_arguments.append(QString("classId=%1").arg(getClassId(args.type)));
@@ -73,7 +74,7 @@ class FlameAPI : public NetworkResourceAPI {
 
     [[nodiscard]] std::optional<QString> getVersionsURL(VersionSearchArgs const& args) const override
     {
-        QString url{QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&").arg(args.pack.addonId.toString())};
+        QString url{ QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&").arg(args.pack.addonId.toString()) };
 
         QStringList get_parameters;
         if (args.mcVersions.has_value())
@@ -82,5 +83,13 @@ class FlameAPI : public NetworkResourceAPI {
             get_parameters.append(QString("modLoaderType=%1").arg(getMappedModLoader(args.loaders.value())));
 
         return url + get_parameters.join('&');
+    };
+
+    [[nodiscard]] std::optional<QString> getDependecyURL(DependencySearchArgs const& args) const override
+    {
+        return QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&gameVersion=%2&modLoaderType=%")
+            .arg(args.dependency.addonId.toString())
+            .arg(args.mcVersion.toString())
+            .arg(getMappedModLoader(args.loader));
     };
 };
