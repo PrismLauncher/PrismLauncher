@@ -22,6 +22,7 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "modplatform/ModIndex.h"
 
 static ModrinthAPI api;
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -144,7 +145,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
         auto dep = Json::ensureObject(d);
         ModPlatform::Dependency dependency;
         dependency.addonId = Json::requireString(dep, "project_id");
-        dependency.version = Json::requireString(dep, "version_id");
+        dependency.version = Json::ensureString(dep, "version_id");
         auto depType = Json::requireString(dep, "dependency_type");
 
         if (depType == "required")
@@ -231,5 +232,5 @@ auto Modrinth::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr
         return a.date > b.date;
     };
     std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
-    return unsortedVersions.front();
+    return unsortedVersions.length() != 0 ? unsortedVersions.front() : ModPlatform::IndexedVersion();
 }

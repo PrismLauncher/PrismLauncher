@@ -69,7 +69,8 @@ void GetModDependenciesTask::prepareDependecies()
         return;
     }
     for (auto dep : c_dependencies) {
-        auto task = m_getDependenciesVersionAPI(dep, [this](ModPlatform::IndexedVersion new_version) { addDependecies(new_version, 20); });
+        auto task =
+            m_getDependenciesVersionAPI(dep, [this](const ModPlatform::IndexedVersion& new_version) { addDependecies(new_version, 20); });
         m_getNetworkDep->addTask(task);
     }
     m_getNetworkDep->start();
@@ -89,7 +90,7 @@ void GetModDependenciesTask::addDependecies(const ModPlatform::IndexedVersion& n
     }
     for (auto dep : c_dependencies) {
         auto task = m_getDependenciesVersionAPI(
-            dep, [this, level](ModPlatform::IndexedVersion new_versions) { addDependecies(new_versions, level - 1); });
+            dep, [this, level](const ModPlatform::IndexedVersion& new_versions) { addDependecies(new_versions, level - 1); });
         m_getNetworkDep->addTask(task);
     }
 };
@@ -101,13 +102,13 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
         for (auto ver_dep : version.dependencies) {
             if (ver_dep.type == ModPlatform::DependencyType::REQUIRED) {
                 if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
-                                            [&ver_dep](auto i) { return i.addonId == ver_dep.addonId; });
+                                            [&ver_dep](const auto& i) { return i.addonId == ver_dep.addonId; });
                     dep == c_dependencies.end()) {  // check the current dependency list
-                    if (auto dep =
-                            std::find_if(selected.begin(), selected.end(), [&ver_dep](auto i) { return i.addonId == ver_dep.addonId; });
+                    if (auto dep = std::find_if(selected.begin(), selected.end(),
+                                                [&ver_dep](const auto& i) { return i.addonId == ver_dep.addonId; });
                         dep == selected.end()) {  // check the selected versions
-                        if (auto dep =
-                                std::find_if(m_mods.begin(), m_mods.end(), [&ver_dep](auto i) { return i.mod_id() == ver_dep.addonId; });
+                        if (auto dep = std::find_if(m_mods.begin(), m_mods.end(),
+                                                    [&ver_dep](const auto& i) { return i.project_id == ver_dep.addonId; });
                             dep == m_mods.end()) {  // check the existing mods
                             c_dependencies.append(ver_dep);
                         }
@@ -124,10 +125,11 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
     auto c_dependencies = QList<ModPlatform::Dependency>();
     for (auto ver_dep : version.dependencies) {
         if (ver_dep.type == ModPlatform::DependencyType::REQUIRED) {
-            if (auto dep =
-                    std::find_if(c_dependencies.begin(), c_dependencies.end(), [&ver_dep](auto i) { return i.addonId == ver_dep.addonId; });
+            if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
+                                        [&ver_dep](const auto& i) { return i.addonId == ver_dep.addonId; });
                 dep == c_dependencies.end()) {  // check the current dependency list
-                if (auto dep = std::find_if(m_mods.begin(), m_mods.end(), [&ver_dep](auto i) { return i.mod_id() == ver_dep.addonId; });
+                if (auto dep =
+                        std::find_if(m_mods.begin(), m_mods.end(), [&ver_dep](const auto& i) { return i.project_id == ver_dep.addonId; });
                     dep == m_mods.end()) {  // check the existing mods
                     c_dependencies.append(ver_dep);
                 }

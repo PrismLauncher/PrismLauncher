@@ -126,7 +126,7 @@ class ResourceAPI {
     };
 
     struct DependencySearchCallbacks {
-        std::function<void(QJsonDocument&, ModPlatform::Dependency)> on_succeed;
+        std::function<void(QJsonDocument&, const ModPlatform::Dependency&)> on_succeed;
     };
 
    public:

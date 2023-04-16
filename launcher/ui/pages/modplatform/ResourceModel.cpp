@@ -459,11 +459,18 @@ QList<ModPlatform::IndexedVersion> ResourceModel::getDependecies(QDir& dir, QLis
 
             // Use default if no callbacks are set
             if (!callbacks.on_succeed)
-                callbacks.on_succeed = [this, dependency, succeeded](auto& doc, auto pack) {
+                callbacks.on_succeed = [this, dependency, succeeded](auto& doc, auto& pack) {
                     ModPlatform::IndexedVersion ver;
                     try {
-                        auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
+                        auto arr = dependency.version.length() != 0 && doc.isObject()
+                                       ? Json::toJsonArray(QList<QJsonObject>() << doc.object())
+                                   : doc.isObject() ? Json::ensureArray(doc.object(), "data")
+                                                    : doc.array();
                         ver = loadDependencyVersions(dependency, arr);
+                        if (!ver.addonId.isValid()) {
+                            qWarning() << "Error while reading " << debugName() << " resource version empty ";
+                            qDebug() << doc;
+                        }
                     } catch (const JSONValidationError& e) {
                         qDebug() << doc;
                         qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
