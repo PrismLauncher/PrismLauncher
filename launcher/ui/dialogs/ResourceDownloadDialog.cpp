@@ -23,7 +23,6 @@
 
 #include <QPushButton>
 #include <algorithm>
-#include <cstddef>
 
 #include "Application.h"
 #include "ResourceDownloadTask.h"
