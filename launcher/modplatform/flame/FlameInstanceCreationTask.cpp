@@ -415,6 +415,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         if (!result.resolved || result.url.isEmpty()) {
             BlockedMod blocked_mod;
             blocked_mod.name = result.fileName;
+            blocked_mod.fileId = result.fileId;
             blocked_mod.websiteUrl = result.websiteUrl;
             blocked_mod.hash = result.hash;
             blocked_mod.matched = false;

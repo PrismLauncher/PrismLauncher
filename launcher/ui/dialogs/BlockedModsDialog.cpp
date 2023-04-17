@@ -106,6 +106,7 @@ void BlockedModsDialog::dropEvent(QDropEvent* e)
         qDebug() << "[Blocked Mods Dialog] Adding watch path:" << path;
         m_watcher.addPath(path);
     }
+    fixOldCurseforgeUrls();
     scanPaths();
     update();
 }
@@ -114,6 +115,15 @@ void BlockedModsDialog::done(int r)
 {
     QDialog::done(r);
     disconnect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
+}
+
+void BlockedModsDialog::fixOldCurseforgeUrls() {
+    /// redirect from /download/(fileid) to /download?fileId=(fileid)
+    QRegularExpression old_url_pattern(R"(/download/(\d+)$)");
+    for (auto& mod : m_mods) {
+        auto new_url = mod.websiteUrl.replace(old_url_pattern, "/download?fileId=\\1");
+        mod.websiteUrl = new_url;
+    }
 }
 
 void BlockedModsDialog::openAll(bool missingOnly)

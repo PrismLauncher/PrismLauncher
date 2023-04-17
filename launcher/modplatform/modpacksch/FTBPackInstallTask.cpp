@@ -191,6 +191,7 @@ void PackInstallTask::onResolveModsSucceeded()
         if (!results_file.resolved || results_file.url.isEmpty()) {
             BlockedMod blocked_mod;
             blocked_mod.name = local_file.name;
+            blocked_mod.fileId = results_file.fileId;
             blocked_mod.websiteUrl = results_file.websiteUrl;
             blocked_mod.hash = results_file.hash;
             blocked_mod.matched = false;

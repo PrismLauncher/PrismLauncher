@@ -37,6 +37,7 @@ class QPushButton;
 
 struct BlockedMod {
     QString name;
+    int fileId;
     QString websiteUrl;
     QString hash;
     bool matched;
@@ -74,6 +75,7 @@ class BlockedModsDialog : public QDialog {
     bool m_rehash_pending;
     QPushButton* m_openMissingButton;
 
+    void fixOldCurseforgeUrls();
     void openAll(bool missingOnly);
     void addDownloadFolder();
     void update();
