@@ -140,9 +140,7 @@ void ResourceDownloadDialog::confirm()
 
         for (auto dep : dependencies) {
             dep.is_currently_selected = true;
-            auto pack = ModPlatform::IndexedPack{
-                .addonId = dep.addonId, .provider = ModPlatform::ResourceProvider::FLAME, .name = dep.fileName, .slug = dep.fileName
-            };
+            auto pack = ModPlatform::IndexedPack{ dep.addonId, ModPlatform::ResourceProvider::FLAME, dep.fileName, dep.fileName };
             m_selected.insert(dep.fileName, makeShared<ResourceDownloadTask>(pack, dep, getBaseModel(), true));
         }
 
