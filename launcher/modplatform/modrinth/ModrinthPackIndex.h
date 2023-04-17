@@ -31,6 +31,6 @@ void loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                              const shared_qobject_ptr<QNetworkAccessManager>& network,
                              const BaseInstance* inst);
 auto loadIndexedPackVersion(QJsonObject& obj, QString hash_type = "sha512", QString filename_prefer = "") -> ModPlatform::IndexedVersion;
-auto loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion;
+auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion;
 
 }  // namespace Modrinth

@@ -41,7 +41,7 @@ LocalModGetAllTask::LocalModGetAllTask(QDir index_dir) : m_index_dir(index_dir)
 void LocalModGetAllTask::executeTask()
 {
     setStatus(tr("Geting all mods"));
-    emit getAllMod(Metadata::getAll(m_index_dir));
+    emit getAllMods(Metadata::getAll(m_index_dir));
     emitSucceeded();
 }
 

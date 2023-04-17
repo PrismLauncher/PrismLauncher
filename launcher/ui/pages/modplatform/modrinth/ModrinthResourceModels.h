@@ -40,7 +40,7 @@ class ModrinthModModel : public ModModel {
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
-    auto loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
+    auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
 
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };
@@ -59,7 +59,7 @@ class ModrinthResourcePackModel : public ResourcePackResourceModel {
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
-    auto loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
+    auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
 
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };
@@ -78,7 +78,7 @@ class ModrinthTexturePackModel : public TexturePackResourceModel {
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
-    auto loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
+    auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
 
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };
@@ -97,7 +97,7 @@ class ModrinthShaderPackModel : public ShaderPackResourceModel {
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
-    auto loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
+    auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
 
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };

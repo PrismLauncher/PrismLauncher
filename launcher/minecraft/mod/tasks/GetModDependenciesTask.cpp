@@ -33,7 +33,7 @@ GetModDependenciesTask::GetModDependenciesTask(QDir index_dir, QList<ModPlatform
     m_getAllMods = makeShared<LocalModGetAllTask>(index_dir);
     m_getNetworkDep = makeShared<SequentialTask>(this, "GetDepInfo");
     connect(m_getNetworkDep.get(), &Task::finished, &loop, &QEventLoop::quit);
-    QObject::connect(m_getAllMods.get(), &LocalModGetAllTask::getAllMod, [this](QList<Metadata::ModStruct> mods) {
+    QObject::connect(m_getAllMods.get(), &LocalModGetAllTask::getAllMods, [this](QList<Metadata::ModStruct> mods) {
         m_mods = mods;
         prepareDependecies();
     });

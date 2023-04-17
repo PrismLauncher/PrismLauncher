@@ -29,7 +29,7 @@ void FlameModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonAr
     FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
-auto FlameModModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto FlameModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return FlameMod::loadDependencyVersions(m, arr);
 };
@@ -57,7 +57,7 @@ void FlameResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m
     FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
-auto FlameResourcePackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto FlameResourcePackModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return FlameMod::loadDependencyVersions(m, arr);
 };
@@ -98,7 +98,7 @@ void FlameTexturePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m,
     m.versions = filtered_versions;
 }
 
-auto FlameTexturePackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto FlameTexturePackModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return FlameMod::loadDependencyVersions(m, arr);
 };

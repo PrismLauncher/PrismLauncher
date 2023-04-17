@@ -170,7 +170,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     return file;
 }
 
-ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr)
+ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
     for (auto versionIter : arr) {

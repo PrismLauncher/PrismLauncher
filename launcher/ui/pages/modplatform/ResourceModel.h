@@ -111,7 +111,7 @@ class ResourceModel : public QAbstractListModel {
     virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&);
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&);
     virtual void loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&);
-    virtual ModPlatform::IndexedVersion loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr);
+    virtual ModPlatform::IndexedVersion loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr);
 
    protected:
     /* Basic search parameters */

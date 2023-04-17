@@ -28,7 +28,7 @@ class ResourcePackResourceModel : public ResourceModel {
     void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&) override = 0;
     void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) override = 0;
     void loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&) override = 0;
-    ModPlatform::IndexedVersion loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) override = 0;
+    ModPlatform::IndexedVersion loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) override = 0;
 
    public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;

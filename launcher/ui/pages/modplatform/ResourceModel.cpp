@@ -324,7 +324,7 @@ void ResourceModel::loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArra
 {
     NEED_FOR_CALLBACK_ASSERT("loadIndexedPackVersions");
 }
-ModPlatform::IndexedVersion ResourceModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr)
+ModPlatform::IndexedVersion ResourceModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr)
 {
     NEED_FOR_CALLBACK_ASSERT("loadDependencyVersions");
     return {};
@@ -451,7 +451,7 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
 
 QList<ModPlatform::IndexedVersion> ResourceModel::getDependecies(QDir& dir, QList<ModPlatform::IndexedVersion> selected)
 {
-    auto task = new GetModDependenciesTask(
+    auto task = std::make_unique<GetModDependenciesTask>(
         dir, selected,
         [this](const ModPlatform::Dependency& dependency, std::function<void(const ModPlatform::IndexedVersion&)> succeeded) -> Task::Ptr {
             auto args{ createDependecyArguments(dependency) };
@@ -462,14 +462,17 @@ QList<ModPlatform::IndexedVersion> ResourceModel::getDependecies(QDir& dir, QLis
                 callbacks.on_succeed = [this, dependency, succeeded](auto& doc, auto& pack) {
                     ModPlatform::IndexedVersion ver;
                     try {
-                        auto arr = dependency.version.length() != 0 && doc.isObject()
-                                       ? Json::toJsonArray(QList<QJsonObject>() << doc.object())
-                                   : doc.isObject() ? Json::ensureArray(doc.object(), "data")
-                                                    : doc.array();
+                        QJsonArray arr;
+                        if (dependency.version.length() != 0 && doc.isObject()) {
+                            arr.append(doc.object());
+                        } else {
+                            arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
+                        }
                         ver = loadDependencyVersions(dependency, arr);
                         if (!ver.addonId.isValid()) {
                             qWarning() << "Error while reading " << debugName() << " resource version empty ";
                             qDebug() << doc;
+                            return;
                         }
                     } catch (const JSONValidationError& e) {
                         qDebug() << doc;

@@ -216,7 +216,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     return {};
 }
 
-auto Modrinth::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto Modrinth::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
 

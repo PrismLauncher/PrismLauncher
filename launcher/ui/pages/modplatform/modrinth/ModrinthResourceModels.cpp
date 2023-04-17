@@ -42,7 +42,7 @@ void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJso
     ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
-auto ModrinthModModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto ModrinthModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return ::Modrinth::loadDependencyVersions(m, arr);
 };
@@ -69,7 +69,7 @@ void ModrinthResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack
     ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
-auto ModrinthResourcePackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto ModrinthResourcePackModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return ::Modrinth::loadDependencyVersions(m, arr);
 };
@@ -96,7 +96,7 @@ void ModrinthTexturePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack&
     ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
-auto ModrinthTexturePackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto ModrinthTexturePackModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return ::Modrinth::loadDependencyVersions(m, arr);
 };
@@ -123,7 +123,7 @@ void ModrinthShaderPackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& 
     ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
-auto ModrinthShaderPackModel::loadDependencyVersions(ModPlatform::Dependency m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto ModrinthShaderPackModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return ::Modrinth::loadDependencyVersions(m, arr);
 };

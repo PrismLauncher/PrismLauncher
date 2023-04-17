@@ -38,7 +38,7 @@ class LocalModGetAllTask : public Task {
     void executeTask() override;
 
    signals:
-    void getAllMod(QList<Metadata::ModStruct>);
+    void getAllMods(QList<Metadata::ModStruct>);
 
    private:
     QDir m_index_dir;
