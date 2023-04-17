@@ -28,6 +28,7 @@
 #include "minecraft/mod/ModFolderModel.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
+const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "zip" });
 
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
@@ -40,6 +41,7 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
     , summary(summary)
     , instance(instance)
     , mcInstance(dynamic_cast<const MinecraftInstance*>(instance.get()))
+    , gameRoot(instance->gameRoot())
     , output(output)
     , filter(filter)
 {}
@@ -86,18 +88,19 @@ void ModrinthPackExportTask::collectFiles()
 
 void ModrinthPackExportTask::collectHashes()
 {
-    QDir mc(instance->gameRoot());
-    for (QFileInfo file : files) {
-        QString relative = mc.relativeFilePath(file.absoluteFilePath());
+    for (const QFileInfo& file : files) {
+        const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
-        if (!(relative.endsWith(".zip") || relative.endsWith(".jar") || relative.endsWith(".litemod")))
-            continue;
-
         if (!std::any_of(PREFIXES.begin(), PREFIXES.end(),
                          [&relative](const QString& prefix) { return relative.startsWith(prefix + QDir::separator()); }))
             continue;
+        if (!std::any_of(FILE_EXTENSIONS.begin(), FILE_EXTENSIONS.end(), [&relative](const QString& extension) {
+                return relative.endsWith('.' + extension) || relative.endsWith('.' + extension + ".disabled");
+            })) {
+            continue;
+        }
 
-        QCryptographicHash hash(QCryptographicHash::Algorithm::Sha512);
+        QCryptographicHash sha512(QCryptographicHash::Algorithm::Sha512);
 
         QFile openFile(file.absoluteFilePath());
         if (!openFile.open(QFile::ReadOnly)) {
@@ -105,27 +108,27 @@ void ModrinthPackExportTask::collectHashes()
             continue;
         }
 
-        QByteArray data = openFile.readAll();
+        const QByteArray data = openFile.readAll();
         if (openFile.error() != QFileDevice::NoError) {
             qWarning() << "Could not read" << file;
             continue;
         }
-        hash.addData(data);
+        sha512.addData(data);
 
         auto allMods = mcInstance->loaderModList()->allMods();
         if (auto modIter = std::find_if(allMods.begin(), allMods.end(), [&file](Mod* mod) { return mod->fileinfo() == file; });
             modIter != allMods.end()) {
-            Mod* mod = *modIter;
+            const Mod* mod = *modIter;
             if (mod->metadata() != nullptr) {
                 QUrl& url = mod->metadata()->url;
                 // most likely some of these may be from curseforge
                 if (!url.isEmpty() && BuildConfig.MODRINTH_MRPACK_HOSTS.contains(url.host())) {
                     qDebug() << "Resolving" << relative << "from index";
 
-                    QCryptographicHash hash2(QCryptographicHash::Algorithm::Sha1);
-                    hash2.addData(data);
+                    QCryptographicHash sha1(QCryptographicHash::Algorithm::Sha1);
+                    sha1.addData(data);
 
-                    ResolvedFile file{ hash2.result().toHex(), hash.result().toHex(), url.toString(), openFile.size() };
+                    ResolvedFile file{ sha1.result().toHex(), sha512.result().toHex(), url.toString(), openFile.size() };
                     resolvedFiles[relative] = file;
 
                     // nice! we've managed to resolve based on local metadata!
@@ -136,7 +139,7 @@ void ModrinthPackExportTask::collectHashes()
         }
 
         qDebug() << "Enqueueing" << relative << "for Modrinth query";
-        pendingHashes[relative] = hash.result().toHex();
+        pendingHashes[relative] = sha512.result().toHex();
     }
 
     makeApiRequest();
@@ -166,11 +169,11 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
         while (iterator.hasNext()) {
             iterator.next();
 
-            QJsonObject obj = doc[iterator.value()].toObject();
+            const QJsonObject obj = doc[iterator.value()].toObject();
             if (obj.isEmpty())
                 continue;
 
-            QJsonArray files = obj["files"].toArray();
+            const QJsonArray files = obj["files"].toArray();
             if (auto fileIter = std::find_if(files.begin(), files.end(),
                                              [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
                 fileIter != files.end()) {
@@ -180,7 +183,7 @@ void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
                                   fileIter->toObject()["url"].toString(), fileIter->toObject()["size"].toInt() };
             }
         }
-    } catch (Json::JsonException& e) {
+    } catch (const Json::JsonException& e) {
         qWarning() << "Failed to parse versions response" << e.what();
     }
     pendingHashes.clear();
@@ -212,8 +215,7 @@ void ModrinthPackExportTask::buildZip()
         }
         indexFile.write(generateIndex());
 
-        QDir mc(instance->gameRoot());
-        size_t i = 0;
+        size_t progress = 0;
         for (const QFileInfo& file : files) {
             if (pendingAbort) {
                 QFile::remove(output);
@@ -221,15 +223,15 @@ void ModrinthPackExportTask::buildZip()
                 return;
             }
 
-            setProgress(i, files.length());
-            QString relative = mc.relativeFilePath(file.absoluteFilePath());
+            setProgress(progress, files.length());
+            const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
             if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative)) {
                 QFile::remove(output);
                 QMetaObject::invokeMethod(
                     this, [this, relative]() { emitFailed(tr("Could not read and compress %1").arg(relative)); }, Qt::QueuedConnection);
                 return;
             }
-            i++;
+            progress++;
         }
 
         zip.close();
@@ -255,14 +257,13 @@ QByteArray ModrinthPackExportTask::generateIndex()
     if (!summary.isEmpty())
         obj["summary"] = summary;
 
-    MinecraftInstance* mc = dynamic_cast<MinecraftInstance*>(instance.get());
-    if (mc) {
-        auto profile = mc->getPackProfile();
+    if (mcInstance) {
+        auto profile = mcInstance->getPackProfile();
         // collect all supported components
-        ComponentPtr minecraft = profile->getComponent("net.minecraft");
-        ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
-        ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
-        ComponentPtr forge = profile->getComponent("net.minecraftforge");
+        const ComponentPtr minecraft = profile->getComponent("net.minecraft");
+        const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
+        const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
+        const ComponentPtr forge = profile->getComponent("net.minecraftforge");
 
         // convert all available components to mrpack dependencies
         QJsonObject dependencies;

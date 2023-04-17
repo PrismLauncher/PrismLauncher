@@ -44,12 +44,14 @@ class ModrinthPackExportTask : public Task {
     };
 
     static const QStringList PREFIXES;
+    static const QStringList FILE_EXTENSIONS;
     static const QStringList ALLOWED_HOSTS;
 
     // inputs
     const QString name, version, summary;
     const InstancePtr instance;
     const MinecraftInstance* mcInstance;
+    const QDir gameRoot;
     const QString output;
     const MMCZip::FilterFunction filter;
 
