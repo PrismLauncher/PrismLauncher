@@ -45,7 +45,6 @@ class ModrinthPackExportTask : public Task {
 
     static const QStringList PREFIXES;
     static const QStringList FILE_EXTENSIONS;
-    static const QStringList ALLOWED_HOSTS;
 
     // inputs
     const QString name, version, summary;
