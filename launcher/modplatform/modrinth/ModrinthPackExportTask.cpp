@@ -56,9 +56,7 @@ void ModrinthPackExportTask::executeTask()
 bool ModrinthPackExportTask::abort()
 {
     if (task != nullptr) {
-        if (!task->abort())
-            return false;
-
+        task->abort();
         task = nullptr;
         emitAborted();
         return true;
@@ -158,7 +156,7 @@ void ModrinthPackExportTask::makeApiRequest()
     }
 }
 
-void ModrinthPackExportTask::parseApiResponse(QByteArray* response)
+void ModrinthPackExportTask::parseApiResponse(const QByteArray* response)
 {
     task = nullptr;
 
