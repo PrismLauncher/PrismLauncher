@@ -26,9 +26,9 @@ void Update::executeTask()
     m_updateTask.reset(m_parent->instance()->createUpdateTask(m_mode));
     if(m_updateTask)
     {
-        connect(m_updateTask.get(), SIGNAL(finished()), this, SLOT(updateFinished()));
-        connect(m_updateTask.get(), &Task::progress, this, &Task::setProgress);
-        connect(m_updateTask.get(), &Task::status, this, &Task::setStatus);
+        connect(m_updateTask.get(), &Task::finished, this, &Update::updateFinished);
+        connect(m_updateTask.get(), &Task::progress, this, &Update::setProgress);
+        connect(m_updateTask.get(), &Task::status, this, &Update::setStatus);
         emit progressReportingRequest();
         return;
     }

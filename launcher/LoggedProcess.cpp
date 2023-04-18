@@ -44,11 +44,11 @@ LoggedProcess::LoggedProcess(QObject *parent) : QProcess(parent)
     // QProcess has a strange interface... let's map a lot of those into a few.
     connect(this, &QProcess::readyReadStandardOutput, this, &LoggedProcess::on_stdOut);
     connect(this, &QProcess::readyReadStandardError, this, &LoggedProcess::on_stdErr);
-    connect(this, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(on_exit(int,QProcess::ExitStatus)));
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(this, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(on_error(QProcess::ProcessError)));
+    connect(this, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &LoggedProcess::on_exit);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0) // &QProcess::errorOccurred added in 5.6
+    connect(this, &QProcess::errorOccurred, this, &LoggedProcess::on_error);
 #else
-    connect(this, SIGNAL(error(QProcess::ProcessError)), this, SLOT(on_error(QProcess::ProcessError)));
+    connect(this, QOverload<QProcess::ProcessError>::of(&QProcess::error), this, &LoggedProcess::on_error);
 #endif
     connect(this, &QProcess::stateChanged, this, &LoggedProcess::on_stateChange);
 }

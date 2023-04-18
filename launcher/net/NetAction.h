@@ -61,6 +61,17 @@ class NetAction : public Task {
     virtual void downloadFinished() = 0;
     virtual void downloadReadyRead() = 0;
 
+    virtual void sslErrors(const QList<QSslError>& errors) {
+        int i = 1;
+        for (auto error : errors) {
+            qCritical() << "Network SSL Error #" << i << " : " << error.errorString();
+            auto cert = error.certificate();
+            qCritical() << "Certificate in question:\n" << cert.toText();
+            i++;
+        }
+
+    };
+
    public slots:
     void startAction(shared_qobject_ptr<QNetworkAccessManager> network)
     {

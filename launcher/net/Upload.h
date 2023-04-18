@@ -54,7 +54,7 @@ namespace Net {
     protected slots:
         void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
         void downloadError(QNetworkReply::NetworkError error) override;
-        void sslErrors(const QList<QSslError> & errors);
+        void sslErrors(const QList<QSslError> & errors) override;
         void downloadFinished() override;
         void downloadReadyRead() override;
 
