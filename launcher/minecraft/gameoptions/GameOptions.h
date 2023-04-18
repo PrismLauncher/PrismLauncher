@@ -60,7 +60,7 @@ struct GameOptionItem {
 class GameOptions : public QAbstractItemModel {
     Q_OBJECT
    public:
-    enum class Column { Key, Description, Value, DefaultValue };
+    enum class Column { Key, Description, Value };
     explicit GameOptions(const QString& path);
     virtual ~GameOptions() = default;
 
@@ -86,6 +86,6 @@ class GameOptions : public QAbstractItemModel {
     QString path;
     int version = 0;
 
-    QMap<QString, std::shared_ptr<GameOption>>* knownOptions;
-    QList<std::shared_ptr<KeyBindData>>* keybindingOptions;
+    QMap<QString, std::shared_ptr<GameOption>>* knownOptions{};
+    QList<std::shared_ptr<KeyBindData>>* keybindingOptions{};
 };

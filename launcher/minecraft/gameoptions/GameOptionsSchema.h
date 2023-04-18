@@ -21,11 +21,12 @@
 #include <QList>
 #include <QMap>
 #include <memory>
+#include <utility>
 
 enum class OptionType { String, Int, Float, Bool, KeyBind };
 
 template <class T> struct Range {
-    typename T min, max;
+    T min, max;
 };
 
 union UniversalRange {
@@ -46,10 +47,9 @@ class GameOption {
     /// @brief Bool variant
     /// @param defaultValue Default Value
     /// @param description The Description for this Option
-    /// @param readOnly wether or not this option should be editable
-    GameOption(bool defaultValue, QString description = "", bool readOnly = false)
-        : description(description)
-        , type(OptionType::Bool), readOnly(readOnly) {
+    /// @param readOnly whether or not this option should be editable
+    explicit GameOption(bool defaultValue, QString description = "", bool readOnly = false)
+        : description(std::move(description)), type(OptionType::Bool), readOnly(readOnly) {
         GameOption::defaultValue.boolValue = defaultValue;
     };
 
@@ -57,31 +57,31 @@ class GameOption {
     /// @param defaultValue Default Value
     /// @param description The Description for this Option
     /// @param validValues List of possible options for this field, if empty any input will be possible
-    /// @param readOnly wether or not this option should be editable
-    GameOption(QString defaultValue = "", QString description = "", QList<QString> validValues = QList<QString>(), bool readOnly = false)
-        : description(description), type(OptionType::String), readOnly(readOnly), defaultString(defaultValue), validValues(validValues){};
+    /// @param readOnly whether or not this option should be editable
+    explicit GameOption(QString defaultValue = "", QString description = "", QList<QString> validValues = QList<QString>(), bool readOnly = false)
+        : description(std::move(description)), type(OptionType::String), readOnly(readOnly), defaultString(std::move(defaultValue)), validValues(std::move(validValues)){};
 
     /// @brief KeyBind variant
     /// @param defaultValue Default Value
     /// @param description The Description for this Option
-    GameOption(QString defaultValue = "", QString description = "", OptionType type = OptionType::KeyBind)
-        : description(description), type(OptionType::KeyBind), defaultString(defaultValue){};
+    explicit GameOption(QString defaultValue = "", QString description = "")
+        : description(std::move(description)), type(OptionType::KeyBind), defaultString(std::move(defaultValue)){};
 
     /// @brief Float variant
     /// @param defaultValue Default Value
     /// @param description The Description for this Option
     /// @param range if left empty (0,0) no limits are assumed
-    /// @param readOnly wether or not this option should be editable
-    GameOption(float defaultValue = 0.0f, QString description = "", Range<float> range = Range<float>{ 0.0f, 0.0f }, bool readOnly = false)
-        : description(description), type(OptionType::Float), readOnly(readOnly), range{ range }, defaultValue{ defaultValue } {};
+    /// @param readOnly whether or not this option should be editable
+    explicit GameOption(float defaultValue = 0.0f, QString description = "", Range<float> range = Range<float>{ 0.0f, 0.0f }, bool readOnly = false)
+        : description(std::move(description)), type(OptionType::Float), readOnly(readOnly), range{ range }, defaultValue{ defaultValue } {};
 
     /// @brief Int variant
     /// @param defaultValue Default Value 
     /// @param description Description for this Option
     /// @param range if left empty (0,0) no limits are assumed
-    /// @param readOnly wether or not this option should be editable
-    GameOption(int defaultValue = 0, QString description = "", Range<int> range = Range<int>{ 0, 0 }, bool readOnly = false)
-        : description(description), type(OptionType::Int), readOnly(readOnly)
+    /// @param readOnly whether or not this option should be editable
+    explicit GameOption(int defaultValue = 0, QString description = "", Range<int> range = Range<int>{ 0, 0 }, bool readOnly = false)
+        : description(std::move(description)), type(OptionType::Int), readOnly(readOnly)
     {
         GameOption::range.intRange = range;
         GameOption::defaultValue.intValue = defaultValue;
@@ -94,25 +94,19 @@ class GameOption {
     //int introducedVersion;
     //int removedVersion;
 
-    int getDefaultInt() { return defaultValue.intValue; };
-    bool getDefaultBool() { return defaultValue.boolValue; };
-    float getDefaultFloat() { return defaultValue.floatValue; };
-    QString getDefaultString() { return defaultString; };
+    int getDefaultInt() const { return defaultValue.intValue; };
+    bool getDefaultBool() const { return defaultValue.boolValue; };
+    float getDefaultFloat() const { return defaultValue.floatValue; };
+    QString getDefaultString();;
 
-    Range<int> getIntRange() { return range.intRange; };
-    Range<float> getFloatRange() { return range.floatRange; };
+    Range<int> getIntRange() const { return range.intRange; };
+    Range<float> getFloatRange() const { return range.floatRange; };
 
    private:
     OptionValue defaultValue = { 0.0f };
     QString defaultString;
     UniversalRange range = { 0.0f, 0.0f };
 
-};
-
-union a {
-    QList<QString> enumValues;
-    struct BoolMarker {
-    } boolean;
 };
 
 union mouseOrKeyboardButton {
@@ -123,13 +117,13 @@ union mouseOrKeyboardButton {
 class KeyBindData {
    public:
     KeyBindData(QString minecraftKeyCode, int glfwCode, QString displayName, Qt::MouseButton mouseButton) : 
-        minecraftKeyCode(minecraftKeyCode), glfwCode(glfwCode), displayName(displayName)
+        minecraftKeyCode(std::move(minecraftKeyCode)), glfwCode(glfwCode), displayName(std::move(displayName))
     {
         qtKeyCode.mouseButton = mouseButton;
     }
 
     KeyBindData(QString minecraftKeyCode, int glfwCode, QString displayName, Qt::Key keyboardKey)
-        : minecraftKeyCode(minecraftKeyCode), glfwCode(glfwCode), displayName(displayName)
+        : minecraftKeyCode(std::move(minecraftKeyCode)), glfwCode(glfwCode), displayName(std::move(displayName))
     {
         qtKeyCode.keyboardKey = keyboardKey;
     }
@@ -154,13 +148,13 @@ class GameOptionsSchema {
     static void populateInternalOptionList();
     static void populateInternalKeyBindList();
 
-    static void addKeyboardBind(QString minecraftKeyCode, int glfwCode, QString displayName, Qt::Key keyboardKey)
+    static void addKeyboardBind(const QString& minecraftKeyCode, int glfwCode, const QString& displayName, Qt::Key keyboardKey)
     {
-        keyboardButtons.append(std::shared_ptr<KeyBindData>(new KeyBindData(minecraftKeyCode, glfwCode, displayName, keyboardKey)));
+        keyboardButtons.append(std::make_shared<KeyBindData>(minecraftKeyCode, glfwCode, displayName, keyboardKey));
     };
-    static void addMouseBind(QString minecraftKeyCode, int glfwCode, QString displayName, Qt::MouseButton mouseButton)
+    static void addMouseBind(const QString& minecraftKeyCode, int glfwCode, const QString& displayName, Qt::MouseButton mouseButton)
     {
-        keyboardButtons.append(std::shared_ptr<KeyBindData>(new KeyBindData(minecraftKeyCode, glfwCode, displayName, mouseButton)));
+        keyboardButtons.append(std::make_shared<KeyBindData>(minecraftKeyCode, glfwCode, displayName, mouseButton));
     };
 
 };
