@@ -38,6 +38,7 @@ class ResourceDownloadTask : public SequentialTask {
     const QString& getCustomPath() const { return m_pack_version.custom_target_folder; }
     const QVariant& getVersionID() const { return m_pack_version.fileId; }
     const ModPlatform::IndexedVersion& getVersion() const { return m_pack_version; }
+    const ModPlatform::IndexedPack& getPack() const { return m_pack; }
 
    private:
     ModPlatform::IndexedPack m_pack;

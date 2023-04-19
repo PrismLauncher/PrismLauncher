@@ -85,8 +85,6 @@ class ResourceModel : public QAbstractListModel {
     /** Gets the icon at the URL for the given index. If it's not fetched yet, fetch it and update when fisinhed. */
     std::optional<QIcon> getIcon(QModelIndex&, const QUrl&);
 
-    QList<ModPlatform::IndexedVersion> getDependecies(QDir& dir, QList<ModPlatform::IndexedVersion> m_selected);
-
    protected:
     /** Resets the model's data. */
     void clearData();

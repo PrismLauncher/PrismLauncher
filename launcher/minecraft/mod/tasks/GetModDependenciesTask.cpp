@@ -20,90 +20,74 @@
 #include "GetModDependenciesTask.h"
 
 #include <QDebug>
+#include <algorithm>
+#include <memory>
+#include "Json.h"
 #include "QObjectPtr.h"
 #include "minecraft/mod/MetadataHandler.h"
-#include "minecraft/mod/tasks/LocalModGetAllTask.h"
 #include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/ConcurrentTask.h"
 #include "tasks/SequentialTask.h"
+#include "ui/pages/modplatform/ModModel.h"
+#include "ui/pages/modplatform/flame/FlameResourceModels.h"
+#include "ui/pages/modplatform/modrinth/ModrinthResourceModels.h"
 
-GetModDependenciesTask::GetModDependenciesTask(QDir index_dir, QList<ModPlatform::IndexedVersion> selected, NewDependecyVersionAPITask api)
-    : m_selected(selected), m_getDependenciesVersionAPI(api)
+static Version mcVersions(BaseInstance* inst)
 {
-    m_getAllMods = makeShared<LocalModGetAllTask>(index_dir);
-    m_getNetworkDep = makeShared<SequentialTask>(this, "GetDepInfo");
-    connect(m_getNetworkDep.get(), &Task::finished, &loop, &QEventLoop::quit);
-    QObject::connect(m_getAllMods.get(), &LocalModGetAllTask::getAllMods, [this](QList<Metadata::ModStruct> mods) {
-        m_mods = mods;
-        prepareDependecies();
-    });
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion();
 }
 
-void GetModDependenciesTask::executeTask()
+static ResourceAPI::ModLoaderTypes mcLoaders(BaseInstance* inst)
 {
-    setStatus(tr("Geting all mods"));
-    m_getAllMods->start();
-    loop.exec();
-    emitSucceeded();
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoaders().value();
 }
 
-auto GetModDependenciesTask::abort() -> bool
+GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
+                                               BaseInstance* instance,
+                                               ModFolderModel* folder,
+                                               QList<std::shared_ptr<PackDependecny>> selected)
+    : SequentialTask(parent, "Get dependencies"), m_selected(selected), m_version(mcVersions(instance)), m_loaderType(mcLoaders(instance))
 {
-    emitAborted();
-    return true;
-}
-
-void GetModDependenciesTask::prepareDependecies()
-{
-    auto c_dependencies = getDependenciesForVersions(m_selected);
-    if (c_dependencies.length() == 0) {
-        m_getNetworkDep->start();
-        return;
-    }
-    for (auto dep : c_dependencies) {
-        auto task =
-            m_getDependenciesVersionAPI(dep, [this](const ModPlatform::IndexedVersion& new_version) { addDependecies(new_version, 20); });
-        m_getNetworkDep->addTask(task);
-    }
-    m_getNetworkDep->start();
-}
-
-void GetModDependenciesTask::addDependecies(const ModPlatform::IndexedVersion& new_version, int level)
-{
-    // some mutex?
-    m_dependencies.append(new_version);
-    auto c_dependencies = getDependenciesForVersion(new_version);
-    if (c_dependencies.length() == 0) {
-        return;
-    }
-    if (level == 0) {
-        qWarning() << "Dependency cycle exeeded";
-        return;
-    }
-    for (auto dep : c_dependencies) {
-        auto task = m_getDependenciesVersionAPI(
-            dep, [this, level](const ModPlatform::IndexedVersion& new_versions) { addDependecies(new_versions, level - 1); });
-        m_getNetworkDep->addTask(task);
-    }
+    m_providers.append(Provider{ ModPlatform::ResourceProvider::FLAME, std::make_shared<ResourceDownload::FlameModModel>(*instance),
+                                 std::make_shared<FlameAPI>() });
+    m_providers.append(Provider{ ModPlatform::ResourceProvider::MODRINTH, std::make_shared<ResourceDownload::ModrinthModModel>(*instance),
+                                 std::make_shared<ModrinthAPI>() });
+    for (auto mod : folder->allMods())
+        m_mods.append(mod->metadata());
+    prepare();
 };
 
-QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersions(const QList<ModPlatform::IndexedVersion>& selected)
+void GetModDependenciesTask::prepare()
+{
+    for (auto sel : m_selected) {
+        for (auto dep : getDependenciesForVersion(sel->version, sel->pack.provider)) {
+            addTask(prepareDependencyTask(dep, sel->pack.provider, 20));
+        }
+    }
+}
+
+QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion(const ModPlatform::IndexedVersion& version,
+                                                                                 const ModPlatform::ResourceProvider providerName)
 {
     auto c_dependencies = QList<ModPlatform::Dependency>();
-    for (auto version : selected) {
-        for (auto ver_dep : version.dependencies) {
-            if (ver_dep.type == ModPlatform::DependencyType::REQUIRED) {
-                if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
-                                            [&ver_dep](const auto& i) { return i.addonId == ver_dep.addonId; });
-                    dep == c_dependencies.end()) {  // check the current dependency list
-                    if (auto dep = std::find_if(selected.begin(), selected.end(),
-                                                [&ver_dep](const auto& i) { return i.addonId == ver_dep.addonId; });
-                        dep == selected.end()) {  // check the selected versions
-                        if (auto dep = std::find_if(m_mods.begin(), m_mods.end(),
-                                                    [&ver_dep](const auto& i) { return i.project_id == ver_dep.addonId; });
-                            dep == m_mods.end()) {  // check the existing mods
-                            c_dependencies.append(ver_dep);
-                        }
+    for (auto ver_dep : version.dependencies) {
+        if (ver_dep.type == ModPlatform::DependencyType::REQUIRED) {
+            if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
+                                        [&ver_dep](const ModPlatform::Dependency& i) { return i.addonId == ver_dep.addonId; });
+                dep == c_dependencies.end()) {  // check the current dependency list
+                if (auto dep = std::find_if(m_selected.begin(), m_selected.end(),
+                                            [&ver_dep, providerName](std::shared_ptr<PackDependecny> i) {
+                                                return i->pack.addonId == ver_dep.addonId && i->pack.provider == providerName;
+                                            });
+                    dep == m_selected.end()) {  // check the selected versions
+                    if (auto dep = std::find_if(m_mods.begin(), m_mods.end(),
+                                                [&ver_dep, providerName](std::shared_ptr<Metadata::ModStruct> i) {
+                                                    return i->project_id == ver_dep.addonId && i->provider == providerName;
+                                                });
+                        dep == m_mods.end()) {  // check the existing mods
+                        c_dependencies.append(ver_dep);
                     }
                 }
             }
@@ -112,21 +96,80 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
     return c_dependencies;
 };
 
-QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion(const ModPlatform::IndexedVersion& version)
+Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Dependency& dep,
+                                                        const ModPlatform::ResourceProvider providerName,
+                                                        int level)
 {
-    auto c_dependencies = QList<ModPlatform::Dependency>();
-    for (auto ver_dep : version.dependencies) {
-        if (ver_dep.type == ModPlatform::DependencyType::REQUIRED) {
-            if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
-                                        [&ver_dep](const auto& i) { return i.addonId == ver_dep.addonId; });
-                dep == c_dependencies.end()) {  // check the current dependency list
-                if (auto dep =
-                        std::find_if(m_mods.begin(), m_mods.end(), [&ver_dep](const auto& i) { return i.project_id == ver_dep.addonId; });
-                    dep == m_mods.end()) {  // check the existing mods
-                    c_dependencies.append(ver_dep);
-                }
-            }
+    auto pDep = std::make_shared<PackDependecny>();
+    pDep->dependency = dep;
+    pDep->pack = { dep.addonId, providerName };
+    m_pack_dependencies.append(pDep);
+    auto provider =
+        std::find_if(m_providers.begin(), m_providers.end(), [providerName](const Provider& p) { return p.name == providerName; });
+    // if (provider == m_providers.end()) {
+    //     qWarning() << "Unsuported provider for dependency check";
+    //     return nullptr;
+    // }
+
+    auto tasks = makeShared<SequentialTask>(this, QString("DependencyInfo: %1").arg(dep.addonId.toString()));
+
+    auto responseInfo = new QByteArray();
+    auto info = provider->api->getProject(dep.addonId.toString(), responseInfo);
+    QObject::connect(info.get(), &NetJob::succeeded, [responseInfo, provider, pDep] {
+        QJsonParseError parse_error{};
+        QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
+            qWarning() << *responseInfo;
+            return;
         }
-    }
-    return c_dependencies;
+        try {
+            auto obj = provider->name == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
+                                                                              : Json::requireObject(doc);
+            provider->mod->loadIndexedPack(pDep->pack, obj);
+        } catch (const JSONValidationError& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading mod info: " << e.cause();
+        }
+    });
+    tasks->addTask(info);
+
+    ResourceAPI::DependencySearchArgs args = { dep, m_version, m_loaderType };
+    ResourceAPI::DependencySearchCallbacks callbacks;
+
+    callbacks.on_succeed = [dep, provider, pDep, level, this](auto& doc, auto& pack) {
+        try {
+            QJsonArray arr;
+            if (dep.version.length() != 0 && doc.isObject()) {
+                arr.append(doc.object());
+            } else {
+                arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
+            }
+            pDep->version = provider->mod->loadDependencyVersions(dep, arr);
+            if (!pDep->version.addonId.isValid()) {
+                qWarning() << "Error while reading mod version empty ";
+                qDebug() << doc;
+                return;
+            }
+            pDep->version.is_currently_selected = true;
+            pDep->pack.versions = { pDep->version };
+            pDep->pack.versionsLoaded = true;
+        } catch (const JSONValidationError& e) {
+            qDebug() << doc;
+            qWarning() << "Error while reading mod version: " << e.cause();
+            return;
+        }
+        if (level == 0) {
+            qWarning() << "Dependency cycle exeeded";
+            return;
+        }
+        for (auto dep : getDependenciesForVersion(pDep->version, provider->name)) {
+            addTask(prepareDependencyTask(dep, provider->name, level - 1));
+        }
+    };
+
+    auto version = provider->api->getDependencyVersion(std::move(args), std::move(callbacks));
+    tasks->addTask(version);
+    return tasks;
 };

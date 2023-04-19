@@ -75,8 +75,6 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
     virtual void removeResourceFromDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
 
-    QList<ModPlatform::IndexedVersion> getDependecies(QDir& dir, QList<ModPlatform::IndexedVersion> m_selected);
-
    protected slots:
     virtual void triggerSearch() {}
 

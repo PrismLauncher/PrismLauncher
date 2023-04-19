@@ -449,46 +449,4 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
     emit projectInfoUpdated();
 }
 
-QList<ModPlatform::IndexedVersion> ResourceModel::getDependecies(QDir& dir, QList<ModPlatform::IndexedVersion> selected)
-{
-    auto task = std::make_unique<GetModDependenciesTask>(
-        dir, selected,
-        [this](const ModPlatform::Dependency& dependency, std::function<void(const ModPlatform::IndexedVersion&)> succeeded) -> Task::Ptr {
-            auto args{ createDependecyArguments(dependency) };
-            auto callbacks{ createDependecyCallbacks() };
-
-            // Use default if no callbacks are set
-            if (!callbacks.on_succeed)
-                callbacks.on_succeed = [this, dependency, succeeded](auto& doc, auto& pack) {
-                    ModPlatform::IndexedVersion ver;
-                    try {
-                        QJsonArray arr;
-                        if (dependency.version.length() != 0 && doc.isObject()) {
-                            arr.append(doc.object());
-                        } else {
-                            arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
-                        }
-                        ver = loadDependencyVersions(dependency, arr);
-                        if (!ver.addonId.isValid()) {
-                            qWarning() << "Error while reading " << debugName() << " resource version empty ";
-                            qDebug() << doc;
-                            return;
-                        }
-                    } catch (const JSONValidationError& e) {
-                        qDebug() << doc;
-                        qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
-                        return;
-                    }
-
-                    succeeded(ver);
-                };
-
-            return m_api->getDependencyVersion(std::move(args), std::move(callbacks));
-        });
-
-    task->start();
-
-    return task->getDependecies();
-};
-
 }  // namespace ResourceDownload

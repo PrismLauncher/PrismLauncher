@@ -23,8 +23,10 @@
 
 #include <QPushButton>
 #include <algorithm>
+#include <memory>
 
 #include "Application.h"
+#include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
@@ -32,7 +34,10 @@
 #include "minecraft/mod/ShaderPackFolderModel.h"
 #include "minecraft/mod/TexturePackFolderModel.h"
 
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ReviewMessageBox.h"
 
 #include "ui/pages/modplatform/ResourcePage.h"
@@ -122,30 +127,38 @@ void ResourceDownloadDialog::connectButtons()
 
 void ResourceDownloadDialog::confirm()
 {
-    auto keys = m_selected.keys();
-    keys.sort(Qt::CaseInsensitive);
-
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
     confirm_dialog->retranslateUi(resourcesString());
 
-    if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
-        QList<ModPlatform::IndexedVersion> selectedVers;
-        for (auto& task : keys) {
-            auto selected = m_selected.constFind(task).value();
-            selectedVers.append(selected->getVersion());
-        }
+    if (auto task = getModDependenciesTask(); task) {
+        connect(task.get(), &Task::failed, this,
+                [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
-        auto dir = model->indexDir();
-        auto dependencies = m_selectedPage->getDependecies(dir, selectedVers);
+        connect(task.get(), &Task::succeeded, this, [&]() {
+            QStringList warnings = task->warnings();
+            if (warnings.count()) {
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+            }
+        });
 
-        for (auto dep : dependencies) {
-            dep.is_currently_selected = true;
-            auto pack = ModPlatform::IndexedPack{ dep.addonId, ModPlatform::ResourceProvider::FLAME, dep.fileName, dep.fileName };
-            m_selected.insert(dep.fileName, makeShared<ResourceDownloadTask>(pack, dep, getBaseModel(), true));
-        }
+        // Check for updates
+        ProgressDialog progress_dialog(this);
+        progress_dialog.setSkipButton(true, tr("Abort"));
+        progress_dialog.setWindowTitle(tr("Checking for dependencies..."));
+        auto ret = progress_dialog.execWithTask(task.get());
 
-        keys = m_selected.keys();
+        // If the dialog was skipped / some download error happened
+        if (ret == QDialog::DialogCode::Rejected) {
+            QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
+            return;
+        } else
+            for (auto dep : task->getDependecies()) {
+                addResource(dep->pack, dep->version, true);
+            }
     }
+
+    auto keys = m_selected.keys();
+    keys.sort(Qt::CaseInsensitive);
     for (auto& task : keys) {
         auto selected = m_selected.constFind(task).value();
         confirm_dialog->appendResource({ task, selected->getFilename(), selected->getCustomPath() });
@@ -173,6 +186,7 @@ ResourcePage* ResourceDownloadDialog::getSelectedPage()
 
 void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, bool is_indexed)
 {
+    qWarning() << "DebugName: " << pack.name;
     removeResource(pack, ver);
 
     ver.is_currently_selected = true;
@@ -255,6 +269,21 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
     return pages;
 }
+
+GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
+{
+    if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
+        auto keys = m_selected.keys();
+        QList<std::shared_ptr<GetModDependenciesTask::PackDependecny>> selectedVers;
+        for (auto& task : keys) {
+            auto selected = m_selected.constFind(task).value();
+            selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependecny>(selected->getPack(), selected->getVersion()));
+        }
+
+        return makeShared<GetModDependenciesTask>(this, m_instance, model, selectedVers);
+    }
+    return nullptr;
+};
 
 ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
                                                        const std::shared_ptr<ResourcePackFolderModel>& resource_packs,
