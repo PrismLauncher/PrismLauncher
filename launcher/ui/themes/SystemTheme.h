@@ -40,7 +40,7 @@ class SystemTheme : public ITheme {
    public:
     SystemTheme();
     virtual ~SystemTheme() {}
-    void apply() override;
+    void apply(bool initial) override;
 
     QString id() override;
     QString name() override;
