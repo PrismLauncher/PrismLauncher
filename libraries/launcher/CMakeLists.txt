@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.9.4)
 project(launcher Java)
-find_package(Java 1.7 REQUIRED COMPONENTS Development)
+find_package(Java 1.8 REQUIRED COMPONENTS Development)
 
 include(UseJava)
 set(CMAKE_JAVA_JAR_ENTRY_POINT org.prismlauncher.EntryPoint)
-set(CMAKE_JAVA_COMPILE_FLAGS -target 7 -source 7)
+set(CMAKE_JAVA_COMPILE_FLAGS -target 8 -source 8)
 
 set(SRC
     org/prismlauncher/EntryPoint.java
