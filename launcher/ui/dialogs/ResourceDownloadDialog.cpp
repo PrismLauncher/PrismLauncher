@@ -185,7 +185,6 @@ ResourcePage* ResourceDownloadDialog::getSelectedPage()
 
 void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, bool is_indexed)
 {
-    qWarning() << "DebugName: " << pack.name;
     removeResource(pack, ver);
 
     ver.is_currently_selected = true;

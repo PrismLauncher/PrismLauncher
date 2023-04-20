@@ -4,14 +4,12 @@
 
 #pragma once
 
-#include <QDir>
 #include <optional>
 
 #include <QAbstractListModel>
 
 #include "QObjectPtr.h"
 
-#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "tasks/ConcurrentTask.h"
