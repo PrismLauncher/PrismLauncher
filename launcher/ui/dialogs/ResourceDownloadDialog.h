@@ -27,7 +27,6 @@
 #include "QObjectPtr.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
-#include "tasks/Task.h"
 #include "ui/pages/BasePageProvider.h"
 
 class BaseInstance;

@@ -57,11 +57,6 @@ void FlameResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m
     FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
 }
 
-auto FlameResourcePackModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
-{
-    return FlameMod::loadDependencyVersions(m, arr);
-};
-
 auto FlameResourcePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return Json::ensureArray(obj.object(), "data");
@@ -97,11 +92,6 @@ void FlameTexturePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m,
 
     m.versions = filtered_versions;
 }
-
-auto FlameTexturePackModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
-{
-    return FlameMod::loadDependencyVersions(m, arr);
-};
 
 ResourceAPI::SearchArgs FlameTexturePackModel::createSearchArguments()
 {

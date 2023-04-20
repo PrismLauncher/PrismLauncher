@@ -324,11 +324,6 @@ void ResourceModel::loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArra
 {
     NEED_FOR_CALLBACK_ASSERT("loadIndexedPackVersions");
 }
-ModPlatform::IndexedVersion ResourceModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr)
-{
-    NEED_FOR_CALLBACK_ASSERT("loadDependencyVersions");
-    return {};
-}
 
 /* Default callbacks */
 

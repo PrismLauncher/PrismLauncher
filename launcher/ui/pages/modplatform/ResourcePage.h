@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <QDir>
 #include <QTimer>
 #include <QWidget>
 
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/BasePage.h"
 #include "ui/widgets/ProgressWidget.h"
@@ -77,7 +77,7 @@ class ResourcePage : public QWidget, public BasePage {
 
    protected slots:
     virtual void triggerSearch() {}
-
+   
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
     void onResourceSelected();

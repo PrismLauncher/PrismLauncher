@@ -32,7 +32,7 @@ class ModModel : public ResourceModel {
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override = 0;
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override = 0;
     void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override = 0;
-    ModPlatform::IndexedVersion loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) override = 0;
+    virtual ModPlatform::IndexedVersion loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) = 0;
 
     void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = filter; }
 
@@ -40,7 +40,6 @@ class ModModel : public ResourceModel {
     ResourceAPI::SearchArgs createSearchArguments() override;
     ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override;
     ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) override;
-    ResourceAPI::DependencySearchArgs createDependecyArguments(const ModPlatform::Dependency&) override;
 
    protected:
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override = 0;

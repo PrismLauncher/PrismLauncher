@@ -21,8 +21,6 @@
 #include <QDebug>
 #include <QDir>
 #include <QObject>
-#include <algorithm>
-#include <iterator>
 
 #include "FileSystem.h"
 #include "StringUtils.h"
@@ -311,15 +309,6 @@ auto V1::getIndexForMod(QDir& index_dir, QVariant& mod_id) -> Mod
     }
 
     return {};
-}
-
-auto V1::getAllMods(QDir& index_dir) -> QList<Mod>
-{
-    auto files = index_dir.entryList(QDir::Filter::Files);
-    auto mods = QList<Mod>();
-    std::transform(files.begin(), files.end(), std::back_inserter(mods),
-                   [&index_dir](auto file_name) { return getIndexForMod(index_dir, file_name); });
-    return mods;
 }
 
 }  // namespace Packwiz

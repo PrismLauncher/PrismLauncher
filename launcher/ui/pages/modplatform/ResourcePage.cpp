@@ -43,6 +43,9 @@
 #include <QKeyEvent>
 
 #include "Markdown.h"
+#include "ResourceDownloadTask.h"
+
+#include "minecraft/MinecraftInstance.h"
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/pages/modplatform/ResourceModel.h"

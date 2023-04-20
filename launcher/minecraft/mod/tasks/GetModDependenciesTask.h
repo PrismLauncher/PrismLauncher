@@ -18,11 +18,10 @@
 
 #pragma once
 
-#include <qlist.h>
-#include <qvariant.h>
 #include <QDir>
 #include <QEventLoop>
 #include <QList>
+#include <QVariant>
 #include <functional>
 #include <memory>
 
@@ -74,7 +73,8 @@ class GetModDependenciesTask : public SequentialTask {
     QList<std::shared_ptr<PackDependecny>> m_pack_dependencies;
     QList<std::shared_ptr<Metadata::ModStruct>> m_mods;
     QList<std::shared_ptr<PackDependecny>> m_selected;
-    QList<Provider> m_providers;
+    Provider m_flame_provider;
+    Provider m_modrinth_provider;
 
     Version m_version;
     ResourceAPI::ModLoaderTypes m_loaderType;

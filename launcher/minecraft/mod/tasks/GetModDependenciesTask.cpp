@@ -48,12 +48,15 @@ GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
                                                BaseInstance* instance,
                                                ModFolderModel* folder,
                                                QList<std::shared_ptr<PackDependecny>> selected)
-    : SequentialTask(parent, "Get dependencies"), m_selected(selected), m_version(mcVersions(instance)), m_loaderType(mcLoaders(instance))
+    : SequentialTask(parent, "Get dependencies")
+    , m_selected(selected)
+    , m_flame_provider{ ModPlatform::ResourceProvider::FLAME, std::make_shared<ResourceDownload::FlameModModel>(*instance),
+                        std::make_shared<FlameAPI>() }
+    , m_modrinth_provider{ ModPlatform::ResourceProvider::MODRINTH, std::make_shared<ResourceDownload::ModrinthModModel>(*instance),
+                           std::make_shared<ModrinthAPI>() }
+    , m_version(mcVersions(instance))
+    , m_loaderType(mcLoaders(instance))
 {
-    m_providers.append(Provider{ ModPlatform::ResourceProvider::FLAME, std::make_shared<ResourceDownload::FlameModModel>(*instance),
-                                 std::make_shared<FlameAPI>() });
-    m_providers.append(Provider{ ModPlatform::ResourceProvider::MODRINTH, std::make_shared<ResourceDownload::ModrinthModModel>(*instance),
-                                 std::make_shared<ModrinthAPI>() });
     for (auto mod : folder->allMods())
         m_mods.append(mod->metadata());
     prepare();
@@ -104,17 +107,12 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     pDep->dependency = dep;
     pDep->pack = { dep.addonId, providerName };
     m_pack_dependencies.append(pDep);
-    auto provider =
-        std::find_if(m_providers.begin(), m_providers.end(), [providerName](const Provider& p) { return p.name == providerName; });
-    // if (provider == m_providers.end()) {
-    //     qWarning() << "Unsuported provider for dependency check";
-    //     return nullptr;
-    // }
+    auto provider = providerName == m_flame_provider.name ? m_flame_provider : m_modrinth_provider;
 
     auto tasks = makeShared<SequentialTask>(this, QString("DependencyInfo: %1").arg(dep.addonId.toString()));
 
     auto responseInfo = new QByteArray();
-    auto info = provider->api->getProject(dep.addonId.toString(), responseInfo);
+    auto info = provider.api->getProject(dep.addonId.toString(), responseInfo);
     QObject::connect(info.get(), &NetJob::succeeded, [responseInfo, provider, pDep] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
@@ -125,9 +123,9 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             return;
         }
         try {
-            auto obj = provider->name == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
-                                                                              : Json::requireObject(doc);
-            provider->mod->loadIndexedPack(pDep->pack, obj);
+            auto obj = provider.name == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
+                                                                             : Json::requireObject(doc);
+            provider.mod->loadIndexedPack(pDep->pack, obj);
         } catch (const JSONValidationError& e) {
             qDebug() << doc;
             qWarning() << "Error while reading mod info: " << e.cause();
@@ -146,7 +144,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             } else {
                 arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
             }
-            pDep->version = provider->mod->loadDependencyVersions(dep, arr);
+            pDep->version = provider.mod->loadDependencyVersions(dep, arr);
             if (!pDep->version.addonId.isValid()) {
                 qWarning() << "Error while reading mod version empty ";
                 qDebug() << doc;
@@ -164,12 +162,12 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             qWarning() << "Dependency cycle exeeded";
             return;
         }
-        for (auto dep : getDependenciesForVersion(pDep->version, provider->name)) {
-            addTask(prepareDependencyTask(dep, provider->name, level - 1));
+        for (auto dep : getDependenciesForVersion(pDep->version, provider.name)) {
+            addTask(prepareDependencyTask(dep, provider.name, level - 1));
         }
     };
 
-    auto version = provider->api->getDependencyVersion(std::move(args), std::move(callbacks));
+    auto version = provider.api->getDependencyVersion(std::move(args), std::move(callbacks));
     tasks->addTask(version);
     return tasks;
 };

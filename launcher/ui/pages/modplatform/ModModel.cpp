@@ -24,7 +24,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
     std::optional<std::list<Version>> versions{};
 
-    {  // Version filter
+    { // Version filter
         if (!m_filter->versions.empty())
             versions = m_filter->versions;
     }
@@ -48,20 +48,6 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& en
 
     return { pack, versions, profile->getModLoaders() };
 }
-
-ResourceAPI::DependencySearchArgs ModModel::createDependecyArguments(const ModPlatform::Dependency& dep)
-{
-    auto profile = static_cast<MinecraftInstance const&>(m_base_instance).getPackProfile();
-
-    Q_ASSERT(profile);
-    Q_ASSERT(m_filter);
-
-    std::optional<std::list<Version>> versions{};
-    if (!m_filter->versions.empty())
-        versions = m_filter->versions;
-
-    return { dep, versions->front(), profile->getModLoaders().value() };
-};
 
 ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(QModelIndex& entry)
 {

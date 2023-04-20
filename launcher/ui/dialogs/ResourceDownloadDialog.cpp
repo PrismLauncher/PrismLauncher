@@ -26,7 +26,6 @@
 #include <memory>
 
 #include "Application.h"
-#include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
