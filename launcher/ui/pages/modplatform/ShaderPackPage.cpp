@@ -13,8 +13,7 @@
 
 namespace ResourceDownload {
 
-ShaderPackResourcePage::ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
-    : ResourcePage(dialog, instance)
+ShaderPackResourcePage::ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
 {
     connect(m_ui->searchButton, &QPushButton::clicked, this, &ShaderPackResourcePage::triggerSearch);
     connect(m_ui->packView, &QListView::doubleClicked, this, &ShaderPackResourcePage::onResourceSelected);
@@ -38,7 +37,8 @@ QMap<QString, QString> ShaderPackResourcePage::urlHandlers() const
 {
     QMap<QString, QString> map;
     map.insert(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/shaders\\/([^\\/]+)\\/?"), "modrinth");
-    map.insert(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/customization\\/([^\\/]+)\\/?"), "curseforge");
+    map.insert(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/customization\\/([^\\/]+)\\/?"),
+               "curseforge");
     map.insert(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"), "curseforge");
     return map;
 }
@@ -47,7 +47,7 @@ void ShaderPackResourcePage::addResourceToDialog(ModPlatform::IndexedPack& pack,
 {
     if (version.loaders.contains(QStringLiteral("canvas")))
         version.custom_target_folder = QStringLiteral("resourcepacks");
-
+    m_model->addPack(pack);
     m_parent_dialog->addResource(pack, version);
 }
 

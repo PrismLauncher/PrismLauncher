@@ -3,12 +3,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ResourceModel.h"
+#include <qlist.h>
 
 #include <QCryptographicHash>
 #include <QIcon>
 #include <QMessageBox>
 #include <QPixmapCache>
 #include <QUrl>
+#include <algorithm>
 
 #include "Application.h"
 #include "BuildConfig.h"
@@ -335,6 +337,14 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
         ModPlatform::IndexedPack pack;
         try {
             loadIndexedPack(pack, packObj);
+            if (auto sel =
+                    std::find_if(m_selected.begin(), m_selected.end(),
+                                 [&pack](ModPlatform::IndexedPack& i) { return i.provider == pack.provider && i.addonId == pack.addonId; });
+                sel != m_selected.end()) {
+                pack.versionsLoaded = sel->versionsLoaded;
+                pack.versions = sel->versions;
+                pack.loadedFileId = sel->loadedFileId;
+            }
             newList.append(pack);
         } catch (const JSONValidationError& e) {
             qWarning() << "Error while loading resource from " << debugName() << ": " << e.cause();
@@ -398,6 +408,11 @@ void ResourceModel::versionRequestSucceeded(QJsonDocument& doc, ModPlatform::Ind
     try {
         auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
         loadIndexedPackVersions(current_pack, arr);
+        if (current_pack.loadedFileId.isValid())
+            if (auto ver = std::find_if(current_pack.versions.begin(), current_pack.versions.end(),
+                                        [&current_pack](ModPlatform::IndexedVersion v) { return v.fileId == current_pack.loadedFileId; });
+                ver != current_pack.versions.end())
+                ver->is_currently_selected = true;
     } catch (const JSONValidationError& e) {
         qDebug() << doc;
         qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
@@ -439,6 +454,21 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
     }
 
     emit projectInfoUpdated();
+}
+
+void ResourceModel::removePack(QString& rem)
+{
+    m_selected.removeIf([&rem](ModPlatform::IndexedPack i) { return rem == i.name; });
+    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](ModPlatform::IndexedPack i) { return rem == i.name; });
+    if (pack == m_packs.end()) {  // ignore it if is not in the current search
+        return;
+    }
+    if (!pack->versionsLoaded) {
+        pack->loadedFileId = {};
+        return;
+    }
+    for (auto& ver : pack->versions)
+        ver.is_currently_selected = false;
 }
 
 }  // namespace ResourceDownload
