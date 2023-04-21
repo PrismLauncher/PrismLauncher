@@ -20,7 +20,6 @@ ModModel::ModModel(BaseInstance const& base_inst, ResourceAPI* api) : ResourceMo
         auto meta = mod->metadata();
         ModPlatform::IndexedPack pack{ meta->project_id, meta->provider, meta->name, meta->slug };
         pack.loadedFileId = meta->file_id;
-        qWarning() << pack.loadedFileId;
         addPack(pack);
     }
 }

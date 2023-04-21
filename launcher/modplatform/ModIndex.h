@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <qvariant.h>
 #include <QList>
 #include <QMetaType>
 #include <QString>
