@@ -123,13 +123,13 @@ Task::Ptr NetworkResourceAPI::getProject(QString addonId, QByteArray* response) 
 
 Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, DependencySearchCallbacks&& callbacks) const
 {
-    auto versions_url_optional = getDependecyURL(args);
+    auto versions_url_optional = getDependencyURL(args);
     if (!versions_url_optional.has_value())
         return nullptr;
 
     auto versions_url = versions_url_optional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::Dependecy").arg(args.dependency.addonId.toString()), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
     auto response = new QByteArray();
 
     netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));

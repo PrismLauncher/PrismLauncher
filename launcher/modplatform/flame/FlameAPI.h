@@ -85,7 +85,7 @@ class FlameAPI : public NetworkResourceAPI {
         return url + get_parameters.join('&');
     };
 
-    [[nodiscard]] std::optional<QString> getDependecyURL(DependencySearchArgs const& args) const override
+    [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
     {
         return QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&gameVersion=%2&modLoaderType=%")
             .arg(args.dependency.addonId.toString())

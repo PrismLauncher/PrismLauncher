@@ -20,5 +20,5 @@ class NetworkResourceAPI : public ResourceAPI {
     [[nodiscard]] virtual auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> = 0;
     [[nodiscard]] virtual auto getInfoURL(QString const& id) const -> std::optional<QString> = 0;
     [[nodiscard]] virtual auto getVersionsURL(VersionSearchArgs const& args) const -> std::optional<QString> = 0;
-    [[nodiscard]] virtual auto getDependecyURL(DependencySearchArgs const& args) const -> std::optional<QString> = 0;
+    [[nodiscard]] virtual auto getDependencyURL(DependencySearchArgs const& args) const -> std::optional<QString> = 0;
 };

@@ -143,7 +143,7 @@ class ModrinthAPI : public NetworkResourceAPI {
 
     inline auto validateModLoaders(ModLoaderTypes loaders) const -> bool { return loaders & (Forge | Fabric | Quilt); }
 
-    [[nodiscard]] std::optional<QString> getDependecyURL(DependencySearchArgs const& args) const override
+    [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
     {
         return args.dependency.version.length() != 0 ? QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.dependency.version)
                                                      : QString("%1/project/%2/version?game_versions=[\"%1\"]&loaders=[\"%1\"]")
