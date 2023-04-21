@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-*  PolyMC - Minecraft Launcher
-*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
-*
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, version 3.
-*
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #pragma once
 
@@ -104,6 +104,7 @@ struct IndexedPack {
 
     bool versionsLoaded = false;
     QVector<IndexedVersion> versions;
+    QVariant loadedFileId;  // to check for already downloaded mods
 
     // Don't load by default, since some modplatform don't have that info
     bool extraDataLoaded = true;
@@ -119,11 +120,12 @@ struct IndexedPack {
     }
     [[nodiscard]] bool isAnyVersionSelected() const
     {
+        if (loadedFileId.isValid())
+            return true;
         if (!versionsLoaded)
             return false;
 
-        return std::any_of(versions.constBegin(), versions.constEnd(),
-                [](auto const& v) { return v.is_currently_selected; });
+        return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }
 };
 

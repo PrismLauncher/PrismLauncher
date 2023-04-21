@@ -196,25 +196,10 @@ void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlat
     m_buttons.button(QDialogButtonBox::Ok)->setEnabled(!m_selected.isEmpty());
 }
 
-static ModPlatform::IndexedVersion& getVersionWithID(ModPlatform::IndexedPack& pack, QVariant id)
-{
-    Q_ASSERT(pack.versionsLoaded);
-    auto it = std::find_if(pack.versions.begin(), pack.versions.end(), [id](auto const& v) { return v.fileId == id; });
-    Q_ASSERT(it != pack.versions.end());
-    return *it;
-}
-
 void ResourceDownloadDialog::removeResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver)
 {
-    if (auto selected_task_it = m_selected.find(pack.name); selected_task_it != m_selected.end()) {
-        auto selected_task = *selected_task_it;
-        auto old_version_id = selected_task->getVersionID();
-        if (selected_task->getProvider() != pack.provider)  // If the pack name matches but they are different providers search for the
-                                                            // old one(in the actual pack) and deselect it.
-            getVersionWithID(selected_task->getPack(), old_version_id).is_currently_selected = false;
-        else if (ver.fileId != old_version_id)  // If the new and old version IDs don't match, search for the old one and deselect it.
-            getVersionWithID(pack, old_version_id).is_currently_selected = false;
-    }
+    dynamic_cast<ResourcePage*>(m_container->getPage(Modrinth::id()))->removeResourceFromPage(pack.name);
+    dynamic_cast<ResourcePage*>(m_container->getPage(Flame::id()))->removeResourceFromPage(pack.name);
 
     // Deselect the new version too, since all versions of that pack got removed.
     ver.is_currently_selected = false;

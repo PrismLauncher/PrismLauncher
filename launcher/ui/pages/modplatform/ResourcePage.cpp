@@ -308,12 +308,18 @@ void ResourcePage::onVersionSelectionChanged(QString data)
 
 void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
 {
+    m_model->addPack(pack);
     m_parent_dialog->addResource(pack, version);
 }
 
 void ResourcePage::removeResourceFromDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
 {
     m_parent_dialog->removeResource(pack, version);
+}
+
+void ResourcePage::removeResourceFromPage(QString& name)
+{
+    m_model->removePack(name);
 }
 
 void ResourcePage::onResourceSelected()

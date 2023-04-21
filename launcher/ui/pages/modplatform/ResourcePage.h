@@ -74,10 +74,11 @@ class ResourcePage : public QWidget, public BasePage {
 
     virtual void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
     virtual void removeResourceFromDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
+    virtual void removeResourceFromPage(QString& name);
 
    protected slots:
     virtual void triggerSearch() {}
-   
+
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
     void onResourceSelected();

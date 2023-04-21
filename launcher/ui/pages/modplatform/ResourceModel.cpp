@@ -6,9 +6,11 @@
 
 #include <QCryptographicHash>
 #include <QIcon>
+#include <QList>
 #include <QMessageBox>
 #include <QPixmapCache>
 #include <QUrl>
+#include <algorithm>
 
 #include "Application.h"
 #include "BuildConfig.h"
@@ -335,6 +337,14 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
         ModPlatform::IndexedPack pack;
         try {
             loadIndexedPack(pack, packObj);
+            if (auto sel =
+                    std::find_if(m_selected.begin(), m_selected.end(),
+                                 [&pack](ModPlatform::IndexedPack& i) { return i.provider == pack.provider && i.addonId == pack.addonId; });
+                sel != m_selected.end()) {
+                pack.versionsLoaded = sel->versionsLoaded;
+                pack.versions = sel->versions;
+                pack.loadedFileId = sel->loadedFileId;
+            }
             newList.append(pack);
         } catch (const JSONValidationError& e) {
             qWarning() << "Error while loading resource from " << debugName() << ": " << e.cause();
@@ -398,6 +408,11 @@ void ResourceModel::versionRequestSucceeded(QJsonDocument& doc, ModPlatform::Ind
     try {
         auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
         loadIndexedPackVersions(current_pack, arr);
+        if (current_pack.loadedFileId.isValid())
+            if (auto ver = std::find_if(current_pack.versions.begin(), current_pack.versions.end(),
+                                        [&current_pack](ModPlatform::IndexedVersion v) { return v.fileId == current_pack.loadedFileId; });
+                ver != current_pack.versions.end())
+                ver->is_currently_selected = true;
     } catch (const JSONValidationError& e) {
         qDebug() << doc;
         qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
@@ -439,6 +454,53 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
     }
 
     emit projectInfoUpdated();
+}
+
+void ResourceModel::removePack(QString& rem)
+{
+    auto pred = [&rem](ModPlatform::IndexedPack i) { return rem == i.name; };
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
+    m_selected.removeIf(pred);
+#else
+    {  // well partial implementation of remove_if in case the QT Version is not high enough
+        const auto cbegin = m_selected.cbegin();
+        const auto cend = m_selected.cend();
+        const auto t_it = std::find_if(cbegin, cend, pred);
+        auto result = std::distance(cbegin, t_it);
+        if (result != m_selected.size()) {
+            // now detach:
+            const auto e = m_selected.end();
+
+            auto it = std::next(m_selected.begin(), result);
+            auto dest = it;
+
+            // Loop Invariants:
+            // - it != e
+            // - [next(it), e[ still to be checked
+            // - [c.begin(), dest[ are result
+            while (++it != e) {
+                if (!pred(*it)) {
+                    *dest = std::move(*it);
+                    ++dest;
+                }
+            }
+
+            result = std::distance(dest, e);
+            m_selected.erase(dest, e);
+        }
+    }
+#endif
+    // m_selected.removeAt(qsizetype i)
+    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](ModPlatform::IndexedPack i) { return rem == i.name; });
+    if (pack == m_packs.end()) {  // ignore it if is not in the current search
+        return;
+    }
+    if (!pack->versionsLoaded) {
+        pack->loadedFileId = {};
+        return;
+    }
+    for (auto& ver : pack->versions)
+        ver.is_currently_selected = false;
 }
 
 }  // namespace ResourceDownload
