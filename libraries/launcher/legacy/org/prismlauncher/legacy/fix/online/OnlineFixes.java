@@ -58,7 +58,7 @@ public final class OnlineFixes implements URLStreamHandlerFactory {
 
         if (!UrlUtils.isSupported() || !Base64.isSupported()) {
             Log.warning("Cannot access the necessary Java internals for skin fix");
-            Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
+            Log.warning("Turning off online fixes in the settings will silence the warnings");
             return;
         }
 
@@ -66,7 +66,7 @@ public final class OnlineFixes implements URLStreamHandlerFactory {
             URL.setURLStreamHandlerFactory(new OnlineFixes());
         } catch (Error e) {
             Log.warning("Cannot apply skin fix: URLStreamHandlerFactory is already set");
-            Log.warning("Turning off legacy skin fix in Settings > Miscellaneous will silence the warnings");
+            Log.warning("Turning off online fixes in the settings will silence the warnings");
         }
     }
 
