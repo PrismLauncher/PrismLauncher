@@ -26,8 +26,8 @@
 
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourcePackFolderModel.h"
-#include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 
 #include "ui/dialogs/ReviewMessageBox.h"
 
@@ -41,7 +41,10 @@
 namespace ResourceDownload {
 
 ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, const std::shared_ptr<ResourceFolderModel> base_model)
-    : QDialog(parent), m_base_model(base_model), m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel), m_vertical_layout(this)
+    : QDialog(parent)
+    , m_base_model(base_model)
+    , m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel)
+    , m_vertical_layout(this)
 {
     setObjectName(QStringLiteral("ResourceDownloadDialog"));
 
@@ -102,7 +105,8 @@ void ResourceDownloadDialog::initializeContainer()
 void ResourceDownloadDialog::connectButtons()
 {
     auto OkButton = m_buttons.button(QDialogButtonBox::Ok);
-    OkButton->setToolTip(tr("Opens a new popup to review your selected %1 and confirm your selection. Shortcut: Ctrl+Return").arg(resourcesString()));
+    OkButton->setToolTip(
+        tr("Opens a new popup to review your selected %1 and confirm your selection. Shortcut: Ctrl+Return").arg(resourcesString()));
     connect(OkButton, &QPushButton::clicked, this, &ResourceDownloadDialog::confirm);
 
     auto CancelButton = m_buttons.button(QDialogButtonBox::Cancel);
@@ -169,8 +173,10 @@ void ResourceDownloadDialog::removeResource(ModPlatform::IndexedPack& pack, ModP
         auto selected_task = *selected_task_it;
         auto old_version_id = selected_task->getVersionID();
 
-        // If the new and old version IDs don't match, search for the old one and deselect it.
-        if (ver.fileId != old_version_id)
+        if (selected_task->getProvider() != pack.provider)  // If the pack name matches but they are different providers search for the
+                                                            // old one(in the actual pack) and deselect it.
+            getVersionWithID(selected_task->getPack(), old_version_id).is_currently_selected = false;
+        else if (ver.fileId != old_version_id)  // If the new and old version IDs don't match, search for the old one and deselect it.
             getVersionWithID(pack, old_version_id).is_currently_selected = false;
     }
 
@@ -205,8 +211,6 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
 }
 
-
-
 ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
     : ResourceDownloadDialog(parent, mods), m_instance(instance)
 {
@@ -231,7 +235,6 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
     return pages;
 }
-
 
 ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
                                                        const std::shared_ptr<ResourcePackFolderModel>& resource_packs,
@@ -258,7 +261,6 @@ QList<BasePage*> ResourcePackDownloadDialog::getPages()
     return pages;
 }
 
-
 TexturePackDownloadDialog::TexturePackDownloadDialog(QWidget* parent,
                                                      const std::shared_ptr<TexturePackFolderModel>& resource_packs,
                                                      BaseInstance* instance)
@@ -283,7 +285,6 @@ QList<BasePage*> TexturePackDownloadDialog::getPages()
 
     return pages;
 }
-
 
 ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent,
                                                    const std::shared_ptr<ShaderPackFolderModel>& shaders,
