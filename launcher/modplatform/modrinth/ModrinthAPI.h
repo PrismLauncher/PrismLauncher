@@ -146,7 +146,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
     {
         return args.dependency.version.length() != 0 ? QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.dependency.version)
-                                                     : QString("%1/project/%2/version?game_versions=[\"%1\"]&loaders=[\"%1\"]")
+                                                     : QString("%1/project/%2/version?game_versions=[\"%3\"]&loaders=[\"%4\"]")
                                                            .arg(BuildConfig.MODRINTH_PROD_URL)
                                                            .arg(args.dependency.addonId.toString())
                                                            .arg(args.mcVersion.toString())

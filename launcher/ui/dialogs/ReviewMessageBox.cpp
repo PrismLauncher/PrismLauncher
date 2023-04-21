@@ -40,7 +40,8 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
     auto filenameItem = new QTreeWidgetItem(itemTop);
     filenameItem->setText(0, tr("Filename: %1").arg(info.filename));
 
-    itemTop->insertChildren(0, { filenameItem });
+    auto childIndx = 0;
+    itemTop->insertChildren(childIndx++, { filenameItem });
 
     if (!info.custom_file_path.isEmpty()) {
         auto customPathItem = new QTreeWidgetItem(itemTop);
@@ -49,8 +50,15 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
         itemTop->insertChildren(1, { customPathItem });
 
         itemTop->setIcon(1, QIcon(APPLICATION->getThemedIcon("status-yellow")));
-        itemTop->setToolTip(1, tr("This file will be downloaded to a folder location different from the default, possibly due to its loader requiring it."));
+        itemTop->setToolTip(
+            childIndx++,
+            tr("This file will be downloaded to a folder location different from the default, possibly due to its loader requiring it."));
     }
+
+    auto providerItem = new QTreeWidgetItem(itemTop);
+    providerItem->setText(0, tr("Provider: %1").arg(info.provider));
+
+    itemTop->insertChildren(childIndx++, { providerItem });
 
     ui->modTreeWidget->addTopLevelItem(itemTop);
 }

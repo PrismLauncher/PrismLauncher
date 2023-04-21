@@ -124,6 +124,8 @@ void ResourceDownloadDialog::connectButtons()
     connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
 }
 
+static ModPlatform::ProviderCapabilities ProviderCaps;
+
 void ResourceDownloadDialog::confirm()
 {
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
@@ -160,7 +162,8 @@ void ResourceDownloadDialog::confirm()
     keys.sort(Qt::CaseInsensitive);
     for (auto& task : keys) {
         auto selected = m_selected.constFind(task).value();
-        confirm_dialog->appendResource({ task, selected->getFilename(), selected->getCustomPath() });
+        confirm_dialog->appendResource(
+            { task, selected->getFilename(), selected->getCustomPath(), ProviderCaps.name(selected->getProvider()) });
     }
 
     if (confirm_dialog->exec()) {
@@ -206,9 +209,10 @@ void ResourceDownloadDialog::removeResource(ModPlatform::IndexedPack& pack, ModP
     if (auto selected_task_it = m_selected.find(pack.name); selected_task_it != m_selected.end()) {
         auto selected_task = *selected_task_it;
         auto old_version_id = selected_task->getVersionID();
-
-        // If the new and old version IDs don't match, search for the old one and deselect it.
-        if (ver.fileId != old_version_id)
+        if (selected_task->getProvider() != pack.provider)  // If the pack name matches but they are different providers search for the
+                                                            // old one(in the actual pack) and deselect it.
+            getVersionWithID(selected_task->getPack(), old_version_id).is_currently_selected = false;
+        else if (ver.fileId != old_version_id)  // If the new and old version IDs don't match, search for the old one and deselect it.
             getVersionWithID(pack, old_version_id).is_currently_selected = false;
     }
 
