@@ -337,9 +337,9 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
         ModPlatform::IndexedPack pack;
         try {
             loadIndexedPack(pack, packObj);
-            if (auto sel =
-                    std::find_if(m_selected.begin(), m_selected.end(),
-                                 [&pack](ModPlatform::IndexedPack& i) { return i.provider == pack.provider && i.addonId == pack.addonId; });
+            if (auto sel = std::find_if(
+                    m_selected.begin(), m_selected.end(),
+                    [&pack](const ModPlatform::IndexedPack& i) { return i.provider == pack.provider && i.addonId == pack.addonId; });
                 sel != m_selected.end()) {
                 pack.versionsLoaded = sel->versionsLoaded;
                 pack.versions = sel->versions;
@@ -409,8 +409,9 @@ void ResourceModel::versionRequestSucceeded(QJsonDocument& doc, ModPlatform::Ind
         auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
         loadIndexedPackVersions(current_pack, arr);
         if (current_pack.loadedFileId.isValid())
-            if (auto ver = std::find_if(current_pack.versions.begin(), current_pack.versions.end(),
-                                        [&current_pack](ModPlatform::IndexedVersion v) { return v.fileId == current_pack.loadedFileId; });
+            if (auto ver =
+                    std::find_if(current_pack.versions.begin(), current_pack.versions.end(),
+                                 [&current_pack](const ModPlatform::IndexedVersion& v) { return v.fileId == current_pack.loadedFileId; });
                 ver != current_pack.versions.end())
                 ver->is_currently_selected = true;
     } catch (const JSONValidationError& e) {
@@ -458,7 +459,7 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
 
 void ResourceModel::removePack(QString& rem)
 {
-    auto pred = [&rem](ModPlatform::IndexedPack i) { return rem == i.name; };
+    auto pred = [&rem](const ModPlatform::IndexedPack& i) { return rem == i.name; };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
     m_selected.removeIf(pred);
 #else
@@ -491,7 +492,7 @@ void ResourceModel::removePack(QString& rem)
     }
 #endif
     // m_selected.removeAt(qsizetype i)
-    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](ModPlatform::IndexedPack i) { return rem == i.name; });
+    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](const ModPlatform::IndexedPack& i) { return rem == i.name; });
     if (pack == m_packs.end()) {  // ignore it if is not in the current search
         return;
     }
