@@ -1106,6 +1106,7 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
+// TODO move somewhere else?
 template <typename T>
 static void withVersionsLoaded(Meta::VersionList::Ptr versions, T action)
 {
@@ -1128,7 +1129,6 @@ static void withVersionsLoaded(Meta::VersionList::Ptr versions, T action)
     action();
 }
 
-// TODO move somewhere else?
 static bool versionRequires(Meta::Version* version, const QString& gameVersion)
 {
     return version && std::any_of(version->requires().begin(), version->requires().end(), [gameVersion](auto require) {
@@ -1136,7 +1136,7 @@ static bool versionRequires(Meta::Version* version, const QString& gameVersion)
            });
 }
 
-static BaseVersion* pickBest(Component* component, const QString& gameVersion)
+static BaseVersion* pickBest(ComponentPtr component, const QString& gameVersion)
 {
     auto versions = component->getVersionList();
 
@@ -1182,7 +1182,7 @@ void PackProfile::updateLoaderVersions()
 
 void PackProfile::updateLoaderVersion(const QString& id, const QString &gameVersion)
 {
-    Component* component = getComponent(id);
+    ComponentPtr component = getComponent(id);
 
     if (!component)
         return;
