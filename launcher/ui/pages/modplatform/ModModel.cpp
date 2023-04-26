@@ -6,8 +6,6 @@
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "minecraft/mod/ModFolderModel.h"
-#include "modplatform/ModIndex.h"
 
 #include <QMessageBox>
 
@@ -26,7 +24,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
     std::optional<std::list<Version>> versions{};
 
-    {  // Version filter
+    { // Version filter
         if (!m_filter->versions.empty())
             versions = m_filter->versions;
     }
