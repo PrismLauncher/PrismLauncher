@@ -161,8 +161,8 @@ void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlat
 
 void ResourceDownloadDialog::removeResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver)
 {
-    dynamic_cast<ResourcePage*>(m_container->getPage(Modrinth::id()))->removeResourceFromPage(pack.name);
-    dynamic_cast<ResourcePage*>(m_container->getPage(Flame::id()))->removeResourceFromPage(pack.name);
+    for (auto page : m_container->getPages())
+        static_cast<ResourcePage*>(page)->removeResourceFromPage(pack.name);
 
     // Deselect the new version too, since all versions of that pack got removed.
     ver.is_currently_selected = false;

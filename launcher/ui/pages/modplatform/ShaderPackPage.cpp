@@ -47,8 +47,8 @@ void ShaderPackResourcePage::addResourceToDialog(ModPlatform::IndexedPack& pack,
 {
     if (version.loaders.contains(QStringLiteral("canvas")))
         version.custom_target_folder = QStringLiteral("resourcepacks");
-    m_model->addPack(pack);
     m_parent_dialog->addResource(pack, version);
+    m_model->addPack(pack);
 }
 
 }  // namespace ResourceDownload

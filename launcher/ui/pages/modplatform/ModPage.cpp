@@ -148,8 +148,8 @@ void ModPage::updateVersionList()
 void ModPage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_model->addPack(pack);
     m_parent_dialog->addResource(pack, version, is_indexed);
+    m_model->addPack(pack);
 }
 
 }  // namespace ResourceDownload

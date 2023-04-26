@@ -13,16 +13,7 @@
 
 namespace ResourceDownload {
 
-ModModel::ModModel(BaseInstance const& base_inst, ResourceAPI* api) : ResourceModel(api), m_base_instance(base_inst)
-{
-    auto folder = static_cast<MinecraftInstance const&>(m_base_instance).loaderModList();
-    for (auto mod : folder->allMods()) {
-        auto meta = mod->metadata();
-        ModPlatform::IndexedPack pack{ meta->project_id, meta->provider, meta->name, meta->slug };
-        pack.loadedFileId = meta->file_id;
-        addPack(pack);
-    }
-}
+ModModel::ModModel(BaseInstance const& base_inst, ResourceAPI* api) : ResourceModel(api), m_base_instance(base_inst) {}
 
 /******** Make data requests ********/
 
