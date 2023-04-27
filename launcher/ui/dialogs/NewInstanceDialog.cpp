@@ -56,7 +56,6 @@
 #include "ui/widgets/PageContainer.h"
 #include "ui/pages/modplatform/VanillaPage.h"
 #include "ui/pages/modplatform/atlauncher/AtlPage.h"
-#include "ui/pages/modplatform/ftb/FtbPage.h"
 #include "ui/pages/modplatform/legacy_ftb/Page.h"
 #include "ui/pages/modplatform/flame/FlamePage.h"
 #include "ui/pages/modplatform/ImportPage.h"
@@ -168,7 +167,6 @@ QList<BasePage *> NewInstanceDialog::getPages()
     pages.append(new AtlPage(this));
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(new FlamePage(this));
-    pages.append(new FtbPage(this));
     pages.append(new LegacyFTB::Page(this));
     pages.append(new ModrinthPage(this));
     pages.append(new TechnicPage(this));
