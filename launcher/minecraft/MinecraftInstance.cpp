@@ -925,7 +925,10 @@ QString MinecraftInstance::getStatusbarDescription()
     if(m_settings->get("ShowGameTime").toBool())
     {
         if (lastTimePlayed() > 0) {
-            description.append(tr(", last played for %1").arg(Time::prettifyDuration(lastTimePlayed())));
+            QDateTime lastLaunchTime = QDateTime::fromMSecsSinceEpoch(lastLaunch());
+            description.append(tr(", last played on %1 for %2")
+                                   .arg(QLocale().toString(lastLaunchTime, QLocale::ShortFormat))
+                                   .arg(Time::prettifyDuration(lastTimePlayed())));
         }
 
         if (totalTimePlayed() > 0) {
