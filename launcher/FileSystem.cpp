@@ -329,8 +329,7 @@ bool create_link::operator()(const QString& offset, bool dryRun)
 
 /**
  * @brief Make a list of all the links to make
- * @param offset subdirectory form src to link to dest
- * @return if there was an error during the attempt to link
+ * @param offset subdirectory of src to link to dest
  */
 void create_link::make_link_list(const QString& offset)
 {

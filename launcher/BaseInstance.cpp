@@ -188,25 +188,25 @@ bool BaseInstance::shouldStopOnConsoleOverflow() const
 
 QStringList BaseInstance::getLinkedInstances() const
 {
-    return m_settings->getList<QString>("linkedInstances");
+    return m_settings->get("linkedInstances").toStringList();
 }
 
 void BaseInstance::setLinkedInstances(const QStringList& list)
 {
-    auto linkedInstances = m_settings->getList<QString>("linkedInstances");
-    m_settings->setList("linkedInstances", list);
+    auto linkedInstances = m_settings->get("linkedInstances").toStringList();
+    m_settings->set("linkedInstances", list);
 }
 
 void BaseInstance::addLinkedInstanceId(const QString& id)
 {
-    auto linkedInstances = m_settings->getList<QString>("linkedInstances");
+    auto linkedInstances = m_settings->get("linkedInstances").toStringList();
     linkedInstances.append(id);
     setLinkedInstances(linkedInstances);
 }
 
 bool BaseInstance::removeLinkedInstanceId(const QString& id)
 {
-    auto linkedInstances = m_settings->getList<QString>("linkedInstances");
+    auto linkedInstances = m_settings->get("linkedInstances").toStringList();
     int numRemoved = linkedInstances.removeAll(id);
     setLinkedInstances(linkedInstances);
     return numRemoved > 0;
@@ -214,7 +214,7 @@ bool BaseInstance::removeLinkedInstanceId(const QString& id)
 
 bool BaseInstance::isLinkedToInstanceId(const QString& id) const
 {
-    auto linkedInstances = m_settings->getList<QString>("linkedInstances");
+    auto linkedInstances = m_settings->get("linkedInstances").toStringList();
     return linkedInstances.contains(id);
 }
 

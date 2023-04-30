@@ -121,19 +121,6 @@ bool SettingsObject::contains(const QString &id)
     return m_settings.contains(id);
 }
 
-bool SettingsObject::setList(const QString &id, QVariantList value)
-{
-    QString stringList = QJsonDocument(QVariant(value).toJsonArray()).toJson(QJsonDocument::Compact);
-
-    return set(id, stringList);
-}
-
-QVariantList SettingsObject::getList(const QString &id)
-{   
-    QVariant value = this->get(id);
-    return QJsonDocument::fromJson(value.toByteArray()).toVariant().toList();
-}
-
 bool SettingsObject::reload()
 {
     for (auto setting : m_settings.values())

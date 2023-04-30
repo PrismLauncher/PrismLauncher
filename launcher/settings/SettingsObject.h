@@ -145,45 +145,6 @@ public:
     bool contains(const QString &id);
 
     /*!
-     * \brief Sets the value of the setting with the given ID with a json list.
-     * If no setting with the given ID exists, returns false
-     * \param id The ID of the setting to change.
-     * \param value The new value of the setting.
-     */
-    bool setList(const QString &id, QVariantList value);
-    template <typename T> bool setList(const QString &id, QList<T> val)
-    {
-        QVariantList variantList;
-        variantList.reserve(val.size());
-        for (const T& v : val)
-        {
-            variantList.append(v);
-        }
-
-        return setList(id, variantList);
-    }
-
-    /**
-     * \brief Gets the value of the setting with the given ID as if it were a json list.
-     * \param id The ID of the setting to change.
-     * \return The setting's value as a QVariantList.
-     * If no setting with the given ID exists, returns an empty QVariantList.
-     */
-    QVariantList getList(const QString &id);
-    template <typename T> QList<T>  getList(const QString &id)
-    {   
-        QVariantList variantList = this->getList(id);
-
-        QList<T>TList;
-        TList.reserve(variantList.size());
-        for (const QVariant& v : variantList)
-        {
-            TList.append(v.value<T>());
-        }
-        return TList;
-    }
-
-    /*!
      * \brief Reloads the settings and emit signals for changed settings
      * \return True if reloading was successful
      */

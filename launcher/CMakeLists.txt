@@ -26,6 +26,7 @@ set(CORE_SOURCES
     MMCZip.cpp
     StringUtils.h
     StringUtils.cpp
+    QVariantUtils.h
     RuntimeContext.h
 
     # Basic instance manipulation tasks (derived from InstanceTask)
