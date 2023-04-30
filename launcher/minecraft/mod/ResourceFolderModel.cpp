@@ -16,7 +16,8 @@
 
 #include "tasks/Task.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent, bool create_dir) : QAbstractListModel(parent), m_dir(dir), m_watcher(this)
+ResourceFolderModel::ResourceFolderModel(QDir dir, std::shared_ptr<const BaseInstance> instance, QObject* parent, bool create_dir)
+    : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this)
 {
     if (create_dir) {
         FS::ensureFolderPathExists(m_dir.absolutePath());
@@ -26,7 +27,7 @@ ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent, bool create_
     m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &ResourceFolderModel::directoryChanged);
-    connect(&m_helper_thread_task, &ConcurrentTask::finished, this, [this]{ m_helper_thread_task.clear(); });
+    connect(&m_helper_thread_task, &ConcurrentTask::finished, this, [this] { m_helper_thread_task.clear(); });
 }
 
 ResourceFolderModel::~ResourceFolderModel()
@@ -556,5 +557,5 @@ void ResourceFolderModel::enableInteraction(bool enabled)
 }
 
 QString ResourceFolderModel::instDirPath() const {
-    return QFileInfo(m_dir.filePath("../..")).absoluteFilePath();
+    return QFileInfo(m_instance->instanceRoot()).absoluteFilePath();
 }

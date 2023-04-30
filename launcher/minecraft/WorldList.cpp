@@ -45,8 +45,8 @@
 #include <QFileSystemWatcher>
 #include <QDebug>
 
-WorldList::WorldList(const QString &dir)
-    : QAbstractListModel(), m_dir(dir)
+WorldList::WorldList(const QString &dir, std::shared_ptr<const BaseInstance> instance)
+    : QAbstractListModel(), m_instance(instance), m_dir(dir)
 {
     FS::ensureFolderPathExists(m_dir.absolutePath());
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
@@ -129,7 +129,7 @@ bool WorldList::isValid()
 }
 
 QString WorldList::instDirPath() const {
-    return QFileInfo(m_dir.filePath("../..")).absoluteFilePath();
+    return QFileInfo(m_instance->instanceRoot()).absoluteFilePath();
 }
 
 bool WorldList::deleteWorld(int index)
