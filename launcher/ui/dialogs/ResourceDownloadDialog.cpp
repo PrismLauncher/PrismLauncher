@@ -20,6 +20,7 @@
 #include "ResourceDownloadDialog.h"
 
 #include <QPushButton>
+#include <algorithm>
 
 #include "Application.h"
 #include "ResourceDownloadTask.h"
@@ -118,21 +119,24 @@ void ResourceDownloadDialog::connectButtons()
 
 void ResourceDownloadDialog::confirm()
 {
-    auto keys = m_selected.keys();
-    keys.sort(Qt::CaseInsensitive);
+    auto selected = getTasks();
+    std::sort(selected.begin(), selected.end(), [](const DownloadTaskPtr& a, const DownloadTaskPtr& b) {
+        return QString::compare(a->getName(), b->getName(), Qt::CaseInsensitive) < 0;
+    });
 
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
     confirm_dialog->retranslateUi(resourcesString());
 
-    for (auto& task : keys) {
-        auto selected = m_selected.constFind(task).value();
-        confirm_dialog->appendResource({ task, selected->getFilename(), selected->getCustomPath() });
+    for (auto& task : selected) {
+        confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath() });
     }
 
     if (confirm_dialog->exec()) {
         auto deselected = confirm_dialog->deselectedResources();
-        for (auto name : deselected) {
-            m_selected.remove(name);
+        for (auto page : m_container->getPages()) {
+            auto res = static_cast<ResourcePage*>(page);
+            for (auto name : deselected)
+                res->removeResourceFromPage(name);
         }
 
         this->accept();
@@ -149,32 +153,39 @@ ResourcePage* ResourceDownloadDialog::getSelectedPage()
     return m_selectedPage;
 }
 
-void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, bool is_indexed)
+void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver)
 {
-    removeResource(pack, ver);
-
-    ver.is_currently_selected = true;
-    m_selected.insert(pack.name, makeShared<ResourceDownloadTask>(pack, ver, getBaseModel(), is_indexed));
-
-    m_buttons.button(QDialogButtonBox::Ok)->setEnabled(!m_selected.isEmpty());
+    removeResource(pack.name);
+    m_selectedPage->addResourceToPage(pack, ver, getBaseModel());
+    setButtonStatus();
 }
 
-void ResourceDownloadDialog::removeResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver)
+void ResourceDownloadDialog::removeResource(const QString& pack_name)
 {
-    for (auto page : m_container->getPages())
-        static_cast<ResourcePage*>(page)->removeResourceFromPage(pack.name);
+    for (auto page : m_container->getPages()) {
+        static_cast<ResourcePage*>(page)->removeResourceFromPage(pack_name);
+    }
+    setButtonStatus();
+}
 
-    // Deselect the new version too, since all versions of that pack got removed.
-    ver.is_currently_selected = false;
-
-    m_selected.remove(pack.name);
-
-    m_buttons.button(QDialogButtonBox::Ok)->setEnabled(!m_selected.isEmpty());
+void ResourceDownloadDialog::setButtonStatus()
+{
+    bool selected;
+    for (auto page : m_container->getPages()) {
+        auto res = static_cast<ResourcePage*>(page);
+        selected = selected || res->hasSelectedPacks();
+    }
+    m_buttons.button(QDialogButtonBox::Ok)->setEnabled(selected);
 }
 
 const QList<ResourceDownloadDialog::DownloadTaskPtr> ResourceDownloadDialog::getTasks()
 {
-    return m_selected.values();
+    QList<DownloadTaskPtr> selected;
+    for (auto page : m_container->getPages()) {
+        auto res = static_cast<ResourcePage*>(page);
+        selected.append(res->selectedPacks());
+    }
+    return selected;
 }
 
 void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* selected)

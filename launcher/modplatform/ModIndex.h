@@ -68,7 +68,6 @@ struct IndexedVersion {
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
-    QString custom_target_folder;
 };
 
 struct ExtraPackData {

@@ -145,11 +145,12 @@ void ModPage::updateVersionList()
     updateSelectionButton();
 }
 
-void ModPage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
+void ModPage::addResourceToPage(ModPlatform::IndexedPack& pack,
+                                ModPlatform::IndexedVersion& version,
+                                const std::shared_ptr<ResourceFolderModel> base_model)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_parent_dialog->addResource(pack, version, is_indexed);
-    m_model->addPack(pack);
+    m_model->addPack(pack, version, base_model, is_indexed);
 }
 
 }  // namespace ResourceDownload

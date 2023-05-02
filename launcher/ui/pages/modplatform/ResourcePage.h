@@ -7,10 +7,12 @@
 #include <QTimer>
 #include <QWidget>
 
+#include "ResourceDownloadTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/BasePage.h"
+#include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/widgets/ProgressWidget.h"
 
 namespace Ui {
@@ -27,6 +29,7 @@ class ResourceModel;
 class ResourcePage : public QWidget, public BasePage {
     Q_OBJECT
    public:
+    using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
     ~ResourcePage() override;
 
     /* Affects what the user sees */
@@ -72,9 +75,13 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void updateSelectionButton();
     virtual void updateVersionList();
 
-    virtual void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
-    virtual void removeResourceFromDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
-    virtual void removeResourceFromPage(QString& name);
+    void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
+    void removeResourceFromDialog(const QString& pack_name);
+    virtual void removeResourceFromPage(const QString& name);
+    virtual void addResourceToPage(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&, const std::shared_ptr<ResourceFolderModel>);
+
+    QList<DownloadTaskPtr> selectedPacks() { return m_model->selectedPacks(); }
+    bool hasSelectedPacks() { return !(m_model->selectedPacks().isEmpty()); }
 
    protected slots:
     virtual void triggerSearch() {}

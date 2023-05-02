@@ -37,6 +37,7 @@
  */
 
 #include "ResourcePage.h"
+#include "modplatform/ModIndex.h"
 #include "ui_ResourcePage.h"
 
 #include <QDesktopServices>
@@ -309,15 +310,21 @@ void ResourcePage::onVersionSelectionChanged(QString data)
 void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
 {
     m_parent_dialog->addResource(pack, version);
-    m_model->addPack(pack);
 }
 
-void ResourcePage::removeResourceFromDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
+void ResourcePage::removeResourceFromDialog(const QString& pack_name)
 {
-    m_parent_dialog->removeResource(pack, version);
+    m_parent_dialog->removeResource(pack_name);
 }
 
-void ResourcePage::removeResourceFromPage(QString& name)
+void ResourcePage::addResourceToPage(ModPlatform::IndexedPack& pack,
+                                     ModPlatform::IndexedVersion& ver,
+                                     const std::shared_ptr<ResourceFolderModel> base_model)
+{
+    m_model->addPack(pack, ver, base_model);
+}
+
+void ResourcePage::removeResourceFromPage(const QString& name)
 {
     m_model->removePack(name);
 }
@@ -333,7 +340,7 @@ void ResourcePage::onResourceSelected()
 
     auto& version = current_pack.versions[m_selected_version_index];
     if (version.is_currently_selected)
-        removeResourceFromDialog(current_pack, version);
+        removeResourceFromDialog(current_pack.name);
     else
         addResourceToDialog(current_pack, version);
 

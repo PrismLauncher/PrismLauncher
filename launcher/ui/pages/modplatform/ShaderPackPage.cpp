@@ -43,12 +43,14 @@ QMap<QString, QString> ShaderPackResourcePage::urlHandlers() const
     return map;
 }
 
-void ShaderPackResourcePage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
+void ShaderPackResourcePage::addResourceToPage(ModPlatform::IndexedPack& pack,
+                                               ModPlatform::IndexedVersion& version,
+                                               const std::shared_ptr<ResourceFolderModel> base_model)
 {
+    QString custom_target_folder;
     if (version.loaders.contains(QStringLiteral("canvas")))
-        version.custom_target_folder = QStringLiteral("resourcepacks");
-    m_parent_dialog->addResource(pack, version);
-    m_model->addPack(pack);
+        custom_target_folder = QStringLiteral("resourcepacks");
+    m_model->addPack(pack, version, base_model, false, custom_target_folder);
 }
 
 }  // namespace ResourceDownload

@@ -50,7 +50,7 @@ class ModPage : public ResourcePage {
 
     [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
 
-    void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&) override;
+    void addResourceToPage(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&, const std::shared_ptr<ResourceFolderModel>) override;
 
     virtual auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const -> bool = 0;
 

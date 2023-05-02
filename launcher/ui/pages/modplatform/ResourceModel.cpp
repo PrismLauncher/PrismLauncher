@@ -337,14 +337,15 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
         ModPlatform::IndexedPack pack;
         try {
             loadIndexedPack(pack, packObj);
-            if (auto sel = std::find_if(
-                    m_selected.begin(), m_selected.end(),
-                    [&pack](const ModPlatform::IndexedPack& i) { return i.provider == pack.provider && i.addonId == pack.addonId; });
+            if (auto sel = std::find_if(m_selected.begin(), m_selected.end(),
+                                        [&pack](const DownloadTaskPtr i) {
+                                            const auto ipack = i->getPack();
+                                            return ipack.provider == pack.provider && ipack.addonId == pack.addonId;
+                                        });
                 sel != m_selected.end()) {
-                pack.versionsLoaded = sel->versionsLoaded;
-                pack.versions = sel->versions;
-            }
-            newList.append(pack);
+                newList.append(sel->get()->getPack());
+            } else
+                newList.append(pack);
         } catch (const JSONValidationError& e) {
             qWarning() << "Error while loading resource from " << debugName() << ": " << e.cause();
             continue;
@@ -450,9 +451,19 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
     emit projectInfoUpdated();
 }
 
-void ResourceModel::removePack(QString& rem)
+void ResourceModel::addPack(ModPlatform::IndexedPack& pack,
+                            ModPlatform::IndexedVersion& version,
+                            const std::shared_ptr<ResourceFolderModel> packs,
+                            bool is_indexed,
+                            QString custom_target_folder)
 {
-    auto pred = [&rem](const ModPlatform::IndexedPack& i) { return rem == i.name; };
+    version.is_currently_selected = true;
+    m_selected.append(makeShared<ResourceDownloadTask>(pack, version, packs, is_indexed, custom_target_folder));
+}
+
+void ResourceModel::removePack(const QString& rem)
+{
+    auto pred = [&rem](const DownloadTaskPtr i) { return rem == i->getName(); };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
     m_selected.removeIf(pred);
 #else
