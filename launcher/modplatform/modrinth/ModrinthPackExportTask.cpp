@@ -62,8 +62,11 @@ bool ModrinthPackExportTask::abort()
         return true;
     }
 
-    pendingAbort = true;
-    return true;
+    if (buildZipFuture.isRunning()) {
+        buildZipFuture.cancel();
+        return true;
+    }
+    return false;
 }
 
 void ModrinthPackExportTask::collectFiles()
@@ -190,44 +193,37 @@ void ModrinthPackExportTask::parseApiResponse(const QByteArray* response)
 
 void ModrinthPackExportTask::buildZip()
 {
-    static_cast<void>(QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
-        setStatus("Adding files...");
+    setStatus("Adding files...");
+
+    buildZipFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
         QuaZip zip(output);
         if (!zip.open(QuaZip::mdCreate)) {
             QFile::remove(output);
-            emitFailed(tr("Could not create file"));
-            return;
+            return BuildZipResult(tr("Could not create file"));
         }
 
-        if (pendingAbort) {
-            QMetaObject::invokeMethod(this, &ModrinthPackExportTask::emitAborted, Qt::QueuedConnection);
-            return;
-        }
+        if (buildZipFuture.isCanceled())
+            return BuildZipResult();
 
         QuaZipFile indexFile(&zip);
         if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
             QFile::remove(output);
-            QMetaObject::invokeMethod(
-                this, [this]() { emitFailed(tr("Could not create index")); }, Qt::QueuedConnection);
-            return;
+            return BuildZipResult(tr("Could not create index"));
         }
         indexFile.write(generateIndex());
 
         size_t progress = 0;
         for (const QFileInfo& file : files) {
-            if (pendingAbort) {
+            if (buildZipFuture.isCanceled()) {
                 QFile::remove(output);
-                QMetaObject::invokeMethod(this, &ModrinthPackExportTask::emitAborted, Qt::QueuedConnection);
-                return;
+                return BuildZipResult();
             }
 
             setProgress(progress, files.length());
             const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
             if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative)) {
                 QFile::remove(output);
-                QMetaObject::invokeMethod(
-                    this, [this, relative]() { emitFailed(tr("Could not read and compress %1").arg(relative)); }, Qt::QueuedConnection);
-                return;
+                return BuildZipResult(tr("Could not read and compress %1").arg(relative));
             }
             progress++;
         }
@@ -236,13 +232,26 @@ void ModrinthPackExportTask::buildZip()
 
         if (zip.getZipError() != 0) {
             QFile::remove(output);
-            QMetaObject::invokeMethod(
-                this, [this]() { emitFailed(tr("A zip error occurred")); }, Qt::QueuedConnection);
-            return;
+            return BuildZipResult(tr("A zip error occurred"));
         }
 
-        QMetaObject::invokeMethod(this, &ModrinthPackExportTask::emitSucceeded, Qt::QueuedConnection);
-    }));
+        return BuildZipResult();
+    });
+    connect(&buildZipWatcher, &QFutureWatcher<BuildZipResult>::finished, this, &ModrinthPackExportTask::finish);
+    buildZipWatcher.setFuture(buildZipFuture);
+}
+
+void ModrinthPackExportTask::finish()
+{
+    if (buildZipFuture.isCanceled())
+        emitAborted();
+    else {
+        const BuildZipResult result = buildZipFuture.result();
+        if (result.has_value())
+            emitFailed(result.value());
+        else
+            emitSucceeded();
+    }
 }
 
 QByteArray ModrinthPackExportTask::generateIndex()

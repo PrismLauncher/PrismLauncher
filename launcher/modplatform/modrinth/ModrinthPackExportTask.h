@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <QFuture>
+#include <QFutureWatcher>
 #include "BaseInstance.h"
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
@@ -54,18 +56,22 @@ class ModrinthPackExportTask : public Task {
     const QString output;
     const MMCZip::FilterFunction filter;
 
+    typedef std::optional<QString> BuildZipResult;
+
     ModrinthAPI api;
     QFileInfoList files;
     QMap<QString, QString> pendingHashes;
     QMap<QString, ResolvedFile> resolvedFiles;
     Task::Ptr task;
-    bool pendingAbort = false;
+    QFuture<BuildZipResult> buildZipFuture;
+    QFutureWatcher<BuildZipResult> buildZipWatcher;
 
     void collectFiles();
     void collectHashes();
     void makeApiRequest();
     void parseApiResponse(const QByteArray* response);
     void buildZip();
+    void finish();
 
     QByteArray generateIndex();
 };
