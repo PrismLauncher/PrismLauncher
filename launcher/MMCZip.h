@@ -59,18 +59,20 @@ namespace MMCZip
      * \param zip target archive
      * \param dir directory that will be compressed (to compress with relative paths)
      * \param files list of files to compress
+     * \param followSymlinks should follow symlinks when compressing file data
      * \return true for success or false for failure
      */
-    bool compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files);
+    bool compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files, bool followSymlinks = false);
 
     /**
      * Compress directory, by providing a list of files to compress
      * \param fileCompressed target archive file
      * \param dir directory that will be compressed (to compress with relative paths)
      * \param files list of files to compress
+     * \param followSymlinks should follow symlinks when compressing file data
      * \return true for success or false for failure
      */
-    bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files);
+    bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks = false);
 
     /**
      * take a source jar, add mods to it, resulting in target jar

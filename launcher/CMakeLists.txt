@@ -26,6 +26,7 @@ set(CORE_SOURCES
     MMCZip.cpp
     StringUtils.h
     StringUtils.cpp
+    QVariantUtils.h
     RuntimeContext.h
 
     # Basic instance manipulation tasks (derived from InstanceTask)
@@ -524,13 +525,6 @@ set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthInstanceCreationTask.h
 )
 
-set(MODPACKSCH_SOURCES
-    modplatform/modpacksch/FTBPackInstallTask.h
-    modplatform/modpacksch/FTBPackInstallTask.cpp
-    modplatform/modpacksch/FTBPackManifest.h
-    modplatform/modpacksch/FTBPackManifest.cpp
-)
-
 set(PACKWIZ_SOURCES
     modplatform/packwiz/Packwiz.h
     modplatform/packwiz/Packwiz.cpp
@@ -557,6 +551,18 @@ set(ATLAUNCHER_SOURCES
     modplatform/atlauncher/ATLPackManifest.h
     modplatform/atlauncher/ATLShareCode.cpp
     modplatform/atlauncher/ATLShareCode.h
+)
+
+set(LINKEXE_SOURCES
+    filelink/FileLink.h
+    filelink/FileLink.cpp
+    FileSystem.h
+    FileSystem.cpp
+    Exception.h
+    StringUtils.h
+    StringUtils.cpp
+    DesktopServices.h
+    DesktopServices.cpp
 )
 
 ######## Logging categories ########
@@ -599,7 +605,6 @@ set(LOGIC_SOURCES
     ${FTB_SOURCES}
     ${FLAME_SOURCES}
     ${MODRINTH_SOURCES}
-    ${MODPACKSCH_SOURCES}
     ${PACKWIZ_SOURCES}
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
@@ -797,13 +802,6 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/atlauncher/AtlUserInteractionSupportImpl.cpp
     ui/pages/modplatform/atlauncher/AtlUserInteractionSupportImpl.h
 
-    ui/pages/modplatform/ftb/FtbFilterModel.cpp
-    ui/pages/modplatform/ftb/FtbFilterModel.h
-    ui/pages/modplatform/ftb/FtbListModel.cpp
-    ui/pages/modplatform/ftb/FtbListModel.h
-    ui/pages/modplatform/ftb/FtbPage.cpp
-    ui/pages/modplatform/ftb/FtbPage.h
-
     ui/pages/modplatform/legacy_ftb/Page.cpp
     ui/pages/modplatform/legacy_ftb/Page.h
     ui/pages/modplatform/legacy_ftb/ListModel.h
@@ -978,7 +976,6 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/flame/FlamePage.ui
     ui/pages/modplatform/legacy_ftb/Page.ui
     ui/pages/modplatform/ImportPage.ui
-    ui/pages/modplatform/ftb/FtbPage.ui
     ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/InstanceCardWidget.ui
@@ -1106,6 +1103,41 @@ install(TARGETS ${Launcher_Name}
     RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
     FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
+
+if(WIN32)
+    add_library(filelink_logic STATIC ${LINKEXE_SOURCES})
+    target_include_directories(filelink_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(filelink_logic
+        systeminfo
+        BuildConfig
+        ghcFilesystem::ghc_filesystem
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Network
+        # Qt${QT_VERSION_MAJOR}::Concurrent
+        ${Launcher_QT_LIBS}
+    )
+
+    add_executable("${Launcher_Name}_filelink" WIN32 filelink/main.cpp)
+
+    target_sources("${Launcher_Name}_filelink" PRIVATE filelink/filelink.exe.manifest)
+
+    target_link_libraries("${Launcher_Name}_filelink" filelink_logic)
+
+    if(DEFINED Launcher_APP_BINARY_NAME)
+        set_target_properties("${Launcher_Name}_filelink" PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}_filelink")
+    endif()
+    if(DEFINED Launcher_BINARY_RPATH)
+        SET_TARGET_PROPERTIES("${Launcher_Name}_filelink" PROPERTIES INSTALL_RPATH "${Launcher_BINARY_RPATH}")
+    endif()
+
+    install(TARGETS "${Launcher_Name}_filelink"
+        BUNDLE DESTINATION "." COMPONENT Runtime
+        LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
+        RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
+        FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
+    )
+endif()
 
 if (UNIX AND APPLE)
     # Add Sparkle updater

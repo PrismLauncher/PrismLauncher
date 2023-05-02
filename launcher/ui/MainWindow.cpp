@@ -1337,6 +1337,20 @@ void MainWindow::on_actionDeleteInstance_triggered()
     if (response != QMessageBox::Yes)
         return;
 
+    auto linkedInstances = APPLICATION->instances()->getLinkedInstancesById(id);
+    if (!linkedInstances.empty()) {
+        response = CustomMessageBox::selectable(
+                this, tr("There are linked instances"),
+                tr("The following instance(s) might reference files in this instance:\n\n"
+                "%1\n\n"
+                "Deleting it could break the other instance(s), \n\n"
+                "Do you wish to proceed?", nullptr, linkedInstances.count()).arg(linkedInstances.join("\n")), 
+                QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No
+            )->exec();
+        if (response != QMessageBox::Yes)
+            return;
+    }
+
     if (APPLICATION->instances()->trashInstance(id)) {
         ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
         return;

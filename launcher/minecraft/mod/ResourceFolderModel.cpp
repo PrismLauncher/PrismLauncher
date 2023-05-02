@@ -2,17 +2,22 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFileInfo>
+#include <QIcon>
 #include <QMimeData>
+#include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
 
+#include "Application.h"
 #include "FileSystem.h"
 
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 
 #include "tasks/Task.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent, bool create_dir) : QAbstractListModel(parent), m_dir(dir), m_watcher(this)
+ResourceFolderModel::ResourceFolderModel(QDir dir, std::shared_ptr<const BaseInstance> instance, QObject* parent, bool create_dir)
+    : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this)
 {
     if (create_dir) {
         FS::ensureFolderPathExists(m_dir.absolutePath());
@@ -22,7 +27,7 @@ ResourceFolderModel::ResourceFolderModel(QDir dir, QObject* parent, bool create_
     m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &ResourceFolderModel::directoryChanged);
-    connect(&m_helper_thread_task, &ConcurrentTask::finished, this, [this]{ m_helper_thread_task.clear(); });
+    connect(&m_helper_thread_task, &ConcurrentTask::finished, this, [this] { m_helper_thread_task.clear(); });
 }
 
 ResourceFolderModel::~ResourceFolderModel()
@@ -417,7 +422,26 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                     return {};
             }
         case Qt::ToolTipRole:
+            if (column == NAME_COLUMN) {
+                if (at(row).isSymLinkUnder(instDirPath())) {
+                    return m_resources[row]->internal_id() +
+                        tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
+                           "\nCanonical Path: %1")
+                            .arg(at(row).fileinfo().canonicalFilePath());;
+                }
+                if (at(row).isMoreThanOneHardLink()) {
+                    return m_resources[row]->internal_id() +
+                        tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
+                }
+            }
+            
             return m_resources[row]->internal_id();
+        case Qt::DecorationRole: {
+            if (column == NAME_COLUMN && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
+                return APPLICATION->getThemedIcon("status-yellow");
+
+            return {};
+        }
         case Qt::CheckStateRole:
             switch (column) {
                 case ACTIVE_COLUMN:
@@ -530,4 +554,8 @@ void ResourceFolderModel::enableInteraction(bool enabled)
     if (compare_result.second || sortOrder() != Qt::DescendingOrder)
         return (compare_result.first < 0);
     return (compare_result.first > 0);
+}
+
+QString ResourceFolderModel::instDirPath() const {
+    return QFileInfo(m_instance->instanceRoot()).absoluteFilePath();
 }

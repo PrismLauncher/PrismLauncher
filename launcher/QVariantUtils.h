@@ -36,22 +36,35 @@
 
 #pragma once
 
-#include <QString>
+
 #include <QVariant>
-#include <QIODevice>
+#include <QList>
 
-#include <QJsonDocument>
-#include <QJsonArray>
+namespace QVariantUtils {
 
-// Sectionless INI parser (for instance config files)
-class INIFile : public QMap<QString, QVariant>
-{
-public:
-    explicit INIFile();
+template <typename T> 
+inline QList<T> toList(QVariant src) {
+    QVariantList variantList = src.toList();
 
-    bool loadFile(QString fileName);
-    bool saveFile(QString fileName);
+    QList<T> list_t;
+    list_t.reserve(variantList.size());
+    for (const QVariant& v : variantList)
+    {
+        list_t.append(v.value<T>());
+    }
+    return list_t; 
+}
 
-    QVariant get(QString key, QVariant def) const;
-    void set(QString key, QVariant val);
-};
+template <typename T> 
+inline QVariant fromList(QList<T> val) {
+    QVariantList variantList;
+    variantList.reserve(val.size());
+    for (const T& v : val)
+    {
+        variantList.append(v);
+    }
+
+    return variantList;
+}
+
+}
