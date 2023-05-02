@@ -1114,7 +1114,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList() const
     if (!m_loader_mod_list)
     {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_loader_mod_list.reset(new ModFolderModel(modsRoot(), is_indexed));
+        m_loader_mod_list.reset(new ModFolderModel(modsRoot(), shared_from_this(), is_indexed));
         m_loader_mod_list->disableInteraction(isRunning());
         connect(this, &BaseInstance::runningStatusChanged, m_loader_mod_list.get(), &ModFolderModel::disableInteraction);
     }
@@ -1126,7 +1126,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList() const
     if (!m_core_mod_list)
     {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_core_mod_list.reset(new ModFolderModel(coreModsDir(), is_indexed));
+        m_core_mod_list.reset(new ModFolderModel(coreModsDir(), shared_from_this(), is_indexed));
         m_core_mod_list->disableInteraction(isRunning());
         connect(this, &BaseInstance::runningStatusChanged, m_core_mod_list.get(), &ModFolderModel::disableInteraction);
     }
@@ -1138,7 +1138,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::nilModList() const
     if (!m_nil_mod_list)
     {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_nil_mod_list.reset(new ModFolderModel(nilModsDir(), is_indexed, false));
+        m_nil_mod_list.reset(new ModFolderModel(nilModsDir(), shared_from_this(), is_indexed, false));
         m_nil_mod_list->disableInteraction(isRunning());
         connect(this, &BaseInstance::runningStatusChanged, m_nil_mod_list.get(), &ModFolderModel::disableInteraction);
     }
@@ -1149,7 +1149,7 @@ std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList() c
 {
     if (!m_resource_pack_list)
     {
-        m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir()));
+        m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir(), shared_from_this()));
     }
     return m_resource_pack_list;
 }
@@ -1158,7 +1158,7 @@ std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList() con
 {
     if (!m_texture_pack_list)
     {
-        m_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir()));
+        m_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir(), shared_from_this()));
     }
     return m_texture_pack_list;
 }
@@ -1167,7 +1167,7 @@ std::shared_ptr<ShaderPackFolderModel> MinecraftInstance::shaderPackList() const
 {
     if (!m_shader_pack_list)
     {
-        m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir()));
+        m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir(), shared_from_this()));
     }
     return m_shader_pack_list;
 }
@@ -1176,7 +1176,7 @@ std::shared_ptr<WorldList> MinecraftInstance::worldList() const
 {
     if (!m_world_list)
     {
-        m_world_list.reset(new WorldList(worldDir()));
+        m_world_list.reset(new WorldList(worldDir(), shared_from_this()));
     }
     return m_world_list;
 }

@@ -37,7 +37,6 @@
 #include <QDesktopServices>
 #include <QProcess>
 #include <QDebug>
-#include "Application.h"
 
 /**
  * This shouldn't exist, but until QTBUG-9328 and other unreported bugs are fixed, it needs to be a thing.
