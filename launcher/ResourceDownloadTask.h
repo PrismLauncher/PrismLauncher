@@ -40,7 +40,6 @@ class ResourceDownloadTask : public SequentialTask {
     const QVariant& getVersionID() const { return m_pack_version.fileId; }
     const QString& getName() const { return m_pack.name; }
     ModPlatform::IndexedPack& getPack() { return m_pack; }
-    // void setSelectedVersion(ModPlatform::IndexedVersion version) { m_pack_version = std::move(version); }
 
    private:
     ModPlatform::IndexedPack m_pack;
