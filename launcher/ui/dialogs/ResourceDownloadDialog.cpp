@@ -170,7 +170,7 @@ void ResourceDownloadDialog::removeResource(const QString& pack_name)
 
 void ResourceDownloadDialog::setButtonStatus()
 {
-    bool selected;
+    auto selected = false;
     for (auto page : m_container->getPages()) {
         auto res = static_cast<ResourcePage*>(page);
         selected = selected || res->hasSelectedPacks();
