@@ -65,7 +65,7 @@ void GetModDependenciesTask::prepare()
 {
     for (auto sel : m_selected) {
         for (auto dep : getDependenciesForVersion(sel->version, sel->pack.provider)) {
-            addTask(prepareDependencyTask(dep, sel->pack.provider, sel->pack.addonId, 20));
+            addTask(prepareDependencyTask(dep, sel->pack.provider, 20));
         }
     }
 }
@@ -95,8 +95,6 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
                                                     });
                             dep == m_pack_dependencies.end()) {  // check loaded dependencies
                             c_dependencies.append(ver_dep);
-                        } else {  // already there just append the required_by
-                            dep->get()->version.required_by.append(version.addonId);
                         }
                     }
                 }
@@ -108,13 +106,11 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 
 Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Dependency& dep,
                                                         const ModPlatform::ResourceProvider providerName,
-                                                        QVariant required_by,
                                                         int level)
 {
     auto pDep = std::make_shared<PackDependency>();
     pDep->dependency = dep;
     pDep->pack = { dep.addonId, providerName };
-    pDep->version.required_by.append(required_by);
     m_pack_dependencies.append(pDep);
     auto provider = providerName == m_flame_provider.name ? m_flame_provider : m_modrinth_provider;
 
@@ -145,7 +141,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     ResourceAPI::DependencySearchArgs args = { dep, m_version, m_loaderType };
     ResourceAPI::DependencySearchCallbacks callbacks;
 
-    callbacks.on_succeed = [dep, provider, pDep, level, required_by, this](auto& doc, auto& pack) {
+    callbacks.on_succeed = [dep, provider, pDep, level, this](auto& doc, auto& pack) {
         try {
             QJsonArray arr;
             if (dep.version.length() != 0 && doc.isObject()) {
@@ -153,7 +149,6 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             } else {
                 arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
             }
-            auto required_by = pDep->version.required_by;
             pDep->version = provider.mod->loadDependencyVersions(dep, arr);
             if (!pDep->version.addonId.isValid()) {
                 qWarning() << "Error while reading mod version empty ";
@@ -161,7 +156,6 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
                 return;
             }
             pDep->version.is_currently_selected = true;
-            pDep->version.required_by = required_by;
             pDep->pack.versions = { pDep->version };
             pDep->pack.versionsLoaded = true;
 
@@ -175,7 +169,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             return;
         }
         for (auto dep : getDependenciesForVersion(pDep->version, provider.name)) {
-            addTask(prepareDependencyTask(dep, provider.name, pDep->pack.addonId, level - 1));
+            addTask(prepareDependencyTask(dep, provider.name, level - 1));
         }
     };
 

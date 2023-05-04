@@ -62,12 +62,17 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
 
     if (!info.required_by.isEmpty()) {
         auto requiredByItem = new QTreeWidgetItem(itemTop);
-        QString req;
-        if (info.required_by.length() == 1)
-            req = info.required_by.back();
-        else
-            req = QString("[%1]").arg(info.required_by.join(", "));
-        requiredByItem->setText(0, tr("Required by: %1").arg(req));
+        if (info.required_by.length() == 1) {
+            requiredByItem->setText(0, tr("Required by: %1").arg(info.required_by.back()));
+        } else {
+            requiredByItem->setText(0, tr("Required by:"));
+            auto i = 0;
+            for (auto req : info.required_by) {
+                auto reqItem = new QTreeWidgetItem(requiredByItem);
+                reqItem->setText(0, req);
+                reqItem->insertChildren(i++, { reqItem });
+            }
+        }
 
         itemTop->insertChildren(childIndx++, { requiredByItem });
     }

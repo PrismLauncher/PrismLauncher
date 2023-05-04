@@ -78,7 +78,6 @@ struct IndexedVersion {
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
-    QList<QVariant> required_by;
 };
 
 struct ExtraPackData {

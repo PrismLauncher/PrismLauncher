@@ -125,16 +125,17 @@ void ResourceDownloadDialog::connectButtons()
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
-QStringList getReqiredBy(QList<ResourceDownloadDialog::DownloadTaskPtr> tasks, QList<QVariant> req_by)
+QStringList getReqiredBy(QList<ResourceDownloadDialog::DownloadTaskPtr> tasks, QVariant addonId)
 {
     auto req = QStringList();
-    for (auto r : req_by) {
-        for (auto& task : tasks) {
-            auto selected = task->getPack();
-            if (selected.addonId == r) {
-                req.append(selected.name);
-                break;
-            }
+    for (auto& task : tasks) {
+        auto deps = task->getVersion().dependencies;
+        if (auto dep = std::find_if(deps.begin(), deps.end(),
+                                    [addonId](const ModPlatform::Dependency& d) {
+                                        return d.addonId == addonId && d.type == ModPlatform::DependencyType::REQUIRED;
+                                    });
+            dep) {
+            req.append(task->getName());
         }
     }
     return req;
@@ -178,7 +179,7 @@ void ResourceDownloadDialog::confirm()
     });
     for (auto& task : selected) {
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ProviderCaps.name(task->getProvider()), getReqiredBy(selected, task->getVersion().required_by) });
+                                         ProviderCaps.name(task->getProvider()), getReqiredBy(selected, task->getPack().addonId) });
     }
 
     if (confirm_dialog->exec()) {
