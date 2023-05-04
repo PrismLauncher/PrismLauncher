@@ -126,6 +126,22 @@ void ResourceDownloadDialog::connectButtons()
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
+QStringList ResourceDownloadDialog::getReqiredBy(QList<QVariant> req_by)
+{
+    auto req = QStringList();
+    auto keys = m_selected.keys();
+    for (auto r : req_by) {
+        for (auto& task : keys) {
+            auto selected = m_selected.constFind(task).value()->getPack();
+            if (selected.addonId == r) {
+                req.append(selected.name);
+                break;
+            }
+        }
+    }
+    return req;
+}
+
 void ResourceDownloadDialog::confirm()
 {
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
@@ -162,8 +178,9 @@ void ResourceDownloadDialog::confirm()
     keys.sort(Qt::CaseInsensitive);
     for (auto& task : keys) {
         auto selected = m_selected.constFind(task).value();
+        auto required_by = getReqiredBy(selected->getVersion().required_by);
         confirm_dialog->appendResource(
-            { task, selected->getFilename(), selected->getCustomPath(), ProviderCaps.name(selected->getProvider()) });
+            { task, selected->getFilename(), selected->getCustomPath(), ProviderCaps.name(selected->getProvider()), required_by });
     }
 
     if (confirm_dialog->exec()) {
@@ -261,10 +278,10 @@ GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
 {
     if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
         auto keys = m_selected.keys();
-        QList<std::shared_ptr<GetModDependenciesTask::PackDependecny>> selectedVers;
+        QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
         for (auto& task : keys) {
             auto selected = m_selected.constFind(task).value();
-            selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependecny>(selected->getPack(), selected->getVersion()));
+            selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
         }
 
         return makeShared<GetModDependenciesTask>(this, m_instance, model, selectedVers);

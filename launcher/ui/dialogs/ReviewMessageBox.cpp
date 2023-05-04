@@ -60,6 +60,18 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
 
     itemTop->insertChildren(childIndx++, { providerItem });
 
+    if (!info.required_by.isEmpty()) {
+        auto requiredByItem = new QTreeWidgetItem(itemTop);
+        QString req;
+        if (info.required_by.length() == 1)
+            req = info.required_by.back();
+        else
+            req = QString("[%1]").arg(info.required_by.join(", "));
+        requiredByItem->setText(0, tr("Required by: %1").arg(req));
+
+        itemTop->insertChildren(childIndx++, { requiredByItem });
+    }
+
     ui->modTreeWidget->addTopLevelItem(itemTop);
 }
 

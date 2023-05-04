@@ -17,6 +17,7 @@ class ReviewMessageBox : public QDialog {
         QString filename;
         QString custom_file_path{};
         QString provider;
+        QStringList required_by;
     };
 
     void appendResource(ResourceInformation&& info);

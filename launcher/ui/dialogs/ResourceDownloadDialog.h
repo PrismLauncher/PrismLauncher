@@ -83,6 +83,8 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
     [[nodiscard]] virtual GetModDependenciesTask::Ptr getModDependenciesTask() { return nullptr; }
 
+    QStringList getReqiredBy(QList<QVariant> req_by);
+
    protected:
     const std::shared_ptr<ResourceFolderModel> m_base_model;
 
