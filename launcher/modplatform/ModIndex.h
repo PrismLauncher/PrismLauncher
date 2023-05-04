@@ -78,7 +78,6 @@ struct IndexedVersion {
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
-    QString custom_target_folder;
     QList<QVariant> required_by;
 };
 
@@ -106,7 +105,6 @@ struct IndexedPack {
 
     bool versionsLoaded = false;
     QVector<IndexedVersion> versions;
-    QVariant loadedFileId;  // to check for already downloaded mods
 
     // Don't load by default, since some modplatform don't have that info
     bool extraDataLoaded = true;
@@ -122,8 +120,6 @@ struct IndexedPack {
     }
     [[nodiscard]] bool isAnyVersionSelected() const
     {
-        if (loadedFileId.isValid())
-            return true;
         if (!versionsLoaded)
             return false;
 

@@ -6,23 +6,12 @@
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "minecraft/mod/ModFolderModel.h"
-#include "modplatform/ModIndex.h"
 
 #include <QMessageBox>
 
 namespace ResourceDownload {
 
-ModModel::ModModel(BaseInstance const& base_inst, ResourceAPI* api) : ResourceModel(api), m_base_instance(base_inst)
-{
-    auto folder = static_cast<MinecraftInstance const&>(m_base_instance).loaderModList();
-    for (auto mod : folder->allMods()) {
-        auto meta = mod->metadata();
-        ModPlatform::IndexedPack pack{ meta->project_id, meta->provider, meta->name, meta->slug };
-        pack.loadedFileId = meta->file_id;
-        addPack(pack);
-    }
-}
+ModModel::ModModel(BaseInstance const& base_inst, ResourceAPI* api) : ResourceModel(api), m_base_instance(base_inst) {}
 
 /******** Make data requests ********/
 
@@ -35,7 +24,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
     std::optional<std::list<Version>> versions{};
 
-    {  // Version filter
+    { // Version filter
         if (!m_filter->versions.empty())
             versions = m_filter->versions;
     }

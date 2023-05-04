@@ -27,8 +27,9 @@
 ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack pack,
                                            ModPlatform::IndexedVersion version,
                                            const std::shared_ptr<ResourceFolderModel> packs,
-                                           bool is_indexed)
-    : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs)
+                                           bool is_indexed,
+                                           QString custom_target_folder)
+    : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs), m_custom_target_folder(custom_target_folder)
 {
     if (auto model = dynamic_cast<ModFolderModel*>(m_pack_model.get()); model && is_indexed) {
         m_update_task.reset(new LocalModUpdateTask(model->indexDir(), m_pack, m_pack_version));
@@ -40,13 +41,13 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack pack,
     m_filesNetJob.reset(new NetJob(tr("Resource download"), APPLICATION->network()));
     m_filesNetJob->setStatus(tr("Downloading resource:\n%1").arg(m_pack_version.downloadUrl));
 
-    QDir dir { m_pack_model->dir() };
+    QDir dir{ m_pack_model->dir() };
     {
         // FIXME: Make this more generic. May require adding additional info to IndexedVersion,
         //        or adquiring a reference to the base instance.
-        if (!m_pack_version.custom_target_folder.isEmpty()) {
+        if (!m_custom_target_folder.isEmpty()) {
             dir.cdUp();
-            dir.cd(m_pack_version.custom_target_folder);
+            dir.cd(m_custom_target_folder);
         }
     }
 

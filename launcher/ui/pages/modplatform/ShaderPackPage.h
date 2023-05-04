@@ -40,7 +40,7 @@ class ShaderPackResourcePage : public ResourcePage {
 
     [[nodiscard]] bool supportsFiltering() const override { return false; };
 
-    void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&) override;
+    void addResourceToPage(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&, const std::shared_ptr<ResourceFolderModel>) override;
 
     [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
 

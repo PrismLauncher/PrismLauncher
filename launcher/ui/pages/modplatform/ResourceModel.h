@@ -10,6 +10,7 @@
 
 #include "QObjectPtr.h"
 
+#include "ResourceDownloadTask.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "tasks/ConcurrentTask.h"
@@ -29,6 +30,8 @@ class ResourceModel : public QAbstractListModel {
     Q_PROPERTY(QString search_term MEMBER m_search_term WRITE setSearchTerm)
 
    public:
+    using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
+
     ResourceModel(ResourceAPI* api);
     ~ResourceModel() override;
 
@@ -80,8 +83,13 @@ class ResourceModel : public QAbstractListModel {
     /** Gets the icon at the URL for the given index. If it's not fetched yet, fetch it and update when fisinhed. */
     std::optional<QIcon> getIcon(QModelIndex&, const QUrl&);
 
-    void addPack(ModPlatform::IndexedPack& add) { m_selected.append(add); }
-    void removePack(QString& rem);
+    void addPack(ModPlatform::IndexedPack& pack,
+                 ModPlatform::IndexedVersion& version,
+                 const std::shared_ptr<ResourceFolderModel> packs,
+                 bool is_indexed = false,
+                 QString custom_target_folder = {});
+    void removePack(const QString& rem);
+    QList<DownloadTaskPtr> selectedPacks() { return m_selected; }
 
    protected:
     /** Resets the model's data. */
@@ -127,7 +135,7 @@ class ResourceModel : public QAbstractListModel {
     QSet<QUrl> m_failed_icon_actions;
 
     QList<ModPlatform::IndexedPack> m_packs;
-    QList<ModPlatform::IndexedPack> m_selected;
+    QList<DownloadTaskPtr> m_selected;
 
     // HACK: We need this to prevent callbacks from calling the model after it has already been deleted.
     // This leaks a tiny bit of memory per time the user has opened a resource dialog. How to make this better?
