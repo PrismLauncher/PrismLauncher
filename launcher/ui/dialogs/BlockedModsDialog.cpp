@@ -305,6 +305,9 @@ bool BlockedModsDialog::checkValidPath(QString path)
     QString laxFilename(filename);
     laxFilename.replace('+', ' ');
 
+    QString laxFilename2(filename);
+    laxFilename.replace(' ', '+');
+
     auto compare = [](QString fsfilename, QString metadataFilename) {
         return metadataFilename.compare(fsfilename, Qt::CaseInsensitive) == 0;
     };
@@ -314,7 +317,7 @@ bool BlockedModsDialog::checkValidPath(QString path)
             qDebug() << "[Blocked Mods Dialog] Name match found:" << mod.name << "| From path:" << path;
             return true;
         }
-        if (compare(laxFilename, mod.name)) {
+        if (compare(laxFilename, mod.name) || compare(laxFilename2, mod.name)) {
             qDebug() << "[Blocked Mods Dialog] Lax name match found:" << mod.name << "| From path:" << path;
             return true;
         }
