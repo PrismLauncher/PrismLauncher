@@ -134,7 +134,7 @@ QStringList getReqiredBy(QList<ResourceDownloadDialog::DownloadTaskPtr> tasks, Q
                                     [addonId](const ModPlatform::Dependency& d) {
                                         return d.addonId == addonId && d.type == ModPlatform::DependencyType::REQUIRED;
                                     });
-            dep) {
+            dep != deps.end()) {
             req.append(task->getName());
         }
     }
