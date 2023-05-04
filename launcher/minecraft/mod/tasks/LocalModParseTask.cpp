@@ -242,7 +242,7 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
     return details;
 }
 
-ModDetails ReadForgeInfo(QByteArray contents)
+ModDetails ReadForgeInfo(QString fileName)
 {
     ModDetails details;
     // Read the data
@@ -250,7 +250,7 @@ ModDetails ReadForgeInfo(QByteArray contents)
     details.mod_id = "Forge";
     details.homeurl = "http://www.minecraftforge.net/forum/";
     INIFile ini;
-    if (!ini.loadFile(contents))
+    if (!ini.loadFile(fileName))
         return details;
 
     QString major = ini.get("forge.major.number", "0").toString();
@@ -422,7 +422,7 @@ bool processZIP(Mod& mod, ProcessingLevel level)
             return false;
         }
 
-        details = ReadForgeInfo(file.readAll());
+        details = ReadForgeInfo(file.getFileName());
         file.close();
         zip.close();
 

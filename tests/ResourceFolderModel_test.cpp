@@ -36,6 +36,7 @@
 #include <QTest>
 #include <QTemporaryDir>
 #include <QTimer>
+#include "BaseInstance.h"
 
 #include <FileSystem.h>
 
@@ -89,7 +90,9 @@ slots:
 
             QEventLoop loop;
 
-            ModFolderModel m(tempDir.path(), true);
+            InstancePtr instance;
+
+            ModFolderModel m(tempDir.path(), instance, true);
 
             connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
 
@@ -113,7 +116,8 @@ slots:
             QString folder = source + '/';
             QTemporaryDir tempDir;
             QEventLoop loop;
-            ModFolderModel m(tempDir.path(), true);
+            InstancePtr instance;
+            ModFolderModel m(tempDir.path(), instance, true);
 
             connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
 
@@ -136,8 +140,8 @@ slots:
     void test_addFromWatch()
     {
         QString source = QFINDTESTDATA("testdata/ResourceFolderModel");
-
-        ModFolderModel model(source);
+        InstancePtr instance;
+        ModFolderModel model(source, instance);
 
         QCOMPARE(model.size(), 0);
 
@@ -157,8 +161,9 @@ slots:
         QString file_mod = QFINDTESTDATA("testdata/ResourceFolderModel/supercoolmod.jar");
 
         QTemporaryDir tmp;
+        InstancePtr instance;
 
-        ResourceFolderModel model(QDir(tmp.path()));
+        ResourceFolderModel model(QDir(tmp.path()), instance);
 
         QCOMPARE(model.size(), 0);
 
@@ -209,7 +214,8 @@ slots:
         QString file_mod = QFINDTESTDATA("testdata/ResourceFolderModel/supercoolmod.jar");
 
         QTemporaryDir tmp;
-        ResourceFolderModel model(tmp.path());
+        InstancePtr instance;
+        ResourceFolderModel model(tmp.path(), instance);
 
         QCOMPARE(model.size(), 0);
 

@@ -19,6 +19,8 @@
 #include <QMap>
 #include <QStringList>
 #include <QVariant>
+#include <QJsonDocument>
+#include <QJsonArray>
 #include <memory>
 
 class Setting;
