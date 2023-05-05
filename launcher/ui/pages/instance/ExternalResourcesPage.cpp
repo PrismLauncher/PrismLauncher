@@ -96,7 +96,6 @@ void ExternalResourcesPage::itemActivated(const QModelIndex&)
         return;
 
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
-    m_model->setResourceEnabled(selection.indexes(), EnableAction::TOGGLE);
 }
 
 void ExternalResourcesPage::filterTextChanged(const QString& newContents)
