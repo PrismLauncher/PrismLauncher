@@ -68,6 +68,7 @@ public:
         VersionColumn,
         DateColumn,
         ProviderColumn,
+        ImageColumn,
         NUM_COLUMNS
     };
     enum ModStatusAction {

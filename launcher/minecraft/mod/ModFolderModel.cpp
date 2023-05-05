@@ -57,7 +57,7 @@
 ModFolderModel::ModFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER, SortType::NAME };
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
@@ -118,7 +118,9 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
     case Qt::DecorationRole: {
         if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
             return APPLICATION->getThemedIcon("status-yellow");
-
+        if (column == ImageColumn) {
+            return at(row)->icon(QSize(64, 64), Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+        }
         return {};
     }
     case Qt::CheckStateRole:
@@ -151,6 +153,8 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
             return tr("Last changed");
         case ProviderColumn:
             return tr("Provider");
+        case ImageColumn:
+            return tr("Image");
         default:
             return QVariant();
         }

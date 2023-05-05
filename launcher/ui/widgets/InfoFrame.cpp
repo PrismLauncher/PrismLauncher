@@ -88,7 +88,7 @@ void InfoFrame::updateWithMod(Mod const& m)
         setDescription(m.description());
     }
 
-    setImage();
+    setImage(m.icon({64,64}));
 }
 
 void InfoFrame::updateWithResource(const Resource& resource)
