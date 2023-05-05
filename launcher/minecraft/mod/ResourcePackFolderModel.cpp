@@ -35,6 +35,8 @@
  */
 
 #include "ResourcePackFolderModel.h"
+#include <qnamespace.h>
+#include <qsize.h>
 
 #include <QIcon>
 #include <QStyle>
@@ -48,7 +50,7 @@
 ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance)
     : ResourceFolderModel(QDir(dir), instance)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE };
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE, SortType::NAME };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
@@ -84,9 +86,11 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                     return {};
             }
         case Qt::DecorationRole: {
-            if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
+            if (column == NameColumn && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
-
+            if (column == ImageColumn) {
+                return at(row)->image(QSize(64, 64), Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+            }
             return {};
         }
         case Qt::ToolTipRole: {
@@ -94,7 +98,7 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                 //: The string being explained by this is in the format: ID (Lower version - Upper version)
                 return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");
             }
-            if (column == NAME_COLUMN) {
+            if (column == NameColumn) {
                 if (at(row)->isSymLinkUnder(instDirPath())) {
                     return m_resources[row]->internal_id() +
                         tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
@@ -133,6 +137,8 @@ QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orient
                     return tr("Pack Format");
                 case DateColumn:
                     return tr("Last changed");
+                case ImageColumn:
+                    return tr("Image");
                 default:
                     return {};
             }
@@ -148,6 +154,13 @@ QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orient
                     return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");
                 case DateColumn:
                     return tr("The date and time this resource pack was last changed (or added).");
+                default:
+                    return {};
+            }
+        case Qt::SizeHintRole:
+            switch (section) {
+                case ImageColumn:
+                    return QSize(64,0);
                 default:
                     return {};
             }

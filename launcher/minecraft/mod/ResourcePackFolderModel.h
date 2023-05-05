@@ -14,6 +14,7 @@ public:
         NameColumn,
         PackFormatColumn,
         DateColumn,
+        ImageColumn,
         NUM_COLUMNS
     };
 
