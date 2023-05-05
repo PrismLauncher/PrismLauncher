@@ -8,6 +8,7 @@
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *  Copyright (C) 2022 Tayou <tayou@gmx.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -423,7 +424,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // search the dataPath()
         
-        if(!foundLoggingRules && ! isPortable()) {
+        if(!foundLoggingRules && !isPortable() && dirParam.isEmpty()) {
             logRulesPath = QStandardPaths::locate(QStandardPaths::AppDataLocation, logRulesFile);
             if(!logRulesPath.isEmpty()) {
                 qDebug() << "Found" << logRulesPath << "...";
