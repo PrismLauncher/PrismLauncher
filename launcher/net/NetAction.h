@@ -44,8 +44,8 @@
 #include "QObjectPtr.h"
 #include "tasks/Task.h"
 
-static const QStringList s_units_si  {"kb", "MB", "GB", "TB"};
-static const QStringList s_units_kibi {"kiB", "MiB", "Gib", "TiB"};
+static const QStringList s_units_si  {"kB", "MB", "GB", "TB"};
+static const QStringList s_units_kibi {"KiB", "MiB", "Gib", "TiB"};
 
 inline QString humanReadableFileSize(double bytes, bool use_si = false, int decimal_points = 1) {
     const QStringList units = use_si ? s_units_si : s_units_kibi;

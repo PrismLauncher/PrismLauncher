@@ -247,19 +247,20 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 
     // use milliseconds for speed precision
     auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-    auto bytes_recived_since = bytesReceived - m_last_progress_bytes;
-    auto dl_speed_bps = (double)bytes_recived_since / elapsed_ms.count() * 1000;
+    auto bytes_received_since = bytesReceived - m_last_progress_bytes;
+    auto dl_speed_bps = (double)bytes_received_since / elapsed_ms.count() * 1000;
     auto remaing_time_s = (bytesTotal - bytesReceived) / dl_speed_bps;
 
-    // current bytes out of total bytes
+    //: Current amount of bytes downloaded, out of the total amount of bytes in the download
     QString dl_progress = tr("%1  / %2").arg(humanReadableFileSize(bytesReceived)).arg(humanReadableFileSize(bytesTotal));
     
     QString dl_speed_str;
     if (elapsed_ms.count() > 0) {
-        // bytes per second
-        dl_speed_str = tr("%1/s (%2)").arg(humanReadableFileSize(dl_speed_bps)).arg(humanReadableDuration(remaing_time_s));
+        //: Download speed, in bytes per second (remaining download time in parenthesis)
+        dl_speed_str = tr("%1 /s (%2)").arg(humanReadableFileSize(dl_speed_bps)).arg(humanReadableDuration(remaing_time_s));
     } else {
-        dl_speed_str = tr("0 b/s");
+		//: Download speed at 0 bytes per second
+        dl_speed_str = tr("0 B/s");
     } 
 
     setDetails(dl_progress + "\n" + dl_speed_str);

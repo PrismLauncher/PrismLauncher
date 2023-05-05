@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include <qobjectdefs.h>
-#include <qwidget.h>
 #include <QWidget>
 #include "QObjectPtr.h"
 

@@ -65,7 +65,7 @@ void ConcurrentTask::addTask(Task::Ptr task)
 
 void ConcurrentTask::executeTask()
 {
-    // Start One task, startNext hadels starting the up to the m_total_max_size
+    // Start one task, startNext handles starting the up to the m_total_max_size
     // while tracking the number currently being done
     QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
 }
@@ -293,9 +293,9 @@ void ConcurrentTask::updateState()
                       .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
     } else {
         setProgress(m_stepProgress, m_stepTotalProgress);
-        QString status = tr("Please wait ...");
+        QString status = tr("Please wait...");
         if (m_queue.size() > 0) {
-            status = tr("Waiting for 1 task to start ...");
+            status = tr("Waiting for a task to start...");
         } else if (m_doing.size() > 0) {
             status = tr("Executing 1 task:");
         } else if (m_done.size() > 0) {

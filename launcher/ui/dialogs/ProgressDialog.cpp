@@ -45,7 +45,7 @@
 #include "ui/widgets/SubTaskProgressBar.h"
 
 
-// map a value in a numaric range of an arbatray type to between 0 and INT_MAX
+// map a value in a numeric range of an arbitrary type to between 0 and INT_MAX
 // for getting the best precision out of the qt progress bar
 template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
 std::tuple<int, int> map_int_zero_max(T current, T range_max, T range_min)
