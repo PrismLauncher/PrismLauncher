@@ -64,8 +64,11 @@ struct ModLicense {
         auto parts = license.split(' ');
         QStringList notNameParts  = {};
         for (auto part : parts) {
-            auto url = QUrl::fromUserInput(part);
-            if (url.isValid()) {
+            auto url = QUrl(part);
+            if (part.startsWith("(") && part.endsWith(")"))
+                url = QUrl(part.mid(1, part.size() - 2));
+
+            if (url.isValid() && !url.scheme().isEmpty() && !url.host().isEmpty()) {
                 this->url = url.toString();
                 notNameParts.append(part);
                 continue;
@@ -118,6 +121,10 @@ struct ModLicense {
         this->description = other.description;
 
         return *this;
+    }
+
+    bool isEmpty() {
+        return this->name.isEmpty() && this->id.isEmpty() && this->url.isEmpty() && this->description.isEmpty();
     }
 };
 

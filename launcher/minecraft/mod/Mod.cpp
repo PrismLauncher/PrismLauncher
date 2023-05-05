@@ -215,6 +215,15 @@ auto Mod::provider() const -> std::optional<QString>
     return {};
 }
 
+auto Mod::licenses() const -> const QList<ModLicense>&
+{
+    return details().licenses;
+}
+
+ auto Mod::issueTracker() const -> QString
+{
+    return details().issue_tracker;
+}
 
 void Mod::setIcon(QImage new_image) const
 {

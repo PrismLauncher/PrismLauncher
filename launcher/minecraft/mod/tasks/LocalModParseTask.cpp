@@ -184,7 +184,8 @@ ModDetails ReadMCModTOML(QByteArray contents)
     } else if (auto licenseDatum =(*modsTable)["license"].as_string()) {
         license = QString::fromStdString(licenseDatum->get());
     }
-    details.licenses.push_back(ModLicense(license));
+    if (!license.isEmpty())
+        details.licenses.append(ModLicense(license));
 
     QString logoFile = "";
     if (auto logoFileDatum = tomlData["logoFile"].as_string()) {
