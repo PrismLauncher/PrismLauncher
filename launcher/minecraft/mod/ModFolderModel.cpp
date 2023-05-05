@@ -119,7 +119,7 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
         if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
             return APPLICATION->getThemedIcon("status-yellow");
         if (column == ImageColumn) {
-            return at(row)->icon(QSize(64, 64), Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+            return at(row)->icon({32, 32}, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
         }
         return {};
     }

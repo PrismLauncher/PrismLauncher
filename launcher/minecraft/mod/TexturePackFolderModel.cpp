@@ -96,7 +96,7 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
             if (column == NameColumn && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
             if (column == ImageColumn) {
-                return at(row)->image(QSize(64, 64), Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+                return at(row)->image({32, 32}, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }
             return {};
         }
