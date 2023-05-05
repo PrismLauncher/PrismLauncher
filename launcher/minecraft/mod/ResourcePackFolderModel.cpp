@@ -158,12 +158,10 @@ QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orient
                     return {};
             }
         case Qt::SizeHintRole:
-            switch (section) {
-                case ImageColumn:
-                    return QSize(64,0);
-                default:
-                    return {};
+            if (section == ImageColumn) {
+                return QSize(64,0);
             }
+            return {};
         default:
             return {};
     }

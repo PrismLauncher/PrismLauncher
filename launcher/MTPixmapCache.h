@@ -95,7 +95,7 @@ class PixmapCache final : public QObject {
     }
 
     /** 
-     *  Mark that a cach miss occured because of a eviciton if too man of these occure to fast the cache size is increased 
+     *  Mark that a cache miss occurred because of a eviction if too many of these occur too fast the cache size is increased 
      * @return if the cache size was increased
      */
     bool _markCacheMissByEviciton()

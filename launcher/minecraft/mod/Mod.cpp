@@ -206,7 +206,7 @@ void Mod::finishResolvingWithDetails(ModDetails&& details)
     if (!iconPath().isEmpty()) {
         m_pack_image_cache_key.was_read_attempt = false;
     }
-};
+}
 
 auto Mod::provider() const -> std::optional<QString>
 {
@@ -250,7 +250,7 @@ QPixmap Mod::icon(QSize size, Qt::AspectRatioMode mode) const
         qDebug() << "Mod" << name() << "Had it's icon evicted form the cache. reloading...";
         PixmapCache::markCacheMissByEviciton();
     }
-    // Imaged got evicted from the cache or an attmept to load it has not been made. load it and retry.
+    // Image got evicted from the cache or an attempt to load it has not been made. load it and retry.
     m_pack_image_cache_key.was_read_attempt = true;
     ModUtils::loadIconFile(*this);
     return icon(size);

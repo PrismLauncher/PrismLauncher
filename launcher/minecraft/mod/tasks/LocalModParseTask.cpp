@@ -268,12 +268,12 @@ ModDetails ReadFabricModInfo(QByteArray contents)
                     }
                 }
                 if (largest > 0) {
-                    auto key = QString::number(largest) + "x" + largest;
+                    auto key = QString::number(largest) + "x" + QString::number(largest);
                     details.icon_file = obj.value(key).toString();
                 } else { // parsing the sizes failed
                     // take the first
-                    for (auto icon : obj) {
-                        details.icon_file = icon.toString();
+                    for (auto i : obj) {
+                        details.icon_file = i.toString();
                         break;
                     }
                 }
@@ -355,12 +355,12 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
                     }
                 }
                 if (largest > 0) {
-                    auto key = QString::number(largest) + "x" + largest;
+                    auto key = QString::number(largest) + "x" + QString::number(largest);
                     details.icon_file = obj.value(key).toString();
                 } else { // parsing the sizes failed
                     // take the first
-                    for (auto icon : obj) {
-                        details.icon_file = icon.toString();
+                    for (auto i : obj) {
+                        details.icon_file = i.toString();
                         break;
                     }
                 }
