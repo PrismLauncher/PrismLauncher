@@ -38,12 +38,32 @@
 
 #include "ResourceFolderModel.h"
 
+#include "TexturePack.h"
+
 class TexturePackFolderModel : public ResourceFolderModel
 {
     Q_OBJECT
 
 public:
+
+    enum Columns
+    {
+        ActiveColumn = 0,
+        NameColumn,
+        DateColumn,
+        ImageColumn,
+        NUM_COLUMNS
+    };
+
     explicit TexturePackFolderModel(const QString &dir, std::shared_ptr<const BaseInstance> instance);
+
+    [[nodiscard]] QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] int columnCount(const QModelIndex &parent) const override;
+
     [[nodiscard]] Task* createUpdateTask() override;
     [[nodiscard]] Task* createParseTask(Resource&) override;
+
+    RESOURCE_HELPERS(TexturePack)
 };
