@@ -78,7 +78,6 @@ int StringUtils::naturalCompare(const QString& s1, const QString& s2, Qt::CaseSe
     return QString::compare(s1, s2, cs);
 }
 
-/// Truncate a url while keeping its readability py placing the `...` in the middle of the path  
 QString StringUtils::truncateUrlHumanFriendly(QUrl &url, int max_len, bool hard_limit)
 {
     auto display_options = QUrl::RemoveUserInfo | QUrl::RemoveFragment | QUrl::NormalizePathSegments;
