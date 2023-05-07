@@ -46,7 +46,6 @@
 MinecraftPage::MinecraftPage(QWidget *parent) : QWidget(parent), ui(new Ui::MinecraftPage)
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
     loadSettings();
     updateCheckboxStuff();
 }
