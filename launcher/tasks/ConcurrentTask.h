@@ -35,17 +35,17 @@
  */
 #pragma once
 
-#include <QUuid>
 #include <QHash>
 #include <QQueue>
 #include <QSet>
+#include <QUuid>
 #include <memory>
 
 #include "tasks/Task.h"
 
 class ConcurrentTask : public Task {
     Q_OBJECT
-public:
+   public:
     using Ptr = shared_qobject_ptr<ConcurrentTask>;
 
     explicit ConcurrentTask(QObject* parent = nullptr, QString task_name = "", int max_concurrent = 6);
@@ -58,7 +58,7 @@ public:
 
     void addTask(Task::Ptr task);
 
-public slots:
+   public slots:
     bool abort() override;
 
     /** Resets the internal state of the task.
@@ -66,20 +66,19 @@ public slots:
      */
     void clear();
 
-protected
-slots:
+   protected slots:
     void executeTask() override;
 
     virtual void startNext();
 
     void subTaskSucceeded(Task::Ptr);
-    void subTaskFailed(Task::Ptr, const QString &msg);
-    void subTaskStatus(Task::Ptr task, const QString &msg);
-    void subTaskDetails(Task::Ptr task, const QString &msg);
+    void subTaskFailed(Task::Ptr, const QString& msg);
+    void subTaskStatus(Task::Ptr task, const QString& msg);
+    void subTaskDetails(Task::Ptr task, const QString& msg);
     void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
     void subTaskStepProgress(Task::Ptr task, TaskStepProgress const& task_step_progress);
 
-protected:
+   protected:
     // NOTE: This is not thread-safe.
     [[nodiscard]] unsigned int totalSize() const { return m_queue.size() + m_doing.size() + m_done.size(); }
 
@@ -88,13 +87,13 @@ protected:
 
     virtual void updateState();
 
-protected:
+   protected:
     QString m_name;
     QString m_step_status;
 
     QQueue<Task::Ptr> m_queue;
 
-    QHash<Task*, Task::Ptr> m_doing; 
+    QHash<Task*, Task::Ptr> m_doing;
     QHash<Task*, Task::Ptr> m_done;
     QHash<Task*, Task::Ptr> m_failed;
     QHash<Task*, Task::Ptr> m_succeeded;

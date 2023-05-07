@@ -846,7 +846,7 @@ void PackInstallTask::downloadMods()
         emitFailed(reason);
     });
     connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
-    {   
+    {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         abortable = true;
         setProgress(current, total);
