@@ -1,7 +1,44 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 flowln <flowlnlnln@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 #include "StringUtils.h"
 
-#include <cmath>
 #include <QRegularExpression>
+#include <QUuid>
+#include <cmath>
 
 /// If you're wondering where these came from exactly, then know you're not the only one =D
 
@@ -78,7 +115,7 @@ int StringUtils::naturalCompare(const QString& s1, const QString& s2, Qt::CaseSe
     return QString::compare(s1, s2, cs);
 }
 
-QString StringUtils::truncateUrlHumanFriendly(QUrl &url, int max_len, bool hard_limit)
+QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_limit)
 {
     auto display_options = QUrl::RemoveUserInfo | QUrl::RemoveFragment | QUrl::NormalizePathSegments;
     auto str_url = url.toDisplayString(display_options);
@@ -120,18 +157,18 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl &url, int max_len, bool hard_
     }
 
     return url_compact;
-
 }
 
-static const QStringList s_units_si  {"KB", "MB", "GB", "TB"};
-static const QStringList s_units_kibi {"KiB", "MiB", "Gib", "TiB"};
+static const QStringList s_units_si{ "KB", "MB", "GB", "TB" };
+static const QStringList s_units_kibi{ "KiB", "MiB", "Gib", "TiB" };
 
-QString StringUtils::humanReadableFileSize(double bytes, bool use_si, int decimal_points) {
+QString StringUtils::humanReadableFileSize(double bytes, bool use_si, int decimal_points)
+{
     const QStringList units = use_si ? s_units_si : s_units_kibi;
     const int scale = use_si ? 1000 : 1024;
 
     int u = -1;
-    double r = pow(10,  decimal_points);
+    double r = pow(10, decimal_points);
 
     do {
         bytes /= scale;
@@ -139,4 +176,9 @@ QString StringUtils::humanReadableFileSize(double bytes, bool use_si, int decima
     } while (round(abs(bytes) * r) / r >= scale && u < units.length() - 1);
 
     return QString::number(bytes, 'f', 2) + " " + units[u];
+}
+
+QString StringUtils::getRandomAlphaNumeric()
+{
+    return QUuid::createUuid().toString(QUuid::Id128);
 }
