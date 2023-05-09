@@ -1203,10 +1203,10 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 
 void MainWindow::on_actionViewLauncherRootFolder_triggered()
 {
-    QDir rootDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
-    QString DataPath = rootDir.absolutePath();
+    QDir dataDir = QDir::current();
+    QString dataPath = dataDir.absolutePath();
 
-    DesktopServices::openDirectory(DataPath);
+    DesktopServices::openDirectory(dataPath);
 }
 
 void MainWindow::refreshInstances()
