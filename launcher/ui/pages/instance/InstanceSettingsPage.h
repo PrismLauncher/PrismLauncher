@@ -81,6 +81,7 @@ public:
     void updateThresholds();
 
 private slots:
+    void updateRunningStatus(bool running);
     void on_javaDetectBtn_clicked();
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();

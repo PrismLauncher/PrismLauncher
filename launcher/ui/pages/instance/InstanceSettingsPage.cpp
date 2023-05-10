@@ -60,11 +60,15 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
     m_settings = inst->settings();
     ui->setupUi(this);
 
+    // As the signal will (probably) not be triggered once we click edit, let's update it manually instead.
+    updateRunningStatus(m_instance->isRunning());
+
     accountMenu = new QMenu(this);
     // Use undocumented property... https://stackoverflow.com/questions/7121718/create-a-scrollbar-in-a-submenu-qt
     accountMenu->setStyleSheet("QMenu { menu-scrollable: 1; }");
     ui->instanceAccountSelector->setMenu(accountMenu);
 
+    connect(m_instance, &BaseInstance::runningStatusChanged, this, &InstanceSettingsPage::updateRunningStatus);
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
     connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
@@ -74,7 +78,7 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
 
 bool InstanceSettingsPage::shouldDisplay() const
 {
-    return !m_instance->isRunning();
+    return true;
 }
 
 InstanceSettingsPage::~InstanceSettingsPage()
@@ -551,4 +555,9 @@ void InstanceSettingsPage::updateThresholds()
         QPixmap pix = icon.pixmap(height, height);
         ui->labelMaxMemIcon->setPixmap(pix);
     }
+}
+
+void InstanceSettingsPage::updateRunningStatus(bool running)
+{
+    setEnabled(!running);
 }
