@@ -88,11 +88,7 @@ void JavaChecker::performCheck()
     qDebug() << "Running java checker: " + m_path + args.join(" ");;
 
     connect(process.get(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &JavaChecker::finished);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0) // &QProcess::errorOccurred added in 5.6
     connect(process.get(), &QProcess::errorOccurred, this, &JavaChecker::error);
-#else
-    connect(process.get(), &QProcess::error, this, &JavaChecker::error);
-#endif
     connect(process.get(), &QProcess::readyReadStandardOutput, this, &JavaChecker::stdoutReady);
     connect(process.get(), &QProcess::readyReadStandardError, this, &JavaChecker::stderrReady);
     connect(&killTimer, &QTimer::timeout, this, &JavaChecker::timeout);

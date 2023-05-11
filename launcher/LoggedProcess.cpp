@@ -45,11 +45,7 @@ LoggedProcess::LoggedProcess(QObject *parent) : QProcess(parent)
     connect(this, &QProcess::readyReadStandardOutput, this, &LoggedProcess::on_stdOut);
     connect(this, &QProcess::readyReadStandardError, this, &LoggedProcess::on_stdErr);
     connect(this, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &LoggedProcess::on_exit);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0) // &QProcess::errorOccurred added in 5.6
     connect(this, &QProcess::errorOccurred, this, &LoggedProcess::on_error);
-#else
-    connect(this, QOverload<QProcess::ProcessError>::of(&QProcess::error), this, &LoggedProcess::on_error);
-#endif
     connect(this, &QProcess::stateChanged, this, &LoggedProcess::on_stateChange);
 }
 
