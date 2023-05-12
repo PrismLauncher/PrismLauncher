@@ -220,7 +220,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {"show", "Opens the window for the specified instance (by instance ID)", "show"}
     });
     // Has to be positional for some OS to handle that properly
-    parser.addPositionalArgument("urls","import the resource at the given url(s) (same as -I / --import)","[urls...]");
+    parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
     
     parser.addHelpOption();
     parser.addVersionOption();
