@@ -75,7 +75,7 @@ public:
         Enable,
         Toggle
     };
-    ModFolderModel(const QString &dir, bool is_indexed = false, bool create_dir = true);
+    ModFolderModel(const QString &dir, std::shared_ptr<const BaseInstance> instance, bool is_indexed = false, bool create_dir = true);
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 

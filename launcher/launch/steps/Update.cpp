@@ -28,7 +28,9 @@ void Update::executeTask()
     {
         connect(m_updateTask.get(), &Task::finished, this, &Update::updateFinished);
         connect(m_updateTask.get(), &Task::progress, this, &Update::setProgress);
+        connect(m_updateTask.get(), &Task::stepProgress, this, &Update::propogateStepProgress);
         connect(m_updateTask.get(), &Task::status, this, &Update::setStatus);
+        connect(m_updateTask.get(), &Task::details, this, &Update::setDetails);
         emit progressReportingRequest();
         return;
     }

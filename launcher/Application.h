@@ -187,6 +187,10 @@ public:
         return m_rootPath;
     }
 
+    bool isPortable() {
+        return m_portable;
+    }
+
     const Capabilities capabilities() {
         return m_capabilities;
     }
@@ -275,6 +279,7 @@ private:
     QString m_rootPath;
     Status m_status = Application::StartingUp;
     Capabilities m_capabilities;
+    bool m_portable = false; 
 
 #ifdef Q_OS_MACOS
     Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;

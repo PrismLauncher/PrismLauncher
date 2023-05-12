@@ -129,6 +129,16 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
     return mimeData;
 }
 
+QStringList InstanceList::getLinkedInstancesById(const QString &id) const
+{
+    QStringList linkedInstances;
+    for (auto inst : m_instances) {
+        if (inst->isLinkedToInstanceId(id))
+            linkedInstances.append(inst->id());
+    }
+    return linkedInstances;
+}
+
 int InstanceList::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
@@ -787,7 +797,9 @@ class InstanceStaging : public Task {
         connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
         connect(child, &Task::abortStatusChanged, this, &InstanceStaging::setAbortable);
         connect(child, &Task::status, this, &InstanceStaging::setStatus);
+        connect(child, &Task::details, this, &InstanceStaging::setDetails);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
+        connect(child, &Task::stepProgress, this, &InstanceStaging::propogateStepProgress);
         connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
     }
 
@@ -865,7 +877,7 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath()
 {
-    QString key = QUuid::createUuid().toString();
+    QString key = QUuid::createUuid().toString(QUuid::WithoutBraces);
     QString tempDir = ".LAUNCHER_TEMP/";
     QString relPath = FS::PathCombine(tempDir, key);
     QDir rootPath(m_instDir);

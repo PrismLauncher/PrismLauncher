@@ -98,6 +98,7 @@ void InstanceImportTask::executeTask()
 
         connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
         connect(m_filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
+        connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &InstanceImportTask::propogateStepProgress);
         connect(m_filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::downloadFailed);
         connect(m_filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::downloadAborted);
 
@@ -291,7 +292,9 @@ void InstanceImportTask::processFlame()
     });
     connect(inst_creation_task, &Task::failed, this, &InstanceImportTask::emitFailed);
     connect(inst_creation_task, &Task::progress, this, &InstanceImportTask::setProgress);
+    connect(inst_creation_task, &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
     connect(inst_creation_task, &Task::status, this, &InstanceImportTask::setStatus);
+    connect(inst_creation_task, &Task::details, this, &InstanceImportTask::setDetails);
     connect(inst_creation_task, &Task::finished, inst_creation_task, &InstanceCreationTask::deleteLater);
 
     connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);
@@ -382,7 +385,9 @@ void InstanceImportTask::processModrinth()
     });
     connect(inst_creation_task, &Task::failed, this, &InstanceImportTask::emitFailed);
     connect(inst_creation_task, &Task::progress, this, &InstanceImportTask::setProgress);
+    connect(inst_creation_task, &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
     connect(inst_creation_task, &Task::status, this, &InstanceImportTask::setStatus);
+    connect(inst_creation_task, &Task::details, this, &InstanceImportTask::setDetails);
     connect(inst_creation_task, &Task::finished, inst_creation_task, &InstanceCreationTask::deleteLater);
 
     connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);

@@ -43,7 +43,7 @@ class TexturePackFolderModel : public ResourceFolderModel
     Q_OBJECT
 
 public:
-    explicit TexturePackFolderModel(const QString &dir);
+    explicit TexturePackFolderModel(const QString &dir, std::shared_ptr<const BaseInstance> instance);
     [[nodiscard]] Task* createUpdateTask() override;
     [[nodiscard]] Task* createParseTask(Resource&) override;
 };
