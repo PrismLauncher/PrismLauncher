@@ -425,16 +425,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         foundLoggingRules = QFile::exists(logRulesPath);
 
         // search the dataPath()
-        
+        // seach app data standard path
         if(!foundLoggingRules && !isPortable() && dirParam.isEmpty()) {
-            logRulesPath = QStandardPaths::locate(QStandardPaths::AppDataLocation, logRulesFile);
+            logRulesPath = QStandardPaths::locate(QStandardPaths::AppDataLocation, FS::PathCombine("..", logRulesFile));
             if(!logRulesPath.isEmpty()) {
                 qDebug() << "Found" << logRulesPath << "...";
                 foundLoggingRules = true;
             }
         }
-
-        if(!QFile::exists(logRulesPath)) {
+        // seach root path
+        if(!foundLoggingRules) {
            logRulesPath = FS::PathCombine(m_rootPath, logRulesFile); 
             qDebug() << "Testing" << logRulesPath << "...";
             foundLoggingRules = QFile::exists(logRulesPath);

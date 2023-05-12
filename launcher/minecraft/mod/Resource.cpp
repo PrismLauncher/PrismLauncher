@@ -1,6 +1,8 @@
 #include "Resource.h"
 
+
 #include <QRegularExpression>
+#include <QFileInfo>
 
 #include "FileSystem.h"
 
@@ -151,4 +153,22 @@ bool Resource::destroy()
         return true;
 
     return FS::deletePath(m_file_info.filePath());
+}
+
+bool Resource::isSymLinkUnder(const QString& instPath) const 
+{
+    if (isSymLink())
+        return true;
+
+    auto instDir = QDir(instPath);
+
+    auto relAbsPath = instDir.relativeFilePath(m_file_info.absoluteFilePath());
+    auto relCanonPath = instDir.relativeFilePath(m_file_info.canonicalFilePath());
+
+    return relAbsPath != relCanonPath;
+}
+
+bool Resource::isMoreThanOneHardLink() const 
+{
+    return FS::hardLinkCount(m_file_info.absoluteFilePath()) > 1;
 }

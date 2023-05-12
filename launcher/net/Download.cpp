@@ -37,7 +37,6 @@
  */
 
 #include "Download.h"
-#include <QRegularExpression>
 #include <QUrl>
 
 #include <QDateTime>
@@ -45,106 +44,18 @@
 
 #include "ByteArraySink.h"
 #include "ChecksumValidator.h"
-#include "FileSystem.h"
 #include "MetaCacheSink.h"
 
-#include "BuildConfig.h"
 #include "Application.h"
+#include "BuildConfig.h"
 
 #include "net/Logging.h"
 #include "net/NetAction.h"
 
+#include "MMCTime.h"
+#include "StringUtils.h"
+
 namespace Net {
-
-QString truncateUrlHumanFriendly(QUrl &url, int max_len, bool hard_limit = false)
-{   
-    auto display_options = QUrl::RemoveUserInfo | QUrl::RemoveFragment | QUrl::NormalizePathSegments;
-    auto str_url = url.toDisplayString(display_options);
-    if (str_url.length() <= max_len)
-        return str_url;
-
-    /* this is a PCRE regular expression that splits a URL (given by the display rules above) into 5 capture groups
-     * the scheme (ie https://) is group 1
-     * the host (with trailing /) is group 2
-     * the first part of the path (with trailing /) is group 3
-     * the last part of the path (with leading /) is group 5
-     * the remainder of the URL is in the .* and in group 4
-     *
-     * See: https://regex101.com/r/inHkek/1
-     * for an interactive breakdown
-     */ 
-    QRegularExpression re(R"(^([\w]+:\/\/)([\w._-]+\/)([\w._-]+\/)(.*)(\/[^]+[^]+)$)");
-    
-    auto url_compact = QString(str_url);
-    url_compact.replace(re, "\\1\\2\\3...\\5");
-    if (url_compact.length() >= max_len) {
-        url_compact = QString(str_url);
-        url_compact.replace(re, "\\1\\2...\\5");
-    }
-
-
-    if ((url_compact.length() >= max_len) && hard_limit) {
-        auto to_remove = url_compact.length() - max_len + 3;
-        url_compact.remove(url_compact.length() - to_remove - 1, to_remove);
-        url_compact.append("...");
-    }
-
-    return url_compact;
-
-}
-
-QString humanReadableDuration(double duration, int precision = 0) {
-
-    using days = std::chrono::duration<int, std::ratio<86400>>;
-
-    QString outStr;
-    QTextStream os(&outStr);
-
-    auto std_duration = std::chrono::duration<double>(duration);
-    auto d = std::chrono::duration_cast<days>(std_duration);
-    std_duration -= d;
-    auto h = std::chrono::duration_cast<std::chrono::hours>(std_duration);
-    std_duration -= h;
-    auto m = std::chrono::duration_cast<std::chrono::minutes>(std_duration);
-    std_duration -= m;
-    auto s = std::chrono::duration_cast<std::chrono::seconds>(std_duration);
-    std_duration -= s;
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std_duration);
-
-    auto dc = d.count();
-    auto hc = h.count();
-    auto mc = m.count();
-    auto sc = s.count();
-    auto msc = ms.count();
-
-    if (dc) {
-        os << dc << "days";
-    }
-    if (hc) {
-        if (dc)
-            os << " ";
-        os << qSetFieldWidth(2) << hc << "h";
-    }
-    if (mc) {
-        if (dc || hc)
-            os << " ";
-        os << qSetFieldWidth(2) << mc << "m";
-    }
-    if (dc || hc || mc || sc) {
-        if (dc || hc || mc)
-            os << " ";
-        os << qSetFieldWidth(2) << sc << "s";
-    }
-    if ((msc && (precision > 0)) || !(dc || hc || mc || sc)) {
-        if (dc || hc || mc || sc)
-            os << " ";
-        os << qSetFieldWidth(0) << qSetRealNumberPrecision(precision) << msc << "ms";
-    }
-
-    os.flush();
-
-    return outStr;
-}
 
 auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
@@ -185,7 +96,7 @@ void Download::addValidator(Validator* v)
 
 void Download::executeTask()
 {
-    setStatus(tr("Downloading %1").arg(truncateUrlHumanFriendly(m_url, 100)));
+    setStatus(tr("Downloading %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(taskDownloadLogC) << getUid().toString() << "Attempt to start an aborted Download:" << m_url.toString();
@@ -222,12 +133,12 @@ void Download::executeTask()
         if (!token.isNull())
             request.setRawHeader("Authorization", token.toUtf8());
     }
-    
+
     m_last_progress_time = m_clock.now();
     m_last_progress_bytes = 0;
 
     QNetworkReply* rep = m_network->get(request);
-    
+
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::downloadProgress, this, &Download::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &Download::downloadFinished);
@@ -252,16 +163,19 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     auto remaing_time_s = (bytesTotal - bytesReceived) / dl_speed_bps;
 
     //: Current amount of bytes downloaded, out of the total amount of bytes in the download
-    QString dl_progress = tr("%1  / %2").arg(humanReadableFileSize(bytesReceived)).arg(humanReadableFileSize(bytesTotal));
-    
+    QString dl_progress =
+        tr("%1 / %2").arg(StringUtils::humanReadableFileSize(bytesReceived)).arg(StringUtils::humanReadableFileSize(bytesTotal));
+
     QString dl_speed_str;
     if (elapsed_ms.count() > 0) {
+        auto str_eta = bytesTotal > 0 ? Time::humanReadableDuration(remaing_time_s) : tr("unknown");
         //: Download speed, in bytes per second (remaining download time in parenthesis)
-        dl_speed_str = tr("%1 /s (%2)").arg(humanReadableFileSize(dl_speed_bps)).arg(humanReadableDuration(remaing_time_s));
+        dl_speed_str =
+            tr("%1 /s (%2)").arg(StringUtils::humanReadableFileSize(dl_speed_bps)).arg(str_eta);
     } else {
-		//: Download speed at 0 bytes per second
+        //: Download speed at 0 bytes per second
         dl_speed_str = tr("0 B/s");
-    } 
+    }
 
     setDetails(dl_progress + "\n" + dl_speed_str);
 
@@ -290,7 +204,8 @@ void Download::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
     for (auto error : errors) {
-        qCCritical(taskDownloadLogC) << getUid().toString() << "Download" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
+        qCCritical(taskDownloadLogC) << getUid().toString() << "Download" << m_url.toString() << "SSL Error #" << i << " : "
+                                     << error.errorString();
         auto cert = error.certificate();
         qCCritical(taskDownloadLogC) << getUid().toString() << "Certificate in question:\n" << cert.toText();
         i++;

@@ -281,6 +281,7 @@ Section "@Launcher_DisplayName@"
   SetOutPath $INSTDIR
 
   File "@Launcher_APP_BINARY_NAME@.exe"
+  File "@Launcher_APP_BINARY_NAME@_filelink.exe"
   File "qt.conf"
   File "qtlogging.ini"
   File *.dll
@@ -366,6 +367,7 @@ Section "Uninstall"
   DeleteRegKey HKCU SOFTWARE\@Launcher_CommonName@
 
   Delete $INSTDIR\@Launcher_APP_BINARY_NAME@.exe
+  Delete $INSTDIR\@Launcher_APP_BINARY_NAME@_filelink.exe
   Delete $INSTDIR\qt.conf
   Delete $INSTDIR\*.dll
 

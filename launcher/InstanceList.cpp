@@ -129,6 +129,16 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
     return mimeData;
 }
 
+QStringList InstanceList::getLinkedInstancesById(const QString &id) const
+{
+    QStringList linkedInstances;
+    for (auto inst : m_instances) {
+        if (inst->isLinkedToInstanceId(id))
+            linkedInstances.append(inst->id());
+    }
+    return linkedInstances;
+}
+
 int InstanceList::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
@@ -867,7 +877,7 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath()
 {
-    QString key = QUuid::createUuid().toString();
+    QString key = QUuid::createUuid().toString(QUuid::WithoutBraces);
     QString tempDir = ".LAUNCHER_TEMP/";
     QString relPath = FS::PathCombine(tempDir, key);
     QDir rootPath(m_instDir);

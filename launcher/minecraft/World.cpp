@@ -56,6 +56,8 @@
 
 #include <optional>
 
+#include "FileSystem.h"
+
 using std::optional;
 using std::nullopt;
 
@@ -566,4 +568,26 @@ bool World::destroy()
 bool World::operator==(const World &other) const
 {
     return is_valid == other.is_valid && folderName() == other.folderName();
+}
+
+bool World::isSymLinkUnder(const QString& instPath) const
+{
+    if (isSymLink())
+        return true;
+
+    auto instDir = QDir(instPath);
+
+    auto relAbsPath = instDir.relativeFilePath(m_containerFile.absoluteFilePath());
+    auto relCanonPath = instDir.relativeFilePath(m_containerFile.canonicalFilePath());
+
+    return relAbsPath != relCanonPath;
+}
+
+bool World::isMoreThanOneHardLink() const
+{
+    if (m_containerFile.isDir())
+    {
+        return FS::hardLinkCount(QDir(m_containerFile.absoluteFilePath()).filePath("level.dat")) > 1;
+    }
+    return FS::hardLinkCount(m_containerFile.absoluteFilePath()) > 1;
 }

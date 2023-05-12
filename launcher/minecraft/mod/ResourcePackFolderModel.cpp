@@ -36,12 +36,17 @@
 
 #include "ResourcePackFolderModel.h"
 
+#include <QIcon>
+#include <QStyle>
+
+#include "Application.h"
 #include "Version.h"
 
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 #include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
 
-ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir) : ResourceFolderModel(QDir(dir))
+ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance)
+    : ResourceFolderModel(QDir(dir), instance)
 {
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE };
 }
@@ -78,11 +83,28 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                 default:
                     return {};
             }
+        case Qt::DecorationRole: {
+            if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
+                return APPLICATION->getThemedIcon("status-yellow");
 
+            return {};
+        }
         case Qt::ToolTipRole: {
             if (column == PackFormatColumn) {
                 //: The string being explained by this is in the format: ID (Lower version - Upper version)
                 return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");
+            }
+            if (column == NAME_COLUMN) {
+                if (at(row)->isSymLinkUnder(instDirPath())) {
+                    return m_resources[row]->internal_id() +
+                        tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
+                           "\nCanonical Path: %1")
+                            .arg(at(row)->fileinfo().canonicalFilePath());;
+                }
+                if (at(row)->isMoreThanOneHardLink()) {
+                    return m_resources[row]->internal_id() +
+                        tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
+                }
             }
             return m_resources[row]->internal_id();
         }

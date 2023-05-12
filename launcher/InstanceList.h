@@ -154,6 +154,8 @@ public:
     QStringList mimeTypes() const override;
     QMimeData *mimeData(const QModelIndexList &indexes) const override;
 
+    QStringList getLinkedInstancesById(const QString &id) const;
+
 signals:
     void dataIsInvalid();
     void instancesChanged();
