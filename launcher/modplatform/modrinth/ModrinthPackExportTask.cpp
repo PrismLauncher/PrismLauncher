@@ -64,6 +64,7 @@ bool ModrinthPackExportTask::abort()
 
     if (buildZipFuture.isRunning()) {
         buildZipFuture.cancel();
+        // NOTE: Here we don't do `emitAborted()` because it will be done when `buildZipFuture` actually cancels, which may not occur immediately.
         return true;
     }
     return false;
