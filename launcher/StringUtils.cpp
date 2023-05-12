@@ -160,7 +160,7 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_
 }
 
 static const QStringList s_units_si{ "KB", "MB", "GB", "TB" };
-static const QStringList s_units_kibi{ "KiB", "MiB", "Gib", "TiB" };
+static const QStringList s_units_kibi{ "KiB", "MiB", "GiB", "TiB" };
 
 QString StringUtils::humanReadableFileSize(double bytes, bool use_si, int decimal_points)
 {
