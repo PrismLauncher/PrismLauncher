@@ -235,12 +235,12 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_instanceIdToShowWindowOf = parser.value("show");
 
     for (auto url : parser.values("import")){
-        addImportUrl(url);
+        m_urlsToImport.append(normalizeImportUrl(url));
     }
 
     // treat unspecified positional arguments as import urls
     for (auto url : parser.positionalArguments()) {
-        addImportUrl(url);
+        m_urlsToImport.append(normalizeImportUrl(url));
     }
 
     // error if --launch is missing with --server or --profile
@@ -345,12 +345,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 activate.command = "activate";
                 m_peerInstance->sendMessage(activate.serialize(), timeout);
 
-                if(!m_urlsToImport.isEmpty())
-                {
+                if (!m_urlsToImport.isEmpty()) {
                     for (auto url : m_urlsToImport) {
                         ApplicationMessage import;
                         import.command = "import";
-                        import.args.insert("path", url.toString());
+                        import.args.insert("url", url.toString());
                         m_peerInstance->sendMessage(import.serialize(), timeout);
                     }
                 }
@@ -1071,27 +1070,16 @@ void Application::messageReceived(const QByteArray& message)
 
     auto & command = received.command;
 
-    if(command == "activate")
-    {
+    if (command == "activate") {
         showMainWindow();
-    }
-    else if(command == "import")
-    {
-        QString path = received.args["path"];
-        if(path.isEmpty())
-        {
+    } else if (command == "import") {
+        QString url = received.args["url"];
+        if (url.isEmpty()) {
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        auto local_file = QFileInfo(path);
-        if (local_file.exists()) {
-            m_mainWindow->processURLs({ QUrl::fromLocalFile(local_file.absoluteFilePath()) });        
-        } else {
-            m_mainWindow->processURLs({ QUrl::fromUserInput(path) });
-        }
-    }
-    else if(command == "launch")
-    {
+        m_mainWindow->processURLs({ normalizeImportUrl(url) });
+    } else if (command == "launch") {
         QString id = received.args["id"];
         QString server = received.args["server"];
         QString profile = received.args["profile"];
@@ -1131,9 +1119,7 @@ void Application::messageReceived(const QByteArray& message)
             serverObject,
             accountObject
         );
-    }
-    else
-    {
+    } else {
         qWarning() << "Received invalid message" << message;
     }
 }
@@ -1741,13 +1727,12 @@ void Application::triggerUpdateCheck()
     }
 }
 
-void Application::addImportUrl(QString const& url)
+QUrl Application::normalizeImportUrl(QString const& url)
 {
     auto local_file = QFileInfo(url);
-    if (local_file.exists()){
-        m_urlsToImport.append(QUrl::fromLocalFile(local_file.absoluteFilePath()));
+    if (local_file.exists()) {
+        return QUrl::fromLocalFile(local_file.absoluteFilePath());
     } else {
-        m_urlsToImport.append(QUrl::fromUserInput(url));
+        return QUrl::fromUserInput(url);
     }
 }
-

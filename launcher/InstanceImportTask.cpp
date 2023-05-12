@@ -90,7 +90,7 @@ void InstanceImportTask::executeTask()
         setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
         m_downloadRequired = true;
 
-            downloadFromUrl();
+        downloadFromUrl();
     }
 }
 

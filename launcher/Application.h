@@ -211,7 +211,7 @@ public:
 
     int suitableMaxMem();
 
-    void addImportUrl(QString const& url);
+    QUrl normalizeImportUrl(QString const& url);
 
 signals:
     void updateAllowedChanged(bool status);

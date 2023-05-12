@@ -102,16 +102,13 @@ void ImportPage::openedImpl()
 
 void ImportPage::updateState()
 {
-    if(!isOpened)
-    {
+    if (!isOpened) {
         return;
     }
-    if(ui->modpackEdit->hasAcceptableInput())
-    {
+    if (ui->modpackEdit->hasAcceptableInput()) {
         QString input = ui->modpackEdit->text();
         auto url = QUrl::fromUserInput(input);
-        if(url.isLocalFile())
-        {
+        if (url.isLocalFile()) {
             // FIXME: actually do some validation of what's inside here... this is fake AF
             QFileInfo fi(input);
 
@@ -120,15 +117,12 @@ void ImportPage::updateState()
             // mrpack is a modrinth pack
             bool isMRPack = fi.suffix() == "mrpack";
 
-            if(fi.exists() && (isZip || isMRPack))
-            {
+            if (fi.exists() && (isZip || isMRPack)) {
                 QFileInfo fi(url.fileName());
-                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url,this));
+                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this));
                 dialog->setSuggestedIcon("default");
             }
-        }
-        else if (url.scheme() == "curseforge")
-        {
+        } else if (url.scheme() == "curseforge") {
             // need to find the download link for the modpack
             // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
             QUrlQuery query(url);
@@ -139,12 +133,9 @@ void ImportPage::updateState()
             req->addNetAction(
                 Net::Download::makeByteArray(QUrl(QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(addonId, fileId)), array));
 
-            connect(req.get(), &NetJob::finished, [array] {
-                delete array;
-            });
-            connect(req.get(), &NetJob::failed, this, [this](QString reason){
-                CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            });
+            connect(req.get(), &NetJob::finished, [array] { delete array; });
+            connect(req.get(), &NetJob::failed, this,
+                    [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
             connect(req.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
                 qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                 auto doc = Json::requireDocument(*array);
@@ -156,12 +147,15 @@ void ImportPage::updateState()
                     auto dl_url = QUrl(
                         Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl", "", "downloadUrl"));
                     if (!dl_url.isValid()) {
-                        CustomMessageBox::selectable(this, tr("Error"), tr("The modpack is blocked ! Please download it manually"), QMessageBox::Critical)->show();
+                        CustomMessageBox::selectable(this, tr("Error"), tr("The modpack is blocked ! Please download it manually"),
+                                                     QMessageBox::Critical)
+                            ->show();
                         return;
                     }
 
                     QFileInfo dl_file(dl_url.fileName());
-                    QString pack_name = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "displayName", dl_file.completeBaseName(), "displayName");
+                    QString pack_name = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "displayName",
+                                                           dl_file.completeBaseName(), "displayName");
 
                     QMap<QString, QString> extra_info;
                     extra_info.insert("pack_id", addonId);
@@ -169,7 +163,7 @@ void ImportPage::updateState()
 
                     dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, this, std::move(extra_info)));
                     dialog->setSuggestedIcon("default");
-                    
+
                 } else {
                     CustomMessageBox::selectable(this, tr("Error"), tr("This url isn't a valid modpack !"), QMessageBox::Critical)->show();
                 }
@@ -178,24 +172,18 @@ void ImportPage::updateState()
             dlUrlDialod.setSkipButton(true, tr("Abort"));
             dlUrlDialod.execWithTask(req.get());
             return;
-        }
-        else
-        {
-            
-
-            if(input.endsWith("?client=y")) {
+        } else {
+            if (input.endsWith("?client=y")) {
                 input.chop(9);
                 input.append("/file");
                 url = QUrl::fromUserInput(input);
             }
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
-            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url,this));
+            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this));
             dialog->setSuggestedIcon("default");
         }
-    }
-    else
-    {
+    } else {
         dialog->setSuggestedPack();
     }
 }
