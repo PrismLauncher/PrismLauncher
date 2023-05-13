@@ -81,6 +81,7 @@ void PackInstallTask::downloadPack()
     connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
     connect(netJobContainer.get(), &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
+    connect(netJobContainer.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
     connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
 
     netJobContainer->start();

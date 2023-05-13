@@ -12,6 +12,8 @@ html/
 CMakeLists.txt.user
 CMakeLists.txt.user.*
 CMakeSettings.json
+/CMakeFiles
+CMakeCache.txt
 /.project
 /.settings
 /.idea
@@ -23,10 +25,6 @@ Debug
 # Build dirs
 build
 /build-*
-
-# direnv / Nix
-.direnv/
-.pre-commit-config.yaml
 
 # Install dirs
 install
@@ -48,7 +46,9 @@ run/
 .cache/
 
 # Nix/NixOS
-result/
+.direnv/
+.pre-commit-config.yaml
+result
 
 # Flatpak
 .flatpak-builder

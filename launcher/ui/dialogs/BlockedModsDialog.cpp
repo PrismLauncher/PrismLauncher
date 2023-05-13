@@ -39,7 +39,6 @@
 #include <QFileInfo>
 #include <QMimeData>
 #include <QPushButton>
-#include <QMimeData>
 #include <QStandardPaths>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
@@ -89,11 +88,11 @@ void BlockedModsDialog::dragEnterEvent(QDragEnterEvent* e)
 void BlockedModsDialog::dropEvent(QDropEvent* e)
 {
     for (QUrl& url : e->mimeData()->urls()) {
-        if (url.scheme().isEmpty()) { // ensure isLocalFile() works correctly
+        if (url.scheme().isEmpty()) {  // ensure isLocalFile() works correctly
             url.setScheme("file");
         }
 
-        if (!url.isLocalFile()) { // can't drop external files here.
+        if (!url.isLocalFile()) {  // can't drop external files here.
             continue;
         }
 
@@ -172,7 +171,7 @@ void BlockedModsDialog::update()
     }
 }
 
-/// @brief Signal fired when a watched direcotry has changed
+/// @brief Signal fired when a watched directory has changed
 /// @param path the path to the changed directory
 void BlockedModsDialog::directoryChanged(QString path)
 {
@@ -186,8 +185,29 @@ void BlockedModsDialog::setupWatch()
 {
     const QString downloadsFolder = APPLICATION->settings()->get("DownloadsDir").toString();
     const QString modsFolder = APPLICATION->settings()->get("CentralModsDir").toString();
-    m_watcher.addPath(downloadsFolder);
-    m_watcher.addPath(modsFolder);
+    const bool downloadsFolderWatchRecursive = APPLICATION->settings()->get("DownloadsDirWatchRecursive").toBool();
+    watchPath(downloadsFolder, downloadsFolderWatchRecursive);
+    watchPath(modsFolder, true);
+}
+
+void BlockedModsDialog::watchPath(QString path, bool watch_recursive)
+{
+    auto to_watch = QFileInfo(path);
+    auto to_watch_path = to_watch.canonicalFilePath();
+    if (m_watcher.directories().contains(to_watch_path))
+        return;  // don't watch the same path twice (no loops!)
+
+    qDebug() << "[Blocked Mods Dialog] Adding Watch Path:" << path;
+    m_watcher.addPath(to_watch_path);
+
+    if (!to_watch.isDir() || !watch_recursive)
+        return;
+
+    QDirIterator it(to_watch_path, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+    while (it.hasNext()) {
+        QString watch_dir = QDir(it.next()).canonicalPath();  // resolve symlinks and relative paths
+        watchPath(watch_dir, watch_recursive);
+    }
 }
 
 /// @brief scan all watched folder
@@ -221,7 +241,7 @@ void BlockedModsDialog::scanPath(QString path, bool start_task)
     }
 }
 
-/// @brief add a hashing task for the file located at path, add the path to the pending set if the hasing task is already running
+/// @brief add a hashing task for the file located at path, add the path to the pending set if the hashing task is already running
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::addHashTask(QString path)
 {
@@ -281,11 +301,35 @@ bool BlockedModsDialog::checkValidPath(QString path)
 {
     const QFileInfo file = QFileInfo(path);
     const QString filename = file.fileName();
-    QString laxFilename(filename);
-    laxFilename.replace('+', ' ');
 
-    auto compare = [](QString fsfilename, QString metadataFilename) {
-        return metadataFilename.compare(fsfilename, Qt::CaseInsensitive) == 0;
+    auto compare = [](QString fsFilename, QString metadataFilename) {
+        return metadataFilename.compare(fsFilename, Qt::CaseInsensitive) == 0;
+    };
+
+    // super lax compare (but not fuzzy)
+    // convert to lowercase
+    // convert all speratores to whitespace
+    // simplify sequence of internal whitespace to a single space
+    // efectivly compare two strings ignoring all separators and case
+    auto laxCompare = [](QString fsfilename, QString metadataFilename) {
+        // allowed character seperators
+        QList<QChar> allowedSeperators = { '-', '+', '.' , '_'};
+
+        // copy in lowercase
+        auto fsName = fsfilename.toLower();
+        auto metaName = metadataFilename.toLower();
+
+        // replace all potential allowed seperatores with whitespace
+        for (auto sep : allowedSeperators) {
+            fsName = fsName.replace(sep, ' ');
+            metaName = metaName.replace(sep, ' ');
+        }
+
+        // remove extraneous whitespace
+        fsName = fsName.simplified();
+        metaName = metaName.simplified();
+
+        return fsName.compare(metaName) == 0;
     };
 
     for (auto& mod : m_mods) {
@@ -293,7 +337,7 @@ bool BlockedModsDialog::checkValidPath(QString path)
             qDebug() << "[Blocked Mods Dialog] Name match found:" << mod.name << "| From path:" << path;
             return true;
         }
-        if (compare(laxFilename, mod.name)) {
+        if (laxCompare(filename, mod.name)) {
             qDebug() << "[Blocked Mods Dialog] Lax name match found:" << mod.name << "| From path:" << path;
             return true;
         }
@@ -328,7 +372,7 @@ void BlockedModsDialog::validateMatchedMods()
     }
 }
 
-/// @brief run hash task or mark a pending run if it is already runing
+/// @brief run hash task or mark a pending run if it is already running
 void BlockedModsDialog::runHashTask()
 {
     if (!m_hashing_task->isRunning()) {

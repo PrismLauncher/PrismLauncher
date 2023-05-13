@@ -53,6 +53,7 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack pack,
     m_filesNetJob->addNetAction(Net::Download::makeFile(m_pack_version.downloadUrl, dir.absoluteFilePath(getFilename())));
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &ResourceDownloadTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &ResourceDownloadTask::downloadProgressChanged);
+    connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &ResourceDownloadTask::propogateStepProgress);
     connect(m_filesNetJob.get(), &NetJob::failed, this, &ResourceDownloadTask::downloadFailed);
 
     addTask(m_filesNetJob);
