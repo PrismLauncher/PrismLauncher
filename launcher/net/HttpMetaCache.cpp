@@ -57,7 +57,7 @@ HttpMetaCache::HttpMetaCache(QString path) : QObject(), m_index_file(path)
     saveBatchingTimer.setSingleShot(true);
     saveBatchingTimer.setTimerType(Qt::VeryCoarseTimer);
 
-    connect(&saveBatchingTimer, SIGNAL(timeout()), SLOT(SaveNow()));
+    connect(&saveBatchingTimer, &QTimer::timeout, this, &HttpMetaCache::SaveNow);
 }
 
 HttpMetaCache::~HttpMetaCache()

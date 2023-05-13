@@ -235,9 +235,13 @@ namespace Net {
         QNetworkReply* rep = m_network->post(request, m_post_data);
 
         m_reply.reset(rep);
-        connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));
-        connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
-        connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+        connect(rep, &QNetworkReply::downloadProgress, this,  &Upload::downloadProgress);
+        connect(rep, &QNetworkReply::finished, this, &Upload::downloadFinished);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+        connect(rep, &QNetworkReply::errorOccurred, this, &Upload::downloadError);
+#else
+        connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &Upload::downloadError);
+#endif
         connect(rep, &QNetworkReply::sslErrors, this, &Upload::sslErrors);
         connect(rep, &QNetworkReply::readyRead, this, &Upload::downloadReadyRead);
     }

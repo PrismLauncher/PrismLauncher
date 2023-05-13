@@ -68,8 +68,8 @@ void JProfiler::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
     profiler->setArguments(profilerArgs);
     profiler->setProgram(profilerProgram);
 
-    connect(profiler, SIGNAL(started()), SLOT(profilerStarted()));
-    connect(profiler, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(profilerFinished(int,QProcess::ExitStatus)));
+    connect(profiler, &QProcess::started, this, &JProfiler::profilerStarted);
+    connect(profiler, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &JProfiler::profilerFinished);
 
     m_profilerProcess = profiler;
     profiler->start();

@@ -132,11 +132,10 @@ bool SettingsObject::reload()
 
 void SettingsObject::connectSignals(const Setting &setting)
 {
-    connect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)),
-            SLOT(changeSetting(const Setting &, QVariant)));
-    connect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)),
+    connect(&setting, &Setting::SettingChanged, this, &SettingsObject::changeSetting);
+    connect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)), this,
             SIGNAL(SettingChanged(const Setting &, QVariant)));
 
-    connect(&setting, SIGNAL(settingReset(Setting)), SLOT(resetSetting(const Setting &)));
-    connect(&setting, SIGNAL(settingReset(Setting)), SIGNAL(settingReset(const Setting &)));
+    connect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
+    connect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting &)));
 }

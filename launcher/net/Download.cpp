@@ -142,10 +142,10 @@ void Download::executeTask()
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::downloadProgress, this, &Download::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &Download::downloadFinished);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+    connect(rep, &QNetworkReply::errorOccurred, this, &Download::downloadError);
 #else
-    connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &Download::downloadError);
 #endif
     connect(rep, &QNetworkReply::sslErrors, this, &Download::sslErrors);
     connect(rep, &QNetworkReply::readyRead, this, &Download::downloadReadyRead);
