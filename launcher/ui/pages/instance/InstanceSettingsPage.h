@@ -75,7 +75,6 @@ public:
     {
         return "Instance-settings";
     }
-    virtual bool shouldDisplay() const override;
     void retranslate() override;
 
     void updateThresholds();

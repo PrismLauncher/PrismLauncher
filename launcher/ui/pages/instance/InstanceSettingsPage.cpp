@@ -76,11 +76,6 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
     updateThresholds();
 }
 
-bool InstanceSettingsPage::shouldDisplay() const
-{
-    return true;
-}
-
 InstanceSettingsPage::~InstanceSettingsPage()
 {
     delete ui;
