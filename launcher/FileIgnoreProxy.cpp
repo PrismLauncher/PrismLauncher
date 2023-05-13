@@ -129,12 +129,7 @@ bool FileIgnoreProxy::setData(const QModelIndex& index, const QVariant& value, i
 
 QString FileIgnoreProxy::relPath(const QString& path) const
 {
-    QString prefix = QDir().absoluteFilePath(root);
-    prefix += '/';
-    if (!path.startsWith(prefix)) {
-        return QString();
-    }
-    return path.mid(prefix.size());
+    return QDir(root).relativeFilePath(path);
 }
 
 bool FileIgnoreProxy::setFilterState(QModelIndex index, Qt::CheckState state)
