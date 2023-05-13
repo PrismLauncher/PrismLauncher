@@ -67,11 +67,15 @@ bool ModrinthPackExportTask::abort()
         // NOTE: Here we don't do `emitAborted()` because it will be done when `buildZipFuture` actually cancels, which may not occur immediately.
         return true;
     }
+
     return false;
 }
 
 void ModrinthPackExportTask::collectFiles()
 {
+    setAbortable(false);
+    QCoreApplication::processEvents();
+
     files.clear();
     if (!MMCZip::collectFileListRecursively(instance->gameRoot(), nullptr, &files, filter)) {
         emitFailed(tr("Could not search for files"));
@@ -91,6 +95,8 @@ void ModrinthPackExportTask::collectFiles()
 void ModrinthPackExportTask::collectHashes()
 {
     for (const QFileInfo& file : files) {
+        QCoreApplication::processEvents();
+
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
         if (!std::any_of(PREFIXES.begin(), PREFIXES.end(),
@@ -149,6 +155,8 @@ void ModrinthPackExportTask::collectHashes()
 
 void ModrinthPackExportTask::makeApiRequest()
 {
+    setAbortable(true);
+
     if (pendingHashes.isEmpty())
         buildZip();
     else {
@@ -186,7 +194,8 @@ void ModrinthPackExportTask::parseApiResponse(const QByteArray* response)
             }
         }
     } catch (const Json::JsonException& e) {
-        qWarning() << "Failed to parse versions response" << e.what();
+        emitFailed(tr("Failed to parse versions response: %1").arg(e.what()));
+        return;
     }
     pendingHashes.clear();
     buildZip();
@@ -194,7 +203,7 @@ void ModrinthPackExportTask::parseApiResponse(const QByteArray* response)
 
 void ModrinthPackExportTask::buildZip()
 {
-    setStatus("Adding files...");
+    setStatus(tr("Adding files..."));
 
     buildZipFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
         QuaZip zip(output);

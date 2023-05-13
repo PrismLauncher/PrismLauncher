@@ -45,7 +45,6 @@
 #include <QDebug>
 #include <QSaveFile>
 #include <QStack>
-#include "StringUtils.h"
 #include "SeparatorPrefixTree.h"
 #include "Application.h"
 #include <icons/IconList.h>
@@ -218,5 +217,3 @@ void ExportInstanceDialog::savePackIgnore()
         qWarning() << e.cause();
     }
 }
-
-#include "ExportInstanceDialog.moc"
