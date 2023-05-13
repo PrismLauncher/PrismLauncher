@@ -150,13 +150,12 @@ void ModrinthPackExportTask::collectHashes()
         pendingHashes[relative] = sha512.result().toHex();
     }
 
+    setAbortable(true);
     makeApiRequest();
 }
 
 void ModrinthPackExportTask::makeApiRequest()
 {
-    setAbortable(true);
-
     if (pendingHashes.isEmpty())
         buildZip();
     else {
