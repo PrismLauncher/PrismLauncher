@@ -33,10 +33,12 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
- 
+
 #include "StringUtils.h"
 
+#include <QRegularExpression>
 #include <QUuid>
+#include <cmath>
 
 /// If you're wondering where these came from exactly, then know you're not the only one =D
 
@@ -111,6 +113,69 @@ int StringUtils::naturalCompare(const QString& s1, const QString& s2, Qt::CaseSe
 
     // The two strings are the same (02 == 2) so fall back to the normal sort
     return QString::compare(s1, s2, cs);
+}
+
+QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_limit)
+{
+    auto display_options = QUrl::RemoveUserInfo | QUrl::RemoveFragment | QUrl::NormalizePathSegments;
+    auto str_url = url.toDisplayString(display_options);
+
+    if (str_url.length() <= max_len)
+        return str_url;
+
+    auto url_path_parts = url.path().split('/');
+    QString last_path_segment = url_path_parts.takeLast();
+
+    if (url_path_parts.size() >= 1 && url_path_parts.first().isEmpty())
+        url_path_parts.removeFirst();  // drop empty first segment (from leading / )
+
+    if (url_path_parts.size() >= 1)
+        url_path_parts.removeLast();  // drop the next to last path segment
+
+    auto url_template = QStringLiteral("%1://%2/%3%4");
+
+    auto url_compact = url_path_parts.isEmpty()
+                           ? url_template.arg(url.scheme(), url.host(), QStringList({ "...", last_path_segment }).join('/'), url.query())
+                           : url_template.arg(url.scheme(), url.host(),
+                                              QStringList({ url_path_parts.join('/'), "...", last_path_segment }).join('/'), url.query());
+
+    // remove url parts one by one if it's still too long
+    while (url_compact.length() > max_len && url_path_parts.size() >= 1) {
+        url_path_parts.removeLast();  // drop the next to last path segment
+        url_compact = url_path_parts.isEmpty()
+                          ? url_template.arg(url.scheme(), url.host(), QStringList({ "...", last_path_segment }).join('/'), url.query())
+                          : url_template.arg(url.scheme(), url.host(),
+                                             QStringList({ url_path_parts.join('/'), "...", last_path_segment }).join('/'), url.query());
+    }
+
+    if ((url_compact.length() >= max_len) && hard_limit) {
+        // still too long, truncate normaly
+        url_compact = QString(str_url);
+        auto to_remove = url_compact.length() - max_len + 3;
+        url_compact.remove(url_compact.length() - to_remove - 1, to_remove);
+        url_compact.append("...");
+    }
+
+    return url_compact;
+}
+
+static const QStringList s_units_si{ "KB", "MB", "GB", "TB" };
+static const QStringList s_units_kibi{ "KiB", "MiB", "GiB", "TiB" };
+
+QString StringUtils::humanReadableFileSize(double bytes, bool use_si, int decimal_points)
+{
+    const QStringList units = use_si ? s_units_si : s_units_kibi;
+    const int scale = use_si ? 1000 : 1024;
+
+    int u = -1;
+    double r = pow(10, decimal_points);
+
+    do {
+        bytes /= scale;
+        u++;
+    } while (round(abs(bytes) * r) / r >= scale && u < units.length() - 1);
+
+    return QString::number(bytes, 'f', 2) + " " + units[u];
 }
 
 QString StringUtils::getRandomAlphaNumeric()

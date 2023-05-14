@@ -53,13 +53,14 @@ void SkinDelete::executeTask()
     m_reply = shared_qobject_ptr<QNetworkReply>(rep);
 
     setStatus(tr("Deleting skin"));
-    connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(rep, &QNetworkReply::uploadProgress, this, &SkinDelete::setProgress);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+    connect(rep, &QNetworkReply::errorOccurred, this, &SkinDelete::downloadError);
 #else
-    connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &SkinDelete::downloadError);
 #endif
-    connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    connect(rep, &QNetworkReply::sslErrors, this, &SkinDelete::sslErrors);
+    connect(rep, &QNetworkReply::finished, this, &SkinDelete::downloadFinished);
 }
 
 void SkinDelete::downloadError(QNetworkReply::NetworkError error)
@@ -67,6 +68,17 @@ void SkinDelete::downloadError(QNetworkReply::NetworkError error)
     // error happened during download.
     qCritical() << "Network error: " << error;
     emitFailed(m_reply->errorString());
+}
+
+void SkinDelete::sslErrors(const QList<QSslError>& errors)
+{
+    int i = 1;
+    for (auto error : errors) {
+        qCritical() << "Skin Delete SSL Error #" << i << " : " << error.errorString();
+        auto cert = error.certificate();
+        qCritical() << "Certificate in question:\n" << cert.toText();
+        i++;
+    }
 }
 
 void SkinDelete::downloadFinished()

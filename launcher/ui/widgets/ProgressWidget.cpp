@@ -51,6 +51,7 @@ void ProgressWidget::watch(const Task* task)
 
     connect(m_task, &Task::finished, this, &ProgressWidget::handleTaskFinish);
     connect(m_task, &Task::status, this, &ProgressWidget::handleTaskStatus);
+    // TODO: should we connect &Task::details
     connect(m_task, &Task::progress, this, &ProgressWidget::handleTaskProgress);
     connect(m_task, &Task::destroyed, this, &ProgressWidget::taskDestroyed);
 

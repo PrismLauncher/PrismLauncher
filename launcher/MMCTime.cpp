@@ -18,6 +18,8 @@
 #include <MMCTime.h>
 
 #include <QObject>
+#include <QDateTime>
+#include <QTextStream>
 
 QString Time::prettifyDuration(int64_t duration) {
     int seconds = (int) (duration % 60);
@@ -35,4 +37,66 @@ QString Time::prettifyDuration(int64_t duration) {
         return QObject::tr("%1h %2min").arg(hours).arg(minutes);
     }
     return QObject::tr("%1d %2h %3min").arg(days).arg(hours).arg(minutes);
+}
+
+QString Time::humanReadableDuration(double duration, int precision) {
+
+    using days = std::chrono::duration<int, std::ratio<86400>>;
+
+    QString outStr;
+    QTextStream os(&outStr);
+
+    bool neg = false;
+    if (duration < 0) {
+        neg = true; // flag
+        duration  *= -1; // invert
+    }
+        
+    auto std_duration = std::chrono::duration<double>(duration);
+    auto d = std::chrono::duration_cast<days>(std_duration);
+    std_duration -= d;
+    auto h = std::chrono::duration_cast<std::chrono::hours>(std_duration);
+    std_duration -= h;
+    auto m = std::chrono::duration_cast<std::chrono::minutes>(std_duration);
+    std_duration -= m;
+    auto s = std::chrono::duration_cast<std::chrono::seconds>(std_duration);
+    std_duration -= s;
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(std_duration);
+
+    auto dc = d.count();
+    auto hc = h.count();
+    auto mc = m.count();
+    auto sc = s.count();
+    auto msc = ms.count();
+
+    if (neg) {
+        os << '-';
+    }
+    if (dc) {
+        os << dc << QObject::tr("days");
+    }
+    if (hc) {
+        if (dc)
+            os << " ";
+        os << qSetFieldWidth(2) << hc << QObject::tr("h"); // hours
+    }
+    if (mc) {
+        if (dc || hc)
+            os << " ";
+        os << qSetFieldWidth(2) << mc << QObject::tr("m"); // minutes
+    }
+    if (dc || hc || mc || sc) {
+        if (dc || hc || mc)
+            os << " ";
+        os << qSetFieldWidth(2) << sc << QObject::tr("s"); // seconds
+    }
+    if ((msc && (precision > 0)) || !(dc || hc || mc || sc)) {
+        if (dc || hc || mc || sc)
+            os << " ";
+        os << qSetFieldWidth(0) << qSetRealNumberPrecision(precision) << msc << QObject::tr("ms"); // miliseconds
+    }
+
+    os.flush();
+
+    return outStr;
 }

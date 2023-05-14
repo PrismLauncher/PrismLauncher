@@ -53,8 +53,7 @@ WorldList::WorldList(const QString &dir, std::shared_ptr<const BaseInstance> ins
     m_dir.setSorting(QDir::Name | QDir::IgnoreCase | QDir::LocaleAware);
     m_watcher = new QFileSystemWatcher(this);
     is_watching = false;
-    connect(m_watcher, SIGNAL(directoryChanged(QString)), this,
-            SLOT(directoryChanged(QString)));
+    connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &WorldList::directoryChanged);
 }
 
 void WorldList::startWatching()

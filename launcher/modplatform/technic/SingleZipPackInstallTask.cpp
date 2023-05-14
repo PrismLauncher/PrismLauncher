@@ -50,6 +50,7 @@ void Technic::SingleZipPackInstallTask::executeTask()
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SingleZipPackInstallTask::downloadSucceeded);
     connect(job, &NetJob::progress, this, &Technic::SingleZipPackInstallTask::downloadProgressChanged);
+    connect(job, &NetJob::stepProgress, this, &Technic::SingleZipPackInstallTask::propogateStepProgress);
     connect(job, &NetJob::failed, this, &Technic::SingleZipPackInstallTask::downloadFailed);
     m_filesNetJob->start();
 }

@@ -74,17 +74,20 @@ void ImgurAlbumCreation::executeTask()
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &ImgurAlbumCreation::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &ImgurAlbumCreation::downloadFinished);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+    connect(rep, &QNetworkReply::errorOccurred, this, &ImgurAlbumCreation::downloadError);
 #else
-    connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &ImgurAlbumCreation::downloadError);
 #endif
+    connect(rep, &QNetworkReply::sslErrors, this, &ImgurAlbumCreation::sslErrors);
 }
+
 void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
 {
     qDebug() << m_reply->errorString();
     m_state = State::Failed;
 }
+
 void ImgurAlbumCreation::downloadFinished()
 {
     if (m_state != State::Failed)
@@ -120,6 +123,7 @@ void ImgurAlbumCreation::downloadFinished()
         return;
     }
 }
+
 void ImgurAlbumCreation::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     setProgress(bytesReceived, bytesTotal);
