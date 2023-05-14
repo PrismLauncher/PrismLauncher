@@ -57,8 +57,8 @@ void JVisualVM::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
     profiler->setArguments(profilerArgs);
     profiler->setProgram(programPath);
 
-    connect(profiler, SIGNAL(started()), SLOT(profilerStarted()));
-    connect(profiler, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(profilerFinished(int,QProcess::ExitStatus)));
+    connect(profiler, &QProcess::started, this, &JVisualVM::profilerStarted);
+    connect(profiler, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this,  &JVisualVM::profilerFinished);
 
     profiler->start();
     m_profilerProcess = profiler;

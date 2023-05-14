@@ -27,6 +27,7 @@ protected:
 
 public slots:
     void downloadError(QNetworkReply::NetworkError);
+    void sslErrors(const QList<QSslError>& errors);
     void downloadFinished();
 };
 
