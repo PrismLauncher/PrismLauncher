@@ -57,7 +57,8 @@ GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
     , m_loaderType(mcLoaders(instance))
 {
     for (auto mod : folder->allMods())
-        m_mods.append(mod->metadata());
+        if (auto meta = mod->metadata(); meta)
+            m_mods.append(meta);
     prepare();
 };
 
