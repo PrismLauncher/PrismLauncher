@@ -53,9 +53,9 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
 
     MinecraftInstance* mcInstance = dynamic_cast<MinecraftInstance*>(instance.get());
     if (mcInstance) {
-        const QDir dir = mcInstance->loaderModList()->indexDir();
-        if (dir.exists())
-            proxy->blockedPaths().insert(root.relativeFilePath(dir.absolutePath()));
+        const QDir index = mcInstance->loaderModList()->indexDir();
+        if (index.exists())
+            proxy->blockedPaths().insert(root.relativeFilePath(index.absolutePath()));
     }
 
     ui->treeView->setModel(proxy);
