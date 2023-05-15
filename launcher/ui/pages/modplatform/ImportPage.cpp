@@ -35,14 +35,19 @@
  */
 
 #include "ImportPage.h"
+#include <qdebug.h>
+#include <qmap.h>
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ImportPage.h"
 
 #include <QFileDialog>
 #include <QValidator>
+#include <utility>
 
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
+
+#include "modplatform/flame/FlameAPI.h"
 
 #include "Json.h"
 
@@ -119,7 +124,9 @@ void ImportPage::updateState()
 
             if (fi.exists() && (isZip || isMRPack)) {
                 QFileInfo fi(url.fileName());
-                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this));
+                auto extra_info = QMap(m_extra_info);
+                qDebug() << "Pack Extra Info" << extra_info << m_extra_info;
+                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this, std::move(extra_info)));
                 dialog->setSuggestedIcon("default");
             }
         } else if (url.scheme() == "curseforge") {
@@ -129,14 +136,13 @@ void ImportPage::updateState()
             auto addonId = query.allQueryItemValues("addonId")[0];
             auto fileId = query.allQueryItemValues("fileId")[0];
             auto array = new QByteArray();
-            auto req = unique_qobject_ptr<NetJob>(new NetJob("Curseforge Meta", APPLICATION->network()));
-            req->addNetAction(
-                Net::Download::makeByteArray(QUrl(QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(addonId, fileId)), array));
 
-            connect(req.get(), &NetJob::finished, [array] { delete array; });
-            connect(req.get(), &NetJob::failed, this,
+            auto api = FlameAPI();
+            auto job = api.getFile(addonId, fileId, array);
+            
+            connect(job.get(), &NetJob::failed, this,
                     [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-            connect(req.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
+            connect(job.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
                 qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                 auto doc = Json::requireDocument(*array);
                 // No way to find out if it's a mod or a modpack before here
@@ -170,7 +176,7 @@ void ImportPage::updateState()
             });
             ProgressDialog dlUrlDialod(this);
             dlUrlDialod.setSkipButton(true, tr("Abort"));
-            dlUrlDialod.execWithTask(req.get());
+            dlUrlDialod.execWithTask(job.get());
             return;
         } else {
             if (input.endsWith("?client=y")) {
@@ -180,7 +186,8 @@ void ImportPage::updateState()
             }
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
-            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this));
+            auto extra_info = QMap(m_extra_info);
+            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this, std::move(extra_info)));
             dialog->setSuggestedIcon("default");
         }
     } else {
@@ -191,6 +198,11 @@ void ImportPage::updateState()
 void ImportPage::setUrl(const QString& url)
 {
     ui->modpackEdit->setText(url);
+    updateState();
+}
+
+void ImportPage::setExtraInfo(const QMap<QString, QString>& extra_info) {
+    m_extra_info = QMap(extra_info); // copy
     updateState();
 }
 

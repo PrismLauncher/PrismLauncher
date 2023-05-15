@@ -76,7 +76,7 @@ public:
 
     void setUrl(const QString & url);
     void openedImpl() override;
-
+    void setExtraInfo(const QMap<QString, QString>& extra_info);
 private slots:
     void on_modpackBtn_clicked();
     void updateState();
@@ -87,5 +87,6 @@ private:
 private:
     Ui::ImportPage *ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
+    QMap<QString, QString> m_extra_info = {};
 };
 

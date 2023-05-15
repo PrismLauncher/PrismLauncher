@@ -55,24 +55,27 @@ class NewInstanceDialog : public QDialog, public BasePageProvider
     Q_OBJECT
 
 public:
-    explicit NewInstanceDialog(const QString & initialGroup, const QString & url = QString(), QWidget *parent = 0);
-    ~NewInstanceDialog();
+ explicit NewInstanceDialog(const QString& initialGroup,
+                            const QString& url = QString(),
+                            const QMap<QString, QString>& extra_info = {},
+                            QWidget* parent = 0);
+ ~NewInstanceDialog();
 
-    void updateDialogState();
+ void updateDialogState();
 
-    void setSuggestedPack(const QString& name = QString(), InstanceTask * task = nullptr);
-    void setSuggestedPack(const QString& name, QString version, InstanceTask * task = nullptr);
-    void setSuggestedIconFromFile(const QString &path, const QString &name);
-    void setSuggestedIcon(const QString &key);
+ void setSuggestedPack(const QString& name = QString(), InstanceTask* task = nullptr);
+ void setSuggestedPack(const QString& name, QString version, InstanceTask* task = nullptr);
+ void setSuggestedIconFromFile(const QString& path, const QString& name);
+ void setSuggestedIcon(const QString& key);
 
-    InstanceTask * extractTask();
+ InstanceTask* extractTask();
 
-    QString dialogTitle() override;
-    QList<BasePage *> getPages() override;
+ QString dialogTitle() override;
+ QList<BasePage*> getPages() override;
 
-    QString instName() const;
-    QString instGroup() const;
-    QString iconKey() const;
+ QString instName() const;
+ QString instGroup() const;
+ QString iconKey() const;
 
 public slots:
     void accept() override;

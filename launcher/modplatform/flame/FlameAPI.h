@@ -17,6 +17,7 @@ class FlameAPI : public NetworkResourceAPI {
     Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
     Task::Ptr matchFingerprints(const QList<uint>& fingerprints, QByteArray* response);
     Task::Ptr getFiles(const QStringList& fileIds, QByteArray* response) const;
+    Task::Ptr getFile(const QString& addonId, const QString& fileId, QByteArray* response) const;
 
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 

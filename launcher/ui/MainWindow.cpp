@@ -86,6 +86,7 @@
 #include <net/NetJob.h>
 #include <net/Download.h>
 #include <news/NewsChecker.h>
+#include <qurl.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
 #include <DesktopServices.h>
@@ -116,10 +117,14 @@
 #include "minecraft/mod/ShaderPackFolderModel.h"
 #include "minecraft/WorldList.h"
 
+#include "modplatform/flame/FlameAPI.h"
+
 #include "KonamiCode.h"
 
 #include "InstanceImportTask.h"
 #include "InstanceCopyTask.h"
+
+#include "Json.h"
 
 #include "MMCTime.h"
 
@@ -981,7 +986,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
     }
 }
 
-void MainWindow::addInstance(QString url)
+void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info)
 {
     QString groupName;
     do
@@ -1003,7 +1008,7 @@ void MainWindow::addInstance(QString url)
         groupName = APPLICATION->settings()->get("LastUsedGroupForNewInstance").toString();
     }
 
-    NewInstanceDialog newInstDlg(groupName, url, this);
+    NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
     if (!newInstDlg.exec())
         return;
 
@@ -1031,18 +1036,103 @@ void MainWindow::processURLs(QList<QUrl> urls)
         if (url.scheme().isEmpty())
             url.setScheme("file");
 
-        if (!url.isLocalFile()) {  // probably instance/modpack
-            addInstance(url.toString());
-            break;
+        QMap<QString, QString> extra_info;
+        QUrl local_url;
+        if (!url.isLocalFile()) {  // download the remote resource and identify
+            QUrl dl_url;
+            if(url.scheme() == "curseforge") {
+                // need to find the download link for the modpack / resource
+                // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
+                QUrlQuery query(url);
+
+                auto addonId = query.allQueryItemValues("addonId")[0];
+                auto fileId = query.allQueryItemValues("fileId")[0];
+
+                extra_info.insert("pack_id", addonId);
+                extra_info.insert("pack_version_id", fileId);
+
+                auto array = new QByteArray();
+
+                auto api = FlameAPI();
+                auto job = api.getFile(addonId, fileId, array);
+
+                QString resource_name;
+                
+
+                connect(job.get(), &Task::failed, this,
+                        [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId,  &dl_url, &resource_name] {
+                    qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
+                    auto doc = Json::requireDocument(*array);
+                    // No way to find out if it's a mod or a modpack before here
+                    // And also we need to check if it ends with .zip, instead of any better way
+                    auto fileName = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "fileName");
+                   
+                    // Have to use ensureString then use QUrl to get proper url encoding
+                    dl_url = QUrl(Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl",
+                                                            "", "downloadUrl"));
+                    if (!dl_url.isValid()) {
+                        CustomMessageBox::selectable(this, tr("Error"), tr("The modpack, mod, or resource is blocked ! Please download it manually \n%1").arg(dl_url.toDisplayString()),
+                                                        QMessageBox::Critical)
+                            ->show();
+                        return;
+                    }
+
+                    QFileInfo dl_file(dl_url.fileName());
+                    resource_name = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "displayName",
+                                                            dl_file.completeBaseName(), "displayName");
+                });
+                
+                { // drop stack
+                    ProgressDialog dlUrlDialod(this);
+                    dlUrlDialod.setSkipButton(true, tr("Abort"));
+                    dlUrlDialod.execWithTask(job.get());
+                }
+                
+                // dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, this, std::move(extra_info)));
+                // dialog->setSuggestedIcon("default");
+
+            } else {
+                dl_url = url;
+            }
+
+            if (!dl_url.isValid()) {
+                continue; // no valid url to download this resource
+            }
+
+            const QString path = dl_url.host() + '/' + dl_url.path();
+            auto entry = APPLICATION->metacache()->resolveEntry("general", path);
+            entry->setStale(true);
+            auto dl_job = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
+            dl_job->addNetAction(Net::Download::makeCached(dl_url, entry));
+            auto archivePath = entry->getFullPath();
+
+            bool dl_success = false;
+            connect(dl_job.get(), &Task::failed, this, [this](QString reason){CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+            connect(dl_job.get(), &Task::succeeded, this, [&dl_success]{dl_success = true;});
+
+            { // drop stack
+                ProgressDialog dlUrlDialod(this);
+                dlUrlDialod.setSkipButton(true, tr("Abort"));
+                dlUrlDialod.execWithTask(dl_job.get());
+            }
+
+            if (!dl_success) {
+                continue; // no local file to identify
+            }
+            local_url = QUrl::fromLocalFile(archivePath);
+
+        } else {
+            local_url = url;
         }
 
-        auto localFileName = QDir::toNativeSeparators(url.toLocalFile()) ;
+        auto localFileName = QDir::toNativeSeparators(local_url.toLocalFile()) ;
         QFileInfo localFileInfo(localFileName);
 
         auto type = ResourceUtils::identify(localFileInfo);
 
         if (ResourceUtils::ValidResourceTypes.count(type) == 0) {  // probably instance/modpack
-            addInstance(localFileName);
+            addInstance(localFileName, extra_info);
             continue;
         }
 

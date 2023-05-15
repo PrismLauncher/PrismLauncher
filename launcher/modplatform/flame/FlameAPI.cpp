@@ -217,6 +217,18 @@ Task::Ptr FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) c
     return netJob;
 }
 
+Task::Ptr FlameAPI::getFile(const QString& addonId, const QString& fileId, QByteArray* response) const
+{
+    auto netJob = makeShared<NetJob>(QString("Flame::GetFile"), APPLICATION->network());
+    netJob->addNetAction(
+        Net::Download::makeByteArray(QUrl(QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(addonId, fileId)), response));
+
+    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
+    QObject::connect(netJob.get(), &NetJob::failed, [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
+
+    return netJob;
+}
+
 // https://docs.curseforge.com/?python#tocS_ModsSearchSortField
 static QList<ResourceAPI::SortingMethod> s_sorts = { { 1, "Featured", QObject::tr("Sort by Featured") },
                                                      { 2, "Popularity", QObject::tr("Sort by Popularity") },
