@@ -17,6 +17,7 @@
  */
 
 #include "ExportMrPackDialog.h"
+#include "minecraft/mod/ModFolderModel.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ExportMrPackDialog.h"
@@ -36,32 +37,35 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     ui->name->setText(instance->name());
     ui->summary->setText(instance->notes().split(QRegularExpression("\\r?\\n"))[0]);
 
-    auto model = new QFileSystemModel(this);
+    QFileSystemModel* model = new QFileSystemModel(this);
     // use the game root - everything outside cannot be exported
-    QString root = instance->gameRoot();
-    proxy = new FileIgnoreProxy(root, this);
+    const QDir root(instance->gameRoot());
+    proxy = new FileIgnoreProxy(instance->gameRoot(), this);
     proxy->setSourceModel(model);
 
-    QDir::Filters filter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
+    const QDir::Filters filter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
 
-    for (QString file : QDir(root).entryList(filter)) {
+    for (const QString& file : root.entryList(filter)) {
         if (!(file == "mods" || file == "coremods" || file == "datapacks" || file == "config" || file == "options.txt" ||
               file == "servers.dat"))
             proxy->blockedPaths().insert(file);
     }
 
-    QDir modsIndex(instance->gameRoot() + "/mods/.index");
-    if (modsIndex.exists())
-        proxy->blockedPaths().insert("mods/.index");
+    MinecraftInstance* mcInstance = dynamic_cast<MinecraftInstance*>(instance.get());
+    if (mcInstance) {
+        const QDir dir = mcInstance->loaderModList()->indexDir();
+        if (dir.exists())
+            proxy->blockedPaths().insert(root.relativeFilePath(dir.absolutePath()));
+    }
 
     ui->treeView->setModel(proxy);
-    ui->treeView->setRootIndex(proxy->mapFromSource(model->index(root)));
+    ui->treeView->setRootIndex(proxy->mapFromSource(model->index(instance->gameRoot())));
     ui->treeView->sortByColumn(0, Qt::AscendingOrder);
 
     model->setFilter(filter);
-    model->setRootPath(root);
+    model->setRootPath(instance->gameRoot());
 
-    auto headerView = ui->treeView->header();
+    QHeaderView* headerView = ui->treeView->header();
     headerView->setSectionResizeMode(QHeaderView::ResizeToContents);
     headerView->setSectionResizeMode(0, QHeaderView::Stretch);
 }
@@ -100,4 +104,3 @@ void ExportMrPackDialog::done(int result)
 
     QDialog::done(result);
 }
-
