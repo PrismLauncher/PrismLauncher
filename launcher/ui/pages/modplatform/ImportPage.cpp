@@ -35,8 +35,7 @@
  */
 
 #include "ImportPage.h"
-#include <qdebug.h>
-#include <qmap.h>
+
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ImportPage.h"
 

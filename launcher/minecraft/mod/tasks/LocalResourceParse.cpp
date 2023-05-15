@@ -44,7 +44,7 @@ static const QMap<PackedResourceType, QString> s_packed_type_names = {
 namespace ResourceUtils {
 PackedResourceType identify(QFileInfo file){
     if (file.exists() && file.isFile()) {
-        if (ModUtils::validate(file)) {
+        if (ModUtils::validate(file)) { // Mods can also contain resource and data packs
             qDebug() << file.fileName() << "is a mod";
             return PackedResourceType::Mod;
         } else if (ResourcePackUtils::validate(file)) {

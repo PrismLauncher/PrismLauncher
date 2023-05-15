@@ -86,7 +86,6 @@
 #include <net/NetJob.h>
 #include <net/Download.h>
 #include <news/NewsChecker.h>
-#include <qurl.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
 #include <DesktopServices.h>
