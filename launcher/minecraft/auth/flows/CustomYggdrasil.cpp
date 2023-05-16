@@ -2,7 +2,6 @@
 
 #include "minecraft/auth/steps/YggdrasilStep.h"
 #include "minecraft/auth/steps/MinecraftProfileStepMojang.h"
-#include "minecraft/auth/steps/MigrationEligibilityStep.h"
 #include "minecraft/auth/steps/GetSkinStep.h"
 
 CustomYggdrasilRefresh::CustomYggdrasilRefresh(

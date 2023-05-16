@@ -206,6 +206,9 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
     else if(data.type == AccountType::Offline) {
         m_currentTask.reset(new OfflineRefresh(&data));
     }
+    else if (data.type == AccountType::CustomYggdrasil) {
+        m_currentTask.reset(new CustomYggdrasilRefresh(&data));
+    }
     else {
         m_currentTask.reset(new MojangRefresh(&data));
     }

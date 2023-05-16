@@ -175,7 +175,11 @@ void AccountListPage::on_actionAddCustomYggdrasil_triggered()
 
     MinecraftAccountPtr account = CustomYggdrasilLoginDialog::newAccount(
         this,
-        tr("Please enter your email/username, password, and the URLs of your API servers.")
+        tr(
+            "Please enter your username (sometimes an email address), password, and the URLs of your API servers."
+            "<br><br>"
+            "<b>Caution!</b> Your username and password will be sent to the authentication server you specify!"
+        )
     );
 
     if (account)
