@@ -1088,8 +1088,6 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     dlUrlDialod.execWithTask(job.get());
                 }
                 
-                // dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, this, std::move(extra_info)));
-                // dialog->setSuggestedIcon("default");
 
             } else {
                 dl_url = url;
