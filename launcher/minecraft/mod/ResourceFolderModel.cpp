@@ -8,6 +8,7 @@
 #include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
+#include <QMenu>
 
 #include "Application.h"
 #include "FileSystem.h"
@@ -16,7 +17,7 @@
 
 #include "tasks/Task.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, std::shared_ptr<const BaseInstance> instance, QObject* parent, bool create_dir)
+ResourceFolderModel::ResourceFolderModel(QDir dir, std::shared_ptr<BaseInstance> instance, QObject* parent, bool create_dir)
     : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this)
 {
     if (create_dir) {
@@ -471,6 +472,8 @@ QVariant ResourceFolderModel::headerData(int section, Qt::Orientation orientatio
     switch (role) {
         case Qt::DisplayRole:
             switch (section) {
+                case ACTIVE_COLUMN:
+                    return tr("Enable");
                 case NAME_COLUMN:
                     return tr("Name");
                 case DATE_COLUMN:
@@ -499,6 +502,39 @@ QVariant ResourceFolderModel::headerData(int section, Qt::Orientation orientatio
 
     return {};
 }
+
+void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
+{
+    Q_ASSERT(act);
+
+    act->setText(headerData(column, Qt::Orientation::Horizontal).toString());
+}
+
+std::unique_ptr<QMenu> ResourceFolderModel::createHeaderContextMenu(QWidget* parent, QTreeView* tree)
+{
+    auto menu = std::make_unique<QMenu>(parent);
+
+    menu->addSeparator()->setText(tr("Show / Hide Columns"));
+
+    for (int col = 0; col < columnCount(); ++col) {
+        auto act = new QAction();
+        setupHeaderAction(act, col);
+
+        act->setCheckable(true);
+        act->setChecked(!tree->isColumnHidden(col));
+
+        connect(act, &QAction::toggled, tree, [col, tree](bool toggled){
+            tree->setColumnHidden(col, !toggled);
+        });
+
+        menu->addAction(act);
+
+    }
+
+    return menu;
+}
+
+
 
 QSortFilterProxyModel* ResourceFolderModel::createFilterProxyModel(QObject* parent)
 {

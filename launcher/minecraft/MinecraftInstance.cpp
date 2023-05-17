@@ -195,11 +195,14 @@ void MinecraftInstance::loadSpecificSettings()
     // Use account for instance, this does not have a global override
     m_settings->registerSetting("UseAccountForInstance", false);
     m_settings->registerSetting("InstanceAccountId", "");
+    
+    // Mod group settings
+    m_settings->registerSetting("Mods/UpdateIgnoreList", QVariantList({}));
 
     qDebug() << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);
-
+    
     updateRuntimeContext();
 }
 
@@ -1109,7 +1112,7 @@ JavaVersion MinecraftInstance::getJavaVersion()
     return JavaVersion(settings()->get("JavaVersion").toString());
 }
 
-std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList() const
+std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList()
 {
     if (!m_loader_mod_list)
     {
@@ -1121,7 +1124,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList() const
     return m_loader_mod_list;
 }
 
-std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList() const
+std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList()
 {
     if (!m_core_mod_list)
     {
@@ -1133,7 +1136,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList() const
     return m_core_mod_list;
 }
 
-std::shared_ptr<ModFolderModel> MinecraftInstance::nilModList() const
+std::shared_ptr<ModFolderModel> MinecraftInstance::nilModList()
 {
     if (!m_nil_mod_list)
     {
@@ -1145,7 +1148,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::nilModList() const
     return m_nil_mod_list;
 }
 
-std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList() const
+std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList()
 {
     if (!m_resource_pack_list)
     {
@@ -1154,7 +1157,7 @@ std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList() c
     return m_resource_pack_list;
 }
 
-std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList() const
+std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList()
 {
     if (!m_texture_pack_list)
     {
@@ -1163,7 +1166,7 @@ std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList() con
     return m_texture_pack_list;
 }
 
-std::shared_ptr<ShaderPackFolderModel> MinecraftInstance::shaderPackList() const
+std::shared_ptr<ShaderPackFolderModel> MinecraftInstance::shaderPackList()
 {
     if (!m_shader_pack_list)
     {
@@ -1172,7 +1175,7 @@ std::shared_ptr<ShaderPackFolderModel> MinecraftInstance::shaderPackList() const
     return m_shader_pack_list;
 }
 
-std::shared_ptr<WorldList> MinecraftInstance::worldList() const
+std::shared_ptr<WorldList> MinecraftInstance::worldList()
 {
     if (!m_world_list)
     {

@@ -66,7 +66,7 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("totalTimePlayed", 0);
     m_settings->registerSetting("lastTimePlayed", 0);
 
-    m_settings->registerSetting("linkedInstances", "[]");
+    m_settings->registerSetting("linkedInstances", QVariantList({}));
 
     // Game time override
     auto gameTimeOverride = m_settings->registerSetting("OverrideGameTime", false);

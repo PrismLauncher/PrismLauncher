@@ -1,4 +1,7 @@
 #include "ExternalResourcesPage.h"
+
+#include <QHeaderView>
+
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ExternalResourcesPage.h"
 
@@ -28,7 +31,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     ui->treeView->installEventFilter(this);
     ui->treeView->sortByColumn(1, Qt::AscendingOrder);
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
-
+    
     // The default function names by Qt are pretty ugly, so let's just connect the actions manually,
     // to make it easier to read :)
     connect(ui->actionAddItem, &QAction::triggered, this, &ExternalResourcesPage::addItem);
@@ -44,6 +47,12 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     auto selection_model = ui->treeView->selectionModel();
     connect(selection_model, &QItemSelectionModel::currentChanged, this, &ExternalResourcesPage::current);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
+
+    auto viewHeader = ui->treeView->header();
+    viewHeader->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(viewHeader, &QHeaderView::customContextMenuRequested, this, &ExternalResourcesPage::ShowHeaderContextMenu);
+
 }
 
 ExternalResourcesPage::~ExternalResourcesPage()
@@ -63,6 +72,12 @@ void ExternalResourcesPage::ShowContextMenu(const QPoint& pos)
     auto menu = ui->actionsToolbar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->treeView->mapToGlobal(pos));
     delete menu;
+}
+
+void ExternalResourcesPage::ShowHeaderContextMenu(const QPoint& pos)
+{
+    auto menu = m_model->createHeaderContextMenu(this, ui->treeView);
+    menu->exec(ui->treeView->mapToGlobal(pos));
 }
 
 void ExternalResourcesPage::openedImpl()

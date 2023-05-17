@@ -60,6 +60,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     virtual void viewConfigs();
 
     void ShowContextMenu(const QPoint& pos);
+    void ShowHeaderContextMenu(const QPoint& pos);
 
    protected:
     BaseInstance* m_instance = nullptr;

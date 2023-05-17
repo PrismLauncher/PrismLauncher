@@ -8,8 +8,12 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
 
    public:
-    ModrinthCheckUpdate(QList<Mod*>& mods, std::list<Version>& mcVersions, std::optional<ResourceAPI::ModLoaderTypes> loaders, std::shared_ptr<ModFolderModel> mods_folder)
-        : CheckUpdateTask(mods, mcVersions, loaders, mods_folder)
+    ModrinthCheckUpdate(QList<Mod*>& mods,
+                        std::list<Version>& mcVersions,
+                        std::optional<ResourceAPI::ModLoaderTypes> loaders,
+                        std::shared_ptr<ModFolderModel> mods_folder,
+                        QStringList blacklist = {})
+        : CheckUpdateTask(mods, mcVersions, loaders, mods_folder), m_blacklist(blacklist)
     {}
 
    public slots:
@@ -20,4 +24,5 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
 
    private:
     NetJob::Ptr m_net_job = nullptr;
+    QStringList m_blacklist = {};
 };

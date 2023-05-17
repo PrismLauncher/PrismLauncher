@@ -50,14 +50,16 @@
 
 #include "Application.h"
 
+#include "QVariantUtils.h"
+
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
 #include "modplatform/ModIndex.h"
 
-ModFolderModel::ModFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance, bool is_indexed, bool create_dir)
+ModFolderModel::ModFolderModel(const QString& dir, std::shared_ptr<BaseInstance> instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER, SortType::UPDATE };
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
@@ -126,6 +128,10 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
         {
         case ActiveColumn:
             return at(row)->enabled() ? Qt::Checked : Qt::Unchecked;
+        case UpdateColumn: {
+            auto update_ignore_list = QVariantUtils::toList<QString>(m_instance->getSettingsConst()->get(QStringList({"Mods", "UpdateIgnoreList"}).join('/')));
+            return update_ignore_list.contains(at(row)->fileinfo().fileName()) ? Qt::Checked : Qt::Unchecked;
+        }
         default:
             return QVariant();
         }
@@ -142,7 +148,7 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
         switch (section)
         {
         case ActiveColumn:
-            return QString();
+            return tr("Enabled");
         case NameColumn:
             return tr("Name");
         case VersionColumn:
@@ -151,6 +157,8 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
             return tr("Last changed");
         case ProviderColumn:
             return tr("Provider");
+        case UpdateColumn:
+            return tr("Update");
         default:
             return QVariant();
         }
@@ -168,6 +176,8 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
             return tr("The date and time this mod was last changed (or added).");
         case ProviderColumn:
             return tr("Where the mod was downloaded from.");
+        case UpdateColumn:
+            return tr("Should this mod be updated?");
         default:
             return QVariant();
         }
@@ -175,6 +185,75 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
         return QVariant();
     }
     return QVariant();
+}
+
+bool ModFolderModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    int row = index.row();
+    if (row < 0 || row >= rowCount(index.parent()) || !index.isValid())
+        return false;
+
+    if (role == Qt::CheckStateRole) {
+
+    }
+
+    return false;
+}
+
+bool ModFolderModel::setModUpdate(const QModelIndexList& indexes, EnableAction action)
+{
+    if (!m_can_interact)
+        return false;
+
+    if (indexes.isEmpty())
+        return true;
+
+
+    bool succeeded = true;
+    for (auto const& idx : indexes) {
+        if (!validateIndex(idx) || idx.column() != UpdateColumn)
+            continue;
+
+        int row = idx.row();
+        auto& resource = m_resources[row];
+        auto fileName = resource->fileinfo().fileName();
+
+        auto update_ignore_list = QVariantUtils::toList<QString>(m_instance->getSettingsConst()->get(QStringList({"Mods", "UpdateIgnoreList"}).join('/')));
+
+        bool in_ignore_list = update_ignore_list.contains(fileName);
+        
+        bool update = true;
+        switch (action) {
+            case EnableAction::ENABLE:
+                update = true;
+                break;
+            case EnableAction::DISABLE:
+                update = false;
+                break;
+            case EnableAction::TOGGLE:
+            default:
+                update = in_ignore_list;
+                break;
+        }
+
+        if (!in_ignore_list == update) {
+            succeeded = false;
+            continue;
+        }
+            
+        if (in_ignore_list && update) {
+            update_ignore_list.removeOne(fileName);
+        } else if (!in_ignore_list && !update) {
+            update_ignore_list.append(fileName);
+        }
+
+        m_instance->settings()->set(QStringList({"Mods", "UpdateIgnoreList"}).join('/'), QVariantUtils::fromList(update_ignore_list));
+
+        emit dataChanged(index(row, UpdateColumn), index(row, columnCount(QModelIndex()) - 1));
+
+    }
+
+    return succeeded;
 }
 
 int ModFolderModel::columnCount(const QModelIndex &parent) const

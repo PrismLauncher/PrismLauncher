@@ -37,18 +37,20 @@
 #pragma once
 
 
+#include <qhash.h>
 #include <QVariant>
 #include <QList>
+#include <QMap>
 
 namespace QVariantUtils {
 
 template <typename T> 
 inline QList<T> toList(QVariant src) {
-    QVariantList variantList = src.toList();
+    QVariantList variant_l = src.toList();
 
     QList<T> list_t;
-    list_t.reserve(variantList.size());
-    for (const QVariant& v : variantList)
+    list_t.reserve(variant_l.size());
+    for (const QVariant& v : variant_l)
     {
         list_t.append(v.value<T>());
     }
@@ -57,14 +59,15 @@ inline QList<T> toList(QVariant src) {
 
 template <typename T> 
 inline QVariant fromList(QList<T> val) {
-    QVariantList variantList;
-    variantList.reserve(val.size());
+    QVariantList variant_l;
+    variant_l.reserve(val.size());
     for (const T& v : val)
     {
-        variantList.append(v);
+        variant_l.append(v);
     }
 
-    return variantList;
+    return variant_l;
 }
 
 }
+

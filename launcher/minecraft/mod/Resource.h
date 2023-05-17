@@ -21,7 +21,8 @@ enum class SortType {
     VERSION,
     ENABLED,
     PACK_FORMAT,
-    PROVIDER
+    PROVIDER,
+    UPDATE
 };
 
 enum class EnableAction {
