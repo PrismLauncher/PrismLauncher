@@ -130,7 +130,7 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
             return at(row)->enabled() ? Qt::Checked : Qt::Unchecked;
         case UpdateColumn: {
             auto update_ignore_list = QVariantUtils::toList<QString>(m_instance->getSettingsConst()->get(QStringList({"Mods", "UpdateIgnoreList"}).join('/')));
-            return update_ignore_list.contains(at(row)->fileinfo().fileName()) ? Qt::Checked : Qt::Unchecked;
+            return !update_ignore_list.contains(at(row)->name()) ? Qt::Checked : Qt::Unchecked;
         }
         default:
             return QVariant();

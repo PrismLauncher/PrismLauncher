@@ -41,13 +41,15 @@ static std::optional<ResourceAPI::ModLoaderTypes> mcLoaders(BaseInstance* inst)
 ModUpdateDialog::ModUpdateDialog(QWidget* parent,
                                  BaseInstance* instance,
                                  const std::shared_ptr<ModFolderModel> mods,
-                                 QList<Mod*>& search_for)
+                                 QList<Mod*>& search_for,
+                                 bool use_blacklist)
     : ReviewMessageBox(parent, tr("Confirm mods to update"), "")
     , m_parent(parent)
     , m_mod_model(mods)
     , m_candidates(search_for)
     , m_second_try_metadata(new ConcurrentTask())
     , m_instance(instance)
+    , m_use_blacklist(use_blacklist)
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
@@ -89,6 +91,8 @@ void ModUpdateDialog::checkCandidates()
     auto loaders = mcLoaders(m_instance);
 
     auto update_ignore_list = QVariantUtils::toList<QString>(m_instance->getSettingsConst()->get(QStringList({"Mods", "UpdateIgnoreList"}).join('/')));
+    if (!m_use_blacklist)
+        update_ignore_list.clear(); // clear the list
 
     SequentialTask check_task(m_parent, tr("Checking for updates"));
 

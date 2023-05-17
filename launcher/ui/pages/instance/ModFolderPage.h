@@ -65,6 +65,9 @@ class ModFolderPage : public ExternalResourcesPage {
     void installMods();
     void updateMods();
 
+    void enableUpdates();
+    void disableUpdates();
+
    protected:
     std::shared_ptr<ModFolderModel> m_model;
 };

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1042</width>
+    <width>620</width>
     <height>501</height>
    </rect>
   </property>
@@ -152,6 +152,22 @@
    </property>
    <property name="toolTip">
     <string>Try to check or update all selected resources (all resources if none are selected)</string>
+   </property>
+  </action>
+  <action name="actionEnableUpdates">
+   <property name="text">
+    <string>Ena&amp;ble Updates</string>
+   </property>
+   <property name="toolTip">
+    <string>Mark resource to be updated</string>
+   </property>
+  </action>
+  <action name="actionDisableUpdates">
+   <property name="text">
+    <string>Disable U&amp;pdates</string>
+   </property>
+   <property name="toolTip">
+    <string>Mark resource to prevent it from being updated</string>
    </property>
   </action>
  </widget>

@@ -19,7 +19,8 @@ class ModUpdateDialog final : public ReviewMessageBox {
     explicit ModUpdateDialog(QWidget* parent,
                              BaseInstance* instance,
                              const std::shared_ptr<ModFolderModel> mod_model,
-                             QList<Mod*>& search_for);
+                             QList<Mod*>& search_for,
+                             bool use_blacklist = true);
 
     void checkCandidates();
 
@@ -59,4 +60,5 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
     bool m_no_updates = false;
     bool m_aborted = false;
+    bool m_use_blacklist;
 };

@@ -85,6 +85,11 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
+        ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionEnableUpdates);
+        ui->actionsToolbar->insertActionAfter(ui->actionEnableUpdates, ui->actionDisableUpdates);
+        connect(ui->actionEnableUpdates, &QAction::triggered, this, &ModFolderPage::enableUpdates);
+        connect(ui->actionDisableUpdates, &QAction::triggered, this, &ModFolderPage::disableUpdates);
+
         auto check_allow_update = [this] {
             return (!m_instance || !m_instance->isRunning()) &&
                    (ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
@@ -122,6 +127,8 @@ void ModFolderPage::runningStateChanged(bool running)
     ui->actionEnableItem->setEnabled(!running);
     ui->actionDisableItem->setEnabled(!running);
     ui->actionRemoveItem->setEnabled(!running);
+    ui->actionEnableUpdates->setEnabled(!running);
+    ui->actionDisableUpdates->setEnabled(!running);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -198,7 +205,7 @@ void ModFolderPage::updateMods()
     if (use_all)
         mods_list = m_model->allMods();
 
-    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list);
+    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list, !use_all);
     update_dialog.checkCandidates();
 
     if (update_dialog.aborted()) {
@@ -247,6 +254,24 @@ void ModFolderPage::updateMods()
 
         m_model->update();
     }
+}
+
+void ModFolderPage::enableUpdates()
+{
+    if (!m_controlsEnabled)
+        return;
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setModUpdate(selection.indexes(), EnableAction::ENABLE);
+}
+
+void ModFolderPage::disableUpdates()
+{
+    if (!m_controlsEnabled)
+        return;
+
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setModUpdate(selection.indexes(), EnableAction::DISABLE);
 }
 
 CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
