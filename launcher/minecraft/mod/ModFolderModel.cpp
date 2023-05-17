@@ -216,11 +216,10 @@ bool ModFolderModel::setModUpdate(const QModelIndexList& indexes, EnableAction a
 
         int row = idx.row();
         auto& resource = m_resources[row];
-        auto fileName = resource->fileinfo().fileName();
 
         auto update_ignore_list = QVariantUtils::toList<QString>(m_instance->getSettingsConst()->get(QStringList({"Mods", "UpdateIgnoreList"}).join('/')));
 
-        bool in_ignore_list = update_ignore_list.contains(fileName);
+        bool in_ignore_list = update_ignore_list.contains(resource->name());
         
         bool update = true;
         switch (action) {
@@ -242,9 +241,9 @@ bool ModFolderModel::setModUpdate(const QModelIndexList& indexes, EnableAction a
         }
             
         if (in_ignore_list && update) {
-            update_ignore_list.removeOne(fileName);
+            update_ignore_list.removeOne(resource->name());
         } else if (!in_ignore_list && !update) {
-            update_ignore_list.append(fileName);
+            update_ignore_list.append(resource->name());
         }
 
         m_instance->settings()->set(QStringList({"Mods", "UpdateIgnoreList"}).join('/'), QVariantUtils::fromList(update_ignore_list));

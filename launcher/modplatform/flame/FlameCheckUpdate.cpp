@@ -126,7 +126,7 @@ void FlameCheckUpdate::executeTask()
             continue;
         }
         
-        if (m_blacklist.contains(mod->fileinfo().fileName())) {
+        if (m_blacklist.contains(mod->name())) {
             qDebug() << "Ignoring" << mod->fileinfo().fileName() << "Because it is in blacklist";
             continue;
         }
