@@ -194,7 +194,10 @@ bool ModFolderModel::setData(const QModelIndex& index, const QVariant& value, in
         return false;
 
     if (role == Qt::CheckStateRole) {
-
+        if (index.column() == UpdateColumn) {
+            return setModUpdate({ index }, EnableAction::TOGGLE);
+        }
+        return setResourceEnabled({ index }, EnableAction::TOGGLE); 
     }
 
     return false;
