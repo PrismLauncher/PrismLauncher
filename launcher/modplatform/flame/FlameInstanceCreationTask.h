@@ -45,6 +45,7 @@
 
 #include "net/NetJob.h"
 
+#include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "ui/dialogs/BlockedModsDialog.h"
 
 class FlameCreationTask final : public InstanceCreationTask {
@@ -57,10 +58,7 @@ class FlameCreationTask final : public InstanceCreationTask {
                       QString id,
                       QString version_id,
                       QString original_instance_id = {})
-        : InstanceCreationTask()
-        , m_parent(parent)
-        , m_managed_id(std::move(id))
-        , m_managed_version_id(std::move(version_id))
+        : InstanceCreationTask(), m_parent(parent), m_managed_id(std::move(id)), m_managed_version_id(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
@@ -77,7 +75,8 @@ class FlameCreationTask final : public InstanceCreationTask {
     void idResolverSucceeded(QEventLoop&);
     void setupDownloadJob(QEventLoop&);
     void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
-    void validateZIPResouces();
+    void finalizeResouces();
+    bool setupManagedResource(std::unique_ptr<Resource> resource, PackedResourceType type, const QString& hash, const QUrl& url);
 
    private:
     QWidget* m_parent = nullptr;
@@ -91,7 +90,7 @@ class FlameCreationTask final : public InstanceCreationTask {
 
     QString m_managed_id, m_managed_version_id;
 
-    QList<std::pair<QString, QString>> m_ZIP_resources;
+    QList<std::tuple<QString, QString, QString, QUrl>> m_resources;
 
     std::optional<InstancePtr> m_instance;
 };

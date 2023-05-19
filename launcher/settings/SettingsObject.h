@@ -152,6 +152,25 @@ public:
 
     virtual void suspendSave() = 0;
     virtual void resumeSave() = 0;
+    
+    /*!
+     * \brief Get the value of the setting with the given ID or an empty QVariant.
+     * bypasses the registration step.
+     * \pram id the ID to check for
+     * \return The settings as a QVariant
+     */
+    virtual QVariant getRaw(const QString& id) const;
+    QVariant getRaw(const QStringList& id_parts) { return getRaw(id_parts.join('/')); }
+
+    /*!
+     * \brief Sets the vale of the setting with the given ID.
+     * If no setting with the given ID exists the setting is created with the id as the only synonym.
+     * \param id The ID of the setting to change.
+     * \param value The new value of the setting.
+     */
+    virtual void setRaw(const QString& id, QVariant value);
+    void setRaw(const QStringList& id_parts, QVariant value) { setRaw(id_parts.join('/'), value); }
+
 signals:
     /*!
      * \brief Signal emitted when one of this SettingsObject object's settings changes.

@@ -35,6 +35,10 @@
 
 #include "FlameInstanceCreationTask.h"
 
+#include "minecraft/mod/DataPack.h"
+#include "minecraft/mod/ResourcePack.h"
+#include "minecraft/mod/ShaderPack.h"
+#include "minecraft/mod/TexturePack.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/PackManifest.h"
@@ -59,7 +63,6 @@
 
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
-
 
 const static QMap<QString, QString> forgemap = { { "1.2.5", "3.4.9.171" },
                                                  { "1.4.2", "6.0.1.355" },
@@ -409,9 +412,8 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
-        if (result.fileName.endsWith(".zip")) {
-            m_ZIP_resources.append(std::make_pair(result.fileName, result.targetFolder));
-        }
+        m_resources.append(
+            std::make_tuple(result.fileName, result.targetFolder, result.hash, result.url.isEmpty() ? result.websiteUrl : result.url));
 
         if (!result.resolved || result.url.isEmpty()) {
             BlockedMod blocked_mod;
@@ -491,13 +493,13 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     m_mod_id_resolver.reset();
     connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
         m_files_job.reset();
-        validateZIPResouces();
+        finalizeResouces();
     });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::progress, this, [this](qint64 current, qint64 total){
+    connect(m_files_job.get(), &NetJob::progress, this, [this](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);
     });
@@ -540,11 +542,78 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     setAbortable(true);
 }
 
-
-void FlameCreationTask::validateZIPResouces()
+template <typename Derived, typename Base, typename Del>
+std::unique_ptr<Derived, Del> dynamic_unique_ptr_cast(std::unique_ptr<Base, Del>&& p)
 {
-    qDebug() << "Validating whether resources stored as .zip are in the right place";
-    for (auto [fileName, targetFolder] : m_ZIP_resources) {
+    if (Derived* result = dynamic_cast<Derived*>(p.get())) {
+        [[maybe_unused]] auto _ = p.release();
+        return std::unique_ptr<Derived, Del>(result, std::move(p.get_deleter()));
+    }
+    return std::unique_ptr<Derived, Del>(nullptr, p.get_deleter());
+}
+
+bool FlameCreationTask::setupManagedResource(std::unique_ptr<Resource> resource,
+                                             PackedResourceType type,
+                                             const QString& hash,
+                                             const QUrl& url)
+{
+    if (!m_instance)
+        return false;  // can't set up an invalid instance
+    //
+    auto inst = m_instance.value();
+    auto settings = inst->settings();
+    auto fileName = resource->fileinfo().fileName();
+    auto managmentType = ResourceUtils::getManagmentTypeName(ResourceManagmentType::PackManaged);
+
+    QString topPath = "";
+    switch (type) {
+        case PackedResourceType::Mod: {
+            topPath = "mods";
+            auto mod = dynamic_unique_ptr_cast<Mod>(std::move(resource));
+            settings->setRaw({ topPath, fileName, "name" }, mod->name());
+            settings->setRaw({ topPath, fileName, "version" }, mod->version());
+            break;
+        }
+        case PackedResourceType::ResourcePack: {
+            topPath = "resourcepacks";
+            auto rp = dynamic_unique_ptr_cast<ResourcePack>(std::move(resource));
+            settings->setRaw({ topPath, fileName, "name" }, rp->name());
+            settings->setRaw({ topPath, fileName, "type" }, managmentType);
+            break;
+        }
+        case PackedResourceType::TexturePack: {
+            topPath = "texturepacks";
+            auto tp = dynamic_unique_ptr_cast<TexturePack>(std::move(resource));
+            settings->setRaw({ topPath, fileName, "name" }, tp->name());
+            break;
+        }
+        case PackedResourceType::DataPack: {
+            topPath = "datapacks";
+            auto dp = dynamic_unique_ptr_cast<DataPack>(std::move(resource));
+            settings->setRaw({ topPath, fileName, "name" }, dp->name());
+            break;
+        }
+        case PackedResourceType::ShaderPack: {
+            auto sp = dynamic_unique_ptr_cast<ShaderPack>(std::move(resource));
+            break;
+        }
+        case PackedResourceType::WorldSave:
+        case PackedResourceType::UNKNOWN:
+        default:
+            return false;
+            break;
+    }
+    settings->setRaw({ topPath, fileName, "type" }, managmentType);
+    settings->setRaw({ topPath, fileName, "hash" }, hash);
+    settings->setRaw({ topPath, fileName, "url" }, url);
+
+    return true;
+}
+
+void FlameCreationTask::finalizeResouces()
+{
+    for (auto [fileName, targetFolder, hash, url] : m_resources) {
+
         qDebug() << "Checking" << fileName << "...";
         auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
 
@@ -562,7 +631,7 @@ void FlameCreationTask::validateZIPResouces()
             return localPath;
         };
 
-        auto installWorld = [this](QString worldPath){
+        auto installWorld = [this](QString worldPath) {
             qDebug() << "Installing World from" << worldPath;
             QFileInfo worldFileInfo(worldPath);
             World w(worldFileInfo);
@@ -574,34 +643,36 @@ void FlameCreationTask::validateZIPResouces()
         };
 
         QFileInfo localFileInfo(localPath);
-        auto type = ResourceUtils::identify(localFileInfo);
+        auto [type, resource] = ResourceUtils::identify(localFileInfo);
+
+        setupManagedResource(std::move(resource), type, hash, url);
 
         QString worldPath;
 
         switch (type) {
-            case PackedResourceType::ResourcePack :
-                validatePath(fileName, targetFolder, "resourcepacks");
-                break;
-            case PackedResourceType::TexturePack :
-                validatePath(fileName, targetFolder, "texturepacks");
-                break;
-            case PackedResourceType::DataPack :
-                validatePath(fileName, targetFolder, "datapacks");
-                break;
-            case PackedResourceType::Mod :
+            case PackedResourceType::Mod:
                 validatePath(fileName, targetFolder, "mods");
                 break;
-            case PackedResourceType::ShaderPack :
+            case PackedResourceType::ResourcePack:
+                validatePath(fileName, targetFolder, "resourcepacks");
+                break;
+            case PackedResourceType::TexturePack:
+                validatePath(fileName, targetFolder, "texturepacks");
+                break;
+            case PackedResourceType::DataPack:
+                validatePath(fileName, targetFolder, "datapacks");
+                break;
+            case PackedResourceType::ShaderPack:
                 // in theroy flame API can't do this but who knows, that *may* change ?
-                // better to handle it if it *does* occure in the future
+                // better to handle it if it *does* occur in the future
                 validatePath(fileName, targetFolder, "shaderpacks");
                 break;
-            case PackedResourceType::WorldSave :
+            case PackedResourceType::WorldSave:
                 worldPath = validatePath(fileName, targetFolder, "saves");
                 installWorld(worldPath);
                 break;
-            case PackedResourceType::UNKNOWN :
-            default :
+            case PackedResourceType::UNKNOWN:
+            default:
                 qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
                 break;
         }

@@ -128,3 +128,14 @@ QVariant INISettingsObject::retrieveValue(const Setting &setting)
     }
     return QVariant();
 }
+
+QVariant INISettingsObject::getRaw(const QString& id) const
+{
+    return m_ini.get(id, QVariant());
+}
+
+void INISettingsObject::setRaw(const QString& id, QVariant value)
+{
+    m_ini.set(id, value);
+}
+

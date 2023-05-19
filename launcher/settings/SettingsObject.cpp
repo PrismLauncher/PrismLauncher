@@ -94,6 +94,11 @@ QVariant SettingsObject::get(const QString &id) const
     return (setting ? setting->get() : QVariant());
 }
 
+QVariant SettingsObject::getRaw(const QString& id) const
+{
+    return get(id);
+}
+
 bool SettingsObject::set(const QString &id, QVariant value)
 {
     auto setting = getSetting(id);
@@ -107,6 +112,14 @@ bool SettingsObject::set(const QString &id, QVariant value)
         setting->set(value);
         return true;
     }
+}
+
+void SettingsObject::setRaw(const QString& id, QVariant value)
+{
+    auto setting = getSetting(id);
+    if (!setting)
+        setting = registerSetting(id, value);
+    setting->set(value);
 }
 
 void SettingsObject::reset(const QString &id) const

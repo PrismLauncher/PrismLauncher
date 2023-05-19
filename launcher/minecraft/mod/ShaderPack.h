@@ -49,6 +49,7 @@ class ShaderPack : public Resource {
 
     ShaderPack(QObject* parent = nullptr) : Resource(parent) {}
     ShaderPack(QFileInfo file_info) : Resource(file_info) {}
+    ShaderPack(ShaderPack& sp) : Resource(sp), m_pack_format(sp.m_pack_format) {}
 
     /** Thread-safe. */
     void setPackFormat(ShaderPackFormat new_format);

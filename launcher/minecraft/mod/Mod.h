@@ -55,6 +55,7 @@ public:
     Mod(const QFileInfo &file);
     Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
     Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
+    Mod(Mod& mod) : Resource(mod), m_local_details(mod.m_local_details) {}
 
     auto details()     const -> const ModDetails&;
     auto name()        const -> QString override;

@@ -39,6 +39,7 @@ class DataPack : public Resource {
 
     DataPack(QObject* parent = nullptr) : Resource(parent) {}
     DataPack(QFileInfo file_info) : Resource(file_info) {}
+    DataPack(DataPack& dp) : Resource(dp), m_pack_format(dp.m_pack_format), m_description(dp.m_description) {}
 
     /** Gets the numerical ID of the pack format. */
     [[nodiscard]] int packFormat() const { return m_pack_format; }
