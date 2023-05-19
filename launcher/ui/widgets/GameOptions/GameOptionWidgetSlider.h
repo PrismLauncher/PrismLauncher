@@ -32,6 +32,7 @@ class GameOptionWidgetSlider : public GameOptionWidget {
     ~GameOptionWidgetSlider() override;
     void setEditorData(GameOptionItem optionItem);
     void saveEditorData(GameOptionItem optionItem) override;
+    QSize sizeHint() const override;
 
    private:
     Ui::GameOptionWidgetSlider* ui;

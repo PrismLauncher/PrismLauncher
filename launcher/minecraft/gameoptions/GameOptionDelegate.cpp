@@ -16,14 +16,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "GameOptionDelegate.h"
-#include "ui/widgets/GameOptionWidget.h"
-#include "ui/widgets/GameOptionWidgetCheckBox.h"
-#include "ui/widgets/GameOptionWidgetComboBox.h"
-#include "ui/widgets/GameOptionWidgetKeyBind.h"
-#include "ui/widgets/GameOptionWidgetSlider.h"
-#include "ui/widgets/GameOptionWidgetSpinnerFloat.h"
-#include "ui/widgets/GameOptionWidgetSpinnerInt.h"
-#include "ui/widgets/GameOptionWidgetText.h"
+#include "ui/widgets/GameOptions/GameOptionWidget.h"
+#include "ui/widgets/GameOptions/GameOptionWidgetCheckBox.h"
+#include "ui/widgets/GameOptions/GameOptionWidgetComboBox.h"
+#include "ui/widgets/GameOptions/GameOptionWidgetKeyBind.h"
+#include "ui/widgets/GameOptions/GameOptionWidgetSlider.h"
+#include "ui/widgets/GameOptions/GameOptionWidgetSpinnerFloat.h"
+#include "ui/widgets/GameOptions/GameOptionWidgetSpinnerInt.h"
+#include "ui/widgets/GameOptions/GameOptionWidgetText.h"
 
 #include <QDebug>
 
@@ -94,4 +94,8 @@ void GameOptionDelegate::setModelData(QWidget* editor, QAbstractItemModel* model
     } else {
         qDebug() << "[GameOptions] Saving widget data to Model failed because widget was null";
     }
+}
+QSize GameOptionDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    return QSize(option.widget->height(), option.widget->width());
 }

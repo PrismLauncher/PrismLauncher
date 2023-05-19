@@ -1015,21 +1015,21 @@ SET(LAUNCHER_SOURCES
     ui/widgets/WideBar.cpp
     ui/widgets/ThemeCustomizationWidget.h
     ui/widgets/ThemeCustomizationWidget.cpp
-    ui/widgets/GameOptionWidget.h
-    ui/widgets/GameOptionWidgetSlider.h
-    ui/widgets/GameOptionWidgetSlider.cpp
-    ui/widgets/GameOptionWidgetComboBox.h
-    ui/widgets/GameOptionWidgetComboBox.cpp
-    ui/widgets/GameOptionWidgetCheckBox.h
-    ui/widgets/GameOptionWidgetCheckBox.cpp
-    ui/widgets/GameOptionWidgetSpinnerFloat.h
-    ui/widgets/GameOptionWidgetSpinnerFloat.cpp
-    ui/widgets/GameOptionWidgetSpinnerInt.h
-    ui/widgets/GameOptionWidgetSpinnerInt.cpp
-    ui/widgets/GameOptionWidgetText.h
-    ui/widgets/GameOptionWidgetText.cpp
-    ui/widgets/GameOptionWidgetKeyBind.h
-    ui/widgets/GameOptionWidgetKeyBind.cpp
+    ui/widgets/GameOptions/GameOptionWidget.h
+    ui/widgets/GameOptions/GameOptionWidgetSlider.h
+    ui/widgets/GameOptions/GameOptionWidgetSlider.cpp
+    ui/widgets/GameOptions/GameOptionWidgetComboBox.h
+    ui/widgets/GameOptions/GameOptionWidgetComboBox.cpp
+    ui/widgets/GameOptions/GameOptionWidgetCheckBox.h
+    ui/widgets/GameOptions/GameOptionWidgetCheckBox.cpp
+    ui/widgets/GameOptions/GameOptionWidgetSpinnerFloat.h
+    ui/widgets/GameOptions/GameOptionWidgetSpinnerFloat.cpp
+    ui/widgets/GameOptions/GameOptionWidgetSpinnerInt.h
+    ui/widgets/GameOptions/GameOptionWidgetSpinnerInt.cpp
+    ui/widgets/GameOptions/GameOptionWidgetText.h
+    ui/widgets/GameOptions/GameOptionWidgetText.cpp
+    ui/widgets/GameOptions/GameOptionWidgetKeyBind.h
+    ui/widgets/GameOptions/GameOptionWidgetKeyBind.cpp
 
     # GUI - instance group view
     ui/instanceview/InstanceProxyModel.cpp
@@ -1083,13 +1083,13 @@ qt_wrap_ui(LAUNCHER_UI
     ui/widgets/ModFilterWidget.ui
     ui/widgets/SubTaskProgressBar.ui
     ui/widgets/ThemeCustomizationWidget.ui
-    ui/widgets/GameOptionWidgetSlider.ui
-    ui/widgets/GameOptionWidgetComboBox.ui
-    ui/widgets/GameOptionWidgetCheckBox.ui
-    ui/widgets/GameOptionWidgetSpinnerFloat.ui
-    ui/widgets/GameOptionWidgetSpinnerInt.ui
-    ui/widgets/GameOptionWidgetText.ui
-    ui/widgets/GameOptionWidgetKeyBind.ui
+    ui/widgets/GameOptions/GameOptionWidgetSlider.ui
+    ui/widgets/GameOptions/GameOptionWidgetComboBox.ui
+    ui/widgets/GameOptions/GameOptionWidgetCheckBox.ui
+    ui/widgets/GameOptions/GameOptionWidgetSpinnerFloat.ui
+    ui/widgets/GameOptions/GameOptionWidgetSpinnerInt.ui
+    ui/widgets/GameOptions/GameOptionWidgetText.ui
+    ui/widgets/GameOptions/GameOptionWidgetKeyBind.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui
     ui/dialogs/ProgressDialog.ui

@@ -89,3 +89,11 @@ void GameOptionWidgetSlider::saveEditorData(GameOptionItem optionItem) {
             break;
     }
 }
+
+QSize GameOptionWidgetSlider::sizeHint() const
+{
+    QSize size = GameOptionWidget::sizeHint();
+    size.setHeight(size.height() * 2);
+    return size;
+}
+
