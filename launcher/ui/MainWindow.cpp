@@ -1471,9 +1471,36 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             return;
         }
 
+        auto pIcon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
+        if (pIcon == nullptr)
+        {
+            pIcon = APPLICATION->icons()->icon("grass");
+        }
+
+        QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "Icon.icns");
+
+        QFile iconFile(iconPath);
+        if (!iconFile.open(QFile::WriteOnly))
+        {
+            QMessageBox::critical(this, tr("Create instance Application"), tr("Failed to create pIcon for Application."));
+            return;
+        }
+
+        QIcon icon = pIcon->icon();
+
+        bool success = icon.pixmap(1024, 1024).save(iconPath, "ICNS");
+        iconFile.close();
+
+        if (!success)
+        {
+            iconFile.remove();
+            QMessageBox::critical(this, tr("Create instance Application"), tr("Failed to create pIcon for Application."));
+            return;
+        }
+
         if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
                            appPath, { "--launch", m_selectedInstance->id() },
-                           m_selectedInstance->name(), "")) {
+                           m_selectedInstance->name(), iconPath)) {
             QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
         }
         else
@@ -1495,27 +1522,27 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             }
         }
 
-        auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
-        if (icon == nullptr)
+        auto pIcon = APPLICATION->icons()->pIcon(m_selectedInstance->iconKey());
+        if (pIcon == nullptr)
         {
-            icon = APPLICATION->icons()->icon("grass");
+            pIcon = APPLICATION->icons()->pIcon("grass");
         }
 
-        QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.png");
+        QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "pIcon.png");
 
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
         {
-            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create pIcon for shortcut."));
             return;
         }
-        bool success = icon->icon().pixmap(64, 64).save(&iconFile, "PNG");
+        bool success = pIcon->pIcon().pixmap(64, 64).save(&iconFile, "PNG");
         iconFile.close();
 
         if (!success)
         {
             iconFile.remove();
-            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create pIcon for shortcut."));
             return;
         }
 
@@ -1545,34 +1572,34 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
         }
 #elif defined(Q_OS_WIN)
-        auto icon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
-        if (icon == nullptr)
+        auto pIcon = APPLICATION->icons()->pIcon(m_selectedInstance->iconKey());
+        if (pIcon == nullptr)
         {
-            icon = APPLICATION->icons()->icon("grass");
+            pIcon = APPLICATION->icons()->pIcon("grass");
         }
 
-        QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "icon.ico");
+        QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "pIcon.ico");
 
-        // part of fix for weird bug involving the window icon being replaced
+        // part of fix for weird bug involving the window pIcon being replaced
         // dunno why it happens, but this 2-line fix seems to be enough, so w/e
         auto appIcon = APPLICATION->getThemedIcon("logo");
 
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
         {
-            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create pIcon for shortcut."));
             return;
         }
-        bool success = icon->icon().pixmap(64, 64).save(&iconFile, "ICO");
+        bool success = pIcon->pIcon().pixmap(64, 64).save(&iconFile, "ICO");
         iconFile.close();
 
-        // restore original window icon
+        // restore original window pIcon
         QGuiApplication::setWindowIcon(appIcon);
 
         if (!success)
         {
             iconFile.remove();
-            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create icon for shortcut."));
+            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create pIcon for shortcut."));
             return;
         }
 
