@@ -23,7 +23,7 @@
 #include <memory>
 #include <utility>
 
-enum class OptionType { String, Int, Float, Bool, KeyBind };
+enum class OptionType { String, Int, Float, Bool, KeyBind, Array };
 
 template <class T> struct Range {
     T min, max;
@@ -38,7 +38,6 @@ union OptionValue {
     float floatValue;
     int intValue;
     bool boolValue;
-    // QString stringValue;
 };
 
 class GameOption {
@@ -91,13 +90,16 @@ class GameOption {
     OptionType type;
     bool readOnly = false;
     QList<QString> validValues;  // if empty, treat as text input
-    //int introducedVersion;
-    //int removedVersion;
+
+    // Not sure if versioning these makes sense, it would be a lot of effort to keep track of as new minecraft versions are made.
+    // not even considering the large bulk of old minecraft versions, of which some data may not even be documented yet.
+    // int introducedVersion; // format version number, where this options key got introduced
+    // int removedVersion; // format version number, where this options key got removed - -1 if it is still present in the latest version
 
     int getDefaultInt() const { return defaultValue.intValue; };
     bool getDefaultBool() const { return defaultValue.boolValue; };
     float getDefaultFloat() const { return defaultValue.floatValue; };
-    QString getDefaultString();;
+    QString getDefaultString();
 
     Range<int> getIntRange() const { return range.intRange; };
     Range<float> getFloatRange() const { return range.floatRange; };

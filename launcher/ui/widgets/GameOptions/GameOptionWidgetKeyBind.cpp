@@ -38,6 +38,7 @@ GameOptionWidgetKeyBind::~GameOptionWidgetKeyBind()
 }
 
 void GameOptionWidgetKeyBind::setEditorData(GameOptionItem optionItem) {
+    // TODO implement this, *keybindingOptions is needed
     /*for (auto& keyBinding : *keybindingOptions) {
         // this could become a std::find_if eventually, if someone wants to bother making it that.
         if (keyBinding->minecraftKeyCode == contents[row].knownOption->getDefaultString()) {
@@ -50,6 +51,7 @@ void GameOptionWidgetKeyBind::setEditorData(GameOptionItem optionItem) {
 }
 void GameOptionWidgetKeyBind::saveEditorData(GameOptionItem optionItem) {
     QString minecraftKeyCode;
+    // TODO implement this, *keybindingOptions is needed
     /*for (auto& keyBinding : *keybindingOptions) {
         // this could become a std::find_if eventually, if someone wants to bother making it that.
         if (keyBinding->qtKeyCode.keyboardKey == ui->keySequenceEdit->keySequence()[0].key() ||

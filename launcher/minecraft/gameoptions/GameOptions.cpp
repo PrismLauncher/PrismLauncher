@@ -41,11 +41,6 @@
 #include "FileSystem.h"
 #include "GameOptions.h"
 
-static Qt::CheckState boolToState(bool b)
-{
-    return b ? Qt::Checked : Qt::Unchecked;
-};
-
 namespace {
 bool load(const QString& path,
           std::vector<GameOptionItem>& contents,
@@ -91,32 +86,26 @@ bool load(const QString& path,
         bool isFloat = false;
         item.intValue = item.value.toInt(&isInt);
         item.floatValue = item.value.toFloat(&isFloat);
-        if (isInt) {
-            item.type = OptionType::Int;
-            // qDebug() << "The value" << value << "is a int";
-        } else if (isFloat) {
-            item.type = OptionType::Float;
-            // qDebug() << "The value" << value << "is a float";
-        } else if (item.value == "true" || item.value == "false") {
-            item.boolValue = item.value == "true";
-            item.type = OptionType::Bool;
-            qDebug() << "The value" << item.value << "is a bool";
-        } else if (item.value.endsWith("]") && item.value.startsWith("[")) {
+        item.boolValue = item.value == "true";
+        item.type = isInt ? OptionType::Int : isFloat ? OptionType::Float : OptionType::Bool;
+        if (item.value.startsWith("[") && item.value.endsWith("]")) {
             qDebug() << "The value" << item.value << "is an array";
             for (const QString& part : item.value.mid(1, item.value.size() - 2).split(",")) {
                 GameOptionChildItem child{ part, static_cast<int>(contents.size()) };
                 qDebug() << "Array has entry" << part;
                 item.children.append(child);
             }
+            item.type = OptionType::Array;
         } else if (item.key.startsWith("key_")) {
             item.type = OptionType::KeyBind;
         } else {
-            // this is really ugly, please suggest how to truncate the start and end
-            item.value = item.value.remove(item.value.length()-1, 1).remove(0, 1);
+            // This removes the leading and ending " from the string to display it more cleanly.
+            item.value = item.value.mid(1, item.value.length()-2);
+            item.type = OptionType::String;
         }
 
-        // adds reference to known option from gameOptionsSchema if avaiable to get display name and other metadata
-        item.knownOption = knownOptions->find(item.key) != knownOptions->end() ? knownOptions->find(item.key).value() : nullptr;
+        // adds reference to known option from gameOptionsSchema if available to get display name and other metadata
+        item.knownOption = knownOptions->value(item.key, nullptr);
         contents.emplace_back(item);
     }
     qDebug() << "Loaded" << path << "with version:" << version;
@@ -171,6 +160,7 @@ bool GameOptions::setData(const QModelIndex& index, const QVariant& value, int r
     auto column = (Column)index.column();
     if (column == Column::Value) {
         switch (contents[row].type) {
+            case OptionType::Array:
             case OptionType::String: {
                 contents[row].value = value.toString();
                 return true;
@@ -203,13 +193,13 @@ Qt::ItemFlags GameOptions::flags(const QModelIndex& index) const
 QVariant GameOptions::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-        return QVariant();
+        return {};
 
     int row = index.row();
     Column column = (Column)index.column();
 
     if (row < 0 || row >= int(contents.size()))
-        return QVariant();
+        return {};
 
     if (index.parent().isValid()) {
         switch (role) {
@@ -218,11 +208,11 @@ QVariant GameOptions::data(const QModelIndex& index, int role) const
                     GameOptionChildItem* item = static_cast<GameOptionChildItem*>(index.internalPointer());
                     return item->value;
                 } else {
-                    return QVariant();
+                    return {};
                 }
             }
             default: {
-                return QVariant();
+                return {};
             }
         }
     }
@@ -237,29 +227,29 @@ QVariant GameOptions::data(const QModelIndex& index, int role) const
                     if (contents[row].knownOption != nullptr) {
                         return contents[row].knownOption->description;
                     } else {
-                        return QVariant();
+                        return {};
                     }
                 }
                 default: {
-                    return QVariant();
+                    return {};
                 }
             }
         }
         default: {
-            return QVariant();
+            return {};
         }
     }
-    return QVariant();
+    return {};
 }
 
 QModelIndex GameOptions::index(int row, int column, const QModelIndex& parent) const
 {
     if (!hasIndex(row, column, parent))
-        return QModelIndex();
+        return {};
 
     if (parent.isValid()) {
         if (parent.parent().isValid())
-            return QModelIndex();
+            return {};
 
         GameOptionItem* item = static_cast<GameOptionItem*>(parent.internalPointer());
         return createIndex(row, column, &item->children[row]);
@@ -271,14 +261,14 @@ QModelIndex GameOptions::index(int row, int column, const QModelIndex& parent) c
 QModelIndex GameOptions::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
-        return QModelIndex();
+        return {};
 
     const void* childItem = index.internalPointer();
 
     // Determine where childItem points to
     if (childItem >= &contents[0] && childItem <= &contents.back()) {
         // Parent is root/contents
-        return QModelIndex();
+        return {};
     } else {
         GameOptionChildItem* child = static_cast<GameOptionChildItem*>(index.internalPointer());
         return createIndex(child->parentRow, 0, reinterpret_cast<quintptr>(&contents[child->parentRow]));
@@ -298,7 +288,7 @@ int GameOptions::rowCount(const QModelIndex& parent) const
         if (parent.parent().isValid())
             return 0;
 
-        GameOptionItem* item = static_cast<GameOptionItem*>(parent.internalPointer());
+        auto* item = static_cast<GameOptionItem*>(parent.internalPointer());
         return item->children.count();
     }
 }
