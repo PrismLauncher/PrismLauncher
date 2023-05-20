@@ -138,7 +138,7 @@ bool BlockedModHasher::useHashType(QString type) {
     return false;
 }
 
-const static QHash<HashType, QString> s_hash_type_names = {
+const static QMap<HashType, QString> s_hash_type_names = {
     { HashType::Md5, "md5" },
     { HashType::Sha1, "sha1" },
     { HashType::Sha256, "sha256" },

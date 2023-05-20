@@ -240,15 +240,6 @@ class SettingsObject : public QObject {
      */
     virtual void resetSetting(const Setting& setting) = 0;
 
-    /*!
-     * \brief Removes a setting.
-     * This slot is usually connected to eash Setting object's
-     * settingRemoved signal. the signal is emitted, causing this slot
-     * to remove the the setting form the config file.
-     * \parap setting A reference to the Setting object that was removed.
-     */
-    virtual void removeSetting(const Setting& setting) = 0;
-
    protected:
     /*!
      * \brief Connects the necessary signals to the given Setting.
@@ -268,6 +259,12 @@ class SettingsObject : public QObject {
      * \return
      */
     virtual QVariant retrieveValue(const Setting& setting) = 0;
+   
+   /*!
+    * \brief Function used by Settings object to clear their storage in the SettingsObject.
+    * \param setting The settig to clear storage for.
+    */ 
+    virtual void removeValue(const Setting& setting) = 0;
 
     friend class Setting;
 

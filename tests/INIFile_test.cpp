@@ -186,6 +186,27 @@ slots:
 
         settings->remove({ "group3", "subgroup2" });
         QCOMPARE(settings->childGroups("group3"), QStringList({ "subgroup1", "subgroup3" }));
+
+        INIFile ini_settings;
+        ini_settings.loadFile("test_settings.cfg");
+
+        QCOMPARE(ini_settings.get("tl_key1", 0), QVariant(1));
+        QCOMPARE(ini_settings.get("tl_key2", 0), QVariant(0)); // default, so removed
+        QCOMPARE(ini_settings.get("group1/g1_key1", 0), QVariant("g1 key 1"));
+        QCOMPARE(ini_settings.get({ "group1", "g1_key2" }, 0), QVariant(0)); // default, so removed
+        QCOMPARE(ini_settings.get({ "group2", "g2_key1" }, 0), QVariant("g2 key 1"));
+        QCOMPARE(ini_settings.get({ "group2", "g2_key2" }, 0), QVariant("g2 key 2"));
+        QCOMPARE(ini_settings.get("group3/g3_key1", 0), QVariant("g3 key 1"));
+        QCOMPARE(ini_settings.get("group3/g3_key2", 0), QVariant("g3 key 2"));
+        QCOMPARE(ini_settings.get("group3/subgroup1/g3_sg1_key1", 0), QVariant(1));
+        QCOMPARE(ini_settings.get("group3/subgroup1/g3_sg1_key2", 0), QVariant(2));
+        QCOMPARE(ini_settings.get("group3/subgroup2/g3_sg2_key1", 0), QVariant(0)); // default, so removed
+        QCOMPARE(ini_settings.get("group3/subgroup2/g3_sg2_key2", 0), QVariant(0)); // default, so removed
+        QCOMPARE(ini_settings.get("group3/subgroup3/g3_sg3_key1", 0), QVariant(5));
+        QCOMPARE(ini_settings.get("group3/subgroup3/g3_sg3_key2", 0), QVariant(6));
+        QCOMPARE(ini_settings.get("group4/sub1/sub2/sub3/sub4_key", 0), QVariant(100));
+
+
     }
 };
 

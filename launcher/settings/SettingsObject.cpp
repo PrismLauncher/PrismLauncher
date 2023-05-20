@@ -251,7 +251,6 @@ void SettingsObject::connectSignals(const Setting &setting)
     connect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
     connect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting &)));
 
-    connect(&setting, &Setting::settingRemoved, this, &SettingsObject::removeSetting);
     connect(&setting, SIGNAL(settingRemoved(Setting)), this, SIGNAL(settingRemoved(const Setting &)));
 }
 
@@ -264,6 +263,5 @@ void SettingsObject::disconnectSignals(const Setting& setting)
     disconnect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
     disconnect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting &)));
 
-    disconnect(&setting, &Setting::settingRemoved, this, &SettingsObject::removeSetting);
     disconnect(&setting, SIGNAL(settingRemoved(Setting)), this, SIGNAL(settingRemoved(const Setting &)));
 }

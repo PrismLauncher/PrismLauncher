@@ -56,10 +56,10 @@ public:
 protected slots:
     virtual void changeSetting(const Setting &setting, QVariant value) override;
     virtual void resetSetting(const Setting &setting) override;
-    virtual void removeSetting(const Setting& setting) override;
 
    protected:
     virtual QVariant retrieveValue(const Setting &setting) override;
+    virtual void removeValue(const Setting& setting) override;
     void doSave();
 
 protected:

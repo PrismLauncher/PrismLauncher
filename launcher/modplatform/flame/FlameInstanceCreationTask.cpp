@@ -344,7 +344,7 @@ bool FlameCreationTask::createInstance()
         components->setComponentVersion("net.fabricmc.fabric-loader", fabricVersion);
 
     if (m_instIcon != "default") {
-        m_instance.setIconKey(m_instIcon);
+        m_instance->setIconKey(m_instIcon);
     } else {
         if (m_pack.name.contains("Direwolf20")) {
             m_instance->setIconKey("steve");

@@ -53,6 +53,7 @@ bool INIFile::saveFile(QString fileName)
 {
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
     _settings_obj.setFallbacksEnabled(false);
+    _settings_obj.clear(); // clean up old settings that would otherwise persist;
 
     for (Iterator iter = begin(); iter != end(); iter++)
         _settings_obj.setValue(iter.key(), iter.value());
