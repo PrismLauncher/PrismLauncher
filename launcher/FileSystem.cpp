@@ -774,8 +774,12 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     // The reason why we want to do this is that then we can use things like spotlight to launch the instance
 
     // Create the Application
-    QString applicationDirectory = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
-    QDir application = applicationDirectory + "/" + name + ".app/";
+    QDir applicationDirectory = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Prism Launchers/";
+
+    if (!applicationDirectory.exists())
+        applicationDirectory.mkpath(".");
+
+    QDir application = applicationDirectory.path() + "/" + name + ".app/";
 
     if (application.exists()) {
         qWarning() << "Application already exists!";
