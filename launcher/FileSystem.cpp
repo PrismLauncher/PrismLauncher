@@ -770,9 +770,6 @@ QString getDesktopDir()
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
 #if defined(Q_OS_MACOS)
-    // Instead of creating a file on the desktop, we want to use launchpad
-    // The reason why we want to do this is that then we can use things like spotlight to launch the instance
-
     // Create the Application
     QDir applicationDirectory = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Prism Launchers/";
 
@@ -798,7 +795,6 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     binaryDir.mkpath(".");
     info.open(QIODevice::WriteOnly | QIODevice::Text);
 
-    // Move over the icon
     QFile(icon).rename(resources.path() + "/Icon.icns");
 
     // Create the Command file
