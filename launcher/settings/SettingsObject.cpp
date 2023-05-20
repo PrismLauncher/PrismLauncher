@@ -149,7 +149,8 @@ bool SettingsObject::remove(const QString& id)
 
 bool SettingsObject::removeGroup(const QString& path)
 {
-    bool found = false;
+    // build list of settings to remove (no collection modification in loops over that collection!)
+    QList<std::shared_ptr<Setting>> to_remove = {};
     auto path_parts = path.split('/');
     if (!path_parts.isEmpty() && (path_parts.first() == ""))
         path_parts.removeFirst();
@@ -165,13 +166,14 @@ bool SettingsObject::removeGroup(const QString& path)
                 match = false;
             }
         }
-        if (match || path.isEmpty()) {
-            setting->remove();
-            unregisterSetting(setting);
-            found = true;
-        }
+        if (match || path.isEmpty())
+            to_remove.append(setting);
     }
-    return found;
+    for (auto setting : to_remove) {
+        setting->remove();
+        unregisterSetting(setting);
+    }
+    return !to_remove.isEmpty();
 }
 
 bool SettingsObject::contains(const QString &id)
