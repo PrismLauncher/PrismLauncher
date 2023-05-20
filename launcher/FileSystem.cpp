@@ -770,9 +770,37 @@ QString getDesktopDir()
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
 #if defined(Q_OS_MACOS)
-    destination += ".command";
+    // Instead of creating a file on the desktop, we want to use launchpad
+    // The reason why we want to do this is that then we can use things like spotlight to launch the instance
 
-    QFile f(destination);
+    // Create the Application
+    QString applicationDirectory = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
+    QDir application = applicationDirectory + "/" + name + ".app/";
+
+    if (application.exists()) {
+        qWarning() << "Application already exists!";
+        return false;
+    }
+
+    application.mkpath(".");
+
+    QDir content = application.path() + "/Contents/";
+    QDir resources = content.path() + "/Resources/";
+    QDir binaryDir = content.path() + "/MacOS/";
+    QFile info = content.path() + "/Info.plist";
+
+    content.mkpath(".");
+    resources.mkpath(".");
+    binaryDir.mkpath(".");
+    info.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    // Move over the icon
+    QFile(icon).rename(resources.path() + "/Icon.icns");
+
+    // Create the Command file
+    QString exec = binaryDir.path() + "/Run.command";
+
+    QFile f(exec);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream stream(&f);
 
@@ -788,6 +816,28 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     f.close();
 
     f.setPermissions(f.permissions() | QFileDevice::ExeOwner | QFileDevice::ExeGroup | QFileDevice::ExeOther);
+
+    // Generate the Info.plist
+    QTextStream infoStream(&info);
+    infoStream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n"
+      "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" "
+      "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
+      "<plist version=\"1.0\">\n"
+      "<dict>\n"
+      "    <key>CFBundleExecutable</key>\n"
+      "    <string>Run.command</string>\n" // The path to the executable
+      "    <key>CFBundleIconFile</key>\n"
+      "    <string>Icon.icns</string>\n"
+      "    <key>CFBundleName</key>\n"
+      "    <string>" << name << "</string>\n" // Name of the application
+      "    <key>CFBundlePackageType</key>\n"
+      "    <string>APPL</string>\n"
+      "    <key>CFBundleShortVersionString</key>\n"
+      "    <string>1.0</string>\n"
+      "    <key>CFBundleVersion</key>\n"
+      "    <string>1.0</string>\n"
+      "</dict>\n"
+      "</plist>";
 
     return true;
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
