@@ -74,10 +74,16 @@
 
 #include "icons/IconList.h"
 
+#include "mod/DataPack.h"
 #include "mod/ModFolderModel.h"
+#include "mod/ResourcePack.h"
 #include "mod/ResourcePackFolderModel.h"
+#include "mod/ShaderPack.h"
 #include "mod/ShaderPackFolderModel.h"
+#include "mod/TexturePack.h"
 #include "mod/TexturePackFolderModel.h"
+
+#include "modplatform/helpers/HashUtils.h"
 
 #include "WorldList.h"
 
@@ -943,6 +949,68 @@ QString MinecraftInstance::getStatusbarDescription()
         description.append(tr(", has crashed."));
     }
     return description;
+}
+
+bool MinecraftInstance::setupManagedResource(Resource::Ptr resource,
+                                             PackedResourceType type,
+                                             ResourceManagmentType managment_type,
+                                             const QUrl& url,
+                                             const QString& hash,
+                                             Hashing::HashType hash_type)
+{
+    auto settings = this->settings();
+    auto fileName = resource->fileinfo().fileName();
+    auto managmentType = ResourceUtils::getManagmentTypeName(managment_type);
+
+    if (hash_type == Hashing::HashType::UNKNOWN)
+        hash_type = Hashing::guessHashType(hash);
+
+    QString topPath = "";
+    switch (type) {
+        case PackedResourceType::Mod: {
+            topPath = "mods";
+            auto mod = qSharedPointerDynamicCast<Mod>(resource);
+            settings->setOrRegister({ topPath, fileName, "name" }, mod->name());
+            settings->setOrRegister({ topPath, fileName, "version" }, mod->version());
+            break;
+        }
+        case PackedResourceType::ResourcePack: {
+            topPath = "resourcepacks";
+            auto rp = qSharedPointerDynamicCast<ResourcePack>(resource);
+            settings->setOrRegister({ topPath, fileName, "name" }, rp->name());
+            settings->setOrRegister({ topPath, fileName, "type" }, managmentType);
+            break;
+        }
+        case PackedResourceType::TexturePack: {
+            topPath = "texturepacks";
+            auto tp = qSharedPointerDynamicCast<TexturePack>(resource);
+            settings->setOrRegister({ topPath, fileName, "name" }, tp->name());
+            break;
+        }
+        case PackedResourceType::DataPack: {
+            topPath = "datapacks";
+            auto dp = qSharedPointerDynamicCast<DataPack>(resource);
+            settings->setOrRegister({ topPath, fileName, "name" }, dp->name());
+            break;
+        }
+        case PackedResourceType::ShaderPack: {
+            topPath = "shaderpacks";
+            auto sp = qSharedPointerDynamicCast<ShaderPack>(resource);
+            settings->setOrRegister({ topPath, fileName, "name" }, sp->name());
+            break;
+        }
+        case PackedResourceType::WorldSave:
+        case PackedResourceType::UNKNOWN:
+        default:
+            return false;
+            break;
+    }
+    settings->setOrRegister({ topPath, fileName, "type" }, managmentType);
+    settings->setOrRegister({ topPath, fileName, "url" }, url);
+    settings->setOrRegister({ topPath, fileName, "hash" }, hash);
+    settings->setOrRegister({ topPath, fileName, "hashType" }, Hashing::getHashTypeName(hash_type));
+
+    return true;
 }
 
 Task::Ptr MinecraftInstance::createUpdateTask(Net::Mode mode)

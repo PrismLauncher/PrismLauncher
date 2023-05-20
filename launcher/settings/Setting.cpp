@@ -51,3 +51,8 @@ void Setting::reset()
 {
     emit settingReset(*this);
 }
+
+void Setting::remove()
+{
+    emit settingRemoved(*this);
+}

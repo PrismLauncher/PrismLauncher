@@ -59,4 +59,15 @@ Hasher::Ptr createModrinthHasher(QString file_path);
 Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider);
 Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider, QString type);
 
+enum class HashType { Md5, Sha1, Sha256, Sha512, UNKNOWN };
+
+/**
+ * @brief Guess the hash type of a hex string representing a hash.
+ * @param hash The String represnting the hash.
+ * @return The HashType that best matches the provided hash.
+ */
+HashType guessHashType(const QString& hash);
+QString getHashTypeName(HashType type);
+HashType getHashTypeFromName(const QString& name);
+
 }  // namespace Hashing

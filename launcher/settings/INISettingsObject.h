@@ -52,16 +52,13 @@ public:
 
     void suspendSave() override;
     void resumeSave() override;
- 
-    QVariant getRaw(const QString& id) const override;
-    void setRaw(const QString& id, QVariant value) override;
-
 
 protected slots:
     virtual void changeSetting(const Setting &setting, QVariant value) override;
     virtual void resetSetting(const Setting &setting) override;
+    virtual void removeSetting(const Setting& setting) override;
 
-protected:
+   protected:
     virtual QVariant retrieveValue(const Setting &setting) override;
     void doSave();
 

@@ -76,7 +76,6 @@ class FlameCreationTask final : public InstanceCreationTask {
     void setupDownloadJob(QEventLoop&);
     void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
     void finalizeResouces();
-    bool setupManagedResource(std::unique_ptr<Resource> resource, PackedResourceType type, const QString& hash, const QUrl& url);
 
    private:
     QWidget* m_parent = nullptr;
@@ -92,5 +91,6 @@ class FlameCreationTask final : public InstanceCreationTask {
 
     QList<std::tuple<QString, QString, QString, QUrl>> m_resources;
 
-    std::optional<InstancePtr> m_instance;
+    std::shared_ptr<MinecraftInstance> m_instance = nullptr;
+    std::optional<InstancePtr> m_update_instance;
 };

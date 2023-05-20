@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QRegularExpression>
 
 #include "FileSystem.h"
 #include "StringUtils.h"
@@ -135,6 +136,45 @@ bool BlockedModHasher::useHashType(QString type) {
     }
     qDebug() << "Bad hash type " << type << " for provider";
     return false;
+}
+
+const static QHash<HashType, QString> s_hash_type_names = {
+    { HashType::Md5, "md5" },
+    { HashType::Sha1, "sha1" },
+    { HashType::Sha256, "sha256" },
+    { HashType::Sha256, "sha256" },
+};
+
+HashType guessHashType(const QString& hash)
+{
+    QRegularExpression hexMatcher("^[0-9A-Fa-f]{32,128}$", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match = hexMatcher.match(hash);
+    if (!match.hasMatch()) {
+        // did not found a hex string with a length between 32 and 128
+        return HashType::UNKNOWN;
+    }
+    auto len = hash.length();
+    switch (len) {
+        case 128 / 8 * 2:  // MD5 128 bits -> hex
+            return HashType::Md5;
+        case 160 / 8 * 2:  // SHA1 160 bits -> hex
+            return HashType::Sha1;
+        case 256 / 8 * 2:  // SHA256 256 bits -> hex
+            return HashType::Sha256;
+        case 512 / 8 * 2:  // SHA512 512 bis -> hex
+            return HashType::Sha512;
+        default:
+            return HashType::UNKNOWN;
+    }
+}
+QString getHashTypeName(HashType type)
+{
+    return s_hash_type_names.value(type, "unknown");
+}
+
+HashType getHashTypeFromName(const QString& name)
+{
+    return s_hash_type_names.key(name, HashType::UNKNOWN);
 }
 
 }  // namespace Hashing

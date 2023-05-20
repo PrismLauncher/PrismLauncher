@@ -9,6 +9,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QString>
+#include <memory>
 
 #include "FileSystem.h"
 #include "Json.h"
@@ -509,10 +510,14 @@ bool processLitemod(Mod& mod, ProcessingLevel level)
 }
 
 /** Checks whether a file is valid as a mod or not. */
-bool validate(QFileInfo file)
+Mod::Ptr validate(QFileInfo file)
 {
-    Mod mod{ file };
-    return ModUtils::process(mod, ProcessingLevel::BasicInfoOnly) && mod.valid();
+    auto mod = makeShared<Mod>(file);
+    // Mod mod{ file };
+    bool valid = ModUtils::process(*mod, ProcessingLevel::BasicInfoOnly) && mod->valid();
+    if (!valid)
+        return nullptr;
+    return mod;
 }
 
 }  // namespace ModUtils

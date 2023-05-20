@@ -23,12 +23,14 @@
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "minecraft/mod/DataPack.h"
 
 #include <quazip/quazip.h>
 #include <quazip/quazipdir.h>
 #include <quazip/quazipfile.h>
 
 #include <QCryptographicHash>
+#include <memory>
 
 namespace DataPackUtils {
 
@@ -149,10 +151,13 @@ bool processMCMeta(DataPack& pack, QByteArray&& raw_data)
     return true;
 }
 
-bool validate(QFileInfo file)
+DataPack::Ptr validate(QFileInfo file)
 {
-    DataPack dp{ file };
-    return DataPackUtils::process(dp, ProcessingLevel::BasicInfoOnly) && dp.valid();
+    auto dp = makeShared<DataPack>(file);
+    bool valid = DataPackUtils::process(*dp, ProcessingLevel::BasicInfoOnly) && dp->valid();
+    if (!valid)
+        return nullptr;
+    return dp;
 }
 
 }  // namespace DataPackUtils

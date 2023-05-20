@@ -38,7 +38,7 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data);
 bool processPackPNG(ResourcePack& pack, QByteArray&& raw_data);
 
 /** Checks whether a file is valid as a resource pack or not. */
-bool validate(QFileInfo file);
+ResourcePack::Ptr validate(QFileInfo file);
 }  // namespace ResourcePackUtils
 
 class LocalResourcePackParseTask : public Task {

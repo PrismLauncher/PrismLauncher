@@ -20,6 +20,8 @@
 #include <QDebug>
 
 #include <QVariant>
+#include <memory>
+#include <random>
 
 SettingsObject::SettingsObject(QObject *parent) : QObject(parent)
 {
@@ -79,6 +81,14 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, Q
     return setting;
 }
 
+void SettingsObject::unregisterSetting(std::shared_ptr<Setting> setting)
+{
+    if (!m_settings.contains(setting->id()))
+        return;
+    disconnectSignals(*setting);
+    m_settings.remove(setting->id());
+}
+
 std::shared_ptr<Setting> SettingsObject::getSetting(const QString &id) const
 {
     // Make sure there is a setting with the given ID.
@@ -92,11 +102,6 @@ QVariant SettingsObject::get(const QString &id) const
 {
     auto setting = getSetting(id);
     return (setting ? setting->get() : QVariant());
-}
-
-QVariant SettingsObject::getRaw(const QString& id) const
-{
-    return get(id);
 }
 
 bool SettingsObject::set(const QString &id, QVariant value)
@@ -114,12 +119,13 @@ bool SettingsObject::set(const QString &id, QVariant value)
     }
 }
 
-void SettingsObject::setRaw(const QString& id, QVariant value)
+std::shared_ptr<Setting> SettingsObject::setOrRegister(const QString& id, QVariant value)
 {
     auto setting = getSetting(id);
     if (!setting)
         setting = registerSetting(id, value);
     setting->set(value);
+    return setting;
 }
 
 void SettingsObject::reset(const QString &id) const
@@ -127,6 +133,45 @@ void SettingsObject::reset(const QString &id) const
     auto setting = getSetting(id);
     if (setting)
         setting->reset();
+}
+
+bool SettingsObject::remove(const QString& id)
+{
+    auto setting = getSetting(id);
+    if (setting) {
+        setting->remove();
+        unregisterSetting(setting);
+        return true;
+    } else {
+        return removeGroup(id);
+    }
+}
+
+bool SettingsObject::removeGroup(const QString& path)
+{
+    bool found = false;
+    auto path_parts = path.split('/');
+    if (!path_parts.isEmpty() && (path_parts.first() == ""))
+        path_parts.removeFirst();
+    for (auto setting : m_settings) {
+        auto id = setting->id();
+        auto id_parts = id.split('/');
+        bool match = true;
+        for (auto part : path_parts) {
+            if (match && !id_parts.isEmpty()) {
+                auto cur = id_parts.takeFirst();
+                match = part == cur;
+            } else {
+                match = false;
+            }
+        }
+        if (match || path.isEmpty()) {
+            setting->remove();
+            unregisterSetting(setting);
+            found = true;
+        }
+    }
+    return found;
 }
 
 bool SettingsObject::contains(const QString &id)
@@ -143,6 +188,60 @@ bool SettingsObject::reload()
     return true;
 }
 
+QStringList SettingsObject::childGroups(const QString& path)
+{
+    QStringList child_groups = {};
+    auto path_parts = path.split('/');
+    if (!path_parts.isEmpty() && (path_parts.first() == ""))
+        path_parts.removeFirst();
+    for (auto setting : m_settings) {
+        auto id = setting->id();
+        auto id_parts = id.split('/');
+        bool match = true;
+        for (auto part: path_parts) {
+            if (match && !id_parts.isEmpty()){
+                auto cur = id_parts.takeFirst();
+                match = part == cur;
+            } else {
+                match = false;
+            }
+        }
+        if ((match || path.isEmpty()) && !id_parts.isEmpty()) {
+            auto key = id_parts.takeFirst();
+            if (!id_parts.isEmpty() && !child_groups.contains(key)) 
+                child_groups.append(key); // that was not the last section of the path so this is a group 
+        }
+    }
+    return child_groups;
+}
+
+QStringList SettingsObject::childKeys(const QString& path)
+{
+    QStringList child_keys = {};
+    auto path_parts = path.split('/');
+    if (!path_parts.isEmpty() && (path_parts.first() == ""))
+        path_parts.removeFirst();
+    for (auto setting: m_settings) {
+        auto id = setting->id();
+        auto id_parts = id.split('/');
+        bool match = true;
+        for (auto part: path_parts) {
+            if (match && !id_parts.isEmpty()){
+                auto cur = id_parts.takeFirst();
+                match = part == cur;
+            } else {
+                match = false;
+            }
+        }
+        if ((match || path.isEmpty()) && !id_parts.isEmpty()) {
+            auto key = id_parts.takeFirst();
+            if (id_parts.isEmpty()  && !child_keys.contains(key)) 
+                child_keys.append(key); // that was the last section of the path so this is a key 
+        }
+    }
+    return child_keys;
+}
+
 void SettingsObject::connectSignals(const Setting &setting)
 {
     connect(&setting, &Setting::SettingChanged, this, &SettingsObject::changeSetting);
@@ -151,4 +250,20 @@ void SettingsObject::connectSignals(const Setting &setting)
 
     connect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
     connect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting &)));
+
+    connect(&setting, &Setting::settingRemoved, this, &SettingsObject::removeSetting);
+    connect(&setting, SIGNAL(settingRemoved(Setting)), this, SIGNAL(settingRemoved(const Setting &)));
+}
+
+void SettingsObject::disconnectSignals(const Setting& setting)
+{
+    disconnect(&setting, &Setting::SettingChanged, this, &SettingsObject::changeSetting);
+    disconnect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)), this,
+            SIGNAL(SettingChanged(const Setting &, QVariant)));
+
+    disconnect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
+    disconnect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting &)));
+
+    disconnect(&setting, &Setting::settingRemoved, this, &SettingsObject::removeSetting);
+    disconnect(&setting, SIGNAL(settingRemoved(Setting)), this, SIGNAL(settingRemoved(const Setting &)));
 }

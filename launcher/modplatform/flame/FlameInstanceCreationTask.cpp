@@ -253,7 +253,7 @@ bool FlameCreationTask::updateInstance()
     setOverride(true, inst->id());
     qDebug() << "Will override instance!";
 
-    m_instance = inst;
+    m_update_instance = inst;
 
     // We let it go through the createInstance() stage, just with a couple modifications for updating
     return false;
@@ -317,7 +317,7 @@ bool FlameCreationTask::createInstance()
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    m_instance = std::make_shared<MinecraftInstance>(m_globalSettings, instanceSettings, m_stagingPath);
     auto mcVersion = m_pack.minecraft.version;
 
     // Hack to correct some 'special sauce'...
@@ -326,7 +326,7 @@ bool FlameCreationTask::createInstance()
         logWarning(tr("Mysterious trailing dots removed from Minecraft version while importing pack."));
     }
 
-    auto components = instance.getPackProfile();
+    auto components = m_instance->getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", mcVersion, true);
     if (!forgeVersion.isEmpty()) {
@@ -344,14 +344,14 @@ bool FlameCreationTask::createInstance()
         components->setComponentVersion("net.fabricmc.fabric-loader", fabricVersion);
 
     if (m_instIcon != "default") {
-        instance.setIconKey(m_instIcon);
+        m_instance.setIconKey(m_instIcon);
     } else {
         if (m_pack.name.contains("Direwolf20")) {
-            instance.setIconKey("steve");
+            m_instance->setIconKey("steve");
         } else if (m_pack.name.contains("FTB") || m_pack.name.contains("Feed The Beast")) {
-            instance.setIconKey("ftb_logo");
+            m_instance->setIconKey("ftb_logo");
         } else {
-            instance.setIconKey("flame");
+            m_instance->setIconKey("flame");
         }
     }
 
@@ -366,7 +366,7 @@ bool FlameCreationTask::createInstance()
             qDebug() << info.fileName();
             jarMods.push_back(info.absoluteFilePath());
         }
-        auto profile = instance.getPackProfile();
+        auto profile = m_instance->getPackProfile();
         profile->installJarMods(jarMods);
         // nuke the original files
         FS::deletePath(jarmodsPath);
@@ -374,8 +374,8 @@ bool FlameCreationTask::createInstance()
 
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managed_id.isEmpty())
-        instance.setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
-    instance.setName(name());
+        m_instance->setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
+    m_instance->setName(name());
 
     m_mod_id_resolver.reset(new Flame::FileResolvingTask(APPLICATION->network(), m_pack));
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::succeeded, this, [this, &loop] { idResolverSucceeded(loop); });
@@ -394,11 +394,11 @@ bool FlameCreationTask::createInstance()
     bool did_succeed = getError().isEmpty();
 
     // Update information of the already installed instance, if any.
-    if (m_instance && did_succeed) {
+    if (m_update_instance && did_succeed) {
         setAbortable(false);
-        auto inst = m_instance.value();
+        auto inst = m_update_instance.value();
 
-        inst->copyManagedPack(instance);
+        inst->copyManagedPack(*m_instance);
     }
 
     return did_succeed;
@@ -542,74 +542,6 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     setAbortable(true);
 }
 
-template <typename Derived, typename Base, typename Del>
-std::unique_ptr<Derived, Del> dynamic_unique_ptr_cast(std::unique_ptr<Base, Del>&& p)
-{
-    if (Derived* result = dynamic_cast<Derived*>(p.get())) {
-        [[maybe_unused]] auto _ = p.release();
-        return std::unique_ptr<Derived, Del>(result, std::move(p.get_deleter()));
-    }
-    return std::unique_ptr<Derived, Del>(nullptr, p.get_deleter());
-}
-
-bool FlameCreationTask::setupManagedResource(std::unique_ptr<Resource> resource,
-                                             PackedResourceType type,
-                                             const QString& hash,
-                                             const QUrl& url)
-{
-    if (!m_instance)
-        return false;  // can't set up an invalid instance
-    //
-    auto inst = m_instance.value();
-    auto settings = inst->settings();
-    auto fileName = resource->fileinfo().fileName();
-    auto managmentType = ResourceUtils::getManagmentTypeName(ResourceManagmentType::PackManaged);
-
-    QString topPath = "";
-    switch (type) {
-        case PackedResourceType::Mod: {
-            topPath = "mods";
-            auto mod = dynamic_unique_ptr_cast<Mod>(std::move(resource));
-            settings->setRaw({ topPath, fileName, "name" }, mod->name());
-            settings->setRaw({ topPath, fileName, "version" }, mod->version());
-            break;
-        }
-        case PackedResourceType::ResourcePack: {
-            topPath = "resourcepacks";
-            auto rp = dynamic_unique_ptr_cast<ResourcePack>(std::move(resource));
-            settings->setRaw({ topPath, fileName, "name" }, rp->name());
-            settings->setRaw({ topPath, fileName, "type" }, managmentType);
-            break;
-        }
-        case PackedResourceType::TexturePack: {
-            topPath = "texturepacks";
-            auto tp = dynamic_unique_ptr_cast<TexturePack>(std::move(resource));
-            settings->setRaw({ topPath, fileName, "name" }, tp->name());
-            break;
-        }
-        case PackedResourceType::DataPack: {
-            topPath = "datapacks";
-            auto dp = dynamic_unique_ptr_cast<DataPack>(std::move(resource));
-            settings->setRaw({ topPath, fileName, "name" }, dp->name());
-            break;
-        }
-        case PackedResourceType::ShaderPack: {
-            auto sp = dynamic_unique_ptr_cast<ShaderPack>(std::move(resource));
-            break;
-        }
-        case PackedResourceType::WorldSave:
-        case PackedResourceType::UNKNOWN:
-        default:
-            return false;
-            break;
-    }
-    settings->setRaw({ topPath, fileName, "type" }, managmentType);
-    settings->setRaw({ topPath, fileName, "hash" }, hash);
-    settings->setRaw({ topPath, fileName, "url" }, url);
-
-    return true;
-}
-
 void FlameCreationTask::finalizeResouces()
 {
     for (auto [fileName, targetFolder, hash, url] : m_resources) {
@@ -644,8 +576,7 @@ void FlameCreationTask::finalizeResouces()
 
         QFileInfo localFileInfo(localPath);
         auto [type, resource] = ResourceUtils::identify(localFileInfo);
-
-        setupManagedResource(std::move(resource), type, hash, url);
+        m_instance->setupManagedResource(resource, type, ResourceManagmentType::PackManaged, url, hash);
 
         QString worldPath;
 

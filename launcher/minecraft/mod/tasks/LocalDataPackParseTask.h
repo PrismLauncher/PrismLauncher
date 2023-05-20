@@ -23,6 +23,7 @@
 
 #include <QDebug>
 #include <QObject>
+#include <memory>
 
 #include "minecraft/mod/DataPack.h"
 
@@ -40,7 +41,7 @@ bool processFolder(DataPack& pack, ProcessingLevel level = ProcessingLevel::Full
 bool processMCMeta(DataPack& pack, QByteArray&& raw_data);
 
 /** Checks whether a file is valid as a data pack or not. */
-bool validate(QFileInfo file);
+DataPack::Ptr validate(QFileInfo file);
 
 }  // namespace DataPackUtils
 

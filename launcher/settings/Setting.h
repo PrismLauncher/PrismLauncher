@@ -92,8 +92,12 @@ signals:
      */
     void settingReset(const Setting &setting);
 
-public
-slots:
+    /*!
+     * \brief Signal emitted when this Setting object has been removed from it's container.
+     */
+    void settingRemoved(const Setting& setting);
+
+   public slots:
     /*!
      * \brief Changes the setting's value.
      * This is done by emitting the SettingChanged() signal which will then be
@@ -109,10 +113,14 @@ slots:
      */
     virtual void reset();
 
-protected:
+    /*!
+     * \brief Remove the setting and clear it's storage.
+     */
+    virtual void remove();
+
+   protected:
     friend class SettingsObject;
     SettingsObject * m_storage;
     QStringList m_synonyms;
     QVariant m_defVal;
 };
-

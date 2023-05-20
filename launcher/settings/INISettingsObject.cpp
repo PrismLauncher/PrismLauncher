@@ -115,6 +115,15 @@ void INISettingsObject::resetSetting(const Setting &setting)
     }
 }
 
+void INISettingsObject::removeSetting(const Setting& setting)
+{
+    if (contains(setting.id())) {
+        for (auto iter : setting.configKeys())
+            m_ini.remove(iter);
+        doSave();
+    }
+}
+
 QVariant INISettingsObject::retrieveValue(const Setting &setting)
 {
     // if we have the setting, return value of the first matching synonym
@@ -128,14 +137,3 @@ QVariant INISettingsObject::retrieveValue(const Setting &setting)
     }
     return QVariant();
 }
-
-QVariant INISettingsObject::getRaw(const QString& id) const
-{
-    return m_ini.get(id, QVariant());
-}
-
-void INISettingsObject::setRaw(const QString& id, QVariant value)
-{
-    m_ini.set(id, value);
-}
-
