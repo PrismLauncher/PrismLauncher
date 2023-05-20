@@ -958,6 +958,9 @@ bool MinecraftInstance::setupManagedResource(Resource::Ptr resource,
                                              const QString& hash,
                                              Hashing::HashType hash_type)
 {
+    if (!resource || type == PackedResourceType::INVALID)
+        return false;
+
     auto settings = this->settings();
     auto fileName = resource->fileinfo().fileName();
     auto managmentType = ResourceUtils::getManagmentTypeName(managment_type);
@@ -1006,7 +1009,7 @@ bool MinecraftInstance::setupManagedResource(Resource::Ptr resource,
             break;
     }
     settings->setOrRegister({ topPath, fileName, "type" }, managmentType);
-    settings->setOrRegister({ topPath, fileName, "url" }, url);
+    settings->setOrRegister({ topPath, fileName, "url" }, url.toString());
     settings->setOrRegister({ topPath, fileName, "hash" }, hash);
     settings->setOrRegister({ topPath, fileName, "hashType" }, Hashing::getHashTypeName(hash_type));
 

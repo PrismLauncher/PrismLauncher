@@ -520,6 +520,8 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     int total = blocked_mods.length();
     setProgress(i, total);
     for (auto const& mod : blocked_mods) {
+        QCoreApplication::processEvents();  // keep UI updated
+
         if (!mod.matched) {
             qDebug() << mod.name << "was not matched to a local file, skipping copy";
             continue;
@@ -544,7 +546,15 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
 
 void FlameCreationTask::finalizeResouces()
 {
+    auto num_resources = m_resources.length();
+    int num_checked = 0;
+    setAbortable(false);
+    setStatus(tr("Verifying and identifying resources"));
+
     for (auto [fileName, targetFolder, hash, url] : m_resources) {
+        QCoreApplication::processEvents();  // keep the UI updated
+        setDetails(tr("%1 out of %2 complete").arg(num_checked).arg(num_resources));
+        setProgress(num_checked, num_resources);
 
         qDebug() << "Checking" << fileName << "...";
         auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
@@ -607,5 +617,7 @@ void FlameCreationTask::finalizeResouces()
                 qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
                 break;
         }
+
+        ++num_checked;
     }
 }

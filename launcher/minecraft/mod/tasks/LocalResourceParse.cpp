@@ -73,11 +73,12 @@ std::pair<PackedResourceType, Resource::Ptr> identify(QFileInfo file){
             return std::make_pair(PackedResourceType::ShaderPack, sp);
         } else {
             qDebug() << "Can't Identify" << file.fileName() ;
+            return std::make_pair(PackedResourceType::UNKNOWN, makeShared<Resource>(file));
         }
     } else {
         qDebug() << "Can't find" << file.absolutePath();
     }
-    return std::make_pair(PackedResourceType::UNKNOWN, nullptr);
+    return std::make_pair(PackedResourceType::INVALID, nullptr);
 }
 
 QString getPackedTypeName(PackedResourceType type) {

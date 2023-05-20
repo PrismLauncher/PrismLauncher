@@ -371,7 +371,7 @@ bool processZIP(Mod& mod, ProcessingLevel level)
                     manifestVersion = "NONE";
                 }
 
-                details.version = manifestVersion;
+                details.version = manifestVersion.trimmed();
 
                 file.close();
             }
@@ -455,6 +455,63 @@ bool processZIP(Mod& mod, ProcessingLevel level)
             mod.setDetails(details);
             return true;
         }
+    } else if (zip.setCurrentFile("META-INF/MANIFEST.MF")) {
+        // META-INF/MANIFEST.MF present by itself. (possibly a library?)
+        ModDetails details;
+        auto fileInfo = mod.fileinfo();
+        auto name = fileInfo.completeBaseName();
+        details.name = details.mod_id = name;
+
+        if (!file.open(QIODevice::ReadOnly)) {
+            zip.close();
+            return false;
+        }
+
+        // quick and dirty line-by-line parser
+        auto manifestLines = file.readAll().split('\n');
+        QString manifestVersion = "";
+        for (auto& line : manifestLines) {
+            if (QString(line).startsWith("Implementation-Version: ")) {
+                manifestVersion = QString(line).remove("Implementation-Version: ");
+            }
+            if (QString(line).startsWith("Implementation-Vendor: ")) {
+                details.authors.append(QString(line).remove("Implemetation-Vendor: "));
+            }
+        }
+
+        // some mods use ${projectversion} in their build.gradle, causing this mess to show up in MANIFEST.MF
+        // also keep with forge's behavior of setting the version to "NONE" if none is found
+        if (manifestVersion.contains("task ':jar' property 'archiveVersion'") || manifestVersion == "") {
+            manifestVersion = "NONE";
+        }
+
+        details.version = manifestVersion;
+
+        file.close();
+
+        if (zip.setCurrentFile("pack.mcmeta")) {
+            if (!file.open(QIODevice::ReadOnly)) {
+                zip.close();
+                return false;
+            }
+
+            auto contents = file.readAll();
+            QJsonParseError jsonError;
+            QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+            auto object = jsonDoc.object();
+            if (object.contains("pack")) {
+                auto pack = object.value("pack").toObject();
+                if (pack.contains("description")) {
+                    details.description = pack.value("description").toString();
+                }
+            }
+
+            file.close();
+        }
+
+        zip.close();
+        mod.setDetails(details);
+        return true;
     }
 
     zip.close();

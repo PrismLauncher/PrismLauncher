@@ -29,7 +29,7 @@
 
 #include "minecraft/mod/Resource.h"
 
-enum class PackedResourceType { DataPack, ResourcePack, TexturePack, ShaderPack, WorldSave, Mod, UNKNOWN };
+enum class PackedResourceType { DataPack, ResourcePack, TexturePack, ShaderPack, WorldSave, Mod, UNKNOWN, INVALID };
 enum class ResourceManagmentType { PackManaged, UserInstalled, External };
 
 namespace ResourceUtils {
