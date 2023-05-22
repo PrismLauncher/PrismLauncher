@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Export Modrinth Pack</string>
   </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QGroupBox" name="information">
