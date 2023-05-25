@@ -50,7 +50,9 @@
 ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance)
     : ResourceFolderModel(QDir(dir), instance)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE, SortType::NAME };
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE};
+    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents};
+
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
@@ -130,7 +132,7 @@ QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orient
         case Qt::DisplayRole:
             switch (section) {
                 case ActiveColumn:
-                    return QString();
+                    return tr("Enable");
                 case NameColumn:
                     return tr("Name");
                 case PackFormatColumn:

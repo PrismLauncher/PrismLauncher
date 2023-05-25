@@ -64,11 +64,11 @@ public:
     enum Columns
     {
         ActiveColumn = 0,
+        ImageColumn,
         NameColumn,
         VersionColumn,
         DateColumn,
         ProviderColumn,
-        ImageColumn,
         NUM_COLUMNS
     };
     enum ModStatusAction {
@@ -77,6 +77,8 @@ public:
         Toggle
     };
     ModFolderModel(const QString &dir, std::shared_ptr<const BaseInstance> instance, bool is_indexed = false, bool create_dir = true);
+
+    virtual QString id() const override { return "mods"; }
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 

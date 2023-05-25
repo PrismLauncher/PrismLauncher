@@ -37,6 +37,7 @@
 #include "ModFolderModel.h"
 
 #include <FileSystem.h>
+#include <qheaderview.h>
 #include <QDebug>
 #include <QFileSystemWatcher>
 #include <QIcon>
@@ -56,7 +57,8 @@
 ModFolderModel::ModFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER, SortType::NAME };
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME , SortType::VERSION, SortType::DATE, SortType::PROVIDER};
+    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents};
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
@@ -143,7 +145,7 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
         switch (section)
         {
         case ActiveColumn:
-            return QString();
+            return tr("Enable");
         case NameColumn:
             return tr("Name");
         case VersionColumn:

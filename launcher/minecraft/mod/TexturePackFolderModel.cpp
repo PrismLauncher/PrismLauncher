@@ -45,7 +45,9 @@
 TexturePackFolderModel::TexturePackFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance)
     : ResourceFolderModel(QDir(dir), instance)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE, SortType::NAME };
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::DATE };
+    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents};
+
 }
 
 Task* TexturePackFolderModel::createUpdateTask()
@@ -115,6 +117,8 @@ QVariant TexturePackFolderModel::headerData(int section, Qt::Orientation orienta
     switch (role) {
         case Qt::DisplayRole:
             switch (section) {
+                case ActiveColumn:
+                    return tr("Enable");
                 case NameColumn:
                     return tr("Name");
                 case DateColumn:
@@ -150,3 +154,4 @@ int TexturePackFolderModel::columnCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : NUM_COLUMNS;
 }
+

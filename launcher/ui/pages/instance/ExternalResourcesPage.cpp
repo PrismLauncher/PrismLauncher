@@ -24,6 +24,8 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     m_filterModel->setSourceModel(m_model.get());
     m_filterModel->setFilterKeyColumn(-1);
     ui->treeView->setModel(m_filterModel);
+    // must come after setModel
+    ui->treeView->setResizeModes(m_model->columnResizeModes());
 
     ui->treeView->installEventFilter(this);
     ui->treeView->sortByColumn(1, Qt::AscendingOrder);
@@ -44,6 +46,13 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     auto selection_model = ui->treeView->selectionModel();
     connect(selection_model, &QItemSelectionModel::currentChanged, this, &ExternalResourcesPage::current);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
+
+    auto viewHeader = ui->treeView->header();
+    viewHeader->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(viewHeader, &QHeaderView::customContextMenuRequested, this, &ExternalResourcesPage::ShowHeaderContextMenu);
+
+    m_model->loadHiddenColumns(ui->treeView);
 }
 
 ExternalResourcesPage::~ExternalResourcesPage()
@@ -63,6 +72,12 @@ void ExternalResourcesPage::ShowContextMenu(const QPoint& pos)
     auto menu = ui->actionsToolbar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->treeView->mapToGlobal(pos));
     delete menu;
+}
+
+void ExternalResourcesPage::ShowHeaderContextMenu(const QPoint& pos)
+{
+    auto menu = m_model->createHeaderContextMenu(this, ui->treeView);
+    menu->exec(ui->treeView->mapToGlobal(pos));
 }
 
 void ExternalResourcesPage::openedImpl()

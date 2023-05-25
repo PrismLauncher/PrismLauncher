@@ -49,13 +49,15 @@ public:
     enum Columns
     {
         ActiveColumn = 0,
+        ImageColumn,
         NameColumn,
         DateColumn,
-        ImageColumn,
         NUM_COLUMNS
     };
 
     explicit TexturePackFolderModel(const QString &dir, std::shared_ptr<const BaseInstance> instance);
+
+    virtual QString id() const override { return "texturepacks"; }
 
     [[nodiscard]] QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
