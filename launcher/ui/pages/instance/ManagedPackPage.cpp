@@ -62,8 +62,11 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
 
     // NOTE: GTK2 themes crash with the proxy style.
     // This seems like an upstream bug, so there's not much else that can be done.
-    if (!QStyleFactory::keys().contains("gtk2"))
-        ui->versionsComboBox->setStyle(new NoBigComboBoxStyle(ui->versionsComboBox->style()));
+    if (!QStyleFactory::keys().contains("gtk2")){
+        auto comboStyle = new NoBigComboBoxStyle(ui->versionsComboBox->style());
+        comboStyle->setParent(APPLICATION); // make sure this gets cleaned up (setting to simply `this` causes it to be freed too soon)
+        ui->versionsComboBox->setStyle(comboStyle);
+    }
 
     ui->reloadButton->setVisible(false);
     connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool){
