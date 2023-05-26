@@ -109,9 +109,7 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
-        bool a_better_release = true;
-        if (a.verison_type.has_value() && b.verison_type.has_value())
-            a_better_release = a.verison_type.value() < b.verison_type.value();
+        bool a_better_release = a.verison_type < b.verison_type;
         // dates are in RFC 3339 format
         return a.date > b.date && a_better_release;
     };
@@ -141,9 +139,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     }
     file.version = Json::requireString(obj, "name");
     file.version_number = Json::requireString(obj, "version_number");
-    auto verison_type = ModPlatform::IndexedVersionType(Json::requireString(obj, "version_type"));
-    if (verison_type.isValid())
-        file.verison_type = verison_type;
+    file.verison_type = ModPlatform::IndexedVersionType(Json::requireString(obj, "version_type"));
 
     file.changelog = Json::requireString(obj, "changelog");
 

@@ -63,6 +63,7 @@ struct IndexedVersionType {
     IndexedVersionType(int type);
     IndexedVersionType(const IndexedVersionType::Enum& type);
     IndexedVersionType(const IndexedVersionType& type);
+    IndexedVersionType() : IndexedVersionType(IndexedVersionType::Enum::UNKNOWN) {}
     static const QString toString (const IndexedVersionType::Enum& type);
     static const IndexedVersionType::Enum enumFromString(const QString& type);
     bool isValid() const {return m_type != IndexedVersionType::Enum::UNKNOWN; }
@@ -70,6 +71,7 @@ struct IndexedVersionType {
     bool operator==(const IndexedVersionType::Enum& type) const { return m_type == type; }
     bool operator<(const IndexedVersionType& other) const { return m_type < other.m_type; }
     bool operator<(const IndexedVersionType::Enum& type) const { return m_type < type; }
+    QString toString() const { return toString(m_type); }
 
     IndexedVersionType::Enum m_type;
 };
@@ -79,7 +81,7 @@ struct IndexedVersion {
     QVariant fileId;
     QString version;
     QString version_number = {};
-    std::optional<IndexedVersionType> verison_type = {};
+    IndexedVersionType verison_type;
     QStringList mcVersion;
     QString downloadUrl;
     QString date;

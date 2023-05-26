@@ -155,7 +155,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             }
 
             for (auto version : current.versions) {
-                ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+                auto release_type = version.version_type.isValid() ? QString(" : %1").arg(version.version_type.toString()) : "";
+                ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(version.downloadUrl));
             }
 
             QVariant current_updated;

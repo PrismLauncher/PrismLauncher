@@ -362,6 +362,11 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
     auto new_version_item = new QTreeWidgetItem(item_top);
     new_version_item->setText(0, tr("New version: %1").arg(info.new_version));
 
+    if (info.new_verison_type.has_value()) {
+        auto new_version_type_itme = new QTreeWidgetItem(item_top);
+        new_version_type_itme->setText(0, tr("New Version Type: %1").arg(info.new_verison_type.value().toString()));
+    }
+    
     auto changelog_item = new QTreeWidgetItem(item_top);
     changelog_item->setText(0, tr("Changelog of the latest version"));
 

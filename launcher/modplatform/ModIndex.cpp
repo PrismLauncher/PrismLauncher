@@ -35,7 +35,19 @@ IndexedVersionType::IndexedVersionType(const QString& type): IndexedVersionType(
 
 IndexedVersionType::IndexedVersionType(int type)
 {
-    m_type = static_cast<IndexedVersionType::Enum>(type);
+    switch (type) {
+        case 1:
+            m_type = IndexedVersionType::Enum::Release;
+            break;
+        case 2:
+            m_type = IndexedVersionType::Enum::Beta;
+            break;
+        case 3:
+            m_type = IndexedVersionType::Enum::Alpha;
+            break;
+        default:
+            m_type = IndexedVersionType::Enum::UNKNOWN;
+    }
 }
 
 IndexedVersionType::IndexedVersionType(const IndexedVersionType::Enum& type)

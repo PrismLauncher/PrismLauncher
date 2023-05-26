@@ -111,8 +111,9 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModpackVersion& a, const ModpackVersion& b) -> bool {
+        bool a_better_release = a.version_type < b.version_type;
         // dates are in RFC 3339 format
-        return a.date > b.date;
+        return a.date > b.date && a_better_release;
     };
 
     std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
@@ -128,6 +129,7 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
 
     file.name = Json::requireString(obj, "name");
     file.version = Json::requireString(obj, "version_number");
+    file.version_type = ModPlatform::IndexedVersionType(Json::requireString(obj, "version_type"));
     file.changelog = Json::ensureString(obj, "changelog");
 
     file.id = Json::requireString(obj, "id");

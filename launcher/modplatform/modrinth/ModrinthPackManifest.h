@@ -45,6 +45,8 @@
 #include <QUrl>
 #include <QVector>
 
+#include "modplatform/ModIndex.h"
+
 class MinecraftInstance;
 
 namespace Modrinth {
@@ -80,6 +82,7 @@ struct ModpackExtra {
 struct ModpackVersion {
     QString name;
     QString version;
+    ModPlatform::IndexedVersionType version_type;
     QString changelog;
 
     QString id;

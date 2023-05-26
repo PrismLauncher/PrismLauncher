@@ -256,8 +256,8 @@ void ResourcePage::updateVersionList()
         auto& version = current_pack.versions[i];
         if (optedOut(version))
             continue;
-
-        m_ui->versionSelectionBox->addItem(current_pack.versions[i].version, QVariant(i));
+        auto release_type = current_pack.versions[i].verison_type.isValid() ? QString(" : %1").arg(current_pack.versions[i].verison_type.toString()) : "";
+        m_ui->versionSelectionBox->addItem(QString("%1%2").arg(current_pack.versions[i].version, release_type), QVariant(i));
     }
 
     if (m_ui->versionSelectionBox->count() == 0) {
