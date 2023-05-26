@@ -144,7 +144,10 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
             for (auto file : arr) {
                 auto file_obj = Json::requireObject(file);
                 auto file_tmp = FlameMod::loadIndexedPackVersion(file_obj);
-                if(file_tmp.date > ver_tmp.date) {
+                bool better_release = true;
+                if (file_tmp.verison_type.has_value() && ver_tmp.verison_type.has_value())
+                    better_release = file_tmp.verison_type.value() < ver_tmp.verison_type.value();
+                if(file_tmp.date > ver_tmp.date && better_release) {
                     ver_tmp = file_tmp;
                     latest_file_obj = file_obj;
                 }

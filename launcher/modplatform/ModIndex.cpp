@@ -24,6 +24,56 @@
 
 namespace ModPlatform {
 
+static const QMap<QString, IndexedVersionType::Enum> s_indexed_version_type_names = {
+    {"release", IndexedVersionType::Enum::Release},
+    {"beta", IndexedVersionType::Enum::Beta},
+    {"alpha", IndexedVersionType::Enum::Alpha}
+};
+
+IndexedVersionType::IndexedVersionType(const QString& type): IndexedVersionType(enumFromString(type))
+{}
+
+IndexedVersionType::IndexedVersionType(int type)
+{
+    m_type = static_cast<IndexedVersionType::Enum>(type);
+}
+
+IndexedVersionType::IndexedVersionType(const IndexedVersionType::Enum& type)
+{
+    m_type = type;
+}
+
+IndexedVersionType::IndexedVersionType(const IndexedVersionType& other)
+{
+    m_type = other.m_type;
+}
+
+const QString IndexedVersionType::toString (const IndexedVersionType::Enum& type)
+{
+    switch (type) {
+        case IndexedVersionType::Enum::Release:
+            return "release";
+        case IndexedVersionType::Enum::Beta:
+            return "beta";
+        case IndexedVersionType::Enum::Alpha:
+            return "alpha";
+        case IndexedVersionType::Enum::UNKNOWN:
+        default:
+            return "unknown";
+
+    }
+}
+
+const IndexedVersionType::Enum IndexedVersionType::enumFromString(const QString& type)
+{
+    auto found = s_indexed_version_type_names.constFind(type);
+    if (found != s_indexed_version_type_names.constEnd()) {
+        return *found;
+    } else {
+        return IndexedVersionType::Enum::UNKNOWN;
+    }
+}
+
 auto ProviderCapabilities::name(ResourceProvider p) -> const char*
 {
     switch (p) {
