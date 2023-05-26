@@ -65,8 +65,9 @@ struct IndexedVersionType {
     IndexedVersionType(const IndexedVersionType& type);
     IndexedVersionType() : IndexedVersionType(IndexedVersionType::Enum::UNKNOWN) {}
     static const QString toString (const IndexedVersionType::Enum& type);
-    static const IndexedVersionType::Enum enumFromString(const QString& type);
+    static IndexedVersionType::Enum enumFromString(const QString& type);
     bool isValid() const {return m_type != IndexedVersionType::Enum::UNKNOWN; }
+    IndexedVersionType& operator=(const IndexedVersionType& other);
     bool operator==(const IndexedVersionType& other) const { return m_type == other.m_type; }
     bool operator==(const IndexedVersionType::Enum& type) const { return m_type == type; }
     bool operator<(const IndexedVersionType& other) const { return m_type < other.m_type; }

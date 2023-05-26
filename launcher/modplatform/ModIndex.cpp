@@ -60,6 +60,12 @@ IndexedVersionType::IndexedVersionType(const IndexedVersionType& other)
     m_type = other.m_type;
 }
 
+IndexedVersionType& IndexedVersionType::operator=(const IndexedVersionType& other) 
+{
+    m_type = other.m_type;
+    return *this;
+}
+
 const QString IndexedVersionType::toString (const IndexedVersionType::Enum& type)
 {
     switch (type) {
@@ -76,7 +82,7 @@ const QString IndexedVersionType::toString (const IndexedVersionType::Enum& type
     }
 }
 
-const IndexedVersionType::Enum IndexedVersionType::enumFromString(const QString& type)
+IndexedVersionType::Enum IndexedVersionType::enumFromString(const QString& type)
 {
     auto found = s_indexed_version_type_names.constFind(type);
     if (found != s_indexed_version_type_names.constEnd()) {
