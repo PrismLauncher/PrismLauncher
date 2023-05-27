@@ -70,8 +70,17 @@ struct IndexedVersionType {
     IndexedVersionType& operator=(const IndexedVersionType& other);
     bool operator==(const IndexedVersionType& other) const { return m_type == other.m_type; }
     bool operator==(const IndexedVersionType::Enum& type) const { return m_type == type; }
+    bool operator!=(const IndexedVersionType& other) const { return m_type != other.m_type; }
+    bool operator!=(const IndexedVersionType::Enum& type) const { return m_type != type; }
     bool operator<(const IndexedVersionType& other) const { return m_type < other.m_type; }
     bool operator<(const IndexedVersionType::Enum& type) const { return m_type < type; }
+    bool operator<=(const IndexedVersionType& other) const { return m_type <= other.m_type; }
+    bool operator<=(const IndexedVersionType::Enum& type) const { return m_type <= type; }
+    bool operator>(const IndexedVersionType& other) const { return m_type > other.m_type; }
+    bool operator>(const IndexedVersionType::Enum& type) const { return m_type > type; }
+    bool operator>=(const IndexedVersionType& other) const { return m_type >= other.m_type; }
+    bool operator>=(const IndexedVersionType::Enum& type) const { return m_type >= type; }
+
     QString toString() const { return toString(m_type); }
 
     IndexedVersionType::Enum m_type;

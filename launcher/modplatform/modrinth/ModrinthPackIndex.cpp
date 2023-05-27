@@ -109,7 +109,7 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
-        bool a_better_release = a.verison_type < b.verison_type;
+        bool a_better_release = a.verison_type <= b.verison_type;
         // dates are in RFC 3339 format
         return a.date > b.date && a_better_release;
     };
