@@ -123,7 +123,7 @@ class ResourceModel : public QAbstractListModel {
     QSet<QUrl> m_currently_running_icon_actions;
     QSet<QUrl> m_failed_icon_actions;
 
-    QList<ModPlatform::IndexedPack> m_packs;
+    QList<ModPlatform::IndexedPack::Ptr> m_packs;
 
     // HACK: We need this to prevent callbacks from calling the model after it has already been deleted.
     // This leaks a tiny bit of memory per time the user has opened a resource dialog. How to make this better?
