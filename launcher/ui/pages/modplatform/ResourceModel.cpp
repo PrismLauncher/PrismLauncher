@@ -230,7 +230,7 @@ void ResourceModel::clearData()
 
 void ResourceModel::runSearchJob(Task::Ptr ptr)
 {
-    m_current_search_job = ptr;
+    m_current_search_job.reset(ptr); // clean up first
     m_current_search_job->start();
 }
 void ResourceModel::runInfoJob(Task::Ptr ptr)

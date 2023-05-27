@@ -41,8 +41,6 @@ class ModPage : public ResourcePage {
         return page;
     }
 
-    ~ModPage() override = default;
-
     //: The plural version of 'mod'
     [[nodiscard]] inline QString resourcesString() const override { return tr("mods"); }
     //: The singular version of 'mods'
