@@ -16,6 +16,7 @@
 
           alejandra.enable = true;
           deadnix.enable = true;
+          nil.enable = true;
 
           clang-format = {
             enable =
@@ -33,6 +34,7 @@
         alejandra
         deadnix
         clang-tools
+        nil
       ];
 
       inputsFrom = [self.packages.${system}.default];
