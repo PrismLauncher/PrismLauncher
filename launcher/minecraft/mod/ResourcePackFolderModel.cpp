@@ -50,6 +50,8 @@
 ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, BaseInstance* instance)
     : ResourceFolderModel(QDir(dir), instance)
 {
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Pack Format", "Last Modified" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified") });
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE};
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents};
 
@@ -132,15 +134,11 @@ QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orient
         case Qt::DisplayRole:
             switch (section) {
                 case ActiveColumn:
-                    return tr("Enable");
                 case NameColumn:
-                    return tr("Name");
                 case PackFormatColumn:
-                    return tr("Pack Format");
                 case DateColumn:
-                    return tr("Last changed");
                 case ImageColumn:
-                    return tr("Image");
+                    return columnNames().at(section);
                 default:
                     return {};
             }

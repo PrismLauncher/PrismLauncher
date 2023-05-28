@@ -57,6 +57,8 @@
 ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider") });
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME , SortType::VERSION, SortType::DATE, SortType::PROVIDER};
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents};
 }
@@ -145,17 +147,12 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
         switch (section)
         {
         case ActiveColumn:
-            return tr("Enable");
         case NameColumn:
-            return tr("Name");
         case VersionColumn:
-            return tr("Version");
         case DateColumn:
-            return tr("Last changed");
         case ProviderColumn:
-            return tr("Provider");
         case ImageColumn:
-            return tr("Image");
+            return columnNames().at(section);
         default:
             return QVariant();
         }

@@ -475,11 +475,9 @@ QVariant ResourceFolderModel::headerData(int section, Qt::Orientation orientatio
         case Qt::DisplayRole:
             switch (section) {
                 case ACTIVE_COLUMN:
-                    return tr("Enable");
                 case NAME_COLUMN:
-                    return tr("Name");
                 case DATE_COLUMN:
-                    return tr("Last modified");
+                    return columnNames().at(section);
                 default:
                     return {};
             }
@@ -509,7 +507,7 @@ void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
 {
     Q_ASSERT(act);
 
-    act->setText(headerData(column, Qt::Orientation::Horizontal).toString());
+    act->setText(columnNames().at(column));
 }
 
 void ResourceFolderModel::saveHiddenColumn(int column, bool hidden)
@@ -518,12 +516,13 @@ void ResourceFolderModel::saveHiddenColumn(int column, bool hidden)
     auto setting = (APPLICATION->settings()->contains(setting_name)) ?
         APPLICATION->settings()->getSetting(setting_name) : APPLICATION->settings()->registerSetting(setting_name);
 
-    auto hiddenColumns = QVariantUtils::toList<int>(setting->get());
-    auto index = hiddenColumns.indexOf(column);
+    auto hiddenColumns = QVariantUtils::toList<QString>(setting->get());
+    auto name = columnNames(false).at(column);
+    auto index = hiddenColumns.indexOf(name);
     if (index >= 0 && !hidden) {
         hiddenColumns.removeAt(index);
     } else if ( index < 0 && hidden) {
-        hiddenColumns.append(column);
+        hiddenColumns.append(name);
     }
     setting->set(QVariantUtils::fromList(hiddenColumns));
 }

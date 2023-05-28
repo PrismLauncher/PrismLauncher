@@ -45,6 +45,8 @@
 TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance* instance)
     : ResourceFolderModel(QDir(dir), instance)
 {
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified") });
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::DATE };
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents};
 
@@ -118,13 +120,10 @@ QVariant TexturePackFolderModel::headerData(int section, Qt::Orientation orienta
         case Qt::DisplayRole:
             switch (section) {
                 case ActiveColumn:
-                    return tr("Enable");
                 case NameColumn:
-                    return tr("Name");
                 case DateColumn:
-                    return tr("Last modified");
                 case ImageColumn:
-                    return tr("Image");
+                    return columnNames().at(section);
                 default:
                     return {};
             }
