@@ -129,7 +129,7 @@ void ModrinthPackExportTask::collectHashes()
             const Mod* mod = *modIter;
             if (mod->metadata() != nullptr) {
                 QUrl& url = mod->metadata()->url;
-                // most likely some of these may be from curseforge
+                // ensure the url is permitted on modrinth.com
                 if (!url.isEmpty() && BuildConfig.MODRINTH_MRPACK_HOSTS.contains(url.host())) {
                     qDebug() << "Resolving" << relative << "from index";
 
