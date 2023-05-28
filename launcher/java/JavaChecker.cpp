@@ -85,17 +85,13 @@ void JavaChecker::performCheck()
     process->setProgram(m_path);
     process->setProcessChannelMode(QProcess::SeparateChannels);
     process->setProcessEnvironment(CleanEnviroment());
-    qDebug() << "Running java checker: " + m_path + args.join(" ");;
+    qDebug() << "Running java checker:" << m_path << args.join(" ");
 
-    connect(process.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(finished(int, QProcess::ExitStatus)));
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(process.get(), SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
-#else
-    connect(process.get(), SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
-#endif
-    connect(process.get(), SIGNAL(readyReadStandardOutput()), this, SLOT(stdoutReady()));
-    connect(process.get(), SIGNAL(readyReadStandardError()), this, SLOT(stderrReady()));
-    connect(&killTimer, SIGNAL(timeout()), SLOT(timeout()));
+    connect(process.get(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &JavaChecker::finished);
+    connect(process.get(), &QProcess::errorOccurred, this, &JavaChecker::error);
+    connect(process.get(), &QProcess::readyReadStandardOutput, this, &JavaChecker::stdoutReady);
+    connect(process.get(), &QProcess::readyReadStandardError, this, &JavaChecker::stderrReady);
+    connect(&killTimer, &QTimer::timeout, this, &JavaChecker::timeout);
     killTimer.setSingleShot(true);
     killTimer.start(15000);
     process->start();
@@ -132,7 +128,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     result.outLog = m_stdout;
     qDebug() << "STDOUT" << m_stdout;
     qWarning() << "STDERR" << m_stderr;
-    qDebug() << "Java checker finished with status " << status << " exit code " << exitcode;
+    qDebug() << "Java checker finished with status" << status << "exit code" << exitcode;
 
     if (status == QProcess::CrashExit || exitcode == 1)
     {

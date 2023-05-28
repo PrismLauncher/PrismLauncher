@@ -75,12 +75,11 @@ public:
     {
         return "Instance-settings";
     }
-    virtual bool shouldDisplay() const override;
     void retranslate() override;
 
     void updateThresholds();
 
-private slots:
+   private slots:
     void on_javaDetectBtn_clicked();
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();
@@ -95,12 +94,11 @@ private slots:
 
     void updateAccountsMenu();
     QIcon getFaceForAccount(MinecraftAccountPtr account);
-    void changeInstanceAccount();
+    void changeInstanceAccount(int index);
 
 private:
     Ui::InstanceSettingsPage *ui;
     BaseInstance *m_instance;
     SettingsObjectPtr m_settings;
     unique_qobject_ptr<JavaCommon::TestCheck> checker;
-    QMenu *accountMenu = nullptr;
 };

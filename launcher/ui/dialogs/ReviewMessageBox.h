@@ -13,9 +13,11 @@ class ReviewMessageBox : public QDialog {
     static auto create(QWidget* parent, QString&& title, QString&& icon = "") -> ReviewMessageBox*;
 
     using ResourceInformation = struct res_info {
-        QString name;  
-        QString filename;  
-        QString custom_file_path {};
+        QString name;
+        QString filename;
+        QString custom_file_path{};
+        QString provider;
+        QStringList required_by;
     };
 
     void appendResource(ResourceInformation&& info);

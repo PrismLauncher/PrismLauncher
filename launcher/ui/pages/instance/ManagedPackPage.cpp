@@ -30,8 +30,6 @@ class NoBigComboBoxStyle : public QProxyStyle {
     Q_OBJECT
 
    public:
-    NoBigComboBoxStyle(QStyle* style) : QProxyStyle(style) {}
-
     // clang-format off
     int styleHint(QStyle::StyleHint hint, const QStyleOption* option = nullptr, const QWidget* widget = nullptr, QStyleHintReturn* returnData = nullptr) const override
     {
@@ -41,6 +39,37 @@ class NoBigComboBoxStyle : public QProxyStyle {
         return QProxyStyle::styleHint(hint, option, widget, returnData);
     }
     // clang-format on
+
+    /**
+     * Something about QProxyStyle and QStyle objects means they can't be free'd just
+     * because all the widgets using them are gone.
+     * They seems to be tied to the QApplicaiton lifecycle.
+     * So make singletons tied to the lifetime of the application to clean them up and ensure they aren't
+     * being remade over and over again, thus leaking memory.
+     */
+   public:
+    static NoBigComboBoxStyle* getInstance(QStyle* style)
+    {
+        static QHash<QStyle*, NoBigComboBoxStyle*> s_singleton_instances_ = {};
+        static std::mutex s_singleton_instances_mutex_;
+
+        std::lock_guard<std::mutex> lock(s_singleton_instances_mutex_);
+        auto inst_iter = s_singleton_instances_.constFind(style);
+        NoBigComboBoxStyle* inst = nullptr;
+        if (inst_iter == s_singleton_instances_.constEnd() || *inst_iter == nullptr) {
+            inst = new NoBigComboBoxStyle(style);
+            inst->setParent(APPLICATION);
+            s_singleton_instances_.insert(style, inst);
+            qDebug() << "QProxyStyle NoBigComboBox created for" << style->objectName() << style;
+        } else {
+            inst = *inst_iter;
+        }
+        return inst;
+    }
+
+   private:
+    NoBigComboBoxStyle(QStyle* style) : QProxyStyle(style) {}
+
 };
 
 ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, QWidget* parent)
@@ -62,8 +91,10 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
 
     // NOTE: GTK2 themes crash with the proxy style.
     // This seems like an upstream bug, so there's not much else that can be done.
-    if (!QStyleFactory::keys().contains("gtk2"))
-        ui->versionsComboBox->setStyle(new NoBigComboBoxStyle(ui->versionsComboBox->style()));
+    if (!QStyleFactory::keys().contains("gtk2")){
+        auto comboStyle = NoBigComboBoxStyle::getInstance(ui->versionsComboBox->style());
+        ui->versionsComboBox->setStyle(comboStyle);
+    }
 
     ui->reloadButton->setVisible(false);
     connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool){
@@ -174,7 +205,7 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
-    connect(ui->updateButton, &QPushButton::pressed, this, &ModrinthManagedPackPage::update);
+    connect(ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
 }
 
 // MODRINTH
@@ -195,7 +226,7 @@ void ModrinthManagedPackPage::parseManagedPack()
 
     QString id = m_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response.get()));
+    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
     QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
@@ -301,7 +332,7 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
-    connect(ui->updateButton, &QPushButton::pressed, this, &FlameManagedPackPage::update);
+    connect(ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
 }
 
 void FlameManagedPackPage::parseManagedPack()
@@ -338,7 +369,7 @@ void FlameManagedPackPage::parseManagedPack()
 
     QString id = m_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response.get()));
+    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response));
 
     QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};

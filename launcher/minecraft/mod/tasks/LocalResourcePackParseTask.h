@@ -35,7 +35,10 @@ bool processZIP(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Ful
 bool processFolder(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
 bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data);
-bool processPackPNG(ResourcePack& pack, QByteArray&& raw_data);
+bool processPackPNG(const ResourcePack& pack, QByteArray&& raw_data);
+
+/// processes ONLY the pack.png (rest of the pack may be invalid)
+bool processPackPNG(const ResourcePack& pack);
 
 /** Checks whether a file is valid as a resource pack or not. */
 bool validate(QFileInfo file);

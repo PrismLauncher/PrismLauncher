@@ -55,12 +55,12 @@ void AuthRequest::get(const QNetworkRequest &req, int timeout/* = 60*1000*/) {
     reply_ = APPLICATION->network()->get(request_);
     status_ = Requesting;
     timedReplies_.add(new Katabasis::Reply(reply_, timeout));
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(reply_, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
-#else
-    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+    connect(reply_, &QNetworkReply::errorOccurred, this, &AuthRequest::onRequestError);
+#else // &QNetworkReply::error SIGNAL depricated
+    connect(reply_, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &AuthRequest::onRequestError);
 #endif
-    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()));
+    connect(reply_, &QNetworkReply::finished, this, &AuthRequest::onRequestFinished);
     connect(reply_, &QNetworkReply::sslErrors, this, &AuthRequest::onSslErrors);
 }
 
@@ -70,14 +70,14 @@ void AuthRequest::post(const QNetworkRequest &req, const QByteArray &data, int t
     status_ = Requesting;
     reply_ = APPLICATION->network()->post(request_, data_);
     timedReplies_.add(new Katabasis::Reply(reply_, timeout));
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(reply_, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
-#else
-    connect(reply_, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onRequestError(QNetworkReply::NetworkError)));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+    connect(reply_, &QNetworkReply::errorOccurred, this, &AuthRequest::onRequestError);
+#else // &QNetworkReply::error SIGNAL depricated
+    connect(reply_, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &AuthRequest::onRequestError);
 #endif
-    connect(reply_, SIGNAL(finished()), this, SLOT(onRequestFinished()));
+    connect(reply_, &QNetworkReply::finished, this, &AuthRequest::onRequestFinished);
     connect(reply_, &QNetworkReply::sslErrors, this, &AuthRequest::onSslErrors);
-    connect(reply_, SIGNAL(uploadProgress(qint64,qint64)), this, SLOT(onUploadProgress(qint64,qint64)));
+    connect(reply_, &QNetworkReply::uploadProgress, this, &AuthRequest::onUploadProgress);
 }
 
 void AuthRequest::onRequestFinished() {

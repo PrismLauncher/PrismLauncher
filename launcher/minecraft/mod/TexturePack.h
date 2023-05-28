@@ -40,13 +40,13 @@ class TexturePack : public Resource {
     [[nodiscard]] QString description() const { return m_description; }
 
     /** Gets the image of the texture pack, converted to a QPixmap for drawing, and scaled to size. */
-    [[nodiscard]] QPixmap image(QSize size);
+    [[nodiscard]] QPixmap image(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
 
     /** Thread-safe. */
     void setDescription(QString new_description);
 
     /** Thread-safe. */
-    void setImage(QImage new_image);
+    void setImage(QImage new_image) const;
 
     bool valid() const override;
 
@@ -65,5 +65,5 @@ class TexturePack : public Resource {
     struct {
         QPixmapCache::Key key;
         bool was_ever_used = false;
-    } m_pack_image_cache_key;
+    } mutable m_pack_image_cache_key;
 };

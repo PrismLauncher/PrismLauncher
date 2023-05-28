@@ -43,7 +43,7 @@ SystemTheme::SystemTheme()
 {
     themeDebugLog() << "Determining System Theme...";
     const auto& style = QApplication::style();
-    systemPalette = style->standardPalette();
+    systemPalette = QApplication::palette();
     QString lowerThemeName = style->objectName();
     themeDebugLog() << "System theme seems to be:" << lowerThemeName;
     QStringList styles = QStyleFactory::keys();

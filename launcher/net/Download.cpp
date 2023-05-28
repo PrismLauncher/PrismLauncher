@@ -41,6 +41,7 @@
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <memory>
 
 #include "ByteArraySink.h"
 #include "ChecksumValidator.h"
@@ -69,7 +70,7 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
     return dl;
 }
 
-auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
+auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
     dl->m_url = url;
@@ -134,18 +135,21 @@ void Download::executeTask()
             request.setRawHeader("Authorization", token.toUtf8());
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    request.setTransferTimeout();
+#endif
+
     m_last_progress_time = m_clock.now();
     m_last_progress_bytes = 0;
 
     QNetworkReply* rep = m_network->get(request);
-
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::downloadProgress, this, &Download::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &Download::downloadFinished);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+    connect(rep, &QNetworkReply::errorOccurred, this, &Download::downloadError);
 #else
-    connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &Download::downloadError);
 #endif
     connect(rep, &QNetworkReply::sslErrors, this, &Download::sslErrors);
     connect(rep, &QNetworkReply::readyRead, this, &Download::downloadReadyRead);

@@ -31,8 +31,6 @@ class ResourcePackResourcePage : public ResourcePage {
         return page;
     }
 
-    ~ResourcePackResourcePage() override = default;
-
     //: The plural version of 'resource pack'
     [[nodiscard]] inline QString resourcesString() const override { return tr("resource packs"); }
     //: The singular version of 'resource packs'

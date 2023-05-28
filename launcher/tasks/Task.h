@@ -64,7 +64,21 @@ struct TaskStepProgress {
     QString status = "";
     QString details = "";
     TaskStepState state = TaskStepState::Waiting;
+    TaskStepProgress() {
+        this->uid = QUuid::createUuid();
+    }
+    TaskStepProgress(QUuid uid) {
+        this->uid = uid;
+    }
     bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
+    void update(qint64 current, qint64 total) {
+        this->old_current = this->current;
+        this->old_total = this->total;
+
+        this->current = current;
+        this->total = total;
+        this->state = TaskStepState::Running;
+    }
 };
 
 Q_DECLARE_METATYPE(TaskStepProgress)

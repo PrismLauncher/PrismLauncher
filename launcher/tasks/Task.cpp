@@ -109,7 +109,7 @@ void Task::start()
             return;
         }
     }
-    // NOTE: only fall thorugh to here in end states
+    // NOTE: only fall through to here in end states
     m_state = State::Running;
     emit started();
     executeTask();

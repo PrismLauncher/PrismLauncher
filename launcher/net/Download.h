@@ -60,7 +60,7 @@ class Download : public NetAction {
     ~Download() override = default;
 
     static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
-    static auto makeByteArray(QUrl url, QByteArray* output, Options options = Option::NoOptions) -> Download::Ptr;
+    static auto makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options = Option::NoOptions) -> Download::Ptr;
     static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
 
    public:
@@ -74,7 +74,7 @@ class Download : public NetAction {
    protected slots:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
     void downloadError(QNetworkReply::NetworkError error) override;
-    void sslErrors(const QList<QSslError>& errors);
+    void sslErrors(const QList<QSslError>& errors) override;
     void downloadFinished() override;
     void downloadReadyRead() override;
 
