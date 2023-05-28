@@ -50,6 +50,9 @@ class NoBigComboBoxStyle : public QProxyStyle {
    public:
     static NoBigComboBoxStyle* getInstance(QStyle* style)
     {
+        static QHash<QStyle*, NoBigComboBoxStyle*> s_singleton_instances_ = {};
+        static std::mutex s_singleton_instances_mutex_;
+
         std::lock_guard<std::mutex> lock(s_singleton_instances_mutex_);
         auto inst_iter = s_singleton_instances_.constFind(style);
         NoBigComboBoxStyle* inst = nullptr;
@@ -67,13 +70,7 @@ class NoBigComboBoxStyle : public QProxyStyle {
    private:
     NoBigComboBoxStyle(QStyle* style) : QProxyStyle(style) {}
 
-    static QHash<QStyle*, NoBigComboBoxStyle*> s_singleton_instances_;
-    static std::mutex s_singleton_instances_mutex_;
 };
-
-QHash<QStyle*, NoBigComboBoxStyle*> NoBigComboBoxStyle::s_singleton_instances_ = {};
-std::mutex NoBigComboBoxStyle::s_singleton_instances_mutex_;
-
 
 ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, QWidget* parent)
 {
