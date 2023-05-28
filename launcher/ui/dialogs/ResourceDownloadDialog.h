@@ -63,7 +63,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     bool selectPage(QString pageId);
     ResourcePage* getSelectedPage();
 
-    void addResource(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
+    void addResource(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
     void removeResource(const QString&);
 
     const QList<DownloadTaskPtr> getTasks();

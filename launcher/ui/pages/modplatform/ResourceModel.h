@@ -83,7 +83,7 @@ class ResourceModel : public QAbstractListModel {
     /** Gets the icon at the URL for the given index. If it's not fetched yet, fetch it and update when fisinhed. */
     std::optional<QIcon> getIcon(QModelIndex&, const QUrl&);
 
-    void addPack(ModPlatform::IndexedPack& pack,
+    void addPack(ModPlatform::IndexedPack::Ptr pack,
                  ModPlatform::IndexedVersion& version,
                  const std::shared_ptr<ResourceFolderModel> packs,
                  bool is_indexed = false,
@@ -134,7 +134,7 @@ class ResourceModel : public QAbstractListModel {
     QSet<QUrl> m_currently_running_icon_actions;
     QSet<QUrl> m_failed_icon_actions;
 
-    QList<ModPlatform::IndexedPack> m_packs;
+    QList<ModPlatform::IndexedPack::Ptr> m_packs;
     QList<DownloadTaskPtr> m_selected;
 
     // HACK: We need this to prevent callbacks from calling the model after it has already been deleted.

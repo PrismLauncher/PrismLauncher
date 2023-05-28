@@ -17,7 +17,7 @@ public:
         NUM_COLUMNS
     };
 
-    explicit ResourcePackFolderModel(const QString &dir, std::shared_ptr<const BaseInstance> instance);
+    explicit ResourcePackFolderModel(const QString &dir, BaseInstance* instance);
 
     [[nodiscard]] QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 

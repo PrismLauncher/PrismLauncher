@@ -36,7 +36,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
 ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& entry)
 {
-    auto& pack = m_packs[entry.row()];
+    auto& pack = *m_packs[entry.row()];
     auto profile = static_cast<MinecraftInstance const&>(m_base_instance).getPackProfile();
 
     Q_ASSERT(profile);
@@ -51,7 +51,7 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& en
 
 ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(QModelIndex& entry)
 {
-    auto& pack = m_packs[entry.row()];
+    auto& pack = *m_packs[entry.row()];
     return { pack };
 }
 

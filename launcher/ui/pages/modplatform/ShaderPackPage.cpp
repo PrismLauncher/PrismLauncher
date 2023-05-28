@@ -43,7 +43,7 @@ QMap<QString, QString> ShaderPackResourcePage::urlHandlers() const
     return map;
 }
 
-void ShaderPackResourcePage::addResourceToPage(ModPlatform::IndexedPack& pack,
+void ShaderPackResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                                ModPlatform::IndexedVersion& version,
                                                const std::shared_ptr<ResourceFolderModel> base_model)
 {

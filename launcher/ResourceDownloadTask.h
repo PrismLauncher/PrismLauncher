@@ -30,7 +30,7 @@ class ResourceFolderModel;
 class ResourceDownloadTask : public SequentialTask {
     Q_OBJECT
    public:
-    explicit ResourceDownloadTask(ModPlatform::IndexedPack pack,
+    explicit ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                   ModPlatform::IndexedVersion version,
                                   const std::shared_ptr<ResourceFolderModel> packs,
                                   bool is_indexed = true,
@@ -39,12 +39,12 @@ class ResourceDownloadTask : public SequentialTask {
     const QString& getCustomPath() const { return m_custom_target_folder; }
     const QVariant& getVersionID() const { return m_pack_version.fileId; }
     const ModPlatform::IndexedVersion& getVersion() const { return m_pack_version; }
-    ModPlatform::IndexedPack& getPack() { return m_pack; }
-    const ModPlatform::ResourceProvider& getProvider() const { return m_pack.provider; }
-    const QString& getName() const { return m_pack.name; }
+    const ModPlatform::ResourceProvider& getProvider() const { return m_pack->provider; }
+    const QString& getName() const { return m_pack->name; }
+    ModPlatform::IndexedPack::Ptr getPack() { return m_pack; }
 
    private:
-    ModPlatform::IndexedPack m_pack;
+    ModPlatform::IndexedPack::Ptr m_pack;
     ModPlatform::IndexedVersion m_pack_version;
     const std::shared_ptr<ResourceFolderModel> m_pack_model;
     QString m_custom_target_folder;

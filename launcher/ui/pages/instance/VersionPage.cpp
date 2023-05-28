@@ -165,7 +165,7 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     auto proxy = new IconProxy(ui->packageView);
     proxy->setSourceModel(m_profile.get());
 
-    m_filterModel = new QSortFilterProxyModel();
+    m_filterModel = new QSortFilterProxyModel(this);
     m_filterModel->setDynamicSortFilter(true);
     m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
