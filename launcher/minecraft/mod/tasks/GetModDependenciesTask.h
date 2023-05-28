@@ -40,10 +40,10 @@ class GetModDependenciesTask : public SequentialTask {
 
     struct PackDependency {
         ModPlatform::Dependency dependency;
-        ModPlatform::IndexedPack pack;
+        ModPlatform::IndexedPack::Ptr pack;
         ModPlatform::IndexedVersion version;
         PackDependency(){};
-        PackDependency(const ModPlatform::IndexedPack& p, const ModPlatform::IndexedVersion& v)
+        PackDependency(const ModPlatform::IndexedPack::Ptr p, const ModPlatform::IndexedVersion& v)
         {
             pack = p;
             version = v;
