@@ -132,4 +132,5 @@ struct IndexedPack {
 }  // namespace ModPlatform
 
 Q_DECLARE_METATYPE(ModPlatform::IndexedPack)
+Q_DECLARE_METATYPE(ModPlatform::IndexedPack::Ptr)
 Q_DECLARE_METATYPE(ModPlatform::ResourceProvider)
