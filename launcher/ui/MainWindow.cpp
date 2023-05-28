@@ -1071,7 +1071,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     dl_url = QUrl(Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl",
                                                             "", "downloadUrl"));
                     if (!dl_url.isValid()) {
-                        CustomMessageBox::selectable(this, tr("Error"), tr("The modpack, mod, or resource is blocked ! Please download it manually \n%1").arg(dl_url.toDisplayString()),
+                        CustomMessageBox::selectable(this, tr("Error"), tr("The modpack, mod, or resource is blocked for third-parties! Please download it manually at: \n%1").arg(dl_url.toDisplayString()),
                                                         QMessageBox::Critical)
                             ->show();
                         return;
