@@ -76,7 +76,7 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void updateVersionList();
 
     void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
-    void removeResourceFromDialog(const QString& pack_name);
+    void removeResourceFromDialog(ModPlatform::IndexedPack& pack);
     virtual void removeResourceFromPage(const QString& name);
     virtual void addResourceToPage(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&, const std::shared_ptr<ResourceFolderModel>);
 

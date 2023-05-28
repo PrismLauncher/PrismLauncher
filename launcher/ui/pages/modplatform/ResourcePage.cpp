@@ -312,9 +312,11 @@ void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatfo
     m_parent_dialog->addResource(pack, version);
 }
 
-void ResourcePage::removeResourceFromDialog(const QString& pack_name)
+void ResourcePage::removeResourceFromDialog(ModPlatform::IndexedPack& pack)
 {
-    m_parent_dialog->removeResource(pack_name);
+    m_parent_dialog->removeResource(pack.name);
+    for (auto& ver : pack.versions)
+        ver.is_currently_selected = false;
 }
 
 void ResourcePage::addResourceToPage(ModPlatform::IndexedPack& pack,
@@ -340,7 +342,7 @@ void ResourcePage::onResourceSelected()
 
     auto& version = current_pack.versions[m_selected_version_index];
     if (version.is_currently_selected)
-        removeResourceFromDialog(current_pack.name);
+        removeResourceFromDialog(current_pack);
     else
         addResourceToDialog(current_pack, version);
 
@@ -351,7 +353,7 @@ void ResourcePage::onResourceSelected()
     updateSelectionButton();
 
     /* Force redraw on the resource list when the selection changes */
-    m_ui->packView->adjustSize();
+    m_ui->packView->repaint();
 }
 
 void ResourcePage::openUrl(const QUrl& url)
