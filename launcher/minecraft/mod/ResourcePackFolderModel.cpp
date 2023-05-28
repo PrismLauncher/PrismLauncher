@@ -53,7 +53,7 @@ ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, BaseInstanc
     m_column_names = QStringList({ "Enable", "Image", "Name", "Pack Format", "Last Modified" });
     m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified") });
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE};
-    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents};
+    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::ResizeToContents};
 
 }
 

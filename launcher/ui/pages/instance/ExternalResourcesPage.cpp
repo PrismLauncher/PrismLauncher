@@ -76,8 +76,9 @@ void ExternalResourcesPage::ShowContextMenu(const QPoint& pos)
 
 void ExternalResourcesPage::ShowHeaderContextMenu(const QPoint& pos)
 {
-    auto menu = m_model->createHeaderContextMenu(this, ui->treeView);
+    auto menu = m_model->createHeaderContextMenu(ui->treeView);
     menu->exec(ui->treeView->mapToGlobal(pos));
+    menu->deleteLater();
 }
 
 void ExternalResourcesPage::openedImpl()

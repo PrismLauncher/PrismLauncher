@@ -513,10 +513,10 @@ void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
 void ResourceFolderModel::saveHiddenColumn(int column, bool hidden)
 {
     auto const setting_name = QString("UI/%1_Page/HiddenColumns").arg(id());
-    auto setting = (APPLICATION->settings()->contains(setting_name)) ?
-        APPLICATION->settings()->getSetting(setting_name) : APPLICATION->settings()->registerSetting(setting_name);
+    auto setting = (m_instance->settings()->contains(setting_name)) ?
+        m_instance->settings()->getSetting(setting_name) : m_instance->settings()->registerSetting(setting_name);
 
-    auto hiddenColumns = QVariantUtils::toList<QString>(setting->get());
+    auto hiddenColumns = setting->get().toStringList();
     auto name = columnNames(false).at(column);
     auto index = hiddenColumns.indexOf(name);
     if (index >= 0 && !hidden) {
@@ -524,30 +524,33 @@ void ResourceFolderModel::saveHiddenColumn(int column, bool hidden)
     } else if ( index < 0 && hidden) {
         hiddenColumns.append(name);
     }
-    setting->set(QVariantUtils::fromList(hiddenColumns));
+    setting->set(hiddenColumns);
 }
 
 void ResourceFolderModel::loadHiddenColumns(QTreeView *tree)
 {
     auto const setting_name = QString("UI/%1_Page/HiddenColumns").arg(id());
-    auto setting = (APPLICATION->settings()->contains(setting_name)) ?
-        APPLICATION->settings()->getSetting(setting_name) : APPLICATION->settings()->registerSetting(setting_name);
+    auto setting = (m_instance->settings()->contains(setting_name)) ?
+        m_instance->settings()->getSetting(setting_name) : m_instance->settings()->registerSetting(setting_name);
 
-    auto hiddenColumns = QVariantUtils::toList<int>(setting->get().toList());
-    for (auto col : hiddenColumns) {
-        tree->setColumnHidden(col, true);
+    auto hiddenColumns = setting->get().toStringList();
+    auto col_names = columnNames(false);
+    for (auto col_name : hiddenColumns) {
+        auto index = col_names.indexOf(col_name);
+        if (index >= 0)
+            tree->setColumnHidden(index, true);
     }
 
 }
 
-std::unique_ptr<QMenu> ResourceFolderModel::createHeaderContextMenu(QWidget* parent, QTreeView* tree)
+QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
 {
-    auto menu = std::make_unique<QMenu>(parent);
+    auto menu = new QMenu(tree);
 
     menu->addSeparator()->setText(tr("Show / Hide Columns"));
 
     for (int col = 0; col < columnCount(); ++col) {
-        auto act = new QAction();
+        auto act = new QAction(menu);
         setupHeaderAction(act, col);
 
         act->setCheckable(true);

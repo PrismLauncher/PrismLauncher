@@ -119,7 +119,7 @@ class ResourceFolderModel : public QAbstractListModel {
     void setupHeaderAction(QAction* act, int column);
     void saveHiddenColumn(int column, bool hidden);
     void loadHiddenColumns(QTreeView* tree);
-    std::unique_ptr<QMenu> createHeaderContextMenu(QWidget* parent, QTreeView* tree);
+    QMenu* createHeaderContextMenu(QTreeView* tree);
     
     /** This creates a proxy model to filter / sort the model for a UI.
      *
