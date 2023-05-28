@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QPixmapCache>
 #include <QUrl>
+#include <memory>
 
 #include "Application.h"
 #include "BuildConfig.h"
@@ -45,16 +46,16 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
     auto pack = m_packs.at(pos);
     switch (role) {
         case Qt::ToolTipRole: {
-            if (pack.description.length() > 100) {
+            if (pack->description.length() > 100) {
                 // some magic to prevent to long tooltips and replace html linebreaks
-                QString edit = pack.description.left(97);
+                QString edit = pack->description.left(97);
                 edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
                 return edit;
             }
-            return pack.description;
+            return pack->description;
         }
         case Qt::DecorationRole: {
-            if (auto icon_or_none = const_cast<ResourceModel*>(this)->getIcon(const_cast<QModelIndex&>(index), pack.logoUrl);
+            if (auto icon_or_none = const_cast<ResourceModel*>(this)->getIcon(const_cast<QModelIndex&>(index), pack->logoUrl);
                 icon_or_none.has_value())
                 return icon_or_none.value();
 
@@ -64,16 +65,16 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
             return QSize(0, 58);
         case Qt::UserRole: {
             QVariant v;
-            v.setValue(pack);
+            v.setValue(*pack);
             return v;
         }
             // Custom data
         case UserDataTypes::TITLE:
-            return pack.name;
+            return pack->name;
         case UserDataTypes::DESCRIPTION:
-            return pack.description;
+            return pack->description;
         case UserDataTypes::SELECTED:
-            return pack.isAnyVersionSelected();
+            return pack->isAnyVersionSelected();
         default:
             break;
     }
@@ -102,7 +103,7 @@ bool ResourceModel::setData(const QModelIndex& index, const QVariant& value, int
     if (pos >= m_packs.size() || pos < 0 || !index.isValid())
         return false;
 
-    m_packs[pos] = value.value<ModPlatform::IndexedPack>();
+    m_packs[pos] = std::make_shared<ModPlatform::IndexedPack>(value.value<ModPlatform::IndexedPack>());
     emit dataChanged(index, index);
 
     return true;
@@ -161,7 +162,7 @@ void ResourceModel::loadEntry(QModelIndex& entry)
     if (!hasActiveInfoJob())
         m_current_info_job.clear();
 
-    if (!pack.versionsLoaded) {
+    if (!pack->versionsLoaded) {
         auto args{ createVersionsArguments(entry) };
         auto callbacks{ createVersionsCallbacks(entry) };
 
@@ -177,7 +178,7 @@ void ResourceModel::loadEntry(QModelIndex& entry)
             runInfoJob(job);
     }
 
-    if (!pack.extraDataLoaded) {
+    if (!pack->extraDataLoaded) {
         auto args{ createInfoArguments(entry) };
         auto callbacks{ createInfoCallbacks(entry) };
 
@@ -229,7 +230,7 @@ void ResourceModel::clearData()
 
 void ResourceModel::runSearchJob(Task::Ptr ptr)
 {
-    m_current_search_job = ptr;
+    m_current_search_job.reset(ptr); // clean up first
     m_current_search_job->start();
 }
 void ResourceModel::runInfoJob(Task::Ptr ptr)
@@ -326,15 +327,15 @@ void ResourceModel::loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArra
 
 void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
 {
-    QList<ModPlatform::IndexedPack> newList;
+    QList<ModPlatform::IndexedPack::Ptr> newList;
     auto packs = documentToArray(doc);
 
     for (auto packRaw : packs) {
         auto packObj = packRaw.toObject();
 
-        ModPlatform::IndexedPack pack;
+        ModPlatform::IndexedPack::Ptr pack = std::make_shared<ModPlatform::IndexedPack>();
         try {
-            loadIndexedPack(pack, packObj);
+            loadIndexedPack(*pack, packObj);
             newList.append(pack);
         } catch (const JSONValidationError& e) {
             qWarning() << "Error while loading resource from " << debugName() << ": " << e.cause();

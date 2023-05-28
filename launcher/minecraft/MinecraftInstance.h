@@ -115,14 +115,14 @@ public:
     std::shared_ptr<PackProfile> getPackProfile() const;
 
     //////  Mod Lists  //////
-    std::shared_ptr<ModFolderModel> loaderModList() const;
-    std::shared_ptr<ModFolderModel> coreModList() const;
-    std::shared_ptr<ModFolderModel> nilModList() const;
-    std::shared_ptr<ResourcePackFolderModel> resourcePackList() const;
-    std::shared_ptr<TexturePackFolderModel> texturePackList() const;
-    std::shared_ptr<ShaderPackFolderModel> shaderPackList() const;
-    std::shared_ptr<WorldList> worldList() const;
-    std::shared_ptr<GameOptions> gameOptionsModel() const;
+    std::shared_ptr<ModFolderModel> loaderModList();
+    std::shared_ptr<ModFolderModel> coreModList();
+    std::shared_ptr<ModFolderModel> nilModList();
+    std::shared_ptr<ResourcePackFolderModel> resourcePackList();
+    std::shared_ptr<TexturePackFolderModel> texturePackList();
+    std::shared_ptr<ShaderPackFolderModel> shaderPackList();
+    std::shared_ptr<WorldList> worldList();
+    std::shared_ptr<GameOptions> gameOptionsModel();
 
     //////  Launch stuff //////
     Task::Ptr createUpdateTask(Net::Mode mode) override;

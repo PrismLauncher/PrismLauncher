@@ -22,13 +22,13 @@ ResourceAPI::SearchArgs ShaderPackResourceModel::createSearchArguments()
 ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
-    return { pack };
+    return { *pack };
 }
 
 ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
-    return { pack };
+    return { *pack };
 }
 
 void ShaderPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

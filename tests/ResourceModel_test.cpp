@@ -75,9 +75,9 @@ class ResourceModelTest : public QObject {
         auto search_json = DummyResourceAPI::searchRequestResult();
         auto processed_response = model->documentToArray(search_json).first().toObject();
 
-        QVERIFY(processed_pack.addonId.toString() == Json::requireString(processed_response, "project_id"));
-        QVERIFY(processed_pack.description == Json::requireString(processed_response, "description"));
-        QVERIFY(processed_pack.authors.first().name == Json::requireString(processed_response, "author"));
+        QVERIFY(processed_pack->addonId.toString() == Json::requireString(processed_response, "project_id"));
+        QVERIFY(processed_pack->description == Json::requireString(processed_response, "description"));
+        QVERIFY(processed_pack->authors.first().name == Json::requireString(processed_response, "author"));
     }
 };
 

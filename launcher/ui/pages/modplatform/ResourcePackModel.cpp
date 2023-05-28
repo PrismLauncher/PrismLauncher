@@ -22,13 +22,13 @@ ResourceAPI::SearchArgs ResourcePackResourceModel::createSearchArguments()
 ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
-    return { pack };
+    return { *pack };
 }
 
 ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
-    return { pack };
+    return { *pack };
 }
 
 void ResourcePackResourceModel::searchWithTerm(const QString& term, unsigned int sort)
