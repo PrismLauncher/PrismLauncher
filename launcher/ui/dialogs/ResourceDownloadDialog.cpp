@@ -89,7 +89,7 @@ void ResourceDownloadDialog::reject()
 // won't work with subclasses if we put it in this ctor.
 void ResourceDownloadDialog::initializeContainer()
 {
-    m_container = new PageContainer(this);
+    m_container = new PageContainer(this, {}, this);
     m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
     m_vertical_layout.addWidget(m_container);

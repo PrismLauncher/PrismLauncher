@@ -39,7 +39,7 @@
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 #include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
 
-TexturePackFolderModel::TexturePackFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance)
+TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance* instance)
     : ResourceFolderModel(QDir(dir), instance)
 {}
 
