@@ -41,7 +41,37 @@ class NoBigComboBoxStyle : public QProxyStyle {
         return QProxyStyle::styleHint(hint, option, widget, returnData);
     }
     // clang-format on
+
+    static NoBigComboBoxStyle* GetInstance(QStyle* style);
+
+   private:
+    static QMap<QStyle*, NoBigComboBoxStyle*> s_singleton_instances_;
+    static std::mutex s_singleton_instances_mutex_;
 };
+
+QMap<QStyle*, NoBigComboBoxStyle*>  NoBigComboBoxStyle::s_singleton_instances_ = {};
+std::mutex NoBigComboBoxStyle::s_singleton_instances_mutex_;
+
+/**
+ * QProxyStyle and QStyle objects object to being freed even if all the widgets using them are gone
+ * so make singlestons tied to the lifetime of the application to clean them up and ensure they arn't 
+ * being remade over and over agian leaking memory.
+ * */
+NoBigComboBoxStyle* NoBigComboBoxStyle::GetInstance(QStyle* style)
+{
+    std::lock_guard<std::mutex> lock(s_singleton_instances_mutex_);
+    auto inst_iter = s_singleton_instances_.constFind(style);
+    NoBigComboBoxStyle* inst = nullptr;
+    if(inst_iter == s_singleton_instances_.constEnd() || *inst_iter == nullptr) {
+        inst = new NoBigComboBoxStyle(style);
+        inst->setParent(APPLICATION);
+        s_singleton_instances_.insert(style, inst);
+        qDebug() << "QProxyStyle NoBigComboBox created for" << style->objectName() << style;
+    } else {
+        inst = *inst_iter;
+    }
+    return inst;
+}
 
 ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, QWidget* parent)
 {
@@ -63,8 +93,7 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
     // NOTE: GTK2 themes crash with the proxy style.
     // This seems like an upstream bug, so there's not much else that can be done.
     if (!QStyleFactory::keys().contains("gtk2")){
-        auto comboStyle = new NoBigComboBoxStyle(ui->versionsComboBox->style());
-        comboStyle->setParent(APPLICATION); // make sure this gets cleaned up (setting to simply `this` causes it to be freed too soon)
+        auto comboStyle = NoBigComboBoxStyle::GetInstance(ui->versionsComboBox->style());
         ui->versionsComboBox->setStyle(comboStyle);
     }
 
