@@ -29,7 +29,7 @@ class QSortFilterProxyModel;
 class ResourceFolderModel : public QAbstractListModel {
     Q_OBJECT
    public:
-    ResourceFolderModel(QDir, std::shared_ptr<const BaseInstance>, QObject* parent = nullptr, bool create_dir = true);
+    ResourceFolderModel(QDir, BaseInstance* instance, QObject* parent = nullptr, bool create_dir = true);
     ~ResourceFolderModel() override;
 
     virtual QString id() const { return "resource"; }
@@ -203,7 +203,7 @@ class ResourceFolderModel : public QAbstractListModel {
     bool m_can_interact = true;
 
     QDir m_dir;
-    std::shared_ptr<const BaseInstance> m_instance;
+    BaseInstance* m_instance;
     QFileSystemWatcher m_watcher;
     bool m_is_watching = false;
 

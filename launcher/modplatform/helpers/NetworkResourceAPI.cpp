@@ -24,7 +24,7 @@ Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(search_url), response));
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [=]{
+    QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks]{
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -40,16 +40,20 @@ Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&
         callbacks.on_succeed(doc);
     });
 
-    QObject::connect(netJob.get(), &NetJob::failed, [=](QString reason){
+    QObject::connect(netJob.get(), &NetJob::failed, [&netJob, callbacks](QString reason){
         int network_error_code = -1;
         if (auto* failed_action = netJob->getFailedActions().at(0); failed_action && failed_action->m_reply)
             network_error_code = failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
        callbacks.on_fail(reason, network_error_code); 
     });
-    QObject::connect(netJob.get(), &NetJob::aborted, [=]{
+    QObject::connect(netJob.get(), &NetJob::aborted, [callbacks]{
        callbacks.on_abort(); 
     });
+    QObject::connect(netJob.get(), &NetJob::finished, [response] {
+        delete response;
+    });
+
 
     return netJob;
 }
@@ -88,7 +92,7 @@ Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Versi
 
     netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [=] {
+    QObject::connect(netJob.get(), &NetJob::succeeded, [response, callbacks, args] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {

@@ -64,6 +64,7 @@ public:
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     [[nodiscard]] int columnCount(const QModelIndex &parent) const override;
 
+    explicit TexturePackFolderModel(const QString &dir, BaseInstance* instance);
     [[nodiscard]] Task* createUpdateTask() override;
     [[nodiscard]] Task* createParseTask(Resource&) override;
 

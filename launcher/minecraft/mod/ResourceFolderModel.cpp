@@ -19,7 +19,7 @@
 #include "settings/Setting.h"
 #include "tasks/Task.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, std::shared_ptr<const BaseInstance> instance, QObject* parent, bool create_dir)
+ResourceFolderModel::ResourceFolderModel(QDir dir, BaseInstance* instance, QObject* parent, bool create_dir)
     : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this)
 {
     if (create_dir) {

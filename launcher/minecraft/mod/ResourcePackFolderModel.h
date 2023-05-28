@@ -18,7 +18,7 @@ public:
         NUM_COLUMNS
     };
 
-    explicit ResourcePackFolderModel(const QString &dir, std::shared_ptr<const BaseInstance> instance);
+    explicit ResourcePackFolderModel(const QString &dir, BaseInstance* instance);
 
     virtual QString id() const override { return "resourcepacks"; }
 

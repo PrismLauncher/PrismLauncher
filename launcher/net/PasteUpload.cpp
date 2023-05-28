@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *  Copyright (C) 2022 Swirl <swurl@swurl.xyz>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
@@ -46,6 +46,8 @@
 #include <QJsonDocument>
 #include <QFile>
 #include <QUrlQuery>
+
+#include "net/Logging.h"
 
 std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = {
     {{"0x0.st", "https://0x0.st", ""},
@@ -147,7 +149,7 @@ void PasteUpload::executeTask()
 void PasteUpload::downloadError(QNetworkReply::NetworkError error)
 {
     // error happened during download.
-    qCritical() << "Network error: " << error;
+    qCCritical(taskUploadLogC) << getUid().toString() << "Network error: " << error;
     emitFailed(m_reply->errorString());
 }
 
@@ -166,7 +168,7 @@ void PasteUpload::downloadFinished()
     {
         QString reasonPhrase = m_reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
         emitFailed(tr("Error: %1 returned unexpected status code %2 %3").arg(m_uploadUrl).arg(statusCode).arg(reasonPhrase));
-        qCritical() << m_uploadUrl << " returned unexpected status code " << statusCode << " with body: " << data;
+        qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned unexpected status code " << statusCode << " with body: " << data;
         m_reply.reset();
         return;
     }
@@ -187,7 +189,7 @@ void PasteUpload::downloadFinished()
         else
         {
             emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
-            qCritical() << m_uploadUrl << " returned malformed response body: " << data;
+            qCCritical(taskUploadLogC) << getUid().toString() << getUid().toString() << m_uploadUrl << " returned malformed response body: " << data;
             return;
         }
         break;
@@ -206,15 +208,15 @@ void PasteUpload::downloadFinished()
             {
                 QString error = jsonObj["error"].toString();
                 emitFailed(tr("Error: %1 returned an error: %2").arg(m_uploadUrl, error));
-                qCritical() << m_uploadUrl << " returned error: " << error;
-                qCritical() << "Response body: " << data;
+                qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned error: " << error;
+                qCCritical(taskUploadLogC) << getUid().toString() << "Response body: " << data;
                 return;
             }
         }
         else
         {
             emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
-            qCritical() << m_uploadUrl << " returned malformed response body: " << data;
+            qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned malformed response body: " << data;
             return;
         }
         break;
@@ -234,16 +236,16 @@ void PasteUpload::downloadFinished()
                 QString error = jsonObj["error"].toString();
                 QString message = (jsonObj.contains("message") && jsonObj["message"].isString()) ? jsonObj["message"].toString() : "none";
                 emitFailed(tr("Error: %1 returned an error code: %2\nError message: %3").arg(m_uploadUrl, error, message));
-                qCritical() << m_uploadUrl << " returned error: " << error;
-                qCritical() << "Error message: " << message;
-                qCritical() << "Response body: " << data;
+                qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned error: " << error;
+                qCCritical(taskUploadLogC) << getUid().toString() << "Error message: " << message;
+                qCCritical(taskUploadLogC) << getUid().toString() << "Response body: " << data;
                 return;
             }
         }
         else
         {
             emitFailed(tr("Error: %1 returned a malformed response body").arg(m_uploadUrl));
-            qCritical() << m_uploadUrl << " returned malformed response body: " << data;
+            qCCritical(taskUploadLogC) << getUid().toString() << m_uploadUrl << " returned malformed response body: " << data;
             return;
         }
         break;

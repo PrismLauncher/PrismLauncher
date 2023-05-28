@@ -11,6 +11,7 @@
 
 #include "net/ChecksumValidator.h"
 
+#include "net/NetJob.h"
 #include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
@@ -223,7 +224,7 @@ bool ModrinthCreationTask::createInstance()
     instance.setName(name());
     instance.saveNow();
 
-    m_files_job.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
+    m_files_job.reset(new NetJob(tr("Mod Download Modrinth"), APPLICATION->network()));
 
     auto root_modpack_path = FS::PathCombine(m_stagingPath, ".minecraft");
     auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
@@ -262,7 +263,11 @@ bool ModrinthCreationTask::createInstance()
         setError(reason);
     });
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { setProgress(current, total); });
+    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { 
+        setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
+        setProgress(current, total); 
+    });
+    connect(m_files_job.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propogateStepProgress);
 
     setStatus(tr("Downloading mods..."));
     m_files_job->start();

@@ -54,9 +54,14 @@ void CapeChange::setCape(QString& cape) {
     setStatus(tr("Equipping cape"));
 
     m_reply = shared_qobject_ptr<QNetworkReply>(rep);
-    connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
-    connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
-    connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    connect(rep, &QNetworkReply::uploadProgress, this, &CapeChange::setProgress);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+    connect(rep, &QNetworkReply::errorOccurred, this, &CapeChange::downloadError);
+#else
+    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &CapeChange::downloadError);
+#endif
+    connect(rep, &QNetworkReply::sslErrors, this, &CapeChange::sslErrors);
+    connect(rep, &QNetworkReply::finished, this, &CapeChange::downloadFinished);
 }
 
 void CapeChange::clearCape() {
@@ -68,13 +73,14 @@ void CapeChange::clearCape() {
     setStatus(tr("Removing cape"));
 
     m_reply = shared_qobject_ptr<QNetworkReply>(rep);
-    connect(rep, &QNetworkReply::uploadProgress, this, &Task::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(rep, &QNetworkReply::uploadProgress, this, &CapeChange::setProgress);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+    connect(rep, &QNetworkReply::errorOccurred, this, &CapeChange::downloadError);
 #else
-    connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &CapeChange::downloadError);
 #endif
-    connect(rep, SIGNAL(finished()), this, SLOT(downloadFinished()));
+    connect(rep, &QNetworkReply::sslErrors, this, &CapeChange::sslErrors);
+    connect(rep, &QNetworkReply::finished, this, &CapeChange::downloadFinished);
 }
 
 
@@ -93,6 +99,17 @@ void CapeChange::downloadError(QNetworkReply::NetworkError error)
     // error happened during download.
     qCritical() << "Network error: " << error;
     emitFailed(m_reply->errorString());
+}
+
+void CapeChange::sslErrors(const QList<QSslError>& errors)
+{
+    int i = 1;
+    for (auto error : errors) {
+        qCritical() << "Cape change SSL Error #" << i << " : " << error.errorString();
+        auto cert = error.certificate();
+        qCritical() << "Certificate in question:\n" << cert.toText();
+        i++;
+    }
 }
 
 void CapeChange::downloadFinished()

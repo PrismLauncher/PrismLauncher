@@ -76,7 +76,7 @@ public:
         Enable,
         Toggle
     };
-    ModFolderModel(const QString &dir, std::shared_ptr<const BaseInstance> instance, bool is_indexed = false, bool create_dir = true);
+    ModFolderModel(const QString &dir, BaseInstance* instance, bool is_indexed = false, bool create_dir = true);
 
     virtual QString id() const override { return "mods"; }
 

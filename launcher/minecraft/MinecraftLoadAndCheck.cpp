@@ -22,6 +22,7 @@ void MinecraftLoadAndCheck::executeTask()
     connect(m_task.get(), &Task::failed, this, &MinecraftLoadAndCheck::subtaskFailed);
     connect(m_task.get(), &Task::aborted, this, [this]{ subtaskFailed(tr("Aborted")); });
     connect(m_task.get(), &Task::progress, this, &MinecraftLoadAndCheck::progress);
+    connect(m_task.get(), &Task::stepProgress, this, &MinecraftLoadAndCheck::propogateStepProgress);
     connect(m_task.get(), &Task::status, this, &MinecraftLoadAndCheck::setStatus);
 }
 
