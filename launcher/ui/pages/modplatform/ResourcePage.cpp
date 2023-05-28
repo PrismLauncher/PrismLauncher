@@ -314,11 +314,9 @@ void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack::Ptr pack, ModPl
     m_parent_dialog->addResource(pack, version);
 }
 
-void ResourcePage::removeResourceFromDialog(ModPlatform::IndexedPack::Ptr pack)
+void ResourcePage::removeResourceFromDialog(const QString& pack_name)
 {
-    m_parent_dialog->removeResource(pack->name);
-    for (auto& ver : pack->versions)
-        ver.is_currently_selected = false;
+    m_parent_dialog->removeResource(pack_name);
 }
 
 void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
@@ -344,7 +342,7 @@ void ResourcePage::onResourceSelected()
 
     auto& version = current_pack->versions[m_selected_version_index];
     if (version.is_currently_selected)
-        removeResourceFromDialog(current_pack);
+        removeResourceFromDialog(current_pack->name);
     else
         addResourceToDialog(current_pack, version);
 
