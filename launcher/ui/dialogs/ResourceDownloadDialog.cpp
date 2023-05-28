@@ -93,7 +93,7 @@ void ResourceDownloadDialog::reject()
 // won't work with subclasses if we put it in this ctor.
 void ResourceDownloadDialog::initializeContainer()
 {
-    m_container = new PageContainer(this);
+    m_container = new PageContainer(this, {}, this);
     m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
     m_vertical_layout.addWidget(m_container);
@@ -153,9 +153,9 @@ ResourcePage* ResourceDownloadDialog::getSelectedPage()
     return m_selectedPage;
 }
 
-void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver)
+void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver)
 {
-    removeResource(pack.name);
+    removeResource(pack->name);
     m_selectedPage->addResourceToPage(pack, ver, getBaseModel());
     setButtonStatus();
 }

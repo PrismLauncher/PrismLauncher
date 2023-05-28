@@ -62,7 +62,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     bool selectPage(QString pageId);
     ResourcePage* getSelectedPage();
 
-    void addResource(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
+    void addResource(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
     void removeResource(const QString&);
 
     const QList<DownloadTaskPtr> getTasks();
@@ -132,8 +132,8 @@ class TexturePackDownloadDialog final : public ResourceDownloadDialog {
 
    public:
     explicit TexturePackDownloadDialog(QWidget* parent,
-                                        const std::shared_ptr<TexturePackFolderModel>& resource_packs,
-                                        BaseInstance* instance);
+                                       const std::shared_ptr<TexturePackFolderModel>& resource_packs,
+                                       BaseInstance* instance);
     ~TexturePackDownloadDialog() override = default;
 
     //: String that gets appended to the texture pack download dialog title ("Download " + resourcesString())
@@ -150,9 +150,7 @@ class ShaderPackDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
-    explicit ShaderPackDownloadDialog(QWidget* parent,
-                                      const std::shared_ptr<ShaderPackFolderModel>& shader_packs,
-                                      BaseInstance* instance);
+    explicit ShaderPackDownloadDialog(QWidget* parent, const std::shared_ptr<ShaderPackFolderModel>& shader_packs, BaseInstance* instance);
     ~ShaderPackDownloadDialog() override = default;
 
     //: String that gets appended to the shader pack download dialog title ("Download " + resourcesString())

@@ -87,7 +87,9 @@ PageContainer::PageContainer(BasePageProvider *pageProvider, QString defaultId,
     auto pages = pageProvider->getPages();
     for (auto page : pages)
     {
-        page->stackIndex = m_pageStack->addWidget(dynamic_cast<QWidget *>(page));
+        auto widget = dynamic_cast<QWidget *>(page);
+        widget->setParent(this);
+        page->stackIndex = m_pageStack->addWidget(widget);
         page->listIndex = counter;
         page->setParentContainer(this);
         counter++;

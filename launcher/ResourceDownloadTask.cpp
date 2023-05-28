@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
-/* 
-*  Prism Launcher - Minecraft Launcher
-*  Copyright (c) 2022-2023 flowln <flowlnlnln@gmail.com>
-*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
-*
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, version 3.
-*
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-* 
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2022-2023 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #include "ResourceDownloadTask.h"
 
@@ -24,7 +24,7 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 
-ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack pack,
+ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            ModPlatform::IndexedVersion version,
                                            const std::shared_ptr<ResourceFolderModel> packs,
                                            bool is_indexed,
@@ -32,7 +32,7 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack pack,
     : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs), m_custom_target_folder(custom_target_folder)
 {
     if (auto model = dynamic_cast<ModFolderModel*>(m_pack_model.get()); model && is_indexed) {
-        m_update_task.reset(new LocalModUpdateTask(model->indexDir(), m_pack, m_pack_version));
+        m_update_task.reset(new LocalModUpdateTask(model->indexDir(), *m_pack, m_pack_version));
         connect(m_update_task.get(), &LocalModUpdateTask::hasOldMod, this, &ResourceDownloadTask::hasOldResource);
 
         addTask(m_update_task);

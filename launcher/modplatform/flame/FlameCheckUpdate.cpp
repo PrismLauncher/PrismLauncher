@@ -3,6 +3,7 @@
 #include "FlameModIndex.h"
 
 #include <MurmurHash2.h>
+#include <memory>
 
 #include "FileSystem.h"
 #include "Json.h"
@@ -156,15 +157,15 @@ void FlameCheckUpdate::executeTask()
 
         if (!latest_ver.hash.isEmpty() && (mod->metadata()->hash != latest_ver.hash || mod->status() == ModStatus::NotInstalled)) {
             // Fake pack with the necessary info to pass to the download task :)
-            ModPlatform::IndexedPack pack;
-            pack.name = mod->name();
-            pack.slug = mod->metadata()->slug;
-            pack.addonId = mod->metadata()->project_id;
-            pack.websiteUrl = mod->homeurl();
+            auto pack = std::make_shared<ModPlatform::IndexedPack>();
+            pack->name = mod->name();
+            pack->slug = mod->metadata()->slug;
+            pack->addonId = mod->metadata()->project_id;
+            pack->websiteUrl = mod->homeurl();
             for (auto& author : mod->authors())
-                pack.authors.append({ author });
-            pack.description = mod->description();
-            pack.provider = ModPlatform::ResourceProvider::FLAME;
+                pack->authors.append({ author });
+            pack->description = mod->description();
+            pack->provider = ModPlatform::ResourceProvider::FLAME;
 
             auto old_version = mod->version();
             if (old_version.isEmpty() && mod->status() != ModStatus::NotInstalled) {
@@ -173,7 +174,7 @@ void FlameCheckUpdate::executeTask()
             }
 
             auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver, m_mods_folder);
-            m_updatable.emplace_back(pack.name, mod->metadata()->hash, old_version, latest_ver.version,
+            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver.version,
                                      api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
                                      ModPlatform::ResourceProvider::FLAME, download_task);
         }

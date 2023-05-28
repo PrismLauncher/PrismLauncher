@@ -122,8 +122,8 @@ void ModPage::updateVersionList()
     QString mcVersion = packProfile->getComponentVersion("net.minecraft");
 
     auto current_pack = getCurrentPack();
-    for (int i = 0; i < current_pack.versions.size(); i++) {
-        auto version = current_pack.versions[i];
+    for (int i = 0; i < current_pack->versions.size(); i++) {
+        auto version = current_pack->versions[i];
         bool valid = false;
         for (auto& mcVer : m_filter->versions) {
             // NOTE: Flame doesn't care about loader, so passing it changes nothing.
@@ -145,7 +145,7 @@ void ModPage::updateVersionList()
     updateSelectionButton();
 }
 
-void ModPage::addResourceToPage(ModPlatform::IndexedPack& pack,
+void ModPage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                 ModPlatform::IndexedVersion& version,
                                 const std::shared_ptr<ResourceFolderModel> base_model)
 {

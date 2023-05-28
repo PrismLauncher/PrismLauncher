@@ -90,9 +90,7 @@ slots:
 
             QEventLoop loop;
 
-            InstancePtr instance;
-
-            ModFolderModel m(tempDir.path(), instance, true);
+            ModFolderModel m(tempDir.path(), nullptr, true);
 
             connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
 
@@ -116,8 +114,7 @@ slots:
             QString folder = source + '/';
             QTemporaryDir tempDir;
             QEventLoop loop;
-            InstancePtr instance;
-            ModFolderModel m(tempDir.path(), instance, true);
+            ModFolderModel m(tempDir.path(), nullptr, true);
 
             connect(&m, &ModFolderModel::updateFinished, &loop, &QEventLoop::quit);
 
@@ -140,8 +137,7 @@ slots:
     void test_addFromWatch()
     {
         QString source = QFINDTESTDATA("testdata/ResourceFolderModel");
-        InstancePtr instance;
-        ModFolderModel model(source, instance);
+        ModFolderModel model(source, nullptr);
 
         QCOMPARE(model.size(), 0);
 
@@ -161,9 +157,7 @@ slots:
         QString file_mod = QFINDTESTDATA("testdata/ResourceFolderModel/supercoolmod.jar");
 
         QTemporaryDir tmp;
-        InstancePtr instance;
-
-        ResourceFolderModel model(QDir(tmp.path()), instance);
+        ResourceFolderModel model(QDir(tmp.path()), nullptr);
 
         QCOMPARE(model.size(), 0);
 
@@ -214,8 +208,7 @@ slots:
         QString file_mod = QFINDTESTDATA("testdata/ResourceFolderModel/supercoolmod.jar");
 
         QTemporaryDir tmp;
-        InstancePtr instance;
-        ResourceFolderModel model(tmp.path(), instance);
+        ResourceFolderModel model(tmp.path(), nullptr);
 
         QCOMPARE(model.size(), 0);
 

@@ -23,6 +23,7 @@
 #include <QString>
 #include <QVariant>
 #include <QVector>
+#include <memory>
 
 class QIODevice;
 
@@ -82,6 +83,8 @@ struct ExtraPackData {
 };
 
 struct IndexedPack {
+    using Ptr = std::shared_ptr<IndexedPack>;
+
     QVariant addonId;
     ResourceProvider provider;
     QString name;

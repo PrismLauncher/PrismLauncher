@@ -60,8 +60,8 @@ class ResourcePage : public QWidget, public BasePage {
     /** Programatically set the term in the search bar. */
     void setSearchTerm(QString);
 
-    [[nodiscard]] bool setCurrentPack(ModPlatform::IndexedPack);
-    [[nodiscard]] auto getCurrentPack() const -> ModPlatform::IndexedPack;
+    [[nodiscard]] bool setCurrentPack(ModPlatform::IndexedPack::Ptr);
+    [[nodiscard]] auto getCurrentPack() const -> ModPlatform::IndexedPack::Ptr;
     [[nodiscard]] auto getDialog() const -> const ResourceDownloadDialog* { return m_parent_dialog; }
     [[nodiscard]] auto getModel() const -> ResourceModel* { return m_model; }
 
@@ -75,10 +75,10 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void updateSelectionButton();
     virtual void updateVersionList();
 
-    void addResourceToDialog(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
-    void removeResourceFromDialog(ModPlatform::IndexedPack& pack);
+    void addResourceToDialog(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
+    void removeResourceFromDialog(ModPlatform::IndexedPack::Ptr pack);
     virtual void removeResourceFromPage(const QString& name);
-    virtual void addResourceToPage(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&, const std::shared_ptr<ResourceFolderModel>);
+    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, const std::shared_ptr<ResourceFolderModel>);
 
     QList<DownloadTaskPtr> selectedPacks() { return m_model->selectedPacks(); }
     bool hasSelectedPacks() { return !(m_model->selectedPacks().isEmpty()); }
