@@ -1085,31 +1085,31 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
                 QString resource_name;
                 
-
                 connect(job.get(), &Task::failed, this,
                         [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId,  &dl_url, &resource_name] {
+                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &resource_name] {
                     qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                     auto doc = Json::requireDocument(*array);
+                    auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
-                    auto fileName = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "fileName");
-                   
+                    auto fileName = Json::ensureString(data, "fileName");
+
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    dl_url = QUrl(Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl",
-                                                            "", "downloadUrl"));
+                    dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
                     if (!dl_url.isValid()) {
-                        CustomMessageBox::selectable(this, tr("Error"), tr("The modpack, mod, or resource is blocked for third-parties! Please download it manually at: \n%1").arg(dl_url.toDisplayString()),
-                                                        QMessageBox::Critical)
+                        CustomMessageBox::selectable(
+                            this, tr("Error"),
+                            tr("The modpack, mod, or resource %1 is blocked for third-parties! Please download it manually.").arg(fileName),
+                            QMessageBox::Critical)
                             ->show();
                         return;
                     }
 
                     QFileInfo dl_file(dl_url.fileName());
-                    resource_name = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "displayName",
-                                                            dl_file.completeBaseName(), "displayName");
+                    resource_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
                 });
-                
+
                 { // drop stack
                     ProgressDialog dlUrlDialod(this);
                     dlUrlDialod.setSkipButton(true, tr("Abort"));

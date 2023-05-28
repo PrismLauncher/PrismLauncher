@@ -144,23 +144,24 @@ void ImportPage::updateState()
             connect(job.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
                 qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                 auto doc = Json::requireDocument(*array);
+                auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
                 // No way to find out if it's a mod or a modpack before here
                 // And also we need to check if it ends with .zip, instead of any better way
-                auto fileName = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "fileName");
+                auto fileName = Json::ensureString(data, "fileName");
                 if (fileName.endsWith(".zip")) {
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    auto dl_url = QUrl(
-                        Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "downloadUrl", "", "downloadUrl"));
+                    auto dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
                     if (!dl_url.isValid()) {
-                        CustomMessageBox::selectable(this, tr("Error"), tr("The modpack is blocked ! Please download it manually"),
-                                                     QMessageBox::Critical)
+                        CustomMessageBox::selectable(
+                            this, tr("Error"),
+                            tr("The modpack %1 is blocked for third-parties! Please download it manually.").arg(fileName),
+                            QMessageBox::Critical)
                             ->show();
                         return;
                     }
 
                     QFileInfo dl_file(dl_url.fileName());
-                    QString pack_name = Json::ensureString(Json::ensureObject(Json::ensureObject(doc.object()), "data"), "displayName",
-                                                           dl_file.completeBaseName(), "displayName");
+                    QString pack_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
 
                     QMap<QString, QString> extra_info;
                     extra_info.insert("pack_id", addonId);
@@ -201,7 +202,7 @@ void ImportPage::setUrl(const QString& url)
 }
 
 void ImportPage::setExtraInfo(const QMap<QString, QString>& extra_info) {
-    m_extra_info = QMap(extra_info); // copy
+    m_extra_info = extra_info;
     updateState();
 }
 
