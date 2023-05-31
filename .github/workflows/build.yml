@@ -375,11 +375,13 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --install ${{ env.BUILD_DIR }}
+          Copy-Item ${{ env.BUILD_DIR }}/install_manifest.txt ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
           cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build_type }}
+          Copy-Item ${{ env.BUILD_DIR }}/install_manifest.txt ${{ env.INSTALL_DIR }}/manifest.txt
 
           cd ${{ env.INSTALL_DIR }}
           if ("${{ matrix.qt_ver }}" -eq "5")
@@ -418,7 +420,7 @@ jobs:
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
-          cat ${{ env.BUILD_DIR }}/install_manifest.txt >> ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
+          cat ${{ env.BUILD_DIR }}/install_manifest_portable.txt >> ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
 
       - name: Package (Windows, installer)
         if: runner.os == 'Windows'
