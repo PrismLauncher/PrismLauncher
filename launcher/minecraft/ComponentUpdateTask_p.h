@@ -4,7 +4,6 @@
 #include <QString>
 #include <QList>
 #include "net/Mode.h"
-#include "ComponentUpdateTask.h"
 
 class PackProfile;
 
