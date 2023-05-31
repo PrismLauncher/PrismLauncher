@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -44,6 +44,8 @@
 
 #include <QDebug>
 
+#include "net/Logging.h"
+
 auto MetaEntry::getFullPath() -> QString
 {
     // FIXME: make local?
@@ -55,7 +57,7 @@ HttpMetaCache::HttpMetaCache(QString path) : QObject(), m_index_file(path)
     saveBatchingTimer.setSingleShot(true);
     saveBatchingTimer.setTimerType(Qt::VeryCoarseTimer);
 
-    connect(&saveBatchingTimer, SIGNAL(timeout()), SLOT(SaveNow()));
+    connect(&saveBatchingTimer, &QTimer::timeout, this, &HttpMetaCache::SaveNow);
 }
 
 HttpMetaCache::~HttpMetaCache()
@@ -124,7 +126,7 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
     // Get rid of old entries, to prevent cache problems
     auto current_time = QDateTime::currentSecsSinceEpoch();
     if (entry->isExpired(current_time - ( file_last_changed / 1000 ))) {
-        qWarning() << "Removing cache entry because of old age!";
+        qCWarning(taskNetLogC) << "[HttpMetaCache]" << "Removing cache entry because of old age!";
         selected_base.entry_list.remove(resource_path);
         return staleEntry(base, resource_path);
     }
@@ -137,12 +139,12 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
 auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
 {
     if (!m_entries.contains(stale_entry->m_baseId)) {
-        qCritical() << "Cannot add entry with unknown base: " << stale_entry->m_baseId.toLocal8Bit();
+        qCCritical(taskHttpMetaCacheLogC) << "Cannot add entry with unknown base: " << stale_entry->m_baseId.toLocal8Bit();
         return false;
     }
 
     if (stale_entry->m_stale) {
-        qCritical() << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
+        qCCritical(taskHttpMetaCacheLogC) << "Cannot add stale entry: " << stale_entry->getFullPath().toLocal8Bit();
         return false;
     }
 
@@ -166,10 +168,10 @@ void HttpMetaCache::evictAll()
 {
     for (QString& base : m_entries.keys()) {
         EntryMap& map = m_entries[base];
-        qDebug() << "Evicting base" << base;
+        qCDebug(taskHttpMetaCacheLogC) << "Evicting base" << base;
         for (MetaEntryPtr entry : map.entry_list) {
             if (!evictEntry(entry))
-                qWarning() << "Unexpected missing cache entry" << entry->m_basePath;
+                qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
         }
     }
 }
@@ -267,7 +269,7 @@ void HttpMetaCache::SaveNow()
     if (m_index_file.isNull())
         return;
 
-    qDebug() << "[HttpMetaCache]" << "Saving metacache with" << m_entries.size() << "entries";
+    qCDebug(taskHttpMetaCacheLogC) << "Saving metacache with" << m_entries.size() << "entries";
 
     QJsonObject toplevel;
     Json::writeString(toplevel, "version", "1");
@@ -302,6 +304,6 @@ void HttpMetaCache::SaveNow()
     try {
         Json::write(toplevel, m_index_file);
     } catch (const Exception& e) {
-        qWarning() << e.what();
+        qCWarning(taskHttpMetaCacheLogC) << "Error writing cache:" << e.what();
     }
 }

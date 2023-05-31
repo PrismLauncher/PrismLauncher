@@ -39,6 +39,8 @@
 #include <QFileInfo>
 #include <QList>
 
+#include <optional>
+
 #include "Resource.h"
 #include "ModDetails.h"
 
@@ -61,6 +63,7 @@ public:
     auto description() const -> QString;
     auto authors()     const -> QStringList;
     auto status()      const -> ModStatus;
+    auto provider()    const -> std::optional<QString>;
 
     auto metadata() -> std::shared_ptr<Metadata::ModStruct>;
     auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
@@ -68,6 +71,9 @@ public:
     void setStatus(ModStatus status);
     void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
     void setMetadata(const Metadata::ModStruct& metadata) { setMetadata(std::make_shared<Metadata::ModStruct>(metadata)); }
+    void setDetails(const ModDetails& details);
+
+    bool valid() const override;
 
     [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;

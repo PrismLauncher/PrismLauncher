@@ -1,0 +1,177 @@
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+/*
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
+#pragma once
+
+#include <QDebug>
+#include <QList>
+#include <QString>
+
+#include <list>
+#include <optional>
+
+#include "../Version.h"
+
+#include "modplatform/ModIndex.h"
+#include "tasks/Task.h"
+
+/* Simple class with a common interface for interacting with APIs */
+class ResourceAPI {
+   public:
+    virtual ~ResourceAPI() = default;
+
+    enum ModLoaderType { Forge = 1 << 0, Cauldron = 1 << 1, LiteLoader = 1 << 2, Fabric = 1 << 3, Quilt = 1 << 4 };
+    Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
+
+    struct SortingMethod {
+        // The index of the sorting method. Used to allow for arbitrary ordering in the list of methods.
+        // Used by Flame in the API request.
+        unsigned int index;
+        // The real name of the sorting, as used in the respective API specification.
+        // Used by Modrinth in the API request.
+        QString name;
+        // The human-readable name of the sorting, used for display in the UI.
+        QString readable_name;
+    };
+
+    struct SearchArgs {
+        ModPlatform::ResourceType type{};
+        int offset = 0;
+
+        std::optional<QString> search;
+        std::optional<SortingMethod> sorting;
+        std::optional<ModLoaderTypes> loaders;
+        std::optional<std::list<Version> > versions;
+    };
+    struct SearchCallbacks {
+        std::function<void(QJsonDocument&)> on_succeed;
+        std::function<void(QString const& reason, int network_error_code)> on_fail;
+        std::function<void()> on_abort;
+    };
+
+    struct VersionSearchArgs {
+        ModPlatform::IndexedPack pack;
+
+        std::optional<std::list<Version> > mcVersions;
+        std::optional<ModLoaderTypes> loaders;
+
+        VersionSearchArgs(VersionSearchArgs const&) = default;
+        void operator=(VersionSearchArgs other)
+        {
+            pack = other.pack;
+            mcVersions = other.mcVersions;
+            loaders = other.loaders;
+        }
+    };
+    struct VersionSearchCallbacks {
+        std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
+    };
+
+    struct ProjectInfoArgs {
+        ModPlatform::IndexedPack pack;
+
+        ProjectInfoArgs(ProjectInfoArgs const&) = default;
+        void operator=(ProjectInfoArgs other) { pack = other.pack; }
+    };
+    struct ProjectInfoCallbacks {
+        std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
+    };
+
+   public:
+    /** Gets a list of available sorting methods for this API. */
+    [[nodiscard]] virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
+
+   public slots:
+    [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
+    {
+        qWarning() << "TODO";
+        return nullptr;
+    }
+    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, QByteArray* response) const
+    {
+        qWarning() << "TODO";
+        return nullptr;
+    }
+    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const
+    {
+        qWarning() << "TODO";
+        return nullptr;
+    }
+
+    [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
+    {
+        qWarning() << "TODO";
+        return nullptr;
+    }
+    [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
+    {
+        qWarning() << "TODO";
+        return nullptr;
+    }
+
+    static auto getModLoaderString(ModLoaderType type) -> const QString
+    {
+        switch (type) {
+            case Forge:
+                return "forge";
+            case Cauldron:
+                return "cauldron";
+            case LiteLoader:
+                return "liteloader";
+            case Fabric:
+                return "fabric";
+            case Quilt:
+                return "quilt";
+            default:
+                break;
+        }
+        return "";
+    }
+
+   protected:
+    [[nodiscard]] inline QString debugName() const { return "External resource API"; }
+
+    [[nodiscard]] inline auto getGameVersionsString(std::list<Version> mcVersions) const -> QString
+    {
+        QString s;
+        for (auto& ver : mcVersions) {
+            s += QString("\"%1\",").arg(ver.toString());
+        }
+        s.remove(s.length() - 1, 1);  // remove last comma
+        return s;
+    }
+};

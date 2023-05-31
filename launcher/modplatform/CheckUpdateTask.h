@@ -1,18 +1,18 @@
 #pragma once
 
 #include "minecraft/mod/Mod.h"
-#include "modplatform/ModAPI.h"
+#include "modplatform/ResourceAPI.h"
 #include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
 
-class ModDownloadTask;
+class ResourceDownloadTask;
 class ModFolderModel;
 
 class CheckUpdateTask : public Task {
     Q_OBJECT
 
    public:
-    CheckUpdateTask(QList<Mod*>& mods, std::list<Version>& mcVersions, ModAPI::ModLoaderTypes loaders, std::shared_ptr<ModFolderModel> mods_folder)
+    CheckUpdateTask(QList<Mod*>& mods, std::list<Version>& mcVersions, std::optional<ResourceAPI::ModLoaderTypes> loaders, std::shared_ptr<ModFolderModel> mods_folder)
         : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder) {};
 
     struct UpdatableMod {
@@ -21,11 +21,11 @@ class CheckUpdateTask : public Task {
         QString old_version;
         QString new_version;
         QString changelog;
-        ModPlatform::Provider provider;
-        ModDownloadTask* download;
+        ModPlatform::ResourceProvider provider;
+        shared_qobject_ptr<ResourceDownloadTask> download;
 
        public:
-        UpdatableMod(QString name, QString old_h, QString old_v, QString new_v, QString changelog, ModPlatform::Provider p, ModDownloadTask* t)
+        UpdatableMod(QString name, QString old_h, QString old_v, QString new_v, QString changelog, ModPlatform::ResourceProvider p, shared_qobject_ptr<ResourceDownloadTask> t)
             : name(name), old_hash(old_h), old_version(old_v), new_version(new_v), changelog(changelog), provider(p), download(t)
         {}
     };
@@ -44,7 +44,7 @@ class CheckUpdateTask : public Task {
    protected:
     QList<Mod*>& m_mods;
     std::list<Version>& m_game_versions;
-    ModAPI::ModLoaderTypes m_loaders;
+    std::optional<ResourceAPI::ModLoaderTypes> m_loaders;
     std::shared_ptr<ModFolderModel> m_mods_folder;
 
     std::vector<UpdatableMod> m_updatable;

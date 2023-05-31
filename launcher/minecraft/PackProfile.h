@@ -1,7 +1,10 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -49,7 +52,7 @@
 #include "BaseVersion.h"
 #include "MojangDownloadInfo.h"
 #include "net/Mode.h"
-#include "modplatform/ModAPI.h"
+#include "modplatform/ResourceAPI.h"
 
 class MinecraftInstance;
 struct PackProfileData;
@@ -85,6 +88,9 @@ public:
 
     /// install a jar/zip as a replacement for the main jar
     void installCustomJar(QString selectedFile);
+
+    /// install MMC/Prism component files
+    bool installComponents(QStringList selectedFiles);
 
     /// install Java agent files
     void installAgents(QStringList selectedFiles);
@@ -136,16 +142,16 @@ signals:
 
 public:
     /// get the profile component by id
-    Component * getComponent(const QString &id);
+    ComponentPtr getComponent(const QString &id);
 
     /// get the profile component by index
-    Component * getComponent(int index);
+    ComponentPtr getComponent(int index);
 
     /// Add the component to the internal list of patches
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
 
-    ModAPI::ModLoaderTypes getModLoaders();
+    std::optional<ResourceAPI::ModLoaderTypes> getModLoaders();
 
 private:
     void scheduleSave();

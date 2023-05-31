@@ -40,6 +40,8 @@ void ReplyList::remove(QNetworkReply *reply) {
     if (o2Reply) {
         o2Reply->stop();
         (void)replies_.removeOne(o2Reply);
+        // we took ownership, we must free
+        delete o2Reply;
     }
 }
 

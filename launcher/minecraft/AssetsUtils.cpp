@@ -340,7 +340,7 @@ QString AssetObject::getRelPath()
 
 NetJob::Ptr AssetsIndex::getDownloadJob()
 {
-    auto job = new NetJob(QObject::tr("Assets for %1").arg(id), APPLICATION->network());
+    auto job = makeShared<NetJob>(QObject::tr("Assets for %1").arg(id), APPLICATION->network());
     for (auto &object : objects.values())
     {
         auto dl = object.getDownloadAction();

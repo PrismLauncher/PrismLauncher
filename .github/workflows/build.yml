@@ -15,6 +15,12 @@ on:
       SPARKLE_ED25519_KEY:
         description: Private key for signing Sparkle updates
         required: false
+      WINDOWS_CODESIGN_CERT:
+        description: Certificate for signing Windows builds
+        required: false
+      WINDOWS_CODESIGN_PASSWORD:
+        description: Password for signing Windows builds
+        required: false
       CACHIX_AUTH_TOKEN:
         description: Private token for authenticating against Cachix cache
         required: false
@@ -40,6 +46,7 @@ jobs:
           - os: windows-2022
             name: "Windows-MinGW-w64"
             msystem: clang64
+            vcvars_arch: 'amd64_x86'
 
           - os: windows-2022
             name: "Windows-MSVC-Legacy"
@@ -61,7 +68,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.4.0'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -73,7 +80,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.4.0'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -83,7 +90,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
-            qt_version: '6.3.0'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -105,6 +112,7 @@ jobs:
       INSTALL_APPIMAGE_DIR: "install-appdir"
       BUILD_DIR: "build"
       CCACHE_VAR: ""
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
 
     steps:
       ##
@@ -135,6 +143,7 @@ jobs:
             quazip-qt6:p
             ccache:p
             qt6-5compat:p
+            cmark:p
 
       - name: Force newer ccache
         if: runner.os == 'Windows' && matrix.msystem == '' && inputs.build_type == 'Debug'
@@ -143,9 +152,18 @@ jobs:
 
       - name: Setup ccache
         if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
-        uses: hendrikmuhs/ccache-action@v1.2.5
+        uses: hendrikmuhs/ccache-action@v1.2.9
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
+
+      - name: Retrieve ccache cache (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
+        uses: actions/cache@v3.3.1
+        with:
+          path: '${{ github.workspace }}\.ccache'
+          key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
+          restore-keys: |
+              ${{ matrix.os }}-mingw-w64-ccache
 
       - name: Setup ccache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
@@ -162,15 +180,6 @@ jobs:
         shell: bash
         run: |
           echo "CCACHE_VAR=ccache" >> $GITHUB_ENV
-
-      - name: Retrieve ccache cache (Windows MinGW-w64)
-        if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
-        uses: actions/cache@v3.2.1
-        with:
-          path: '${{ github.workspace }}\.ccache'
-          key: ${{ matrix.os }}-mingw-w64
-          restore-keys: |
-              ${{ matrix.os }}-mingw-w64
 
       - name: Set short version
         shell: bash
@@ -199,6 +208,8 @@ jobs:
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         uses: jurplel/install-qt-action@v3
         with:
+           aqtversion: '==3.1.*'
+           py7zrversion: '>=0.20.2'
            version: ${{ matrix.qt_version }}
            host: 'windows'
            target: 'desktop'
@@ -214,6 +225,8 @@ jobs:
         if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
+           aqtversion: '==3.1.*'
+           py7zrversion: '>=0.20.2'
            version: ${{ matrix.qt_version }}
            host: ${{ matrix.qt_host }}
            target: 'desktop'
@@ -223,7 +236,7 @@ jobs:
            cache: ${{ inputs.is_qt_cached }}
 
       - name: Install MSVC (Windows MSVC)
-        if: runner.os == 'Windows' && matrix.msystem == ''
+        if: runner.os == 'Windows'  # We want this for MinGW builds as well, as we need SignTool
         uses: ilammy/msvc-dev-cmd@v1
         with:
           vsversion: 2022
@@ -375,6 +388,23 @@ jobs:
             Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
           }
 
+      - name: Fetch codesign certificate (Windows)
+        if: runner.os == 'Windows'
+        shell: bash  # yes, we are not using MSYS2 or PowerShell here
+        run: |
+          echo '${{ secrets.WINDOWS_CODESIGN_CERT }}' | base64 --decode > codesign.pfx
+
+      - name: Sign executable (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          if (Get-Content ./codesign.pfx){
+            cd ${{ env.INSTALL_DIR }}
+            # We ship the exact same executable for portable and non-portable editions, so signing just once is fine
+            SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com prismlauncher.exe prismlauncher_filelink.exe
+          } else {
+            ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+          }
+
       - name: Package (Windows MinGW-w64, portable)
         if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
@@ -393,6 +423,15 @@ jobs:
         run: |
           cd ${{ env.INSTALL_DIR }}
           makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
+
+      - name: Sign installer (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          if (Get-Content ./codesign.pfx){
+            SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com PrismLauncher-Setup.exe
+          } else {
+            ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+          }
 
       - name: Package (Linux)
         if: runner.os == 'Linux'
@@ -508,30 +547,12 @@ jobs:
         with:
           name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
           path: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
-  snap:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        if: inputs.build_type == 'Debug'
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-      - name: Set short version
-        shell: bash
-        if: inputs.build_type == 'Debug'
+
+      - name: ccache stats (Windows MinGW-w64)
+        if: runner.os == 'Windows' && matrix.msystem != ''
+        shell: msys2 {0}
         run: |
-          ver_short=`git rev-parse --short HEAD`
-          echo "VERSION=$ver_short" >> $GITHUB_ENV
-      - name: Package Snap (Linux)
-        id: snapcraft
-        if: inputs.build_type == 'Debug'
-        uses: snapcore/action-build@v1
-      - name: Upload Snap (Linux)
-        if: inputs.build_type == 'Debug'
-        uses: actions/upload-artifact@v3
-        with:
-          name: prismlauncher_${{ env.VERSION }}_amd64.snap
-          path: ${{ steps.snapcraft.outputs.snap }}
+          ccache -s
 
   flatpak:
     runs-on: ubuntu-latest
@@ -546,11 +567,10 @@ jobs:
           submodules: 'true'
       - name: Build Flatpak (Linux)
         if: inputs.build_type == 'Debug'
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v4
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
-          cache-key: flatpak-${{ github.sha }}-x86_64
 
   nix:
     runs-on: ubuntu-latest
@@ -567,7 +587,7 @@ jobs:
           submodules: 'true'
       - name: Install nix
         if: inputs.build_type == 'Debug'
-        uses: cachix/install-nix-action@v18
+        uses: cachix/install-nix-action@v21
         with:
           install_url: https://nixos.org/nix/install
           extra_nix_config: |

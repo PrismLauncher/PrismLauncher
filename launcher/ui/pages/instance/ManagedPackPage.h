@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 flow <flowlnlnln@gmail.com>
+// SPDX-FileCopyrightText: 2022 flowln <flowlnlnln@gmail.com>
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
@@ -11,6 +11,8 @@
 
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlamePackIndex.h"
+
+#include "net/NetJob.h"
 
 #include "ui/pages/BasePage.h"
 

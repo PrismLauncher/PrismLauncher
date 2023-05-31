@@ -1,8 +1,11 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -162,7 +165,7 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     auto proxy = new IconProxy(ui->packageView);
     proxy->setSourceModel(m_profile.get());
 
-    m_filterModel = new QSortFilterProxyModel();
+    m_filterModel = new QSortFilterProxyModel(this);
     m_filterModel->setDynamicSortFilter(true);
     m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
@@ -282,6 +285,7 @@ void VersionPage::updateButtons(int row)
     ui->actionRevert->setEnabled(controlsEnabled && patch && patch->isRevertible());
     ui->actionDownload_All->setEnabled(controlsEnabled);
     ui->actionAdd_Empty->setEnabled(controlsEnabled);
+    ui->actionImport_Components->setEnabled(controlsEnabled);
     ui->actionReload->setEnabled(controlsEnabled);
     ui->actionInstall_mods->setEnabled(controlsEnabled);
     ui->actionReplace_Minecraft_jar->setEnabled(controlsEnabled);
@@ -318,13 +322,29 @@ void VersionPage::on_actionReload_triggered()
 
 void VersionPage::on_actionRemove_triggered()
 {
-    if (ui->packageView->currentIndex().isValid())
+    if (!ui->packageView->currentIndex().isValid())
     {
-        // FIXME: use actual model, not reloading.
-        if (!m_profile->remove(ui->packageView->currentIndex().row()))
-        {
-            QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
-        }
+        return;
+    }
+    int index = ui->packageView->currentIndex().row();
+    auto component = m_profile->getComponent(index);
+    if (component->isCustom())
+    {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
+                                                     tr("You are about to remove \"%1\".\n"
+                                                        "This is permanent and will completely remove the custom component.\n\n"
+                                                        "Are you sure?")
+                                                         .arg(component->getName()),
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+    // FIXME: use actual model, not reloading.
+    if (!m_profile->remove(index))
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
     }
     updateButtons();
     reloadPackProfile();
@@ -359,6 +379,20 @@ void VersionPage::on_actionReplace_Minecraft_jar_triggered()
     updateButtons();
 }
 
+void VersionPage::on_actionImport_Components_triggered()
+{
+    QStringList list = GuiUtil::BrowseForFiles("component", tr("Select components"), tr("Components (*.json)"),
+                                               APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+
+    if (!list.isEmpty()) {
+        if (!m_profile->installComponents(list)) {
+            QMessageBox::warning(this, tr("Failed to import components"),
+                                 tr("Some components could not be imported. Check logs for details"));
+        }
+    }
+
+    updateButtons();
+}
 
 void VersionPage::on_actionAdd_Agents_triggered()
 {
@@ -467,7 +501,7 @@ void VersionPage::on_actionDownload_All_triggered()
         return;
     }
     ProgressDialog tDialog(this);
-    connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
+    connect(updateTask.get(), &Task::failed, this, &VersionPage::onGameUpdateError);
     // FIXME: unused return value
     tDialog.execWithTask(updateTask.get());
     updateButtons();
@@ -644,7 +678,7 @@ void VersionPage::onGameUpdateError(QString error)
     CustomMessageBox::selectable(this, tr("Error updating instance"), error, QMessageBox::Warning)->show();
 }
 
-Component * VersionPage::current()
+ComponentPtr VersionPage::current()
 {
     auto row = currentRow();
     if(row < 0)
@@ -707,6 +741,19 @@ void VersionPage::on_actionRevert_triggered()
     {
         return;
     }
+    auto component = m_profile->getComponent(version);
+
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Reversion"),
+                                                 tr("You are about to revert \"%1\".\n"
+                                                    "This is permanent and will completely revert your customizations.\n\n"
+                                                    "Are you sure?")
+                                                     .arg(component->getName()),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+
+    if (response != QMessageBox::Yes)
+        return;
+
     if(!m_profile->revertToBase(version))
     {
         // TODO: some error box here

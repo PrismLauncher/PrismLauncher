@@ -69,7 +69,7 @@ void PackInstallTask::downloadPack()
 
     archivePath = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
 
-    netJobContainer = new NetJob("Download FTB Pack", m_network);
+    netJobContainer.reset(new NetJob("Download FTB Pack", m_network));
     QString url;
     if (m_pack.type == PackType::Private) {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "privatepacks/%1").arg(archivePath);
@@ -81,6 +81,7 @@ void PackInstallTask::downloadPack()
     connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
     connect(netJobContainer.get(), &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
+    connect(netJobContainer.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
     connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
 
     netJobContainer->start();

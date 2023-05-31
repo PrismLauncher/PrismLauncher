@@ -14,6 +14,9 @@
  */
 
 #include "ModListView.h"
+
+#include "minecraft/mod/ModFolderModel.h"
+
 #include <QHeaderView>
 #include <QMouseEvent>
 #include <QPainter>
@@ -61,5 +64,18 @@ void ModListView::setModel ( QAbstractItemModel* model )
         head->setSectionResizeMode(0, QHeaderView::Stretch);
         for(int i = 1; i < head->count(); i++)
             head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+    }
+
+    auto real_model = model;
+    if (auto proxy_model = dynamic_cast<QSortFilterProxyModel*>(model); proxy_model)
+        real_model = proxy_model->sourceModel();
+
+    if (auto mod_model = dynamic_cast<ModFolderModel*>(real_model); mod_model) {
+        connect(mod_model, &ModFolderModel::updateFinished, this, [this, mod_model]{
+            auto mods = mod_model->allMods();
+            // Hide the 'Provider' column if no mod has a defined provider!
+            setColumnHidden(ModFolderModel::Columns::ProviderColumn,
+                    std::none_of(mods.constBegin(), mods.constEnd(), [](auto const mod){ return mod->provider().has_value(); }));
+        });
     }
 }

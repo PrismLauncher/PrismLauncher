@@ -2,9 +2,10 @@
 
 #include <QNetworkRequest>
 
+#include "Logging.h"
+#include "minecraft/auth/AccountTask.h"
 #include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
-#include "minecraft/auth/AccountTask.h"
 #include "net/NetUtils.h"
 
 LauncherLoginStep::LauncherLoginStep(AccountData* data) : AuthStep(data) {
@@ -51,14 +52,10 @@ void LauncherLoginStep::onRequestDone(
     auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
     requestor->deleteLater();
 
-#ifndef NDEBUG
-    qDebug() << data;
-#endif
+    qCDebug(authCredentials()) << data;
     if (error != QNetworkReply::NoError) {
         qWarning() << "Reply error:" << error;
-#ifndef NDEBUG
-        qDebug() << data;
-#endif
+        qCDebug(authCredentials()) << data;
         if (Net::isApplicationError(error)) {
             emit finished(
                 AccountTaskState::STATE_FAILED_SOFT,
@@ -76,9 +73,7 @@ void LauncherLoginStep::onRequestDone(
 
     if(!Parsers::parseMojangResponse(data, m_data->yggdrasilToken)) {
         qWarning() << "Could not parse login_with_xbox response...";
-#ifndef NDEBUG
-        qDebug() << data;
-#endif
+        qCDebug(authCredentials()) << data;
         emit finished(
             AccountTaskState::STATE_FAILED_SOFT,
             tr("Failed to parse the Minecraft access token response.")

@@ -44,6 +44,9 @@
 #include <QSortFilterProxyModel>
 #include <QDebug>
 #include <QSaveFile>
+#include <QStack>
+#include <QFileInfo>
+
 #include "StringUtils.h"
 #include "SeparatorPrefixTree.h"
 #include "Application.h"
@@ -428,7 +431,8 @@ bool ExportInstanceDialog::doExport()
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;
     }
-    if (!MMCZip::compressDirFiles(output, m_instance->instanceRoot(), files))
+
+    if (!MMCZip::compressDirFiles(output, m_instance->instanceRoot(), files, true))
     {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;

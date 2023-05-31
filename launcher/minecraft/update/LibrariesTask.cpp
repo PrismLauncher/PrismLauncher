@@ -20,7 +20,7 @@ void LibrariesTask::executeTask()
     auto components = inst->getPackProfile();
     auto profile = components->getProfile();
 
-    auto job = new NetJob(tr("Libraries for instance %1").arg(inst->name()), APPLICATION->network());
+    NetJob::Ptr job{ new NetJob(tr("Libraries for instance %1").arg(inst->name()), APPLICATION->network()) };
     downloadJob.reset(job);
 
     auto metacache = APPLICATION->metacache();
@@ -70,6 +70,8 @@ void LibrariesTask::executeTask()
     connect(downloadJob.get(), &NetJob::failed, this, &LibrariesTask::jarlibFailed);
     connect(downloadJob.get(), &NetJob::aborted, this, [this]{ emitFailed(tr("Aborted")); });
     connect(downloadJob.get(), &NetJob::progress, this, &LibrariesTask::progress);
+    connect(downloadJob.get(), &NetJob::stepProgress, this, &LibrariesTask::propogateStepProgress);
+
     downloadJob->start();
 }
 

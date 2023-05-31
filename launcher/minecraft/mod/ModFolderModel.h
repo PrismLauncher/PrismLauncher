@@ -67,6 +67,7 @@ public:
         NameColumn,
         VersionColumn,
         DateColumn,
+        ProviderColumn,
         NUM_COLUMNS
     };
     enum ModStatusAction {
@@ -74,7 +75,7 @@ public:
         Enable,
         Toggle
     };
-    ModFolderModel(const QString &dir, bool is_indexed = false);
+    ModFolderModel(const QString &dir, BaseInstance* instance, bool is_indexed = false, bool create_dir = true);
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 

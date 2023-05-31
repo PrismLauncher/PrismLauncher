@@ -43,6 +43,9 @@
 
 #include "MetadataHandler.h"
 #include "Version.h"
+#include "minecraft/mod/ModDetails.h"
+
+static ModPlatform::ProviderCapabilities ProviderCaps;
 
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
@@ -68,6 +71,10 @@ void Mod::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
     m_local_details.metadata = metadata;
 }
 
+void Mod::setDetails(const ModDetails& details) {
+    m_local_details = details;
+}
+
 std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
 {
     auto cast_other = dynamic_cast<Mod const*>(&other);
@@ -90,6 +97,11 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
                 return { 1, type == SortType::VERSION };
             if (this_ver < other_ver)
                 return { -1, type == SortType::VERSION };
+        }
+        case SortType::PROVIDER: {
+            auto compare_result = QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
+            if (compare_result != 0)
+                return { compare_result, type == SortType::PROVIDER };
         }
     }
     return { 0, false };
@@ -189,4 +201,16 @@ void Mod::finishResolvingWithDetails(ModDetails&& details)
     m_local_details = std::move(details);
     if (metadata)
         setMetadata(std::move(metadata));
+};
+
+auto Mod::provider() const -> std::optional<QString>
+{
+    if (metadata())
+        return ProviderCaps.readableName(metadata()->provider);
+    return {};
+}
+
+bool Mod::valid() const
+{
+    return !m_local_details.mod_id.isEmpty();
 }

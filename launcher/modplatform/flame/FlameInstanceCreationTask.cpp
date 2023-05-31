@@ -35,6 +35,7 @@
 
 #include "FlameInstanceCreationTask.h"
 
+#include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/PackManifest.h"
 
@@ -52,6 +53,13 @@
 
 #include "ui/dialogs/BlockedModsDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
+
+#include <QDebug>
+#include <QFileInfo>
+
+#include "minecraft/World.h"
+#include "minecraft/mod/tasks/LocalResourceParse.h"
+
 
 const static QMap<QString, QString> forgemap = { { "1.2.5", "3.4.9.171" },
                                                  { "1.4.2", "6.0.1.355" },
@@ -176,7 +184,7 @@ bool FlameCreationTask::updateInstance()
 
         QEventLoop loop;
 
-        connect(job, &NetJob::succeeded, this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
+        connect(job.get(), &Task::succeeded, this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
             // Parse the API response
             QJsonParseError parse_error{};
             auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
@@ -218,7 +226,7 @@ bool FlameCreationTask::updateInstance()
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
             }
         });
-        connect(job, &NetJob::finished, &loop, &QEventLoop::quit);
+        connect(job.get(), &Task::finished, &loop, &QEventLoop::quit);
 
         m_process_update_file_info_job = job;
         job->start();
@@ -366,7 +374,7 @@ bool FlameCreationTask::createInstance()
         instance.setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
     instance.setName(name());
 
-    m_mod_id_resolver = new Flame::FileResolvingTask(APPLICATION->network(), m_pack);
+    m_mod_id_resolver.reset(new Flame::FileResolvingTask(APPLICATION->network(), m_pack));
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::succeeded, this, [this, &loop] { idResolverSucceeded(loop); });
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::failed, [&](QString reason) {
         m_mod_id_resolver.reset();
@@ -375,7 +383,8 @@ bool FlameCreationTask::createInstance()
     });
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::progress, this, &FlameCreationTask::setProgress);
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::status, this, &FlameCreationTask::setStatus);
-
+    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::stepProgress, this, &FlameCreationTask::propogateStepProgress);
+    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::details, this, &FlameCreationTask::setDetails);
     m_mod_id_resolver->start();
 
     loop.exec();
@@ -401,6 +410,10 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
+        if (result.fileName.endsWith(".zip")) {
+            m_ZIP_resources.append(std::make_pair(result.fileName, result.targetFolder));
+        }
+
         if (!result.resolved || result.url.isEmpty()) {
             BlockedMod blocked_mod;
             blocked_mod.name = result.fileName;
@@ -439,41 +452,9 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     }
 }
 
-/// @brief copy the matched blocked mods to the instance staging area
-/// @param blocked_mods list of the blocked mods and their matched paths
-void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
-{
-    setStatus(tr("Copying Blocked Mods..."));
-    setAbortable(false);
-    int i = 0;
-    int total = blocked_mods.length();
-    setProgress(i, total);
-    for (auto const& mod : blocked_mods) {
-        if (!mod.matched) {
-            qDebug() << mod.name << "was not matched to a local file, skipping copy";
-            continue;
-        }
-
-        auto dest_path = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
-
-        setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
-
-        qDebug() << "Will try to copy" << mod.localPath << "to" << dest_path;
-
-        if (!FS::copy(mod.localPath, dest_path)()) {
-            qDebug() << "Copy of" << mod.localPath << "to" << dest_path << "Failed";
-        }
-
-        i++;
-        setProgress(i, total);
-    }
-
-    setAbortable(true);
-}
-
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 {
-    m_files_job = new NetJob(tr("Mod download"), APPLICATION->network());
+    m_files_job.reset(new NetJob(tr("Mod Download Flame"), APPLICATION->network()));
     for (const auto& result : m_mod_id_resolver->getResults().files) {
         QString filename = result.fileName;
         if (!result.required) {
@@ -509,14 +490,121 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     }
 
     m_mod_id_resolver.reset();
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { m_files_job.reset(); });
+    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
+        m_files_job.reset();
+        validateZIPResouces();
+    });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::progress, this, &FlameCreationTask::setProgress);
+    connect(m_files_job.get(), &NetJob::progress, this, [this](qint64 current, qint64 total){
+        setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
+        setProgress(current, total);
+    });
+    connect(m_files_job.get(), &NetJob::stepProgress, this, &FlameCreationTask::propogateStepProgress);
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));
     m_files_job->start();
+}
+
+/// @brief copy the matched blocked mods to the instance staging area
+/// @param blocked_mods list of the blocked mods and their matched paths
+void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
+{
+    setStatus(tr("Copying Blocked Mods..."));
+    setAbortable(false);
+    int i = 0;
+    int total = blocked_mods.length();
+    setProgress(i, total);
+    for (auto const& mod : blocked_mods) {
+        if (!mod.matched) {
+            qDebug() << mod.name << "was not matched to a local file, skipping copy";
+            continue;
+        }
+
+        auto destPath = FS::PathCombine(m_stagingPath, "minecraft", mod.targetFolder, mod.name);
+
+        setStatus(tr("Copying Blocked Mods (%1 out of %2 are done)").arg(QString::number(i), QString::number(total)));
+
+        qDebug() << "Will try to copy" << mod.localPath << "to" << destPath;
+
+        if (!FS::copy(mod.localPath, destPath)()) {
+            qDebug() << "Copy of" << mod.localPath << "to" << destPath << "Failed";
+        }
+
+        i++;
+        setProgress(i, total);
+    }
+
+    setAbortable(true);
+}
+
+
+void FlameCreationTask::validateZIPResouces()
+{
+    qDebug() << "Validating whether resources stored as .zip are in the right place";
+    for (auto [fileName, targetFolder] : m_ZIP_resources) {
+        qDebug() << "Checking" << fileName << "...";
+        auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
+
+        /// @brief check the target and move the the file
+        /// @return path where file can now be found
+        auto validatePath = [&localPath, this](QString fileName, QString targetFolder, QString realTarget) {
+            if (targetFolder != realTarget) {
+                qDebug() << "Target folder of" << fileName << "is incorrect, it belongs in" << realTarget;
+                auto destPath = FS::PathCombine(m_stagingPath, "minecraft", realTarget, fileName);
+                qDebug() << "Moving" << localPath << "to" << destPath;
+                if (FS::move(localPath, destPath)) {
+                    return destPath;
+                }
+            }
+            return localPath;
+        };
+
+        auto installWorld = [this](QString worldPath){
+            qDebug() << "Installing World from" << worldPath;
+            QFileInfo worldFileInfo(worldPath);
+            World w(worldFileInfo);
+            if (!w.isValid()) {
+                qDebug() << "World at" << worldPath << "is not valid, skipping install.";
+            } else {
+                w.install(FS::PathCombine(m_stagingPath, "minecraft", "saves"));
+            }
+        };
+
+        QFileInfo localFileInfo(localPath);
+        auto type = ResourceUtils::identify(localFileInfo);
+
+        QString worldPath;
+
+        switch (type) {
+            case PackedResourceType::ResourcePack :
+                validatePath(fileName, targetFolder, "resourcepacks");
+                break;
+            case PackedResourceType::TexturePack :
+                validatePath(fileName, targetFolder, "texturepacks");
+                break;
+            case PackedResourceType::DataPack :
+                validatePath(fileName, targetFolder, "datapacks");
+                break;
+            case PackedResourceType::Mod :
+                validatePath(fileName, targetFolder, "mods");
+                break;
+            case PackedResourceType::ShaderPack :
+                // in theroy flame API can't do this but who knows, that *may* change ?
+                // better to handle it if it *does* occure in the future
+                validatePath(fileName, targetFolder, "shaderpacks");
+                break;
+            case PackedResourceType::WorldSave :
+                worldPath = validatePath(fileName, targetFolder, "saves");
+                installWorld(worldPath);
+                break;
+            case PackedResourceType::UNKNOWN :
+            default :
+                qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
+                break;
+        }
+    }
 }

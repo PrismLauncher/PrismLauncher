@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,7 +60,7 @@ class ModFolderPage : public ExternalResourcesPage {
 
    private slots:
     void runningStateChanged(bool running);
-    void removeItem() override;
+    void removeItems(const QItemSelection &selection) override;
 
     void installMods();
     void updateMods();
@@ -77,6 +78,19 @@ class CoreModFolderPage : public ModFolderPage {
     virtual QIcon icon() const override { return APPLICATION->getThemedIcon("coremods"); }
     virtual QString id() const override { return "coremods"; }
     virtual QString helpPage() const override { return "Core-mods"; }
+
+    virtual bool shouldDisplay() const override;
+};
+
+class NilModFolderPage : public ModFolderPage {
+   public:
+    explicit NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent = 0);
+    virtual ~NilModFolderPage() = default;
+
+    virtual QString displayName() const override { return tr("Nilmods"); }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("coremods"); }
+    virtual QString id() const override { return "nilmods"; }
+    virtual QString helpPage() const override { return "Nilmods"; }
 
     virtual bool shouldDisplay() const override;
 };

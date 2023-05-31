@@ -6,4 +6,4 @@ let
     sha256 = narHash;
   };
 in
-import flake-compat { src = ../.; }
+  import flake-compat {src = ../.;}

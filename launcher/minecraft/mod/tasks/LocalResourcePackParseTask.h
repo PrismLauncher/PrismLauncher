@@ -31,11 +31,11 @@ enum class ProcessingLevel { Full, BasicInfoOnly };
 
 bool process(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
-void processZIP(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
-void processFolder(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processZIP(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processFolder(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
-void processMCMeta(ResourcePack& pack, QByteArray&& raw_data);
-void processPackPNG(ResourcePack& pack, QByteArray&& raw_data);
+bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data);
+bool processPackPNG(ResourcePack& pack, QByteArray&& raw_data);
 
 /** Checks whether a file is valid as a resource pack or not. */
 bool validate(QFileInfo file);

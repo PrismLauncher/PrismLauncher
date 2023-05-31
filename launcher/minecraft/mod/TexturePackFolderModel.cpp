@@ -39,11 +39,13 @@
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 #include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
 
-TexturePackFolderModel::TexturePackFolderModel(const QString &dir) : ResourceFolderModel(QDir(dir)) {}
+TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance* instance)
+    : ResourceFolderModel(QDir(dir), instance)
+{}
 
 Task* TexturePackFolderModel::createUpdateTask()
 {
-    return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return new TexturePack(entry); });
+    return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return makeShared<TexturePack>(entry); });
 }
 
 Task* TexturePackFolderModel::createParseTask(Resource& resource)

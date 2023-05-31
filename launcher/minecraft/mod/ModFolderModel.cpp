@@ -39,19 +39,25 @@
 #include <FileSystem.h>
 #include <QDebug>
 #include <QFileSystemWatcher>
+#include <QIcon>
 #include <QMimeData>
 #include <QString>
+#include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
 #include <QUuid>
 #include <algorithm>
 
+#include "Application.h"
+
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
+#include "modplatform/ModIndex.h"
 
-ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : ResourceFolderModel(QDir(dir)), m_is_indexed(is_indexed)
+ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
+    : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE };
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
@@ -82,14 +88,39 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
         }
         case DateColumn:
             return m_resources[row]->dateTimeChanged();
+        case ProviderColumn: {
+            auto provider = at(row)->provider();
+            if (!provider.has_value()) {
+	            //: Unknown mod provider (i.e. not Modrinth, CurseForge, etc...)
+                return tr("Unknown");
+            }
 
+            return provider.value();
+        }
         default:
             return QVariant();
         }
 
     case Qt::ToolTipRole:
+        if (column == NAME_COLUMN) {
+            if (at(row)->isSymLinkUnder(instDirPath())) {
+                return m_resources[row]->internal_id() +
+                    tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original." 
+                       "\nCanonical Path: %1")
+                        .arg(at(row)->fileinfo().canonicalFilePath());
+            }
+            if (at(row)->isMoreThanOneHardLink()) {
+                return m_resources[row]->internal_id() +
+                    tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
+            }
+        }
         return m_resources[row]->internal_id();
+    case Qt::DecorationRole: {
+        if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
+            return APPLICATION->getThemedIcon("status-yellow");
 
+        return {};
+    }
     case Qt::CheckStateRole:
         switch (column)
         {
@@ -118,6 +149,8 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
             return tr("Version");
         case DateColumn:
             return tr("Last changed");
+        case ProviderColumn:
+            return tr("Provider");
         default:
             return QVariant();
         }
@@ -133,6 +166,8 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
             return tr("The version of the mod.");
         case DateColumn:
             return tr("The date and time this mod was last changed (or added).");
+        case ProviderColumn:
+            return tr("Where the mod was downloaded from.");
         default:
             return QVariant();
         }

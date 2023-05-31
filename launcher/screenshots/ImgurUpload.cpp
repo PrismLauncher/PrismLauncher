@@ -89,12 +89,14 @@ void ImgurUpload::executeTask()
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &ImgurUpload::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &ImgurUpload::downloadFinished);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+    connect(rep, &QNetworkReply::errorOccurred, this, &ImgurUpload::downloadError);
 #else
-    connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &ImgurUpload::downloadError);
 #endif
+    connect(rep, &QNetworkReply::sslErrors, this, &ImgurUpload::sslErrors);
 }
+
 void ImgurUpload::downloadError(QNetworkReply::NetworkError error)
 {
     qCritical() << "ImgurUpload failed with error" << m_reply->errorString() << "Server reply:\n" << m_reply->readAll();
@@ -108,6 +110,7 @@ void ImgurUpload::downloadError(QNetworkReply::NetworkError error)
     m_reply.reset();
     emitFailed();
 }
+
 void ImgurUpload::downloadFinished()
 {
     if(finished)
@@ -144,6 +147,7 @@ void ImgurUpload::downloadFinished()
     emit succeeded();
     return;
 }
+
 void ImgurUpload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     setProgress(bytesReceived, bytesTotal);

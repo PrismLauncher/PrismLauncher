@@ -48,7 +48,6 @@
 #include "BaseInstance.h"
 #include "minecraft/auth/MinecraftAccount.h"
 #include "net/NetJob.h"
-#include "updater/GoUpdate.h"
 
 class LaunchController;
 class NewsChecker;
@@ -61,12 +60,15 @@ class BaseProfilerFactory;
 class InstanceView;
 class KonamiCode;
 class InstanceTask;
+class LabeledToolButton;
 
+namespace Ui
+{
+class MainWindow;
+}
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
-    class Ui;
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -80,7 +82,7 @@ public:
 
     void updatesAllowedChanged(bool allowed);
 
-    void droppedURLs(QList<QUrl> urls);
+    void processURLs(QList<QUrl> urls);
 signals:
     void isClosing();
 
@@ -89,6 +91,8 @@ protected:
 
 private slots:
     void onCatToggled(bool);
+
+    void onCatChanged(int);
 
     void on_actionAbout_triggered();
 
@@ -105,10 +109,6 @@ private slots:
     void on_actionChangeInstGroup_triggered();
 
     void on_actionChangeInstIcon_triggered();
-    void on_changeIconButton_clicked(bool)
-    {
-        on_actionChangeInstIcon_triggered();
-    }
 
     void on_actionViewInstanceFolder_triggered();
 
@@ -154,10 +154,6 @@ private slots:
     void on_actionExportInstance_triggered();
 
     void on_actionRenameInstance_triggered();
-    void on_renameButton_clicked(bool)
-    {
-        on_actionRenameInstance_triggered();
-    }
 
     void on_actionEditInstance_triggered();
 
@@ -190,10 +186,6 @@ private slots:
 
     void startTask(Task *task);
 
-    void updateAvailable(GoUpdate::Status status);
-
-    void updateNotAvailable();
-
     void defaultAccountChanged();
 
     void changeActiveAccount();
@@ -202,10 +194,6 @@ private slots:
 
     void updateNewsLabel();
 
-    /*!
-     * Runs the DownloadTask and installs updates.
-     */
-    void downloadUpdates(GoUpdate::Status status);
 
     void konamiTriggered();
 
@@ -228,23 +216,26 @@ private:
     void updateInstanceToolIcon(QString new_icon);
     void setSelectedInstanceById(const QString &id);
     void updateStatusCenter();
+    void setInstanceActionsEnabled(bool enabled);
 
     void runModalTask(Task *task);
     void instanceFromInstanceTask(InstanceTask *task);
     void finalizeInstance(InstancePtr inst);
 
 private:
-    std::unique_ptr<Ui> ui;
-
+    Ui::MainWindow *ui;
     // these are managed by Qt's memory management model!
     InstanceView *view = nullptr;
     InstanceProxyModel *proxymodel = nullptr;
     QToolButton *newsLabel = nullptr;
     QLabel *m_statusLeft = nullptr;
     QLabel *m_statusCenter = nullptr;
-    QMenu *accountMenu = nullptr;
-    QToolButton *accountMenuButton = nullptr;
+    LabeledToolButton *changeIconButton = nullptr;
+    LabeledToolButton *renameButton = nullptr;
+    QToolButton *helpMenuButton = nullptr;
     KonamiCode * secretEventFilter = nullptr;
+
+    std::shared_ptr<Setting> instanceToolbarSetting = nullptr;
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;
 
@@ -254,4 +245,3 @@ private:
     // managed by the application object
     Task *m_versionLoadTask = nullptr;
 };
-
