@@ -441,6 +441,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
+          while read l; do l=${l#${{ env.INSTALL_DIR }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest.txt >> ${{ env.INSTALL_DIR }}/manifest.txt
 
           cd ${{ env.INSTALL_DIR }}
           tar --owner root --group root -czf ../PrismLauncher.tar.gz *
@@ -450,6 +451,8 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+          while read l; do l=${l#${{ env.INSTALL_DIR_PORTABLE }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest.txt >> ${{ env.INSTALL_DIR_PORTABLE }}/manifest.txt
+          while read l; do l=${l#${{ env.INSTALL_DIR_PORTABLE }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest_portable.txt >> ${{ env.INSTALL_DIR_PORTABLE }}/manifest.txt
 
           cd ${{ env.INSTALL_PORTABLE_DIR }}
           tar -czf ../PrismLauncher-portable.tar.gz *
