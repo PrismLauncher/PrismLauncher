@@ -376,13 +376,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // init the logger
     {
-        static const QString logBase = "logs/"+BuildConfig.LAUNCHER_NAME + "-%0.log";
-        QDir logDir = QDir(dataPath);
-        if(!logDir.exists("logs")) {
-            logDir.mkpath("logs"); //this can fail, but there is no need to throw an error *yet*, since it also triggers the error message below!
-        }
-        auto moveFile = [](const QString &oldName, const QString &newName)
-        {
+        static const QString logBase = FS::PathCombine("logs", BuildConfig.LAUNCHER_NAME + "-%0.log");
+        FS::ensureFolderPathExists(
+            "logs");  // this can fail, but there is no need to throw an error *yet*, since it also triggers the error message below!
+        auto moveFile = [](const QString& oldName, const QString& newName) {
             QFile::remove(newName);
             QFile::copy(oldName, newName);
             QFile::remove(oldName);
@@ -394,19 +391,15 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         moveFile(logBase.arg(0), logBase.arg(1));
 
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
-        if(!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-        {
-            showFatalErrorMessage(
-                "The launcher data folder is not writable!",
-                QString(
-                    "The launcher couldn't create a log file - the data folder is not writable.\n"
-                    "\n"
-                    "Make sure you have write permissions to the logs folder.\n"
-                    "(%1)\n"
-                    "\n"
-                    "The launcher cannot continue until you fix this problem."
-                ).arg(dataPath+"/logs")
-            );
+        if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+            showFatalErrorMessage("The launcher data folder is not writable!",
+                                  QString("The launcher couldn't create a log file - the data folder is not writable.\n"
+                                          "\n"
+                                          "Make sure you have write permissions to the data folder.\n"
+                                          "(%1)\n"
+                                          "\n"
+                                          "The launcher cannot continue until you fix this problem.")
+                                      .arg(dataPath));
             return;
         }
         qInstallMessageHandler(appDebugOutput);
