@@ -567,6 +567,25 @@ set(LINKEXE_SOURCES
     DesktopServices.cpp
 )
 
+set(WINDOWSUPDATEREXE_SOURCES
+    updater/windows/WindowsUpdater.h
+    updater/windows/WindowsUpdater.cpp
+    updater/windows/UpdaterDialogs.h
+    updater/windows/UpdaterDialogs.cpp
+    updater/windows/GitHubRelease.h
+    Json.h
+    Json.cpp
+    FileSystem.h
+    FileSystem.cpp
+    StringUtils.h
+    StringUtils.cpp
+    DesktopServices.h
+    DesktopServices.cpp
+    Version.h
+    Version.cpp
+    Markdown.h
+)
+
 ######## Logging categories ########
 
 ecm_qt_declare_logging_category(CORE_SOURCES
@@ -1075,6 +1094,10 @@ qt_add_resources(LAUNCHER_RESOURCES
     ../${Launcher_Branding_LogoQRC}
 )
 
+qt_wrap_ui(WINDOWSUPDATER_UI
+    updater/windows/SelectReleaseDialog.ui
+)
+
 ######## Windows resource files ########
 if(WIN32)
     set(LAUNCHER_RCS ${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_WindowsRC})
@@ -1158,7 +1181,41 @@ install(TARGETS ${Launcher_Name}
     FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
 
-if(WIN32)
+if(WIN32 OR (DEFINED Launcher_BUILD_UPDATER AND Launcher_BUILD_UPDATER) )
+    # Updater
+    add_library(windows_updater_logic STATIC ${WINDOWSUPDATEREXE_SOURCES} ${WINDOWSUPDATER_UI})
+    target_include_directories(windows_updater_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(windows_updater_logic
+        systeminfo
+        BuildConfig
+        ghcFilesystem::ghc_filesystem
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Network
+        ${Launcher_QT_LIBS}
+        cmark::cmark
+    )
+
+    add_executable("${Launcher_Name}_updater" WIN32 updater/windows/windows_main.cpp)
+    target_link_libraries("${Launcher_Name}_updater" windows_updater_logic)
+    
+    if(DEFINED Launcher_APP_BINARY_NAME)
+        set_target_properties("${Launcher_Name}_updater" PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}_updater")
+    endif()
+    if(DEFINED Launcher_BINARY_RPATH)
+        SET_TARGET_PROPERTIES("${Launcher_Name}_updater" PROPERTIES INSTALL_RPATH "${Launcher_BINARY_RPATH}")
+    endif()
+
+    install(TARGETS "${Launcher_Name}_updater"
+        BUNDLE DESTINATION "." COMPONENT Runtime
+        LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
+        RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
+        FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
+    )
+endif()
+
+if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
+    # File link
     add_library(filelink_logic STATIC ${LINKEXE_SOURCES})
     target_include_directories(filelink_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(filelink_logic

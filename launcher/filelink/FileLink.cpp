@@ -111,6 +111,7 @@ FileLinkApp::FileLinkApp(int& argc, char** argv) : QCoreApplication(argc, argv),
         joinServer(serverToJoin);
     } else {
         qDebug() << "no server to join";
+        m_status = Failed;
         exit();
     }
 }
@@ -126,6 +127,7 @@ void FileLinkApp::joinServer(QString server)
     connect(&socket, &QLocalSocket::readyRead, this, &FileLinkApp::readPathPairs);
 
     connect(&socket, &QLocalSocket::errorOccurred, this, [&](QLocalSocket::LocalSocketError socketError) {
+        m_status = Failed;
         switch (socketError) {
             case QLocalSocket::ServerNotFoundError:
                 qDebug()
@@ -150,6 +152,7 @@ void FileLinkApp::joinServer(QString server)
 
     connect(&socket, &QLocalSocket::disconnected, this, [&]() {
         qDebug() << "disconnected from server, should exit";
+        m_status = Succeeded;
         exit();
     });
 

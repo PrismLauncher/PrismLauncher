@@ -20,23 +20,25 @@
  *
  */
 
-#include "FileLink.h"
 
+
+#include "updater/windows/WindowsUpdater.h"
 int main(int argc, char* argv[])
 {
-    FileLinkApp ldh(argc, argv);
+    WindowsUpdaterApp wUpApp(argc, argv);
 
-    switch(ldh.status()) {
-        case FileLinkApp::Starting:
-        case FileLinkApp::Initialized:
+    switch(wUpApp.status()) {
+        case WindowsUpdaterApp::Starting:
+        case WindowsUpdaterApp::Initialized:
         {
-            return ldh.exec();
+            return wUpApp.exec();
         }
-        case FileLinkApp::Failed:
+        case WindowsUpdaterApp::Failed:
             return 1;
-        case FileLinkApp::Succeeded:
+        case WindowsUpdaterApp::Succeeded:
             return 0;
         default:
             return -1;
     }
+
 }
