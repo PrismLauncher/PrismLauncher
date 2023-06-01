@@ -567,12 +567,12 @@ set(LINKEXE_SOURCES
     DesktopServices.cpp
 )
 
-set(WINDOWSUPDATEREXE_SOURCES
-    updater/windows/WindowsUpdater.h
-    updater/windows/WindowsUpdater.cpp
-    updater/windows/UpdaterDialogs.h
-    updater/windows/UpdaterDialogs.cpp
-    updater/windows/GitHubRelease.h
+set(PRISMUPDATER_SOURCES
+    updater/prismupdater/PrismUpdater.h
+    updater/prismupdater/PrismUpdater.cpp
+    updater/prismupdater/UpdaterDialogs.h
+    updater/prismupdater/UpdaterDialogs.cpp
+    updater/prismupdater/GitHubRelease.h
     Json.h
     Json.cpp
     FileSystem.h
@@ -1094,8 +1094,8 @@ qt_add_resources(LAUNCHER_RESOURCES
     ../${Launcher_Branding_LogoQRC}
 )
 
-qt_wrap_ui(WINDOWSUPDATER_UI
-    updater/windows/SelectReleaseDialog.ui
+qt_wrap_ui(PRISMUPDATER_UI
+    updater/prismupdater/SelectReleaseDialog.ui
 )
 
 ######## Windows resource files ########
@@ -1183,9 +1183,9 @@ install(TARGETS ${Launcher_Name}
 
 if(WIN32 OR (DEFINED Launcher_BUILD_UPDATER AND Launcher_BUILD_UPDATER) )
     # Updater
-    add_library(windows_updater_logic STATIC ${WINDOWSUPDATEREXE_SOURCES} ${WINDOWSUPDATER_UI})
-    target_include_directories(windows_updater_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-    target_link_libraries(windows_updater_logic
+    add_library(prism_updater_logic STATIC ${PRISMUPDATER_SOURCES} ${PRISMUPDATER_UI})
+    target_include_directories(prism_updater_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(prism_updater_logic
         systeminfo
         BuildConfig
         ghcFilesystem::ghc_filesystem
@@ -1196,8 +1196,8 @@ if(WIN32 OR (DEFINED Launcher_BUILD_UPDATER AND Launcher_BUILD_UPDATER) )
         cmark::cmark
     )
 
-    add_executable("${Launcher_Name}_updater" WIN32 updater/windows/windows_main.cpp)
-    target_link_libraries("${Launcher_Name}_updater" windows_updater_logic)
+    add_executable("${Launcher_Name}_updater" WIN32 updater/prismupdater/updater_main.cpp)
+    target_link_libraries("${Launcher_Name}_updater" prism_updater_logic)
     
     if(DEFINED Launcher_APP_BINARY_NAME)
         set_target_properties("${Launcher_Name}_updater" PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}_updater")
@@ -1229,7 +1229,7 @@ if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
         ${Launcher_QT_LIBS}
     )
 
-    add_executable("${Launcher_Name}_filelink" WIN32 filelink/main.cpp)
+    add_executable("${Launcher_Name}_filelink" WIN32 filelink/filelink_main.cpp)
 
     target_sources("${Launcher_Name}_filelink" PRIVATE filelink/filelink.exe.manifest)
 

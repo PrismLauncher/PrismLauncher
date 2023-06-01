@@ -20,7 +20,7 @@
  *
  */
 
-#include "WindowsUpdater.h"
+#include "PrismUpdater.h"
 #include "BuildConfig.h"
 
 #include <cstdlib>
@@ -68,7 +68,7 @@ namespace fs = ghc::filesystem;
 
 #include <DesktopServices.h>
 
-#include "UpdaterDialogs.h"
+#include "updater/prismupdater/UpdaterDialogs.h"
 
 #include "FileSystem.h"
 #include "Json.h"
@@ -83,7 +83,7 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
     QString out = qFormatLogMessage(type, context, msg);
     out += QChar::LineFeed;
 
-    WindowsUpdaterApp* app = static_cast<WindowsUpdaterApp*>(QCoreApplication::instance());
+    PrismUpdaterApp* app = static_cast<PrismUpdaterApp*>(QCoreApplication::instance());
     app->logFile->write(out.toUtf8());
     app->logFile->flush();
     if (app->logToConsole) {
@@ -92,7 +92,7 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
     }
 }
 
-WindowsUpdaterApp::WindowsUpdaterApp(int& argc, char** argv) : QApplication(argc, argv)
+PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
     // attach the parent console
@@ -313,7 +313,7 @@ WindowsUpdaterApp::WindowsUpdaterApp(int& argc, char** argv) : QApplication(argc
     loadReleaseList();
 }
 
-WindowsUpdaterApp::~WindowsUpdaterApp()
+PrismUpdaterApp::~PrismUpdaterApp()
 {
     qDebug() << "updater shutting down";
     // Shut down logger by setting the logger function to nothing
@@ -334,21 +334,21 @@ WindowsUpdaterApp::~WindowsUpdaterApp()
         m_reply->deleteLater();
 }
 
-void WindowsUpdaterApp::fail(const QString& reason)
+void PrismUpdaterApp::fail(const QString& reason)
 {
     qCritical() << qPrintable(reason);
     m_status = Failed;
     exit(1);
 }
 
-void WindowsUpdaterApp::abort(const QString& reason)
+void PrismUpdaterApp::abort(const QString& reason)
 {
     qCritical() << qPrintable(reason);
     m_status = Aborted;
     exit(2);
 }
 
-void WindowsUpdaterApp::showFatalErrorMessage(const QString& title, const QString& content)
+void PrismUpdaterApp::showFatalErrorMessage(const QString& title, const QString& content)
 {
     m_status = Failed;
     auto msgBox = new QMessageBox();
@@ -362,7 +362,7 @@ void WindowsUpdaterApp::showFatalErrorMessage(const QString& title, const QStrin
     exit(1);
 }
 
-void WindowsUpdaterApp::run()
+void PrismUpdaterApp::run()
 {
     qDebug() << "found" << m_releases.length() << "releases on github";
     qDebug() << "loading exe at " << m_prismExecutable;
@@ -424,14 +424,14 @@ void WindowsUpdaterApp::run()
     exit(0);
 }
 
-void WindowsUpdaterApp::printReleases()
+void PrismUpdaterApp::printReleases()
 {
     for (auto release : m_releases) {
         std::cout << release.name.toStdString() << " Version: " << release.tag_name.toStdString() << std::endl;
     }
 }
 
-QList<GitHubRelease> WindowsUpdaterApp::nonDraftReleases()
+QList<GitHubRelease> PrismUpdaterApp::nonDraftReleases()
 {
     QList<GitHubRelease> nonDraft;
     for (auto rls : m_releases) {
@@ -441,7 +441,7 @@ QList<GitHubRelease> WindowsUpdaterApp::nonDraftReleases()
     return nonDraft;
 }
 
-QList<GitHubRelease> WindowsUpdaterApp::newerReleases()
+QList<GitHubRelease> PrismUpdaterApp::newerReleases()
 {
     QList<GitHubRelease> newer;
     for (auto rls : nonDraftReleases()) {
@@ -451,7 +451,7 @@ QList<GitHubRelease> WindowsUpdaterApp::newerReleases()
     return newer;
 }
 
-GitHubRelease WindowsUpdaterApp::selectRelease()
+GitHubRelease PrismUpdaterApp::selectRelease()
 {
     QList<GitHubRelease> releases;
 
@@ -475,12 +475,12 @@ GitHubRelease WindowsUpdaterApp::selectRelease()
     return release;
 }
 
-void WindowsUpdaterApp::performUpdate(const GitHubRelease& release)
+void PrismUpdaterApp::performUpdate(const GitHubRelease& release)
 {
     qDebug() << "Updating to" << release.tag_name;
 }
 
-void WindowsUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
+void PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
 {
     QProcess proc = QProcess();
     proc.start(exe_path, { "-v" });
@@ -509,7 +509,7 @@ void WindowsUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
     m_prismGitCommit = lines.takeFirst().simplified();
 }
 
-void WindowsUpdaterApp::loadReleaseList()
+void PrismUpdaterApp::loadReleaseList()
 {
     auto github_repo = m_prismRepoUrl;
     if (github_repo.host() != "github.com")
@@ -526,7 +526,7 @@ void WindowsUpdaterApp::loadReleaseList()
     downloadReleasePage(api_url, 1);
 }
 
-void WindowsUpdaterApp::downloadReleasePage(const QString& api_url, int page)
+void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
 {
     int per_page = 30;
     auto page_url = QString("%1?per_page=%2&page=%3").arg(api_url).arg(QString::number(per_page)).arg(QString::number(page));
@@ -549,18 +549,18 @@ void WindowsUpdaterApp::downloadReleasePage(const QString& api_url, int page)
         }
     });
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
-    connect(rep, &QNetworkReply::errorOccurred, this, &WindowsUpdaterApp::downloadError);
+    connect(rep, &QNetworkReply::errorOccurred, this, &PrismUpdaterApp::downloadError);
 #else
     connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &WindowsUpdaterApp::downloadError);
 #endif
-    connect(rep, &QNetworkReply::sslErrors, this, &WindowsUpdaterApp::sslErrors);
+    connect(rep, &QNetworkReply::sslErrors, this, &PrismUpdaterApp::sslErrors);
     connect(rep, &QNetworkReply::readyRead, this, [this, responce]() {
         auto data = m_reply->readAll();
         responce->append(data);
     });
 }
 
-int WindowsUpdaterApp::parseReleasePage(const QByteArray* responce)
+int PrismUpdaterApp::parseReleasePage(const QByteArray* responce)
 {
     if (responce->isEmpty())  // empty page
         return 0;
@@ -607,7 +607,7 @@ int WindowsUpdaterApp::parseReleasePage(const QByteArray* responce)
     return num_releases;
 }
 
-GitHubRelease WindowsUpdaterApp::getLatestRelease()
+GitHubRelease PrismUpdaterApp::getLatestRelease()
 {
     GitHubRelease latest;
     for (auto release : m_releases) {
@@ -618,13 +618,13 @@ GitHubRelease WindowsUpdaterApp::getLatestRelease()
     return latest;
 }
 
-bool WindowsUpdaterApp::needUpdate(const GitHubRelease& release)
+bool PrismUpdaterApp::needUpdate(const GitHubRelease& release)
 {
     auto current_ver = Version(QString("%1.%2").arg(QString::number(m_prismVersionMajor)).arg(QString::number(m_prismVersionMinor)));
     return current_ver < release.version;
 }
 
-void WindowsUpdaterApp::downloadError(QNetworkReply::NetworkError error)
+void PrismUpdaterApp::downloadError(QNetworkReply::NetworkError error)
 {
     if (error == QNetworkReply::OperationCanceledError) {
         abort(QString("Aborted %1").arg(m_reply->url().toString()));
@@ -633,7 +633,7 @@ void WindowsUpdaterApp::downloadError(QNetworkReply::NetworkError error)
     }
 }
 
-void WindowsUpdaterApp::sslErrors(const QList<QSslError>& errors)
+void PrismUpdaterApp::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
     QString err_msg;

@@ -39,15 +39,15 @@
 #define PRISM_EXTERNAL_EXE
 #include "FileSystem.h"
 
-#include "updater/windows/GitHubRelease.h"
+#include "updater/prismupdater/GitHubRelease.h"
 
-class WindowsUpdaterApp : public QApplication {
+class PrismUpdaterApp : public QApplication {
     // friends for the purpose of limiting access to deprecated stuff
     Q_OBJECT
    public:
     enum Status { Starting, Failed, Succeeded, Initialized, Aborted };
-    WindowsUpdaterApp(int& argc, char** argv);
-    virtual ~WindowsUpdaterApp();
+    PrismUpdaterApp(int& argc, char** argv);
+    virtual ~PrismUpdaterApp();
     void loadReleaseList();
     void run();
     Status status() const { return m_status; }

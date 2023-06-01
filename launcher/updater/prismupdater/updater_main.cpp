@@ -22,20 +22,20 @@
 
 
 
-#include "updater/windows/WindowsUpdater.h"
+#include "updater/prismupdater/PrismUpdater.h"
 int main(int argc, char* argv[])
 {
-    WindowsUpdaterApp wUpApp(argc, argv);
+    PrismUpdaterApp wUpApp(argc, argv);
 
     switch(wUpApp.status()) {
-        case WindowsUpdaterApp::Starting:
-        case WindowsUpdaterApp::Initialized:
+        case PrismUpdaterApp::Starting:
+        case PrismUpdaterApp::Initialized:
         {
             return wUpApp.exec();
         }
-        case WindowsUpdaterApp::Failed:
+        case PrismUpdaterApp::Failed:
             return 1;
-        case WindowsUpdaterApp::Succeeded:
+        case PrismUpdaterApp::Succeeded:
             return 0;
         default:
             return -1;

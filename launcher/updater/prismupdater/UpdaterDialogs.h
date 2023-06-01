@@ -4,7 +4,7 @@
 #include <QTreeWidgetItem>
 
 #include "Version.h"
-#include "updater/windows/GitHubRelease.h"
+#include "updater/prismupdater/GitHubRelease.h"
 
 namespace Ui {
 class SelectReleaseDialog;
