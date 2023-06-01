@@ -376,9 +376,18 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // init the logger
     {
-        static const QString logBase = FS::PathCombine("logs", BuildConfig.LAUNCHER_NAME + "-%0.log");
-        FS::ensureFolderPathExists(
-            "logs");  // this can fail, but there is no need to throw an error *yet*, since it also triggers the error message below!
+        static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "-%0.log";
+        static const QString logBase = FS::PathCombine("logs", baseLogFile);
+        if (FS::ensureFolderPathExists("logs")) {  // if this did not fail
+            for (auto i = 0; i <= 4; i++) {
+                auto oldName = baseLogFile.arg(i);
+                auto newName = logBase.arg(i);
+                if (QFile::exists(newName))  // in case there are already files in folder just to be safe add a suffix
+                    newName += ".old";
+                QFile::rename(oldName, newName);
+            }
+        }
+
         auto moveFile = [](const QString& oldName, const QString& newName) {
             QFile::remove(newName);
             QFile::copy(oldName, newName);
