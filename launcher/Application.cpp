@@ -378,26 +378,20 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     {
         static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "-%0.log";
         static const QString logBase = FS::PathCombine("logs", baseLogFile);
-        if (FS::ensureFolderPathExists("logs")) {  // if this did not fail
-            for (auto i = 0; i <= 4; i++) {
-                auto oldName = baseLogFile.arg(i);
-                auto newName = logBase.arg(i);
-                if (QFile::exists(newName))  // in case there are already files in folder just to be safe add a suffix
-                    newName += ".old";
-                QFile::rename(oldName, newName);
-            }
-        }
-
         auto moveFile = [](const QString& oldName, const QString& newName) {
             QFile::remove(newName);
             QFile::copy(oldName, newName);
             QFile::remove(oldName);
         };
+        if (FS::ensureFolderPathExists("logs")) {  // if this did not fail
+            for (auto i = 0; i <= 4; i++)
+                if (auto oldName = baseLogFile.arg(i);
+                    QFile::exists(oldName))  // do not pointlessly delete new files if the old ones are not there
+                    moveFile(oldName, logBase.arg(i));
+        }
 
-        moveFile(logBase.arg(3), logBase.arg(4));
-        moveFile(logBase.arg(2), logBase.arg(3));
-        moveFile(logBase.arg(1), logBase.arg(2));
-        moveFile(logBase.arg(0), logBase.arg(1));
+        for (auto i = 4; i > 0; i--)
+            moveFile(logBase.arg(i - 1), logBase.arg(i));
 
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
         if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
