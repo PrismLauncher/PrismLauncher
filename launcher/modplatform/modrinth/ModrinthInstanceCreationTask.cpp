@@ -12,6 +12,7 @@
 #include "net/ChecksumValidator.h"
 
 #include "net/NetJob.h"
+#include "net/ApiDownload.h"
 #include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
@@ -238,7 +239,7 @@ bool ModrinthCreationTask::createInstance()
         }
 
         qDebug() << "Will try to download" << file.downloads.front() << "to" << file_path;
-        auto dl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
+        auto dl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         m_files_job->addNetAction(dl);
 
@@ -247,7 +248,7 @@ bool ModrinthCreationTask::createInstance()
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
             connect(dl.get(), &NetAction::failed, [this, &file, file_path, param] {
-                auto ndl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
+                auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 m_files_job->addNetAction(ndl);
                 if (auto shared = param.lock()) shared->succeeded();

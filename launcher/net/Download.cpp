@@ -124,15 +124,11 @@ void Download::executeTask()
     }
 
     request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
-    // TODO remove duplication
-    if (APPLICATION->capabilities() & Application::SupportsFlame && request.url().host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {
-        request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
-    } else if (request.url().host() == QUrl(BuildConfig.MODRINTH_PROD_URL).host() ||
-               request.url().host() == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
-        QString token = APPLICATION->getModrinthAPIToken();
-        if (!token.isNull())
-            request.setRawHeader("Authorization", token.toUtf8());
+    for ( auto header_proxy : m_headerProxies ) {
+        header_proxy->writeHeaders(request);
     }
+    // TODO remove duplication
+    
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     request.setTransferTimeout();
