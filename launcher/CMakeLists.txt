@@ -136,6 +136,10 @@ set(NET_SOURCES
     net/Validator.h
     net/Upload.cpp
     net/Upload.h
+    net/HeaderProxy.h
+    net/RawHeaderProxy.h
+    net/ApiHeaderProxy.h
+    net/ApiDownload.h
 )
 
 # Game launch logic

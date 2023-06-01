@@ -2,6 +2,7 @@
 
 #include "Json.h"
 #include "net/Upload.h"
+#include "net/ApiDownload.h"
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
@@ -94,7 +95,7 @@ void Flame::FileResolvingTask::netJobFinished()
             if(!hash.isEmpty()) {
                 auto url = QString("https://api.modrinth.com/v2/version_file/%1?algorithm=sha1").arg(hash);
                 auto output = std::make_shared<QByteArray>();
-                auto dl = Net::Download::makeByteArray(QUrl(url), output.get());
+                auto dl = Net::ApiDownload::makeByteArray(QUrl(url), output.get());
                 QObject::connect(dl.get(), &Net::Download::succeeded, [&out]() {
                     out.resolved = true;
                 });
@@ -169,7 +170,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished() {
             auto projectId = mod->projectId;
             auto output = std::make_shared<QByteArray>();
             auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(projectId);
-            auto dl = Net::Download::makeByteArray(url, output.get());
+            auto dl = Net::ApiDownload::makeByteArray(url, output.get());
             qDebug() << "Fetching url slug for file:" << mod->fileName;
             QObject::connect(dl.get(), &Net::Download::succeeded, [block, index, output]() {
                 auto mod = block->at(index);  // use the shared_ptr so it is captured and only freed when we are done
