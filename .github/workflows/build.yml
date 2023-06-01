@@ -375,7 +375,7 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --install ${{ env.BUILD_DIR }}
-          while read l; do l;=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest.txt >> ${{ env.INSTALL_DIR }}/manifest.txt 
+          while read l; do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest.txt >> ${{ env.INSTALL_DIR }}/manifest.txt 
 
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
