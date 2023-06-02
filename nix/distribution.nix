@@ -6,13 +6,13 @@
 }: {
   perSystem = {pkgs, ...}: {
     packages = {
-      inherit (pkgs) prismlauncher prismlauncher-qt5;
+      inherit (pkgs) prismlauncher-qt5-unwrapped prismlauncher-qt5 prismlauncher-unwrapped prismlauncher;
       default = pkgs.prismlauncher;
     };
   };
 
   flake = {
-    overlays.default = _: prev: let
+    overlays.default = final: prev: let
       # Helper function to build prism against different versions of Qt.
       mkPrism = qt:
         qt.callPackage ./package.nix {
@@ -20,8 +20,10 @@
           inherit self version;
         };
     in {
-      prismlauncher = mkPrism prev.qt6Packages;
-      prismlauncher-qt5 = mkPrism prev.libsForQt5;
+      prismlauncher-qt5-unwrapped = mkPrism final.libsForQt5;
+      prismlauncher-qt5 = prev.prismlauncher-qt5.override {inherit (final) prismlauncher-unwrapped;};
+      prismlauncher-unwrapped = mkPrism final.qt6Packages;
+      prismlauncher = prev.prismlauncher.override {inherit (final) prismlauncher-unwrapped;};
     };
   };
 }
