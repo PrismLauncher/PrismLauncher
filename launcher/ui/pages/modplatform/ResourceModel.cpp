@@ -6,9 +6,11 @@
 
 #include <QCryptographicHash>
 #include <QIcon>
+#include <QList>
 #include <QMessageBox>
 #include <QPixmapCache>
 #include <QUrl>
+#include <algorithm>
 #include <memory>
 
 #include "Application.h"
@@ -65,7 +67,7 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
             return QSize(0, 58);
         case Qt::UserRole: {
             QVariant v;
-            v.setValue(*pack);
+            v.setValue(pack);
             return v;
         }
             // Custom data
@@ -103,7 +105,7 @@ bool ResourceModel::setData(const QModelIndex& index, const QVariant& value, int
     if (pos >= m_packs.size() || pos < 0 || !index.isValid())
         return false;
 
-    m_packs[pos] = std::make_shared<ModPlatform::IndexedPack>(value.value<ModPlatform::IndexedPack>());
+    m_packs[pos] = value.value<ModPlatform::IndexedPack::Ptr>();
     emit dataChanged(index, index);
 
     return true;
@@ -230,7 +232,7 @@ void ResourceModel::clearData()
 
 void ResourceModel::runSearchJob(Task::Ptr ptr)
 {
-    m_current_search_job.reset(ptr); // clean up first
+    m_current_search_job.reset(ptr);  // clean up first
     m_current_search_job->start();
 }
 void ResourceModel::runInfoJob(Task::Ptr ptr)
@@ -336,7 +338,15 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
         ModPlatform::IndexedPack::Ptr pack = std::make_shared<ModPlatform::IndexedPack>();
         try {
             loadIndexedPack(*pack, packObj);
-            newList.append(pack);
+            if (auto sel = std::find_if(m_selected.begin(), m_selected.end(),
+                                        [&pack](const DownloadTaskPtr i) {
+                                            const auto ipack = i->getPack();
+                                            return ipack->provider == pack->provider && ipack->addonId == pack->addonId;
+                                        });
+                sel != m_selected.end()) {
+                newList.append(sel->get()->getPack());
+            } else
+                newList.append(pack);
         } catch (const JSONValidationError& e) {
             qWarning() << "Error while loading resource from " << debugName() << ": " << e.cause();
             continue;
@@ -390,15 +400,15 @@ void ResourceModel::searchRequestAborted()
 
 void ResourceModel::versionRequestSucceeded(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
 {
-    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
     // Check if the index is still valid for this resource or not
-    if (pack.addonId != current_pack.addonId)
+    if (pack.addonId != current_pack->addonId)
         return;
 
     try {
         auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
-        loadIndexedPackVersions(current_pack, arr);
+        loadIndexedPackVersions(*current_pack, arr);
     } catch (const JSONValidationError& e) {
         qDebug() << doc;
         qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
@@ -417,15 +427,15 @@ void ResourceModel::versionRequestSucceeded(QJsonDocument& doc, ModPlatform::Ind
 
 void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
 {
-    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
     // Check if the index is still valid for this resource or not
-    if (pack.addonId != current_pack.addonId)
+    if (pack.addonId != current_pack->addonId)
         return;
 
     try {
         auto obj = Json::requireObject(doc);
-        loadExtraPackInfo(current_pack, obj);
+        loadExtraPackInfo(*current_pack, obj);
     } catch (const JSONValidationError& e) {
         qDebug() << doc;
         qWarning() << "Error while reading " << debugName() << " resource info: " << e.cause();
@@ -440,6 +450,41 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
     }
 
     emit projectInfoUpdated();
+}
+
+void ResourceModel::addPack(ModPlatform::IndexedPack::Ptr pack,
+                            ModPlatform::IndexedVersion& version,
+                            const std::shared_ptr<ResourceFolderModel> packs,
+                            bool is_indexed,
+                            QString custom_target_folder)
+{
+    version.is_currently_selected = true;
+    m_selected.append(makeShared<ResourceDownloadTask>(pack, version, packs, is_indexed, custom_target_folder));
+}
+
+void ResourceModel::removePack(const QString& rem)
+{
+    auto pred = [&rem](const DownloadTaskPtr i) { return rem == i->getName(); };
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
+    m_selected.removeIf(pred);
+#else
+    {
+        for (auto it = m_selected.begin(); it != m_selected.end();)
+            if (pred(*it))
+                it = m_selected.erase(it);
+            else
+                ++it;
+    }
+#endif
+    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](const ModPlatform::IndexedPack::Ptr i) { return rem == i->name; });
+    if (pack == m_packs.end()) {  // ignore it if is not in the current search
+        return;
+    }
+    if (!pack->get()->versionsLoaded) {
+        return;
+    }
+    for (auto& ver : pack->get()->versions)
+        ver.is_currently_selected = false;
 }
 
 }  // namespace ResourceDownload
