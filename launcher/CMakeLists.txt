@@ -578,6 +578,7 @@ set(PRISMUPDATER_SOURCES
     updater/prismupdater/UpdaterDialogs.h
     updater/prismupdater/UpdaterDialogs.cpp
     updater/prismupdater/GitHubRelease.h
+   
     Json.h
     Json.cpp
     FileSystem.h
@@ -589,6 +590,31 @@ set(PRISMUPDATER_SOURCES
     Version.h
     Version.cpp
     Markdown.h
+    
+    # Time
+    MMCTime.h
+    MMCTime.cpp
+
+
+    net/ByteArraySink.h
+    net/ChecksumValidator.h
+    net/Download.cpp
+    net/Download.h
+    net/FileSink.cpp
+    net/FileSink.h
+    net/HttpMetaCache.cpp
+    net/HttpMetaCache.h
+    net/Logging.h
+    net/Logging.cpp
+    net/NetAction.h
+    net/NetJob.cpp
+    net/NetJob.h
+    net/NetUtils.h
+    net/Sink.h
+    net/Validator.h
+    net/HeaderProxy.h
+    net/RawHeaderProxy.h
+
 )
 
 ######## Logging categories ########
@@ -1111,6 +1137,7 @@ endif()
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_link_libraries(Launcher_logic
     systeminfo
     Launcher_murmur2
@@ -1188,7 +1215,7 @@ install(TARGETS ${Launcher_Name}
 
 if(WIN32 OR (DEFINED Launcher_BUILD_UPDATER AND Launcher_BUILD_UPDATER) )
     # Updater
-    add_library(prism_updater_logic STATIC ${PRISMUPDATER_SOURCES} ${PRISMUPDATER_UI})
+    add_library(prism_updater_logic STATIC ${PRISMUPDATER_SOURCES} ${TASKS_SOURCES} ${PRISMUPDATER_UI})
     target_include_directories(prism_updater_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(prism_updater_logic
         systeminfo
@@ -1199,6 +1226,7 @@ if(WIN32 OR (DEFINED Launcher_BUILD_UPDATER AND Launcher_BUILD_UPDATER) )
         Qt${QT_VERSION_MAJOR}::Network
         ${Launcher_QT_LIBS}
         cmark::cmark
+        Katabasis
     )
 
     add_executable("${Launcher_Name}_updater" WIN32 updater/prismupdater/updater_main.cpp)

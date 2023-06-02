@@ -59,7 +59,9 @@ class Download : public NetAction {
    public:
     ~Download() override = default;
 
+ #if defined(LAUNCHER_APPLICATION)
     static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
+ #endif
     static auto makeByteArray(QUrl url, QByteArray* output, Options options = Option::NoOptions) -> Download::Ptr;
     static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
 

@@ -57,6 +57,7 @@
 
 namespace Net {
 
+#if defined(LAUNCHER_APPLICATION)
 auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
@@ -68,6 +69,7 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
     dl->m_sink.reset(cachedNode);
     return dl;
 }
+#endif
 
 auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
 {
@@ -125,7 +127,12 @@ void Download::executeTask()
             return;
     }
 
-    request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
+#if defined(LAUNCHER_APPLICATION)
+    auto user_agent = APPLICATION->getUserAgent().toUtf8();
+#else
+    auto user_agent = BuildConfig.USER_AGENT.toUtf8();
+#endif
+    request.setHeader(QNetworkRequest::UserAgentHeader, user_agent);
     for ( auto& header_proxy : m_headerProxies ) {
 
         header_proxy->writeHeaders(request);
@@ -283,18 +290,21 @@ void Download::downloadFinished()
         m_sink->abort();
         m_reply.reset();
         emit succeeded();
+        emit finished();
         return;
     } else if (m_state == State::Failed) {
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit failed("");
+        emit finished();
         return;
     } else if (m_state == State::AbortedByUser) {
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit aborted();
+        emit finished();
         return;
     }
 
@@ -312,12 +322,14 @@ void Download::downloadFinished()
         m_sink->abort();
         m_reply.reset();
         emit failed("");
+        emit finished();
         return;
     }
 
     m_reply.reset();
     qCDebug(taskDownloadLogC) << getUid().toString() << "Download succeeded:" << m_url.toString();
     emit succeeded();
+    emit finished();
 }
 
 void Download::downloadReadyRead()

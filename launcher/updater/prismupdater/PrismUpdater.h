@@ -36,6 +36,10 @@
 #include <QUrl>
 #include <memory>
 
+#include "QObjectPtr.h"
+#include "net/Download.h"
+
+
 #define PRISM_EXTERNAL_EXE
 #include "FileSystem.h"
 
@@ -58,7 +62,7 @@ class PrismUpdaterApp : public QApplication {
     void showFatalErrorMessage(const QString& title, const QString& content);
 
     void loadPrismVersionFromExe(const QString& exe_path);
-    
+
     void downloadReleasePage(const QString& api_url, int page);
     int parseReleasePage(const QByteArray* responce);
     GitHubRelease getLatestRelease();
@@ -69,8 +73,10 @@ class PrismUpdaterApp : public QApplication {
     QList<GitHubRelease> newerReleases();
     QList<GitHubRelease> nonDraftReleases();
 
-    void downloadError(QNetworkReply::NetworkError error);
-    void sslErrors(const QList<QSslError>& errors);
+   public slots:
+    void downloadError(QString reason);
+
+   private:
 
     const QString& root() { return m_rootPath; }
 
@@ -95,8 +101,9 @@ class PrismUpdaterApp : public QApplication {
     QString m_prismGitCommit;
 
     Status m_status = Status::Starting;
-    QNetworkAccessManager* m_network;
-    QNetworkReply* m_reply;
+    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    QString m_current_url;
+    Task::Ptr m_current_task;
     QList<GitHubRelease> m_releases;
 
    public:

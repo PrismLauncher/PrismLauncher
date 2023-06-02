@@ -34,7 +34,9 @@
 
 #include <QMessageBox>
 #include <QNetworkRequest>
+#include <QNetworkProxy>
 #include <QProcess>
+#include <memory>
 
 #include <qglobal.h>
 #include <sys.h>
@@ -73,6 +75,9 @@ namespace fs = ghc::filesystem;
 #include "FileSystem.h"
 #include "Json.h"
 #include "StringUtils.h"
+
+#include "net/Download.h"
+#include "net/RawHeaderProxy.h"
 
 /** output to the log file */
 void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg)
@@ -205,8 +210,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         }
 #endif
     }
-    m_network = new QNetworkAccessManager();
-
+    
     {  // setup logging
         static const QString logBase = BuildConfig.LAUNCHER_NAME + "Updater" + (m_checkOnly ? "-CheckOnly" : "") + "-%0.log";
         auto moveFile = [](const QString& oldName, const QString& newName) {
@@ -292,6 +296,8 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         qDebug() << "<> Log initialized.";
     }
 
+    
+
     {  // log debug program info
         qDebug() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME) << "Updater"
                  << ", (c) 2022-2023 " << qPrintable(QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
@@ -310,7 +316,14 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         qDebug() << "<> Paths set.";
     }
 
-    loadReleaseList();
+    { // network
+        m_network = makeShared<QNetworkAccessManager>(new QNetworkAccessManager());
+        qDebug() << "Detecting proxy settings...";
+        QNetworkProxy proxy = QNetworkProxy::applicationProxy();
+        m_network->setProxy(proxy);
+    }
+
+    QMetaObject::invokeMethod(this, &PrismUpdaterApp::loadReleaseList, Qt::QueuedConnection);
 }
 
 PrismUpdaterApp::~PrismUpdaterApp()
@@ -329,9 +342,6 @@ PrismUpdaterApp::~PrismUpdaterApp()
     }
 #endif
 
-    m_network->deleteLater();
-    if (m_reply)
-        m_reply->deleteLater();
 }
 
 void PrismUpdaterApp::fail(const QString& reason)
@@ -460,7 +470,7 @@ GitHubRelease PrismUpdaterApp::selectRelease()
     } else {
         releases = newerReleases();
     }
-    
+
     if (releases.isEmpty())
         return {};
 
@@ -530,34 +540,40 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
 {
     int per_page = 30;
     auto page_url = QString("%1?per_page=%2&page=%3").arg(api_url).arg(QString::number(per_page)).arg(QString::number(page));
-    QNetworkRequest request(page_url);
-    request.setRawHeader("Accept", "application/vnd.github+json");
-    request.setRawHeader("X-GitHub-Api-Version", "2022-11-28");
+    auto responce = std::make_shared<QByteArray>();
+    auto download = Net::Download::makeByteArray(page_url, responce.get());
+    download->setNetwork(m_network);
+    m_current_url = page_url;
 
-    QNetworkReply* rep = m_network->get(request);
-    m_reply = rep;
-    auto responce = new QByteArray();
+    auto githup_api_headers = new Net::RawHeaderProxy();
+    githup_api_headers->addHeaders({
+        { "Accept", "application/vnd.github+json" },
+        { "X-GitHub-Api-Version", "2022-11-28" },
+    });
+    download->addHeaderProxy(githup_api_headers);
 
-    connect(rep, &QNetworkReply::finished, this, [this, responce, per_page, api_url, page]() {
-        int num_found = parseReleasePage(responce);
-        delete responce;
-
+    connect(download.get(), &Net::Download::succeeded, this, [this, responce, per_page, api_url, page]() {
+        int num_found = parseReleasePage(responce.get());
         if (!(num_found < per_page)) {  // there may be more, fetch next page
             downloadReleasePage(api_url, page + 1);
         } else {
             run();
         }
     });
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
-    connect(rep, &QNetworkReply::errorOccurred, this, &PrismUpdaterApp::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &WindowsUpdaterApp::downloadError);
-#endif
-    connect(rep, &QNetworkReply::sslErrors, this, &PrismUpdaterApp::sslErrors);
-    connect(rep, &QNetworkReply::readyRead, this, [this, responce]() {
-        auto data = m_reply->readAll();
-        responce->append(data);
+    connect(download.get(), &Net::Download::failed, this, &PrismUpdaterApp::downloadError);
+
+
+    m_current_task.reset(download);
+    connect(download.get(), &Net::Download::finished, this, [this](){
+        qDebug() << "Download" << m_current_task->getUid().toString() << "finsihed";
+        m_current_task.reset();
+        m_current_url = "";
     });
+    
+
+    QCoreApplication::processEvents();
+
+    QMetaObject::invokeMethod(download.get(), &Task::start, Qt::QueuedConnection);
 }
 
 int PrismUpdaterApp::parseReleasePage(const QByteArray* responce)
@@ -624,24 +640,7 @@ bool PrismUpdaterApp::needUpdate(const GitHubRelease& release)
     return current_ver < release.version;
 }
 
-void PrismUpdaterApp::downloadError(QNetworkReply::NetworkError error)
+void PrismUpdaterApp::downloadError(QString reason)
 {
-    if (error == QNetworkReply::OperationCanceledError) {
-        abort(QString("Aborted %1").arg(m_reply->url().toString()));
-    } else {
-        fail(QString("Network request Failed: %1 with reason %2").arg(m_reply->url().toString()).arg(error));
-    }
-}
-
-void PrismUpdaterApp::sslErrors(const QList<QSslError>& errors)
-{
-    int i = 1;
-    QString err_msg;
-    for (auto error : errors) {
-        err_msg.append(QString("Network request %1 SSL Error %2: %3\n").arg(m_reply->url().toString()).arg(i).arg(error.errorString()));
-        auto cert = error.certificate();
-        err_msg.append(QString("Certificate in question:\n%1").arg(cert.toText()));
-        i++;
-    }
-    fail(err_msg);
+    fail(QString("Network request Failed: %1 with reason %2").arg(m_current_url).arg(reason));
 }
