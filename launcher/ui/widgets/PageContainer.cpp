@@ -137,6 +137,11 @@ BasePage* PageContainer::getPage(QString pageId)
     return m_model->findPageEntryById(pageId);
 }
 
+const QList<BasePage*> PageContainer::getPages() const
+{
+    return m_model->pages();
+}
+
 void PageContainer::refreshContainer()
 {
     m_proxyModel->invalidate();

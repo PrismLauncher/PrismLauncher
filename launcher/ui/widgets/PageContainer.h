@@ -80,6 +80,7 @@ public:
 
     virtual bool selectPage(QString pageId) override;
     BasePage* getPage(QString pageId) override;
+    const QList<BasePage*> getPages() const;
 
     void refreshContainer() override;
     virtual void setParentContainer(BasePageContainer * container)
