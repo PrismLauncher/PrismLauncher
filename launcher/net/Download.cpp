@@ -131,13 +131,12 @@ void Download::executeTask()
             return;
     }
 
-#if defined (LAUNCHER_APPLICATION)
-    auto user_agent = APPLICATION->getUserAgent();
+#if defined(LAUNCHER_APPLICATION)
+    auto user_agent = APPLICATION->getUserAgent().toUtf8();
 #else
-    auto user_agent = BuildConfig.USER_AGENT;
+    auto user_agent = BuildConfig.USER_AGENT.toUtf8();
 #endif
-    
-    request.setHeader(QNetworkRequest::UserAgentHeader, user_agent.toUtf8());
+    request.setHeader(QNetworkRequest::UserAgentHeader, user_agent);
     for ( auto& header_proxy : m_headerProxies ) {
 
         header_proxy->writeHeaders(request);
