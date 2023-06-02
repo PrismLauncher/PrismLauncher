@@ -9,6 +9,7 @@
 #include "BuildConfig.h"
 #include "Json.h"
 #include "net/NetJob.h"
+#include "net/ApiDownload.h"
 #include "net/Upload.h"
 
 Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, QByteArray* response)
@@ -40,7 +41,7 @@ auto FlameAPI::getModFileChangelog(int modId, int fileId) -> QString
 
     auto netJob = makeShared<NetJob>(QString("Flame::FileChangelog"), APPLICATION->network());
     auto response = std::make_shared<QByteArray>();
-    netJob->addNetAction(Net::Download::makeByteArray(
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString("https://api.curseforge.com/v1/mods/%1/files/%2/changelog")
             .arg(QString::fromStdString(std::to_string(modId)), QString::fromStdString(std::to_string(fileId))),
         response.get()));
@@ -75,7 +76,7 @@ auto FlameAPI::getModDescription(int modId) -> QString
 
     auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"), APPLICATION->network());
     auto response = std::make_shared<QByteArray>();
-    netJob->addNetAction(Net::Download::makeByteArray(
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString("https://api.curseforge.com/v1/mods/%1/description").arg(QString::number(modId)), response.get()));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [&netJob, response, &description] {
@@ -115,7 +116,7 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
     auto response = std::make_shared<QByteArray>();
     ModPlatform::IndexedVersion ver;
 
-    netJob->addNetAction(Net::Download::makeByteArray(versions_url, response.get()));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response.get()));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [response, args, &ver] {
         QJsonParseError parse_error{};

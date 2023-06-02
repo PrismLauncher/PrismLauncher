@@ -60,6 +60,8 @@
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 
+#include "net/ApiDownload.h"
+
 
 const static QMap<QString, QString> forgemap = { { "1.2.5", "3.4.9.171" },
                                                  { "1.4.2", "6.0.1.355" },
@@ -473,7 +475,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
             case Flame::File::Type::Mod: {
                 if (!result.url.isEmpty()) {
                     qDebug() << "Will download" << result.url << "to" << path;
-                    auto dl = Net::Download::makeFile(result.url, path);
+                    auto dl = Net::ApiDownload::makeFile(result.url, path);
                     m_files_job->addNetAction(dl);
                 }
                 break;

@@ -37,6 +37,7 @@
 #include "Application.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
+#include "net/ApiDownload.h"
 
 #include "StringUtils.h"
 #include <Version.h>
@@ -254,7 +255,7 @@ void ListModel::requestLogo(QString file)
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
     NetJob *job = new NetJob(QString("FTB Icon Download for %1").arg(file), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::finished, this, [this, file, fullPath]

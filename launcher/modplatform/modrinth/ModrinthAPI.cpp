@@ -8,12 +8,13 @@
 #include "Json.h"
 #include "net/NetJob.h"
 #include "net/Upload.h"
+#include "net/ApiDownload.h"
 
 Task::Ptr ModrinthAPI::currentVersion(QString hash, QString hash_format, QByteArray* response)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
 
-    netJob->addNetAction(Net::Download::makeByteArray(
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hash_format), response));
 
     QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
@@ -111,7 +112,7 @@ Task::Ptr ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) c
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetProjects"), APPLICATION->network());
     auto searchUrl = getMultipleModInfoURL(addonIds);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
 
     QObject::connect(netJob.get(), &NetJob::finished, [response, netJob] {
         delete response;
