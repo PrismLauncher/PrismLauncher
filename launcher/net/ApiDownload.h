@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -28,12 +26,14 @@ namespace Net {
 
 class ApiDownload : public Download {
    public:
-    ApiDownload() : Download()
-    {
-        auto api_headers = new ApiHeaderProxy();
-        addHeaderProxy(api_headers);
-    }
     virtual ~ApiDownload() = default;
+
+    static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
+    static auto makeByteArray(QUrl url, QByteArray* output, Options options = Option::NoOptions) -> Download::Ptr;
+    static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
+
+    void init() override;
+    
 };
 
 }  // namespace Net

@@ -59,6 +59,7 @@ class NetAction : public Task {
     void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
 
     void addHeaderProxy(Net::HeaderProxy* proxy) { m_headerProxies.push_back(std::shared_ptr<Net::HeaderProxy>(proxy)); }
+    virtual void init() = 0;
 
    protected slots:
     virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) = 0;
