@@ -96,6 +96,8 @@ void Download::addValidator(Validator* v)
 
 void Download::executeTask()
 {
+    init();
+
     setStatus(tr("Downloading %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
     if (getState() == Task::State::AbortedByUser) {
@@ -124,7 +126,8 @@ void Download::executeTask()
     }
 
     request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
-    for ( auto header_proxy : m_headerProxies ) {
+    for ( auto& header_proxy : m_headerProxies ) {
+
         header_proxy->writeHeaders(request);
     }
     // TODO remove duplication
