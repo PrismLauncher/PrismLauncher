@@ -33,7 +33,6 @@ class ApiDownload : public Download {
     static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
 
     void init() override;
-    
 };
 
 }  // namespace Net
