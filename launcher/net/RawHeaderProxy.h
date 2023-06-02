@@ -25,10 +25,10 @@
 
 namespace Net {
 
-class ApiHeaderProxy : public HeaderProxy {
+class RawHeaderProxy : public HeaderProxy {
    public:
-    ApiHeaderProxy() : HeaderProxy(){};
-    virtual ~ApiHeaderProxy() = default;
+    RawHeaderProxy() : HeaderProxy(){};
+    virtual ~RawHeaderProxy() = default;
 
    public:
     virtual QList<HeaderPair> headers(const QNetworkRequest&) const override { return m_headers; };
