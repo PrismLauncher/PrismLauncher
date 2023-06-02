@@ -21,7 +21,7 @@
         };
     in {
       prismlauncher-qt5-unwrapped = mkPrism final.libsForQt5;
-      prismlauncher-qt5 = prev.prismlauncher-qt5.override {inherit (final) prismlauncher-unwrapped;};
+      prismlauncher-qt5 = prev.prismlauncher-qt5.override {prismlauncher-unwrapped = final.prismlauncher-qt5-unwrapped;};
       prismlauncher-unwrapped = mkPrism final.qt6Packages;
       prismlauncher = prev.prismlauncher.override {inherit (final) prismlauncher-unwrapped;};
     };
