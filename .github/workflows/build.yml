@@ -383,6 +383,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
           cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build_type }}
+          Get-Content ${{ env.BUILD_DIR }}/install_manifest.txt | %{ $_.TrimStart("$pwd/") } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('./') } | Out-File -Append -FilePath ${{ env.INSTALL_DIR }}/manifest.txt 
 
           cd ${{ env.INSTALL_DIR }}
           if ("${{ matrix.qt_ver }}" -eq "5")
