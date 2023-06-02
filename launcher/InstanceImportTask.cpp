@@ -51,6 +51,8 @@
 
 #include "settings/INISettingsObject.h"
 
+#include "net/ApiDownload.h"
+
 #include <QtConcurrentRun>
 #include <algorithm>
 
@@ -95,7 +97,7 @@ void InstanceImportTask::executeTask()
         m_archivePath = entry->getFullPath();
 
         m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
-        m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
+        m_filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
 
         connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
         connect(m_filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);

@@ -15,7 +15,7 @@
 #include "BuildConfig.h"
 #include "Json.h"
 
-#include "net/Download.h"
+#include "net/ApiDownload.h"
 #include "net/NetJob.h"
 
 #include "modplatform/ModIndex.h"
@@ -276,7 +276,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     auto cache_entry = APPLICATION->metacache()->resolveEntry(
         metaEntryBase(),
         QString("logos/%1").arg(QString(QCryptographicHash::hash(url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
-    auto icon_fetch_action = Net::Download::makeCached(url, cache_entry);
+    auto icon_fetch_action = Net::ApiDownload::makeCached(url, cache_entry);
 
     auto full_file_path = cache_entry->getFullPath();
     connect(icon_fetch_action.get(), &NetAction::succeeded, this, [=] {

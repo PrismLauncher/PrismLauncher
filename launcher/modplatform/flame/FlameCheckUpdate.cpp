@@ -12,6 +12,8 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 
+#include "net/ApiDownload.h"
+
 static FlameAPI api;
 
 bool FlameCheckUpdate::abort()
@@ -32,7 +34,7 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
 
     auto response = new QByteArray();
     auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(ver_info.addonId.toString());
-    auto dl = Net::Download::makeByteArray(url, response);
+    auto dl = Net::ApiDownload::makeByteArray(url, response);
     get_project_job->addNetAction(dl);
 
     QObject::connect(get_project_job, &NetJob::succeeded, [response, &pack]() {
@@ -76,7 +78,7 @@ ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
 
     auto response = new QByteArray();
     auto url = QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(QString::number(addonId), QString::number(fileId));
-    auto dl = Net::Download::makeByteArray(url, response);
+    auto dl = Net::ApiDownload::makeByteArray(url, response);
     get_file_info_job->addNetAction(dl);
 
     QObject::connect(get_file_info_job, &NetJob::succeeded, [response, &ver]() {

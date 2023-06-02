@@ -38,6 +38,8 @@
 #include "BuildConfig.h"
 #include "Json.h"
 
+#include "net/ApiDownload.h"
+
 #include <QIcon>
 
 Technic::ListModel::ListModel(QObject *parent) : QAbstractListModel(parent)
@@ -134,7 +136,7 @@ void Technic::ListModel::performSearch()
         ).arg(BuildConfig.TECHNIC_API_BASE_URL, BuildConfig.TECHNIC_API_BUILD, currentSearchTerm);
         searchMode = List;
     }
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), &response));
     jobPtr = netJob;
     jobPtr->start();
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
@@ -286,7 +288,7 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo));
     NetJob *job = new NetJob(QString("Technic Icon Download %1").arg(logo), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
 
