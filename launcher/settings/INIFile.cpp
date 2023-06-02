@@ -45,12 +45,12 @@
 
 #include <QSettings>
 
-INIFile::INIFile()
-{
-}
+INIFile::INIFile() {}
 
 bool INIFile::saveFile(QString fileName)
 {
+    if (!contains("ConfigVersion"))
+        insert("ConfigVersion", "1.2");
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
     _settings_obj.setFallbacksEnabled(false);
 
@@ -71,6 +71,81 @@ bool INIFile::saveFile(QString fileName)
 
     return true;
 }
+QString unescape(QString orig)
+{
+    QString out;
+    QChar prev = QChar::Null;
+    for (auto c : orig) {
+        if (prev == '\\') {
+            if (c == 'n')
+                out += '\n';
+            else if (c == 't')
+                out += '\t';
+            else if (c == '#')
+                out += '#';
+            else
+                out += c;
+            prev = QChar::Null;
+        } else {
+            if (c == '\\') {
+                prev = c;
+                continue;
+            }
+            out += c;
+            prev = QChar::Null;
+        }
+    }
+    return out;
+}
+
+QString unquote(QString str)
+{
+    if ((str.contains(QChar(';')) || str.contains(QChar('=')) || str.contains(QChar(','))) && str.endsWith("\"") && str.startsWith("\"")) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+        str = str.remove(0, 1);
+        str = str.remove(str.size() - 1, 1);
+#else
+        str = str.removeFirst().removeLast();
+#endif
+    }
+    return str;
+}
+
+bool parseOldFileFormat(QIODevice& device, QSettings::SettingsMap& map)
+{
+    QTextStream in(device.readAll());
+#if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
+    in.setCodec("UTF-8");
+#endif
+
+    QStringList lines = in.readAll().split('\n');
+    for (int i = 0; i < lines.count(); i++) {
+        QString& lineRaw = lines[i];
+        // Ignore comments.
+        int commentIndex = 0;
+        QString line = lineRaw;
+        // Search for comments until no more escaped # are available
+        while ((commentIndex = line.indexOf('#', commentIndex + 1)) != -1) {
+            if (commentIndex > 0 && line.at(commentIndex - 1) == '\\') {
+                continue;
+            }
+            line = line.left(lineRaw.indexOf('#')).trimmed();
+        }
+
+        int eqPos = line.indexOf('=');
+        if (eqPos == -1)
+            continue;
+        QString key = line.left(eqPos).trimmed();
+        QString valueStr = line.right(line.length() - eqPos - 1).trimmed();
+
+        valueStr = unquote(unescape(valueStr));
+
+        QVariant value(valueStr);
+        map.insert(key, value);
+    }
+
+    return true;
+}
 
 bool INIFile::loadFile(QString fileName)
 {
@@ -84,10 +159,29 @@ bool INIFile::loadFile(QString fileName)
             qCritical() << "A format error occurred (e.g. loading a malformed INI file).";
         return false;
     }
-
-    for (auto&& key : _settings_obj.allKeys())
-        insert(key, _settings_obj.value(key));
- 
+    if (!_settings_obj.value("ConfigVersion").isValid()) {
+        QFile file(fileName);
+        if (!file.open(QIODevice::ReadOnly))
+            return false;
+        QSettings::SettingsMap map;
+        parseOldFileFormat(file, map);
+        file.close();
+        for (auto&& key : map.keys())
+            insert(key, map.value(key));
+        insert("ConfigVersion", "1.2");
+    } else if (_settings_obj.value("ConfigVersion").toString() == "1.1") {
+        for (auto&& key : _settings_obj.allKeys()) {
+            if (auto valueStr = _settings_obj.value(key).toString();
+                (valueStr.contains(QChar(';')) || valueStr.contains(QChar('=')) || valueStr.contains(QChar(','))) &&
+                valueStr.endsWith("\"") && valueStr.startsWith("\"")) {
+                insert(key, unquote(valueStr));
+            } else
+                insert(key, _settings_obj.value(key));
+        }
+        insert("ConfigVersion", "1.2");
+    } else
+        for (auto&& key : _settings_obj.allKeys())
+            insert(key, _settings_obj.value(key));
     return true;
 }
 
@@ -103,4 +197,3 @@ void INIFile::set(QString key, QVariant val)
 {
     this->operator[](key) = val;
 }
-

@@ -46,6 +46,7 @@ public:
     static Ptr make(ScreenShot::Ptr shot) {
         return Ptr(new ImgurUpload(shot));
     }
+    void init() override {};
 
 protected
 slots:

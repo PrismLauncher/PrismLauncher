@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -21,6 +19,7 @@
 
 #pragma once
 
+#include <QDebug>
 #include <QNetworkRequest>
 
 namespace Net {
@@ -39,7 +38,8 @@ class HeaderProxy {
     virtual QList<HeaderPair> headers(const QNetworkRequest& request) const = 0;
 
    public:
-    void writeHeaders(QNetworkRequest& request) {
+    void writeHeaders(QNetworkRequest& request)
+    {
         for (auto header : headers(request)) {
             request.setRawHeader(header.headerName, header.headerValue);
         }

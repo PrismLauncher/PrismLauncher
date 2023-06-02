@@ -60,8 +60,10 @@ class Download : public NetAction {
     ~Download() override = default;
 
     static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
-    static auto makeByteArray(QUrl url, QByteArray* output, Options options = Option::NoOptions) -> Download::Ptr;
+    static auto makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options = Option::NoOptions) -> Download::Ptr;
     static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
+
+    void init() override {};
 
    public:
     void addValidator(Validator* v);
@@ -81,7 +83,7 @@ class Download : public NetAction {
    public slots:
     void executeTask() override;
 
-   private:
+   protected:
     std::unique_ptr<Sink> m_sink;
     Options m_options;
 

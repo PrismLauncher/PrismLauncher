@@ -41,12 +41,16 @@
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <memory>
 
 #include "ByteArraySink.h"
 #include "ChecksumValidator.h"
 #include "MetaCacheSink.h"
 
+#if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
+#endif
+
 #include "BuildConfig.h"
 
 #include "net/Logging.h"
@@ -57,6 +61,7 @@
 
 namespace Net {
 
+#if defined(LAUNCHER_APPLICATION)
 auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
@@ -68,8 +73,9 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
     dl->m_sink.reset(cachedNode);
     return dl;
 }
+#endif
 
-auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
+auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
     dl->m_url = url;
@@ -96,6 +102,8 @@ void Download::addValidator(Validator* v)
 
 void Download::executeTask()
 {
+    init();
+
     setStatus(tr("Downloading %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
     if (getState() == Task::State::AbortedByUser) {
@@ -108,8 +116,8 @@ void Download::executeTask()
     m_state = m_sink->init(request);
     switch (m_state) {
         case State::Succeeded:
-            emit succeeded();
             qCDebug(taskDownloadLogC) << getUid().toString() << "Download cache hit " << m_url.toString();
+            emitSucceeded();
             return;
         case State::Running:
             qCDebug(taskDownloadLogC) << getUid().toString() << "Downloading " << m_url.toString();
@@ -123,8 +131,15 @@ void Download::executeTask()
             return;
     }
 
-    request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgent().toUtf8());
-    for ( auto header_proxy : m_headerProxies ) {
+#if defined (LAUNCHER_APPLICATION)
+    auto user_agent = APPLICATION->getUserAgent();
+#else
+    auto user_agent = BuildConfig.USER_AGENT;
+#endif
+    
+    request.setHeader(QNetworkRequest::UserAgentHeader, user_agent.toUtf8());
+    for ( auto& header_proxy : m_headerProxies ) {
+
         header_proxy->writeHeaders(request);
     }
     // TODO remove duplication
@@ -159,7 +174,7 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
     auto bytes_received_since = bytesReceived - m_last_progress_bytes;
     auto dl_speed_bps = (double)bytes_received_since / elapsed_ms.count() * 1000;
-    auto remaing_time_s = (bytesTotal - bytesReceived) / dl_speed_bps;
+    auto remaining_time_s = (bytesTotal - bytesReceived) / dl_speed_bps;
 
     //: Current amount of bytes downloaded, out of the total amount of bytes in the download
     QString dl_progress =
@@ -167,7 +182,7 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 
     QString dl_speed_str;
     if (elapsed_ms.count() > 0) {
-        auto str_eta = bytesTotal > 0 ? Time::humanReadableDuration(remaing_time_s) : tr("unknown");
+        auto str_eta = bytesTotal > 0 ? Time::humanReadableDuration(remaining_time_s) : tr("unknown");
         //: Download speed, in bytes per second (remaining download time in parenthesis)
         dl_speed_str =
             tr("%1 /s (%2)").arg(StringUtils::humanReadableFileSize(dl_speed_bps)).arg(str_eta);
@@ -279,19 +294,19 @@ void Download::downloadFinished()
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit succeeded();
+        emitSucceeded();
         return;
     } else if (m_state == State::Failed) {
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit failed("");
+        emitFailed("");
         return;
     } else if (m_state == State::AbortedByUser) {
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit aborted();
+        emitAborted();
         return;
     }
 
@@ -308,13 +323,13 @@ void Download::downloadFinished()
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emit failed("");
+        emitFailed("");
         return;
     }
 
     m_reply.reset();
     qCDebug(taskDownloadLogC) << getUid().toString() << "Download succeeded:" << m_url.toString();
-    emit succeeded();
+    emitSucceeded();
 }
 
 void Download::downloadReadyRead()

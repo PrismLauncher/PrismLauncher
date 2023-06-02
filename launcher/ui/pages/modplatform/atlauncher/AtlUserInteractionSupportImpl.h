@@ -42,15 +42,15 @@
 class AtlUserInteractionSupportImpl : public QObject, public ATLauncher::UserInteractionSupport {
     Q_OBJECT
 
-public:
+   public:
     AtlUserInteractionSupportImpl(QWidget* parent);
+    virtual ~AtlUserInteractionSupportImpl() = default;
 
-private:
+   private:
     QString chooseVersion(Meta::VersionList::Ptr vlist, QString minecraftVersion) override;
     std::optional<QVector<QString>> chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods) override;
     void displayMessage(QString message) override;
 
-private:
+   private:
     QWidget* m_parent;
-
 };

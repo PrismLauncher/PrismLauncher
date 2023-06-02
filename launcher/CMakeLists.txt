@@ -140,6 +140,9 @@ set(NET_SOURCES
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
     net/ApiDownload.h
+    net/ApiDownload.cpp
+    net/ApiUpload.cpp
+    net/ApiUpload.h
 )
 
 # Game launch logic
@@ -366,6 +369,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/LocalWorldSaveParseTask.cpp
     minecraft/mod/tasks/LocalResourceParse.h
     minecraft/mod/tasks/LocalResourceParse.cpp
+    minecraft/mod/tasks/GetModDependenciesTask.h
+    minecraft/mod/tasks/GetModDependenciesTask.cpp
 
     # Assets
     minecraft/AssetsUtils.h
@@ -529,6 +534,8 @@ set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthCheckUpdate.h
     modplatform/modrinth/ModrinthInstanceCreationTask.cpp
     modplatform/modrinth/ModrinthInstanceCreationTask.h
+    modplatform/modrinth/ModrinthPackExportTask.cpp
+    modplatform/modrinth/ModrinthPackExportTask.h
 )
 
 set(PACKWIZ_SOURCES
@@ -743,6 +750,10 @@ SET(LAUNCHER_SOURCES
     # FIXME: maybe find a better home for this.
     SkinUtils.cpp
     SkinUtils.h
+    FileIgnoreProxy.cpp
+    FileIgnoreProxy.h
+    FastFileIconProvider.cpp
+    FastFileIconProvider.h
 
     # GUI - setup wizard
     ui/setupwizard/SetupWizard.h
@@ -923,6 +934,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/EditAccountDialog.h
     ui/dialogs/ExportInstanceDialog.cpp
     ui/dialogs/ExportInstanceDialog.h
+    ui/dialogs/ExportMrPackDialog.cpp
+    ui/dialogs/ExportMrPackDialog.h
     ui/dialogs/IconPickerDialog.cpp
     ui/dialogs/IconPickerDialog.h
     ui/dialogs/ImportResourceDialog.cpp
@@ -1069,6 +1082,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ProfileSelectDialog.ui
     ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
+    ui/dialogs/ExportMrPackDialog.ui
     ui/dialogs/IconPickerDialog.ui
     ui/dialogs/ImportResourceDialog.ui
     ui/dialogs/MSALoginDialog.ui
@@ -1109,6 +1123,7 @@ endif()
 
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Launcher_logic
     systeminfo
