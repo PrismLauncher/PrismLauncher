@@ -40,7 +40,7 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
     , version(version)
     , summary(summary)
     , instance(instance)
-    , mcInstance(dynamic_cast<const MinecraftInstance*>(instance.get()))
+    , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
     , gameRoot(instance->gameRoot())
     , output(output)
     , filter(filter)

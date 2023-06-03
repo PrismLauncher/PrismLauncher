@@ -51,7 +51,7 @@ class ModrinthPackExportTask : public Task {
     // inputs
     const QString name, version, summary;
     const InstancePtr instance;
-    const MinecraftInstance* mcInstance;
+    MinecraftInstance* mcInstance;
     const QDir gameRoot;
     const QString output;
     const MMCZip::FilterFunction filter;
