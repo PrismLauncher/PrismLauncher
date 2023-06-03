@@ -18,27 +18,9 @@
 
 #pragma once
 
-#include <QDialog>
-#include "BaseInstance.h"
-#include "FastFileIconProvider.h"
-#include "FileIgnoreProxy.h"
+#include <QFileIconProvider>
 
-namespace Ui {
-class ExportMrPackDialog;
-}
-
-class ExportMrPackDialog : public QDialog {
-    Q_OBJECT
-
+class FastFileIconProvider : public QFileIconProvider {
    public:
-    explicit ExportMrPackDialog(InstancePtr instance, QWidget* parent = nullptr);
-    ~ExportMrPackDialog();
-
-    void done(int result) override;
-
-   private:
-    const InstancePtr instance;
-    Ui::ExportMrPackDialog* ui;
-    FileIgnoreProxy* proxy;
-    FastFileIconProvider icons;
+    QIcon icon(const QFileInfo& info) const override;
 };

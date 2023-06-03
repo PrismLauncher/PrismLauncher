@@ -26,6 +26,7 @@
 #include <QFileSystemModel>
 #include <QJsonDocument>
 #include <QMessageBox>
+#include "FastFileIconProvider.h"
 #include "FileSystem.h"
 #include "MMCZip.h"
 #include "modplatform/modrinth/ModrinthPackExportTask.h"
@@ -38,6 +39,8 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     ui->summary->setText(instance->notes().split(QRegularExpression("\\r?\\n"))[0]);
 
     QFileSystemModel* model = new QFileSystemModel(this);
+    model->setIconProvider(&icons);
+
     // use the game root - everything outside cannot be exported
     const QDir root(instance->gameRoot());
     proxy = new FileIgnoreProxy(instance->gameRoot(), this);

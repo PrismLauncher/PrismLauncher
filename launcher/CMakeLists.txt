@@ -724,6 +724,8 @@ SET(LAUNCHER_SOURCES
     SkinUtils.h
     FileIgnoreProxy.cpp
     FileIgnoreProxy.h
+    FastFileIconProvider.cpp
+    FastFileIconProvider.h
 
     # GUI - setup wizard
     ui/setupwizard/SetupWizard.h

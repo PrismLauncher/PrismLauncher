@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,7 +47,6 @@
 #include <QSaveFile>
 #include <QStack>
 #include <QFileInfo>
-#include "StringUtils.h"
 #include "SeparatorPrefixTree.h"
 #include "Application.h"
 #include <icons/IconList.h>
@@ -57,6 +57,7 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent
 {
     ui->setupUi(this);
     auto model = new QFileSystemModel(this);
+    model->setIconProvider(&icons);
     auto root = instance->instanceRoot();
     proxyModel = new FileIgnoreProxy(root, this);
     loadPackIgnore();
