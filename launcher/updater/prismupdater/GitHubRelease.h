@@ -3,6 +3,8 @@
 #include <QList>
 #include <QString>
 
+#include <QDebug>
+
 #include "Version.h"
 
 struct GitHubReleaseAsset {
@@ -32,3 +34,7 @@ struct GitHubRelease {
 
     bool isValid() const { return id > 0; }
 };
+
+QDebug operator<<(QDebug debug, const GitHubReleaseAsset& rls);
+QDebug operator<<(QDebug debug, const GitHubRelease& rls);
+
