@@ -39,7 +39,6 @@
 #include "QObjectPtr.h"
 #include "net/Download.h"
 
-
 #define PRISM_EXTERNAL_EXE
 #include "FileSystem.h"
 
@@ -65,25 +64,34 @@ class PrismUpdaterApp : public QApplication {
 
     void downloadReleasePage(const QString& api_url, int page);
     int parseReleasePage(const QByteArray* responce);
-    GitHubRelease getLatestRelease();
+
     bool needUpdate(const GitHubRelease& release);
+
+    GitHubRelease getLatestRelease();
     GitHubRelease selectRelease();
-    void performUpdate(const GitHubRelease& release);
-    void printReleases();
     QList<GitHubRelease> newerReleases();
     QList<GitHubRelease> nonDraftReleases();
+
+    void printReleases();
+
+    QList<GitHubReleaseAsset> validReleaseArtifacts(const GitHubRelease& release);
+    GitHubReleaseAsset selectAsset(const QList<GitHubReleaseAsset>& assets);
+    void performUpdate(const GitHubRelease& release);
+
+    QFileInfo downloadAsset(const GitHubReleaseAsset& asset);
 
    public slots:
     void downloadError(QString reason);
 
    private:
-
     const QString& root() { return m_rootPath; }
 
     bool isPortable() { return m_portable; }
 
     QString m_rootPath;
     bool m_portable = false;
+    bool m_appimage = false;
+    QString m_appimagePath;
     QString m_prismExecutable;
     QUrl m_prismRepoUrl;
     Version m_userSelectedVersion;
