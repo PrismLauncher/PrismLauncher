@@ -483,8 +483,14 @@ jobs:
 
           chmod +x AppImageUpdate-x86_64.AppImage
           ./AppImageUpdate-x86_64.AppImage --appimage-extract
-          rm -rf squashfs_root/usr/share
-          rsync --ignore-existing -ar squashfs_root/usr/ ${{ env.INSTALL_APPIMAGE_DIR }}/usr/
+
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
+
+          cp -r squashfs-root/usr/bin/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
+          cp -r squashfs-root/usr/lib/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib
+          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
+          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
 
           export UPDATE_INFORMATION="gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-${{ runner.os }}-*-x86_64.AppImage.zsync" 
 
