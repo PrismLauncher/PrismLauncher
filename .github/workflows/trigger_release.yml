@@ -44,7 +44,7 @@ jobs:
           mv PrismLauncher-Linux-Portable*/PrismLauncher-portable.tar.gz PrismLauncher-Linux-Portable-${{ env.VERSION }}.tar.gz
           mv PrismLauncher-Linux*/PrismLauncher.tar.gz PrismLauncher-Linux-${{ env.VERSION }}.tar.gz
           mv PrismLauncher-*.AppImage/PrismLauncher-*.AppImage PrismLauncher-Linux-${{ env.VERSION }}-x86_64.AppImage
-          mv PrismLauncher-*.AppImage/PrismLauncher-*.AppImage.zsync PrismLauncher-Linux-${{ env.VERSION }}-x86_64.AppImage.zsync
+          mv PrismLauncher-*.AppImage.zsync/PrismLauncher-*.AppImage.zsync PrismLauncher-Linux-${{ env.VERSION }}-x86_64.AppImage.zsync
           mv PrismLauncher-macOS-Legacy*/PrismLauncher.tar.gz PrismLauncher-macOS-Legacy-${{ env.VERSION }}.tar.gz
           mv PrismLauncher-macOS*/PrismLauncher.tar.gz PrismLauncher-macOS-${{ env.VERSION }}.tar.gz
 
