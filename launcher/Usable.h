@@ -12,28 +12,20 @@ class Usable;
  *
  * @see UseLock
  */
-class Usable
-{
+class Usable {
     friend class UseLock;
-public:
-    std::size_t useCount() const
-    {
-        return m_useCount;
-    }
-    bool isInUse() const
-    {
-        return m_useCount > 0;
-    }
-protected:
-    virtual void decrementUses()
-    {
-        m_useCount--;
-    }
-    virtual void incrementUses()
-    {
-        m_useCount++;
-    }
-private:
+
+   public:
+    virtual ~Usable() {}
+
+    std::size_t useCount() const { return m_useCount; }
+    bool isInUse() const { return m_useCount > 0; }
+
+   protected:
+    virtual void decrementUses() { m_useCount--; }
+    virtual void incrementUses() { m_useCount++; }
+
+   private:
     std::size_t m_useCount = 0;
 };
 

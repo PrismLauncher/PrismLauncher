@@ -118,28 +118,30 @@ class ResourceAPI {
    public slots:
     [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::searchProjects";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, QByteArray* response) const
+    /** getProject(QString addonId, QByteArray* responce)*/
+    [[nodiscard]] virtual Task::Ptr getProject(QString, QByteArray*) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProject";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const
+    /** getProjects(QStringList addonIds, QByteArray* responce) */
+    [[nodiscard]] virtual Task::Ptr getProjects(QStringList, QByteArray*) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjects";
         return nullptr;
     }
 
     [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjectInfo";
         return nullptr;
     }
     [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjectVersions";
         return nullptr;
     }
 

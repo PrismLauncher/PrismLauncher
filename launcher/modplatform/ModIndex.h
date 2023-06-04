@@ -104,7 +104,7 @@ struct IndexedPack {
     ExtraPackData extraData;
 
     // For internal use, not provided by APIs
-    [[nodiscard]] bool isVersionSelected(size_t index) const
+    [[nodiscard]] bool isVersionSelected(int index) const
     {
         if (!versionsLoaded)
             return false;

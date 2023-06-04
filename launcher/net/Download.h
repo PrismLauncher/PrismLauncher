@@ -66,7 +66,7 @@ class Download : public NetAction {
    public:
     void addValidator(Validator* v);
     auto abort() -> bool override;
-    auto canAbort() const -> bool override { return true; };
+    auto canAbort() const -> bool override { return true; }
 
    private:
     auto handleRedirect() -> bool;

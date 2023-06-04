@@ -48,11 +48,11 @@ public:
     virtual bool operator<(BaseVersion &a)
     {
         return name() < a.name();
-    };
+    }
     virtual bool operator>(BaseVersion &a)
     {
         return name() > a.name();
-    };
+    }
 };
 
 Q_DECLARE_METATYPE(BaseVersion::Ptr)

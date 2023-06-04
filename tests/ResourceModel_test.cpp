@@ -39,17 +39,17 @@ class DummyResourceModel : public ResourceModel {
    public:
     DummyResourceModel() : ResourceModel(new DummyResourceAPI) {}
 
-    [[nodiscard]] auto metaEntryBase() const -> QString override { return ""; };
+    [[nodiscard]] auto metaEntryBase() const -> QString override { return ""; }
 
-    ResourceAPI::SearchArgs createSearchArguments() override { return {}; };
-    ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override { return {}; };
-    ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) override { return {}; };
+    ResourceAPI::SearchArgs createSearchArguments() override { return {}; }
+    ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override { return {}; }
+    ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) override { return {}; }
 
     QJsonArray documentToArray(QJsonDocument& doc) const override { return doc.object().value("hits").toArray(); }
 
     void loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj) override
     {
-        pack.authors.append({ Json::requireString(obj, "author") });
+        pack.authors.append({ Json::requireString(obj, "author"), "" });
         pack.description = Json::requireString(obj, "description");
         pack.addonId = Json::requireString(obj, "project_id");
     }

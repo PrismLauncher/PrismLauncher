@@ -44,8 +44,8 @@ class ResourceFolderModel : public QAbstractListModel {
     bool stopWatching(const QStringList paths);
 
     /* Helper methods for subclasses, using a predetermined list of paths. */
-    virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); };
-    virtual bool stopWatching() { return stopWatching({ m_dir.absolutePath() }); };
+    virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); }
+    virtual bool stopWatching() { return stopWatching({ m_dir.absolutePath() }); }
 
     /** Given a path in the system, install that resource, moving it to its place in the
      *  instance file hierarchy.
@@ -73,7 +73,7 @@ class ResourceFolderModel : public QAbstractListModel {
     /** Creates a new parse task, if needed, for 'res' and start it.*/
     virtual void resolveResource(Resource* res);
 
-    [[nodiscard]] size_t size() const { return m_resources.size(); };
+    [[nodiscard]] int size() const { return m_resources.size(); }
     [[nodiscard]] bool empty() const { return size() == 0; }
     [[nodiscard]] Resource& at(int index) { return *m_resources.at(index); }
     [[nodiscard]] Resource const& at(int index) const { return *m_resources.at(index); }
@@ -94,7 +94,7 @@ class ResourceFolderModel : public QAbstractListModel {
     enum Columns { ACTIVE_COLUMN = 0, NAME_COLUMN, DATE_COLUMN, NUM_COLUMNS };
 
     [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
-    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; };
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; }
 
     [[nodiscard]] Qt::DropActions supportedDropActions() const override;
 
@@ -151,7 +151,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *  This task should load and parse all heavy info needed by a resource, such as parsing a manifest. It gets executed
      *  in the background, so it slowly updates the UI as tasks get done.
      */
-    [[nodiscard]] virtual Task* createParseTask(Resource&) { return nullptr; };
+    [[nodiscard]] virtual Task* createParseTask(Resource&) { return nullptr; }
 
     /** Standard implementation of the model update logic.
      *
@@ -210,15 +210,15 @@ class ResourceFolderModel : public QAbstractListModel {
 
 /* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
 #define RESOURCE_HELPERS(T)                                                                       \
-    [[nodiscard]] T* operator[](size_t index)                                                     \
+    [[nodiscard]] T* operator[](int index)                                                     \
     {                                                                                             \
         return static_cast<T*>(m_resources[index].get());                                         \
     }                                                                                             \
-    [[nodiscard]] T* at(size_t index)                                                             \
+    [[nodiscard]] T* at(int index)                                                             \
     {                                                                                             \
         return static_cast<T*>(m_resources[index].get());                                         \
     }                                                                                             \
-    [[nodiscard]] const T* at(size_t index) const                                                 \
+    [[nodiscard]] const T* at(int index) const                                                 \
     {                                                                                             \
         return static_cast<const T*>(m_resources.at(index).get());                                \
     }                                                                                             \

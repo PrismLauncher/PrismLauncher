@@ -22,7 +22,7 @@ class BasicTask : public Task {
     void executeTask() override
     {
         emitSucceeded();
-    };
+    }
 };
 
 /* Does nothing. Only used for testing. */
@@ -34,7 +34,7 @@ class BasicTask_MultiStep : public Task {
    private:
     auto isMultiStep() const -> bool override { return true; }
 
-    void executeTask() override {};   
+    void executeTask() override {}   
 };
 
 class BigConcurrentTask : public ConcurrentTask {

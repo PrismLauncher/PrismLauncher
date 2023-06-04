@@ -23,8 +23,8 @@ struct MojangDownloadInfo
 
 struct MojangLibraryDownloadInfo
 {
-    MojangLibraryDownloadInfo(MojangDownloadInfo::Ptr artifact): artifact(artifact) {};
-    MojangLibraryDownloadInfo() {};
+    MojangLibraryDownloadInfo(MojangDownloadInfo::Ptr artifact): artifact(artifact) {}
+    MojangLibraryDownloadInfo() {}
 
     // types
     typedef std::shared_ptr<MojangLibraryDownloadInfo> Ptr;
