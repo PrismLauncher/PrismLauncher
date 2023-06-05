@@ -8,8 +8,10 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-VersionSelectWidget::VersionSelectWidget(QWidget* parent)
-    : QWidget(parent)
+VersionSelectWidget::VersionSelectWidget(QWidget* parent) : VersionSelectWidget(false, parent) {}
+
+VersionSelectWidget::VersionSelectWidget(bool focusSearch, QWidget* parent)
+    : QWidget(parent), focusSearch(focusSearch)
 {
     setObjectName(QStringLiteral("VersionSelectWidget"));
     verticalLayout = new QVBoxLayout(this);
@@ -29,6 +31,12 @@ VersionSelectWidget::VersionSelectWidget(QWidget* parent)
     listView->header()->setStretchLastSection(false);
     listView->setModel(m_proxyModel);
     verticalLayout->addWidget(listView);
+
+    search = new QLineEdit(this);
+    search->setPlaceholderText(tr("Search"));
+    search->setClearButtonEnabled(true);
+    verticalLayout->addWidget(search);
+    connect(search, &QLineEdit::textEdited, this, &VersionSelectWidget::updateSearch);
 
     sneakyProgressBar = new QProgressBar(this);
     sneakyProgressBar->setObjectName(QStringLiteral("sneakyProgressBar"));
@@ -89,6 +97,8 @@ void VersionSelectWidget::initialize(BaseVersionList *vlist)
         {
             listView->setEmptyMode(VersionListView::String);
         }
+        search->setFocus();
+        focusSearch = false;
         preselect();
     }
 }
@@ -114,6 +124,7 @@ void VersionSelectWidget::loadList()
         loadTask->start();
     }
     sneakyProgressBar->setHidden(false);
+    search->setHidden(true);
 }
 
 void VersionSelectWidget::onTaskSucceeded()
@@ -123,6 +134,14 @@ void VersionSelectWidget::onTaskSucceeded()
         listView->setEmptyMode(VersionListView::String);
     }
     sneakyProgressBar->setHidden(true);
+    search->setHidden(false);
+
+    if (focusSearch)
+    {
+        search->setFocus();
+        focusSearch = false;
+    }
+
     preselect();
     loadTask = nullptr;
 }
@@ -153,6 +172,17 @@ void VersionSelectWidget::preselect()
     if(preselectedAlready)
         return;
     selectRecommended();
+}
+
+void VersionSelectWidget::updateSearch(const QString &value) {
+    m_proxyModel->setSearch(value);
+    // if nothing is selected, pick the first result
+    if (!value.isEmpty()) {
+        listView->selectionModel()->setCurrentIndex(
+            listView->model()->index(0, 0), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+        listView->scrollToTop();
+    } else
+        listView->scrollTo(listView->selectionModel()->currentIndex(), QAbstractItemView::PositionAtCenter);
 }
 
 void VersionSelectWidget::selectCurrent()
