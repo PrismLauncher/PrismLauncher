@@ -389,6 +389,7 @@ jobs:
             Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll -Destination libcrypto-1_1.dll
             Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
           }
+          cd ${{ github.workspace }}
 
           Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('./') } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('/') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
