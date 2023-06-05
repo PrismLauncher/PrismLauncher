@@ -35,6 +35,7 @@ class ExportMrPackDialog : public QDialog {
     ~ExportMrPackDialog();
 
     void done(int result) override;
+    void validate();
 
    private:
     const InstancePtr instance;

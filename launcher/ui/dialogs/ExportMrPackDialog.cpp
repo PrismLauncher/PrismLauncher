@@ -26,6 +26,7 @@
 #include <QFileSystemModel>
 #include <QJsonDocument>
 #include <QMessageBox>
+#include <QPushButton>
 #include "FastFileIconProvider.h"
 #include "FileSystem.h"
 #include "MMCZip.h"
@@ -37,6 +38,13 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     ui->setupUi(this);
     ui->name->setText(instance->name());
     ui->summary->setText(instance->notes().split(QRegularExpression("\\r?\\n"))[0]);
+
+    // ensure a valid pack is generated
+    // the name and version fields mustn't be empty
+    connect(ui->name, &QLineEdit::textEdited, this, &ExportMrPackDialog::validate);
+    connect(ui->version, &QLineEdit::textEdited, this, &ExportMrPackDialog::validate);
+    // the instance name can technically be empty
+    validate();
 
     QFileSystemModel* model = new QFileSystemModel(this);
     model->setIconProvider(&icons);
@@ -106,4 +114,10 @@ void ExportMrPackDialog::done(int result)
     }
 
     QDialog::done(result);
+}
+
+void ExportMrPackDialog::validate()
+{
+    const bool invalid = ui->name->text().isEmpty() || ui->version->text().isEmpty();
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(invalid);
 }
