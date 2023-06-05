@@ -58,7 +58,7 @@ public:
         const QString &search = m_parent->search();
         const QModelIndex idx = sourceModel()->index(source_row, 0, source_parent);
 
-        if (!search.isEmpty() && !sourceModel()->data(idx, BaseVersionList::VersionRole).toString().contains(search))
+        if (!search.isEmpty() && !sourceModel()->data(idx, BaseVersionList::VersionRole).toString().contains(search, Qt::CaseInsensitive))
             return false;
 
         for (auto it = filters.begin(); it != filters.end(); ++it)
