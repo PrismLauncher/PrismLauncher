@@ -77,8 +77,12 @@ class PrismUpdaterApp : public QApplication {
     QList<GitHubReleaseAsset> validReleaseArtifacts(const GitHubRelease& release);
     GitHubReleaseAsset selectAsset(const QList<GitHubReleaseAsset>& assets);
     void performUpdate(const GitHubRelease& release);
+    void performInstall(QFileInfo file);
+    void unpackAndInstall(QFileInfo file);
+    void backupAppDir();
 
     QFileInfo downloadAsset(const GitHubReleaseAsset& asset);
+    bool callAppimageUpdate(); 
 
    public slots:
     void downloadError(QString reason);
@@ -86,11 +90,12 @@ class PrismUpdaterApp : public QApplication {
    private:
     const QString& root() { return m_rootPath; }
 
-    bool isPortable() { return m_portable; }
+    bool isPortable() { return m_isPortable; }
 
     QString m_rootPath;
-    bool m_portable = false;
-    bool m_appimage = false;
+    bool m_isPortable = false;
+    bool m_isAppimage = false;
+    bool m_isFlatpak = false;
     QString m_appimagePath;
     QString m_prismExecutable;
     QUrl m_prismRepoUrl;
@@ -98,7 +103,7 @@ class PrismUpdaterApp : public QApplication {
     bool m_checkOnly;
     bool m_forceUpdate;
     bool m_printOnly;
-    bool m_updateLatest;
+    bool m_selectUI;
     bool m_allowDowngrade;
 
     QString m_prismBinaryName;
