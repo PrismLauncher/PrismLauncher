@@ -51,7 +51,11 @@
        <widget class="QLineEdit" name="name"/>
       </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="version"/>
+       <widget class="QLineEdit" name="version">
+        <property name="text">
+         <string>1.0.0</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
