@@ -14,7 +14,7 @@ class JavaVersion
 {
     friend class JavaVersionTest;
 public:
-    JavaVersion() {};
+    JavaVersion() {}
     JavaVersion(const QString & rhs);
 
     JavaVersion & operator=(const QString & rhs);

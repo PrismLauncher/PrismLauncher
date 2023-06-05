@@ -94,6 +94,7 @@ class LinkTask : public Task {
     }
 
     FS::create_link *m_lnk;
+    [[maybe_unused]] bool m_useHard = false;
     bool m_linkRecursive = true;
 };
 
