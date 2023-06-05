@@ -375,7 +375,8 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --install ${{ env.BUILD_DIR }}
-          while read l; do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest.txt >> ${{ env.INSTALL_DIR }}/manifest.txt 
+          touch ${{ env.INSTALL_DIR }}/manifest.txt
+          for l in $(cat ${{ env.BUILD_DIR }}/install_manifest.txt); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt 
 
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
@@ -413,7 +414,9 @@ jobs:
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
-          while read l; do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest_portable.txt >> ${{ env.INSTALL_DIR }}/manifest.txt 
+          touch ${{ env.INSTALL_DIR }}/manifest.txt
+          for l in $(cat ${{ env.BUILD_DIR }}/install_manifest_portable.txt); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt 
+
 
       - name: Package (Windows MSVC, portable)
         if: runner.os == 'Windows' && matrix.msystem == ''
@@ -441,7 +444,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
-          while read l; do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest.txt >> ${{ env.INSTALL_DIR }}/manifest.txt
+          touch ${{ env.INSTALL_DIR }}/manifest.txt
+          for l in $(cat ${{ env.BUILD_DIR }}/install_manifest.txt); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt
 
           cd ${{ env.INSTALL_DIR }}
           tar --owner root --group root -czf ../PrismLauncher.tar.gz *
@@ -449,10 +453,12 @@ jobs:
       - name: Package (Linux, portable)
         if: runner.os == 'Linux'
         run: |
-          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
-          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
-          while read l; do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR_PORTABLE }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest.txt >> ${{ env.INSTALL_DIR_PORTABLE }}/manifest.txt
-          while read l; do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR_PORTABLE }}}; l=${l#./}; echo $l; done < ${{ env.BUILD_DIR }}/install_manifest_portable.txt >> ${{ env.INSTALL_DIR_PORTABLE }}/manifest.txt
+          # install normaly and then copy to the portable dir (using --prefix doesn't create the manifest properly)
+          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR_PORTABLE }}
+          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR_PORTABLE }} --component portable 
+          touch ${{ env.INSTALL_DIR_PORTABLE }}/manifest.txt
+          for l in $(cat ${{ env.BUILD_DIR }}/install_manifest.txt); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR_PORTABLE }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR_PORTABLE }}/manifest.txt
+          for l in $(cat ${{ env.BUILD_DIR }}/install_manifest_portable.txt); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR_PORTABLE }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR_PORTABLE }}/manifest.txt
 
           cd ${{ env.INSTALL_PORTABLE_DIR }}
           tar -czf ../PrismLauncher-portable.tar.gz *
