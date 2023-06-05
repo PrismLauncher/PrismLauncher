@@ -249,6 +249,8 @@ jobs:
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
 
+          wget "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-x86_64.AppImage"
+
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
           sudo apt install libopengl0
 
@@ -388,8 +390,8 @@ jobs:
           cd ${{ env.INSTALL_DIR }}
           if ("${{ matrix.qt_ver }}" -eq "5")
           {
-            Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll -Destination libcrypto-1_1.dll
-            Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
+            Copy-Item ${{ runner.workspace }}/Qt/Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll -Destination libcrypto-1_1.dll
+            Copy-Item ${{ runner.workspace }}/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
           }
           cd ${{ github.workspace }}
 
@@ -482,7 +484,7 @@ jobs:
 
           cp -r ${{ github.workspace }}/JREs/jre17/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk
 
-          cp -r /home/runner/work/PrismLauncher/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
+          cp -r ${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
           
           cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
           cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
@@ -494,6 +496,19 @@ jobs:
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib/server"
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib"
           export LD_LIBRARY_PATH
+
+          chmod +x AppImageUpdate-x86_64.AppImage
+          ./AppImageUpdate-x86_64.AppImage --appimage-extract
+
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
+
+          cp -r squashfs-root/usr/bin/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
+          cp -r squashfs-root/usr/lib/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib
+          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
+          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
+
+          export UPDATE_INFORMATION="gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-${{ runner.os }}-*-x86_64.AppImage.zsync" 
 
           ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
 
@@ -563,6 +578,13 @@ jobs:
         with:
           name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
           path: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
+      
+      - name: Upload AppImage Zsync (Linux)
+        if: runner.os == 'Linux' && matrix.qt_ver != 5
+        uses: actions/upload-artifact@v3
+        with:
+          name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage.zsync
+          path: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage.zsync
 
       - name: ccache stats (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != ''
