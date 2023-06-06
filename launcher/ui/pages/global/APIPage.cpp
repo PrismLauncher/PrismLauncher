@@ -177,7 +177,7 @@ void APIPage::applySettings()
         metaURL.setScheme("https");
     }
 
-    s->set("MetaURLOverride", metaURL);
+    s->set("MetaURLOverride", metaURL.toString());
     QString flameKey = ui->flameKey->text();
     s->set("FlameKeyOverride", flameKey);
     QString modrinthToken = ui->modrinthToken->text();
