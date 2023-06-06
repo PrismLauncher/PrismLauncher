@@ -36,7 +36,15 @@ VersionSelectWidget::VersionSelectWidget(bool focusSearch, QWidget* parent)
     search->setPlaceholderText(tr("Search"));
     search->setClearButtonEnabled(true);
     verticalLayout->addWidget(search);
-    connect(search, &QLineEdit::textEdited, this, &VersionSelectWidget::updateSearch);
+    connect(search, &QLineEdit::textEdited, [this](const QString& value) {
+        m_proxyModel->setSearch(value);
+        if (!value.isEmpty() || !listView->selectionModel()->hasSelection()) {
+            const QModelIndex first = listView->model()->index(0, 0);
+            listView->selectionModel()->setCurrentIndex(first, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+            listView->scrollToTop();
+        } else
+            listView->scrollTo(listView->selectionModel()->currentIndex(), QAbstractItemView::PositionAtCenter);
+    });
 
     sneakyProgressBar = new QProgressBar(this);
     sneakyProgressBar->setObjectName(QStringLiteral("sneakyProgressBar"));
@@ -124,7 +132,6 @@ void VersionSelectWidget::loadList()
         loadTask->start();
     }
     sneakyProgressBar->setHidden(false);
-    search->setHidden(true);
 }
 
 void VersionSelectWidget::onTaskSucceeded()
@@ -134,13 +141,6 @@ void VersionSelectWidget::onTaskSucceeded()
         listView->setEmptyMode(VersionListView::String);
     }
     sneakyProgressBar->setHidden(true);
-    search->setHidden(false);
-
-    if (focusSearch)
-    {
-        search->setFocus();
-        focusSearch = false;
-    }
 
     preselect();
     loadTask = nullptr;
@@ -172,17 +172,6 @@ void VersionSelectWidget::preselect()
     if(preselectedAlready)
         return;
     selectRecommended();
-}
-
-void VersionSelectWidget::updateSearch(const QString &value) {
-    m_proxyModel->setSearch(value);
-    // if nothing is selected, pick the first result
-    if (!value.isEmpty()) {
-        listView->selectionModel()->setCurrentIndex(
-            listView->model()->index(0, 0), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
-        listView->scrollToTop();
-    } else
-        listView->scrollTo(listView->selectionModel()->currentIndex(), QAbstractItemView::PositionAtCenter);
 }
 
 void VersionSelectWidget::selectCurrent()

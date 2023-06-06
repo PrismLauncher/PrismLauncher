@@ -89,7 +89,6 @@ private slots:
 
 private:
     void preselect();
-    void updateSearch(const QString &value);
 
 private:
     QString m_currentVersion;
