@@ -87,7 +87,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
-        ui->actionVisitItemPage->setToolTip(tr("Go to mods home page"));
+        ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
         ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
 
@@ -100,9 +100,16 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
             auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
             auto mods_list = m_model->selectedMods(selection);
-            auto enableView = std::any_of(mods_list.cbegin(), mods_list.cend(),
+            auto selected = std::count_if(mods_list.cbegin(), mods_list.cend(),
                                           [](Mod* v) { return v->metadata() != nullptr || v->homeurl().size() != 0; });
-            ui->actionVisitItemPage->setEnabled(enableView);
+            if (selected <= 1) {
+                ui->actionVisitItemPage->setText(tr("Visit on mod's page"));
+                ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
+            } else {
+                ui->actionVisitItemPage->setText(tr("Visit the pages of the selected mods"));
+                ui->actionVisitItemPage->setToolTip(tr("Go to the pages of the selected mods"));
+            }
+            ui->actionVisitItemPage->setEnabled(selected != 0);
         });
 
         connect(mods.get(), &ModFolderModel::rowsInserted, this,
