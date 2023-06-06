@@ -9,6 +9,7 @@
 
 #include <QKeyEvent>
 #include <QMenu>
+#include <algorithm>
 
 ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared_ptr<ResourceFolderModel> model, QWidget* parent)
     : QMainWindow(parent), m_instance(instance), ui(new Ui::ExternalResourcesPage), m_model(model)
@@ -43,6 +44,13 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
 
     auto selection_model = ui->treeView->selectionModel();
     connect(selection_model, &QItemSelectionModel::currentChanged, this, &ExternalResourcesPage::current);
+    auto updateExtra = [this]() {
+        if (updateExtraInfo)
+            updateExtraInfo(extraHeaderInfoString());
+    };
+    connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
+    connect(model.get(), &ResourceFolderModel::updateFinished, this, updateExtra);
+
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
 }
 
@@ -248,6 +256,15 @@ bool ExternalResourcesPage::onSelectionChanged(const QModelIndex& current, const
     int row = sourceCurrent.row();
     Resource const& resource = m_model->at(row);
     ui->frame->updateWithResource(resource);
-
     return true;
+}
+
+QString ExternalResourcesPage::extraHeaderInfoString()
+{
+    if (ui && ui->treeView && ui->treeView->selectionModel()) {
+        auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+        if (auto count = std::count_if(selection.cbegin(), selection.cend(), [](auto v) { return v.column() == 0; }); count != 0)
+            return tr("[%1 installed, %2 selected]").arg(m_model->size()).arg(count);
+    }
+    return tr("[%1 installed]").arg(m_model->size());
 }
