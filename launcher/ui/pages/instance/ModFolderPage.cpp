@@ -44,6 +44,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
+#include <algorithm>
 
 #include "Application.h"
 
@@ -59,6 +60,7 @@
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModFolderModel.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "Version.h"
@@ -85,22 +87,29 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
+        ui->actionVisitItemPage->setToolTip(tr("Go to mods home page"));
+        ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionVisitItemPage);
+        connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
+
         auto check_allow_update = [this] {
-            return (!m_instance || !m_instance->isRunning()) &&
-                   (ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
+            return (!m_instance || !m_instance->isRunning()) && (ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
         };
 
         connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
             ui->actionUpdateItem->setEnabled(check_allow_update());
+
+            auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+            auto mods_list = m_model->selectedMods(selection);
+            auto enableView = std::any_of(mods_list.cbegin(), mods_list.cend(),
+                                          [](Mod* v) { return v->metadata() != nullptr || v->homeurl().size() != 0; });
+            ui->actionVisitItemPage->setEnabled(enableView);
         });
 
-        connect(mods.get(), &ModFolderModel::rowsInserted, this, [this, check_allow_update] {
-            ui->actionUpdateItem->setEnabled(check_allow_update());
-        });
+        connect(mods.get(), &ModFolderModel::rowsInserted, this,
+                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
 
-        connect(mods.get(), &ModFolderModel::rowsRemoved, this, [this, check_allow_update] {
-            ui->actionUpdateItem->setEnabled(check_allow_update());
-        });
+        connect(mods.get(), &ModFolderModel::rowsRemoved, this,
+                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
 
         connect(mods.get(), &ModFolderModel::updateFinished, this, [this, check_allow_update, mods] {
             ui->actionUpdateItem->setEnabled(check_allow_update());
@@ -140,7 +149,7 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelI
     return true;
 }
 
-void ModFolderPage::removeItems(const QItemSelection &selection)
+void ModFolderPage::removeItems(const QItemSelection& selection)
 {
     m_model->deleteMods(selection.indexes());
 }
@@ -214,8 +223,7 @@ void ModFolderPage::updateMods()
                 message = tr("All selected mods are up-to-date! :)");
             }
         }
-        CustomMessageBox::selectable(this, tr("Update checker"), message)
-            ->exec();
+        CustomMessageBox::selectable(this, tr("Update checker"), message)->exec();
         return;
     }
 
@@ -281,4 +289,22 @@ NilModFolderPage::NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolder
 bool NilModFolderPage::shouldDisplay() const
 {
     return m_model->dir().exists();
+}
+
+void ModFolderPage::visitModPages()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    for (auto mod : m_model->selectedMods(selection))
+        if (auto meta = mod->metadata(); meta != nullptr) {
+            auto slug = meta->slug.remove(".pw.toml");
+            switch (meta->provider) {
+                case ModPlatform::ResourceProvider::MODRINTH:
+                    DesktopServices::openUrl(QString("https://modrinth.com/mod/%1").arg(slug));
+                    break;
+                case ModPlatform::ResourceProvider::FLAME:
+                    DesktopServices::openUrl(QString("https://www.curseforge.com/minecraft/mc-mods/%1").arg(slug));
+                    break;
+            }
+        } else if (mod->homeurl().size() != 0)
+            DesktopServices::openUrl(mod->homeurl());
 }

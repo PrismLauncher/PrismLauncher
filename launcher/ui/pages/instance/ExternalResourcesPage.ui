@@ -154,6 +154,17 @@
     <string>Try to check or update all selected resources (all resources if none are selected)</string>
    </property>
   </action>
+  <action name="actionVisitItemPage">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Visit on mod's page</string>
+   </property>
+   <property name="toolTip">
+    <string>Go to mods home page</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
