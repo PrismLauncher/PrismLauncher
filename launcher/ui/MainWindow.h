@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -151,7 +152,9 @@ private slots:
     void deleteGroup();
     void undoTrashInstance();
 
-    void on_actionExportInstance_triggered();
+    inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
+    void on_actionExportInstanceZip_triggered();
+    void on_actionExportInstanceMrPack_triggered();
 
     void on_actionRenameInstance_triggered();
 

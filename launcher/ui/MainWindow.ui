@@ -150,6 +150,10 @@
     <addaction name="actionChangeInstGroup"/>
     <addaction name="actionViewSelectedInstFolder"/>
     <addaction name="actionExportInstance"/>
+    <widget class="QMenu" name="exportInstanceMenu">
+     <addaction name="actionExportInstanceZip"/>
+     <addaction name="actionExportInstanceMrPack"/>
+    </widget>
     <addaction name="actionCopyInstance"/>
     <addaction name="actionDeleteInstance"/>
     <addaction name="actionCreateInstanceShortcut"/>
@@ -459,10 +463,17 @@
     <string>E&amp;xport...</string>
    </property>
    <property name="toolTip">
-    <string>Export the selected instance as a zip file.</string>
+    <string>Export the selected instance to supported formats.</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+E</string>
+  </action>
+  <action name="actionExportInstanceZip">
+   <property name="text">
+    <string>Prism Launcher (zip)</string>
+   </property>
+  </action>
+  <action name="actionExportInstanceMrPack">
+   <property name="text">
+    <string>Modrinth (mrpack)</string>
    </property>
   </action>
   <action name="actionCreateInstanceShortcut">
