@@ -74,6 +74,7 @@ public:
     void setEmptyErrorString(QString emptyErrorString);
     void setEmptyMode(VersionListView::EmptyMode mode);
     void setResizeOn(int column);
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 signals:
     void selectedVersionChanged(BaseVersion::Ptr version);

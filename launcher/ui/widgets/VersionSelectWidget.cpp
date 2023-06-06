@@ -1,8 +1,11 @@
 #include "VersionSelectWidget.h"
 
+#include <QApplication>
+#include <QEvent>
+#include <QHeaderView>
+#include <QKeyEvent>
 #include <QProgressBar>
 #include <QVBoxLayout>
-#include <QHeaderView>
 
 #include "VersionProxyModel.h"
 
@@ -45,6 +48,7 @@ VersionSelectWidget::VersionSelectWidget(bool focusSearch, QWidget* parent)
         } else
             listView->scrollTo(listView->selectionModel()->currentIndex(), QAbstractItemView::PositionAtCenter);
     });
+    search->installEventFilter(this);
 
     sneakyProgressBar = new QProgressBar(this);
     sneakyProgressBar->setObjectName(QStringLiteral("sneakyProgressBar"));
@@ -88,12 +92,32 @@ void VersionSelectWidget::setResizeOn(int column)
     listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
 }
 
+bool VersionSelectWidget::eventFilter(QObject *watched, QEvent *event) {
+    if (watched == search && event->type() == QEvent::KeyPress) {
+        const QKeyEvent* keyEvent = (QKeyEvent*)event;
+        const bool up = keyEvent->key() == Qt::Key_Up;
+        const bool down = keyEvent->key() == Qt::Key_Down;
+        if (up || down) {
+            const QModelIndex index = listView->model()->index(listView->currentIndex().row() + (up ? -1 : 1), 0);
+            if (index.row() >= 0 && index.row() < listView->model()->rowCount()) {
+                listView->selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+                return true;
+            }
+        }
+    }
+
+    return QObject::eventFilter(watched, event);
+}
+
 void VersionSelectWidget::initialize(BaseVersionList *vlist)
 {
     m_vlist = vlist;
     m_proxyModel->setSourceModel(vlist);
     listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
+
+    if (focusSearch)
+        search->setFocus();
 
     if (!m_vlist->isLoaded())
     {
@@ -105,8 +129,6 @@ void VersionSelectWidget::initialize(BaseVersionList *vlist)
         {
             listView->setEmptyMode(VersionListView::String);
         }
-        search->setFocus();
-        focusSearch = false;
         preselect();
     }
 }
@@ -141,7 +163,6 @@ void VersionSelectWidget::onTaskSucceeded()
         listView->setEmptyMode(VersionListView::String);
     }
     sneakyProgressBar->setHidden(true);
-
     preselect();
     loadTask = nullptr;
 }
