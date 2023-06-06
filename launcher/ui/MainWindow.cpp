@@ -200,7 +200,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         helpMenuButton->setPopupMode(QToolButton::InstantPopup);
 
         auto accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
-        ui->actionAccountsButton->setMenu(ui->accountsMenu);
         accountMenuButton->setPopupMode(QToolButton::InstantPopup);
     }
 
@@ -417,15 +416,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 
 void MainWindow::retranslateUi()
 {
-    auto accounts = APPLICATION->accounts();
-    MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
-    if(defaultAccount) {
-        auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
-        ui->actionAccountsButton->setText(profileLabel);
-    }
-    else {
-        ui->actionAccountsButton->setText(tr("Accounts"));
-    }
 
     if (m_selectedInstance) {
         m_statusLeft->setText(m_selectedInstance->getStatusbarDescription());
@@ -434,6 +424,12 @@ void MainWindow::retranslateUi()
     }
 
     ui->retranslateUi(this);
+
+    MinecraftAccountPtr defaultAccount = APPLICATION->accounts()->defaultAccount();
+    if(defaultAccount) {
+        auto profileLabel = profileInUseFilter(defaultAccount->profileName(), defaultAccount->isInUse());
+        ui->actionAccountsButton->setText(profileLabel);
+    }
 
     changeIconButton->setToolTip(ui->actionChangeInstIcon->toolTip());
     renameButton->setToolTip(ui->actionRenameInstance->toolTip());
@@ -676,6 +672,15 @@ void MainWindow::repopulateAccountsMenu()
 {
     ui->accountsMenu->clear();
 
+    // NOTE: this is done so the accounts button text is not set to the accounts menu title
+    QMenu *accountsButtonMenu = ui->actionAccountsButton->menu();
+    if (accountsButtonMenu) {
+        accountsButtonMenu->clear();
+    } else {
+        accountsButtonMenu = new QMenu(this);
+        ui->actionAccountsButton->setMenu(accountsButtonMenu);
+    }
+
     auto accounts = APPLICATION->accounts();
     MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
 
@@ -689,6 +694,8 @@ void MainWindow::repopulateAccountsMenu()
             ui->actionAccountsButton->setText(profileLabel);
         }
     }
+
+    QActionGroup* accountsGroup = new QActionGroup(this);
 
     if (accounts->count() <= 0)
     {
@@ -705,6 +712,7 @@ void MainWindow::repopulateAccountsMenu()
             QAction *action = new QAction(profileLabel, this);
             action->setData(i);
             action->setCheckable(true);
+            action->setActionGroup(accountsGroup);
             if (defaultAccount == account)
             {
                 action->setChecked(true);
@@ -733,6 +741,7 @@ void MainWindow::repopulateAccountsMenu()
 
     ui->actionNoDefaultAccount->setData(-1);
     ui->actionNoDefaultAccount->setChecked(!defaultAccount);
+    ui->actionNoDefaultAccount->setActionGroup(accountsGroup);
 
     ui->accountsMenu->addAction(ui->actionNoDefaultAccount);
 
@@ -740,6 +749,8 @@ void MainWindow::repopulateAccountsMenu()
 
     ui->accountsMenu->addSeparator();
     ui->accountsMenu->addAction(ui->actionManageAccounts);
+
+    accountsButtonMenu->addActions(ui->accountsMenu->actions());
 }
 
 void MainWindow::updatesAllowedChanged(bool allowed)

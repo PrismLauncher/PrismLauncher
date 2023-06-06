@@ -60,15 +60,13 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
     m_settings = inst->settings();
     ui->setupUi(this);
 
-    accountMenu = new QMenu(this);
-    // Use undocumented property... https://stackoverflow.com/questions/7121718/create-a-scrollbar-in-a-submenu-qt
-    accountMenu->setStyleSheet("QMenu { menu-scrollable: 1; }");
-    ui->instanceAccountSelector->setMenu(accountMenu);
-
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
     connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
+    connect(ui->instanceAccountSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InstanceSettingsPage::changeInstanceAccount);
     loadSettings();
+
+
     updateThresholds();
 }
 
@@ -454,36 +452,17 @@ void InstanceSettingsPage::on_javaTestBtn_clicked()
 
 void InstanceSettingsPage::updateAccountsMenu()
 {
-    accountMenu->clear();
-
+    ui->instanceAccountSelector->clear();
     auto accounts = APPLICATION->accounts();
     int accountIndex = accounts->findAccountByProfileId(m_settings->get("InstanceAccountId").toString());
-    MinecraftAccountPtr defaultAccount = accounts->defaultAccount();
-
-    if (accountIndex != -1 && accounts->at(accountIndex)) {
-        defaultAccount = accounts->at(accountIndex);
-    }
-
-    if (defaultAccount) {
-        ui->instanceAccountSelector->setText(defaultAccount->profileName());
-        ui->instanceAccountSelector->setIcon(getFaceForAccount(defaultAccount));
-    } else {
-        ui->instanceAccountSelector->setText(tr("No default account"));
-        ui->instanceAccountSelector->setIcon(APPLICATION->getThemedIcon("noaccount"));
-    }
 
     for (int i = 0; i < accounts->count(); i++) {
         MinecraftAccountPtr account = accounts->at(i);
-        QAction* action = new QAction(account->profileName(), this);
-        action->setData(i);
-        action->setCheckable(true);
-        if (accountIndex == i) {
-            action->setChecked(true);
-        }
-        action->setIcon(getFaceForAccount(account));
-        accountMenu->addAction(action);
-        connect(action, SIGNAL(triggered(bool)), this, SLOT(changeInstanceAccount()));
+        ui->instanceAccountSelector->addItem(getFaceForAccount(account), account->profileName(), i);
+        if (i == accountIndex)
+            ui->instanceAccountSelector->setCurrentIndex(i);
     }
+
 }
 
 QIcon InstanceSettingsPage::getFaceForAccount(MinecraftAccountPtr account)
@@ -495,20 +474,13 @@ QIcon InstanceSettingsPage::getFaceForAccount(MinecraftAccountPtr account)
     return APPLICATION->getThemedIcon("noaccount");
 }
 
-void InstanceSettingsPage::changeInstanceAccount()
+void InstanceSettingsPage::changeInstanceAccount(int index)
 {
-    QAction* sAction = (QAction*)sender();
-
-    Q_ASSERT(sAction->data().type() == QVariant::Type::Int);
-
-    QVariant data = sAction->data();
-    int index = data.toInt();
     auto accounts = APPLICATION->accounts();
-    auto account = accounts->at(index);
-    m_settings->set("InstanceAccountId", account->profileId());
-
-    ui->instanceAccountSelector->setText(account->profileName());
-    ui->instanceAccountSelector->setIcon(getFaceForAccount(account));
+    if (index != -1 && accounts->at(index) && ui->instanceAccountGroupBox->isChecked()) {
+        auto account = accounts->at(index);
+        m_settings->set("InstanceAccountId", account->profileId());
+    }
 }
 
 void InstanceSettingsPage::on_maxMemSpinBox_valueChanged(int i)
