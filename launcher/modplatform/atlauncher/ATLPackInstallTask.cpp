@@ -352,7 +352,7 @@ QString PackInstallTask::getVersionForLoader(QString uid)
         if(m_version.loader.recommended || m_version.loader.latest) {
             for (int i = 0; i < vlist->versions().size(); i++) {
                 auto version = vlist->versions().at(i);
-                auto reqs = version->requires();
+                auto reqs = version->requiredSet();
 
                 // filter by minecraft version, if the loader depends on a certain version.
                 // not all mod loaders depend on a given Minecraft version, so we won't do this

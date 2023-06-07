@@ -149,7 +149,7 @@ void InstanceCopyTask::copyFinished()
 
         QByteArray allowed_symlinks;
         if (allowed_symlinks_file.exists()) {
-            allowed_symlinks.append(FS::read(allowed_symlinks_file.path()));
+            allowed_symlinks.append(FS::read(allowed_symlinks_file.filePath()));
             if (allowed_symlinks.right(1) != "\n")
                 allowed_symlinks.append("\n");  // we want to be on a new line
         }
@@ -157,9 +157,9 @@ void InstanceCopyTask::copyFinished()
         allowed_symlinks.append("\n");
         if (allowed_symlinks_file.isSymLink())
             FS::deletePath(allowed_symlinks_file
-                               .path());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
+                               .filePath());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
 
-        FS::write(allowed_symlinks_file.path(), allowed_symlinks);
+        FS::write(allowed_symlinks_file.filePath(), allowed_symlinks);
     }
 
     emitSucceeded();
