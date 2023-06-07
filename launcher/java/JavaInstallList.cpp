@@ -98,6 +98,8 @@ QVariant JavaInstallList::data(const QModelIndex &index, int role) const
     auto version = std::dynamic_pointer_cast<JavaInstall>(m_vlist[index.row()]);
     switch (role)
     {
+        case SortRole:
+            return -index.row();
         case VersionPointerRole:
             return QVariant::fromValue(m_vlist[index.row()]);
         case VersionIdRole:
@@ -117,7 +119,7 @@ QVariant JavaInstallList::data(const QModelIndex &index, int role) const
 
 BaseVersionList::RoleList JavaInstallList::providesRoles() const
 {
-    return {VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, ArchitectureRole};
+    return {VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, LatestRole, PathRole, ArchitectureRole};
 }
 
 
