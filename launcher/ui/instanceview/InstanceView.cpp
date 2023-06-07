@@ -48,6 +48,7 @@
 #include <QAccessible>
 
 #include "VisualGroup.h"
+#include "ui/themes/ThemeManager.h"
 #include <QDebug>
 
 #include <Application.h>
@@ -73,6 +74,7 @@ InstanceView::InstanceView(QWidget *parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setAcceptDrops(true);
     setAutoScroll(true);
+    setCatVisible(APPLICATION->settings()->get("TheCat").toBool());
 }
 
 InstanceView::~InstanceView()
@@ -498,11 +500,30 @@ void InstanceView::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void InstanceView::paintEvent(QPaintEvent *event)
+void InstanceView::setCatVisible(bool visible)
+{
+    m_catVisible = visible;
+    m_catPixmap.load(QString(":/backgrounds/%1").arg(ThemeManager::getCatImage()));
+}
+
+void InstanceView::paintEvent(QPaintEvent* event)
 {
     executeDelayedItemsLayout();
 
     QPainter painter(this->viewport());
+
+    if (m_catVisible) {
+        int widWidth = this->viewport()->width();
+        int widHeight = this->viewport()->height();
+        if (m_catPixmap.width() < widWidth)
+            widWidth = m_catPixmap.width();
+        if (m_catPixmap.height() < widHeight)
+            widHeight = m_catPixmap.height();
+        auto pixmap = m_catPixmap.scaled(widWidth, widHeight, Qt::KeepAspectRatio);
+        QRect rectOfPixmap = pixmap.rect();
+        rectOfPixmap.moveBottomRight(this->viewport()->rect().bottomRight());
+        painter.drawPixmap(rectOfPixmap.topLeft(), pixmap);
+    }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     QStyleOptionViewItem option;
