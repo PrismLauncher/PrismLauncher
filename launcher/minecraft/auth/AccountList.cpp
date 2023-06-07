@@ -328,7 +328,7 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
                     case AccountState::Gone: {
                         return tr("Gone", "Account status");
                     }
-                    case default: {
+                    default: {
                         return tr("Unknown", "Account status");
                     }
                 }
