@@ -119,7 +119,7 @@ QVariant JavaInstallList::data(const QModelIndex &index, int role) const
 
 BaseVersionList::RoleList JavaInstallList::providesRoles() const
 {
-    return {VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, LatestRole, PathRole, ArchitectureRole};
+    return {VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, ArchitectureRole};
 }
 
 

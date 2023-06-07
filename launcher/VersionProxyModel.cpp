@@ -212,10 +212,6 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                                 return tr("Latest");
                             }
                         }
-                        else if(index.row() == 0)
-                        {
-                            return tr("Latest");
-                        }
                     }
                 }
                 default:
@@ -244,10 +240,6 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                             {
                                 return APPLICATION->getThemedIcon("bug");
                             }
-                        }
-                        else if(index.row() == 0)
-                        {
-                            return APPLICATION->getThemedIcon("bug");
                         }
                         QPixmap pixmap;
                         QPixmapCache::find("placeholder", &pixmap);
