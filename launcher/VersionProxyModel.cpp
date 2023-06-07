@@ -185,80 +185,50 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                     return QVariant();
             }
         }
-        case Qt::ToolTipRole:
-        {
-            switch(column)
-            {
-                case Name:
-                {
-                    if(hasRecommended)
+        case Qt::ToolTipRole: {
+            if (column == Name && hasRecommended) {
+                auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
+                if(value.toBool()) {
+                    return tr("Recommended");
+                }
+                else if(hasLatest) {
+                    auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
+                    if(value.toBool())
                     {
-                        auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
-                        if(value.toBool())
-                        {
-                            return tr("Recommended");
-                        }
-                        else if(hasLatest)
-                        {
-                            auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
-                            if(value.toBool())
-                            {
-                                return tr("Latest");
-                            }
-                        }
-                        else if(index.row() == 0)
-                        {
-                            return tr("Latest");
-                        }
+                        return tr("Latest");
                     }
                 }
-                default:
-                {
-                    return sourceModel()->data(parentIndex, BaseVersionList::VersionIdRole);
+                else if(index.row() == 0) {
+                    return tr("Latest");
                 }
             }
+            return sourceModel()->data(parentIndex, BaseVersionList::VersionIdRole);
         }
-        case Qt::DecorationRole:
-        {
-            switch(column)
-            {
-                case Name:
-                {
-                    if(hasRecommended)
-                    {
-                        auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
-                        if(value.toBool())
-                        {
-                            return APPLICATION->getThemedIcon("star");
-                        }
-                        else if(hasLatest)
-                        {
-                            auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
-                            if(value.toBool())
-                            {
-                                return APPLICATION->getThemedIcon("bug");
-                            }
-                        }
-                        else if(index.row() == 0)
-                        {
-                            return APPLICATION->getThemedIcon("bug");
-                        }
-                        QPixmap pixmap;
-                        QPixmapCache::find("placeholder", &pixmap);
-                        if(!pixmap)
-                        {
-                            QPixmap px(16,16);
-                            px.fill(Qt::transparent);
-                            QPixmapCache::insert("placeholder", px);
-                            return px;
-                        }
-                        return pixmap;
+        case Qt::DecorationRole: {
+            if (column == Name && hasRecommended) {
+                auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
+                if(value.toBool()) {
+                    return APPLICATION->getThemedIcon("star");
+                } else if(hasLatest) {
+                    auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
+                    if(value.toBool()) {
+                        return APPLICATION->getThemedIcon("bug");
                     }
                 }
-                default:
-                {
-                    return QVariant();
+                else if(index.row() == 0) {
+                    return APPLICATION->getThemedIcon("bug");
                 }
+                QPixmap pixmap;
+                QPixmapCache::find("placeholder", &pixmap);
+                if(!pixmap) {
+                    QPixmap px(16,16);
+                    px.fill(Qt::transparent);
+                    QPixmapCache::insert("placeholder", px);
+                    return px;
+                }
+                return pixmap;
+            } else {
+                return QVariant();
             }
         }
         default:
