@@ -125,14 +125,9 @@ void VersionListView::paintEvent(QPaintEvent *event)
 
 QString VersionListView::currentEmptyString() const
 {
-    if(m_itemCount) {
-        return QString();
-    }
     switch(m_emptyMode)
     {
         default:
-        case VersionListView::Empty:
-            return QString();
         case VersionListView::String:
             return m_emptyString;
         case VersionListView::ErrorString:
