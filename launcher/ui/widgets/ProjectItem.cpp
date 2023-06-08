@@ -64,6 +64,11 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
             font.setBold(true);
             font.setUnderline(true);
         }
+        if (index.data(UserDataTypes::INSTALLED).toBool()) {
+            // Set nice font
+            font.setItalic(true);
+            font.setOverline(true);
+        }
 
         font.setPointSize(font.pointSize() + 2);
         painter->setFont(font);

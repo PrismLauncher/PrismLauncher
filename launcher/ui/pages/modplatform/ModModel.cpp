@@ -6,8 +6,10 @@
 
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/mod/ModFolderModel.h"
 
 #include <QMessageBox>
+#include <algorithm>
 
 namespace ResourceDownload {
 
@@ -65,6 +67,16 @@ void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filte
     m_current_sort_index = sort;
 
     refresh();
+}
+
+bool ModModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
+{
+    auto allMods = static_cast<MinecraftInstance const&>(m_base_instance).loaderModList()->allMods();
+    return std::any_of(allMods.cbegin(), allMods.cend(), [pack](Mod* mod) {
+        if (auto meta = mod->metadata(); meta)
+            return meta->provider == pack->provider && meta->project_id == pack->addonId;
+        return false;
+    });
 }
 
 }  // namespace ResourceDownload

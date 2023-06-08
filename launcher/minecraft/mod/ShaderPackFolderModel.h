@@ -6,7 +6,5 @@ class ShaderPackFolderModel : public ResourceFolderModel {
     Q_OBJECT
 
    public:
-    explicit ShaderPackFolderModel(const QString& dir, BaseInstance* instance)
-        : ResourceFolderModel(QDir(dir), instance)
-    {}
+    explicit ShaderPackFolderModel(const QString& dir, const BaseInstance* instance) : ResourceFolderModel(QDir(dir), instance) {}
 };
