@@ -246,7 +246,7 @@ void ResourcePage::updateSelectionButton()
         else
             m_ui->resourceSelectionButton->setText(tr("Deselect %1 for download").arg(resourceString()));
     } else {
-        qWarning() << "Try to update selection but there is not a pack selected";
+        qWarning() << "Tried to update the selected button but there is not a pack selected";
     }
 }
 

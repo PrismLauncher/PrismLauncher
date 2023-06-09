@@ -56,7 +56,7 @@ class ByteArraySink : public Sink {
         if (m_output)
             m_output->clear();
         else
-            qWarning() << "ByteArraySink was not cleared because it's not adresable";
+            qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
         if (initAllValidators(request))
             return Task::State::Running;
         return Task::State::Failed;
@@ -67,7 +67,7 @@ class ByteArraySink : public Sink {
         if (m_output)
             m_output->append(data);
         else
-            qWarning() << "ByteArraySink no write because it's not adresable";
+            qWarning() << "ByteArraySink did not write the buffer because it's not addressable";
         if (writeAllValidators(data))
             return Task::State::Running;
         return Task::State::Failed;
@@ -78,7 +78,7 @@ class ByteArraySink : public Sink {
         if (m_output)
             m_output->clear();
         else
-            qWarning() << "ByteArraySink no clear because it's not adresable";
+            qWarning() << "ByteArraySink did not clear the buffer because it's not addressable";
         failAllValidators();
         return Task::State::Failed;
     }
