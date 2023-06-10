@@ -24,7 +24,7 @@ class ModModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ModModel(const BaseInstance&, ResourceAPI* api);
+    ModModel(BaseInstance&, ResourceAPI* api);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
@@ -45,7 +45,7 @@ class ModModel : public ResourceModel {
     virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const override;
 
    protected:
-    const BaseInstance& m_base_instance;
+    BaseInstance& m_base_instance;
 
     std::shared_ptr<ModFilterWidget::Filter> m_filter = nullptr;
 };

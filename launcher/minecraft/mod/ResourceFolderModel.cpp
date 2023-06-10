@@ -16,7 +16,7 @@
 
 #include "tasks/Task.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, const BaseInstance* instance, QObject* parent, bool create_dir)
+ResourceFolderModel::ResourceFolderModel(QDir dir, BaseInstance* instance, QObject* parent, bool create_dir)
     : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this)
 {
     if (create_dir) {

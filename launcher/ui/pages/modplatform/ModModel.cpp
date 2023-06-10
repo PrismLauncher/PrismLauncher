@@ -13,7 +13,7 @@
 
 namespace ResourceDownload {
 
-ModModel::ModModel(BaseInstance const& base_inst, ResourceAPI* api) : ResourceModel(api), m_base_instance(base_inst) {}
+ModModel::ModModel(BaseInstance& base_inst, ResourceAPI* api) : ResourceModel(api), m_base_instance(base_inst) {}
 
 /******** Make data requests ********/
 
@@ -26,7 +26,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
     std::optional<std::list<Version>> versions{};
 
-    { // Version filter
+    {  // Version filter
         if (!m_filter->versions.empty())
             versions = m_filter->versions;
     }
@@ -71,7 +71,7 @@ void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filte
 
 bool ModModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
 {
-    auto allMods = static_cast<MinecraftInstance const&>(m_base_instance).loaderModList()->allMods();
+    auto allMods = static_cast<MinecraftInstance&>(m_base_instance).loaderModList()->allMods();
     return std::any_of(allMods.cbegin(), allMods.cend(), [pack](Mod* mod) {
         if (auto meta = mod->metadata(); meta)
             return meta->provider == pack->provider && meta->project_id == pack->addonId;
