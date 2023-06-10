@@ -86,7 +86,7 @@ jobs:
 
           - os: macos-12
             name: macOS
-            macosx_deployment_target: 10.15
+            macosx_deployment_target: 11.0
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
