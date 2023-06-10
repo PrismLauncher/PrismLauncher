@@ -427,17 +427,35 @@ jobs:
           
           Get-ChildItem ${{ env.INSTALL_PORTABLE_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_PORTABLE_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
-      - name: Package (Windows, installer)
-        if: runner.os == 'Windows'
+      - name: Package (Windows MinGW-w64, installer)
+        if: runner.os == 'Windows' && (matrix.msystem != '' || matrix.architecture == "win32")
         run: |
           cd ${{ env.INSTALL_DIR }}
           makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
 
-      - name: Sign installer (Windows)
-        if: runner.os == 'Windows'
+      - name: Package (Windows MSVC, installer)
+        if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != "win32"
+        shell: pwsh
+        run: |
+          cd ${{ env.INSTALL_DIR }}
+          Copy-Item ..\program_info\prismlauncher_*x*.png .
+          Copy-Item ..\program_info\AppxManifest.xml .
+          makeappx.exe pack /v /h SHA256 /d . /p prismlauncher.msix
+
+      - name: Sign installer (Windows MinGW-w64/MSVC Legacy)
+        if: runner.os == 'Windows' && (matrix.msystem != '' || matrix.architecture == "win32")
         run: |
           if (Get-Content ./codesign.pfx){
             SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com PrismLauncher-Setup.exe
+          } else {
+            ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+          }
+
+      - name: Sign installer (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != "win32"
+        run: |
+          if (Get-Content ./codesign.pfx){
+            SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com ${{ env.INSTALL_DIR }}/prismlauncher.msix
           } else {
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
@@ -518,12 +536,19 @@ jobs:
           name: PrismLauncher-${{ matrix.name }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_PORTABLE_DIR }}/**
 
-      - name: Upload installer (Windows)
-        if: runner.os == 'Windows'
+      - name: Upload installer (Windows MinGW-w64/MSVC Legacy)
+        if: runner.os == 'Windows' && (matrix.msystem != '' || matrix.architecture == "win32")
         uses: actions/upload-artifact@v3
         with:
           name: PrismLauncher-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher-Setup.exe
+
+      - name: Upload installer (Windows MSVC)
+        if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != "win32"
+        uses: actions/upload-artifact@v3
+        with:
+          name: PrismLauncher-${{ matrix.name }}-MSIX-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: ${{ env.INSTALL_DIR }}/prismlauncher.msix
 
       - name: Upload binary tarball (Linux, Qt 5)
         if: runner.os == 'Linux' && matrix.qt_ver != 6
