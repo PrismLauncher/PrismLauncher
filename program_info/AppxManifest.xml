@@ -7,7 +7,7 @@
 	xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10"
 	xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
 	IgnorableNamespaces="rescap virtualization desktop6">
-  <Identity Name="github.PrismLauncher.PrismLauncher" Version="7.0.0.0" Publisher="CN=PrismLauncher, O=PrismLauncher, L=MyCity, S=MyState, C=MyCountry" ProcessorArchitecture="x64" />
+<Identity Name="github.PrismLauncher.PrismLauncher" Version="PRISM_VERSION_REPLACEME" Publisher="CN=PrismLauncher, O=PrismLauncher, L=MyCity, S=MyState, C=MyCountry" ProcessorArchitecture="PRISM_ARCH_REPLACEME" />
   <Properties>
     <DisplayName>Prism Launcher</DisplayName>
     <PublisherDisplayName>Prism Launcher</PublisherDisplayName>
