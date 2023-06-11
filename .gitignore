@@ -56,3 +56,7 @@ flatbuild
 
 # Snap
 *.snap
+
+# msix
+bundle_staging
+microsoft.system.package.metadata

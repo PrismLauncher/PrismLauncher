@@ -437,10 +437,15 @@ jobs:
         if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != 'win32'
         shell: pwsh
         run: |
-          cd ${{ env.INSTALL_DIR }}
-          Copy-Item ..\program_info\prismlauncher_*x*.png .
-          (Get-Content ..\program_info\AppxManifest.xml) -replace "PRISM_VERSION_REPLACEME","${{ env.VERSION }}.0.0" -replace "PRISM_ARCH_REPLACEME","${{ matrix.architecture }}" > ${{ env.INSTALL_DIR }}\AppxManifest.xml
-          makeappx.exe pack /v /h SHA256 /d . /p prismlauncher.msix
+          Set-Location ${{ env.INSTALL_DIR }}
+
+          Copy-Item ${{ github.workspace }}\program_info\prismlauncher_*x*.png .
+          (Get-Content ${{ github.workspace }}\program_info\AppxManifest.xml) `
+            -replace "PRISM_VERSION_REPLACEME","${{ env.VERSION }}.0.0" `
+            -replace "PRISM_ARCH_REPLACEME","${{ matrix.architecture }}" `
+            > .\AppxManifest.xml
+
+          makeappx.exe pack /v /h SHA256 /d . /p prismlauncher-${{ matrix.architecture }}.msix
 
       - name: Sign installer (Windows MinGW-w64/MSVC Legacy)
         if: runner.os == 'Windows' && (matrix.msystem != '' || matrix.architecture == 'win32')
@@ -455,7 +460,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != 'win32'
         run: |
           if (Get-Content ./codesign.pfx){
-            SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com ${{ env.INSTALL_DIR }}/prismlauncher.msix
+            SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com ${{ env.INSTALL_DIR }}/prismlauncher-${{ matrix.architecture }}.msix
           } else {
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
@@ -543,12 +548,12 @@ jobs:
           name: PrismLauncher-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher-Setup.exe
 
-      - name: Upload installer (Windows MSVC)
+      - name: Upload MSIX Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != 'win32'
         uses: actions/upload-artifact@v3
         with:
           name: PrismLauncher-${{ matrix.name }}-MSIX-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: ${{ env.INSTALL_DIR }}/prismlauncher.msix
+          path: ${{ env.INSTALL_DIR }}/prismlauncher-${{ matrix.architecture }}.msix
 
       - name: Upload binary tarball (Linux, Qt 5)
         if: runner.os == 'Linux' && matrix.qt_ver != 6
@@ -590,6 +595,68 @@ jobs:
         shell: msys2 {0}
         run: |
           ccache -s
+
+  msix-bundle:
+    runs-on: windows-latest
+    needs: build
+    env:
+      BUNDLE_STAGING: "bundle_staging"
+
+    steps:
+      - name: Install MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          vsversion: 2022
+
+      - name: Set short version
+        shell: bash
+        run: |
+          ver_short=`git rev-parse --short HEAD`
+          echo "VERSION=$ver_short" >> $GITHUB_ENV
+
+      - name: Create Bundle Staging Directory
+        shell: pwsh
+        run: New-Item -Type Directory -Path ${{ env.BUNDLE_STAGING }}
+
+      - name: Download MSIX (x64)
+        uses: actions/download-artifact@v2
+        with:
+          name: PrismLauncher-Windows-MSVC-MSIX-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: ${{ env.BUNDLE_STAGING }}/
+
+      - name: Download MSIX (arm64)
+        uses: actions/download-artifact@v2
+        with:
+          name: PrismLauncher-Windows-MSVC-arm64-MSIX-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: ${{ env.BUNDLE_STAGING }}/
+
+      - name: Create MSIXBundle
+        shell: pwsh
+        run: |
+          makeappx.exe bundle /d ${{ env.BUNDLE_STAGING }} /p ${{ env.BUNDLE_STAGING}}\prismlauncher.msixbundle
+
+      - name: Fetch codesign certificate
+        shell: bash
+        run: |
+          echo '${{ secrets.WINDOWS_CODESIGN_CERT }}' | base64 --decode > codesign.pfx
+
+      - name: Sign MSIXBundle
+        shell: pwsh
+        run: |
+          if (Get-Content ./codesign.pfx) {
+            SignTool sign /fd sha256 /td sha256 /f codesign.pfx `
+              /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' `
+              /tr http://timestamp.digicert.com `
+              ${{ env.BUNDLE_STAGING }}\prismlauncher.msixbundle
+          } else {
+            ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+          }
+
+      - name: Upload MSIXBundle
+        uses: actions/upload-artifact@v2
+        with:
+          name: PrismLauncher-Windows-MSVC-Universal-MSIXBundle-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: ${{ env.BUNDLE_STAGING }}/prismlauncher.msixbundle
 
   flatpak:
     runs-on: ubuntu-latest
