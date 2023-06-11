@@ -38,7 +38,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QRegularExpression>
-#include <QtEnvironmentVariables>
+#include <QtGlobal>
 
 #include "BuildConfig.h"
 #include "launch/LaunchTask.h"
