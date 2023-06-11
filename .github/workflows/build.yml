@@ -612,6 +612,9 @@ jobs:
         with:
           vsversion: 2022
 
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Set short version
         shell: bash
         run: |
@@ -637,7 +640,7 @@ jobs:
       - name: Create MSIXBundle
         shell: pwsh
         run: |
-          makeappx.exe bundle /d ${{ env.BUNDLE_STAGING }} /p ${{ env.BUNDLE_STAGING}}\prismlauncher.msixbundle
+          makeappx.exe bundle /d ${{ env.BUNDLE_STAGING }} /p ${{ env.BUNDLE_STAGING }}\prismlauncher.msixbundle
 
       - name: Fetch codesign certificate
         shell: bash
