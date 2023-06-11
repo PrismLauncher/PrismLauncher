@@ -438,10 +438,14 @@ jobs:
         shell: pwsh
         run: |
           Set-Location ${{ env.INSTALL_DIR }}
+          # MSIX only allows numbers in their versions,
+          # so we need to sacrifice a bit of verbosity
+          $commitNumbers = "${{ env.VERSION }}" -replace "[^0-9]", ""
+          $version = "7.0.0.$commitNumbers"
 
           Copy-Item ${{ github.workspace }}\program_info\prismlauncher_*x*.png .
           (Get-Content ${{ github.workspace }}\program_info\AppxManifest.xml) `
-            -replace "PRISM_VERSION_REPLACEME","${{ env.VERSION }}.0.0" `
+            -replace "PRISM_VERSION_REPLACEME","$version" `
             -replace "PRISM_ARCH_REPLACEME","${{ matrix.architecture }}" `
             > .\AppxManifest.xml
 
