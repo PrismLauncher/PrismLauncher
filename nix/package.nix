@@ -42,6 +42,13 @@ stdenv.mkDerivation rec {
     lib.optionals (msaClientID != null) ["-DLauncher_MSA_CLIENT_ID=${msaClientID}"]
     ++ lib.optionals (lib.versionOlder qtbase.version "6") ["-DLauncher_QT_VERSION_MAJOR=5"];
 
+  preConfigure = ''
+    # see https://github.com/NixOS/nixpkgs/issues/114044, setting this through cmakeFlags does not work.
+    cmakeFlagsArray+=(
+      "-DLauncher_LINUX_BWRAP_EXTRA_ARGS=--ro-bind /nix /nix --ro-bind /run/opengl-driver /run/opengl-driver"
+    )
+  '';
+
   postUnpack = ''
     rm -rf source/libraries/libnbtplusplus
     ln -s ${libnbtplusplus} source/libraries/libnbtplusplus

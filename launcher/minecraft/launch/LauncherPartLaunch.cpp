@@ -35,9 +35,12 @@
 
 #include "LauncherPartLaunch.h"
 
+#include <QDir>
 #include <QStandardPaths>
 #include <QRegularExpression>
+#include <QtEnvironmentVariables>
 
+#include "BuildConfig.h"
 #include "launch/LaunchTask.h"
 #include "minecraft/MinecraftInstance.h"
 #include "FileSystem.h"
@@ -113,8 +116,6 @@ void LauncherPartLaunch::executeTask()
     QString allArgs = args.join(", ");
     emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::Launcher);
 
-    auto javaPath = FS::ResolveExecutable(instance->settings()->get("JavaPath").toString());
-
     m_process.setProcessEnvironment(instance->createLaunchEnvironment());
 
     // make detachable - this will keep the process running even if the object is destroyed
@@ -136,7 +137,7 @@ void LauncherPartLaunch::executeTask()
 #else
     args << "-Djava.library.path=" + natPath;
 #endif
-
+ 
     args << "-cp";
 #ifdef Q_OS_WIN
     QStringList processed;
@@ -159,6 +160,74 @@ void LauncherPartLaunch::executeTask()
 
     qDebug() << args.join(' ');
 
+    args.prepend(FS::ResolveExecutable(instance->settings()->get("JavaPath").toString()));
+
+#ifdef Q_OS_LINUX
+    // TODO: Sandboxing setting
+    if (true) {
+        QString actualRuntimeDir = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+        QString sandboxedRuntimeDir = "/tmp";
+
+        QStringList bwrapArgs{};
+        bwrapArgs << QStandardPaths::findExecutable(BuildConfig.LINUX_BWRAP_BINARY);
+        bwrapArgs << "--unshare-user" << "--unshare-ipc" << "--unshare-pid" << "--unshare-uts" << "--unshare-cgroup";
+        bwrapArgs << "--share-net";
+        bwrapArgs << "--die-with-parent";
+        bwrapArgs << "--unsetenv" << "DBUS_SESSION_BUS_ADDRESS";
+
+        // default binds
+        bwrapArgs << "--dev" << "/dev";
+        bwrapArgs << "--dev-bind-try" << "/dev/dri" << "/dev/dri";
+        bwrapArgs << "--proc" << "/proc";
+        bwrapArgs << "--tmpfs" << "/tmp";
+        bwrapArgs << "--ro-bind" << "/etc" << "/etc";
+        bwrapArgs << "--ro-bind" << "/usr" << "/usr";
+        bwrapArgs << "--ro-bind-try" << "/sys/class" << "/sys/class";
+        bwrapArgs << "--ro-bind-try" << "/sys/dev/char" << "/sys/dev/char";
+        bwrapArgs << "--ro-bind-try" << "/sys/devices/pci0000:00" << "/sys/devices/pci0000:00";
+        bwrapArgs << "--ro-bind-try" << "/sys/devices/system/cpu" << "/sys/devices/system/cpu";
+        bwrapArgs << "--ro-bind-try" << "/run/systemd/resolve" << "/run/systemd/resolve";
+        bwrapArgs << "--setenv" << "XDG_RUNTIME_DIR" << sandboxedRuntimeDir;
+
+        // desktop integration
+        bwrapArgs << "--ro-bind-try" << QString("%1/pulse").arg(actualRuntimeDir) << QString("%1/pulse").arg(sandboxedRuntimeDir);
+        bwrapArgs << "--ro-bind-try" << QString("%1/pipewire-0").arg(actualRuntimeDir) << QString("%1/pipewire-0").arg(sandboxedRuntimeDir);
+        {
+            auto display = qEnvironmentVariable("DISPLAY");
+            auto wlDisplay = qEnvironmentVariable("WAYLAND_DISPLAY");
+
+            if (display.startsWith(':')) {
+                auto x11Socket = QString("/tmp/.X11-unix/X%1").arg(display.mid(1));
+                bwrapArgs << "--ro-bind-try" << x11Socket << x11Socket;
+            }
+
+            if (wlDisplay.startsWith('/'))
+                bwrapArgs << "--ro-bind-try" << wlDisplay << wlDisplay;
+            else
+                bwrapArgs << "--ro-bind-try" << FS::PathCombine(actualRuntimeDir, wlDisplay) << FS::PathCombine(sandboxedRuntimeDir, wlDisplay);
+        }
+
+        // launcher
+        {
+            QString instPath = QDir::toNativeSeparators(QDir(minecraftInstance->instanceRoot()).absolutePath());
+            QString assetsPath = QDir::toNativeSeparators(QDir("assets").absolutePath());
+
+            bwrapArgs << "--bind" << instPath << instPath;
+            bwrapArgs << "--ro-bind" << assetsPath << assetsPath;
+        }
+        for (auto p : classPath) {
+            bwrapArgs << "--ro-bind" << p << p;
+        }
+
+        bwrapArgs << Commandline::splitArgs(BuildConfig.LINUX_BWRAP_EXTRA_ARGS);
+
+        bwrapArgs << "--";
+        args = bwrapArgs + args;
+    }
+#endif
+
+    qDebug() << args.join(' ');
+
     QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
     if(!wrapperCommandStr.isEmpty())
     {
@@ -173,12 +242,11 @@ void LauncherPartLaunch::executeTask()
             return;
         }
         emit logLine("Wrapper command is:\n" + wrapperCommandStr + "\n\n", MessageLevel::Launcher);
-        args.prepend(javaPath);
         m_process.start(wrapperCommand, wrapperArgs + args);
     }
     else
     {
-        m_process.start(javaPath, args);
+        m_process.start(args.takeFirst(), args);
     }
 
 #ifdef Q_OS_LINUX

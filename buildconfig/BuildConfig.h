@@ -140,6 +140,12 @@ class Config {
     QString DISCORD_URL;
     QString SUBREDDIT_URL;
 
+    /**
+     * Sandboxing options
+     */
+    QString LINUX_BWRAP_BINARY = "bwrap"; // TODO: CMake
+    QString LINUX_BWRAP_EXTRA_ARGS;
+
     QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
     QString LIBRARY_BASE = "https://libraries.minecraft.net/";
     QString AUTH_BASE = "https://authserver.mojang.com/";

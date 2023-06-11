@@ -114,6 +114,8 @@ Config::Config()
     MATRIX_URL = "@Launcher_MATRIX_URL@";
     DISCORD_URL = "@Launcher_DISCORD_URL@";
     SUBREDDIT_URL = "@Launcher_SUBREDDIT_URL@";
+
+    LINUX_BWRAP_EXTRA_ARGS = "@Launcher_LINUX_BWRAP_EXTRA_ARGS@";
 }
 
 QString Config::versionString() const
