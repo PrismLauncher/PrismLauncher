@@ -211,12 +211,14 @@ void LauncherPartLaunch::executeTask()
         {
             QString instPath = QDir::toNativeSeparators(QDir(minecraftInstance->instanceRoot()).absolutePath());
             QString assetsPath = QDir::toNativeSeparators(QDir("assets").absolutePath());
+            QString librariesPath = QDir::toNativeSeparators(QDir("libraries").absolutePath());
 
             bwrapArgs << "--bind" << instPath << instPath;
             bwrapArgs << "--ro-bind" << assetsPath << assetsPath;
-        }
-        for (auto p : classPath) {
-            bwrapArgs << "--ro-bind" << p << p;
+            bwrapArgs << "--ro-bind" << librariesPath << librariesPath;
+
+            // also add NewLaunch.jar just to be safe. This is probably covered by /usr or LINUX_BWRAP_EXTRA_ARGS though
+            bwrapArgs << "--ro-bind" << jarPath << jarPath;
         }
 
         bwrapArgs << Commandline::splitArgs(BuildConfig.LINUX_BWRAP_EXTRA_ARGS);
