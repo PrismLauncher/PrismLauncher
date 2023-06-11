@@ -7,8 +7,8 @@
   <MainBundle
     Name="github.PrismLauncher.PrismLauncher"
     Publisher="CN=PrismLauncher, O=PrismLauncher, L=MyCity, S=MyState, C=MyCountry"
-    Version="7.0.0.0"
-		Uri="https://prismlauncher.org/prismlauncher.msixbundle" />
+    Version="PRISM_VERSION_REPLACEME"
+    Uri="https://prismlauncher.org/prismlauncher-PRISM_VERSION_REPLACEME.msixbundle" />
 
   <UpdateSettings>
     <OnLaunch

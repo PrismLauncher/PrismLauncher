@@ -438,14 +438,14 @@ jobs:
         shell: pwsh
         run: |
           Set-Location ${{ env.INSTALL_DIR }}
+
           # MSIX only allows numbers in their versions,
-          # so we need to sacrifice a bit of verbosity
-          $commitNumbers = ("${{ env.VERSION }}" -replace "[^0-9]", "").Substring(0, 3)
-          $version = "7.0.0.$commitNumbers"
+          # so we need to use another clear identifier
+          $version = ("${{ github.run_number }}").Substring(0, 3)
 
           Copy-Item ${{ github.workspace }}\program_info\prismlauncher_*x*.png .
           (Get-Content ${{ github.workspace }}\program_info\AppxManifest.xml) `
-            -replace "PRISM_VERSION_REPLACEME","$version" `
+            -replace "PRISM_VERSION_REPLACEME","7.0.0.$version" `
             -replace "PRISM_ARCH_REPLACEME","${{ matrix.architecture }}" `
             > .\AppxManifest.xml
 
@@ -600,11 +600,12 @@ jobs:
         run: |
           ccache -s
 
-  msix-bundle:
+  appinstaller:
     runs-on: windows-latest
     needs: build
     env:
       BUNDLE_STAGING: "bundle_staging"
+      APPINSTALLER_STAGING: "appinstaller_staging"
 
     steps:
       - name: Install MSVC
@@ -621,9 +622,17 @@ jobs:
           ver_short=`git rev-parse --short HEAD`
           echo "VERSION=$ver_short" >> $GITHUB_ENV
 
+      - name: Set Appx version
+        shell: pwsh
+        run: |
+          $version = ("${{ github.run_number }}").Substring(0, 3)
+          "APPX_VERSION=7.0.0.$version" >> $env:GITHUB_ENV
+
       - name: Create Bundle Staging Directory
         shell: pwsh
-        run: New-Item -Type Directory -Path ${{ env.BUNDLE_STAGING }}
+        run: |
+          New-Item -Type Directory -Path ${{ env.BUNDLE_STAGING }}
+          New-Item -Type Directory -Path ${{ env.APPINSTALLER_STAGING }}
 
       - name: Download MSIX (x64)
         uses: actions/download-artifact@v2
@@ -640,7 +649,14 @@ jobs:
       - name: Create MSIXBundle
         shell: pwsh
         run: |
-          makeappx.exe bundle /d ${{ env.BUNDLE_STAGING }} /p ${{ env.BUNDLE_STAGING }}\prismlauncher.msixbundle
+          makeappx.exe bundle /d ${{ env.BUNDLE_STAGING }} /p ${{ env.BUNDLE_STAGING }}\prismlauncher-${{ env.APPX_VERSION }}.msixbundle
+
+      - name: Update AppInstaller File
+        shell: pwsh
+        run: |
+           (Get-Content ${{ github.workspace }}\program_info\prismlauncher.AppInstaller) `
+             -replace "PRISM_VERSION_REPLACEME","${{ env.APPX_VERSION }}" `
+             > ${{ env.APPINSTALLER_STAGING }}\prismlauncher-${{ env.APPX_VERSION }}.appInstaller
 
       - name: Fetch codesign certificate
         shell: bash
@@ -654,7 +670,19 @@ jobs:
             SignTool sign /fd sha256 /td sha256 /f codesign.pfx `
               /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' `
               /tr http://timestamp.digicert.com `
-              ${{ env.BUNDLE_STAGING }}\prismlauncher.msixbundle
+              ${{ env.BUNDLE_STAGING }}\prismlauncher-${{ env.APPX_VERSION }}.msixbundle
+          } else {
+            ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
+          }
+
+      - name: Sign AppInstaller
+        shell: pwsh
+        run: |
+          if (Get-Content ./codesign.pfx) {
+            SignTool sign /fd sha256 /td sha256 /f codesign.pfx `
+              /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' `
+              /tr http://timestamp.digicert.com `
+              ${{ env.APPINSTALLER_STAGING }}\prismlauncher-${{ env.APPX_VERSION }}.AppInstaller
           } else {
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
@@ -663,7 +691,13 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: PrismLauncher-Windows-MSVC-Universal-MSIXBundle-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: ${{ env.BUNDLE_STAGING }}/prismlauncher.msixbundle
+          path: ${{ env.BUNDLE_STAGING }}/prismlauncher-${{ env.APPX_VERSION }}.msixbundle
+
+      - name: Upload AppInstaller
+        uses: actions/upload-artifact@v2
+        with:
+          name: PrismLauncher-Windows-MSVC-Universal-AppInstaller-${{ env.VERSION }}-${{ inputs.build_type }}
+          path: ${{ env.APPINSTALLER_STAGING }}/prismlauncher-${{ env.APPX_VERSION }}.AppInstaller
 
   flatpak:
     runs-on: ubuntu-latest
