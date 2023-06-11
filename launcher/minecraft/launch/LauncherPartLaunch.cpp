@@ -207,6 +207,12 @@ void LauncherPartLaunch::executeTask()
                 bwrapArgs << "--ro-bind-try" << FS::PathCombine(actualRuntimeDir, wlDisplay) << FS::PathCombine(sandboxedRuntimeDir, wlDisplay);
         }
 
+        if (minecraftInstance->settings()->get("EnableMangoHud").toBool() && APPLICATION->capabilities() & Application::SupportsMangoHud) {
+            auto mangoHudConfigPath = qEnvironmentVariable("MANGOHUD_CONFIGFILE",
+                    FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation), "MangoHud")); 
+            bwrapArgs << "--ro-bind-try" << mangoHudConfigPath << mangoHudConfigPath;
+        }
+
         // launcher
         {
             QString instPath = QDir::toNativeSeparators(QDir(minecraftInstance->instanceRoot()).absolutePath());
