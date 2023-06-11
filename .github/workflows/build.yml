@@ -440,7 +440,7 @@ jobs:
           Set-Location ${{ env.INSTALL_DIR }}
           # MSIX only allows numbers in their versions,
           # so we need to sacrifice a bit of verbosity
-          $commitNumbers = "${{ env.VERSION }}" -replace "[^0-9]", ""
+          $commitNumbers = ("${{ env.VERSION }}" -replace "[^0-9]", "").Substring(0, 3)
           $version = "7.0.0.$commitNumbers"
 
           Copy-Item ${{ github.workspace }}\program_info\prismlauncher_*x*.png .
