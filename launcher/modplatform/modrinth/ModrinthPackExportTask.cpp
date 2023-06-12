@@ -301,9 +301,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
         const ResolvedFile& value = iterator.value();
 
         QJsonObject file;
-        QString path = iterator.key();
-        path.replace(QDir::separator(), "/");
-        file["path"] = path;
+        file["path"] = iterator.key();
         file["downloads"] = QJsonArray({ iterator.value().url });
 
         QJsonObject hashes;
