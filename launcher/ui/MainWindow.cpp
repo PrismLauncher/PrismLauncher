@@ -187,7 +187,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     }
 
-    // set the menu for the folders help, and accounts tool buttons
+    // set the menu for the folders help, accounts, and export tool buttons
     {
         auto foldersMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionFoldersButton));
         ui->actionFoldersButton->setMenu(ui->foldersMenu);
@@ -201,6 +201,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         auto accountMenuButton = dynamic_cast<QToolButton*>(ui->mainToolBar->widgetForAction(ui->actionAccountsButton));
         accountMenuButton->setPopupMode(QToolButton::InstantPopup);
+
+        auto exportInstanceMenu = new QMenu(this);
+        exportInstanceMenu->addAction(ui->actionExportInstanceZip);
+        exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
+        ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
 
     // hide, disable and show stuff
@@ -396,8 +401,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     // removing this looks stupid
     view->setFocus();
-
-    ui->actionExportInstance->setMenu(ui->exportInstanceMenu);
 
     retranslateUi();
 }
