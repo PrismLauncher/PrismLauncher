@@ -18,7 +18,7 @@
     <Resource Language="en-us" />
   </Resources>
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.22621.0" />
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.14316.0" MaxVersionTested="10.0.22621.0" />
   </Dependencies>
   <Capabilities>
     <Capability Name="internetClientServer"/>
@@ -42,8 +42,7 @@
     <Application
       Id="PrismLauncher"
       Executable="prismlauncher.exe"
-      uap10:RuntimeBehavior="win32App"
-      uap10:TrustLevel="mediumIL"
+      EntryPoint="windows.fullTrustApplication"
     >
     <uap:VisualElements
       DisplayName="Prism Launcher"
