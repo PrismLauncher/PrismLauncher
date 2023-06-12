@@ -470,7 +470,23 @@ void MainWindow::lockToolbars(bool state)
 
 void MainWindow::konamiTriggered()
 {
-    qDebug() << "Super Secret Mode ACTIVATED!";
+    QString gradient = " stop:0 rgba(125, 0, 0, 255), stop:0.166 rgba(125, 125, 0, 255), stop:0.333 rgba(0, 125, 0, 255), stop:0.5 rgba(0, 125, 125, 255), stop:0.666 rgba(0, 0, 125, 255), stop:0.833 rgba(125, 0, 125, 255), stop:1 rgba(125, 0, 0, 255));";
+    QString stylesheet = "background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0," + gradient;
+    if (ui->mainToolBar->styleSheet() == stylesheet) {
+        ui->mainToolBar->setStyleSheet("");
+        ui->instanceToolBar->setStyleSheet("");
+        ui->centralWidget->setStyleSheet("");
+        ui->newsToolBar->setStyleSheet("");
+        ui->statusBar->setStyleSheet("");
+        qDebug() << "Super Secret Mode DEACTIVATED!";
+    } else {
+        ui->mainToolBar->setStyleSheet(stylesheet);
+        ui->instanceToolBar->setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1," + gradient);
+        ui->centralWidget->setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1," + gradient);
+        ui->newsToolBar->setStyleSheet(stylesheet);
+        ui->statusBar->setStyleSheet(stylesheet);
+        qDebug() << "Super Secret Mode ACTIVATED!";
+    }
 }
 
 void MainWindow::showInstanceContextMenu(const QPoint &pos)
