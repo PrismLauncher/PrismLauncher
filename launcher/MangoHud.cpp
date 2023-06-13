@@ -2,6 +2,7 @@
 /*
  *  PrismLauncher - Minecraft Launcher
  *  Copyright (C) 2022 Jan Drögehoff <sentrycraft123@gmail.com>
+ *  Copyright (C) 2023 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
