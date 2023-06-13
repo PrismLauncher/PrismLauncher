@@ -163,9 +163,22 @@ void LauncherPartLaunch::executeTask()
 
     args.prepend(FS::ResolveExecutable(instance->settings()->get("JavaPath").toString()));
 
+    const auto wantSandbox = minecraftInstance->settings()->get("EnableSandboxing").toBool();
+
 #ifdef Q_OS_LINUX
     const auto bwrapPath = MangoHud::getBwrapBinary();
-    if (minecraftInstance->settings()->get("EnableSandboxing").toBool() && !bwrapPath.isEmpty()) {
+    const auto canSandbox = !bwrapPath.isEmpty();
+#endif
+
+    if (wantSandbox && !canSandbox) {
+        const char *reason = QT_TR_NOOP("Sandboxing was requested, but is NOT available on your system.\nPlease turn off sandboxing to proceed launching.");
+        emit logLine(tr(reason), MessageLevel::Error);
+        emitFailed(tr(reason));
+        return;
+    }
+
+#ifdef Q_OS_LINUX
+    if (wantSandbox && canSandbox) {
         QString actualRuntimeDir = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
         QString sandboxedRuntimeDir = "/tmp";
 
