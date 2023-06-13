@@ -43,7 +43,7 @@ SystemTheme::SystemTheme()
 {
     themeDebugLog() << "Determining System Theme...";
     const auto& style = QApplication::style();
-    systemPalette = style->standardPalette();
+    systemPalette = QApplication::palette();
     QString lowerThemeName = style->objectName();
     themeDebugLog() << "System theme seems to be:" << lowerThemeName;
     QStringList styles = QStyleFactory::keys();
@@ -60,9 +60,13 @@ SystemTheme::SystemTheme()
     themeDebugLog() << "System theme not found, defaulted to Fusion";
 }
 
-void SystemTheme::apply()
+void SystemTheme::apply(bool initial)
 {
-    ITheme::apply();
+    // See https://github.com/MultiMC/Launcher/issues/1790
+    // or https://github.com/PrismLauncher/PrismLauncher/issues/490
+    if (initial)
+        return; 
+    ITheme::apply(initial);
 }
 
 QString SystemTheme::id()

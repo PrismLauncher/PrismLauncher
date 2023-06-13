@@ -120,7 +120,7 @@ public:
 
     void setIconTheme(const QString& name);
 
-    void applyCurrentlySelectedTheme();
+    void applyCurrentlySelectedTheme(bool initial = false);
 
     QList<ITheme*> getValidApplicationThemes();
 
@@ -185,6 +185,10 @@ public:
     /// this is the root of the 'installation'. Used for automatic updates
     const QString &root() {
         return m_rootPath;
+    }
+
+    bool isPortable() {
+        return m_portable;
     }
 
     const Capabilities capabilities() {
@@ -275,6 +279,7 @@ private:
     QString m_rootPath;
     Status m_status = Application::StartingUp;
     Capabilities m_capabilities;
+    bool m_portable = false; 
 
 #ifdef Q_OS_MACOS
     Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;

@@ -69,8 +69,9 @@ class BigConcurrentTaskThread : public QThread {
         auto sub_tasks = new BasicTask::Ptr[s_num_tasks];
 
         for (unsigned i = 0; i < s_num_tasks; i++) {
-            sub_tasks[i] = makeShared<BasicTask>(false);
-            big_task.addTask(sub_tasks[i]);
+            auto sub_task = makeShared<BasicTask>(false);
+            sub_tasks[i] = sub_task;
+            big_task.addTask(sub_task);
         }
 
         big_task.run();
@@ -99,7 +100,7 @@ class TaskTest : public QObject {
         t.setStatus(status);
 
         QCOMPARE(t.getStatus(), status);
-        QCOMPARE(t.getStepStatus(), status);
+        QCOMPARE(t.getStepProgress().isEmpty(), TaskStepProgressList{}.isEmpty());
     }
 
     void test_SetStatus_MultiStep(){
@@ -111,7 +112,7 @@ class TaskTest : public QObject {
         QCOMPARE(t.getStatus(), status);
         // Even though it is multi step, it does not override the getStepStatus method,
         // so it should remain the same.
-        QCOMPARE(t.getStepStatus(), status);
+        QCOMPARE(t.getStepProgress().isEmpty(), TaskStepProgressList{}.isEmpty());
     }
 
     void test_SetProgress(){

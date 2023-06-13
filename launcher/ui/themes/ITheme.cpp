@@ -38,7 +38,7 @@
 #include <QDir>
 #include "Application.h"
 
-void ITheme::apply()
+void ITheme::apply(bool)
 {
     APPLICATION->setStyleSheet(QString());
     QApplication::setStyle(QStyleFactory::create(qtTheme()));

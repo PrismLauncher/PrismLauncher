@@ -95,6 +95,21 @@ public:
     // WEAK compare operator - used for replacing worlds
     bool operator==(const World &other) const;
 
+    [[nodiscard]] auto isSymLink() const -> bool{ return m_containerFile.isSymLink(); }
+
+    /**
+     * @brief Take a instance path, checks if the file pointed to by the resource is a symlink or under a symlink in that instance
+     * 
+     * @param instPath path to an instance directory
+     * @return true 
+     * @return false 
+     */
+    [[nodiscard]] bool isSymLinkUnder(const QString& instPath) const;
+
+    [[nodiscard]] bool isMoreThanOneHardLink() const;
+
+    QString canonicalFilePath() const { return m_containerFile.canonicalFilePath(); }
+
 private:
     void readFromZip(const QFileInfo &file);
     void readFromFS(const QFileInfo &file);

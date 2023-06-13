@@ -68,7 +68,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.4.2'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -80,17 +80,17 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.4.2'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
           - os: macos-12
             name: macOS
-            macosx_deployment_target: 10.15
+            macosx_deployment_target: 11.0
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
-            qt_version: '6.3.0'
+            qt_version: '6.5.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -152,7 +152,7 @@ jobs:
 
       - name: Setup ccache
         if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
-        uses: hendrikmuhs/ccache-action@v1.2.8
+        uses: hendrikmuhs/ccache-action@v1.2.9
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
 
@@ -208,6 +208,8 @@ jobs:
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         uses: jurplel/install-qt-action@v3
         with:
+           aqtversion: '==3.1.*'
+           py7zrversion: '>=0.20.2'
            version: ${{ matrix.qt_version }}
            host: 'windows'
            target: 'desktop'
@@ -223,6 +225,8 @@ jobs:
         if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
+           aqtversion: '==3.1.*'
+           py7zrversion: '>=0.20.2'
            version: ${{ matrix.qt_version }}
            host: ${{ matrix.qt_host }}
            target: 'desktop'
@@ -371,6 +375,8 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --install ${{ env.BUILD_DIR }}
+          touch ${{ env.INSTALL_DIR }}/manifest.txt
+          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt 
 
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
@@ -383,6 +389,10 @@ jobs:
             Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll -Destination libcrypto-1_1.dll
             Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
           }
+          cd ${{ github.workspace }}
+
+          Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
+
 
       - name: Fetch codesign certificate (Windows)
         if: runner.os == 'Windows'
@@ -396,7 +406,7 @@ jobs:
           if (Get-Content ./codesign.pfx){
             cd ${{ env.INSTALL_DIR }}
             # We ship the exact same executable for portable and non-portable editions, so signing just once is fine
-            SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com prismlauncher.exe
+            SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com prismlauncher.exe prismlauncher_filelink.exe
           } else {
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
@@ -407,12 +417,15 @@ jobs:
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+          for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
 
       - name: Package (Windows MSVC, portable)
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+          
+          Get-ChildItem ${{ env.INSTALL_PORTABLE_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_PORTABLE_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Package (Windows, installer)
         if: runner.os == 'Windows'
@@ -433,6 +446,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
+          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_DIR }}/manifest.txt
 
           cd ${{ env.INSTALL_DIR }}
           tar --owner root --group root -czf ../PrismLauncher.tar.gz *
@@ -442,6 +456,8 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+          for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
+
 
           cd ${{ env.INSTALL_PORTABLE_DIR }}
           tar -czf ../PrismLauncher-portable.tar.gz *
@@ -563,7 +579,7 @@ jobs:
           submodules: 'true'
       - name: Build Flatpak (Linux)
         if: inputs.build_type == 'Debug'
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v5
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
@@ -583,7 +599,7 @@ jobs:
           submodules: 'true'
       - name: Install nix
         if: inputs.build_type == 'Debug'
-        uses: cachix/install-nix-action@v20
+        uses: cachix/install-nix-action@v21
         with:
           install_url: https://nixos.org/nix/install
           extra_nix_config: |

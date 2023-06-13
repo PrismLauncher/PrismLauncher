@@ -20,14 +20,15 @@
 #include "ResourceDownloadDialog.h"
 
 #include <QPushButton>
+#include <algorithm>
 
 #include "Application.h"
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourcePackFolderModel.h"
-#include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 
 #include "ui/dialogs/ReviewMessageBox.h"
 
@@ -41,7 +42,10 @@
 namespace ResourceDownload {
 
 ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, const std::shared_ptr<ResourceFolderModel> base_model)
-    : QDialog(parent), m_base_model(base_model), m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel), m_vertical_layout(this)
+    : QDialog(parent)
+    , m_base_model(base_model)
+    , m_buttons(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel)
+    , m_vertical_layout(this)
 {
     setObjectName(QStringLiteral("ResourceDownloadDialog"));
 
@@ -89,7 +93,7 @@ void ResourceDownloadDialog::reject()
 // won't work with subclasses if we put it in this ctor.
 void ResourceDownloadDialog::initializeContainer()
 {
-    m_container = new PageContainer(this);
+    m_container = new PageContainer(this, {}, this);
     m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
     m_vertical_layout.addWidget(m_container);
@@ -102,7 +106,8 @@ void ResourceDownloadDialog::initializeContainer()
 void ResourceDownloadDialog::connectButtons()
 {
     auto OkButton = m_buttons.button(QDialogButtonBox::Ok);
-    OkButton->setToolTip(tr("Opens a new popup to review your selected %1 and confirm your selection. Shortcut: Ctrl+Return").arg(resourcesString()));
+    OkButton->setToolTip(
+        tr("Opens a new popup to review your selected %1 and confirm your selection. Shortcut: Ctrl+Return").arg(resourcesString()));
     connect(OkButton, &QPushButton::clicked, this, &ResourceDownloadDialog::confirm);
 
     auto CancelButton = m_buttons.button(QDialogButtonBox::Cancel);
@@ -114,21 +119,24 @@ void ResourceDownloadDialog::connectButtons()
 
 void ResourceDownloadDialog::confirm()
 {
-    auto keys = m_selected.keys();
-    keys.sort(Qt::CaseInsensitive);
+    auto selected = getTasks();
+    std::sort(selected.begin(), selected.end(), [](const DownloadTaskPtr& a, const DownloadTaskPtr& b) {
+        return QString::compare(a->getName(), b->getName(), Qt::CaseInsensitive) < 0;
+    });
 
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
     confirm_dialog->retranslateUi(resourcesString());
 
-    for (auto& task : keys) {
-        auto selected = m_selected.constFind(task).value();
-        confirm_dialog->appendResource({ task, selected->getFilename(), selected->getCustomPath() });
+    for (auto& task : selected) {
+        confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath() });
     }
 
     if (confirm_dialog->exec()) {
         auto deselected = confirm_dialog->deselectedResources();
-        for (auto name : deselected) {
-            m_selected.remove(name);
+        for (auto page : m_container->getPages()) {
+            auto res = static_cast<ResourcePage*>(page);
+            for (auto name : deselected)
+                res->removeResourceFromPage(name);
         }
 
         this->accept();
@@ -145,46 +153,39 @@ ResourcePage* ResourceDownloadDialog::getSelectedPage()
     return m_selectedPage;
 }
 
-void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, bool is_indexed)
+void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver)
 {
-    removeResource(pack, ver);
-
-    ver.is_currently_selected = true;
-    m_selected.insert(pack.name, makeShared<ResourceDownloadTask>(pack, ver, getBaseModel(), is_indexed));
-
-    m_buttons.button(QDialogButtonBox::Ok)->setEnabled(!m_selected.isEmpty());
+    removeResource(pack->name);
+    m_selectedPage->addResourceToPage(pack, ver, getBaseModel());
+    setButtonStatus();
 }
 
-static ModPlatform::IndexedVersion& getVersionWithID(ModPlatform::IndexedPack& pack, QVariant id)
+void ResourceDownloadDialog::removeResource(const QString& pack_name)
 {
-    Q_ASSERT(pack.versionsLoaded);
-    auto it = std::find_if(pack.versions.begin(), pack.versions.end(), [id](auto const& v) { return v.fileId == id; });
-    Q_ASSERT(it != pack.versions.end());
-    return *it;
-}
-
-void ResourceDownloadDialog::removeResource(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver)
-{
-    if (auto selected_task_it = m_selected.find(pack.name); selected_task_it != m_selected.end()) {
-        auto selected_task = *selected_task_it;
-        auto old_version_id = selected_task->getVersionID();
-
-        // If the new and old version IDs don't match, search for the old one and deselect it.
-        if (ver.fileId != old_version_id)
-            getVersionWithID(pack, old_version_id).is_currently_selected = false;
+    for (auto page : m_container->getPages()) {
+        static_cast<ResourcePage*>(page)->removeResourceFromPage(pack_name);
     }
+    setButtonStatus();
+}
 
-    // Deselect the new version too, since all versions of that pack got removed.
-    ver.is_currently_selected = false;
-
-    m_selected.remove(pack.name);
-
-    m_buttons.button(QDialogButtonBox::Ok)->setEnabled(!m_selected.isEmpty());
+void ResourceDownloadDialog::setButtonStatus()
+{
+    auto selected = false;
+    for (auto page : m_container->getPages()) {
+        auto res = static_cast<ResourcePage*>(page);
+        selected = selected || res->hasSelectedPacks();
+    }
+    m_buttons.button(QDialogButtonBox::Ok)->setEnabled(selected);
 }
 
 const QList<ResourceDownloadDialog::DownloadTaskPtr> ResourceDownloadDialog::getTasks()
 {
-    return m_selected.values();
+    QList<DownloadTaskPtr> selected;
+    for (auto page : m_container->getPages()) {
+        auto res = static_cast<ResourcePage*>(page);
+        selected.append(res->selectedPacks());
+    }
+    return selected;
 }
 
 void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* selected)
@@ -204,8 +205,6 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     // Same effect as having a global search bar
     m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
 }
-
-
 
 ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
     : ResourceDownloadDialog(parent, mods), m_instance(instance)
@@ -232,7 +231,6 @@ QList<BasePage*> ModDownloadDialog::getPages()
     return pages;
 }
 
-
 ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
                                                        const std::shared_ptr<ResourcePackFolderModel>& resource_packs,
                                                        BaseInstance* instance)
@@ -255,9 +253,10 @@ QList<BasePage*> ResourcePackDownloadDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameResourcePackPage::create(this, *m_instance));
 
+    m_selectedPage = dynamic_cast<ResourcePackResourcePage*>(pages[0]);
+
     return pages;
 }
-
 
 TexturePackDownloadDialog::TexturePackDownloadDialog(QWidget* parent,
                                                      const std::shared_ptr<TexturePackFolderModel>& resource_packs,
@@ -281,9 +280,10 @@ QList<BasePage*> TexturePackDownloadDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameTexturePackPage::create(this, *m_instance));
 
+    m_selectedPage = dynamic_cast<TexturePackResourcePage*>(pages[0]);
+
     return pages;
 }
-
 
 ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent,
                                                    const std::shared_ptr<ShaderPackFolderModel>& shaders,
@@ -304,6 +304,8 @@ QList<BasePage*> ShaderPackDownloadDialog::getPages()
     QList<BasePage*> pages;
 
     pages.append(ModrinthShaderPackPage::create(this, *m_instance));
+
+    m_selectedPage = dynamic_cast<ShaderPackResourcePage*>(pages[0]);
 
     return pages;
 }

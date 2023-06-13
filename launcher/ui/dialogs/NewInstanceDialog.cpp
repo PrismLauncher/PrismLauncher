@@ -56,7 +56,6 @@
 #include "ui/widgets/PageContainer.h"
 #include "ui/pages/modplatform/VanillaPage.h"
 #include "ui/pages/modplatform/atlauncher/AtlPage.h"
-#include "ui/pages/modplatform/ftb/FtbPage.h"
 #include "ui/pages/modplatform/legacy_ftb/Page.h"
 #include "ui/pages/modplatform/flame/FlamePage.h"
 #include "ui/pages/modplatform/ImportPage.h"
@@ -100,7 +99,7 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
     // NOTE: m_buttons must be initialized before PageContainer, because it indirectly accesses m_buttons through setSuggestedPack! Do not move this below.
     m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-    m_container = new PageContainer(this);
+    m_container = new PageContainer(this, {}, this);
     m_container->setSizePolicy(QSizePolicy::Policy::Preferred, QSizePolicy::Policy::Expanding);
     m_container->layout()->setContentsMargins(0, 0, 0, 0);
     ui->verticalLayout->insertWidget(2, m_container);
@@ -168,7 +167,6 @@ QList<BasePage *> NewInstanceDialog::getPages()
     pages.append(new AtlPage(this));
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(new FlamePage(this));
-    pages.append(new FtbPage(this));
     pages.append(new LegacyFTB::Page(this));
     pages.append(new ModrinthPage(this));
     pages.append(new TechnicPage(this));

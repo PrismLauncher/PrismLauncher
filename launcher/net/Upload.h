@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,7 +55,7 @@ namespace Net {
     protected slots:
         void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
         void downloadError(QNetworkReply::NetworkError error) override;
-        void sslErrors(const QList<QSslError> & errors);
+        void sslErrors(const QList<QSslError> & errors) override;
         void downloadFinished() override;
         void downloadReadyRead() override;
 

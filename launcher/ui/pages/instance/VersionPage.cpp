@@ -165,7 +165,7 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     auto proxy = new IconProxy(ui->packageView);
     proxy->setSourceModel(m_profile.get());
 
-    m_filterModel = new QSortFilterProxyModel();
+    m_filterModel = new QSortFilterProxyModel(this);
     m_filterModel->setDynamicSortFilter(true);
     m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
@@ -501,7 +501,7 @@ void VersionPage::on_actionDownload_All_triggered()
         return;
     }
     ProgressDialog tDialog(this);
-    connect(updateTask.get(), SIGNAL(failed(QString)), SLOT(onGameUpdateError(QString)));
+    connect(updateTask.get(), &Task::failed, this, &VersionPage::onGameUpdateError);
     // FIXME: unused return value
     tDialog.execWithTask(updateTask.get());
     updateButtons();

@@ -56,10 +56,10 @@ static Version::Ptr parseCommonVersion(const QString &uid, const QJsonObject &ob
     version->setType(ensureString(obj, "type", QString()));
     version->setRecommended(ensureBoolean(obj, QString("recommended"), false));
     version->setVolatile(ensureBoolean(obj, QString("volatile"), false));
-    RequireSet requires, conflicts;
-    parseRequires(obj, &requires, "requires");
+    RequireSet reqs, conflicts;
+    parseRequires(obj, &reqs, "requires");
     parseRequires(obj, &conflicts, "conflicts");
-    version->setRequires(requires, conflicts);
+    version->setRequires(reqs, conflicts);
     return version;
 }
 
@@ -176,7 +176,6 @@ void parseRequires(const QJsonObject& obj, RequireSet* ptr, const char * keyName
 {
     if(obj.contains(keyName))
     {
-        QSet<QString> requires;
         auto reqArray = requireArray(obj, keyName);
         auto iter = reqArray.begin();
         while(iter != reqArray.end())

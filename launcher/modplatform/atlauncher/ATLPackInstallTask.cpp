@@ -352,7 +352,7 @@ QString PackInstallTask::getVersionForLoader(QString uid)
         if(m_version.loader.recommended || m_version.loader.latest) {
             for (int i = 0; i < vlist->versions().size(); i++) {
                 auto version = vlist->versions().at(i);
-                auto reqs = version->requires();
+                auto reqs = version->requiredSet();
 
                 // filter by minecraft version, if the loader depends on a certain version.
                 // not all mod loaders depend on a given Minecraft version, so we won't do this
@@ -683,6 +683,7 @@ void PackInstallTask::installConfigs()
         abortable = true;
         setProgress(current, total);
     });
+    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
     connect(jobPtr.get(), &NetJob::aborted, [&]{
         abortable = false;
         jobPtr.reset();
@@ -846,9 +847,11 @@ void PackInstallTask::downloadMods()
     });
     connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
     {
+        setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         abortable = true;
         setProgress(current, total);
     });
+    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
     connect(jobPtr.get(), &NetJob::aborted, [&]
     {
         abortable = false;

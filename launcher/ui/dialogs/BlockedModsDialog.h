@@ -79,6 +79,7 @@ class BlockedModsDialog : public QDialog {
     void update();
     void directoryChanged(QString path);
     void setupWatch();
+    void watchPath(QString path, bool watch_recursive = false);
     void scanPaths();
     void scanPath(QString path, bool start_task);
     void addHashTask(QString path);

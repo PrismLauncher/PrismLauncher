@@ -459,10 +459,23 @@
     <string>E&amp;xport...</string>
    </property>
    <property name="toolTip">
-    <string>Export the selected instance as a zip file.</string>
+    <string>Export the selected instance to supported formats.</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+E</string>
+  </action>
+  <action name="actionExportInstanceZip">
+   <property name="icon">
+    <iconset theme="launcher"/>
+   </property>
+   <property name="text">
+    <string>Prism Launcher (zip)</string>
+   </property>
+  </action>
+  <action name="actionExportInstanceMrPack">
+   <property name="icon">
+    <iconset theme="modrinth"/>
+   </property>
+   <property name="text">
+    <string>Modrinth (mrpack)</string>
    </property>
   </action>
   <action name="actionCreateInstanceShortcut">

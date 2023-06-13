@@ -127,6 +127,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
 
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
+    connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &Technic::SolderPackInstallTask::propogateStepProgress);
     connect(m_filesNetJob.get(), &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
     connect(m_filesNetJob.get(), &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
     m_filesNetJob->start();

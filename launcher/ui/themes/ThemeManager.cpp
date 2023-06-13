@@ -116,22 +116,22 @@ void ThemeManager::setIconTheme(const QString& name)
     QIcon::setThemeName(name);
 }
 
-void ThemeManager::applyCurrentlySelectedTheme()
+void ThemeManager::applyCurrentlySelectedTheme(bool initial)
 {
     setIconTheme(APPLICATION->settings()->get("IconTheme").toString());
     themeDebugLog() << "<> Icon theme set.";
-    setApplicationTheme(APPLICATION->settings()->get("ApplicationTheme").toString());
+    setApplicationTheme(APPLICATION->settings()->get("ApplicationTheme").toString(), initial);
     themeDebugLog() << "<> Application theme set.";
 }
 
-void ThemeManager::setApplicationTheme(const QString& name)
+void ThemeManager::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
     auto themeIter = m_themes.find(name);
     if (themeIter != m_themes.end()) {
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
-        theme->apply();
+        theme->apply(initial);
     } else {
         themeWarningLog() << "Tried to set invalid theme:" << name;
     }

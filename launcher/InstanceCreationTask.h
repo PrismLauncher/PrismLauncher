@@ -34,7 +34,7 @@ class InstanceCreationTask : public InstanceTask {
     QString getError() const { return m_error_message; }
 
    protected:
-    void setError(QString message) { m_error_message = message; };
+    void setError(const QString& message) { m_error_message = message; };
 
    protected:
     bool m_abort = false;
