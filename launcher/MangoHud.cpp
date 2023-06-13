@@ -16,16 +16,19 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QStringList>
 #include <QDir>
+#include <QStandardPaths>
 #include <QString>
+#include <QStringList>
 #include <QSysInfo>
 #include <QtGlobal>
 
-#include "MangoHud.h"
+#include "BuildConfig.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "MangoHud.h"
 
+// FIXME: rename this to something generic
 namespace MangoHud {
 
 QString getLibraryString()
@@ -105,5 +108,25 @@ QString getLibraryString()
     }
 
     return QString();
+}
+
+QString getBwrapBinary()
+{
+    QStringList binaries{ BuildConfig.LINUX_BWRAP_BINARY, "bwrap" };
+    for (const auto& binary : binaries) {
+        // return if an absolute path is specified (i.e. distribution override)
+        if (binary.startsWith('/') && QFileInfo(binary).isExecutable()) {
+            qDebug() << "Found absolute bwrap binary" << binary;
+            return binary;
+        }
+
+        // lookup otherwise
+        QString path = QStandardPaths::findExecutable(binary);
+        if (!path.isEmpty()) {
+            qDebug() << "Found bwrap binary" << binary << "at" << path;
+            return path;
+        }
+    }
+    return {};
 }
 }  // namespace MangoHud

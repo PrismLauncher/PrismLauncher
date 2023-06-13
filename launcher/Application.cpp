@@ -604,6 +604,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
 
+        // Sandboxing Settings
+        m_settings->registerSetting("EnableSandboxing", true);
+        m_settings->registerSetting("BwrapExtraArgs", "");
+
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
         m_settings->registerSetting("UseNativeGLFW", false);

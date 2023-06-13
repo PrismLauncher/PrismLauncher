@@ -41,6 +41,7 @@
 #include <QtGlobal>
 
 #include "BuildConfig.h"
+#include "MangoHud.h"
 #include "launch/LaunchTask.h"
 #include "minecraft/MinecraftInstance.h"
 #include "FileSystem.h"
@@ -163,13 +164,13 @@ void LauncherPartLaunch::executeTask()
     args.prepend(FS::ResolveExecutable(instance->settings()->get("JavaPath").toString()));
 
 #ifdef Q_OS_LINUX
-    // TODO: Sandboxing setting
-    if (true) {
+    const auto bwrapPath = MangoHud::getBwrapBinary();
+    if (minecraftInstance->settings()->get("EnableSandboxing").toBool() && !bwrapPath.isEmpty()) {
         QString actualRuntimeDir = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
         QString sandboxedRuntimeDir = "/tmp";
 
         QStringList bwrapArgs{};
-        bwrapArgs << QStandardPaths::findExecutable(BuildConfig.LINUX_BWRAP_BINARY);
+        bwrapArgs << bwrapPath; // will either be taken out using takeFirst or passed to wrapper command
         bwrapArgs << "--unshare-all";
         bwrapArgs << "--share-net";
         bwrapArgs << "--die-with-parent";
@@ -227,6 +228,8 @@ void LauncherPartLaunch::executeTask()
         }
 
         bwrapArgs << Commandline::splitArgs(BuildConfig.LINUX_BWRAP_EXTRA_ARGS);
+        // TODO: add args from environment variable?
+        bwrapArgs << Commandline::splitArgs(minecraftInstance->settings()->get("BwrapExtraArgs").toString());
 
         bwrapArgs << "--";
         args = bwrapArgs + args;

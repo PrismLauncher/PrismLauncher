@@ -165,6 +165,11 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("MaxMemAlloc"), memorySetting);
         m_settings->registerOverride(global_settings->getSetting("PermGen"), memorySetting);
 
+        // Sandboxing
+        auto sandboxingSetting = m_settings->registerSetting("OverrideSandboxing", false);
+        m_settings->registerOverride(global_settings->getSetting("EnableSandboxing"), sandboxingSetting);
+        m_settings->registerOverride(global_settings->getSetting("BwrapExtraArgs"), sandboxingSetting);
+
         // Minecraft launch method
         auto launchMethodOverride = m_settings->registerSetting("OverrideMCLaunchMethod", false);
         m_settings->registerOverride(global_settings->getSetting("MCLaunchMethod"), launchMethodOverride);
