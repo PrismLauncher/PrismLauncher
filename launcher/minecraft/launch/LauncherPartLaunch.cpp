@@ -170,7 +170,7 @@ void LauncherPartLaunch::executeTask()
 
         QStringList bwrapArgs{};
         bwrapArgs << QStandardPaths::findExecutable(BuildConfig.LINUX_BWRAP_BINARY);
-        bwrapArgs << "--unshare-user" << "--unshare-ipc" << "--unshare-pid" << "--unshare-uts" << "--unshare-cgroup";
+        bwrapArgs << "--unshare-all";
         bwrapArgs << "--share-net";
         bwrapArgs << "--die-with-parent";
         bwrapArgs << "--unsetenv" << "DBUS_SESSION_BUS_ADDRESS";
@@ -179,7 +179,6 @@ void LauncherPartLaunch::executeTask()
         bwrapArgs << "--dev" << "/dev";
         bwrapArgs << "--dev-bind-try" << "/dev/dri" << "/dev/dri";
         bwrapArgs << "--proc" << "/proc";
-        bwrapArgs << "--tmpfs" << "/tmp";
         bwrapArgs << "--ro-bind" << "/etc" << "/etc";
         bwrapArgs << "--ro-bind" << "/usr" << "/usr";
         bwrapArgs << "--ro-bind-try" << "/sys/class" << "/sys/class";
