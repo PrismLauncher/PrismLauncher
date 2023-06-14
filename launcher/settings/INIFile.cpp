@@ -101,7 +101,7 @@ QString unescape(QString orig)
 QString unquete(QString str)
 {
     if ((str.contains(QChar(';')) || str.contains(QChar('=')) || str.contains(QChar(','))) && str.endsWith("\"") && str.startsWith("\"")) {
-#if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
         str = str.remove(0, 1);
         str = str.remove(str.size() - 1, 1);
 #else
