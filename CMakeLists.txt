@@ -172,6 +172,9 @@ set(Launcher_DISCORD_URL "https://prismlauncher.org/discord" CACHE STRING "URL f
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL for the subreddit.")
 
+# AppContainer Support for Windows
+set(Launcher_APPCONTAINER_ENABLE OFF CACHE BOOL "Enable AppContainer support for Windows.")
+
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
 set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
