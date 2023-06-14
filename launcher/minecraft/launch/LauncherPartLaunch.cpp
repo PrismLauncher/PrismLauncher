@@ -196,6 +196,11 @@ void LauncherPartLaunch::executeTask()
         bwrapArgs << "--proc" << "/proc";
         bwrapArgs << "--ro-bind" << "/etc" << "/etc";
         bwrapArgs << "--ro-bind" << "/usr" << "/usr";
+        bwrapArgs << "--ro-bind-try" << "/bin" << "/bin";
+        bwrapArgs << "--ro-bind-try" << "/sbin" << "/sbin";
+        bwrapArgs << "--ro-bind-try" << "/lib" << "/lib";
+        bwrapArgs << "--ro-bind-try" << "/lib32" << "/lib32";
+        bwrapArgs << "--ro-bind-try" << "/lib64" << "/lib64";
         bwrapArgs << "--ro-bind-try" << "/sys/class" << "/sys/class";
         bwrapArgs << "--ro-bind-try" << "/sys/dev/char" << "/sys/dev/char";
         bwrapArgs << "--ro-bind-try" << "/sys/devices/pci0000:00" << "/sys/devices/pci0000:00";
