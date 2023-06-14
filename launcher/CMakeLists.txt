@@ -124,6 +124,8 @@ set(NET_SOURCES
     net/HttpMetaCache.h
     net/MetaCacheSink.cpp
     net/MetaCacheSink.h
+    net/Logging.h
+    net/Logging.cpp
     net/NetAction.h
     net/NetJob.cpp
     net/NetJob.h
@@ -523,6 +525,8 @@ set(MODRINTH_SOURCES
     modplatform/modrinth/ModrinthCheckUpdate.h
     modplatform/modrinth/ModrinthInstanceCreationTask.cpp
     modplatform/modrinth/ModrinthInstanceCreationTask.h
+    modplatform/modrinth/ModrinthPackExportTask.cpp
+    modplatform/modrinth/ModrinthPackExportTask.h
 )
 
 set(PACKWIZ_SOURCES
@@ -575,6 +579,55 @@ ecm_qt_declare_logging_category(CORE_SOURCES
     DESCRIPTION "Secrets and credentials for debugging purposes"
     EXPORT "${Launcher_Name}"
 )
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskLogC
+    CATEGORY_NAME "launcher.task"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "Task actions"
+    EXPORT "${Launcher_Name}"
+)
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskNetLogC
+    CATEGORY_NAME "launcher.task.net"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network action"
+    EXPORT "${Launcher_Name}"
+)
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskDownloadLogC
+    CATEGORY_NAME "launcher.task.net.download"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network download actions"
+    EXPORT "${Launcher_Name}"
+)
+ecm_qt_export_logging_category(
+    IDENTIFIER taskUploadLogC
+    CATEGORY_NAME "launcher.task.net.upload"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network upload actions"
+    EXPORT "${Launcher_Name}"
+)
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskMetaCacheLogC
+    CATEGORY_NAME "launcher.task.net.metacache"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network meta-cache actions"
+    EXPORT "${Launcher_Name}"
+)
+
+ecm_qt_export_logging_category(
+    IDENTIFIER taskHttpMetaCacheLogC
+    CATEGORY_NAME "launcher.task.net.metacache.http"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "task network http meta-cache actions"
+    EXPORT "${Launcher_Name}"
+)
+
+
 
 if(KDE_INSTALL_LOGGINGCATEGORIESDIR)  # only install if there is a standard path for this
     ecm_qt_install_logging_categories(
@@ -669,6 +722,10 @@ SET(LAUNCHER_SOURCES
     # FIXME: maybe find a better home for this.
     SkinUtils.cpp
     SkinUtils.h
+    FileIgnoreProxy.cpp
+    FileIgnoreProxy.h
+    FastFileIconProvider.cpp
+    FastFileIconProvider.h
 
     # GUI - setup wizard
     ui/setupwizard/SetupWizard.h
@@ -849,6 +906,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/EditAccountDialog.h
     ui/dialogs/ExportInstanceDialog.cpp
     ui/dialogs/ExportInstanceDialog.h
+    ui/dialogs/ExportMrPackDialog.cpp
+    ui/dialogs/ExportMrPackDialog.h
     ui/dialogs/IconPickerDialog.cpp
     ui/dialogs/IconPickerDialog.h
     ui/dialogs/ImportResourceDialog.cpp
@@ -922,6 +981,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/VariableSizedImageObject.cpp
     ui/widgets/ProjectItem.h
     ui/widgets/ProjectItem.cpp
+    ui/widgets/SubTaskProgressBar.h
+    ui/widgets/SubTaskProgressBar.cpp
     ui/widgets/VersionListView.cpp
     ui/widgets/VersionListView.h
     ui/widgets/VersionSelectWidget.cpp
@@ -982,6 +1043,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/widgets/CustomCommands.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
+    ui/widgets/SubTaskProgressBar.ui
     ui/widgets/ThemeCustomizationWidget.ui
     ui/dialogs/CopyInstanceDialog.ui
     ui/dialogs/ProfileSetupDialog.ui
@@ -992,6 +1054,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ProfileSelectDialog.ui
     ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
+    ui/dialogs/ExportMrPackDialog.ui
     ui/dialogs/IconPickerDialog.ui
     ui/dialogs/ImportResourceDialog.ui
     ui/dialogs/MSALoginDialog.ui
@@ -1153,6 +1216,12 @@ if(INSTALL_BUNDLE STREQUAL "full")
     # Add qt.conf - this makes Qt stop looking for things outside the bundle
     install(
         CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \" \")"
+        COMPONENT Runtime
+    )
+    # add qtlogging.ini as a config file
+    install(
+        FILES "qtlogging.ini"
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}
         COMPONENT Runtime
     )
     # Bundle plugins

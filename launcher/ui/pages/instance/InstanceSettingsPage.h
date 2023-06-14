@@ -95,12 +95,11 @@ private slots:
 
     void updateAccountsMenu();
     QIcon getFaceForAccount(MinecraftAccountPtr account);
-    void changeInstanceAccount();
+    void changeInstanceAccount(int index);
 
 private:
     Ui::InstanceSettingsPage *ui;
     BaseInstance *m_instance;
     SettingsObjectPtr m_settings;
     unique_qobject_ptr<JavaCommon::TestCheck> checker;
-    QMenu *accountMenu = nullptr;
 };

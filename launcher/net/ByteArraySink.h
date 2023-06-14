@@ -53,7 +53,10 @@ class ByteArraySink : public Sink {
    public:
     auto init(QNetworkRequest& request) -> Task::State override
     {
-        m_output->clear();
+        if (m_output)
+            m_output->clear();
+        else
+            qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
         if (initAllValidators(request))
             return Task::State::Running;
         return Task::State::Failed;
@@ -61,7 +64,10 @@ class ByteArraySink : public Sink {
 
     auto write(QByteArray& data) -> Task::State override
     {
-        m_output->append(data);
+        if (m_output)
+            m_output->append(data);
+        else
+            qWarning() << "ByteArraySink did not write the buffer because it's not addressable";
         if (writeAllValidators(data))
             return Task::State::Running;
         return Task::State::Failed;
@@ -69,7 +75,10 @@ class ByteArraySink : public Sink {
 
     auto abort() -> Task::State override
     {
-        m_output->clear();
+        if (m_output)
+            m_output->clear();
+        else
+            qWarning() << "ByteArraySink did not clear the buffer because it's not addressable";
         failAllValidators();
         return Task::State::Failed;
     }

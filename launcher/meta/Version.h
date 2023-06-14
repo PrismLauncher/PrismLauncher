@@ -63,7 +63,7 @@ public:
     {
         return m_time;
     }
-    const Meta::RequireSet &requires() const
+    const Meta::RequireSet &requiredSet() const
     {
         return m_requires;
     }
@@ -91,7 +91,7 @@ public:
 public: // for usage by format parsers only
     void setType(const QString &type);
     void setTime(const qint64 time);
-    void setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts);
+    void setRequires(const Meta::RequireSet &reqs, const Meta::RequireSet &conflicts);
     void setVolatile(bool volatile_);
     void setRecommended(bool recommended);
     void setProvidesRecommendations();

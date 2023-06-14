@@ -45,7 +45,7 @@
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 #include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
 
-ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance)
+ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, BaseInstance* instance)
     : ResourceFolderModel(QDir(dir), instance)
 {
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE };
