@@ -26,5 +26,6 @@
         <!-- https://commons.wikimedia.org/wiki/File:Teawie_Party.png -->
         <file alias="teawie-spooky">teawie-spooky.png</file>
         <!-- https://commons.wikimedia.org/wiki/File:Teawie_Halloween.png -->
+        <file alias="maxwell">maxwell.png</file>
     </qresource>
 </RCC>
