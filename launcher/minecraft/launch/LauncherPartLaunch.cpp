@@ -164,10 +164,11 @@ void LauncherPartLaunch::executeTask()
     args.prepend(FS::ResolveExecutable(instance->settings()->get("JavaPath").toString()));
 
     const auto wantSandbox = minecraftInstance->settings()->get("EnableSandboxing").toBool();
+    auto canSandbox = false;
 
 #ifdef Q_OS_LINUX
     const auto bwrapPath = MangoHud::getBwrapBinary();
-    const auto canSandbox = !bwrapPath.isEmpty();
+    canSandbox = !bwrapPath.isEmpty();
 #endif
 
     if (wantSandbox && !canSandbox) {
