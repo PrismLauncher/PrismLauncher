@@ -2,7 +2,9 @@
 
 #include <settings/INIFile.h>
 #include <QList>
+#include <QSettings>
 #include <QVariant>
+#include "FileSystem.h"
 
 #include <QVariantUtils.h>
 
@@ -80,7 +82,10 @@ iconKey=vanillia_icon
 name=Minecraft Vanillia
 OverrideCommands=true
 PreLaunchCommand="$INST_JAVA" -jar packwiz-installer-bootstrap.jar link
-)";
+Wrapperommand=)";
+        fileContent += "\"";
+        fileContent += +R"(\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =)";
+        fileContent += "\"\n";
         QFile file(fileName);
 
         if (file.open(QFile::WriteOnly | QFile::Text)) {
@@ -93,11 +98,69 @@ PreLaunchCommand="$INST_JAVA" -jar packwiz-installer-bootstrap.jar link
         INIFile f1;
         f1.loadFile(fileName);
         QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
+        QCOMPARE(f1.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
         f1.saveFile(fileName);
         INIFile f2;
         f2.loadFile(fileName);
         QCOMPARE(f2.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
-        QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.1");
+        QCOMPARE(f2.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
+        QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.2");
+    }
+
+    void test_SaveAleardyExistingFileWithSpecialChars()
+    {
+        QString fileName = "test_SaveAleardyExistingFileWithSpecialChars.ini";
+        FS::deletePath(fileName);  // just to clean the previous test run
+        QSettings settings{ fileName, QSettings::Format::IniFormat };
+        settings.setFallbacksEnabled(false);
+
+        settings.setValue("simple", "value1");
+        settings.setValue("withQuotes", R"("value2" with quotes)");
+        settings.setValue("withSpecialCharacters", "env mesa=true");
+        settings.setValue("withSpecialCharacters2", "1,2,3,4");
+        settings.setValue("withSpecialCharacters2", "1;2;3;4");
+        settings.setValue("withAll", "val=\"$INST_JAVA\" -jar; ls ");
+
+        settings.sync();
+
+        QCOMPARE(settings.status(), QSettings::Status::NoError);
+
+        // load
+        INIFile f1;
+        f1.loadFile(fileName);
+        for (auto key : settings.allKeys())
+            QCOMPARE(f1.get(key, "NOT SET").toString(), settings.value(key).toString());
+        f1.saveFile(fileName);
+        INIFile f2;
+        f2.loadFile(fileName);
+        for (auto key : settings.allKeys())
+            QCOMPARE(f2.get(key, "NOT SET").toString(), settings.value(key).toString());
+        QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.2");
+    }
+
+    void test_SaveAleardyExistingFileWithSpecialCharsV1()
+    {
+        QString fileName = "test_SaveAleardyExistingFileWithSpecialCharsV1.ini";
+        QString fileContent = R"(InstanceType=OneSix
+ConfigVersion=1.1
+iconKey=vanillia_icon
+name=Minecraft Vanillia
+OverrideCommands=true
+PreLaunchCommand=)";
+        fileContent += "\"\\\"env mesa=true\\\"\"\n";
+        QFile file(fileName);
+
+        if (file.open(QFile::WriteOnly | QFile::Text)) {
+            QTextStream stream(&file);
+            stream << fileContent;
+            file.close();
+        }
+
+        // load
+        INIFile f1;
+        f1.loadFile(fileName);
+        QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "env mesa=true");
+        QCOMPARE(f1.get("ConfigVersion", "NOT SET").toString(), "1.2");
     }
 };
 
