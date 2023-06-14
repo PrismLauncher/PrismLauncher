@@ -183,6 +183,21 @@ void LauncherPartLaunch::executeTask()
         QString actualRuntimeDir = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
         QString sandboxedRuntimeDir = "/tmp";
 
+        const static QStringList systemBinds{
+            "/etc",
+            "/usr",
+            "/bin",
+            "/sbin",
+            "/lib",
+            "/lib32",
+            "/lib64",
+            "/sys/class",
+            "/sys/dev/char",
+            "/sys/devices/pci0000:00",
+            "/sys/devices/system/cpu",
+            "/run/systemd/resolve",
+        };
+
         QStringList bwrapArgs{};
         bwrapArgs << bwrapPath; // will either be taken out using takeFirst or passed to wrapper command
         bwrapArgs << "--unshare-all";
@@ -194,19 +209,11 @@ void LauncherPartLaunch::executeTask()
         bwrapArgs << "--dev" << "/dev";
         bwrapArgs << "--dev-bind-try" << "/dev/dri" << "/dev/dri";
         bwrapArgs << "--proc" << "/proc";
-        bwrapArgs << "--ro-bind" << "/etc" << "/etc";
-        bwrapArgs << "--ro-bind" << "/usr" << "/usr";
-        bwrapArgs << "--ro-bind-try" << "/bin" << "/bin";
-        bwrapArgs << "--ro-bind-try" << "/sbin" << "/sbin";
-        bwrapArgs << "--ro-bind-try" << "/lib" << "/lib";
-        bwrapArgs << "--ro-bind-try" << "/lib32" << "/lib32";
-        bwrapArgs << "--ro-bind-try" << "/lib64" << "/lib64";
-        bwrapArgs << "--ro-bind-try" << "/sys/class" << "/sys/class";
-        bwrapArgs << "--ro-bind-try" << "/sys/dev/char" << "/sys/dev/char";
-        bwrapArgs << "--ro-bind-try" << "/sys/devices/pci0000:00" << "/sys/devices/pci0000:00";
-        bwrapArgs << "--ro-bind-try" << "/sys/devices/system/cpu" << "/sys/devices/system/cpu";
-        bwrapArgs << "--ro-bind-try" << "/run/systemd/resolve" << "/run/systemd/resolve";
         bwrapArgs << "--setenv" << "XDG_RUNTIME_DIR" << sandboxedRuntimeDir;
+
+        for (auto path : systemBinds) {
+            bwrapArgs << "--ro-bind-try" << path << path;
+        }
 
         // desktop integration
         bwrapArgs << "--ro-bind-try" << QString("%1/pulse").arg(actualRuntimeDir) << QString("%1/pulse").arg(sandboxedRuntimeDir);
