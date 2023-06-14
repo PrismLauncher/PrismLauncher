@@ -240,10 +240,13 @@ void ResourcePage::updateSelectionButton()
     }
 
     m_ui->resourceSelectionButton->setEnabled(true);
-    if (!getCurrentPack()->isVersionSelected(m_selected_version_index)) {
-        m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
+    if (getCurrentPack()) {
+        if (!getCurrentPack()->isVersionSelected(m_selected_version_index))
+            m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
+        else
+            m_ui->resourceSelectionButton->setText(tr("Deselect %1 for download").arg(resourceString()));
     } else {
-        m_ui->resourceSelectionButton->setText(tr("Deselect %1 for download").arg(resourceString()));
+        qWarning() << "Tried to update the selected button but there is not a pack selected";
     }
 }
 
