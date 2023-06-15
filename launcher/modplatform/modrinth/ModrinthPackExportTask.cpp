@@ -27,7 +27,7 @@
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 
-const QStringList ModrinthPackExportTask::PREFIXES({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
+const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
 const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "zip" });
 
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
@@ -99,14 +99,12 @@ void ModrinthPackExportTask::collectHashes()
 
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
-        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(),
-                         [&relative](const QString& prefix) { return relative.startsWith(prefix + QDir::separator()); }))
+        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(), [&relative](const QString& prefix) { return relative.startsWith(prefix); }))
             continue;
         if (!std::any_of(FILE_EXTENSIONS.begin(), FILE_EXTENSIONS.end(), [&relative](const QString& extension) {
                 return relative.endsWith('.' + extension) || relative.endsWith('.' + extension + ".disabled");
-            })) {
+            }))
             continue;
-        }
 
         QCryptographicHash sha512(QCryptographicHash::Algorithm::Sha512);
 
@@ -303,9 +301,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
         const ResolvedFile& value = iterator.value();
 
         QJsonObject file;
-        QString path = iterator.key();
-        path.replace(QDir::separator(), "/");
-        file["path"] = path;
+        file["path"] = iterator.key();
         file["downloads"] = QJsonArray({ iterator.value().url });
 
         QJsonObject hashes;

@@ -138,19 +138,18 @@ void ConcurrentTask::startNext()
     connect(next.get(), &Task::progress, this, [this, next](qint64 current, qint64 total) { subTaskProgress(next, current, total); });
 
     m_doing.insert(next.get(), next);
+    qsizetype num_starts = qMin(m_queue.size(), m_total_max_size - m_doing.size());
     auto task_progress = std::make_shared<TaskStepProgress>(next->getUid());
     m_task_progress.insert(next->getUid(), task_progress);
 
     updateState();
     updateStepProgress(*task_progress.get(), Operation::ADDED);
-    
 
     QCoreApplication::processEvents();
 
     QMetaObject::invokeMethod(next.get(), &Task::start, Qt::QueuedConnection);
 
     // Allow going up the number of concurrent tasks in case of tasks being added in the middle of a running task.
-    int num_starts = qMin(m_queue.size(), m_total_max_size - m_doing.size());
     for (int i = 0; i < num_starts; i++)
         QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
 }
