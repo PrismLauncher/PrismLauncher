@@ -40,12 +40,13 @@
 #include "ATLPackManifest.h"
 
 #include "InstanceTask.h"
-#include "net/NetJob.h"
-#include "settings/INISettingsObject.h"
+#include "meta/Version.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "meta/Version.h"
+#include "net/NetJob.h"
+#include "settings/INISettingsObject.h"
 
+#include <memory>
 #include <optional>
 
 namespace ATLauncher {
@@ -123,7 +124,7 @@ private:
     bool abortable = false;
 
     NetJob::Ptr jobPtr;
-    QByteArray response;
+    std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
 
     InstallMode m_install_mode;
     QString m_pack_name;

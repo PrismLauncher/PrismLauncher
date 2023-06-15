@@ -212,12 +212,12 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
     auto hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
-    auto* response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto ver_task = modrinth_api.currentVersions(m_mods.keys(), hash_type, response);
 
     // Prevents unfortunate timings when aborting the task
     if (!ver_task)
-        return Task::Ptr{nullptr};
+        return Task::Ptr{ nullptr };
 
     connect(ver_task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
@@ -264,7 +264,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
     for (auto const& data : m_temp_versions)
         addonIds.insert(data.addonId.toString(), data.hash);
 
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     Task::Ptr proj_task;
 
     if (addonIds.isEmpty()) {
@@ -277,7 +277,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 
     // Prevents unfortunate timings when aborting the task
     if (!proj_task)
-        return Task::Ptr{nullptr};
+        return Task::Ptr{ nullptr };
 
     connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
         QJsonParseError parse_error{};
@@ -345,7 +345,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 // Flame
 Task::Ptr EnsureMetadataTask::flameVersionsTask()
 {
-    auto* response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
 
     QList<uint> fingerprints;
     for (auto& murmur : m_mods.keys()) {
@@ -413,7 +413,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     QHash<QString, QString> addonIds;
     for (auto const& hash : m_mods.keys()) {
         if (m_temp_versions.contains(hash)) {
-            auto const& data = m_temp_versions.find(hash).value();
+            auto data = m_temp_versions.find(hash).value();
 
             auto id_str = data.addonId.toString();
             if (!id_str.isEmpty())
@@ -421,7 +421,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
         }
     }
 
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     Task::Ptr proj_task;
 
     if (addonIds.isEmpty()) {
@@ -434,7 +434,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
 
     // Prevents unfortunate timings when aborting the task
     if (!proj_task)
-        return Task::Ptr{nullptr};
+        return Task::Ptr{ nullptr };
 
     connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
         QJsonParseError parse_error{};

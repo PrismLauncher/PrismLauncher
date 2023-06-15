@@ -88,7 +88,7 @@ void ListModel::request()
 
     auto netJob = makeShared<NetJob>("Atl::Request", APPLICATION->network());
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/json/packsnew.json");
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), &response));
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), response));
     jobPtr = netJob;
     jobPtr->start();
 
@@ -101,10 +101,10 @@ void ListModel::requestFinished()
     jobPtr.reset();
 
     QJsonParseError parse_error;
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
     if(parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from ATL at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qWarning() << *response;
         return;
     }
 
@@ -120,7 +120,7 @@ void ListModel::requestFinished()
             ATLauncher::loadIndexedPack(pack, packObj);
         }
         catch (const JSONValidationError &e) {
-            qDebug() << QString::fromUtf8(response);
+            qDebug() << QString::fromUtf8(*response);
             qWarning() << "Error while reading pack manifest from ATLauncher: " << e.cause();
             return;
         }

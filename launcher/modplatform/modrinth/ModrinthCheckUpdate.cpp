@@ -71,7 +71,7 @@ void ModrinthCheckUpdate::executeTask()
     hashing_task.start();
     loop.exec();
 
-    auto* response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto job = api.latestVersions(hashes, best_hash_type, m_game_versions, m_loaders, response);
 
     QEventLoop lock;

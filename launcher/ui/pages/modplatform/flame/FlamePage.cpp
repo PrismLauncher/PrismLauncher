@@ -130,7 +130,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     if (current.versionsLoaded == false) {
         qDebug() << "Loading flame modpack versions";
         auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
         netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
 
@@ -170,10 +170,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             }
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         netJob->start();
     } else {
         for (auto version : current.versions) {
