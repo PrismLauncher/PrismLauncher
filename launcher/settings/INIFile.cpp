@@ -98,7 +98,7 @@ QString unescape(QString orig)
     return out;
 }
 
-QString unquete(QString str)
+QString unquote(QString str)
 {
     if ((str.contains(QChar(';')) || str.contains(QChar('=')) || str.contains(QChar(','))) && str.endsWith("\"") && str.startsWith("\"")) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
@@ -138,7 +138,7 @@ bool parseOldFileFormat(QIODevice& device, QSettings::SettingsMap& map)
         QString key = line.left(eqPos).trimmed();
         QString valueStr = line.right(line.length() - eqPos - 1).trimmed();
 
-        valueStr = unquete(unescape(valueStr));
+        valueStr = unquote(unescape(valueStr));
 
         QVariant value(valueStr);
         map.insert(key, value);
@@ -174,7 +174,7 @@ bool INIFile::loadFile(QString fileName)
             if (auto valueStr = _settings_obj.value(key).toString();
                 (valueStr.contains(QChar(';')) || valueStr.contains(QChar('=')) || valueStr.contains(QChar(','))) &&
                 valueStr.endsWith("\"") && valueStr.startsWith("\"")) {
-                insert(key, unquete(valueStr));
+                insert(key, unquote(valueStr));
             } else
                 insert(key, _settings_obj.value(key));
         }

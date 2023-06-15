@@ -3,6 +3,7 @@
 #include <settings/INIFile.h>
 #include <QList>
 #include <QSettings>
+#include <QTemporaryFile>
 #include <QVariant>
 #include "FileSystem.h"
 
@@ -74,9 +75,8 @@ class IniFileTest : public QObject {
         QCOMPARE(out_list_numbers, list_numbers);
     }
 
-    void test_SaveAleardyExistingFile()
+    void test_SaveAlreadyExistingFile()
     {
-        QString fileName = "test_SaveAleardyExistingFile.ini";
         QString fileContent = R"(InstanceType=OneSix
 iconKey=vanillia_icon
 name=Minecraft Vanillia
@@ -86,9 +86,10 @@ Wrapperommand=)";
         fileContent += "\"";
         fileContent += +R"(\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =)";
         fileContent += "\"\n";
-        QFile file(fileName);
+        QTemporaryFile file;
 
-        if (file.open(QFile::WriteOnly | QFile::Text)) {
+        // QFile file(fileName);
+        if (file.open()) {
             QTextStream stream(&file);
             stream << fileContent;
             file.close();
@@ -96,22 +97,23 @@ Wrapperommand=)";
 
         // load
         INIFile f1;
-        f1.loadFile(fileName);
+        f1.loadFile(file.fileName());
         QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
         QCOMPARE(f1.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
-        f1.saveFile(fileName);
+        f1.saveFile(file.fileName());
         INIFile f2;
-        f2.loadFile(fileName);
+        f2.loadFile(file.fileName());
         QCOMPARE(f2.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
         QCOMPARE(f2.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
         QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.2");
     }
 
-    void test_SaveAleardyExistingFileWithSpecialChars()
+    void test_SaveAlreadyExistingFileWithSpecialChars()
     {
-        QString fileName = "test_SaveAleardyExistingFileWithSpecialChars.ini";
-        FS::deletePath(fileName);  // just to clean the previous test run
-        QSettings settings{ fileName, QSettings::Format::IniFormat };
+        QTemporaryFile file;
+        file.open();
+        file.close();
+        QSettings settings{ file.fileName(), QSettings::Format::IniFormat };
         settings.setFallbacksEnabled(false);
 
         settings.setValue("simple", "value1");
@@ -127,20 +129,20 @@ Wrapperommand=)";
 
         // load
         INIFile f1;
-        f1.loadFile(fileName);
+        f1.loadFile(file.fileName());
         for (auto key : settings.allKeys())
             QCOMPARE(f1.get(key, "NOT SET").toString(), settings.value(key).toString());
-        f1.saveFile(fileName);
+        f1.saveFile(file.fileName());
         INIFile f2;
-        f2.loadFile(fileName);
+        f2.loadFile(file.fileName());
         for (auto key : settings.allKeys())
             QCOMPARE(f2.get(key, "NOT SET").toString(), settings.value(key).toString());
         QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.2");
     }
 
-    void test_SaveAleardyExistingFileWithSpecialCharsV1()
+    void test_SaveAlreadyExistingFileWithSpecialCharsV1()
     {
-        QString fileName = "test_SaveAleardyExistingFileWithSpecialCharsV1.ini";
+        QTemporaryFile file;
         QString fileContent = R"(InstanceType=OneSix
 ConfigVersion=1.1
 iconKey=vanillia_icon
@@ -148,9 +150,8 @@ name=Minecraft Vanillia
 OverrideCommands=true
 PreLaunchCommand=)";
         fileContent += "\"\\\"env mesa=true\\\"\"\n";
-        QFile file(fileName);
 
-        if (file.open(QFile::WriteOnly | QFile::Text)) {
+        if (file.open()) {
             QTextStream stream(&file);
             stream << fileContent;
             file.close();
@@ -158,7 +159,7 @@ PreLaunchCommand=)";
 
         // load
         INIFile f1;
-        f1.loadFile(fileName);
+        f1.loadFile(file.fileName());
         QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "env mesa=true");
         QCOMPARE(f1.get("ConfigVersion", "NOT SET").toString(), "1.2");
     }
