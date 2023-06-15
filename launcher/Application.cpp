@@ -376,33 +376,33 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // init the logger
     {
-        static const QString logBase = BuildConfig.LAUNCHER_NAME + "-%0.log";
-        auto moveFile = [](const QString &oldName, const QString &newName)
-        {
+        static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "-%0.log";
+        static const QString logBase = FS::PathCombine("logs", baseLogFile);
+        auto moveFile = [](const QString& oldName, const QString& newName) {
             QFile::remove(newName);
             QFile::copy(oldName, newName);
             QFile::remove(oldName);
         };
+        if (FS::ensureFolderPathExists("logs")) {  // if this did not fail
+            for (auto i = 0; i <= 4; i++)
+                if (auto oldName = baseLogFile.arg(i);
+                    QFile::exists(oldName))  // do not pointlessly delete new files if the old ones are not there
+                    moveFile(oldName, logBase.arg(i));
+        }
 
-        moveFile(logBase.arg(3), logBase.arg(4));
-        moveFile(logBase.arg(2), logBase.arg(3));
-        moveFile(logBase.arg(1), logBase.arg(2));
-        moveFile(logBase.arg(0), logBase.arg(1));
+        for (auto i = 4; i > 0; i--)
+            moveFile(logBase.arg(i - 1), logBase.arg(i));
 
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
-        if(!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-        {
-            showFatalErrorMessage(
-                "The launcher data folder is not writable!",
-                QString(
-                    "The launcher couldn't create a log file - the data folder is not writable.\n"
-                    "\n"
-                    "Make sure you have write permissions to the data folder.\n"
-                    "(%1)\n"
-                    "\n"
-                    "The launcher cannot continue until you fix this problem."
-                ).arg(dataPath)
-            );
+        if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+            showFatalErrorMessage("The launcher data folder is not writable!",
+                                  QString("The launcher couldn't create a log file - the data folder is not writable.\n"
+                                          "\n"
+                                          "Make sure you have write permissions to the data folder.\n"
+                                          "(%1)\n"
+                                          "\n"
+                                          "The launcher cannot continue until you fix this problem.")
+                                      .arg(dataPath));
             return;
         }
         qInstallMessageHandler(appDebugOutput);
@@ -1699,6 +1699,7 @@ bool Application::handleDataMigration(const QString& currentData,
         matcher->add(std::make_shared<SimplePrefixMatcher>(configFile));
         matcher->add(std::make_shared<SimplePrefixMatcher>(
             BuildConfig.LAUNCHER_CONFIGFILE));  // it's possible that we already used that directory before
+        matcher->add(std::make_shared<SimplePrefixMatcher>("logs/"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("accounts.json"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("accounts/"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("assets/"));

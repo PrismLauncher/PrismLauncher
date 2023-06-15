@@ -1234,6 +1234,12 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
     DesktopServices::openDirectory(str);
 }
 
+void MainWindow::on_actionViewLauncherRootFolder_triggered()
+{
+    const QString dataPath = QDir::currentPath();
+    DesktopServices::openDirectory(dataPath);
+}
+
 void MainWindow::refreshInstances()
 {
     APPLICATION->instances()->loadList();
