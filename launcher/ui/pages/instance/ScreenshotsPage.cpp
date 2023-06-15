@@ -515,13 +515,11 @@ void ScreenshotsPage::on_actionDelete_triggered()
     int count = ui->listView->selectionModel()->selectedRows().size();
     QString text;
     if (count > 1)
-        text = tr("You are about to delete %1 screenshots.\n"
-                  "This may be permanent and they will be gone from the folder.\n\n"
+        text = tr("You are about to delete %1 screenshots.\n\n"
                   "Are you sure?")
                    .arg(count);
     else
-        text = tr("You are about to delete the selected screenshot.\n"
-                  "This may be permanent and it will be gone from the folder.\n\n"
+        text = tr("You are about to delete the selected screenshot.\n\n"
                   "Are you sure?")
                    .arg(count);
 
