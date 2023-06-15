@@ -25,7 +25,7 @@ public:
 private:
     Model m_model;
     QByteArray m_skin;
-    MinecraftAccountPtr m_acct;
+    MinecraftAccountPtr m_account;
     shared_qobject_ptr<QNetworkReply> m_reply;
 protected:
     virtual void executeTask();

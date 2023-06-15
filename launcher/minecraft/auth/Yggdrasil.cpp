@@ -73,8 +73,6 @@ void Yggdrasil::refresh() {
     QJsonObject req;
     req.insert("clientToken", m_data->clientToken());
     req.insert("accessToken", m_data->accessToken());
-
-    qDebug() << "refreshing, access token is" << m_data->accessToken();
     /*
     {
         auto currentProfile = m_account->currentProfile();

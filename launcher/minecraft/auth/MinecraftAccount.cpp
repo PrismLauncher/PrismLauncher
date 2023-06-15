@@ -41,7 +41,6 @@
 #include <QUuid>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QRegularExpression>
 #include <QStringList>
 #include <QJsonDocument>
 
@@ -55,7 +54,7 @@
 #include "flows/Offline.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent) {
-    data.internalId = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    data.internalId = QUuid::createUuid().toString(QUuid::Id128);
 }
 
 
@@ -80,7 +79,7 @@ MinecraftAccountPtr MinecraftAccount::createFromUsername(const QString &username
     auto account = makeShared<MinecraftAccount>();
     account->data.type = AccountType::Mojang;
     account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
     return account;
 }
 
@@ -95,7 +94,9 @@ MinecraftAccountPtr MinecraftAccount::createFromUsernameCustomYggdrasil(
     auto account = makeShared<MinecraftAccount>();
     account->data.type = AccountType::CustomYggdrasil;
     account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
+    account->data.minecraftEntitlement.ownsMinecraft = true;
+    account->data.minecraftEntitlement.canPlayMinecraft = true;
 
     account->data.customAuthServerUrl = customAuthServerUrl;
     account->data.customAccountServerUrl = customAccountServerUrl;
@@ -119,10 +120,10 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString &username)
     account->data.yggdrasilToken.validity = Katabasis::Validity::Certain;
     account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
     account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
     account->data.minecraftEntitlement.ownsMinecraft = true;
     account->data.minecraftEntitlement.canPlayMinecraft = true;
-    account->data.minecraftProfile.id = uuidFromUsername(username).toString().remove(QRegularExpression("[{}-]"));
+    account->data.minecraftProfile.id = QUuid::createUuid().toString(QUuid::Id128);
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Katabasis::Validity::Certain;
     return account;
@@ -166,8 +167,8 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::loginCustomYggdrasil(QString p
     Q_ASSERT(m_currentTask.get() == nullptr);
 
     m_currentTask.reset(new CustomYggdrasilLogin(&data, password));
-    connect(m_currentTask.get(), SIGNAL(succeeded()), SLOT(authSucceeded()));
-    connect(m_currentTask.get(), SIGNAL(failed(QString)), SLOT(authFailed(QString)));
+    connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
+    connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
     connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
     emit activityChanged(true);
     return m_currentTask;

@@ -524,9 +524,7 @@ QString AccountData::profileName() const {
 
 QString AccountData::accountDisplayString() const {
     switch(type) {
-        case AccountType::Mojang: {
-            return userName();
-        }
+        case AccountType::Mojang:
         case AccountType::CustomYggdrasil: {
             return userName();
         }

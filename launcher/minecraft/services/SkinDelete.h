@@ -15,7 +15,7 @@ public:
     virtual ~SkinDelete() = default;
 
 private:
-    MinecraftAccountPtr m_acct;
+    MinecraftAccountPtr m_account;
     shared_qobject_ptr<QNetworkReply> m_reply;
 
 protected:

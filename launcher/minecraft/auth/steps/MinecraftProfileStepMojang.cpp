@@ -48,7 +48,7 @@ void MinecraftProfileStepMojang::onRequestDone(
     qCDebug(authCredentials()) << data;
     if (error == QNetworkReply::ContentNotFoundError) {
         // NOTE: Succeed even if we do not have a profile. This is a valid account state.
-        if(m_data->type == AccountType::Mojang || m_data->type == AccountType::CustomYggdrasil) {
+        if(m_data->type == AccountType::Mojang) {
             m_data->minecraftEntitlement.canPlayMinecraft = false;
             m_data->minecraftEntitlement.ownsMinecraft = false;
         }
@@ -91,7 +91,7 @@ void MinecraftProfileStepMojang::onRequestDone(
         return;
     }
 
-    if(m_data->type == AccountType::Mojang || m_data->type == AccountType::CustomYggdrasil) {
+    if(m_data->type == AccountType::Mojang) {
         auto validProfile = m_data->minecraftProfile.validity == Katabasis::Validity::Certain;
         m_data->minecraftEntitlement.canPlayMinecraft = validProfile;
         m_data->minecraftEntitlement.ownsMinecraft = validProfile;

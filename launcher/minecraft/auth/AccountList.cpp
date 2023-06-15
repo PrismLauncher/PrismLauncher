@@ -123,27 +123,22 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
     // override/replace existing account with the same profileId
     auto profileId = account->profileId();
     if(profileId.size() && account->isMojangOrMSA()) {
-        int existingAccount = -1;
-        for (int i = 0; i < count(); i++) {
-            MinecraftAccountPtr existing = at(i);
-            if (existing->profileId() == profileId &&
-                existing->isMojangOrMSA()) {
-                existingAccount = i;
-                break;
-            }
-        }
+        auto iter = std::find_if(m_accounts.constBegin(), m_accounts.constEnd(), [&](const MinecraftAccountPtr & existing) {
+            return existing->profileId() == profileId && existing->isMojangOrMSA();
+        });
 
-        if(existingAccount != -1) {
+        if(iter != m_accounts.constEnd()) {
             qDebug() << "Replacing old account with a new one with the same profile ID!";
 
-            MinecraftAccountPtr existingAccountPtr = m_accounts[existingAccount];
-            m_accounts[existingAccount] = account;
-            if(m_defaultAccount == existingAccountPtr) {
+            MinecraftAccountPtr existingAccount = *iter;
+            const auto existingAccountIndex = std::distance(m_accounts.constBegin(), iter);
+            m_accounts[existingAccountIndex] = account;
+            if(m_defaultAccount == existingAccount) {
                 m_defaultAccount = account;
             }
             // disconnect notifications for changes in the account being replaced
-            existingAccountPtr->disconnect(this);
-            emit dataChanged(index(existingAccount), index(existingAccount, columnCount(QModelIndex()) - 1));
+            existingAccount->disconnect(this);
+            emit dataChanged(index(existingAccountIndex), index(existingAccountIndex, columnCount(QModelIndex()) - 1));
             onListChanged();
             return;
         }
