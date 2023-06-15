@@ -1203,9 +1203,7 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 
 void MainWindow::on_actionViewLauncherRootFolder_triggered()
 {
-    QDir dataDir = QDir::current();
-    QString dataPath = dataDir.absolutePath();
-
+    const QString dataPath = QDir::currentPath();
     DesktopServices::openDirectory(dataPath);
 }
 
