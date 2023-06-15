@@ -187,6 +187,7 @@
      <bool>true</bool>
     </property>
     <addaction name="actionViewInstanceFolder"/>
+    <addaction name="actionViewLauncherRootFolder"/>
     <addaction name="actionViewCentralModsFolder"/>
    </widget>
    <widget class="QMenu" name="accountsMenu">
@@ -539,6 +540,18 @@
    </property>
    <property name="toolTip">
     <string>Open the instance folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewLauncherRootFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;View Launcher Root Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the launcher's root folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewCentralModsFolder">
