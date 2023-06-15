@@ -11,7 +11,7 @@ class CapeChange : public Task
 {
     Q_OBJECT
 public:
-    CapeChange(QObject *parent, MinecraftAccountPtr m_acct, QString capeId);
+    CapeChange(QObject *parent, MinecraftAccountPtr m_account, QString capeId);
     virtual ~CapeChange() {}
 
 private:
@@ -20,7 +20,7 @@ private:
 
 private:
     QString m_capeId;
-    MinecraftAccountPtr m_acct;
+    MinecraftAccountPtr m_account;
     shared_qobject_ptr<QNetworkReply> m_reply;
 
 protected:
