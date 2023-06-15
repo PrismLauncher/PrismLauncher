@@ -317,6 +317,8 @@ QList<BasePage*> ResourcePackDownloadDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameResourcePackPage::create(this, *m_instance));
 
+    m_selectedPage = dynamic_cast<ResourcePackResourcePage*>(pages[0]);
+
     return pages;
 }
 
@@ -342,6 +344,8 @@ QList<BasePage*> TexturePackDownloadDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameTexturePackPage::create(this, *m_instance));
 
+    m_selectedPage = dynamic_cast<TexturePackResourcePage*>(pages[0]);
+
     return pages;
 }
 
@@ -364,6 +368,8 @@ QList<BasePage*> ShaderPackDownloadDialog::getPages()
     QList<BasePage*> pages;
 
     pages.append(ModrinthShaderPackPage::create(this, *m_instance));
+
+    m_selectedPage = dynamic_cast<ShaderPackResourcePage*>(pages[0]);
 
     return pages;
 }

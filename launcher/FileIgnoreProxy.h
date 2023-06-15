@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,42 +36,37 @@
 
 #pragma once
 
-#include <QDialog>
-#include <QModelIndex>
-#include <memory>
-#include "FileIgnoreProxy.h"
-#include "FastFileIconProvider.h"
+#include <QSortFilterProxyModel>
+#include "SeparatorPrefixTree.h"
 
-class BaseInstance;
-typedef std::shared_ptr<BaseInstance> InstancePtr;
-
-namespace Ui
-{
-class ExportInstanceDialog;
-}
-
-class ExportInstanceDialog : public QDialog
-{
+class FileIgnoreProxy : public QSortFilterProxyModel {
     Q_OBJECT
 
-public:
-    explicit ExportInstanceDialog(InstancePtr instance, QWidget *parent = 0);
-    ~ExportInstanceDialog();
+   public:
+    FileIgnoreProxy(QString root, QObject* parent);
+    // NOTE: Sadly, we have to do sorting ourselves.
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const;
 
-    virtual void done(int result);
+    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
 
-private:
-    bool doExport();
-    void loadPackIgnore();
-    void savePackIgnore();
-    QString ignoreFileName();
+    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole);
 
-private:
-    Ui::ExportInstanceDialog *ui;
-    InstancePtr m_instance;
-    FileIgnoreProxy * proxyModel;
-    FastFileIconProvider icons;
+    QString relPath(const QString& path) const;
 
-private slots:
-    void rowsInserted(QModelIndex parent, int top, int bottom);
+    bool setFilterState(QModelIndex index, Qt::CheckState state);
+
+    bool shouldExpand(QModelIndex index);
+
+    void setBlockedPaths(QStringList paths);
+
+    inline const SeparatorPrefixTree<'/'>& blockedPaths() const { return blocked; }
+    inline SeparatorPrefixTree<'/'>& blockedPaths() { return blocked; }
+
+   protected:
+    bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const;
+
+   private:
+    const QString root;
+    SeparatorPrefixTree<'/'> blocked;
 };

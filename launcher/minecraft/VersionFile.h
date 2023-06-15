@@ -138,7 +138,7 @@ public: /* data */
      * Prism Launcher: set of packages this depends on
      * NOTE: this is shared with the meta format!!!
      */
-    Meta::RequireSet requires;
+    Meta::RequireSet m_requires;
 
     /**
      * Prism Launcher: set of packages this conflicts with
