@@ -86,11 +86,11 @@ jobs:
 
           - os: macos-12
             name: macOS
-            macosx_deployment_target: 10.15
+            macosx_deployment_target: 11.0
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
-            qt_version: '6.5.1'
+            qt_version: '6.5.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 

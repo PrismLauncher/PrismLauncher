@@ -150,10 +150,6 @@
     <addaction name="actionChangeInstGroup"/>
     <addaction name="actionViewSelectedInstFolder"/>
     <addaction name="actionExportInstance"/>
-    <widget class="QMenu" name="exportInstanceMenu">
-     <addaction name="actionExportInstanceZip"/>
-     <addaction name="actionExportInstanceMrPack"/>
-    </widget>
     <addaction name="actionCopyInstance"/>
     <addaction name="actionDeleteInstance"/>
     <addaction name="actionCreateInstanceShortcut"/>
@@ -467,11 +463,17 @@
    </property>
   </action>
   <action name="actionExportInstanceZip">
+   <property name="icon">
+    <iconset theme="launcher"/>
+   </property>
    <property name="text">
     <string>Prism Launcher (zip)</string>
    </property>
   </action>
   <action name="actionExportInstanceMrPack">
+   <property name="icon">
+    <iconset theme="modrinth"/>
+   </property>
    <property name="text">
     <string>Modrinth (mrpack)</string>
    </property>
