@@ -1,37 +1,38 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-*  PolyMC - Minecraft Launcher
-*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
-*
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, version 3.
-*
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*
-* This file incorporates work covered by the following copyright and
-* permission notice:
-*
-*      Copyright 2013-2021 MultiMC Contributors
-*
-*      Licensed under the Apache License, Version 2.0 (the "License");
-*      you may not use this file except in compliance with the License.
-*      You may obtain a copy of the License at
-*
-*          http://www.apache.org/licenses/LICENSE-2.0
-*
-*      Unless required by applicable law or agreed to in writing, software
-*      distributed under the License is distributed on an "AS IS" BASIS,
-*      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*      See the License for the specific language governing permissions and
-*      limitations under the License.
-*/
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
 
 #include <QMessageBox>
 
@@ -57,34 +58,47 @@ InfoFrame::~InfoFrame()
 
 void InfoFrame::updateWithMod(Mod const& m)
 {
-    if (m.type() == ResourceType::FOLDER)
-    {
+    if (m.type() == ResourceType::FOLDER) {
         clear();
         return;
     }
 
     QString text = "";
     QString name = "";
+    QString link = "";
+    QString toolTip = "";
     if (m.name().isEmpty())
         name = m.internal_id();
     else
         name = m.name();
 
-    if (m.homeurl().isEmpty())
+    if (auto meta = m.metadata(); meta != nullptr) {
+        auto slug = meta->slug.remove(".pw.toml");
+        switch (meta->provider) {
+            case ModPlatform::ResourceProvider::MODRINTH:
+                link = QString("https://modrinth.com/mod/%1").arg(slug);
+                break;
+            case ModPlatform::ResourceProvider::FLAME:
+                link = QString("https://www.curseforge.com/minecraft/mc-mods/%1").arg(slug);
+                break;
+        }
+    } else if (!m.homeurl().isEmpty())
+        link = m.homeurl();
+
+    if (link.isEmpty())
         text = name;
-    else
-        text = "<a href=\"" + m.homeurl() + "\">" + name + "</a>";
+    else {
+        text = "<a href=\"" + link + "\">" + name + "</a>";
+        toolTip = tr("Go to mod's home page");
+    }
     if (!m.authors().isEmpty())
         text += " by " + m.authors().join(", ");
 
-    setName(text);
+    setName(text, toolTip);
 
-    if (m.description().isEmpty())
-    {
+    if (m.description().isEmpty()) {
         setDescription(QString());
-    }
-    else
-    {
+    } else {
         setDescription(m.description());
     }
 
@@ -191,16 +205,15 @@ void InfoFrame::updateHiddenState()
     }
 }
 
-void InfoFrame::setName(QString text)
+void InfoFrame::setName(QString text, QString toolTip)
 {
-    if(text.isEmpty())
-    {
+    if (text.isEmpty()) {
         ui->nameLabel->setHidden(true);
-    }
-    else
-    {
+        ui->nameLabel->setToolTip({});
+    } else {
         ui->nameLabel->setText(text);
         ui->nameLabel->setHidden(false);
+        ui->nameLabel->setToolTip(toolTip);
     }
     updateHiddenState();
 }
