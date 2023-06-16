@@ -257,6 +257,8 @@ void LauncherPartLaunch::executeTask()
             bwrapArgs << "--ro-bind" << jarPath << jarPath;
         }
 
+        bwrapArgs << "--setenv" << "MINECRAFT_SANDBOX_VARIANT" << QString("%1-bwrap").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+
         bwrapArgs << Commandline::splitArgs(BuildConfig.LINUX_BWRAP_EXTRA_ARGS);
         // TODO: add args from environment variable?
         bwrapArgs << Commandline::splitArgs(minecraftInstance->settings()->get("BwrapExtraArgs").toString());
