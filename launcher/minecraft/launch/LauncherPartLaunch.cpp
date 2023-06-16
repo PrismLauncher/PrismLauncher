@@ -222,7 +222,7 @@ void LauncherPartLaunch::executeTask()
             auto display = qEnvironmentVariable("DISPLAY");
             auto xAuthPath = qEnvironmentVariable("XAUTHORITY",
                     FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::HomeLocation), ".Xauthority"));
-            auto wlDisplay = qEnvironmentVariable("WAYLAND_DISPLAY");
+            auto wlDisplay = qEnvironmentVariable("WAYLAND_DISPLAY", "wayland-0");
 
             if (display.startsWith(':')) {
                 auto x11Socket = QString("/tmp/.X11-unix/X%1").arg(display.mid(1));
