@@ -30,7 +30,7 @@ class ModrinthModModel : public ModModel {
     Q_OBJECT
 
    public:
-    ModrinthModModel(const BaseInstance&);
+    ModrinthModModel(BaseInstance&);
     ~ModrinthModModel() override = default;
 
    private:
