@@ -82,6 +82,7 @@ Config::Config()
     {
         GIT_REFSPEC = "refs/heads/stable";
         GIT_TAG = versionString();
+        GIT_COMMIT = "";
     }
 
     if (GIT_REFSPEC.startsWith("refs/heads/"))
