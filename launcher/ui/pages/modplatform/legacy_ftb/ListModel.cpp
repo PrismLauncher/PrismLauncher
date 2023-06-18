@@ -35,7 +35,6 @@
 
 #include "ListModel.h"
 #include "Application.h"
-#include "QObjectPtr.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <qtmetamacros.h>
 #include <QString>
 
 #include "modplatform/ModIndex.h"
