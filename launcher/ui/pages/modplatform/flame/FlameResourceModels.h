@@ -14,7 +14,7 @@ class FlameModModel : public ModModel {
     Q_OBJECT
 
    public:
-    FlameModModel(const BaseInstance&);
+    FlameModModel(BaseInstance&);
     ~FlameModModel() override = default;
 
    private:

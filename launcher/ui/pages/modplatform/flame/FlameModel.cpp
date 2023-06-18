@@ -60,6 +60,8 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             return pack.description;
         case UserDataTypes::SELECTED:
             return false;
+        case UserDataTypes::INSTALLED:
+            return false;
         default:
             break;
     }

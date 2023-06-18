@@ -11,7 +11,7 @@
 
 namespace ResourceDownload {
 
-FlameModModel::FlameModModel(BaseInstance const& base) : ModModel(base, new FlameAPI) {}
+FlameModModel::FlameModModel(BaseInstance& base) : ModModel(base, new FlameAPI) {}
 
 void FlameModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {
