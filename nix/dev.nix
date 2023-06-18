@@ -35,6 +35,8 @@
         deadnix
         clang-tools
         nil
+        bubblewrap # TODO: these should be added to the wrapper
+        xdg-dbus-proxy
       ];
 
       inputsFrom = [self.packages.${system}.prismlauncher-unwrapped];
