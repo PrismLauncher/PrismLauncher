@@ -45,7 +45,7 @@ stdenv.mkDerivation rec {
   preConfigure = ''
     # see https://github.com/NixOS/nixpkgs/issues/114044, setting this through cmakeFlags does not work.
     cmakeFlagsArray+=(
-      "-DLauncher_LINUX_BWRAP_EXTRA_ARGS=--ro-bind /nix /nix --ro-bind /run/opengl-driver /run/opengl-driver"
+      "-DLauncher_LINUX_BWRAP_EXTRA_ARGS=--ro-bind /nix /nix --ro-bind /run/current-system/sw /run/current-system/sw --ro-bind /run/opengl-driver /run/opengl-driver"
     )
   '';
 
