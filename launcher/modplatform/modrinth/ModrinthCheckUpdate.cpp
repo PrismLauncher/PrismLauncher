@@ -53,12 +53,11 @@ void ModrinthCheckUpdate::executeTask()
         // (though it will rarely happen, if at all)
         if (mod->metadata()->hash_format != best_hash_type) {
             auto hash_task = Hashing::createModrinthHasher(mod->fileinfo().absoluteFilePath());
-            connect(hash_task.get(), &Task::succeeded, [&] {
-                QString hash(hash_task->getResult());
+            connect(hash_task.get(), &Hashing::Hasher::getResults, [&hashes, &mappings, mod](QString hash) {
                 hashes.append(hash);
                 mappings.insert(hash, mod);
             });
-            connect(hash_task.get(), &Task::failed, [this, hash_task] { failed("Failed to generate hash"); });
+            connect(hash_task.get(), &Task::failed, [this] { failed("Failed to generate hash"); });
             hashing_task.addTask(hash_task);
         } else {
             hashes.append(hash);
