@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include <QList>
+
 #include <launch/LaunchStep.h>
 #include <LoggedProcess.h>
 #include <minecraft/auth/AuthSession.h>
@@ -50,7 +52,10 @@ private slots:
     void on_state(LoggedProcess::State state);
 
 private:
+    void launchMainProcess();
+
     LoggedProcess m_process;
+    QProcess m_sideProcess; // make this a QList if we need more in the future
     QString m_command;
     AuthSessionPtr m_session;
     QString m_launchScript;

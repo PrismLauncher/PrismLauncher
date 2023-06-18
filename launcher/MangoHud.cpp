@@ -130,4 +130,24 @@ QString getBwrapBinary()
     }
     return {};
 }
+
+QString getXDGDbusProxyBinary()
+{
+    QStringList binaries{ BuildConfig.LINUX_DBUSPROXY_BINARY, "xdg-dbus-proxy" };
+    for (const auto& binary : binaries) {
+        // return if an absolute path is specified (i.e. distribution override)
+        if (binary.startsWith('/') && QFileInfo(binary).isExecutable()) {
+            qDebug() << "Found absolute xdg-dbus-proxy binary" << binary;
+            return binary;
+        }
+
+        // lookup otherwise
+        QString path = QStandardPaths::findExecutable(binary);
+        if (!path.isEmpty()) {
+            qDebug() << "Found xdg-dbus-proxy binary" << binary << "at" << path;
+            return path;
+        }
+    }
+    return {};
+}
 }  // namespace MangoHud

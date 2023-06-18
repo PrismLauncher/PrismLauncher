@@ -144,6 +144,7 @@ class Config {
      * Sandboxing options
      */
     QString LINUX_BWRAP_BINARY = "bwrap"; // TODO: CMake
+    QString LINUX_DBUSPROXY_BINARY = "xdg-dbus-proxy"; // TODO: CMake
     QString LINUX_BWRAP_EXTRA_ARGS;
 
     QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
