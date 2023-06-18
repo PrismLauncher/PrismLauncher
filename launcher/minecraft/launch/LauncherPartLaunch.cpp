@@ -198,8 +198,7 @@ void LauncherPartLaunch::executeTask()
             "/run/systemd/resolve",
         };
 
-        QStringList bwrapArgs{};
-        bwrapArgs << bwrapPath; // will either be taken out using takeFirst or passed to wrapper command
+        QStringList bwrapArgs{bwrapPath};
         bwrapArgs << "--unshare-all";
         bwrapArgs << "--share-net";
         bwrapArgs << "--die-with-parent";
@@ -214,6 +213,10 @@ void LauncherPartLaunch::executeTask()
         for (auto path : systemBinds) {
             bwrapArgs << "--ro-bind-try" << path << path;
         }
+
+        // distribution args
+        // These are probably important so let's put them here
+        bwrapArgs << Commandline::splitArgs(BuildConfig.LINUX_BWRAP_EXTRA_ARGS);
 
         // desktop integration
         bwrapArgs << "--ro-bind-try" << QString("%1/pulse").arg(actualRuntimeDir) << QString("%1/pulse").arg(sandboxedRuntimeDir);
@@ -259,7 +262,6 @@ void LauncherPartLaunch::executeTask()
 
         bwrapArgs << "--setenv" << "MINECRAFT_SANDBOX_VARIANT" << QString("%1-bwrap").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 
-        bwrapArgs << Commandline::splitArgs(BuildConfig.LINUX_BWRAP_EXTRA_ARGS);
         // TODO: add args from environment variable?
         bwrapArgs << Commandline::splitArgs(minecraftInstance->settings()->get("BwrapExtraArgs").toString());
 
