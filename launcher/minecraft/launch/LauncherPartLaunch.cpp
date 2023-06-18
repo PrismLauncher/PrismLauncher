@@ -167,15 +167,17 @@ void LauncherPartLaunch::executeTask()
     args.prepend(FS::ResolveExecutable(instance->settings()->get("JavaPath").toString()));
 
     const auto wantSandbox = minecraftInstance->settings()->get("EnableSandboxing").toBool();
+    auto platformSupportsSandboxing = false;
     auto canSandbox = false;
 
 #ifdef Q_OS_LINUX
     const auto bwrapPath = MangoHud::getBwrapBinary();
     const auto xdgDbusProxyPath = MangoHud::getXDGDbusProxyBinary();
+    platformSupportsSandboxing = true; //
     canSandbox = !bwrapPath.isEmpty() && !xdgDbusProxyPath.isEmpty();
 #endif
 
-    if (wantSandbox && !canSandbox) {
+    if (wantSandbox && platformSupportsSandboxing && !canSandbox) {
         const char *reason = QT_TR_NOOP("Sandboxing was requested, but is NOT available on your system.\nPlease turn off sandboxing to proceed launching.");
         emit logLine(tr(reason), MessageLevel::Error);
         emitFailed(tr(reason));
