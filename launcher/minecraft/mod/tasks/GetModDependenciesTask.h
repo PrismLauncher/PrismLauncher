@@ -42,7 +42,7 @@ class GetModDependenciesTask : public SequentialTask {
         ModPlatform::Dependency dependency;
         ModPlatform::IndexedPack::Ptr pack;
         ModPlatform::IndexedVersion version;
-        PackDependency(){};
+        PackDependency() = default;
         PackDependency(const ModPlatform::IndexedPack::Ptr p, const ModPlatform::IndexedVersion& v)
         {
             pack = p;

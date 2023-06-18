@@ -34,7 +34,7 @@ enum class ResourceProvider { MODRINTH, FLAME };
 
 enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
 
-enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE };
+enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 
 class ProviderCapabilities {
    public:

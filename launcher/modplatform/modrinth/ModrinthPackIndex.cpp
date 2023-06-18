@@ -156,6 +156,8 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
             dependency.type = ModPlatform::DependencyType::INCOMPATIBLE;
         else if (depType == "embedded")
             dependency.type = ModPlatform::DependencyType::EMBEDDED;
+        else
+            dependency.type = ModPlatform::DependencyType::UNKNOWN;
 
         file.dependencies.append(dependency);
     }
@@ -218,19 +220,19 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
 
 auto Modrinth::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
-    QVector<ModPlatform::IndexedVersion> unsortedVersions;
+    QVector<ModPlatform::IndexedVersion> versions;
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
         auto file = loadIndexedPackVersion(obj);
 
         if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
-            unsortedVersions.append(file);
+            versions.append(file);
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
         // dates are in RFC 3339 format
         return a.date > b.date;
     };
-    std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
-    return unsortedVersions.length() != 0 ? unsortedVersions.front() : ModPlatform::IndexedVersion();
+    std::sort(versions.begin(), versions.end(), orderSortPredicate);
+    return versions.length() != 0 ? versions.front() : ModPlatform::IndexedVersion();
 }

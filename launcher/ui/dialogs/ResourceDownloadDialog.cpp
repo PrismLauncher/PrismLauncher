@@ -125,7 +125,7 @@ void ResourceDownloadDialog::connectButtons()
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
-QStringList getReqiredBy(QList<ResourceDownloadDialog::DownloadTaskPtr> tasks, QVariant addonId)
+QStringList getRequiredBy(QList<ResourceDownloadDialog::DownloadTaskPtr> tasks, QVariant addonId)
 {
     auto req = QStringList();
     for (auto& task : tasks) {
@@ -167,10 +167,10 @@ void ResourceDownloadDialog::confirm()
         if (ret == QDialog::DialogCode::Rejected) {
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
-        } else
-            for (auto dep : task->getDependecies()) {
+        } else {
+            for (auto dep : task->getDependecies())
                 addResource(dep->pack, dep->version);
-            }
+        }
     }
 
     auto selected = getTasks();
@@ -179,7 +179,7 @@ void ResourceDownloadDialog::confirm()
     });
     for (auto& task : selected) {
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ProviderCaps.name(task->getProvider()), getReqiredBy(selected, task->getPack()->addonId) });
+                                         ProviderCaps.name(task->getProvider()), getRequiredBy(selected, task->getPack()->addonId) });
     }
 
     if (confirm_dialog->exec()) {

@@ -160,6 +160,10 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
             case 6:  // Include
                 dependency.type = ModPlatform::DependencyType::INCLUDE;
                 break;
+                default:
+                dependency.type = ModPlatform::DependencyType::UNKNOWN;
+                break;
+                
         }
         file.dependencies.append(dependency);
     }
@@ -172,7 +176,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
 
 ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr)
 {
-    QVector<ModPlatform::IndexedVersion> unsortedVersions;
+    QVector<ModPlatform::IndexedVersion> versions;
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
@@ -181,13 +185,13 @@ ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::
             file.addonId = m.addonId;
 
         if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
-            unsortedVersions.append(file);
+            versions.append(file);
     }
 
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
         // dates are in RFC 3339 format
         return a.date > b.date;
     };
-    std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
-    return unsortedVersions.front();
+    std::sort(versions.begin(), versions.end(), orderSortPredicate);
+    return versions.front();
 };

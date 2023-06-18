@@ -115,14 +115,6 @@ class ResourceAPI {
         ModPlatform::Dependency dependency;
         Version mcVersion;
         ModLoaderTypes loader;
-
-        DependencySearchArgs(DependencySearchArgs const&) = default;
-        void operator=(DependencySearchArgs other)
-        {
-            dependency = other.dependency;
-            mcVersion = other.mcVersion;
-            loader = other.loader;
-        }
     };
 
     struct DependencySearchCallbacks {

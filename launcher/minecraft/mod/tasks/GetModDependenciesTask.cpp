@@ -33,7 +33,7 @@
 #include "ui/pages/modplatform/flame/FlameResourceModels.h"
 #include "ui/pages/modplatform/modrinth/ModrinthResourceModels.h"
 
-static Version mcVersions(BaseInstance* inst)
+static Version mcVersion(BaseInstance* inst)
 {
     return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion();
 }
@@ -53,7 +53,7 @@ GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
                         std::make_shared<FlameAPI>() }
     , m_modrinth_provider{ ModPlatform::ResourceProvider::MODRINTH, std::make_shared<ResourceDownload::ModrinthModModel>(*instance),
                            std::make_shared<ModrinthAPI>() }
-    , m_version(mcVersions(instance))
+    , m_version(mcVersion(instance))
     , m_loaderType(mcLoaders(instance))
 {
     for (auto mod : folder->allMods())
@@ -74,33 +74,38 @@ void GetModDependenciesTask::prepare()
 QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion(const ModPlatform::IndexedVersion& version,
                                                                                  const ModPlatform::ResourceProvider providerName)
 {
-    auto c_dependencies = QList<ModPlatform::Dependency>();
+    QList<ModPlatform::Dependency> c_dependencies;
     for (auto ver_dep : version.dependencies) {
-        if (ver_dep.type == ModPlatform::DependencyType::REQUIRED) {
-            if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
-                                        [&ver_dep](const ModPlatform::Dependency& i) { return i.addonId == ver_dep.addonId; });
-                dep == c_dependencies.end()) {  // check the current dependency list
-                if (auto dep = std::find_if(m_selected.begin(), m_selected.end(),
-                                            [&ver_dep, providerName](std::shared_ptr<PackDependency> i) {
-                                                return i->pack->addonId == ver_dep.addonId && i->pack->provider == providerName;
-                                            });
-                    dep == m_selected.end()) {  // check the selected versions
-                    if (auto dep = std::find_if(m_mods.begin(), m_mods.end(),
-                                                [&ver_dep, providerName](std::shared_ptr<Metadata::ModStruct> i) {
-                                                    return i->project_id == ver_dep.addonId && i->provider == providerName;
-                                                });
-                        dep == m_mods.end()) {  // check the existing mods
-                        if (auto dep = std::find_if(m_pack_dependencies.begin(), m_pack_dependencies.end(),
-                                                    [&ver_dep, providerName](std::shared_ptr<PackDependency> i) {
-                                                        return i->pack->addonId == ver_dep.addonId && i->pack->provider == providerName;
-                                                    });
-                            dep == m_pack_dependencies.end()) {  // check loaded dependencies
-                            c_dependencies.append(ver_dep);
-                        }
-                    }
-                }
-            }
-        }
+        if (ver_dep.type != ModPlatform::DependencyType::REQUIRED)
+            continue;
+
+        if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
+                                    [&ver_dep](const ModPlatform::Dependency& i) { return i.addonId == ver_dep.addonId; });
+            dep != c_dependencies.end())
+            continue;  // check the current dependency list
+
+        if (auto dep = std::find_if(m_selected.begin(), m_selected.end(),
+                                    [&ver_dep, providerName](std::shared_ptr<PackDependency> i) {
+                                        return i->pack->addonId == ver_dep.addonId && i->pack->provider == providerName;
+                                    });
+            dep != m_selected.end())
+            continue;  // check the selected versions
+
+        if (auto dep = std::find_if(m_mods.begin(), m_mods.end(),
+                                    [&ver_dep, providerName](std::shared_ptr<Metadata::ModStruct> i) {
+                                        return i->project_id == ver_dep.addonId && i->provider == providerName;
+                                    });
+            dep != m_mods.end())
+            continue;  // check the existing mods
+
+        if (auto dep = std::find_if(m_pack_dependencies.begin(), m_pack_dependencies.end(),
+                                    [&ver_dep, providerName](std::shared_ptr<PackDependency> i) {
+                                        return i->pack->addonId == ver_dep.addonId && i->pack->provider == providerName;
+                                    });
+            dep != m_pack_dependencies.end())  // check loaded dependencies
+            continue;
+
+        c_dependencies.append(ver_dep);
     }
     return c_dependencies;
 };
