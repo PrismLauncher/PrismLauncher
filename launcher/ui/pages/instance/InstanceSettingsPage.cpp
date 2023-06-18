@@ -284,6 +284,17 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("InstanceAccountId");
     }
 
+    // Sandboxing
+    bool overrideSandboxing = ui->sandboxingGroupBox->isChecked();
+    m_settings->set("OverrideSandboxing", overrideSandboxing);
+    if (overrideSandboxing) {
+        m_settings->set("EnableSandboxing", ui->sandboxingCheckBox->isChecked());
+        m_settings->set("BwrapExtraArgs", ui->bwrapArgsLineEdit->text());
+    } else {
+        m_settings->reset("EnableSandboxing");
+        m_settings->reset("BwrapExtraArgs");
+    }
+
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -384,6 +395,13 @@ void InstanceSettingsPage::loadSettings()
 
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
+
+    ui->sandboxingGroupBox->setChecked(m_settings->get("OverrideSandboxing").toBool());
+    ui->sandboxingCheckBox->setChecked(m_settings->get("EnableSandboxing").toBool());
+    ui->bwrapArgsLineEdit->setText(m_settings->get("BwrapExtraArgs").toString());
+#ifndef Q_OS_LINUX
+    ui->sandboxingGroupBox->setVisible(false);
+#endif
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
