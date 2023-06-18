@@ -181,7 +181,7 @@ void LauncherPartLaunch::executeTask()
         //: Make sure to translate "Enable Sandboxing" the same way as the actual setting
         const char *reason = QT_TR_NOOP("Sandboxing was requested, but is NOT available on your system.\n"
                                         "Please turn off sandboxing to proceed launching.\n"
-                                        "You can do so by going to the launcher settings and unchecking \"Enable Sandboxing\" under \"Minecraft\"");
+                                        "You can do so by going to the launcher settings and unchecking \"Enable sandboxing\" under \"Minecraft\"");
         emit logLine(tr(reason), MessageLevel::Error);
         emitFailed(tr(reason));
         return;

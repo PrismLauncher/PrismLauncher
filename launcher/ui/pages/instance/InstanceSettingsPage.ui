@@ -658,7 +658,7 @@
           <item>
            <widget class="QCheckBox" name="sandboxingCheckBox">
             <property name="text">
-             <string>Enable &amp;Sandboxing</string>
+             <string>Enable &amp;sandboxing</string>
             </property>
            </widget>
           </item>
