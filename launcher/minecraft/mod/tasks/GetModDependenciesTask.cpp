@@ -25,11 +25,13 @@
 #include "QObjectPtr.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/ConcurrentTask.h"
 #include "tasks/SequentialTask.h"
 #include "ui/pages/modplatform/ModModel.h"
+#include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/pages/modplatform/flame/FlameResourceModels.h"
 #include "ui/pages/modplatform/modrinth/ModrinthResourceModels.h"
 
@@ -69,6 +71,21 @@ void GetModDependenciesTask::prepare()
             addTask(prepareDependencyTask(dep, sel->pack->provider, 20));
         }
     }
+}
+
+auto GetModDependenciesTask::getOverride(const ModPlatform::Dependency& dep, const ModPlatform::ResourceProvider providerName)
+    -> ModPlatform::Dependency
+{
+    if (auto isQuilt = m_loaderType & ResourceAPI::Quilt; isQuilt || m_loaderType & ResourceAPI::Fabric) {
+        auto overide = ModPlatform::getOverrideDeps();
+        auto over = std::find_if(overide.cbegin(), overide.cend(), [dep, providerName, isQuilt](auto o) {
+            return o.provider == providerName && dep.addonId == (isQuilt ? o.fabric : o.quilt);
+        });
+        if (over != overide.cend()) {
+            return { isQuilt ? over->quilt : over->fabric, dep.type };
+        }
+    }
+    return dep;
 }
 
 QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion(const ModPlatform::IndexedVersion& version,
@@ -111,7 +128,7 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
             dep != m_pack_dependencies.end())  // check loaded dependencies
             continue;
 
-        c_dependencies.append(ver_dep);
+        c_dependencies.append(getOverride(ver_dep, providerName));
     }
     return c_dependencies;
 };
@@ -151,6 +168,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     pDep->pack = std::make_shared<ModPlatform::IndexedPack>();
     pDep->pack->addonId = dep.addonId;
     pDep->pack->provider = providerName;
+
     m_pack_dependencies.append(pDep);
     auto provider = providerName == m_flame_provider.name ? m_flame_provider : m_modrinth_provider;
 
@@ -193,7 +211,13 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         }
         if (dep.addonId.toString().isEmpty() && !pDep->version.addonId.toString().isEmpty()) {
             pDep->pack->addonId = pDep->version.addonId;
-            addTask(getProjectInfoTask(pDep));
+            auto dep = getOverride({ pDep->version.addonId, pDep->dependency.type }, provider.name);
+            if (dep.addonId != pDep->version.addonId) {
+                auto toRemoveID = pDep->version.addonId;
+                m_pack_dependencies.removeIf([toRemoveID](auto v) { return v->pack->addonId == toRemoveID; });
+                addTask(prepareDependencyTask(dep, provider.name, level));
+            } else
+                addTask(getProjectInfoTask(pDep));
         }
         for (auto dep : getDependenciesForVersion(pDep->version, provider.name)) {
             addTask(prepareDependencyTask(dep, provider.name, level - 1));
