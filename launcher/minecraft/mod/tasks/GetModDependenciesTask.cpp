@@ -214,7 +214,17 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             auto dep = getOverride({ pDep->version.addonId, pDep->dependency.type }, provider.name);
             if (dep.addonId != pDep->version.addonId) {
                 auto toRemoveID = pDep->version.addonId;
-                m_pack_dependencies.removeIf([toRemoveID](auto v) { return v->pack->addonId == toRemoveID; });
+
+                auto pred = [toRemoveID](auto v) { return v->pack->addonId == toRemoveID; };
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
+                m_pack_dependencies.removeIf(pred);
+#else
+                for (auto it = m_pack_dependencies.begin(); it != m_pack_dependencies.end();)
+                    if (pred(*it))
+                        it = m_pack_dependencies.erase(it);
+                    else
+                        ++it;
+#endif
                 addTask(prepareDependencyTask(dep, provider.name, level));
             } else
                 addTask(getProjectInfoTask(pDep));
