@@ -144,7 +144,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     for (auto d : dependencies) {
         auto dep = Json::ensureObject(d);
         ModPlatform::Dependency dependency;
-        dependency.addonId = Json::requireString(dep, "project_id");
+        dependency.addonId = Json::ensureString(dep, "project_id");
         dependency.version = Json::ensureString(dep, "version_id");
         auto depType = Json::requireString(dep, "dependency_type");
 

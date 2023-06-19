@@ -125,14 +125,22 @@ void ResourceDownloadDialog::connectButtons()
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
-QStringList getRequiredBy(QList<ResourceDownloadDialog::DownloadTaskPtr> tasks, QVariant addonId)
+QStringList getRequiredBy(QList<ResourceDownloadDialog::DownloadTaskPtr> tasks, ResourceDownloadDialog::DownloadTaskPtr pack)
 {
+    auto addonId = pack->getPack()->addonId;
+    auto provider = pack->getPack()->provider;
+    auto version = pack->getVersionID();
     auto req = QStringList();
     for (auto& task : tasks) {
+        if (provider != task->getPack()->provider)
+            continue;
         auto deps = task->getVersion().dependencies;
         if (auto dep = std::find_if(deps.begin(), deps.end(),
-                                    [addonId](const ModPlatform::Dependency& d) {
-                                        return d.addonId == addonId && d.type == ModPlatform::DependencyType::REQUIRED;
+                                    [addonId, provider, version](const ModPlatform::Dependency& d) {
+                                        return d.type == ModPlatform::DependencyType::REQUIRED &&
+                                               (provider == ModPlatform::ResourceProvider::MODRINTH && d.addonId.toString().isEmpty()
+                                                    ? version == d.version
+                                                    : d.addonId == addonId);
                                     });
             dep != deps.end()) {
             req.append(task->getName());
@@ -179,7 +187,7 @@ void ResourceDownloadDialog::confirm()
     });
     for (auto& task : selected) {
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ProviderCaps.name(task->getProvider()), getRequiredBy(selected, task->getPack()->addonId) });
+                                         ProviderCaps.name(task->getProvider()), getRequiredBy(selected, task) });
     }
 
     if (confirm_dialog->exec()) {
