@@ -71,6 +71,7 @@ jobs:
             qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
+            prism_version: '8.0'
 
           - os: windows-2022
             name: "Windows-MSVC-arm64"
@@ -83,6 +84,7 @@ jobs:
             qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
+            prism_version: '8.0'
 
           - os: macos-12
             name: macOS
@@ -445,7 +447,7 @@ jobs:
 
           Copy-Item ${{ github.workspace }}\program_info\prismlauncher_*x*.png .
           (Get-Content ${{ github.workspace }}\program_info\AppxManifest.xml) `
-            -replace "PRISM_VERSION_REPLACEME","7.0.0.$version" `
+            -replace "PRISM_VERSION_REPLACEME","${{ matrix.prism_version }}.0.$version" `
             -replace "PRISM_ARCH_REPLACEME","${{ matrix.architecture }}" `
             > .\AppxManifest.xml
 
@@ -626,7 +628,7 @@ jobs:
         shell: pwsh
         run: |
           $version = ("${{ github.run_number }}").Substring(0, 3)
-          "APPX_VERSION=7.0.0.$version" >> $env:GITHUB_ENV
+          "APPX_VERSION=${{ matrix.prism_version }}.0.$version" >> $env:GITHUB_ENV
 
       - name: Create Bundle Staging Directory
         shell: pwsh
