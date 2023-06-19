@@ -73,8 +73,8 @@ void GetModDependenciesTask::prepare()
     }
 }
 
-auto GetModDependenciesTask::getOverride(const ModPlatform::Dependency& dep, const ModPlatform::ResourceProvider providerName)
-    -> ModPlatform::Dependency
+ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::Dependency& dep,
+                                                            const ModPlatform::ResourceProvider providerName)
 {
     if (auto isQuilt = m_loaderType & ResourceAPI::Quilt; isQuilt || m_loaderType & ResourceAPI::Fabric) {
         auto overide = ModPlatform::getOverrideDeps();
@@ -215,7 +215,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             if (dep.addonId != pDep->version.addonId) {
                 auto toRemoveID = pDep->version.addonId;
 
-                auto pred = [toRemoveID](auto v) { return v->pack->addonId == toRemoveID; };
+                auto pred = [toRemoveID](const std::shared_ptr<PackDependency>& v) { return v->pack->addonId == toRemoveID; };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
                 m_pack_dependencies.removeIf(pred);
 #else

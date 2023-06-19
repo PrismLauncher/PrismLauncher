@@ -69,7 +69,7 @@ class GetModDependenciesTask : public SequentialTask {
                                                              const ModPlatform::ResourceProvider providerName);
     void prepare();
     Task::Ptr getProjectInfoTask(std::shared_ptr<PackDependency> pDep);
-    auto getOverride(const ModPlatform::Dependency&, const ModPlatform::ResourceProvider providerName) -> ModPlatform::Dependency;
+    ModPlatform::Dependency getOverride(const ModPlatform::Dependency&, const ModPlatform::ResourceProvider providerName);
 
    private:
     QList<std::shared_ptr<PackDependency>> m_pack_dependencies;
