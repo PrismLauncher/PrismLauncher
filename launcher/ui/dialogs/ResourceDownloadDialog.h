@@ -60,7 +60,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     QString dialogTitle() override { return tr("Download %1").arg(resourcesString()); };
 
     bool selectPage(QString pageId);
-    ResourcePage* getSelectedPage();
+    ResourcePage* selectedPage();
 
     void addResource(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
     void removeResource(const QString&);
@@ -85,7 +85,6 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     const std::shared_ptr<ResourceFolderModel> m_base_model;
 
     PageContainer* m_container = nullptr;
-    ResourcePage* m_selectedPage = nullptr;
 
     QDialogButtonBox m_buttons;
     QVBoxLayout m_vertical_layout;

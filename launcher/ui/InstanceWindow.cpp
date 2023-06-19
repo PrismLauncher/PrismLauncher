@@ -263,6 +263,11 @@ bool InstanceWindow::selectPage(QString pageId)
     return m_container->selectPage(pageId);
 }
 
+BasePage* InstanceWindow::selectedPage()
+{
+    return m_container->selectedPage();
+}
+
 void InstanceWindow::refreshContainer()
 {
     m_container->refreshContainer();

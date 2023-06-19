@@ -56,6 +56,7 @@ public:
     virtual ~InstanceWindow();
 
     bool selectPage(QString pageId) override;
+    BasePage* selectedPage() override;
     void refreshContainer() override;
 
     QString instanceId();

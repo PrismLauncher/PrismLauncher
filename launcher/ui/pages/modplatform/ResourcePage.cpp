@@ -389,7 +389,7 @@ void ResourcePage::openUrl(const QUrl& url)
         if (slug != getCurrentPack()->slug) {
             m_parent_dialog->selectPage(page);
 
-            auto newPage = m_parent_dialog->getSelectedPage();
+            auto newPage = m_parent_dialog->selectedPage();
 
             QLineEdit* searchEdit = newPage->m_ui->searchEdit;
             auto model = newPage->m_model;

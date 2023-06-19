@@ -944,6 +944,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ChooseProviderDialog.cpp
     ui/dialogs/ModUpdateDialog.cpp
     ui/dialogs/ModUpdateDialog.h
+    ui/dialogs/InstallLoaderDialog.cpp
+    ui/dialogs/InstallLoaderDialog.h
 
     # GUI - widgets
     ui/widgets/Common.cpp
@@ -1066,6 +1068,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ScrollMessageBox.ui
     ui/dialogs/BlockedModsDialog.ui
     ui/dialogs/ChooseProviderDialog.ui
+    ui/dialogs/InstallLoaderDialog.ui
 )
 
 qt_add_resources(LAUNCHER_RESOURCES

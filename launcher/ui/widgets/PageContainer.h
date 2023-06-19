@@ -78,7 +78,8 @@ public:
         return false;
     }
 
-    virtual bool selectPage(QString pageId) override;
+    bool selectPage(QString pageId) override;
+    BasePage* selectedPage() override;
     BasePage* getPage(QString pageId) override;
     const QList<BasePage*> getPages() const;
 

@@ -148,15 +148,17 @@ bool ResourceDownloadDialog::selectPage(QString pageId)
     return m_container->selectPage(pageId);
 }
 
-ResourcePage* ResourceDownloadDialog::getSelectedPage()
+ResourcePage* ResourceDownloadDialog::selectedPage()
 {
-    return m_selectedPage;
+    ResourcePage* result = dynamic_cast<ResourcePage*>(m_container->selectedPage());
+    Q_ASSERT(result != nullptr);
+    return result;
 }
 
 void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver)
 {
     removeResource(pack->name);
-    m_selectedPage->addResourceToPage(pack, ver, getBaseModel());
+    selectedPage()->addResourceToPage(pack, ver, getBaseModel());
     setButtonStatus();
 }
 
@@ -196,14 +198,8 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
         return;
     }
 
-    m_selectedPage = dynamic_cast<ResourcePage*>(selected);
-    if (!m_selectedPage) {
-        qCritical() << "Page '" << selected->displayName() << "' in ResourceDownloadDialog is not a ResourcePage!";
-        return;
-    }
-
     // Same effect as having a global search bar
-    m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
+    selectedPage()->setSearchTerm(prev_page->getSearchTerm());
 }
 
 ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
@@ -225,8 +221,6 @@ QList<BasePage*> ModDownloadDialog::getPages()
     pages.append(ModrinthModPage::create(this, *m_instance));
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameModPage::create(this, *m_instance));
-
-    m_selectedPage = dynamic_cast<ModPage*>(pages[0]);
 
     return pages;
 }
@@ -253,8 +247,6 @@ QList<BasePage*> ResourcePackDownloadDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameResourcePackPage::create(this, *m_instance));
 
-    m_selectedPage = dynamic_cast<ResourcePackResourcePage*>(pages[0]);
-
     return pages;
 }
 
@@ -280,8 +272,6 @@ QList<BasePage*> TexturePackDownloadDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameTexturePackPage::create(this, *m_instance));
 
-    m_selectedPage = dynamic_cast<TexturePackResourcePage*>(pages[0]);
-
     return pages;
 }
 
@@ -302,11 +292,7 @@ ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent,
 QList<BasePage*> ShaderPackDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
-
     pages.append(ModrinthShaderPackPage::create(this, *m_instance));
-
-    m_selectedPage = dynamic_cast<ShaderPackResourcePage*>(pages[0]);
-
     return pages;
 }
 

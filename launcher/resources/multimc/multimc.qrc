@@ -347,5 +347,9 @@
         <file>scalable/export.svg</file>
         <file>scalable/launch.svg</file>
         <file>scalable/server.svg</file>
+
+        <file>scalable/fabric-loader.svg</file>
+        <file>scalable/quilt-loader.svg</file>
+        <file>scalable/forge-loader.svg</file>
     </qresource>
 </RCC>
