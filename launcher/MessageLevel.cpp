@@ -6,19 +6,19 @@ namespace MessageLevel {
 
 MessageLevel::Enum getLevel(const QString& levelName)
 {
-    if (levelName == "Launcher")
+    if (levelName == QLatin1String("Launcher"))
         return MessageLevel::Launcher;
-    else if (levelName == "Debug")
+    else if (levelName == QLatin1String("Debug"))
         return MessageLevel::Debug;
-    else if (levelName == "Info")
+    else if (levelName == QLatin1String("Info"))
         return MessageLevel::Info;
-    else if (levelName == "Message")
+    else if (levelName == QLatin1String("Message"))
         return MessageLevel::Message;
-    else if (levelName == "Warning")
+    else if (levelName == QLatin1String("Warning"))
         return MessageLevel::Warning;
-    else if (levelName == "Error")
+    else if (levelName == QLatin1String("Error"))
         return MessageLevel::Error;
-    else if (levelName == "Fatal")
+    else if (levelName == QLatin1String("Fatal"))
         return MessageLevel::Fatal;
     // Skip PrePost, it's not exposed to !![]!
     // Also skip StdErr and StdOut
@@ -58,24 +58,24 @@ MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level)
         QString levelStr = match.captured(QLatin1String("level"));
         if(levelStr == QLatin1String("INFO"))
             level = MessageLevel::Message;
-        if(levelStr == QLatin1String("WARN"))
+        else if(levelStr == QLatin1String("WARN"))
             level = MessageLevel::Warning;
-        if(levelStr == QLatin1String("ERROR"))
+        else if(levelStr == QLatin1String("ERROR"))
             level = MessageLevel::Error;
-        if(levelStr == QLatin1String("FATAL"))
+        else if(levelStr == QLatin1String("FATAL"))
             level = MessageLevel::Fatal;
-        if(levelStr == QLatin1String("TRACE") || levelStr == QLatin1String("DEBUG"))
+        else if(levelStr == QLatin1String("TRACE") || levelStr == QLatin1String("DEBUG"))
             level = MessageLevel::Debug;
     } else {
         // Old style forge logs
         if (line.contains(QLatin1String("[INFO]")) || line.contains(QLatin1String("[CONFIG]")) || line.contains(QLatin1String("[FINE]")) ||
             line.contains(QLatin1String("[FINER]")) || line.contains(QLatin1String("[FINEST]")))
             level = MessageLevel::Message;
-        if (line.contains(QLatin1String("[SEVERE]")) || line.contains(QLatin1String("[STDERR]")))
+        else if (line.contains(QLatin1String("[SEVERE]")) || line.contains(QLatin1String("[STDERR]")))
             level = MessageLevel::Error;
-        if (line.contains(QLatin1String("[WARNING]")))
+        else if (line.contains(QLatin1String("[WARNING]")))
             level = MessageLevel::Warning;
-        if (line.contains(QLatin1String("[DEBUG]")))
+        else if (line.contains(QLatin1String("[DEBUG]")))
             level = MessageLevel::Debug;
     }
 
