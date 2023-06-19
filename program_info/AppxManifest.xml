@@ -5,16 +5,24 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
   xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5">
-<Identity Name="github.PrismLauncher.PrismLauncher" Version="PRISM_VERSION_REPLACEME" Publisher="CN=PrismLauncher, O=PrismLauncher, L=MyCity, S=MyState, C=MyCountry" ProcessorArchitecture="PRISM_ARCH_REPLACEME" />
+
+<Identity
+  Name="github.PrismLauncher.PrismLauncher"
+  Version="PRISM_VERSION_REPLACEME"
+  Publisher="CN=Sefa Eyeoglu, O=Sefa Eyeoglu, S=Nordrhein-Westfalen, C=DE"
+  ProcessorArchitecture="PRISM_ARCH_REPLACEME" />
+
   <Properties>
     <DisplayName>Prism Launcher</DisplayName>
     <PublisherDisplayName>Prism Launcher</PublisherDisplayName>
     <Description>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</Description>
     <Logo>prismlauncher_150x150.png</Logo>
   </Properties>
+
   <Resources>
     <Resource Language="en-us" />
   </Resources>
+
   <Dependencies>
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.22621.0" />
     <PackageDependency
@@ -22,6 +30,7 @@
       Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
       MinVersion="14.0.30035.0" />
   </Dependencies>
+
   <Capabilities>
     <Capability Name="internetClientServer"/>
     <rescap:Capability Name="runFullTrust"/>
@@ -40,6 +49,7 @@
       </Device>
     </DeviceCapability>
   </Capabilities>
+
   <Applications>
     <Application
       Id="PrismLauncher"

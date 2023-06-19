@@ -6,7 +6,7 @@
 
   <MainBundle
     Name="github.PrismLauncher.PrismLauncher"
-    Publisher="CN=PrismLauncher, O=PrismLauncher, L=MyCity, S=MyState, C=MyCountry"
+    Publisher="CN=Sefa Eyeoglu, O=Sefa Eyeoglu, S=Nordrhein-Westfalen, C=DE"
     Version="PRISM_VERSION_REPLACEME"
     Uri="https://prismlauncher.org/prismlauncher-PRISM_VERSION_REPLACEME.msixbundle" />
 
