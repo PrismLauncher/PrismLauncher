@@ -5,7 +5,7 @@
   Uri="https://prismlauncher.org/prismUpdate.AppInstaller" >
 
   <MainBundle
-    Name="github.PrismLauncher.PrismLauncher"
+    Name="org.prismlauncher.PrismLauncher"
     Publisher="CN=Sefa Eyeoglu, O=Sefa Eyeoglu, S=Nordrhein-Westfalen, C=DE"
     Version="PRISM_VERSION_REPLACEME"
     Uri="https://prismlauncher.org/prismlauncher-PRISM_VERSION_REPLACEME.msixbundle" />

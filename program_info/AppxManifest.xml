@@ -7,7 +7,7 @@
   xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5">
 
 <Identity
-  Name="github.PrismLauncher.PrismLauncher"
+  Name="org.prismlauncher.PrismLauncher"
   Version="PRISM_VERSION_REPLACEME"
   Publisher="CN=Sefa Eyeoglu, O=Sefa Eyeoglu, S=Nordrhein-Westfalen, C=DE"
   ProcessorArchitecture="PRISM_ARCH_REPLACEME" />
