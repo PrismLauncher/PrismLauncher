@@ -243,8 +243,8 @@ void LauncherPartLaunch::executeTask()
         bwrapArgs << "--ro-bind-try" << QString("%1/pipewire-0").arg(actualRuntimeDir) << QString("%1/pipewire-0").arg(sandboxedRuntimeDir);
         {
             auto display = qEnvironmentVariable("DISPLAY");
-            auto xAuthPath = qEnvironmentVariable("XAUTHORITY",
-                    FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::HomeLocation), ".Xauthority"));
+            auto defaultXAuthPath = FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::HomeLocation), ".Xauthority");
+            auto xAuthPath = qEnvironmentVariable("XAUTHORITY", defaultXAuthPath);
             auto wlDisplay = qEnvironmentVariable("WAYLAND_DISPLAY", "wayland-0");
 
             if (display.startsWith(':')) {
@@ -252,7 +252,8 @@ void LauncherPartLaunch::executeTask()
                 bwrapArgs << "--ro-bind-try" << x11Socket << x11Socket;
             }
 
-            bwrapArgs << "--ro-bind-try" << xAuthPath << xAuthPath;
+            bwrapArgs << "--ro-bind-try" << xAuthPath << defaultXAuthPath;
+            bwrapArgs << "--unsetenv" << "XAUTHORITY";
 
             if (wlDisplay.startsWith('/'))
                 bwrapArgs << "--ro-bind-try" << wlDisplay << wlDisplay;
