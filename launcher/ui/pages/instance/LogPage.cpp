@@ -50,6 +50,7 @@
 
 #include "ui/ColorCache.h"
 #include "ui/GuiUtil.h"
+#include "ui/QmlUtils.h"
 
 #include <BuildConfig.h>
 
@@ -146,23 +147,15 @@ void LogPage::onStatusChanged(QQuickWidget::Status status)
 
 void LogPage::onQuickWidgetReady()
 {
-    [[maybe_unused]] bool no_errors = QQmlProperty::write(rootObject(), "logModel", QVariant::fromValue(m_proxy));
-    Q_ASSERT(no_errors);
+    MUST_SUCCEED(QQmlProperty::write(rootObject(), "logModel", QVariant::fromValue(m_proxy)));
 
-    no_errors = connect(rootObject(), SIGNAL(onWrapModeChanged(int)), this, SLOT(wrapModeChanged(int)));
-    Q_ASSERT(no_errors);
-    no_errors = connect(rootObject(), SIGNAL(onSuspendedChanged(bool)), this, SLOT(suspendedChanged(bool)));
-    Q_ASSERT(no_errors);
-    no_errors = connect(rootObject(), SIGNAL(onUseRegexChanged(bool)), this, SLOT(useRegexChanged(bool)));
-    Q_ASSERT(no_errors);
-    no_errors = connect(rootObject(), SIGNAL(onCopyPressed(QString)), this, SLOT(copyPressed(QString)));
-    Q_ASSERT(no_errors);
-    no_errors = connect(rootObject(), SIGNAL(onUploadPressed()), this, SLOT(uploadPressed()));
-    Q_ASSERT(no_errors);
-    no_errors = connect(rootObject(), SIGNAL(onClearPressed()), this, SLOT(clearPressed()));
-    Q_ASSERT(no_errors);
-    no_errors = connect(rootObject(), SIGNAL(onSearchRequested(QString, bool)), this, SLOT(searchRequested(QString, bool)));
-    Q_ASSERT(no_errors);
+    MUST_SUCCEED(connect(rootObject(), SIGNAL(onWrapModeChanged(int)), this, SLOT(wrapModeChanged(int))));
+    MUST_SUCCEED(connect(rootObject(), SIGNAL(onSuspendedChanged(bool)), this, SLOT(suspendedChanged(bool))));
+    MUST_SUCCEED(connect(rootObject(), SIGNAL(onUseRegexChanged(bool)), this, SLOT(useRegexChanged(bool))));
+    MUST_SUCCEED(connect(rootObject(), SIGNAL(onCopyPressed(QString)), this, SLOT(copyPressed(QString))));
+    MUST_SUCCEED(connect(rootObject(), SIGNAL(onUploadPressed()), this, SLOT(uploadPressed())));
+    MUST_SUCCEED(connect(rootObject(), SIGNAL(onClearPressed()), this, SLOT(clearPressed())));
+    MUST_SUCCEED(connect(rootObject(), SIGNAL(onSearchRequested(QString, bool)), this, SLOT(searchRequested(QString, bool))));
 
     loadSettings();
 
@@ -196,8 +189,7 @@ void LogPage::onInstanceLaunchTaskChanged(LaunchTask::Ptr proc)
 
 void LogPage::wrapModeChanged(int new_state)
 {
-    [[maybe_unused]] bool no_errors = QQmlProperty::write(rootObject(), "wrapMode", new_state);
-    Q_ASSERT(no_errors);
+    MUST_SUCCEED(QQmlProperty::write(rootObject(), "wrapMode", new_state));
 }
 
 void LogPage::suspendedChanged(bool new_state)
@@ -205,16 +197,14 @@ void LogPage::suspendedChanged(bool new_state)
     Q_ASSERT(m_model);
     m_model->suspend(new_state);
 
-    [[maybe_unused]] bool no_errors = QQmlProperty::write(rootObject(), "suspended", m_model->suspended());
-    Q_ASSERT(no_errors);
+    MUST_SUCCEED(QQmlProperty::write(rootObject(), "suspended", m_model->suspended()));
 }
 
 void LogPage::useRegexChanged(bool new_state)
 {
     m_use_regex_in_search = new_state;
 
-    [[maybe_unused]] bool no_errors = QQmlProperty::write(rootObject(), "useRegexInSearch", m_use_regex_in_search);
-    Q_ASSERT(no_errors);
+    MUST_SUCCEED(QQmlProperty::write(rootObject(), "useRegexInSearch", m_use_regex_in_search));
 }
 
 void LogPage::copyPressed(QString to_copy)
@@ -288,25 +278,21 @@ void LogPage::searchRequested(QString search_string, bool reverse)
         }
     }
 
-    [[maybe_unused]] bool no_errors = QMetaObject::invokeMethod(rootObject(), "goToLine", Q_ARG(QVariant, next_line),
-                                                                Q_ARG(QVariant, begin_index), Q_ARG(QVariant, end_index));
-    Q_ASSERT(no_errors);
+    MUST_SUCCEED(QMetaObject::invokeMethod(rootObject(), "goToLine", Q_ARG(QVariant, next_line), Q_ARG(QVariant, begin_index),
+                                                    Q_ARG(QVariant, end_index)));
 }
 
 static const QString s_wrap_mode_setting_name{ "MinecraftLogWrapMode" };
 void LogPage::loadSettings()
 {
-    [[maybe_unused]] bool no_errors = true;
-
-    if (m_model) {
-        no_errors = QQmlProperty::write(rootObject(), "suspended", m_model->suspended());
-        Q_ASSERT(no_errors);
-    }
+    if (m_model)
+        MUST_SUCCEED(QQmlProperty::write(rootObject(), "suspended", m_model->suspended()));
 
     auto settings_obj = m_instance->settings();
     auto wrap_mode_setting = settings_obj->contains(s_wrap_mode_setting_name) ? settings_obj->getSetting(s_wrap_mode_setting_name)
                                                                               : settings_obj->registerSetting(s_wrap_mode_setting_name, 0);
 
+    [[maybe_unused]] bool no_errors = true;
     wrapModeChanged(wrap_mode_setting->get().toInt(&no_errors));
     Q_ASSERT(no_errors);
 }
@@ -314,7 +300,6 @@ void LogPage::loadSettings()
 void LogPage::saveSettings()
 {
     [[maybe_unused]] bool no_errors = true;
-
     auto current_wrap_mode = rootObject()->property("wrapMode").toInt(&no_errors);
     Q_ASSERT(no_errors);
 
