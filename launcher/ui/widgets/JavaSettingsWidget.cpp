@@ -46,7 +46,7 @@ void JavaSettingsWidget::setupUi()
     m_verticalLayout = new QVBoxLayout(this);
     m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
-    m_versionWidget = new VersionSelectWidget(this);
+    m_versionWidget = new VersionSelectWidget(true, this);
     m_verticalLayout->addWidget(m_versionWidget);
 
     m_horizontalLayout = new QHBoxLayout();
