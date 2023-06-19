@@ -24,6 +24,12 @@ on:
       CACHIX_AUTH_TOKEN:
         description: Private token for authenticating against Cachix cache
         required: false
+      GPG_PRIVATE_KEY:
+        description: Private key for AppImage signing
+        required: false
+      GPG_PRIVATE_KEY_ID:
+        description: ID for the GPG_PRIVATE_KEY, to select the signign key
+        required: false
 
 jobs:
   build:
@@ -426,7 +432,7 @@ jobs:
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
-          
+
           Get-ChildItem ${{ env.INSTALL_PORTABLE_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_PORTABLE_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Package (Windows, installer)
@@ -467,6 +473,8 @@ jobs:
       - name: Package AppImage (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
         shell: bash
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
 
@@ -482,7 +490,7 @@ jobs:
           cp -r ${{ github.workspace }}/JREs/jre17/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk
 
           cp -r ${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
-          
+
           cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
           cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}//usr/lib/
 
@@ -506,8 +514,18 @@ jobs:
 
           export UPDATE_INFORMATION="gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-Linux-x86_64.AppImage.zsync" 
 
+          if [ '${{ secrets.GPG_PRIVATE_KEY_ID }}' != '' ]; then
+            export SIGN=1
+            export SIGN_KEY=${{ secrets.GPG_PRIVATE_KEY_ID }}
+            mkdir -p ~/.gnupg/
+            printf "$GPG_PRIVATE_KEY" | base64 --decode > ~/.gnupg/private.key
+            gpg --import ~/.gnupg/private.key
+          else
+            echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $env:GITHUB_STEP_SUMMARY
+          fi
+
           ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
-          
+
           mv "PrismLauncher-Linux-x86_64.AppImage" "PrismLauncher-Linux-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
 
       ##
