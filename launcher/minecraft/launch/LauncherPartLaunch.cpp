@@ -204,7 +204,18 @@ void LauncherPartLaunch::executeTask()
         FS::ensureFolderPathExists(dbusProxyDir);
 
         const static QStringList systemBinds{
-            "/etc",
+            "/etc/drirc",
+            "/etc/gai.conf",
+            "/etc/gnutls",
+            "/etc/hostname",
+            "/etc/hosts",
+            "/etc/je_malloc.conf",
+            "/etc/localtime",
+            "/etc/machine-id",
+            "/etc/os-release",
+            "/etc/resolv.conf",
+            "/etc/selinux",
+            "/etc/timezone",
             "/usr",
             "/bin",
             "/sbin",
@@ -215,7 +226,6 @@ void LauncherPartLaunch::executeTask()
             "/sys/dev/char",
             "/sys/devices/pci0000:00",
             "/sys/devices/system/cpu",
-            "/run/systemd/resolve",
         };
 
         QStringList bwrapArgs{bwrapPath};
@@ -231,7 +241,11 @@ void LauncherPartLaunch::executeTask()
         bwrapArgs << "--setenv" << "XDG_RUNTIME_DIR" << sandboxedRuntimeDir;
 
         for (auto path : systemBinds) {
-            bwrapArgs << "--ro-bind-try" << path << path;
+            auto hostPath = QFileInfo(path).canonicalFilePath();
+            if (hostPath.isEmpty())
+                hostPath = path;
+
+            bwrapArgs << "--ro-bind-try" << hostPath << path;
         }
 
         // distribution args
