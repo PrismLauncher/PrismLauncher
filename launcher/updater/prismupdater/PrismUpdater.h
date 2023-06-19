@@ -63,7 +63,7 @@ class PrismUpdaterApp : public QApplication {
     void loadPrismVersionFromExe(const QString& exe_path);
 
     void downloadReleasePage(const QString& api_url, int page);
-    int parseReleasePage(const QByteArray* responce);
+    int parseReleasePage(const QByteArray* response);
 
     bool needUpdate(const GitHubRelease& release);
 
@@ -80,6 +80,7 @@ class PrismUpdaterApp : public QApplication {
     void performInstall(QFileInfo file);
     void unpackAndInstall(QFileInfo file);
     void backupAppDir();
+    std::optional<QDir> unpackArchive(QFileInfo file);
 
     QFileInfo downloadAsset(const GitHubReleaseAsset& asset);
     bool callAppimageUpdate(); 
@@ -92,7 +93,12 @@ class PrismUpdaterApp : public QApplication {
 
     bool isPortable() { return m_isPortable; }
 
+    void clearUpdateLog();
+    void logUpdate(const QString& msg);
+
+
     QString m_rootPath;
+    QString m_dataPath;
     bool m_isPortable = false;
     bool m_isAppimage = false;
     bool m_isFlatpak = false;
@@ -107,11 +113,13 @@ class PrismUpdaterApp : public QApplication {
     bool m_allowDowngrade;
 
     QString m_prismBinaryName;
-    QString m_prismVerison;
+    QString m_prismVersion;
     int m_prismVersionMajor;
     int m_prismVersionMinor;
     QString m_prsimVersionChannel;
     QString m_prismGitCommit;
+
+    GitHubRelease m_install_release;
 
     Status m_status = Status::Starting;
     shared_qobject_ptr<QNetworkAccessManager> m_network;

@@ -597,11 +597,14 @@ set(PRISMUPDATER_SOURCES
     Version.h
     Version.cpp
     Markdown.h
+
+    # Zip
+    MMCZip.h
+    MMCZip.cpp
     
     # Time
     MMCTime.h
     MMCTime.cpp
-
 
     net/ByteArraySink.h
     net/ChecksumValidator.h

@@ -193,6 +193,40 @@ void write(const QString& filename, const QByteArray& data)
     }
 }
 
+void appendSafe(const QString& filename, const QByteArray& data)
+{
+    ensureExists(QFileInfo(filename).dir());
+    QByteArray buffer;
+    try {
+        buffer = read(filename);
+    } catch (FileSystemException) {
+        buffer = QByteArray();
+    }
+    buffer.append(data);
+    QSaveFile file(filename);
+    if (!file.open(QSaveFile::WriteOnly)) {
+        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+    }
+    if (buffer.size() != file.write(buffer)) {
+        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+    }
+    if (!file.commit()) {
+        throw FileSystemException("Error while committing data to " + filename + ": " + file.errorString());
+    }
+}
+
+void append(const QString& filename, const QByteArray& data)
+{
+    ensureExists(QFileInfo(filename).dir());
+    QFile file(filename);
+    if (!file.open(QFile::Append)) {
+        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+    }
+    if (data.size() != file.write(data)) {
+        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+    }
+}
+
 QByteArray read(const QString& filename)
 {
     QFile file(filename);
