@@ -100,7 +100,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
                 [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
 
         connect(mods.get(), &ModFolderModel::updateFinished, this,
-                [this, check_allow_update, mods] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
+                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
 
         connect(m_instance, &BaseInstance::runningStatusChanged, this, &ModFolderPage::runningStateChanged);
         ModFolderPage::runningStateChanged(m_instance && m_instance->isRunning());
