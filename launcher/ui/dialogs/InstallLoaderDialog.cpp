@@ -107,12 +107,12 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, Q
 
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
-    return { // Fabric
+    return { // Forge
+             new LoaderPage("net.minecraftforge", "forge-loader", tr("Forge"), false, m_profile, this),
+             // Fabric
              new LoaderPage("net.fabricmc.fabric-loader", "fabric-loader", tr("Fabric"), true, m_profile, this),
              // Quilt
              new LoaderPage("org.quiltmc.quilt-loader", "quilt-loader", tr("Quilt"), true, m_profile, this),
-             // Forge
-             new LoaderPage("net.minecraftforge", "forge-loader", tr("Forge"), false, m_profile, this),
              // LiteLoader
              new LoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), false, m_profile, this)
     };
