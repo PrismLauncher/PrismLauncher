@@ -15,6 +15,7 @@
 #include "DirectJavaLaunch.h"
 
 #include <QStandardPaths>
+#include <QRegularExpression>
 
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
