@@ -42,7 +42,7 @@ class LoaderPage : public VersionSelectWidget, public BasePage {
         : VersionSelectWidget(parent), m_id(std::move(id)), m_icon(std::move(icon)), m_name(std::move(name))
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
-        setEmptyErrorString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
+        setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
         if (!lightweight)
             setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
 
@@ -108,11 +108,11 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, Q
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
     return { // Forge
-             new LoaderPage("net.minecraftforge", "forge-loader", tr("Forge"), false, m_profile, this),
+             new LoaderPage("net.minecraftforge", "forge", tr("Forge"), false, m_profile, this),
              // Fabric
-             new LoaderPage("net.fabricmc.fabric-loader", "fabric-loader", tr("Fabric"), true, m_profile, this),
+             new LoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), true, m_profile, this),
              // Quilt
-             new LoaderPage("org.quiltmc.quilt-loader", "quilt-loader", tr("Quilt"), true, m_profile, this),
+             new LoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), true, m_profile, this),
              // LiteLoader
              new LoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), false, m_profile, this)
     };
