@@ -333,13 +333,13 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
 
             case MigrationColumn: {
                 if(account->isMSA() || account->isOffline()) {
-                    return tr("N/A", "Can Migrate?");
+                    return tr("N/A", "Can Migrate");
                 }
                 if (account->canMigrate()) {
-                    return tr("Yes", "Can Migrate?");
+                    return tr("Yes", "Can Migrate");
                 }
                 else {
-                    return tr("No", "Can Migrate?");
+                    return tr("No", "Can Migrate");
                 }
             }
 
