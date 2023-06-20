@@ -167,6 +167,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="enableDirectJavaLaunch">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Launch instance using wrapper jar or use direct java call.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Direct Java Launch</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

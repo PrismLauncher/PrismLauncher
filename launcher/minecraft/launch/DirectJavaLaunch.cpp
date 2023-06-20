@@ -29,6 +29,17 @@
 
 DirectJavaLaunch::DirectJavaLaunch(LaunchTask *parent) : LaunchStep(parent)
 {
+    auto instance = parent->instance();
+    if (instance->settings()->get("CloseAfterLaunch").toBool()) {
+        std::shared_ptr<QMetaObject::Connection> connection{ new QMetaObject::Connection };
+        *connection = connect(&m_process, &LoggedProcess::log, this, [=](QStringList lines, MessageLevel::Enum level) {
+            qDebug() << lines;
+            if (lines.filter(QRegularExpression(".*Setting user.+", QRegularExpression::CaseInsensitiveOption)).length() != 0) {
+                APPLICATION->closeAllWindows();
+                disconnect(*connection);
+            }
+        });
+    }
     connect(&m_process, &LoggedProcess::log, this, &DirectJavaLaunch::logLines);
     connect(&m_process, &LoggedProcess::stateChanged, this, &DirectJavaLaunch::on_state);
 }
@@ -63,6 +74,17 @@ void DirectJavaLaunch::executeTask()
     m_process.setDetachable(true);
 
     auto mcArgs = minecraftInstance->processMinecraftArgs(m_session, m_serverToJoin);
+    // window size, title and state, legacy
+    {
+        QString windowParams;
+        if (!instance->settings()->get("LaunchMaximized").toBool()){
+            mcArgs.append("--width");
+            mcArgs.append(instance->settings()->get("MinecraftWinWidth").toString());
+            mcArgs.append("--height");
+            mcArgs.append(instance->settings()->get("MinecraftWinHeight").toString());
+        }
+    }
+
     args.append(mcArgs);
 
     QString wrapperCommandStr = instance->getWrapperCommand().trimmed();
@@ -118,8 +140,10 @@ void DirectJavaLaunch::on_state(LoggedProcess::State state)
             emitFailed(tr("Game crashed."));
             return;
         }
-        case LoggedProcess::Finished:
-        {
+        case LoggedProcess::Finished: {
+            auto instance = m_parent->instance();
+            if (instance->settings()->get("CloseAfterLaunch").toBool())
+                APPLICATION->showMainWindow();
             m_parent->setPid(-1);
             // if the exit code wasn't 0, report this as a crash
             auto exitCode = m_process.exitCode();
