@@ -145,7 +145,6 @@ public:
         m_thumbnailCache = std::make_shared<SharedIconCache>();
         m_thumbnailCache->add("placeholder", APPLICATION->getThemedIcon("screenshot-placeholder"));
         connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
-        // FIXME: the watched file set is not updated when files are removed
     }
     virtual ~FilterModel() { m_thumbnailingPool.waitForDone(500); }
     virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
@@ -214,10 +213,12 @@ private slots:
     void fileChanged(QString filepath)
     {
         m_thumbnailCache->setStale(filepath);
-        thumbnailImage(filepath);
         // reinsert the path...
         watcher.removePath(filepath);
-        watcher.addPath(filepath);
+        if (QFile::exists(filepath)) {
+            watcher.addPath(filepath);
+            thumbnailImage(filepath);
+        }
     }
 
 private:
