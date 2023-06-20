@@ -102,7 +102,7 @@ namespace fs = ghc::filesystem;
 #include <linux/fs.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_MACOS) || defined(Q_OS_OPENBSD)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
 #elif defined(Q_OS_WIN)
@@ -1151,7 +1151,7 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
         return false;
     }
 
-#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_MACOS) || defined(Q_OS_OPENBSD)
 
     if (!macos_bsd_clonefile(src_path, dst_path, ec)) {
         qDebug() << "failed macos_bsd_clonefile:";
@@ -1380,7 +1380,7 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
     return true;
 }
 
-#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_MACOS) || defined(Q_OS_OPENBSD)
 
 bool macos_bsd_clonefile(const std::string& src_path, const std::string& dst_path, std::error_code& ec)
 {
