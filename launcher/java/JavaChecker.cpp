@@ -85,7 +85,7 @@ void JavaChecker::performCheck()
     process->setProgram(m_path);
     process->setProcessChannelMode(QProcess::SeparateChannels);
     process->setProcessEnvironment(CleanEnviroment());
-    qDebug() << "Running java checker: " + m_path + " " + args.join(" ");;
+    qDebug() << "Running java checker:" << m_path << args.join(" ");
 
     connect(process.get(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &JavaChecker::finished);
     connect(process.get(), &QProcess::errorOccurred, this, &JavaChecker::error);
