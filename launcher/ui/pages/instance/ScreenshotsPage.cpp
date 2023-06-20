@@ -146,7 +146,11 @@ public:
         m_thumbnailCache->add("placeholder", APPLICATION->getThemedIcon("screenshot-placeholder"));
         connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
     }
-    virtual ~FilterModel() { m_thumbnailingPool.waitForDone(500); }
+    virtual ~FilterModel() {
+        m_thumbnailingPool.clear();
+        if (!m_thumbnailingPool.waitForDone(500))
+            qDebug() << "Thumbnail pool took longer than 500ms to finish";
+    }
     virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
     {
         auto model = sourceModel();
