@@ -96,37 +96,30 @@ public:
             return;
         if ((info.suffix().compare("png", Qt::CaseInsensitive) != 0))
             return;
-        int tries = 5;
-        while (tries)
-        {
-            if (!m_cache->stale(m_path))
-                return;
-            QImage image(m_path);
-            if (image.isNull())
-            {
-                QThread::msleep(500);
-                tries--;
-                continue;
-            }
-            QImage small;
-            if (image.width() > image.height())
-                small = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
-            else
-                small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
-            QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
-            QImage square(QSize(256, 256), QImage::Format_ARGB32);
-            square.fill(Qt::transparent);
-
-            QPainter painter(&square);
-            painter.drawImage(offset, small);
-            painter.end();
-
-            QIcon icon(QPixmap::fromImage(square));
-            m_cache->add(m_path, icon);
-            m_resultEmitter.emitResultsReady(m_path);
+        if (!m_cache->stale(m_path))
+            return;
+        QImage image(m_path);
+        if (image.isNull()) {
+            m_resultEmitter.emitResultsFailed(m_path);
+            qDebug() << "Error loading screenshot: " + m_path + ". Perhaps too large?";
             return;
         }
-        m_resultEmitter.emitResultsFailed(m_path);
+        QImage small;
+        if (image.width() > image.height())
+            small = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
+        else
+            small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
+        QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
+        QImage square(QSize(256, 256), QImage::Format_ARGB32);
+        square.fill(Qt::transparent);
+
+        QPainter painter(&square);
+        painter.drawImage(offset, small);
+        painter.end();
+
+        QIcon icon(QPixmap::fromImage(square));
+        m_cache->add(m_path, icon);
+        m_resultEmitter.emitResultsReady(m_path);
     }
     QString m_path;
     SharedIconCachePtr m_cache;
