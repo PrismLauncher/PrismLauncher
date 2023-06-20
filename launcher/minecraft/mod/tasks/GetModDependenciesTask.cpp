@@ -31,7 +31,6 @@
 #include "tasks/ConcurrentTask.h"
 #include "tasks/SequentialTask.h"
 #include "ui/pages/modplatform/ModModel.h"
-#include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/pages/modplatform/flame/FlameResourceModels.h"
 #include "ui/pages/modplatform/modrinth/ModrinthResourceModels.h"
 
@@ -192,6 +191,16 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             }
             pDep->version = provider.mod->loadDependencyVersions(dep, arr);
             if (!pDep->version.addonId.isValid()) {
+                if (m_loaderType & ResourceAPI::Quilt) {  // falback for quilt
+                    auto overide = ModPlatform::getOverrideDeps();
+                    auto over = std::find_if(overide.cbegin(), overide.cend(),
+                                             [dep, provider](auto o) { return o.provider == provider.name && dep.addonId == o.quilt; });
+                    if (over != overide.cend()) {
+                        removePack(dep.addonId);
+                        addTask(prepareDependencyTask({ over->fabric, dep.type }, provider.name, level));
+                        return;
+                    }
+                }
                 qWarning() << "Error while reading mod version empty ";
                 qDebug() << doc;
                 return;
@@ -213,18 +222,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             pDep->pack->addonId = pDep->version.addonId;
             auto dep = getOverride({ pDep->version.addonId, pDep->dependency.type }, provider.name);
             if (dep.addonId != pDep->version.addonId) {
-                auto toRemoveID = pDep->version.addonId;
-
-                auto pred = [toRemoveID](const std::shared_ptr<PackDependency>& v) { return v->pack->addonId == toRemoveID; };
-#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
-                m_pack_dependencies.removeIf(pred);
-#else
-                for (auto it = m_pack_dependencies.begin(); it != m_pack_dependencies.end();)
-                    if (pred(*it))
-                        it = m_pack_dependencies.erase(it);
-                    else
-                        ++it;
-#endif
+                removePack(pDep->version.addonId);
                 addTask(prepareDependencyTask(dep, provider.name, level));
             } else
                 addTask(getProjectInfoTask(pDep));
@@ -238,3 +236,17 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     tasks->addTask(version);
     return tasks;
 };
+
+void GetModDependenciesTask::removePack(const QVariant addonId)
+{
+    auto pred = [addonId](const std::shared_ptr<PackDependency>& v) { return v->pack->addonId == addonId; };
+#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
+    m_pack_dependencies.removeIf(pred);
+#else
+    for (auto it = m_pack_dependencies.begin(); it != m_pack_dependencies.end();)
+        if (pred(*it))
+            it = m_pack_dependencies.erase(it);
+        else
+            ++it;
+#endif
+}
