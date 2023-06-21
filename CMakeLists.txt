@@ -138,7 +138,7 @@ set(Launcher_NEWS_OPEN_URL "https://prismlauncher.org/news" CACHE STRING "URL th
 set(Launcher_HELP_URL "https://prismlauncher.org/wiki/help-pages/%1" CACHE STRING "URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help")
 
 ######## Set version numbers ########
-set(Launcher_VERSION_MAJOR 7)
+set(Launcher_VERSION_MAJOR 8)
 set(Launcher_VERSION_MINOR 0)
 
 set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}")

@@ -45,7 +45,10 @@ QString InstanceName::name() const
 {
     if (!m_modified_name.isEmpty())
         return modifiedName();
-    return QString("%1 %2").arg(m_original_name, m_original_version);
+    if (!m_original_version.isEmpty())
+        return QString("%1 %2").arg(m_original_name, m_original_version);
+
+    return m_original_name;
 }
 
 QString InstanceName::originalName() const

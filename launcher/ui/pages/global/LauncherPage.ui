@@ -172,7 +172,7 @@
              <string>Disable using metadata provided by mod providers (like Modrinth or Curseforge) for mods.</string>
             </property>
             <property name="text">
-             <string>Disable using metadata for mods?</string>
+             <string>Disable using metadata for mods</string>
             </property>
            </widget>
           </item>
@@ -307,21 +307,21 @@
           <item>
            <widget class="QCheckBox" name="showConsoleCheck">
             <property name="text">
-             <string>Show console while the game is &amp;running?</string>
+             <string>Show console while the game is &amp;running</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="autoCloseConsoleCheck">
             <property name="text">
-             <string>&amp;Automatically close console when the game quits?</string>
+             <string>&amp;Automatically close console when the game quits</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="showConsoleErrorCheck">
             <property name="text">
-             <string>Show console when the game &amp;crashes?</string>
+             <string>Show console when the game &amp;crashes</string>
             </property>
            </widget>
           </item>

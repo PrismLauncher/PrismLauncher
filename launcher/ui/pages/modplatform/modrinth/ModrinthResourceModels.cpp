@@ -25,7 +25,7 @@
 
 namespace ResourceDownload {
 
-ModrinthModModel::ModrinthModModel(BaseInstance const& base) : ModModel(base, new ModrinthAPI) {}
+ModrinthModModel::ModrinthModModel(BaseInstance& base) : ModModel(base, new ModrinthAPI) {}
 
 void ModrinthModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
 {

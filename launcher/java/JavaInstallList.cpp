@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -98,6 +99,8 @@ QVariant JavaInstallList::data(const QModelIndex &index, int role) const
     auto version = std::dynamic_pointer_cast<JavaInstall>(m_vlist[index.row()]);
     switch (role)
     {
+        case SortRole:
+            return -index.row();
         case VersionPointerRole:
             return QVariant::fromValue(m_vlist[index.row()]);
         case VersionIdRole:

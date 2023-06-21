@@ -116,6 +116,8 @@ class ResourceModel : public QAbstractListModel {
     virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&);
     virtual void loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&);
 
+    virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const { return false; }
+
    protected:
     /* Basic search parameters */
     enum class SearchState { None, CanFetchMore, ResetRequested, Finished } m_search_state = SearchState::None;
