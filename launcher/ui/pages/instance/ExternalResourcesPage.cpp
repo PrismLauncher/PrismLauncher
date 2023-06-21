@@ -135,9 +135,6 @@ void ExternalResourcesPage::retranslate()
 
 void ExternalResourcesPage::itemActivated(const QModelIndex&)
 {
-    if (!m_controlsEnabled)
-        return;
-
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->setResourceEnabled(selection.indexes(), EnableAction::TOGGLE);
 }
@@ -182,9 +179,6 @@ bool ExternalResourcesPage::eventFilter(QObject* obj, QEvent* ev)
 
 void ExternalResourcesPage::addItem()
 {
-    if (!m_controlsEnabled)
-        return;
-
     auto list = GuiUtil::BrowseForFiles(
         helpPage(), tr("Select %1", "Select whatever type of files the page contains. Example: 'Loader Mods'").arg(displayName()),
         m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
@@ -198,9 +192,6 @@ void ExternalResourcesPage::addItem()
 
 void ExternalResourcesPage::removeItem()
 {
-    if (!m_controlsEnabled)
-        return;
-
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
 
     int count = 0;
@@ -249,18 +240,12 @@ void ExternalResourcesPage::removeItems(const QItemSelection& selection)
 
 void ExternalResourcesPage::enableItem()
 {
-    if (!m_controlsEnabled)
-        return;
-
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->setResourceEnabled(selection.indexes(), EnableAction::ENABLE);
 }
 
 void ExternalResourcesPage::disableItem()
 {
-    if (!m_controlsEnabled)
-        return;
-
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->setResourceEnabled(selection.indexes(), EnableAction::DISABLE);
 }

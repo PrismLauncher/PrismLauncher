@@ -133,15 +133,13 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelI
     return true;
 }
 
-void ModFolderPage::removeItems(const QItemSelection &selection)
+void ModFolderPage::removeItems(const QItemSelection& selection)
 {
     m_model->deleteMods(selection.indexes());
 }
 
 void ModFolderPage::installMods()
 {
-    if (!m_controlsEnabled)
-        return;
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
