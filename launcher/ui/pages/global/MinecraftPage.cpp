@@ -99,7 +99,7 @@ void MinecraftPage::applySettings()
     // Miscellaneous
     s->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
     s->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
-    s->set("MCLaunchMethod", ui->enableDirectJavaLaunch->isChecked() ? "LauncherPart" : "DirectJava");
+    s->set("MCLaunchMethod", ui->enableDirectJavaLaunch->isChecked() ? "DirectJava" : "LauncherPart");
 }
 
 void MinecraftPage::loadSettings()

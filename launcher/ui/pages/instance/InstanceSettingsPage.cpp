@@ -288,7 +288,7 @@ void InstanceSettingsPage::applySettings()
     bool launchMethod = ui->directJavaGroupBox->isChecked();
     m_settings->set("OverrideMCLaunchMethod", launchMethod);
     if (launchMethod) {
-        m_settings->set("MCLaunchMethod", ui->enableDirectJavaLaunch->isChecked() ? "LauncherPart" : "DirectJava");
+        m_settings->set("MCLaunchMethod", ui->enableDirectJavaLaunch->isChecked() ? "DirectJava" : "LauncherPart");
     } else {
         m_settings->reset("MCLaunchMethod");
     }
@@ -394,6 +394,7 @@ void InstanceSettingsPage::loadSettings()
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
 
+    ui->directJavaGroupBox->setChecked(m_settings->get("OverrideMCLaunchMethod").toBool());
     ui->enableDirectJavaLaunch->setChecked(m_settings->get("MCLaunchMethod").toString() == "DirectJava");
 }
 
