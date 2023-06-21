@@ -60,7 +60,7 @@ ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool 
     m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider" });
     m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider") });
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME , SortType::VERSION, SortType::DATE, SortType::PROVIDER};
-    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents};
+    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents};
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const

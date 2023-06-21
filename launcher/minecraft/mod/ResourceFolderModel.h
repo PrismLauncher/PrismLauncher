@@ -201,7 +201,7 @@ class ResourceFolderModel : public QAbstractListModel {
     QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
     QStringList m_column_names = {"Enable", "Name", "Last Modified"};
     QStringList m_column_names_translated = {tr("Enable"), tr("Name"), tr("Last Modified")};
-    QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::Stretch, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents };
+    QList<QHeaderView::ResizeMode> m_column_resize_modes = {  QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents };
 
     bool m_can_interact = true;
 

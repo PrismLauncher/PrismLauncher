@@ -558,6 +558,10 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
 
         connect(act, &QAction::toggled, tree, [this, col, tree](bool toggled){
             tree->setColumnHidden(col, !toggled);
+            for(int c = 0; c < columnCount(); ++c) {
+                if (m_column_resize_modes.at(c) == QHeaderView::ResizeToContents)
+                    tree->resizeColumnToContents(c);
+            }
             saveHiddenColumn(col, !toggled);
         });
 
