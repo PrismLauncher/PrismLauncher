@@ -59,8 +59,7 @@ class ModFolderPage : public ExternalResourcesPage {
     bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
 
    private slots:
-    void runningStateChanged(bool running);
-    void removeItems(const QItemSelection &selection) override;
+    void removeItems(const QItemSelection& selection) override;
 
     void installMods();
     void updateMods();

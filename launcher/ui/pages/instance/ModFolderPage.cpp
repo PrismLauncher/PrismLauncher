@@ -86,9 +86,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
-        auto check_allow_update = [this] {
-            return (!m_instance || !m_instance->isRunning()) && (ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
-        };
+        auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
         connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
                 [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
@@ -101,20 +99,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
         connect(mods.get(), &ModFolderModel::updateFinished, this,
                 [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
-
-        connect(m_instance, &BaseInstance::runningStatusChanged, this, &ModFolderPage::runningStateChanged);
-        ModFolderPage::runningStateChanged(m_instance && m_instance->isRunning());
     }
-}
-
-void ModFolderPage::runningStateChanged(bool running)
-{
-    ui->actionDownloadItem->setEnabled(!running);
-    ui->actionUpdateItem->setEnabled(!running);
-    ui->actionAddItem->setEnabled(!running);
-    ui->actionEnableItem->setEnabled(!running);
-    ui->actionDisableItem->setEnabled(!running);
-    ui->actionRemoveItem->setEnabled(!running);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -205,8 +190,7 @@ void ModFolderPage::updateMods()
                 message = tr("All selected mods are up-to-date! :)");
             }
         }
-        CustomMessageBox::selectable(this, tr("Update checker"), message)
-            ->exec();
+        CustomMessageBox::selectable(this, tr("Update checker"), message)->exec();
         return;
     }
 
