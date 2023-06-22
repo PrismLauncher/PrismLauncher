@@ -97,7 +97,7 @@ QString ExportModsToStringTask(QList<Mod*> mods, QString lineTemplate)
         if (meta != nullptr) {
             url = (meta->provider == ModPlatform::ResourceProvider::FLAME ? "https://www.curseforge.com/minecraft/mc-mods/"
                                                                           : "https://modrinth.com/mod/") +
-                  meta->project_id.toString();
+                  meta->slug.remove(".pw.toml");
         }
         auto ver = mod->version();
         if (ver.isEmpty() && meta != nullptr)
