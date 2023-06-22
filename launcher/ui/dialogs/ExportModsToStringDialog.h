@@ -36,7 +36,8 @@ class ExportModsToStringDialog : public QDialog {
 
    protected slots:
     void formatChanged(int index);
-    void trigger();
+    void triggerImp();
+    void trigger(int) { triggerImp(); };
 
    private:
     QList<Mod*> m_allMods;

@@ -42,16 +42,16 @@ ExportModsToStringDialog::ExportModsToStringDialog(InstancePtr instance, QWidget
         mcInstance->loaderModList()->update();
         connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, [this, mcInstance]() {
             m_allMods = mcInstance->loaderModList()->allMods();
-            trigger();
+            triggerImp();
         });
     }
 
-    connect(ui->formatComboBox, &QComboBox::currentIndexChanged, this, &ExportModsToStringDialog::formatChanged);
+    connect(ui->formatComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ExportModsToStringDialog::formatChanged);
     connect(ui->authorsCheckBox, &QCheckBox::stateChanged, this, &ExportModsToStringDialog::trigger);
     connect(ui->versionCheckBox, &QCheckBox::stateChanged, this, &ExportModsToStringDialog::trigger);
     connect(ui->urlCheckBox, &QCheckBox::stateChanged, this, &ExportModsToStringDialog::trigger);
-    connect(ui->templateText, &QTextEdit::textChanged, this, &ExportModsToStringDialog::trigger);
-    connect(ui->copyButton, &QPushButton::clicked, this, [this]() {
+    connect(ui->templateText, &QTextEdit::textChanged, this, &ExportModsToStringDialog::triggerImp);
+    connect(ui->copyButton, &QPushButton::clicked, this, [this](bool) {
         this->ui->finalText->selectAll();
         this->ui->finalText->copy();
     });
@@ -81,10 +81,10 @@ void ExportModsToStringDialog::formatChanged(int index)
             break;
         }
     }
-    trigger();
+    triggerImp();
 }
 
-void ExportModsToStringDialog::trigger()
+void ExportModsToStringDialog::triggerImp()
 {
     ExportToString::Formats format;
     switch (ui->formatComboBox->currentIndex()) {
