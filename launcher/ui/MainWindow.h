@@ -157,6 +157,7 @@ private slots:
     inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
     void on_actionExportInstanceZip_triggered();
     void on_actionExportInstanceMrPack_triggered();
+    void on_actionExportInstanceToString_triggered();
 
     void on_actionRenameInstance_triggered();
 

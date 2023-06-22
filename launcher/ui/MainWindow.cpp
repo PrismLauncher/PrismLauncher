@@ -43,6 +43,7 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
+#include "ui/dialogs/ExportModsToStringDialog.h"
 #include "ui_MainWindow.h"
 
 #include <QVariant>
@@ -205,6 +206,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         auto exportInstanceMenu = new QMenu(this);
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
+        exportInstanceMenu->addAction(ui->actionExportInstanceToString);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
 
@@ -1412,6 +1414,14 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
     if (m_selectedInstance)
     {
         ExportMrPackDialog dlg(m_selectedInstance, this);
+        dlg.exec();
+    }
+}
+
+void MainWindow::on_actionExportInstanceToString_triggered()
+{
+    if (m_selectedInstance) {
+        ExportModsToStringDialog dlg(m_selectedInstance, this);
         dlg.exec();
     }
 }

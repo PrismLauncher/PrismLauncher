@@ -479,6 +479,14 @@
     <string>Modrinth (mrpack)</string>
    </property>
   </action>
+  <action name="actionExportInstanceToString">
+   <property name="icon">
+    <iconset theme="new"/>
+   </property>
+   <property name="text">
+    <string>Text</string>
+   </property>
+  </action>
   <action name="actionCreateInstanceShortcut">
    <property name="icon">
     <iconset theme="shortcut">
