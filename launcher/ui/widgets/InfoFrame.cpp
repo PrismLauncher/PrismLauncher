@@ -47,6 +47,8 @@ InfoFrame::InfoFrame(QWidget *parent) :
     ui->setupUi(this);
     ui->descriptionLabel->setHidden(true);
     ui->nameLabel->setHidden(true);
+    ui->licenseLabel->setHidden(true);
+    ui->issueTrackerLabel->setHidden(true);
     updateHiddenState();
 }
 
@@ -88,7 +90,41 @@ void InfoFrame::updateWithMod(Mod const& m)
         setDescription(m.description());
     }
 
-    setImage();
+    setImage(m.icon({64,64}));
+
+    auto licenses = m.licenses();
+    QString licenseText = "";
+    if (!licenses.empty()) {
+        for (auto l : licenses) {
+            if (!licenseText.isEmpty()) {
+                licenseText += "\n"; // add newline between licenses
+            }
+            if (!l.name.isEmpty()) {
+                if (l.url.isEmpty()) {
+                    licenseText += l.name;
+                } else {
+                    licenseText += "<a href=\"" + l.url + "\">" + l.name + "</a>";
+                }
+            } else if (!l.url.isEmpty()) {
+                licenseText += "<a href=\"" + l.url + "\">" + l.url + "</a>";
+            }
+            if (!l.description.isEmpty() && l.description != l.name) {
+               licenseText += " " + l.description;
+            }
+        } 
+    }
+    if (!licenseText.isEmpty()) {
+        setLicense(tr("License: %1").arg(licenseText));
+    } else {
+        setLicense();
+    }
+
+    QString issueTracker = "";
+    if (!m.issueTracker().isEmpty()) {
+        issueTracker += tr("Report issues to: ");
+        issueTracker += "<a href=\"" + m.issueTracker() + "\">" + m.issueTracker() + "</a>";
+    } 
+    setIssueTracker(issueTracker);
 }
 
 void InfoFrame::updateWithResource(const Resource& resource)
@@ -177,16 +213,16 @@ void InfoFrame::clear()
     setName();
     setDescription();
     setImage();
+    setLicense();
+    setIssueTracker();
 }
 
 void InfoFrame::updateHiddenState()
 {
-    if(ui->descriptionLabel->isHidden() && ui->nameLabel->isHidden())
-    {
+    if (ui->descriptionLabel->isHidden() && ui->nameLabel->isHidden() && ui->licenseLabel->isHidden() &&
+        ui->issueTrackerLabel->isHidden()) {
         setHidden(true);
-    }
-    else
-    {
+    } else {
         setHidden(false);
     }
 }
@@ -251,6 +287,66 @@ void InfoFrame::setDescription(QString text)
     ui->descriptionLabel->setText(labeltext);
 }
 
+void InfoFrame::setLicense(QString text)
+{
+    if(text.isEmpty())
+    {
+        ui->licenseLabel->setHidden(true);
+        updateHiddenState();
+        return;
+    }
+    else
+    {
+        ui->licenseLabel->setHidden(false);
+        updateHiddenState();
+    }
+    ui->licenseLabel->setToolTip("");
+    QString intermediatetext = text.trimmed();
+    bool prev(false);
+    QChar rem('\n');
+    QString finaltext;
+    finaltext.reserve(intermediatetext.size());
+    foreach(const QChar& c, intermediatetext)
+    {
+        if(c == rem && prev){
+            continue;
+        }
+        prev = c == rem;
+        finaltext += c;
+    }
+    QString labeltext;
+    labeltext.reserve(300);
+    if(finaltext.length() > 290)
+    {
+        ui->licenseLabel->setOpenExternalLinks(false);
+        ui->licenseLabel->setTextFormat(Qt::TextFormat::RichText);
+        m_description = text;
+        // This allows injecting HTML here.
+        labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
+        QObject::connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
+    }
+    else
+    {
+        ui->licenseLabel->setTextFormat(Qt::TextFormat::AutoText);
+        labeltext.append(finaltext);
+    }
+    ui->licenseLabel->setText(labeltext);
+}
+
+void InfoFrame::setIssueTracker(QString text)
+{
+    if(text.isEmpty())
+    {
+        ui->issueTrackerLabel->setHidden(true);
+    }
+    else
+    {
+        ui->issueTrackerLabel->setText(text);
+        ui->issueTrackerLabel->setHidden(false);
+    }
+    updateHiddenState();
+}
+
 void InfoFrame::setImage(QPixmap img)
 {
     if (img.isNull()) {
@@ -272,6 +368,20 @@ void InfoFrame::descriptionEllipsisHandler(QString link)
     else
     {
         m_current_box->setText(m_description);
+    }
+}
+
+void InfoFrame::licenseEllipsisHandler(QString link)
+{
+    if(!m_current_box)
+    {
+        m_current_box = CustomMessageBox::selectable(this, "", m_license);
+        connect(m_current_box, &QMessageBox::finished, this, &InfoFrame::boxClosed);
+        m_current_box->show();
+    }
+    else
+    {
+        m_current_box->setText(m_license);
     }
 }
 
