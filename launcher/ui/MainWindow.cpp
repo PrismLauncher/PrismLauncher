@@ -924,14 +924,14 @@ void MainWindow::setCatBackground(bool enabled)
         view->setStyleSheet(QString(R"(
 InstanceView
 {
-    background-image: url(:/backgrounds/%1);
+    background-image: url(%1);
     background-attachment: fixed;
     background-clip: padding;
     background-position: bottom right;
     background-repeat: none;
     background-color:palette(base);
 })")
-                                .arg(ThemeManager::getCatImage()));
+                                .arg(APPLICATION->getCatPack()));
     } else {
         view->setStyleSheet(QString());
     }

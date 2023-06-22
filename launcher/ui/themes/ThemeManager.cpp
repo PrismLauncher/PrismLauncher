@@ -22,6 +22,7 @@
 #include <QDirIterator>
 #include <QIcon>
 #include "ui/themes/BrightTheme.h"
+#include "ui/themes/CatPack.h"
 #include "ui/themes/CustomTheme.h"
 #include "ui/themes/DarkTheme.h"
 #include "ui/themes/SystemTheme.h"
@@ -32,6 +33,7 @@ ThemeManager::ThemeManager(MainWindow* mainWindow)
 {
     m_mainWindow = mainWindow;
     initializeThemes();
+    initializeCatPacks();
 }
 
 /// @brief Adds the Theme to the list of themes
@@ -111,6 +113,16 @@ QList<ITheme*> ThemeManager::getValidApplicationThemes()
     return ret;
 }
 
+QList<CatPack*> ThemeManager::getValidCatPacks()
+{
+    QList<CatPack*> ret;
+    ret.reserve(m_catPacks.size());
+    for (auto&& [id, theme] : m_catPacks) {
+        ret.append(theme.get());
+    }
+    return ret;
+}
+
 void ThemeManager::setIconTheme(const QString& name)
 {
     QIcon::setThemeName(name);
@@ -137,19 +149,63 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
     }
 }
 
-QString ThemeManager::getCatImage(QString catName)
+QString ThemeManager::getCatPack(QString catName)
 {
-    QDateTime now = QDateTime::currentDateTime();
-    QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
-    QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-    QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
-    QString cat = !catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString();
-    if (std::abs(now.daysTo(xmas)) <= 4) {
-        cat += "-xmas";
-    } else if (std::abs(now.daysTo(halloween)) <= 4) {
-        cat += "-spooky";
-    } else if (std::abs(now.daysTo(birthday)) <= 12) {
-        cat += "-bday";
+    auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
+    if (catIter != m_catPacks.end()) {
+        auto& catPack = catIter->second;
+        themeDebugLog() << "applying catpack" << catPack->id();
+        return catPack->path();
+    } else {
+        themeWarningLog() << "Tried to get invalid catPack:" << catName;
     }
-    return cat;
+
+    return m_catPacks.begin()->second->path();
+}
+
+QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
+{
+    QString id = catPack->id();
+    m_catPacks.emplace(id, std::move(catPack));
+    return id;
+}
+
+void ThemeManager::initializeCatPacks()
+{
+    QList<std::pair<QString, QString>> defaultCats{ { "kitteh", QObject::tr("Background Cat (from MultiMC)") },
+                                                    { "rory", QObject::tr("Rory ID 11 (drawn by Ashtaka)") },
+                                                    { "rory-flat", QObject::tr("Rory ID 11 (flat edition, drawn by Ashtaka)") },
+                                                    { "teawie", QObject::tr("Teawie (drawn by SympathyTea)") } };
+    for (auto [id, name] : defaultCats) {
+        addCatPack(std::unique_ptr<CatPack>(new BasicCatPack(id, name)));
+    }
+    QDir catpacksDir("./catpacks/");
+    QString catpacksFolder = catpacksDir.absoluteFilePath("");
+    themeDebugLog() << "CatPacks Folder Path: " << catpacksFolder;
+
+    auto loadFiles = [this](QDir dir) {
+        // Load image files directly
+        QDirIterator ImageFileIterator(dir.absoluteFilePath(""), { "*.png", "*.gif", "*.jpg", "*.apng", "*.jxl", "*.avif" }, QDir::Files);
+        while (ImageFileIterator.hasNext()) {
+            QFile customCatFile(ImageFileIterator.next());
+            QFileInfo customCatFileInfo(customCatFile);
+            themeDebugLog() << "Loading QSS Theme from:" << customCatFileInfo.absoluteFilePath();
+            addCatPack(std::unique_ptr<CatPack>(new FileCatPack(customCatFileInfo)));
+        }
+    };
+
+    loadFiles(catpacksDir);
+
+    QDirIterator directoryIterator(catpacksFolder, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (directoryIterator.hasNext()) {
+        QDir dir(directoryIterator.next());
+        QFileInfo manifest(dir.absoluteFilePath("catpack.json"));
+        if (manifest.exists()) {
+            // Load background manifest
+            themeDebugLog() << "Loading background manifest from:" << manifest.absoluteFilePath();
+            addCatPack(std::unique_ptr<CatPack>(new JsonCatPack(manifest)));
+        } else {
+            loadFiles(dir);
+        }
+    }
 }

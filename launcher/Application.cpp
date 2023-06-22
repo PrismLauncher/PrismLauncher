@@ -1173,7 +1173,17 @@ QIcon Application::getThemedIcon(const QString& name)
     return QIcon::fromTheme(name);
 }
 
-bool Application::openJsonEditor(const QString &filename)
+QList<CatPack*> Application::getValidCatPacks()
+{
+    return m_themeManager->getValidCatPacks();
+}
+
+QString Application::getCatPack(QString catName)
+{
+    return m_themeManager->getCatPack(catName);
+}
+
+bool Application::openJsonEditor(const QString& filename)
 {
     const QString file = QDir::current().absoluteFilePath(filename);
     if (m_settings->get("JsonEditor").toString().isEmpty())
