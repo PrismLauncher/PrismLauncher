@@ -577,7 +577,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Report a &amp;Bug...</string>
+    <string>Report a Bug or Suggest a Feature</string>
    </property>
    <property name="toolTip">
     <string>Open the bug tracker to report a bug with %1.</string>
