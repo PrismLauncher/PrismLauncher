@@ -24,6 +24,7 @@
 class MinecraftInstance;
 class PageContainer;
 class PackProfile;
+class QDialogButtonBox;
 
 class InstallLoaderDialog : public QDialog, public BasePageProvider {
     Q_OBJECT
@@ -34,9 +35,11 @@ class InstallLoaderDialog : public QDialog, public BasePageProvider {
     QList<BasePage*> getPages() override;
     QString dialogTitle() override;
 
+    void updateAcceptButton(const BasePage* page);
     void done(int result) override;
 
    private:
     std::shared_ptr<PackProfile> m_profile;
     PageContainer* m_container;
+    QDialogButtonBox* m_buttons;
 };

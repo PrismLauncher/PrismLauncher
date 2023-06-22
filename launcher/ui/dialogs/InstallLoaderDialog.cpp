@@ -75,7 +75,7 @@ class LoaderPage : public VersionSelectWidget, public BasePage {
 };
 
 InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, QWidget* parent)
-    : QDialog(parent), m_profile(profile), m_container(new PageContainer(this))
+    : QDialog(parent), m_profile(profile), m_container(new PageContainer(this)), m_buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
 
@@ -92,17 +92,20 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, Q
     });
     buttonLayout->addWidget(refreshButton);
 
-    auto buttons = new QDialogButtonBox(this);
-    buttons->setOrientation(Qt::Horizontal);
-    buttons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
-    connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    buttonLayout->addWidget(buttons);
+    m_buttons->setOrientation(Qt::Horizontal);
+    m_buttons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+    connect(m_buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(m_buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    buttonLayout->addWidget(m_buttons);
 
     layout->addLayout(buttonLayout);
 
     setWindowTitle(dialogTitle());
     resize(650, 400);
+
+    connect(m_container, &PageContainer::selectedPageChanged, this,
+            [this](BasePage* previous, BasePage* selected) { updateAcceptButton(selected); });
+    updateAcceptButton(m_container->selectedPage());
 }
 
 QList<BasePage*> InstallLoaderDialog::getPages()
@@ -121,6 +124,12 @@ QList<BasePage*> InstallLoaderDialog::getPages()
 QString InstallLoaderDialog::dialogTitle()
 {
     return tr("Install Loader");
+}
+
+void InstallLoaderDialog::updateAcceptButton(const BasePage* page)
+{
+    auto installed = !m_profile->getComponentVersion(page->id()).isNull();
+    m_buttons->button(QDialogButtonBox::Ok)->setText(installed ? tr("&Update") : tr("&Install"));
 }
 
 void InstallLoaderDialog::done(int result)
