@@ -39,10 +39,13 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent, Mo
 {
     ui->setupUi(this);
     ui->name->setText(instance->name());
-    if (m_provider == ModPlatform::ResourceProvider::MODRINTH)
+    if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
         ui->summary->setText(instance->notes().split(QRegularExpression("\\r?\\n"))[0]);
-    else
+        ui->author->hide();
+        ui->authorLabel->hide();
+    } else {
         ui->summaryLabel->setText("ProjectID");
+    }
 
     // ensure a valid pack is generated
     // the name and version fields mustn't be empty
@@ -96,9 +99,14 @@ void ExportMrPackDialog::done(int result)
 {
     if (result == Accepted) {
         const QString filename = FS::RemoveInvalidFilenameChars(ui->name->text());
-        const QString output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(ui->name->text()),
-                                                            FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
-                                                            "Modrinth pack (*.mrpack *.zip)", nullptr);
+        QString output;
+        if (m_provider == ModPlatform::ResourceProvider::MODRINTH)
+            output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(ui->name->text()),
+                                                  FS::PathCombine(QDir::homePath(), filename + ".mrpack"), "Modrinth pack (*.mrpack *.zip)",
+                                                  nullptr);
+        else
+            output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(ui->name->text()),
+                                                  FS::PathCombine(QDir::homePath(), filename + ".zip"), "Curseforge pack (*.zip)", nullptr);
 
         if (output.isEmpty())
             return;
@@ -107,7 +115,7 @@ void ExportMrPackDialog::done(int result)
             task = new ModrinthPackExportTask(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
                                               [this](const QString& path) { return proxy->blockedPaths().covers(path); });
         else
-            task = new FlamePackExportTask(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
+            task = new FlamePackExportTask(ui->name->text(), ui->version->text(), ui->author->text(), ui->summary->text(), instance, output,
                                            [this](const QString& path) { return proxy->blockedPaths().covers(path); });
 
         connect(task, &Task::failed,

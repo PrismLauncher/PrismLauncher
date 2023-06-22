@@ -28,20 +28,21 @@
 #include "MMCZip.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/helpers/ExportModsToStringTask.h"
 
-const QStringList FlamePackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
-const QStringList FlamePackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "zip" });
 const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name}({authors})</a></li>";
 
 FlamePackExportTask::FlamePackExportTask(const QString& name,
                                          const QString& version,
+                                         const QString& author,
                                          const QVariant& projectID,
                                          InstancePtr instance,
                                          const QString& output,
                                          MMCZip::FilterFunction filter)
     : name(name)
     , version(version)
+    , author(author)
     , projectID(projectID)
     , instance(instance)
     , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
@@ -193,28 +194,27 @@ QByteArray FlamePackExportTask::generateIndex()
 
         QJsonObject loader;
         if (quilt != nullptr)
-            loader["id"] = quilt->getName();
+            loader["id"] = "quilt-" + quilt->getVersion();
         else if (fabric != nullptr)
-            loader["id"] = fabric->getName();
+            loader["id"] = "fabric-" + fabric->getVersion();
         else if (forge != nullptr)
-            loader["id"] = forge->getName();
+            loader["id"] = "forge-" + forge->getVersion();
         loader["primary"] = true;
-
         version["modLoaders"] = QJsonArray({ loader });
         obj["minecraft"] = version;
     }
 
     QJsonArray files;
-    QMapIterator<QString, ResolvedFile> iterator(resolvedFiles);
-    while (iterator.hasNext()) {
-        iterator.next();
-
-        const ResolvedFile& value = iterator.value();
+    for (auto mod : mods) {
+        auto meta = mod->metadata();
+        if (meta == nullptr || meta->provider != ModPlatform::ResourceProvider::FLAME)
+            continue;
+        resolvedFiles[gameRoot.relativeFilePath(mod->fileinfo().absoluteFilePath())] = {};
 
         QJsonObject file;
-        file["projectID"] = value.projectID.toInt();
-        file["fileID"] = value.fileID.toInt();
-        file["required"] = value.required;
+        file["projectID"] = meta->project_id.toInt();
+        file["fileID"] = meta->file_id.toInt();
+        file["required"] = true;
         files << file;
     }
     obj["files"] = files;

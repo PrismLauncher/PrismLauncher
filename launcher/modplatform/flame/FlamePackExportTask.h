@@ -29,6 +29,7 @@ class FlamePackExportTask : public Task {
    public:
     FlamePackExportTask(const QString& name,
                         const QString& version,
+                        const QString& author,
                         const QVariant& projectID,
                         InstancePtr instance,
                         const QString& output,
@@ -39,13 +40,6 @@ class FlamePackExportTask : public Task {
     bool abort() override;
 
    private:
-    struct ResolvedFile {
-        QVariant projectID, fileID;
-        bool required;
-    };
-
-    static const QStringList PREFIXES;
-    static const QStringList FILE_EXTENSIONS;
     static const QString TEMPLATE;
 
     // inputs
@@ -60,7 +54,7 @@ class FlamePackExportTask : public Task {
     typedef std::optional<QString> BuildZipResult;
 
     QFileInfoList files;
-    QMap<QString, ResolvedFile> resolvedFiles;
+    QMap<QString, QString> resolvedFiles;
     Task::Ptr task;
     QFuture<BuildZipResult> buildZipFuture;
     QFutureWatcher<BuildZipResult> buildZipWatcher;
