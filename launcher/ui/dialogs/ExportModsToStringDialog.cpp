@@ -86,7 +86,7 @@ void ExportModsToStringDialog::formatChanged(int index)
 
 void ExportModsToStringDialog::triggerImp()
 {
-    ExportToString::Formats format;
+    auto format = ExportToString::HTML;
     switch (ui->formatComboBox->currentIndex()) {
         case 2: {
             m_template_selected = true;
@@ -100,6 +100,9 @@ void ExportModsToStringDialog::triggerImp()
         case 1: {
             format = ExportToString::MARKDOWN;
             break;
+        }
+        default: {
+            return;
         }
     }
     auto opt = 0;
