@@ -138,7 +138,7 @@ BasePage* PageContainer::getPage(QString pageId)
     return m_model->findPageEntryById(pageId);
 }
 
-BasePage* PageContainer::selectedPage()
+BasePage* PageContainer::selectedPage() const
 {
     return m_currentPage;
 }

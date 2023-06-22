@@ -80,7 +80,7 @@ public:
     }
 
     bool selectPage(QString pageId) override;
-    BasePage* selectedPage() override;
+    BasePage* selectedPage() const override;
     BasePage* getPage(QString pageId) override;
     const QList<BasePage*> getPages() const;
 

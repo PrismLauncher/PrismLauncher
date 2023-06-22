@@ -264,7 +264,7 @@ bool InstanceWindow::selectPage(QString pageId)
     return m_container->selectPage(pageId);
 }
 
-BasePage* InstanceWindow::selectedPage()
+BasePage* InstanceWindow::selectedPage() const
 {
     return m_container->selectedPage();
 }
