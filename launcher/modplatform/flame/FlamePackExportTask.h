@@ -54,7 +54,7 @@ class FlamePackExportTask : public Task {
     typedef std::optional<QString> BuildZipResult;
 
     QFileInfoList files;
-    QMap<QString, QString> resolvedFiles;
+    QMap<QString, bool> resolvedFiles;
     Task::Ptr task;
     QFuture<BuildZipResult> buildZipFuture;
     QFutureWatcher<BuildZipResult> buildZipWatcher;

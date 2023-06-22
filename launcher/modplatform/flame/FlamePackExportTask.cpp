@@ -209,7 +209,7 @@ QByteArray FlamePackExportTask::generateIndex()
         auto meta = mod->metadata();
         if (meta == nullptr || meta->provider != ModPlatform::ResourceProvider::FLAME)
             continue;
-        resolvedFiles[gameRoot.relativeFilePath(mod->fileinfo().absoluteFilePath())] = {};
+        resolvedFiles[gameRoot.relativeFilePath(mod->fileinfo().absoluteFilePath())] = true;
 
         QJsonObject file;
         file["projectID"] = meta->project_id.toInt();
