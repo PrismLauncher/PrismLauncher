@@ -22,6 +22,7 @@
 #include "BaseInstance.h"
 #include "FastFileIconProvider.h"
 #include "FileIgnoreProxy.h"
+#include "modplatform/ModIndex.h"
 
 namespace Ui {
 class ExportMrPackDialog;
@@ -31,7 +32,9 @@ class ExportMrPackDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ExportMrPackDialog(InstancePtr instance, QWidget* parent = nullptr);
+    explicit ExportMrPackDialog(InstancePtr instance,
+                                QWidget* parent = nullptr,
+                                ModPlatform::ResourceProvider provider = ModPlatform::ResourceProvider::MODRINTH);
     ~ExportMrPackDialog();
 
     void done(int result) override;
@@ -42,4 +45,5 @@ class ExportMrPackDialog : public QDialog {
     Ui::ExportMrPackDialog* ui;
     FileIgnoreProxy* proxy;
     FastFileIconProvider icons;
+    const ModPlatform::ResourceProvider m_provider;
 };

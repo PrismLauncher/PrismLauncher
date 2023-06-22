@@ -18,6 +18,8 @@
 
 #include "ExportMrPackDialog.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlamePackExportTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ExportMrPackDialog.h"
@@ -32,12 +34,15 @@
 #include "MMCZip.h"
 #include "modplatform/modrinth/ModrinthPackExportTask.h"
 
-ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
-    : QDialog(parent), instance(instance), ui(new Ui::ExportMrPackDialog)
+ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent, ModPlatform::ResourceProvider provider)
+    : QDialog(parent), instance(instance), ui(new Ui::ExportMrPackDialog), m_provider(provider)
 {
     ui->setupUi(this);
     ui->name->setText(instance->name());
-    ui->summary->setText(instance->notes().split(QRegularExpression("\\r?\\n"))[0]);
+    if (m_provider == ModPlatform::ResourceProvider::MODRINTH)
+        ui->summary->setText(instance->notes().split(QRegularExpression("\\r?\\n"))[0]);
+    else
+        ui->summaryLabel->setText("ProjectID");
 
     // ensure a valid pack is generated
     // the name and version fields mustn't be empty
@@ -97,20 +102,25 @@ void ExportMrPackDialog::done(int result)
 
         if (output.isEmpty())
             return;
+        Task* task;
+        if (m_provider == ModPlatform::ResourceProvider::MODRINTH)
+            task = new ModrinthPackExportTask(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
+                                              [this](const QString& path) { return proxy->blockedPaths().covers(path); });
+        else
+            task = new FlamePackExportTask(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
+                                           [this](const QString& path) { return proxy->blockedPaths().covers(path); });
 
-        ModrinthPackExportTask task(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
-                                    [this](const QString& path) { return proxy->blockedPaths().covers(path); });
-
-        connect(&task, &Task::failed,
+        connect(task, &Task::failed,
                 [this](const QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-        connect(&task, &Task::aborted, [this] {
+        connect(task, &Task::aborted, [this] {
             CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
                 ->show();
         });
+        connect(task, &Task::finished, [task] { task->deleteLater(); });
 
         ProgressDialog progress(this);
         progress.setSkipButton(true, tr("Abort"));
-        if (progress.execWithTask(&task) != QDialog::Accepted)
+        if (progress.execWithTask(task) != QDialog::Accepted)
             return;
     }
 

@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include <QFuture>
+#include <QFutureWatcher>
+#include "BaseInstance.h"
+#include "MMCZip.h"
+#include "minecraft/MinecraftInstance.h"
+#include "tasks/Task.h"
+
+class FlamePackExportTask : public Task {
+   public:
+    FlamePackExportTask(const QString& name,
+                        const QString& version,
+                        const QVariant& projectID,
+                        InstancePtr instance,
+                        const QString& output,
+                        MMCZip::FilterFunction filter);
+
+   protected:
+    void executeTask() override;
+    bool abort() override;
+
+   private:
+    struct ResolvedFile {
+        QVariant projectID, fileID;
+        bool required;
+    };
+
+    static const QStringList PREFIXES;
+    static const QStringList FILE_EXTENSIONS;
+    static const QString TEMPLATE;
+
+    // inputs
+    const QString name, version, author;
+    const QVariant projectID;
+    const InstancePtr instance;
+    MinecraftInstance* mcInstance;
+    const QDir gameRoot;
+    const QString output;
+    const MMCZip::FilterFunction filter;
+
+    typedef std::optional<QString> BuildZipResult;
+
+    QFileInfoList files;
+    QMap<QString, ResolvedFile> resolvedFiles;
+    Task::Ptr task;
+    QFuture<BuildZipResult> buildZipFuture;
+    QFutureWatcher<BuildZipResult> buildZipWatcher;
+    QList<Mod*> mods;
+
+    void collectFiles();
+    void buildZip();
+    void finish();
+
+    QByteArray generateIndex();
+};

@@ -479,6 +479,14 @@
     <string>Modrinth (mrpack)</string>
    </property>
   </action>
+  <action name="actionExportInstanceFlamePack">
+   <property name="icon">
+    <iconset theme="flame"/>
+   </property>
+   <property name="text">
+    <string>Curseforge (zip)</string>
+   </property>
+  </action>
   <action name="actionCreateInstanceShortcut">
    <property name="icon">
     <iconset theme="shortcut">

@@ -205,6 +205,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         auto exportInstanceMenu = new QMenu(this);
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
+        exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
 
@@ -1412,6 +1413,14 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
     if (m_selectedInstance)
     {
         ExportMrPackDialog dlg(m_selectedInstance, this);
+        dlg.exec();
+    }
+}
+
+void MainWindow::on_actionExportInstanceFlamePack_triggered()
+{
+    if (m_selectedInstance) {
+        ExportMrPackDialog dlg(m_selectedInstance, this, ModPlatform::ResourceProvider::FLAME);
         dlg.exec();
     }
 }
