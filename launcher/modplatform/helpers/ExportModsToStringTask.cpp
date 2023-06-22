@@ -32,7 +32,7 @@ QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData ex
                     if (meta != nullptr) {
                         url = (meta->provider == ModPlatform::ResourceProvider::FLAME ? "https://www.curseforge.com/minecraft/mc-mods/"
                                                                                       : "https://modrinth.com/mod/") +
-                              meta->project_id.toString();
+                              meta->slug.remove(".pw.toml");
                     }
                     if (!url.isEmpty())
                         modName = QString("<a href=\"%1\">%2</a>").arg(url, modName);
@@ -61,7 +61,7 @@ QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData ex
                     if (meta != nullptr) {
                         url = (meta->provider == ModPlatform::ResourceProvider::FLAME ? "https://www.curseforge.com/minecraft/mc-mods/"
                                                                                       : "https://modrinth.com/mod/") +
-                              meta->project_id.toString();
+                              meta->slug.remove(".pw.toml");
                     }
                     if (!url.isEmpty())
                         modName = QString("[%1](%2)").arg(modName, url);
