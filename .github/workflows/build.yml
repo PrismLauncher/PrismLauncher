@@ -429,13 +429,13 @@ jobs:
           
           Get-ChildItem ${{ env.INSTALL_PORTABLE_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_PORTABLE_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
-      - name: Package (Windows MinGW-w64, installer)
-        if: runner.os == 'Windows' && (matrix.msystem != '' || matrix.architecture == 'win32')
+      - name: Package (Windows, setup.exe)
+        if: runner.os == 'Windows'
         run: |
           cd ${{ env.INSTALL_DIR }}
           makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
 
-      - name: Package (Windows MSVC, installer)
+      - name: Package (Windows MSVC, MSIX)
         if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != 'win32'
         shell: pwsh
         run: |
@@ -453,8 +453,8 @@ jobs:
 
           makeappx.exe pack /v /h SHA256 /d . /p prismlauncher-${{ matrix.architecture }}.msix
 
-      - name: Sign installer (Windows MinGW-w64/MSVC Legacy)
-        if: runner.os == 'Windows' && (matrix.msystem != '' || matrix.architecture == 'win32')
+      - name: Sign installer (Windows, setup.exe)
+        if: runner.os == 'Windows'
         run: |
           if (Get-Content ./codesign.pfx){
             SignTool sign /fd sha256 /td sha256 /f codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com PrismLauncher-Setup.exe
@@ -462,7 +462,7 @@ jobs:
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
 
-      - name: Sign installer (Windows MSVC)
+      - name: Sign installer (Windows MSVC, MSIX)
         if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != 'win32'
         run: |
           if (Get-Content ./codesign.pfx){
@@ -547,8 +547,8 @@ jobs:
           name: PrismLauncher-${{ matrix.name }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_PORTABLE_DIR }}/**
 
-      - name: Upload installer (Windows MinGW-w64/MSVC Legacy)
-        if: runner.os == 'Windows' && (matrix.msystem != '' || matrix.architecture == 'win32')
+      - name: Upload setup.exe (Windows)
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v3
         with:
           name: PrismLauncher-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
