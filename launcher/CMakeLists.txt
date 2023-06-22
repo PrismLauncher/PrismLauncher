@@ -487,6 +487,9 @@ set(API_SOURCES
     modplatform/helpers/HashUtils.cpp
     modplatform/helpers/OverrideUtils.h
     modplatform/helpers/OverrideUtils.cpp
+
+    modplatform/helpers/ExportModsToStringTask.h
+    modplatform/helpers/ExportModsToStringTask.cpp
 )
 
 set(FTB_SOURCES
