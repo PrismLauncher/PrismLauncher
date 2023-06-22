@@ -32,14 +32,14 @@
 
 class LoaderPage : public VersionSelectWidget, public BasePage {
    public:
-    LoaderPage(const QString&& id,
-               const QString&& icon,
-               const QString&& name,
+    LoaderPage(const QString& id,
+               const QString& icon,
+               const QString& name,
                // "lightweight" loaders are independent to any game version
                const bool lightweight,
                const std::shared_ptr<PackProfile> profile,
                QWidget* parent = nullptr)
-        : VersionSelectWidget(parent), m_id(std::move(id)), m_icon(std::move(icon)), m_name(std::move(name))
+        : VersionSelectWidget(parent), m_id(id), m_icon(icon), m_name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
