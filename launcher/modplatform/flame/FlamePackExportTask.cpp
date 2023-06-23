@@ -24,12 +24,15 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QtConcurrentRun>
+#include <memory>
 #include "Json.h"
 #include "MMCZip.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/ExportModsToStringTask.h"
+#include "modplatform/helpers/HashUtils.h"
 
 const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name}({authors})</a></li>";
 
@@ -88,13 +91,118 @@ void FlamePackExportTask::collectFiles()
         return;
     }
 
+    pendingHashes.clear();
     resolvedFiles.clear();
 
-    mcInstance->loaderModList()->update();
-    connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, [this]() {
-        mods = mcInstance->loaderModList()->allMods();
+    if (mcInstance) {
+        mcInstance->loaderModList()->update();
+        connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, [this]() {
+            mods = mcInstance->loaderModList()->allMods();
+            collectHashes();
+        });
+    } else
+        collectHashes();
+}
+
+void FlamePackExportTask::collectHashes()
+{
+    ConcurrentTask::Ptr hashing_task(new ConcurrentTask(this, "MakeHashesTask", 10));
+    for (auto* mod : mods) {
+        if (!mod || !mod->valid() || mod->type() == ResourceType::FOLDER)
+            continue;
+        if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
+            resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
+                                 { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled() });
+            continue;
+        }
+
+        auto hash_task = Hashing::createFlameHasher(mod->fileinfo().absoluteFilePath());
+        connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { pendingHashes.insert(hash_task->getResult(), mod); });
+        connect(hash_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+        connect(hash_task.get(), &Task::finished, [hash_task] { hash_task->deleteLater(); });
+        hashing_task->addTask(hash_task);
+    }
+    connect(hashing_task.get(), &Task::succeeded, this, &FlamePackExportTask::makeApiRequest);
+    connect(hashing_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+    connect(hashing_task.get(), &Task::finished, [hashing_task] { hashing_task->deleteLater(); });
+    hashing_task->start();
+}
+
+void FlamePackExportTask::makeApiRequest()
+{
+    setAbortable(true);
+    if (pendingHashes.isEmpty()) {
+        buildZip();
+        return;
+    }
+
+    auto response = std::make_shared<QByteArray>();
+
+    QList<uint> fingerprints;
+    for (auto& murmur : pendingHashes.keys()) {
+        fingerprints.push_back(murmur.toUInt());
+    }
+
+    auto task = api.matchFingerprints(fingerprints, response.get());
+
+    connect(task.get(), &Task::succeeded, this, [this, response] {
+        QJsonParseError parse_error{};
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
+            qWarning() << *response;
+
+            failed(parse_error.errorString());
+            return;
+        }
+
+        try {
+            auto doc_obj = Json::requireObject(doc);
+            auto data_obj = Json::requireObject(doc_obj, "data");
+            auto data_arr = Json::requireArray(data_obj, "exactMatches");
+
+            if (data_arr.isEmpty()) {
+                qWarning() << "No matches found for fingerprint search!";
+
+                return;
+            }
+
+            for (auto match : data_arr) {
+                auto match_obj = Json::ensureObject(match, {});
+                auto file_obj = Json::ensureObject(match_obj, "file", {});
+
+                if (match_obj.isEmpty() || file_obj.isEmpty()) {
+                    qWarning() << "Fingerprint match is empty!";
+
+                    return;
+                }
+
+                auto fingerprint = QString::number(Json::ensureVariant(file_obj, "fileFingerprint").toUInt());
+                auto mod = pendingHashes.find(fingerprint);
+                if (mod == pendingHashes.end()) {
+                    qWarning() << "Invalid fingerprint from the API response.";
+                    continue;
+                }
+
+                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*mod)->name()));
+
+                resolvedFiles.insert(
+                    mod.value()->fileinfo().absoluteFilePath(),
+                    { Json::requireInteger(file_obj, "modId"), Json::requireInteger(file_obj, "modId"), mod.value()->enabled() });
+            }
+
+        } catch (Json::JsonException& e) {
+            qDebug() << e.cause();
+            qDebug() << doc;
+        }
+        pendingHashes.clear();
         buildZip();
     });
+
+    connect(task.get(), &NetJob::finished, [task]() { task->deleteLater(); });
+    connect(task.get(), &NetJob::failed, this, &FlamePackExportTask::emitFailed);
+    task->start();
 }
 
 void FlamePackExportTask::buildZip()
@@ -177,7 +285,8 @@ QByteArray FlamePackExportTask::generateIndex()
     obj["name"] = name;
     obj["version"] = version;
     obj["author"] = author;
-    obj["projectID"] = projectID.toInt();
+    if (projectID.toInt() != 0)
+        obj["projectID"] = projectID.toInt();
     obj["overrides"] = "overrides";
     if (mcInstance) {
         QJsonObject version;
@@ -205,16 +314,11 @@ QByteArray FlamePackExportTask::generateIndex()
     }
 
     QJsonArray files;
-    for (auto mod : mods) {
-        auto meta = mod->metadata();
-        if (meta == nullptr || meta->provider != ModPlatform::ResourceProvider::FLAME)
-            continue;
-        resolvedFiles[gameRoot.relativeFilePath(mod->fileinfo().absoluteFilePath())] = true;
-
+    for (auto mod : resolvedFiles) {
         QJsonObject file;
-        file["projectID"] = meta->project_id.toInt();
-        file["fileID"] = meta->file_id.toInt();
-        file["required"] = true;
+        file["projectID"] = mod.addonId;
+        file["fileID"] = mod.version;
+        file["required"] = mod.enabled;
         files << file;
     }
     obj["files"] = files;

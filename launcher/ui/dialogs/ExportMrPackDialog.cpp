@@ -44,6 +44,8 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent, Mo
         ui->author->hide();
         ui->authorLabel->hide();
     } else {
+        setWindowTitle("Export CurseForge Pack");
+        ui->version->setText("");
         ui->summaryLabel->setText("ProjectID");
     }
 
@@ -137,6 +139,7 @@ void ExportMrPackDialog::done(int result)
 
 void ExportMrPackDialog::validate()
 {
-    const bool invalid = ui->name->text().isEmpty() || ui->version->text().isEmpty();
+    const bool invalid =
+        ui->name->text().isEmpty() || ((m_provider == ModPlatform::ResourceProvider::MODRINTH) && ui->version->text().isEmpty());
     ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(invalid);
 }

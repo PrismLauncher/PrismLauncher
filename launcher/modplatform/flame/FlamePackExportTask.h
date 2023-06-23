@@ -23,6 +23,7 @@
 #include "BaseInstance.h"
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "tasks/Task.h"
 
 class FlamePackExportTask : public Task {
@@ -52,15 +53,25 @@ class FlamePackExportTask : public Task {
     const MMCZip::FilterFunction filter;
 
     typedef std::optional<QString> BuildZipResult;
+    struct ResolvedFile {
+        int addonId;
+        int version;
+        bool enabled;
+    };
+
+    FlameAPI api;
 
     QFileInfoList files;
-    QMap<QString, bool> resolvedFiles;
+    QMap<QString, Mod*> pendingHashes;
+    QMap<QString, ResolvedFile> resolvedFiles;
     Task::Ptr task;
     QFuture<BuildZipResult> buildZipFuture;
     QFutureWatcher<BuildZipResult> buildZipWatcher;
     QList<Mod*> mods;
 
     void collectFiles();
+    void collectHashes();
+    void makeApiRequest();
     void buildZip();
     void finish();
 
