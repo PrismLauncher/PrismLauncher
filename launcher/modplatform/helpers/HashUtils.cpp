@@ -89,6 +89,7 @@ void FlameHasher::executeTask()
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
+        emit resultsReady(m_hash);
     }
 }
 
@@ -120,6 +121,7 @@ void BlockedModHasher::executeTask()
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
+        emit resultsReady(m_hash);
     }
 }
 
