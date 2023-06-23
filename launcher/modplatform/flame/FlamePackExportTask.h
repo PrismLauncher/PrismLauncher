@@ -62,12 +62,11 @@ class FlamePackExportTask : public Task {
     FlameAPI api;
 
     QFileInfoList files;
-    QMap<QString, Mod*> pendingHashes;
-    QMap<QString, ResolvedFile> resolvedFiles;
+    QMap<QString, Mod*> pendingHashes{};
+    QMap<QString, ResolvedFile> resolvedFiles{};
     Task::Ptr task;
     QFuture<BuildZipResult> buildZipFuture;
     QFutureWatcher<BuildZipResult> buildZipWatcher;
-    QList<Mod*> mods;
 
     void collectFiles();
     void collectHashes();

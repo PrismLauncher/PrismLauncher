@@ -28,11 +28,11 @@
 #include "Json.h"
 #include "MMCZip.h"
 #include "minecraft/PackProfile.h"
-#include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/ExportModsToStringTask.h"
 #include "modplatform/helpers/HashUtils.h"
+#include "tasks/Task.h"
 
 const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name}({authors})</a></li>";
 
@@ -94,43 +94,51 @@ void FlamePackExportTask::collectFiles()
     pendingHashes.clear();
     resolvedFiles.clear();
 
-    if (mcInstance) {
+    if (mcInstance != nullptr) {
+        connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, &FlamePackExportTask::collectHashes);
         mcInstance->loaderModList()->update();
-        connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, [this]() {
-            mods = mcInstance->loaderModList()->allMods();
-            collectHashes();
-        });
     } else
         collectHashes();
 }
 
 void FlamePackExportTask::collectHashes()
 {
+    setAbortable(true);
+    setStatus(tr("Find file hashes..."));
+    auto mods = mcInstance->loaderModList()->allMods();
     ConcurrentTask::Ptr hashing_task(new ConcurrentTask(this, "MakeHashesTask", 10));
+    task.reset(hashing_task);
+    setProgress(0, mods.count());
     for (auto* mod : mods) {
-        if (!mod || !mod->valid() || mod->type() == ResourceType::FOLDER)
+        if (!mod || mod->type() == ResourceType::FOLDER) {
+            setProgress(m_progress + 1, mods.count());
             continue;
+        }
         if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
             resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
                                  { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled() });
+            setProgress(m_progress + 1, mods.count());
             continue;
         }
 
         auto hash_task = Hashing::createFlameHasher(mod->fileinfo().absoluteFilePath());
-        connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { pendingHashes.insert(hash_task->getResult(), mod); });
+        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod, mods](QString hash) {
+            if (m_state == Task::State::Running) {
+                setProgress(m_progress + 1, mods.count());
+                pendingHashes.insert(hash, mod);
+            }
+        });
         connect(hash_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
-        connect(hash_task.get(), &Task::finished, [hash_task] { hash_task->deleteLater(); });
         hashing_task->addTask(hash_task);
     }
     connect(hashing_task.get(), &Task::succeeded, this, &FlamePackExportTask::makeApiRequest);
     connect(hashing_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
-    connect(hashing_task.get(), &Task::finished, [hashing_task] { hashing_task->deleteLater(); });
     hashing_task->start();
 }
 
 void FlamePackExportTask::makeApiRequest()
 {
-    setAbortable(true);
+    setStatus(tr("Find versions for hashes..."));
     if (pendingHashes.isEmpty()) {
         buildZip();
         return;
@@ -143,7 +151,7 @@ void FlamePackExportTask::makeApiRequest()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto task = api.matchFingerprints(fingerprints, response);
+    task.reset(api.matchFingerprints(fingerprints, response));
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
@@ -167,8 +175,9 @@ void FlamePackExportTask::makeApiRequest()
 
                 return;
             }
-
+            size_t progress = 0;
             for (auto match : data_arr) {
+                setProgress(progress++, data_arr.count());
                 auto match_obj = Json::ensureObject(match, {});
                 auto file_obj = Json::ensureObject(match_obj, "file", {});
 
@@ -200,7 +209,6 @@ void FlamePackExportTask::makeApiRequest()
         buildZip();
     });
 
-    connect(task.get(), &NetJob::finished, [task]() { task->deleteLater(); });
     connect(task.get(), &NetJob::failed, this, &FlamePackExportTask::emitFailed);
     task->start();
 }
@@ -231,7 +239,7 @@ void FlamePackExportTask::buildZip()
             QFile::remove(output);
             return BuildZipResult(tr("Could not create index"));
         }
-        QString content = ExportToString::ExportModsToStringTask(mods, TEMPLATE);
+        QString content = ExportToString::ExportModsToStringTask(mcInstance->loaderModList()->allMods(), TEMPLATE);
         content = "<ul>" + content + "</ul>";
         modlist.write(content.toUtf8());
 
@@ -244,7 +252,8 @@ void FlamePackExportTask::buildZip()
 
             setProgress(progress, files.length());
             const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
-            if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative)) {
+            if (!resolvedFiles.contains(file.absoluteFilePath()) &&
+                !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative)) {
                 QFile::remove(output);
                 return BuildZipResult(tr("Could not read and compress %1").arg(relative));
             }
