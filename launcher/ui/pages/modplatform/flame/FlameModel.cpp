@@ -171,7 +171,7 @@ void ListModel::performPaginatedSearch()
                          .arg(currentSearchTerm)
                          .arg(currentSort + 1);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
     jobPtr = netJob;
     jobPtr->start();
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
@@ -204,11 +204,11 @@ void Flame::ListModel::searchRequestFinished()
     jobPtr.reset();
 
     QJsonParseError parse_error;
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset
                    << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qWarning() << *response;
         return;
     }
 
