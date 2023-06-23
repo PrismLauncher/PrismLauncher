@@ -121,12 +121,12 @@ class ResourceAPI {
         qWarning() << "TODO";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, QByteArray* response) const
+    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, std::shared_ptr<QByteArray> response) const
     {
         qWarning() << "TODO";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const
+    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const
     {
         qWarning() << "TODO";
         return nullptr;

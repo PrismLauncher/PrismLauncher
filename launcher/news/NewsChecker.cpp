@@ -58,7 +58,7 @@ void NewsChecker::reloadNews()
     qDebug() << "Reloading news.";
 
     NetJob::Ptr job{ new NetJob("News RSS Feed", m_network) };
-    job->addNetAction(Net::Download::makeByteArray(m_feedUrl, &newsData));
+    job->addNetAction(Net::Download::makeByteArray(m_feedUrl, newsData));
     QObject::connect(job.get(), &NetJob::succeeded, this, &NewsChecker::rssDownloadFinished);
     QObject::connect(job.get(), &NetJob::failed, this, &NewsChecker::rssDownloadFailed);
     m_newsNetJob.reset(job);
@@ -79,32 +79,27 @@ void NewsChecker::rssDownloadFinished()
         int errorCol = -1;
 
         // Parse the XML.
-        if (!doc.setContent(newsData, false, &errorMsg, &errorLine, &errorCol))
-        {
+        if (!doc.setContent(*newsData, false, &errorMsg, &errorLine, &errorCol)) {
             QString fullErrorMsg = QString("Error parsing RSS feed XML. %1 at %2:%3.").arg(errorMsg).arg(errorLine).arg(errorCol);
             fail(fullErrorMsg);
-            newsData.clear();
+            newsData->clear();
             return;
         }
-        newsData.clear();
+        newsData->clear();
     }
 
     // If the parsing succeeded, read it.
     QDomNodeList items = doc.elementsByTagName("entry");
     m_newsEntries.clear();
-    for (int i = 0; i < items.length(); i++)
-    {
+    for (int i = 0; i < items.length(); i++) {
         QDomElement element = items.at(i).toElement();
         NewsEntryPtr entry;
         entry.reset(new NewsEntry());
         QString errorMsg = "An unknown error occurred.";
-        if (NewsEntry::fromXmlElement(element, entry.get(), &errorMsg))
-        {
+        if (NewsEntry::fromXmlElement(element, entry.get(), &errorMsg)) {
             qDebug() << "Loaded news entry" << entry->title;
             m_newsEntries.append(entry);
-        }
-        else
-        {
+        } else {
             qWarning() << "Failed to load news entry at index" << i << ":" << errorMsg;
         }
     }

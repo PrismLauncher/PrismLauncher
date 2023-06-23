@@ -157,7 +157,7 @@ void ModrinthPackExportTask::makeApiRequest()
     if (pendingHashes.isEmpty())
         buildZip();
     else {
-        QByteArray* response = new QByteArray;
+        auto response = std::make_shared<QByteArray>();
         task = api.currentVersions(pendingHashes.values(), "sha512", response);
         connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
         connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
@@ -165,7 +165,7 @@ void ModrinthPackExportTask::makeApiRequest()
     }
 }
 
-void ModrinthPackExportTask::parseApiResponse(const QByteArray* response)
+void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<QByteArray> response)
 {
     task = nullptr;
 
