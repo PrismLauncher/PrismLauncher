@@ -43,6 +43,7 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent, Mo
         ui->summary->setText(instance->notes().split(QRegularExpression("\\r?\\n"))[0]);
         ui->author->hide();
         ui->authorLabel->hide();
+        ui->gnerateModlist->hide();
     } else {
         setWindowTitle("Export CurseForge Pack");
         ui->version->setText("");
@@ -117,7 +118,8 @@ void ExportMrPackDialog::done(int result)
             task = new ModrinthPackExportTask(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
                                               [this](const QString& path) { return proxy->blockedPaths().covers(path); });
         else
-            task = new FlamePackExportTask(ui->name->text(), ui->version->text(), ui->author->text(), ui->summary->text(), instance, output,
+            task = new FlamePackExportTask(ui->name->text(), ui->version->text(), ui->author->text(), ui->summary->text(),
+                                           ui->gnerateModlist->isChecked(), instance, output,
                                            [this](const QString& path) { return proxy->blockedPaths().covers(path); });
 
         connect(task, &Task::failed,

@@ -24,13 +24,14 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QtConcurrentRun>
+#include <algorithm>
 #include <memory>
 #include "Json.h"
 #include "MMCZip.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/helpers/ExportModsToStringTask.h"
+#include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
 
@@ -40,6 +41,7 @@ FlamePackExportTask::FlamePackExportTask(const QString& name,
                                          const QString& version,
                                          const QString& author,
                                          const QVariant& projectID,
+                                         const bool generateModList,
                                          InstancePtr instance,
                                          const QString& output,
                                          MMCZip::FilterFunction filter)
@@ -52,6 +54,7 @@ FlamePackExportTask::FlamePackExportTask(const QString& name,
     , gameRoot(instance->gameRoot())
     , output(output)
     , filter(filter)
+    , generateModList(generateModList)
 {}
 
 void FlamePackExportTask::executeTask()
@@ -116,7 +119,8 @@ void FlamePackExportTask::collectHashes()
         }
         if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
             resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
-                                 { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled() });
+                                 { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled(),
+                                   mod->metadata()->name, mod->metadata()->slug, mod->authors().join(", ") });
             setProgress(m_progress + 1, mods.count());
             continue;
         }
@@ -195,10 +199,10 @@ void FlamePackExportTask::makeApiRequest()
                 }
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*mod)->name()));
-
-                resolvedFiles.insert(
-                    mod.value()->fileinfo().absoluteFilePath(),
-                    { Json::requireInteger(file_obj, "modId"), Json::requireInteger(file_obj, "modId"), mod.value()->enabled() });
+                if (Json::ensureBoolean(file_obj, "isAvailable", false))
+                    resolvedFiles.insert(
+                        mod.value()->fileinfo().absoluteFilePath(),
+                        { Json::requireInteger(file_obj, "modId"), Json::requireInteger(file_obj, "id"), mod.value()->enabled() });
             }
 
         } catch (Json::JsonException& e) {
@@ -206,10 +210,91 @@ void FlamePackExportTask::makeApiRequest()
             qDebug() << doc;
         }
         pendingHashes.clear();
+    });
+    connect(task.get(), &Task::finished, this, &FlamePackExportTask::getProjectsInfo);
+    connect(task.get(), &NetJob::failed, this, &FlamePackExportTask::emitFailed);
+    task->start();
+}
+
+void FlamePackExportTask::getProjectsInfo()
+{
+    if (!generateModList) {
+        buildZip();
+        return;
+    }
+    setStatus(tr("Find project info from curseforge..."));
+    QList<QString> addonIds;
+    for (auto resolved : resolvedFiles) {
+        if (resolved.slug.isEmpty()) {
+            addonIds << QString::number(resolved.addonId);
+        }
+    }
+
+    auto response = std::make_shared<QByteArray>();
+    Task::Ptr proj_task;
+
+    if (addonIds.isEmpty()) {
+        buildZip();
+        return;
+    } else if (addonIds.size() == 1) {
+        proj_task = api.getProject(*addonIds.begin(), response);
+    } else {
+        proj_task = api.getProjects(addonIds, response);
+    }
+
+    connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
+        QJsonParseError parse_error{};
+        auto doc = QJsonDocument::fromJson(*response, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
+            qWarning() << *response;
+            return;
+        }
+
+        try {
+            QJsonArray entries;
+            if (addonIds.size() == 1)
+                entries = { Json::requireObject(Json::requireObject(doc), "data") };
+            else
+                entries = Json::requireArray(Json::requireObject(doc), "data");
+
+            size_t progress = 0;
+            for (auto entry : entries) {
+                setProgress(progress++, entries.count());
+                auto entry_obj = Json::requireObject(entry);
+
+                try {
+                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(Json::requireString(entry_obj, "name")));
+
+                    ModPlatform::IndexedPack pack;
+                    FlameMod::loadIndexedPack(pack, entry_obj);
+                    for (auto key : resolvedFiles.keys()) {
+                        auto val = resolvedFiles.value(key);
+                        if (val.addonId == pack.addonId) {
+                            val.name = pack.name;
+                            val.slug = pack.slug;
+                            QStringList authors;
+                            for (auto author : pack.authors)
+                                authors << author.name;
+
+                            val.authors = authors.join(", ");
+                            resolvedFiles[key] = val;
+                        }
+                    }
+
+                } catch (Json::JsonException& e) {
+                    qDebug() << e.cause();
+                    qDebug() << entries;
+                }
+            }
+        } catch (Json::JsonException& e) {
+            qDebug() << e.cause();
+            qDebug() << doc;
+        }
         buildZip();
     });
-
-    connect(task.get(), &NetJob::failed, this, &FlamePackExportTask::emitFailed);
+    task.reset(proj_task);
     task->start();
 }
 
@@ -234,14 +319,23 @@ void FlamePackExportTask::buildZip()
         }
         indexFile.write(generateIndex());
 
-        QuaZipFile modlist(&zip);
-        if (!modlist.open(QIODevice::WriteOnly, QuaZipNewInfo("modlist.html"))) {
-            QFile::remove(output);
-            return BuildZipResult(tr("Could not create index"));
+        if (generateModList) {
+            QuaZipFile modlist(&zip);
+            if (!modlist.open(QIODevice::WriteOnly, QuaZipNewInfo("modlist.html"))) {
+                QFile::remove(output);
+                return BuildZipResult(tr("Could not create index"));
+            }
+            QString content = "";
+            for (auto mod : resolvedFiles) {
+                content += QString(TEMPLATE)
+                               .replace("{name}", mod.name)
+                               .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.slug))
+                               .replace("{authors}", mod.authors) +
+                           "\n";
+            }
+            content = "<ul>" + content + "</ul>";
+            modlist.write(content.toUtf8());
         }
-        QString content = ExportToString::ExportModsToStringTask(mcInstance->loaderModList()->allMods(), TEMPLATE);
-        content = "<ul>" + content + "</ul>";
-        modlist.write(content.toUtf8());
 
         size_t progress = 0;
         for (const QFileInfo& file : files) {

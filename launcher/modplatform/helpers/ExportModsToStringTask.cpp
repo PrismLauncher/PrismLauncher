@@ -19,6 +19,7 @@
 #include "modplatform/ModIndex.h"
 
 namespace ExportToString {
+
 QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData extraData)
 {
     switch (format) {
@@ -28,12 +29,7 @@ QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData ex
                 auto meta = mod->metadata();
                 auto modName = mod->name();
                 if (extraData & Url) {
-                    auto url = mod->homeurl();
-                    if (meta != nullptr) {
-                        url = (meta->provider == ModPlatform::ResourceProvider::FLAME ? "https://www.curseforge.com/minecraft/mc-mods/"
-                                                                                      : "https://modrinth.com/mod/") +
-                              meta->slug.remove(".pw.toml");
-                    }
+                    auto url = mod->metaurl();
                     if (!url.isEmpty())
                         modName = QString("<a href=\"%1\">%2</a>").arg(url, modName);
                 }
@@ -57,12 +53,7 @@ QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData ex
                 auto meta = mod->metadata();
                 auto modName = mod->name();
                 if (extraData & Url) {
-                    auto url = mod->homeurl();
-                    if (meta != nullptr) {
-                        url = (meta->provider == ModPlatform::ResourceProvider::FLAME ? "https://www.curseforge.com/minecraft/mc-mods/"
-                                                                                      : "https://modrinth.com/mod/") +
-                              meta->slug.remove(".pw.toml");
-                    }
+                    auto url = mod->metaurl();
                     if (!url.isEmpty())
                         modName = QString("[%1](%2)").arg(modName, url);
                 }
@@ -93,12 +84,7 @@ QString ExportModsToStringTask(QList<Mod*> mods, QString lineTemplate)
         auto meta = mod->metadata();
         auto modName = mod->name();
 
-        auto url = mod->homeurl();
-        if (meta != nullptr) {
-            url = (meta->provider == ModPlatform::ResourceProvider::FLAME ? "https://www.curseforge.com/minecraft/mc-mods/"
-                                                                          : "https://modrinth.com/mod/") +
-                  meta->slug.remove(".pw.toml");
-        }
+        auto url = mod->metaurl();
         auto ver = mod->version();
         if (ver.isEmpty() && meta != nullptr)
             ver = meta->version().toString();

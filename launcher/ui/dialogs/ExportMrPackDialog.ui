@@ -67,6 +67,13 @@
       <item row="4" column="1">
        <widget class="QLineEdit" name="author"/>
       </item>
+      <item row="5" column="2">
+       <widget class="QCheckBox" name="gnerateModlist">
+        <property name="text">
+         <string>Generate modlist</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

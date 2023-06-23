@@ -1420,8 +1420,17 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
 void MainWindow::on_actionExportInstanceFlamePack_triggered()
 {
     if (m_selectedInstance) {
-        ExportMrPackDialog dlg(m_selectedInstance, this, ModPlatform::ResourceProvider::FLAME);
-        dlg.exec();
+        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
+        if (instance) {
+            if (instance->getPackProfile()->getComponent("org.quiltmc.quilt-loader")) {
+                QMessageBox msgBox;
+                msgBox.setText(tr("Quilt is not yet supported by curseforge."));
+                msgBox.exec();
+                return;
+            }
+            ExportMrPackDialog dlg(m_selectedInstance, this, ModPlatform::ResourceProvider::FLAME);
+            dlg.exec();
+        }
     }
 }
 
