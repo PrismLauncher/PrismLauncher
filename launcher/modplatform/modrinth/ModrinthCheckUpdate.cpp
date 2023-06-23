@@ -53,7 +53,7 @@ void ModrinthCheckUpdate::executeTask()
         // (though it will rarely happen, if at all)
         if (mod->metadata()->hash_format != best_hash_type) {
             auto hash_task = Hashing::createModrinthHasher(mod->fileinfo().absoluteFilePath());
-            connect(hash_task.get(), &Hashing::Hasher::getResults, [&hashes, &mappings, mod](QString hash) {
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [&hashes, &mappings, mod](QString hash) {
                 hashes.append(hash);
                 mappings.insert(hash, mod);
             });

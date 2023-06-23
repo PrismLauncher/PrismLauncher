@@ -25,7 +25,7 @@ EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Resource
     auto hash_task = createNewHash(mod);
     if (!hash_task)
         return;
-    connect(hash_task.get(), &Hashing::Hasher::getResults, [this, mod](QString hash) { m_mods.insert(hash, mod); });
+    connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) { m_mods.insert(hash, mod); });
     connect(hash_task.get(), &Task::failed, [this, mod] { emitFail(mod, "", RemoveFromList::No); });
     hash_task->start();
 }
@@ -38,7 +38,7 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform:
         auto hash_task = createNewHash(mod);
         if (!hash_task)
             continue;
-        connect(hash_task.get(), &Hashing::Hasher::getResults, [this, mod](QString hash) { m_mods.insert(hash, mod); });
+        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) { m_mods.insert(hash, mod); });
         connect(hash_task.get(), &Task::failed, [this, mod] { emitFail(mod, "", RemoveFromList::No); });
         m_hashing_task->addTask(hash_task);
     }

@@ -71,7 +71,7 @@ void ModrinthHasher::executeTask()
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
-        emit getResults(m_hash);
+        emit resultsReady(m_hash);
     }
 }
 

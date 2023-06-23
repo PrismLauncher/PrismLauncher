@@ -23,7 +23,7 @@ class Hasher : public Task {
     QString getPath() const { return m_path; };
 
    signals:
-    void getResults(QString hash);
+    void resultsReady(QString hash);
 
    protected:
     QString m_hash;
