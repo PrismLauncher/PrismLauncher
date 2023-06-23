@@ -143,7 +143,7 @@ void FlamePackExportTask::makeApiRequest()
         fingerprints.push_back(murmur.toUInt());
     }
 
-    auto task = api.matchFingerprints(fingerprints, response.get());
+    auto task = api.matchFingerprints(fingerprints, response);
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
