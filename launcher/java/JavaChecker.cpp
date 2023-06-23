@@ -85,7 +85,7 @@ void JavaChecker::performCheck()
     process->setProgram(m_path);
     process->setProcessChannelMode(QProcess::SeparateChannels);
     process->setProcessEnvironment(CleanEnviroment());
-    qDebug() << "Running java checker: " + m_path + args.join(" ");;
+    qDebug() << "Running java checker:" << m_path << args.join(" ");
 
     connect(process.get(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &JavaChecker::finished);
     connect(process.get(), &QProcess::errorOccurred, this, &JavaChecker::error);
@@ -128,7 +128,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     result.outLog = m_stdout;
     qDebug() << "STDOUT" << m_stdout;
     qWarning() << "STDERR" << m_stderr;
-    qDebug() << "Java checker finished with status " << status << " exit code " << exitcode;
+    qDebug() << "Java checker finished with status" << status << "exit code" << exitcode;
 
     if (status == QProcess::CrashExit || exitcode == 1)
     {
