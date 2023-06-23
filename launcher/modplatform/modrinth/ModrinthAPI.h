@@ -12,23 +12,23 @@
 
 class ModrinthAPI : public NetworkResourceAPI {
    public:
-    auto currentVersion(QString hash, QString hash_format, QByteArray* response) -> Task::Ptr;
+    auto currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
-    auto currentVersions(const QStringList& hashes, QString hash_format, QByteArray* response) -> Task::Ptr;
+    auto currentVersions(const QStringList& hashes, QString hash_format, std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
     auto latestVersion(QString hash,
                        QString hash_format,
                        std::optional<std::list<Version>> mcVersions,
                        std::optional<ModLoaderTypes> loaders,
-                       QByteArray* response) -> Task::Ptr;
+                       std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
     auto latestVersions(const QStringList& hashes,
                         QString hash_format,
                         std::optional<std::list<Version>> mcVersions,
                         std::optional<ModLoaderTypes> loaders,
-                        QByteArray* response) -> Task::Ptr;
+                        std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
-    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
+    Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
 
    public:
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;

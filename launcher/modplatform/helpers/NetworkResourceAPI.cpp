@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "NetworkResourceAPI.h"
+#include <memory>
 
 #include "Application.h"
 #include "net/NetJob.h"
@@ -19,7 +20,7 @@ Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&
 
     auto search_url = search_url_optional.value();
 
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(search_url), response));
@@ -48,14 +49,13 @@ Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&
         callbacks.on_fail(reason, network_error_code);
     });
     QObject::connect(netJob.get(), &NetJob::aborted, [callbacks] { callbacks.on_abort(); });
-    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
 
     return netJob;
 }
 
 Task::Ptr NetworkResourceAPI::getProjectInfo(ProjectInfoArgs&& args, ProjectInfoCallbacks&& callbacks) const
 {
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto job = getProject(args.pack.addonId.toString(), response);
 
     QObject::connect(job.get(), &NetJob::succeeded, [response, callbacks, args] {
@@ -83,7 +83,7 @@ Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Versi
     auto versions_url = versions_url_optional.value();
 
     auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack.name), APPLICATION->network());
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
 
     netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
 
@@ -100,12 +100,10 @@ Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Versi
         callbacks.on_succeed(doc, args.pack);
     });
 
-    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
-
     return netJob;
 }
 
-Task::Ptr NetworkResourceAPI::getProject(QString addonId, QByteArray* response) const
+Task::Ptr NetworkResourceAPI::getProject(QString addonId, std::shared_ptr<QByteArray> response) const
 {
     auto project_url_optional = getInfoURL(addonId);
     if (!project_url_optional.has_value())
@@ -116,8 +114,6 @@ Task::Ptr NetworkResourceAPI::getProject(QString addonId, QByteArray* response) 
     auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
 
     netJob->addNetAction(Net::Download::makeByteArray(QUrl(project_url), response));
-
-    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
 
     return netJob;
 }
@@ -131,7 +127,7 @@ Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, 
     auto versions_url = versions_url_optional.value();
 
     auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
 
     netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
 
@@ -147,8 +143,6 @@ Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, 
 
         callbacks.on_succeed(doc, args.dependency);
     });
-
-    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
 
     return netJob;
 };

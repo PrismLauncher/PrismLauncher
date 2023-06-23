@@ -31,7 +31,7 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
 
     auto get_project_job = new NetJob("Flame::GetProjectJob", APPLICATION->network());
 
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(ver_info.addonId.toString());
     auto dl = Net::Download::makeByteArray(url, response);
     get_project_job->addNetAction(dl);
@@ -75,7 +75,7 @@ ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
 
     auto get_file_info_job = new NetJob("Flame::GetFileInfoJob", APPLICATION->network());
 
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto url = QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(QString::number(addonId), QString::number(fileId));
     auto dl = Net::Download::makeByteArray(url, response);
     get_file_info_job->addNetAction(dl);

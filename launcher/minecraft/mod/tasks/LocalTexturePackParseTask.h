@@ -36,7 +36,10 @@ bool processZIP(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full
 bool processFolder(TexturePack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
 bool processPackTXT(TexturePack& pack, QByteArray&& raw_data);
-bool processPackPNG(TexturePack& pack, QByteArray&& raw_data);
+bool processPackPNG(const TexturePack& pack, QByteArray&& raw_data);
+
+/// processes ONLY the pack.png (rest of the pack may be invalid)
+bool processPackPNG(const TexturePack& pack);
 
 /** Checks whether a file is valid as a texture pack or not. */
 bool validate(QFileInfo file);

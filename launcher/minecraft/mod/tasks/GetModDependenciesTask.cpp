@@ -135,7 +135,7 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDependency> pDep)
 {
     auto provider = pDep->pack->provider == m_flame_provider.name ? m_flame_provider : m_modrinth_provider;
-    auto responseInfo = new QByteArray();
+    auto responseInfo = std::make_shared<QByteArray>();
     auto info = provider.api->getProject(pDep->pack->addonId.toString(), responseInfo);
     QObject::connect(info.get(), &NetJob::succeeded, [responseInfo, provider, pDep] {
         QJsonParseError parse_error{};

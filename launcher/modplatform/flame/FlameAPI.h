@@ -5,6 +5,7 @@
 #pragma once
 
 #include <algorithm>
+#include <memory>
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/helpers/NetworkResourceAPI.h"
@@ -16,9 +17,9 @@ class FlameAPI : public NetworkResourceAPI {
 
     auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;
 
-    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
-    Task::Ptr matchFingerprints(const QList<uint>& fingerprints, QByteArray* response);
-    Task::Ptr getFiles(const QStringList& fileIds, QByteArray* response) const;
+    Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
+    Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
+    Task::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
 
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
