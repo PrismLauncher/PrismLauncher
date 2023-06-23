@@ -37,6 +37,7 @@
 #include "ModFolderModel.h"
 
 #include <FileSystem.h>
+#include <qheaderview.h>
 #include <QDebug>
 #include <QFileSystemWatcher>
 #include <QIcon>
@@ -52,12 +53,14 @@
 
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
-#include "modplatform/ModIndex.h"
 
 ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME , SortType::VERSION, SortType::DATE, SortType::PROVIDER};
+    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents};
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
@@ -118,7 +121,9 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
     case Qt::DecorationRole: {
         if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
             return APPLICATION->getThemedIcon("status-yellow");
-
+        if (column == ImageColumn) {
+            return at(row)->icon({32, 32}, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+        }
         return {};
     }
     case Qt::CheckStateRole:
@@ -142,15 +147,12 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
         switch (section)
         {
         case ActiveColumn:
-            return QString();
         case NameColumn:
-            return tr("Name");
         case VersionColumn:
-            return tr("Version");
         case DateColumn:
-            return tr("Last changed");
         case ProviderColumn:
-            return tr("Provider");
+        case ImageColumn:
+            return columnNames().at(section);
         default:
             return QVariant();
         }

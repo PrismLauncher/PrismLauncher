@@ -153,6 +153,9 @@ bool FlameCreationTask::updateInstance()
 
                     old_files.remove(file.key());
                     files_iterator = files.erase(files_iterator);
+
+                    if (files_iterator != files.begin())
+                        files_iterator--;
                 }
             }
 

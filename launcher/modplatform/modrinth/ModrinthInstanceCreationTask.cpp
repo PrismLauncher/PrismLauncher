@@ -214,7 +214,7 @@ bool ModrinthCreationTask::createInstance()
 
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
-    } else {
+    } else if (!m_managed_id.isEmpty()) {
         instance.setIconKey("modrinth");
     }
 

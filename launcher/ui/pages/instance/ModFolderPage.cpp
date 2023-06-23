@@ -4,6 +4,7 @@
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -86,28 +87,20 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
         auto check_allow_update = [this] {
-            return (!m_instance || !m_instance->isRunning()) &&
-                   (ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
+            return (!m_instance || !m_instance->isRunning()) && (ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
         };
 
-        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
-            ui->actionUpdateItem->setEnabled(check_allow_update());
-        });
+        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
 
-        connect(mods.get(), &ModFolderModel::rowsInserted, this, [this, check_allow_update] {
-            ui->actionUpdateItem->setEnabled(check_allow_update());
-        });
+        connect(mods.get(), &ModFolderModel::rowsInserted, this,
+                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
 
-        connect(mods.get(), &ModFolderModel::rowsRemoved, this, [this, check_allow_update] {
-            ui->actionUpdateItem->setEnabled(check_allow_update());
-        });
+        connect(mods.get(), &ModFolderModel::rowsRemoved, this,
+                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
 
-        connect(mods.get(), &ModFolderModel::updateFinished, this, [this, check_allow_update, mods] {
-            ui->actionUpdateItem->setEnabled(check_allow_update());
-
-            // Prevent a weird crash when trying to open the mods page twice in a session o.O
-            disconnect(mods.get(), &ModFolderModel::updateFinished, this, 0);
-        });
+        connect(mods.get(), &ModFolderModel::updateFinished, this,
+                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
 
         connect(m_instance, &BaseInstance::runningStatusChanged, this, &ModFolderPage::runningStateChanged);
         ModFolderPage::runningStateChanged(m_instance && m_instance->isRunning());
