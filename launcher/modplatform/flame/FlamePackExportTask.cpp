@@ -36,7 +36,7 @@
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
 
-const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name} (by {authors})</a></li>";
+const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name}{authors}</a></li>";
 
 FlamePackExportTask::FlamePackExportTask(const QString& name,
                                          const QString& version,
@@ -338,11 +338,12 @@ void FlamePackExportTask::buildZip()
         QString content = "";
         for (auto mod : resolvedFiles) {
             if (mod.isMod) {
-                content += QString(TEMPLATE)
-                               .replace("{name}", mod.name)
-                               .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.slug))
-                               .replace("{authors}", mod.authors) +
-                           "\n";
+                auto line = QString(TEMPLATE)
+                                .replace("{name}", mod.name)
+                                .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.slug));
+                if (!mod.authors.isEmpty())
+                    line = line.replace("{authors}", QString(" (by {%1})").arg(mod.authors));
+                content += line + "\n";
             }
         }
         content = "<ul>" + content + "</ul>";
