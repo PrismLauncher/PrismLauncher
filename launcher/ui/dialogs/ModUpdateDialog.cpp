@@ -3,6 +3,9 @@
 #include "CustomMessageBox.h"
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
+#include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui_ReviewMessageBox.h"
 
 #include "FileSystem.h"
@@ -89,15 +92,17 @@ void ModUpdateDialog::checkCandidates()
 
     if (!m_modrinth_to_update.empty()) {
         m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model));
-        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
+        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
+            m_failed_check_update.append({ mod, reason, recover_url });
+        });
         check_task.addTask(m_modrinth_check_task);
     }
 
     if (!m_flame_to_update.empty()) {
         m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model));
-        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
+        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
+            m_failed_check_update.append({ mod, reason, recover_url });
+        });
         check_task.addTask(m_flame_check_task);
     }
 
@@ -124,6 +129,8 @@ void ModUpdateDialog::checkCandidates()
         return;
     }
 
+    QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
+
     // Add found updates for Modrinth
     if (m_modrinth_check_task) {
         auto modrinth_updates = m_modrinth_check_task->getUpdatable();
@@ -133,6 +140,7 @@ void ModUpdateDialog::checkCandidates()
             appendMod(updatable);
             m_tasks.insert(updatable.name, updatable.download);
         }
+        selectedVers.append(m_modrinth_check_task->getDependencies());
     }
 
     // Add found updated for Flame
@@ -144,6 +152,7 @@ void ModUpdateDialog::checkCandidates()
             appendMod(updatable);
             m_tasks.insert(updatable.name, updatable.download);
         }
+        selectedVers.append(m_flame_check_task->getDependencies());
     }
 
     // Report failed update checking
@@ -162,7 +171,7 @@ void ModUpdateDialog::checkCandidates()
             if (!recover_url.isEmpty())
                 //: %1 is the link to download it manually
                 text += tr("Possible solution: Getting the latest version manually:<br>%1<br>")
-                    .arg(QString("<a href='%1'>%1</a>").arg(recover_url.toString()));
+                            .arg(QString("<a href='%1'>%1</a>").arg(recover_url.toString()));
             text += "<br>";
         }
 
@@ -175,6 +184,45 @@ void ModUpdateDialog::checkCandidates()
             m_aborted = true;
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
+        }
+    }
+
+    {  // dependencies
+        auto depTask = makeShared<GetModDependenciesTask>(this, m_instance, m_mod_model.get(), selectedVers);
+
+        connect(depTask.get(), &Task::failed, this,
+                [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+
+        connect(depTask.get(), &Task::succeeded, this, [&]() {
+            QStringList warnings = depTask->warnings();
+            if (warnings.count()) {
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+            }
+        });
+
+        ProgressDialog progress_dialog_deps(m_parent);
+        progress_dialog_deps.setSkipButton(true, tr("Abort"));
+        progress_dialog_deps.setWindowTitle(tr("Checking for dependencies..."));
+        auto dret = progress_dialog_deps.execWithTask(depTask.get());
+
+        // If the dialog was skipped / some download error happened
+        if (dret == QDialog::DialogCode::Rejected) {
+            m_aborted = true;
+            QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
+            return;
+        }
+        static FlameAPI api;
+
+        for (auto dep : depTask->getDependecies()) {
+            auto changelog = dep->version.changelog;
+            if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
+                changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+            auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_mod_model);
+            CheckUpdateTask::UpdatableMod updatable = { dep->pack->name, dep->version.hash,   "",           dep->version.version,
+                                                        changelog,       dep->pack->provider, download_task };
+
+            appendMod(updatable);
+            m_tasks.insert(updatable.name, updatable.download);
         }
     }
 
@@ -342,7 +390,7 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
     } else {
         QString reason{ tr("Couldn't find a valid version on the selected mod provider(s)") };
 
-        m_failed_metadata.append({mod, reason});
+        m_failed_metadata.append({ mod, reason });
     }
 }
 
