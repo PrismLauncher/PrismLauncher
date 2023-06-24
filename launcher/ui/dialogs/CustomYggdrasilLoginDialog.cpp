@@ -15,6 +15,7 @@
 
 #include "CustomYggdrasilLoginDialog.h"
 #include "ui_CustomYggdrasilLoginDialog.h"
+#include "ui/dialogs/CustomMessageBox.h"
 
 #include "minecraft/auth/AccountTask.h"
 
@@ -50,13 +51,27 @@ QString CustomYggdrasilLoginDialog::fixUrl(QString url)
 // Stage 1: User interaction
 void CustomYggdrasilLoginDialog::accept()
 {
+    auto fixedAuthUrl = CustomYggdrasilLoginDialog::fixUrl(ui->authServerTextBox->text());
+
+    auto response = CustomMessageBox::selectable(this, QObject::tr("Confirm account creation"),
+        QObject::tr(
+            "Warning: you are about to send the username and password you entered to an "
+            "unofficial, third-party authentication server:\n"
+            "%1\n\n"
+            "Never use your Mojang or Microsoft password for a third-party account!\n\n"
+            "Are you sure you want to proceed?"
+        ).arg(fixedAuthUrl),
+        QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)->exec();
+    if (response != QMessageBox::Yes)
+        return;
+
     setUserInputsEnabled(false);
     ui->progressBar->setVisible(true);
 
     // Setup the login task and start it
     m_account = MinecraftAccount::createFromUsernameCustomYggdrasil(
         ui->userTextBox->text(),
-        CustomYggdrasilLoginDialog::fixUrl(ui->authServerTextBox->text()),
+        fixedAuthUrl,
         CustomYggdrasilLoginDialog::fixUrl(ui->accountServerTextBox->text()),
         CustomYggdrasilLoginDialog::fixUrl(ui->sessionServerTextBox->text()),
         CustomYggdrasilLoginDialog::fixUrl(ui->servicesServerTextBox->text())
