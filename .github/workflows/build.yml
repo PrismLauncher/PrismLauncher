@@ -526,7 +526,7 @@ jobs:
             printf "$GPG_PRIVATE_KEY" | base64 --decode > ~/.gnupg/private.key
             gpg --import ~/.gnupg/private.key
           else
-            echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $env:GITHUB_STEP_SUMMARY
+            echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $GITHUB_STEP_SUMMARY
           fi
 
           ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
