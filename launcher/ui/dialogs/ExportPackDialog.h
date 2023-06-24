@@ -25,24 +25,24 @@
 #include "modplatform/ModIndex.h"
 
 namespace Ui {
-class ExportMrPackDialog;
+class ExportPackDialog;
 }
 
-class ExportMrPackDialog : public QDialog {
+class ExportPackDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ExportMrPackDialog(InstancePtr instance,
-                                QWidget* parent = nullptr,
-                                ModPlatform::ResourceProvider provider = ModPlatform::ResourceProvider::MODRINTH);
-    ~ExportMrPackDialog();
+    explicit ExportPackDialog(InstancePtr instance,
+                              QWidget* parent = nullptr,
+                              ModPlatform::ResourceProvider provider = ModPlatform::ResourceProvider::MODRINTH);
+    ~ExportPackDialog();
 
     void done(int result) override;
     void validate();
 
    private:
     const InstancePtr instance;
-    Ui::ExportMrPackDialog* ui;
+    Ui::ExportPackDialog* ui;
     FileIgnoreProxy* proxy;
     FastFileIconProvider icons;
     const ModPlatform::ResourceProvider m_provider;

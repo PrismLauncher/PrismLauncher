@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ExportMrPackDialog.h"
+#include "ExportPackDialog.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlamePackExportTask.h"
@@ -34,8 +34,8 @@
 #include "MMCZip.h"
 #include "modplatform/modrinth/ModrinthPackExportTask.h"
 
-ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent, ModPlatform::ResourceProvider provider)
-    : QDialog(parent), instance(instance), ui(new Ui::ExportMrPackDialog), m_provider(provider)
+ExportPackDialog::ExportPackDialog(InstancePtr instance, QWidget* parent, ModPlatform::ResourceProvider provider)
+    : QDialog(parent), instance(instance), ui(new Ui::ExportPackDialog), m_provider(provider)
 {
     ui->setupUi(this);
     ui->name->setText(instance->name());
@@ -51,8 +51,8 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent, Mo
 
     // ensure a valid pack is generated
     // the name and version fields mustn't be empty
-    connect(ui->name, &QLineEdit::textEdited, this, &ExportMrPackDialog::validate);
-    connect(ui->version, &QLineEdit::textEdited, this, &ExportMrPackDialog::validate);
+    connect(ui->name, &QLineEdit::textEdited, this, &ExportPackDialog::validate);
+    connect(ui->version, &QLineEdit::textEdited, this, &ExportPackDialog::validate);
     // the instance name can technically be empty
     validate();
 
@@ -92,12 +92,12 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent, Mo
     headerView->setSectionResizeMode(0, QHeaderView::Stretch);
 }
 
-ExportMrPackDialog::~ExportMrPackDialog()
+ExportPackDialog::~ExportPackDialog()
 {
     delete ui;
 }
 
-void ExportMrPackDialog::done(int result)
+void ExportPackDialog::done(int result)
 {
     if (result == Accepted) {
         const QString filename = FS::RemoveInvalidFilenameChars(ui->name->text());
@@ -137,7 +137,7 @@ void ExportMrPackDialog::done(int result)
     QDialog::done(result);
 }
 
-void ExportMrPackDialog::validate()
+void ExportPackDialog::validate()
 {
     const bool invalid =
         ui->name->text().isEmpty() || ((m_provider == ModPlatform::ResourceProvider::MODRINTH) && ui->version->text().isEmpty());

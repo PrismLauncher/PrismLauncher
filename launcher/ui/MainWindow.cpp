@@ -107,7 +107,7 @@
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
-#include "ui/dialogs/ExportMrPackDialog.h"
+#include "ui/dialogs/ExportPackDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
@@ -1412,7 +1412,7 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
 {
     if (m_selectedInstance)
     {
-        ExportMrPackDialog dlg(m_selectedInstance, this);
+        ExportPackDialog dlg(m_selectedInstance, this);
         dlg.exec();
     }
 }
@@ -1428,7 +1428,7 @@ void MainWindow::on_actionExportInstanceFlamePack_triggered()
                 msgBox.exec();
                 return;
             }
-            ExportMrPackDialog dlg(m_selectedInstance, this, ModPlatform::ResourceProvider::FLAME);
+            ExportPackDialog dlg(m_selectedInstance, this, ModPlatform::ResourceProvider::FLAME);
             dlg.exec();
         }
     }
