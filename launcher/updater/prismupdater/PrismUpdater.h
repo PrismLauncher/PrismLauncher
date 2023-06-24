@@ -60,7 +60,7 @@ class PrismUpdaterApp : public QApplication {
     void abort(const QString& reason);
     void showFatalErrorMessage(const QString& title, const QString& content);
 
-    void loadPrismVersionFromExe(const QString& exe_path);
+    bool loadPrismVersionFromExe(const QString& exe_path);
 
     void downloadReleasePage(const QString& api_url, int page);
     int parseReleasePage(const QByteArray* response);
@@ -83,7 +83,9 @@ class PrismUpdaterApp : public QApplication {
     std::optional<QDir> unpackArchive(QFileInfo file);
 
     QFileInfo downloadAsset(const GitHubReleaseAsset& asset);
-    bool callAppimageUpdate(); 
+    bool callAppImageUpdate();
+
+    void moveAndPostProcess(QDir target);
 
    public slots:
     void downloadError(QString reason);
@@ -114,8 +116,8 @@ class PrismUpdaterApp : public QApplication {
 
     QString m_prismBinaryName;
     QString m_prismVersion;
-    int m_prismVersionMajor;
-    int m_prismVersionMinor;
+    int m_prismVersionMajor = -1;
+    int m_prismVersionMinor = -1;
     QString m_prsimVersionChannel;
     QString m_prismGitCommit;
 

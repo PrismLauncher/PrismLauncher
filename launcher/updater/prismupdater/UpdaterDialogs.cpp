@@ -17,8 +17,8 @@ SelectReleaseDialog::SelectReleaseDialog(const Version& current_version, const Q
     ui->versionsTree->setColumnCount(2);
 
     ui->versionsTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->versionsTree->header()->setSectionResizeMode(1, QHeaderView::Stretch); 
-    ui->versionsTree->setHeaderLabels({tr("Verison"), tr("Published Date")});
+    ui->versionsTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents); 
+    ui->versionsTree->setHeaderLabels({tr("Version"), tr("Published Date")});
     ui->versionsTree->header()->setStretchLastSection(false);
     
     ui->eplainLabel->setText(tr("Select a version to install.\n"
@@ -90,8 +90,8 @@ SelectReleaseAssetDialog::SelectReleaseAssetDialog( const QList<GitHubReleaseAss
     ui->versionsTree->setColumnCount(2);
 
     ui->versionsTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->versionsTree->header()->setSectionResizeMode(1, QHeaderView::Stretch); 
-    ui->versionsTree->setHeaderLabels({tr("Verison"), tr("Published Date")});
+    ui->versionsTree->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents); 
+    ui->versionsTree->setHeaderLabels({tr("Version"), tr("Published Date")});
     ui->versionsTree->header()->setStretchLastSection(false);
     
     ui->eplainLabel->setText(tr("Select a version to install."));

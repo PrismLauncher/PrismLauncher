@@ -625,6 +625,11 @@ set(PRISMUPDATER_SOURCES
     net/HeaderProxy.h
     net/RawHeaderProxy.h
 
+    ui/dialogs/ProgressDialog.cpp
+    ui/dialogs/ProgressDialog.h
+    ui/widgets/SubTaskProgressBar.h
+    ui/widgets/SubTaskProgressBar.cpp
+
 )
 
 ######## Logging categories ########
@@ -1144,6 +1149,8 @@ qt_add_resources(LAUNCHER_RESOURCES
 
 qt_wrap_ui(PRISMUPDATER_UI
     updater/prismupdater/SelectReleaseDialog.ui
+    ui/widgets/SubTaskProgressBar.ui
+    ui/dialogs/ProgressDialog.ui
 )
 
 ######## Windows resource files ########
@@ -1231,11 +1238,13 @@ install(TARGETS ${Launcher_Name}
     FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
 
-if(NOT APPLE OR (DEFINED Launcher_BUILD_UPDATER AND Launcher_BUILD_UPDATER) )
+if(NOT APPLE OR (DEFINED Launcher_BUILD_UPDATER AND Launcher_BUILD_UPDATER))
     # Updater
     add_library(prism_updater_logic STATIC ${PRISMUPDATER_SOURCES} ${TASKS_SOURCES} ${PRISMUPDATER_UI})
     target_include_directories(prism_updater_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(prism_updater_logic
+        QuaZip::QuaZip
+        ${ZLIB_LIBRARIES}
         systeminfo
         BuildConfig
         ghcFilesystem::ghc_filesystem

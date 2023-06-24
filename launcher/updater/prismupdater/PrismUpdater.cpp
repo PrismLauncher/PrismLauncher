@@ -46,8 +46,11 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
+#include <fcntl.h>
+#include <io.h>
 #include <stdio.h>
 #include <windows.h>
+#include <iostream>
 #endif
 
 // Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
@@ -100,27 +103,108 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
     }
 }
 
+#if defined Q_OS_WIN32
+
+// taken from https://stackoverflow.com/a/25927081
+// getting a proper output to console with redirection support on windows is apearently hell
+void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr)
+{
+    // Re-initialize the C runtime "FILE" handles with clean handles bound to "nul". We do this because it has been
+    // observed that the file number of our standard handle file objects can be assigned internally to a value of -2
+    // when not bound to a valid target, which represents some kind of unknown internal invalid state. In this state our
+    // call to "_dup2" fails, as it specifically tests to ensure that the target file number isn't equal to this value
+    // before allowing the operation to continue. We can resolve this issue by first "re-opening" the target files to
+    // use the "nul" device, which will place them into a valid state, after which we can redirect them to our target
+    // using the "_dup2" function.
+    if (bindStdIn) {
+        FILE* dummyFile;
+        freopen_s(&dummyFile, "nul", "r", stdin);
+    }
+    if (bindStdOut) {
+        FILE* dummyFile;
+        freopen_s(&dummyFile, "nul", "w", stdout);
+    }
+    if (bindStdErr) {
+        FILE* dummyFile;
+        freopen_s(&dummyFile, "nul", "w", stderr);
+    }
+
+    // Redirect unbuffered stdin from the current standard input handle
+    if (bindStdIn) {
+        HANDLE stdHandle = GetStdHandle(STD_INPUT_HANDLE);
+        if (stdHandle != INVALID_HANDLE_VALUE) {
+            int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
+            if (fileDescriptor != -1) {
+                FILE* file = _fdopen(fileDescriptor, "r");
+                if (file != NULL) {
+                    int dup2Result = _dup2(_fileno(file), _fileno(stdin));
+                    if (dup2Result == 0) {
+                        setvbuf(stdin, NULL, _IONBF, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    // Redirect unbuffered stdout to the current standard output handle
+    if (bindStdOut) {
+        HANDLE stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (stdHandle != INVALID_HANDLE_VALUE) {
+            int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
+            if (fileDescriptor != -1) {
+                FILE* file = _fdopen(fileDescriptor, "w");
+                if (file != NULL) {
+                    int dup2Result = _dup2(_fileno(file), _fileno(stdout));
+                    if (dup2Result == 0) {
+                        setvbuf(stdout, NULL, _IONBF, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    // Redirect unbuffered stderr to the current standard error handle
+    if (bindStdErr) {
+        HANDLE stdHandle = GetStdHandle(STD_ERROR_HANDLE);
+        if (stdHandle != INVALID_HANDLE_VALUE) {
+            int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
+            if (fileDescriptor != -1) {
+                FILE* file = _fdopen(fileDescriptor, "w");
+                if (file != NULL) {
+                    int dup2Result = _dup2(_fileno(file), _fileno(stderr));
+                    if (dup2Result == 0) {
+                        setvbuf(stderr, NULL, _IONBF, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    // Clear the error state for each of the C++ standard stream objects. We need to do this, as attempts to access the
+    // standard streams before they refer to a valid target will cause the iostream objects to enter an error state. In
+    // versions of Visual Studio after 2005, this seems to always occur during startup regardless of whether anything
+    // has been read from or written to the targets or not.
+    if (bindStdIn) {
+        std::wcin.clear();
+        std::cin.clear();
+    }
+    if (bindStdOut) {
+        std::wcout.clear();
+        std::cout.clear();
+    }
+    if (bindStdErr) {
+        std::wcerr.clear();
+        std::cerr.clear();
+    }
+}
+#endif
+
 PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
     // attach the parent console
     if (AttachConsole(ATTACH_PARENT_PROCESS)) {
-        FILE* _stream;
-        errno_t err;
-        // if attach succeeds, reopen and sync all the i/o
-        if (err = freopen_s(&_stream, "CON", "w", stdout); err == 0) {
-            std::cout.sync_with_stdio();
-        }
-        if (err = freopen_s(&_stream, "CON", "w", stderr); err == 0) {
-            std::cerr.sync_with_stdio();
-        }
-        if (err = freopen_s(&_stream, "CON", "r", stdin); err == 0) {
-            std::cin.sync_with_stdio();
-        }
-        auto out = GetStdHandle(STD_OUTPUT_HANDLE);
-        DWORD written;
-        const char* endline = "\n";
-        WriteConsole(out, endline, strlen(endline), &written, NULL);
+        BindCrtHandlesToStdHandles(true, true, true);
         consoleAttached = true;
     }
 #endif
@@ -133,16 +217,20 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     QCommandLineParser parser;
     parser.setApplicationDescription(QObject::tr("An auto-updater for Prism Launcher"));
 
-    parser.addOptions({ { { "d", "dir" }, tr("Use a custom path as application root (use '.' for current directory)."), tr("directory") },
-                        { { "I", "install-version" }, "Install a specific version.", tr("version name") },
-                        { { "U", "update-url" }, tr("Update from the specified repo."), tr("github repo url") },
-                        { { "c", "check-only" },
-                          tr("Only check if an update is needed. Exit status 100 if true, 0 if false (or non 0 if there was an error).") },
-                        { { "F", "force" }, tr("Force an update, even if one is not needed.") },
-                        { { "l", "list" }, tr("List available releases.") },
-                        { "debug", tr("Log debug to console.") },
-                        { { "S", "select-ui" }, tr("Select the version to install with a GUI.") },
-                        { { "D", "allow-downgrade" }, tr("Allow the updater to downgrade to previous versions.") } });
+    parser.addOptions(
+        { { { "d", "dir" }, tr("Use a custom path as application root (use '.' for current directory)."), tr("directory") },
+          { { "V", "prism-version" },
+            tr("Use this version as the installed launcher version. (provided because stdout can not be reliably captured on windows)"),
+            tr("installed launcher version") },
+          { { "I", "install-version" }, "Install a specific version.", tr("version name") },
+          { { "U", "update-url" }, tr("Update from the specified repo."), tr("github repo url") },
+          { { "c", "check-only" },
+            tr("Only check if an update is needed. Exit status 100 if true, 0 if false (or non 0 if there was an error).") },
+          { { "F", "force" }, tr("Force an update, even if one is not needed.") },
+          { { "l", "list" }, tr("List available releases.") },
+          { "debug", tr("Log debug to console.") },
+          { { "S", "select-ui" }, tr("Select the version to install with a GUI.") },
+          { { "D", "allow-downgrade" }, tr("Allow the updater to downgrade to previous versions.") } });
 
     parser.addHelpOption();
     parser.addVersionOption();
@@ -150,23 +238,30 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     logToConsole = parser.isSet("debug");
 
-    auto prism_executable = QCoreApplication::applicationFilePath();
+    auto updater_executable = QCoreApplication::applicationFilePath();
 
     if (BuildConfig.BUILD_PLATFORM.toLower() == "macos")
         showFatalErrorMessage(tr("MacOS Not Supported"), tr("The updater does not support installations on MacOS"));
 
-    if (!QFileInfo(prism_executable).isFile())
-        showFatalErrorMessage(tr("Unsupported Installation"), tr("The updater can not find the main executable."));
-
-    if (prism_executable.startsWith("/tmp/.mount_")) {
+    if (updater_executable.startsWith("/tmp/.mount_")) {
         m_isAppimage = true;
         m_appimagePath = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
-        if (m_appimagePath.isEmpty())
+        if (m_appimagePath.isEmpty()) {
             showFatalErrorMessage(tr("Unsupported Installation"),
                                   tr("Updater is running as misconfigured AppImage? ($APPIMAGE environment variable is missing)"));
+        }
     }
 
     m_isFlatpak = DesktopServices::isFlatpak();
+
+    QString prism_executable = QCoreApplication::applicationDirPath() + "/" + BuildConfig.LAUNCHER_APP_BINARY_NAME;
+#if defined Q_OS_WIN32
+    prism_executable += ".exe";
+#endif
+
+    if (!QFileInfo(prism_executable).isFile()) {
+        showFatalErrorMessage(tr("Unsupported Installation"), tr("The updater can not find the main executable."));
+    }
 
     m_prismExecutable = prism_executable;
 
@@ -184,6 +279,20 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     }
     m_selectUI = parser.isSet("select-ui");
     m_allowDowngrade = parser.isSet("allow-downgrade");
+
+    auto version = parser.value("prism-version");
+    if (!version.isEmpty()) {
+        if (version.contains('-')) {
+            auto index = version.indexOf('-');
+            m_prsimVersionChannel = version.mid(index + 1);
+            version = version.left(index);
+        } else {
+            m_prsimVersionChannel = "stable";
+        }
+        auto version_parts = version.split('.');
+        m_prismVersionMajor = version_parts.takeFirst().toInt();
+        m_prismVersionMinor = version_parts.takeFirst().toInt();
+    }
 
     QString origCwdPath = QDir::currentPath();
     QString binPath = applicationDirPath();
@@ -338,9 +447,9 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
 PrismUpdaterApp::~PrismUpdaterApp()
 {
-    qDebug() << "updater shutting down";
     // Shut down logger by setting the logger function to nothing
     qInstallMessageHandler(nullptr);
+    qDebug() << "updater shutting down";
 
 #if defined Q_OS_WIN32
     // Detach from Windows console
@@ -392,13 +501,19 @@ void PrismUpdaterApp::run()
         return exit(0);
     }
 
-    loadPrismVersionFromExe(m_prismExecutable);
+    if (!loadPrismVersionFromExe(m_prismExecutable)) {
+        m_prismVersion = BuildConfig.printableVersionString();
+        m_prismVersionMajor = BuildConfig.VERSION_MAJOR;
+        m_prismVersionMinor = BuildConfig.VERSION_MINOR;
+        m_prsimVersionChannel = BuildConfig.VERSION_CHANNEL;
+        m_prismGitCommit = BuildConfig.GIT_COMMIT;
+    }
     m_status = Succeeded;
 
     qDebug() << "Executable reports as:" << m_prismBinaryName << "version:" << m_prismVersion;
     qDebug() << "Version major:" << m_prismVersionMajor;
-    qDebug() << "Verison minor:" << m_prismVersionMinor;
-    qDebug() << "Verison channel:" << m_prsimVersionChannel;
+    qDebug() << "Version minor:" << m_prismVersionMinor;
+    qDebug() << "Version channel:" << m_prsimVersionChannel;
     qDebug() << "Git Commit:" << m_prismGitCommit;
 
     auto latest = getLatestRelease();
@@ -420,7 +535,7 @@ void PrismUpdaterApp::run()
     if (m_isAppimage) {
         bool result = true;
         if (need_update)
-            result = callAppimageUpdate();
+            result = callAppImageUpdate();
         return exit(result ? 0 : 1);
     }
 
@@ -528,6 +643,13 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
 
         bool for_platform = !BuildConfig.BUILD_PLATFORM.isEmpty() && asset.name.toLower().contains(BuildConfig.BUILD_PLATFORM.toLower());
         bool for_portable = asset.name.toLower().contains("portable");
+        if (for_platform && asset.name.toLower().contains("legacy") && !BuildConfig.BUILD_PLATFORM.toLower().contains("legacy"))
+            for_platform = false;
+        if (for_platform && asset.name.toLower().contains("arm64") && !QSysInfo::buildCpuArchitecture().contains("arm64"))
+            for_platform = false;
+        if (for_platform && !asset.name.toLower().contains("arm64") && QSysInfo::buildCpuArchitecture().contains("arm64"))
+            for_platform = false;
+
         if (((m_isPortable && for_portable) || (!m_isPortable && !for_portable)) && for_platform) {
             valid.append(asset);
         }
@@ -557,10 +679,11 @@ void PrismUpdaterApp::performUpdate(const GitHubRelease& release)
 
     GitHubReleaseAsset selected_asset;
     if (valid_assets.isEmpty()) {
-        return showFatalErrorMessage(tr("No Valid Release Assets"),
-                                     tr("Github release %1 has no valid assets for this platform: %2")
-                                         .arg(release.tag_name)
-                                         .arg(tr("%1 portable: %2").arg(BuildConfig.BUILD_PLATFORM).arg(m_isPortable)));
+        return showFatalErrorMessage(
+            tr("No Valid Release Assets"),
+            tr("Github release %1 has no valid assets for this platform: %2")
+                .arg(release.tag_name)
+                .arg(tr("%1 portable: %2").arg(BuildConfig.BUILD_PLATFORM).arg(m_isPortable ? tr("yes") : tr("no"))));
     } else if (valid_assets.length() > 1) {
         selected_asset = selectAsset(valid_assets);
     } else {
@@ -587,18 +710,21 @@ QFileInfo PrismUpdaterApp::downloadAsset(const GitHubReleaseAsset& asset)
     auto file_url = QUrl(asset.browser_download_url);
     auto out_file_path = FS::PathCombine(temp_dir, file_url.fileName());
 
+    qDebug() << "downloading" << file_url << "to" << out_file_path;
     auto download = Net::Download::makeFile(file_url, out_file_path);
-
+    download->setNetwork(m_network);
     auto progress_dialog = ProgressDialog();
 
     if (progress_dialog.execWithTask(download.get()) == QDialog::Rejected)
         showFatalErrorMessage(tr("Download Aborted"), tr("Download of %1 aborted by user").arg(file_url.toString()));
 
+    qDebug() << "download complete";
+
     QFileInfo out_file(out_file_path);
     return out_file;
 }
 
-bool PrismUpdaterApp::callAppimageUpdate()
+bool PrismUpdaterApp::callAppImageUpdate()
 {
     QProcess proc = QProcess();
     proc.setProgram("AppImageUpdate");
@@ -614,20 +740,20 @@ void PrismUpdaterApp::clearUpdateLog()
 
 void PrismUpdaterApp::logUpdate(const QString& msg)
 {
-    qDebug() << msg;
+    qDebug() << qUtf8Printable(msg);
     auto update_log_path = FS::PathCombine(m_dataPath, "prism_launcher_update.log");
     FS::append(update_log_path, QStringLiteral("%1\n").arg(msg).toUtf8());
 }
 
 void PrismUpdaterApp::performInstall(QFileInfo file)
 {
+    qDebug() << "starting install";
     auto update_lock_path = FS::PathCombine(m_dataPath, ".prism_launcher_update.lock");
     FS::write(update_lock_path, QStringLiteral("FROM=%1\nTO=%2\n").arg(m_prismVersion).arg(m_install_release.tag_name).toUtf8());
     clearUpdateLog();
 
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
-    // TODO setup marker file
-    if (m_isPortable) {
+    if (m_isPortable || file.suffix().toLower() == "zip") {
         logUpdate(tr("Updating portable install at %1").arg(applicationDirPath()));
         unpackAndInstall(file);
     } else {
@@ -635,6 +761,7 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
         QProcess proc = QProcess();
         proc.setProgram(file.absoluteFilePath());
         bool result = proc.startDetached();
+        logUpdate(tr("Process start result: %1").arg(result ? tr("yes") : tr("no")));
         exit(result ? 0 : 1);
     }
 }
@@ -643,8 +770,24 @@ void PrismUpdaterApp::unpackAndInstall(QFileInfo archive)
 {
     logUpdate(tr("Backing up install"));
     backupAppDir();
-    auto loc = unpackArchive(archive);
-    // TODO: unpack (rename access failures)
+
+    if (auto loc = unpackArchive(archive)) {
+        auto marker_file_path = loc.value().absoluteFilePath(".prism_launcher_updater_unpack.marker");
+        FS::write(marker_file_path, applicationDirPath().toUtf8());
+        auto new_updater_path = loc.value().absoluteFilePath("prismlauncher-updater");
+#if defined Q_OS_WIN32
+        new_updater_path.append(".exe");
+#endif
+        logUpdate(tr("Starting new updater at '%1'").arg(new_updater_path));
+        QProcess proc = QProcess();
+        proc.startDetached(new_updater_path, {}, loc.value().absolutePath());
+        if (!proc.waitForStarted(5000)) {
+            logUpdate(tr("Failed to launch '%1' %2").arg(new_updater_path).arg(proc.errorString()));
+            return exit(10);
+        }
+        return exit();  // up to the new updater now
+    }
+    return exit(1);  // unpack failure
 }
 
 void PrismUpdaterApp::backupAppDir()
@@ -680,6 +823,8 @@ void PrismUpdaterApp::backupAppDir()
                 "styles/*",
                 "styles/*",
                 "tls/*",
+                "qt.conf",
+                "Qt*.dll",
             });
         }
         file_list.append("portable.txt");
@@ -688,7 +833,10 @@ void PrismUpdaterApp::backupAppDir()
     logUpdate(tr("Backing up:\n  %1").arg(file_list.join(",\n  ")));
 
     QDir app_dir = QCoreApplication::applicationDirPath();
-    auto backup_dir = FS::PathCombine(app_dir.absolutePath(), QStringLiteral("backup_") + m_prismVersion + ":" + m_prismGitCommit);
+    auto backup_dir = FS::PathCombine(
+        app_dir.absolutePath(), QStringLiteral("backup_") +
+                                    QString(m_prismVersion).replace(QRegularExpression("[" + QRegularExpression::escape("\\/:*?\"<>|") + "]"), QString("_")) +
+                                    "-" + m_prismGitCommit);
     FS::ensureFolderPathExists(backup_dir);
 
     for (auto glob : file_list) {
@@ -723,13 +871,12 @@ std::optional<QDir> PrismUpdaterApp::unpackArchive(QFileInfo archive)
     if (archive.fileName().endsWith(".zip")) {
         auto result = MMCZip::extractDir(archive.absoluteFilePath(), tmp_extract_dir.absolutePath());
         if (result) {
-            logUpdate(
-                tr("Extracted the following to \"%1\":\n  %2").arg(tmp_extract_dir.absolutePath()).arg(result->join("\n  ")));
+            logUpdate(tr("Extracted the following to \"%1\":\n  %2").arg(tmp_extract_dir.absolutePath()).arg(result->join("\n  ")));
         } else {
             logUpdate(tr("Failed to extract %1 to %2").arg(archive.absoluteFilePath()).arg(tmp_extract_dir.absolutePath()));
             showFatalErrorMessage("Failed to extract archive",
                                   tr("Failed to extract %1 to %2").arg(archive.absoluteFilePath()).arg(tmp_extract_dir.absolutePath()));
-            return {};
+            return std::nullopt;
         }
 
     } else if (archive.fileName().endsWith(".tar.gz")) {
@@ -739,43 +886,52 @@ std::optional<QDir> PrismUpdaterApp::unpackArchive(QFileInfo archive)
         QProcess proc = QProcess();
         proc.start(cmd, args);
         if (!proc.waitForStarted(5000)) {  // wait 5 seconds to start
-            showFatalErrorMessage(tr("Failed extract archive"),
-                                  tr("Failed to launcher child process \"%1 %2\".").arg(cmd).arg(args.join(" ")));
-            return {};
+            auto msg = tr("Failed to launcher child process \"%1 %2\".").arg(cmd).arg(args.join(" "));
+            logUpdate(msg);
+            showFatalErrorMessage(tr("Failed extract archive"), msg);
+            return std::nullopt;
         }
         auto result = proc.waitForFinished(5000);
         auto out = proc.readAll();
         logUpdate(out);
         if (!result) {
-            showFatalErrorMessage(tr("Failed to extract archive"), tr("Child process \"%1 %2\" failed.").arg(cmd).arg(args.join(" ")));
-            return {};
+            auto msg = tr("Child process \"%1 %2\" failed.").arg(cmd).arg(args.join(" "));
+            logUpdate(msg);
+            showFatalErrorMessage(tr("Failed to extract archive"), msg);
+            return std::nullopt;
         }
 
     } else {
         logUpdate(tr("Unknown archive format for %1").arg(archive.absoluteFilePath()));
         showFatalErrorMessage("Can not extract", QStringLiteral("Unknown archive format %1").arg(archive.absoluteFilePath()));
-        return {};
+        return std::nullopt;
     }
 
     return tmp_extract_dir;
 }
 
-void PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
+bool PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
 {
     QProcess proc = QProcess();
+    proc.setProcessChannelMode(QProcess::MergedChannels);
+    proc.setReadChannel(QProcess::StandardOutput);
     proc.start(exe_path, { "-v" });
-    if (!proc.waitForStarted(5000))  // wait 5 seconds to start
-        return showFatalErrorMessage(tr("Failed to Check Version"), tr("Failed to launcher child launcher process to read version."));
-    if (!proc.waitForFinished(5000))
-        return showFatalErrorMessage(tr("Failed to Check Version"), tr("Child launcher process failed."));
+    if (!proc.waitForStarted(5000)) {
+        showFatalErrorMessage(tr("Failed to Check Version"), tr("Failed to launcher child launcher process to read version."));
+        return false;
+    }  // wait 5 seconds to start
+    if (!proc.waitForFinished(5000)) {
+        showFatalErrorMessage(tr("Failed to Check Version"), tr("Child launcher process failed."));
+        return false;
+    }
     auto out = proc.readAll();
     auto lines = out.split('\n');
     if (lines.length() < 2)
-        return;
+        return false;
     auto first = lines.takeFirst();
     auto first_parts = first.split(' ');
     if (first_parts.length() < 2)
-        return;
+        return false;
     m_prismBinaryName = first_parts.takeFirst();
     auto version = first_parts.takeFirst();
     m_prismVersion = version;
@@ -790,6 +946,7 @@ void PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
     m_prismVersionMajor = version_parts.takeFirst().toInt();
     m_prismVersionMinor = version_parts.takeFirst().toInt();
     m_prismGitCommit = lines.takeFirst().simplified();
+    return true;
 }
 
 void PrismUpdaterApp::loadReleaseList()
