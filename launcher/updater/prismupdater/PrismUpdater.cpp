@@ -640,14 +640,19 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
             continue;
         else if (m_isAppimage && !asset.name.toLower().endsWith("appimage"))
             continue;
+        auto asset_name = asset.name.toLower();
+        auto platform = BuildConfig.BUILD_PLATFORM.toLower();
+        auto system_is_arm = QSysInfo::buildCpuArchitecture().contains("arm64");
+        auto asset_is_arm = asset_name.contains("arm64");
+        auto asset_is_archive = asset_name.endsWith(".zip") || asset_name.endsWith(".tar.gz");
 
-        bool for_platform = !BuildConfig.BUILD_PLATFORM.isEmpty() && asset.name.toLower().contains(BuildConfig.BUILD_PLATFORM.toLower());
-        bool for_portable = asset.name.toLower().contains("portable");
-        if (for_platform && asset.name.toLower().contains("legacy") && !BuildConfig.BUILD_PLATFORM.toLower().contains("legacy"))
+        bool for_platform = !platform.isEmpty() && asset_name.contains(platform);
+        bool for_portable = asset_name.contains("portable");
+        if (for_platform && asset_name.contains("legacy") && !platform.contains("legacy"))
             for_platform = false;
-        if (for_platform && asset.name.toLower().contains("arm64") && !QSysInfo::buildCpuArchitecture().contains("arm64"))
+        if (for_platform && ((asset_is_arm && !system_is_arm) || (!asset_is_arm && system_is_arm)))
             for_platform = false;
-        if (for_platform && !asset.name.toLower().contains("arm64") && QSysInfo::buildCpuArchitecture().contains("arm64"))
+        if (for_platform && platform.contains("windows") && !m_isPortable && asset_is_archive)
             for_platform = false;
 
         if (((m_isPortable && for_portable) || (!m_isPortable && !for_portable)) && for_platform) {
