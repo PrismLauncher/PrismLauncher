@@ -18,6 +18,8 @@
  */
 
 #include "ResourceDownloadDialog.h"
+#include <QEventLoop>
+#include <QList>
 
 #include <QPushButton>
 #include <algorithm>
@@ -30,6 +32,10 @@
 #include "minecraft/mod/ShaderPackFolderModel.h"
 #include "minecraft/mod/TexturePackFolderModel.h"
 
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
+#include "modplatform/ModIndex.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ReviewMessageBox.h"
 
 #include "ui/pages/modplatform/ResourcePage.h"
@@ -117,18 +123,71 @@ void ResourceDownloadDialog::connectButtons()
     connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
 }
 
+static ModPlatform::ProviderCapabilities ProviderCaps;
+
+QStringList getRequiredBy(QList<ResourceDownloadDialog::DownloadTaskPtr> tasks, ResourceDownloadDialog::DownloadTaskPtr pack)
+{
+    auto addonId = pack->getPack()->addonId;
+    auto provider = pack->getPack()->provider;
+    auto version = pack->getVersionID();
+    auto req = QStringList();
+    for (auto& task : tasks) {
+        if (provider != task->getPack()->provider)
+            continue;
+        auto deps = task->getVersion().dependencies;
+        if (auto dep = std::find_if(deps.begin(), deps.end(),
+                                    [addonId, provider, version](const ModPlatform::Dependency& d) {
+                                        return d.type == ModPlatform::DependencyType::REQUIRED &&
+                                               (provider == ModPlatform::ResourceProvider::MODRINTH && d.addonId.toString().isEmpty()
+                                                    ? version == d.version
+                                                    : d.addonId == addonId);
+                                    });
+            dep != deps.end()) {
+            req.append(task->getName());
+        }
+    }
+    return req;
+}
+
 void ResourceDownloadDialog::confirm()
 {
+    auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
+    confirm_dialog->retranslateUi(resourcesString());
+
+    if (auto task = getModDependenciesTask(); task) {
+        connect(task.get(), &Task::failed, this,
+                [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+
+        connect(task.get(), &Task::succeeded, this, [&]() {
+            QStringList warnings = task->warnings();
+            if (warnings.count()) {
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+            }
+        });
+
+        // Check for updates
+        ProgressDialog progress_dialog(this);
+        progress_dialog.setSkipButton(true, tr("Abort"));
+        progress_dialog.setWindowTitle(tr("Checking for dependencies..."));
+        auto ret = progress_dialog.execWithTask(task.get());
+
+        // If the dialog was skipped / some download error happened
+        if (ret == QDialog::DialogCode::Rejected) {
+            QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
+            return;
+        } else {
+            for (auto dep : task->getDependecies())
+                addResource(dep->pack, dep->version);
+        }
+    }
+
     auto selected = getTasks();
     std::sort(selected.begin(), selected.end(), [](const DownloadTaskPtr& a, const DownloadTaskPtr& b) {
         return QString::compare(a->getName(), b->getName(), Qt::CaseInsensitive) < 0;
     });
-
-    auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
-    confirm_dialog->retranslateUi(resourcesString());
-
     for (auto& task : selected) {
-        confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath() });
+        confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
+                                         ProviderCaps.name(task->getProvider()), getRequiredBy(selected, task) });
     }
 
     if (confirm_dialog->exec()) {
@@ -230,6 +289,19 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
     return pages;
 }
+
+GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
+{
+    if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
+        QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
+        for (auto& selected : getTasks()) {
+            selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
+        }
+
+        return makeShared<GetModDependenciesTask>(this, m_instance, model, selectedVers);
+    }
+    return nullptr;
+};
 
 ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
                                                        const std::shared_ptr<ResourcePackFolderModel>& resource_packs,

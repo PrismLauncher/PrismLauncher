@@ -136,8 +136,8 @@ void ModrinthPackExportTask::collectHashes()
                     QCryptographicHash sha1(QCryptographicHash::Algorithm::Sha1);
                     sha1.addData(data);
 
-                    ResolvedFile file{ sha1.result().toHex(), sha512.result().toHex(), url.toString(), openFile.size() };
-                    resolvedFiles[relative] = file;
+                    ResolvedFile resolvedFile{ sha1.result().toHex(), sha512.result().toHex(), url.toEncoded(), openFile.size() };
+                    resolvedFiles[relative] = resolvedFile;
 
                     // nice! we've managed to resolve based on local metadata!
                     // no need to enqueue it

@@ -39,15 +39,15 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     auto links_obj = Json::ensureObject(obj, "links");
 
     pack.extraData.issuesUrl = Json::ensureString(links_obj, "issuesUrl");
-    if(pack.extraData.issuesUrl.endsWith('/'))
+    if (pack.extraData.issuesUrl.endsWith('/'))
         pack.extraData.issuesUrl.chop(1);
 
     pack.extraData.sourceUrl = Json::ensureString(links_obj, "sourceUrl");
-    if(pack.extraData.sourceUrl.endsWith('/'))
+    if (pack.extraData.sourceUrl.endsWith('/'))
         pack.extraData.sourceUrl.chop(1);
 
     pack.extraData.wikiUrl = Json::ensureString(links_obj, "wikiUrl");
-    if(pack.extraData.wikiUrl.endsWith('/'))
+    if (pack.extraData.wikiUrl.endsWith('/'))
         pack.extraData.wikiUrl.chop(1);
 
     if (!pack.extraData.body.isEmpty())
@@ -56,7 +56,7 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
 void FlameMod::loadBody(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
-    pack.extraData.body  = api.getModDescription(pack.addonId.toInt());
+    pack.extraData.body = api.getModDescription(pack.addonId.toInt());
 
     if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty())
         pack.extraDataLoaded = true;
@@ -64,12 +64,12 @@ void FlameMod::loadBody(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
 static QString enumToString(int hash_algorithm)
 {
-    switch(hash_algorithm){
-    default:
-    case 1:
-        return "sha1";
-    case 2:
-        return "md5";
+    switch (hash_algorithm) {
+        default:
+        case 1:
+            return "sha1";
+        case 2:
+            return "md5";
     }
 }
 
@@ -84,12 +84,12 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
-        
+
         auto file = loadIndexedPackVersion(obj);
-        if(!file.addonId.isValid())
+        if (!file.addonId.isValid())
             file.addonId = pack.addonId;
 
-        if(file.fileId.isValid()) // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
 
@@ -136,8 +136,61 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         }
     }
 
-    if(load_changelog)
+    auto dependencies = Json::ensureArray(obj, "dependencies");
+    for (auto d : dependencies) {
+        auto dep = Json::ensureObject(d);
+        ModPlatform::Dependency dependency;
+        dependency.addonId = Json::requireInteger(dep, "modId");
+        switch (Json::requireInteger(dep, "relationType")) {
+            case 1:  // EmbeddedLibrary
+                dependency.type = ModPlatform::DependencyType::EMBEDDED;
+                break;
+            case 2:  // OptionalDependency
+                dependency.type = ModPlatform::DependencyType::OPTIONAL;
+                break;
+            case 3:  // RequiredDependency
+                dependency.type = ModPlatform::DependencyType::REQUIRED;
+                break;
+            case 4:  // Tool
+                dependency.type = ModPlatform::DependencyType::TOOL;
+                break;
+            case 5:  // Incompatible
+                dependency.type = ModPlatform::DependencyType::INCOMPATIBLE;
+                break;
+            case 6:  // Include
+                dependency.type = ModPlatform::DependencyType::INCLUDE;
+                break;
+            default:
+                dependency.type = ModPlatform::DependencyType::UNKNOWN;
+                break;
+        }
+        file.dependencies.append(dependency);
+    }
+
+    if (load_changelog)
         file.changelog = api.getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
 
     return file;
 }
+
+ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr)
+{
+    QVector<ModPlatform::IndexedVersion> versions;
+    for (auto versionIter : arr) {
+        auto obj = versionIter.toObject();
+
+        auto file = loadIndexedPackVersion(obj);
+        if (!file.addonId.isValid())
+            file.addonId = m.addonId;
+
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+            versions.append(file);
+    }
+
+    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        // dates are in RFC 3339 format
+        return a.date > b.date;
+    };
+    std::sort(versions.begin(), versions.end(), orderSortPredicate);
+    return versions.front();
+};

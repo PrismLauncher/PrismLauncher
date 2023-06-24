@@ -25,6 +25,7 @@
 #include <QLayout>
 
 #include "QObjectPtr.h"
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "ui/pages/BasePageProvider.h"
 
@@ -81,6 +82,8 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     [[nodiscard]] virtual QString geometrySaveKey() const { return ""; }
     void setButtonStatus();
 
+    [[nodiscard]] virtual GetModDependenciesTask::Ptr getModDependenciesTask() { return nullptr; }
+
    protected:
     const std::shared_ptr<ResourceFolderModel> m_base_model;
 
@@ -103,6 +106,7 @@ class ModDownloadDialog final : public ResourceDownloadDialog {
     [[nodiscard]] QString geometrySaveKey() const override { return "ModDownloadGeometry"; }
 
     QList<BasePage*> getPages() override;
+    GetModDependenciesTask::Ptr getModDependenciesTask() override;
 
    private:
     BaseInstance* m_instance;
