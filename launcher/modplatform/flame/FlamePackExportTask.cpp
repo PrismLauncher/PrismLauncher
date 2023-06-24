@@ -197,7 +197,7 @@ void FlamePackExportTask::makeApiRequest()
                 }
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*mod)->name()));
-                if (Json::ensureBoolean(file_obj, "isAvailable", false))
+                if (Json::ensureBoolean(file_obj, "isAvailable", false, "isAvailable"))
                     resolvedFiles.insert(
                         mod.value()->fileinfo().absoluteFilePath(),
                         { Json::requireInteger(file_obj, "modId"), Json::requireInteger(file_obj, "id"), mod.value()->enabled() });
