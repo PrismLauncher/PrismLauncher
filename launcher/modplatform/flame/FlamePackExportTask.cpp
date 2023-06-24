@@ -35,7 +35,7 @@
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
 
-const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name}({authors})</a></li>";
+const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name} (by {authors})</a></li>";
 
 FlamePackExportTask::FlamePackExportTask(const QString& name,
                                          const QString& version,
