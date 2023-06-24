@@ -23,7 +23,7 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
     void checkCandidates();
 
-    void appendMod(const CheckUpdateTask::UpdatableMod& info);
+    void appendMod(const CheckUpdateTask::UpdatableMod& info, QStringList requiredBy = {});
 
     const QList<ResourceDownloadTask::Ptr> getTasks();
     auto indexDir() const -> QDir { return m_mod_model->indexDir(); }
@@ -36,7 +36,9 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
    private slots:
     void onMetadataEnsured(Mod*);
-    void onMetadataFailed(Mod*, bool try_others = false, ModPlatform::ResourceProvider first_choice = ModPlatform::ResourceProvider::MODRINTH);
+    void onMetadataFailed(Mod*,
+                          bool try_others = false,
+                          ModPlatform::ResourceProvider first_choice = ModPlatform::ResourceProvider::MODRINTH);
 
    private:
     QWidget* m_parent;

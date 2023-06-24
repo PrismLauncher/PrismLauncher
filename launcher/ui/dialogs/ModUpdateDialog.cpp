@@ -213,6 +213,8 @@ void ModUpdateDialog::checkCandidates()
         }
         static FlameAPI api;
 
+        auto getRequiredBy = depTask->getRequiredBy();
+
         for (auto dep : depTask->getDependecies()) {
             auto changelog = dep->version.changelog;
             if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
@@ -221,7 +223,7 @@ void ModUpdateDialog::checkCandidates()
             CheckUpdateTask::UpdatableMod updatable = { dep->pack->name, dep->version.hash,   "",           dep->version.version,
                                                         changelog,       dep->pack->provider, download_task };
 
-            appendMod(updatable);
+            appendMod(updatable, getRequiredBy.value(dep->version.addonId.toString()));
             m_tasks.insert(updatable.name, updatable.download);
         }
     }
@@ -394,7 +396,7 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
     }
 }
 
-void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
+void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStringList requiredBy)
 {
     auto item_top = new QTreeWidgetItem(ui->modTreeWidget);
     item_top->setCheckState(0, Qt::CheckState::Checked);
@@ -409,6 +411,24 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
 
     auto new_version_item = new QTreeWidgetItem(item_top);
     new_version_item->setText(0, tr("New version: %1").arg(info.new_version));
+
+    if (!requiredBy.isEmpty()) {
+        auto new_version_item = new QTreeWidgetItem(item_top);
+        new_version_item->setText(0, tr("New version: %1").arg(info.new_version));
+
+        auto requiredByItem = new QTreeWidgetItem(item_top);
+        if (requiredBy.length() == 1) {
+            requiredByItem->setText(0, tr("Required by: %1").arg(requiredBy.back()));
+        } else {
+            requiredByItem->setText(0, tr("Required by:"));
+            auto i = 0;
+            for (auto req : requiredBy) {
+                auto reqItem = new QTreeWidgetItem(requiredByItem);
+                reqItem->setText(0, req);
+                reqItem->insertChildren(i++, { reqItem });
+            }
+        }
+    }
 
     auto changelog_item = new QTreeWidgetItem(item_top);
     changelog_item->setText(0, tr("Changelog of the latest version"));

@@ -62,6 +62,7 @@ class GetModDependenciesTask : public SequentialTask {
                                     QList<std::shared_ptr<PackDependency>> selected);
 
     auto getDependecies() const -> QList<std::shared_ptr<PackDependency>> { return m_pack_dependencies; }
+    QHash<QString, QStringList> getRequiredBy();
 
    protected slots:
     Task::Ptr prepareDependencyTask(const ModPlatform::Dependency&, const ModPlatform::ResourceProvider, int);

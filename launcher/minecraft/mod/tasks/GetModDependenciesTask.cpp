@@ -250,3 +250,32 @@ void GetModDependenciesTask::removePack(const QVariant addonId)
             ++it;
 #endif
 }
+
+QHash<QString, QStringList> GetModDependenciesTask::getRequiredBy()
+{
+    QHash<QString, QStringList> rby;
+    auto fullList = m_selected + m_pack_dependencies;
+    for (auto mod : fullList) {
+        auto addonId = mod->pack->addonId;
+        auto provider = mod->pack->provider;
+        auto version = mod->version.fileId;
+        auto req = QStringList();
+        for (auto& smod : fullList) {
+            if (provider != smod->pack->provider)
+                continue;
+            auto deps = smod->version.dependencies;
+            if (auto dep = std::find_if(deps.begin(), deps.end(),
+                                        [addonId, provider, version](const ModPlatform::Dependency& d) {
+                                            return d.type == ModPlatform::DependencyType::REQUIRED &&
+                                                   (provider == ModPlatform::ResourceProvider::MODRINTH && d.addonId.toString().isEmpty()
+                                                        ? version == d.version
+                                                        : d.addonId == addonId);
+                                        });
+                dep != deps.end()) {
+                req.append(smod->pack->name);
+            }
+        }
+        rby[addonId.toString()] = req;
+    }
+    return rby;
+}
