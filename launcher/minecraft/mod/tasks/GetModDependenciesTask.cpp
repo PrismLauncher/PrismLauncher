@@ -48,7 +48,7 @@ GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
                                                BaseInstance* instance,
                                                ModFolderModel* folder,
                                                QList<std::shared_ptr<PackDependency>> selected)
-    : SequentialTask(parent, "Get dependencies")
+    : SequentialTask(parent, tr("Get dependencies"))
     , m_selected(selected)
     , m_flame_provider{ ModPlatform::ResourceProvider::FLAME, std::make_shared<ResourceDownload::FlameModModel>(*instance),
                         std::make_shared<FlameAPI>() }

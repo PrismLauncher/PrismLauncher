@@ -160,10 +160,9 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
             case 6:  // Include
                 dependency.type = ModPlatform::DependencyType::INCLUDE;
                 break;
-                default:
+            default:
                 dependency.type = ModPlatform::DependencyType::UNKNOWN;
                 break;
-                
         }
         file.dependencies.append(dependency);
     }
