@@ -157,12 +157,12 @@ void FlamePackExportTask::collectHashes()
 
 void FlamePackExportTask::makeApiRequest()
 {
-    setStatus(tr("Find versions for hashes..."));
     if (pendingHashes.isEmpty()) {
         buildZip();
         return;
     }
 
+    setStatus(tr("Find versions for hashes..."));
     auto response = std::make_shared<QByteArray>();
 
     QList<uint> fingerprints;
