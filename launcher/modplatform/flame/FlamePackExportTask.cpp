@@ -109,25 +109,42 @@ void FlamePackExportTask::collectHashes()
     auto mods = mcInstance->loaderModList()->allMods();
     ConcurrentTask::Ptr hashing_task(new ConcurrentTask(this, "MakeHashesTask", 10));
     task.reset(hashing_task);
-    setProgress(0, mods.count());
+    int totalProgres = mods.count();
+    setProgress(0, totalProgres);
     for (auto* mod : mods) {
         if (!mod || mod->type() == ResourceType::FOLDER) {
-            setProgress(m_progress + 1, mods.count());
+            setProgress(m_progress + 1, totalProgres);
             continue;
         }
         if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
             resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
                                  { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled(),
                                    mod->metadata()->name, mod->metadata()->slug, mod->authors().join(", ") });
-            setProgress(m_progress + 1, mods.count());
+            setProgress(m_progress + 1, totalProgres);
             continue;
         }
 
         auto hash_task = Hashing::createFlameHasher(mod->fileinfo().absoluteFilePath());
-        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod, mods](QString hash) {
+        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod, totalProgres](QString hash) {
             if (m_state == Task::State::Running) {
-                setProgress(m_progress + 1, mods.count());
-                pendingHashes.insert(hash, mod);
+                setProgress(m_progress + 1, totalProgres);
+                pendingHashes.insert(hash, { mod->name(), mod->fileinfo().absoluteFilePath(), mod->enabled() });
+            }
+        });
+        connect(hash_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+        hashing_task->addTask(hash_task);
+    }
+
+    for (const QFileInfo& file : files) {
+        const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
+        if (!relative.endsWith(".zip") || !relative.startsWith("resourcepacks/"))
+            continue;
+        totalProgres++;
+        auto hash_task = Hashing::createFlameHasher(file.absoluteFilePath());
+        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, relative, file, totalProgres](QString hash) {
+            if (m_state == Task::State::Running) {
+                setProgress(m_progress + 1, totalProgres);
+                pendingHashes.insert(hash, { relative, file.absoluteFilePath(), true });
             }
         });
         connect(hash_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
@@ -196,11 +213,10 @@ void FlamePackExportTask::makeApiRequest()
                     continue;
                 }
 
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg((*mod)->name()));
+                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
                 if (Json::ensureBoolean(file_obj, "isAvailable", false, "isAvailable"))
-                    resolvedFiles.insert(
-                        mod.value()->fileinfo().absoluteFilePath(),
-                        { Json::requireInteger(file_obj, "modId"), Json::requireInteger(file_obj, "id"), mod.value()->enabled() });
+                    resolvedFiles.insert(mod->path,
+                                         { Json::requireInteger(file_obj, "modId"), Json::requireInteger(file_obj, "id"), mod->enabled });
             }
 
         } catch (Json::JsonException& e) {

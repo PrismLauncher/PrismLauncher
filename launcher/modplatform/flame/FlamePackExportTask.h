@@ -62,11 +62,16 @@ class FlamePackExportTask : public Task {
         QString slug;
         QString authors;
     };
+    struct HashInfo {
+        QString name;
+        QString path;
+        bool enabled;
+    };
 
     FlameAPI api;
 
     QFileInfoList files;
-    QMap<QString, Mod*> pendingHashes{};
+    QMap<QString, HashInfo> pendingHashes{};
     QMap<QString, ResolvedFile> resolvedFiles{};
     Task::Ptr task;
     QFuture<BuildZipResult> buildZipFuture;
