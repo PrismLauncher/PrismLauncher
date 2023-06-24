@@ -77,11 +77,10 @@ auto ProviderCapabilities::hash(ResourceProvider p, QIODevice* device, QString t
     return { hash.result().toHex() };
 }
 
-QString getMetaURL(ResourceProvider provider, QString slug)
+QString getMetaURL(ResourceProvider provider, QVariant projectID)
 {
-    return ((provider == ModPlatform::ResourceProvider::FLAME) ? "https://www.curseforge.com/minecraft/mc-mods/"
-                                                               : "https://modrinth.com/mod/") +
-           slug.remove(".pw.toml");
+    return ((provider == ModPlatform::ResourceProvider::FLAME) ? "https://www.curseforge.com/projects/" : "https://modrinth.com/mod/") +
+           projectID.toString();
 }
 
 }  // namespace ModPlatform
