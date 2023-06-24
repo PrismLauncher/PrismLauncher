@@ -15,9 +15,11 @@ class NetworkResourceAPI : public ResourceAPI {
 
     Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const override;
     Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const override;
+    Task::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const override;
 
    protected:
     [[nodiscard]] virtual auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> = 0;
     [[nodiscard]] virtual auto getInfoURL(QString const& id) const -> std::optional<QString> = 0;
     [[nodiscard]] virtual auto getVersionsURL(VersionSearchArgs const& args) const -> std::optional<QString> = 0;
+    [[nodiscard]] virtual auto getDependencyURL(DependencySearchArgs const& args) const -> std::optional<QString> = 0;
 };

@@ -117,3 +117,32 @@ Task::Ptr NetworkResourceAPI::getProject(QString addonId, std::shared_ptr<QByteA
 
     return netJob;
 }
+
+Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, DependencySearchCallbacks&& callbacks) const
+{
+    auto versions_url_optional = getDependencyURL(args);
+    if (!versions_url_optional.has_value())
+        return nullptr;
+
+    auto versions_url = versions_url_optional.value();
+
+    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
+    auto response = std::make_shared<QByteArray>();
+
+    netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
+
+    QObject::connect(netJob.get(), &NetJob::succeeded, [=] {
+        QJsonParseError parse_error{};
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
+            qWarning() << *response;
+            return;
+        }
+
+        callbacks.on_succeed(doc, args.dependency);
+    });
+
+    return netJob;
+};

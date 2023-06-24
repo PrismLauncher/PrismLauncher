@@ -38,7 +38,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     static auto getModLoaderStrings(const ModLoaderTypes types) -> const QStringList
     {
         QStringList l;
-        for (auto loader : {Forge, Fabric, Quilt}) {
+        for (auto loader : { Forge, Fabric, Quilt }) {
             if (types & loader) {
                 l << getModLoaderString(loader);
             }
@@ -51,8 +51,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     static auto getModLoaderFilters(ModLoaderTypes types) -> const QString
     {
         QStringList l;
-        for (auto loader : getModLoaderStrings(types))
-        {
+        for (auto loader : getModLoaderStrings(types)) {
             l << QString("\"categories:%1\"").arg(loader);
         }
         return l.join(',');
@@ -135,16 +134,22 @@ class ModrinthAPI : public NetworkResourceAPI {
     auto getGameVersionsArray(std::list<Version> mcVersions) const -> QString
     {
         QString s;
-        for(auto& ver : mcVersions){
+        for (auto& ver : mcVersions) {
             s += QString("\"versions:%1\",").arg(ver.toString());
         }
-        s.remove(s.length() - 1, 1); //remove last comma
+        s.remove(s.length() - 1, 1);  // remove last comma
         return s.isEmpty() ? QString() : s;
     }
 
-    inline auto validateModLoaders(ModLoaderTypes loaders) const -> bool
-    {
-        return loaders & (Forge | Fabric | Quilt);
-    }
+    inline auto validateModLoaders(ModLoaderTypes loaders) const -> bool { return loaders & (Forge | Fabric | Quilt); }
 
+    [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
+    {
+        return args.dependency.version.length() != 0 ? QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.dependency.version)
+                                                     : QString("%1/project/%2/version?game_versions=[\"%3\"]&loaders=[\"%4\"]")
+                                                           .arg(BuildConfig.MODRINTH_PROD_URL)
+                                                           .arg(args.dependency.addonId.toString())
+                                                           .arg(args.mcVersion.toString())
+                                                           .arg(getModLoaderStrings(args.loader).join("\",\""));
+    };
 };
