@@ -22,7 +22,7 @@
 #include "modplatform/flame/FlamePackExportTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
-#include "ui_ExportMrPackDialog.h"
+#include "ui_ExportPackDialog.h"
 
 #include <QFileDialog>
 #include <QFileSystemModel>

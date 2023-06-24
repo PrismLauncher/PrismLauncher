@@ -118,7 +118,7 @@ void FlamePackExportTask::collectHashes()
         }
         if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
             resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
-                                 { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled(),
+                                 { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled(), true,
                                    mod->metadata()->name, mod->metadata()->slug, mod->authors().join(", ") });
             setProgress(m_progress + 1, totalProgres);
             continue;
@@ -128,7 +128,7 @@ void FlamePackExportTask::collectHashes()
         connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod, totalProgres](QString hash) {
             if (m_state == Task::State::Running) {
                 setProgress(m_progress + 1, totalProgres);
-                pendingHashes.insert(hash, { mod->name(), mod->fileinfo().absoluteFilePath(), mod->enabled() });
+                pendingHashes.insert(hash, { mod->name(), mod->fileinfo().absoluteFilePath(), mod->enabled(), true });
             }
         });
         connect(hash_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
@@ -215,8 +215,8 @@ void FlamePackExportTask::makeApiRequest()
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
                 if (Json::ensureBoolean(file_obj, "isAvailable", false, "isAvailable"))
-                    resolvedFiles.insert(mod->path,
-                                         { Json::requireInteger(file_obj, "modId"), Json::requireInteger(file_obj, "id"), mod->enabled });
+                    resolvedFiles.insert(mod->path, { Json::requireInteger(file_obj, "modId"), Json::requireInteger(file_obj, "id"),
+                                                      mod->enabled, mod->isMod });
             }
 
         } catch (Json::JsonException& e) {
@@ -336,11 +336,13 @@ void FlamePackExportTask::buildZip()
         }
         QString content = "";
         for (auto mod : resolvedFiles) {
-            content += QString(TEMPLATE)
-                           .replace("{name}", mod.name)
-                           .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.slug))
-                           .replace("{authors}", mod.authors) +
-                       "\n";
+            if (mod.isMod) {
+                content += QString(TEMPLATE)
+                               .replace("{name}", mod.name)
+                               .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.slug))
+                               .replace("{authors}", mod.authors) +
+                           "\n";
+            }
         }
         content = "<ul>" + content + "</ul>";
         modlist.write(content.toUtf8());

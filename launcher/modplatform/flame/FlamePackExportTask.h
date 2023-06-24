@@ -57,6 +57,7 @@ class FlamePackExportTask : public Task {
         int addonId;
         int version;
         bool enabled;
+        bool isMod;
 
         QString name;
         QString slug;
@@ -66,6 +67,7 @@ class FlamePackExportTask : public Task {
         QString name;
         QString path;
         bool enabled;
+        bool isMod;
     };
 
     FlameAPI api;
