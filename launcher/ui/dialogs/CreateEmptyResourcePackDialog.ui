@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>530</width>
+    <width>600</width>
     <height>220</height>
    </rect>
   </property>
@@ -95,7 +95,17 @@
         <number>6</number>
        </property>
        <item>
-        <widget class="QLabel" name="icon"/>
+        <widget class="QLabel" name="icon">
+         <property name="minimumSize">
+          <size>
+           <width>1</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </item>
        <item>
         <spacer name="horizontalSpacer">
