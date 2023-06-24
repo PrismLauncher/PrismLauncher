@@ -41,7 +41,6 @@ FlamePackExportTask::FlamePackExportTask(const QString& name,
                                          const QString& version,
                                          const QString& author,
                                          const QVariant& projectID,
-                                         const bool generateModList,
                                          InstancePtr instance,
                                          const QString& output,
                                          MMCZip::FilterFunction filter)
@@ -54,7 +53,6 @@ FlamePackExportTask::FlamePackExportTask(const QString& name,
     , gameRoot(instance->gameRoot())
     , output(output)
     , filter(filter)
-    , generateModList(generateModList)
 {}
 
 void FlamePackExportTask::executeTask()
@@ -218,10 +216,6 @@ void FlamePackExportTask::makeApiRequest()
 
 void FlamePackExportTask::getProjectsInfo()
 {
-    if (!generateModList) {
-        buildZip();
-        return;
-    }
     setStatus(tr("Find project info from curseforge..."));
     QList<QString> addonIds;
     for (auto resolved : resolvedFiles) {
@@ -319,23 +313,21 @@ void FlamePackExportTask::buildZip()
         }
         indexFile.write(generateIndex());
 
-        if (generateModList) {
-            QuaZipFile modlist(&zip);
-            if (!modlist.open(QIODevice::WriteOnly, QuaZipNewInfo("modlist.html"))) {
-                QFile::remove(output);
-                return BuildZipResult(tr("Could not create index"));
-            }
-            QString content = "";
-            for (auto mod : resolvedFiles) {
-                content += QString(TEMPLATE)
-                               .replace("{name}", mod.name)
-                               .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.slug))
-                               .replace("{authors}", mod.authors) +
-                           "\n";
-            }
-            content = "<ul>" + content + "</ul>";
-            modlist.write(content.toUtf8());
+        QuaZipFile modlist(&zip);
+        if (!modlist.open(QIODevice::WriteOnly, QuaZipNewInfo("modlist.html"))) {
+            QFile::remove(output);
+            return BuildZipResult(tr("Could not create index"));
         }
+        QString content = "";
+        for (auto mod : resolvedFiles) {
+            content += QString(TEMPLATE)
+                           .replace("{name}", mod.name)
+                           .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.slug))
+                           .replace("{authors}", mod.authors) +
+                       "\n";
+        }
+        content = "<ul>" + content + "</ul>";
+        modlist.write(content.toUtf8());
 
         size_t progress = 0;
         for (const QFileInfo& file : files) {

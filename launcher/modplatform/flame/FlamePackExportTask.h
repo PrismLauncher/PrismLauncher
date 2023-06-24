@@ -32,7 +32,6 @@ class FlamePackExportTask : public Task {
                         const QString& version,
                         const QString& author,
                         const QVariant& projectID,
-                        const bool generateModList,
                         InstancePtr instance,
                         const QString& output,
                         MMCZip::FilterFunction filter);
@@ -52,7 +51,6 @@ class FlamePackExportTask : public Task {
     const QDir gameRoot;
     const QString output;
     const MMCZip::FilterFunction filter;
-    const bool generateModList;
 
     typedef std::optional<QString> BuildZipResult;
     struct ResolvedFile {
