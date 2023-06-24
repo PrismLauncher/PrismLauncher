@@ -73,6 +73,7 @@ ExportPackDialog::ExportPackDialog(InstancePtr instance, QWidget* parent, ModPla
 
     MinecraftInstance* mcInstance = dynamic_cast<MinecraftInstance*>(instance.get());
     if (mcInstance) {
+        mcInstance->loaderModList()->update();
         const QDir index = mcInstance->loaderModList()->indexDir();
         if (index.exists())
             proxy->blockedPaths().insert(root.relativeFilePath(index.absolutePath()));

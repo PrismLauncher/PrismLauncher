@@ -95,8 +95,8 @@ void FlamePackExportTask::collectFiles()
     resolvedFiles.clear();
 
     if (mcInstance != nullptr) {
-        connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, &FlamePackExportTask::collectHashes);
         mcInstance->loaderModList()->update();
+        connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, &FlamePackExportTask::collectHashes);
     } else
         collectHashes();
 }
