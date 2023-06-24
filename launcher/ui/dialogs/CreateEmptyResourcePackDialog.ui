@@ -35,16 +35,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="name">
-       <property name="toolTip">
-        <string>The name of the folder (will also be displayed in-game).</string>
-       </property>
-       <property name="placeholderText">
-        <string>Default</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="nameLabel">
        <property name="text">
@@ -52,6 +42,13 @@
        </property>
        <property name="buddy">
         <cstring>name</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="format">
+       <property name="toolTip">
+        <string>The pack format version.</string>
        </property>
       </widget>
      </item>
@@ -65,20 +62,13 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="description">
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="name">
        <property name="toolTip">
-        <string>The text which will appear under the name.</string>
+        <string>The name of the folder (will also be displayed in-game).</string>
        </property>
        <property name="placeholderText">
-        <string>The default look-and-feel of Minecraft</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="format">
-       <property name="toolTip">
-        <string>The pack format version.</string>
+        <string>Default</string>
        </property>
       </widget>
      </item>
@@ -89,11 +79,24 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="description">
+       <property name="toolTip">
+        <string>The text which will appear under the name.</string>
+       </property>
+       <property name="placeholderText">
+        <string>The default look-and-feel of Minecraft</string>
+       </property>
+      </widget>
+     </item>
      <item row="4" column="1">
       <layout class="QHBoxLayout" name="iconLayout">
        <property name="spacing">
         <number>6</number>
        </property>
+       <item>
+        <widget class="QLabel" name="icon"/>
+       </item>
        <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">

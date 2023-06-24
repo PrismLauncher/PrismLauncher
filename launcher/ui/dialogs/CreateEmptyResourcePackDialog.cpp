@@ -59,10 +59,12 @@ CreateEmptyResourcePackDialog::CreateEmptyResourcePackDialog(MinecraftInstance* 
         }
 
         icon = path;
+        ui->icon->setText(QFileInfo(icon).fileName());
         ui->removeIcon->setEnabled(true);
     });
     connect(ui->removeIcon, &QPushButton::clicked, this, [this] {
         icon = QString();
+        ui->icon->setText(QString());
         ui->removeIcon->setEnabled(false);
     });
 
