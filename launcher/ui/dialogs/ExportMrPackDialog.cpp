@@ -108,7 +108,7 @@ void ExportMrPackDialog::done(int result)
                                                   nullptr);
         else
             output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(ui->name->text()),
-                                                  FS::PathCombine(QDir::homePath(), filename + ".zip"), "Curseforge pack (*.zip)", nullptr);
+                                                  FS::PathCombine(QDir::homePath(), filename + ".zip"), "CurseForge pack (*.zip)", nullptr);
 
         if (output.isEmpty())
             return;

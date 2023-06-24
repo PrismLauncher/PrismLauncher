@@ -232,7 +232,7 @@ void FlamePackExportTask::makeApiRequest()
 
 void FlamePackExportTask::getProjectsInfo()
 {
-    setStatus(tr("Find project info from curseforge..."));
+    setStatus(tr("Find project info from CurseForge..."));
     QList<QString> addonIds;
     for (auto resolved : resolvedFiles) {
         if (resolved.slug.isEmpty()) {

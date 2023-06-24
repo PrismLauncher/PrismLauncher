@@ -484,7 +484,7 @@
     <iconset theme="flame"/>
    </property>
    <property name="text">
-    <string>Curseforge (zip)</string>
+    <string>CurseForge (zip)</string>
    </property>
   </action>
   <action name="actionCreateInstanceShortcut">
