@@ -4,6 +4,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,6 +40,7 @@
 
 #include "ResourceDownloadTask.h"
 
+#include "ui/dialogs/CreateEmptyResourcePackDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -51,6 +53,11 @@ ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, std::shared_ptr<
     ui->actionDownloadItem->setEnabled(true);
     connect(ui->actionDownloadItem, &QAction::triggered, this, &ResourcePackPage::downloadRPs);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
+
+    ui->actionCreateEmpty->setToolTip(tr("Create an empty resource pack"));
+    ui->actionCreateEmpty->setEnabled(true);
+    connect(ui->actionCreateEmpty, &QAction::triggered, this, &ResourcePackPage::createEmptyRP);
+    ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionCreateEmpty);
 
     ui->actionViewConfigs->setVisible(false);
 }
@@ -101,4 +108,10 @@ void ResourcePackPage::downloadRPs()
 
         m_model->update();
     }
+}
+
+void ResourcePackPage::createEmptyRP()
+{
+    CreateEmptyResourcePackDialog dialog(static_cast<MinecraftInstance*>(m_instance), this);
+    dialog.exec();
 }

@@ -119,6 +119,6 @@ void ExportMrPackDialog::done(int result)
 
 void ExportMrPackDialog::validate()
 {
-    const bool invalid = ui->name->text().isEmpty() || ui->version->text().isEmpty();
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(invalid);
+    const bool valid = !(ui->name->text().isEmpty() || ui->version->text().isEmpty());
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(valid);
 }

@@ -19,6 +19,9 @@ class ResourcePack : public Resource {
    public:
     using Ptr = shared_qobject_ptr<Resource>;
 
+    static int fuzzyFormat(Version version);
+    static std::pair<Version, Version> formatCompatibleVersions(int format);
+
     ResourcePack(QObject* parent = nullptr) : Resource(parent) {}
     ResourcePack(QFileInfo file_info) : Resource(file_info) {}
 

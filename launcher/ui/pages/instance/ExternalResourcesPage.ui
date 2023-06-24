@@ -146,6 +146,14 @@
     <string>Download a new resource</string>
    </property>
   </action>
+  <action name="actionCreateEmpty">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Create empty</string>
+   </property>
+  </action>
   <action name="actionUpdateItem">
    <property name="enabled">
     <bool>false</bool>

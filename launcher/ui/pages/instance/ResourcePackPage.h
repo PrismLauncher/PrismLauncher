@@ -4,6 +4,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -62,5 +63,6 @@ public:
    public slots:
     bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
     void downloadRPs();
+    void createEmptyRP();
 };
 
