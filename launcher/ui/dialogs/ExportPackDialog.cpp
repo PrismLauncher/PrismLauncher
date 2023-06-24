@@ -41,12 +41,10 @@ ExportPackDialog::ExportPackDialog(InstancePtr instance, QWidget* parent, ModPla
     ui->name->setText(instance->name());
     if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
         ui->summary->setText(instance->notes().split(QRegularExpression("\\r?\\n"))[0]);
-        ui->author->hide();
-        ui->authorLabel->hide();
     } else {
         setWindowTitle("Export CurseForge Pack");
         ui->version->setText("");
-        ui->summaryLabel->setText("ProjectID");
+        ui->summaryLabel->setText("Author");
     }
 
     // ensure a valid pack is generated
@@ -117,7 +115,7 @@ void ExportPackDialog::done(int result)
             task = new ModrinthPackExportTask(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
                                               [this](const QString& path) { return proxy->blockedPaths().covers(path); });
         else
-            task = new FlamePackExportTask(ui->name->text(), ui->version->text(), ui->author->text(), ui->summary->text(), instance, output,
+            task = new FlamePackExportTask(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
                                            [this](const QString& path) { return proxy->blockedPaths().covers(path); });
 
         connect(task, &Task::failed,

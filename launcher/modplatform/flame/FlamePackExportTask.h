@@ -32,7 +32,6 @@ class FlamePackExportTask : public Task {
     FlamePackExportTask(const QString& name,
                         const QString& version,
                         const QString& author,
-                        const QVariant& projectID,
                         InstancePtr instance,
                         const QString& output,
                         MMCZip::FilterFunction filter);
@@ -46,7 +45,6 @@ class FlamePackExportTask : public Task {
 
     // inputs
     const QString name, version, author;
-    const QVariant projectID;
     const InstancePtr instance;
     MinecraftInstance* mcInstance;
     const QDir gameRoot;

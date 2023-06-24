@@ -41,14 +41,12 @@ const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name}{authors}
 FlamePackExportTask::FlamePackExportTask(const QString& name,
                                          const QString& version,
                                          const QString& author,
-                                         const QVariant& projectID,
                                          InstancePtr instance,
                                          const QString& output,
                                          MMCZip::FilterFunction filter)
     : name(name)
     , version(version)
     , author(author)
-    , projectID(projectID)
     , instance(instance)
     , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
     , gameRoot(instance->gameRoot())
@@ -341,7 +339,7 @@ void FlamePackExportTask::buildZip()
                 content += QString(TEMPLATE)
                                .replace("{name}", mod.name)
                                .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.addonId))
-                               .replace("{authors}", !mod.authors.isEmpty() ? QString(" (by {%1})").arg(mod.authors) : "");
+                               .replace("{authors}", !mod.authors.isEmpty() ? QString(" (by %1)").arg(mod.authors) : "");
             }
         }
         content = "<ul>" + content + "</ul>";
@@ -398,8 +396,6 @@ QByteArray FlamePackExportTask::generateIndex()
     obj["name"] = name;
     obj["version"] = version;
     obj["author"] = author;
-    if (projectID.toInt() != 0)
-        obj["projectID"] = projectID.toInt();
     obj["overrides"] = "overrides";
     if (mcInstance) {
         QJsonObject version;

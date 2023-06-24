@@ -57,16 +57,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="authorLabel">
-        <property name="text">
-         <string>Author</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="author"/>
-      </item>
+     
      </layout>
     </widget>
    </item>
