@@ -1424,7 +1424,7 @@ void MainWindow::on_actionExportInstanceFlamePack_triggered()
         if (instance) {
             if (instance->getPackProfile()->getComponent("org.quiltmc.quilt-loader")) {
                 QMessageBox msgBox;
-                msgBox.setText(tr("Quilt is not yet supported by curseforge."));
+                msgBox.setText(tr("Quilt is currently not supported by CurseForge modpacks."));
                 msgBox.exec();
                 return;
             }
