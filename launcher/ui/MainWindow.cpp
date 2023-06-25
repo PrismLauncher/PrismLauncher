@@ -1422,9 +1422,16 @@ void MainWindow::on_actionExportInstanceFlamePack_triggered()
     if (m_selectedInstance) {
         auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
         if (instance) {
+            QString errorMsg;
             if (instance->getPackProfile()->getComponent("org.quiltmc.quilt-loader")) {
+                errorMsg = tr("Quilt is currently not supported by CurseForge modpacks.");
+            } else if (auto cmp = instance->getPackProfile()->getComponent("net.minecraft");
+                       cmp && cmp->getVersionFile() && cmp->getVersionFile()->type == "snapshot") {
+                errorMsg = tr("Snapshots are currently not supported by CurseForge modpacks.");
+            }
+            if (!errorMsg.isEmpty()) {
                 QMessageBox msgBox;
-                msgBox.setText(tr("Quilt is currently not supported by CurseForge modpacks."));
+                msgBox.setText(errorMsg);
                 msgBox.exec();
                 return;
             }

@@ -409,16 +409,20 @@ QByteArray FlamePackExportTask::generateIndex()
         // convert all available components to mrpack dependencies
         if (minecraft != nullptr)
             version["version"] = minecraft->m_version;
-
-        QJsonObject loader;
+        QString id;
         if (quilt != nullptr)
-            loader["id"] = "quilt-" + quilt->getVersion();
+            id = "quilt-" + quilt->getVersion();
         else if (fabric != nullptr)
-            loader["id"] = "fabric-" + fabric->getVersion();
+            id = "fabric-" + fabric->getVersion();
         else if (forge != nullptr)
-            loader["id"] = "forge-" + forge->getVersion();
-        loader["primary"] = true;
-        version["modLoaders"] = QJsonArray({ loader });
+            id = "forge-" + forge->getVersion();
+        version["modLoaders"] = QJsonArray();
+        if (!id.isEmpty()) {
+            QJsonObject loader;
+            loader["id"] = id;
+            loader["primary"] = true;
+            version["modLoaders"] = QJsonArray({ loader });
+        }
         obj["minecraft"] = version;
     }
 
