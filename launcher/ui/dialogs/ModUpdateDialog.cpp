@@ -413,9 +413,6 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStri
     new_version_item->setText(0, tr("New version: %1").arg(info.new_version));
 
     if (!requiredBy.isEmpty()) {
-        auto new_version_item = new QTreeWidgetItem(item_top);
-        new_version_item->setText(0, tr("New version: %1").arg(info.new_version));
-
         auto requiredByItem = new QTreeWidgetItem(item_top);
         if (requiredBy.length() == 1) {
             requiredByItem->setText(0, tr("Required by: %1").arg(requiredBy.back()));
