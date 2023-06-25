@@ -85,7 +85,7 @@ void InstanceSettingsPage::globalSettingsButtonClicked(bool)
         case 0:
             APPLICATION->ShowGlobalSettings(this, "java-settings");
             return;
-        case 1:
+        case 2:
             APPLICATION->ShowGlobalSettings(this, "custom-commands");
             return;
         default:
