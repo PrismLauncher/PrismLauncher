@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,6 +34,8 @@ enum class ResourceProvider { MODRINTH, FLAME };
 
 enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
 
+enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
+
 class ProviderCapabilities {
    public:
     auto name(ResourceProvider) -> const char*;
@@ -52,6 +55,12 @@ struct DonationData {
     QString url;
 };
 
+struct Dependency {
+    QVariant addonId;
+    DependencyType type;
+    QString version;
+};
+
 struct IndexedVersion {
     QVariant addonId;
     QVariant fileId;
@@ -66,6 +75,7 @@ struct IndexedVersion {
     QString hash;
     bool is_preferred = true;
     QString changelog;
+    QList<Dependency> dependencies;
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
@@ -117,6 +127,22 @@ struct IndexedPack {
 
         return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }
+};
+
+struct OverrideDep {
+    QString quilt;
+    QString fabric;
+    QString slug;
+    ModPlatform::ResourceProvider provider;
+};
+
+inline auto getOverrideDeps() -> QList<OverrideDep>
+{
+    return { { "634179", "306612", "API", ModPlatform::ResourceProvider::FLAME },
+             { "720410", "308769", "KotlinLibraries", ModPlatform::ResourceProvider::FLAME },
+
+             { "qvIfYCYJ", "P7dR8mSH", "API", ModPlatform::ResourceProvider::MODRINTH },
+             { "lwVhp9o5", "Ha28R6CL", "KotlinLibraries", ModPlatform::ResourceProvider::MODRINTH } };
 };
 
 }  // namespace ModPlatform
