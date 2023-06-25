@@ -158,18 +158,21 @@ void Upload::downloadFinished()
         m_sink->abort();
         m_reply.reset();
         emit succeeded();
+        emit finished();
         return;
     } else if (m_state == State::Failed) {
         qCDebug(taskUploadLogC) << getUid().toString() << "Upload failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit failed("");
+        emit finished();
         return;
     } else if (m_state == State::AbortedByUser) {
         qCDebug(taskUploadLogC) << getUid().toString() << "Upload aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
         emit aborted();
+        emit finished();
         return;
     }
 
@@ -187,11 +190,13 @@ void Upload::downloadFinished()
         m_sink->abort();
         m_reply.reset();
         emit failed("");
+        emit finished();
         return;
     }
     m_reply.reset();
     qCDebug(taskUploadLogC) << getUid().toString() << "Upload succeeded:" << m_url.toString();
     emit succeeded();
+    emit finished();
 }
 
 void Upload::downloadReadyRead()
@@ -209,6 +214,7 @@ void Upload::executeTask()
     if (m_state == State::AbortedByUser) {
         qCWarning(taskUploadLogC) << getUid().toString() << "Attempt to start an aborted Upload:" << m_url.toString();
         emit aborted();
+        emit finished();
         return;
     }
     QNetworkRequest request(m_url);
