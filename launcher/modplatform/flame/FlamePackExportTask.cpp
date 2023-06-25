@@ -37,7 +37,6 @@
 #include "tasks/Task.h"
 
 const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name}{authors}</a></li>\n";
-const QStringList FlamePackExportTask::PREFIXES({ "mods/", "resourcepacks/" });
 const QStringList FlamePackExportTask::FILE_EXTENSIONS({ "jar", "zip" });
 
 FlamePackExportTask::FlamePackExportTask(const QString& name,
@@ -116,8 +115,6 @@ void FlamePackExportTask::collectHashes()
     for (const QFileInfo& file : files) {
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
-        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(), [&relative](const QString& prefix) { return relative.startsWith(prefix); }))
-            continue;
         if (!std::any_of(FILE_EXTENSIONS.begin(), FILE_EXTENSIONS.end(), [&relative](const QString& extension) {
                 return relative.endsWith('.' + extension) || relative.endsWith('.' + extension + ".disabled");
             }))
