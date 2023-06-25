@@ -11,6 +11,9 @@ import QtQuick.Controls 2.12
  *  See https://www.kdab.com/handling-a-lot-of-text-in-qml/ for more details. :)
  */
 
+// FIXME: Enable this when we are able to use `pragma ComponentBehavior: Bound` without breaking getting a black box instead of our component.
+// qmllint disable unqualified
+
 Rectangle {
     id: root
 
@@ -140,6 +143,12 @@ Rectangle {
         // out of view, a heavier, more feature-complete version is instantiated in its place.
 
         delegate: Loader {
+            required property int index
+            required property string line
+            required property font text_font
+            required property color foreground_color
+            required property color background_color
+
             property int m_index: index
             property string m_line: line
             property font m_text_font: text_font
@@ -212,6 +221,8 @@ Rectangle {
             id: textDelegate
 
             TextArea {
+                id: textDelegateArea
+
                 property int index: m_index
                 property string line: m_line
                 property font text_font: m_text_font
@@ -272,26 +283,26 @@ Rectangle {
                 background: Rectangle {
                     // NOTE: The 8 is completely arbitrary and its only purpose is to make the rectangle look a bit nicer :)
                     width: view.contentWidth + 8
-                    color: background_color
+                    color: textDelegateArea.background_color
                 }
 
                 readOnly: true
                 selectByMouse: false
 
                 wrapMode: view.wrapMode
-                onWrapModeChanged: updateSelection()
+                onWrapModeChanged: textDelegateArea.updateSelection()
 
                 Component.onCompleted: {
-                    updateSelection();
+                    textDelegateArea.updateSelection();
 
                     const new_content_width = contentWidth + verticalScrollBar.width;
                     view.fullWidth = Math.max(view.fullWidth, new_content_width);
                 }
 
                 Connections {
-                    target: selectionArea
+                    target: selectionArea // qmllint disable unqualified
                     function onSelectionChanged() {
-                        updateSelection();
+                        textDelegateArea.updateSelection();
                     }
                 }
             }
@@ -410,7 +421,7 @@ Rectangle {
             icon.name: "edit-copy"
             shortcut: StandardKey.Copy
 
-            onTriggered: requestedCopyToClipboard(getSelection())
+            onTriggered: root.requestedCopyToClipboard(root.getSelection())
         }
     }
 }

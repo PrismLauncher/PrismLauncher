@@ -61,7 +61,7 @@ Components.ThemedControl {
                 id: top_row
 
                 Layout.fillWidth: true
-                height: 48
+                implicitHeight: 48
 
                 CheckBox {
                     id: suspended_checkbox
@@ -70,14 +70,14 @@ Components.ThemedControl {
                     enabled: false
 
                     checked: !page.suspended
-                    onToggled: onSuspendedChanged( !page.suspended )
+                    onToggled: page.onSuspendedChanged( !page.suspended )
                 }
 
                 CheckBox {
                     text: qsTr("Wrap lines")
 
                     checked: page.wrapMode === TextEdit.WordWrap
-                    onToggled: onWrapModeChanged( page.wrapMode === TextEdit.WordWrap ? TextEdit.NoWrap : TextEdit.WordWrap )
+                    onToggled: page.onWrapModeChanged( page.wrapMode === TextEdit.WordWrap ? TextEdit.NoWrap : TextEdit.WordWrap )
                 }
 
                 Item {
@@ -135,7 +135,7 @@ Components.ThemedControl {
                 id: bottomRow
 
                 Layout.fillWidth: true
-                height: 24
+                implicitHeight: 24
 
                 property bool isShiftPressed: false
                 Keys.onPressed: (event) => { if (event.key === Qt.Key_Shift) isShiftPressed = true; }
@@ -145,7 +145,7 @@ Components.ThemedControl {
                     id: search_input_field
 
                     Layout.fillWidth: true
-                    height: parent.height
+                    implicitHeight: parent.implicitHeight
 
                     placeholderText: qsTr("Search...")
                     placeholderTextColor: active_palette.placeholderText || Qt.tint(active_palette.text, "#50404040")
@@ -157,12 +157,12 @@ Components.ThemedControl {
                     text: qsTr("Treat as RegEx")
 
                     checked: page.useRegexInSearch
-                    onToggled: onUseRegexChanged( !page.useRegexInSearch )
+                    onToggled: page.onUseRegexChanged( !page.useRegexInSearch )
 
                     hoverEnabled: true
                     Components.ToolTip {
                         text: qsTr("If enabled, interpret the search input as a regular expression.<br>Otherwise, do a simple text search.")
-                        visible: parent.hovered
+                        visible: CheckBox.hovered
                     }
                 }
 
@@ -173,8 +173,8 @@ Components.ThemedControl {
                 }
 
                 Rectangle {
-                    width: 1
-                    height: parent.height
+                    implicitWidth: 1
+                    implicitHeight: parent.height
                     color: "gray"
                 }
 
