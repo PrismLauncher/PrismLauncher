@@ -1,6 +1,7 @@
 #include "FileResolvingTask.h"
 
 #include "Json.h"
+#include "net/ApiUpload.h"
 #include "net/Upload.h"
 #include "net/ApiDownload.h"
 
@@ -34,7 +35,7 @@ void Flame::FileResolvingTask::executeTask()
         return l;
     }));
     QByteArray data = Json::toText(object);
-    auto dl = Net::Upload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result.get(), data);
+    auto dl = Net::ApiUpload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result.get(), data);
     m_dljob->addNetAction(dl);
 
     auto step_progress = std::make_shared<TaskStepProgress>();

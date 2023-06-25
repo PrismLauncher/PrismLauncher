@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
+#include "net/ApiUpload.h"
 #include "net/NetJob.h"
 #include "net/ApiDownload.h"
 #include "net/Upload.h"
@@ -27,7 +28,7 @@ Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, QByteArra
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/fingerprints"), response, body_raw));
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString("https://api.curseforge.com/v1/fingerprints"), response, body_raw));
 
     QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
 
@@ -176,7 +177,7 @@ Task::Ptr FlameAPI::getProjects(QStringList addonIds, QByteArray* response) cons
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods"), response, body_raw));
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString("https://api.curseforge.com/v1/mods"), response, body_raw));
 
     QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
     QObject::connect(netJob.get(), &NetJob::failed, [body_raw] { qDebug() << body_raw; });
@@ -199,7 +200,7 @@ Task::Ptr FlameAPI::getFiles(const QStringList& fileIds, QByteArray* response) c
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods/files"), response, body_raw));
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString("https://api.curseforge.com/v1/mods/files"), response, body_raw));
 
     QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
     QObject::connect(netJob.get(), &NetJob::failed, [body_raw] { qDebug() << body_raw; });

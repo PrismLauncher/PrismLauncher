@@ -6,9 +6,10 @@
 
 #include "Application.h"
 #include "Json.h"
+#include "net/ApiDownload.h"
+#include "net/ApiUpload.h"
 #include "net/NetJob.h"
 #include "net/Upload.h"
-#include "net/ApiDownload.h"
 
 Task::Ptr ModrinthAPI::currentVersion(QString hash, QString hash_format, QByteArray* response)
 {
@@ -34,7 +35,7 @@ Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_f
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), response, body_raw));
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), response, body_raw));
 
     QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
 
@@ -65,7 +66,7 @@ Task::Ptr ModrinthAPI::latestVersion(QString hash,
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(
         QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hash_format), response, body_raw));
 
     QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
@@ -100,7 +101,8 @@ Task::Ptr ModrinthAPI::latestVersions(const QStringList& hashes,
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), response, body_raw));
+    netJob->addNetAction(
+        Net::ApiUpload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), response, body_raw));
 
     QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
 
@@ -114,9 +116,7 @@ Task::Ptr ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) c
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
 
-    QObject::connect(netJob.get(), &NetJob::finished, [response, netJob] {
-        delete response;
-    });
+    QObject::connect(netJob.get(), &NetJob::finished, [response, netJob] { delete response; });
 
     return netJob;
 }
