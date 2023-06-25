@@ -42,7 +42,6 @@ class FlamePackExportTask : public Task {
 
    private:
     static const QString TEMPLATE;
-    static const QStringList PREFIXES;
     static const QStringList FILE_EXTENSIONS;
 
     // inputs
