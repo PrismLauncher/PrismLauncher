@@ -157,19 +157,19 @@ void Upload::downloadFinished()
         qCDebug(taskUploadLogC) << getUid().toString() << "Upload failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitSucceeded();
+        emit succeeded();
         return;
     } else if (m_state == State::Failed) {
         qCDebug(taskUploadLogC) << getUid().toString() << "Upload failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitFailed("");
+        emit failed("");
         return;
     } else if (m_state == State::AbortedByUser) {
         qCDebug(taskUploadLogC) << getUid().toString() << "Upload aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitAborted();
+        emit aborted();
         return;
     }
 
@@ -186,12 +186,12 @@ void Upload::downloadFinished()
         qCDebug(taskUploadLogC) << getUid().toString() << "Upload failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitFailed("");
+        emit failed("");
         return;
     }
     m_reply.reset();
     qCDebug(taskUploadLogC) << getUid().toString() << "Upload succeeded:" << m_url.toString();
-    emitSucceeded();
+    emit succeeded();
 }
 
 void Upload::downloadReadyRead()
@@ -208,7 +208,7 @@ void Upload::executeTask()
 
     if (m_state == State::AbortedByUser) {
         qCWarning(taskUploadLogC) << getUid().toString() << "Attempt to start an aborted Upload:" << m_url.toString();
-        emitAborted();
+        emit aborted();
         return;
     }
     QNetworkRequest request(m_url);
