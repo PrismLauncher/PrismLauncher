@@ -117,7 +117,8 @@ void Download::executeTask()
     switch (m_state) {
         case State::Succeeded:
             qCDebug(taskDownloadLogC) << getUid().toString() << "Download cache hit " << m_url.toString();
-            emitSucceeded();
+            emit succeeded();
+            emit finished();
             return;
         case State::Running:
             qCDebug(taskDownloadLogC) << getUid().toString() << "Downloading " << m_url.toString();
@@ -293,19 +294,22 @@ void Download::downloadFinished()
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitSucceeded();
+        emit succeeded();
+        emit finished();
         return;
     } else if (m_state == State::Failed) {
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitFailed("");
+        emit failed("");
+        emit finished();
         return;
     } else if (m_state == State::AbortedByUser) {
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download aborted in previous step:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitAborted();
+        emit aborted();
+        emit finished();
         return;
     }
 
@@ -322,13 +326,15 @@ void Download::downloadFinished()
         qCDebug(taskDownloadLogC) << getUid().toString() << "Download failed to finalize:" << m_url.toString();
         m_sink->abort();
         m_reply.reset();
-        emitFailed("");
+        emit failed("");
+        emit finished();
         return;
     }
 
     m_reply.reset();
     qCDebug(taskDownloadLogC) << getUid().toString() << "Download succeeded:" << m_url.toString();
-    emitSucceeded();
+    emit succeeded();
+    emit finished();
 }
 
 void Download::downloadReadyRead()
