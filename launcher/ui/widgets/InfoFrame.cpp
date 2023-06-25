@@ -41,9 +41,7 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-InfoFrame::InfoFrame(QWidget *parent) :
-    QFrame(parent),
-    ui(new Ui::InfoFrame)
+InfoFrame::InfoFrame(QWidget* parent) : QFrame(parent), ui(new Ui::InfoFrame)
 {
     ui->setupUi(this);
     ui->descriptionLabel->setHidden(true);
@@ -67,31 +65,18 @@ void InfoFrame::updateWithMod(Mod const& m)
 
     QString text = "";
     QString name = "";
-    QString link = "";
+    QString link = m.metaurl();
     QString toolTip = "";
     if (m.name().isEmpty())
         name = m.internal_id();
     else
         name = m.name();
 
-    if (auto meta = m.metadata(); meta != nullptr) {
-        auto slug = meta->slug.remove(".pw.toml");
-        switch (meta->provider) {
-            case ModPlatform::ResourceProvider::MODRINTH:
-                link = QString("https://modrinth.com/mod/%1").arg(slug);
-                break;
-            case ModPlatform::ResourceProvider::FLAME:
-                link = QString("https://www.curseforge.com/minecraft/mc-mods/%1").arg(slug);
-                break;
-        }
-    } else if (!m.homeurl().isEmpty())
-        link = m.homeurl();
-
     if (link.isEmpty())
         text = name;
     else {
         text = "<a href=\"" + link + "\">" + name + "</a>";
-        toolTip = tr("Go to mod's home page");
+        toolTip = link;
     }
     if (!m.authors().isEmpty())
         text += " by " + m.authors().join(", ");

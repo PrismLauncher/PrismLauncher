@@ -166,6 +166,13 @@ auto Mod::homeurl() const -> QString
     return details().homeurl;
 }
 
+auto Mod::metaurl() const -> QString
+{
+    if (metadata() == nullptr)
+        return homeurl();
+    return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
+}
+
 auto Mod::description() const -> QString
 {
     return details().description;

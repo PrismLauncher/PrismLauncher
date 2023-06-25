@@ -298,17 +298,9 @@ bool NilModFolderPage::shouldDisplay() const
 void ModFolderPage::visitModPages()
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    for (auto mod : m_model->selectedMods(selection))
-        if (auto meta = mod->metadata(); meta != nullptr) {
-            auto slug = meta->slug.remove(".pw.toml");
-            switch (meta->provider) {
-                case ModPlatform::ResourceProvider::MODRINTH:
-                    DesktopServices::openUrl(QString("https://modrinth.com/mod/%1").arg(slug));
-                    break;
-                case ModPlatform::ResourceProvider::FLAME:
-                    DesktopServices::openUrl(QString("https://www.curseforge.com/minecraft/mc-mods/%1").arg(slug));
-                    break;
-            }
-        } else if (mod->homeurl().size() != 0)
-            DesktopServices::openUrl(mod->homeurl());
+    for (auto mod : m_model->selectedMods(selection)) {
+        auto url = mod->metaurl();
+        if (!url.isEmpty())
+            DesktopServices::openUrl(url);
+    }
 }
