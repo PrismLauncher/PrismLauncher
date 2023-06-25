@@ -108,10 +108,11 @@ ModDetails ReadMCModTOML(QByteArray contents)
         return {};
     }
 #else
-    tomlData = toml::parse(contents.toStdString());
-    if (!tomlData) {
+    toml::parse_result result = toml::parse(contents.toStdString());
+    if (!result) {
         return {};
     }
+    tomlData = result.table();
 #endif
 
     // array defined by [[mods]]

@@ -39,7 +39,7 @@
 #include <QProcess>
 #include <memory>
 
-#include <qglobal.h>
+#include <QProgressDialog>
 #include <sys.h>
 
 #if defined Q_OS_WIN32
@@ -106,7 +106,7 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
 #if defined Q_OS_WIN32
 
 // taken from https://stackoverflow.com/a/25927081
-// getting a proper output to console with redirection support on windows is apearently hell
+// getting a proper output to console with redirection support on windows is apparently hell
 void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr)
 {
     // Re-initialize the C runtime "FILE" handles with clean handles bound to "nul". We do this because it has been
@@ -267,7 +267,10 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     auto prism_update_url = parser.value("update-url");
     if (prism_update_url.isEmpty())
+        prism_update_url = BuildConfig.UPDATER_GITHUB_REPO;
+    if (prism_update_url.isEmpty())
         prism_update_url = "https://github.com/PrismLauncher/PrismLauncher";
+
     m_prismRepoUrl = QUrl::fromUserInput(prism_update_url);
 
     m_checkOnly = parser.isSet("check-only");
@@ -333,6 +336,8 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         }
 #endif
     }
+
+    m_updateLogPath = FS::PathCombine(m_dataPath, "prism_launcher_update.log");
 
     {  // setup logging
         static const QString logBase = BuildConfig.LAUNCHER_NAME + "Updater" + (m_checkOnly ? "-CheckOnly" : "") + "-%0.log";
@@ -424,14 +429,16 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
         if (adjustedBy.size()) {
-            qDebug() << "Work dir before adjustment : " << origCwdPath;
-            qDebug() << "Work dir after adjustment  : " << QDir::currentPath();
+            qDebug() << "Data dir before adjustment : " << origCwdPath;
+            qDebug() << "Data dir after adjustment  : " << m_dataPath;
             qDebug() << "Adjusted by                : " << adjustedBy;
         } else {
-            qDebug() << "Work dir                   : " << QDir::currentPath();
+            qDebug() << "Data dir                   : " << QDir::currentPath();
         }
+        qDebug() << "Work dir                   : " << QDir::currentPath();
         qDebug() << "Binary path                : " << binPath;
         qDebug() << "Application root path      : " << m_rootPath;
+        qDebug() << "Portable install           : " << m_isPortable;
         qDebug() << "<> Paths set.";
     }
 
@@ -442,14 +449,28 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         m_network->setProxy(proxy);
     }
 
-    QMetaObject::invokeMethod(this, &PrismUpdaterApp::loadReleaseList, Qt::QueuedConnection);
+    auto marker_file_path = QDir(applicationDirPath()).absoluteFilePath(".prism_launcher_updater_unpack.marker");
+    auto marker_file = QFileInfo(marker_file_path);
+    if (marker_file.exists()) {
+        auto target_dir = QString(FS::read(marker_file_path)).trimmed();
+        if (target_dir.isEmpty()) {
+            qWarning() << "Empty updater marker file contains no install target. making best guess of parent dir";
+            target_dir = QDir(applicationDirPath()).absoluteFilePath("..");
+        }
+
+        QMetaObject::invokeMethod(
+            this, [this, target_dir]() { moveAndFinishUpdate(target_dir); }, Qt::QueuedConnection);
+
+    } else {
+        QMetaObject::invokeMethod(this, &PrismUpdaterApp::loadReleaseList, Qt::QueuedConnection);
+    }
 }
 
 PrismUpdaterApp::~PrismUpdaterApp()
 {
+    qDebug() << "updater shutting down";
     // Shut down logger by setting the logger function to nothing
     qInstallMessageHandler(nullptr);
-    qDebug() << "updater shutting down";
 
 #if defined Q_OS_WIN32
     // Detach from Windows console
@@ -574,6 +595,81 @@ void PrismUpdaterApp::run()
     }
 
     exit(0);
+}
+
+void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
+{
+    logUpdate("Finishing update process");
+    auto manifest_path = FS::PathCombine(applicationDirPath(), "manifest.txt");
+    QFileInfo manifest(manifest_path);
+
+    auto app_dir = QDir(applicationDirPath());
+
+    QStringList file_list;
+    if (manifest.isFile()) {
+        // load manifest from file
+        logUpdate(tr("Reading manifest from %1").arg(manifest.absoluteFilePath()));
+        try {
+            auto contents = QString::fromUtf8(FS::read(manifest.absoluteFilePath()));
+            auto files = contents.split('\n');
+            for (auto file : files) {
+                file_list.append(file.trimmed());
+            }
+        } catch (FS::FileSystemException) {
+        }
+    }
+
+    if (file_list.isEmpty()) {
+        logUpdate(tr("Manifest empty, making best guess of the directory contents of %1").arg(applicationDirPath()));
+        auto entries = target.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
+        for (auto entry : entries) {
+            file_list.append(entry.fileName());
+        }
+    }
+    logUpdate(tr("Installing the following to %1 :\n %2").arg(target.absolutePath()).arg(file_list.join(",\n  ")));
+
+    bool error = false;
+
+    QProgressDialog progress(tr("Backing up install at %1").arg(applicationDirPath()), "", 0, file_list.length());
+    progress.setCancelButton(nullptr);
+    progress.show();
+    QCoreApplication::processEvents();
+
+    int i = 0;
+    for (auto glob : file_list) {
+        QDirIterator iter(applicationDirPath(), QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+        progress.setValue(i);
+        QCoreApplication::processEvents();
+        while (iter.hasNext()) {
+            auto to_install_file = iter.next();
+            auto rel_path = app_dir.relativeFilePath(to_install_file);
+            auto install_path = FS::PathCombine(target.absolutePath(), rel_path);
+            logUpdate(tr("Installing %1 from %2").arg(install_path).arg(to_install_file));
+            FS::ensureFilePathExists(install_path);
+            auto result = FS::copy(to_install_file, install_path)();
+            if (!result) {
+                error = true;
+                logUpdate(tr("Failed copy %1 to %2").arg(to_install_file).arg(install_path));
+            }
+        }
+        i++;
+    }
+    progress.setValue(i);
+    QCoreApplication::processEvents();
+
+    if (error) {
+        logUpdate(tr("There were errors installing the update."));
+        auto fail_marker = FS::PathCombine(m_dataPath, ".prism_launcher_update.fail");
+        FS::move(m_updateLogPath, fail_marker);
+    } else {
+        logUpdate(tr("Update succeed."));
+        auto success_marker = FS::PathCombine(m_dataPath, ".prism_launcher_update.success");
+        FS::move(m_updateLogPath, success_marker);
+    }
+    auto update_lock_path = FS::PathCombine(m_dataPath, ".prism_launcher_update.lock");
+    FS::deletePath(update_lock_path);
+
+    exit(error ? 1 : 0);
 }
 
 void PrismUpdaterApp::printReleases()
@@ -739,23 +835,106 @@ bool PrismUpdaterApp::callAppImageUpdate()
 
 void PrismUpdaterApp::clearUpdateLog()
 {
-    auto update_log_path = FS::PathCombine(m_dataPath, "prism_launcher_update.log");
-    QFile::remove(update_log_path);
+    QFile::remove(m_updateLogPath);
 }
 
 void PrismUpdaterApp::logUpdate(const QString& msg)
 {
     qDebug() << qUtf8Printable(msg);
-    auto update_log_path = FS::PathCombine(m_dataPath, "prism_launcher_update.log");
-    FS::append(update_log_path, QStringLiteral("%1\n").arg(msg).toUtf8());
+    FS::append(m_updateLogPath, QStringLiteral("%1\n").arg(msg).toUtf8());
+}
+
+std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const QString& path)
+{
+    auto contents = QString(FS::read(path));
+    auto lines = contents.split('\n');
+
+    QDateTime timestamp;
+    QString from, to, target, data_path;
+    for (auto line : lines) {
+        auto index = line.indexOf("=");
+        if (index < 0)
+            continue;
+        auto left = line.left(index);
+        auto right = line.mid(index + 1);
+        if (left.toLower() == "timestamp") {
+            timestamp = QDateTime::fromString(right, Qt::ISODate);
+        } else if (left.toLower() == "from") {
+            from = right;
+        } else if (left.toLower() == "to") {
+            to = right;
+        } else if (left.toLower() == "target") {
+            target = right;
+        } else if (left.toLower() == "data_path") {
+            data_path = right;
+        }
+    }
+    return std::make_tuple(timestamp, from, to, target, data_path);
+}
+
+bool write_lock_file(const QString& path, QDateTime timestamp, QString from, QString to, QString target, QString data_path)
+{
+    try {
+        FS::write(path, QStringLiteral("TIMESTAMP=%1\nFROM=%2\nTO=%3\nTARGET=%4\nDATA_PATH=%5\n")
+                            .arg(timestamp.toString(Qt::ISODate))
+                            .arg(from)
+                            .arg(to)
+                            .arg(target)
+                            .arg(data_path)
+                            .toUtf8());
+    } catch (FS::FileSystemException err) {
+        qWarning() << "Error writing lockfile:" << err.what() << "\n" << err.cause();
+        return false;
+    }
+    return true;
 }
 
 void PrismUpdaterApp::performInstall(QFileInfo file)
 {
     qDebug() << "starting install";
     auto update_lock_path = FS::PathCombine(m_dataPath, ".prism_launcher_update.lock");
-    FS::write(update_lock_path, QStringLiteral("FROM=%1\nTO=%2\n").arg(m_prismVersion).arg(m_install_release.tag_name).toUtf8());
+    QFileInfo update_lock(update_lock_path);
+    if (update_lock.exists()) {
+        auto [timestamp, from, to, target, data_path] = read_lock_File(update_lock_path);
+        auto msg = tr("Update already in progress\n");
+        auto infoMsg =
+            tr("This installation has a update lock file present at: %1\n"
+               "\n"
+               "Timestamp: %2\n"
+               "Updating from version %3 to %4\n"
+               "Target install path: %5\n"
+               "Data Path: %6"
+               "\n"
+               "This likely means that a previous update attempt failed. Please ensure your installation is in working order before "
+               "proceeding.\n"
+               "Check the Prism Launcher updater log at \n"
+               "%7\n"
+               "for details on the last update attempt.\n"
+               "\n"
+               "To overwrite this lock and proceed with this update anyway, select \"Ignore\" below.")
+                .arg(update_lock_path)
+                .arg(timestamp.toString(Qt::ISODate), from, to, target, data_path)
+                .arg(m_updateLogPath);
+        QMessageBox msgBox;
+        msgBox.setText(msg);
+        msgBox.setInformativeText(infoMsg);
+        msgBox.setStandardButtons(QMessageBox::Ignore | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        switch (msgBox.exec()) {
+            case QMessageBox::Ignore:
+                break;
+            case QMessageBox::Cancel:
+                [[fallthrough]];
+            default:
+                return showFatalErrorMessage(tr("Update Aborted"), tr("The update attempt was aborted"));
+        }
+    }
+    write_lock_file(update_lock_path, QDateTime::currentDateTime(), m_prismVersion, m_install_release.tag_name, applicationDirPath(),
+                    m_dataPath);
     clearUpdateLog();
+
+    auto changelog_path = FS::PathCombine(m_dataPath, ".prism_launcher_update.changelog");
+    FS::write(changelog_path, m_install_release.body.toUtf8());
 
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
     if (m_isPortable || file.suffix().toLower() == "zip") {
@@ -779,14 +958,13 @@ void PrismUpdaterApp::unpackAndInstall(QFileInfo archive)
     if (auto loc = unpackArchive(archive)) {
         auto marker_file_path = loc.value().absoluteFilePath(".prism_launcher_updater_unpack.marker");
         FS::write(marker_file_path, applicationDirPath().toUtf8());
-        auto new_updater_path = loc.value().absoluteFilePath("prismlauncher-updater");
+        auto new_updater_path = loc.value().absoluteFilePath("prismlauncher_updater");
 #if defined Q_OS_WIN32
         new_updater_path.append(".exe");
 #endif
         logUpdate(tr("Starting new updater at '%1'").arg(new_updater_path));
         QProcess proc = QProcess();
-        proc.startDetached(new_updater_path, {}, loc.value().absolutePath());
-        if (!proc.waitForStarted(5000)) {
+        if (!proc.startDetached(new_updater_path, { "-d", m_dataPath }, loc.value().absolutePath())) {
             logUpdate(tr("Failed to launch '%1' %2").arg(new_updater_path).arg(proc.errorString()));
             return exit(10);
         }
@@ -807,7 +985,10 @@ void PrismUpdaterApp::backupAppDir()
         logUpdate(tr("Reading manifest from %1").arg(manifest.absoluteFilePath()));
         try {
             auto contents = QString::fromUtf8(FS::read(manifest.absoluteFilePath()));
-            file_list.append(contents.split('\n'));
+            auto files = contents.split('\n');
+            for (auto file : files) {
+                file_list.append(file.trimmed());
+            }
         } catch (FS::FileSystemException) {
         }
     }
@@ -815,19 +996,19 @@ void PrismUpdaterApp::backupAppDir()
     if (file_list.isEmpty()) {
         // best guess
         if (BuildConfig.BUILD_PLATFORM.toLower() == "linux") {
-            file_list.append({ "PrismLauncher", "bin/*", "share/*", "lib/*" });
+            file_list.append({ "PrismLauncher", "bin", "share", "lib" });
         } else {  // windows by process of elimination
             file_list.append({
-                "jars/*",
+                "jars",
                 "prismlauncher.exe",
                 "prismlauncher_filelink.exe",
+                "prismlauncher_updater.exe",
                 "qtlogging.ini",
-                "imageformats/*",
-                "iconengines/*",
-                "platforms/*",
-                "styles/*",
-                "styles/*",
-                "tls/*",
+                "imageformats",
+                "iconengines",
+                "platforms",
+                "styles",
+                "tls",
                 "qt.conf",
                 "Qt*.dll",
             });
@@ -839,32 +1020,41 @@ void PrismUpdaterApp::backupAppDir()
 
     QDir app_dir = QCoreApplication::applicationDirPath();
     auto backup_dir = FS::PathCombine(
-        app_dir.absolutePath(), QStringLiteral("backup_") +
-                                    QString(m_prismVersion).replace(QRegularExpression("[" + QRegularExpression::escape("\\/:*?\"<>|") + "]"), QString("_")) +
-                                    "-" + m_prismGitCommit);
+        app_dir.absolutePath(),
+        QStringLiteral("backup_") +
+            QString(m_prismVersion).replace(QRegularExpression("[" + QRegularExpression::escape("\\/:*?\"<>|") + "]"), QString("_")) + "-" +
+            m_prismGitCommit);
     FS::ensureFolderPathExists(backup_dir);
+    auto backup_marker_path = FS::PathCombine(m_dataPath, ".prism_launcher_update_backup_path.txt");
+    FS::write(backup_marker_path, backup_dir.toUtf8());
 
+    QProgressDialog progress(tr("Backing up install at %1").arg(applicationDirPath()), "", 0, file_list.length());
+    progress.setCancelButton(nullptr);
+    progress.show();
+    QCoreApplication::processEvents();
+    int i = 0;
     for (auto glob : file_list) {
-        QDirIterator iter(app_dir.absolutePath(), QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot,
-                          QDirIterator::Subdirectories);
+        QDirIterator iter(app_dir.absolutePath(), QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+        progress.setValue(i);
+        QCoreApplication::processEvents();
         while (iter.hasNext()) {
             auto to_bak_file = iter.next();
             auto rel_path = app_dir.relativeFilePath(to_bak_file);
             auto bak_path = FS::PathCombine(backup_dir, rel_path);
-
-            if (QFileInfo(to_bak_file).isFile()) {
-                logUpdate(tr("Backing up and then removing %1").arg(to_bak_file));
-                FS::ensureFilePathExists(bak_path);
-                auto result = FS::copy(to_bak_file, bak_path)();
-                if (!result) {
-                    logUpdate(tr("Failed to backup %1 to %2").arg(to_bak_file).arg(bak_path));
-                } else {
-                    if (!FS::deletePath(to_bak_file))
-                        logUpdate(tr("Failed to remove %1").arg(to_bak_file));
-                }
+            logUpdate(tr("Backing up and then removing %1").arg(to_bak_file));
+            FS::ensureFilePathExists(bak_path);
+            auto result = FS::copy(to_bak_file, bak_path)();
+            if (!result) {
+                logUpdate(tr("Failed to backup %1 to %2").arg(to_bak_file).arg(bak_path));
+            } else {
+                if (!FS::deletePath(to_bak_file))
+                    logUpdate(tr("Failed to remove %1").arg(to_bak_file));
             }
         }
+        i++;
     }
+    progress.setValue(i);
+    QCoreApplication::processEvents();
 }
 
 std::optional<QDir> PrismUpdaterApp::unpackArchive(QFileInfo archive)

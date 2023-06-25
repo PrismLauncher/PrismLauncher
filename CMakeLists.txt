@@ -148,8 +148,8 @@ set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_M
 # Build platform.
 set(Launcher_BUILD_PLATFORM "" CACHE STRING "A short string identifying the platform that this build was built for. Only used to display in the about dialog.")
 
-# Channel list URL
-set(Launcher_UPDATER_BASE "" CACHE STRING "Base URL for the updater.")
+# Github repo URL with releases for updater
+set(Launcher_UPDATER_GITHUB_REPO "" CACHE STRING "Base URL for the updater.")
 
 # The metadata server
 set(Launcher_META_URL "https://meta.prismlauncher.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")

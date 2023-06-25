@@ -68,6 +68,8 @@ ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Pr
     setAttribute(Qt::WidgetAttribute::WA_QuitOnClose, true);
     setSkipButton(false);
     changeProgress(0, 100);
+    updateSize();
+    adjustSize();
 }
 
 void ProgressDialog::setSkipButton(bool present, QString label)
@@ -96,7 +98,11 @@ ProgressDialog::~ProgressDialog()
 void ProgressDialog::updateSize()
 {   
     QSize lastSize = this->size();
-    QSize qSize = QSize(480, minimumSizeHint().height());
+    auto min_height = minimumSizeHint().height();
+    if (ui->taskProgressScrollArea->isHidden())
+        min_height -= ui->taskProgressScrollArea->minimumSizeHint().height();
+    min_height = std::max(min_height, 0);
+    QSize qSize = QSize(480, min_height);
 
     // if the current window is too small
     if ((lastSize != qSize) && (lastSize.height() < qSize.height()))
@@ -111,7 +117,6 @@ void ProgressDialog::updateSize()
     }
 
     setMinimumSize(qSize);
-
 }
 
 int ProgressDialog::execWithTask(Task* task)

@@ -241,12 +241,13 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
         return {};
     }
 #else
-    table = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
-    if (!table) {
+    toml::parse_result result = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
+    if (!result) {
         qWarning() << QString("Could not open file %1!").arg(normalized_fname);
-        qWarning() << "Reason: " << QString(table.error().what());
+        qWarning() << "Reason: " << result.error().description();
         return {};
     }
+    table = result.table();
 #endif
 
     // index_file.close();

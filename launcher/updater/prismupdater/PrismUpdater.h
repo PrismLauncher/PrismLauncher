@@ -85,7 +85,7 @@ class PrismUpdaterApp : public QApplication {
     QFileInfo downloadAsset(const GitHubReleaseAsset& asset);
     bool callAppImageUpdate();
 
-    void moveAndPostProcess(QDir target);
+    void moveAndFinishUpdate(QDir target);
 
    public slots:
     void downloadError(QString reason);
@@ -97,7 +97,6 @@ class PrismUpdaterApp : public QApplication {
 
     void clearUpdateLog();
     void logUpdate(const QString& msg);
-
 
     QString m_rootPath;
     QString m_dataPath;
@@ -113,6 +112,8 @@ class PrismUpdaterApp : public QApplication {
     bool m_printOnly;
     bool m_selectUI;
     bool m_allowDowngrade;
+
+    QString m_updateLogPath;
 
     QString m_prismBinaryName;
     QString m_prismVersion;
