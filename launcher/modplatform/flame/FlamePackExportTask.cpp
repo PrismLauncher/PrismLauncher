@@ -58,7 +58,7 @@ FlamePackExportTask::FlamePackExportTask(const QString& name,
 void FlamePackExportTask::executeTask()
 {
     setStatus(tr("Searching for files..."));
-    setProgress(0, 0);
+    setProgress(0, 5);
     collectFiles();
 }
 
@@ -106,11 +106,10 @@ void FlamePackExportTask::collectHashes()
 {
     setAbortable(true);
     setStatus(tr("Find file hashes..."));
+    setProgress(1, 5);
     auto allMods = mcInstance->loaderModList()->allMods();
     ConcurrentTask::Ptr hashing_task(new ConcurrentTask(this, "MakeHashesTask", 10));
     task.reset(hashing_task);
-    int totalProgres = 0;
-
     for (const QFileInfo& file : files) {
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
@@ -121,11 +120,9 @@ void FlamePackExportTask::collectHashes()
 
         if (relative.startsWith("resourcepacks/") &&
             (relative.endsWith(".zip") || relative.endsWith(".zip.disabled"))) {  // is resourcepack
-            totalProgres++;
             auto hash_task = Hashing::createFlameHasher(file.absoluteFilePath());
-            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, relative, file, totalProgres](QString hash) {
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, relative, file](QString hash) {
                 if (m_state == Task::State::Running) {
-                    setProgress(m_progress + 1, totalProgres);
                     pendingHashes.insert(hash, { relative, file.absoluteFilePath(), relative.endsWith(".zip") });
                 }
             });
@@ -147,11 +144,9 @@ void FlamePackExportTask::collectHashes()
                 continue;
             }
 
-            totalProgres++;
             auto hash_task = Hashing::createFlameHasher(mod->fileinfo().absoluteFilePath());
-            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod, totalProgres](QString hash) {
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) {
                 if (m_state == Task::State::Running) {
-                    setProgress(m_progress + 1, totalProgres);
                     pendingHashes.insert(hash, { mod->name(), mod->fileinfo().absoluteFilePath(), mod->enabled(), true });
                 }
             });
@@ -159,9 +154,28 @@ void FlamePackExportTask::collectHashes()
             hashing_task->addTask(hash_task);
         }
     }
+    auto step_progress = std::make_shared<TaskStepProgress>();
+    connect(hashing_task.get(), &Task::finished, this, [this, step_progress] {
+        step_progress->state = TaskStepState::Succeeded;
+        stepProgress(*step_progress);
+    });
 
     connect(hashing_task.get(), &Task::succeeded, this, &FlamePackExportTask::makeApiRequest);
-    connect(hashing_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+    connect(hashing_task.get(), &Task::failed, this, [this, step_progress](QString reason) {
+        step_progress->state = TaskStepState::Failed;
+        stepProgress(*step_progress);
+        emitFailed(reason);
+    });
+    connect(hashing_task.get(), &Task::stepProgress, this, &FlamePackExportTask::propogateStepProgress);
+
+    connect(hashing_task.get(), &Task::progress, this, [this, step_progress](qint64 current, qint64 total) {
+        step_progress->update(current, total);
+        stepProgress(*step_progress);
+    });
+    connect(hashing_task.get(), &Task::status, this, [this, step_progress](QString status) {
+        step_progress->status = status;
+        stepProgress(*step_progress);
+    });
     hashing_task->start();
 }
 
@@ -173,6 +187,7 @@ void FlamePackExportTask::makeApiRequest()
     }
 
     setStatus(tr("Find versions for hashes..."));
+    setProgress(2, 5);
     auto response = std::make_shared<QByteArray>();
 
     QList<uint> fingerprints;
@@ -186,7 +201,7 @@ void FlamePackExportTask::makeApiRequest()
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
+            qWarning() << "Error while parsing JSON response from CurseForge::CurrentVersions at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
             qWarning() << *response;
 
@@ -241,6 +256,7 @@ void FlamePackExportTask::makeApiRequest()
 void FlamePackExportTask::getProjectsInfo()
 {
     setStatus(tr("Find project info from CurseForge..."));
+    setProgress(3, 5);
     QList<QString> addonIds;
     for (auto resolved : resolvedFiles) {
         if (resolved.slug.isEmpty()) {
@@ -264,9 +280,10 @@ void FlamePackExportTask::getProjectsInfo()
         QJsonParseError parse_error{};
         auto doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
+            qWarning() << "Error while parsing JSON response from CurseForge projects task at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
             qWarning() << *response;
+            failed(parse_error.errorString());
             return;
         }
 
@@ -317,6 +334,7 @@ void FlamePackExportTask::getProjectsInfo()
 void FlamePackExportTask::buildZip()
 {
     setStatus(tr("Adding files..."));
+    setProgress(4, 5);
 
     buildZipFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
         QuaZip zip(output);
@@ -352,14 +370,19 @@ void FlamePackExportTask::buildZip()
         content = "<ul>" + content + "</ul>";
         modlist.write(content.toUtf8());
 
+        auto step_progress = std::make_shared<TaskStepProgress>();
+
         size_t progress = 0;
         for (const QFileInfo& file : files) {
             if (buildZipFuture.isCanceled()) {
                 QFile::remove(output);
+                step_progress->state = TaskStepState::Failed;
+                stepProgress(*step_progress);
                 return BuildZipResult();
             }
+            step_progress->update(progress, files.length());
+            stepProgress(*step_progress);
 
-            setProgress(progress, files.length());
             const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
             if (!resolvedFiles.contains(file.absoluteFilePath()) &&
                 !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative)) {
@@ -373,9 +396,12 @@ void FlamePackExportTask::buildZip()
 
         if (zip.getZipError() != 0) {
             QFile::remove(output);
+            step_progress->state = TaskStepState::Failed;
+            stepProgress(*step_progress);
             return BuildZipResult(tr("A zip error occurred"));
         }
-
+        step_progress->state = TaskStepState::Succeeded;
+        stepProgress(*step_progress);
         return BuildZipResult();
     });
     connect(&buildZipWatcher, &QFutureWatcher<BuildZipResult>::finished, this, &FlamePackExportTask::finish);
