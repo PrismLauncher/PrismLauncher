@@ -93,8 +93,8 @@ PageContainer::PageContainer(BasePageProvider *pageProvider, QString defaultId,
         page->listIndex = counter;
         page->setParentContainer(this);
         counter++;
-        page->updateExtraInfo = [this](QString info) {
-            if (m_currentPage)
+        page->updateExtraInfo = [this](QString id, QString info) {
+            if (m_currentPage && id == m_currentPage->id())
                 m_header->setText(m_currentPage->displayName() + info);
         };
     }
