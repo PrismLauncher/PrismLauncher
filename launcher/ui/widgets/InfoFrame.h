@@ -52,7 +52,7 @@ class InfoFrame : public QFrame {
     InfoFrame(QWidget* parent = nullptr);
     ~InfoFrame() override;
 
-    void setName(QString text = {}, QString toolTip = {});
+    void setName(QString text = {});
     void setDescription(QString text = {});
     void setImage(QPixmap img = {});
     void setLicense(QString text = {});

@@ -34,12 +34,23 @@
  *      limitations under the License.
  */
 
+#include <QLabel>
 #include <QMessageBox>
+#include <QToolTip>
 
 #include "InfoFrame.h"
 #include "ui_InfoFrame.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+
+void setupLinkTooTip(QLabel* label)
+{
+    QObject::connect(label, &QLabel::linkHovered, [label](const QString& link) {
+        if (!link.isEmpty() && !link.startsWith("http"))
+            return;
+        label->setToolTip(link);
+    });
+}
 
 InfoFrame::InfoFrame(QWidget* parent) : QFrame(parent), ui(new Ui::InfoFrame)
 {
@@ -48,6 +59,12 @@ InfoFrame::InfoFrame(QWidget* parent) : QFrame(parent), ui(new Ui::InfoFrame)
     ui->nameLabel->setHidden(true);
     ui->licenseLabel->setHidden(true);
     ui->issueTrackerLabel->setHidden(true);
+
+    setupLinkTooTip(ui->iconLabel);
+    setupLinkTooTip(ui->descriptionLabel);
+    setupLinkTooTip(ui->nameLabel);
+    setupLinkTooTip(ui->licenseLabel);
+    setupLinkTooTip(ui->issueTrackerLabel);
     updateHiddenState();
 }
 
@@ -66,7 +83,6 @@ void InfoFrame::updateWithMod(Mod const& m)
     QString text = "";
     QString name = "";
     QString link = m.metaurl();
-    QString toolTip = "";
     if (m.name().isEmpty())
         name = m.internal_id();
     else
@@ -76,12 +92,11 @@ void InfoFrame::updateWithMod(Mod const& m)
         text = name;
     else {
         text = "<a href=\"" + link + "\">" + name + "</a>";
-        toolTip = link;
     }
     if (!m.authors().isEmpty())
         text += " by " + m.authors().join(", ");
 
-    setName(text, toolTip);
+    setName(text);
 
     if (m.description().isEmpty()) {
         setDescription(QString());
@@ -89,14 +104,14 @@ void InfoFrame::updateWithMod(Mod const& m)
         setDescription(m.description());
     }
 
-    setImage(m.icon({64,64}));
+    setImage(m.icon({ 64, 64 }));
 
     auto licenses = m.licenses();
     QString licenseText = "";
     if (!licenses.empty()) {
         for (auto l : licenses) {
             if (!licenseText.isEmpty()) {
-                licenseText += "\n"; // add newline between licenses
+                licenseText += "\n";  // add newline between licenses
             }
             if (!l.name.isEmpty()) {
                 if (l.url.isEmpty()) {
@@ -226,29 +241,24 @@ void InfoFrame::updateHiddenState()
     }
 }
 
-void InfoFrame::setName(QString text, QString toolTip)
+void InfoFrame::setName(QString text)
 {
     if (text.isEmpty()) {
         ui->nameLabel->setHidden(true);
-        ui->nameLabel->setToolTip({});
     } else {
         ui->nameLabel->setText(text);
         ui->nameLabel->setHidden(false);
-        ui->nameLabel->setToolTip(toolTip);
     }
     updateHiddenState();
 }
 
 void InfoFrame::setDescription(QString text)
 {
-    if(text.isEmpty())
-    {
+    if (text.isEmpty()) {
         ui->descriptionLabel->setHidden(true);
         updateHiddenState();
         return;
-    }
-    else
-    {
+    } else {
         ui->descriptionLabel->setHidden(false);
         updateHiddenState();
     }
