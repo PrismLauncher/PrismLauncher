@@ -60,7 +60,7 @@ Config::Config()
 
     BUILD_PLATFORM = "@Launcher_BUILD_PLATFORM@";
     BUILD_DATE = "@Launcher_BUILD_TIMESTAMP@";
-    UPDATER_BASE = "@Launcher_UPDATER_BASE@";
+    UPDATER_GITHUB_REPO = "@Launcher_UPDATER_GITHUB_REPO@";
 
     MAC_SPARKLE_PUB_KEY = "@MACOSX_SPARKLE_UPDATE_PUBLIC_KEY@";
     MAC_SPARKLE_APPCAST_URL = "@MACOSX_SPARKLE_UPDATE_FEED_URL@";
@@ -89,7 +89,7 @@ Config::Config()
     {
         VERSION_CHANNEL = GIT_REFSPEC;
         VERSION_CHANNEL.remove("refs/heads/");
-        if(!UPDATER_BASE.isEmpty() && !BUILD_PLATFORM.isEmpty()) {
+        if(!UPDATER_GITHUB_REPO.isEmpty() && !BUILD_PLATFORM.isEmpty()) {
             UPDATER_ENABLED = true;
         }
     }

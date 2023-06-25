@@ -75,7 +75,7 @@ class Config {
     QString BUILD_DATE;
 
     /// URL for the updater's channel
-    QString UPDATER_BASE;
+    QString UPDATER_GITHUB_REPO;
 
     /// The public key used to sign releases for the Sparkle updater appcast
     QString MAC_SPARKLE_PUB_KEY;
