@@ -1166,7 +1166,7 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     int per_page = 30;
     auto page_url = QString("%1?per_page=%2&page=%3").arg(api_url).arg(QString::number(per_page)).arg(QString::number(page));
     auto response = std::make_shared<QByteArray>();
-    auto download = Net::Download::makeByteArray(page_url, response.get());
+    auto download = Net::Download::makeByteArray(page_url, response);
     download->setNetwork(m_network);
     m_current_url = page_url;
 
