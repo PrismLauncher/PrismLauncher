@@ -38,7 +38,10 @@
 #include <QString>
 #include <QFileInfo>
 #include <QSet>
+#include <QUrl>
+#if defined(LAUNCHER_APPLICATION)
 #include "minecraft/mod/Mod.h"
+#endif
 #include <functional>
 
 #include <quazip/JlCompress.h>
@@ -74,10 +77,12 @@ namespace MMCZip
      */
     bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks = false);
 
+#if defined(LAUNCHER_APPLICATION)
     /**
      * take a source jar, add mods to it, resulting in target jar
      */
     bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods);
+#endif
 
     /**
      * Find a single file in archive by file name (not path)

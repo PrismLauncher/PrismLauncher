@@ -35,6 +35,7 @@
 #include <QNetworkReply>
 #include <QUrl>
 #include <memory>
+#include <optional>
 
 #include "QObjectPtr.h"
 #include "net/Download.h"

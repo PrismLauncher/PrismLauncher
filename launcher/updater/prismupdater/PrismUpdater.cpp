@@ -72,7 +72,7 @@ namespace fs = std::filesystem;
 namespace fs = ghc::filesystem;
 #endif
 
-#include <DesktopServices.h>
+#include "DesktopServices.h"
 
 #include "updater/prismupdater/UpdaterDialogs.h"
 
@@ -83,7 +83,7 @@ namespace fs = ghc::filesystem;
 #include "net/Download.h"
 #include "net/RawHeaderProxy.h"
 
-#include <MMCZip.h>
+#include "MMCZip.h"
 
 /** output to the log file */
 void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg)

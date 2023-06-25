@@ -135,6 +135,7 @@ bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList
     return result;
 }
 
+#if defined(LAUNCHER_APPLICATION)
 // ours
 bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
 {
@@ -235,6 +236,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
     }
     return true;
 }
+#endif
 
 // ours
 QString MMCZip::findFolderOfFileInZip(QuaZip* zip, const QString& what, const QStringList& ignore_paths, const QString& root)
