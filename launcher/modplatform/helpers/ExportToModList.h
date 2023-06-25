@@ -20,14 +20,14 @@
 #include <QString>
 #include "minecraft/mod/Mod.h"
 
-namespace ExportToString {
+namespace ExportToModList {
 
-enum Formats { HTML, MARKDOWN };
+enum Formats { HTML, MARKDOWN, PLAINTXT, CUSTOM };
 enum OptionalData {
     Authors = 1 << 0,
     Url = 1 << 1,
     Version = 1 << 2,
 };
-QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData extraData);
-QString ExportModsToStringTask(QList<Mod*> mods, QString lineTemplate);
-}  // namespace ExportToString
+QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData);
+QString ExportToModList(QList<Mod*> mods, QString lineTemplate);
+}  // namespace ExportToModList

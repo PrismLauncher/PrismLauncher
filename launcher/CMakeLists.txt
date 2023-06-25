@@ -490,8 +490,8 @@ set(API_SOURCES
     modplatform/helpers/OverrideUtils.h
     modplatform/helpers/OverrideUtils.cpp
 
-    modplatform/helpers/ExportModsToStringTask.h
-    modplatform/helpers/ExportModsToStringTask.cpp
+    modplatform/helpers/ExportToModList.h
+    modplatform/helpers/ExportToModList.cpp
 )
 
 set(FTB_SOURCES
@@ -913,8 +913,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ExportInstanceDialog.h
     ui/dialogs/ExportMrPackDialog.cpp
     ui/dialogs/ExportMrPackDialog.h
-    ui/dialogs/ExportModsToStringDialog.cpp
-    ui/dialogs/ExportModsToStringDialog.h
+    ui/dialogs/ExportToModListDialog.cpp
+    ui/dialogs/ExportToModListDialog.h
     ui/dialogs/IconPickerDialog.cpp
     ui/dialogs/IconPickerDialog.h
     ui/dialogs/ImportResourceDialog.cpp
@@ -1062,7 +1062,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
     ui/dialogs/ExportMrPackDialog.ui
-    ui/dialogs/ExportModsToStringDialog.ui
+    ui/dialogs/ExportToModListDialog.ui
     ui/dialogs/IconPickerDialog.ui
     ui/dialogs/ImportResourceDialog.ui
     ui/dialogs/MSALoginDialog.ui

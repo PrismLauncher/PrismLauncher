@@ -479,12 +479,12 @@
     <string>Modrinth (mrpack)</string>
    </property>
   </action>
-  <action name="actionExportInstanceToString">
+  <action name="actionExportInstanceToModList">
    <property name="icon">
     <iconset theme="new"/>
    </property>
    <property name="text">
-    <string>Text</string>
+    <string>ModList (txt)</string>
    </property>
   </action>
   <action name="actionCreateInstanceShortcut">

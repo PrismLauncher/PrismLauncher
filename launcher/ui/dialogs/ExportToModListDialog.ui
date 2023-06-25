@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ExportModsToStringDialog</class>
- <widget class="QDialog" name="ExportModsToStringDialog">
+ <class>ExportToModListDialog</class>
+ <widget class="QDialog" name="ExportToModListDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Export Modrinth Pack</string>
+   <string>Export Pack to ModList</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
@@ -51,6 +51,11 @@
           <item>
            <property name="text">
             <string>Markdown</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Plaintext</string>
            </property>
           </item>
           <item>
@@ -124,6 +129,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QTextBrowser" name="resultText">
+          <property name="openExternalLinks">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -141,7 +153,7 @@
      <item>
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="standardButtons">
-        <set>QDialogButtonBox::Ok</set>
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
        </property>
       </widget>
      </item>
@@ -154,12 +166,28 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ExportModsToStringDialog</receiver>
+   <receiver>ExportToModListDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>334</x>
      <y>435</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>324</x>
+     <y>206</y>
+    </hint>
+   </hints>
+  </connection>
+   <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>ExportToModListDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>324</x>
+     <y>390</y>
     </hint>
     <hint type="destinationlabel">
      <x>324</x>

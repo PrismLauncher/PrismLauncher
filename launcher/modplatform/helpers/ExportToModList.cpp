@@ -15,11 +15,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "ExportModsToStringTask.h"
-#include "modplatform/ModIndex.h"
+#include "ExportToModList.h"
 
-namespace ExportToString {
-QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData extraData)
+namespace ExportToModList {
+QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData)
 {
     switch (format) {
         case HTML: {
@@ -28,12 +27,7 @@ QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData ex
                 auto meta = mod->metadata();
                 auto modName = mod->name();
                 if (extraData & Url) {
-                    auto url = mod->homeurl();
-                    if (meta != nullptr) {
-                        url = (meta->provider == ModPlatform::ResourceProvider::FLAME ? "https://www.curseforge.com/minecraft/mc-mods/"
-                                                                                      : "https://modrinth.com/mod/") +
-                              meta->slug.remove(".pw.toml");
-                    }
+                    auto url = mod->metaurl();
                     if (!url.isEmpty())
                         modName = QString("<a href=\"%1\">%2</a>").arg(url, modName);
                 }
@@ -49,7 +43,7 @@ QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData ex
                     line += " by " + mod->authors().join(", ");
                 lines.append(QString("<ul>%1</ul>").arg(line));
             }
-            return QString("<html><body>\n\t%1\n</body></html>").arg(lines.join("\n\t"));
+            return QString("<html><body><li>\n\t%1\n</li></body></html>").arg(lines.join("\n\t"));
         }
         case MARKDOWN: {
             QStringList lines;
@@ -57,12 +51,7 @@ QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData ex
                 auto meta = mod->metadata();
                 auto modName = mod->name();
                 if (extraData & Url) {
-                    auto url = mod->homeurl();
-                    if (meta != nullptr) {
-                        url = (meta->provider == ModPlatform::ResourceProvider::FLAME ? "https://www.curseforge.com/minecraft/mc-mods/"
-                                                                                      : "https://modrinth.com/mod/") +
-                              meta->slug.remove(".pw.toml");
-                    }
+                    auto url = mod->metaurl();
                     if (!url.isEmpty())
                         modName = QString("[%1](%2)").arg(modName, url);
                 }
@@ -76,6 +65,31 @@ QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData ex
                 }
                 if (extraData & Authors && !mod->authors().isEmpty())
                     line += " by " + mod->authors().join(", ");
+                lines << "- " + line;
+            }
+            return lines.join("\n");
+        }
+        case PLAINTXT: {
+            QStringList lines;
+            for (auto mod : mods) {
+                auto meta = mod->metadata();
+                auto modName = mod->name();
+
+                auto line = "name: " + modName + ";";
+                if (extraData & Url) {
+                    auto url = mod->metaurl();
+                    if (!url.isEmpty())
+                        line += " url: " + url + ";";
+                }
+                if (extraData & Version) {
+                    auto ver = mod->version();
+                    if (ver.isEmpty() && meta != nullptr)
+                        ver = meta->version().toString();
+                    if (!ver.isEmpty())
+                        line += " version: " + QString("[%1]").arg(ver) + ";";
+                }
+                if (extraData & Authors && !mod->authors().isEmpty())
+                    line += " authors " + mod->authors().join(", ") + ";";
                 lines << line;
             }
             return lines.join("\n");
@@ -86,19 +100,13 @@ QString ExportModsToStringTask(QList<Mod*> mods, Formats format, OptionalData ex
     }
 }
 
-QString ExportModsToStringTask(QList<Mod*> mods, QString lineTemplate)
+QString ExportToModList(QList<Mod*> mods, QString lineTemplate)
 {
     QStringList lines;
     for (auto mod : mods) {
         auto meta = mod->metadata();
         auto modName = mod->name();
-
-        auto url = mod->homeurl();
-        if (meta != nullptr) {
-            url = (meta->provider == ModPlatform::ResourceProvider::FLAME ? "https://www.curseforge.com/minecraft/mc-mods/"
-                                                                          : "https://modrinth.com/mod/") +
-                  meta->slug.remove(".pw.toml");
-        }
+        auto url = mod->metaurl();
         auto ver = mod->version();
         if (ver.isEmpty() && meta != nullptr)
             ver = meta->version().toString();
@@ -111,4 +119,4 @@ QString ExportModsToStringTask(QList<Mod*> mods, QString lineTemplate)
     }
     return lines.join("\n");
 }
-}  // namespace ExportToString
+}  // namespace ExportToModList
