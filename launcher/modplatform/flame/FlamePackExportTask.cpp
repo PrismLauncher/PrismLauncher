@@ -165,21 +165,6 @@ void FlamePackExportTask::collectHashes()
         }
     }
 
-    for (const QFileInfo& file : files) {
-        const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
-        if (!relative.endsWith(".zip") || !relative.startsWith("resourcepacks/"))
-            continue;
-        totalProgres++;
-        auto hash_task = Hashing::createFlameHasher(file.absoluteFilePath());
-        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, relative, file, totalProgres](QString hash) {
-            if (m_state == Task::State::Running) {
-                setProgress(m_progress + 1, totalProgres);
-                pendingHashes.insert(hash, { relative, file.absoluteFilePath(), true });
-            }
-        });
-        connect(hash_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
-        hashing_task->addTask(hash_task);
-    }
     connect(hashing_task.get(), &Task::succeeded, this, &FlamePackExportTask::makeApiRequest);
     connect(hashing_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
     hashing_task->start();
