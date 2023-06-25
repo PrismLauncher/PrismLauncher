@@ -37,6 +37,8 @@
 #include "tasks/Task.h"
 
 const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name}{authors}</a></li>\n";
+const QStringList FlamePackExportTask::PREFIXES({ "mods/", "resourcepacks/" });
+const QStringList FlamePackExportTask::FILE_EXTENSIONS({ "jar", "zip" });
 
 FlamePackExportTask::FlamePackExportTask(const QString& name,
                                          const QString& version,
@@ -105,33 +107,62 @@ void FlamePackExportTask::collectHashes()
 {
     setAbortable(true);
     setStatus(tr("Find file hashes..."));
-    auto mods = mcInstance->loaderModList()->allMods();
+    auto allMods = mcInstance->loaderModList()->allMods();
     ConcurrentTask::Ptr hashing_task(new ConcurrentTask(this, "MakeHashesTask", 10));
     task.reset(hashing_task);
-    int totalProgres = mods.count();
+    int totalProgres = allMods.count();
     setProgress(0, totalProgres);
-    for (auto* mod : mods) {
-        if (!mod || mod->type() == ResourceType::FOLDER) {
-            setProgress(m_progress + 1, totalProgres);
+
+    for (const QFileInfo& file : files) {
+        const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
+        // require sensible file types
+        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(), [&relative](const QString& prefix) { return relative.startsWith(prefix); }))
             continue;
-        }
-        if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
-            resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
-                                 { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled(), true,
-                                   mod->metadata()->name, mod->metadata()->slug, mod->authors().join(", ") });
-            setProgress(m_progress + 1, totalProgres);
+        if (!std::any_of(FILE_EXTENSIONS.begin(), FILE_EXTENSIONS.end(), [&relative](const QString& extension) {
+                return relative.endsWith('.' + extension) || relative.endsWith('.' + extension + ".disabled");
+            }))
+            continue;
+
+        if (relative.startsWith("resourcepacks/") &&
+            (relative.endsWith(".zip") || relative.endsWith(".zip.disabled"))) {  // is resourcepack
+            totalProgres++;
+            auto hash_task = Hashing::createFlameHasher(file.absoluteFilePath());
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, relative, file, totalProgres](QString hash) {
+                if (m_state == Task::State::Running) {
+                    setProgress(m_progress + 1, totalProgres);
+                    pendingHashes.insert(hash, { relative, file.absoluteFilePath(), relative.endsWith(".zip") });
+                }
+            });
+            connect(hash_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+            hashing_task->addTask(hash_task);
             continue;
         }
 
-        auto hash_task = Hashing::createFlameHasher(mod->fileinfo().absoluteFilePath());
-        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod, totalProgres](QString hash) {
-            if (m_state == Task::State::Running) {
+        if (auto modIter = std::find_if(allMods.begin(), allMods.end(), [&file](Mod* mod) { return mod->fileinfo() == file; });
+            modIter != allMods.end()) {
+            const Mod* mod = *modIter;
+            if (!mod || mod->type() == ResourceType::FOLDER) {
                 setProgress(m_progress + 1, totalProgres);
-                pendingHashes.insert(hash, { mod->name(), mod->fileinfo().absoluteFilePath(), mod->enabled(), true });
+                continue;
             }
-        });
-        connect(hash_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
-        hashing_task->addTask(hash_task);
+            if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
+                resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
+                                     { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled(), true,
+                                       mod->metadata()->name, mod->metadata()->slug, mod->authors().join(", ") });
+                setProgress(m_progress + 1, totalProgres);
+                continue;
+            }
+
+            auto hash_task = Hashing::createFlameHasher(mod->fileinfo().absoluteFilePath());
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod, totalProgres](QString hash) {
+                if (m_state == Task::State::Running) {
+                    setProgress(m_progress + 1, totalProgres);
+                    pendingHashes.insert(hash, { mod->name(), mod->fileinfo().absoluteFilePath(), mod->enabled(), true });
+                }
+            });
+            connect(hash_task.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+            hashing_task->addTask(hash_task);
+        }
     }
 
     for (const QFileInfo& file : files) {
