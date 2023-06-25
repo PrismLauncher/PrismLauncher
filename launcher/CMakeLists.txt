@@ -141,6 +141,8 @@ set(NET_SOURCES
     net/ApiHeaderProxy.h
     net/ApiDownload.h
     net/ApiDownload.cpp
+    net/ApiUpload.cpp
+    net/ApiUpload.h
 )
 
 # Game launch logic
