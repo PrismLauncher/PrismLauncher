@@ -367,6 +367,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/LocalWorldSaveParseTask.cpp
     minecraft/mod/tasks/LocalResourceParse.h
     minecraft/mod/tasks/LocalResourceParse.cpp
+    minecraft/mod/tasks/GetModDependenciesTask.h
+    minecraft/mod/tasks/GetModDependenciesTask.cpp
 
     # Assets
     minecraft/AssetsUtils.h
@@ -1096,6 +1098,7 @@ endif()
 
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Launcher_logic
     systeminfo

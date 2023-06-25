@@ -269,7 +269,7 @@
           <item>
            <widget class="QCheckBox" name="maximizedCheckBox">
             <property name="text">
-             <string>Start Minecraft maximized?</string>
+             <string>Start Minecraft maximized</string>
             </property>
            </widget>
           </item>
@@ -341,21 +341,21 @@
           <item>
            <widget class="QCheckBox" name="showConsoleCheck">
             <property name="text">
-             <string>Show console while the game is running?</string>
+             <string>Show console while the game is running</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="autoCloseConsoleCheck">
             <property name="text">
-             <string>Automatically close console when the game quits?</string>
+             <string>Automatically close console when the game quits</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="showConsoleErrorCheck">
             <property name="text">
-             <string>Show console when the game crashes?</string>
+             <string>Show console when the game crashes</string>
             </property>
            </widget>
           </item>

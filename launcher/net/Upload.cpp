@@ -38,6 +38,7 @@
 
 #include "Upload.h"
 
+#include <memory>
 #include <utility>
 #include "BuildConfig.h"
 #include "ByteArraySink.h"
@@ -256,7 +257,7 @@ void Upload::executeTask()
     connect(rep, &QNetworkReply::readyRead, this, &Upload::downloadReadyRead);
 }
 
-Upload::Ptr Upload::makeByteArray(QUrl url, QByteArray* output, QByteArray m_post_data)
+Upload::Ptr Upload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
 {
     auto up = makeShared<Upload>();
     up->m_url = std::move(url);

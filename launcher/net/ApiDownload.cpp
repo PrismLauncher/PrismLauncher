@@ -37,7 +37,7 @@ auto ApiDownload::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> D
     return dl;
 }
 
-auto ApiDownload::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
+auto ApiDownload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
 {
     auto dl = makeShared<ApiDownload>();
     dl->m_url = url;

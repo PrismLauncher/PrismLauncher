@@ -9,4 +9,6 @@ class ShaderPackFolderModel : public ResourceFolderModel {
     explicit ShaderPackFolderModel(const QString& dir, BaseInstance* instance)
         : ResourceFolderModel(QDir(dir), instance)
     {}
+    
+    virtual QString id() const override { return "shaderpacks"; }
 };

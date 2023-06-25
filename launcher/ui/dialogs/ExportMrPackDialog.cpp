@@ -53,6 +53,7 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     const QDir root(instance->gameRoot());
     proxy = new FileIgnoreProxy(instance->gameRoot(), this);
     proxy->setSourceModel(model);
+    proxy->setFilterRegularExpression("^(?!(\\.DS_Store)|([tT]humbs\\.db)).+$");
 
     const QDir::Filters filter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
 

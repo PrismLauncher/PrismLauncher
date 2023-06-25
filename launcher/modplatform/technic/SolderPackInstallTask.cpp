@@ -37,21 +37,20 @@
 
 #include <FileSystem.h>
 #include <Json.h>
-#include <QtConcurrentRun>
 #include <MMCZip.h>
+#include <QtConcurrentRun>
 
-#include "TechnicPackProcessor.h"
 #include "SolderPackManifest.h"
+#include "TechnicPackProcessor.h"
 #include "net/ChecksumValidator.h"
 #include "net/ApiDownload.h"
 
-Technic::SolderPackInstallTask::SolderPackInstallTask(
-    shared_qobject_ptr<QNetworkAccessManager> network,
-    const QUrl &solderUrl,
-    const QString &pack,
-    const QString &version,
-    const QString &minecraftVersion
-) {
+Technic::SolderPackInstallTask::SolderPackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network,
+                                                      const QUrl& solderUrl,
+                                                      const QString& pack,
+                                                      const QString& version,
+                                                      const QString& minecraftVersion)
+{
     m_solderUrl = solderUrl;
     m_pack = pack;
     m_version = version;
@@ -59,9 +58,9 @@ Technic::SolderPackInstallTask::SolderPackInstallTask(
     m_minecraftVersion = minecraftVersion;
 }
 
-bool Technic::SolderPackInstallTask::abort() {
-    if(m_abortable)
-    {
+bool Technic::SolderPackInstallTask::abort()
+{
+    if (m_abortable) {
         return m_filesNetJob->abort();
     }
     return false;
@@ -73,7 +72,7 @@ void Technic::SolderPackInstallTask::executeTask()
 
     m_filesNetJob.reset(new NetJob(tr("Resolving modpack files"), m_network));
     auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
-    m_filesNetJob->addNetAction(Net::ApiDownload::makeByteArray(sourceUrl, &m_response));
+    m_filesNetJob->addNetAction(Net::ApiDownload::makeByteArray(sourceUrl, m_response));
 
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::fileListSucceeded);
@@ -86,11 +85,11 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
 {
     setStatus(tr("Downloading modpack"));
 
-    QJsonParseError parse_error {};
-    QJsonDocument doc = QJsonDocument::fromJson(m_response, &parse_error);
+    QJsonParseError parse_error{};
+    QJsonDocument doc = QJsonDocument::fromJson(*m_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << m_response;
+        qWarning() << *m_response;
         return;
     }
     auto obj = doc.object();
@@ -111,7 +110,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     m_filesNetJob.reset(new NetJob(tr("Downloading modpack"), m_network));
 
     int i = 0;
-    for (const auto &mod : build.mods) {
+    for (const auto& mod : build.mods) {
         auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
 
         auto dl = Net::ApiDownload::makeFile(mod.url, path);

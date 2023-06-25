@@ -134,8 +134,8 @@ void ModrinthPackExportTask::collectHashes()
                     QCryptographicHash sha1(QCryptographicHash::Algorithm::Sha1);
                     sha1.addData(data);
 
-                    ResolvedFile file{ sha1.result().toHex(), sha512.result().toHex(), url.toString(), openFile.size() };
-                    resolvedFiles[relative] = file;
+                    ResolvedFile resolvedFile{ sha1.result().toHex(), sha512.result().toHex(), url.toEncoded(), openFile.size() };
+                    resolvedFiles[relative] = resolvedFile;
 
                     // nice! we've managed to resolve based on local metadata!
                     // no need to enqueue it
@@ -157,7 +157,7 @@ void ModrinthPackExportTask::makeApiRequest()
     if (pendingHashes.isEmpty())
         buildZip();
     else {
-        QByteArray* response = new QByteArray;
+        auto response = std::make_shared<QByteArray>();
         task = api.currentVersions(pendingHashes.values(), "sha512", response);
         connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
         connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
@@ -165,7 +165,7 @@ void ModrinthPackExportTask::makeApiRequest()
     }
 }
 
-void ModrinthPackExportTask::parseApiResponse(const QByteArray* response)
+void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<QByteArray> response)
 {
     task = nullptr;
 

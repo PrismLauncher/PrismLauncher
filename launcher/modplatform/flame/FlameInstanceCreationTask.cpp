@@ -155,6 +155,9 @@ bool FlameCreationTask::updateInstance()
 
                     old_files.remove(file.key());
                     files_iterator = files.erase(files_iterator);
+
+                    if (files_iterator != files.begin())
+                        files_iterator--;
                 }
             }
 
@@ -181,7 +184,7 @@ bool FlameCreationTask::updateInstance()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto* raw_response = new QByteArray;
+        auto raw_response = std::make_shared<QByteArray>();
         auto job = api.getFiles(fileIds, raw_response);
 
         QEventLoop loop;

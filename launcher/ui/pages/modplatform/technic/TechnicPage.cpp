@@ -145,7 +145,7 @@ void TechnicPage::suggestCurrent()
 
     auto netJob = makeShared<NetJob>(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
     QString slug = current.slug;
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), &response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), response));
     QObject::connect(netJob.get(), &NetJob::succeeded, this, [this, slug]
     {
         jobPtr.reset();
@@ -156,7 +156,7 @@ void TechnicPage::suggestCurrent()
         }
 
         QJsonParseError parse_error {};
-        QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         QJsonObject obj = doc.object();
         if(parse_error.error != QJsonParseError::NoError)
         {
@@ -251,7 +251,7 @@ void TechnicPage::metadataLoaded()
 
         auto netJob = makeShared<NetJob>(QString("Technic::SolderMeta(%1)").arg(current.name), APPLICATION->network());
         auto url = QString("%1/modpack/%2").arg(current.url, current.slug);
-        netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), &response));
+        netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
 
         QObject::connect(netJob.get(), &NetJob::succeeded, this, &TechnicPage::onSolderLoaded);
 
@@ -293,11 +293,11 @@ void TechnicPage::onSolderLoaded() {
 
     current.versions.clear();
 
-    QJsonParseError parse_error {};
-    auto doc = QJsonDocument::fromJson(response, &parse_error);
+    QJsonParseError parse_error{};
+    auto doc = QJsonDocument::fromJson(*response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from Solder at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qWarning() << *response;
         fallback();
         return;
     }
@@ -306,8 +306,7 @@ void TechnicPage::onSolderLoaded() {
     TechnicSolder::Pack pack;
     try {
         TechnicSolder::loadPack(pack, obj);
-    }
-    catch (const JSONValidationError& err) {
+    } catch (const JSONValidationError& err) {
         qCritical() << "Couldn't parse Solder pack metadata:" << err.cause();
         fallback();
         return;

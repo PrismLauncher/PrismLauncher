@@ -25,7 +25,7 @@
 
 namespace Net {
 
-Upload::Ptr ApiUpload::makeByteArray(QUrl url, QByteArray* output, QByteArray m_post_data)
+Upload::Ptr ApiUpload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
 {
       auto up = makeShared<ApiUpload>();
       up->m_url = std::move(url);
