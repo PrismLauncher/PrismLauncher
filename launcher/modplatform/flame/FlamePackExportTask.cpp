@@ -110,8 +110,7 @@ void FlamePackExportTask::collectHashes()
     auto allMods = mcInstance->loaderModList()->allMods();
     ConcurrentTask::Ptr hashing_task(new ConcurrentTask(this, "MakeHashesTask", 10));
     task.reset(hashing_task);
-    int totalProgres = allMods.count();
-    setProgress(0, totalProgres);
+    int totalProgres = 0;
 
     for (const QFileInfo& file : files) {
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
@@ -142,17 +141,16 @@ void FlamePackExportTask::collectHashes()
             modIter != allMods.end()) {
             const Mod* mod = *modIter;
             if (!mod || mod->type() == ResourceType::FOLDER) {
-                setProgress(m_progress + 1, totalProgres);
                 continue;
             }
             if (mod->metadata() && mod->metadata()->provider == ModPlatform::ResourceProvider::FLAME) {
                 resolvedFiles.insert(mod->fileinfo().absoluteFilePath(),
                                      { mod->metadata()->project_id.toInt(), mod->metadata()->file_id.toInt(), mod->enabled(), true,
                                        mod->metadata()->name, mod->metadata()->slug, mod->authors().join(", ") });
-                setProgress(m_progress + 1, totalProgres);
                 continue;
             }
 
+            totalProgres++;
             auto hash_task = Hashing::createFlameHasher(mod->fileinfo().absoluteFilePath());
             connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod, totalProgres](QString hash) {
                 if (m_state == Task::State::Running) {
@@ -209,9 +207,7 @@ void FlamePackExportTask::makeApiRequest()
 
                 return;
             }
-            size_t progress = 0;
             for (auto match : data_arr) {
-                setProgress(progress++, data_arr.count());
                 auto match_obj = Json::ensureObject(match, {});
                 auto file_obj = Json::ensureObject(match_obj, "file", {});
 
@@ -284,9 +280,7 @@ void FlamePackExportTask::getProjectsInfo()
             else
                 entries = Json::requireArray(Json::requireObject(doc), "data");
 
-            size_t progress = 0;
             for (auto entry : entries) {
-                setProgress(progress++, entries.count());
                 auto entry_obj = Json::requireObject(entry);
 
                 try {
