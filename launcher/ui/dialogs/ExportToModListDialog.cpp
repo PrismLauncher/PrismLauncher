@@ -21,6 +21,7 @@
 #include <QComboBox>
 #include <QTextEdit>
 #include "FileSystem.h"
+#include "Markdown.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/helpers/ExportToModList.h"
@@ -76,11 +77,7 @@ void ExportToModListDialog::formatChanged(int index)
         case 1: {
             ui->templateGroup->setDisabled(true);
             ui->optionsGroup->setDisabled(false);
-#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
             ui->resultText->show();
-#else
-            ui->resultText->hide();
-#endif
             format = ExportToModList::MARKDOWN;
             break;
         }
@@ -127,9 +124,7 @@ void ExportToModListDialog::triggerImp()
         }
         case ExportToModList::MARKDOWN: {
             exampleLine = "[{name}]({url})[{version}] by {authors}";
-#if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
-            ui->resultText->setMarkdown(txt);
-#endif
+            ui->resultText->setHtml(markdownToHTML(txt));
             break;
         }
         case ExportToModList::PLAINTXT: {
