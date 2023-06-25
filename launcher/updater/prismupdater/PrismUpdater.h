@@ -42,7 +42,7 @@
 #define PRISM_EXTERNAL_EXE
 #include "FileSystem.h"
 
-#include "updater/prismupdater/GitHubRelease.h"
+#include "GitHubRelease.h"
 
 class PrismUpdaterApp : public QApplication {
     // friends for the purpose of limiting access to deprecated stuff

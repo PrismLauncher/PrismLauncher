@@ -20,17 +20,14 @@
  *
  */
 
-
-
-#include "updater/prismupdater/PrismUpdater.h"
+#include "PrismUpdater.h"
 int main(int argc, char* argv[])
 {
     PrismUpdaterApp wUpApp(argc, argv);
 
-    switch(wUpApp.status()) {
+    switch (wUpApp.status()) {
         case PrismUpdaterApp::Starting:
-        case PrismUpdaterApp::Initialized:
-        {
+        case PrismUpdaterApp::Initialized: {
             return wUpApp.exec();
         }
         case PrismUpdaterApp::Failed:
@@ -40,5 +37,4 @@ int main(int argc, char* argv[])
         default:
             return -1;
     }
-
 }
