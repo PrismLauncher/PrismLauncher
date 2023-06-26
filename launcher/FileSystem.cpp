@@ -783,7 +783,10 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
         return false;
     }
 
-    application.mkpath(".");
+    if (!application.mkpath(".")) {
+        qWarning() << "Couldn't create application";
+        return false;
+    }
 
     QDir content = application.path() + "/Contents/";
     QDir resources = content.path() + "/Resources/";
