@@ -224,6 +224,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         // disabled until we have an instance selected
         ui->instanceToolBar->setEnabled(false);
         setInstanceActionsEnabled(false);
+
+        // add a close button at the end of the main toolbar when running on gamescope / steam deck
+        // FIXME: detect if we don't have server side decorations instead
+        if (qgetenv("XDG_CURRENT_DESKTOP") == "gamescope") {
+            ui->mainToolBar->addAction(ui->actionCloseWindow);
+        }
+
     }
 
     // add the toolbar toggles to the view menu
