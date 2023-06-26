@@ -37,13 +37,13 @@ QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData
                     if (ver.isEmpty() && meta != nullptr)
                         ver = meta->version().toString();
                     if (!ver.isEmpty())
-                        line += QString("[%1]").arg(ver);
+                        line += QString(" [%1]").arg(ver);
                 }
                 if (extraData & Authors && !mod->authors().isEmpty())
                     line += " by " + mod->authors().join(", ");
-                lines.append(QString("<ul>%1</ul>").arg(line));
+                lines.append(QString("<li>%1</li>").arg(line));
             }
-            return QString("<html><body><li>\n\t%1\n</li></body></html>").arg(lines.join("\n\t"));
+            return QString("<html><body><ul>\n\t%1\n</ul></body></html>").arg(lines.join("\n\t"));
         }
         case MARKDOWN: {
             QStringList lines;
@@ -61,7 +61,7 @@ QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData
                     if (ver.isEmpty() && meta != nullptr)
                         ver = meta->version().toString();
                     if (!ver.isEmpty())
-                        line += QString("[%1]").arg(ver);
+                        line += QString(" [%1]").arg(ver);
                 }
                 if (extraData & Authors && !mod->authors().isEmpty())
                     line += " by " + mod->authors().join(", ");
@@ -75,21 +75,21 @@ QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData
                 auto meta = mod->metadata();
                 auto modName = mod->name();
 
-                auto line = "name: " + modName + ";";
+                auto line = modName;
                 if (extraData & Url) {
                     auto url = mod->metaurl();
                     if (!url.isEmpty())
-                        line += " url: " + url + ";";
+                        line += QString(" (%1)").arg(url);
                 }
                 if (extraData & Version) {
                     auto ver = mod->version();
                     if (ver.isEmpty() && meta != nullptr)
                         ver = meta->version().toString();
                     if (!ver.isEmpty())
-                        line += " version: " + QString("[%1]").arg(ver) + ";";
+                        line += QString(" [%1]").arg(ver);
                 }
                 if (extraData & Authors && !mod->authors().isEmpty())
-                    line += " authors " + mod->authors().join(", ") + ";";
+                    line += " by " + mod->authors().join(", ");
                 lines << line;
             }
             return lines.join("\n");
