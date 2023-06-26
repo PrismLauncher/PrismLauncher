@@ -41,7 +41,6 @@
 
 #include <QProgressDialog>
 #include <sys.h>
-#include <winbase.h>
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -210,10 +209,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
             BindCrtHandlesToStdHandles(true, true, true);
             consoleAttached = true;
         }
-    } else if (stdout_type == FILE_TYPE_DISK || stdout_type == FILE_TYPE_PIPE ) {
-        BindCrtHandlesToStdHandles(true, true, true);
-    }
-    
+    } 
 #endif
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);

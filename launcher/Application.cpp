@@ -280,8 +280,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             BindCrtHandlesToStdHandles(true, true, true);
             consoleAttached = true;
         }
-    } else if (stdout_type == FILE_TYPE_DISK || stdout_type == FILE_TYPE_PIPE ) {
-        BindCrtHandlesToStdHandles(true, true, true);
     }
 #endif
     setOrganizationName(BuildConfig.LAUNCHER_NAME);

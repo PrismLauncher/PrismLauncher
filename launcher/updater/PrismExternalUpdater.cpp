@@ -28,6 +28,7 @@
 #include <QProcess>
 #include <QTimer>
 #include <QSettings>
+#include <QCoreApplication>
 
 #include "StringUtils.h"
 
@@ -80,6 +81,8 @@ void PrismExternalUpdater::checkForUpdates()
     QProgressDialog progress(tr("Checking for updates..."), "", 0, -1);
     progress.setCancelButton(nullptr);
     progress.show();
+    QCoreApplication::processEvents();
+
 
     QProcess proc;
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
@@ -87,7 +90,7 @@ void PrismExternalUpdater::checkForUpdates()
     exe_name.append(".exe");
 #endif
 
-    QStringList args = { "--check-only" };
+    QStringList args = { "--check-only", "--dir", priv->dataDir.absolutePath(), "--debug" };
     if (priv->allowBeta)
         args.append("--pre-release");
 
@@ -97,6 +100,8 @@ void PrismExternalUpdater::checkForUpdates()
         auto err = proc.error();
         qDebug() << "Failed to start updater after 5 seconds." << "reason:" << err << proc.errorString();
     }
+    QCoreApplication::processEvents();
+
     auto result_finished = proc.waitForFinished(60000);
     if (!result_finished) {
         auto err = proc.error();
@@ -107,6 +112,9 @@ void PrismExternalUpdater::checkForUpdates()
 
     auto std_output = proc.readAllStandardOutput();
     auto std_error = proc.readAllStandardError();
+
+    qDebug() << "captured output:" << std_output;
+    qDebug() << "captured error:" << std_error;
 
     switch (exit_code) {
         case 0:
@@ -188,6 +196,7 @@ void PrismExternalUpdater::resetAutoCheckTimer() {
                 secs_left = 0;
             timeoutDuration = secs_left * 1000; // to msec
         }
+        qDebug() << "Auto update timer starting," << timeoutDuration / 1000 << "seconds left";
         priv->updateTimer.start(timeoutDuration);
     } else {
         if (priv->updateTimer.isActive())
@@ -203,4 +212,8 @@ void PrismExternalUpdater::connectTimer() {
 
 void PrismExternalUpdater::disconnectTimer() {
     disconnect(&priv->updateTimer, &QTimer::timeout, this, &PrismExternalUpdater::autoCheckTimerFired);
+}
+
+void PrismExternalUpdater::autoCheckTimerFired() {
+    checkForUpdates();
 }

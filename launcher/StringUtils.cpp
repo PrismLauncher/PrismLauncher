@@ -184,7 +184,7 @@ QString StringUtils::getRandomAlphaNumeric()
     return QUuid::createUuid().toString(QUuid::Id128);
 }
 
-QPair<QString, QString> splitFirst(const QString& s, const QString& sep, Qt::CaseSensitivity cs = Qt::CaseSensitive) {
+QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QString& sep, Qt::CaseSensitivity cs) {
     QString left, right;
     auto index = s.indexOf(sep, 0, cs);
     left = s.mid(0, index);
@@ -192,7 +192,7 @@ QPair<QString, QString> splitFirst(const QString& s, const QString& sep, Qt::Cas
     return qMakePair(left, right);
 }
 
-QPair<QString, QString> splitFirst(const QString& s, QChar sep, Qt::CaseSensitivity cs = Qt::CaseSensitive) {
+QPair<QString, QString> StringUtils::splitFirst(const QString& s, QChar sep, Qt::CaseSensitivity cs) {
     QString left, right;
     auto index = s.indexOf(sep, 0, cs);
     left = s.mid(0, index);
@@ -200,7 +200,7 @@ QPair<QString, QString> splitFirst(const QString& s, QChar sep, Qt::CaseSensitiv
     return qMakePair(left, right);
 }
 
-QPair<QString, QString> splitFirst(const QString& s, const QRegularExpression& re) {
+QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegularExpression& re) {
     QString left, right;
     auto index = s.indexOf(re);
     left = s.mid(0, index);
