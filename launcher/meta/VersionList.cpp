@@ -77,7 +77,7 @@ QVariant VersionList::data(const QModelIndex &index, int role) const
     case ParentVersionRole:
     {
         // FIXME: HACK: this should be generic and be replaced by something else. Anything that is a hard 'equals' dep is a 'parent uid'.
-        auto & reqs = version->requires();
+        auto & reqs = version->requiredSet();
         auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Require & req)
         {
             return req.uid == "net.minecraft";
@@ -92,7 +92,7 @@ QVariant VersionList::data(const QModelIndex &index, int role) const
 
     case UidRole: return version->uid();
     case TimeRole: return version->time();
-    case RequiresRole: return QVariant::fromValue(version->requires());
+    case RequiresRole: return QVariant::fromValue(version->requiredSet());
     case SortRole: return version->rawTime();
     case VersionPtrRole: return QVariant::fromValue(version);
     case RecommendedRole: return version->isRecommended();

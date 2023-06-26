@@ -39,7 +39,16 @@ void InstanceCopyTask::executeTask()
     setStatus(tr("Copying instance %1").arg(m_origInstance->name()));
 
     auto copySaves = [&]() {
-        FS::copy savesCopy(FS::PathCombine(m_origInstance->instanceRoot(), "saves"), FS::PathCombine(m_stagingPath, "saves"));
+        QFileInfo mcDir(FS::PathCombine(m_stagingPath, "minecraft"));
+        QFileInfo dotMCDir(FS::PathCombine(m_stagingPath, ".minecraft"));
+
+        QString staging_mc_dir;
+        if (mcDir.exists() && !dotMCDir.exists())
+            staging_mc_dir = mcDir.filePath();
+        else
+            staging_mc_dir = dotMCDir.filePath();
+
+        FS::copy savesCopy(FS::PathCombine(m_origInstance->gameRoot(), "saves"), FS::PathCombine(staging_mc_dir, "saves"));
         savesCopy.followSymlinks(true);
 
         return savesCopy();
@@ -123,6 +132,7 @@ void InstanceCopyTask::copyFinished()
         emitFailed(tr("Instance folder copy failed."));
         return;
     }
+
     // FIXME: shouldn't this be able to report errors?
     auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(m_stagingPath, "instance.cfg"));
 
@@ -134,6 +144,24 @@ void InstanceCopyTask::copyFinished()
     }
     if (m_useLinks)
         inst->addLinkedInstanceId(m_origInstance->id());
+    if (m_useLinks) {
+        auto allowed_symlinks_file = QFileInfo(FS::PathCombine(inst->gameRoot(), "allowed_symlinks.txt"));
+
+        QByteArray allowed_symlinks;
+        if (allowed_symlinks_file.exists()) {
+            allowed_symlinks.append(FS::read(allowed_symlinks_file.filePath()));
+            if (allowed_symlinks.right(1) != "\n")
+                allowed_symlinks.append("\n");  // we want to be on a new line
+        }
+        allowed_symlinks.append(m_origInstance->gameRoot().toUtf8());
+        allowed_symlinks.append("\n");
+        if (allowed_symlinks_file.isSymLink())
+            FS::deletePath(allowed_symlinks_file
+                               .filePath());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
+
+        FS::write(allowed_symlinks_file.filePath(), allowed_symlinks);
+    }
+
     emitSucceeded();
 }
 

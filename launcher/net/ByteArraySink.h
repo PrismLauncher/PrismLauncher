@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,14 +47,17 @@ namespace Net {
  */
 class ByteArraySink : public Sink {
    public:
-    ByteArraySink(QByteArray* output) : m_output(output){};
+    ByteArraySink(std::shared_ptr<QByteArray> output) : m_output(output){};
 
     virtual ~ByteArraySink() = default;
 
    public:
     auto init(QNetworkRequest& request) -> Task::State override
     {
-        m_output->clear();
+        if (m_output)
+            m_output->clear();
+        else
+            qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
         if (initAllValidators(request))
             return Task::State::Running;
         return Task::State::Failed;
@@ -61,7 +65,10 @@ class ByteArraySink : public Sink {
 
     auto write(QByteArray& data) -> Task::State override
     {
-        m_output->append(data);
+        if (m_output)
+            m_output->append(data);
+        else
+            qWarning() << "ByteArraySink did not write the buffer because it's not addressable";
         if (writeAllValidators(data))
             return Task::State::Running;
         return Task::State::Failed;
@@ -69,7 +76,10 @@ class ByteArraySink : public Sink {
 
     auto abort() -> Task::State override
     {
-        m_output->clear();
+        if (m_output)
+            m_output->clear();
+        else
+            qWarning() << "ByteArraySink did not clear the buffer because it's not addressable";
         failAllValidators();
         return Task::State::Failed;
     }
@@ -84,6 +94,6 @@ class ByteArraySink : public Sink {
     auto hasLocalData() -> bool override { return false; }
 
    private:
-    QByteArray* m_output;
+    std::shared_ptr<QByteArray> m_output;
 };
 }  // namespace Net

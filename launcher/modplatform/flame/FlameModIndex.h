@@ -6,8 +6,8 @@
 
 #include "modplatform/ModIndex.h"
 
-#include "BaseInstance.h"
 #include <QNetworkAccessManager>
+#include "BaseInstance.h"
 
 namespace FlameMod {
 
@@ -19,5 +19,5 @@ void loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                              const shared_qobject_ptr<QNetworkAccessManager>& network,
                              const BaseInstance* inst);
 auto loadIndexedPackVersion(QJsonObject& obj, bool load_changelog = false) -> ModPlatform::IndexedVersion;
-
+auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion;
 }  // namespace FlameMod

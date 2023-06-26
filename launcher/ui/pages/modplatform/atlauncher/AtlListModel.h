@@ -18,42 +18,41 @@
 
 #include <QAbstractListModel>
 
-#include "net/NetJob.h"
-#include <QIcon>
 #include <modplatform/atlauncher/ATLPackIndex.h>
+#include <QIcon>
+#include "net/NetJob.h"
 
 namespace Atl {
 
 typedef QMap<QString, QIcon> LogoMap;
 typedef std::function<void(QString)> LogoCallback;
 
-class ListModel : public QAbstractListModel
-{
+class ListModel : public QAbstractListModel {
     Q_OBJECT
 
-public:
-    ListModel(QObject *parent);
+   public:
+    ListModel(QObject* parent);
     virtual ~ListModel();
 
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
+    int rowCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 
     void request();
 
-    void getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback);
+    void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
-private slots:
+   private slots:
     void requestFinished();
     void requestFailed(QString reason);
 
     void logoFailed(QString logo);
     void logoLoaded(QString logo, QIcon out);
 
-private:
+   private:
     void requestLogo(QString file, QString url);
 
-private:
+   private:
     QList<ATLauncher::IndexedPack> modpacks;
 
     QStringList m_failedLogos;
@@ -62,7 +61,7 @@ private:
     QMap<QString, LogoCallback> waitingCallbacks;
 
     NetJob::Ptr jobPtr;
-    QByteArray response;
+    std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
 };
 
-}
+}  // namespace Atl

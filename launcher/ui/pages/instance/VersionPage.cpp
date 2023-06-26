@@ -287,7 +287,6 @@ void VersionPage::updateButtons(int row)
     ui->actionAdd_Empty->setEnabled(controlsEnabled);
     ui->actionImport_Components->setEnabled(controlsEnabled);
     ui->actionReload->setEnabled(controlsEnabled);
-    ui->actionInstall_mods->setEnabled(controlsEnabled);
     ui->actionReplace_Minecraft_jar->setEnabled(controlsEnabled);
     ui->actionAdd_to_Minecraft_jar->setEnabled(controlsEnabled);
     ui->actionAdd_Agents->setEnabled(controlsEnabled);
