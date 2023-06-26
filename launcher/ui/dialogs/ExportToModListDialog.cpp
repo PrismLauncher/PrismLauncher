@@ -118,7 +118,7 @@ void ExportToModListDialog::triggerImp()
     QString exampleLine;
     switch (format) {
         case ExportToModList::HTML: {
-            exampleLine = "<ul><a href=\"{url}\">{name}</a>[{version}] by {authors}</ul>";
+            exampleLine = "<ul><a href=\"{url}\">{name}</a> [{version}] by {authors}</ul>";
             ui->resultText->setHtml(txt);
             break;
         }
