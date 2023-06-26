@@ -831,7 +831,13 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 #ifdef Q_OS_MAC
         m_updater.reset(new MacSparkleUpdater());
 #else
-        m_updater.reset(new PrismExternalUpdater(m_rootPath, m_dataPath));
+        auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+#if defined Q_OS_WIN32
+    exe_name.append(".exe");
+#endif
+        auto updater_binary = QFileInfo(QDir(m_rootPath).absoluteFilePath(exe_name));
+        if (updater_binary.isFile())
+            m_updater.reset(new PrismExternalUpdater(m_rootPath, m_dataPath));
 #endif
         qDebug() << "<> Updater started.";
     }
@@ -1058,7 +1064,7 @@ void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
 
-    auto update_log_path = FS::PathCombine(m_dataPath, "prism_launcher_update.log");
+    auto update_log_path = FS::PathCombine(m_dataPath, "logs", "prism_launcher_update.log");
 
     auto update_lock = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.lock"));
     if (update_lock.exists()) {

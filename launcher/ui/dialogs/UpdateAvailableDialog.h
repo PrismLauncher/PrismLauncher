@@ -42,7 +42,7 @@ class UpdateAvailableDialog : public QDialog {
                                    const QString& availableVersion,
                                    const QString& releaseNotes,
                                    QWidget* parent = 0);
-    ~UpdateAvailableDialog();
+    ~UpdateAvailableDialog() = default;
 
    private:
     Ui::UpdateAvailableDialog* ui;

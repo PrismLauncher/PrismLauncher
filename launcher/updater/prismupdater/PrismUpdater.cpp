@@ -343,10 +343,11 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 #endif
     }
 
-    m_updateLogPath = FS::PathCombine(m_dataPath, "prism_launcher_update.log");
+    m_updateLogPath = FS::PathCombine(m_dataPath, "logs", "prism_launcher_update.log");
 
     {  // setup logging
-        static const QString logBase = BuildConfig.LAUNCHER_NAME + "Updater" + (m_checkOnly ? "-CheckOnly" : "") + "-%0.log";
+        static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "Updater" + (m_checkOnly ? "-CheckOnly" : "") + "-%0.log";
+        static const QString logBase = FS::PathCombine("logs", baseLogFile);
         auto moveFile = [](const QString& oldName, const QString& newName) {
             QFile::remove(newName);
             QFile::copy(oldName, newName);
