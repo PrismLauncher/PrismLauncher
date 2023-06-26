@@ -41,6 +41,7 @@
 
 #include <QProgressDialog>
 #include <sys.h>
+#include <winbase.h>
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -202,11 +203,17 @@ void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr
 PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
-    // attach the parent console
-    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+    // attach the parent console if stdout not already captured
+    auto stdout_type = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
+    if (stdout_type == FILE_TYPE_CHAR || stdout_type == FILE_TYPE_UNKNOWN) {
+        if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+            BindCrtHandlesToStdHandles(true, true, true);
+            consoleAttached = true;
+        }
+    } else if (stdout_type == FILE_TYPE_DISK || stdout_type == FILE_TYPE_PIPE ) {
         BindCrtHandlesToStdHandles(true, true, true);
-        consoleAttached = true;
     }
+    
 #endif
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
@@ -226,6 +233,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
           { { "U", "update-url" }, tr("Update from the specified repo."), tr("github repo url") },
           { { "c", "check-only" },
             tr("Only check if an update is needed. Exit status 100 if true, 0 if false (or non 0 if there was an error).") },
+          { { "p", "pre-release" }, tr("Allow updating to pre-release releases") },
           { { "F", "force" }, tr("Force an update, even if one is not needed.") },
           { { "l", "list" }, tr("List available releases.") },
           { "debug", tr("Log debug to console.") },
@@ -296,6 +304,8 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         m_prismVersionMajor = version_parts.takeFirst().toInt();
         m_prismVersionMinor = version_parts.takeFirst().toInt();
     }
+
+    m_allowPreRelease = parser.isSet("pre-release");
 
     QString origCwdPath = QDir::currentPath();
     QString binPath = applicationDirPath();
@@ -542,10 +552,19 @@ void PrismUpdaterApp::run()
     auto need_update = needUpdate(latest);
 
     if (m_checkOnly) {
-        if (need_update)
+        if (need_update) {
+            QTextStream stdOutStream(stdout);
+            stdOutStream << "Name: " << latest.name << "\n";
+            stdOutStream << "Version: " << latest.tag_name << "\n";
+            stdOutStream << "TimeStamp: " << latest.created_at.toString(Qt::ISODate) << "\n";
+            stdOutStream << latest.body << "\n";
+            stdOutStream.flush();
+
             return exit(100);
-        else
+        }
+        else {
             return exit(0);
+        }
     }
 
     if (m_isFlatpak) {
@@ -958,10 +977,11 @@ void PrismUpdaterApp::unpackAndInstall(QFileInfo archive)
     if (auto loc = unpackArchive(archive)) {
         auto marker_file_path = loc.value().absoluteFilePath(".prism_launcher_updater_unpack.marker");
         FS::write(marker_file_path, applicationDirPath().toUtf8());
-        auto new_updater_path = loc.value().absoluteFilePath("prismlauncher_updater");
+        auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
-        new_updater_path.append(".exe");
+        exe_name.append(".exe");
 #endif
+        auto new_updater_path = loc.value().absoluteFilePath(exe_name);
         logUpdate(tr("Starting new updater at '%1'").arg(new_updater_path));
         QProcess proc = QProcess();
         if (!proc.startDetached(new_updater_path, { "-d", m_dataPath }, loc.value().absolutePath())) {
@@ -1110,7 +1130,7 @@ bool PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
     QProcess proc = QProcess();
     proc.setProcessChannelMode(QProcess::MergedChannels);
     proc.setReadChannel(QProcess::StandardOutput);
-    proc.start(exe_path, { "-v" });
+    proc.start(exe_path, { "--version" });
     if (!proc.waitForStarted(5000)) {
         showFatalErrorMessage(tr("Failed to Check Version"), tr("Failed to launcher child launcher process to read version."));
         return false;
@@ -1119,7 +1139,7 @@ bool PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
         showFatalErrorMessage(tr("Failed to Check Version"), tr("Child launcher process failed."));
         return false;
     }
-    auto out = proc.readAll();
+    auto out = proc.readAllStandardOutput();
     auto lines = out.split('\n');
     if (lines.length() < 2)
         return false;
@@ -1250,7 +1270,11 @@ GitHubRelease PrismUpdaterApp::getLatestRelease()
 {
     GitHubRelease latest;
     for (auto release : m_releases) {
-        if (!latest.isValid() || (!release.draft && release.version > latest.version)) {
+        if (release.draft)
+            continue;
+        if (release.prerelease && !m_allowPreRelease)
+            continue;
+        if (!latest.isValid() || (release.version > latest.version)) {
             latest = release;
         }
     }

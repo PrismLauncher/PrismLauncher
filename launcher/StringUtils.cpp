@@ -35,6 +35,7 @@
  */
 
 #include "StringUtils.h"
+#include <qpair.h>
 
 #include <QRegularExpression>
 #include <QUuid>
@@ -149,7 +150,7 @@ QString StringUtils::truncateUrlHumanFriendly(QUrl& url, int max_len, bool hard_
     }
 
     if ((url_compact.length() >= max_len) && hard_limit) {
-        // still too long, truncate normaly
+        // still too long, truncate normally
         url_compact = QString(str_url);
         auto to_remove = url_compact.length() - max_len + 3;
         url_compact.remove(url_compact.length() - to_remove - 1, to_remove);
@@ -182,3 +183,28 @@ QString StringUtils::getRandomAlphaNumeric()
 {
     return QUuid::createUuid().toString(QUuid::Id128);
 }
+
+QPair<QString, QString> splitFirst(const QString& s, const QString& sep, Qt::CaseSensitivity cs = Qt::CaseSensitive) {
+    QString left, right;
+    auto index = s.indexOf(sep, 0, cs);
+    left = s.mid(0, index);
+    right = s.mid(index + 1);
+    return qMakePair(left, right);
+}
+
+QPair<QString, QString> splitFirst(const QString& s, QChar sep, Qt::CaseSensitivity cs = Qt::CaseSensitive) {
+    QString left, right;
+    auto index = s.indexOf(sep, 0, cs);
+    left = s.mid(0, index);
+    right = s.mid(index + 1);
+    return qMakePair(left, right);
+}
+
+QPair<QString, QString> splitFirst(const QString& s, const QRegularExpression& re) {
+    QString left, right;
+    auto index = s.indexOf(re);
+    left = s.mid(0, index);
+    right = s.mid(index + 1);
+    return qMakePair(left, right);
+}
+

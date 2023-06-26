@@ -132,6 +132,8 @@
 
 #ifdef Q_OS_MAC
 #include "updater/MacSparkleUpdater.h"
+#else
+#include "updater/PrismExternalUpdater.h"
 #endif
 
 #if defined Q_OS_WIN32
@@ -271,10 +273,15 @@ void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr
 Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
-    // attach the parent console
-    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+    // attach the parent console if stdout not already captured
+    auto stdout_type = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
+    if (stdout_type == FILE_TYPE_CHAR || stdout_type == FILE_TYPE_UNKNOWN) {
+        if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+            BindCrtHandlesToStdHandles(true, true, true);
+            consoleAttached = true;
+        }
+    } else if (stdout_type == FILE_TYPE_DISK || stdout_type == FILE_TYPE_PIPE ) {
         BindCrtHandlesToStdHandles(true, true, true);
-        consoleAttached = true;
     }
 #endif
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
@@ -823,6 +830,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qDebug() << "Initializing updater";
 #ifdef Q_OS_MAC
         m_updater.reset(new MacSparkleUpdater());
+#else
+        m_updater.reset(new PrismExternalUpdater(m_rootPath, dataPath));
 #endif
         qDebug() << "<> Updater started.";
     }

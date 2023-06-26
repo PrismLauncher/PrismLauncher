@@ -179,6 +179,11 @@ set(MAC_UPDATE_SOURCES
     updater/MacSparkleUpdater.mm
 )
 
+set(PRISM_UPDATE_SOURCES
+    updater/PrismExternalUpdater.h
+    updater/PrismExternalUpdater.cpp
+)
+
 # Backend for the news bar... there's usually no news.
 set(NEWS_SOURCES
     # News System
@@ -728,6 +733,8 @@ set(LOGIC_SOURCES
 
 if(APPLE)
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${MAC_UPDATE_SOURCES})
+else()
+    set (LOGIC_SOURCES ${LOGIC_SOURCES} ${PRISM_UPDATE_SOURCES})
 endif()
 
 SET(LAUNCHER_SOURCES
