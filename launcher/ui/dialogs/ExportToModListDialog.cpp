@@ -128,7 +128,7 @@ void ExportToModListDialog::triggerImp()
             break;
         }
         case ExportToModList::PLAINTXT: {
-            exampleLine = "name: {name}; url: {url}; version: {version}; authors: {authors};";
+            exampleLine = "{name} ({url}) [{version}] by {authors}";
             break;
         }
         case ExportToModList::CUSTOM:
