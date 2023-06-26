@@ -484,7 +484,7 @@
     <iconset theme="new"/>
    </property>
    <property name="text">
-    <string>ModList (txt)</string>
+    <string>Mod List</string>
    </property>
   </action>
   <action name="actionCreateInstanceShortcut">
