@@ -790,9 +790,10 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     QDir binaryDir = content.path() + "/MacOS/";
     QFile info = content.path() + "/Info.plist";
 
-    content.mkpath(".");
-    resources.mkpath(".");
-    binaryDir.mkpath(".");
+    if (!(content.mkpath(".") && resources.mkpath(".") && binaryDir.mkpath("."))) {
+        qWarning() << "Couldn't create directories within application";
+        return false;
+    }
     info.open(QIODevice::WriteOnly | QIODevice::Text);
 
     QFile(icon).rename(resources.path() + "/Icon.icns");
