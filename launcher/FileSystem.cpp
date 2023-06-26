@@ -773,8 +773,10 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     // Create the Application
     QDir applicationDirectory = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Prism Launchers/";
 
-    if (!applicationDirectory.exists())
-        applicationDirectory.mkpath(".");
+    if (!applicationDirectory.mkpath(".")) {
+        qWarning() << "Couldn't create application directory";
+        return false;
+    }
 
     QDir application = applicationDirectory.path() + "/" + name + ".app/";
 
