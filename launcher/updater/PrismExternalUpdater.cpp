@@ -21,18 +21,21 @@
  */
 
 #include "PrismExternalUpdater.h"
-#include <memory>
+#include <QCoreApplication>
 #include <QDateTime>
-#include <QProgressDialog>
 #include <QDir>
 #include <QProcess>
-#include <QTimer>
+#include <QProgressDialog>
 #include <QSettings>
-#include <QCoreApplication>
+#include <QTimer>
+#include <memory>
+#include <QDebug>
 
 #include "StringUtils.h"
 
 #include "BuildConfig.h"
+
+#include "ui/dialogs/UpdateAvailableDialog.h"
 
 class PrismExternalUpdater::Private {
    public:
@@ -78,11 +81,10 @@ PrismExternalUpdater::~PrismExternalUpdater()
 
 void PrismExternalUpdater::checkForUpdates()
 {
-    QProgressDialog progress(tr("Checking for updates..."), "", 0, -1);
+    QProgressDialog progress(tr("Checking for updates..."), "", 0, 0);
     progress.setCancelButton(nullptr);
     progress.show();
     QCoreApplication::processEvents();
-
 
     QProcess proc;
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
@@ -98,14 +100,16 @@ void PrismExternalUpdater::checkForUpdates()
     auto result_start = proc.waitForStarted(5000);
     if (!result_start) {
         auto err = proc.error();
-        qDebug() << "Failed to start updater after 5 seconds." << "reason:" << err << proc.errorString();
+        qDebug() << "Failed to start updater after 5 seconds."
+                 << "reason:" << err << proc.errorString();
     }
     QCoreApplication::processEvents();
 
     auto result_finished = proc.waitForFinished(60000);
     if (!result_finished) {
         auto err = proc.error();
-        qDebug() << "Updater failed to close after 60 seconds." << "reason:" << err << proc.errorString();
+        qDebug() << "Updater failed to close after 60 seconds."
+                 << "reason:" << err << proc.errorString();
     }
 
     auto exit_code = proc.exitCode();
@@ -115,6 +119,9 @@ void PrismExternalUpdater::checkForUpdates()
 
     qDebug() << "captured output:" << std_output;
     qDebug() << "captured error:" << std_error;
+
+    progress.hide();
+    QCoreApplication::processEvents();
 
     switch (exit_code) {
         case 0:
@@ -134,12 +141,14 @@ void PrismExternalUpdater::checkForUpdates()
             {
                 auto [first_line, remainder1] = StringUtils::splitFirst(std_output, '\n');
                 auto [second_line, remainder2] = StringUtils::splitFirst(remainder1, '\n');
-                auto [third_line, changelog] = StringUtils::splitFirst(remainder2, '\n');
+                auto [third_line, release_notes] = StringUtils::splitFirst(remainder2, '\n');
                 auto version_name = StringUtils::splitFirst(first_line, ": ").second;
                 auto version_tag = StringUtils::splitFirst(second_line, ": ").second;
                 auto release_timestamp = QDateTime::fromString(StringUtils::splitFirst(third_line, ": ").second, Qt::ISODate);
                 qDebug() << "Update available:" << version_name << version_tag << release_timestamp;
-                qDebug() << "Update changelog:" << changelog;
+                qDebug() << "Update release notes:" << release_notes;
+
+                offerUpdate(version_name, version_tag, release_notes);
             }
             break;
         default:
@@ -153,48 +162,55 @@ void PrismExternalUpdater::checkForUpdates()
     priv->settings->sync();
 }
 
-bool PrismExternalUpdater::getAutomaticallyChecksForUpdates() {
+bool PrismExternalUpdater::getAutomaticallyChecksForUpdates()
+{
     return priv->autoCheck;
 }
 
-double PrismExternalUpdater::getUpdateCheckInterval() {
+double PrismExternalUpdater::getUpdateCheckInterval()
+{
     return priv->updateInterval;
 }
 
-bool PrismExternalUpdater::getBetaAllowed() {
+bool PrismExternalUpdater::getBetaAllowed()
+{
     return priv->allowBeta;
 }
 
-void PrismExternalUpdater::setAutomaticallyChecksForUpdates(bool check) {
+void PrismExternalUpdater::setAutomaticallyChecksForUpdates(bool check)
+{
     priv->autoCheck = check;
     priv->settings->setValue("auto_check", check);
     priv->settings->sync();
     resetAutoCheckTimer();
 }
 
-void PrismExternalUpdater::setUpdateCheckInterval(double seconds) {
+void PrismExternalUpdater::setUpdateCheckInterval(double seconds)
+{
     priv->updateInterval = seconds;
     priv->settings->setValue("update_interval", seconds);
     priv->settings->sync();
     resetAutoCheckTimer();
 }
 
-void PrismExternalUpdater::setBetaAllowed(bool allowed) {
+void PrismExternalUpdater::setBetaAllowed(bool allowed)
+{
     priv->allowBeta = allowed;
     priv->settings->setValue("auto_beta", allowed);
     priv->settings->sync();
 }
 
-void PrismExternalUpdater::resetAutoCheckTimer() {
+void PrismExternalUpdater::resetAutoCheckTimer()
+{
     int timeoutDuration = 0;
     auto now = QDateTime::currentDateTime();
     if (priv->autoCheck) {
-        if (priv->lastCheck.isValid())  {
+        if (priv->lastCheck.isValid()) {
             auto diff = priv->lastCheck.secsTo(now);
             auto secs_left = priv->updateInterval - diff;
             if (secs_left < 0)
                 secs_left = 0;
-            timeoutDuration = secs_left * 1000; // to msec
+            timeoutDuration = secs_left * 1000;  // to msec
         }
         qDebug() << "Auto update timer starting," << timeoutDuration / 1000 << "seconds left";
         priv->updateTimer.start(timeoutDuration);
@@ -202,18 +218,66 @@ void PrismExternalUpdater::resetAutoCheckTimer() {
         if (priv->updateTimer.isActive())
             priv->updateTimer.stop();
     }
-    
 }
 
-void PrismExternalUpdater::connectTimer() {
+void PrismExternalUpdater::connectTimer()
+{
     connect(&priv->updateTimer, &QTimer::timeout, this, &PrismExternalUpdater::autoCheckTimerFired);
-
 }
 
-void PrismExternalUpdater::disconnectTimer() {
+void PrismExternalUpdater::disconnectTimer()
+{
     disconnect(&priv->updateTimer, &QTimer::timeout, this, &PrismExternalUpdater::autoCheckTimerFired);
 }
 
-void PrismExternalUpdater::autoCheckTimerFired() {
+void PrismExternalUpdater::autoCheckTimerFired()
+{
     checkForUpdates();
+}
+
+void PrismExternalUpdater::offerUpdate(const QString& version_name, const QString& version_tag, const QString& release_notes)
+{
+    priv->settings->beginGroup("skip");
+    auto should_skip = priv->settings->value(version_tag, false).toBool();
+    priv->settings->endGroup();
+
+    if (should_skip)
+        return;
+
+    UpdateAvailableDialog dlg(BuildConfig.printableVersionString(), version_name, release_notes);
+
+    auto result = dlg.exec();
+    switch (result) {
+        case UpdateAvailableDialog::Install: {
+            performUpdate(version_tag);
+        }
+        case UpdateAvailableDialog::Skip: {
+            priv->settings->beginGroup("skip");
+            priv->settings->setValue(version_tag, true);
+            priv->settings->endGroup();
+            priv->settings->sync();
+            return;
+        }
+        case UpdateAvailableDialog::DontInstall: {
+            return;
+        }
+    }
+}
+
+void PrismExternalUpdater::performUpdate(const QString& version_tag) {
+    QProcess proc;
+    auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+#if defined Q_OS_WIN32
+    exe_name.append(".exe");
+#endif
+
+    QStringList args = {  "--dir", priv->dataDir.absolutePath(), "--install-version", version_tag };
+    if (priv->allowBeta)
+        args.append("--pre-release");
+
+    auto result = proc.startDetached(priv->appDir.absoluteFilePath(exe_name), args);
+    if (!result) {
+        qDebug() << "Failed to start updater:" << proc.error() << proc.errorString();
+    }
+    QCoreApplication::exit();
 }

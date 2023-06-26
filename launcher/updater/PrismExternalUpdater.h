@@ -34,7 +34,7 @@ class PrismExternalUpdater : public ExternalUpdater {
     Q_OBJECT
 
    public:
-  PrismExternalUpdater(const QString& appDir, const QString& dataDir);
+    PrismExternalUpdater(const QString& appDir, const QString& dataDir);
     ~PrismExternalUpdater() override;
 
     /*!
@@ -82,7 +82,8 @@ class PrismExternalUpdater : public ExternalUpdater {
     void disconnectTimer();
     void connectTimer();
 
-    void performUpdate();
+    void offerUpdate(const QString& version_name, const QString& version_tag, const QString& release_notes);
+    void performUpdate(const QString& version_tag);
 
    public slots:
     void autoCheckTimerFired();

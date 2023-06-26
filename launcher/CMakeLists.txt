@@ -1078,6 +1078,15 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/VisualGroup.h
 )
 
+if (NOT Apple)
+set(LAUNCHER_SOURCES
+    ${LAUNCHER_SOURCES}
+
+    ui/dialogs/UpdateAvailableDialog.h
+    ui/dialogs/UpdateAvailableDialog.cpp
+)
+endif()
+
 qt_wrap_ui(LAUNCHER_UI
     ui/MainWindow.ui
     ui/setupwizard/PasteWizardPage.ui
@@ -1137,6 +1146,14 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/BlockedModsDialog.ui
     ui/dialogs/ChooseProviderDialog.ui
 )
+
+qt_wrap_ui(PRISM_UPDATE_UI
+    ui/dialogs/UpdateAvailableDialog.ui
+)
+
+if (NOT Apple)
+    set (LAUNCHER_UI ${LAUNCHER_UI} ${PRISM_UPDATE_UI})
+endif()
 
 qt_add_resources(LAUNCHER_RESOURCES
     resources/backgrounds/backgrounds.qrc

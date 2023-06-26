@@ -187,6 +187,11 @@ public:
         return m_rootPath;
     }
 
+    /// the data path the application is using
+    const QString& dataRoot() {
+        return m_dataPath;
+    }
+
     bool isPortable() {
         return m_portable;
     }
@@ -277,6 +282,7 @@ private:
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 
     QString m_rootPath;
+    QString m_dataPath;
     Status m_status = Application::StartingUp;
     Capabilities m_capabilities;
     bool m_portable = false; 

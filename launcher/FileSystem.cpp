@@ -199,7 +199,7 @@ void appendSafe(const QString& filename, const QByteArray& data)
     QByteArray buffer;
     try {
         buffer = read(filename);
-    } catch (FileSystemException) {
+    } catch (FileSystemException&) {
         buffer = QByteArray();
     }
     buffer.append(data);

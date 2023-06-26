@@ -630,7 +630,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
             for (auto file : files) {
                 file_list.append(file.trimmed());
             }
-        } catch (FS::FileSystemException) {
+        } catch (FS::FileSystemException&) {
         }
     }
 
@@ -675,14 +675,22 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
     if (error) {
         logUpdate(tr("There were errors installing the update."));
         auto fail_marker = FS::PathCombine(m_dataPath, ".prism_launcher_update.fail");
-        FS::move(m_updateLogPath, fail_marker);
+        FS::copy(m_updateLogPath, fail_marker)();
     } else {
         logUpdate(tr("Update succeed."));
         auto success_marker = FS::PathCombine(m_dataPath, ".prism_launcher_update.success");
-        FS::move(m_updateLogPath, success_marker);
+        FS::copy(m_updateLogPath, success_marker)();
     }
     auto update_lock_path = FS::PathCombine(m_dataPath, ".prism_launcher_update.lock");
     FS::deletePath(update_lock_path);
+
+    QProcess proc;
+    auto app_exe_name = BuildConfig.LAUNCHER_APP_BINARY_NAME;
+#if defined Q_OS_WIN32
+    app_exe_name.append(".exe");
+#endif
+    auto app_exe_path = target.absoluteFilePath(app_exe_name);
+    proc.startDetached(app_exe_path);
 
     exit(error ? 1 : 0);
 }
@@ -897,7 +905,7 @@ bool write_lock_file(const QString& path, QDateTime timestamp, QString from, QSt
                             .arg(target)
                             .arg(data_path)
                             .toUtf8());
-    } catch (FS::FileSystemException err) {
+    } catch (FS::FileSystemException& err) {
         qWarning() << "Error writing lockfile:" << err.what() << "\n" << err.cause();
         return false;
     }
@@ -922,7 +930,7 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
                "\n"
                "This likely means that a previous update attempt failed. Please ensure your installation is in working order before "
                "proceeding.\n"
-               "Check the Prism Launcher updater log at \n"
+               "Check the Prism Launcher updater log at: \n"
                "%7\n"
                "for details on the last update attempt.\n"
                "\n"
@@ -936,9 +944,9 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
         msgBox.setStandardButtons(QMessageBox::Ignore | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Cancel);
         switch (msgBox.exec()) {
-            case QMessageBox::Ignore:
+            case QMessageBox::AcceptRole:
                 break;
-            case QMessageBox::Cancel:
+            case QMessageBox::RejectRole:
                 [[fallthrough]];
             default:
                 return showFatalErrorMessage(tr("Update Aborted"), tr("The update attempt was aborted"));
@@ -1005,7 +1013,7 @@ void PrismUpdaterApp::backupAppDir()
             for (auto file : files) {
                 file_list.append(file.trimmed());
             }
-        } catch (FS::FileSystemException) {
+        } catch (FS::FileSystemException&) {
         }
     }
 
