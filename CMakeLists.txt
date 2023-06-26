@@ -146,7 +146,7 @@ set(Launcher_VERSION_NAME4 "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.
 set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_MINOR},0,0")
 
 # Build platform.
-set(Launcher_BUILD_PLATFORM "" CACHE STRING "A short string identifying the platform that this build was built for. Only used to display in the about dialog.")
+set(Launcher_BUILD_PLATFORM "unknown" CACHE STRING "A short string identifying the platform that this build was built for. Only used to display in the about dialog.")
 
 # Channel list URL
 set(Launcher_UPDATER_BASE "" CACHE STRING "Base URL for the updater.")
