@@ -123,7 +123,7 @@ void ExportToModListDialog::triggerImp()
             break;
         }
         case ExportToModList::MARKDOWN: {
-            exampleLine = "[{name}]({url})[{version}] by {authors}";
+            exampleLine = "[{name}]({url}) [{version}] by {authors}";
             ui->resultText->setHtml(markdownToHTML(txt));
             break;
         }
