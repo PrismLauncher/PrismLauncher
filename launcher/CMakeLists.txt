@@ -377,8 +377,6 @@ set(MINECRAFT_SOURCES
     minecraft/services/SkinDelete.cpp
     minecraft/services/SkinDelete.h
 
-    mojang/PackageManifest.h
-    mojang/PackageManifest.cpp
     minecraft/Agent.h)
 
 # the screenshots feature
