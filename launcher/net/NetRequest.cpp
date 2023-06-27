@@ -43,17 +43,10 @@
 #include <QFileInfo>
 #include <memory>
 
-#include "ByteArraySink.h"
-#include "ChecksumValidator.h"
-#include "MetaCacheSink.h"
-
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
 #endif
 
-#include "BuildConfig.h"
-
-#include "net/Logging.h"
 #include "net/NetAction.h"
 
 #include "MMCTime.h"
@@ -70,7 +63,7 @@ void NetRequest::executeTask()
 {
     init();
 
-    setStatus(tr("Downloading %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
+    setStatus(tr("Requesting %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(logCat) << getUid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
@@ -314,9 +307,7 @@ void NetRequest::downloadReadyRead()
     }
 }
 
-}  // namespace Net
-
-auto Net::NetRequest::abort() -> bool
+auto NetRequest::abort() -> bool
 {
     if (m_reply) {
         m_reply->abort();
@@ -325,3 +316,5 @@ auto Net::NetRequest::abort() -> bool
     }
     return true;
 }
+
+}  // namespace Net

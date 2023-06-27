@@ -47,17 +47,7 @@
 #include "ChecksumValidator.h"
 #include "MetaCacheSink.h"
 
-#if defined(LAUNCHER_APPLICATION)
-#include "Application.h"
-#endif
-
-#include "BuildConfig.h"
-
-#include "net/Logging.h"
 #include "net/NetAction.h"
-
-#include "MMCTime.h"
-#include "StringUtils.h"
 
 namespace Net {
 
@@ -65,7 +55,6 @@ namespace Net {
 auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
-    dl->logCat = taskDownloadLogC;
     dl->m_url = url;
     dl->setObjectName(QString("CACHE:") + url.toString());
     dl->m_options = options;
@@ -79,7 +68,6 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
 auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
-    dl->logCat = taskDownloadLogC;
     dl->m_url = url;
     dl->setObjectName(QString("BYTES:") + url.toString());
     dl->m_options = options;
@@ -90,7 +78,6 @@ auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Optio
 auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
-    dl->logCat = taskDownloadLogC;
     dl->m_url = url;
     dl->setObjectName(QString("FILE:") + url.toString());
     dl->m_options = options;

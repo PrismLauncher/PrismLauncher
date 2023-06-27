@@ -28,7 +28,6 @@ namespace Net {
 auto ApiDownload::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
 {
     auto dl = makeShared<ApiDownload>();
-    dl->logCat = taskDownloadLogC;
     dl->m_url = url;
     dl->setObjectName(QString("CACHE:") + url.toString());
     dl->m_options = options;
@@ -41,7 +40,6 @@ auto ApiDownload::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> D
 auto ApiDownload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
 {
     auto dl = makeShared<ApiDownload>();
-    dl->logCat = taskDownloadLogC;
     dl->m_url = url;
     dl->setObjectName(QString("BYTES:") + url.toString());
     dl->m_options = options;
@@ -52,7 +50,6 @@ auto ApiDownload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Op
 auto ApiDownload::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
 {
     auto dl = makeShared<ApiDownload>();
-    dl->logCat = taskDownloadLogC;
     dl->m_url = url;
     dl->setObjectName(QString("FILE:") + url.toString());
     dl->m_options = options;

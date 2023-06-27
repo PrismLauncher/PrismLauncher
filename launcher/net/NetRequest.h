@@ -51,6 +51,8 @@
 namespace Net {
 class NetRequest : public NetAction {
     Q_OBJECT
+   protected:
+    explicit NetRequest() : NetAction(){};
 
    public:
     using Ptr = shared_qobject_ptr<class NetRequest>;

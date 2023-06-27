@@ -38,12 +38,7 @@
 
 #pragma once
 
-#include <chrono>
-
 #include "HttpMetaCache.h"
-#include "NetAction.h"
-#include "Sink.h"
-#include "Validator.h"
 
 #include "QObjectPtr.h"
 #include "net/NetRequest.h"
@@ -51,12 +46,9 @@
 namespace Net {
 class Download : public NetRequest {
     Q_OBJECT
-
    public:
     using Ptr = shared_qobject_ptr<class Download>;
-
-   public:
-    ~Download() override = default;
+    explicit Download() : NetRequest() { logCat = taskDownloadLogC; };
 
 #if defined(LAUNCHER_APPLICATION)
     static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
@@ -64,8 +56,6 @@ class Download : public NetRequest {
 
     static auto makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options = Option::NoOptions) -> Download::Ptr;
     static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
-
-    void init() override{};
 
    protected:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;

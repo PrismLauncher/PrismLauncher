@@ -42,8 +42,6 @@
 #include <utility>
 #include "ByteArraySink.h"
 
-#include "net/Logging.h"
-
 namespace Net {
 
 QNetworkReply* Upload::getReply(QNetworkRequest& request)
@@ -55,7 +53,6 @@ QNetworkReply* Upload::getReply(QNetworkRequest& request)
 Upload::Ptr Upload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
 {
     auto up = makeShared<Upload>();
-    up->logCat = taskUploadLogC;
     up->m_url = std::move(url);
     up->m_sink.reset(new ByteArraySink(output));
     up->m_post_data = std::move(m_post_data);
