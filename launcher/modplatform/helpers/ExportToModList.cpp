@@ -21,135 +21,157 @@
 #include <QJsonObject>
 
 namespace ExportToModList {
+QString toHTML(QList<Mod*> mods, OptionalData extraData)
+{
+    QStringList lines;
+    for (auto mod : mods) {
+        auto meta = mod->metadata();
+        auto modName = mod->name();
+        if (extraData & Url) {
+            auto url = mod->metaurl();
+            if (!url.isEmpty())
+                modName = QString("<a href=\"%1\">%2</a>").arg(url, modName);
+        }
+        auto line = modName;
+        if (extraData & Version) {
+            auto ver = mod->version();
+            if (ver.isEmpty() && meta != nullptr)
+                ver = meta->version().toString();
+            if (!ver.isEmpty())
+                line += QString(" [%1]").arg(ver);
+        }
+        if (extraData & Authors && !mod->authors().isEmpty())
+            line += " by " + mod->authors().join(", ");
+        lines.append(QString("<li>%1</li>").arg(line));
+    }
+    return QString("<html><body><ul>\n\t%1\n</ul></body></html>").arg(lines.join("\n\t"));
+}
+
+QString toMARKDOWN(QList<Mod*> mods, OptionalData extraData)
+{
+    QStringList lines;
+    for (auto mod : mods) {
+        auto meta = mod->metadata();
+        auto modName = mod->name();
+        if (extraData & Url) {
+            auto url = mod->metaurl();
+            if (!url.isEmpty())
+                modName = QString("[%1](%2)").arg(modName, url);
+        }
+        auto line = modName;
+        if (extraData & Version) {
+            auto ver = mod->version();
+            if (ver.isEmpty() && meta != nullptr)
+                ver = meta->version().toString();
+            if (!ver.isEmpty())
+                line += QString(" [%1]").arg(ver);
+        }
+        if (extraData & Authors && !mod->authors().isEmpty())
+            line += " by " + mod->authors().join(", ");
+        lines << "- " + line;
+    }
+    return lines.join("\n");
+}
+
+QString toPLAINTXT(QList<Mod*> mods, OptionalData extraData)
+{
+    QStringList lines;
+    for (auto mod : mods) {
+        auto meta = mod->metadata();
+        auto modName = mod->name();
+
+        auto line = modName;
+        if (extraData & Url) {
+            auto url = mod->metaurl();
+            if (!url.isEmpty())
+                line += QString(" (%1)").arg(url);
+        }
+        if (extraData & Version) {
+            auto ver = mod->version();
+            if (ver.isEmpty() && meta != nullptr)
+                ver = meta->version().toString();
+            if (!ver.isEmpty())
+                line += QString(" [%1]").arg(ver);
+        }
+        if (extraData & Authors && !mod->authors().isEmpty())
+            line += " by " + mod->authors().join(", ");
+        lines << line;
+    }
+    return lines.join("\n");
+}
+
+QString toJSON(QList<Mod*> mods, OptionalData extraData)
+{
+    QJsonArray lines;
+    for (auto mod : mods) {
+        auto meta = mod->metadata();
+        auto modName = mod->name();
+        QJsonObject line;
+        line["name"] = modName;
+        if (extraData & Url) {
+            auto url = mod->metaurl();
+            if (!url.isEmpty())
+                line["url"] = url;
+        }
+        if (extraData & Version) {
+            auto ver = mod->version();
+            if (ver.isEmpty() && meta != nullptr)
+                ver = meta->version().toString();
+            if (!ver.isEmpty())
+                line["version"] = ver;
+        }
+        if (extraData & Authors && !mod->authors().isEmpty())
+            line["authors"] = QJsonArray::fromStringList(mod->authors());
+        lines << line;
+    }
+    QJsonDocument doc;
+    doc.setArray(lines);
+    return doc.toJson();
+}
+
+QString toCSV(QList<Mod*> mods, OptionalData extraData)
+{
+    QStringList lines;
+    for (auto mod : mods) {
+        QStringList data;
+        auto meta = mod->metadata();
+        auto modName = mod->name();
+
+        data << modName;
+        if (extraData & Url)
+            data << mod->metaurl();
+        if (extraData & Version) {
+            auto ver = mod->version();
+            if (ver.isEmpty() && meta != nullptr)
+                ver = meta->version().toString();
+            data << ver;
+        }
+        if (extraData & Authors) {
+            QString authors;
+            if (mod->authors().length() == 1)
+                authors = mod->authors().back();
+            else if (mod->authors().length() > 1)
+                authors = QString("\"%1\"").arg(mod->authors().join(","));
+            data << authors;
+        }
+        lines << data.join(",");
+    }
+    return lines.join("\n");
+}
+
 QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData)
 {
     switch (format) {
-        case HTML: {
-            QStringList lines;
-            for (auto mod : mods) {
-                auto meta = mod->metadata();
-                auto modName = mod->name();
-                if (extraData & Url) {
-                    auto url = mod->metaurl();
-                    if (!url.isEmpty())
-                        modName = QString("<a href=\"%1\">%2</a>").arg(url, modName);
-                }
-                auto line = modName;
-                if (extraData & Version) {
-                    auto ver = mod->version();
-                    if (ver.isEmpty() && meta != nullptr)
-                        ver = meta->version().toString();
-                    if (!ver.isEmpty())
-                        line += QString(" [%1]").arg(ver);
-                }
-                if (extraData & Authors && !mod->authors().isEmpty())
-                    line += " by " + mod->authors().join(", ");
-                lines.append(QString("<li>%1</li>").arg(line));
-            }
-            return QString("<html><body><ul>\n\t%1\n</ul></body></html>").arg(lines.join("\n\t"));
-        }
-        case MARKDOWN: {
-            QStringList lines;
-            for (auto mod : mods) {
-                auto meta = mod->metadata();
-                auto modName = mod->name();
-                if (extraData & Url) {
-                    auto url = mod->metaurl();
-                    if (!url.isEmpty())
-                        modName = QString("[%1](%2)").arg(modName, url);
-                }
-                auto line = modName;
-                if (extraData & Version) {
-                    auto ver = mod->version();
-                    if (ver.isEmpty() && meta != nullptr)
-                        ver = meta->version().toString();
-                    if (!ver.isEmpty())
-                        line += QString(" [%1]").arg(ver);
-                }
-                if (extraData & Authors && !mod->authors().isEmpty())
-                    line += " by " + mod->authors().join(", ");
-                lines << "- " + line;
-            }
-            return lines.join("\n");
-        }
-        case PLAINTXT: {
-            QStringList lines;
-            for (auto mod : mods) {
-                auto meta = mod->metadata();
-                auto modName = mod->name();
-
-                auto line = modName;
-                if (extraData & Url) {
-                    auto url = mod->metaurl();
-                    if (!url.isEmpty())
-                        line += QString(" (%1)").arg(url);
-                }
-                if (extraData & Version) {
-                    auto ver = mod->version();
-                    if (ver.isEmpty() && meta != nullptr)
-                        ver = meta->version().toString();
-                    if (!ver.isEmpty())
-                        line += QString(" [%1]").arg(ver);
-                }
-                if (extraData & Authors && !mod->authors().isEmpty())
-                    line += " by " + mod->authors().join(", ");
-                lines << line;
-            }
-            return lines.join("\n");
-        }
-        case JSON: {
-            QJsonArray lines;
-            for (auto mod : mods) {
-                auto meta = mod->metadata();
-                auto modName = mod->name();
-                QJsonObject line;
-                line["name"] = modName;
-                if (extraData & Url) {
-                    auto url = mod->metaurl();
-                    if (!url.isEmpty())
-                        line["url"] = url;
-                }
-                if (extraData & Version) {
-                    auto ver = mod->version();
-                    if (ver.isEmpty() && meta != nullptr)
-                        ver = meta->version().toString();
-                    if (!ver.isEmpty())
-                        line["version"] = ver;
-                }
-                if (extraData & Authors && !mod->authors().isEmpty())
-                    line["authors"] = QJsonArray::fromStringList(mod->authors());
-                lines << line;
-            }
-            QJsonDocument doc;
-            doc.setArray(lines);
-            return doc.toJson();
-        }
-        case CSV: {
-            QStringList lines;
-            for (auto mod : mods) {
-                QStringList data;
-                auto meta = mod->metadata();
-                auto modName = mod->name();
-
-                data << modName;
-                if (extraData & Url) {
-                    auto url = mod->metaurl();
-                    if (!url.isEmpty())
-                        data << url;
-                }
-                if (extraData & Version) {
-                    auto ver = mod->version();
-                    if (ver.isEmpty() && meta != nullptr)
-                        ver = meta->version().toString();
-                    if (!ver.isEmpty())
-                        data << ver;
-                }
-                if (extraData & Authors && !mod->authors().isEmpty())
-                    data << QString("\"%1\"").arg(mod->authors().join(","));
-                lines << data.join(",");
-            }
-            return lines.join("\n");
-        }
+        case HTML:
+            return toHTML(mods, extraData);
+        case MARKDOWN:
+            return toMARKDOWN(mods, extraData);
+        case PLAINTXT:
+            return toPLAINTXT(mods, extraData);
+        case JSON:
+            return toJSON(mods, extraData);
+        case CSV:
+            return toCSV(mods, extraData);
         default: {
             return QString("unknown format:%1").arg(format);
         }
