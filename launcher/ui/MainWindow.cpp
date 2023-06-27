@@ -1613,7 +1613,9 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
     if (FS::createShortcut(desktopFilePath, appPath, args, m_selectedInstance->name(), iconPath)) {
         QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
     } else {
+#if not defined(Q_OS_MACOS)
         iconFile.remove();
+#endif
         QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
     }
 }
