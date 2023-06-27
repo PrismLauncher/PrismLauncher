@@ -175,6 +175,34 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
 
 }  // namespace
 
+std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const QString& path)
+{
+    auto contents = QString(FS::read(path));
+    auto lines = contents.split('\n');
+
+    QDateTime timestamp;
+    QString from, to, target, data_path;
+    for (auto line : lines) {
+        auto index = line.indexOf("=");
+        if (index < 0)
+            continue;
+        auto left = line.left(index);
+        auto right = line.mid(index + 1);
+        if (left.toLower() == "timestamp") {
+            timestamp = QDateTime::fromString(right, Qt::ISODate);
+        } else if (left.toLower() == "from") {
+            from = right;
+        } else if (left.toLower() == "to") {
+            to = right;
+        } else if (left.toLower() == "target") {
+            target = right;
+        } else if (left.toLower() == "data_path") {
+            data_path = right;
+        }
+    }
+    return std::make_tuple(timestamp, from, to, target, data_path);
+}
+
 #if defined Q_OS_WIN32
 
 // taken from https://stackoverflow.com/a/25927081
@@ -554,6 +582,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
+        qDebug() << "Compiled for               : " << BuildConfig.systemID();
+        qDebug() << "Compiled by                : " << BuildConfig.compilerID();
         if (adjustedBy.size()) {
             qDebug() << "Work dir before adjustment : " << origcwdPath;
             qDebug() << "Work dir after adjustment  : " << QDir::currentPath();
@@ -942,6 +972,95 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     applyCurrentlySelectedTheme(true);
 
+    // check update locks
+    {
+        auto update_log_path = FS::PathCombine(m_dataPath, "logs", "prism_launcher_update.log");
+
+        auto update_lock = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.lock"));
+        if (update_lock.exists()) {
+            auto [timestamp, from, to, target, data_path] = read_lock_File(update_lock.absoluteFilePath());
+            auto infoMsg = tr("This installation has a update lock file present at: %1\n"
+                              "\n"
+                              "Timestamp: %2\n"
+                              "Updating from version %3 to %4\n"
+                              "Target install path: %5\n"
+                              "Data Path: %6"
+                              "\n"
+                              "This likely means that a update attempt failed. Please ensure your installation is in working order before "
+                              "proceeding.\n"
+                              "Check the Prism Launcher updater log at: \n"
+                              "%7\n"
+                              "for details on the last update attempt.\n"
+                              "\n"
+                              "To delete this lock and proceed select \"Ignore\" below.")
+                               .arg(update_lock.absoluteFilePath())
+                               .arg(timestamp.toString(Qt::ISODate), from, to, target, data_path)
+                               .arg(update_log_path);
+            auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update In Progress"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
+            msgBox.setDefaultButton(QMessageBox::Abort);
+            msgBox.setModal(true);
+            auto res = msgBox.exec();
+            switch (res) {
+                case QMessageBox::Ignore: {
+                    FS::deletePath(update_lock.absoluteFilePath());
+                    break;
+                }
+                case QMessageBox::Abort:
+                    [[fallthrough]];
+                default: {
+                    qDebug() << "Exiting because update lockfile is present";
+                    QMetaObject::invokeMethod(this, [](){ exit(1); }, Qt::QueuedConnection);
+                    return;
+                }
+            }
+        }
+
+        auto update_fail_marker = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.fail"));
+        if (update_fail_marker.exists()) {
+            auto infoMsg = tr("An update attempt failed\n"
+                              "\n"
+                              "Please ensure your installation is in working order before "
+                              "proceeding.\n"
+                              "Check the Prism Launcher updater log at: \n"
+                              "%1\n"
+                              "for details on the last update attempt.")
+                               .arg(update_log_path);
+            auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Failed"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
+            msgBox.setDefaultButton(QMessageBox::Abort);
+            msgBox.setModal(true);
+            auto res = msgBox.exec();
+            switch (res) {
+                case QMessageBox::Ignore: {
+                    FS::deletePath(update_fail_marker.absoluteFilePath());
+                    break;
+                }
+                case QMessageBox::Abort:
+                    [[fallthrough]];
+                default: {
+                    qDebug() << "Exiting because update lockfile is present";
+                    QMetaObject::invokeMethod(this, [](){ exit(1); }, Qt::QueuedConnection);
+                    return;
+                }
+            }
+        }
+
+        auto update_success_marker = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.success"));
+        if (update_success_marker.exists()) {
+            auto infoMsg = tr("Update succeeded\n"
+                              "\n"
+                              "You are now running %1 .\n"
+                              "Check the Prism Launcher updater log at: \n"
+                              "%1\n"
+                              "for details.")
+                               .arg(BuildConfig.printableVersionString())
+                               .arg(update_log_path);
+            auto msgBox = QMessageBox(QMessageBox::Information, tr("Update Succeeded"), infoMsg, QMessageBox::Ok);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+            msgBox.open();
+            FS::deletePath(update_success_marker.absoluteFilePath());
+        }
+    }
+
     updateCapabilities();
 
     if (createSetupWizard()) {
@@ -1032,119 +1151,11 @@ void Application::setupWizardFinished(int status)
     performMainStartupAction();
 }
 
-std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const QString& path)
-{
-    auto contents = QString(FS::read(path));
-    auto lines = contents.split('\n');
-
-    QDateTime timestamp;
-    QString from, to, target, data_path;
-    for (auto line : lines) {
-        auto index = line.indexOf("=");
-        if (index < 0)
-            continue;
-        auto left = line.left(index);
-        auto right = line.mid(index + 1);
-        if (left.toLower() == "timestamp") {
-            timestamp = QDateTime::fromString(right, Qt::ISODate);
-        } else if (left.toLower() == "from") {
-            from = right;
-        } else if (left.toLower() == "to") {
-            to = right;
-        } else if (left.toLower() == "target") {
-            target = right;
-        } else if (left.toLower() == "data_path") {
-            data_path = right;
-        }
-    }
-    return std::make_tuple(timestamp, from, to, target, data_path);
-}
-
 void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
 
-    auto update_log_path = FS::PathCombine(m_dataPath, "logs", "prism_launcher_update.log");
-
-    auto update_lock = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.lock"));
-    if (update_lock.exists()) {
-        auto [timestamp, from, to, target, data_path] = read_lock_File(update_lock.absoluteFilePath());
-        auto infoMsg = tr("This installation has a update lock file present at: %1\n"
-                          "\n"
-                          "Timestamp: %2\n"
-                          "Updating from version %3 to %4\n"
-                          "Target install path: %5\n"
-                          "Data Path: %6"
-                          "\n"
-                          "This likely means that a update attempt failed. Please ensure your installation is in working order before "
-                          "proceeding.\n"
-                          "Check the Prism Launcher updater log at: \n"
-                          "%7\n"
-                          "for details on the last update attempt.\n"
-                          "\n"
-                          "To delete this lock and proceed select \"Ignore\" below.")
-                           .arg(update_lock.absoluteFilePath())
-                           .arg(timestamp.toString(Qt::ISODate), from, to, target, data_path)
-                           .arg(update_log_path);
-        auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update In Progress"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
-        msgBox.setDefaultButton(QMessageBox::Abort);
-        msgBox.setModal(true);
-        switch (msgBox.exec()) {
-            case QMessageBox::AcceptRole: {
-                FS::deletePath(update_lock.absoluteFilePath());
-                break;
-            }
-            case QMessageBox::RejectRole:
-                [[fallthrough]];
-            default: {
-                qDebug() << "Exiting because update lockfile is present";
-                exit(1);
-            }
-        }
-    }
-
-    auto update_fail_marker = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.fail"));
-    if (update_fail_marker.exists()) {
-        auto infoMsg = tr("An update attempt failed\n"
-                          "\n"
-                          "Please ensure your installation is in working order before "
-                          "proceeding.\n"
-                          "Check the Prism Launcher updater log at: \n"
-                          "%1\n"
-                          "for details on the last update attempt.")
-                           .arg(update_log_path);
-        auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Failed"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
-        msgBox.setDefaultButton(QMessageBox::Abort);
-        msgBox.setModal(true);
-        switch (msgBox.exec()) {
-            case QMessageBox::AcceptRole: {
-                FS::deletePath(update_fail_marker.absoluteFilePath());
-                break;
-            }
-            case QMessageBox::RejectRole:
-                [[fallthrough]];
-            default: {
-                qDebug() << "Exiting because update lockfile is present";
-                exit(1);
-            }
-        }
-    }
-
-    auto update_success_marker = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.success"));
-    if (update_success_marker.exists()) {
-        auto infoMsg = tr("Update succeeded\n"
-                          "\n"
-                          "You are now running %1 .\n"
-                          "Check the Prism Launcher updater log at: \n"
-                          "%1\n"
-                          "for details.")
-                           .arg(BuildConfig.printableVersionString())
-                           .arg(update_log_path);
-        auto msgBox = QMessageBox(QMessageBox::Information, tr("Update Succeeded"), infoMsg, QMessageBox::Ok);
-        msgBox.setDefaultButton(QMessageBox::Ok);
-        msgBox.open();
-        FS::deletePath(update_success_marker.absoluteFilePath());
-    }
+    
 
     if (!m_instanceIdToLaunch.isEmpty()) {
         auto inst = instances()->getInstanceById(m_instanceIdToLaunch);

@@ -244,7 +244,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     auto updater_executable = QCoreApplication::applicationFilePath();
 
-    if (BuildConfig.BUILD_PLATFORM.toLower() == "macos")
+    if (BuildConfig.BUILD_ARTIFACT.toLower() == "macos")
         showFatalErrorMessage(tr("MacOS Not Supported"), tr("The updater does not support installations on MacOS"));
 
     if (updater_executable.startsWith("/tmp/.mount_")) {
@@ -435,6 +435,8 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
+        qDebug() << "Compiled for               : " << BuildConfig.systemID();
+        qDebug() << "Compiled by                : " << BuildConfig.compilerID();
         if (adjustedBy.size()) {
             qDebug() << "Data dir before adjustment : " << origCwdPath;
             qDebug() << "Data dir after adjustment  : " << m_dataPath;
@@ -576,7 +578,7 @@ void PrismUpdaterApp::run()
         return exit(result ? 0 : 1);
     }
 
-    if (BuildConfig.BUILD_PLATFORM.toLower() == "linux" && !m_isPortable) {
+    if (BuildConfig.BUILD_ARTIFACT.toLower() == "linux" && !m_isPortable) {
         showFatalErrorMessage(tr("Updating Not Supported"),
                               tr("Updating non-portable linux installations is not supported. Please use your system package manager"));
         return;
@@ -751,9 +753,9 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
 {
     QList<GitHubReleaseAsset> valid;
 
-    qDebug() << "Selecting best asset from" << release.tag_name << "for platform" << BuildConfig.BUILD_PLATFORM
+    qDebug() << "Selecting best asset from" << release.tag_name << "for platform" << BuildConfig.BUILD_ARTIFACT
              << "portable:" << m_isPortable;
-    if (BuildConfig.BUILD_PLATFORM.isEmpty())
+    if (BuildConfig.BUILD_ARTIFACT.isEmpty())
         qWarning() << "Build platform is not set!";
     for (auto asset : release.assets) {
         if (!m_isAppimage && asset.name.toLower().endsWith("appimage"))
@@ -761,7 +763,7 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
         else if (m_isAppimage && !asset.name.toLower().endsWith("appimage"))
             continue;
         auto asset_name = asset.name.toLower();
-        auto platform = BuildConfig.BUILD_PLATFORM.toLower();
+        auto platform = BuildConfig.BUILD_ARTIFACT.toLower();
         auto system_is_arm = QSysInfo::buildCpuArchitecture().contains("arm64");
         auto asset_is_arm = asset_name.contains("arm64");
         auto asset_is_archive = asset_name.endsWith(".zip") || asset_name.endsWith(".tar.gz");
@@ -808,7 +810,7 @@ void PrismUpdaterApp::performUpdate(const GitHubRelease& release)
             tr("No Valid Release Assets"),
             tr("Github release %1 has no valid assets for this platform: %2")
                 .arg(release.tag_name)
-                .arg(tr("%1 portable: %2").arg(BuildConfig.BUILD_PLATFORM).arg(m_isPortable ? tr("yes") : tr("no"))));
+                .arg(tr("%1 portable: %2").arg(BuildConfig.BUILD_ARTIFACT).arg(m_isPortable ? tr("yes") : tr("no"))));
     } else if (valid_assets.length() > 1) {
         selected_asset = selectAsset(valid_assets);
     } else {
@@ -1020,7 +1022,7 @@ void PrismUpdaterApp::backupAppDir()
 
     if (file_list.isEmpty()) {
         // best guess
-        if (BuildConfig.BUILD_PLATFORM.toLower() == "linux") {
+        if (BuildConfig.BUILD_ARTIFACT.toLower() == "linux") {
             file_list.append({ "PrismLauncher", "bin", "share", "lib" });
         } else {  // windows by process of elimination
             file_list.append({
