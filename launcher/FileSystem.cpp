@@ -36,7 +36,7 @@
  */
 
 #include "FileSystem.h"
-#include <qpair.h>
+#include <QPair>
 
 #include "BuildConfig.h"
 
