@@ -22,7 +22,7 @@
 
 namespace ExportToModList {
 
-enum Formats { HTML, MARKDOWN, PLAINTXT, CUSTOM };
+enum Formats { HTML, MARKDOWN, PLAINTXT, JSON, CSV, CUSTOM };
 enum OptionalData {
     Authors = 1 << 0,
     Url = 1 << 1,

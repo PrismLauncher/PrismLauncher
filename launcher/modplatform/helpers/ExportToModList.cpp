@@ -16,6 +16,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "ExportToModList.h"
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 namespace ExportToModList {
 QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData)
@@ -91,6 +94,59 @@ QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData
                 if (extraData & Authors && !mod->authors().isEmpty())
                     line += " by " + mod->authors().join(", ");
                 lines << line;
+            }
+            return lines.join("\n");
+        }
+        case JSON: {
+            QJsonArray lines;
+            for (auto mod : mods) {
+                auto meta = mod->metadata();
+                auto modName = mod->name();
+                QJsonObject line;
+                line["name"] = modName;
+                if (extraData & Url) {
+                    auto url = mod->metaurl();
+                    if (!url.isEmpty())
+                        line["url"] = url;
+                }
+                if (extraData & Version) {
+                    auto ver = mod->version();
+                    if (ver.isEmpty() && meta != nullptr)
+                        ver = meta->version().toString();
+                    if (!ver.isEmpty())
+                        line["version"] = ver;
+                }
+                if (extraData & Authors && !mod->authors().isEmpty())
+                    line["authors"] = QJsonArray::fromStringList(mod->authors());
+                lines << line;
+            }
+            QJsonDocument doc;
+            doc.setArray(lines);
+            return doc.toJson();
+        }
+        case CSV: {
+            QStringList lines;
+            for (auto mod : mods) {
+                QStringList data;
+                auto meta = mod->metadata();
+                auto modName = mod->name();
+
+                data << modName;
+                if (extraData & Url) {
+                    auto url = mod->metaurl();
+                    if (!url.isEmpty())
+                        data << url;
+                }
+                if (extraData & Version) {
+                    auto ver = mod->version();
+                    if (ver.isEmpty() && meta != nullptr)
+                        ver = meta->version().toString();
+                    if (!ver.isEmpty())
+                        data << ver;
+                }
+                if (extraData & Authors && !mod->authors().isEmpty())
+                    data << QString("\"%1\"").arg(mod->authors().join(","));
+                lines << data.join(",");
             }
             return lines.join("\n");
         }

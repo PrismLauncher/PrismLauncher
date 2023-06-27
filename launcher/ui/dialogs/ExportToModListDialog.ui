@@ -60,6 +60,16 @@
           </item>
           <item>
            <property name="text">
+            <string>JSON</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>CSV</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>Custom</string>
            </property>
           </item>

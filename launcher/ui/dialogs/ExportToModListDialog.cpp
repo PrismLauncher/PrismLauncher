@@ -89,6 +89,20 @@ void ExportToModListDialog::formatChanged(int index)
             break;
         }
         case 3: {
+            ui->templateGroup->setDisabled(true);
+            ui->optionsGroup->setDisabled(false);
+            ui->resultText->hide();
+            format = ExportToModList::JSON;
+            break;
+        }
+        case 4: {
+            ui->templateGroup->setDisabled(true);
+            ui->optionsGroup->setDisabled(false);
+            ui->resultText->hide();
+            format = ExportToModList::CSV;
+            break;
+        }
+        case 5: {
             ui->templateGroup->setDisabled(false);
             ui->optionsGroup->setDisabled(true);
             ui->resultText->hide();
@@ -133,6 +147,12 @@ void ExportToModListDialog::triggerImp()
         }
         case ExportToModList::CUSTOM:
             return;
+        case ExportToModList::JSON:
+            exampleLine = "{\"name\":\"{name}\",\"url\":\"{url}\",\"version\":\"{version}\",\"authors\":\"{authors}\"},";
+            break;
+        case ExportToModList::CSV:
+            exampleLine = "{name},{url},{version},\"{authors}\"";
+            break;
     }
     if (!m_template_selected) {
         if (ui->templateText->toPlainText() != exampleLine)
@@ -146,7 +166,7 @@ void ExportToModListDialog::done(int result)
         const QString filename = FS::RemoveInvalidFilenameChars(name);
         const QString output =
             QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + extension()),
-                                         "File (*.txt *.html *.md)", nullptr);
+                                         "File (*.txt *.html *.md *.json *.csv)", nullptr);
 
         if (output.isEmpty())
             return;
@@ -167,6 +187,10 @@ QString ExportToModListDialog::extension()
             return ".txt";
         case ExportToModList::CUSTOM:
             return ".txt";
+        case ExportToModList::JSON:
+            return ".json";
+        case ExportToModList::CSV:
+            return ".csv";
     }
     return ".txt";
 }
