@@ -372,7 +372,7 @@ void create_link::make_link_list(const QString& offset)
                 auto src_path = source_it.next();
                 auto relative_path = src_dir.relativeFilePath(src_path);
 
-                if (m_max_depth >= 0 && pathDepth(relative_path) > m_max_depth){
+                if (m_max_depth >= 0 && pathDepth(relative_path) > m_max_depth) {
                     relative_path = pathTruncate(relative_path, m_max_depth);
                     src_path = src_dir.filePath(relative_path);
                     if (linkedPaths.contains(src_path)) {
@@ -663,7 +663,7 @@ QString pathTruncate(const QString& path, int depth)
 
     QString trunc = QFileInfo(path).path();
 
-    if (pathDepth(trunc) > depth ) {
+    if (pathDepth(trunc) > depth) {
         return pathTruncate(trunc, depth);
     }
 
@@ -769,6 +769,9 @@ QString getDesktopDir()
 // Cross-platform Shortcut creation
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
+    if (destination.isEmpty()) {
+        destination = PathCombine(getDesktopDir(), RemoveInvalidFilenameChars(name));
+    }
 #if defined(Q_OS_MACOS)
     destination += ".command";
 
@@ -791,6 +794,8 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 
     return true;
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    if (!destination.endsWith(".desktop"))  // in case of isFlatpak destination is already populated
+        destination += ".desktop";
     QFile f(destination);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream stream(&f);
@@ -974,7 +979,7 @@ FilesystemType getFilesystemType(const QString& name)
 {
     for (auto iter = s_filesystem_type_names.constBegin(); iter != s_filesystem_type_names.constEnd(); ++iter) {
         auto fs_names = iter.value();
-        if(fs_names.contains(name.toUpper())) 
+        if (fs_names.contains(name.toUpper()))
             return iter.key();
     }
     return FilesystemType::UNKNOWN;
