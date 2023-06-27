@@ -143,6 +143,8 @@ set(NET_SOURCES
     net/ApiDownload.cpp
     net/ApiUpload.cpp
     net/ApiUpload.h
+    net/NetRequest.cpp
+    net/NetRequest.h
 )
 
 # Game launch logic
