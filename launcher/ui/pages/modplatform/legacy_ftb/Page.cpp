@@ -116,8 +116,8 @@ Page::Page(NewInstanceDialog* dialog, QWidget *parent)
     connect(ui->thirdPartyPackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &Page::onThirdPartyPackSelectionChanged);
     connect(ui->privatePackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &Page::onPrivatePackSelectionChanged);
 
-    connect(ui->addPackBtn, &QPushButton::pressed, this, &Page::onAddPackClicked);
-    connect(ui->removePackBtn, &QPushButton::pressed, this, &Page::onRemovePackClicked);
+    connect(ui->addPackBtn, &QPushButton::clicked, this, &Page::onAddPackClicked);
+    connect(ui->removePackBtn, &QPushButton::clicked, this, &Page::onRemovePackClicked);
 
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &Page::onTabChanged);
 

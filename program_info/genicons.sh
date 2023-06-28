@@ -67,7 +67,4 @@ else
 fi
 
 # replace icon in themes
-for dir in ../launcher/resources/*/scalable
-do
-    cp -v org.prismlauncher.PrismLauncher.svg "$dir/launcher.svg"
-done
+cp -v org.prismlauncher.PrismLauncher.svg "../launcher/resources/multimc/scalable/launcher.svg"
