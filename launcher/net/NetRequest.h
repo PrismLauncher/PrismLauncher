@@ -3,7 +3,6 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,6 +23,7 @@
  *      Copyright 2013-2021 MultiMC Contributors
  *
  *      Licensed under the Apache License, Version 2.0 (the "License");
+
  *      you may not use this file except in compliance with the License.
  *      You may obtain a copy of the License at
  *
@@ -36,26 +36,64 @@
  *      limitations under the License.
  */
 
-#include "Upload.h"
+#pragma once
 
-#include <memory>
-#include <utility>
-#include "ByteArraySink.h"
+#include <qloggingcategory.h>
+#include <chrono>
+
+#include "NetAction.h"
+#include "Sink.h"
+#include "Validator.h"
+
+#include "QObjectPtr.h"
+#include "net/Logging.h"
 
 namespace Net {
+class NetRequest : public NetAction {
+    Q_OBJECT
+   protected:
+    explicit NetRequest() : NetAction(){};
 
-QNetworkReply* Upload::getReply(QNetworkRequest& request)
-{
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    return m_network->post(request, m_post_data);
-}
+   public:
+    using Ptr = shared_qobject_ptr<class NetRequest>;
+    enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2 };
+    Q_DECLARE_FLAGS(Options, Option)
 
-Upload::Ptr Upload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
-{
-    auto up = makeShared<Upload>();
-    up->m_url = std::move(url);
-    up->m_sink.reset(new ByteArraySink(output));
-    up->m_post_data = std::move(m_post_data);
-    return up;
-}
+   public:
+    ~NetRequest() override = default;
+
+    void init() override{};
+
+   public:
+    void addValidator(Validator* v);
+    auto abort() -> bool override;
+    auto canAbort() const -> bool override { return true; };
+
+   private:
+    auto handleRedirect() -> bool;
+    virtual QNetworkReply* getReply(QNetworkRequest&) = 0;
+
+   protected slots:
+    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
+    void downloadError(QNetworkReply::NetworkError error) override;
+    void sslErrors(const QList<QSslError>& errors) override;
+    void downloadFinished() override;
+    void downloadReadyRead() override;
+
+   public slots:
+    void executeTask() override;
+
+   protected:
+    std::unique_ptr<Sink> m_sink;
+    Options m_options;
+
+    typedef const QLoggingCategory& (*logCatFunc)();
+    logCatFunc logCat = taskUploadLogC;
+
+    std::chrono::steady_clock m_clock;
+    std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;
+    qint64 m_last_progress_bytes;
+};
 }  // namespace Net
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Net::NetRequest::Options)
