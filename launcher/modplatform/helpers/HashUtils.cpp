@@ -71,6 +71,7 @@ void ModrinthHasher::executeTask()
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
+        emit resultsReady(m_hash);
     }
 }
 
@@ -88,13 +89,13 @@ void FlameHasher::executeTask()
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
+        emit resultsReady(m_hash);
     }
 }
 
-
-BlockedModHasher::BlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider)
-    : Hasher(file_path), provider(provider) { 
-    setObjectName(QString("BlockedModHasher: %1").arg(file_path)); 
+BlockedModHasher::BlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider) : Hasher(file_path), provider(provider)
+{
+    setObjectName(QString("BlockedModHasher: %1").arg(file_path));
     hash_type = ProviderCaps.hashType(provider).first();
 }
 
@@ -120,14 +121,17 @@ void BlockedModHasher::executeTask()
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
+        emit resultsReady(m_hash);
     }
 }
 
-QStringList BlockedModHasher::getHashTypes() {
+QStringList BlockedModHasher::getHashTypes()
+{
     return ProviderCaps.hashType(provider);
 }
 
-bool BlockedModHasher::useHashType(QString type) {
+bool BlockedModHasher::useHashType(QString type)
+{
     auto types = ProviderCaps.hashType(provider);
     if (types.contains(type)) {
         hash_type = type;

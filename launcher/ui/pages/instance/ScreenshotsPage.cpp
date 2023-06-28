@@ -36,6 +36,7 @@
  */
 
 #include "ScreenshotsPage.h"
+#include "BuildConfig.h"
 #include "ui_ScreenshotsPage.h"
 
 #include <QModelIndex>
@@ -380,16 +381,18 @@ void ScreenshotsPage::on_actionUpload_triggered()
     if (selection.isEmpty())
         return;
 
-
     QString text;
+    QUrl baseUrl(BuildConfig.IMGUR_BASE_URL);
     if (selection.size() > 1)
-        text = tr("You are about to upload %1 screenshots.\n\n"
+        text = tr("You are about to upload %1 screenshots to %2.\n"
+                  "You should double-check for personal information.\n\n"
                   "Are you sure?")
-                   .arg(selection.size());
+                   .arg(QString::number(selection.size()), baseUrl.host());
     else
-        text =
-            tr("You are about to upload the selected screenshot.\n\n"
-               "Are you sure?");
+        text = tr("You are about to upload the selected screenshot to %1.\n"
+                  "You should double-check for personal information.\n\n"
+                  "Are you sure?")
+                   .arg(baseUrl.host());
 
     auto response = CustomMessageBox::selectable(this, "Confirm Upload", text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
                                                  QMessageBox::No)

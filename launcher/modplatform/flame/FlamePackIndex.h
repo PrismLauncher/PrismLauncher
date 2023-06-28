@@ -4,6 +4,7 @@
 #include <QMetaType>
 #include <QString>
 #include <QVector>
+#include "modplatform/ModIndex.h"
 
 #include "modplatform/ModIndex.h"
 
@@ -30,8 +31,7 @@ struct ModpackExtra {
     QString sourceUrl;
 };
 
-struct IndexedPack
-{
+struct IndexedPack {
     int addonId;
     QString name;
     QString description;
@@ -46,9 +46,9 @@ struct IndexedPack
     ModpackExtra extra;
 };
 
-void loadIndexedPack(IndexedPack & m, QJsonObject & obj);
+void loadIndexedPack(IndexedPack& m, QJsonObject& obj);
 void loadIndexedInfo(IndexedPack&, QJsonObject&);
-void loadIndexedPackVersions(IndexedPack & m, QJsonArray & arr);
-}
+void loadIndexedPackVersions(IndexedPack& m, QJsonArray& arr);
+}  // namespace Flame
 
 Q_DECLARE_METATYPE(Flame::IndexedPack)

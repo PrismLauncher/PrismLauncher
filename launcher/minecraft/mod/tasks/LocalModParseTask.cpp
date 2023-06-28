@@ -52,6 +52,10 @@ ModDetails ReadMCModInfo(QByteArray contents)
             authors = firstObj.value("authors").toArray();
         }
 
+        if (firstObj.contains("logoFile")) {
+            details.icon_file = firstObj.value("logoFile").toString();
+        }
+
         for (auto author : authors) {
             details.authors.append(author.toString());
         }
@@ -166,6 +170,31 @@ ModDetails ReadMCModTOML(QByteArray contents)
     }
     details.homeurl = homeurl;
 
+    QString issueTrackerURL = "";
+    if (auto issueTrackerURLDatum = tomlData["issueTrackerURL"].as_string()) {
+        issueTrackerURL = QString::fromStdString(issueTrackerURLDatum->get());
+    } else if (auto issueTrackerURLDatum = (*modsTable)["issueTrackerURL"].as_string()) {
+        issueTrackerURL = QString::fromStdString(issueTrackerURLDatum->get());
+    }
+    details.issue_tracker = issueTrackerURL;
+
+    QString license = "";
+    if (auto licenseDatum = tomlData["license"].as_string()) {
+        license = QString::fromStdString(licenseDatum->get());
+    } else if (auto licenseDatum =(*modsTable)["license"].as_string()) {
+        license = QString::fromStdString(licenseDatum->get());
+    }
+    if (!license.isEmpty())
+        details.licenses.append(ModLicense(license));
+
+    QString logoFile = "";
+    if (auto logoFileDatum = tomlData["logoFile"].as_string()) {
+        logoFile = QString::fromStdString(logoFileDatum->get());
+    } else if (auto logoFileDatum =(*modsTable)["logoFile"].as_string()) {
+        logoFile = QString::fromStdString(logoFileDatum->get());
+    }
+    details.icon_file = logoFile;
+
     return details;
 }
 
@@ -200,6 +229,57 @@ ModDetails ReadFabricModInfo(QByteArray contents)
 
             if (contact.contains("homepage")) {
                 details.homeurl = contact.value("homepage").toString();
+            }
+            if (contact.contains("issues")) {
+                details.issue_tracker = contact.value("issues").toString();
+            }
+        }
+
+        if (object.contains("license")) {
+            auto license = object.value("license");
+            if (license.isArray()) {
+                for (auto l : license.toArray()) {
+                    if (l.isString()) {
+                        details.licenses.append(ModLicense(l.toString()));
+                    } else if (l.isObject()) {
+                        auto obj = l.toObject();
+                        details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
+                                                           obj.value("url").toString(), obj.value("description").toString()));
+                    }
+                }
+            } else if (license.isString()) {
+                details.licenses.append(ModLicense(license.toString()));
+            } else if (license.isObject()) {
+                auto obj = license.toObject();
+                details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(), obj.value("url").toString(),
+                                                   obj.value("description").toString()));
+            }
+        }
+
+        if (object.contains("icon")) {
+            auto icon = object.value("icon");
+            if (icon.isObject()) {
+                auto obj = icon.toObject();
+                // take the largest icon
+                int largest = 0;
+                for (auto key : obj.keys()) {
+                    auto size = key.split('x').first().toInt();
+                    if (size > largest) {
+                        largest = size;
+                    }
+                }
+                if (largest > 0) {
+                    auto key = QString::number(largest) + "x" + QString::number(largest);
+                    details.icon_file = obj.value(key).toString();
+                } else { // parsing the sizes failed
+                    // take the first
+                    for (auto i : obj) {
+                        details.icon_file = i.toString();
+                        break;
+                    }
+                }
+            } else if (icon.isString()) {
+                details.icon_file = icon.toString();
             }
         }
     }
@@ -238,6 +318,58 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
         if (modContact.contains("homepage")) {
             details.homeurl = Json::requireString(modContact.value("homepage"));
         }
+        if (modContact.contains("issues")) {
+            details.issue_tracker = Json::requireString(modContact.value("issues"));
+        }
+
+        if (modMetadata.contains("license")) {
+            auto license = modMetadata.value("license");
+            if (license.isArray()) {
+                for (auto l : license.toArray()) {
+                    if (l.isString()) {
+                        details.licenses.append(ModLicense(l.toString()));
+                    } else if (l.isObject()) {
+                        auto obj = l.toObject();
+                        details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
+                                                           obj.value("url").toString(), obj.value("description").toString()));
+                    }
+                }
+            } else if (license.isString()) {
+                details.licenses.append(ModLicense(license.toString()));
+            } else if (license.isObject()) {
+                auto obj = license.toObject();
+                details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(), obj.value("url").toString(),
+                                                   obj.value("description").toString()));
+            }
+        }
+
+        if (modMetadata.contains("icon")) {
+            auto icon = modMetadata.value("icon");
+            if (icon.isObject()) {
+                auto obj = icon.toObject();
+                // take the largest icon
+                int largest = 0;
+                for (auto key : obj.keys()) {
+                    auto size = key.split('x').first().toInt();
+                    if (size > largest) {
+                        largest = size;
+                    }
+                }
+                if (largest > 0) {
+                    auto key = QString::number(largest) + "x" + QString::number(largest);
+                    details.icon_file = obj.value(key).toString();
+                } else { // parsing the sizes failed
+                    // take the first
+                    for (auto i : obj) {
+                        details.icon_file = i.toString();
+                        break;
+                    }
+                }
+            } else if (icon.isString()) {
+                details.icon_file = icon.toString();
+            }
+        }
+
     }
     return details;
 }
@@ -513,6 +645,85 @@ bool validate(QFileInfo file)
 {
     Mod mod{ file };
     return ModUtils::process(mod, ProcessingLevel::BasicInfoOnly) && mod.valid();
+}
+
+bool processIconPNG(const Mod& mod, QByteArray&& raw_data)
+{
+    auto img = QImage::fromData(raw_data);
+    if (!img.isNull()) {
+        mod.setIcon(img);
+    } else {
+        qWarning() << "Failed to parse mod logo:" << mod.iconPath() << "from" << mod.name();
+        return false;
+    }
+    return true;
+}
+
+bool loadIconFile(const Mod& mod) {
+    if (mod.iconPath().isEmpty()) {
+        qWarning() << "No Iconfile set, be sure to parse the mod first";
+        return false;
+    }
+
+    auto png_invalid = [&mod]() {
+        qWarning() << "Mod at" << mod.fileinfo().filePath() << "does not have a valid icon";
+        return false;
+    };
+
+    switch (mod.type()) {
+        case ResourceType::FOLDER:
+        {
+            QFileInfo icon_info(FS::PathCombine(mod.fileinfo().filePath(), mod.iconPath()));
+            if (icon_info.exists() && icon_info.isFile()) {
+                QFile icon(icon_info.filePath());
+                if (!icon.open(QIODevice::ReadOnly))
+                    return false;
+                auto data = icon.readAll();
+                
+                bool icon_result = ModUtils::processIconPNG(mod, std::move(data));
+
+                icon.close();
+
+                if (!icon_result) {
+                    return png_invalid();  // icon invalid
+                }
+            }
+        }
+        case ResourceType::ZIPFILE:
+        {
+            QuaZip zip(mod.fileinfo().filePath());
+            if (!zip.open(QuaZip::mdUnzip))
+                return false;
+
+            QuaZipFile file(&zip);
+
+            if (zip.setCurrentFile(mod.iconPath())) {
+                if (!file.open(QIODevice::ReadOnly)) {
+                    qCritical() << "Failed to open file in zip.";
+                    zip.close();
+                    return png_invalid();
+                }
+
+                auto data = file.readAll();
+
+                bool icon_result = ModUtils::processIconPNG(mod, std::move(data));
+
+                file.close();
+                if (!icon_result) {
+                    return png_invalid();  // icon png invalid
+                }
+            } else {
+                return png_invalid();  // could not set icon as current file.
+            }
+        }
+        case ResourceType::LITEMOD:
+        {
+            return false; // can lightmods even have icons?
+        }
+        default:
+            qWarning() << "Invalid type for mod, can not load icon.";
+            return false;
+    }
 }
 
 }  // namespace ModUtils

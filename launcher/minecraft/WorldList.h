@@ -50,7 +50,7 @@ public:
         IconFileRole
     };
 
-    WorldList(const QString &dir, std::shared_ptr<const BaseInstance> instance);
+    WorldList(const QString &dir, BaseInstance* instance);
 
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
@@ -128,7 +128,7 @@ signals:
     void changed();
 
 protected:
-    std::shared_ptr<const BaseInstance> m_instance;
+    BaseInstance* m_instance;
     QFileSystemWatcher *m_watcher;
     bool is_watching;
     QDir m_dir;

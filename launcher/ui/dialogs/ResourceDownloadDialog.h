@@ -25,6 +25,7 @@
 #include <QLayout>
 
 #include "QObjectPtr.h"
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "ui/pages/BasePageProvider.h"
 
@@ -62,8 +63,8 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     bool selectPage(QString pageId);
     ResourcePage* getSelectedPage();
 
-    void addResource(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&, bool is_indexed = false);
-    void removeResource(ModPlatform::IndexedPack&, ModPlatform::IndexedVersion&);
+    void addResource(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
+    void removeResource(const QString&);
 
     const QList<DownloadTaskPtr> getTasks();
     [[nodiscard]] const std::shared_ptr<ResourceFolderModel> getBaseModel() const { return m_base_model; }
@@ -79,6 +80,9 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
    protected:
     [[nodiscard]] virtual QString geometrySaveKey() const { return ""; }
+    void setButtonStatus();
+
+    [[nodiscard]] virtual GetModDependenciesTask::Ptr getModDependenciesTask() { return nullptr; }
 
    protected:
     const std::shared_ptr<ResourceFolderModel> m_base_model;
@@ -88,11 +92,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
 
     QDialogButtonBox m_buttons;
     QVBoxLayout m_vertical_layout;
-
-    QHash<QString, DownloadTaskPtr> m_selected;
 };
-
-
 
 class ModDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
@@ -106,6 +106,7 @@ class ModDownloadDialog final : public ResourceDownloadDialog {
     [[nodiscard]] QString geometrySaveKey() const override { return "ModDownloadGeometry"; }
 
     QList<BasePage*> getPages() override;
+    GetModDependenciesTask::Ptr getModDependenciesTask() override;
 
    private:
     BaseInstance* m_instance;
@@ -135,8 +136,8 @@ class TexturePackDownloadDialog final : public ResourceDownloadDialog {
 
    public:
     explicit TexturePackDownloadDialog(QWidget* parent,
-                                        const std::shared_ptr<TexturePackFolderModel>& resource_packs,
-                                        BaseInstance* instance);
+                                       const std::shared_ptr<TexturePackFolderModel>& resource_packs,
+                                       BaseInstance* instance);
     ~TexturePackDownloadDialog() override = default;
 
     //: String that gets appended to the texture pack download dialog title ("Download " + resourcesString())
@@ -153,9 +154,7 @@ class ShaderPackDownloadDialog final : public ResourceDownloadDialog {
     Q_OBJECT
 
    public:
-    explicit ShaderPackDownloadDialog(QWidget* parent,
-                                      const std::shared_ptr<ShaderPackFolderModel>& shader_packs,
-                                      BaseInstance* instance);
+    explicit ShaderPackDownloadDialog(QWidget* parent, const std::shared_ptr<ShaderPackFolderModel>& shader_packs, BaseInstance* instance);
     ~ShaderPackDownloadDialog() override = default;
 
     //: String that gets appended to the shader pack download dialog title ("Download " + resourcesString())

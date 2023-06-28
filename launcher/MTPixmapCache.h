@@ -3,6 +3,8 @@
 #include <QCoreApplication>
 #include <QPixmapCache>
 #include <QThread>
+#include <QTime>
+#include <QDebug>
 
 #define GET_TYPE()                                                          \
     Qt::ConnectionType type;                                                \
@@ -60,6 +62,8 @@ class PixmapCache final : public QObject {
     DEFINE_FUNC_ONE_PARAM(remove, bool, const QPixmapCache::Key&)
     DEFINE_FUNC_TWO_PARAM(replace, bool, const QPixmapCache::Key&, const QPixmap&)
     DEFINE_FUNC_ONE_PARAM(setCacheLimit, bool, int)
+    DEFINE_FUNC_NO_PARAM(markCacheMissByEviciton, bool)
+    DEFINE_FUNC_ONE_PARAM(setFastEvictionThreshold, bool, int)
 
     // NOTE: Every function returns something non-void to simplify the macros.
    private slots:
@@ -90,6 +94,43 @@ class PixmapCache final : public QObject {
         return true;
     }
 
+    /** 
+     *  Mark that a cache miss occurred because of a eviction if too many of these occur too fast the cache size is increased 
+     * @return if the cache size was increased
+     */
+    bool _markCacheMissByEviciton()
+    {
+        auto now = QTime::currentTime();
+        if (!m_last_cache_miss_by_eviciton.isNull()) {
+            auto diff = m_last_cache_miss_by_eviciton.msecsTo(now);
+            if (diff < 1000) {  // less than a second ago
+                ++m_consecutive_fast_evicitons;
+            } else {
+                m_consecutive_fast_evicitons = 0;
+            }
+        }
+        m_last_cache_miss_by_eviciton = now;
+        if (m_consecutive_fast_evicitons >= m_consecutive_fast_evicitons_threshold) {
+            // double the cache size
+            auto newSize = _cacheLimit() * 2;
+            qDebug() << m_consecutive_fast_evicitons << "pixmap cache misses by eviction happened too fast, doubling cache size to"
+                     << newSize;
+            _setCacheLimit(newSize);
+            m_consecutive_fast_evicitons = 0;
+            return true;
+        }
+        return false;
+    }
+
+    bool _setFastEvictionThreshold(int threshold)
+    {
+        m_consecutive_fast_evicitons_threshold = threshold;
+        return true;
+    }
+
    private:
     static PixmapCache* s_instance;
+    QTime m_last_cache_miss_by_eviciton;
+    int m_consecutive_fast_evicitons = 0;
+    int m_consecutive_fast_evicitons_threshold = 15;
 };

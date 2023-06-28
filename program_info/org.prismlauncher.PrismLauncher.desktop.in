@@ -8,6 +8,6 @@ Exec=@Launcher_APP_BINARY_NAME@
 StartupNotify=true
 Icon=org.prismlauncher.PrismLauncher
 Categories=Game;ActionGame;AdventureGame;Simulation;
-Keywords=game;minecraft;launcher;mc;multimc;polymc;
+Keywords=game;minecraft;mc;
 StartupWMClass=PrismLauncher
 MimeType=application/zip;application/x-modrinth-modpack+zip
