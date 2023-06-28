@@ -297,6 +297,9 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (!m_followSymlinks)
         opt |= copy_opts::copy_symlinks;
 
+    if (m_overwrite)
+        opt |= copy_opts::overwrite_existing;
+
     // Function that'll do the actual copying
     auto copy_file = [&](QString src_path, QString relative_dst_path) {
         if (m_matcher && (m_matcher->matches(relative_dst_path) != m_whitelist))

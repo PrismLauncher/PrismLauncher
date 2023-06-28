@@ -120,6 +120,11 @@ class copy : public QObject {
         m_whitelist = whitelist;
         return *this;
     }
+    copy& overwrite(const bool overwrite)
+    {
+        m_overwrite = overwrite;
+        return *this;
+    }
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
@@ -136,6 +141,7 @@ class copy : public QObject {
     bool m_followSymlinks = true;
     const IPathMatcher* m_matcher = nullptr;
     bool m_whitelist = false;
+    bool m_overwrite = false;
     QDir m_src;
     QDir m_dst;
     int m_copied;
