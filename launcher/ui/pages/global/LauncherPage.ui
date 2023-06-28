@@ -99,7 +99,7 @@
           <item row="3" column="2">
            <widget class="QToolButton" name="downloadsDirBrowseBtn">
             <property name="text">
-             <string notr="true">...</string>
+             <string>Browse</string>
             </property>
            </widget>
           </item>
@@ -109,7 +109,7 @@
           <item row="1" column="2">
            <widget class="QToolButton" name="modsDirBrowseBtn">
             <property name="text">
-             <string notr="true">...</string>
+             <string>Browse</string>
             </property>
            </widget>
           </item>
@@ -126,14 +126,14 @@
           <item row="0" column="2">
            <widget class="QToolButton" name="instDirBrowseBtn">
             <property name="text">
-             <string notr="true">...</string>
+             <string>Browse</string>
             </property>
            </widget>
           </item>
           <item row="2" column="2">
            <widget class="QToolButton" name="iconsDirBrowseBtn">
             <property name="text">
-             <string notr="true">...</string>
+             <string>Browse</string>
             </property>
            </widget>
           </item>
