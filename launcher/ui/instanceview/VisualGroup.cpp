@@ -157,133 +157,65 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint &pos) const
 
 void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &option)
 {
-    painter->setRenderHint(QPainter::Antialiasing);
-
     const QRect optRect = option.rect;
     QFont font(QApplication::font());
     font.setBold(true);
     const QFontMetrics fontMetrics = QFontMetrics(font);
 
-    QColor outlineColor = option.palette.text().color();
-    outlineColor.setAlphaF(0.35);
+    int centerHeight = option.rect.top() + fontMetrics.height()/2;
 
-    //BEGIN: top left corner
-    {
-        painter->save();
-        painter->setPen(outlineColor);
-        const QPointF topLeft(optRect.topLeft());
-        QRectF arc(topLeft, QSizeF(4, 4));
-        arc.translate(0.5, 0.5);
-        painter->drawArc(arc, 1440, 1440);
-        painter->restore();
-    }
-    //END: top left corner
+    QPen pen;
+    pen.setWidth(2);
+    QColor penColor = option.palette.text().color();
+    penColor.setAlphaF(0.6);
+    pen.setColor(penColor);
+    painter->setPen(pen);
 
-    //BEGIN: left vertical line
+    //BEGIN: arrow
     {
-        QPoint start(optRect.topLeft());
-        start.ry() += 3;
-        QPoint verticalGradBottom(optRect.topLeft());
-        verticalGradBottom.ry() += fontMetrics.height() + 5;
-        QLinearGradient gradient(start, verticalGradBottom);
-        gradient.setColorAt(0, outlineColor);
-        gradient.setColorAt(1, Qt::transparent);
-        painter->fillRect(QRect(start, QSize(1, fontMetrics.height() + 5)), gradient);
-    }
-    //END: left vertical line
-
-    //BEGIN: horizontal line
-    {
-        QPoint start(optRect.topLeft());
-        start.rx() += 3;
-        QPoint horizontalGradTop(optRect.topLeft());
-        horizontalGradTop.rx() += optRect.width() - 6;
-        painter->fillRect(QRect(start, QSize(optRect.width() - 6, 1)), outlineColor);
-    }
-    //END: horizontal line
-
-    //BEGIN: top right corner
-    {
-        painter->save();
-        painter->setPen(outlineColor);
-        QPointF topRight(optRect.topRight());
-        topRight.rx() -= 4;
-        QRectF arc(topRight, QSizeF(4, 4));
-        arc.translate(0.5, 0.5);
-        painter->drawArc(arc, 0, 1440);
-        painter->restore();
-    }
-    //END: top right corner
-
-    //BEGIN: right vertical line
-    {
-        QPoint start(optRect.topRight());
-        start.ry() += 3;
-        QPoint verticalGradBottom(optRect.topRight());
-        verticalGradBottom.ry() += fontMetrics.height() + 5;
-        QLinearGradient gradient(start, verticalGradBottom);
-        gradient.setColorAt(0, outlineColor);
-        gradient.setColorAt(1, Qt::transparent);
-        painter->fillRect(QRect(start, QSize(1, fontMetrics.height() + 5)), gradient);
-    }
-    //END: right vertical line
-
-    //BEGIN: checkboxy thing
-    {
-        painter->save();
         painter->setRenderHint(QPainter::Antialiasing, false);
-        painter->setFont(font);
-        QColor penColor(option.palette.text().color());
-        penColor.setAlphaF(0.6);
-        painter->setPen(penColor);
-        QRect iconSubRect(option.rect);
-        iconSubRect.setTop(iconSubRect.top() + 7);
-        iconSubRect.setLeft(iconSubRect.left() + 7);
+        painter->save();
 
-        int sizing = fontMetrics.height();
-        int even = ( (sizing - 1) % 2 );
+        int offsetLeft = fontMetrics.height()/2;
+        int offsetTop = centerHeight;
+        int arrowSize = 6;
 
-        iconSubRect.setHeight(sizing - even);
-        iconSubRect.setWidth(sizing - even);
-        painter->drawRect(iconSubRect);
-
-
-        /*
-        if(collapsed)
-            painter->drawText(iconSubRect, Qt::AlignHCenter | Qt::AlignVCenter, "+");
-        else
-            painter->drawText(iconSubRect, Qt::AlignHCenter | Qt::AlignVCenter, "-");
-        */
-        painter->setBrush(option.palette.text());
-        painter->fillRect(iconSubRect.x(), iconSubRect.y() + iconSubRect.height() / 2,
-                          iconSubRect.width(), 2, penColor);
-        if (collapsed)
-        {
-            painter->fillRect(iconSubRect.x() + iconSubRect.width() / 2, iconSubRect.y(), 2,
-                              iconSubRect.height(), penColor);
+        QPolygon polygon;
+        if (collapsed) {
+            polygon << QPoint(offsetLeft - arrowSize/2, offsetTop - arrowSize) << QPoint(offsetLeft + arrowSize/2, offsetTop) << QPoint(offsetLeft - arrowSize/2, offsetTop + arrowSize);
+            painter->drawPolyline(polygon);
+        } else {
+            polygon << QPoint(offsetLeft - arrowSize, offsetTop - arrowSize/2) << QPoint(offsetLeft, offsetTop + arrowSize/2) << QPoint(offsetLeft + arrowSize, offsetTop - arrowSize/2);
+            painter->drawPolyline(polygon);
         }
-
-        painter->restore();
     }
-    //END: checkboxy thing
+    //END: arrow
 
     //BEGIN: text
     {
+        painter->setRenderHint(QPainter::Antialiasing);
         QRect textRect(option.rect);
-        textRect.setTop(textRect.top() + 7);
-        textRect.setLeft(textRect.left() + 7 + fontMetrics.height() + 7);
+        textRect.setTop(textRect.top());
+        textRect.setLeft(textRect.left() + fontMetrics.height());
         textRect.setHeight(fontMetrics.height());
         textRect.setRight(textRect.right() - 7);
 
         painter->save();
         painter->setFont(font);
-        QColor penColor(option.palette.text().color());
-        penColor.setAlphaF(0.6);
-        painter->setPen(penColor);
         painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
-        painter->restore();
     }
     //END: text
+
+    //BEGIN: horizontal line
+    {
+        // startPoint is left + arrow + text + space
+        int startPoint = optRect.left() + fontMetrics.height() + fontMetrics.size(Qt::AlignLeft | Qt::AlignVCenter, text).width() + 7;
+        painter->setRenderHint(QPainter::Antialiasing, false);
+        QPolygon polygon;
+        polygon << QPoint(startPoint, centerHeight) << QPoint(optRect.right() - 3, centerHeight);
+        painter->drawPolyline(polygon);
+    }
+    //END: horizontal line
 }
 
 int VisualGroup::totalHeight() const
