@@ -94,7 +94,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
     }
 
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
-        bool a_better_release = a.verison_type <= b.verison_type;
+        bool a_better_release = a.version_type <= b.version_type;
         // dates are in RFC 3339 format
         return a.date > b.date && a_better_release;
     };
@@ -124,7 +124,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     file.version = Json::requireString(obj, "displayName");
     file.downloadUrl = Json::ensureString(obj, "downloadUrl");
     file.fileName = Json::requireString(obj, "fileName");
-    file.verison_type = ModPlatform::IndexedVersionType(Json::requireInteger(obj, "releaseType"));
+    file.version_type = ModPlatform::IndexedVersionType(Json::requireInteger(obj, "releaseType"));
 
     auto hash_list = Json::ensureArray(obj, "hashes");
     for (auto h : hash_list) {

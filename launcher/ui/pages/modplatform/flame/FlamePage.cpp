@@ -42,9 +42,9 @@
 #include "FlameModel.h"
 #include "InstanceImportTask.h"
 #include "Json.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
-#include "modplatform/flame/FlameAPI.h"
 
 static FlameAPI api;
 
@@ -155,7 +155,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             }
 
             for (auto version : current.versions) {
-                auto release_type = version.version_type.isValid() ? QString(" : %1").arg(version.version_type.toString()) : "";
+                auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
                 ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(version.downloadUrl));
             }
 
@@ -253,10 +253,8 @@ void FlamePage::updateUi()
         text += "<br>" + tr(" by ") + authorStrs.join(", ");
     }
 
-    if(current.extraInfoLoaded) {
-        if (!current.extra.issuesUrl.isEmpty()
-         || !current.extra.sourceUrl.isEmpty()
-         || !current.extra.wikiUrl.isEmpty()) {
+    if (current.extraInfoLoaded) {
+        if (!current.extra.issuesUrl.isEmpty() || !current.extra.sourceUrl.isEmpty() || !current.extra.wikiUrl.isEmpty()) {
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 
@@ -267,7 +265,6 @@ void FlamePage::updateUi()
         if (!current.extra.sourceUrl.isEmpty())
             text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extra.sourceUrl) + "<br>";
     }
-
 
     text += "<hr>";
     text += api.getModDescription(current.addonId).toUtf8();

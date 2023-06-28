@@ -173,7 +173,7 @@ void FlameCheckUpdate::executeTask()
             }
 
             auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver, m_mods_folder);
-            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver.version, latest_ver.verison_type,
+            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver.version, latest_ver.version_type,
                                      api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
                                      ModPlatform::ResourceProvider::FLAME, download_task);
         }

@@ -162,7 +162,7 @@ void ModrinthCheckUpdate::executeTask()
 
                     auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_mods_folder);
 
-                    m_updatable.emplace_back(pack->name, hash, mod->version(), project_ver.version_number, project_ver.verison_type,
+                    m_updatable.emplace_back(pack->name, hash, mod->version(), project_ver.version_number, project_ver.version_type,
                                              project_ver.changelog, ModPlatform::ResourceProvider::MODRINTH, download_task);
                 }
             }

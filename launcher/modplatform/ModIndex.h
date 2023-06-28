@@ -96,7 +96,7 @@ struct IndexedVersion {
     QVariant fileId;
     QString version;
     QString version_number = {};
-    IndexedVersionType verison_type;
+    IndexedVersionType version_type;
     QStringList mcVersion;
     QString downloadUrl;
     QString date;
