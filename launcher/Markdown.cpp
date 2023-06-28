@@ -16,9 +16,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "Markdown.h"
 
-#include <QString>
-#include <cmark.h>
+QString markdownToHTML(const QString& markdown)
+{
+    const QByteArray markdownData = markdown.toUtf8();
+    char* buffer = cmark_markdown_to_html(markdownData.constData(), markdownData.length(), CMARK_OPT_NOBREAKS | CMARK_OPT_UNSAFE);
 
-QString markdownToHTML(const QString& markdown);
+    QString htmlStr(buffer);
+
+    free(buffer);
+
+    return htmlStr;
+}
