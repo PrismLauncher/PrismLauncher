@@ -59,7 +59,7 @@ void SetupWizard::pageChanged(int id)
     {
         setButtonLayout({QWizard::CustomButton1, QWizard::Stretch, QWizard::BackButton, QWizard::NextButton, QWizard::FinishButton});
         auto customButton = button(QWizard::CustomButton1);
-        connect(customButton, &QAbstractButton::pressed, [&](){
+        connect(customButton, &QAbstractButton::clicked, [&](){
             auto basePagePtr = getCurrentBasePage();
             if(basePagePtr)
             {

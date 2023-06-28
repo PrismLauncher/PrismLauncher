@@ -40,12 +40,13 @@
 #include "ATLPackManifest.h"
 
 #include "InstanceTask.h"
-#include "net/NetJob.h"
-#include "settings/INISettingsObject.h"
+#include "meta/Version.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "meta/Version.h"
+#include "net/NetJob.h"
+#include "settings/INISettingsObject.h"
 
+#include <memory>
 #include <optional>
 
 namespace ATLauncher {
@@ -57,8 +58,7 @@ enum class InstallMode {
 };
 
 class UserInteractionSupport {
-
-public:
+   public:
     /**
      * Requests a user interaction to select which optional mods should be installed.
      */
@@ -74,23 +74,27 @@ public:
      * Requests a user interaction to display a message.
      */
     virtual void displayMessage(QString message) = 0;
+
+    virtual ~UserInteractionSupport() = default;
 };
 
-class PackInstallTask : public InstanceTask
-{
-Q_OBJECT
+class PackInstallTask : public InstanceTask {
+    Q_OBJECT
 
-public:
-    explicit PackInstallTask(UserInteractionSupport *support, QString packName, QString version, InstallMode installMode = InstallMode::Install);
-    virtual ~PackInstallTask(){}
+   public:
+    explicit PackInstallTask(UserInteractionSupport* support,
+                             QString packName,
+                             QString version,
+                             InstallMode installMode = InstallMode::Install);
+    virtual ~PackInstallTask() { delete m_support; }
 
     bool canAbort() const override { return true; }
     bool abort() override;
 
-protected:
+   protected:
     virtual void executeTask() override;
 
-private slots:
+   private slots:
     void onDownloadSucceeded();
     void onDownloadFailed(QString reason);
     void onDownloadAborted();
@@ -98,7 +102,7 @@ private slots:
     void onModsDownloaded();
     void onModsExtracted();
 
-private:
+   private:
     QString getDirForModType(ModType type, QString raw);
     QString getVersionForLoader(QString uid);
     QString detectLibrary(VersionLibrary library);
@@ -110,20 +114,18 @@ private:
     void installConfigs();
     void extractConfigs();
     void downloadMods();
-    bool extractMods(
-        const QMap<QString, VersionMod> &toExtract,
-        const QMap<QString, VersionMod> &toDecomp,
-        const QMap<QString, QString> &toCopy
-    );
+    bool extractMods(const QMap<QString, VersionMod>& toExtract,
+                     const QMap<QString, VersionMod>& toDecomp,
+                     const QMap<QString, QString>& toCopy);
     void install();
 
-private:
-    UserInteractionSupport *m_support;
+   private:
+    UserInteractionSupport* m_support;
 
     bool abortable = false;
 
     NetJob::Ptr jobPtr;
-    QByteArray response;
+    std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
 
     InstallMode m_install_mode;
     QString m_pack_name;
@@ -145,7 +147,6 @@ private:
 
     QFuture<bool> m_modExtractFuture;
     QFutureWatcher<bool> m_modExtractFutureWatcher;
-
 };
 
-}
+}  // namespace ATLauncher

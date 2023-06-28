@@ -38,6 +38,10 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include <QList>
+#include <QImage>
+#include <QMutex>
+#include <QPixmap>
+#include <QPixmapCache>
 
 #include <optional>
 
@@ -64,6 +68,15 @@ public:
     auto authors()     const -> QStringList;
     auto status()      const -> ModStatus;
     auto provider()    const -> std::optional<QString>;
+    auto licenses()     const -> const QList<ModLicense>&;
+    auto issueTracker() const -> QString;
+
+    /** Get the intneral path to the mod's icon file*/
+    QString iconPath() const { return m_local_details.icon_file; };
+    /** Gets the icon of the mod, converted to a QPixmap for drawing, and scaled to size. */
+    [[nodiscard]] QPixmap icon(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
+    /** Thread-safe. */
+    void setIcon(QImage new_image) const;
 
     auto metadata() -> std::shared_ptr<Metadata::ModStruct>;
     auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
@@ -85,4 +98,13 @@ public:
 
 protected:
     ModDetails m_local_details;
+
+    mutable QMutex m_data_lock;
+
+    struct {
+        QPixmapCache::Key key;
+        bool was_ever_used = false;
+        bool was_read_attempt = false;
+    } mutable m_pack_image_cache_key;
+    
 };

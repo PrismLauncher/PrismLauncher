@@ -102,7 +102,6 @@
    <addaction name="actionInstall_Fabric"/>
    <addaction name="actionInstall_Quilt"/>
    <addaction name="actionInstall_LiteLoader"/>
-   <addaction name="actionInstall_mods"/>
    <addaction name="separator"/>
    <addaction name="actionAdd_to_Minecraft_jar"/>
    <addaction name="actionReplace_Minecraft_jar"/>
@@ -112,7 +111,6 @@
    <addaction name="separator"/>
    <addaction name="actionMinecraftFolder"/>
    <addaction name="actionLibrariesFolder"/>
-   <addaction name="separator"/>
    <addaction name="actionReload"/>
    <addaction name="actionDownload_All"/>
   </widget>
@@ -202,14 +200,6 @@
    </property>
    <property name="toolTip">
     <string>Install the LiteLoader package.</string>
-   </property>
-  </action>
-  <action name="actionInstall_mods">
-   <property name="text">
-    <string>Install mods</string>
-   </property>
-   <property name="toolTip">
-    <string>Install normal mods.</string>
    </property>
   </action>
   <action name="actionAdd_to_Minecraft_jar">

@@ -37,7 +37,7 @@
         nil
       ];
 
-      inputsFrom = [self.packages.${system}.default];
+      inputsFrom = [self.packages.${system}.prismlauncher-unwrapped];
       buildInputs = with pkgs; [ccache ninja];
     };
 

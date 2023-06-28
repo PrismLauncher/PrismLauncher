@@ -40,6 +40,6 @@ private:
 
 private:
     QString m_javaPath;
-    qlonglong m_javaUnixTime;
+    QString m_javaSignature;
     JavaCheckerPtr m_JavaChecker;
 };

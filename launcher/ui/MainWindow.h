@@ -113,6 +113,8 @@ private slots:
 
     void on_actionViewInstanceFolder_triggered();
 
+    void on_actionViewLauncherRootFolder_triggered();
+
     void on_actionViewSelectedInstFolder_triggered();
 
     void refreshInstances();

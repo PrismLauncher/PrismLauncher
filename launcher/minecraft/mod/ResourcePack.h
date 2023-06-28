@@ -31,7 +31,7 @@ class ResourcePack : public Resource {
     [[nodiscard]] QString description() const { return m_description; }
 
     /** Gets the image of the resource pack, converted to a QPixmap for drawing, and scaled to size. */
-    [[nodiscard]] QPixmap image(QSize size);
+    [[nodiscard]] QPixmap image(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
 
     /** Thread-safe. */
     void setPackFormat(int new_format_id);
@@ -40,7 +40,7 @@ class ResourcePack : public Resource {
     void setDescription(QString new_description);
 
     /** Thread-safe. */
-    void setImage(QImage new_image);
+    void setImage(QImage new_image) const;
 
     bool valid() const override;
 
@@ -67,5 +67,5 @@ class ResourcePack : public Resource {
     struct {
         QPixmapCache::Key key;
         bool was_ever_used = false;
-    } m_pack_image_cache_key;
+    } mutable m_pack_image_cache_key;
 };
