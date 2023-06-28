@@ -623,6 +623,8 @@ set(PRISMUPDATER_SOURCES
     net/Logging.h
     net/Logging.cpp
     net/NetAction.h
+    net/NetRequest.cpp
+    net/NetRequest.h
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
