@@ -145,9 +145,9 @@ void PrismExternalUpdater::checkForUpdates()
                 auto [first_line, remainder1] = StringUtils::splitFirst(std_output, '\n');
                 auto [second_line, remainder2] = StringUtils::splitFirst(remainder1, '\n');
                 auto [third_line, release_notes] = StringUtils::splitFirst(remainder2, '\n');
-                auto version_name = StringUtils::splitFirst(first_line, ": ").second;
-                auto version_tag = StringUtils::splitFirst(second_line, ": ").second;
-                auto release_timestamp = QDateTime::fromString(StringUtils::splitFirst(third_line, ": ").second, Qt::ISODate);
+                auto version_name = StringUtils::splitFirst(first_line, ": ").second.trimmed();
+                auto version_tag = StringUtils::splitFirst(second_line, ": ").second.trimmed();
+                auto release_timestamp = QDateTime::fromString(StringUtils::splitFirst(third_line, ": ").second.trimmed(), Qt::ISODate);
                 qDebug() << "Update available:" << version_name << version_tag << release_timestamp;
                 qDebug() << "Update release notes:" << release_notes;
 
