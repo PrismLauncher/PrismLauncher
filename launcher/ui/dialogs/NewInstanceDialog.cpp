@@ -54,7 +54,7 @@
 #include <utility>
 
 #include "ui/widgets/PageContainer.h"
-#include "ui/pages/modplatform/VanillaPage.h"
+#include "ui/pages/modplatform/CustomPage.h"
 #include "ui/pages/modplatform/atlauncher/AtlPage.h"
 #include "ui/pages/modplatform/legacy_ftb/Page.h"
 #include "ui/pages/modplatform/flame/FlamePage.h"
@@ -162,7 +162,7 @@ QList<BasePage *> NewInstanceDialog::getPages()
 
     importPage = new ImportPage(this);
 
-    pages.append(new VanillaPage(this));
+    pages.append(new CustomPage(this));
     pages.append(importPage);
     pages.append(new AtlPage(this));
     if (APPLICATION->capabilities() & Application::SupportsFlame)

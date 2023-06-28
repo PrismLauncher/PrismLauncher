@@ -682,6 +682,7 @@ SET(LAUNCHER_SOURCES
     VersionProxyModel.h
     VersionProxyModel.cpp
     Markdown.h
+    Markdown.cpp
 
     # Super secret!
     KonamiCode.h
@@ -825,8 +826,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/global/APIPage.h
 
     # GUI - platform pages
-    ui/pages/modplatform/VanillaPage.cpp
-    ui/pages/modplatform/VanillaPage.h
+    ui/pages/modplatform/CustomPage.cpp
+    ui/pages/modplatform/CustomPage.h
 
     ui/pages/modplatform/ResourcePage.cpp
     ui/pages/modplatform/ResourcePage.h
@@ -1032,7 +1033,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/instance/ScreenshotsPage.ui
     ui/pages/modplatform/atlauncher/AtlOptionalModDialog.ui
     ui/pages/modplatform/atlauncher/AtlPage.ui
-    ui/pages/modplatform/VanillaPage.ui
+    ui/pages/modplatform/CustomPage.ui
     ui/pages/modplatform/ResourcePage.ui
     ui/pages/modplatform/flame/FlamePage.ui
     ui/pages/modplatform/legacy_ftb/Page.ui

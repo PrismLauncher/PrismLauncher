@@ -205,7 +205,7 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
-    connect(ui->updateButton, &QPushButton::pressed, this, &ModrinthManagedPackPage::update);
+    connect(ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
 }
 
 // MODRINTH
@@ -332,7 +332,7 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
-    connect(ui->updateButton, &QPushButton::pressed, this, &FlameManagedPackPage::update);
+    connect(ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
 }
 
 void FlameManagedPackPage::parseManagedPack()
