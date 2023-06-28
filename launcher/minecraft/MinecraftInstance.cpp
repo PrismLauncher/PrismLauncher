@@ -148,7 +148,7 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("IgnoreJavaCompatibility"), javaOrLocation);
 
         // special!
-        m_settings->registerPassthrough(global_settings->getSetting("JavaTimestamp"), javaOrLocation);
+        m_settings->registerPassthrough(global_settings->getSetting("JavaSignature"), javaOrLocation);
         m_settings->registerPassthrough(global_settings->getSetting("JavaArchitecture"), javaOrLocation);
         m_settings->registerPassthrough(global_settings->getSetting("JavaRealArchitecture"), javaOrLocation);
         m_settings->registerPassthrough(global_settings->getSetting("JavaVersion"), javaOrLocation);

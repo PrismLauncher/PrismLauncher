@@ -81,11 +81,11 @@ void InstanceSettingsPage::globalSettingsButtonClicked(bool)
         case 0:
             APPLICATION->ShowGlobalSettings(this, "java-settings");
             return;
-        case 1:
-            APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
-            return;
         case 2:
             APPLICATION->ShowGlobalSettings(this, "custom-commands");
+            return;
+        default:
+            APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
             return;
     }
 }
