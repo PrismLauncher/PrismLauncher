@@ -189,6 +189,7 @@ void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &opti
             polygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize/2) << QPoint(arrowOffsetLeft, centerHeight + arrowSize/2) << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize/2);
             painter->drawPolyline(polygon);
         }
+        painter->restore();
     }
     //END: arrow
 
@@ -203,7 +204,8 @@ void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &opti
 
         painter->save();
         painter->setFont(font);
-        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
+        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text != "" ? text : QObject::tr("Ungrouped"));
+        painter->restore();
     }
     //END: text
 }
