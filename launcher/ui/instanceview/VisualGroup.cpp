@@ -120,7 +120,7 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint& pos) const
     VisualGroup::HitResults results = VisualGroup::NoHit;
     int y_start = verticalPosition();
     int body_start = y_start + headerHeight();
-    int body_end = body_start + contentHeight() + 5;  // FIXME: wtf is this 5?
+    int body_end = body_start + contentHeight();
     int y = pos.y();
     // int x = pos.x();
     if (y < y_start) {
@@ -147,8 +147,7 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
     QFont font(QApplication::font());
     font.setBold(true);
     const QFontMetrics fontMetrics = QFontMetrics(font);
-
-    int centerHeight = optRect.top() + fontMetrics.height() / 2;
+    painter->setFont(font);
 
     QPen pen;
     pen.setWidth(2);
@@ -157,14 +156,15 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
     pen.setColor(penColor);
     painter->setPen(pen);
 
+    // sizes and offsets, to keep things consistent below
     int arrowOffsetLeft = fontMetrics.height() / 2 + 7;
     int textOffsetLeft = arrowOffsetLeft * 2;
     int arrowSize = 6;
+    int centerHeight = optRect.top() + fontMetrics.height() / 2;
 
     // BEGIN: arrow
     {
         painter->setRenderHint(QPainter::Antialiasing, false);
-        painter->save();
 
         QPolygon polygon;
         if (collapsed) {
@@ -178,7 +178,6 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
                     << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
             painter->drawPolyline(polygon);
         }
-        painter->restore();
     }
     // END: arrow
 
@@ -191,10 +190,7 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
         textRect.setHeight(fontMetrics.height());
         textRect.setRight(textRect.right() - 7);
 
-        painter->save();
-        painter->setFont(font);
         painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, !text.isEmpty() ? text : QObject::tr("Ungrouped"));
-        painter->restore();
     }
     // END: text
 }
