@@ -157,12 +157,13 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint &pos) const
 
 void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &option)
 {
-    const QRect optRect = option.rect;
+    QRect optRect = option.rect;
+    optRect.setTop(optRect.top() + 7);
     QFont font(QApplication::font());
     font.setBold(true);
     const QFontMetrics fontMetrics = QFontMetrics(font);
 
-    int centerHeight = option.rect.top() + fontMetrics.height()/2;
+    int centerHeight = optRect.top() + fontMetrics.height()/2;
 
     QPen pen;
     pen.setWidth(2);
@@ -171,21 +172,21 @@ void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &opti
     pen.setColor(penColor);
     painter->setPen(pen);
 
+    int arrowOffsetLeft = fontMetrics.height()/2 + 7;
+    int textOffsetLeft = arrowOffsetLeft *2;
+    int arrowSize = 6;
+
     //BEGIN: arrow
     {
         painter->setRenderHint(QPainter::Antialiasing, false);
         painter->save();
 
-        int offsetLeft = fontMetrics.height()/2;
-        int offsetTop = centerHeight;
-        int arrowSize = 6;
-
         QPolygon polygon;
         if (collapsed) {
-            polygon << QPoint(offsetLeft - arrowSize/2, offsetTop - arrowSize) << QPoint(offsetLeft + arrowSize/2, offsetTop) << QPoint(offsetLeft - arrowSize/2, offsetTop + arrowSize);
+            polygon << QPoint(arrowOffsetLeft - arrowSize/2, centerHeight - arrowSize) << QPoint(arrowOffsetLeft + arrowSize/2, centerHeight) << QPoint(arrowOffsetLeft - arrowSize/2, centerHeight + arrowSize);
             painter->drawPolyline(polygon);
         } else {
-            polygon << QPoint(offsetLeft - arrowSize, offsetTop - arrowSize/2) << QPoint(offsetLeft, offsetTop + arrowSize/2) << QPoint(offsetLeft + arrowSize, offsetTop - arrowSize/2);
+            polygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize/2) << QPoint(arrowOffsetLeft, centerHeight + arrowSize/2) << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize/2);
             painter->drawPolyline(polygon);
         }
     }
@@ -194,9 +195,9 @@ void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &opti
     //BEGIN: text
     {
         painter->setRenderHint(QPainter::Antialiasing);
-        QRect textRect(option.rect);
+        QRect textRect(optRect);
         textRect.setTop(textRect.top());
-        textRect.setLeft(textRect.left() + fontMetrics.height());
+        textRect.setLeft(textOffsetLeft);
         textRect.setHeight(fontMetrics.height());
         textRect.setRight(textRect.right() - 7);
 
@@ -205,22 +206,11 @@ void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &opti
         painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
     }
     //END: text
-
-    //BEGIN: horizontal line
-    {
-        // startPoint is left + arrow + text + space
-        int startPoint = optRect.left() + fontMetrics.height() + fontMetrics.size(Qt::AlignLeft | Qt::AlignVCenter, text).width() + 7;
-        painter->setRenderHint(QPainter::Antialiasing, false);
-        QPolygon polygon;
-        polygon << QPoint(startPoint, centerHeight) << QPoint(optRect.right() - 3, centerHeight);
-        painter->drawPolyline(polygon);
-    }
-    //END: horizontal line
 }
 
 int VisualGroup::totalHeight() const
 {
-    return headerHeight() + 5 + contentHeight(); // FIXME: wtf is that '5'?
+    return headerHeight() + contentHeight();
 }
 
 int VisualGroup::headerHeight() const
