@@ -600,6 +600,7 @@ set(PRISMUPDATER_SOURCES
     Version.h
     Version.cpp
     Markdown.h
+    Markdown.cpp
 
     # Zip
     MMCZip.h
