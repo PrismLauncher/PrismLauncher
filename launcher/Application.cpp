@@ -999,6 +999,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update In Progress"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
             msgBox.setDefaultButton(QMessageBox::Abort);
             msgBox.setModal(true);
+            msgBox.setDetailedText(FS::read(update_log_path));
             auto res = msgBox.exec();
             switch (res) {
                 case QMessageBox::Ignore: {
@@ -1028,6 +1029,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Failed"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
             msgBox.setDefaultButton(QMessageBox::Abort);
             msgBox.setModal(true);
+            msgBox.setDetailedText(FS::read(update_log_path));
             auto res = msgBox.exec();
             switch (res) {
                 case QMessageBox::Ignore: {
@@ -1056,7 +1058,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                                .arg(update_log_path);
             auto msgBox = QMessageBox(QMessageBox::Information, tr("Update Succeeded"), infoMsg, QMessageBox::Ok);
             msgBox.setDefaultButton(QMessageBox::Ok);
-            msgBox.open();
+            msgBox.setDetailedText(FS::read(update_log_path));
+            msgBox.exec();
             FS::deletePath(update_success_marker.absoluteFilePath());
         }
     }

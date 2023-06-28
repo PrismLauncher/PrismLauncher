@@ -617,6 +617,10 @@ void PrismUpdaterApp::run()
 void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
 {
     logUpdate("Finishing update process");
+
+    logUpdate("Waiting 2 seconds for resources to free");
+    this->thread()->sleep(2);
+
     auto manifest_path = FS::PathCombine(applicationDirPath(), "manifest.txt");
     QFileInfo manifest(manifest_path);
 

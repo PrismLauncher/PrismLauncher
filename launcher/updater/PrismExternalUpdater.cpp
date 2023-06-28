@@ -23,13 +23,14 @@
 #include "PrismExternalUpdater.h"
 #include <QCoreApplication>
 #include <QDateTime>
+#include <QDebug>
 #include <QDir>
+#include <QMessageBox>
 #include <QProcess>
 #include <QProgressDialog>
 #include <QSettings>
 #include <QTimer>
 #include <memory>
-#include <QDebug>
 
 #include "StringUtils.h"
 
@@ -117,9 +118,6 @@ void PrismExternalUpdater::checkForUpdates()
     auto std_output = proc.readAllStandardOutput();
     auto std_error = proc.readAllStandardError();
 
-    qDebug() << "captured output:" << std_output;
-    qDebug() << "captured error:" << std_error;
-
     progress.hide();
     QCoreApplication::processEvents();
 
@@ -128,12 +126,17 @@ void PrismExternalUpdater::checkForUpdates()
             // no update available
             {
                 qDebug() << "No update available";
+                auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("You are running the latest version."));
+                msgBox.exec();
             }
             break;
         case 1:
             // there was an error
             {
-                qDebug() << "Updater subprocess error" << std_error;
+                qDebug() << "Updater subprocess error" << qPrintable(std_error);
+                auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Check Error"), tr("There was an error running the update check."));
+                msgBox.setDetailedText(std_error);
+                msgBox.exec();
             }
             break;
         case 100:
@@ -264,14 +267,15 @@ void PrismExternalUpdater::offerUpdate(const QString& version_name, const QStrin
     }
 }
 
-void PrismExternalUpdater::performUpdate(const QString& version_tag) {
+void PrismExternalUpdater::performUpdate(const QString& version_tag)
+{
     QProcess proc;
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
     exe_name.append(".exe");
 #endif
 
-    QStringList args = {  "--dir", priv->dataDir.absolutePath(), "--install-version", version_tag };
+    QStringList args = { "--dir", priv->dataDir.absolutePath(), "--install-version", version_tag };
     if (priv->allowBeta)
         args.append("--pre-release");
 
