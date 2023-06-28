@@ -60,8 +60,6 @@ class Config {
     /// The minor version number.
     int VERSION_MINOR;
 
-    QString VERSION_PRERELEASE;
-
     /**
      * The version channel
      * This is used by the updater to determine what channel the current version came from.

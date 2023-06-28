@@ -39,8 +39,8 @@
 #include <QProcess>
 #include <memory>
 
-#include <QProgressDialog>
 #include <sys.h>
+#include <QProgressDialog>
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -209,7 +209,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
             BindCrtHandlesToStdHandles(true, true, true);
             consoleAttached = true;
         }
-    } 
+    }
 #endif
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
@@ -272,8 +272,6 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     auto prism_update_url = parser.value("update-url");
     if (prism_update_url.isEmpty())
         prism_update_url = BuildConfig.UPDATER_GITHUB_REPO;
-    if (prism_update_url.isEmpty())
-        prism_update_url = "https://github.com/PrismLauncher/PrismLauncher";
 
     m_prismRepoUrl = QUrl::fromUserInput(prism_update_url);
 
@@ -354,18 +352,20 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
             QFile::remove(oldName);
         };
 
-        moveFile(logBase.arg(1), logBase.arg(2));
-        moveFile(logBase.arg(0), logBase.arg(1));
+        if (FS::ensureFolderPathExists("logs")) {
+            moveFile(logBase.arg(1), logBase.arg(2));
+            moveFile(logBase.arg(0), logBase.arg(1));
+        }
 
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
         if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
             showFatalErrorMessage(tr("The launcher data folder is not writable!"),
-                                  tr("The launcher couldn't create a log file - the data folder is not writable.\n"
+                                  tr("The updater couldn't create a log file - the data folder is not writable.\n"
                                      "\n"
                                      "Make sure you have write permissions to the data folder.\n"
                                      "(%1)\n"
                                      "\n"
-                                     "The launcher cannot continue until you fix this problem.")
+                                     "The updater cannot continue until you fix this problem.")
                                       .arg(m_dataPath));
             return;
         }
@@ -560,8 +560,7 @@ void PrismUpdaterApp::run()
             stdOutStream.flush();
 
             return exit(100);
-        }
-        else {
+        } else {
             return exit(0);
         }
     }
@@ -1155,7 +1154,7 @@ bool PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
     if (first_parts.length() < 2)
         return false;
     m_prismBinaryName = first_parts.takeFirst();
-    auto version = first_parts.takeFirst();
+    auto version = first_parts.takeFirst().trimmed();
     m_prismVersion = version;
     if (version.contains('-')) {
         auto index = version.indexOf('-');
