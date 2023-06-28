@@ -1,14 +1,15 @@
 #include "ResourceFolderModel.h"
+#include <QMessageBox>
 
 #include <QCoreApplication>
 #include <QDebug>
 #include <QFileInfo>
 #include <QIcon>
+#include <QMenu>
 #include <QMimeData>
 #include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
-#include <QMenu>
 
 #include "Application.h"
 #include "FileSystem.h"
@@ -18,6 +19,7 @@
 
 #include "settings/Setting.h"
 #include "tasks/Task.h"
+#include "ui/dialogs/CustomMessageBox.h"
 
 ResourceFolderModel::ResourceFolderModel(QDir dir, BaseInstance* instance, QObject* parent, bool create_dir)
     : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this)
@@ -451,8 +453,20 @@ bool ResourceFolderModel::setData(const QModelIndex& index, const QVariant& valu
     if (row < 0 || row >= rowCount(index.parent()) || !index.isValid())
         return false;
 
-    if (role == Qt::CheckStateRole)
+    if (role == Qt::CheckStateRole) {
+        if (m_instance != nullptr && m_instance->isRunning()) {
+            auto response =
+                CustomMessageBox::selectable(nullptr, "Confirm toggle",
+                                             "If you enable/disable this resource while the game is running it may crash your game.\n"
+                                             "Are you sure you want to do this?",
+                                             QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                    ->exec();
+
+            if (response != QMessageBox::Yes)
+                return false;
+        }
         return setResourceEnabled({ index }, EnableAction::TOGGLE);
+    }
 
     return false;
 }

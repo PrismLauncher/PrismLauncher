@@ -120,6 +120,16 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelI
 
 void ModFolderPage::removeItems(const QItemSelection& selection)
 {
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response = CustomMessageBox::selectable(this, "Confirm Delete",
+                                                     "If you remove mods while the game is running it may crash your game.\n"
+                                                     "Are you sure you want to do this?",
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
     m_model->deleteMods(selection.indexes());
 }
 
