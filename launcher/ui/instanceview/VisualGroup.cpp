@@ -204,7 +204,7 @@ void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &opti
 
         painter->save();
         painter->setFont(font);
-        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text != "" ? text : QObject::tr("Ungrouped"));
+        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, !text.isEmpty() ? text : QObject::tr("Ungrouped"));
         painter->restore();
     }
     //END: text
