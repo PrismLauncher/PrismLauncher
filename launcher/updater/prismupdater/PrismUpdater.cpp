@@ -327,6 +327,11 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         // on command line
         adjustedBy = "Command line";
         m_dataPath = dirParam;
+#ifndef Q_OS_MACOS
+        if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
+            m_isPortable = true;
+        }
+#endif
     } else {
         QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         m_dataPath = foo.absolutePath();
@@ -958,8 +963,6 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
                 return showFatalErrorMessage(tr("Update Aborted"), tr("The update attempt was aborted"));
         }
     }
-    write_lock_file(update_lock_path, QDateTime::currentDateTime(), m_prismVersion, m_install_release.tag_name, applicationDirPath(),
-                    m_dataPath);
     clearUpdateLog();
 
     auto changelog_path = FS::PathCombine(m_dataPath, ".prism_launcher_update.changelog");
@@ -967,6 +970,8 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
 
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
     if (m_isPortable || file.suffix().toLower() == "zip") {
+        write_lock_file(update_lock_path, QDateTime::currentDateTime(), m_prismVersion, m_install_release.tag_name, applicationDirPath(),
+                    m_dataPath);
         logUpdate(tr("Updating portable install at %1").arg(applicationDirPath()));
         unpackAndInstall(file);
     } else {

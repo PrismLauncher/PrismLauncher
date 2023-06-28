@@ -32,10 +32,10 @@ class UpdateAvailableDialog : public QDialog {
 
    public:
     
-    enum DialogCode {
-        Install,
-        DontInstall,
-        Skip,
+    enum ResultCode {
+        Install = 10,
+        DontInstall = 11,
+        Skip = 12,
     };
     
     explicit UpdateAvailableDialog(const QString& currentVersion,

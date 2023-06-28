@@ -134,7 +134,8 @@ void PrismExternalUpdater::checkForUpdates()
             // there was an error
             {
                 qDebug() << "Updater subprocess error" << qPrintable(std_error);
-                auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Check Error"), tr("There was an error running the update check."));
+                auto msgBox =
+                    QMessageBox(QMessageBox::Warning, tr("Update Check Error"), tr("There was an error running the update check."));
                 msgBox.setDetailedText(std_error);
                 msgBox.exec();
             }
@@ -244,15 +245,20 @@ void PrismExternalUpdater::offerUpdate(const QString& version_name, const QStrin
     auto should_skip = priv->settings->value(version_tag, false).toBool();
     priv->settings->endGroup();
 
-    if (should_skip)
+    if (should_skip) {
+        auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("There are no new updates available."));
+        msgBox.exec();
         return;
+    }
 
     UpdateAvailableDialog dlg(BuildConfig.printableVersionString(), version_name, release_notes);
 
     auto result = dlg.exec();
+    qDebug() << "offer dlg result" << result;
     switch (result) {
         case UpdateAvailableDialog::Install: {
             performUpdate(version_tag);
+            return;
         }
         case UpdateAvailableDialog::Skip: {
             priv->settings->beginGroup("skip");

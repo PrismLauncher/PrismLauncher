@@ -47,17 +47,17 @@ UpdateAvailableDialog::UpdateAvailableDialog(const QString& currentVersion,
     ui->releaseNotes->setOpenExternalLinks(true);
 
     connect(ui->skipButton, &QPushButton::clicked, this, [this](){
-        this->setResult(DialogCode::Skip);
-        this->close();
+        setResult(ResultCode::Skip);
+        done(ResultCode::Skip);
     });
 
     connect(ui->delayButton, &QPushButton::clicked, this, [this](){
-        this->setResult(DialogCode::DontInstall);
-        this->close();
+        setResult(ResultCode::DontInstall);
+        done(ResultCode::DontInstall);
     });
 
     connect(ui->installButton, &QPushButton::clicked, this, [this](){
-        this->setResult(DialogCode::Install);
-        this->close();
+        setResult(ResultCode::Install);
+        done(ResultCode::Install);
     });
 }
