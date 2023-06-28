@@ -927,7 +927,7 @@ void MainWindow::onCatToggled(bool state)
 
 void MainWindow::setCatBackground(bool enabled)
 {
-    view->setCatVisible(enabled);
+    view->setPaintCat(enabled);
     view->viewport()->repaint();
 }
 

@@ -74,7 +74,7 @@ InstanceView::InstanceView(QWidget *parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setAcceptDrops(true);
     setAutoScroll(true);
-    setCatVisible(APPLICATION->settings()->get("TheCat").toBool());
+    setPaintCat(APPLICATION->settings()->get("TheCat").toBool());
 }
 
 InstanceView::~InstanceView()
@@ -500,10 +500,13 @@ void InstanceView::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void InstanceView::setCatVisible(bool visible)
+void InstanceView::setPaintCat(bool visible)
 {
     m_catVisible = visible;
-    m_catPixmap.load(QString(":/backgrounds/%1").arg(ThemeManager::getCatImage()));
+    if (visible)
+        m_catPixmap.load(QString(":/backgrounds/%1").arg(ThemeManager::getCatImage()));
+    else
+        m_catPixmap = QPixmap();
 }
 
 void InstanceView::paintEvent(QPaintEvent* event)
