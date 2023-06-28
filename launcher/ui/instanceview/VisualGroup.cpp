@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,10 +41,11 @@
 #include <QModelIndex>
 #include <QPainter>
 #include <QtMath>
+#include <utility>
 
 #include "InstanceView.h"
 
-VisualGroup::VisualGroup(const QString& text, InstanceView* view) : view(view), text(text), collapsed(false) {}
+VisualGroup::VisualGroup(QString text, InstanceView* view) : view(view), text(std::move(text)), collapsed(false) {}
 
 VisualGroup::VisualGroup(const VisualGroup* other) : view(other->view), text(other->text), collapsed(other->collapsed) {}
 
@@ -138,7 +140,7 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint& pos) const
     return results;
 }
 
-void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& option)
+void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& option) const
 {
     QRect optRect = option.rect;
     optRect.setTop(optRect.top() + 7);
@@ -202,7 +204,7 @@ int VisualGroup::totalHeight() const
     return headerHeight() + contentHeight();
 }
 
-int VisualGroup::headerHeight() const
+int VisualGroup::headerHeight()
 {
     QFont font(QApplication::font());
     font.setBold(true);
@@ -231,7 +233,7 @@ int VisualGroup::contentHeight() const
 
 int VisualGroup::numRows() const
 {
-    return rows.size();
+    return (int)rows.size();
 }
 
 int VisualGroup::verticalPosition() const
