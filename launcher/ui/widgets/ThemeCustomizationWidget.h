@@ -61,8 +61,6 @@ class ThemeCustomizationWidget : public QWidget {
         { "pe_blue",        QObject::tr("Simple (Blue Icons)") },    
         { "breeze_light",   QObject::tr("Breeze Light") }, 
         { "breeze_dark",    QObject::tr("Breeze Dark") },
-        { "OSX",            QObject::tr("OSX") },        
-        { "iOS",            QObject::tr("iOS") },          
         { "flat",           QObject::tr("Flat") },
         { "flat_white",     QObject::tr("Flat (White)") }, 
         { "multimc",        QObject::tr("Legacy") },      
