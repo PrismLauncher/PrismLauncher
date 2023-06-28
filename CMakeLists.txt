@@ -140,8 +140,9 @@ set(Launcher_HELP_URL "https://prismlauncher.org/wiki/help-pages/%1" CACHE STRIN
 ######## Set version numbers ########
 set(Launcher_VERSION_MAJOR 8)
 set(Launcher_VERSION_MINOR 0)
+set(Launcher_VERSION_PRERELEASE "")
 
-set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}")
+set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}${Launcher_VERSION_PRERELEASE}")
 set(Launcher_VERSION_NAME4 "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}.0.0")
 set(Launcher_VERSION_NAME4_COMMA "${Launcher_VERSION_MAJOR},${Launcher_VERSION_MINOR},0,0")
 
