@@ -35,31 +35,36 @@
 
 #pragma once
 
-#include "net/NetAction.h"
+#include <QFileInfo>
 #include "Screenshot.h"
+#include "net/NetRequest.h"
 
-class ImgurUpload : public NetAction {
-public:
-    using Ptr = shared_qobject_ptr<ImgurUpload>;
+class ImgurUpload : public Net::NetRequest {
+   public:
+    class Sink : public Net::Sink {
+       public:
+        Sink(ScreenShot::Ptr shot) : m_shot(shot){};
+        virtual ~Sink() = default;
 
-    explicit ImgurUpload(ScreenShot::Ptr shot);
-    static Ptr make(ScreenShot::Ptr shot) {
-        return Ptr(new ImgurUpload(shot));
-    }
-    void init() override {};
+       public:
+        auto init(QNetworkRequest& request) -> Task::State override;
+        auto write(QByteArray& data) -> Task::State override;
+        auto abort() -> Task::State override;
+        auto finalize(QNetworkReply& reply) -> Task::State override;
+        auto hasLocalData() -> bool override { return false; }
 
-protected
-slots:
-    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
-    void downloadError(QNetworkReply::NetworkError error) override;
-    void downloadFinished() override;
-    void downloadReadyRead() override {}
+       private:
+        ScreenShot::Ptr m_shot;
+        QByteArray m_output;
+    };
+    ImgurUpload(QFileInfo info) : m_fileInfo(info) {}
+    virtual ~ImgurUpload() = default;
 
-public
-slots:
-    void executeTask() override;
+    static NetRequest::Ptr make(ScreenShot::Ptr m_shot);
 
-private:
-    ScreenShot::Ptr m_shot;
-    bool finished = true;
+    void init() override;
+
+   private:
+    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    const QFileInfo m_fileInfo;
 };
