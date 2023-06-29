@@ -40,7 +40,7 @@
 
 class PrismExternalUpdater::Private {
    public:
-    QDir appDir;
+    QDir binDir;
     QDir dataDir;
     QTimer updateTimer;
     bool allowBeta;
@@ -50,10 +50,10 @@ class PrismExternalUpdater::Private {
     std::unique_ptr<QSettings> settings;
 };
 
-PrismExternalUpdater::PrismExternalUpdater(const QString& appDir, const QString& dataDir)
+PrismExternalUpdater::PrismExternalUpdater(const QString& binDir, const QString& dataDir)
 {
     priv = new PrismExternalUpdater::Private();
-    priv->appDir = QDir(appDir);
+    priv->binDir = QDir(binDir);
     priv->dataDir = QDir(dataDir);
     auto settings_file = priv->dataDir.absoluteFilePath("prismlauncher_update.cfg");
     priv->settings = std::make_unique<QSettings>(settings_file, QSettings::Format::IniFormat);
@@ -97,20 +97,42 @@ void PrismExternalUpdater::checkForUpdates()
     if (priv->allowBeta)
         args.append("--pre-release");
 
-    proc.start(priv->appDir.absoluteFilePath(exe_name), args);
+    proc.start(priv->binDir.absoluteFilePath(exe_name), args);
     auto result_start = proc.waitForStarted(5000);
     if (!result_start) {
         auto err = proc.error();
         qDebug() << "Failed to start updater after 5 seconds."
                  << "reason:" << err << proc.errorString();
+        auto msgBox = QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
+                                  tr("Failed to start after 5 seconds\nReason: %1.").arg(proc.errorString()));
+
+        msgBox.adjustSize();
+        msgBox.exec();
+        priv->lastCheck = QDateTime::currentDateTime();
+        priv->settings->setValue("last_check", priv->lastCheck.toString(Qt::ISODate));
+        priv->settings->sync();
+        resetAutoCheckTimer();
+        return;
     }
     QCoreApplication::processEvents();
 
     auto result_finished = proc.waitForFinished(60000);
     if (!result_finished) {
+        proc.kill();
         auto err = proc.error();
+        auto output = proc.readAll();
         qDebug() << "Updater failed to close after 60 seconds."
                  << "reason:" << err << proc.errorString();
+        auto msgBox = QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
+                                  tr("Updater failed to close 60 seconds\nReason: %1.").arg(proc.errorString()));
+        msgBox.setDetailedText(output);
+        msgBox.adjustSize();
+        msgBox.exec();
+        priv->lastCheck = QDateTime::currentDateTime();
+        priv->settings->setValue("last_check", priv->lastCheck.toString(Qt::ISODate));
+        priv->settings->sync();
+        resetAutoCheckTimer();
+        return;
     }
 
     auto exit_code = proc.exitCode();
@@ -127,6 +149,8 @@ void PrismExternalUpdater::checkForUpdates()
             {
                 qDebug() << "No update available";
                 auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("You are running the latest version."));
+
+                msgBox.adjustSize();
                 msgBox.exec();
             }
             break;
@@ -137,6 +161,8 @@ void PrismExternalUpdater::checkForUpdates()
                 auto msgBox =
                     QMessageBox(QMessageBox::Warning, tr("Update Check Error"), tr("There was an error running the update check."));
                 msgBox.setDetailedText(std_error);
+
+                msgBox.adjustSize();
                 msgBox.exec();
             }
             break;
@@ -159,11 +185,19 @@ void PrismExternalUpdater::checkForUpdates()
             // unknown error code
             {
                 qDebug() << "Updater exited with unknown code" << exit_code;
+                auto msgBox = QMessageBox(QMessageBox::Information, tr("Unknown Update Error"),
+                                          tr("The updater exited with an unknown condition.\nExit Code: %1").arg(exit_code));
+                auto detail_txt = tr("StdOut: %1\nStdErr: %2").arg(std_output).arg(std_error);
+                msgBox.setDetailedText(detail_txt);
+
+                msgBox.adjustSize();
+                msgBox.exec();
             }
     }
     priv->lastCheck = QDateTime::currentDateTime();
     priv->settings->setValue("last_check", priv->lastCheck.toString(Qt::ISODate));
     priv->settings->sync();
+    resetAutoCheckTimer();
 }
 
 bool PrismExternalUpdater::getAutomaticallyChecksForUpdates()
@@ -247,6 +281,8 @@ void PrismExternalUpdater::offerUpdate(const QString& version_name, const QStrin
 
     if (should_skip) {
         auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("There are no new updates available."));
+
+        msgBox.adjustSize();
         msgBox.exec();
         return;
     }
@@ -285,7 +321,7 @@ void PrismExternalUpdater::performUpdate(const QString& version_tag)
     if (priv->allowBeta)
         args.append("--pre-release");
 
-    auto result = proc.startDetached(priv->appDir.absoluteFilePath(exe_name), args);
+    auto result = proc.startDetached(priv->binDir.absoluteFilePath(exe_name), args);
     if (!result) {
         qDebug() << "Failed to start updater:" << proc.error() << proc.errorString();
     }

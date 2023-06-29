@@ -215,7 +215,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->actionDISCORD->setVisible(!BuildConfig.DISCORD_URL.isEmpty());
         ui->actionREDDIT->setVisible(!BuildConfig.SUBREDDIT_URL.isEmpty());
 
-        ui->actionCheckUpdate->setVisible(BuildConfig.UPDATER_ENABLED);
+        ui->actionCheckUpdate->setVisible(APPLICATION->updaterEnabled());
 
 #ifndef Q_OS_MAC
         ui->actionAddToPATH->setVisible(false);
@@ -388,7 +388,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         updateNewsLabel();
     }
 
-    if (BuildConfig.UPDATER_ENABLED) {
+    if (APPLICATION->updaterEnabled()) {
         bool updatesAllowed = APPLICATION->updatesAreAllowed();
         updatesAllowedChanged(updatesAllowed);
 
@@ -781,7 +781,7 @@ void MainWindow::repopulateAccountsMenu()
 
 void MainWindow::updatesAllowedChanged(bool allowed)
 {
-    if(!BuildConfig.UPDATER_ENABLED)
+    if(!APPLICATION->updaterEnabled())
     {
         return;
     }
@@ -1259,7 +1259,7 @@ void MainWindow::on_actionViewCentralModsFolder_triggered()
 
 void MainWindow::checkForUpdates()
 {
-    if(BuildConfig.UPDATER_ENABLED)
+    if(APPLICATION->updaterEnabled())
     {
         APPLICATION->triggerUpdateCheck();
     }

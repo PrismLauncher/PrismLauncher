@@ -350,14 +350,14 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     {  // setup logging
         static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "Updater" + (m_checkOnly ? "-CheckOnly" : "") + "-%0.log";
-        static const QString logBase = FS::PathCombine("logs", baseLogFile);
+        static const QString logBase = FS::PathCombine(m_dataPath, "logs", baseLogFile);
         auto moveFile = [](const QString& oldName, const QString& newName) {
             QFile::remove(newName);
             QFile::copy(oldName, newName);
             QFile::remove(oldName);
         };
 
-        if (FS::ensureFolderPathExists("logs")) {
+        if (FS::ensureFolderPathExists("logs")) {  // enough history to track both launches of the updater during a portable install
             moveFile(logBase.arg(1), logBase.arg(2));
             moveFile(logBase.arg(0), logBase.arg(1));
         }
@@ -442,6 +442,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
         qDebug() << "Compiled for               : " << BuildConfig.systemID();
         qDebug() << "Compiled by                : " << BuildConfig.compilerID();
+        qDebug() << "Build Artifact             : " << BuildConfig.BUILD_ARTIFACT;
         if (adjustedBy.size()) {
             qDebug() << "Data dir before adjustment : " << origCwdPath;
             qDebug() << "Data dir after adjustment  : " << m_dataPath;
@@ -521,6 +522,7 @@ void PrismUpdaterApp::showFatalErrorMessage(const QString& title, const QString&
     msgBox->setDefaultButton(QMessageBox::Ok);
     msgBox->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextBrowserInteraction);
     msgBox->setIcon(QMessageBox::Critical);
+    msgBox->adjustSize();
     msgBox->exec();
     exit(1);
 }
@@ -658,6 +660,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
 
     QProgressDialog progress(tr("Backing up install at %1").arg(applicationDirPath()), "", 0, file_list.length());
     progress.setCancelButton(nullptr);
+    progress.adjustSize();
     progress.show();
     QCoreApplication::processEvents();
 
@@ -766,10 +769,13 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
     if (BuildConfig.BUILD_ARTIFACT.isEmpty())
         qWarning() << "Build platform is not set!";
     for (auto asset : release.assets) {
-        if (!m_isAppimage && asset.name.toLower().endsWith("appimage"))
+        if (!m_isAppimage && asset.name.toLower().endsWith("appimage")) {
+            qDebug() << "Rejecting" << asset.name << "because it is an AppImage";
             continue;
-        else if (m_isAppimage && !asset.name.toLower().endsWith("appimage"))
+        } else if (m_isAppimage && !asset.name.toLower().endsWith("appimage")) {
+            qDebug() << "Rejecting" << asset.name << "because it is not an AppImage";
             continue;
+        }
         auto asset_name = asset.name.toLower();
         auto platform = BuildConfig.BUILD_ARTIFACT.toLower();
         auto system_is_arm = QSysInfo::buildCpuArchitecture().contains("arm64");
@@ -786,6 +792,8 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
             for_platform = false;
 
         if (((m_isPortable && for_portable) || (!m_isPortable && !for_portable)) && for_platform) {
+            qDebug() << "Rejecting" << asset.name << "|"
+                     << "For Platform:" << (for_platform ? "Yes" : "No") << "For Portable:" << (for_portable ? "Yes" : "No");
             valid.append(asset);
         }
     }
@@ -849,6 +857,7 @@ QFileInfo PrismUpdaterApp::downloadAsset(const GitHubReleaseAsset& asset)
     auto download = Net::Download::makeFile(file_url, out_file_path);
     download->setNetwork(m_network);
     auto progress_dialog = ProgressDialog();
+    progress_dialog.adjustSize();
 
     if (progress_dialog.execWithTask(download.get()) == QDialog::Rejected)
         showFatalErrorMessage(tr("Download Aborted"), tr("Download of %1 aborted by user").arg(file_url.toString()));
@@ -954,6 +963,7 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
         msgBox.setInformativeText(infoMsg);
         msgBox.setStandardButtons(QMessageBox::Ignore | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Cancel);
+        msgBox.adjustSize();
         switch (msgBox.exec()) {
             case QMessageBox::AcceptRole:
                 break;
@@ -971,7 +981,7 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
     if (m_isPortable || file.suffix().toLower() == "zip") {
         write_lock_file(update_lock_path, QDateTime::currentDateTime(), m_prismVersion, m_install_release.tag_name, applicationDirPath(),
-                    m_dataPath);
+                        m_dataPath);
         logUpdate(tr("Updating portable install at %1").arg(applicationDirPath()));
         unpackAndInstall(file);
     } else {
@@ -1065,6 +1075,7 @@ void PrismUpdaterApp::backupAppDir()
 
     QProgressDialog progress(tr("Backing up install at %1").arg(applicationDirPath()), "", 0, file_list.length());
     progress.setCancelButton(nullptr);
+    progress.adjustSize();
     progress.show();
     QCoreApplication::processEvents();
     int i = 0;

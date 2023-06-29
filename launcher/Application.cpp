@@ -584,6 +584,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
         qDebug() << "Compiled for               : " << BuildConfig.systemID();
         qDebug() << "Compiled by                : " << BuildConfig.compilerID();
+        qDebug() << "Build Artifact             : " << BuildConfig.BUILD_ARTIFACT;
+        qDebug() << "Updates Enabeled           : " << (updaterEnabled() ? "Yes" : "No");
         if (adjustedBy.size()) {
             qDebug() << "Work dir before adjustment : " << origcwdPath;
             qDebug() << "Work dir after adjustment  : " << QDir::currentPath();
@@ -856,18 +858,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     // initialize the updater
-    if (BuildConfig.UPDATER_ENABLED) {
+    if (updaterEnabled()) {
         qDebug() << "Initializing updater";
 #ifdef Q_OS_MAC
         m_updater.reset(new MacSparkleUpdater());
 #else
-        auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-#if defined Q_OS_WIN32
-    exe_name.append(".exe");
-#endif
-        auto updater_binary = QFileInfo(QDir(m_rootPath).absoluteFilePath(exe_name));
-        if (updater_binary.isFile())
-            m_updater.reset(new PrismExternalUpdater(m_rootPath, m_dataPath));
+        m_updater.reset(new PrismExternalUpdater(applicationDirPath(), m_dataPath));
 #endif
         qDebug() << "<> Updater started.";
     }
@@ -1000,6 +996,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox.setDefaultButton(QMessageBox::Abort);
             msgBox.setModal(true);
             msgBox.setDetailedText(FS::read(update_log_path));
+            msgBox.adjustSize();
             auto res = msgBox.exec();
             switch (res) {
                 case QMessageBox::Ignore: {
@@ -1030,6 +1027,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox.setDefaultButton(QMessageBox::Abort);
             msgBox.setModal(true);
             msgBox.setDetailedText(FS::read(update_log_path));
+            msgBox.adjustSize();
             auto res = msgBox.exec();
             switch (res) {
                 case QMessageBox::Ignore: {
@@ -1056,10 +1054,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                               "for details.")
                                .arg(BuildConfig.printableVersionString())
                                .arg(update_log_path);
-            auto msgBox = QMessageBox(QMessageBox::Information, tr("Update Succeeded"), infoMsg, QMessageBox::Ok);
-            msgBox.setDefaultButton(QMessageBox::Ok);
-            msgBox.setDetailedText(FS::read(update_log_path));
-            msgBox.exec();
+            auto msgBox = new QMessageBox(QMessageBox::Information, tr("Update Succeeded"), infoMsg, QMessageBox::Ok);
+            msgBox->setDefaultButton(QMessageBox::Ok);
+            msgBox->setDetailedText(FS::read(update_log_path));
+            msgBox->setAttribute(Qt::WA_DeleteOnClose);
+            msgBox->adjustSize();
+            msgBox->open();
             FS::deletePath(update_success_marker.absoluteFilePath());
         }
     }
@@ -1125,6 +1125,22 @@ bool Application::createSetupWizard()
         return true;
     }
     return false;
+}
+
+bool Application::updaterEnabled() {
+#if defined(Q_OS_MAC)
+    return BuildConfig.UPDATER_ENABLED;
+#else
+    return BuildConfig.UPDATER_ENABLED && QFileInfo(updaterBinaryName()).isFile();
+#endif
+}
+
+QString Application::updaterBinaryName() {
+    auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+#if defined Q_OS_WIN32
+    exe_name.append(".exe");
+#endif
+    return exe_name;
 }
 
 bool Application::event(QEvent* event)

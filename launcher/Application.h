@@ -216,6 +216,9 @@ public:
 
     int suitableMaxMem();
 
+    bool updaterEnabled();
+    QString updaterBinaryName();
+
 signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
