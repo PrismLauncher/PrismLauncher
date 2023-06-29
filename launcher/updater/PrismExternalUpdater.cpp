@@ -193,9 +193,10 @@ void PrismExternalUpdater::checkForUpdates()
             // unknown error code
             {
                 qDebug() << "Updater exited with unknown code" << exit_code;
-                auto msgBox = QMessageBox(QMessageBox::Information, tr("Unknown Update Error"),
-                                          tr("The updater exited with an unknown condition.\nExit Code: %1").arg(exit_code),
-                                          QMessageBox::Ok, priv->parent);
+                auto msgBox =
+                    QMessageBox(QMessageBox::Information, tr("Unknown Update Error"),
+                                tr("The updater exited with an unknown condition.\nExit Code: %1").arg(QString::number(exit_code)),
+                                QMessageBox::Ok, priv->parent);
                 auto detail_txt = tr("StdOut: %1\nStdErr: %2").arg(std_output).arg(std_error);
                 msgBox.setDetailedText(detail_txt);
 
