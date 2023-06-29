@@ -60,6 +60,7 @@ PrismExternalUpdater::PrismExternalUpdater(const QString& binDir, const QString&
     priv->allowBeta = priv->settings->value("allow_beta", false).toBool();
     priv->autoCheck = priv->settings->value("auto_check", false).toBool();
     bool interval_ok;
+    // default once per day
     priv->updateInterval = priv->settings->value("update_interval", 86400).toInt(&interval_ok);
     if (!interval_ok)
         priv->updateInterval = 86400;
@@ -240,9 +241,9 @@ void PrismExternalUpdater::setBetaAllowed(bool allowed)
 
 void PrismExternalUpdater::resetAutoCheckTimer()
 {
-    int timeoutDuration = 0;
-    auto now = QDateTime::currentDateTime();
     if (priv->autoCheck) {
+        int timeoutDuration = 0;
+        auto now = QDateTime::currentDateTime();
         if (priv->lastCheck.isValid()) {
             auto diff = priv->lastCheck.secsTo(now);
             auto secs_left = priv->updateInterval - diff;
@@ -270,6 +271,7 @@ void PrismExternalUpdater::disconnectTimer()
 
 void PrismExternalUpdater::autoCheckTimerFired()
 {
+    qDebug() << "Auto update Timer fired";
     checkForUpdates();
 }
 
