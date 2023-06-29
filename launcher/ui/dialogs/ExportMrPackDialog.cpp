@@ -52,8 +52,9 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     // use the game root - everything outside cannot be exported
     const QDir root(instance->gameRoot());
     proxy = new FileIgnoreProxy(instance->gameRoot(), this);
+    proxy->ignoreFilesWithPath().append({ "logs", "crash-reports" });
+    proxy->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
     proxy->setSourceModel(model);
-    proxy->setFilterRegularExpression("^(?!(\\.DS_Store)|([tT]humbs\\.db)).+$");
 
     const QDir::Filters filter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
 

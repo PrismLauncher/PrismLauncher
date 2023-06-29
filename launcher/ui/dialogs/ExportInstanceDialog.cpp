@@ -35,24 +35,24 @@
  */
 
 #include "ExportInstanceDialog.h"
-#include "ui_ExportInstanceDialog.h"
 #include <BaseInstance.h>
 #include <MMCZip.h>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QFileSystemModel>
+#include <QMessageBox>
+#include "ui_ExportInstanceDialog.h"
 
-#include <QSortFilterProxyModel>
-#include <QDebug>
-#include <QSaveFile>
-#include <QStack>
-#include <QFileInfo>
-#include "SeparatorPrefixTree.h"
-#include "Application.h"
-#include <icons/IconList.h>
 #include <FileSystem.h>
+#include <icons/IconList.h>
+#include <QDebug>
+#include <QFileInfo>
+#include <QSaveFile>
+#include <QSortFilterProxyModel>
+#include <QStack>
+#include "Application.h"
+#include "SeparatorPrefixTree.h"
 
-ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent)
+ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget* parent)
     : QDialog(parent), ui(new Ui::ExportInstanceDialog), m_instance(instance)
 {
     ui->setupUi(this);
@@ -60,8 +60,12 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent
     model->setIconProvider(&icons);
     auto root = instance->instanceRoot();
     proxyModel = new FileIgnoreProxy(root, this);
-    loadPackIgnore();
     proxyModel->setSourceModel(model);
+    auto prefix = QDir(instance->instanceRoot()).relativeFilePath(instance->gameRoot());
+    proxyModel->ignoreFilesWithPath().append({ FS::PathCombine(prefix, "logs"), FS::PathCombine(prefix, "crash-reports") });
+    proxyModel->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
+    loadPackIgnore();
+
     ui->treeView->setModel(proxyModel);
     ui->treeView->setRootIndex(proxyModel->mapFromSource(model->index(root)));
     ui->treeView->sortByColumn(0, Qt::AscendingOrder);

@@ -63,10 +63,18 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
     inline const SeparatorPrefixTree<'/'>& blockedPaths() const { return blocked; }
     inline SeparatorPrefixTree<'/'>& blockedPaths() { return blocked; }
 
+    // list of file names that need to be removed completely from model
+    inline QStringList& ignoreFilesWithName() { return m_ignoreFiles; }
+    // list of relative paths that need to be removed completely from model
+    inline QStringList& ignoreFilesWithPath() { return m_ignoreFilePaths; }
+
    protected:
     bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const;
+    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
 
    private:
     const QString root;
     SeparatorPrefixTree<'/'> blocked;
+    QStringList m_ignoreFiles;
+    QStringList m_ignoreFilePaths;
 };
