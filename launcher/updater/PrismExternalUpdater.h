@@ -34,7 +34,7 @@ class PrismExternalUpdater : public ExternalUpdater {
     Q_OBJECT
 
    public:
-    PrismExternalUpdater(const QString& appDir, const QString& dataDir);
+    PrismExternalUpdater(QWidget* parent, const QString& appDir, const QString& dataDir);
     ~PrismExternalUpdater() override;
 
     /*!

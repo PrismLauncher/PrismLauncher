@@ -48,9 +48,11 @@ class PrismExternalUpdater::Private {
     double updateInterval;
     QDateTime lastCheck;
     std::unique_ptr<QSettings> settings;
+
+    QWidget* parent;
 };
 
-PrismExternalUpdater::PrismExternalUpdater(const QString& binDir, const QString& dataDir)
+PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& binDir, const QString& dataDir)
 {
     priv = new PrismExternalUpdater::Private();
     priv->binDir = QDir(binDir);
@@ -68,6 +70,7 @@ PrismExternalUpdater::PrismExternalUpdater(const QString& binDir, const QString&
     if (!last_check.isNull() && last_check.isValid()) {
         priv->lastCheck = QDateTime::fromString(last_check.toString(), Qt::ISODate);
     }
+    priv->parent = parent;
     connectTimer();
     resetAutoCheckTimer();
 }
@@ -83,7 +86,7 @@ PrismExternalUpdater::~PrismExternalUpdater()
 
 void PrismExternalUpdater::checkForUpdates()
 {
-    QProgressDialog progress(tr("Checking for updates..."), "", 0, 0);
+    QProgressDialog progress(tr("Checking for updates..."), "", 0, 0, priv->parent);
     progress.setCancelButton(nullptr);
     progress.show();
     QCoreApplication::processEvents();
