@@ -88,6 +88,7 @@ void PrismExternalUpdater::checkForUpdates()
 {
     QProgressDialog progress(tr("Checking for updates..."), "", 0, 0, priv->parent);
     progress.setCancelButton(nullptr);
+    progress.adjustSize();
     progress.show();
     QCoreApplication::processEvents();
 
@@ -107,8 +108,9 @@ void PrismExternalUpdater::checkForUpdates()
         auto err = proc.error();
         qDebug() << "Failed to start updater after 5 seconds."
                  << "reason:" << err << proc.errorString();
-        auto msgBox = QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
-                                  tr("Failed to start after 5 seconds\nReason: %1.").arg(proc.errorString()));
+        auto msgBox =
+            QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
+                        tr("Failed to start after 5 seconds\nReason: %1.").arg(proc.errorString()), QMessageBox::Ok, priv->parent);
 
         msgBox.adjustSize();
         msgBox.exec();
@@ -127,8 +129,9 @@ void PrismExternalUpdater::checkForUpdates()
         auto output = proc.readAll();
         qDebug() << "Updater failed to close after 60 seconds."
                  << "reason:" << err << proc.errorString();
-        auto msgBox = QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
-                                  tr("Updater failed to close 60 seconds\nReason: %1.").arg(proc.errorString()));
+        auto msgBox =
+            QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
+                        tr("Updater failed to close 60 seconds\nReason: %1.").arg(proc.errorString()), QMessageBox::Ok, priv->parent);
         msgBox.setDetailedText(output);
         msgBox.adjustSize();
         msgBox.exec();
@@ -152,7 +155,8 @@ void PrismExternalUpdater::checkForUpdates()
             // no update available
             {
                 qDebug() << "No update available";
-                auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("You are running the latest version."));
+                auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("You are running the latest version."),
+                                          QMessageBox::Ok, priv->parent);
 
                 msgBox.adjustSize();
                 msgBox.exec();
@@ -162,8 +166,8 @@ void PrismExternalUpdater::checkForUpdates()
             // there was an error
             {
                 qDebug() << "Updater subprocess error" << qPrintable(std_error);
-                auto msgBox =
-                    QMessageBox(QMessageBox::Warning, tr("Update Check Error"), tr("There was an error running the update check."));
+                auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Check Error"),
+                                          tr("There was an error running the update check."), QMessageBox::Ok, priv->parent);
                 msgBox.setDetailedText(std_error);
 
                 msgBox.adjustSize();
@@ -190,7 +194,8 @@ void PrismExternalUpdater::checkForUpdates()
             {
                 qDebug() << "Updater exited with unknown code" << exit_code;
                 auto msgBox = QMessageBox(QMessageBox::Information, tr("Unknown Update Error"),
-                                          tr("The updater exited with an unknown condition.\nExit Code: %1").arg(exit_code));
+                                          tr("The updater exited with an unknown condition.\nExit Code: %1").arg(exit_code),
+                                          QMessageBox::Ok, priv->parent);
                 auto detail_txt = tr("StdOut: %1\nStdErr: %2").arg(std_output).arg(std_error);
                 msgBox.setDetailedText(detail_txt);
 
@@ -285,7 +290,8 @@ void PrismExternalUpdater::offerUpdate(const QString& version_name, const QStrin
     priv->settings->endGroup();
 
     if (should_skip) {
-        auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("There are no new updates available."));
+        auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("There are no new updates available."),
+                                  QMessageBox::Ok, priv->parent);
 
         msgBox.adjustSize();
         msgBox.exec();
