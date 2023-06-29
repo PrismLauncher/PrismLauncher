@@ -522,6 +522,7 @@ void PrismUpdaterApp::showFatalErrorMessage(const QString& title, const QString&
     msgBox->setDefaultButton(QMessageBox::Ok);
     msgBox->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextBrowserInteraction);
     msgBox->setIcon(QMessageBox::Critical);
+    msgBox->setMinimumWidth(460);
     msgBox->adjustSize();
     msgBox->exec();
     exit(1);
@@ -660,6 +661,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
 
     QProgressDialog progress(tr("Backing up install at %1").arg(applicationDirPath()), "", 0, file_list.length());
     progress.setCancelButton(nullptr);
+    progress.setMinimumWidth(400);
     progress.adjustSize();
     progress.show();
     QCoreApplication::processEvents();
@@ -963,6 +965,7 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
         msgBox.setInformativeText(infoMsg);
         msgBox.setStandardButtons(QMessageBox::Ignore | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Cancel);
+        msgBox.setMinimumWidth(460);
         msgBox.adjustSize();
         switch (msgBox.exec()) {
             case QMessageBox::AcceptRole:
@@ -1075,6 +1078,7 @@ void PrismUpdaterApp::backupAppDir()
 
     QProgressDialog progress(tr("Backing up install at %1").arg(applicationDirPath()), "", 0, file_list.length());
     progress.setCancelButton(nullptr);
+    progress.setMinimumWidth(400);
     progress.adjustSize();
     progress.show();
     QCoreApplication::processEvents();

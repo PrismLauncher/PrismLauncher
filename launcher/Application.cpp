@@ -1004,6 +1004,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox.setDefaultButton(QMessageBox::Abort);
             msgBox.setModal(true);
             msgBox.setDetailedText(FS::read(update_log_path));
+            msgBox.setMinimumWidth(460);
             msgBox.adjustSize();
             auto res = msgBox.exec();
             switch (res) {
@@ -1015,7 +1016,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                     [[fallthrough]];
                 default: {
                     qDebug() << "Exiting because update lockfile is present";
-                    QMetaObject::invokeMethod(this, [](){ exit(1); }, Qt::QueuedConnection);
+                    QMetaObject::invokeMethod(
+                        this, []() { exit(1); }, Qt::QueuedConnection);
                     return;
                 }
             }
@@ -1035,6 +1037,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox.setDefaultButton(QMessageBox::Abort);
             msgBox.setModal(true);
             msgBox.setDetailedText(FS::read(update_log_path));
+            msgBox.setMinimumWidth(460);
             msgBox.adjustSize();
             auto res = msgBox.exec();
             switch (res) {
@@ -1046,7 +1049,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                     [[fallthrough]];
                 default: {
                     qDebug() << "Exiting because update lockfile is present";
-                    QMetaObject::invokeMethod(this, [](){ exit(1); }, Qt::QueuedConnection);
+                    QMetaObject::invokeMethod(
+                        this, []() { exit(1); }, Qt::QueuedConnection);
                     return;
                 }
             }
@@ -1066,6 +1070,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox->setDefaultButton(QMessageBox::Ok);
             msgBox->setDetailedText(FS::read(update_log_path));
             msgBox->setAttribute(Qt::WA_DeleteOnClose);
+            msgBox->setMinimumWidth(460);
             msgBox->adjustSize();
             msgBox->open();
             FS::deletePath(update_success_marker.absoluteFilePath());
@@ -1127,7 +1132,8 @@ bool Application::createSetupWizard()
     return false;
 }
 
-bool Application::updaterEnabled() {
+bool Application::updaterEnabled()
+{
 #if defined(Q_OS_MAC)
     return BuildConfig.UPDATER_ENABLED;
 #else
@@ -1135,7 +1141,8 @@ bool Application::updaterEnabled() {
 #endif
 }
 
-QString Application::updaterBinaryName() {
+QString Application::updaterBinaryName()
+{
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
     exe_name.append(".exe");
@@ -1173,8 +1180,6 @@ void Application::setupWizardFinished(int status)
 void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
-
-    
 
     if (!m_instanceIdToLaunch.isEmpty()) {
         auto inst = instances()->getInstanceById(m_instanceIdToLaunch);

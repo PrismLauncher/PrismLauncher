@@ -111,7 +111,7 @@ void PrismExternalUpdater::checkForUpdates()
         auto msgBox =
             QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
                         tr("Failed to start after 5 seconds\nReason: %1.").arg(proc.errorString()), QMessageBox::Ok, priv->parent);
-
+        msgBox.setMinimumWidth(460);
         msgBox.adjustSize();
         msgBox.exec();
         priv->lastCheck = QDateTime::currentDateTime();
@@ -133,6 +133,7 @@ void PrismExternalUpdater::checkForUpdates()
             QMessageBox(QMessageBox::Information, tr("Update Check Failed"),
                         tr("Updater failed to close 60 seconds\nReason: %1.").arg(proc.errorString()), QMessageBox::Ok, priv->parent);
         msgBox.setDetailedText(output);
+        msgBox.setMinimumWidth(460);
         msgBox.adjustSize();
         msgBox.exec();
         priv->lastCheck = QDateTime::currentDateTime();
@@ -157,7 +158,7 @@ void PrismExternalUpdater::checkForUpdates()
                 qDebug() << "No update available";
                 auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("You are running the latest version."),
                                           QMessageBox::Ok, priv->parent);
-
+                msgBox.setMinimumWidth(460);
                 msgBox.adjustSize();
                 msgBox.exec();
             }
@@ -169,7 +170,7 @@ void PrismExternalUpdater::checkForUpdates()
                 auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Check Error"),
                                           tr("There was an error running the update check."), QMessageBox::Ok, priv->parent);
                 msgBox.setDetailedText(std_error);
-
+                msgBox.setMinimumWidth(460);
                 msgBox.adjustSize();
                 msgBox.exec();
             }
@@ -199,7 +200,7 @@ void PrismExternalUpdater::checkForUpdates()
                                 QMessageBox::Ok, priv->parent);
                 auto detail_txt = tr("StdOut: %1\nStdErr: %2").arg(std_output).arg(std_error);
                 msgBox.setDetailedText(detail_txt);
-
+                msgBox.setMinimumWidth(460);
                 msgBox.adjustSize();
                 msgBox.exec();
             }
@@ -293,7 +294,7 @@ void PrismExternalUpdater::offerUpdate(const QString& version_name, const QStrin
     if (should_skip) {
         auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("There are no new updates available."),
                                   QMessageBox::Ok, priv->parent);
-
+        msgBox.setMinimumWidth(460);
         msgBox.adjustSize();
         msgBox.exec();
         return;
