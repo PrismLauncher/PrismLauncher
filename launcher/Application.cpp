@@ -1126,7 +1126,7 @@ bool Application::updaterEnabled()
 #if defined(Q_OS_MAC)
     return BuildConfig.UPDATER_ENABLED;
 #else
-    return BuildConfig.UPDATER_ENABLED && QFileInfo(updaterBinaryName()).isFile();
+    return BuildConfig.UPDATER_ENABLED && QFileInfo(FS::PathCombine(applicationDirPath(), updaterBinaryName())).isFile();
 #endif
 }
 
