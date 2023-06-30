@@ -189,7 +189,7 @@ public: /* methods */
 
     // Get a list of downloads for this library
     QList<NetAction::Ptr> getDownloads(const RuntimeContext & runtimeContext, class HttpMetaCache * cache,
-                                     QStringList & failedLocalFiles, const QString & overridePath) const;
+                                     QStringList & failedLocalFiles, const QString & overridePath, bool useBMCLAPI) const;
 
     QString getCompatibleNative(const RuntimeContext & runtimeContext) const;
 

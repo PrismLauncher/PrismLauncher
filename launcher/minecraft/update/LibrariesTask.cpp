@@ -24,6 +24,7 @@ void LibrariesTask::executeTask()
     downloadJob.reset(job);
 
     auto metacache = APPLICATION->metacache();
+    auto useBMCLAPI = APPLICATION->settings()->get("UseBMCLAPI").toBool();
 
     auto processArtifactPool = [&](const QList<LibraryPtr> & pool, QStringList & errors, const QString & localPath)
     {
@@ -34,7 +35,7 @@ void LibrariesTask::executeTask()
                 emitFailed(tr("Null jar is specified in the metadata, aborting."));
                 return false;
             }
-            auto dls = lib->getDownloads(inst->runtimeContext(), metacache.get(), errors, localPath);
+            auto dls = lib->getDownloads(inst->runtimeContext(), metacache.get(), errors, localPath, useBMCLAPI);
             for(auto dl : dls)
             {
                 downloadJob->addNetAction(dl);

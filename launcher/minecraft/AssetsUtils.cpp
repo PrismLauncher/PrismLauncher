@@ -330,6 +330,8 @@ QString AssetObject::getLocalPath()
 
 QUrl AssetObject::getUrl()
 {
+    if (APPLICATION->settings()->get("UseBMCLAPI").toBool())
+        return BuildConfig.BMCLAPI_RESOURCE_BASE + getRelPath();
     return BuildConfig.RESOURCE_BASE + getRelPath();
 }
 

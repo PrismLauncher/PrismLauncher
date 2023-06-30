@@ -83,7 +83,8 @@ QList<NetAction::Ptr> Library::getDownloads(
     const RuntimeContext & runtimeContext,
     class HttpMetaCache* cache,
     QStringList& failedLocalFiles,
-    const QString & overridePath
+    const QString & overridePath,
+    bool useBMCLAPI
 ) const
 {
     QList<NetAction::Ptr> out;
@@ -125,6 +126,10 @@ QList<NetAction::Ptr> Library::getDownloads(
 
         // Don't add a time limit for the libraries cache entry validity
         options |= Net::Download::Option::MakeEternal;
+
+        if (useBMCLAPI) {
+            url.replace(BuildConfig.LIBRARY_BASE, BuildConfig.BMCLAPI_LIBRARY_BASE);
+        }
 
         if(sha1.size())
         {

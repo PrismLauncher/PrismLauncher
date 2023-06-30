@@ -78,7 +78,10 @@ void AssetUpdateTask::assetIndexFinished()
     auto job = index.getDownloadJob();
     if(job)
     {
-        setStatus(tr("Getting the assets files from Mojang..."));
+        if (APPLICATION->settings()->get("UseBMCLAPI").toBool())
+            setStatus(tr("Getting the assets files from BMCLAPI..."));
+        else
+            setStatus(tr("Getting the assets files from Mojang..."));
         downloadJob = job;
         connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::emitSucceeded);
         connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetsFailed);

@@ -253,6 +253,22 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="downloadMirrorGroupBox">
+         <property name="title">
+          <string>Download mirror</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QCheckBox" name="useBMCLAPI">
+            <property name="text">
+             <string>Use &amp;BMCLAPI as aseets and libraries download source</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

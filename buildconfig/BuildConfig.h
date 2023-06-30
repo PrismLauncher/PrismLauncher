@@ -166,6 +166,12 @@ class Config {
 
     QString FLAME_BASE_URL = "https://api.curseforge.com/v1";
 
+    /**
+     * BMCLAPI (Minecraft assets and libraries mirror) URLs
+     */
+    QString BMCLAPI_RESOURCE_BASE = "https://bmclapi2.bangbang93.com/assets/";
+    QString BMCLAPI_LIBRARY_BASE = "https://bmclapi2.bangbang93.com/maven/";
+
     QString versionString() const;
     /**
      * \brief Converts the Version to a string.

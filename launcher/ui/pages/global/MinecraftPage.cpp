@@ -86,6 +86,9 @@ void MinecraftPage::applySettings()
     s->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
     s->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
 
+    // Minecraft assets and libraries download mirror
+    s->set("UseBMCLAPI", ui->useBMCLAPI->isChecked());
+
     // Peformance related options
     s->set("EnableFeralGamemode", ui->enableFeralGamemodeCheck->isChecked());
     s->set("EnableMangoHud", ui->enableMangoHud->isChecked());
@@ -116,6 +119,8 @@ void MinecraftPage::loadSettings()
     ui->enableFeralGamemodeCheck->setChecked(s->get("EnableFeralGamemode").toBool());
     ui->enableMangoHud->setChecked(s->get("EnableMangoHud").toBool());
     ui->useDiscreteGpuCheck->setChecked(s->get("UseDiscreteGpu").toBool());
+
+    ui->useBMCLAPI->setChecked(s->get("UseBMCLAPI").toBool());
 
 #if !defined(Q_OS_LINUX)
     ui->perfomanceGroupBox->setVisible(false);

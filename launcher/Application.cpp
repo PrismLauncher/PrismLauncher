@@ -618,6 +618,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
 
+        // Minecraft assets and libraries download mirror
+        m_settings->registerSetting("UseBMCLAPI", false);
+
         // Minecraft launch method
         m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
 
