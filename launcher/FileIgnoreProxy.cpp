@@ -269,9 +269,8 @@ bool FileIgnoreProxy::ignoreFile(QFileInfo fileInfo) const
 {
     auto fileName = fileInfo.fileName();
     auto path = relPath(fileInfo.absoluteFilePath());
-    return (path.startsWith("..") ||  // just in case ignore files outside the gameroot
-            std::any_of(m_ignoreFiles.cbegin(), m_ignoreFiles.cend(), [fileName](auto iFileName) { return fileName == iFileName; }) ||
-            m_ignoreFilePaths.covers(path));
+    return std::any_of(m_ignoreFiles.cbegin(), m_ignoreFiles.cend(), [fileName](auto iFileName) { return fileName == iFileName; }) ||
+           m_ignoreFilePaths.covers(path);
 }
 
 bool FileIgnoreProxy::filterFile(const QString& fileName) const
