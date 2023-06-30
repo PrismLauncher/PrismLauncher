@@ -169,7 +169,7 @@ void PrismExternalUpdater::checkForUpdates()
                 qDebug() << "Updater subprocess error" << qPrintable(std_error);
                 auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Check Error"),
                                           tr("There was an error running the update check."), QMessageBox::Ok, priv->parent);
-                msgBox.setDetailedText(std_error);
+                msgBox.setDetailedText(QString(std_error));
                 msgBox.setMinimumWidth(460);
                 msgBox.adjustSize();
                 msgBox.exec();
@@ -198,7 +198,7 @@ void PrismExternalUpdater::checkForUpdates()
                     QMessageBox(QMessageBox::Information, tr("Unknown Update Error"),
                                 tr("The updater exited with an unknown condition.\nExit Code: %1").arg(QString::number(exit_code)),
                                 QMessageBox::Ok, priv->parent);
-                auto detail_txt = tr("StdOut: %1\nStdErr: %2").arg(std_output).arg(std_error);
+                auto detail_txt = tr("StdOut: %1\nStdErr: %2").arg(QString(std_output)).arg(QString(std_error));
                 msgBox.setDetailedText(detail_txt);
                 msgBox.setMinimumWidth(460);
                 msgBox.adjustSize();
