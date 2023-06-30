@@ -1285,6 +1285,7 @@ if(NOT APPLE OR (DEFINED Launcher_BUILD_UPDATER AND Launcher_BUILD_UPDATER))
     )
 
     add_executable("${Launcher_Name}_updater" WIN32 updater/prismupdater/updater_main.cpp)
+    target_sources("${Launcher_Name}_updater" PRIVATE updater/prismupdater/updater.exe.manifest)
     target_link_libraries("${Launcher_Name}_updater" prism_updater_logic)
     
     if(DEFINED Launcher_APP_BINARY_NAME)
