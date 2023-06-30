@@ -169,8 +169,11 @@ class Config {
     /**
      * BMCLAPI (Minecraft assets and libraries mirror) URLs
      */
+    QString BMCLAPI_BASE = "https://bmclapi2.bangbang93.com/";
     QString BMCLAPI_RESOURCE_BASE = "https://bmclapi2.bangbang93.com/assets/";
     QString BMCLAPI_LIBRARY_BASE = "https://bmclapi2.bangbang93.com/maven/";
+    QString BMCLAPI_FORGE_BASE = BMCLAPI_LIBRARY_BASE;
+    QString BMCLAPI_FABRIC_BASE = BMCLAPI_LIBRARY_BASE;
 
     QString versionString() const;
     /**

@@ -129,6 +129,10 @@ QList<NetAction::Ptr> Library::getDownloads(
 
         if (useBMCLAPI) {
             url.replace(BuildConfig.LIBRARY_BASE, BuildConfig.BMCLAPI_LIBRARY_BASE);
+            url.replace("https://launcher.mojang.com/", BuildConfig.BMCLAPI_BASE);
+            url.replace("https://piston-data.mojang.com/", BuildConfig.BMCLAPI_BASE);
+            url.replace("https://maven.minecraftforge.net/", BuildConfig.BMCLAPI_BASE);
+            url.replace("https://maven.fabricmc.net/", BuildConfig.BMCLAPI_FABRIC_BASE);
         }
 
         if(sha1.size())
