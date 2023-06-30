@@ -40,6 +40,7 @@
 #include <QFileDialog>
 #include <QFileSystemModel>
 #include <QMessageBox>
+#include "FileIgnoreProxy.h"
 #include "ui_ExportInstanceDialog.h"
 
 #include <FileSystem.h>
@@ -49,6 +50,7 @@
 #include <QSaveFile>
 #include <QSortFilterProxyModel>
 #include <QStack>
+#include <functional>
 #include "Application.h"
 #include "SeparatorPrefixTree.h"
 
@@ -62,7 +64,7 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget* parent
     proxyModel = new FileIgnoreProxy(root, this);
     proxyModel->setSourceModel(model);
     auto prefix = QDir(instance->instanceRoot()).relativeFilePath(instance->gameRoot());
-    proxyModel->ignoreFilesWithPath().append({ FS::PathCombine(prefix, "logs"), FS::PathCombine(prefix, "crash-reports") });
+    proxyModel->ignoreFilesWithPath().insert({ FS::PathCombine(prefix, "logs"), FS::PathCombine(prefix, "crash-reports") });
     proxyModel->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
     loadPackIgnore();
 
@@ -137,11 +139,9 @@ bool ExportInstanceDialog::doExport()
 
     SaveIcon(m_instance);
 
-    auto & blocked = proxyModel->blockedPaths();
-    using std::placeholders::_1;
     auto files = QFileInfoList();
     if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,
-                                    std::bind(&SeparatorPrefixTree<'/'>::covers, blocked, _1))) {
+                                            std::bind(&FileIgnoreProxy::filterFile, proxyModel, std::placeholders::_1))) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;
     }

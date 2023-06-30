@@ -262,9 +262,19 @@ bool FileIgnoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceP
     QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
 
     auto fileInfo = fsm->fileInfo(index);
+    return !ignoreFile(fileInfo);
+}
+
+bool FileIgnoreProxy::ignoreFile(QFileInfo fileInfo) const
+{
     auto fileName = fileInfo.fileName();
     auto path = relPath(fileInfo.absoluteFilePath());
-    return !(path.startsWith("..") ||  // just in case ignore files outside the gameroot
-             std::any_of(m_ignoreFiles.cbegin(), m_ignoreFiles.cend(), [fileName](auto iFileName) { return fileName == iFileName; }) ||
-             std::any_of(m_ignoreFilePaths.cbegin(), m_ignoreFilePaths.cend(), [path](auto iPath) { return path == iPath; }));
+    return (path.startsWith("..") ||  // just in case ignore files outside the gameroot
+            std::any_of(m_ignoreFiles.cbegin(), m_ignoreFiles.cend(), [fileName](auto iFileName) { return fileName == iFileName; }) ||
+            m_ignoreFilePaths.covers(path));
+}
+
+bool FileIgnoreProxy::filterFile(const QString& fileName) const
+{
+    return blocked.covers(fileName) || ignoreFile(QFileInfo(QDir(root), fileName));
 }
