@@ -96,6 +96,10 @@ void PrismExternalUpdater::checkForUpdates()
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
     exe_name.append(".exe");
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    env.insert("__COMPAT_LAYER", "RUNASINVOKER");
+    proc.setProcessEnvironment(env);
 #endif
 
     QStringList args = { "--check-only", "--dir", priv->dataDir.absolutePath(), "--debug" };
@@ -328,6 +332,10 @@ void PrismExternalUpdater::performUpdate(const QString& version_tag)
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
     exe_name.append(".exe");
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    env.insert("__COMPAT_LAYER", "RUNASINVOKER");
+    proc.setProcessEnvironment(env);
 #endif
 
     QStringList args = { "--dir", priv->dataDir.absolutePath(), "--install-version", version_tag };

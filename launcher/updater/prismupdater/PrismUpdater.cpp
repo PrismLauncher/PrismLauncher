@@ -704,7 +704,12 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
     auto app_exe_name = BuildConfig.LAUNCHER_APP_BINARY_NAME;
 #if defined Q_OS_WIN32
     app_exe_name.append(".exe");
+
+    auto env = QProcessEnvironment::systemEnvironment();
+    env.insert("__COMPAT_LAYER", "RUNASINVOKER");
+    proc.setProcessEnvironment(env);
 #endif
+
     auto app_exe_path = target.absoluteFilePath(app_exe_name);
     proc.startDetached(app_exe_path);
 
@@ -990,6 +995,11 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
     } else {
         logUpdate(tr("Running installer file at %1").arg(file.absoluteFilePath()));
         QProcess proc = QProcess();
+#if defined Q_OS_WIN
+        auto env = QProcessEnvironment::systemEnvironment();
+        env.insert("__COMPAT_LAYER", "RUNASINVOKER");
+        proc.setProcessEnvironment(env);
+#endif
         proc.setProgram(file.absoluteFilePath());
         bool result = proc.startDetached();
         logUpdate(tr("Process start result: %1").arg(result ? tr("yes") : tr("no")));
@@ -1005,13 +1015,20 @@ void PrismUpdaterApp::unpackAndInstall(QFileInfo archive)
     if (auto loc = unpackArchive(archive)) {
         auto marker_file_path = loc.value().absoluteFilePath(".prism_launcher_updater_unpack.marker");
         FS::write(marker_file_path, applicationDirPath().toUtf8());
+
+        QProcess proc = QProcess();
+
         auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
         exe_name.append(".exe");
+
+        auto env = QProcessEnvironment::systemEnvironment();
+        env.insert("__COMPAT_LAYER", "RUNASINVOKER");
+        proc.setProcessEnvironment(env);
 #endif
+
         auto new_updater_path = loc.value().absoluteFilePath(exe_name);
         logUpdate(tr("Starting new updater at '%1'").arg(new_updater_path));
-        QProcess proc = QProcess();
         if (!proc.startDetached(new_updater_path, { "-d", m_dataPath }, loc.value().absolutePath())) {
             logUpdate(tr("Failed to launch '%1' %2").arg(new_updater_path).arg(proc.errorString()));
             return exit(10);

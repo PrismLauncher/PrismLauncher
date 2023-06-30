@@ -959,23 +959,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     updateCapabilities();
 
-    if (createSetupWizard()) {
-        return;
-    }
-
-    performMainStartupAction();
-
-    // initialize the updater
-    if (updaterEnabled()) {
-        qDebug() << "Initializing updater";
-#ifdef Q_OS_MAC
-        m_updater.reset(new MacSparkleUpdater());
-#else
-        m_updater.reset(new PrismExternalUpdater(m_mainWindow, applicationDirPath(), m_dataPath));
-#endif
-        qDebug() << "<> Updater started.";
-    }
-
     // check update locks
     {
         auto update_log_path = FS::PathCombine(m_dataPath, "logs", "prism_launcher_update.log");
@@ -1076,6 +1059,12 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             FS::deletePath(update_success_marker.absoluteFilePath());
         }
     }
+
+    if (createSetupWizard()) {
+        return;
+    }
+
+    performMainStartupAction();
 }
 
 bool Application::createSetupWizard()
@@ -1219,6 +1208,18 @@ void Application::performMainStartupAction()
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
+
+    // initialize the updater
+    if (updaterEnabled()) {
+        qDebug() << "Initializing updater";
+#ifdef Q_OS_MAC
+        m_updater.reset(new MacSparkleUpdater());
+#else
+        m_updater.reset(new PrismExternalUpdater(m_mainWindow, applicationDirPath(), m_dataPath));
+#endif
+        qDebug() << "<> Updater started.";
+    }
+
     if (!m_zipsToImport.isEmpty()) {
         qDebug() << "<> Importing from zip:" << m_zipsToImport;
         m_mainWindow->processURLs(m_zipsToImport);
