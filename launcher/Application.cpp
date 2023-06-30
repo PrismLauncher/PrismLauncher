@@ -585,7 +585,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qDebug() << "Compiled for               : " << BuildConfig.systemID();
         qDebug() << "Compiled by                : " << BuildConfig.compilerID();
         qDebug() << "Build Artifact             : " << BuildConfig.BUILD_ARTIFACT;
-        qDebug() << "Updates Enabeled           : " << (updaterEnabled() ? "Yes" : "No");
+        qDebug() << "Updates Enabled           : " << (updaterEnabled() ? "Yes" : "No");
         if (adjustedBy.size()) {
             qDebug() << "Work dir before adjustment : " << origcwdPath;
             qDebug() << "Work dir after adjustment  : " << QDir::currentPath();
