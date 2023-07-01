@@ -432,6 +432,16 @@ void VersionPage::on_actionChange_version_triggered()
         return;
     }
     auto uid = list->uid();
+
+    // FIXME: this is still a horrible HACK.
+    if (uid == "net.minecraftforge" || uid == "com.mumfrey.liteloader" || uid == "net.fabricmc.fabric-loader" ||
+        uid == "org.quiltmc.quilt-loader") {
+        InstallLoaderDialog dialog(m_inst->getPackProfile(), uid, this);
+        dialog.exec();
+        m_container->refreshContainer();
+        return;
+    }
+
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
     if (uid == "net.fabricmc.intermediary" || uid == "org.quiltmc.hashed")
     {
@@ -485,7 +495,7 @@ void VersionPage::on_actionDownload_All_triggered()
 
 void VersionPage::on_actionInstall_Loader_triggered()
 {
-    InstallLoaderDialog dialog(m_inst->getPackProfile(), this);
+    InstallLoaderDialog dialog(m_inst->getPackProfile(), QString(), this);
     dialog.exec();
     m_container->refreshContainer();
 }

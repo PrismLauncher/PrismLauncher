@@ -26,11 +26,11 @@ class PageContainer;
 class PackProfile;
 class QDialogButtonBox;
 
-class InstallLoaderDialog : public QDialog, public BasePageProvider {
+class InstallLoaderDialog final : public QDialog, public BasePageProvider {
     Q_OBJECT
 
    public:
-    explicit InstallLoaderDialog(std::shared_ptr<PackProfile> instance, QWidget* parent = nullptr);
+    explicit InstallLoaderDialog(std::shared_ptr<PackProfile> instance, const QString& uid = QString(), QWidget* parent = nullptr);
 
     QList<BasePage*> getPages() override;
     QString dialogTitle() override;

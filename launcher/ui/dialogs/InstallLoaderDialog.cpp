@@ -74,7 +74,14 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     bool m_loaded = false;
 };
 
-InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, QWidget* parent)
+InstallLoaderPage* pageCast(BasePage* page)
+{
+    auto result = dynamic_cast<InstallLoaderPage*>(page);
+    Q_ASSERT(result != nullptr);
+    return result;
+}
+
+InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, const QString& uid, QWidget* parent)
     : QDialog(parent), m_profile(profile), m_container(new PageContainer(this)), m_buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
@@ -86,7 +93,7 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, Q
 
     auto refreshButton = new QPushButton(tr("&Refresh"), this);
     connect(refreshButton, &QPushButton::pressed, this, [this] {
-        dynamic_cast<InstallLoaderPage*>(m_container->selectedPage())->loadList();
+        pageCast(m_container->selectedPage())->loadList();
     });
     buttonLayout->addWidget(refreshButton);
 
@@ -105,7 +112,10 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, Q
             [this](BasePage* previous, BasePage* selected) { updateAcceptButton(selected); });
     updateAcceptButton(m_container->selectedPage());
 
-    dynamic_cast<InstallLoaderPage*>(m_container->selectedPage())->selectSearch();
+    pageCast(m_container->selectedPage())->selectSearch();
+    for (BasePage* page : m_container->getPages())
+        if (page->id() == uid)
+            m_container->selectPage(page->id());
 }
 
 QList<BasePage*> InstallLoaderDialog::getPages()
@@ -135,7 +145,7 @@ void InstallLoaderDialog::updateAcceptButton(const BasePage* page)
 void InstallLoaderDialog::done(int result)
 {
     if (result == Accepted) {
-        auto* page = dynamic_cast<InstallLoaderPage*>(m_container->selectedPage());
+        auto* page = pageCast(m_container->selectedPage());
         if (page->selectedVersion()) {
             m_profile->setComponentVersion(page->id(), page->selectedVersion()->descriptor());
             m_profile->resolve(Net::Mode::Online);
