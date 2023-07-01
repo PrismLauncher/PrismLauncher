@@ -35,24 +35,26 @@
  */
 
 #include "ExportInstanceDialog.h"
-#include "ui_ExportInstanceDialog.h"
 #include <BaseInstance.h>
 #include <MMCZip.h>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QFileSystemModel>
+#include <QMessageBox>
+#include "FileIgnoreProxy.h"
+#include "ui_ExportInstanceDialog.h"
 
-#include <QSortFilterProxyModel>
-#include <QDebug>
-#include <QSaveFile>
-#include <QStack>
-#include <QFileInfo>
-#include "SeparatorPrefixTree.h"
-#include "Application.h"
-#include <icons/IconList.h>
 #include <FileSystem.h>
+#include <icons/IconList.h>
+#include <QDebug>
+#include <QFileInfo>
+#include <QSaveFile>
+#include <QSortFilterProxyModel>
+#include <QStack>
+#include <functional>
+#include "Application.h"
+#include "SeparatorPrefixTree.h"
 
-ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent)
+ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget* parent)
     : QDialog(parent), ui(new Ui::ExportInstanceDialog), m_instance(instance)
 {
     ui->setupUi(this);
@@ -60,8 +62,12 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent
     model->setIconProvider(&icons);
     auto root = instance->instanceRoot();
     proxyModel = new FileIgnoreProxy(root, this);
-    loadPackIgnore();
     proxyModel->setSourceModel(model);
+    auto prefix = QDir(instance->instanceRoot()).relativeFilePath(instance->gameRoot());
+    proxyModel->ignoreFilesWithPath().insert({ FS::PathCombine(prefix, "logs"), FS::PathCombine(prefix, "crash-reports") });
+    proxyModel->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
+    loadPackIgnore();
+
     ui->treeView->setModel(proxyModel);
     ui->treeView->setRootIndex(proxyModel->mapFromSource(model->index(root)));
     ui->treeView->sortByColumn(0, Qt::AscendingOrder);
@@ -133,11 +139,9 @@ bool ExportInstanceDialog::doExport()
 
     SaveIcon(m_instance);
 
-    auto & blocked = proxyModel->blockedPaths();
-    using std::placeholders::_1;
     auto files = QFileInfoList();
     if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,
-                                    std::bind(&SeparatorPrefixTree<'/'>::covers, blocked, _1))) {
+                                            std::bind(&FileIgnoreProxy::filterFile, proxyModel, std::placeholders::_1))) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
         return false;
     }
