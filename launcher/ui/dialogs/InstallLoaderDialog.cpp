@@ -108,10 +108,6 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, c
     setWindowTitle(dialogTitle());
     resize(650, 400);
 
-    connect(m_container, &PageContainer::selectedPageChanged, this,
-            [this](BasePage* previous, BasePage* selected) { updateAcceptButton(selected); });
-    updateAcceptButton(m_container->selectedPage());
-
     pageCast(m_container->selectedPage())->selectSearch();
     for (BasePage* page : m_container->getPages())
         if (page->id() == uid)
@@ -134,12 +130,6 @@ QList<BasePage*> InstallLoaderDialog::getPages()
 QString InstallLoaderDialog::dialogTitle()
 {
     return tr("Install Loader");
-}
-
-void InstallLoaderDialog::updateAcceptButton(const BasePage* page)
-{
-    auto installed = !m_profile->getComponentVersion(page->id()).isNull();
-    m_buttons->button(QDialogButtonBox::Ok)->setText(installed ? tr("&Update") : tr("&Install"));
 }
 
 void InstallLoaderDialog::done(int result)

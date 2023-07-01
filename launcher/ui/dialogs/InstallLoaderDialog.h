@@ -35,7 +35,6 @@ class InstallLoaderDialog final : public QDialog, public BasePageProvider {
     QList<BasePage*> getPages() override;
     QString dialogTitle() override;
 
-    void updateAcceptButton(const BasePage* page);
     void done(int result) override;
 
    private:
