@@ -171,7 +171,7 @@ void ConcurrentTask::subTaskSucceeded(Task::Ptr task)
     startNext();
 }
 
-void ConcurrentTask::subTaskFailed(Task::Ptr task, const QString& msg)
+void ConcurrentTask::subTaskFailed(Task::Ptr task, [[maybe_unused]] const QString& msg)
 {
     m_done.insert(task.get(), task);
     m_failed.insert(task.get(), task);

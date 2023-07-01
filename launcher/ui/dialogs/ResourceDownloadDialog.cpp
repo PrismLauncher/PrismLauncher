@@ -301,7 +301,7 @@ GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
         return makeShared<GetModDependenciesTask>(this, m_instance, model, selectedVers);
     }
     return nullptr;
-};
+}
 
 ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
                                                        const std::shared_ptr<ResourcePackFolderModel>& resource_packs,

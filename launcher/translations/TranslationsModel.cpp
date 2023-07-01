@@ -267,9 +267,7 @@ void readIndex(const QString & path, QMap<QString, Language>& languages)
     try
     {
         data = FS::read(path);
-    }
-    catch (const Exception &e)
-    {
+    } catch ([[maybe_unused]] const Exception& e) {
         qCritical() << "Translations Download Failed: index file not readable";
         return;
     }
@@ -307,9 +305,7 @@ void readIndex(const QString & path, QMap<QString, Language>& languages)
 
             languages.insert(lang.key, lang);
         }
-    }
-    catch (Json::JsonException & e)
-    {
+    } catch ([[maybe_unused]] Json::JsonException& e) {
         qCritical() << "Translations Download Failed: index file could not be parsed as json";
     }
 }
@@ -498,12 +494,12 @@ QVariant TranslationsModel::headerData(int section, Qt::Orientation orientation,
     return QAbstractListModel::headerData(section, orientation, role);
 }
 
-int TranslationsModel::rowCount(const QModelIndex& parent) const
+int TranslationsModel::rowCount([[maybe_unused]] const QModelIndex& parent) const
 {
     return d->m_languages.size();
 }
 
-int TranslationsModel::columnCount(const QModelIndex& parent) const
+int TranslationsModel::columnCount([[maybe_unused]] const QModelIndex& parent) const
 {
     return 2;
 }

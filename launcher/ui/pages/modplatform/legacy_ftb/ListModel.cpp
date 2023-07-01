@@ -76,7 +76,7 @@ bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
     return true;
 }
 
-bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+bool FilterModel::filterAcceptsRow([[maybe_unused]] int sourceRow, [[maybe_unused]] const QModelIndex& sourceParent) const
 {
     return true;
 }
@@ -173,10 +173,10 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void ListModel::fill(ModpackList modpacks)
+void ListModel::fill(ModpackList modpacks_)
 {
     beginResetModel();
-    this->modpacks = modpacks;
+    this->modpacks = modpacks_;
     endResetModel();
 }
 

@@ -82,7 +82,7 @@ void ImgurAlbumCreation::executeTask()
     connect(rep, &QNetworkReply::sslErrors, this, &ImgurAlbumCreation::sslErrors);
 }
 
-void ImgurAlbumCreation::downloadError(QNetworkReply::NetworkError error)
+void ImgurAlbumCreation::downloadError([[maybe_unused]] QNetworkReply::NetworkError error)
 {
     qDebug() << m_reply->errorString();
     m_state = State::Failed;

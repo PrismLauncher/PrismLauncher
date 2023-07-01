@@ -115,7 +115,7 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
     return {};
 }
 
-bool ModpackListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ModpackListModel::setData(const QModelIndex &index, const QVariant &value, [[maybe_unused]] int role)
 {
     int pos = index.row();
     if (pos >= modpacks.size() || pos < 0 || !index.isValid())
@@ -194,8 +194,6 @@ static auto sortFromIndex(int index) -> QString
     case 4:
         return "updated";
     }
-
-    return {};
 }
 
 void ModpackListModel::searchWithTerm(const QString& term, const int sort)

@@ -1061,8 +1061,8 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
 
     {
         // actually launch the game
-        auto method = launchMethod();
-        if(method == "LauncherPart")
+        auto launch_method = launchMethod();
+        if(launch_method == "LauncherPart")
         {
             auto step = makeShared<LauncherPartLaunch>(pptr);
             step->setWorkingDirectory(gameRoot());
@@ -1070,7 +1070,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
             step->setServerToJoin(serverToJoin);
             process->appendStep(step);
         }
-        else if (method == "DirectJava")
+        else if (launch_method == "DirectJava")
         {
             auto step = makeShared<DirectJavaLaunch>(pptr);
             step->setWorkingDirectory(gameRoot());

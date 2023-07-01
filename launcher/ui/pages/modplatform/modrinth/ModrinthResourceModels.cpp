@@ -45,7 +45,7 @@ void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJso
 auto ModrinthModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return ::Modrinth::loadDependencyVersions(m, arr);
-};
+}
 
 auto ModrinthModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {

@@ -70,7 +70,7 @@ public:
     {
         return nullptr;
     }
-    shared_qobject_ptr< Task > createUpdateTask(Net::Mode mode) override
+    shared_qobject_ptr< Task > createUpdateTask([[maybe_unused]] Net::Mode mode) override
     {
         return nullptr;
     }

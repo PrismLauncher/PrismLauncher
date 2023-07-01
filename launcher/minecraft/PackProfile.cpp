@@ -225,11 +225,11 @@ static bool loadPackProfile(PackProfile * parent, const QString & filename, cons
         auto orderArray = Json::requireArray(obj.value("components"));
         for(auto item: orderArray)
         {
-            auto obj = Json::requireObject(item, "Component must be an object.");
-            container.append(componentFromJsonV1(parent, componentJsonPattern, obj));
+            auto comp_obj = Json::requireObject(item, "Component must be an object.");
+            container.append(componentFromJsonV1(parent, componentJsonPattern, comp_obj));
         }
     }
-    catch (const JSONValidationError &err)
+    catch ([[maybe_unused]] const JSONValidationError &err)
     {
         qCritical() << "Couldn't parse" << componentsFile.fileName() << ": bad file format";
         container.clear();
@@ -414,7 +414,7 @@ void PackProfile::insertComponent(size_t index, ComponentPtr component)
         qWarning() << "Attempt to add a component that is already present!";
         return;
     }
-    beginInsertRows(QModelIndex(), index, index);
+    beginInsertRows(QModelIndex(), static_cast<int>(index), static_cast<int>(index));
     d->components.insert(index, component);
     d->componentIndex[id] = component;
     endInsertRows();
@@ -427,7 +427,7 @@ void PackProfile::componentDataChanged()
     auto objPtr = qobject_cast<Component *>(sender());
     if(!objPtr)
     {
-        qWarning() << "PackProfile got dataChenged signal from a non-Component!";
+        qWarning() << "PackProfile got dataChanged signal from a non-Component!";
         return;
     }
     if(objPtr->getID() == "net.minecraft") {
@@ -445,7 +445,7 @@ void PackProfile::componentDataChanged()
         }
         index++;
     }
-    qWarning() << "PackProfile got dataChenged signal from a Component which does not belong to it!";
+    qWarning() << "PackProfile got dataChanged signal from a Component which does not belong to it!";
 }
 
 bool PackProfile::remove(const int index)
@@ -532,9 +532,9 @@ ComponentPtr PackProfile::getComponent(const QString &id)
     return (*iter);
 }
 
-ComponentPtr PackProfile::getComponent(int index)
+ComponentPtr PackProfile::getComponent(size_t index)
 {
-    if(index < 0 || index >= d->components.size())
+    if(index < 0 || index >= static_cast<size_t>(d->components.size()))
     {
         return nullptr;
     }
@@ -615,7 +615,7 @@ QVariant PackProfile::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-bool PackProfile::setData(const QModelIndex& index, const QVariant& value, int role)
+bool PackProfile::setData(const QModelIndex& index, [[maybe_unused]] const QVariant& value, int role)
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount(index.parent()))
     {

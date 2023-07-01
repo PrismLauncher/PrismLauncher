@@ -165,7 +165,7 @@ void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &opti
     const QFontMetrics fontMetrics = QFontMetrics(font);
 
     QColor outlineColor = option.palette.text().color();
-    outlineColor.setAlphaF(0.35);
+    outlineColor.setAlphaF(static_cast<float>(0.35));
 
     //BEGIN: top left corner
     {
@@ -234,7 +234,7 @@ void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &opti
         painter->setRenderHint(QPainter::Antialiasing, false);
         painter->setFont(font);
         QColor penColor(option.palette.text().color());
-        penColor.setAlphaF(0.6);
+        penColor.setAlphaF(static_cast<float>(0.6));
         painter->setPen(penColor);
         QRect iconSubRect(option.rect);
         iconSubRect.setTop(iconSubRect.top() + 7);
@@ -278,7 +278,7 @@ void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &opti
         painter->save();
         painter->setFont(font);
         QColor penColor(option.palette.text().color());
-        penColor.setAlphaF(0.6);
+        penColor.setAlphaF(static_cast<float>(0.6));
         painter->setPen(penColor);
         painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
         painter->restore();
