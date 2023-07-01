@@ -710,7 +710,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
     env.insert("__COMPAT_LAYER", "RUNASINVOKER");
     proc.setProcessEnvironment(env);
 #else
-    exe_name.prepend("bin/");
+    app_exe_name.prepend("bin/");
 #endif
 
     auto app_exe_path = target.absoluteFilePath(app_exe_name);
@@ -1023,8 +1023,6 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
         auto env = QProcessEnvironment::systemEnvironment();
         env.insert("__COMPAT_LAYER", "RUNASINVOKER");
         proc.setProcessEnvironment(env);
-#else
-        exe_name.prepend("bin/");
 #endif
         proc.setProgram(file.absoluteFilePath());
         bool result = proc.startDetached();
