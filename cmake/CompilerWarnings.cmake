@@ -39,7 +39,6 @@ endfunction()
 function(
   set_project_warnings
   _project_name
-  WARNINGS_AS_ERRORS
   MSVC_WARNINGS
   CLANG_WARNINGS
   GCC_WARNINGS
@@ -103,14 +102,6 @@ function(
         -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
         -Wuseless-cast # warn if you perform a cast to the same type
     )
-  endif()
-
-  
-  if(WARNINGS_AS_ERRORS)
-    message(TRACE "Warnings are treated as errors")
-    list(APPEND CLANG_WARNINGS -Werror)
-    list(APPEND GCC_WARNINGS -Werror)
-    list(APPEND MSVC_WARNINGS /WX)
   endif()
 
   if(MSVC)
