@@ -11,10 +11,8 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-VersionSelectWidget::VersionSelectWidget(QWidget* parent) : VersionSelectWidget(false, parent) {}
-
-VersionSelectWidget::VersionSelectWidget(bool focusSearch, QWidget* parent)
-    : QWidget(parent), focusSearch(focusSearch)
+VersionSelectWidget::VersionSelectWidget(QWidget* parent)
+    : QWidget(parent)
 {
     setObjectName(QStringLiteral("VersionSelectWidget"));
     verticalLayout = new QVBoxLayout(this);
@@ -116,9 +114,6 @@ void VersionSelectWidget::initialize(BaseVersionList *vlist)
     listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
 
-    if (focusSearch)
-        search->setFocus();
-
     if (!m_vlist->isLoaded())
     {
         loadList();
@@ -208,6 +203,11 @@ void VersionSelectWidget::selectCurrent()
         listView->selectionModel()->setCurrentIndex(idx,QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
         listView->scrollTo(idx, QAbstractItemView::PositionAtCenter);
     }
+}
+
+void VersionSelectWidget::selectSearch()
+{
+    search->setFocus();
 }
 
 void VersionSelectWidget::selectRecommended()

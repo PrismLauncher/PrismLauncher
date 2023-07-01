@@ -30,9 +30,9 @@
 #include "ui/widgets/PageContainer.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
-class LoaderPage : public VersionSelectWidget, public BasePage {
+class InstallLoaderPage : public VersionSelectWidget, public BasePage {
    public:
-    LoaderPage(const QString& id,
+    InstallLoaderPage(const QString& id,
                const QString& icon,
                const QString& name,
                // "lightweight" loaders are independent to any game version
@@ -86,9 +86,7 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, Q
 
     auto refreshButton = new QPushButton(tr("&Refresh"), this);
     connect(refreshButton, &QPushButton::pressed, this, [this] {
-        LoaderPage* page = dynamic_cast<LoaderPage*>(m_container->selectedPage());
-        Q_ASSERT(page != nullptr);
-        page->loadList();
+        dynamic_cast<InstallLoaderPage*>(m_container->selectedPage())->loadList();
     });
     buttonLayout->addWidget(refreshButton);
 
@@ -106,18 +104,20 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, Q
     connect(m_container, &PageContainer::selectedPageChanged, this,
             [this](BasePage* previous, BasePage* selected) { updateAcceptButton(selected); });
     updateAcceptButton(m_container->selectedPage());
+
+    dynamic_cast<InstallLoaderPage*>(m_container->selectedPage())->selectSearch();
 }
 
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
     return { // Forge
-             new LoaderPage("net.minecraftforge", "forge", tr("Forge"), false, m_profile, this),
+             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), false, m_profile, this),
              // Fabric
-             new LoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), true, m_profile, this),
+             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), true, m_profile, this),
              // Quilt
-             new LoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), true, m_profile, this),
+             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), true, m_profile, this),
              // LiteLoader
-             new LoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), false, m_profile, this)
+             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), false, m_profile, this)
     };
 }
 
@@ -135,9 +135,7 @@ void InstallLoaderDialog::updateAcceptButton(const BasePage* page)
 void InstallLoaderDialog::done(int result)
 {
     if (result == Accepted) {
-        LoaderPage* page = dynamic_cast<LoaderPage*>(m_container->selectedPage());
-        Q_ASSERT(page != nullptr);
-
+        auto* page = dynamic_cast<InstallLoaderPage*>(m_container->selectedPage());
         if (page->selectedVersion()) {
             m_profile->setComponentVersion(page->id(), page->selectedVersion()->descriptor());
             m_profile->resolve(Net::Mode::Online);
