@@ -33,13 +33,12 @@
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
    public:
     InstallLoaderPage(const QString& id,
-               const QString& icon,
-               const QString& name,
-               // "lightweight" loaders are independent to any game version
-               const bool lightweight,
-               const std::shared_ptr<PackProfile> profile,
-               QWidget* parent = nullptr)
-        : VersionSelectWidget(parent), m_id(id), m_icon(icon), m_name(name)
+                      const QString& icon,
+                      const QString& name,
+                      // "lightweight" loaders are independent to any game version
+                      const bool lightweight,
+                      const std::shared_ptr<PackProfile> profile)
+        : VersionSelectWidget(nullptr), m_id(id), m_icon(icon), m_name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
@@ -67,6 +66,12 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
         m_loaded = true;
     }
 
+    void setParentContainer(BasePageContainer* container) override
+    {
+        auto dialog = dynamic_cast<QDialog*>(dynamic_cast<PageContainer*>(container)->parent());
+        connect(view(), &QAbstractItemView::doubleClicked, dialog, &QDialog::accept);
+    }
+
    private:
     const QString m_id;
     const QString m_icon;
@@ -82,7 +87,7 @@ InstallLoaderPage* pageCast(BasePage* page)
 }
 
 InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, const QString& uid, QWidget* parent)
-    : QDialog(parent), m_profile(profile), m_container(new PageContainer(this)), m_buttons(new QDialogButtonBox(this))
+    : QDialog(parent), m_profile(profile), m_container(new PageContainer(this, QString(), this)), m_buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
 
@@ -92,9 +97,7 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, c
     auto buttonLayout = new QHBoxLayout(this);
 
     auto refreshButton = new QPushButton(tr("&Refresh"), this);
-    connect(refreshButton, &QPushButton::pressed, this, [this] {
-        pageCast(m_container->selectedPage())->loadList();
-    });
+    connect(refreshButton, &QPushButton::pressed, this, [this] { pageCast(m_container->selectedPage())->loadList(); });
     buttonLayout->addWidget(refreshButton);
 
     m_buttons->setOrientation(Qt::Horizontal);
@@ -117,13 +120,13 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, c
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
     return { // Forge
-             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), false, m_profile, this),
+             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), false, m_profile),
              // Fabric
-             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), true, m_profile, this),
+             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), true, m_profile),
              // Quilt
-             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), true, m_profile, this),
+             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), true, m_profile),
              // LiteLoader
-             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), false, m_profile, this)
+             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), false, m_profile)
     };
 }
 

@@ -210,6 +210,11 @@ void VersionSelectWidget::selectSearch()
     search->setFocus();
 }
 
+VersionListView* VersionSelectWidget::view()
+{
+    return listView;
+}
+
 void VersionSelectWidget::selectRecommended()
 {
     auto idx = m_proxyModel->getRecommended();

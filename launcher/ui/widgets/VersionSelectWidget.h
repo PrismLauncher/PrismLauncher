@@ -65,6 +65,7 @@ public:
     void selectRecommended();
     void selectCurrent();
     void selectSearch();
+    VersionListView* view();
 
     void setCurrentVersion(const QString & version);
     void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);

@@ -75,8 +75,9 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
 
     retranslate();
 
-    QObject::connect(m_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    QObject::connect(m_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(m_buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(m_versionWidget->view(), &QAbstractItemView::doubleClicked, this, &QDialog::accept);
+    connect(m_buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     QMetaObject::connectSlotsByName(this);
     setWindowModality(Qt::WindowModal);
