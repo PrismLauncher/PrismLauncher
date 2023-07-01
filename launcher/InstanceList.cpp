@@ -787,20 +787,25 @@ class InstanceStaging : public Task {
     Q_OBJECT
     const unsigned minBackoff = 1;
     const unsigned maxBackoff = 16;
+
    public:
     InstanceStaging(InstanceList* parent, InstanceTask* child, QString stagingPath, InstanceName const& instanceName, QString groupName)
-        : m_parent(parent), backoff(minBackoff, maxBackoff), m_stagingPath(std::move(stagingPath)), m_instance_name(std::move(instanceName)), m_groupName(std::move(groupName))
+        : m_parent(parent)
+        , backoff(minBackoff, maxBackoff)
+        , m_stagingPath(std::move(stagingPath))
+        , m_instance_name(std::move(instanceName))
+        , m_groupName(std::move(groupName))
     {
         m_child.reset(child);
-        connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
+        connect(child, &Task::succeeded, this, &InstanceStaging::childSucceeded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
         connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
         connect(child, &Task::abortStatusChanged, this, &InstanceStaging::setAbortable);
         connect(child, &Task::status, this, &InstanceStaging::setStatus);
         connect(child, &Task::details, this, &InstanceStaging::setDetails);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
-        connect(child, &Task::stepProgress, this, &InstanceStaging::propogateStepProgress);
-        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
+        connect(child, &Task::stepProgress, this, &InstanceStaging::propagateStepProgress);
+        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceeded);
     }
 
     virtual ~InstanceStaging(){};
