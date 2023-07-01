@@ -104,14 +104,15 @@ ModDetails ReadMCModTOML(QByteArray contents)
 #if TOML_EXCEPTIONS
     try {
         tomlData = toml::parse(contents.toStdString());
-    } catch (const toml::parse_error& err) {
+    } catch ([[maybe_unused]] const toml::parse_error& err) {
         return {};
     }
 #else
-    tomlData = toml::parse(contents.toStdString());
-    if (!tomlData) {
+    toml::parse_result result = toml::parse(contents.toStdString());
+    if (!result) {
         return {};
     }
+    tomlData = result.table();
 #endif
 
     // array defined by [[mods]]
