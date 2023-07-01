@@ -40,7 +40,7 @@
 
 class PrismExternalUpdater::Private {
    public:
-    QDir binDir;
+    QDir appDir;
     QDir dataDir;
     QTimer updateTimer;
     bool allowBeta;
@@ -52,10 +52,10 @@ class PrismExternalUpdater::Private {
     QWidget* parent;
 };
 
-PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& binDir, const QString& dataDir)
+PrismExternalUpdater::PrismExternalUpdater(QWidget* parent, const QString& appDir, const QString& dataDir)
 {
     priv = new PrismExternalUpdater::Private();
-    priv->binDir = QDir(binDir);
+    priv->appDir = QDir(appDir);
     priv->dataDir = QDir(dataDir);
     auto settings_file = priv->dataDir.absoluteFilePath("prismlauncher_update.cfg");
     priv->settings = std::make_unique<QSettings>(settings_file, QSettings::Format::IniFormat);
@@ -100,13 +100,15 @@ void PrismExternalUpdater::checkForUpdates()
     auto env = QProcessEnvironment::systemEnvironment();
     env.insert("__COMPAT_LAYER", "RUNASINVOKER");
     proc.setProcessEnvironment(env);
+#else
+    exe_name = QString("bin/%1").arg(exe_name);
 #endif
 
     QStringList args = { "--check-only", "--dir", priv->dataDir.absolutePath(), "--debug" };
     if (priv->allowBeta)
         args.append("--pre-release");
 
-    proc.start(priv->binDir.absoluteFilePath(exe_name), args);
+    proc.start(priv->appDir.absoluteFilePath(exe_name), args);
     auto result_start = proc.waitForStarted(5000);
     if (!result_start) {
         auto err = proc.error();
@@ -342,7 +344,7 @@ void PrismExternalUpdater::performUpdate(const QString& version_tag)
     if (priv->allowBeta)
         args.append("--pre-release");
 
-    auto result = proc.startDetached(priv->binDir.absoluteFilePath(exe_name), args);
+    auto result = proc.startDetached(priv->appDir.absoluteFilePath(exe_name), args);
     if (!result) {
         qDebug() << "Failed to start updater:" << proc.error() << proc.errorString();
     }

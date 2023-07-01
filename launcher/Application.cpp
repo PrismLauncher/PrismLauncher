@@ -1126,7 +1126,7 @@ bool Application::updaterEnabled()
 #if defined(Q_OS_MAC)
     return BuildConfig.UPDATER_ENABLED;
 #else
-    return BuildConfig.UPDATER_ENABLED && QFileInfo(FS::PathCombine(applicationDirPath(), updaterBinaryName())).isFile();
+    return BuildConfig.UPDATER_ENABLED && QFileInfo(FS::PathCombine(m_rootPath, updaterBinaryName())).isFile();
 #endif
 }
 
@@ -1135,6 +1135,8 @@ QString Application::updaterBinaryName()
     auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
     exe_name.append(".exe");
+#else
+    exe_name.prepend("bin/");
 #endif
     return exe_name;
 }
@@ -1215,7 +1217,7 @@ void Application::performMainStartupAction()
 #ifdef Q_OS_MAC
         m_updater.reset(new MacSparkleUpdater());
 #else
-        m_updater.reset(new PrismExternalUpdater(m_mainWindow, applicationDirPath(), m_dataPath));
+        m_updater.reset(new PrismExternalUpdater(m_mainWindow, m_rootPath, m_dataPath));
 #endif
         qDebug() << "<> Updater started.";
     }

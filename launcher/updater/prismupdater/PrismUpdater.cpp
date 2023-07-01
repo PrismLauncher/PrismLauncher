@@ -258,9 +258,9 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     m_isFlatpak = DesktopServices::isFlatpak();
 
-    QString prism_executable = QCoreApplication::applicationDirPath() + "/" + BuildConfig.LAUNCHER_APP_BINARY_NAME;
+    QString prism_executable = FS::PathCombine(applicationDirPath(), BuildConfig.LAUNCHER_APP_BINARY_NAME);
 #if defined Q_OS_WIN32
-    prism_executable += ".exe";
+    prism_executable.append(".exe");
 #endif
 
     if (!QFileInfo(prism_executable).isFile()) {
@@ -349,6 +349,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
     m_updateLogPath = FS::PathCombine(m_dataPath, "logs", "prism_launcher_update.log");
 
     {  // setup logging
+        FS::ensureFolderPathExists(FS::PathCombine(m_dataPath, "logs"));
         static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "Updater" + (m_checkOnly ? "-CheckOnly" : "") + "-%0.log";
         static const QString logBase = FS::PathCombine(m_dataPath, "logs", baseLogFile);
         auto moveFile = [](const QString& oldName, const QString& newName) {
@@ -464,13 +465,13 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         m_network->setProxy(proxy);
     }
 
-    auto marker_file_path = QDir(applicationDirPath()).absoluteFilePath(".prism_launcher_updater_unpack.marker");
+    auto marker_file_path = QDir(m_rootPath).absoluteFilePath(".prism_launcher_updater_unpack.marker");
     auto marker_file = QFileInfo(marker_file_path);
     if (marker_file.exists()) {
         auto target_dir = QString(FS::read(marker_file_path)).trimmed();
         if (target_dir.isEmpty()) {
             qWarning() << "Empty updater marker file contains no install target. making best guess of parent dir";
-            target_dir = QDir(applicationDirPath()).absoluteFilePath("..");
+            target_dir = QDir(m_rootPath).absoluteFilePath("..");
         }
 
         QMetaObject::invokeMethod(
@@ -629,10 +630,10 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
     logUpdate("Waiting 2 seconds for resources to free");
     this->thread()->sleep(2);
 
-    auto manifest_path = FS::PathCombine(applicationDirPath(), "manifest.txt");
+    auto manifest_path = FS::PathCombine(m_rootPath, "manifest.txt");
     QFileInfo manifest(manifest_path);
 
-    auto app_dir = QDir(applicationDirPath());
+    auto app_dir = QDir(m_rootPath);
 
     QStringList file_list;
     if (manifest.isFile()) {
@@ -649,7 +650,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
     }
 
     if (file_list.isEmpty()) {
-        logUpdate(tr("Manifest empty, making best guess of the directory contents of %1").arg(applicationDirPath()));
+        logUpdate(tr("Manifest empty, making best guess of the directory contents of %1").arg(m_rootPath));
         auto entries = target.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
         for (auto entry : entries) {
             file_list.append(entry.fileName());
@@ -659,7 +660,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
 
     bool error = false;
 
-    QProgressDialog progress(tr("Backing up install at %1").arg(applicationDirPath()), "", 0, file_list.length());
+    QProgressDialog progress(tr("Backing up install at %1").arg(m_rootPath), "", 0, file_list.length());
     progress.setCancelButton(nullptr);
     progress.setMinimumWidth(400);
     progress.adjustSize();
@@ -668,7 +669,7 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
 
     int i = 0;
     for (auto glob : file_list) {
-        QDirIterator iter(applicationDirPath(), QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+        QDirIterator iter(m_rootPath, QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
         progress.setValue(i);
         QCoreApplication::processEvents();
         while (iter.hasNext()) {
@@ -708,6 +709,8 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
     auto env = QProcessEnvironment::systemEnvironment();
     env.insert("__COMPAT_LAYER", "RUNASINVOKER");
     proc.setProcessEnvironment(env);
+#else
+    exe_name.prepend("bin/");
 #endif
 
     auto app_exe_path = target.absoluteFilePath(app_exe_name);
@@ -894,10 +897,15 @@ QFileInfo PrismUpdaterApp::downloadAsset(const GitHubReleaseAsset& asset)
 
 bool PrismUpdaterApp::callAppImageUpdate()
 {
+    auto appimage_path = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
     QProcess proc = QProcess();
+    qDebug() << "Calling: AppImageUpdate" << appimage_path;
     proc.setProgram("AppImageUpdate");
-    proc.setArguments({ QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE")) });
-    return proc.startDetached();
+    proc.setArguments({ appimage_path });
+    auto result = proc.startDetached();
+    if (!result)
+        qDebug() << "Failed to start AppImageUpdate reason:" << proc.errorString();
+    return result;
 }
 
 void PrismUpdaterApp::clearUpdateLog()
@@ -1005,9 +1013,8 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
 
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
     if (m_isPortable || file.suffix().toLower() == "zip") {
-        write_lock_file(update_lock_path, QDateTime::currentDateTime(), m_prismVersion, m_install_release.tag_name, applicationDirPath(),
-                        m_dataPath);
-        logUpdate(tr("Updating portable install at %1").arg(applicationDirPath()));
+        write_lock_file(update_lock_path, QDateTime::currentDateTime(), m_prismVersion, m_install_release.tag_name, m_rootPath, m_dataPath);
+        logUpdate(tr("Updating portable install at %1").arg(m_rootPath));
         unpackAndInstall(file);
     } else {
         logUpdate(tr("Running installer file at %1").arg(file.absoluteFilePath()));
@@ -1016,6 +1023,8 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
         auto env = QProcessEnvironment::systemEnvironment();
         env.insert("__COMPAT_LAYER", "RUNASINVOKER");
         proc.setProcessEnvironment(env);
+#else
+        exe_name.prepend("bin/");
 #endif
         proc.setProgram(file.absoluteFilePath());
         bool result = proc.startDetached();
@@ -1031,7 +1040,7 @@ void PrismUpdaterApp::unpackAndInstall(QFileInfo archive)
 
     if (auto loc = unpackArchive(archive)) {
         auto marker_file_path = loc.value().absoluteFilePath(".prism_launcher_updater_unpack.marker");
-        FS::write(marker_file_path, applicationDirPath().toUtf8());
+        FS::write(marker_file_path, m_rootPath.toUtf8());
 
         QProcess proc = QProcess();
 
@@ -1042,6 +1051,8 @@ void PrismUpdaterApp::unpackAndInstall(QFileInfo archive)
         auto env = QProcessEnvironment::systemEnvironment();
         env.insert("__COMPAT_LAYER", "RUNASINVOKER");
         proc.setProcessEnvironment(env);
+#else
+        exe_name.prepend("bin/");
 #endif
 
         auto new_updater_path = loc.value().absoluteFilePath(exe_name);
@@ -1057,7 +1068,7 @@ void PrismUpdaterApp::unpackAndInstall(QFileInfo archive)
 
 void PrismUpdaterApp::backupAppDir()
 {
-    auto manifest_path = FS::PathCombine(applicationDirPath(), "manifest.txt");
+    auto manifest_path = FS::PathCombine(m_rootPath, "manifest.txt");
     QFileInfo manifest(manifest_path);
 
     QStringList file_list;
@@ -1099,8 +1110,7 @@ void PrismUpdaterApp::backupAppDir()
         logUpdate("manifest.txt empty or missing. making best guess at files to back up.");
     }
     logUpdate(tr("Backing up:\n  %1").arg(file_list.join(",\n  ")));
-
-    QDir app_dir = QCoreApplication::applicationDirPath();
+    auto app_dir = QDir(m_rootPath);
     auto backup_dir = FS::PathCombine(
         app_dir.absolutePath(),
         QStringLiteral("backup_") +
@@ -1110,7 +1120,7 @@ void PrismUpdaterApp::backupAppDir()
     auto backup_marker_path = FS::PathCombine(m_dataPath, ".prism_launcher_update_backup_path.txt");
     FS::write(backup_marker_path, backup_dir.toUtf8());
 
-    QProgressDialog progress(tr("Backing up install at %1").arg(applicationDirPath()), "", 0, file_list.length());
+    QProgressDialog progress(tr("Backing up install at %1").arg(m_rootPath), "", 0, file_list.length());
     progress.setCancelButton(nullptr);
     progress.setMinimumWidth(400);
     progress.adjustSize();
