@@ -107,7 +107,6 @@
    <addaction name="separator"/>
    <addaction name="actionMinecraftFolder"/>
    <addaction name="actionLibrariesFolder"/>
-   <addaction name="separator"/>
    <addaction name="actionReload"/>
    <addaction name="actionDownload_All"/>
   </widget>

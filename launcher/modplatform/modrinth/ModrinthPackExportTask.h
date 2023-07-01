@@ -69,7 +69,7 @@ class ModrinthPackExportTask : public Task {
     void collectFiles();
     void collectHashes();
     void makeApiRequest();
-    void parseApiResponse(const QByteArray* response);
+    void parseApiResponse(const std::shared_ptr<QByteArray> response);
     void buildZip();
     void finish();
 

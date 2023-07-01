@@ -43,21 +43,21 @@
 
 namespace Ui
 {
-class VanillaPage;
+class CustomPage;
 }
 
 class NewInstanceDialog;
 
-class VanillaPage : public QWidget, public BasePage
+class CustomPage : public QWidget, public BasePage
 {
     Q_OBJECT
 
 public:
-    explicit VanillaPage(NewInstanceDialog *dialog, QWidget *parent = 0);
-    virtual ~VanillaPage();
+    explicit CustomPage(NewInstanceDialog *dialog, QWidget *parent = 0);
+    virtual ~CustomPage();
     virtual QString displayName() const override
     {
-        return tr("Vanilla");
+        return tr("Custom");
     }
     virtual QIcon icon() const override
     {
@@ -96,7 +96,7 @@ private:
 private:
     bool initialized = false;
     NewInstanceDialog *dialog = nullptr;
-    Ui::VanillaPage *ui = nullptr;
+    Ui::CustomPage *ui = nullptr;
     bool m_versionSetByUser = false;
     BaseVersion::Ptr m_selectedVersion;
     BaseVersion::Ptr m_selectedLoaderVersion;
