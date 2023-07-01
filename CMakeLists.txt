@@ -33,6 +33,13 @@ if(MSVC)
     # Use /W4 as /Wall includes unnesserey warnings such as added padding to structs
     set(CMAKE_CXX_FLAGS "/GS /permissive- /W4 ${CMAKE_CXX_FLAGS}")
 
+    # /EHs Enables stack unwind semantics for standard C++ exceptions to ensure stackframes are unwound
+    # and object deconstructors are called when an exception is caught.
+    # without it memory leaks and a warning is printed
+    # /EHc tells the compiler to assume that functions declared as extern "C" never throw a C++ exception
+    # This appears to not always be a defualt compiler option in CMAKE
+    set(CMAKE_CXX_FLAGS "/EHsc ${CMAKE_CXX_FLAGS}")
+
     # LINK accepts /SUBSYSTEM whics sets if we are a WINDOWS (gui) or a CONSOLE programs
     # This implicitly selects an entrypoint specific to the subsystem selected
     # qtmain/QtEntryPointLib provides the correct entrypoint (wWinMain) for gui programs
