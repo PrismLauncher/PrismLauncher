@@ -184,27 +184,31 @@ QString StringUtils::getRandomAlphaNumeric()
     return QUuid::createUuid().toString(QUuid::Id128);
 }
 
-QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QString& sep, Qt::CaseSensitivity cs) {
+QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QString& sep, Qt::CaseSensitivity cs)
+{
     QString left, right;
     auto index = s.indexOf(sep, 0, cs);
     left = s.mid(0, index);
-    right = s.mid(index + 1);
+    right = s.mid(index + sep.length());
     return qMakePair(left, right);
 }
 
-QPair<QString, QString> StringUtils::splitFirst(const QString& s, QChar sep, Qt::CaseSensitivity cs) {
+QPair<QString, QString> StringUtils::splitFirst(const QString& s, QChar sep, Qt::CaseSensitivity cs)
+{
     QString left, right;
     auto index = s.indexOf(sep, 0, cs);
     left = s.mid(0, index);
-    right = s.mid(index + 1);
+    right = s.mid(left.length() + 1);
     return qMakePair(left, right);
 }
 
-QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegularExpression& re) {
+QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegularExpression& re)
+{
     QString left, right;
-    auto index = s.indexOf(re);
+    QRegularExpressionMatch match;
+    auto index = s.indexOf(re, 0, &match);
     left = s.mid(0, index);
-    right = s.mid(index + 1);
+    auto end = match.hasMatch() ? left.length() + match.capturedLength() : left.length() + 1;
+    right = s.mid(end);
     return qMakePair(left, right);
 }
-

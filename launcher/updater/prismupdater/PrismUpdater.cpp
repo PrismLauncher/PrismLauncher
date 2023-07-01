@@ -784,23 +784,41 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
             continue;
         }
         auto asset_name = asset.name.toLower();
-        auto platform = BuildConfig.BUILD_ARTIFACT.toLower();
+        auto [platform, platform_qt_ver] = StringUtils::splitFirst(BuildConfig.BUILD_ARTIFACT.toLower(), "-qt");
         auto system_is_arm = QSysInfo::buildCpuArchitecture().contains("arm64");
         auto asset_is_arm = asset_name.contains("arm64");
         auto asset_is_archive = asset_name.endsWith(".zip") || asset_name.endsWith(".tar.gz");
 
         bool for_platform = !platform.isEmpty() && asset_name.contains(platform);
+        if (!for_platform) {
+            qDebug() << "Rejecting" << asset.name << "because platforms do not match";
+        }
         bool for_portable = asset_name.contains("portable");
-        if (for_platform && asset_name.contains("legacy") && !platform.contains("legacy"))
+        if (for_platform && asset_name.contains("legacy") && !platform.contains("legacy")) {
+            qDebug() << "Rejecting" << asset.name << "because platforms do not match";
             for_platform = false;
-        if (for_platform && ((asset_is_arm && !system_is_arm) || (!asset_is_arm && system_is_arm)))
+        }
+        if (for_platform && ((asset_is_arm && !system_is_arm) || (!asset_is_arm && system_is_arm))) {
+            qDebug() << "Rejecting" << asset.name << "because architecture does not match";
             for_platform = false;
-        if (for_platform && platform.contains("windows") && !m_isPortable && asset_is_archive)
+        }
+        if (for_platform && platform.contains("windows") && !m_isPortable && asset_is_archive) {
+            qDebug() << "Rejecting" << asset.name << "because it is not an installer";
             for_platform = false;
+        }
+
+        auto qt_pattern = QRegularExpression("-qt(\\d+)");
+        auto qt_match = qt_pattern.match(asset_name);
+        if (for_platform && qt_match.hasMatch()) {
+            if (platform_qt_ver.isEmpty() || platform_qt_ver.toInt() != qt_match.captured(1).toInt()) {
+                qDebug() << "Rejecting" << asset.name << "because it is not for the correct qt version" << platform_qt_ver.toInt() << "vs"
+                         << qt_match.captured(1).toInt();
+                for_platform = false;
+            }
+        }
 
         if (((m_isPortable && for_portable) || (!m_isPortable && !for_portable)) && for_platform) {
-            qDebug() << "Rejecting" << asset.name << "|"
-                     << "For Platform:" << (for_platform ? "Yes" : "No") << "For Portable:" << (for_portable ? "Yes" : "No");
+            qDebug() << "Accepting" << asset.name;
             valid.append(asset);
         }
     }
@@ -866,8 +884,7 @@ QFileInfo PrismUpdaterApp::downloadAsset(const GitHubReleaseAsset& asset)
     auto progress_dialog = ProgressDialog();
     progress_dialog.adjustSize();
 
-    if (progress_dialog.execWithTask(download.get()) == QDialog::Rejected)
-        showFatalErrorMessage(tr("Download Aborted"), tr("Download of %1 aborted by user").arg(file_url.toString()));
+    progress_dialog.execWithTask(download.get());
 
     qDebug() << "download complete";
 
