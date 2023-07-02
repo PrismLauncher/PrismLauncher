@@ -189,7 +189,7 @@ void ThemeManager::initializeCatPacks()
         while (ImageFileIterator.hasNext()) {
             QFile customCatFile(ImageFileIterator.next());
             QFileInfo customCatFileInfo(customCatFile);
-            themeDebugLog() << "Loading QSS Theme from:" << customCatFileInfo.absoluteFilePath();
+            themeDebugLog() << "Loading CatPack from:" << customCatFileInfo.absoluteFilePath();
             addCatPack(std::unique_ptr<CatPack>(new FileCatPack(customCatFileInfo)));
         }
     };

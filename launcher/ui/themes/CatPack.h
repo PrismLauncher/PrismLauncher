@@ -79,9 +79,9 @@ class JsonCatPack : public BasicCatPack {
             auto sp = d.split("-");
             day = sp[0].toInt();
             if (sp.length() >= 2)
-                mounth = sp[1].toInt();
+                month = sp[1].toInt();
         }
-        int mounth;
+        int month;
         int day;
     };
     struct Variant {

@@ -99,11 +99,13 @@ JsonCatPack::JsonCatPack(QFileInfo& manifestInfo) : BasicCatPack(manifestInfo.di
 
 QString JsonCatPack::path()
 {
-    const QDateTime now = QDateTime::currentDateTime();
+    const QDate now = QDate::currentDate();
     for (auto var : m_variants) {
-        QDateTime startDate(QDate(now.date().year(), var.startTime.mounth, var.startTime.day), QTime(0, 0));
-        QDateTime endDate(QDate(now.date().year(), var.endTime.mounth, var.endTime.day), QTime(0, 0));
-        if (startDate.daysTo(now) > 0 && now.daysTo(endDate) > 0)
+        QDate startDate(now.year(), var.startTime.month, var.startTime.day);
+        QDate endDate(now.year(), var.endTime.month, var.endTime.day);
+        if (startDate.daysTo(endDate) < 0)  // in this case end date should be next year
+            endDate = endDate.addYears(1);
+        if (startDate.daysTo(now) >= 0 && now.daysTo(endDate) >= 0)
             return var.path;
     }
     return m_defaultPath;
