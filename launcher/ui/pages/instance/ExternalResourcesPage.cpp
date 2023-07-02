@@ -83,7 +83,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     connect(selection_model, &QItemSelectionModel::currentChanged, this, &ExternalResourcesPage::current);
     auto updateExtra = [this]() {
         if (updateExtraInfo)
-            updateExtraInfo(extraHeaderInfoString());
+            updateExtraInfo(id(), extraHeaderInfoString());
     };
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
     connect(model.get(), &ResourceFolderModel::updateFinished, this, updateExtra);

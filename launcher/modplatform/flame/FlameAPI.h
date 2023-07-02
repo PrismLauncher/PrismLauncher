@@ -77,24 +77,28 @@ class FlameAPI : public NetworkResourceAPI {
 
     [[nodiscard]] std::optional<QString> getVersionsURL(VersionSearchArgs const& args) const override
     {
-        auto mappedModLoader = getMappedModLoader(args.loaders.value());
         auto addonId = args.pack.addonId.toString();
-        if (args.loaders.value() & Quilt) {
-            auto overide = ModPlatform::getOverrideDeps();
-            auto over = std::find_if(overide.cbegin(), overide.cend(), [addonId](auto dep) {
-                return dep.provider == ModPlatform::ResourceProvider::FLAME && addonId == dep.quilt;
-            });
-            if (over != overide.cend()) {
-                mappedModLoader = 5;
-            }
-        }
         QString url{ QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&").arg(addonId) };
 
         QStringList get_parameters;
         if (args.mcVersions.has_value())
             get_parameters.append(QString("gameVersion=%1").arg(args.mcVersions.value().front().toString()));
-        if (args.loaders.has_value())
+
+        if (args.loaders.has_value()) {
+            int mappedModLoader = getMappedModLoader(args.loaders.value());
+
+            if (args.loaders.value() & Quilt) {
+                auto overide = ModPlatform::getOverrideDeps();
+                auto over = std::find_if(overide.cbegin(), overide.cend(), [addonId](auto dep) {
+                    return dep.provider == ModPlatform::ResourceProvider::FLAME && addonId == dep.quilt;
+                });
+                if (over != overide.cend()) {
+                    mappedModLoader = 5;
+                }
+            }
+
             get_parameters.append(QString("modLoaderType=%1").arg(mappedModLoader));
+        }
 
         return url + get_parameters.join('&');
     };
