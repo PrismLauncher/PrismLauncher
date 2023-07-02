@@ -82,9 +82,9 @@ private:
     void toggleMod(ATLauncher::VersionMod mod, int index);
     void setMod(ATLauncher::VersionMod mod, int index, bool enable, bool shouldEmit = true);
 
-private:
+   private:
     NetJob::Ptr m_jobPtr;
-    QByteArray m_response;
+    std::shared_ptr<QByteArray> m_response = std::make_shared<QByteArray>();
 
     ATLauncher::PackVersion m_version;
     QVector<ATLauncher::VersionMod> m_mods;
