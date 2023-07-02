@@ -95,7 +95,7 @@ void ModrinthPackExportTask::collectFiles()
 
 void ModrinthPackExportTask::collectHashes()
 {
-    setStatus(tr("Find file hashes..."));
+    setStatus(tr("Finding file hashes..."));
     for (const QFileInfo& file : files) {
         QCoreApplication::processEvents();
 
@@ -159,7 +159,7 @@ void ModrinthPackExportTask::makeApiRequest()
     if (pendingHashes.isEmpty())
         buildZip();
     else {
-        setStatus(tr("Find versions for hashes..."));
+        setStatus(tr("Finding versions for hashes..."));
         auto response = std::make_shared<QByteArray>();
         task = api.currentVersions(pendingHashes.values(), "sha512", response);
         connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
