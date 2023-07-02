@@ -105,7 +105,7 @@ void FlamePackExportTask::collectFiles()
 void FlamePackExportTask::collectHashes()
 {
     setAbortable(true);
-    setStatus(tr("Find file hashes..."));
+    setStatus(tr("Finding file hashes..."));
     setProgress(1, 5);
     auto allMods = mcInstance->loaderModList()->allMods();
     ConcurrentTask::Ptr hashing_task(new ConcurrentTask(this, "MakeHashesTask", 10));
@@ -186,7 +186,7 @@ void FlamePackExportTask::makeApiRequest()
         return;
     }
 
-    setStatus(tr("Find versions for hashes..."));
+    setStatus(tr("Finding versions for hashes..."));
     setProgress(2, 5);
     auto response = std::make_shared<QByteArray>();
 
@@ -255,10 +255,10 @@ void FlamePackExportTask::makeApiRequest()
 
 void FlamePackExportTask::getProjectsInfo()
 {
-    setStatus(tr("Find project info from CurseForge..."));
+    setStatus(tr("Finding project info from CurseForge..."));
     setProgress(3, 5);
-    QList<QString> addonIds;
-    for (auto resolved : resolvedFiles) {
+    QStringList addonIds;
+    for (const auto& resolved : resolvedFiles) {
         if (resolved.slug.isEmpty()) {
             addonIds << QString::number(resolved.addonId);
         }

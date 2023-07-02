@@ -41,6 +41,7 @@ ExportPackDialog::ExportPackDialog(InstancePtr instance, QWidget* parent, ModPla
     ui->name->setText(instance->name());
     if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
         ui->summary->setText(instance->notes().split(QRegularExpression("\\r?\\n"))[0]);
+        setWindowTitle("Export Modrinth Pack");
     } else {
         setWindowTitle("Export CurseForge Pack");
         ui->version->setText("");
