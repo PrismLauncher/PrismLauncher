@@ -130,7 +130,7 @@ VisualGroup::HitResults VisualGroup::hitScan(const QPoint& pos) const
         int collapseSize = headerHeight() - 4;
 
         // the icon
-        QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y_start, collapseSize, collapseSize);
+        QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y_start, view->width() - 4, collapseSize);
         if (iconRect.contains(pos)) {
             results |= VisualGroup::CheckboxHit;
         }
@@ -155,6 +155,7 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
     penColor.setAlphaF(0.6);
     pen.setColor(penColor);
     painter->setPen(pen);
+    painter->setRenderHint(QPainter::Antialiasing);
 
     // sizes and offsets, to keep things consistent below
     int arrowOffsetLeft = fontMetrics.height() / 2 + 7;
@@ -164,26 +165,23 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
 
     // BEGIN: arrow
     {
-        painter->setRenderHint(QPainter::Antialiasing, false);
-
-        QPolygon polygon;
+        QPolygon arrowPolygon;
         if (collapsed) {
-            polygon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
-                    << QPoint(arrowOffsetLeft + arrowSize / 2, centerHeight)
-                    << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight + arrowSize);
-            painter->drawPolyline(polygon);
+            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
+                         << QPoint(arrowOffsetLeft + arrowSize / 2, centerHeight)
+                         << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight + arrowSize);
+            painter->drawPolyline(arrowPolygon);
         } else {
-            polygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2)
-                    << QPoint(arrowOffsetLeft, centerHeight + arrowSize / 2)
-                    << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
-            painter->drawPolyline(polygon);
+            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2)
+                         << QPoint(arrowOffsetLeft, centerHeight + arrowSize / 2)
+                         << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
+            painter->drawPolyline(arrowPolygon);
         }
     }
     // END: arrow
 
     // BEGIN: text
     {
-        painter->setRenderHint(QPainter::Antialiasing);
         QRect textRect(optRect);
         textRect.setTop(textRect.top());
         textRect.setLeft(textOffsetLeft);
