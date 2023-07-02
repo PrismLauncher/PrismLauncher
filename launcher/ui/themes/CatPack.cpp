@@ -78,7 +78,8 @@ JsonCatPack::JsonCatPack(QFileInfo& manifestInfo) : BasicCatPack(manifestInfo.di
             const auto root = doc.object();
             m_name = Json::requireString(root, "name", "Catpack name");
             auto id = Json::ensureString(root, "id", "", "Catpack ID");
-            m_id = id.isEmpty() ? m_id : id;
+            if (!id.isEmpty())
+                m_id = id;
             m_defaultPath = FS::PathCombine(path, Json::requireString(root, "default", "Deafult Cat"));
             auto variants = Json::ensureArray(root, "variants", QJsonArray(), "Catpack Variants");
             for (auto v : variants) {
