@@ -43,7 +43,7 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-void setupLinkTooTip(QLabel* label)
+void setupLinkToolTip(QLabel* label)
 {
     QObject::connect(label, &QLabel::linkHovered, [label](const QString& link) {
         if (!link.isEmpty() && !link.startsWith("http"))
@@ -60,11 +60,11 @@ InfoFrame::InfoFrame(QWidget* parent) : QFrame(parent), ui(new Ui::InfoFrame)
     ui->licenseLabel->setHidden(true);
     ui->issueTrackerLabel->setHidden(true);
 
-    setupLinkTooTip(ui->iconLabel);
-    setupLinkTooTip(ui->descriptionLabel);
-    setupLinkTooTip(ui->nameLabel);
-    setupLinkTooTip(ui->licenseLabel);
-    setupLinkTooTip(ui->issueTrackerLabel);
+    setupLinkToolTip(ui->iconLabel);
+    setupLinkToolTip(ui->descriptionLabel);
+    setupLinkToolTip(ui->nameLabel);
+    setupLinkToolTip(ui->licenseLabel);
+    setupLinkToolTip(ui->issueTrackerLabel);
     updateHiddenState();
 }
 
@@ -123,9 +123,9 @@ void InfoFrame::updateWithMod(Mod const& m)
                 licenseText += "<a href=\"" + l.url + "\">" + l.url + "</a>";
             }
             if (!l.description.isEmpty() && l.description != l.name) {
-               licenseText += " " + l.description;
+                licenseText += " " + l.description;
             }
-        } 
+        }
     }
     if (!licenseText.isEmpty()) {
         setLicense(tr("License: %1").arg(licenseText));
@@ -137,7 +137,7 @@ void InfoFrame::updateWithMod(Mod const& m)
     if (!m.issueTracker().isEmpty()) {
         issueTracker += tr("Report issues to: ");
         issueTracker += "<a href=\"" + m.issueTracker() + "\">" + m.issueTracker() + "</a>";
-    } 
+    }
     setIssueTracker(issueTracker);
 }
 
@@ -147,7 +147,8 @@ void InfoFrame::updateWithResource(const Resource& resource)
     setImage();
 }
 
-QString InfoFrame::renderColorCodes(QString input) {
+QString InfoFrame::renderColorCodes(QString input)
+{
     // We have to manually set the colors for use.
     //
     // A color is set using §x, with x = a hex number from 0 to f.
@@ -158,16 +159,12 @@ QString InfoFrame::renderColorCodes(QString input) {
     // TODO: Wrap links inside <a> tags
 
     // https://minecraft.fandom.com/wiki/Formatting_codes#Color_codes
-    const QMap<QChar, QString> color_codes_map = {
-        {'0', "#000000"}, {'1', "#0000AA"}, {'2', "#00AA00"}, {'3', "#00AAAA"}, {'4', "#AA0000"},
-        {'5', "#AA00AA"}, {'6', "#FFAA00"}, {'7', "#AAAAAA"}, {'8', "#555555"}, {'9', "#5555FF"},
-        {'a', "#55FF55"}, {'b', "#55FFFF"}, {'c', "#FF5555"}, {'d', "#FF55FF"}, {'e', "#FFFF55"},
-        {'f', "#FFFFFF"}
-    };
+    const QMap<QChar, QString> color_codes_map = { { '0', "#000000" }, { '1', "#0000AA" }, { '2', "#00AA00" }, { '3', "#00AAAA" },
+                                                   { '4', "#AA0000" }, { '5', "#AA00AA" }, { '6', "#FFAA00" }, { '7', "#AAAAAA" },
+                                                   { '8', "#555555" }, { '9', "#5555FF" }, { 'a', "#55FF55" }, { 'b', "#55FFFF" },
+                                                   { 'c', "#FF5555" }, { 'd', "#FF55FF" }, { 'e', "#FFFF55" }, { 'f', "#FFFFFF" } };
     // https://minecraft.fandom.com/wiki/Formatting_codes#Formatting_codes
-    const QMap<QChar, QString> formatting_codes_map = {
-        {'l', "b"}, {'m', "s"}, {'n', "u"}, {'o', "i"}
-    };
+    const QMap<QChar, QString> formatting_codes_map = { { 'l', "b" }, { 'm', "s" }, { 'n', "u" }, { 'o', "i" } };
 
     QString html("<html>");
     QList<QString> tags{};
@@ -212,14 +209,14 @@ void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
 {
     setName(renderColorCodes(resource_pack.name()));
     setDescription(renderColorCodes(resource_pack.description()));
-    setImage(resource_pack.image({64, 64}));
+    setImage(resource_pack.image({ 64, 64 }));
 }
 
 void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
 {
     setName(renderColorCodes(texture_pack.name()));
     setDescription(renderColorCodes(texture_pack.description()));
-    setImage(texture_pack.image({64, 64}));
+    setImage(texture_pack.image({ 64, 64 }));
 }
 
 void InfoFrame::clear()
@@ -268,9 +265,8 @@ void InfoFrame::setDescription(QString text)
     QChar rem('\n');
     QString finaltext;
     finaltext.reserve(intermediatetext.size());
-    foreach(const QChar& c, intermediatetext)
-    {
-        if(c == rem && prev){
+    foreach (const QChar& c, intermediatetext) {
+        if (c == rem && prev) {
             continue;
         }
         prev = c == rem;
@@ -278,17 +274,14 @@ void InfoFrame::setDescription(QString text)
     }
     QString labeltext;
     labeltext.reserve(300);
-    if(finaltext.length() > 290)
-    {
+    if (finaltext.length() > 290) {
         ui->descriptionLabel->setOpenExternalLinks(false);
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::RichText);
         m_description = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
         QObject::connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
-    }
-    else
-    {
+    } else {
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);
     }
@@ -297,14 +290,11 @@ void InfoFrame::setDescription(QString text)
 
 void InfoFrame::setLicense(QString text)
 {
-    if(text.isEmpty())
-    {
+    if (text.isEmpty()) {
         ui->licenseLabel->setHidden(true);
         updateHiddenState();
         return;
-    }
-    else
-    {
+    } else {
         ui->licenseLabel->setHidden(false);
         updateHiddenState();
     }
@@ -314,9 +304,8 @@ void InfoFrame::setLicense(QString text)
     QChar rem('\n');
     QString finaltext;
     finaltext.reserve(intermediatetext.size());
-    foreach(const QChar& c, intermediatetext)
-    {
-        if(c == rem && prev){
+    foreach (const QChar& c, intermediatetext) {
+        if (c == rem && prev) {
             continue;
         }
         prev = c == rem;
@@ -324,17 +313,14 @@ void InfoFrame::setLicense(QString text)
     }
     QString labeltext;
     labeltext.reserve(300);
-    if(finaltext.length() > 290)
-    {
+    if (finaltext.length() > 290) {
         ui->licenseLabel->setOpenExternalLinks(false);
         ui->licenseLabel->setTextFormat(Qt::TextFormat::RichText);
         m_description = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
         QObject::connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
-    }
-    else
-    {
+    } else {
         ui->licenseLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);
     }
@@ -343,12 +329,9 @@ void InfoFrame::setLicense(QString text)
 
 void InfoFrame::setIssueTracker(QString text)
 {
-    if(text.isEmpty())
-    {
+    if (text.isEmpty()) {
         ui->issueTrackerLabel->setHidden(true);
-    }
-    else
-    {
+    } else {
         ui->issueTrackerLabel->setText(text);
         ui->issueTrackerLabel->setHidden(false);
     }
@@ -367,28 +350,22 @@ void InfoFrame::setImage(QPixmap img)
 
 void InfoFrame::descriptionEllipsisHandler(QString link)
 {
-    if(!m_current_box)
-    {
+    if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_description);
         connect(m_current_box, &QMessageBox::finished, this, &InfoFrame::boxClosed);
         m_current_box->show();
-    }
-    else
-    {
+    } else {
         m_current_box->setText(m_description);
     }
 }
 
 void InfoFrame::licenseEllipsisHandler(QString link)
 {
-    if(!m_current_box)
-    {
+    if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_license);
         connect(m_current_box, &QMessageBox::finished, this, &InfoFrame::boxClosed);
         m_current_box->show();
-    }
-    else
-    {
+    } else {
         m_current_box->setText(m_license);
     }
 }
