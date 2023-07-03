@@ -38,7 +38,7 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
                       // "lightweight" loaders are independent to any game version
                       const bool lightweight,
                       const std::shared_ptr<PackProfile> profile)
-        : VersionSelectWidget(nullptr), m_id(id), m_icon(icon), m_name(name)
+        : VersionSelectWidget(nullptr), uid(id), iconName(icon), name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
@@ -49,21 +49,21 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
             setCurrentVersion(currentVersion);
     }
 
-    QString id() const override { return m_id; }
-    QString displayName() const override { return m_name; }
-    QIcon icon() const override { return APPLICATION->getThemedIcon(m_icon); }
+    QString id() const override { return uid; }
+    QString displayName() const override { return name; }
+    QIcon icon() const override { return APPLICATION->getThemedIcon(iconName); }
 
     void openedImpl() override
     {
-        if (m_loaded)
+        if (loaded)
             return;
 
-        const auto versions = APPLICATION->metadataIndex()->get(m_id);
+        const auto versions = APPLICATION->metadataIndex()->get(uid);
         if (!versions)
             return;
 
         initialize(versions.get());
-        m_loaded = true;
+        loaded = true;
     }
 
     void setParentContainer(BasePageContainer* container) override
@@ -73,13 +73,13 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     }
 
    private:
-    const QString m_id;
-    const QString m_icon;
-    const QString m_name;
-    bool m_loaded = false;
+    const QString uid;
+    const QString iconName;
+    const QString name;
+    bool loaded = false;
 };
 
-InstallLoaderPage* pageCast(BasePage* page)
+static InstallLoaderPage* pageCast(BasePage* page)
 {
     auto result = dynamic_cast<InstallLoaderPage*>(page);
     Q_ASSERT(result != nullptr);
@@ -87,46 +87,55 @@ InstallLoaderPage* pageCast(BasePage* page)
 }
 
 InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, const QString& uid, QWidget* parent)
-    : QDialog(parent), m_profile(profile), m_container(new PageContainer(this, QString(), this)), m_buttons(new QDialogButtonBox(this))
+    : QDialog(parent), profile(std::move(profile)), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
 
-    m_container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    layout->addWidget(m_container);
+    container->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    layout->addWidget(container);
 
     auto buttonLayout = new QHBoxLayout(this);
 
     auto refreshButton = new QPushButton(tr("&Refresh"), this);
-    connect(refreshButton, &QPushButton::pressed, this, [this] { pageCast(m_container->selectedPage())->loadList(); });
+    connect(refreshButton, &QPushButton::pressed, this, [this] { pageCast(container->selectedPage())->loadList(); });
     buttonLayout->addWidget(refreshButton);
 
-    m_buttons->setOrientation(Qt::Horizontal);
-    m_buttons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
-    connect(m_buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(m_buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    buttonLayout->addWidget(m_buttons);
+    buttons->setOrientation(Qt::Horizontal);
+    buttons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+    connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    buttonLayout->addWidget(buttons);
 
     layout->addLayout(buttonLayout);
 
     setWindowTitle(dialogTitle());
-    resize(650, 400);
+    setWindowModality(Qt::WindowModal);
+    resize(520, 347);
 
-    pageCast(m_container->selectedPage())->selectSearch();
-    for (BasePage* page : m_container->getPages())
+    for (BasePage* page : container->getPages()) {
         if (page->id() == uid)
-            m_container->selectPage(page->id());
+            container->selectPage(page->id());
+
+        connect(pageCast(page), &VersionSelectWidget::selectedVersionChanged, this, [this, page] {
+            if (page->id() == container->selectedPage()->id())
+                validate(container->selectedPage());
+        });
+    }
+    connect(container, &PageContainer::selectedPageChanged, this, [this](BasePage* previous, BasePage* current) { validate(current); });
+    pageCast(container->selectedPage())->selectSearch();
+    validate(container->selectedPage());
 }
 
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
     return { // Forge
-             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), false, m_profile),
+             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), false, profile),
              // Fabric
-             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), true, m_profile),
+             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), true, profile),
              // Quilt
-             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), true, m_profile),
+             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), true, profile),
              // LiteLoader
-             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), false, m_profile)
+             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), false, profile)
     };
 }
 
@@ -135,13 +144,18 @@ QString InstallLoaderDialog::dialogTitle()
     return tr("Install Loader");
 }
 
+void InstallLoaderDialog::validate(BasePage* page)
+{
+    buttons->button(QDialogButtonBox::Ok)->setEnabled(pageCast(page)->selectedVersion() != nullptr);
+}
+
 void InstallLoaderDialog::done(int result)
 {
     if (result == Accepted) {
-        auto* page = pageCast(m_container->selectedPage());
+        auto* page = pageCast(container->selectedPage());
         if (page->selectedVersion()) {
-            m_profile->setComponentVersion(page->id(), page->selectedVersion()->descriptor());
-            m_profile->resolve(Net::Mode::Online);
+            profile->setComponentVersion(page->id(), page->selectedVersion()->descriptor());
+            profile->resolve(Net::Mode::Online);
         }
     }
 

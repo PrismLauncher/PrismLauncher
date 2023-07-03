@@ -35,10 +35,11 @@ class InstallLoaderDialog final : public QDialog, public BasePageProvider {
     QList<BasePage*> getPages() override;
     QString dialogTitle() override;
 
+    void validate(BasePage* page);
     void done(int result) override;
 
    private:
-    std::shared_ptr<PackProfile> m_profile;
-    PageContainer* m_container;
-    QDialogButtonBox* m_buttons;
+    std::shared_ptr<PackProfile> profile;
+    PageContainer* container;
+    QDialogButtonBox* buttons;
 };

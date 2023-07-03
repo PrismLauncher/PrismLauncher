@@ -147,7 +147,7 @@ BasePage* PageContainer::selectedPage() const
     return m_currentPage;
 }
 
-const QList<BasePage*> PageContainer::getPages() const
+const QList<BasePage*>& PageContainer::getPages() const
 {
     return m_model->pages();
 }
