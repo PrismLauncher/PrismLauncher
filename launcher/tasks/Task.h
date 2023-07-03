@@ -36,25 +36,22 @@
 
 #pragma once
 
+#include <QLoggingCategory>
 #include <QRunnable>
 #include <QUuid>
-#include <QLoggingCategory>
+#include <cstddef>
 
 #include "QObjectPtr.h"
 
 Q_DECLARE_LOGGING_CATEGORY(taskLogC)
+Q_DECLARE_LOGGING_CATEGORY(taskLogCNoDebug)
 
-enum class TaskStepState {
-    Waiting,
-    Running,
-    Failed,
-    Succeeded
-};
+enum class TaskStepState { Waiting, Running, Failed, Succeeded };
 
 Q_DECLARE_METATYPE(TaskStepState)
 
 struct TaskStepProgress {
-    QUuid uid; 
+    QUuid uid;
     qint64 current = 0;
     qint64 total = -1;
 
@@ -64,14 +61,11 @@ struct TaskStepProgress {
     QString status = "";
     QString details = "";
     TaskStepState state = TaskStepState::Waiting;
-    TaskStepProgress() {
-        this->uid = QUuid::createUuid();
-    }
-    TaskStepProgress(QUuid uid) {
-        this->uid = uid;
-    }
+    TaskStepProgress() { this->uid = QUuid::createUuid(); }
+    TaskStepProgress(QUuid uid) { this->uid = uid; }
     bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
-    void update(qint64 current, qint64 total) {
+    void update(qint64 current, qint64 total)
+    {
         this->old_current = this->current;
         this->old_total = this->total;
 
@@ -93,15 +87,15 @@ class Task : public QObject, public QRunnable {
     enum class State { Inactive, Running, Succeeded, Failed, AbortedByUser };
 
    public:
-    explicit Task(QObject* parent = 0, bool show_debug_log = true);
+    explicit Task(QObject* parent = nullptr, const QLoggingCategory& log_category = taskLogC());
     virtual ~Task() = default;
 
     bool isRunning() const;
     bool isFinished() const;
     bool wasSuccessful() const;
 
-    /*! 
-     * MultiStep tasks are combinations of multiple tasks into a single logical task. 
+    /*!
+     * MultiStep tasks are combinations of multiple tasks into a single logical task.
      * The main usage of this is in SequencialTask.
      */
     virtual auto isMultiStep() const -> bool { return false; }
@@ -125,7 +119,7 @@ class Task : public QObject, public QRunnable {
     qint64 getTotalProgress() { return m_progressTotal; }
     virtual auto getStepProgress() const -> TaskStepProgressList { return {}; }
 
-     
+    virtual bool canRetry() const;
 
     QUuid getUid() { return m_uid; }
 
@@ -155,9 +149,24 @@ class Task : public QObject, public QRunnable {
     void run() override { start(); }
 
     virtual void start();
-    virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); };
+    virtual bool abort()
+    {
+        if (canAbort())
+            emitAborted();
+        return canAbort();
+    };
 
-    void setAbortable(bool can_abort) { m_can_abort = can_abort; emit abortStatusChanged(can_abort); }
+    virtual void retry()
+    {
+        if (canRetry())
+            start();
+    };
+
+    void setAbortable(bool can_abort)
+    {
+        m_can_abort = can_abort;
+        emit abortStatusChanged(can_abort);
+    }
 
    protected:
     virtual void executeTask() = 0;
@@ -183,12 +192,11 @@ class Task : public QObject, public QRunnable {
     int m_progress = 0;
     int m_progressTotal = 100;
 
-    // TODO: Nuke in favor of QLoggingCategory
-    bool m_show_debug = true;
+    const QLoggingCategory& m_log_category;
 
    private:
     // Change using setAbortStatus
     bool m_can_abort = false;
+    bool m_can_retry = false;
     QUuid m_uid;
-
 };

@@ -52,10 +52,13 @@ class NetJob : public ConcurrentTask {
    public:
     using Ptr = shared_qobject_ptr<NetJob>;
 
-    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network) : ConcurrentTask(nullptr, job_name), m_network(network) {}
+    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network)
+        : ConcurrentTask(nullptr, job_name), m_network(network)
+    {
+        setMaxRetry(3);
+        setSubTaskFailStrategy(SubTaskFailStratagy::Retry);
+    }
     ~NetJob() override = default;
-
-    void startNext() override;
 
     auto size() const -> int;
 
@@ -74,6 +77,4 @@ class NetJob : public ConcurrentTask {
 
    private:
     shared_qobject_ptr<QNetworkAccessManager> m_network;
-
-    int m_try = 1;
 };

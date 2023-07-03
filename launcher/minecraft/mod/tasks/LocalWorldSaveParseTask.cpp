@@ -170,7 +170,7 @@ bool validate(QFileInfo file)
 
 }  // namespace WorldSaveUtils
 
-LocalWorldSaveParseTask::LocalWorldSaveParseTask(int token, WorldSave& save) : Task(nullptr, false), m_token(token), m_save(save) {}
+LocalWorldSaveParseTask::LocalWorldSaveParseTask(int token, WorldSave& save) : Task(nullptr, taskLogCNoDebug()), m_token(token), m_save(save) {}
 
 bool LocalWorldSaveParseTask::abort()
 {

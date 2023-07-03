@@ -157,7 +157,8 @@ bool validate(QFileInfo file)
 
 }  // namespace DataPackUtils
 
-LocalDataPackParseTask::LocalDataPackParseTask(int token, DataPack& dp) : Task(nullptr, false), m_token(token), m_data_pack(dp) {}
+LocalDataPackParseTask::LocalDataPackParseTask(int token, DataPack& dp) : Task(nullptr, taskLogCNoDebug()), m_token(token), m_data_pack(dp)
+{}
 
 bool LocalDataPackParseTask::abort()
 {

@@ -111,6 +111,7 @@ void ConcurrentTask::clear()
 
     m_progress = 0;
     m_stepProgress = 0;
+    m_current_retry = 0;
 }
 
 void ConcurrentTask::startNext()
@@ -118,9 +119,9 @@ void ConcurrentTask::startNext()
     if (m_aborted || m_doing.count() > m_total_max_size)
         return;
 
-    if (m_queue.isEmpty() && m_doing.isEmpty() && !wasSuccessful()) {
-        emitSucceeded();
-        return;
+    if (m_queue.isEmpty() && m_doing.isEmpty() && isRunning()) {
+        if (finalize())
+            return;
     }
 
     if (m_queue.isEmpty())
@@ -194,7 +195,7 @@ void ConcurrentTask::subTaskStatus(Task::Ptr task, const QString& msg)
     auto task_progress = m_task_progress.value(task->getUid());
     task_progress->status = msg;
     task_progress->state = TaskStepState::Running;
-    
+
     emit stepProgress(*task_progress);
 
     if (totalSize() == 1) {
@@ -207,7 +208,7 @@ void ConcurrentTask::subTaskDetails(Task::Ptr task, const QString& msg)
     auto task_progress = m_task_progress.value(task->getUid());
     task_progress->details = msg;
     task_progress->state = TaskStepState::Running;
-    
+
     emit stepProgress(*task_progress);
 
     if (totalSize() == 1) {
@@ -220,7 +221,7 @@ void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 tota
     auto task_progress = m_task_progress.value(task->getUid());
 
     task_progress->update(current, total);
-        
+
     emit stepProgress(*task_progress);
     updateStepProgress(*task_progress, Operation::CHANGED);
     updateState();
@@ -233,7 +234,7 @@ void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 tota
 void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgress const& task_progress)
 {
     Operation op = Operation::ADDED;
-    
+
     if (!m_task_progress.contains(task_progress.uid)) {
         m_task_progress.insert(task_progress.uid, std::make_shared<TaskStepProgress>(task_progress));
         op = Operation::ADDED;
@@ -254,12 +255,10 @@ void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgress const&
         emit stepProgress(*tp.get());
         updateStepProgress(*tp.get(), op);
     }
-
 }
 
 void ConcurrentTask::updateStepProgress(TaskStepProgress const& changed_progress, Operation op)
 {
-
     switch (op) {
         case Operation::ADDED:
             m_stepProgress += changed_progress.current;
@@ -274,9 +273,8 @@ void ConcurrentTask::updateStepProgress(TaskStepProgress const& changed_progress
             m_stepTotalProgress -= changed_progress.old_total;
             m_stepProgress += changed_progress.current;
             m_stepTotalProgress += changed_progress.total;
-            break;    
+            break;
     }
-
 }
 
 void ConcurrentTask::updateState()
@@ -297,4 +295,26 @@ void ConcurrentTask::updateState()
         }
         setStatus(status);
     }
+}
+bool ConcurrentTask::finalize()
+{
+    if (!m_failed.isEmpty()) {
+        switch (m_strategy) {
+            case SubTaskFailStratagy::Success:
+                break;
+            case SubTaskFailStratagy::Retry:
+                if (m_current_retry < m_max_retry) {
+                    m_current_retry++;
+                    while (!m_failed.isEmpty())
+                        m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
+                    return false;
+                }
+                /* fallthrough */
+            case SubTaskFailStratagy::Fail:
+                emitFailed("One ore more subtasks failed");
+                return true;
+        }
+    }
+    emitSucceeded();
+    return true;
 }

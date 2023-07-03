@@ -46,20 +46,6 @@ auto NetJob::addNetAction(NetAction::Ptr action) -> bool
     return true;
 }
 
-void NetJob::startNext()
-{
-    if (m_queue.isEmpty() && m_doing.isEmpty()) {
-        // We're finished, check for failures and retry if we can (up to 3 times)
-        if (!m_failed.isEmpty() && m_try < 3) {
-            m_try += 1;
-            while (!m_failed.isEmpty())
-                m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
-        }
-    }
-
-    ConcurrentTask::startNext();
-}
-
 auto NetJob::size() const -> int
 {
     return m_queue.size() + m_doing.size() + m_done.size();
