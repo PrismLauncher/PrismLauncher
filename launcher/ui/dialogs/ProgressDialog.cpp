@@ -113,7 +113,7 @@ void ProgressDialog::updateSize()
 
     QSize newSize = this->size();
     // if the current window is too small
-    if ((lastSize != minSize) && (lastSize.height() < newSize.height()))
+    if ((lastSize != newSize) && (lastSize.height() < newSize.height()))
     {
         QSize sizeDiff = lastSize - newSize; // last size was smaller, the results should be negative
         // center on old position after resize
