@@ -34,11 +34,7 @@
  */
 
 #include "ui/themes/CatPack.h"
-#include <qdatetime.h>
-#include <qjsonarray.h>
-#include <qjsonobject.h>
-#include <qobject.h>
-#include <QDateTime>
+#include <QDate>
 #include <QDir>
 #include <QFileInfo>
 #include "FileSystem.h"
@@ -47,10 +43,10 @@
 
 QString BasicCatPack::path()
 {
-    const QDateTime now = QDateTime::currentDateTime();
-    const QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
-    const QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-    const QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
+    const auto now = QDate::currentDate();
+    const auto birthday = QDate(now.year(), 11, 30);
+    const auto xmas = QDate(now.year(), 12, 25);
+    const auto halloween = QDate(now.year(), 10, 31);
 
     QString cat = QString(":/backgrounds/%1").arg(m_id);
     if (std::abs(now.daysTo(xmas)) <= 4) {
@@ -85,8 +81,8 @@ JsonCatPack::JsonCatPack(QFileInfo& manifestInfo) : BasicCatPack(manifestInfo.di
             for (auto v : variants) {
                 auto variant = Json::ensureObject(v, QJsonObject(), "Cat variant");
                 m_variants << Variant{ FS::PathCombine(path, Json::requireString(variant, "path", "Variant path")),
-                                       date(Json::requireString(variant, "startTime", "Variant startTime")),
-                                       date(Json::requireString(variant, "endTime", "Variant endTime")) };
+                                       PartialDate(Json::requireString(variant, "startTime", "Variant startTime")),
+                                       PartialDate(Json::requireString(variant, "endTime", "Variant endTime")) };
             }
 
         } catch (const Exception& e) {
@@ -104,9 +100,14 @@ QString JsonCatPack::path()
     for (auto var : m_variants) {
         QDate startDate(now.year(), var.startTime.month, var.startTime.day);
         QDate endDate(now.year(), var.endTime.month, var.endTime.day);
-        if (startDate.daysTo(endDate) < 0)  // in this case end date should be next year
-            endDate = endDate.addYears(1);
-        if (startDate.daysTo(now) >= 0 && now.daysTo(endDate) >= 0)
+        if (startDate > endDate) {  // it's spans over multiple years
+            if (endDate <= now)     // end date is in the past so jump one year into the future for endDate
+                endDate = endDate.addYears(1);
+            else  // end date is in the future so jump one year into the past for startDate
+                startDate = startDate.addYears(-1);
+        }
+
+        if (startDate >= now && now >= endDate)
             return var.path;
     }
     return m_defaultPath;

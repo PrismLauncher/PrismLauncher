@@ -35,7 +35,7 @@
 
 #pragma once
 
-#include <QDateTime>
+#include <QDate>
 #include <QFileInfo>
 #include <QList>
 #include <QString>
@@ -73,8 +73,8 @@ class FileCatPack : public BasicCatPack {
 
 class JsonCatPack : public BasicCatPack {
    public:
-    struct date {
-        date(QString d)
+    struct PartialDate {
+        PartialDate(QString d)
         {
             auto sp = d.split("-");
             day = sp[0].toInt();
@@ -86,8 +86,8 @@ class JsonCatPack : public BasicCatPack {
     };
     struct Variant {
         QString path;
-        date startTime;
-        date endTime;
+        PartialDate startTime;
+        PartialDate endTime;
     };
     JsonCatPack(QFileInfo& manifestInfo);
     virtual QString path();
