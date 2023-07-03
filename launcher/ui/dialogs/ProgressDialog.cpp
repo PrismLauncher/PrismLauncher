@@ -34,6 +34,7 @@
  */
 
 #include "ProgressDialog.h"
+#include <qpoint.h>
 #include "ui_ProgressDialog.h"
 
 #include <limits>
@@ -96,21 +97,30 @@ ProgressDialog::~ProgressDialog()
 void ProgressDialog::updateSize()
 {   
     QSize lastSize = this->size();
-    QSize qSize = QSize(480, minimumSizeHint().height());
+    QPoint lastPos = this->pos();
+    int minHeight = minimumSizeHint().height();
+    if (ui->taskProgressScrollArea->isHidden())
+        minHeight -= ui->taskProgressScrollArea->minimumSizeHint().height();
+    QSize labelMinSize = ui->globalStatusLabel->minimumSize();
+    int labelHeight = ui->globalStatusLabel->height();
+    if (labelHeight > labelMinSize.height())
+        minHeight += labelHeight - labelMinSize.height(); // account for multiline label
+    minHeight = std::max(minHeight, 0);
+    QSize minSize = QSize(480, minHeight);
 
     // if the current window is too small
-    if ((lastSize != qSize) && (lastSize.height() < qSize.height()))
+    if ((lastSize != minSize) && (lastSize.height() < minSize.height()))
     {
-        resize(qSize);
-        
-        // keep the dialog in the center after a resize
-        this->move(
-            this->parentWidget()->x() + (this->parentWidget()->width() - this->width()) / 2,
-            this->parentWidget()->y() + (this->parentWidget()->height() - this->height()) / 2
-        );
+        resize(minSize);
+
+        QSize newSize = this->size();
+        QSize sizeDiff = lastSize - newSize; // last size was smaller, the results should be negative
+        // center on old position after resize
+        QPoint newPos(lastPos.x() + (sizeDiff.width() / 2), lastPos.y() + (sizeDiff.height() / 2));
+        this->move(newPos);
     }
 
-    setMinimumSize(qSize);
+    setMinimumSize(minSize);
 
 }
 
