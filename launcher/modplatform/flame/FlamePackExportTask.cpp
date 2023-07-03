@@ -36,7 +36,7 @@
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
 
-const QString FlamePackExportTask::TEMPLATE = "<li><a href={url}>{name}{authors}</a></li>\n";
+const QString FlamePackExportTask::TEMPLATE = "<li><a href=\"{url}\">{name}{authors}</a></li>\n";
 const QStringList FlamePackExportTask::FILE_EXTENSIONS({ "jar", "zip" });
 
 FlamePackExportTask::FlamePackExportTask(const QString& name,
