@@ -40,7 +40,8 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
     auto filenameItem = new QTreeWidgetItem(itemTop);
     filenameItem->setText(0, tr("Filename: %1").arg(info.filename));
 
-    itemTop->insertChildren(0, { filenameItem });
+    auto childIndx = 0;
+    itemTop->insertChildren(childIndx++, { filenameItem });
 
     if (!info.custom_file_path.isEmpty()) {
         auto customPathItem = new QTreeWidgetItem(itemTop);
@@ -49,8 +50,36 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
         itemTop->insertChildren(1, { customPathItem });
 
         itemTop->setIcon(1, QIcon(APPLICATION->getThemedIcon("status-yellow")));
-        itemTop->setToolTip(1, tr("This file will be downloaded to a folder location different from the default, possibly due to its loader requiring it."));
+        itemTop->setToolTip(
+            childIndx++,
+            tr("This file will be downloaded to a folder location different from the default, possibly due to its loader requiring it."));
     }
+
+    auto providerItem = new QTreeWidgetItem(itemTop);
+    providerItem->setText(0, tr("Provider: %1").arg(info.provider));
+
+    itemTop->insertChildren(childIndx++, { providerItem });
+
+    if (!info.required_by.isEmpty()) {
+        auto requiredByItem = new QTreeWidgetItem(itemTop);
+        if (info.required_by.length() == 1) {
+            requiredByItem->setText(0, tr("Required by: %1").arg(info.required_by.back()));
+        } else {
+            requiredByItem->setText(0, tr("Required by:"));
+            auto i = 0;
+            for (auto req : info.required_by) {
+                auto reqItem = new QTreeWidgetItem(requiredByItem);
+                reqItem->setText(0, req);
+                reqItem->insertChildren(i++, { reqItem });
+            }
+        }
+
+        itemTop->insertChildren(childIndx++, { requiredByItem });
+    }
+
+    auto versionTypeItem = new QTreeWidgetItem(itemTop);
+    versionTypeItem->setText(0, tr("Version Type: %1").arg(info.version_type));
+    itemTop->insertChildren(childIndx++, { versionTypeItem });
 
     ui->modTreeWidget->addTopLevelItem(itemTop);
 }

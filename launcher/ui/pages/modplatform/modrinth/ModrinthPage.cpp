@@ -123,7 +123,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         qDebug() << "Loading modrinth modpack information";
 
         auto netJob = new NetJob(QString("Modrinth::PackInformation(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
 
         QString id = current.id;
 
@@ -162,10 +162,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         netJob->start();
     } else
         updateUI();
@@ -174,7 +171,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         qDebug() << "Loading modrinth modpack versions";
 
         auto netJob = new NetJob(QString("Modrinth::PackVersions(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
 
         QString id = current.id;
 
@@ -202,9 +199,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
                 qWarning() << "Error while reading modrinth modpack version: " << e.cause();
             }
             for (auto version : current.versions) {
-                auto release_type = version.version_type.isValid() ? QString(" : %1").arg(version.version_type.toString()) : "";
+                auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
                 if (!version.name.contains(version.version))
-                    ui->versionSelectionBox->addItem(QString("%1 — %2%3").arg(version.name, version.version, release_type), QVariant(version.id));
+                    ui->versionSelectionBox->addItem(QString("%1 — %2%3").arg(version.name, version.version, release_type),
+                                                     QVariant(version.id));
                 else
                     ui->versionSelectionBox->addItem(QString("%1%2").arg(version.name, release_type), QVariant(version.id));
             }
@@ -217,10 +215,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         netJob->start();
 
     } else {
@@ -260,10 +255,8 @@ void ModrinthPage::updateUI()
             text += donates.join(", ");
         }
 
-        if (!current.extra.issuesUrl.isEmpty()
-         || !current.extra.sourceUrl.isEmpty()
-         || !current.extra.wikiUrl.isEmpty()
-         || !current.extra.discordUrl.isEmpty()) {
+        if (!current.extra.issuesUrl.isEmpty() || !current.extra.sourceUrl.isEmpty() || !current.extra.wikiUrl.isEmpty() ||
+            !current.extra.discordUrl.isEmpty()) {
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 

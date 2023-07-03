@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,301 +47,21 @@
 #include <QSaveFile>
 #include <QStack>
 #include <QFileInfo>
-
-#include "StringUtils.h"
 #include "SeparatorPrefixTree.h"
 #include "Application.h"
 #include <icons/IconList.h>
 #include <FileSystem.h>
-
-class PackIgnoreProxy : public QSortFilterProxyModel
-{
-    Q_OBJECT
-
-public:
-    PackIgnoreProxy(InstancePtr instance, QObject *parent) : QSortFilterProxyModel(parent)
-    {
-        m_instance = instance;
-    }
-    // NOTE: Sadly, we have to do sorting ourselves.
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const
-    {
-        QFileSystemModel *fsm = qobject_cast<QFileSystemModel *>(sourceModel());
-        if (!fsm)
-        {
-            return QSortFilterProxyModel::lessThan(left, right);
-        }
-        bool asc = sortOrder() == Qt::AscendingOrder ? true : false;
-
-        QFileInfo leftFileInfo = fsm->fileInfo(left);
-        QFileInfo rightFileInfo = fsm->fileInfo(right);
-
-        if (!leftFileInfo.isDir() && rightFileInfo.isDir())
-        {
-            return !asc;
-        }
-        if (leftFileInfo.isDir() && !rightFileInfo.isDir())
-        {
-            return asc;
-        }
-
-        // sort and proxy model breaks the original model...
-        if (sortColumn() == 0)
-        {
-            return StringUtils::naturalCompare(leftFileInfo.fileName(), rightFileInfo.fileName(),
-                                           Qt::CaseInsensitive) < 0;
-        }
-        if (sortColumn() == 1)
-        {
-            auto leftSize = leftFileInfo.size();
-            auto rightSize = rightFileInfo.size();
-            if ((leftSize == rightSize) || (leftFileInfo.isDir() && rightFileInfo.isDir()))
-            {
-                return StringUtils::naturalCompare(leftFileInfo.fileName(),
-                                               rightFileInfo.fileName(),
-                                               Qt::CaseInsensitive) < 0
-                           ? asc
-                           : !asc;
-            }
-            return leftSize < rightSize;
-        }
-        return QSortFilterProxyModel::lessThan(left, right);
-    }
-
-    virtual Qt::ItemFlags flags(const QModelIndex &index) const
-    {
-        if (!index.isValid())
-            return Qt::NoItemFlags;
-
-        auto sourceIndex = mapToSource(index);
-        Qt::ItemFlags flags = sourceIndex.flags();
-        if (index.column() == 0)
-        {
-            flags |= Qt::ItemIsUserCheckable;
-            if (sourceIndex.model()->hasChildren(sourceIndex))
-            {
-                flags |= Qt::ItemIsAutoTristate;
-            }
-        }
-
-        return flags;
-    }
-
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const
-    {
-        QModelIndex sourceIndex = mapToSource(index);
-
-        if (index.column() == 0 && role == Qt::CheckStateRole)
-        {
-            QFileSystemModel *fsm = qobject_cast<QFileSystemModel *>(sourceModel());
-            auto blockedPath = relPath(fsm->filePath(sourceIndex));
-            auto cover = blocked.cover(blockedPath);
-            if (!cover.isNull())
-            {
-                return QVariant(Qt::Unchecked);
-            }
-            else if (blocked.exists(blockedPath))
-            {
-                return QVariant(Qt::PartiallyChecked);
-            }
-            else
-            {
-                return QVariant(Qt::Checked);
-            }
-        }
-
-        return sourceIndex.data(role);
-    }
-
-    virtual bool setData(const QModelIndex &index, const QVariant &value,
-                         int role = Qt::EditRole)
-    {
-        if (index.column() == 0 && role == Qt::CheckStateRole)
-        {
-            Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
-            return setFilterState(index, state);
-        }
-
-        QModelIndex sourceIndex = mapToSource(index);
-        return QSortFilterProxyModel::sourceModel()->setData(sourceIndex, value, role);
-    }
-
-    QString relPath(const QString &path) const
-    {
-        QString prefix = QDir().absoluteFilePath(m_instance->instanceRoot());
-        prefix += '/';
-        if (!path.startsWith(prefix))
-        {
-            return QString();
-        }
-        return path.mid(prefix.size());
-    }
-
-    bool setFilterState(QModelIndex index, Qt::CheckState state)
-    {
-        QFileSystemModel *fsm = qobject_cast<QFileSystemModel *>(sourceModel());
-
-        if (!fsm)
-        {
-            return false;
-        }
-
-        QModelIndex sourceIndex = mapToSource(index);
-        auto blockedPath = relPath(fsm->filePath(sourceIndex));
-        bool changed = false;
-        if (state == Qt::Unchecked)
-        {
-            // blocking a path
-            auto &node = blocked.insert(blockedPath);
-            // get rid of all blocked nodes below
-            node.clear();
-            changed = true;
-        }
-        else if (state == Qt::Checked || state == Qt::PartiallyChecked)
-        {
-            if (!blocked.remove(blockedPath))
-            {
-                auto cover = blocked.cover(blockedPath);
-                qDebug() << "Blocked by cover" << cover;
-                // uncover
-                blocked.remove(cover);
-                // block all contents, except for any cover
-                QModelIndex rootIndex =
-                    fsm->index(FS::PathCombine(m_instance->instanceRoot(), cover));
-                QModelIndex doing = rootIndex;
-                int row = 0;
-                QStack<QModelIndex> todo;
-                while (1)
-                {
-                    auto node = fsm->index(row, 0, doing);
-                    if (!node.isValid())
-                    {
-                        if (!todo.size())
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            doing = todo.pop();
-                            row = 0;
-                            continue;
-                        }
-                    }
-                    auto relpath = relPath(fsm->filePath(node));
-                    if (blockedPath.startsWith(relpath)) // cover found?
-                    {
-                        // continue processing cover later
-                        todo.push(node);
-                    }
-                    else
-                    {
-                        // or just block this one.
-                        blocked.insert(relpath);
-                    }
-                    row++;
-                }
-            }
-            changed = true;
-        }
-        if (changed)
-        {
-            // update the thing
-            emit dataChanged(index, index, {Qt::CheckStateRole});
-            // update everything above index
-            QModelIndex up = index.parent();
-            while (1)
-            {
-                if (!up.isValid())
-                    break;
-                emit dataChanged(up, up, {Qt::CheckStateRole});
-                up = up.parent();
-            }
-            // and everything below the index
-            QModelIndex doing = index;
-            int row = 0;
-            QStack<QModelIndex> todo;
-            while (1)
-            {
-                auto node = this->index(row, 0, doing);
-                if (!node.isValid())
-                {
-                    if (!todo.size())
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        doing = todo.pop();
-                        row = 0;
-                        continue;
-                    }
-                }
-                emit dataChanged(node, node, {Qt::CheckStateRole});
-                todo.push(node);
-                row++;
-            }
-            // siblings and unrelated nodes are ignored
-        }
-        return true;
-    }
-
-    bool shouldExpand(QModelIndex index)
-    {
-        QModelIndex sourceIndex = mapToSource(index);
-        QFileSystemModel *fsm = qobject_cast<QFileSystemModel *>(sourceModel());
-        if (!fsm)
-        {
-            return false;
-        }
-        auto blockedPath = relPath(fsm->filePath(sourceIndex));
-        auto found = blocked.find(blockedPath);
-        if(found)
-        {
-            return !found->leaf();
-        }
-        return false;
-    }
-
-    void setBlockedPaths(QStringList paths)
-    {
-        beginResetModel();
-        blocked.clear();
-        blocked.insert(paths);
-        endResetModel();
-    }
-
-    const SeparatorPrefixTree<'/'> & blockedPaths() const
-    {
-        return blocked;
-    }
-
-protected:
-    bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const
-    {
-        Q_UNUSED(source_parent)
-
-        // adjust the columns you want to filter out here
-        // return false for those that will be hidden
-        if (source_column == 2 || source_column == 3)
-            return false;
-
-        return true;
-    }
-
-private:
-    InstancePtr m_instance;
-    SeparatorPrefixTree<'/'> blocked;
-};
 
 ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget *parent)
     : QDialog(parent), ui(new Ui::ExportInstanceDialog), m_instance(instance)
 {
     ui->setupUi(this);
     auto model = new QFileSystemModel(this);
-    proxyModel = new PackIgnoreProxy(m_instance, this);
+    model->setIconProvider(&icons);
+    auto root = instance->instanceRoot();
+    proxyModel = new FileIgnoreProxy(root, this);
     loadPackIgnore();
     proxyModel->setSourceModel(model);
-    auto root = instance->instanceRoot();
     ui->treeView->setModel(proxyModel);
     ui->treeView->setRootIndex(proxyModel->mapFromSource(model->index(root)));
     ui->treeView->sortByColumn(0, Qt::AscendingOrder);
@@ -404,21 +125,10 @@ bool ExportInstanceDialog::doExport()
 
     const QString output = QFileDialog::getSaveFileName(
         this, tr("Export %1").arg(m_instance->name()),
-        FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)", nullptr, QFileDialog::DontConfirmOverwrite);
+        FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)", nullptr);
     if (output.isEmpty())
     {
         return false;
-    }
-    if (QFile::exists(output))
-    {
-        int ret =
-            QMessageBox::question(this, tr("Overwrite?"),
-                                  tr("This file already exists. Do you want to overwrite it?"),
-                                  QMessageBox::No, QMessageBox::Yes);
-        if (ret == QMessageBox::No)
-        {
-            return false;
-        }
     }
 
     SaveIcon(m_instance);
@@ -511,5 +221,3 @@ void ExportInstanceDialog::savePackIgnore()
         qWarning() << e.cause();
     }
 }
-
-#include "ExportInstanceDialog.moc"

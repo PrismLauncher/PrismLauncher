@@ -53,12 +53,11 @@ void ModrinthCheckUpdate::executeTask()
         // (though it will rarely happen, if at all)
         if (mod->metadata()->hash_format != best_hash_type) {
             auto hash_task = Hashing::createModrinthHasher(mod->fileinfo().absoluteFilePath());
-            connect(hash_task.get(), &Task::succeeded, [&] {
-                QString hash (hash_task->getResult());
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [&hashes, &mappings, mod](QString hash) {
                 hashes.append(hash);
                 mappings.insert(hash, mod);
             });
-            connect(hash_task.get(), &Task::failed, [this, hash_task] { failed("Failed to generate hash"); });
+            connect(hash_task.get(), &Task::failed, [this] { failed("Failed to generate hash"); });
             hashing_task.addTask(hash_task);
         } else {
             hashes.append(hash);
@@ -67,11 +66,11 @@ void ModrinthCheckUpdate::executeTask()
     }
 
     QEventLoop loop;
-    connect(&hashing_task, &Task::finished, [&loop]{ loop.quit(); });
+    connect(&hashing_task, &Task::finished, [&loop] { loop.quit(); });
     hashing_task.start();
     loop.exec();
 
-    auto* response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto job = api.latestVersions(hashes, best_hash_type, m_game_versions, m_loaders, response);
 
     QEventLoop lock;
@@ -112,7 +111,8 @@ void ModrinthCheckUpdate::executeTask()
                 // so we may want to filter it
                 QString loader_filter;
                 if (m_loaders.has_value()) {
-                    static auto flags = { ResourceAPI::ModLoaderType::Forge, ResourceAPI::ModLoaderType::Fabric, ResourceAPI::ModLoaderType::Quilt };
+                    static auto flags = { ResourceAPI::ModLoaderType::Forge, ResourceAPI::ModLoaderType::Fabric,
+                                          ResourceAPI::ModLoaderType::Quilt };
                     for (auto flag : flags) {
                         if (m_loaders.value().testFlag(flag)) {
                             loader_filter = api.getModLoaderString(flag);
@@ -122,7 +122,8 @@ void ModrinthCheckUpdate::executeTask()
                 }
 
                 // Currently, we rely on a couple heuristics to determine whether an update is actually available or not:
-                // - The file needs to be preferred: It is either the primary file, or the one found via (explicit) usage of the loader_filter
+                // - The file needs to be preferred: It is either the primary file, or the one found via (explicit) usage of the
+                // loader_filter
                 // - The version reported by the JAR is different from the version reported by the indexed version (it's usually the case)
                 // Such is the pain of having arbitrary files for a given version .-.
 
@@ -149,19 +150,19 @@ void ModrinthCheckUpdate::executeTask()
                         continue;
 
                     // Fake pack with the necessary info to pass to the download task :)
-                    ModPlatform::IndexedPack pack;
-                    pack.name = mod->name();
-                    pack.slug = mod->metadata()->slug;
-                    pack.addonId = mod->metadata()->project_id;
-                    pack.websiteUrl = mod->homeurl();
+                    auto pack = std::make_shared<ModPlatform::IndexedPack>();
+                    pack->name = mod->name();
+                    pack->slug = mod->metadata()->slug;
+                    pack->addonId = mod->metadata()->project_id;
+                    pack->websiteUrl = mod->homeurl();
                     for (auto& author : mod->authors())
-                        pack.authors.append({ author });
-                    pack.description = mod->description();
-                    pack.provider = ModPlatform::ResourceProvider::MODRINTH;
+                        pack->authors.append({ author });
+                    pack->description = mod->description();
+                    pack->provider = ModPlatform::ResourceProvider::MODRINTH;
 
                     auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_mods_folder);
 
-                    m_updatable.emplace_back(pack.name, hash, mod->version(), project_ver.version_number, project_ver.verison_type,
+                    m_updatable.emplace_back(pack->name, hash, mod->version(), project_ver.version_number, project_ver.version_type,
                                              project_ver.changelog, ModPlatform::ResourceProvider::MODRINTH, download_task);
                 }
             }
