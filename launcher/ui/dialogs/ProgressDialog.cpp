@@ -34,7 +34,7 @@
  */
 
 #include "ProgressDialog.h"
-#include <qpoint.h>
+#include <QPoint>
 #include "ui_ProgressDialog.h"
 
 #include <limits>
