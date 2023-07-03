@@ -70,6 +70,7 @@ public:
     void setCurrentVersion(const QString & version);
     void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
     void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
+    void setExactIfPresentFilter(BaseVersionList::ModelRoles role, QString filter);
     void setFilter(BaseVersionList::ModelRoles role, Filter *filter);
     void setEmptyString(QString emptyString);
     void setEmptyErrorString(QString emptyErrorString);

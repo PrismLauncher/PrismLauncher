@@ -434,22 +434,14 @@ void VersionPage::on_actionChange_version_triggered()
     }
     auto uid = list->uid();
 
-    // FIXME: this is still a horrible HACK.
-    if (uid == "net.minecraftforge" || uid == "com.mumfrey.liteloader" || uid == "net.fabricmc.fabric-loader" ||
-        uid == "org.quiltmc.quilt-loader") {
-        InstallLoaderDialog dialog(m_inst->getPackProfile(), uid, this);
-        dialog.exec();
-        m_container->refreshContainer();
-        return;
-    }
-
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
     if (uid == "net.fabricmc.intermediary" || uid == "org.quiltmc.hashed")
     {
         vselect.setEmptyString(tr("No intermediary mappings versions are currently available."));
         vselect.setEmptyErrorString(tr("Couldn't load or download the intermediary mappings version lists!"));
-        vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
     }
+    vselect.setExactIfPresentFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
+
     auto currentVersion = patch->getVersion();
     if(!currentVersion.isEmpty())
     {

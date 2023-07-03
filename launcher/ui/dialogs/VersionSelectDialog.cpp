@@ -152,6 +152,10 @@ void VersionSelectDialog::setExactFilter(BaseVersionList::ModelRoles role, QStri
     m_versionWidget->setExactFilter(role, filter);
 }
 
+void VersionSelectDialog::setExactIfPresentFilter(BaseVersionList::ModelRoles role, QString filter) {
+    m_versionWidget->setExactIfPresentFilter(role, filter);
+}
+
 void VersionSelectDialog::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)
 {
     m_versionWidget->setFuzzyFilter(role, filter);

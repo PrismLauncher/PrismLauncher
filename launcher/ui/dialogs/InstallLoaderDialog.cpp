@@ -35,15 +35,16 @@ class InstallLoaderPage : public VersionSelectWidget, public BasePage {
     InstallLoaderPage(const QString& id,
                       const QString& icon,
                       const QString& name,
-                      // "lightweight" loaders are independent to any game version
-                      const bool lightweight,
+                      const Version& oldestVersion,
                       const std::shared_ptr<PackProfile> profile)
         : VersionSelectWidget(nullptr), uid(id), iconName(icon), name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
-        if (!lightweight)
-            setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
+        setExactIfPresentFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
+
+        if (oldestVersion != Version() && Version(minecraftVersion) < oldestVersion)
+            setExactFilter(BaseVersionList::ParentVersionRole, "AAA");
 
         if (const QString currentVersion = profile->getComponentVersion(id); !currentVersion.isNull())
             setCurrentVersion(currentVersion);
@@ -129,13 +130,13 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, c
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
     return { // Forge
-             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), false, profile),
+             new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), {}, profile),
              // Fabric
-             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), true, profile),
+             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), Version("1.14"), profile),
              // Quilt
-             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), true, profile),
+             new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), Version("1.14"), profile),
              // LiteLoader
-             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), false, profile)
+             new InstallLoaderPage("com.mumfrey.liteloader", "liteloader", tr("LiteLoader"), {}, profile)
     };
 }
 
