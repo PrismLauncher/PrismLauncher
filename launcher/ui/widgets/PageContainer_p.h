@@ -103,6 +103,7 @@ public:
         setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Expanding);
         setItemDelegate(new PageViewDelegate(this));
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        setProperty("_kde_side_panel_view", true);
     }
 
     virtual QSize sizeHint() const
