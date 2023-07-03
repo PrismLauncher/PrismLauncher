@@ -162,7 +162,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Visit on mod's page</string>
+    <string>Visit mod's page</string>
    </property>
    <property name="toolTip">
     <string>Go to mods home page</string>

@@ -104,7 +104,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
             auto selected = std::count_if(mods_list.cbegin(), mods_list.cend(),
                                           [](Mod* v) { return v->metadata() != nullptr || v->homeurl().size() != 0; });
             if (selected <= 1) {
-                ui->actionVisitItemPage->setText(tr("Visit on mod's page"));
+                ui->actionVisitItemPage->setText(tr("Visit mod's page"));
                 ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
             } else {
                 ui->actionVisitItemPage->setText(tr("Visit the pages of the selected mods"));
