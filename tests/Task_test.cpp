@@ -80,6 +80,7 @@ class BigConcurrentTaskThread : public QThread {
             QCoreApplication::processEvents();
 
         emit finished();
+        delete[] sub_tasks;
     }
 
    public:

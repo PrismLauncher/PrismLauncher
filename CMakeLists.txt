@@ -91,16 +91,25 @@ option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" on)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND DEBUG_ADDRESS_SANITIZER)
     message(STATUS "Address Sanitizer enabeled for Debug builds, Turn it off with -DDEBUG_ADDRESS_SANITIZER=off")
     if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-        # AppleClang and Clang
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -faddress-sanitizer -O1 -fno-omit-frame-pointer")
+        if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+            # using clang with clang-cl front end 
+            message(STATUS "Address Sanitizer available on Clang MSVC frontend")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /O1 /Oy-")
+        else()
+            # AppleClang and Clang
+            message(STATUS "Address Sanitizer available on Clang")
+            set(cmake_cxx_flags "${cmake_cxx_flags} -fsanitize=address -O1 -fno-omit-frame-pointer")
+        endif()
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # GCC
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
+        message(STATUS "Address Sanitizer available on GCC")
+        set(cmake_cxx_flags "${cmake_cxx_flags} -fsanitize=address -O1 -fno-omit-frame-pointer")
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
         # Intell compiler ? why?
         # no address sanitiser here though
         message(STATUS "Address Sanitizer not available on Intell compilers")
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+        message(STATUS "Address Sanitizer available on MSVC")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /O1 /Oy-")
     else()
         message(STATUS "Address Sanitizer not available on unknown compiler ${CMAKE_CXX_COMPILER_ID}")
