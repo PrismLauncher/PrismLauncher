@@ -85,6 +85,28 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTOML_ENABLE_FLOAT16=0")
 # set CXXFLAGS for build targets
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
 
+option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" on)
+
+# If this is a Debug build turn on address sanitiser
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND DEBUG_ADDRESS_SANITIZER)
+    message(STATUS "Address Sanitizer enabeled for Debug builds, Turn it off with -DDEBUG_ADDRESS_SANITIZER=off")
+    if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        # AppleClang and Clang
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        # GCC
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+        # Intell compiler ? why?
+        # no address sanitiser here though
+        message(STATUS "Address Sanitizer not available on Intell compilers")
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address")
+    else()
+        message(STATUS "Address Sanitizer not available on unknown compiler ${CMAKE_CXX_COMPILER_ID}")
+    endif()
+endif()
+
 option(ENABLE_LTO "Enable Link Time Optimization" off)
 
 if(ENABLE_LTO)
