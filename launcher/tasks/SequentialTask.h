@@ -50,6 +50,9 @@ class SequentialTask : public ConcurrentTask {
     explicit SequentialTask(QObject* parent = nullptr, QString task_name = "");
     ~SequentialTask() override = default;
 
+   public slots:
+    virtual void retry() override;
+
    protected:
     void startNext() override;
     void updateState() override;

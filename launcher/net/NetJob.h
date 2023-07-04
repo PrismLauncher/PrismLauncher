@@ -55,8 +55,8 @@ class NetJob : public ConcurrentTask {
     explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network)
         : ConcurrentTask(nullptr, job_name), m_network(network)
     {
-        setMaxRetry(3);
-        setSubTaskFailStrategy(SubTaskFailStratagy::Retry);
+        setMaxAutomaticRetry(3);
+        setSubTaskFailStrategy(SubTaskFailStratagy::Fail);
     }
     ~NetJob() override = default;
 

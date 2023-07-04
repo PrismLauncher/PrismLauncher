@@ -48,7 +48,7 @@ class ConcurrentTask : public Task {
    public:
     using Ptr = shared_qobject_ptr<ConcurrentTask>;
 
-    enum class SubTaskFailStratagy { Success, Retry, Fail };
+    enum class SubTaskFailStratagy { Success, Fail };
 
     explicit ConcurrentTask(QObject* parent = nullptr, QString task_name = "", int max_concurrent = 6);
     ~ConcurrentTask() override;
@@ -61,7 +61,7 @@ class ConcurrentTask : public Task {
     void addTask(Task::Ptr task);
 
     void setSubTaskFailStrategy(SubTaskFailStratagy strategy) { m_strategy = strategy; }
-    void setMaxRetry(quint64 max_retry) { m_max_retry = max_retry; }
+    void setMaxAutomaticRetry(quint64 max_retry) { m_max_auto_retry = max_retry; }
 
    public slots:
     bool abort() override;
@@ -78,6 +78,7 @@ class ConcurrentTask : public Task {
 
     // called right before the Task is finished
     bool finalize();
+    virtual void retry() override;
 
     void subTaskSucceeded(Task::Ptr);
     void subTaskFailed(Task::Ptr, const QString& msg);
@@ -116,6 +117,6 @@ class ConcurrentTask : public Task {
     bool m_aborted = false;
 
     SubTaskFailStratagy m_strategy = SubTaskFailStratagy::Success;
-    quint64 m_max_retry = 0;
+    quint64 m_max_auto_retry = 0;
     quint64 m_current_retry = 0;
 };

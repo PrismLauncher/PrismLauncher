@@ -143,6 +143,7 @@ class Task : public QObject, public QRunnable {
     /** Emitted when the canAbort() status has changed.
      */
     void abortStatusChanged(bool can_abort);
+    void retryStatusChanged(bool can_retry);
 
    public slots:
     // QRunnable's interface
@@ -156,16 +157,22 @@ class Task : public QObject, public QRunnable {
         return canAbort();
     };
 
+    void setAbortable(bool can_abort)
+    {
+        m_can_abort = can_abort;
+        emit abortStatusChanged(can_abort);
+    }
+
     virtual void retry()
     {
         if (canRetry())
             start();
     };
 
-    void setAbortable(bool can_abort)
+    void setRetryable(bool can_retry)
     {
-        m_can_abort = can_abort;
-        emit abortStatusChanged(can_abort);
+        m_can_retry = can_retry;
+        emit retryStatusChanged(can_retry);
     }
 
    protected:

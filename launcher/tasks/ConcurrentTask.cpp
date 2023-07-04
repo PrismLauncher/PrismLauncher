@@ -299,17 +299,15 @@ void ConcurrentTask::updateState()
 bool ConcurrentTask::finalize()
 {
     if (!m_failed.isEmpty()) {
+        if (m_current_retry < m_max_auto_retry) {
+            m_current_retry++;
+            while (!m_failed.isEmpty())
+                m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
+            return false;
+        }
         switch (m_strategy) {
             case SubTaskFailStratagy::Success:
                 break;
-            case SubTaskFailStratagy::Retry:
-                if (m_current_retry < m_max_retry) {
-                    m_current_retry++;
-                    while (!m_failed.isEmpty())
-                        m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
-                    return false;
-                }
-                /* fallthrough */
             case SubTaskFailStratagy::Fail:
                 emitFailed("One ore more subtasks failed");
                 return true;
@@ -317,4 +315,13 @@ bool ConcurrentTask::finalize()
     }
     emitSucceeded();
     return true;
+}
+
+void ConcurrentTask::retry()
+{
+    if (canRetry()) {
+        while (!m_failed.isEmpty())
+            m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
+        executeTask();
+    }
 }

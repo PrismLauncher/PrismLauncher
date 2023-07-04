@@ -112,7 +112,6 @@ void Flame::FileResolvingTask::netJobFinished()
     connect(m_checkJob.get(), &NetJob::failed, this, [this, step_progress](QString reason) {
         step_progress->state = TaskStepState::Failed;
         stepProgress(*step_progress);
-        emitFailed(reason);
     });
     connect(m_checkJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propogateStepProgress);
     connect(m_checkJob.get(), &NetJob::progress, this, [this, step_progress](qint64 current, qint64 total) {
@@ -128,12 +127,13 @@ void Flame::FileResolvingTask::netJobFinished()
     m_checkJob->start();
 }
 
-void Flame::FileResolvingTask::modrinthCheckFinished() {
+void Flame::FileResolvingTask::modrinthCheckFinished()
+{
     setProgress(2, 3);
     qDebug() << "Finished with blocked mods : " << blockedProjects.size();
 
     for (auto it = blockedProjects.keyBegin(); it != blockedProjects.keyEnd(); it++) {
-        auto &out = *it;
+        auto& out = *it;
         auto bytes = blockedProjects[out];
         if (!out->resolved) {
             continue;
@@ -153,15 +153,13 @@ void Flame::FileResolvingTask::modrinthCheckFinished() {
             out->resolved = false;
         }
     }
-    //copy to an output list and filter out projects found on modrinth
+    // copy to an output list and filter out projects found on modrinth
     auto block = std::make_shared<QList<File*>>();
     auto it = blockedProjects.keys();
-    std::copy_if(it.begin(), it.end(), std::back_inserter(*block), [](File *f) {
-        return !f->resolved;
-    });
-    //Display not found mods early
+    std::copy_if(it.begin(), it.end(), std::back_inserter(*block), [](File* f) { return !f->resolved; });
+    // Display not found mods early
     if (!block->empty()) {
-        //blocked mods found, we need the slug for displaying.... we need another job :D !
+        // blocked mods found, we need the slug for displaying.... we need another job :D !
         m_slugJob.reset(new NetJob("Slug Job", m_network));
         int index = 0;
         for (auto mod : *block) {
@@ -173,8 +171,8 @@ void Flame::FileResolvingTask::modrinthCheckFinished() {
             QObject::connect(dl.get(), &Net::Download::succeeded, [block, index, output]() {
                 auto mod = block->at(index);  // use the shared_ptr so it is captured and only freed when we are done
                 auto json = QJsonDocument::fromJson(*output);
-                auto base = Json::requireString(Json::requireObject(Json::requireObject(Json::requireObject(json),"data"),"links"),
-                        "websiteUrl");
+                auto base =
+                    Json::requireString(Json::requireObject(Json::requireObject(Json::requireObject(json), "data"), "links"), "websiteUrl");
                 auto link = QString("%1/download/%2").arg(base, QString::number(mod->fileId));
                 mod->websiteUrl = link;
             });

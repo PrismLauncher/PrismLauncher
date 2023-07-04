@@ -55,3 +55,16 @@ void SequentialTask::updateState()
     setProgress(m_done.count(), totalSize());
     setStatus(tr("Executing task %1 out of %2").arg(QString::number(m_doing.count() + m_done.count()), QString::number(totalSize())));
 }
+
+void SequentialTask::retry()
+{
+    if (canRetry()) {
+        QQueue<Task::Ptr> queue;
+        while (!m_failed.isEmpty())
+            queue.enqueue(m_failed.take(*m_failed.keyBegin()));
+        while (!m_queue.isEmpty())
+            queue.enqueue(m_queue.dequeue());
+        m_queue = queue;
+        executeTask();
+    }
+}
