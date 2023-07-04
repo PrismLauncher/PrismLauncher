@@ -52,6 +52,8 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     // use the game root - everything outside cannot be exported
     const QDir root(instance->gameRoot());
     proxy = new FileIgnoreProxy(instance->gameRoot(), this);
+    proxy->ignoreFilesWithPath().insert({ "logs", "crash-reports" });
+    proxy->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
     proxy->setSourceModel(model);
 
     const QDir::Filters filter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Hidden);
@@ -98,7 +100,7 @@ void ExportMrPackDialog::done(int result)
             return;
 
         ModrinthPackExportTask task(ui->name->text(), ui->version->text(), ui->summary->text(), instance, output,
-                                    [this](const QString& path) { return proxy->blockedPaths().covers(path); });
+                                    std::bind(&FileIgnoreProxy::filterFile, proxy, std::placeholders::_1));
 
         connect(&task, &Task::failed,
                 [this](const QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });

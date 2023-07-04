@@ -22,7 +22,7 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "net/NetJob.h"
+#include "modplatform/ModIndex.h"
 
 static ModrinthAPI api;
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -140,6 +140,28 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     file.version_number = Json::requireString(obj, "version_number");
     file.changelog = Json::requireString(obj, "changelog");
 
+    auto dependencies = Json::ensureArray(obj, "dependencies");
+    for (auto d : dependencies) {
+        auto dep = Json::ensureObject(d);
+        ModPlatform::Dependency dependency;
+        dependency.addonId = Json::ensureString(dep, "project_id");
+        dependency.version = Json::ensureString(dep, "version_id");
+        auto depType = Json::requireString(dep, "dependency_type");
+
+        if (depType == "required")
+            dependency.type = ModPlatform::DependencyType::REQUIRED;
+        else if (depType == "optional")
+            dependency.type = ModPlatform::DependencyType::OPTIONAL;
+        else if (depType == "incompatible")
+            dependency.type = ModPlatform::DependencyType::INCOMPATIBLE;
+        else if (depType == "embedded")
+            dependency.type = ModPlatform::DependencyType::EMBEDDED;
+        else
+            dependency.type = ModPlatform::DependencyType::UNKNOWN;
+
+        file.dependencies.append(dependency);
+    }
+
     auto files = Json::requireArray(obj, "files");
     int i = 0;
 
@@ -194,4 +216,23 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     }
 
     return {};
+}
+
+auto Modrinth::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    QVector<ModPlatform::IndexedVersion> versions;
+
+    for (auto versionIter : arr) {
+        auto obj = versionIter.toObject();
+        auto file = loadIndexedPackVersion(obj);
+
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+            versions.append(file);
+    }
+    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        // dates are in RFC 3339 format
+        return a.date > b.date;
+    };
+    std::sort(versions.begin(), versions.end(), orderSortPredicate);
+    return versions.length() != 0 ? versions.front() : ModPlatform::IndexedVersion();
 }

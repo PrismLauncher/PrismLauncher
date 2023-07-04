@@ -150,10 +150,6 @@
     <addaction name="actionChangeInstGroup"/>
     <addaction name="actionViewSelectedInstFolder"/>
     <addaction name="actionExportInstance"/>
-    <widget class="QMenu" name="exportInstanceMenu">
-     <addaction name="actionExportInstanceZip"/>
-     <addaction name="actionExportInstanceMrPack"/>
-    </widget>
     <addaction name="actionCopyInstance"/>
     <addaction name="actionDeleteInstance"/>
     <addaction name="actionCreateInstanceShortcut"/>
@@ -191,6 +187,7 @@
      <bool>true</bool>
     </property>
     <addaction name="actionViewInstanceFolder"/>
+    <addaction name="actionViewLauncherRootFolder"/>
     <addaction name="actionViewCentralModsFolder"/>
    </widget>
    <widget class="QMenu" name="accountsMenu">
@@ -467,11 +464,17 @@
    </property>
   </action>
   <action name="actionExportInstanceZip">
+   <property name="icon">
+    <iconset theme="launcher"/>
+   </property>
    <property name="text">
     <string>Prism Launcher (zip)</string>
    </property>
   </action>
   <action name="actionExportInstanceMrPack">
+   <property name="icon">
+    <iconset theme="modrinth"/>
+   </property>
    <property name="text">
     <string>Modrinth (mrpack)</string>
    </property>
@@ -539,6 +542,18 @@
     <string>Open the instance folder in a file browser.</string>
    </property>
   </action>
+  <action name="actionViewLauncherRootFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;View Launcher Root Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the launcher's root folder in a file browser.</string>
+   </property>
+  </action>
   <action name="actionViewCentralModsFolder">
    <property name="icon">
     <iconset theme="centralmods">
@@ -562,7 +577,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Report a &amp;Bug...</string>
+    <string>Report a Bug or Suggest a Feature</string>
    </property>
    <property name="toolTip">
     <string>Open the bug tracker to report a bug with %1.</string>

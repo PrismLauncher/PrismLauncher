@@ -27,7 +27,7 @@
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 
-const QStringList ModrinthPackExportTask::PREFIXES({ "mods", "coremods", "resourcepacks", "texturepacks", "shaderpacks" });
+const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
 const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "zip" });
 
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
@@ -99,14 +99,12 @@ void ModrinthPackExportTask::collectHashes()
 
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
         // require sensible file types
-        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(),
-                         [&relative](const QString& prefix) { return relative.startsWith(prefix + QDir::separator()); }))
+        if (!std::any_of(PREFIXES.begin(), PREFIXES.end(), [&relative](const QString& prefix) { return relative.startsWith(prefix); }))
             continue;
         if (!std::any_of(FILE_EXTENSIONS.begin(), FILE_EXTENSIONS.end(), [&relative](const QString& extension) {
                 return relative.endsWith('.' + extension) || relative.endsWith('.' + extension + ".disabled");
-            })) {
+            }))
             continue;
-        }
 
         QCryptographicHash sha512(QCryptographicHash::Algorithm::Sha512);
 
@@ -136,8 +134,8 @@ void ModrinthPackExportTask::collectHashes()
                     QCryptographicHash sha1(QCryptographicHash::Algorithm::Sha1);
                     sha1.addData(data);
 
-                    ResolvedFile file{ sha1.result().toHex(), sha512.result().toHex(), url.toString(), openFile.size() };
-                    resolvedFiles[relative] = file;
+                    ResolvedFile resolvedFile{ sha1.result().toHex(), sha512.result().toHex(), url.toEncoded(), openFile.size() };
+                    resolvedFiles[relative] = resolvedFile;
 
                     // nice! we've managed to resolve based on local metadata!
                     // no need to enqueue it
@@ -159,7 +157,7 @@ void ModrinthPackExportTask::makeApiRequest()
     if (pendingHashes.isEmpty())
         buildZip();
     else {
-        QByteArray* response = new QByteArray;
+        auto response = std::make_shared<QByteArray>();
         task = api.currentVersions(pendingHashes.values(), "sha512", response);
         connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
         connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
@@ -167,7 +165,7 @@ void ModrinthPackExportTask::makeApiRequest()
     }
 }
 
-void ModrinthPackExportTask::parseApiResponse(const QByteArray* response)
+void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<QByteArray> response)
 {
     task = nullptr;
 
@@ -303,9 +301,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
         const ResolvedFile& value = iterator.value();
 
         QJsonObject file;
-        QString path = iterator.key();
-        path.replace(QDir::separator(), "/");
-        file["path"] = path;
+        file["path"] = iterator.key();
         file["downloads"] = QJsonArray({ iterator.value().url });
 
         QJsonObject hashes;

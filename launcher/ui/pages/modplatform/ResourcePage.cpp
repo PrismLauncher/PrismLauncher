@@ -174,7 +174,11 @@ ModPlatform::IndexedPack::Ptr ResourcePage::getCurrentPack() const
 void ResourcePage::updateUi()
 {
     auto current_pack = getCurrentPack();
-
+    if (!current_pack) {
+        m_ui->packDescription->setHtml({});
+        m_ui->packDescription->flush();
+        return;
+    }
     QString text = "";
     QString name = current_pack->name;
 
@@ -240,10 +244,13 @@ void ResourcePage::updateSelectionButton()
     }
 
     m_ui->resourceSelectionButton->setEnabled(true);
-    if (!getCurrentPack()->isVersionSelected(m_selected_version_index)) {
-        m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
+    if (auto current_pack = getCurrentPack(); current_pack) {
+        if (!current_pack->isVersionSelected(m_selected_version_index))
+            m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
+        else
+            m_ui->resourceSelectionButton->setText(tr("Deselect %1 for download").arg(resourceString()));
     } else {
-        m_ui->resourceSelectionButton->setText(tr("Deselect %1 for download").arg(resourceString()));
+        qWarning() << "Tried to update the selected button but there is not a pack selected";
     }
 }
 
@@ -255,13 +262,14 @@ void ResourcePage::updateVersionList()
     m_ui->versionSelectionBox->clear();
     m_ui->versionSelectionBox->blockSignals(false);
 
-    for (int i = 0; i < current_pack->versions.size(); i++) {
-        auto& version = current_pack->versions[i];
-        if (optedOut(version))
-            continue;
+    if (current_pack)
+        for (int i = 0; i < current_pack->versions.size(); i++) {
+            auto& version = current_pack->versions[i];
+            if (optedOut(version))
+                continue;
 
-        m_ui->versionSelectionBox->addItem(current_pack->versions[i].version, QVariant(i));
-    }
+            m_ui->versionSelectionBox->addItem(current_pack->versions[i].version, QVariant(i));
+        }
 
     if (m_ui->versionSelectionBox->count() == 0) {
         m_ui->versionSelectionBox->addItem(tr("No valid version found."), QVariant(-1));
@@ -280,7 +288,7 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     auto current_pack = getCurrentPack();
 
     bool request_load = false;
-    if (!current_pack->versionsLoaded) {
+    if (!current_pack || !current_pack->versionsLoaded) {
         m_ui->resourceSelectionButton->setText(tr("Loading versions..."));
         m_ui->resourceSelectionButton->setEnabled(false);
 
@@ -289,7 +297,7 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         updateVersionList();
     }
 
-    if (!current_pack->extraDataLoaded)
+    if (current_pack && !current_pack->extraDataLoaded)
         request_load = true;
 
     if (request_load)
@@ -337,7 +345,7 @@ void ResourcePage::onResourceSelected()
         return;
 
     auto current_pack = getCurrentPack();
-    if (!current_pack->versionsLoaded)
+    if (!current_pack || !current_pack->versionsLoaded)
         return;
 
     auto& version = current_pack->versions[m_selected_version_index];
@@ -383,7 +391,7 @@ void ResourcePage::openUrl(const QUrl& url)
         const QString slug = match.captured(1);
 
         // ensure the user isn't opening the same mod
-        if (slug != getCurrentPack()->slug) {
+        if (auto current_pack = getCurrentPack(); current_pack && slug != current_pack->slug) {
             m_parent_dialog->selectPage(page);
 
             auto newPage = m_parent_dialog->getSelectedPage();

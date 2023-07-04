@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,9 +55,14 @@ public:
     bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
     {
         const auto &filters = m_parent->filters();
+        const QString &search = m_parent->search();
+        const QModelIndex idx = sourceModel()->index(source_row, 0, source_parent);
+
+        if (!search.isEmpty() && !sourceModel()->data(idx, BaseVersionList::VersionRole).toString().contains(search, Qt::CaseInsensitive))
+            return false;
+
         for (auto it = filters.begin(); it != filters.end(); ++it)
         {
-            auto idx = sourceModel()->index(source_row, 0, source_parent);
             auto data = sourceModel()->data(idx, it.key());
             auto match = data.toString();
             if(!it.value()->accepts(match))
@@ -195,7 +201,19 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                     auto latestValue = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
                     if(latestValue.toBool())
                     {
-                        return tr("Latest");
+                        auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
+                        if(value.toBool())
+                        {
+                            return tr("Recommended");
+                        }
+                        else if(hasLatest)
+                        {
+                            auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
+                            if(value.toBool())
+                            {
+                                return tr("Latest");
+                            }
+                        }
                     }
                 }
                 else if(index.row() == 0) {
@@ -204,15 +222,37 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
             }
             return sourceModel()->data(parentIndex, BaseVersionList::VersionIdRole);
         }
-        case Qt::DecorationRole: {
-            if (column == Name && hasRecommended) {
-                auto recommendedValue = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
-                if(recommendedValue.toBool()) {
-                    return APPLICATION->getThemedIcon("star");
-                } else if(hasLatest) {
-                    auto latestValue = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
-                    if(latestValue.toBool()) {
-                        return APPLICATION->getThemedIcon("bug");
+        case Qt::DecorationRole:
+        {
+            switch(column)
+            {
+                case Name:
+                {
+                    if(hasRecommended)
+                    {
+                        auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
+                        if(value.toBool())
+                        {
+                            return APPLICATION->getThemedIcon("star");
+                        }
+                        else if(hasLatest)
+                        {
+                            auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
+                            if(value.toBool())
+                            {
+                                return APPLICATION->getThemedIcon("bug");
+                            }
+                        }
+                        QPixmap pixmap;
+                        QPixmapCache::find("placeholder", &pixmap);
+                        if(!pixmap)
+                        {
+                            QPixmap px(16,16);
+                            px.fill(Qt::transparent);
+                            QPixmapCache::insert("placeholder", px);
+                            return px;
+                        }
+                        return pixmap;
                     }
                 }
                 else if(index.row() == 0) {
@@ -401,6 +441,7 @@ QModelIndex VersionProxyModel::getVersion(const QString& version) const
 void VersionProxyModel::clearFilters()
 {
     m_filters.clear();
+    m_search.clear();
     filterModel->filterChanged();
 }
 
@@ -410,9 +451,19 @@ void VersionProxyModel::setFilter(const BaseVersionList::ModelRoles column, Filt
     filterModel->filterChanged();
 }
 
+void VersionProxyModel::setSearch(const QString &search) {
+    m_search = search;
+    filterModel->filterChanged();
+}
+
 const VersionProxyModel::FilterMap &VersionProxyModel::filters() const
 {
     return m_filters;
+}
+
+const QString &VersionProxyModel::search() const
+{
+    return m_search;
 }
 
 void VersionProxyModel::sourceAboutToBeReset()

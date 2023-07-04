@@ -40,7 +40,7 @@ void ResourcePack::setDescription(QString new_description)
     m_description = new_description;
 }
 
-void ResourcePack::setImage(QImage new_image)
+void ResourcePack::setImage(QImage new_image) const
 {
     QMutexLocker locker(&m_data_lock);
 
@@ -49,7 +49,10 @@ void ResourcePack::setImage(QImage new_image)
     if (m_pack_image_cache_key.key.isValid())
         PixmapCache::instance().remove(m_pack_image_cache_key.key);
 
-    m_pack_image_cache_key.key = PixmapCache::instance().insert(QPixmap::fromImage(new_image));
+    // scale the image to avoid flooding the pixmapcache
+    auto pixmap = QPixmap::fromImage(new_image.scaled({64, 64}, Qt::AspectRatioMode::KeepAspectRatioByExpanding));
+
+    m_pack_image_cache_key.key = PixmapCache::instance().insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;
 
     // This can happen if the pixmap is too big to fit in the cache :c
@@ -59,21 +62,25 @@ void ResourcePack::setImage(QImage new_image)
     }
 }
 
-QPixmap ResourcePack::image(QSize size)
+QPixmap ResourcePack::image(QSize size, Qt::AspectRatioMode mode) const
 {
     QPixmap cached_image;
     if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull())
             return cached_image;
-        return cached_image.scaled(size);
+        return cached_image.scaled(size, mode);
     }
 
     // No valid image we can get
-    if (!m_pack_image_cache_key.was_ever_used)
+    if (!m_pack_image_cache_key.was_ever_used) {
         return {};
+    } else {
+        qDebug() << "Resource Pack" << name() << "Had it's image evicted from the cache. reloading...";
+        PixmapCache::markCacheMissByEviciton();
+    }
 
     // Imaged got evicted from the cache. Re-process it and retry.
-    ResourcePackUtils::process(*this);
+    ResourcePackUtils::processPackPNG(*this);
     return image(size);
 }
 

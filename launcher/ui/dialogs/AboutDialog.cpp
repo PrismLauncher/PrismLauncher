@@ -71,13 +71,18 @@ QString getCreditsHtml()
     //: %1 is the name of the launcher, determined at build time, e.g. "Prism Launcher Developers"
     stream << "<h3>" << QObject::tr("%1 Developers", "About Credits").arg(BuildConfig.LAUNCHER_DISPLAYNAME) << "</h3>\n";
     stream << QString("<p>Sefa Eyeoglu (Scrumplex) %1</p>\n")   .arg(getWebsite("https://scrumplex.net"));
-    stream << QString("<p>dada513 %1</p>\n")                    .arg(getGitHub("dada513"));
+    stream << QString("<p>d-513 %1</p>\n")                      .arg(getGitHub("d-513"));
     stream << QString("<p>txtsd %1</p>\n")                      .arg(getWebsite("https://ihavea.quest"));
     stream << QString("<p>timoreo %1</p>\n")                    .arg(getGitHub("timoreo22"));
     stream << QString("<p>Ezekiel Smith (ZekeSmith) %1</p>\n")  .arg(getGitHub("ZekeSmith"));
     stream << QString("<p>cozyGalvinism %1</p>\n")              .arg(getGitHub("cozyGalvinism"));
-    stream << QString("<p>DioEgizio %1</p>\n")      .arg(getGitHub("DioEgizio"));
-    stream << QString("<p>flowln %1</p>\n")         .arg(getGitHub("flowln"));
+    stream << QString("<p>DioEgizio %1</p>\n")                  .arg(getGitHub("DioEgizio"));
+    stream << QString("<p>flowln %1</p>\n")                     .arg(getGitHub("flowln"));
+    stream << QString("<p>ViRb3 %1</p>\n")                      .arg(getGitHub("ViRb3"));
+    stream << QString("<p>Rachel Powers (Ryex) %1</p>\n")       .arg(getGitHub("Ryex"));
+    stream << QString("<p>TayouVR %1</p>\n")                    .arg(getGitHub("TayouVR"));
+    stream << QString("<p>TheKodeToad %1</p>\n")                .arg(getGitHub("TheKodeToad"));
+    stream << QString("<p>getchoo %1</p>\n")                    .arg(getGitHub("getchoo"));
     stream << "<br />\n";
 
     // TODO: possibly retrieve from git history at build time?

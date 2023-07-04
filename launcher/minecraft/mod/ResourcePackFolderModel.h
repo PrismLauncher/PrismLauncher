@@ -11,6 +11,7 @@ public:
     enum Columns
     {
         ActiveColumn = 0,
+        ImageColumn,
         NameColumn,
         PackFormatColumn,
         DateColumn,
@@ -18,6 +19,8 @@ public:
     };
 
     explicit ResourcePackFolderModel(const QString &dir, BaseInstance* instance);
+
+    virtual QString id() const override { return "resourcepacks"; }
 
     [[nodiscard]] QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
