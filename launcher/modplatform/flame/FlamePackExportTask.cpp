@@ -362,9 +362,9 @@ void FlamePackExportTask::buildZip()
         for (auto mod : resolvedFiles) {
             if (mod.isMod) {
                 content += QString(TEMPLATE)
-                               .replace("{name}", mod.name)
-                               .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.addonId))
-                               .replace("{authors}", !mod.authors.isEmpty() ? QString(" (by %1)").arg(mod.authors) : "");
+                               .replace("{name}", mod.name.toHtmlEscaped())
+                               .replace("{url}", ModPlatform::getMetaURL(ModPlatform::ResourceProvider::FLAME, mod.addonId).toHtmlEscaped())
+                               .replace("{authors}", !mod.authors.isEmpty() ? QString(" (by %1)").arg(mod.authors).toHtmlEscaped() : "");
             }
         }
         content = "<ul>" + content + "</ul>";
