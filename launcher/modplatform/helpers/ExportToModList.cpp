@@ -26,9 +26,9 @@ QString toHTML(QList<Mod*> mods, OptionalData extraData)
     QStringList lines;
     for (auto mod : mods) {
         auto meta = mod->metadata();
-        auto modName = mod->name();
+        auto modName = mod->name().toHtmlEscaped();
         if (extraData & Url) {
-            auto url = mod->metaurl();
+            auto url = mod->metaurl().toHtmlEscaped();
             if (!url.isEmpty())
                 modName = QString("<a href=\"%1\">%2</a>").arg(url, modName);
         }
@@ -38,10 +38,10 @@ QString toHTML(QList<Mod*> mods, OptionalData extraData)
             if (ver.isEmpty() && meta != nullptr)
                 ver = meta->version().toString();
             if (!ver.isEmpty())
-                line += QString(" [%1]").arg(ver);
+                line += QString(" [%1]").arg(ver.toHtmlEscaped());
         }
         if (extraData & Authors && !mod->authors().isEmpty())
-            line += " by " + mod->authors().join(", ");
+            line += " by " + mod->authors().join(", ").toHtmlEscaped();
         lines.append(QString("<li>%1</li>").arg(line));
     }
     return QString("<html><body><ul>\n\t%1\n</ul></body></html>").arg(lines.join("\n\t"));
