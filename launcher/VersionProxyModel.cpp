@@ -191,36 +191,21 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                     return QVariant();
             }
         }
-        case Qt::ToolTipRole: {
+        case Qt::ToolTipRole:
+        {
             if (column == Name && hasRecommended) {
-                auto recommendedValue = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
-                if(recommendedValue.toBool()) {
+                auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
+                if (value.toBool()) {
                     return tr("Recommended");
-                }
-                else if(hasLatest) {
-                    auto latestValue = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
-                    if(latestValue.toBool())
-                    {
-                        auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
-                        if(value.toBool())
-                        {
-                            return tr("Recommended");
-                        }
-                        else if(hasLatest)
-                        {
-                            auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
-                            if(value.toBool())
-                            {
-                                return tr("Latest");
-                            }
-                        }
+                } else if(hasLatest) {
+                    auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
+                    if(value.toBool()) {
+                        return tr("Latest");
                     }
                 }
-                else if(index.row() == 0) {
-                    return tr("Latest");
-                }
+            } else {
+                return sourceModel()->data(parentIndex, BaseVersionList::VersionIdRole);
             }
-            return sourceModel()->data(parentIndex, BaseVersionList::VersionIdRole);
         }
         case Qt::DecorationRole:
         {
@@ -255,20 +240,10 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
                         return pixmap;
                     }
                 }
-                else if(index.row() == 0) {
-                    return APPLICATION->getThemedIcon("bug");
+                default:
+                {
+                    return QVariant();
                 }
-                QPixmap pixmap;
-                QPixmapCache::find("placeholder", &pixmap);
-                if(!pixmap) {
-                    QPixmap px(16,16);
-                    px.fill(Qt::transparent);
-                    QPixmapCache::insert("placeholder", px);
-                    return px;
-                }
-                return pixmap;
-            } else {
-                return QVariant();
             }
         }
         default:
