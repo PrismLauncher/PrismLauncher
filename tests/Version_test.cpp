@@ -145,10 +145,10 @@ class VersionTest : public QObject {
 
     void test_flexVerTestVector()
     {
-        QString first = *static_cast<QString*>(QTest ::qData("first", ::qMetaTypeId<typename std ::remove_cv<QString>::type>()));
-        QString second = *static_cast<QString*>(QTest ::qData("second", ::qMetaTypeId<typename std ::remove_cv<QString>::type>()));
-        bool lessThan = *static_cast<bool*>(QTest ::qData("lessThan", ::qMetaTypeId<typename std ::remove_cv<bool>::type>()));
-        bool equal = *static_cast<bool*>(QTest ::qData("equal", ::qMetaTypeId<typename std ::remove_cv<bool>::type>()));
+        QFETCH(QString, first);
+        QFETCH(QString, second);
+        QFETCH(bool, lessThan);
+        QFETCH(bool, equal);
 
         const auto v1 = Version(first);
         const auto v2 = Version(second);

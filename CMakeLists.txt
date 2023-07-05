@@ -89,7 +89,7 @@ option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" on)
 
 # If this is a Debug build turn on address sanitiser
 if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND DEBUG_ADDRESS_SANITIZER)
-    message(STATUS "Address Sanitizer enabeled for Debug builds, Turn it off with -DDEBUG_ADDRESS_SANITIZER=off")
+    message(STATUS "Address Sanitizer enabled for Debug builds, Turn it off with -DDEBUG_ADDRESS_SANITIZER=off")
     if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
         if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
             # using clang with clang-cl front end 
@@ -98,12 +98,12 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND DEBUG_ADDRESS_SANITIZER)
         else()
             # AppleClang and Clang
             message(STATUS "Address Sanitizer available on Clang")
-            set(CMAKE_CXX_FLAGS "${cmake_cxx_flags} -fsanitize=address -O1 -fno-omit-frame-pointer")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}} -fsanitize=address -O1 -fno-omit-frame-pointer")
         endif()
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # GCC
         message(STATUS "Address Sanitizer available on GCC")
-        set(CMAKE_CXX_FLAGS "${cmake_cxx_flags} -fsanitize=address -O1 -fno-omit-frame-pointer")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         message(STATUS "Address Sanitizer available on MSVC")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /O1 /Oy-")
