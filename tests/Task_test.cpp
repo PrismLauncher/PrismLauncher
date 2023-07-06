@@ -50,31 +50,34 @@ class BigConcurrentTask : public ConcurrentTask {
 class BigConcurrentTaskThread : public QThread {
     Q_OBJECT
 
-    BigConcurrentTask big_task;
 
     void run() override
     {
         QTimer deadline;
+        BigConcurrentTask big_task;
         deadline.setInterval(10000);
-        connect(&deadline, &QTimer::timeout, this, [this] { passed_the_deadline = true; });
+        bool* pt_deadline = &passed_the_deadline;
+        QMetaObject::Connection conn = connect(&deadline, &QTimer::timeout, this, [pt_deadline] { *pt_deadline = true; });
         deadline.start();
 
         // NOTE: Arbitrary value that manages to trigger a problem when there is one.
         //       Considering each tasks, in a problematic state, adds 1024 * 4 bytes to the stack,
         //       this number is enough to fill up 16 MiB of stack, more than enough to cause a problem.
         static const unsigned s_num_tasks = 1 << 12;
-        {
+        for (unsigned i = 0; i < s_num_tasks; i++) {
+            auto sub_task = makeShared<BasicTask>(false);
+            big_task.addTask(sub_task);
+        }
 
-            for (unsigned i = 0; i < s_num_tasks; i++) {
-                auto sub_task = makeShared<BasicTask>(false);
-                big_task.addTask(sub_task);
-            }
+        big_task.run();
 
-            big_task.run();
-
-            while (!big_task.isFinished() && !passed_the_deadline)
-                QCoreApplication::processEvents();
-        } // drop before emit
+        while (!big_task.isFinished() && !passed_the_deadline)
+            QCoreApplication::processEvents();
+        // don't fire timer after this point
+        disconnect(conn);
+        if (deadline.isActive())
+            deadline.stop();
+        // task finished
         emit finished();
     }
 
