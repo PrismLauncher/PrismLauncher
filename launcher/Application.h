@@ -222,14 +222,11 @@ signals:
 #endif
 
 public slots:
-    bool launch(
-        InstancePtr instance,
-        bool online = true,
-        bool demo = false,
-        BaseProfilerFactory *profiler = nullptr,
-        MinecraftServerTargetPtr serverToJoin = nullptr,
-        MinecraftAccountPtr accountToUse = nullptr
-    );
+    bool launch(InstancePtr instance,
+                bool online = true,
+                bool demo = false,
+                MinecraftServerTargetPtr serverToJoin = nullptr,
+                MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);
     void closeCurrentWindow();
 

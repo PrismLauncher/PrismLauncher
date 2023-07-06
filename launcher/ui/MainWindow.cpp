@@ -572,93 +572,14 @@ void MainWindow::updateMainToolBar()
     ui->mainToolBar->setVisible(ui->menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
 }
 
-void MainWindow::updateToolsMenu()
+void MainWindow::updateLaunchButton()
 {
-    bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
-
-    ui->actionLaunchInstance->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceOffline->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceDemo->setDisabled(!m_selectedInstance || currentInstanceRunning);
-
     QMenu *launchMenu = ui->actionLaunchInstance->menu();
     if (launchMenu)
-    {
         launchMenu->clear();
-    }
     else
-    {
         launchMenu = new QMenu(this);
-    }
-    QAction *normalLaunch = launchMenu->addAction(tr("Launch"));
-    normalLaunch->setShortcut(QKeySequence::Open);
-    QAction *normalLaunchOffline = launchMenu->addAction(tr("Launch Offline"));
-    normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
-    QAction *normalLaunchDemo = launchMenu->addAction(tr("Launch Demo"));
-    normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
-    if (m_selectedInstance)
-    {
-        normalLaunch->setEnabled(m_selectedInstance->canLaunch());
-        normalLaunchOffline->setEnabled(m_selectedInstance->canLaunch());
-        normalLaunchDemo->setEnabled(m_selectedInstance->canLaunch());
-
-        connect(normalLaunch, &QAction::triggered, [this]() {
-            APPLICATION->launch(m_selectedInstance, true, false);
-        });
-        connect(normalLaunchOffline, &QAction::triggered, [this]() {
-            APPLICATION->launch(m_selectedInstance, false, false);
-        });
-        connect(normalLaunchDemo, &QAction::triggered, [this]() {
-            APPLICATION->launch(m_selectedInstance, false, true);
-        });
-    }
-    else
-    {
-        normalLaunch->setDisabled(true);
-        normalLaunchOffline->setDisabled(true);
-        normalLaunchDemo->setDisabled(true);
-    }
-
-    // Disable demo-mode if not available.
-    auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
-    if (instance) {
-        normalLaunchDemo->setEnabled(instance->supportsDemo());
-    }
-
-    QString profilersTitle = tr("Profilers");
-    launchMenu->addSeparator()->setText(profilersTitle);
-    for (auto profiler : APPLICATION->profilers().values())
-    {
-        QAction *profilerAction = launchMenu->addAction(profiler->name());
-        QAction *profilerOfflineAction = launchMenu->addAction(tr("%1 Offline").arg(profiler->name()));
-        QString error;
-        if (!profiler->check(&error))
-        {
-            profilerAction->setDisabled(true);
-            profilerOfflineAction->setDisabled(true);
-            QString profilerToolTip = tr("Profiler not setup correctly. Go into settings, \"External Tools\".");
-            profilerAction->setToolTip(profilerToolTip);
-            profilerOfflineAction->setToolTip(profilerToolTip);
-        }
-        else if (m_selectedInstance)
-        {
-            profilerAction->setEnabled(m_selectedInstance->canLaunch());
-            profilerOfflineAction->setEnabled(m_selectedInstance->canLaunch());
-
-            connect(profilerAction, &QAction::triggered, [this, profiler]()
-                    {
-                        APPLICATION->launch(m_selectedInstance, true, false, profiler.get());
-                    });
-            connect(profilerOfflineAction, &QAction::triggered, [this, profiler]()
-                    {
-                        APPLICATION->launch(m_selectedInstance, false, false, profiler.get());
-                    });
-        }
-        else
-        {
-            profilerAction->setDisabled(true);
-            profilerOfflineAction->setDisabled(true);
-        }
-    }
+    m_selectedInstance->populateLaunchMenu(launchMenu);
     ui->actionLaunchInstance->setMenu(launchMenu);
 }
 
@@ -1268,7 +1189,7 @@ void MainWindow::globalSettingsClosed()
     proxymodel->invalidate();
     proxymodel->sort(0);
     updateMainToolBar();
-    updateToolsMenu();
+    updateLaunchButton();
     updateThemeMenu();
     updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
@@ -1471,22 +1392,6 @@ void MainWindow::activateInstance(InstancePtr instance)
     APPLICATION->launch(instance);
 }
 
-void MainWindow::on_actionLaunchInstanceOffline_triggered()
-{
-    if (m_selectedInstance)
-    {
-        APPLICATION->launch(m_selectedInstance, false);
-    }
-}
-
-void MainWindow::on_actionLaunchInstanceDemo_triggered()
-{
-    if (m_selectedInstance)
-    {
-        APPLICATION->launch(m_selectedInstance, false, true);
-    }
-}
-
 void MainWindow::on_actionKillInstance_triggered()
 {
     if(m_selectedInstance && m_selectedInstance->isRunning())
@@ -1633,6 +1538,7 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
     }
     if (m_selectedInstance) {
         disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+        disconnect(m_selectedInstance.get(), &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     }
     QString id = current.data(InstanceList::InstanceIDRole).toString();
     m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
@@ -1641,14 +1547,6 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         ui->instanceToolBar->setEnabled(true);
         setInstanceActionsEnabled(true);
         ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
-        ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
-        ui->actionLaunchInstanceDemo->setEnabled(m_selectedInstance->canLaunch());
-
-        // Disable demo-mode if not available.
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
-        if (instance) {
-             ui->actionLaunchInstanceDemo->setEnabled(instance->supportsDemo());
-        }
 
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
@@ -1657,19 +1555,18 @@ void MainWindow::instanceChanged(const QModelIndex &current, const QModelIndex &
         updateStatusCenter();
         updateInstanceToolIcon(m_selectedInstance->iconKey());
 
-        updateToolsMenu();
+        updateLaunchButton();
 
         APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
 
         connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+        connect(m_selectedInstance.get(), &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     }
     else
     {
         ui->instanceToolBar->setEnabled(false);
         setInstanceActionsEnabled(false);
         ui->actionLaunchInstance->setEnabled(false);
-        ui->actionLaunchInstanceOffline->setEnabled(false);
-        ui->actionLaunchInstanceDemo->setEnabled(false);
         ui->actionKillInstance->setEnabled(false);
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
@@ -1700,7 +1597,7 @@ void MainWindow::selectionBad()
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
     setInstanceActionsEnabled(false);
-    updateToolsMenu();
+    updateLaunchButton();
     renameButton->setText(tr("Rename Instance"));
     updateInstanceToolIcon("grass");
 
@@ -1769,7 +1666,7 @@ void MainWindow::setInstanceActionsEnabled(bool enabled)
     ui->actionCreateInstanceShortcut->setEnabled(enabled);
 }
 
-void MainWindow::refreshCurrentInstance(bool running)
+void MainWindow::refreshCurrentInstance()
 {
     auto current = view->selectionModel()->currentIndex();
     instanceChanged(current, current);

@@ -1005,7 +1005,7 @@ void Application::performMainStartupAction()
                 qDebug() << "   Launching with account" << m_profileToUse;
             }
 
-            launch(inst, true, false, nullptr, serverToJoin, accountToUse);
+            launch(inst, true, false, serverToJoin, accountToUse);
             return;
         }
     }
@@ -1120,7 +1120,6 @@ void Application::messageReceived(const QByteArray& message)
             instance,
             true,
             false,
-            nullptr,
             serverObject,
             accountObject
         );
@@ -1187,14 +1186,12 @@ bool Application::openJsonEditor(const QString &filename)
     }
 }
 
-bool Application::launch(
-        InstancePtr instance,
-        bool online,
-        bool demo,
-        BaseProfilerFactory *profiler,
-        MinecraftServerTargetPtr serverToJoin,
-        MinecraftAccountPtr accountToUse
-) {
+bool Application::launch(InstancePtr instance,
+                         bool online,
+                         bool demo,
+                         MinecraftServerTargetPtr serverToJoin,
+                         MinecraftAccountPtr accountToUse)
+{
     if(m_updateRunning)
     {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
@@ -1202,7 +1199,7 @@ bool Application::launch(
     else if(instance->canLaunch())
     {
         auto & extras = m_instanceExtras[instance->id()];
-        auto & window = extras.window;
+        auto window = extras.window;
         if(window)
         {
             if(!window->saveAll())
@@ -1215,7 +1212,7 @@ bool Application::launch(
         controller->setInstance(instance);
         controller->setOnline(online);
         controller->setDemo(demo);
-        controller->setProfiler(profiler);
+        controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
         controller->setServerToJoin(serverToJoin);
         controller->setAccountToUse(accountToUse);
         if(window)

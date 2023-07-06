@@ -143,10 +143,6 @@ private slots:
 
     void on_actionLaunchInstance_triggered();
 
-    void on_actionLaunchInstanceOffline_triggered();
-
-    void on_actionLaunchInstanceDemo_triggered();
-
     void on_actionKillInstance_triggered();
 
     void on_actionDeleteInstance_triggered();
@@ -175,7 +171,7 @@ private slots:
 
     void updateMainToolBar();
 
-    void updateToolsMenu();
+    void updateLaunchButton();
 
     void updateThemeMenu();
 
@@ -210,7 +206,7 @@ private slots:
     void keyReleaseEvent(QKeyEvent *event) override;
 #endif
 
-    void refreshCurrentInstance(bool running);
+    void refreshCurrentInstance();
 
 private:
     void retranslateUi();

@@ -3,7 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -835,7 +835,7 @@ void ServersPage::on_actionMove_Down_triggered()
 void ServersPage::on_actionJoin_triggered()
 {
     const auto &address = m_model->at(currentServer)->m_address;
-    APPLICATION->launch(m_inst, true, false, nullptr, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
+    APPLICATION->launch(m_inst, true, false, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
 }
 
 #include "ServersPage.moc"

@@ -435,22 +435,6 @@
     <string>Ctrl+D</string>
    </property>
   </action>
-  <action name="actionLaunchInstanceOffline">
-   <property name="text">
-    <string>Launch &amp;Offline</string>
-   </property>
-   <property name="toolTip">
-    <string>Launch the selected instance in offline mode.</string>
-   </property>
-  </action>
-  <action name="actionLaunchInstanceDemo">
-   <property name="text">
-    <string>Launch &amp;Demo</string>
-   </property>
-   <property name="toolTip">
-    <string>Launch the selected instance in demo mode.</string>
-   </property>
-  </action>
   <action name="actionExportInstance">
    <property name="icon">
     <iconset theme="export">
@@ -465,7 +449,8 @@
   </action>
   <action name="actionExportInstanceZip">
    <property name="icon">
-    <iconset theme="launcher"/>
+    <iconset theme="launcher">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Prism Launcher (zip)</string>
@@ -473,7 +458,8 @@
   </action>
   <action name="actionExportInstanceMrPack">
    <property name="icon">
-    <iconset theme="modrinth"/>
+    <iconset theme="modrinth">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Modrinth (mrpack)</string>
