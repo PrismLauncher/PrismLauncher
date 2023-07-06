@@ -64,11 +64,9 @@ class BigConcurrentTaskThread : public QThread {
         //       this number is enough to fill up 16 MiB of stack, more than enough to cause a problem.
         static const unsigned s_num_tasks = 1 << 12;
         {
-            auto sub_tasks = std::array<BasicTask::Ptr, s_num_tasks>();
 
             for (unsigned i = 0; i < s_num_tasks; i++) {
                 auto sub_task = makeShared<BasicTask>(false);
-                sub_tasks[i] = sub_task;
                 big_task.addTask(sub_task);
             }
 
