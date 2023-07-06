@@ -46,7 +46,7 @@
 void setupLinkToolTip(QLabel* label)
 {
     QObject::connect(label, &QLabel::linkHovered, [label](const QString& link) {
-        if (!link.isEmpty() && !link.startsWith("http"))
+        if (auto url = QUrl(link); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https"))
             return;
         label->setToolTip(link);
     });
