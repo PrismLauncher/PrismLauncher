@@ -252,16 +252,15 @@ class TaskTest : public QObject {
     {
         QEventLoop loop;
 
-        auto thread = new BigConcurrentTaskThread;
+        BigConcurrentTaskThread thread{};
 
-        connect(thread, &BigConcurrentTaskThread::finished, &loop, &QEventLoop::quit);
+        connect(&thread, &BigConcurrentTaskThread::finished, &loop, &QEventLoop::quit);
 
-        thread->start();
+        thread.start();
 
         loop.exec();
 
-        QVERIFY(!thread->passed_the_deadline);
-        thread->deleteLater();
+        QVERIFY(!thread.passed_the_deadline);
     }
 };
 
