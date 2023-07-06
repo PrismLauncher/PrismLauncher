@@ -50,15 +50,11 @@ class BigConcurrentTask : public ConcurrentTask {
 class BigConcurrentTaskThread : public QThread {
     Q_OBJECT
 
-
+    QTimer m_deadline;
     void run() override
     {
-        QTimer deadline;
         BigConcurrentTask big_task;
-        deadline.setInterval(10000);
-        bool* pt_deadline = &passed_the_deadline;
-        QMetaObject::Connection conn = connect(&deadline, &QTimer::timeout, this, [pt_deadline] { *pt_deadline = true; });
-        deadline.start();
+        m_deadline.setInterval(10000);
 
         // NOTE: Arbitrary value that manages to trigger a problem when there is one.
         //       Considering each tasks, in a problematic state, adds 1024 * 4 bytes to the stack,
@@ -69,23 +65,17 @@ class BigConcurrentTaskThread : public QThread {
             big_task.addTask(sub_task);
         }
 
+        connect(&big_task, &Task::finished, this, &QThread::quit);
+        connect(&m_deadline, &QTimer::timeout, this, [&] { passed_the_deadline = true; quit(); });
+
+        m_deadline.start();
         big_task.run();
 
-        while (!big_task.isFinished() && !passed_the_deadline)
-            QCoreApplication::processEvents();
-        // don't fire timer after this point
-        disconnect(conn);
-        if (deadline.isActive())
-            deadline.stop();
-        // task finished
-        emit finished();
+        exec();
     }
 
    public:
     bool passed_the_deadline = false;
-
-   signals:
-    void finished();
 };
 
 class TaskTest : public QObject {
@@ -253,7 +243,7 @@ class TaskTest : public QObject {
     {
         QEventLoop loop;
 
-        BigConcurrentTaskThread thread{};
+        BigConcurrentTaskThread thread;
 
         connect(&thread, &BigConcurrentTaskThread::finished, &loop, &QEventLoop::quit);
 
