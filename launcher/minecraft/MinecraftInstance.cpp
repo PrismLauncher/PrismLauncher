@@ -90,6 +90,8 @@
 
 #include "tools/BaseProfiler.h"
 
+#include <QActionGroup>
+
 #ifdef Q_OS_LINUX
 #include "MangoHud.h"
 #endif
