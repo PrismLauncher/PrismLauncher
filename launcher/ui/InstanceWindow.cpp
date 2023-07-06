@@ -98,6 +98,7 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
         m_killButton = new QPushButton(this);
         m_killButton->setText(tr("&Kill"));
         m_killButton->setToolTip(tr("Kill the running instance"));
+        m_killButton->setShortcut(QKeySequence(tr("Ctrl+K")));
         horizontalLayout->addWidget(m_killButton);
         connect(m_killButton, &QPushButton::clicked, this, [this] { APPLICATION->kill(m_instance); });
 
