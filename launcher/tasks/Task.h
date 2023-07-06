@@ -36,10 +36,12 @@
 
 #pragma once
 
+#include <QList>
 #include <QLoggingCategory>
 #include <QRunnable>
 #include <QUuid>
 #include <cstddef>
+#include <memory>
 
 #include "QObjectPtr.h"
 
@@ -75,6 +77,12 @@ struct TaskStepProgress {
     }
 };
 
+struct TaskErrors {
+    TaskErrors(QString task_name = "") : task_name(task_name){};
+    QString task_name;
+    QList<std::shared_ptr<TaskErrors>> errors;
+};
+
 Q_DECLARE_METATYPE(TaskStepProgress)
 
 typedef QList<std::shared_ptr<TaskStepProgress>> TaskStepProgressList;
@@ -107,6 +115,7 @@ class Task : public QObject, public QRunnable {
     QString failReason() const;
 
     virtual QStringList warnings() const;
+    virtual std::shared_ptr<TaskErrors> errors() const { return std::make_shared<TaskErrors>(describe()); };  // fixme: add task name
 
     virtual bool canAbort() const { return m_can_abort; }
 
@@ -127,7 +136,7 @@ class Task : public QObject, public QRunnable {
     void logWarning(const QString& line);
 
    private:
-    QString describe();
+    QString describe() const;
 
    signals:
     void started();

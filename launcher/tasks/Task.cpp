@@ -149,7 +149,7 @@ void Task::propogateStepProgress(TaskStepProgress const& task_progress)
     emit stepProgress(task_progress);
 }
 
-QString Task::describe()
+QString Task::describe() const
 {
     QString outStr;
     QTextStream out(&outStr);

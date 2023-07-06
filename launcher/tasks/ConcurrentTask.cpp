@@ -37,6 +37,9 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <algorithm>
+#include <iterator>
+#include <memory>
 #include "tasks/Task.h"
 
 ConcurrentTask::ConcurrentTask(QObject* parent, QString task_name, int max_concurrent)
@@ -324,4 +327,17 @@ void ConcurrentTask::retry()
             m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
         executeTask();
     }
+}
+
+bool ConcurrentTask::canRetry() const
+{
+    return std::any_of(m_failed.cbegin(), m_failed.cend(), [](auto task) { return task->canRetry(); });
+}
+
+std::shared_ptr<TaskErrors> ConcurrentTask::errors() const
+{
+    auto error = std::make_shared<TaskErrors>();
+    error->task_name = m_name;
+    std::transform(m_failed.cbegin(), m_failed.cend(), std::back_inserter(error->errors), [](auto task) { return task->errors(); });
+    return error;
 }

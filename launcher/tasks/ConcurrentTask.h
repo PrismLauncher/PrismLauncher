@@ -53,7 +53,10 @@ class ConcurrentTask : public Task {
     explicit ConcurrentTask(QObject* parent = nullptr, QString task_name = "", int max_concurrent = 6);
     ~ConcurrentTask() override;
 
-    bool canAbort() const override { return true; }
+    virtual bool canAbort() const override { return true; }
+    virtual bool canRetry() const override;
+
+    virtual std::shared_ptr<TaskErrors> errors() const override;
 
     inline auto isMultiStep() const -> bool override { return totalSize() > 1; };
     auto getStepProgress() const -> TaskStepProgressList override;
