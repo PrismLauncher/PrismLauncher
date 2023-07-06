@@ -193,13 +193,16 @@ QVariant VersionProxyModel::data(const QModelIndex &index, int role) const
         }
         case Qt::ToolTipRole:
         {
-            if (column == Name && hasRecommended) {
+            if(column == Name && hasRecommended) 
+            {
                 auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
-                if (value.toBool()) {
+                if(value.toBool())
+                {
                     return tr("Recommended");
                 } else if(hasLatest) {
                     auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
-                    if(value.toBool()) {
+                    if(value.toBool())
+                    {
                         return tr("Latest");
                     }
                 }
