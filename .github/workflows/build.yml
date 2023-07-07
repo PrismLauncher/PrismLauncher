@@ -608,6 +608,7 @@ jobs:
     env:
       BUNDLE_STAGING: "bundle_staging"
       APPINSTALLER_STAGING: "appinstaller_staging"
+      PRISM_VERSION: '8.0'
 
     steps:
       - name: Install MSVC
@@ -628,7 +629,7 @@ jobs:
         shell: pwsh
         run: |
           $version = ("${{ github.run_number }}").Substring(0, 3)
-          "APPX_VERSION=${{ matrix.prism_version }}.0.$version" >> $env:GITHUB_ENV
+          "APPX_VERSION=${{ env.PRISM_VERSION }}.0.$version" >> $env:GITHUB_ENV
 
       - name: Create Bundle Staging Directory
         shell: pwsh
