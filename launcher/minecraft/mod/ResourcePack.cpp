@@ -95,6 +95,7 @@ std::pair<int, bool> ResourcePack::compare(const Resource& other, SortType type)
             auto res = Resource::compare(other, type);
             if (res.first != 0)
                 return res;
+            break;
         }
         case SortType::PACK_FORMAT: {
             auto this_ver = packFormat();
@@ -104,6 +105,7 @@ std::pair<int, bool> ResourcePack::compare(const Resource& other, SortType type)
                 return { 1, type == SortType::PACK_FORMAT };
             if (this_ver < other_ver)
                 return { -1, type == SortType::PACK_FORMAT };
+            break;
         }
     }
     return { 0, false };

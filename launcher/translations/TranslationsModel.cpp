@@ -455,6 +455,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
                 return QString("%1%").arg(lang.percentTranslated(), 3, 'f', 1);
             }
         }
+        qWarning("TranslationModel::data not implemented when role is DisplayRole");
     }
     case Qt::ToolTipRole:
     {

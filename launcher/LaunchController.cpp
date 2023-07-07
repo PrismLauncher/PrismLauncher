@@ -187,8 +187,8 @@ void LaunchController::login() {
         switch(m_accountToUse->accountState()) {
             case AccountState::Offline: {
                 m_session->wants_online = false;
-                // NOTE: fallthrough is intentional
             }
+            /* fallthrough */
             case AccountState::Online: {
                 if(!m_session->wants_online) {
                     // we ask the user for a player name
@@ -267,8 +267,8 @@ void LaunchController::login() {
                 // This means some sort of soft error that we can fix with a refresh ... so let's refresh.
             case AccountState::Unchecked: {
                 m_accountToUse->refresh();
-                // NOTE: fallthrough intentional
             }
+            /* fallthrough */
             case AccountState::Working: {
                 // refresh is in progress, we need to wait for it to finish to proceed.
                 ProgressDialog progDialog(m_parentWidget);
