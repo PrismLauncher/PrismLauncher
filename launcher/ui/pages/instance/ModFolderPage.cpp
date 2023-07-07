@@ -107,7 +107,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
                 ui->actionVisitItemPage->setText(tr("Visit mod's page"));
                 ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
             } else {
-                ui->actionVisitItemPage->setText(tr("Visit mods pages"));
+                ui->actionVisitItemPage->setText(tr("Visit mods' pages"));
                 ui->actionVisitItemPage->setToolTip(tr("Go to the pages of the selected mods"));
             }
             ui->actionVisitItemPage->setEnabled(selected != 0);
