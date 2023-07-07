@@ -443,7 +443,12 @@ jobs:
 
           # MSIX only allows numbers in their versions,
           # so we need to use another clear identifier
-          $version = ("${{ github.run_number }}").Substring(0, 3)
+          $runNumber = "${{ github.run_number }}"
+          if ($runNumber.Length -gt 3) {
+            $version = $runNumber.Substring(($runNumber.Length - 3))
+          } else {
+            $version = $runNumber
+          }
 
           Copy-Item ${{ github.workspace }}\program_info\prismlauncher_*x*.png .
           (Get-Content ${{ github.workspace }}\program_info\AppxManifest.xml) `
@@ -628,7 +633,13 @@ jobs:
       - name: Set Appx version
         shell: pwsh
         run: |
-          $version = ("${{ github.run_number }}").Substring(0, 3)
+          $runNumber = "${{ github.run_number }}"
+          if ($runNumber.Length -gt 3) {
+            $version = $runNumber.Substring(($runNumber.Length - 3))
+          } else {
+            $version = $runNumber
+          }
+
           "APPX_VERSION=${{ env.PRISM_VERSION }}.0.$version" >> $env:GITHUB_ENV
 
       - name: Create Bundle Staging Directory
@@ -652,7 +663,7 @@ jobs:
       - name: Create MSIXBundle
         shell: pwsh
         run: |
-          makeappx.exe bundle /d ${{ env.BUNDLE_STAGING }} /p ${{ env.BUNDLE_STAGING }}\prismlauncher-${{ env.APPX_VERSION }}.msixbundle
+          makeappx.exe bundle /bv ${{ env.APPX_VERSION }} /d ${{ env.BUNDLE_STAGING }} /p ${{ env.BUNDLE_STAGING }}\prismlauncher-${{ env.APPX_VERSION }}.msixbundle
 
       - name: Update AppInstaller File
         shell: pwsh
