@@ -75,11 +75,11 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 
     // Add custom buttons to the page container layout.
     {
-        auto horizontalLayout = new QHBoxLayout();
+        auto horizontalLayout = new QHBoxLayout(this);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setContentsMargins(6, -1, 6, -1);
 
-        auto btnHelp = new QPushButton();
+        auto btnHelp = new QPushButton(this);
         btnHelp->setText(tr("Help"));
         horizontalLayout->addWidget(btnHelp);
         connect(btnHelp, &QPushButton::clicked, m_container, &PageContainer::help);
@@ -104,7 +104,7 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 
         updateButtons();
 
-        m_closeButton = new QPushButton();
+        m_closeButton = new QPushButton(this);
         m_closeButton->setText(tr("Close"));
         horizontalLayout->addWidget(m_closeButton);
         connect(m_closeButton, &QPushButton::clicked, this, &QMainWindow::close);
