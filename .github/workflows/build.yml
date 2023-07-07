@@ -677,18 +677,6 @@ jobs:
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
 
-      - name: Sign AppInstaller
-        shell: pwsh
-        run: |
-          if (Get-Content ./codesign.pfx) {
-            SignTool sign /fd sha256 /td sha256 /f codesign.pfx `
-              /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' `
-              /tr http://timestamp.digicert.com `
-              ${{ env.APPINSTALLER_STAGING }}\prismlauncher-${{ env.APPX_VERSION }}.AppInstaller
-          } else {
-            ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
-          }
-
       - name: Upload MSIXBundle
         uses: actions/upload-artifact@v2
         with:
