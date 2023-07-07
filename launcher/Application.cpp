@@ -687,8 +687,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 m_settings->reset("PastebinCustomAPIBase");
             }
         }
-        // meta URL
-        m_settings->registerSetting("MetaURLOverride", "");
+        {
+            // Meta URL
+            m_settings->registerSetting("MetaURLOverride", "");
+
+            QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
+
+            // get rid of invalid meta urls
+            if (!metaUrl.isValid() || metaUrl.scheme() != "http" || metaUrl.scheme() != "https")
+                m_settings->reset("MetaURLOverride");
+        }
 
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);
