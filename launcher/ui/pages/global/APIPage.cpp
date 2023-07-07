@@ -165,7 +165,7 @@ void APIPage::applySettings()
 
     QString msaClientID = ui->msaClientID->text();
     s->set("MSAClientIDOverride", msaClientID);
-    QUrl metaURL = ui->metaURL->text();
+    QUrl metaURL(ui->metaURL->text());
     // Add required trailing slash
     if (!metaURL.isEmpty() && !metaURL.path().endsWith('/'))
     {
