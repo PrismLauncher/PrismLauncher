@@ -45,6 +45,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QSortFilterProxyModel>
+#include <algorithm>
 
 #include "Application.h"
 
@@ -60,6 +61,7 @@
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModFolderModel.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "Version.h"
@@ -86,10 +88,28 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
+        ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
+        ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionVisitItemPage);
+        connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
+
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
-        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
+        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
+            ui->actionUpdateItem->setEnabled(check_allow_update());
+
+            auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+            auto mods_list = m_model->selectedMods(selection);
+            auto selected = std::count_if(mods_list.cbegin(), mods_list.cend(),
+                                          [](Mod* v) { return v->metadata() != nullptr || v->homeurl().size() != 0; });
+            if (selected <= 1) {
+                ui->actionVisitItemPage->setText(tr("Visit mod's page"));
+                ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
+            } else {
+                ui->actionVisitItemPage->setText(tr("Visit mods' pages"));
+                ui->actionVisitItemPage->setToolTip(tr("Go to the pages of the selected mods"));
+            }
+            ui->actionVisitItemPage->setEnabled(selected != 0);
+        });
 
         connect(mods.get(), &ModFolderModel::rowsInserted, this,
                 [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
@@ -266,4 +286,14 @@ NilModFolderPage::NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolder
 bool NilModFolderPage::shouldDisplay() const
 {
     return m_model->dir().exists();
+}
+
+void ModFolderPage::visitModPages()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    for (auto mod : m_model->selectedMods(selection)) {
+        auto url = mod->metaurl();
+        if (!url.isEmpty())
+            DesktopServices::openUrl(url);
+    }
 }

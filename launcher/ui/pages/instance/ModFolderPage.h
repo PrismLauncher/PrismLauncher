@@ -4,6 +4,7 @@
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -63,6 +64,7 @@ class ModFolderPage : public ExternalResourcesPage {
 
     void installMods();
     void updateMods();
+    void visitModPages();
 
    protected:
     std::shared_ptr<ModFolderModel> m_model;
