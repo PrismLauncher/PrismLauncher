@@ -195,8 +195,10 @@ static void copyAction(QAction* from, QAction* to)
 
 void WideBar::showVisibilityMenu(QPoint const& position)
 {
-    if (!m_bar_menu)
+    if (!m_bar_menu) {
         m_bar_menu = std::make_unique<QMenu>(this);
+        m_bar_menu->setTearOffEnabled(true);
+    }
 
     if (m_menu_state == MenuState::Dirty) {
         for (auto* old_action : m_bar_menu->actions())
