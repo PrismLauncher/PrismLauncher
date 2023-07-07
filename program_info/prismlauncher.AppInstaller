@@ -10,11 +10,19 @@
     Version="PRISM_VERSION_REPLACEME"
     Uri="https://prismlauncher.org/prismlauncher-PRISM_VERSION_REPLACEME.msixbundle" />
 
+  <UpdateUris>
+    <UpdateUri>https://prismlauncher.org/prismUpdate.AppInstaller</UpdateUri>
+  </UpdateUris>
+
+  <RepairUris>
+    <RepairUri>https://prismlauncher.org/prismUpdate.AppInstaller</RepairUri>
+  </RepairUris>
+
   <UpdateSettings>
     <OnLaunch
-      HoursBetweenUpdateChecks="6"
+      HoursBetweenUpdateChecks="1"
       ShowPrompt="true" />
+    <ForceUpdateFromAnyVersion>true</ForceUpdateFromAnyVersion>
   </UpdateSettings>
 
 </AppInstaller>
-
