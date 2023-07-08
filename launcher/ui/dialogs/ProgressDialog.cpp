@@ -67,9 +67,9 @@ ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Pr
     ui->taskProgressScrollArea->setHidden(true);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setAttribute(Qt::WidgetAttribute::WA_QuitOnClose, true);
-    setSkipButton(false);
     changeProgress(0, 100);
-    updateSize();
+    updateSize(true);
+    setSkipButton(false);
 }
 
 void ProgressDialog::setSkipButton(bool present, QString label)
@@ -95,7 +95,7 @@ ProgressDialog::~ProgressDialog()
     delete ui;
 }
 
-void ProgressDialog::updateSize()
+void ProgressDialog::updateSize(bool recenterParent)
 {   
     QSize lastSize = this->size();
     QPoint lastPos = this->pos();
@@ -112,13 +112,20 @@ void ProgressDialog::updateSize()
     adjustSize();
 
     QSize newSize = this->size();
-    // if the current window is too small
-    if ((lastSize != newSize) && (lastSize.height() < newSize.height()))
+    // if the current window is a different size
+    auto parent = this->parentWidget();
+    if (recenterParent && parent) {
+        auto newX = std::max(0, parent->x() + ((parent->width() - newSize.width()) / 2));
+        auto newY = std::max(0, parent->y() + ((parent->height() - newSize.height()) / 2));
+        this->move(newX, newY);
+    }
+    else if (lastSize != newSize)
     {
-        QSize sizeDiff = lastSize - newSize; // last size was smaller, the results should be negative
         // center on old position after resize
-        QPoint newPos(lastPos.x() + (sizeDiff.width() / 2), lastPos.y() + (sizeDiff.height() / 2));
-        this->move(newPos);
+        QSize sizeDiff = lastSize - newSize; // last size was smaller, the results should be negative
+        auto newX = std::max(0, lastPos.x() + (sizeDiff.width() / 2));
+        auto newY = std::max(0, lastPos.y() + (sizeDiff.height() / 2));
+        this->move(newX, newY);
     }
 
 }
