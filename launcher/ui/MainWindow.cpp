@@ -1511,7 +1511,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
     QString iconPath;
     QStringList args;
 #if defined(Q_OS_MACOS)
-        QString appPath = QApplication::applicationFilePath();
+        appPath = QApplication::applicationFilePath();
         if (appPath.startsWith("/private/var/")) {
             QMessageBox::critical(this, tr("Create instance shortcut"), 
                                   tr("The launcher is in the folder it was extracted from, therefore it cannot create shortcuts."));
@@ -1524,7 +1524,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             pIcon = APPLICATION->icons()->icon("grass");
         }
 
-        QString iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "Icon.icns");
+        iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "Icon.icns");
 
         QFile iconFile(iconPath);
         if (!iconFile.open(QFile::WriteOnly))
@@ -1543,16 +1543,6 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             iconFile.remove();
             QMessageBox::critical(this, tr("Create instance Application"), tr("Failed to create icon for Application."));
             return;
-        }
-
-        if (FS::createShortcut(FS::PathCombine(desktopPath, m_selectedInstance->name()),
-                           appPath, { "--launch", m_selectedInstance->id() },
-                           m_selectedInstance->name(), iconPath)) {
-            QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance in your Applications!"));
-        }
-        else
-        {
-            QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
         }
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
     if (appPath.startsWith("/tmp/.mount_")) {
@@ -1636,7 +1626,11 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 #endif
     args.append({ "--launch", m_selectedInstance->id() });
     if (FS::createShortcut(desktopFilePath, appPath, args, m_selectedInstance->name(), iconPath)) {
-        QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
+#if not defined(Q_OS_MACOS)
+            QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
+#else
+        QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance!"));
+#endif
     } else {
 #if not defined(Q_OS_MACOS)
         iconFile.remove();
