@@ -153,6 +153,9 @@ bool FlameCreationTask::updateInstance()
 
                     old_files.remove(file.key());
                     files_iterator = files.erase(files_iterator);
+
+                    if (files_iterator != files.begin())
+                        files_iterator--;
                 }
             }
 
@@ -179,7 +182,7 @@ bool FlameCreationTask::updateInstance()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto* raw_response = new QByteArray;
+        auto raw_response = std::make_shared<QByteArray>();
         auto job = api.getFiles(fileIds, raw_response);
 
         QEventLoop loop;
@@ -384,6 +387,7 @@ bool FlameCreationTask::createInstance()
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::progress, this, &FlameCreationTask::setProgress);
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::status, this, &FlameCreationTask::setStatus);
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::stepProgress, this, &FlameCreationTask::propogateStepProgress);
+    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::details, this, &FlameCreationTask::setDetails);
     m_mod_id_resolver->start();
 
     loop.exec();
@@ -466,8 +470,9 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         switch (result.type) {
             case Flame::File::Type::Folder: {
                 logWarning(tr("This 'Folder' may need extracting: %1").arg(relpath));
-                // fall-through intentional, we treat these as plain old mods and dump them wherever.
+                // fallthrough intentional, we treat these as plain old mods and dump them wherever.
             }
+            /* fallthrough */
             case Flame::File::Type::SingleFile:
             case Flame::File::Type::Mod: {
                 if (!result.url.isEmpty()) {

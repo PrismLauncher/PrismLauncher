@@ -111,6 +111,16 @@ class ResourceAPI {
         std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
     };
 
+    struct DependencySearchArgs {
+        ModPlatform::Dependency dependency;
+        Version mcVersion;
+        ModLoaderTypes loader;
+    };
+
+    struct DependencySearchCallbacks {
+        std::function<void(QJsonDocument&, const ModPlatform::Dependency&)> on_succeed;
+    };
+
    public:
     /** Gets a list of available sorting methods for this API. */
     [[nodiscard]] virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
@@ -121,12 +131,12 @@ class ResourceAPI {
         qWarning() << "TODO";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, QByteArray* response) const
+    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, std::shared_ptr<QByteArray> response) const
     {
         qWarning() << "TODO";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const
+    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const
     {
         qWarning() << "TODO";
         return nullptr;
@@ -138,6 +148,12 @@ class ResourceAPI {
         return nullptr;
     }
     [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
+    {
+        qWarning() << "TODO";
+        return nullptr;
+    }
+
+    [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const
     {
         qWarning() << "TODO";
         return nullptr;

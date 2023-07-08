@@ -41,6 +41,7 @@
 #include "MMCZip.h"
 #include "NullInstance.h"
 
+#include "QObjectPtr.h"
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
 
@@ -260,7 +261,7 @@ void InstanceImportTask::extractFinished()
 
 void InstanceImportTask::processFlame()
 {
-    FlameCreationTask* inst_creation_task = nullptr;
+    shared_qobject_ptr<FlameCreationTask> inst_creation_task = nullptr;
     if (!m_extra_info.isEmpty()) {
         auto pack_id_it = m_extra_info.constFind("pack_id");
         Q_ASSERT(pack_id_it != m_extra_info.constEnd());
@@ -275,10 +276,10 @@ void InstanceImportTask::processFlame()
         if (original_instance_id_it != m_extra_info.constEnd())
             original_instance_id = original_instance_id_it.value();
 
-        inst_creation_task = new FlameCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+        inst_creation_task = makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
     } else {
         // FIXME: Find a way to get IDs in directly imported ZIPs
-        inst_creation_task = new FlameCreationTask(m_stagingPath, m_globalSettings, m_parent, {}, {});
+        inst_creation_task = makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, QString(), QString());
     }
 
     inst_creation_task->setName(*this);
@@ -286,20 +287,19 @@ void InstanceImportTask::processFlame()
     inst_creation_task->setGroup(m_instGroup);
     inst_creation_task->setConfirmUpdate(shouldConfirmUpdate());
     
-    connect(inst_creation_task, &Task::succeeded, this, [this, inst_creation_task] {
+    connect(inst_creation_task.get(), &Task::succeeded, this, [this, inst_creation_task] {
         setOverride(inst_creation_task->shouldOverride(), inst_creation_task->originalInstanceID());
         emitSucceeded();
     });
-    connect(inst_creation_task, &Task::failed, this, &InstanceImportTask::emitFailed);
-    connect(inst_creation_task, &Task::progress, this, &InstanceImportTask::setProgress);
-    connect(inst_creation_task, &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
-    connect(inst_creation_task, &Task::status, this, &InstanceImportTask::setStatus);
-    connect(inst_creation_task, &Task::details, this, &InstanceImportTask::setDetails);
-    connect(inst_creation_task, &Task::finished, inst_creation_task, &InstanceCreationTask::deleteLater);
+    connect(inst_creation_task.get(), &Task::failed, this, &InstanceImportTask::emitFailed);
+    connect(inst_creation_task.get(), &Task::progress, this, &InstanceImportTask::setProgress);
+    connect(inst_creation_task.get(), &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
+    connect(inst_creation_task.get(), &Task::status, this, &InstanceImportTask::setStatus);
+    connect(inst_creation_task.get(), &Task::details, this, &InstanceImportTask::setDetails);
 
-    connect(this, &Task::aborted, inst_creation_task, &InstanceCreationTask::abort);
-    connect(inst_creation_task, &Task::aborted, this, &Task::abort);
-    connect(inst_creation_task, &Task::abortStatusChanged, this, &Task::setAbortable);
+    connect(this, &Task::aborted, inst_creation_task.get(), &InstanceCreationTask::abort);
+    connect(inst_creation_task.get(), &Task::aborted, this, &Task::abort);
+    connect(inst_creation_task.get(), &Task::abortStatusChanged, this, &Task::setAbortable);
 
     inst_creation_task->start();
 }

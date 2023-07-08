@@ -68,7 +68,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.5.0'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -80,13 +80,13 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.5.0'
+            qt_version: '6.5.1'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
           - os: macos-12
             name: macOS
-            macosx_deployment_target: 10.15
+            macosx_deployment_target: 11.0
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
@@ -191,7 +191,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y update
-          sudo apt-get -y install ninja-build extra-cmake-modules scdoc
+          sudo apt-get -y install ninja-build extra-cmake-modules scdoc appstream
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
@@ -250,6 +250,7 @@ jobs:
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
 
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
+          sudo apt install libopengl0
 
       - name: Add QT_HOST_PATH var (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
@@ -375,6 +376,8 @@ jobs:
         shell: msys2 {0}
         run: |
           cmake --install ${{ env.BUILD_DIR }}
+          touch ${{ env.INSTALL_DIR }}/manifest.txt
+          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt 
 
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
@@ -387,6 +390,10 @@ jobs:
             Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll -Destination libcrypto-1_1.dll
             Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
           }
+          cd ${{ github.workspace }}
+
+          Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
+
 
       - name: Fetch codesign certificate (Windows)
         if: runner.os == 'Windows'
@@ -411,12 +418,15 @@ jobs:
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+          for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
 
       - name: Package (Windows MSVC, portable)
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+          
+          Get-ChildItem ${{ env.INSTALL_PORTABLE_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_PORTABLE_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Package (Windows, installer)
         if: runner.os == 'Windows'
@@ -437,6 +447,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
+          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_DIR }}/manifest.txt
 
           cd ${{ env.INSTALL_DIR }}
           tar --owner root --group root -czf ../PrismLauncher.tar.gz *
@@ -446,6 +457,8 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+          for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
+
 
           cd ${{ env.INSTALL_PORTABLE_DIR }}
           tar -czf ../PrismLauncher-portable.tar.gz *
@@ -455,7 +468,8 @@ jobs:
         shell: bash
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
-
+          mv ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.metainfo.xml ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.appdata.xml
+          export "NO_APPSTREAM=1" # we have to skip appstream checking because appstream on ubuntu 20.04 is outdated
           export OUTPUT="PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
 
           chmod +x linuxdeploy-*.AppImage
@@ -470,7 +484,8 @@ jobs:
           cp -r /home/runner/work/PrismLauncher/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
           
           cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
-          cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}//usr/lib/
+          cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+          cp /usr/lib/x86_64-linux-gnu/libOpenGL.so.0* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
 
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib"
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk/lib/amd64/server"
@@ -587,7 +602,7 @@ jobs:
           submodules: 'true'
       - name: Install nix
         if: inputs.build_type == 'Debug'
-        uses: cachix/install-nix-action@v20
+        uses: cachix/install-nix-action@v22
         with:
           install_url: https://nixos.org/nix/install
           extra_nix_config: |

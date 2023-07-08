@@ -138,19 +138,18 @@ void ConcurrentTask::startNext()
     connect(next.get(), &Task::progress, this, [this, next](qint64 current, qint64 total) { subTaskProgress(next, current, total); });
 
     m_doing.insert(next.get(), next);
-    auto task_progress = std::make_shared<TaskStepProgress>(TaskStepProgress({ next->getUid() }));
+    qsizetype num_starts = qMin(m_queue.size(), m_total_max_size - m_doing.size());
+    auto task_progress = std::make_shared<TaskStepProgress>(next->getUid());
     m_task_progress.insert(next->getUid(), task_progress);
 
     updateState();
     updateStepProgress(*task_progress.get(), Operation::ADDED);
-    
 
     QCoreApplication::processEvents();
 
     QMetaObject::invokeMethod(next.get(), &Task::start, Qt::QueuedConnection);
 
     // Allow going up the number of concurrent tasks in case of tasks being added in the middle of a running task.
-    int num_starts = qMin(m_queue.size(), m_total_max_size - m_doing.size());
     for (int i = 0; i < num_starts; i++)
         QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
 }
@@ -166,9 +165,9 @@ void ConcurrentTask::subTaskSucceeded(Task::Ptr task)
 
     disconnect(task.get(), 0, this, 0);
 
-    emit stepProgress(*task_progress.get());
+    emit stepProgress(*task_progress);
     updateState();
-    updateStepProgress(*task_progress.get(), Operation::REMOVED);
+    updateStepProgress(*task_progress, Operation::REMOVED);
     startNext();
 }
 
@@ -184,9 +183,9 @@ void ConcurrentTask::subTaskFailed(Task::Ptr task, const QString& msg)
 
     disconnect(task.get(), 0, this, 0);
 
-    emit stepProgress(*task_progress.get());
+    emit stepProgress(*task_progress);
     updateState();
-    updateStepProgress(*task_progress.get(), Operation::REMOVED);
+    updateStepProgress(*task_progress, Operation::REMOVED);
     startNext();
 }
 
@@ -196,7 +195,7 @@ void ConcurrentTask::subTaskStatus(Task::Ptr task, const QString& msg)
     task_progress->status = msg;
     task_progress->state = TaskStepState::Running;
     
-    emit stepProgress(*task_progress.get());
+    emit stepProgress(*task_progress);
 
     if (totalSize() == 1) {
         setStatus(msg);
@@ -209,7 +208,7 @@ void ConcurrentTask::subTaskDetails(Task::Ptr task, const QString& msg)
     task_progress->details = msg;
     task_progress->state = TaskStepState::Running;
     
-    emit stepProgress(*task_progress.get());
+    emit stepProgress(*task_progress);
 
     if (totalSize() == 1) {
         setDetails(msg);
@@ -220,15 +219,10 @@ void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 tota
 {
     auto task_progress = m_task_progress.value(task->getUid());
 
-    task_progress->old_current = task_progress->current;
-    task_progress->old_total = task_progress->old_total;
-
-    task_progress->current = current;
-    task_progress->total = total;
-    task_progress->state = TaskStepState::Running;
-    
-    emit stepProgress(*task_progress.get());
-    updateStepProgress(*task_progress.get(), Operation::CHANGED);
+    task_progress->update(current, total);
+        
+    emit stepProgress(*task_progress);
+    updateStepProgress(*task_progress, Operation::CHANGED);
     updateState();
 
     if (totalSize() == 1) {

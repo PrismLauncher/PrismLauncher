@@ -165,7 +165,7 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     auto proxy = new IconProxy(ui->packageView);
     proxy->setSourceModel(m_profile.get());
 
-    m_filterModel = new QSortFilterProxyModel();
+    m_filterModel = new QSortFilterProxyModel(this);
     m_filterModel->setDynamicSortFilter(true);
     m_filterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_filterModel->setSortCaseSensitivity(Qt::CaseInsensitive);
@@ -287,7 +287,6 @@ void VersionPage::updateButtons(int row)
     ui->actionAdd_Empty->setEnabled(controlsEnabled);
     ui->actionImport_Components->setEnabled(controlsEnabled);
     ui->actionReload->setEnabled(controlsEnabled);
-    ui->actionInstall_mods->setEnabled(controlsEnabled);
     ui->actionReplace_Minecraft_jar->setEnabled(controlsEnabled);
     ui->actionAdd_to_Minecraft_jar->setEnabled(controlsEnabled);
     ui->actionAdd_Agents->setEnabled(controlsEnabled);

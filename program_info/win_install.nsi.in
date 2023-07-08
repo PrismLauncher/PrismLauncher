@@ -12,6 +12,8 @@ OutFile "../@Launcher_CommonName@-Setup.exe"
 
 !define MUI_ICON "../@Launcher_Branding_ICO@"
 
+!define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\@Launcher_CommonName@"
+
 ;--------------------------------
 
 ; Pages
@@ -269,7 +271,73 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
 !macroend
 
 
-;--------------------------------
+;------------------------------------------
+; Uninstall Previous install
+
+!macro RunUninstall exitcode uninstcommand
+  Push `${uninstcommand}`
+  Call RunUninstall
+  Pop ${exitcode}
+!macroend
+
+; Checks that the uninstaller in the provided command exists and runs it.
+Function RunUninstall
+  Exch $1 ; input uninstcommand
+  Push $2 ; Uninstaller
+  Push $3 ; Len
+  Push $4 ; uninstcommand
+  StrCpy $4 $1 ; make a copy of the command for later
+  StrCpy $3 ""
+  StrCpy $2 $1 1  ; take first char of string
+  StrCmp $2 '"' quoteloop stringloop
+  stringloop:  ; get string length
+	  StrCpy $2 $1 1 $3  ; get next char
+	  IntOp $3 $3 + 1  ; index += 1
+	  StrCmp $2 "" +2  stringloop  ; if empty exit loop
+	  IntOp $3 $3 - 1  ; index -= 1
+	  Goto run
+  quoteloop: ; get string length with quotes removed
+	  StrCmp $3 "" 0 +2  ; if index is set skip quote removal
+	  StrCpy $1 $1 "" 1  ; Remove initial quote
+	  IntOp $3 $3 + 1  ; index += 1
+	  StrCpy $2 $1 1 $3  ; get next char
+	  StrCmp $2 "" +2  ; if empty exit loop
+	  StrCmp $2 '"' 0 quoteloop ; if ending quote exit loop, else loop
+  run:
+	  StrCpy $2 $1 $3 ; Path to uninstaller ; (copy string up to ending quote - if it exists)
+	  StrCpy $1 161 ; ERROR_BAD_PATHNAME  ; set exit code (it get's overwritten with uninstaller exit code if ExecWait call doesn't error)
+	  GetFullPathName $3 "$2\.." ; $InstDir
+	  IfFileExists "$2" 0 +4
+	  ExecWait $4 $1 ; The file exists, call the saved command
+    IntCmp $1 0 "" +2 +2 ; Don't delete the installer if it was aborted ; 
+	  Delete "$2" ; Delete the uninstaller
+	  RMDir "$3" ; Try to delete $InstDir
+  Pop $4
+  Pop $3
+  Pop $2
+  Exch $1 ; exitcode
+FunctionEnd
+
+; The "" makes the section hidden.
+Section "" UninstallPrevious
+
+  ReadRegStr $0 HKCU "${UNINST_KEY}" "QuietUninstallString"
+  ${If} $0 == ""
+    ReadRegStr $0 HKCU "${UNINST_KEY}" "UninstallString"
+  ${EndIf}
+  
+  ${If} $0 != ""
+	  !insertmacro RunUninstall $0 $0
+	  ${If} $0 <> 0
+		  MessageBox MB_YESNO|MB_ICONSTOP "Failed to uninstall, continue anyway?" /SD IDYES IDYES +2
+			  Abort
+	  ${EndIf}
+  ${EndIf}
+
+SectionEnd
+
+
+;------------------------------------
 
 ; The stuff to install
 Section "@Launcher_DisplayName@"
@@ -299,11 +367,10 @@ Section "@Launcher_DisplayName@"
   ${GetParameters} $R0
   ${GetOptions} $R0 "/NoUninstaller" $R1
   ${If} ${Errors}
-    !define UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\@Launcher_CommonName@"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayName" "@Launcher_DisplayName@"
     WriteRegStr HKCU "${UNINST_KEY}" "DisplayIcon" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe"
-    WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe"'
-    WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
+    WriteRegStr HKCU "${UNINST_KEY}" "UninstallString" '"$INSTDIR\uninstall.exe" _?=$INSTDIR'
+    WriteRegStr HKCU "${UNINST_KEY}" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
     WriteRegStr HKCU "${UNINST_KEY}" "InstallLocation" "$INSTDIR"
     WriteRegStr HKCU "${UNINST_KEY}" "Publisher" "@Launcher_DisplayName@ Contributors"
     WriteRegStr HKCU "${UNINST_KEY}" "Version" "@Launcher_VERSION_NAME4@"

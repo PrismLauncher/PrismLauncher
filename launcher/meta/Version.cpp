@@ -116,9 +116,9 @@ void Meta::Version::setTime(const qint64 time)
     emit timeChanged();
 }
 
-void Meta::Version::setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts)
+void Meta::Version::setRequires(const Meta::RequireSet &reqs, const Meta::RequireSet &conflicts)
 {
-    m_requires = requires;
+    m_requires = reqs;
     m_conflicts = conflicts;
     emit requiresChanged();
 }
