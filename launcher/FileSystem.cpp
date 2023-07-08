@@ -36,6 +36,7 @@
  */
 
 #include "FileSystem.h"
+#include <QPair>
 
 #include "BuildConfig.h"
 
@@ -102,7 +103,7 @@ namespace fs = ghc::filesystem;
 #include <linux/fs.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#elif defined(Q_OS_MACOS) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_MACOS)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
 #elif defined(Q_OS_WIN)
@@ -246,6 +247,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
 {
     using copy_opts = fs::copy_options;
     m_copied = 0;  // reset counter
+    m_failedPaths.clear();
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
@@ -277,6 +279,9 @@ bool copy::operator()(const QString& offset, bool dryRun)
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
+            m_failedPaths.append(dst_path);
+            emit copyFailed(relative_dst_path);
+            return;
         }
         m_copied++;
         emit fileCopied(relative_dst_path);
@@ -1077,6 +1082,7 @@ bool clone::operator()(const QString& offset, bool dryRun)
     }
 
     m_cloned = 0;  // reset counter
+    m_failedClones.clear();
 
     auto src = PathCombine(m_src.absolutePath(), offset);
     auto dst = PathCombine(m_dst.absolutePath(), offset);
@@ -1097,6 +1103,9 @@ bool clone::operator()(const QString& offset, bool dryRun)
             qDebug() << "Failed to clone files: error" << err.value() << "message" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
+            m_failedClones.append(qMakePair(src_path, dst_path));
+            emit cloneFailed(src_path, dst_path);
+            return;
         }
         m_cloned++;
         emit fileCloned(src_path, dst_path);
@@ -1156,7 +1165,7 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
         return false;
     }
 
-#elif defined(Q_OS_MACOS) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_MACOS)
 
     if (!macos_bsd_clonefile(src_path, dst_path, ec)) {
         qDebug() << "failed macos_bsd_clonefile:";
@@ -1385,7 +1394,7 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
     return true;
 }
 
-#elif defined(Q_OS_MACOS) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_MACOS)
 
 bool macos_bsd_clonefile(const std::string& src_path, const std::string& dst_path, std::error_code& ec)
 {
