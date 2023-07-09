@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   update-flake:
+    if: github.repository == 'PrismLauncher/PrismLauncher'
     runs-on: ubuntu-latest
 
     steps:
