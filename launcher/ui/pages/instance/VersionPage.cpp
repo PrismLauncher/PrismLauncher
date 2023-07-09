@@ -229,8 +229,6 @@ void VersionPage::updateVersionControls()
     // FIXME: this is a dirty hack
     auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
 
-    ui->actionInstall_Forge->setEnabled(true);
-
     bool supportsFabric = minecraftVersion >= Version("1.14");
     ui->actionInstall_Fabric->setEnabled(supportsFabric);
 
@@ -255,13 +253,6 @@ void VersionPage::updateButtons(int row)
     ui->actionEdit->setEnabled(patch && patch->isCustom());
     ui->actionCustomize->setEnabled(patch && patch->isCustomizable());
     ui->actionRevert->setEnabled(patch && patch->isRevertible());
-    ui->actionDownload_All->setEnabled(true);
-    ui->actionAdd_Empty->setEnabled(true);
-    ui->actionImport_Components->setEnabled(true);
-    ui->actionReload->setEnabled(true);
-    ui->actionReplace_Minecraft_jar->setEnabled(true);
-    ui->actionAdd_to_Minecraft_jar->setEnabled(true);
-    ui->actionAdd_Agents->setEnabled(true);
 }
 
 bool VersionPage::reloadPackProfile()
