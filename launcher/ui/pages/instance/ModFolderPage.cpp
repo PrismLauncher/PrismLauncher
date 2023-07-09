@@ -92,9 +92,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
 
-        auto check_allow_update = [this] {
-            return (!m_instance || !m_instance->isRunning()) && (ui->treeView->selectionModel()->hasSelection() || !m_model->empty());
-        };
+        auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
         connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
             ui->actionUpdateItem->setEnabled(check_allow_update());
@@ -121,20 +119,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
         connect(mods.get(), &ModFolderModel::updateFinished, this,
                 [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
-
-        connect(m_instance, &BaseInstance::runningStatusChanged, this, &ModFolderPage::runningStateChanged);
-        ModFolderPage::runningStateChanged(m_instance && m_instance->isRunning());
     }
-}
-
-void ModFolderPage::runningStateChanged(bool running)
-{
-    ui->actionDownloadItem->setEnabled(!running);
-    ui->actionUpdateItem->setEnabled(!running);
-    ui->actionAddItem->setEnabled(!running);
-    ui->actionEnableItem->setEnabled(!running);
-    ui->actionDisableItem->setEnabled(!running);
-    ui->actionRemoveItem->setEnabled(!running);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -155,13 +140,21 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelI
 
 void ModFolderPage::removeItems(const QItemSelection& selection)
 {
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response = CustomMessageBox::selectable(this, "Confirm Delete",
+                                                     "If you remove mods while the game is running it may crash your game.\n"
+                                                     "Are you sure you want to do this?",
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
     m_model->deleteMods(selection.indexes());
 }
 
 void ModFolderPage::installMods()
 {
-    if (!m_controlsEnabled)
-        return;
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 

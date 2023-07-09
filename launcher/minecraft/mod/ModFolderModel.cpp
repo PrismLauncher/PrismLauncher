@@ -215,16 +215,11 @@ bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadat
 
 bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
 {
-    if(!m_can_interact) {
-        return false;
-    }
-
-    if(indexes.isEmpty())
+    if (indexes.isEmpty())
         return true;
 
-    for (auto i: indexes)
-    {
-        if(i.column() != 0) {
+    for (auto i : indexes) {
+        if (i.column() != 0) {
             continue;
         }
         auto m = at(i.row());
