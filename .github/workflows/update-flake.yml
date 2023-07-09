@@ -1,0 +1,26 @@
+name: Update Flake Lockfile
+
+on:
+  schedule:
+    # run weekly on sunday
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+
+jobs:
+  update-flake:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v22
+
+      - uses: DeterminateSystems/update-flake-lock@v19
+        with:
+          commit-msg: "chore(nix): update lockfile"
+          pr-title: "chore(nix): update lockfile"
+          pr-labels: |
+            Linux
+            simple change

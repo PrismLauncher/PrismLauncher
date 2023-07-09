@@ -928,21 +928,8 @@ void MainWindow::onCatToggled(bool state)
 
 void MainWindow::setCatBackground(bool enabled)
 {
-    if (enabled) {
-        view->setStyleSheet(QString(R"(
-InstanceView
-{
-    background-image: url(:/backgrounds/%1);
-    background-attachment: fixed;
-    background-clip: padding;
-    background-position: bottom right;
-    background-repeat: none;
-    background-color:palette(base);
-})")
-                                .arg(ThemeManager::getCatImage()));
-    } else {
-        view->setStyleSheet(QString());
-    }
+    view->setPaintCat(enabled);
+    view->viewport()->repaint();
 }
 
 void MainWindow::runModalTask(Task *task)

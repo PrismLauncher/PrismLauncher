@@ -81,6 +81,8 @@ APIPage::APIPage(QWidget *parent) :
     connect(ui->pasteTypeComboBox, currentIndexChangedSignal, this, &APIPage::updateBaseURLPlaceholder);
     // This function needs to be called even when the ComboBox's index is still in its default state.
     updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
+    // NOTE: this allows http://, but we replace that with https later anyway
+    ui->metaURL->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->metaURL));
     ui->baseURLEntry->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->baseURLEntry));
     ui->msaClientID->setValidator(new QRegularExpressionValidator(validMSAClientID, ui->msaClientID));
     ui->flameKey->setValidator(new QRegularExpressionValidator(validFlameKey, ui->flameKey));
@@ -163,7 +165,7 @@ void APIPage::applySettings()
 
     QString msaClientID = ui->msaClientID->text();
     s->set("MSAClientIDOverride", msaClientID);
-    QUrl metaURL = ui->metaURL->text();
+    QUrl metaURL(ui->metaURL->text());
     // Add required trailing slash
     if (!metaURL.isEmpty() && !metaURL.path().endsWith('/'))
     {

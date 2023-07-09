@@ -328,6 +328,9 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
                     case AccountState::Gone: {
                         return tr("Gone", "Account status");
                     }
+                    default: {
+                        return tr("Unknown", "Account status");
+                    }
                 }
             }
 
@@ -354,11 +357,12 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
             return QVariant::fromValue(account);
 
         case Qt::CheckStateRole:
-            switch (index.column())
-            {
-                case ProfileNameColumn:
-                    return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
+            if (index.column() == ProfileNameColumn) {
+                return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
+            } else {
+                return QVariant();
             }
+            
 
         default:
             return QVariant();
