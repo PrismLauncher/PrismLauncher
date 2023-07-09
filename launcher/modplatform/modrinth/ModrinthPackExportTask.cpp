@@ -301,10 +301,10 @@ QByteArray ModrinthPackExportTask::generateIndex()
         const ResolvedFile& value = iterator.value();
 
         // detect disabled mod
-        QString disabledSuffix = ".disabled";
-        if (path.endsWith(disabledSuffix)) {
+        const QFileInfo pathInfo(path);
+        if (pathInfo.suffix() == "disabled") {
             // rename it
-            path = path.left(path.length() - disabledSuffix.length());
+            path = pathInfo.dir().filePath(pathInfo.completeBaseName());
             // ...and make it optional
             QJsonObject env;
             env["client"] = "optional";
