@@ -89,7 +89,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
         ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
-        ui->actionsToolbar->insertActionAfter(ui->actionViewFolder, ui->actionVisitItemPage);
+        ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
 
         auto check_allow_update = [this] {
