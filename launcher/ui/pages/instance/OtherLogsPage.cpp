@@ -44,6 +44,7 @@
 #include "RecursiveFileSystemWatcher.h"
 #include <GZip.h>
 #include <FileSystem.h>
+#include <QRegularExpression>
 #include <QShortcut>
 
 OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent)
@@ -199,6 +200,8 @@ void OtherLogsPage::on_btnReload_clicked()
             showTooBig();
             return;
         }
+         // base64 for {"alg":"HS256"}.{"xuid":"
+        content.replace((QRegularExpression) QRegularExpression("eyJhbGciOiJIUzI1NiJ9\\.eyJ4dWlkIjoi[^\\.]+\\.[A-Za-z0-9]+", QRegularExpression::CaseInsensitiveOption), (QString) "<SESSION_TOKEN>");
         setPlainText(content);
     }
 }
