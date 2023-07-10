@@ -1287,7 +1287,7 @@ void MainWindow::on_actionEditInstance_triggered()
         APPLICATION->showInstanceWindow(m_selectedInstance);
     } else  {
         CustomMessageBox::selectable(this, tr("Instance not editable"), 
-                                     tr("This instance is not editable. it may be broken, invalid, or too old. Check logs for details,"),
+                                     tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."),
                                      QMessageBox::Critical)->show();
     }
 }
