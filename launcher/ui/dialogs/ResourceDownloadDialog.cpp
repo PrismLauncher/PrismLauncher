@@ -37,6 +37,8 @@
 #include "ui/pages/modplatform/flame/FlameResourcePages.h"
 #include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
 
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/widgets/PageContainer.h"
 
 namespace ResourceDownload {
@@ -222,8 +224,11 @@ QList<BasePage*> ModDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
 
-    pages.append(ModrinthModPage::create(this, *m_instance));
-    if (APPLICATION->capabilities() & Application::SupportsFlame)
+    auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getModLoaders().value();
+
+    if (ModrinthAPI::validateModLoaders(loaders))
+        pages.append(ModrinthModPage::create(this, *m_instance));
+    if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders))
         pages.append(FlameModPage::create(this, *m_instance));
 
     m_selectedPage = dynamic_cast<ModPage*>(pages[0]);
