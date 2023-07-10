@@ -64,7 +64,8 @@ bool ModrinthPackExportTask::abort()
 
     if (buildZipFuture.isRunning()) {
         buildZipFuture.cancel();
-        // NOTE: Here we don't do `emitAborted()` because it will be done when `buildZipFuture` actually cancels, which may not occur immediately.
+        // NOTE: Here we don't do `emitAborted()` because it will be done when `buildZipFuture` actually cancels, which may not occur
+        // immediately.
         return true;
     }
 
@@ -94,6 +95,7 @@ void ModrinthPackExportTask::collectFiles()
 
 void ModrinthPackExportTask::collectHashes()
 {
+    setStatus(tr("Finding file hashes..."));
     for (const QFileInfo& file : files) {
         QCoreApplication::processEvents();
 
@@ -157,6 +159,7 @@ void ModrinthPackExportTask::makeApiRequest()
     if (pendingHashes.isEmpty())
         buildZip();
     else {
+        setStatus(tr("Finding versions for hashes..."));
         auto response = std::make_shared<QByteArray>();
         task = api.currentVersions(pendingHashes.values(), "sha512", response);
         connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
