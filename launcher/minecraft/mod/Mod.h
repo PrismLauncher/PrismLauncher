@@ -70,6 +70,7 @@ public:
     auto provider()    const -> std::optional<QString>;
     auto licenses()     const -> const QList<ModLicense>&;
     auto issueTracker() const -> QString;
+    auto metaurl()     const -> QString;
 
     /** Get the intneral path to the mod's icon file*/
     QString iconPath() const { return m_local_details.icon_file; };

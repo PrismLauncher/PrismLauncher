@@ -46,7 +46,6 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
-
 ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget* parent)
     : ExternalResourcesPage(instance, model, parent)
 {
@@ -61,8 +60,6 @@ ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<Shad
 
 void ShaderPackPage::downloadShaders()
 {
-    if (!m_controlsEnabled)
-        return;
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 

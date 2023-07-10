@@ -36,6 +36,7 @@
  */
 
 #include "FileSystem.h"
+#include <QPair>
 
 #include "BuildConfig.h"
 
@@ -246,6 +247,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
 {
     using copy_opts = fs::copy_options;
     m_copied = 0;  // reset counter
+    m_failedPaths.clear();
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
@@ -277,6 +279,9 @@ bool copy::operator()(const QString& offset, bool dryRun)
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
+            m_failedPaths.append(dst_path);
+            emit copyFailed(relative_dst_path);
+            return;
         }
         m_copied++;
         emit fileCopied(relative_dst_path);
@@ -1077,6 +1082,7 @@ bool clone::operator()(const QString& offset, bool dryRun)
     }
 
     m_cloned = 0;  // reset counter
+    m_failedClones.clear();
 
     auto src = PathCombine(m_src.absolutePath(), offset);
     auto dst = PathCombine(m_dst.absolutePath(), offset);
@@ -1097,6 +1103,9 @@ bool clone::operator()(const QString& offset, bool dryRun)
             qDebug() << "Failed to clone files: error" << err.value() << "message" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
+            m_failedClones.append(qMakePair(src_path, dst_path));
+            emit cloneFailed(src_path, dst_path);
+            return;
         }
         m_cloned++;
         emit fileCloned(src_path, dst_path);

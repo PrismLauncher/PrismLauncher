@@ -99,7 +99,7 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
-#include "ui/dialogs/ExportMrPackDialog.h"
+#include "ui/dialogs/ExportPackDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -201,6 +201,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         auto exportInstanceMenu = new QMenu(this);
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
+        exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
 
@@ -1311,8 +1312,32 @@ void MainWindow::on_actionExportInstanceZip_triggered()
 void MainWindow::on_actionExportInstanceMrPack_triggered()
 {
     if (m_selectedInstance) {
-        ExportMrPackDialog dlg(m_selectedInstance, this);
+        ExportPackDialog dlg(m_selectedInstance, this);
         dlg.exec();
+    }
+}
+
+void MainWindow::on_actionExportInstanceFlamePack_triggered()
+{
+    if (m_selectedInstance) {
+        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
+        if (instance) {
+            QString errorMsg;
+            if (instance->getPackProfile()->getComponent("org.quiltmc.quilt-loader")) {
+                errorMsg = tr("Quilt is currently not supported by CurseForge modpacks.");
+            } else if (auto cmp = instance->getPackProfile()->getComponent("net.minecraft");
+                       cmp && cmp->getVersionFile() && cmp->getVersionFile()->type == "snapshot") {
+                errorMsg = tr("Snapshots are currently not supported by CurseForge modpacks.");
+            }
+            if (!errorMsg.isEmpty()) {
+                QMessageBox msgBox;
+                msgBox.setText(errorMsg);
+                msgBox.exec();
+                return;
+            }
+            ExportPackDialog dlg(m_selectedInstance, this, ModPlatform::ResourceProvider::FLAME);
+            dlg.exec();
+        }
     }
 }
 

@@ -169,7 +169,7 @@
           <item>
            <widget class="QCheckBox" name="metadataDisableBtn">
             <property name="toolTip">
-             <string>Disable using metadata provided by mod providers (like Modrinth or Curseforge) for mods.</string>
+             <string>Disable using metadata provided by mod providers (like Modrinth or CurseForge) for mods.</string>
             </property>
             <property name="text">
              <string>Disable using metadata for mods</string>
