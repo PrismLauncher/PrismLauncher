@@ -146,12 +146,10 @@ QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
             if (option == 'd') {
                 auto d = std::chrono::duration_cast<days>(std_duration);
                 dc = d.count();
-                qDebug() << QString("%1 days").arg(d.count());
             } else if (option == 'h') {
                 auto d = std::chrono::duration_cast<daysR>(std_duration);
                 auto h = std::chrono::duration_cast<hours>(std_duration - d);
                 dc = h.count();
-                qDebug() << QString("%1 h").arg(h.count());
             } else if (option == 'H') {
                 auto h = std::chrono::duration_cast<hours>(std_duration);
                 dc = h.count();
@@ -160,7 +158,6 @@ QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
                 auto h = std::chrono::duration_cast<std::chrono::hours>(std_duration - d);
                 auto m = std::chrono::duration_cast<minutes>(std_duration - d - h);
                 dc = m.count();
-                qDebug() << QString("%1 m").arg(m.count());
             } else if (option == 'M') {
                 auto m = std::chrono::duration_cast<minutes>(std_duration);
                 dc = m.count();
@@ -169,7 +166,6 @@ QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
                 auto h = std::chrono::duration_cast<std::chrono::hours>(std_duration - d);
                 auto m = std::chrono::duration_cast<std::chrono::minutes>(std_duration - d - h);
                 auto s = std::chrono::duration_cast<std::chrono::seconds>(std_duration - d - h - m);
-                qDebug() << QString("%1 s").arg(s.count());
                 dc = s.count();
             } else if (option == 'S') {
                 auto s = std::chrono::duration_cast<std::chrono::seconds>(std_duration);
@@ -182,7 +178,6 @@ QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
                     formated = QString::number(dc, 'f', precision);
                 else
                     formated = QString::number(int(dc));
-                qDebug() << QString("%1 val").arg(formated);
                 if (formated != "0") {
                     seg << formated;
                     continue;
