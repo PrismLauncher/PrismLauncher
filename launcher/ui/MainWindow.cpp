@@ -1778,9 +1778,12 @@ void MainWindow::updateStatusCenter()
 
     int timePlayed = APPLICATION->instances()->getTotalPlayTime();
     if (timePlayed > 0) {
-        m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
+        m_statusCenter->setText(
+            tr("Total playtime: %1")
+                .arg(Time::humanReadableDuration(timePlayed, APPLICATION->settings()->get("GameTimeFormat").toString())));
     }
 }
+
 // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
 // Actions that also require other conditions (e.g. a running instance) won't be changed.
 void MainWindow::setInstanceActionsEnabled(bool enabled)

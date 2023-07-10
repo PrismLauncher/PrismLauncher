@@ -138,6 +138,28 @@
             </property>
            </widget>
           </item>
+          <item>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelTimeSpentFormat">
+              <property name="text">
+               <string>The format of the time spent playing:</string>
+              </property>
+              <property name="buddy">
+               <cstring>lineTimeSpentFormat</cstring>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="lineTimeSpentFormat">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>

@@ -908,14 +908,12 @@ QString MinecraftInstance::getLogFileRoot()
 QString MinecraftInstance::getStatusbarDescription()
 {
     QStringList traits;
-    if (hasVersionBroken())
-    {
+    if (hasVersionBroken()) {
         traits.append(tr("broken"));
     }
 
     QString mcVersion = m_components->getComponentVersion("net.minecraft");
-    if (mcVersion.isEmpty())
-    {
+    if (mcVersion.isEmpty()) {
         // Load component info if needed
         m_components->reload(Net::Mode::Offline);
         mcVersion = m_components->getComponentVersion("net.minecraft");
@@ -923,21 +921,22 @@ QString MinecraftInstance::getStatusbarDescription()
 
     QString description;
     description.append(tr("Minecraft %1").arg(mcVersion));
-    if(m_settings->get("ShowGameTime").toBool())
-    {
+    if (m_settings->get("ShowGameTime").toBool()) {
         if (lastTimePlayed() > 0) {
             QDateTime lastLaunchTime = QDateTime::fromMSecsSinceEpoch(lastLaunch());
-            description.append(tr(", last played on %1 for %2")
-                                   .arg(QLocale().toString(lastLaunchTime, QLocale::ShortFormat))
-                                   .arg(Time::prettifyDuration(lastTimePlayed())));
+            description.append(
+                tr(", last played on %1 for %2")
+                    .arg(QLocale().toString(lastLaunchTime, QLocale::ShortFormat))
+                    .arg(Time::humanReadableDuration(lastTimePlayed(), APPLICATION->settings()->get("GameTimeFormat").toString())));
         }
 
         if (totalTimePlayed() > 0) {
-            description.append(tr(", total played for %1").arg(Time::prettifyDuration(totalTimePlayed())));
+            description.append(
+                tr(", total played for %1")
+                    .arg(Time::humanReadableDuration(totalTimePlayed(), APPLICATION->settings()->get("GameTimeFormat").toString())));
         }
     }
-    if(hasCrashed())
-    {
+    if (hasCrashed()) {
         description.append(tr(", has crashed."));
     }
     return description;
