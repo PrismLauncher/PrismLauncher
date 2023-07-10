@@ -121,7 +121,7 @@ bool Mod::applyFilter(QRegularExpression filter) const
     return Resource::applyFilter(filter);
 }
 
-auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
+auto Mod::destroy(QDir& index_dir, bool preserve_metadata, bool attempt_trash) -> bool
 {
     if (!preserve_metadata) {
         qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
@@ -134,7 +134,7 @@ auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
         }
     }
 
-    return Resource::destroy();
+    return Resource::destroy(attempt_trash);
 }
 
 auto Mod::details() const -> const ModDetails&

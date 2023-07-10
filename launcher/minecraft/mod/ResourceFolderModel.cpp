@@ -156,7 +156,7 @@ bool ResourceFolderModel::uninstallResource(QString file_name)
 {
     for (auto& resource : m_resources) {
         if (resource->fileinfo().fileName() == file_name) {
-            auto res = resource->destroy();
+            auto res = resource->destroy(false);
 
             update();
 

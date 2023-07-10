@@ -145,14 +145,10 @@ bool Resource::enable(EnableAction action)
     return true;
 }
 
-bool Resource::destroy()
+bool Resource::destroy(bool attemptTrash)
 {
     m_type = ResourceType::UNKNOWN;
-
-    if (FS::trash(m_file_info.filePath()))
-        return true;
-
-    return FS::deletePath(m_file_info.filePath());
+    return (attemptTrash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
 }
 
 bool Resource::isSymLinkUnder(const QString& instPath) const 

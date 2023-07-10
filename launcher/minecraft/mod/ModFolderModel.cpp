@@ -197,10 +197,10 @@ Task* ModFolderModel::createParseTask(Resource& resource)
 
 bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadata)
 {
-    for(auto mod : allMods()){
-        if(mod->fileinfo().fileName() == filename){
+    for(auto mod : allMods()) {
+        if(mod->fileinfo().fileName() == filename) {
             auto index_dir = indexDir();
-            mod->destroy(index_dir, preserve_metadata);
+            mod->destroy(index_dir, preserve_metadata, false);
 
             update();
 
