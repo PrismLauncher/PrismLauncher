@@ -31,5 +31,5 @@ QString prettifyDuration(int64_t duration);
  * @return QString
  */
 QString humanReadableDuration(double duration, int precision = 0);
-QString humanReadableDuration(int64_t duration, const QString& fmt);
+QString humanReadableDuration(int64_t duration, QString fmt, bool trimZeros = true);
 }  // namespace Time

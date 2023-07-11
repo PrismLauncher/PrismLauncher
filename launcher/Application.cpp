@@ -661,7 +661,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("RPDownloadGeometry", "");
         m_settings->registerSetting("TPDownloadGeometry", "");
         m_settings->registerSetting("ShaderDownloadGeometry", "");
-         m_settings->registerSetting("GameTimeFormat", "%d%d %h%h %m%min %s%s");
+        m_settings->registerSetting("GameTimeFormat", "%dd %hh %mmin %ss");
 
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {

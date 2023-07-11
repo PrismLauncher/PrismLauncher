@@ -95,7 +95,7 @@ void MinecraftPage::applySettings()
     s->set("ShowGameTime", ui->showGameTime->isChecked());
     s->set("ShowGlobalGameTime", ui->showGlobalGameTime->isChecked());
     s->set("RecordGameTime", ui->recordGameTime->isChecked());
-    s->set("GameTimeFormat", ui->lineTimeSpentFormat->text());
+    s->set("GameTimeFormat", ui->lineTimeSpentFormat->text().isEmpty() ? "%dd %hh %mmin %ss" : ui->lineTimeSpentFormat->text());
 
     // Miscellaneous
     s->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
@@ -135,7 +135,8 @@ void MinecraftPage::loadSettings()
     ui->showGameTime->setChecked(s->get("ShowGameTime").toBool());
     ui->showGlobalGameTime->setChecked(s->get("ShowGlobalGameTime").toBool());
     ui->recordGameTime->setChecked(s->get("RecordGameTime").toBool());
-    ui->lineTimeSpentFormat->setText(s->get("GameTimeFormat").toString());
+    ui->lineTimeSpentFormat->setText(s->get("GameTimeFormat").toString().isEmpty() ? "%dd %hh %mmin %ss"
+                                                                                   : s->get("GameTimeFormat").toString());
 
     ui->closeAfterLaunchCheck->setChecked(s->get("CloseAfterLaunch").toBool());
     ui->quitAfterGameStopCheck->setChecked(s->get("QuitAfterGameStop").toBool());

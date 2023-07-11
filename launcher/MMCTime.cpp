@@ -150,18 +150,19 @@ QString getOptionValue(std::chrono::duration<double> duration, char option, int 
             dc = s.count();
             break;
         }
+        default:
+            return "";
     }
     option = QChar::Null;
-    if (dc) {
-        if (precision != 0)
-            return QString::number(dc, 'f', precision);
-        return QString::number(int(dc));
-    }
-    return "";
+    if (precision != 0)
+        return QString::number(dc, 'f', precision);
+    return QString::number(int(dc));
 }
 
-QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
+QString Time::humanReadableDuration(int64_t duration, QString fmt, bool trimZeros)
 {
+    if (fmt.isEmpty())  // force default if empty
+        fmt = "%dd %hh %mmin %ss";
     auto std_duration = std::chrono::duration<double>(double(duration));
 
     QString outStr;
@@ -185,7 +186,7 @@ QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
                     break;
                 }
                 auto formated = getOptionValue(std_duration, option.toLatin1(), precision);
-                if (formated.isEmpty() || formated == "0") {
+                if (formated.isEmpty() || (formated == "0" && trimZeros)) {
                     seg.reset();
                     segment = "";
                     current_state = readUntilNextOption;
@@ -228,7 +229,7 @@ QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
                     break;
                 }
                 auto formated = getOptionValue(std_duration, option.toLatin1(), precision);
-                if (formated.isEmpty() || formated == "0") {
+                if (formated.isEmpty() || (formated == "0" && trimZeros)) {
                     seg.reset();
                     segment = "";
                     current_state = readUntilNextOption;
@@ -247,5 +248,6 @@ QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
     seg.flush();
     os << segment;
     os.flush();
-    return outStr.trimmed();
+    outStr = outStr.trimmed();
+    return outStr.isEmpty() && trimZeros ? humanReadableDuration(duration, fmt, false) : outStr;
 }

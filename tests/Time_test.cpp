@@ -43,7 +43,7 @@ class TimeTest : public QObject {
 
                  { 90, "%dd %hh %mmin %ssec", "1min 30sec" },
                  { 30, "%dd %hh %mmin %ssec", "30sec" },
-                 { 30, "%dd %hh %mmin", "" },
+                 { 30, "%dd %hh %mmin", "0d 0h 0min" },
                  { 90 * 60, "%dd %hh %mmin %ssec", "1h 30min" },
                  { 90 * 60 + 20, "%dd %hh %mmin %ssec", "1h 30min 20sec" },
                  { 60 * 60 * 24 * 2 + 90 * 60 + 20, "%dd %hh %mmin %ssec", "2d 1h 30min 20sec" },
@@ -52,6 +52,9 @@ class TimeTest : public QObject {
                  { 60 * 60 * 60 + 30 * 60, "%H.2h", "60.50h" },
                  { 60 * 61 + 15, "%M.2min", "61.25min" },
                  { 90, "%Ssec", "90sec" },
+                 { 90, "", "1min 30s" },
+                 { 90, "%%", "%" },
+                 { 90, "custom text", "custom text" },
              }) {
             auto formated = Time::humanReadableDuration(t.duration, t.fmt);
             QCOMPARE(formated, t.expected);
