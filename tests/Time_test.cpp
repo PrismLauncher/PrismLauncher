@@ -55,6 +55,9 @@ class TimeTest : public QObject {
                  { 90, "", "1min 30s" },
                  { 90, "%%", "%" },
                  { 90, "custom text", "custom text" },
+                 { 90, "custom text =%p=", "custom text ==" },
+                 { 90, "custom text =%p.12=", "custom text ==" },
+                 { 90, "custom text =%p.=", "custom text =.=" },
              }) {
             auto formated = Time::humanReadableDuration(t.duration, t.fmt);
             QCOMPARE(formated, t.expected);

@@ -186,7 +186,7 @@ QString Time::humanReadableDuration(int64_t duration, QString fmt, bool trimZero
                     break;
                 }
                 auto formated = getOptionValue(std_duration, option.toLatin1(), precision);
-                if (formated.isEmpty() || (formated == "0" && trimZeros)) {
+                if (!formated.isEmpty() && (formated == "0" && trimZeros)) {
                     seg.reset();
                     segment = "";
                     current_state = readUntilNextOption;
@@ -229,7 +229,7 @@ QString Time::humanReadableDuration(int64_t duration, QString fmt, bool trimZero
                     break;
                 }
                 auto formated = getOptionValue(std_duration, option.toLatin1(), precision);
-                if (formated.isEmpty() || (formated == "0" && trimZeros)) {
+                if (!formated.isEmpty() && (formated == "0" && trimZeros)) {
                     seg.reset();
                     segment = "";
                     current_state = readUntilNextOption;
