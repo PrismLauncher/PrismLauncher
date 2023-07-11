@@ -32,22 +32,8 @@
   </Dependencies>
 
   <Capabilities>
-    <Capability Name="internetClientServer"/>
     <rescap:Capability Name="runFullTrust"/>
     <rescap:Capability Name="unvirtualizedResources"/>
-    <DeviceCapability Name="humaninterfacedevice">
-      <!--
-      This allows for any
-      generic gaming device,
-      such as a controller or joystick
-      *and* any HID device.
-      -->
-      <Device Id="any">
-        <Function Type="usage:0004 *"/>
-        <Function Type="usage:0005 *"/>
-        <Function Type="usage:ffa0 0001"/>
-      </Device>
-    </DeviceCapability>
   </Capabilities>
 
   <Applications>
