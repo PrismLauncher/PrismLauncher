@@ -101,98 +101,148 @@ QString Time::humanReadableDuration(double duration, int precision)
     return outStr;
 }
 
-QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
+QString getOptionValue(std::chrono::duration<double> duration, char option, int precision)
 {
     using days = std::chrono::duration<double, std::ratio<86400>>;
     using daysR = std::chrono::duration<int, std::ratio<86400>>;
     using hours = std::chrono::duration<double, std::chrono::hours::period>;
     using minutes = std::chrono::duration<double, std::chrono::minutes::period>;
+    double dc = 0;
+    switch (option) {
+        case 'd': {
+            auto d = std::chrono::duration_cast<days>(duration);
+            dc = d.count();
+            break;
+        }
+        case 'h': {
+            auto d = std::chrono::duration_cast<daysR>(duration);
+            auto h = std::chrono::duration_cast<hours>(duration - d);
+            dc = h.count();
+            break;
+        }
+        case 'H': {
+            auto h = std::chrono::duration_cast<hours>(duration);
+            dc = h.count();
+            break;
+        }
+        case 'm': {
+            auto d = std::chrono::duration_cast<daysR>(duration);
+            auto h = std::chrono::duration_cast<std::chrono::hours>(duration - d);
+            auto m = std::chrono::duration_cast<minutes>(duration - d - h);
+            dc = m.count();
+            break;
+        }
+        case 'M': {
+            auto m = std::chrono::duration_cast<minutes>(duration);
+            dc = m.count();
+            break;
+        }
+        case 's': {
+            auto d = std::chrono::duration_cast<daysR>(duration);
+            auto h = std::chrono::duration_cast<std::chrono::hours>(duration - d);
+            auto m = std::chrono::duration_cast<std::chrono::minutes>(duration - d - h);
+            auto s = std::chrono::duration_cast<std::chrono::seconds>(duration - d - h - m);
+            dc = s.count();
+            break;
+        }
+        case 'S': {
+            auto s = std::chrono::duration_cast<std::chrono::seconds>(duration);
+            dc = s.count();
+            break;
+        }
+    }
+    option = QChar::Null;
+    if (dc) {
+        if (precision != 0)
+            return QString::number(dc, 'f', precision);
+        return QString::number(int(dc));
+    }
+    return "";
+}
+
+QString Time::humanReadableDuration(int64_t duration, const QString& fmt)
+{
     auto std_duration = std::chrono::duration<double>(double(duration));
 
     QString outStr;
     QTextStream os(&outStr);
 
-    QChar option = QChar::Null;
-    bool inOption;
-    QString precSeg;
-    QTextStream s(&precSeg);
-
     QString segment;
     QTextStream seg(&segment);
 
+    // more states
+    enum state { readSegment, readOption, readDot, readPrecision, readUntilNextOption };
+    state current_state = readSegment;
+    QChar option = QChar::Null;
+    int precision = 0;
+
     for (auto i = 0; i < fmt.size(); i++) {
         auto c = fmt[i];
-        if (!inOption) {
-            if (inOption = c == '%'; inOption) {
-                seg.flush();
-                os << segment;
-                seg.reset();
-                segment = "";
-            } else {
-                seg << c;
+        switch (current_state) {
+            case readDot: {
+                if (c == '.') {
+                    current_state = readPrecision;
+                    break;
+                }
+                auto formated = getOptionValue(std_duration, option.toLatin1(), precision);
+                if (formated.isEmpty() || formated == "0") {
+                    seg.reset();
+                    segment = "";
+                    current_state = readUntilNextOption;
+                    option = QChar::Null;
+                    break;
+                }
+                seg << formated;
+                current_state = readSegment;
             }
-            continue;
-        }
-        if (c == '%') {
-            inOption = false;
-            int precision = 0;
-            s.flush();
-            if (precSeg.startsWith('.')) {
-                precision = precSeg.remove(0, 1).toInt();
-            }
-            s.reset();
-            precSeg = "";
-            double dc = 0;
-            if (option == 'd') {
-                auto d = std::chrono::duration_cast<days>(std_duration);
-                dc = d.count();
-            } else if (option == 'h') {
-                auto d = std::chrono::duration_cast<daysR>(std_duration);
-                auto h = std::chrono::duration_cast<hours>(std_duration - d);
-                dc = h.count();
-            } else if (option == 'H') {
-                auto h = std::chrono::duration_cast<hours>(std_duration);
-                dc = h.count();
-            } else if (option == 'm') {
-                auto d = std::chrono::duration_cast<daysR>(std_duration);
-                auto h = std::chrono::duration_cast<std::chrono::hours>(std_duration - d);
-                auto m = std::chrono::duration_cast<minutes>(std_duration - d - h);
-                dc = m.count();
-            } else if (option == 'M') {
-                auto m = std::chrono::duration_cast<minutes>(std_duration);
-                dc = m.count();
-            } else if (option == 's') {
-                auto d = std::chrono::duration_cast<daysR>(std_duration);
-                auto h = std::chrono::duration_cast<std::chrono::hours>(std_duration - d);
-                auto m = std::chrono::duration_cast<std::chrono::minutes>(std_duration - d - h);
-                auto s = std::chrono::duration_cast<std::chrono::seconds>(std_duration - d - h - m);
-                dc = s.count();
-            } else if (option == 'S') {
-                auto s = std::chrono::duration_cast<std::chrono::seconds>(std_duration);
-                dc = s.count();
-            }
-            option = QChar::Null;
-            if (dc) {
-                QString formated;
-                if (precision != 0)
-                    formated = QString::number(dc, 'f', precision);
-                else
-                    formated = QString::number(int(dc));
-                if (formated != "0") {
-                    seg << formated;
-                    continue;
+            /* fallthrough */
+            case readSegment: {
+                if (c != '%') {
+                    seg << c;
+                    break;
                 }
             }
-            seg.reset();
-            segment = "";
-            for (; i + 1 < fmt.size() && fmt[i + 1] != '%'; i++)
-                ;
-            continue;
+            /* fallthrough */
+            case readUntilNextOption:
+                if (c == '%') {
+                    current_state = readOption;
+                    seg.flush();
+                    os << segment;
+                    seg.reset();
+                    segment = "";
+                }
+                break;
+            case readOption:
+                precision = 0;
+                if (c == '%') {
+                    seg << "%";
+                    current_state = readSegment;
+                } else {
+                    option = c;
+                    current_state = readDot;
+                }
+                break;
+            case readPrecision: {
+                if (c.isDigit()) {
+                    precision = precision * 10 + c.digitValue();
+                    break;
+                }
+                auto formated = getOptionValue(std_duration, option.toLatin1(), precision);
+                if (formated.isEmpty() || formated == "0") {
+                    seg.reset();
+                    segment = "";
+                    current_state = readUntilNextOption;
+                    option = QChar::Null;
+                    break;
+                }
+                seg << formated;
+                if (precision == 0)
+                    seg << '.';
+                seg << c;
+                current_state = readSegment;
+                break;
+            }
         }
-        if (option == QChar::Null)
-            option = c;
-        else
-            s << c;
     }
     seg.flush();
     os << segment;

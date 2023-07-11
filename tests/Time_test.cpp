@@ -25,27 +25,37 @@ class TimeTest : public QObject {
    private slots:
     void test_humanReadableDuration()
     {
-        QCOMPARE(Time::humanReadableDuration(1, "%s%sec"), "1sec");
-        QCOMPARE(Time::humanReadableDuration(90, "%M.1%min"), "1.5min");
-        QCOMPARE(Time::humanReadableDuration(59, "%s.1%sec"), "59.0sec");
-        QCOMPARE(Time::humanReadableDuration(90, "%s%sec"), "30sec");
-        QCOMPARE(Time::humanReadableDuration(60 * 60 * 30, "%h%h"), "6h");
-        QCOMPARE(Time::humanReadableDuration(60 * 60 * 30, "%H%h"), "30h");
-        QCOMPARE(Time::humanReadableDuration(60 * 60 * 30, "%d%days"), "1days");
-        QCOMPARE(Time::humanReadableDuration(60 * 60 * 30, "%d.1%days"), "1.3days");
-        QCOMPARE(Time::humanReadableDuration(60 * 60 * 30, "%d.2%days"), "1.25days");
+        struct testCase {
+            const int64_t duration;
+            const QString fmt;
+            const QString expected;
+        };
+        for (auto t : {
+                 testCase{ 1, "%ssec", "1sec" },
+                 { 90, "%M.1min", "1.5min" },
+                 { 59, "%s.1sec", "59.0sec" },
+                 { 90, "%ssec", "30sec" },
+                 { 60 * 60 * 30, "%hh", "6h" },
+                 { 60 * 60 * 30, "%Hh", "30h" },
+                 { 60 * 60 * 30, "%ddays", "1days" },
+                 { 60 * 60 * 30, "%d.1days", "1.3days" },
+                 { 60 * 60 * 30, "%d.2days", "1.25days" },
 
-        QCOMPARE(Time::humanReadableDuration(90, "%d%d %h%h %m%min %s%sec"), "1min 30sec");
-        QCOMPARE(Time::humanReadableDuration(30, "%d%d %h%h %m%min %s%sec"), "30sec");
-        QCOMPARE(Time::humanReadableDuration(30, "%d%d %h%h %m%min"), "");
-        QCOMPARE(Time::humanReadableDuration(90 * 60, "%d%d %h%h %m%min %s%sec"), "1h 30min");
-        QCOMPARE(Time::humanReadableDuration(90 * 60 + 20, "%d%d %h%h %m%min %s%sec"), "1h 30min 20sec");
-        QCOMPARE(Time::humanReadableDuration(60 * 60 * 24 * 2 + 90 * 60 + 20, "%d%d %h%h %m%min %s%sec"), "2d 1h 30min 20sec");
+                 { 90, "%dd %hh %mmin %ssec", "1min 30sec" },
+                 { 30, "%dd %hh %mmin %ssec", "30sec" },
+                 { 30, "%dd %hh %mmin", "" },
+                 { 90 * 60, "%dd %hh %mmin %ssec", "1h 30min" },
+                 { 90 * 60 + 20, "%dd %hh %mmin %ssec", "1h 30min 20sec" },
+                 { 60 * 60 * 24 * 2 + 90 * 60 + 20, "%dd %hh %mmin %ssec", "2d 1h 30min 20sec" },
 
-        QCOMPARE(Time::humanReadableDuration(60 * 60 * 24 * 2.5, "%d.2%d"), "2.50d");
-        QCOMPARE(Time::humanReadableDuration(60 * 60 * 24 * 2.5 + 30 * 60, "%H.2%h"), "60.50h");
-        QCOMPARE(Time::humanReadableDuration(60 * 61 + 15, "%M.2%min"), "61.25min");
-        QCOMPARE(Time::humanReadableDuration(90, "%S%sec"), "90sec");
+                 { 60 * 60 * 60, "%d.2d", "2.50d" },
+                 { 60 * 60 * 60 + 30 * 60, "%H.2h", "60.50h" },
+                 { 60 * 61 + 15, "%M.2min", "61.25min" },
+                 { 90, "%Ssec", "90sec" },
+             }) {
+            auto formated = Time::humanReadableDuration(t.duration, t.fmt);
+            QCOMPARE(formated, t.expected);
+        }
     }
 };
 
