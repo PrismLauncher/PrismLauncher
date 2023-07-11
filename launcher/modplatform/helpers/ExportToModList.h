@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <qlist.h>
+#include <QList>
 #include <QString>
 #include "minecraft/mod/Mod.h"
 

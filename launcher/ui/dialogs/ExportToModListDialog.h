@@ -45,8 +45,9 @@ class ExportToModListDialog : public QDialog {
    private:
     QString extension();
     QList<Mod*> m_allMods;
-    bool m_template_selected;
+    bool m_template_changed;
     QString name;
     ExportToModList::Formats format = ExportToModList::Formats::HTML;
     Ui::ExportToModListDialog* ui;
+    static const QHash<ExportToModList::Formats, QString> exampleLines;
 };

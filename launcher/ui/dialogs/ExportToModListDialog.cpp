@@ -33,11 +33,19 @@
 #include <QMessageBox>
 #include <QPushButton>
 
+const QHash<ExportToModList::Formats, QString> ExportToModListDialog::exampleLines = {
+    { ExportToModList::HTML, "<li><a href=\"{url}\">{name}</a> [{version}] by {authors}</li>" },
+    { ExportToModList::MARKDOWN, "[{name}]({url}) [{version}] by {authors}" },
+    { ExportToModList::PLAINTXT, "{name} ({url}) [{version}] by {authors}" },
+    { ExportToModList::JSON, "{\"name\":\"{name}\",\"url\":\"{url}\",\"version\":\"{version}\",\"authors\":\"{authors}\"}," },
+    { ExportToModList::CSV, "{name},{url},{version},\"{authors}\"" },
+};
+
 ExportToModListDialog::ExportToModListDialog(InstancePtr instance, QWidget* parent)
-    : QDialog(parent), m_template_selected(false), name(instance->name()), ui(new Ui::ExportToModListDialog)
+    : QDialog(parent), m_template_changed(false), name(instance->name()), ui(new Ui::ExportToModListDialog)
 {
     ui->setupUi(this);
-    ui->templateGroup->setDisabled(true);
+    ui->optionsGroup->setDisabled(false);
 
     MinecraftInstance* mcInstance = dynamic_cast<MinecraftInstance*>(instance.get());
     if (mcInstance) {
@@ -52,7 +60,12 @@ ExportToModListDialog::ExportToModListDialog(InstancePtr instance, QWidget* pare
     connect(ui->authorsCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->versionCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->urlCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
-    connect(ui->templateText, &QTextEdit::textChanged, this, &ExportToModListDialog::triggerImp);
+    connect(ui->templateText, &QTextEdit::textChanged, this, [this] {
+        if (ui->templateText->toPlainText() != exampleLines[format])
+            ui->formatComboBox->setCurrentIndex(5);
+        else
+            triggerImp();
+    });
     connect(ui->copyButton, &QPushButton::clicked, this, [this](bool) {
         this->ui->finalText->selectAll();
         this->ui->finalText->copy();
@@ -68,42 +81,37 @@ void ExportToModListDialog::formatChanged(int index)
 {
     switch (index) {
         case 0: {
-            ui->templateGroup->setDisabled(true);
             ui->optionsGroup->setDisabled(false);
             ui->resultText->show();
             format = ExportToModList::HTML;
             break;
         }
         case 1: {
-            ui->templateGroup->setDisabled(true);
             ui->optionsGroup->setDisabled(false);
             ui->resultText->show();
             format = ExportToModList::MARKDOWN;
             break;
         }
         case 2: {
-            ui->templateGroup->setDisabled(true);
             ui->optionsGroup->setDisabled(false);
             ui->resultText->hide();
             format = ExportToModList::PLAINTXT;
             break;
         }
         case 3: {
-            ui->templateGroup->setDisabled(true);
             ui->optionsGroup->setDisabled(false);
             ui->resultText->hide();
             format = ExportToModList::JSON;
             break;
         }
         case 4: {
-            ui->templateGroup->setDisabled(true);
             ui->optionsGroup->setDisabled(false);
             ui->resultText->hide();
             format = ExportToModList::CSV;
             break;
         }
         case 5: {
-            ui->templateGroup->setDisabled(false);
+            m_template_changed = true;
             ui->optionsGroup->setDisabled(true);
             ui->resultText->hide();
             format = ExportToModList::CUSTOM;
@@ -116,7 +124,6 @@ void ExportToModListDialog::formatChanged(int index)
 void ExportToModListDialog::triggerImp()
 {
     if (format == ExportToModList::CUSTOM) {
-        m_template_selected = true;
         ui->finalText->setPlainText(ExportToModList::ExportToModList(m_allMods, ui->templateText->toPlainText()));
         return;
     }
@@ -129,35 +136,25 @@ void ExportToModListDialog::triggerImp()
         opt |= ExportToModList::Url;
     auto txt = ExportToModList::ExportToModList(m_allMods, format, static_cast<ExportToModList::OptionalData>(opt));
     ui->finalText->setPlainText(txt);
-    QString exampleLine;
     switch (format) {
-        case ExportToModList::HTML: {
-            exampleLine = "<li><a href=\"{url}\">{name}</a> [{version}] by {authors}</li>";
-            ui->resultText->setHtml(txt);
-            break;
-        }
-        case ExportToModList::MARKDOWN: {
-            exampleLine = "[{name}]({url}) [{version}] by {authors}";
-            ui->resultText->setHtml(markdownToHTML(txt));
-            break;
-        }
-        case ExportToModList::PLAINTXT: {
-            exampleLine = "{name} ({url}) [{version}] by {authors}";
-            break;
-        }
         case ExportToModList::CUSTOM:
             return;
+        case ExportToModList::HTML:
+            ui->resultText->setHtml(txt);
+            break;
+        case ExportToModList::MARKDOWN:
+            ui->resultText->setHtml(markdownToHTML(txt));
+            break;
+        case ExportToModList::PLAINTXT:
+            break;
         case ExportToModList::JSON:
-            exampleLine = "{\"name\":\"{name}\",\"url\":\"{url}\",\"version\":\"{version}\",\"authors\":\"{authors}\"},";
             break;
         case ExportToModList::CSV:
-            exampleLine = "{name},{url},{version},\"{authors}\"";
             break;
     }
-    if (!m_template_selected) {
-        if (ui->templateText->toPlainText() != exampleLine)
-            ui->templateText->setPlainText(exampleLine);
-    }
+    auto exampleLine = exampleLines[format];
+    if (!m_template_changed && ui->templateText->toPlainText() != exampleLine)
+        ui->templateText->setPlainText(exampleLine);
 }
 
 void ExportToModListDialog::done(int result)

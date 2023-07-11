@@ -18,7 +18,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
      <item>
       <widget class="QGroupBox" name="groupBox_3">
        <property name="title">
@@ -149,6 +149,16 @@
        </layout>
       </widget>
      </item>
+     <item>
+      <widget class="QLabel" name="warningLabel">
+       <property name="text">
+        <string>This depends on the mods meta data. To ensure the meta data run at least one time the mods update on the selected instance(no need to update the mods).</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -189,7 +199,7 @@
     </hint>
    </hints>
   </connection>
-   <connection>
+  <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
    <receiver>ExportToModListDialog</receiver>
