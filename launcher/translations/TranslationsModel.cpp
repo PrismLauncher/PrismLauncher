@@ -42,6 +42,7 @@
 #include <QDir>
 #include <QLibraryInfo>
 #include <QDebug>
+#include <locale>
 
 #include "FileSystem.h"
 #include "net/NetJob.h"
