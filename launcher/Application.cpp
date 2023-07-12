@@ -568,6 +568,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Language
         m_settings->registerSetting("Language", QString());
+        m_settings->registerSetting("UseSystemLocale", false);
 
         // Console
         m_settings->registerSetting("ShowConsole", false);
@@ -918,12 +919,7 @@ bool Application::createSetupWizard()
         }
         return false;
     }();
-    bool languageRequired = [&]()
-    {
-        if (settings()->get("Language").toString().isEmpty())
-            return true;
-        return false;
-    }();
+    bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
