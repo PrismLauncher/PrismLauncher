@@ -65,6 +65,7 @@ void PackInstallTask::executeTask()
 void PackInstallTask::downloadPack()
 {
     setStatus(tr("Downloading zip for %1").arg(m_pack.name));
+    setProgress(1, 4);
     setAbortable(false);
 
     archivePath = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
@@ -78,37 +79,15 @@ void PackInstallTask::downloadPack()
     }
     netJobContainer->addNetAction(Net::Download::makeFile(url, archivePath));
 
-    connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
-    connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
-    connect(netJobContainer.get(), &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
+    connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::unzip);
+    connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::emitFailed);
     connect(netJobContainer.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
-    connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
+    connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::emitAborted);
 
     netJobContainer->start();
 
     setAbortable(true);
     progress(1, 4);
-}
-
-void PackInstallTask::onDownloadSucceeded()
-{
-    unzip();
-}
-
-void PackInstallTask::onDownloadFailed(QString reason)
-{
-    emitFailed(reason);
-}
-
-void PackInstallTask::onDownloadProgress(qint64 current, qint64 total)
-{
-    progress(current, total * 4);
-    setStatus(tr("Downloading zip for %1 (%2%)").arg(m_pack.name).arg(current / 10));
-}
-
-void PackInstallTask::onDownloadAborted()
-{
-    emitAborted();
 }
 
 void PackInstallTask::unzip()
