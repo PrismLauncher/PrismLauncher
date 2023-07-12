@@ -145,7 +145,8 @@ void EnsureMetadataTask::executeTask()
         connect(project_task.get(), &Task::finished, this, [=] {
             invalidade_leftover();
             project_task->deleteLater();
-            m_current_task = nullptr;
+            if (m_current_task)
+                m_current_task.reset();
         });
 
         m_current_task = project_task;
