@@ -154,7 +154,8 @@ void EnsureMetadataTask::executeTask()
 
     connect(version_task.get(), &Task::finished, [=] {
         version_task->deleteLater();
-        m_current_task = nullptr;
+        if (m_current_task)
+            m_current_task.reset();
     });
 
     if (m_mods.size() > 1)
