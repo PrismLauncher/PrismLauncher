@@ -568,7 +568,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Language
         m_settings->registerSetting("Language", QString());
-        m_settings->registerSetting("UseSystemLocales", false);
+        m_settings->registerSetting("UseSystemLocale", false);
 
         // Console
         m_settings->registerSetting("ShowConsole", false);

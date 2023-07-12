@@ -530,7 +530,7 @@ Language * TranslationsModel::findLanguage(const QString& key)
 
 void TranslationsModel::setUseSystemLocale(bool useSystemLocale)
 {
-    APPLICATION->settings()->set("UseSystemLocales", useSystemLocale);
+    APPLICATION->settings()->set("UseSystemLocale", useSystemLocale);
     QLocale::setDefault(QLocale(useSystemLocale ? QString::fromStdString(std::locale().name()) : defaultLangCode));
 }
 
@@ -566,7 +566,7 @@ bool TranslationsModel::selectLanguage(QString key)
      * This function is not reentrant.
      */
     QLocale::setDefault(
-        QLocale(APPLICATION->settings()->get("UseSystemLocales").toBool() ? QString::fromStdString(std::locale().name()) : langCode));
+        QLocale(APPLICATION->settings()->get("UseSystemLocale").toBool() ? QString::fromStdString(std::locale().name()) : langCode));
 
 
     // if it's the default UI language, finish
