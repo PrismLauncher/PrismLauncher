@@ -30,7 +30,7 @@ class PackInstallTask : public InstanceTask {
     Q_OBJECT
 
    public:
-    explicit PackInstallTask(Modpack pack) : m_pack(pack) {}
+    explicit PackInstallTask(const Modpack& pack) : m_pack(pack) {}
     virtual ~PackInstallTask() = default;
 
    protected:
@@ -43,7 +43,7 @@ class PackInstallTask : public InstanceTask {
     QFuture<bool> m_copyFuture;
     QFutureWatcher<bool> m_copyFutureWatcher;
 
-    Modpack m_pack;
+    const Modpack m_pack;
 };
 
 }  // namespace FTBImportAPP
