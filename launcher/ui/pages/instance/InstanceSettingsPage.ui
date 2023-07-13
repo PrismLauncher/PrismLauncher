@@ -542,6 +542,28 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
+        <widget class="QGroupBox" name="modLoaderSettingsGroupBox">
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <property name="title">
+          <string>Mod loader settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="VerticalLayout_16">
+          <item>
+           <widget class="QCheckBox" name="disableQuiltBeaconCheckBox">
+            <property name="text">
+             <string>Disable Quilt's Beacon</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="gameTimeGroupBox">
          <property name="enabled">
           <bool>true</bool>
