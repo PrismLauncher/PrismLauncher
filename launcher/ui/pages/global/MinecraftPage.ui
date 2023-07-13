@@ -191,6 +191,22 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_12">
        <item>
+        <widget class="QGroupBox" name="modLoaderSettingsGroupBox">
+         <property name="title">
+          <string>Mod loader settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_13">
+          <item>
+           <widget class="QCheckBox" name="disableQuiltBeaconCheckBox">
+            <property name="text">
+             <string>Disable Quilt's Beacon</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="nativeLibWorkaroundGroupBox">
          <property name="title">
           <string>Native library workarounds</string>
