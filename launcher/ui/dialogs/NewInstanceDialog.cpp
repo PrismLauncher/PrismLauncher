@@ -33,38 +33,37 @@
  *      limitations under the License.
  */
 
-#include "Application.h"
 #include "NewInstanceDialog.h"
+#include "Application.h"
+#include "ui/pages/modplatform/import_ftb/ImportFTBPage.h"
 #include "ui_NewInstanceDialog.h"
 
 #include <BaseVersion.h>
+#include <InstanceList.h>
 #include <icons/IconList.h>
 #include <tasks/Task.h>
-#include <InstanceList.h>
 
-#include "VersionSelectDialog.h"
-#include "ProgressDialog.h"
 #include "IconPickerDialog.h"
+#include "ProgressDialog.h"
+#include "VersionSelectDialog.h"
 
+#include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QLayout>
 #include <QPushButton>
-#include <QFileDialog>
 #include <QValidator>
-#include <QDialogButtonBox>
 #include <utility>
 
-#include "ui/widgets/PageContainer.h"
 #include "ui/pages/modplatform/CustomPage.h"
-#include "ui/pages/modplatform/atlauncher/AtlPage.h"
-#include "ui/pages/modplatform/legacy_ftb/Page.h"
-#include "ui/pages/modplatform/flame/FlamePage.h"
 #include "ui/pages/modplatform/ImportPage.h"
+#include "ui/pages/modplatform/atlauncher/AtlPage.h"
+#include "ui/pages/modplatform/flame/FlamePage.h"
+#include "ui/pages/modplatform/legacy_ftb/Page.h"
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 #include "ui/pages/modplatform/technic/TechnicPage.h"
+#include "ui/widgets/PageContainer.h"
 
-
-
-NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString & url, QWidget *parent)
+NewInstanceDialog::NewInstanceDialog(const QString& initialGroup, const QString& url, QWidget* parent)
     : QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
     ui->setupUi(this);
@@ -168,6 +167,7 @@ QList<BasePage *> NewInstanceDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(new FlamePage(this));
     pages.append(new LegacyFTB::Page(this));
+    pages.append(new FTBImportAPP::ImportFTBPage(this));
     pages.append(new ModrinthPage(this));
     pages.append(new TechnicPage(this));
 
