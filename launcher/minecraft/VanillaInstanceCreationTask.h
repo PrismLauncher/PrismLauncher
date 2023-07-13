@@ -10,7 +10,7 @@ class VanillaCreationTask final : public InstanceCreationTask {
     VanillaCreationTask(BaseVersion::Ptr version) : InstanceCreationTask(), m_version(std::move(version)) {}
     VanillaCreationTask(BaseVersion::Ptr version, QString loader, BaseVersion::Ptr loader_version);
 
-    bool createInstance() override;
+    void createInstance() override;
 
    private:
     // Version to update to / create of the instance.

@@ -6,11 +6,11 @@
 class InstanceCreationTask : public InstanceTask {
     Q_OBJECT
    public:
-    InstanceCreationTask();
+    InstanceCreationTask() = default;
     virtual ~InstanceCreationTask() = default;
 
    protected:
-    void executeTask() final override;
+    void executeTask() final override { checkUpdate(); };
 
     /**
      * Tries to update an already existing instance.
@@ -19,28 +19,27 @@ class InstanceCreationTask : public InstanceTask {
      * instance, according to that implementation's concept of 'identity' (i.e. instances that
      * are updates / downgrades of one another).
      *
-     * If this returns true, createInstance() will not run, so you should do all update steps in here.
-     * Otherwise, createInstance() is run as normal.
+     * This is also responsible to call createInstance() if needed.
      */
-    virtual bool updateInstance() { return false; };
+    virtual void checkUpdate() { createInstance(); }
 
     /**
      * Creates a new instance.
      *
-     * Returns whether the instance creation was successful (true) or not (false).
+     * When succesfully done this should call finishTask.
      */
-    virtual bool createInstance() { return false; };
+    virtual void createInstance() { finishTask(); }
 
-    QString getError() const { return m_error_message; }
+    /**
+     * Finishes the instance creation.
+     *
+     * Removes the overides and emmits success.
+     */
+    void finishTask();
+
+   protected slots:
+    virtual void emitFailed(QString reason = "") override;
 
    protected:
-    void setError(const QString& message) { m_error_message = message; };
-
-   protected:
-    bool m_abort = false;
-
     QStringList m_files_to_remove;
-
-   private:
-    QString m_error_message;
 };
