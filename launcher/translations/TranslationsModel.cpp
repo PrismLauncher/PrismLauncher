@@ -42,6 +42,7 @@
 #include <QDir>
 #include <QLibraryInfo>
 #include <QDebug>
+#include <locale>
 
 #include "FileSystem.h"
 #include "net/NetJob.h"
@@ -454,6 +455,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
                 return QString("%1%").arg(lang.percentTranslated(), 3, 'f', 1);
             }
         }
+        qWarning("TranslationModel::data not implemented when role is DisplayRole");
     }
     case Qt::ToolTipRole:
     {
@@ -526,34 +528,34 @@ Language * TranslationsModel::findLanguage(const QString& key)
     }
 }
 
+void TranslationsModel::setUseSystemLocale(bool useSystemLocale)
+{
+    APPLICATION->settings()->set("UseSystemLocale", useSystemLocale);
+    QLocale::setDefault(QLocale(useSystemLocale ? QString::fromStdString(std::locale().name()) : defaultLangCode));
+}
+
 bool TranslationsModel::selectLanguage(QString key)
 {
-    QString &langCode = key;
+    QString& langCode = key;
     auto langPtr = findLanguage(key);
 
-    if (langCode.isEmpty())
-    {
+    if (langCode.isEmpty()) {
         d->no_language_set = true;
     }
 
-    if(!langPtr)
-    {
+    if (!langPtr) {
         qWarning() << "Selected invalid language" << key << ", defaulting to" << defaultLangCode;
         langCode = defaultLangCode;
-    }
-    else
-    {
+    } else {
         langCode = langPtr->key;
     }
 
     // uninstall existing translators if there are any
-    if (d->m_app_translator)
-    {
+    if (d->m_app_translator) {
         QCoreApplication::removeTranslator(d->m_app_translator.get());
         d->m_app_translator.reset();
     }
-    if (d->m_qt_translator)
-    {
+    if (d->m_qt_translator) {
         QCoreApplication::removeTranslator(d->m_qt_translator.get());
         d->m_qt_translator.reset();
     }
@@ -563,8 +565,9 @@ bool TranslationsModel::selectLanguage(QString key)
      * In a multithreaded application, the default locale should be set at application startup, before any non-GUI threads are created.
      * This function is not reentrant.
      */
-    QLocale locale = QLocale(langCode);
-    QLocale::setDefault(locale);
+    QLocale::setDefault(
+        QLocale(APPLICATION->settings()->get("UseSystemLocale").toBool() ? QString::fromStdString(std::locale().name()) : langCode));
+
 
     // if it's the default UI language, finish
     if(langCode == defaultLangCode)

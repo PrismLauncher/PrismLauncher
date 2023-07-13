@@ -107,7 +107,7 @@
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
-#include "ui/dialogs/ExportMrPackDialog.h"
+#include "ui/dialogs/ExportPackDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
@@ -205,6 +205,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         auto exportInstanceMenu = new QMenu(this);
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
+        exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
 
@@ -927,21 +928,8 @@ void MainWindow::onCatToggled(bool state)
 
 void MainWindow::setCatBackground(bool enabled)
 {
-    if (enabled) {
-        view->setStyleSheet(QString(R"(
-InstanceView
-{
-    background-image: url(:/backgrounds/%1);
-    background-attachment: fixed;
-    background-clip: padding;
-    background-position: bottom right;
-    background-repeat: none;
-    background-color:palette(base);
-})")
-                                .arg(ThemeManager::getCatImage()));
-    } else {
-        view->setStyleSheet(QString());
-    }
+    view->setPaintCat(enabled);
+    view->viewport()->repaint();
 }
 
 void MainWindow::runModalTask(Task *task)
@@ -1292,7 +1280,17 @@ void MainWindow::globalSettingsClosed()
 
 void MainWindow::on_actionEditInstance_triggered()
 {
-    APPLICATION->showInstanceWindow(m_selectedInstance);
+
+    if (!m_selectedInstance)
+        return;
+
+    if (m_selectedInstance->canEdit()) {
+        APPLICATION->showInstanceWindow(m_selectedInstance);
+    } else  {
+        CustomMessageBox::selectable(this, tr("Instance not editable"), 
+                                     tr("This instance is not editable. It may be broken, invalid, or too old. Check logs for details."),
+                                     QMessageBox::Critical)->show();
+    }
 }
 
 void MainWindow::on_actionManageAccounts_triggered()
@@ -1418,8 +1416,32 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
 {
     if (m_selectedInstance)
     {
-        ExportMrPackDialog dlg(m_selectedInstance, this);
+        ExportPackDialog dlg(m_selectedInstance, this);
         dlg.exec();
+    }
+}
+
+void MainWindow::on_actionExportInstanceFlamePack_triggered()
+{
+    if (m_selectedInstance) {
+        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
+        if (instance) {
+            QString errorMsg;
+            if (instance->getPackProfile()->getComponent("org.quiltmc.quilt-loader")) {
+                errorMsg = tr("Quilt is currently not supported by CurseForge modpacks.");
+            } else if (auto cmp = instance->getPackProfile()->getComponent("net.minecraft");
+                       cmp && cmp->getVersionFile() && cmp->getVersionFile()->type == "snapshot") {
+                errorMsg = tr("Snapshots are currently not supported by CurseForge modpacks.");
+            }
+            if (!errorMsg.isEmpty()) {
+                QMessageBox msgBox;
+                msgBox.setText(errorMsg);
+                msgBox.exec();
+                return;
+            }
+            ExportPackDialog dlg(m_selectedInstance, this, ModPlatform::ResourceProvider::FLAME);
+            dlg.exec();
+        }
     }
 }
 
@@ -1524,11 +1546,39 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
     QString iconPath;
     QStringList args;
 #if defined(Q_OS_MACOS)
-    if (appPath.startsWith("/private/var/")) {
-        QMessageBox::critical(this, tr("Create instance shortcut"),
-                              tr("The launcher is in the folder it was extracted from, therefore it cannot create shortcuts."));
-        return;
-    }
+        appPath = QApplication::applicationFilePath();
+        if (appPath.startsWith("/private/var/")) {
+            QMessageBox::critical(this, tr("Create instance shortcut"), 
+                                  tr("The launcher is in the folder it was extracted from, therefore it cannot create shortcuts."));
+            return;
+        }
+
+        auto pIcon = APPLICATION->icons()->icon(m_selectedInstance->iconKey());
+        if (pIcon == nullptr)
+        {
+            pIcon = APPLICATION->icons()->icon("grass");
+        }
+
+        iconPath = FS::PathCombine(m_selectedInstance->instanceRoot(), "Icon.icns");
+
+        QFile iconFile(iconPath);
+        if (!iconFile.open(QFile::WriteOnly))
+        {
+            QMessageBox::critical(this, tr("Create instance Application"), tr("Failed to create icon for Application."));
+            return;
+        }
+
+        QIcon icon = pIcon->icon();
+
+        bool success = icon.pixmap(1024, 1024).save(iconPath, "ICNS");
+        iconFile.close();
+
+        if (!success)
+        {
+            iconFile.remove();
+            QMessageBox::critical(this, tr("Create instance Application"), tr("Failed to create icon for Application."));
+            return;
+        }
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
     if (appPath.startsWith("/tmp/.mount_")) {
         // AppImage!
@@ -1611,7 +1661,11 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 #endif
     args.append({ "--launch", m_selectedInstance->id() });
     if (FS::createShortcut(desktopFilePath, appPath, args, m_selectedInstance->name(), iconPath)) {
-        QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
+#if not defined(Q_OS_MACOS)
+            QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance on your desktop!"));
+#else
+        QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance!"));
+#endif
     } else {
 #if not defined(Q_OS_MACOS)
         iconFile.remove();
