@@ -41,9 +41,11 @@ class ExportToModListDialog : public QDialog {
     void formatChanged(int index);
     void triggerImp();
     void trigger(int) { triggerImp(); };
+    void addExtra(ExportToModList::OptionalData option);
 
    private:
     QString extension();
+    void enableCustom(bool enabled);
     QList<Mod*> m_allMods;
     bool m_template_changed;
     QString name;

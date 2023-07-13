@@ -45,7 +45,7 @@ ExportToModListDialog::ExportToModListDialog(InstancePtr instance, QWidget* pare
     : QDialog(parent), m_template_changed(false), name(instance->name()), ui(new Ui::ExportToModListDialog)
 {
     ui->setupUi(this);
-    ui->optionsGroup->setDisabled(false);
+    enableCustom(false);
 
     MinecraftInstance* mcInstance = dynamic_cast<MinecraftInstance*>(instance.get());
     if (mcInstance) {
@@ -60,6 +60,9 @@ ExportToModListDialog::ExportToModListDialog(InstancePtr instance, QWidget* pare
     connect(ui->authorsCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->versionCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->urlCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
+    connect(ui->authorsButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Authors); });
+    connect(ui->versionButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Version); });
+    connect(ui->urlButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Url); });
     connect(ui->templateText, &QTextEdit::textChanged, this, [this] {
         if (ui->templateText->toPlainText() != exampleLines[format])
             ui->formatComboBox->setCurrentIndex(5);
@@ -81,38 +84,38 @@ void ExportToModListDialog::formatChanged(int index)
 {
     switch (index) {
         case 0: {
-            ui->optionsGroup->setDisabled(false);
+            enableCustom(false);
             ui->resultText->show();
             format = ExportToModList::HTML;
             break;
         }
         case 1: {
-            ui->optionsGroup->setDisabled(false);
+            enableCustom(false);
             ui->resultText->show();
             format = ExportToModList::MARKDOWN;
             break;
         }
         case 2: {
-            ui->optionsGroup->setDisabled(false);
+            enableCustom(false);
             ui->resultText->hide();
             format = ExportToModList::PLAINTXT;
             break;
         }
         case 3: {
-            ui->optionsGroup->setDisabled(false);
+            enableCustom(false);
             ui->resultText->hide();
             format = ExportToModList::JSON;
             break;
         }
         case 4: {
-            ui->optionsGroup->setDisabled(false);
+            enableCustom(false);
             ui->resultText->hide();
             format = ExportToModList::CSV;
             break;
         }
         case 5: {
             m_template_changed = true;
-            ui->optionsGroup->setDisabled(true);
+            enableCustom(true);
             ui->resultText->hide();
             format = ExportToModList::CUSTOM;
             break;
@@ -190,4 +193,31 @@ QString ExportToModListDialog::extension()
             return ".csv";
     }
     return ".txt";
+}
+
+void ExportToModListDialog::addExtra(ExportToModList::OptionalData option)
+{
+    if (format != ExportToModList::CUSTOM)
+        return;
+    switch (option) {
+        case ExportToModList::Authors:
+            ui->templateText->insertPlainText("{authors}");
+            break;
+        case ExportToModList::Url:
+            ui->templateText->insertPlainText("{url}");
+            break;
+        case ExportToModList::Version:
+            ui->templateText->insertPlainText("{version}");
+            break;
+    }
+}
+void ExportToModListDialog::enableCustom(bool enabled)
+{
+    ui->authorsCheckBox->setHidden(enabled);
+    ui->versionCheckBox->setHidden(enabled);
+    ui->urlCheckBox->setHidden(enabled);
+
+    ui->authorsButton->setHidden(!enabled);
+    ui->versionButton->setHidden(!enabled);
+    ui->urlButton->setHidden(!enabled);
 }
