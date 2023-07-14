@@ -5,6 +5,7 @@
 #include "InstanceList.h"
 #include "Json.h"
 
+#include "QObjectPtr.h"
 #include "minecraft/PackProfile.h"
 
 #include "modplatform/helpers/OverrideUtils.h"
@@ -23,13 +24,12 @@ bool ModrinthCreationTask::abort()
     if (!canAbort())
         return false;
 
-    m_abort = true;
-    if (m_files_job)
-        m_files_job->abort();
+    if (m_current_task)
+        m_current_task->abort();
     return Task::abort();
 }
 
-bool ModrinthCreationTask::updateInstance()
+void ModrinthCreationTask::checkUpdate()
 {
     auto instance_list = APPLICATION->instances();
 
@@ -45,24 +45,28 @@ bool ModrinthCreationTask::updateInstance()
             inst = instance_list->getInstanceById(originalName());
 
             if (!inst)
-                return false;
+                createInstance();
+            return;
         }
     }
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
     if (!parseManifest(index_path, m_files, true, false))
-        return false;
+        return;
 
     auto version_name = inst->getManagedPackVersionName();
     auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
     if (shouldConfirmUpdate()) {
-        auto should_update = askIfShouldUpdate(m_parent, version_str);
-        if (should_update == ShouldUpdate::SkipUpdating)
-            return false;
-        if (should_update == ShouldUpdate::Cancel) {
-            m_abort = true;
-            return false;
+        switch (askIfShouldUpdate(m_parent, version_str)) {
+            case ShouldUpdate::SkipUpdating:
+                createInstance();
+                return;
+            case ShouldUpdate::Cancel:
+                abort();
+                return;
+            case ShouldUpdate::Update:
+                break;
         }
     }
 
@@ -133,37 +137,38 @@ bool ModrinthCreationTask::updateInstance()
         }
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent,
-                tr("No index file."),
-                tr("We couldn't find a suitable index file for the older version. This may cause some of the files to be duplicated. Do you want to continue?"),
-                QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
+        auto dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
+                                                   tr("We couldn't find a suitable index file for the older version. This may cause some "
+                                                      "of the files to be duplicated. Do you want to continue?"),
+                                                   QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
 
         if (dialog->exec() == QDialog::DialogCode::Rejected) {
-            m_abort = true;
-            return false;
+            abort();
+            return;
         }
     }
+    overrideInstance(inst);
+}
 
-
+void ModrinthCreationTask::overrideInstance(InstancePtr inst)
+{
     setOverride(true, inst->id());
     qDebug() << "Will override instance!";
 
     m_instance = inst;
 
     // We let it go through the createInstance() stage, just with a couple modifications for updating
-    return false;
+    createInstance();
 }
 
 // https://docs.modrinth.com/docs/modpacks/format_definition/
-bool ModrinthCreationTask::createInstance()
+void ModrinthCreationTask::createInstance()
 {
-    QEventLoop loop;
-
     QString parent_folder(FS::PathCombine(m_stagingPath, "mrpack"));
 
     QString index_path = FS::PathCombine(m_stagingPath, "modrinth.index.json");
     if (m_files.empty() && !parseManifest(index_path, m_files, true, true))
-        return false;
+        return;
 
     // Keep index file in case we need it some other time (like when changing versions)
     QString new_index_place(FS::PathCombine(parent_folder, "modrinth.index.json"));
@@ -179,8 +184,8 @@ bool ModrinthCreationTask::createInstance()
 
         // Apply the overrides
         if (!QFile::rename(override_path, mcPath)) {
-            setError(tr("Could not rename the overrides folder:\n") + "overrides");
-            return false;
+            emitFailed(tr("Could not rename the overrides folder:\n") + "overrides");
+            return;
         }
     }
 
@@ -192,16 +197,16 @@ bool ModrinthCreationTask::createInstance()
 
         // Apply the overrides
         if (!FS::overrideFolder(mcPath, client_override_path)) {
-            setError(tr("Could not rename the client overrides folder:\n") + "client overrides");
-            return false;
+            emitFailed(tr("Could not rename the client overrides folder:\n") + "client overrides");
+            return;
         }
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    auto instance = std::make_shared<MinecraftInstance>(m_globalSettings, instanceSettings, m_stagingPath);
 
-    auto components = instance.getPackProfile();
+    auto components = instance->getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_minecraft_version, true);
 
@@ -213,18 +218,18 @@ bool ModrinthCreationTask::createInstance()
         components->setComponentVersion("net.minecraftforge", m_forge_version);
 
     if (m_instIcon != "default") {
-        instance.setIconKey(m_instIcon);
+        instance->setIconKey(m_instIcon);
     } else if (!m_managed_id.isEmpty()) {
-        instance.setIconKey("modrinth");
+        instance->setIconKey("modrinth");
     }
 
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managed_id.isEmpty())
-        instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
-    instance.setName(name());
-    instance.saveNow();
+        instance->setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
+    instance->setName(name());
+    instance->saveNow();
 
-    m_files_job.reset(new NetJob(tr("Mod Download Modrinth"), APPLICATION->network()));
+    auto files_job = makeShared<NetJob>(tr("Mod Download Modrinth"), APPLICATION->network());
 
     auto root_modpack_path = FS::PathCombine(m_stagingPath, ".minecraft");
     auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
@@ -233,67 +238,64 @@ bool ModrinthCreationTask::createInstance()
         auto file_path = FS::PathCombine(root_modpack_path, file.path);
         if (!root_modpack_url.isParentOf(QUrl::fromLocalFile(file_path))) {
             // This means we somehow got out of the root folder, so abort here to prevent exploits
-            setError(tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.").arg(file.path));
-            return false;
+            emitFailed(
+                tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.")
+                    .arg(file.path));
+            return;
         }
 
         qDebug() << "Will try to download" << file.downloads.front() << "to" << file_path;
         auto dl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
-        m_files_job->addNetAction(dl);
+        files_job->addNetAction(dl);
 
         if (!file.downloads.empty()) {
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &NetAction::failed, [this, &file, file_path, param] {
+            connect(dl.get(), &NetAction::failed, [files_job, &file, file_path, param] {
                 auto ndl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
-                m_files_job->addNetAction(ndl);
-                if (auto shared = param.lock()) shared->succeeded();
+                files_job->addNetAction(ndl);
+                if (auto shared = param.lock())
+                    shared->succeeded();
             });
         }
     }
 
-    bool ended_well = false;
+    connect(files_job.get(), &NetJob::failed, this, &ModrinthCreationTask::emitFailed);
+    connect(files_job.get(), &NetJob::succeeded, this, [this, instance] {
+        // Update information of the already installed instance, if any.
+        if (m_instance) {
+            setAbortable(false);
+            auto inst = m_instance.value();
+            // Only change the name if it didn't use a custom name, so that the previous custom name
+            // is preserved, but if we're using the original one, we update the version string.
+            // NOTE: This needs to come before the copyManagedPack call!
+            if (inst->name().contains(inst->getManagedPackVersionName())) {
+                if (askForChangingInstanceName(m_parent, inst->name(), instance->name()) == InstanceNameChange::ShouldChange)
+                    inst->setName(instance->name());
+            }
 
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { ended_well = true; });
-    connect(m_files_job.get(), &NetJob::failed, [&](const QString& reason) {
-        ended_well = false;
-        setError(reason);
-    });
-    connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { 
-        setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
-        setProgress(current, total); 
-    });
-    connect(m_files_job.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propogateStepProgress);
-
-    setStatus(tr("Downloading mods..."));
-    m_files_job->start();
-
-    loop.exec();
-
-    // Update information of the already installed instance, if any.
-    if (m_instance && ended_well) {
-        setAbortable(false);
-        auto inst = m_instance.value();
-
-        // Only change the name if it didn't use a custom name, so that the previous custom name
-        // is preserved, but if we're using the original one, we update the version string.
-        // NOTE: This needs to come before the copyManagedPack call!
-        if (inst->name().contains(inst->getManagedPackVersionName())) {
-            if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
-                inst->setName(instance.name());
+            inst->copyManagedPack(*instance);
         }
+        finishTask();
+    });
+    connect(files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
+        setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
+        setProgress(current, total);
+    });
+    connect(files_job.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propogateStepProgress);
 
-        inst->copyManagedPack(instance);
-    }
-
-    return ended_well;
+    m_current_task.reset(files_job);
+    setStatus(tr("Downloading mods..."));
+    files_job->start();
 }
 
-bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<Modrinth::File>& files, bool set_internal_data, bool show_optional_dialog)
+bool ModrinthCreationTask::parseManifest(const QString& index_path,
+                                         std::vector<Modrinth::File>& files,
+                                         bool set_internal_data,
+                                         bool show_optional_dialog)
 {
     try {
         auto doc = Json::requireDocument(index_path);
@@ -403,9 +405,16 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<
         }
 
     } catch (const JSONValidationError& e) {
-        setError(tr("Could not understand pack index:\n") + e.cause());
+        emitFailed(tr("Could not understand pack index:\n") + e.cause());
         return false;
     }
 
     return true;
+}
+
+bool ModrinthCreationTask::canRetry() const
+{
+    if (m_current_task)
+        return m_current_task->canRetry();
+    return false;
 }

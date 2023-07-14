@@ -68,6 +68,13 @@ class FlameCreationTask final : public InstanceCreationTask {
 
     bool canRetry() const override;
 
+   public slots:
+    virtual void retry() override
+    {
+        if (canRetry())
+            m_current_task->retry();
+    };
+
    private slots:
     void overrideInstance(InstancePtr);
     void idResolverSucceeded();

@@ -20,10 +20,7 @@ class ModrinthCreationTask final : public InstanceCreationTask {
                          QString id,
                          QString version_id = {},
                          QString original_instance_id = {})
-        : InstanceCreationTask()
-        , m_parent(parent)
-        , m_managed_id(std::move(id))
-        , m_managed_version_id(std::move(version_id))
+        : InstanceCreationTask(), m_parent(parent), m_managed_id(std::move(id)), m_managed_version_id(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
@@ -33,8 +30,20 @@ class ModrinthCreationTask final : public InstanceCreationTask {
 
     bool abort() override;
 
-    bool updateInstance() override;
-    bool createInstance() override;
+    void checkUpdate() override;
+    void createInstance() override;
+
+    bool canRetry() const override;
+
+   public slots:
+    virtual void retry() override
+    {
+        if (canRetry())
+            m_current_task->retry();
+    };
+
+   private slots:
+    void overrideInstance(InstancePtr);
 
    private:
     bool parseManifest(const QString&, std::vector<Modrinth::File>&, bool set_internal_data = true, bool show_optional_dialog = true);
@@ -46,7 +55,8 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     QString m_managed_id, m_managed_version_id, m_managed_name;
 
     std::vector<Modrinth::File> m_files;
-    NetJob::Ptr m_files_job;
 
     std::optional<InstancePtr> m_instance;
+
+    Task::Ptr m_current_task;
 };

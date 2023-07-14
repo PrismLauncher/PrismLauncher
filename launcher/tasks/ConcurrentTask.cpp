@@ -323,8 +323,11 @@ bool ConcurrentTask::finalize()
 void ConcurrentTask::retry()
 {
     if (canRetry()) {
-        while (!m_failed.isEmpty())
-            m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
+        while (!m_failed.isEmpty()) {
+            auto task = m_failed.take(*m_failed.keyBegin());
+            m_done.remove(task.get());
+            m_queue.enqueue(task);
+        }
         executeTask();
     }
 }

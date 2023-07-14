@@ -247,6 +247,7 @@ void FlameCreationTask::checkUpdate()
             overrideInstance(inst);
     }
 }
+
 void FlameCreationTask::overrideInstance(InstancePtr inst)
 {
     setOverride(true, inst->id());
@@ -472,7 +473,7 @@ void FlameCreationTask::setupDownloadJob()
         }
     }
 
-    m_current_task = files_job;
+    m_current_task.reset(files_job);
     connect(files_job.get(), &NetJob::succeeded, this, &FlameCreationTask::validateZIPResouces);
     connect(files_job.get(), &NetJob::failed, this, &FlameCreationTask::emitFailed);
     connect(files_job.get(), &NetJob::progress, this, [this](qint64 current, qint64 total) {
@@ -480,15 +481,6 @@ void FlameCreationTask::setupDownloadJob()
         setProgress(current, total);
     });
     connect(files_job.get(), &NetJob::stepProgress, this, &FlameCreationTask::propogateStepProgress);
-    connect(files_job.get(), &NetJob::finished, this, [this] {
-        // Update information of the already installed instance, if any.
-        if (m_instance) {
-            setAbortable(false);
-            auto inst = m_instance.value();
-            inst->copyManagedPack(*m_minecraft_instance);
-        }
-        finishTask();
-    });
 
     setStatus(tr("Downloading mods..."));
     files_job->start();
@@ -593,11 +585,16 @@ void FlameCreationTask::validateZIPResouces()
                 break;
         }
     }
+    // Update information of the already installed instance, if any.
+    if (m_instance) {
+        setAbortable(false);
+        auto inst = m_instance.value();
+        inst->copyManagedPack(*m_minecraft_instance);
+    }
+    finishTask();
 }
 
 bool FlameCreationTask::canRetry() const
 {
-    if (m_current_task)
-        return m_current_task->canRetry();
-    return false;
+    return m_current_task && m_current_task->canRetry();
 }
