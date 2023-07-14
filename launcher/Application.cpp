@@ -568,6 +568,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Language
         m_settings->registerSetting("Language", QString());
+        m_settings->registerSetting("UseSystemLocale", false);
 
         // Console
         m_settings->registerSetting("ShowConsole", false);
@@ -687,8 +688,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 m_settings->reset("PastebinCustomAPIBase");
             }
         }
-        // meta URL
-        m_settings->registerSetting("MetaURLOverride", "");
+        {
+            // Meta URL
+            m_settings->registerSetting("MetaURLOverride", "");
+
+            QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
+
+            // get rid of invalid meta urls
+            if (!metaUrl.isValid() || metaUrl.scheme() != "http" || metaUrl.scheme() != "https")
+                m_settings->reset("MetaURLOverride");
+        }
 
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);
@@ -910,12 +919,7 @@ bool Application::createSetupWizard()
         }
         return false;
     }();
-    bool languageRequired = [&]()
-    {
-        if (settings()->get("Language").toString().isEmpty())
-            return true;
-        return false;
-    }();
+    bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;

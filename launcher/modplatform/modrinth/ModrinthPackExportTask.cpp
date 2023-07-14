@@ -64,7 +64,8 @@ bool ModrinthPackExportTask::abort()
 
     if (buildZipFuture.isRunning()) {
         buildZipFuture.cancel();
-        // NOTE: Here we don't do `emitAborted()` because it will be done when `buildZipFuture` actually cancels, which may not occur immediately.
+        // NOTE: Here we don't do `emitAborted()` because it will be done when `buildZipFuture` actually cancels, which may not occur
+        // immediately.
         return true;
     }
 
@@ -94,6 +95,7 @@ void ModrinthPackExportTask::collectFiles()
 
 void ModrinthPackExportTask::collectHashes()
 {
+    setStatus(tr("Finding file hashes..."));
     for (const QFileInfo& file : files) {
         QCoreApplication::processEvents();
 
@@ -157,6 +159,7 @@ void ModrinthPackExportTask::makeApiRequest()
     if (pendingHashes.isEmpty())
         buildZip();
     else {
+        setStatus(tr("Finding versions for hashes..."));
         auto response = std::make_shared<QByteArray>();
         task = api.currentVersions(pendingHashes.values(), "sha512", response);
         connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
@@ -263,13 +266,13 @@ void ModrinthPackExportTask::finish()
 
 QByteArray ModrinthPackExportTask::generateIndex()
 {
-    QJsonObject obj;
-    obj["formatVersion"] = 1;
-    obj["game"] = "minecraft";
-    obj["name"] = name;
-    obj["versionId"] = version;
+    QJsonObject out;
+    out["formatVersion"] = 1;
+    out["game"] = "minecraft";
+    out["name"] = name;
+    out["versionId"] = version;
     if (!summary.isEmpty())
-        obj["summary"] = summary;
+        out["summary"] = summary;
 
     if (mcInstance) {
         auto profile = mcInstance->getPackProfile();
@@ -290,30 +293,42 @@ QByteArray ModrinthPackExportTask::generateIndex()
         if (forge != nullptr)
             dependencies["forge"] = forge->m_version;
 
-        obj["dependencies"] = dependencies;
+        out["dependencies"] = dependencies;
     }
 
-    QJsonArray files_array;
-    QMapIterator<QString, ResolvedFile> iterator(resolvedFiles);
-    while (iterator.hasNext()) {
-        iterator.next();
 
+    QJsonArray filesOut;
+    for (auto iterator = resolvedFiles.constBegin(); iterator != resolvedFiles.constEnd(); iterator++) {
+        QJsonObject fileOut;
+
+        QString path = iterator.key();
         const ResolvedFile& value = iterator.value();
 
-        QJsonObject file;
-        file["path"] = iterator.key();
-        file["downloads"] = QJsonArray({ iterator.value().url });
+        // detect disabled mod
+        const QFileInfo pathInfo(path);
+        if (pathInfo.suffix() == "disabled") {
+            // rename it
+            path = pathInfo.dir().filePath(pathInfo.completeBaseName());
+            // ...and make it optional
+            QJsonObject env;
+            env["client"] = "optional";
+            env["server"] = "optional";
+            fileOut["env"] = env;
+        }
+
+        fileOut["path"] = path;
+        fileOut["downloads"] = QJsonArray{ iterator.value().url };
 
         QJsonObject hashes;
         hashes["sha1"] = value.sha1;
         hashes["sha512"] = value.sha512;
+        fileOut["hashes"] = hashes;
 
-        file["hashes"] = hashes;
-        file["fileSize"] = value.size;
 
-        files_array << file;
+        fileOut["fileSize"] = value.size;
+        filesOut << fileOut;
     }
-    obj["files"] = files_array;
+    out["files"] = filesOut;
 
-    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
+    return QJsonDocument(out).toJson(QJsonDocument::Compact);
 }

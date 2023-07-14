@@ -69,8 +69,6 @@ bool TexturePackPage::onSelectionChanged(const QModelIndex& current, [[maybe_unu
 
 void TexturePackPage::downloadTPs()
 {
-    if (!m_controlsEnabled)
-        return;
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 

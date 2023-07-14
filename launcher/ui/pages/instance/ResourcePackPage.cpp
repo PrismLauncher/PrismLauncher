@@ -67,8 +67,6 @@ bool ResourcePackPage::onSelectionChanged(const QModelIndex& current, [[maybe_un
 
 void ResourcePackPage::downloadRPs()
 {
-    if (!m_controlsEnabled)
-        return;
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 

@@ -1,54 +1,70 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-*  PolyMC - Minecraft Launcher
-*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
-*
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, version 3.
-*
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*
-* This file incorporates work covered by the following copyright and
-* permission notice:
-*
-*      Copyright 2013-2021 MultiMC Contributors
-*
-*      Licensed under the Apache License, Version 2.0 (the "License");
-*      you may not use this file except in compliance with the License.
-*      You may obtain a copy of the License at
-*
-*          http://www.apache.org/licenses/LICENSE-2.0
-*
-*      Unless required by applicable law or agreed to in writing, software
-*      distributed under the License is distributed on an "AS IS" BASIS,
-*      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*      See the License for the specific language governing permissions and
-*      limitations under the License.
-*/
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
 
+#include <QLabel>
 #include <QMessageBox>
+#include <QToolTip>
 
 #include "InfoFrame.h"
 #include "ui_InfoFrame.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-InfoFrame::InfoFrame(QWidget *parent) :
-    QFrame(parent),
-    ui(new Ui::InfoFrame)
+void setupLinkToolTip(QLabel* label)
+{
+    QObject::connect(label, &QLabel::linkHovered, [label](const QString& link) {
+        if (auto url = QUrl(link); !url.isValid() || (url.scheme() != "http" && url.scheme() != "https"))
+            return;
+        label->setToolTip(link);
+    });
+}
+
+InfoFrame::InfoFrame(QWidget* parent) : QFrame(parent), ui(new Ui::InfoFrame)
 {
     ui->setupUi(this);
     ui->descriptionLabel->setHidden(true);
     ui->nameLabel->setHidden(true);
     ui->licenseLabel->setHidden(true);
     ui->issueTrackerLabel->setHidden(true);
+
+    setupLinkToolTip(ui->iconLabel);
+    setupLinkToolTip(ui->descriptionLabel);
+    setupLinkToolTip(ui->nameLabel);
+    setupLinkToolTip(ui->licenseLabel);
+    setupLinkToolTip(ui->issueTrackerLabel);
     updateHiddenState();
 }
 
@@ -59,45 +75,43 @@ InfoFrame::~InfoFrame()
 
 void InfoFrame::updateWithMod(Mod const& m)
 {
-    if (m.type() == ResourceType::FOLDER)
-    {
+    if (m.type() == ResourceType::FOLDER) {
         clear();
         return;
     }
 
     QString text = "";
     QString name = "";
+    QString link = m.metaurl();
     if (m.name().isEmpty())
         name = m.internal_id();
     else
         name = m.name();
 
-    if (m.homeurl().isEmpty())
+    if (link.isEmpty())
         text = name;
-    else
-        text = "<a href=\"" + m.homeurl() + "\">" + name + "</a>";
+    else {
+        text = "<a href=\"" + link + "\">" + name + "</a>";
+    }
     if (!m.authors().isEmpty())
         text += " by " + m.authors().join(", ");
 
     setName(text);
 
-    if (m.description().isEmpty())
-    {
+    if (m.description().isEmpty()) {
         setDescription(QString());
-    }
-    else
-    {
+    } else {
         setDescription(m.description());
     }
 
-    setImage(m.icon({64,64}));
+    setImage(m.icon({ 64, 64 }));
 
     auto licenses = m.licenses();
     QString licenseText = "";
     if (!licenses.empty()) {
         for (auto l : licenses) {
             if (!licenseText.isEmpty()) {
-                licenseText += "\n"; // add newline between licenses
+                licenseText += "\n";  // add newline between licenses
             }
             if (!l.name.isEmpty()) {
                 if (l.url.isEmpty()) {
@@ -109,9 +123,9 @@ void InfoFrame::updateWithMod(Mod const& m)
                 licenseText += "<a href=\"" + l.url + "\">" + l.url + "</a>";
             }
             if (!l.description.isEmpty() && l.description != l.name) {
-               licenseText += " " + l.description;
+                licenseText += " " + l.description;
             }
-        } 
+        }
     }
     if (!licenseText.isEmpty()) {
         setLicense(tr("License: %1").arg(licenseText));
@@ -123,7 +137,7 @@ void InfoFrame::updateWithMod(Mod const& m)
     if (!m.issueTracker().isEmpty()) {
         issueTracker += tr("Report issues to: ");
         issueTracker += "<a href=\"" + m.issueTracker() + "\">" + m.issueTracker() + "</a>";
-    } 
+    }
     setIssueTracker(issueTracker);
 }
 
@@ -133,7 +147,8 @@ void InfoFrame::updateWithResource(const Resource& resource)
     setImage();
 }
 
-QString InfoFrame::renderColorCodes(QString input) {
+QString InfoFrame::renderColorCodes(QString input)
+{
     // We have to manually set the colors for use.
     //
     // A color is set using §x, with x = a hex number from 0 to f.
@@ -144,16 +159,12 @@ QString InfoFrame::renderColorCodes(QString input) {
     // TODO: Wrap links inside <a> tags
 
     // https://minecraft.fandom.com/wiki/Formatting_codes#Color_codes
-    const QMap<QChar, QString> color_codes_map = {
-        {'0', "#000000"}, {'1', "#0000AA"}, {'2', "#00AA00"}, {'3', "#00AAAA"}, {'4', "#AA0000"},
-        {'5', "#AA00AA"}, {'6', "#FFAA00"}, {'7', "#AAAAAA"}, {'8', "#555555"}, {'9', "#5555FF"},
-        {'a', "#55FF55"}, {'b', "#55FFFF"}, {'c', "#FF5555"}, {'d', "#FF55FF"}, {'e', "#FFFF55"},
-        {'f', "#FFFFFF"}
-    };
+    const QMap<QChar, QString> color_codes_map = { { '0', "#000000" }, { '1', "#0000AA" }, { '2', "#00AA00" }, { '3', "#00AAAA" },
+                                                   { '4', "#AA0000" }, { '5', "#AA00AA" }, { '6', "#FFAA00" }, { '7', "#AAAAAA" },
+                                                   { '8', "#555555" }, { '9', "#5555FF" }, { 'a', "#55FF55" }, { 'b', "#55FFFF" },
+                                                   { 'c', "#FF5555" }, { 'd', "#FF55FF" }, { 'e', "#FFFF55" }, { 'f', "#FFFFFF" } };
     // https://minecraft.fandom.com/wiki/Formatting_codes#Formatting_codes
-    const QMap<QChar, QString> formatting_codes_map = {
-        {'l', "b"}, {'m', "s"}, {'n', "u"}, {'o', "i"}
-    };
+    const QMap<QChar, QString> formatting_codes_map = { { 'l', "b" }, { 'm', "s" }, { 'n', "u" }, { 'o', "i" } };
 
     QString html("<html>");
     QList<QString> tags{};
@@ -198,14 +209,14 @@ void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
 {
     setName(renderColorCodes(resource_pack.name()));
     setDescription(renderColorCodes(resource_pack.description()));
-    setImage(resource_pack.image({64, 64}));
+    setImage(resource_pack.image({ 64, 64 }));
 }
 
 void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
 {
     setName(renderColorCodes(texture_pack.name()));
     setDescription(renderColorCodes(texture_pack.description()));
-    setImage(texture_pack.image({64, 64}));
+    setImage(texture_pack.image({ 64, 64 }));
 }
 
 void InfoFrame::clear()
@@ -229,12 +240,9 @@ void InfoFrame::updateHiddenState()
 
 void InfoFrame::setName(QString text)
 {
-    if(text.isEmpty())
-    {
+    if (text.isEmpty()) {
         ui->nameLabel->setHidden(true);
-    }
-    else
-    {
+    } else {
         ui->nameLabel->setText(text);
         ui->nameLabel->setHidden(false);
     }
@@ -243,14 +251,11 @@ void InfoFrame::setName(QString text)
 
 void InfoFrame::setDescription(QString text)
 {
-    if(text.isEmpty())
-    {
+    if (text.isEmpty()) {
         ui->descriptionLabel->setHidden(true);
         updateHiddenState();
         return;
-    }
-    else
-    {
+    } else {
         ui->descriptionLabel->setHidden(false);
         updateHiddenState();
     }
@@ -260,9 +265,8 @@ void InfoFrame::setDescription(QString text)
     QChar rem('\n');
     QString finaltext;
     finaltext.reserve(intermediatetext.size());
-    foreach(const QChar& c, intermediatetext)
-    {
-        if(c == rem && prev){
+    foreach (const QChar& c, intermediatetext) {
+        if (c == rem && prev) {
             continue;
         }
         prev = c == rem;
@@ -270,17 +274,14 @@ void InfoFrame::setDescription(QString text)
     }
     QString labeltext;
     labeltext.reserve(300);
-    if(finaltext.length() > 290)
-    {
+    if (finaltext.length() > 290) {
         ui->descriptionLabel->setOpenExternalLinks(false);
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::RichText);
         m_description = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
         QObject::connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
-    }
-    else
-    {
+    } else {
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);
     }
@@ -289,14 +290,11 @@ void InfoFrame::setDescription(QString text)
 
 void InfoFrame::setLicense(QString text)
 {
-    if(text.isEmpty())
-    {
+    if (text.isEmpty()) {
         ui->licenseLabel->setHidden(true);
         updateHiddenState();
         return;
-    }
-    else
-    {
+    } else {
         ui->licenseLabel->setHidden(false);
         updateHiddenState();
     }
@@ -306,9 +304,8 @@ void InfoFrame::setLicense(QString text)
     QChar rem('\n');
     QString finaltext;
     finaltext.reserve(intermediatetext.size());
-    foreach(const QChar& c, intermediatetext)
-    {
-        if(c == rem && prev){
+    foreach (const QChar& c, intermediatetext) {
+        if (c == rem && prev) {
             continue;
         }
         prev = c == rem;
@@ -316,17 +313,14 @@ void InfoFrame::setLicense(QString text)
     }
     QString labeltext;
     labeltext.reserve(300);
-    if(finaltext.length() > 290)
-    {
+    if (finaltext.length() > 290) {
         ui->licenseLabel->setOpenExternalLinks(false);
         ui->licenseLabel->setTextFormat(Qt::TextFormat::RichText);
         m_description = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
         QObject::connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
-    }
-    else
-    {
+    } else {
         ui->licenseLabel->setTextFormat(Qt::TextFormat::AutoText);
         labeltext.append(finaltext);
     }
@@ -335,12 +329,9 @@ void InfoFrame::setLicense(QString text)
 
 void InfoFrame::setIssueTracker(QString text)
 {
-    if(text.isEmpty())
-    {
+    if (text.isEmpty()) {
         ui->issueTrackerLabel->setHidden(true);
-    }
-    else
-    {
+    } else {
         ui->issueTrackerLabel->setText(text);
         ui->issueTrackerLabel->setHidden(false);
     }
@@ -359,28 +350,22 @@ void InfoFrame::setImage(QPixmap img)
 
 void InfoFrame::descriptionEllipsisHandler([[maybe_unused]] QString link)
 {
-    if(!m_current_box)
-    {
+    if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_description);
         connect(m_current_box, &QMessageBox::finished, this, &InfoFrame::boxClosed);
         m_current_box->show();
-    }
-    else
-    {
+    } else {
         m_current_box->setText(m_description);
     }
 }
 
 void InfoFrame::licenseEllipsisHandler([[maybe_unused]] QString link)
 {
-    if(!m_current_box)
-    {
+    if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_license);
         connect(m_current_box, &QMessageBox::finished, this, &InfoFrame::boxClosed);
         m_current_box->show();
-    }
-    else
-    {
+    } else {
         m_current_box->setText(m_license);
     }
 }
