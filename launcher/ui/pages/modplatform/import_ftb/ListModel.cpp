@@ -17,7 +17,6 @@
  */
 
 #include "ListModel.h"
-#include <qnamespace.h>
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>

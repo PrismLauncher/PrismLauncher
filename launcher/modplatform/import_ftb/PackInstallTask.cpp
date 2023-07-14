@@ -53,17 +53,14 @@ void PackInstallTask::copySettings()
     QString instanceConfigPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(instanceConfigPath);
     instanceSettings->suspendSave();
-    instanceSettings->registerSetting("InstanceType", "OneSix");
-    instanceSettings->set("InstanceType", "OneSix");
+    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    instance.settings()->set("InstanceType", "OneSix");
 
     if (m_pack.jvmArgs.isValid() && !m_pack.jvmArgs.toString().isEmpty()) {
-        instanceSettings->registerSetting("OverrideJavaArgs", true);
-        instanceSettings->set("OverrideJavaArgs", true);
-        instanceSettings->registerSetting("JvmArgs", m_pack.jvmArgs.toString());
-        instanceSettings->set("JvmArgs", m_pack.jvmArgs.toString());
+        instance.settings()->set("OverrideJavaArgs", true);
+        instance.settings()->set("JvmArgs", m_pack.jvmArgs.toString());
     }
 
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_pack.mcVersion, true);
