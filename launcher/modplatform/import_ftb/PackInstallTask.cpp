@@ -32,7 +32,7 @@ namespace FTBImportAPP {
 
 void PackInstallTask::executeTask()
 {
-    setStatus(tr("Copy files"));
+    setStatus(tr("Copying files..."));
     setAbortable(false);
     progress(1, 2);
 
