@@ -45,7 +45,7 @@ namespace ResourceUtils {
 PackedResourceType identify(QFileInfo file){
     if (file.exists() && file.isFile()) {
         if (ModUtils::validate(file)) {
-            // mods can contain resource and data packs so they much be tested first
+            // mods can contain resource and data packs so they must be tested first
             qDebug() << file.fileName() << "is a mod";
             return PackedResourceType::Mod;
         } else if (ResourcePackUtils::validate(file)) {
