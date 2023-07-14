@@ -36,6 +36,8 @@
  */
 
 #include "NetJob.h"
+#include "tasks/ConcurrentTask.h"
+#include "ui/dialogs/CustomMessageBox.h"
 
 auto NetJob::addNetAction(NetAction::Ptr action) -> bool
 {
@@ -52,8 +54,11 @@ void NetJob::startNext()
         // We're finished, check for failures and retry if we can (up to 3 times)
         if (!m_failed.isEmpty() && m_try < 3) {
             m_try += 1;
-            while (!m_failed.isEmpty())
-                m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
+            while (!m_failed.isEmpty()) {
+                auto task = m_failed.take(*m_failed.keyBegin());
+                m_done.remove(task.get());
+                m_queue.enqueue(task);
+            }
         }
     }
 
@@ -126,4 +131,24 @@ void NetJob::updateState()
     emit progress(m_done.count(), totalSize());
     setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
                   .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
+}
+
+void NetJob::emitFailed(QString reason)
+{
+    auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
+                                                 "The tasks failed\n"
+                                                 "Failed urls\n" +
+                                                     getFailedFiles().join("\n\t") +
+                                                     "\n"
+                                                     "If this continues to happen please check the logs of the application"
+                                                     "Do you want to retry?",
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+
+    if (response == QMessageBox::Yes) {
+        m_try = 0;
+        startNext();
+        return;
+    }
+    ConcurrentTask::emitFailed(reason);
 }
