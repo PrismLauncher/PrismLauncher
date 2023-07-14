@@ -18,6 +18,7 @@
 
 #include "JavaInstall.h"
 
+#include "BaseVersion.h"
 #include "StringUtils.h"
 
 bool JavaInstall::operator<(const JavaInstall& rhs)
@@ -42,4 +43,22 @@ bool JavaInstall::operator==(const JavaInstall& rhs)
 bool JavaInstall::operator>(const JavaInstall& rhs)
 {
     return (!operator<(rhs)) && (!operator==(rhs));
+}
+
+bool JavaInstall::operator<(BaseVersion& a)
+{
+    try {
+        return operator<(dynamic_cast<JavaInstall&>(a));
+    } catch (const std::bad_cast& e) {
+        return BaseVersion::operator<(a);
+    }
+}
+
+bool JavaInstall::operator>(BaseVersion& a)
+{
+    try {
+        return operator>(dynamic_cast<JavaInstall&>(a));
+    } catch (const std::bad_cast& e) {
+        return BaseVersion::operator>(a);
+    }
 }

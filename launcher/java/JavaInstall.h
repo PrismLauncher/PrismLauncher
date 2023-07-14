@@ -30,6 +30,8 @@ struct JavaInstall : public BaseVersion {
 
     virtual QString typeString() const { return arch; }
 
+    virtual bool operator<(BaseVersion& a) override;
+    virtual bool operator>(BaseVersion& a) override;
     bool operator<(const JavaInstall& rhs);
     bool operator==(const JavaInstall& rhs);
     bool operator>(const JavaInstall& rhs);
