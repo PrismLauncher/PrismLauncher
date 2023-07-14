@@ -148,7 +148,7 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("IgnoreJavaCompatibility"), javaOrLocation);
 
         // special!
-        m_settings->registerPassthrough(global_settings->getSetting("JavaTimestamp"), javaOrLocation);
+        m_settings->registerPassthrough(global_settings->getSetting("JavaSignature"), javaOrLocation);
         m_settings->registerPassthrough(global_settings->getSetting("JavaArchitecture"), javaOrLocation);
         m_settings->registerPassthrough(global_settings->getSetting("JavaRealArchitecture"), javaOrLocation);
         m_settings->registerPassthrough(global_settings->getSetting("JavaVersion"), javaOrLocation);
@@ -1112,36 +1112,27 @@ JavaVersion MinecraftInstance::getJavaVersion()
 
 std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList()
 {
-    if (!m_loader_mod_list)
-    {
+    if (!m_loader_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_loader_mod_list.reset(new ModFolderModel(modsRoot(), this, is_indexed));
-        m_loader_mod_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_loader_mod_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_loader_mod_list;
 }
 
 std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList()
 {
-    if (!m_core_mod_list)
-    {
+    if (!m_core_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_core_mod_list.reset(new ModFolderModel(coreModsDir(), this, is_indexed));
-        m_core_mod_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_core_mod_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_core_mod_list;
 }
 
 std::shared_ptr<ModFolderModel> MinecraftInstance::nilModList()
 {
-    if (!m_nil_mod_list)
-    {
+    if (!m_nil_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
         m_nil_mod_list.reset(new ModFolderModel(nilModsDir(), this, is_indexed, false));
-        m_nil_mod_list->disableInteraction(isRunning());
-        connect(this, &BaseInstance::runningStatusChanged, m_nil_mod_list.get(), &ModFolderModel::disableInteraction);
     }
     return m_nil_mod_list;
 }
