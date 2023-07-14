@@ -562,6 +562,8 @@ void FlameCreationTask::validateZIPResouces()
                 if (FS::move(localPath, destPath)) {
                     return destPath;
                 }
+            } else {
+                qDebug() << "Target folder of" << fileName << "is correct at" << targetFolder;
             }
             return localPath;
         };
@@ -583,6 +585,9 @@ void FlameCreationTask::validateZIPResouces()
         QString worldPath;
 
         switch (type) {
+            case PackedResourceType::Mod :
+                validatePath(fileName, targetFolder, "mods");
+                break;
             case PackedResourceType::ResourcePack :
                 validatePath(fileName, targetFolder, "resourcepacks");
                 break;
@@ -591,9 +596,6 @@ void FlameCreationTask::validateZIPResouces()
                 break;
             case PackedResourceType::DataPack :
                 validatePath(fileName, targetFolder, "datapacks");
-                break;
-            case PackedResourceType::Mod :
-                validatePath(fileName, targetFolder, "mods");
                 break;
             case PackedResourceType::ShaderPack :
                 // in theroy flame API can't do this but who knows, that *may* change ?
