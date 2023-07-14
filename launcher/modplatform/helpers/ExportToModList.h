@@ -28,6 +28,6 @@ enum OptionalData {
     Url = 1 << 1,
     Version = 1 << 2,
 };
-QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData);
-QString ExportToModList(QList<Mod*> mods, QString lineTemplate);
+QString exportToModList(QList<Mod*> mods, Formats format, OptionalData extraData);
+QString exportToModList(QList<Mod*> mods, QString lineTemplate);
 }  // namespace ExportToModList

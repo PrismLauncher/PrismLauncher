@@ -47,7 +47,7 @@ QString toHTML(QList<Mod*> mods, OptionalData extraData)
     return QString("<html><body><ul>\n\t%1\n</ul></body></html>").arg(lines.join("\n\t"));
 }
 
-QString toMARKDOWN(QList<Mod*> mods, OptionalData extraData)
+QString toMarkdown(QList<Mod*> mods, OptionalData extraData)
 {
     QStringList lines;
     for (auto mod : mods) {
@@ -73,7 +73,7 @@ QString toMARKDOWN(QList<Mod*> mods, OptionalData extraData)
     return lines.join("\n");
 }
 
-QString toPLAINTXT(QList<Mod*> mods, OptionalData extraData)
+QString toPlainTXT(QList<Mod*> mods, OptionalData extraData)
 {
     QStringList lines;
     for (auto mod : mods) {
@@ -159,15 +159,15 @@ QString toCSV(QList<Mod*> mods, OptionalData extraData)
     return lines.join("\n");
 }
 
-QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData)
+QString exportToModList(QList<Mod*> mods, Formats format, OptionalData extraData)
 {
     switch (format) {
         case HTML:
             return toHTML(mods, extraData);
         case MARKDOWN:
-            return toMARKDOWN(mods, extraData);
+            return toMarkdown(mods, extraData);
         case PLAINTXT:
-            return toPLAINTXT(mods, extraData);
+            return toPlainTXT(mods, extraData);
         case JSON:
             return toJSON(mods, extraData);
         case CSV:
@@ -178,7 +178,7 @@ QString ExportToModList(QList<Mod*> mods, Formats format, OptionalData extraData
     }
 }
 
-QString ExportToModList(QList<Mod*> mods, QString lineTemplate)
+QString exportToModList(QList<Mod*> mods, QString lineTemplate)
 {
     QStringList lines;
     for (auto mod : mods) {

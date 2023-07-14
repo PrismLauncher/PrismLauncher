@@ -127,7 +127,7 @@ void ExportToModListDialog::formatChanged(int index)
 void ExportToModListDialog::triggerImp()
 {
     if (format == ExportToModList::CUSTOM) {
-        ui->finalText->setPlainText(ExportToModList::ExportToModList(m_allMods, ui->templateText->toPlainText()));
+        ui->finalText->setPlainText(ExportToModList::exportToModList(m_allMods, ui->templateText->toPlainText()));
         return;
     }
     auto opt = 0;
@@ -137,7 +137,7 @@ void ExportToModListDialog::triggerImp()
         opt |= ExportToModList::Version;
     if (ui->urlCheckBox->isChecked())
         opt |= ExportToModList::Url;
-    auto txt = ExportToModList::ExportToModList(m_allMods, format, static_cast<ExportToModList::OptionalData>(opt));
+    auto txt = ExportToModList::exportToModList(m_allMods, format, static_cast<ExportToModList::OptionalData>(opt));
     ui->finalText->setPlainText(txt);
     switch (format) {
         case ExportToModList::CUSTOM:
