@@ -433,7 +433,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
         // seach root path
         if(!foundLoggingRules) {
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+           logRulesPath = FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME, logRulesFile); 
+#else
            logRulesPath = FS::PathCombine(m_rootPath, logRulesFile); 
+#endif
             qDebug() << "Testing" << logRulesPath << "...";
             foundLoggingRules = QFile::exists(logRulesPath);
         }
@@ -1563,7 +1567,7 @@ QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
+        FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"),
         FS::PathCombine(applicationDirPath(), "jars"),
