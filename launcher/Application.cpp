@@ -529,6 +529,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("MenuBarInsteadOfToolBar", false);
 
+        m_settings->registerSetting("NumberOfConcurrentTasks", 6);
+
         QString defaultMonospace;
         int defaultSize = 11;
 #ifdef Q_OS_WIN32

@@ -108,7 +108,7 @@ void FlamePackExportTask::collectHashes()
     setStatus(tr("Finding file hashes..."));
     setProgress(1, 5);
     auto allMods = mcInstance->loaderModList()->allMods();
-    ConcurrentTask::Ptr hashingTask(new ConcurrentTask(this, "MakeHashesTask", 10));
+    ConcurrentTask::Ptr hashingTask(new ConcurrentTask(this, "MakeHashesTask"));
     task.reset(hashingTask);
     for (const QFileInfo& file : files) {
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());

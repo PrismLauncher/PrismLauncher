@@ -41,6 +41,7 @@
 #include <QUuid>
 #include <memory>
 
+#include "Application.h"
 #include "tasks/Task.h"
 
 class ConcurrentTask : public Task {
@@ -48,7 +49,9 @@ class ConcurrentTask : public Task {
    public:
     using Ptr = shared_qobject_ptr<ConcurrentTask>;
 
-    explicit ConcurrentTask(QObject* parent = nullptr, QString task_name = "", int max_concurrent = 6);
+    explicit ConcurrentTask(QObject* parent = nullptr,
+                            QString task_name = "",
+                            int max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     ~ConcurrentTask() override;
 
     bool canAbort() const override { return true; }
