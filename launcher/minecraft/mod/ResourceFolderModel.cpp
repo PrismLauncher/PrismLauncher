@@ -33,6 +33,7 @@ ResourceFolderModel::ResourceFolderModel(QDir dir, BaseInstance* instance, QObje
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &ResourceFolderModel::directoryChanged);
     connect(&m_helper_thread_task, &ConcurrentTask::finished, this, [this] { m_helper_thread_task.clear(); });
+    m_helper_thread_task.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
 }
 
 ResourceFolderModel::~ResourceFolderModel()

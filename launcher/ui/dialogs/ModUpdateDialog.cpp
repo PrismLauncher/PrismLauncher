@@ -43,7 +43,8 @@ ModUpdateDialog::ModUpdateDialog(QWidget* parent,
     , m_parent(parent)
     , m_mod_model(mods)
     , m_candidates(search_for)
-    , m_second_try_metadata(new ConcurrentTask())
+    , m_second_try_metadata(
+          new ConcurrentTask(nullptr, "Second Metadata Search", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
     , m_instance(instance)
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
@@ -89,15 +90,17 @@ void ModUpdateDialog::checkCandidates()
 
     if (!m_modrinth_to_update.empty()) {
         m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model));
-        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
+        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
+            m_failed_check_update.append({ mod, reason, recover_url });
+        });
         check_task.addTask(m_modrinth_check_task);
     }
 
     if (!m_flame_to_update.empty()) {
         m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model));
-        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
+        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
+            m_failed_check_update.append({ mod, reason, recover_url });
+        });
         check_task.addTask(m_flame_check_task);
     }
 
@@ -162,7 +165,7 @@ void ModUpdateDialog::checkCandidates()
             if (!recover_url.isEmpty())
                 //: %1 is the link to download it manually
                 text += tr("Possible solution: Getting the latest version manually:<br>%1<br>")
-                    .arg(QString("<a href='%1'>%1</a>").arg(recover_url.toString()));
+                            .arg(QString("<a href='%1'>%1</a>").arg(recover_url.toString()));
             text += "<br>";
         }
 
@@ -342,7 +345,7 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
     } else {
         QString reason{ tr("Couldn't find a valid version on the selected mod provider(s)") };
 
-        m_failed_metadata.append({mod, reason});
+        m_failed_metadata.append({ mod, reason });
     }
 }
 

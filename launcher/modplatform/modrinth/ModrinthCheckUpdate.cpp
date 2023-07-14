@@ -39,7 +39,7 @@ void ModrinthCheckUpdate::executeTask()
     QStringList hashes;
     auto best_hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
-    ConcurrentTask hashing_task(this, "MakeModrinthHashesTask");
+    ConcurrentTask hashing_task(this, "MakeModrinthHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     for (auto* mod : m_mods) {
         if (!mod->enabled()) {
             emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));

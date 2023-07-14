@@ -202,6 +202,7 @@ void LauncherPage::applySettings()
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
 
     s->set("NumberOfConcurrentTasks", ui->numberOfConcurrentTasksSpinBox->value());
+    s->set("NumberOfConcurrentDownloads", ui->numberOfConcurrentDownloadsSpinBox->value());
 
     // Console settings
     s->set("ShowConsole", ui->showConsoleCheck->isChecked());
@@ -254,6 +255,7 @@ void LauncherPage::loadSettings()
     ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
 
     ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
+    ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
 
     // Console settings
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
