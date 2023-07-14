@@ -50,40 +50,35 @@ class BigConcurrentTask : public ConcurrentTask {
 class BigConcurrentTaskThread : public QThread {
     Q_OBJECT
 
-    BigConcurrentTask big_task;
-
+    QTimer m_deadline;
     void run() override
     {
-        QTimer deadline;
-        deadline.setInterval(10000);
-        connect(&deadline, &QTimer::timeout, this, [this] { passed_the_deadline = true; });
-        deadline.start();
+        BigConcurrentTask big_task;
+        m_deadline.setInterval(10000);
 
         // NOTE: Arbitrary value that manages to trigger a problem when there is one.
         //       Considering each tasks, in a problematic state, adds 1024 * 4 bytes to the stack,
         //       this number is enough to fill up 16 MiB of stack, more than enough to cause a problem.
         static const unsigned s_num_tasks = 1 << 12;
-        auto sub_tasks = new BasicTask::Ptr[s_num_tasks];
-
         for (unsigned i = 0; i < s_num_tasks; i++) {
             auto sub_task = makeShared<BasicTask>(false);
-            sub_tasks[i] = sub_task;
             big_task.addTask(sub_task);
         }
 
+        connect(&big_task, &Task::finished, this, &QThread::quit);
+        connect(&m_deadline, &QTimer::timeout, this, [&] {
+            passed_the_deadline = true;
+            quit();
+        });
+
+        m_deadline.start();
         big_task.run();
 
-        while (!big_task.isFinished() && !passed_the_deadline)
-            QCoreApplication::processEvents();
-
-        emit finished();
+        exec();
     }
 
    public:
     bool passed_the_deadline = false;
-
-   signals:
-    void finished();
 };
 
 class TaskTest : public QObject {
@@ -148,7 +143,7 @@ class TaskTest : public QObject {
         t.addTask(t2);
         t.addTask(t3);
 
-        QObject::connect(&t, &Task::finished, [&] {
+        QObject::connect(&t, &Task::finished, [&t, &t1, &t2, &t3] {
             QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
             QVERIFY(t1->wasSuccessful());
             QVERIFY(t2->wasSuccessful());
@@ -184,7 +179,7 @@ class TaskTest : public QObject {
         t.addTask(t8);
         t.addTask(t9);
 
-        QObject::connect(&t, &Task::finished, [&] {
+        QObject::connect(&t, &Task::finished, [&t, &t1, &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9] {
             QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
             QVERIFY(t1->wasSuccessful());
             QVERIFY(t2->wasSuccessful());
@@ -213,7 +208,7 @@ class TaskTest : public QObject {
         t.addTask(t2);
         t.addTask(t3);
 
-        QObject::connect(&t, &Task::finished, [&] {
+        QObject::connect(&t, &Task::finished, [&t, &t1, &t2, &t3] {
             QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
             QVERIFY(t1->wasSuccessful());
             QVERIFY(t2->wasSuccessful());
@@ -236,7 +231,7 @@ class TaskTest : public QObject {
         t.addTask(t2);
         t.addTask(t3);
 
-        QObject::connect(&t, &Task::finished, [&] {
+        QObject::connect(&t, &Task::finished, [&t, &t1, &t2, &t3] {
             QVERIFY2(t.wasSuccessful(), "Task finished but was not successful when it should have been.");
             QVERIFY(t1->wasSuccessful());
             QVERIFY(!t2->wasSuccessful());
@@ -251,16 +246,15 @@ class TaskTest : public QObject {
     {
         QEventLoop loop;
 
-        auto thread = new BigConcurrentTaskThread;
+        BigConcurrentTaskThread thread;
 
-        connect(thread, &BigConcurrentTaskThread::finished, &loop, &QEventLoop::quit);
+        connect(&thread, &BigConcurrentTaskThread::finished, &loop, &QEventLoop::quit);
 
-        thread->start();
+        thread.start();
 
         loop.exec();
 
-        QVERIFY(!thread->passed_the_deadline);
-        thread->deleteLater();
+        QVERIFY(!thread.passed_the_deadline);
     }
 };
 
