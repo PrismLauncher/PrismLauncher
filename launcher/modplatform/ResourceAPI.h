@@ -99,6 +99,7 @@ class ResourceAPI {
     };
     struct VersionSearchCallbacks {
         std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
+        std::function<void(QString const& reason, int network_error_code)> on_fail;
     };
 
     struct ProjectInfoArgs {
@@ -109,6 +110,7 @@ class ResourceAPI {
     };
     struct ProjectInfoCallbacks {
         std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
+        std::function<void(QString const& reason)> on_fail;
     };
 
     struct DependencySearchArgs {
@@ -119,6 +121,7 @@ class ResourceAPI {
 
     struct DependencySearchCallbacks {
         std::function<void(QJsonDocument&, const ModPlatform::Dependency&)> on_succeed;
+        std::function<void(QString const& reason, int network_error_code)> on_fail;
     };
 
    public:

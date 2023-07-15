@@ -70,7 +70,7 @@ Task::Ptr NetworkResourceAPI::getProjectInfo(ProjectInfoArgs&& args, ProjectInfo
 
         callbacks.on_succeed(doc, args.pack);
     });
-
+    QObject::connect(job.get(), &NetJob::failed, [callbacks](QString reason) { callbacks.on_fail(reason); });
     return job;
 }
 
@@ -98,6 +98,13 @@ Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Versi
         }
 
         callbacks.on_succeed(doc, args.pack);
+    });
+    QObject::connect(netJob.get(), &NetJob::failed, [&netJob, callbacks](QString reason) {
+        int network_error_code = -1;
+        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action && failed_action->m_reply)
+            network_error_code = failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+        callbacks.on_fail(reason, network_error_code);
     });
 
     return netJob;
@@ -143,6 +150,12 @@ Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, 
 
         callbacks.on_succeed(doc, args.dependency);
     });
+    QObject::connect(netJob.get(), &NetJob::failed, [&netJob, callbacks](QString reason) {
+        int network_error_code = -1;
+        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action && failed_action->m_reply)
+            network_error_code = failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
+        callbacks.on_fail(reason, network_error_code);
+    });
     return netJob;
 };
