@@ -173,7 +173,7 @@
      <item>
       <widget class="QLabel" name="warningLabel">
        <property name="text">
-        <string>This depends on the mods meta data. To ensure the meta data run at least one time the mods update on the selected instance(no need to update the mods).</string>
+        <string>This depends on the mods' metadata. To ensure it is available, run an update on the instance. Installing the updates isn't necessary.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
