@@ -65,7 +65,8 @@
 static const QMap<QString, ResourceAPI::ModLoaderType> modloaderMapping{
     {"net.minecraftforge", ResourceAPI::Forge},
     {"net.fabricmc.fabric-loader", ResourceAPI::Fabric},
-    {"org.quiltmc.quilt-loader", ResourceAPI::Quilt}
+    {"org.quiltmc.quilt-loader", ResourceAPI::Quilt},
+    {"com.mumfrey.liteloader", ResourceAPI::LiteLoader}
 };
 
 PackProfile::PackProfile(MinecraftInstance * instance)
