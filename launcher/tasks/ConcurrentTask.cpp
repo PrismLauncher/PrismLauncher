@@ -134,8 +134,7 @@ void ConcurrentTask::startNext()
 
     connect(next.get(), &Task::succeeded, this, [this, next]() { subTaskSucceeded(next); });
     connect(next.get(), &Task::failed, this, [this, next](QString msg) { subTaskFailed(next, msg); });
-    // this should never happen but if it does better to fail the task that being stuck
-    // most
+    // this should never happen but if it does, it's better to fail the task than get stuck
     connect(next.get(), &Task::aborted, this, [this, next] { subTaskFailed(next, "Aborted"); });
 
     connect(next.get(), &Task::status, this, [this, next](QString msg) { subTaskStatus(next, msg); });
