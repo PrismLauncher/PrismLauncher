@@ -159,7 +159,7 @@ void NetRequest::downloadError(QNetworkReply::NetworkError error)
 {
     if (error == QNetworkReply::OperationCanceledError) {
         qCCritical(logCat) << getUid().toString() << "Aborted " << m_url.toString();
-        m_state = State::AbortedByUser;
+        m_state = State::Failed;
     } else {
         if (m_options & Option::AcceptLocalFiles) {
             if (m_sink->hasLocalData()) {
@@ -276,6 +276,13 @@ void NetRequest::downloadFinished()
     if (data.size()) {
         qCDebug(logCat) << getUid().toString() << "Writing extra" << data.size() << "bytes";
         m_state = m_sink->write(data);
+        if (m_state != State::Succeeded) {
+            qCDebug(logCat) << getUid().toString() << "Request failed to write:" << m_url.toString();
+            m_sink->abort();
+            emit failed("");
+            emit finished();
+            return;
+        }
     }
 
     // otherwise, finalize the whole graph
@@ -311,10 +318,14 @@ void NetRequest::downloadReadyRead()
 
 auto NetRequest::abort() -> bool
 {
+    m_state = State::AbortedByUser;
     if (m_reply) {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
+        disconnect(m_reply.get(), &QNetworkReply::errorOccurred, nullptr, nullptr);
+#else
+        disconnect(m_reply.get(), QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), nullptr, nullptr);
+#endif
         m_reply->abort();
-    } else {
-        m_state = State::AbortedByUser;
     }
     return true;
 }
