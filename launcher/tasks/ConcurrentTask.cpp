@@ -88,6 +88,7 @@ bool ConcurrentTask::abort()
     QMutableHashIterator<Task*, Task::Ptr> doing_iter(m_doing);
     while (doing_iter.hasNext()) {
         auto task = doing_iter.next();
+        disconnect(task.value().get(), &Task::aborted, this, 0);
         suceedeed &= (task.value())->abort();
     }
 
@@ -133,6 +134,9 @@ void ConcurrentTask::startNext()
 
     connect(next.get(), &Task::succeeded, this, [this, next]() { subTaskSucceeded(next); });
     connect(next.get(), &Task::failed, this, [this, next](QString msg) { subTaskFailed(next, msg); });
+    // this should never happen but if it does better to fail the task that being stuck
+    // most
+    connect(next.get(), &Task::aborted, this, [this, next] { subTaskFailed(next, "Aborted"); });
 
     connect(next.get(), &Task::status, this, [this, next](QString msg) { subTaskStatus(next, msg); });
     connect(next.get(), &Task::details, this, [this, next](QString msg) { subTaskDetails(next, msg); });
