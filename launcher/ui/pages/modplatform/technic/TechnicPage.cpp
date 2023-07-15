@@ -34,6 +34,7 @@
  */
 
 #include "TechnicPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_TechnicPage.h"
 
 #include <QKeyEvent>
@@ -41,16 +42,15 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 
 #include "BuildConfig.h"
+#include "Json.h"
 #include "TechnicModel.h"
 #include "modplatform/technic/SingleZipPackInstallTask.h"
 #include "modplatform/technic/SolderPackInstallTask.h"
-#include "Json.h"
 
 #include "Application.h"
 #include "modplatform/technic/SolderPackManifest.h"
 
-TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget *parent)
-    : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
+TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &TechnicPage::triggerSearch);
@@ -201,6 +201,8 @@ void TechnicPage::suggestCurrent()
 
         metadataLoaded();
     });
+    connect(jobPtr.get(), &NetJob::failed,
+            [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
     jobPtr = netJob;
     jobPtr->start();
@@ -252,6 +254,8 @@ void TechnicPage::metadataLoaded()
         netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), response));
 
         QObject::connect(netJob.get(), &NetJob::succeeded, this, &TechnicPage::onSolderLoaded);
+        connect(jobPtr.get(), &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         jobPtr = netJob;
         jobPtr->start();

@@ -23,7 +23,7 @@ bool FlameCheckUpdate::abort()
     return true;
 }
 
-ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
+ModPlatform::IndexedPack FlameCheckUpdate::getProjectInfo(ModPlatform::IndexedVersion& ver_info)
 {
     ModPlatform::IndexedPack pack;
 
@@ -56,6 +56,7 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
         }
     });
 
+    connect(get_project_job, &NetJob::failed, this, &FlameCheckUpdate::emitFailed);
     QObject::connect(get_project_job, &NetJob::finished, [&loop, get_project_job] {
         get_project_job->deleteLater();
         loop.quit();
@@ -67,7 +68,7 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
     return pack;
 }
 
-ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
+ModPlatform::IndexedVersion FlameCheckUpdate::getFileInfo(int addonId, int fileId)
 {
     ModPlatform::IndexedVersion ver;
 
@@ -99,7 +100,7 @@ ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
             qDebug() << doc;
         }
     });
-
+    connect(get_file_info_job, &NetJob::failed, this, &FlameCheckUpdate::emitFailed);
     QObject::connect(get_file_info_job, &NetJob::finished, [&loop, get_file_info_job] {
         get_file_info_job->deleteLater();
         loop.quit();

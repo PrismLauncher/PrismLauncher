@@ -35,6 +35,7 @@
  */
 
 #include "ModrinthPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ModrinthPage.h"
 
 #include "ModrinthModel.h"
@@ -163,6 +164,8 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
     } else
         updateUI();
@@ -215,6 +218,8 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
 
     } else {

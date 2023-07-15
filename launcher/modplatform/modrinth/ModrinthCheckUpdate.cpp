@@ -73,8 +73,6 @@ void ModrinthCheckUpdate::executeTask()
     auto response = std::make_shared<QByteArray>();
     auto job = api.latestVersions(hashes, best_hash_type, m_game_versions, m_loaders, response);
 
-    QEventLoop lock;
-
     connect(job.get(), &Task::succeeded, this, [this, response, &mappings, best_hash_type, job] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
@@ -83,7 +81,7 @@ void ModrinthCheckUpdate::executeTask()
                        << " reason: " << parse_error.errorString();
             qWarning() << *response;
 
-            failed(parse_error.errorString());
+            emitFailed(parse_error.errorString());
             return;
         }
 
@@ -167,19 +165,17 @@ void ModrinthCheckUpdate::executeTask()
                 }
             }
         } catch (Json::JsonException& e) {
-            failed(e.cause() + " : " + e.what());
+            emitFailed(e.cause() + " : " + e.what());
+            return;
         }
+        emitSucceeded();
     });
 
-    connect(job.get(), &Task::finished, &lock, &QEventLoop::quit);
+    connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::emitFailed);
 
     setStatus(tr("Waiting for the API response from Modrinth..."));
     setProgress(1, 3);
 
     m_net_job = qSharedPointerObjectCast<NetJob, Task>(job);
     job->start();
-
-    lock.exec();
-
-    emitSucceeded();
 }

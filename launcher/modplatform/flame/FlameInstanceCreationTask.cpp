@@ -229,6 +229,7 @@ bool FlameCreationTask::updateInstance()
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
             }
         });
+        connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files: " << reason; });
         connect(job.get(), &Task::finished, &loop, &QEventLoop::quit);
 
         m_process_update_file_info_job = job;

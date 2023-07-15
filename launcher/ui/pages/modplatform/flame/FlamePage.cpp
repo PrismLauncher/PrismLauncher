@@ -34,6 +34,7 @@
  */
 
 #include "FlamePage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_FlamePage.h"
 
 #include <QKeyEvent>
@@ -42,9 +43,9 @@
 #include "FlameModel.h"
 #include "InstanceImportTask.h"
 #include "Json.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
-#include "modplatform/flame/FlameAPI.h"
 
 static FlameAPI api;
 
@@ -171,6 +172,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
     } else {
         for (auto version : current.versions) {
@@ -252,10 +255,8 @@ void FlamePage::updateUi()
         text += "<br>" + tr(" by ") + authorStrs.join(", ");
     }
 
-    if(current.extraInfoLoaded) {
-        if (!current.extra.issuesUrl.isEmpty()
-         || !current.extra.sourceUrl.isEmpty()
-         || !current.extra.wikiUrl.isEmpty()) {
+    if (current.extraInfoLoaded) {
+        if (!current.extra.issuesUrl.isEmpty() || !current.extra.sourceUrl.isEmpty() || !current.extra.wikiUrl.isEmpty()) {
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 
@@ -266,7 +267,6 @@ void FlamePage::updateUi()
         if (!current.extra.sourceUrl.isEmpty())
             text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extra.sourceUrl) + "<br>";
     }
-
 
     text += "<hr>";
     text += api.getModDescription(current.addonId).toUtf8();
