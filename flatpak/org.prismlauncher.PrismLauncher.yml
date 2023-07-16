@@ -25,6 +25,8 @@ finish-args:
   - --filesystem=xdg-run/app/com.discordapp.Discord:create
     # Mod drag&drop
   - --filesystem=xdg-download:ro
+    # FTBApp import
+  - --filesystem=~/.ftba:ro
 
 modules:
   - name: prismlauncher
@@ -38,8 +40,8 @@ modules:
         JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
         JAVA_COMPILER: /usr/lib/sdk/openjdk17/jvm/openjdk-17/bin/javac
     sources:
-        - type: dir
-          path: ../
+      - type: dir
+        path: ../
     builddir: true
   - name: openjdk
     buildsystem: simple
