@@ -14,10 +14,12 @@ import QtQuick.Controls 2.12
 // FIXME: Enable this when we are able to use `pragma ComponentBehavior: Bound` without breaking getting a black box instead of our component.
 // qmllint disable unqualified
 
-Rectangle {
+Pane {
     id: root
 
-    color: palette.base
+    background: Rectangle {
+        color: palette.base
+    }
 
     property alias model: view.model
     property alias wrapMode: view.wrapMode
