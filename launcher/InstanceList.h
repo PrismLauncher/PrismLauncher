@@ -203,6 +203,9 @@ private:
     QList<InstanceId> discoverInstances();
     InstancePtr loadInstance(const InstanceId& id);
 
+    void increaseGroupCount(const QString& group);
+    void decreaseGroupCount(const QString& group);
+
 private:
     int m_watchLevel = 0;
     int totalPlayTime = 0;

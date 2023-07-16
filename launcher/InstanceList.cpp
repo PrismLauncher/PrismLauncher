@@ -253,9 +253,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)
     auto iter = m_instanceGroupIndex.find(inst->id());
     if (iter != m_instanceGroupIndex.end()) {
         if (*iter != name) {
-            if (!iter->isEmpty() && --m_groupNameCache[*iter] == 0)
-                m_groupNameCache.remove(*iter);
-
+            decreaseGroupCount(*iter);
             *iter = name;
             changed = true;
         }
@@ -265,9 +263,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)
     }
 
     if (changed) {
-        if (!name.isEmpty())
-            m_groupNameCache[name]++;
-
+        increaseGroupCount(name);
         auto idx = getInstIndex(inst.get());
         emit dataChanged(index(idx), index(idx), { GroupRole });
         saveGroupList();
@@ -315,7 +311,7 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
         const QString instGroupName = getInstanceGroup(instID);
         if (instGroupName == src) {
             m_instanceGroupIndex[instID] = dst;
-            m_groupNameCache[dst]++;
+            increaseGroupCount(dst);
             qDebug() << "Set" << instID << "group to" << dst;
             modified = true;
             auto idx = getInstIndex(instance.get());
@@ -346,9 +342,7 @@ bool InstanceList::trashInstance(const InstanceId& id)
     QString trashedLoc;
 
     if (m_instanceGroupIndex.remove(id)) {
-        if (!cachedGroupId.isEmpty() && --m_groupNameCache[cachedGroupId] == 0)
-            m_groupNameCache.remove(cachedGroupId);
-
+        decreaseGroupCount(cachedGroupId);
         saveGroupList();
     }
 
@@ -384,8 +378,7 @@ void InstanceList::undoTrashInstance() {
     QFile(top.trashPath).rename(top.polyPath);
 
     m_instanceGroupIndex[top.id] = top.groupName;
-    if (!top.groupName.isEmpty())
-        m_groupNameCache[top.groupName]++;
+    increaseGroupCount(top.groupName);
 
     saveGroupList();
     emit instancesChanged();
@@ -402,9 +395,7 @@ void InstanceList::deleteInstance(const InstanceId& id)
     QString cachedGroupId = m_instanceGroupIndex[id];
 
     if (m_instanceGroupIndex.remove(id)) {
-        if (!cachedGroupId.isEmpty() && --m_groupNameCache[cachedGroupId] == 0)
-            m_groupNameCache.remove(cachedGroupId);
-
+        decreaseGroupCount(cachedGroupId);
         saveGroupList();
     }
 
@@ -654,6 +645,26 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     return inst;
 }
 
+
+void InstanceList::increaseGroupCount(const QString& group)
+{
+    if (group.isEmpty())
+        return;
+
+    ++m_groupNameCache[group];
+}
+
+void InstanceList::decreaseGroupCount(const QString& group)
+{
+    if (group.isEmpty())
+        return;
+
+    if (--m_groupNameCache[group] < 1) {
+        m_groupNameCache.remove(group);
+        m_collapsedGroups.remove(group);
+    }
+}
+
 void InstanceList::saveGroupList()
 {
     qDebug() << "Will save group list now.";
@@ -782,9 +793,6 @@ void InstanceList::loadGroupList()
             continue;
         }
 
-        // keep a list/set of groups for choosing
-        m_groupNameCache[groupName]++;
-
         auto hidden = groupObj.value("hidden").toBool(false);
         if (hidden)
             m_collapsedGroups.insert(groupName);
@@ -792,8 +800,10 @@ void InstanceList::loadGroupList()
         // Iterate through the list of instances in the group.
         QJsonArray instancesArray = groupObj.value("instances").toArray();
 
-        for (auto value : instancesArray)
+        for (auto value : instancesArray) {
             m_instanceGroupIndex[value.toString()] = groupName;
+            increaseGroupCount(groupName);
+        }
     }
     m_groupsLoaded = true;
     qDebug() << "Group list loaded.";
@@ -970,8 +980,7 @@ bool InstanceList::commitStagedInstance(const QString& path, InstanceName const&
             }
 
             m_instanceGroupIndex[instID] = groupName;
-            if (!groupName.isEmpty())
-                m_groupNameCache[groupName]++;
+            increaseGroupCount(groupName);
         }
 
         instanceSet.insert(instID);
