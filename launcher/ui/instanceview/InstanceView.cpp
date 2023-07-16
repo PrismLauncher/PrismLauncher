@@ -542,7 +542,7 @@ void InstanceView::paintEvent(QPaintEvent* event)
         const QString line2 = "Add an instance to get started.";
         auto rect = this->viewport()->rect();
         auto font = option.font;
-        font.setPointSize(64);
+        font.setPointSize(53);
         painter.setFont(font);
         auto fm = painter.fontMetrics();
 
@@ -558,14 +558,6 @@ void InstanceView::paintEvent(QPaintEvent* event)
             painter.setFont(font);
             fm = painter.fontMetrics();
         }
-        // about icon
-        auto about = QIcon::fromTheme("about");
-        QRect aboutRect(0, 0, fm.height() * .75, fm.height() * .75);
-        aboutRect.moveCenter(rect.center());
-        aboutRect.moveTop(fm.height() * .75);
-        auto px = about.pixmap(about.actualSize(aboutRect.size()));
-        if (!px.isNull())
-            painter.drawPixmap(aboutRect, px);
 
         // text
         rect.setTop(rect.top() + fm.height() * 1.5);
