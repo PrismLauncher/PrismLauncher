@@ -16,6 +16,7 @@
 #pragma once
 
 #include "BaseVersion.h"
+#include "../Version.h"
 
 #include <QJsonObject>
 #include <QStringList>
@@ -30,13 +31,14 @@
 
 namespace Meta
 {
-using VersionPtr = std::shared_ptr<class Version>;
 
 class Version : public QObject, public BaseVersion, public BaseEntity
 {
     Q_OBJECT
 
-public: /* con/des */
+public:
+    using Ptr = std::shared_ptr<Version>;
+
     explicit Version(const QString &uid, const QString &version);
     virtual ~Version();
 
@@ -61,7 +63,7 @@ public: /* con/des */
     {
         return m_time;
     }
-    const Meta::RequireSet &requires() const
+    const Meta::RequireSet &requiredSet() const
     {
         return m_requires;
     }
@@ -78,16 +80,18 @@ public: /* con/des */
         return m_data != nullptr;
     }
 
-    void merge(const VersionPtr &other);
-    void mergeFromList(const VersionPtr &other);
+    void merge(const Version::Ptr &other);
+    void mergeFromList(const Version::Ptr &other);
     void parse(const QJsonObject &obj) override;
 
     QString localFilename() const override;
 
+    [[nodiscard]] ::Version toComparableVersion() const;
+
 public: // for usage by format parsers only
     void setType(const QString &type);
     void setTime(const qint64 time);
-    void setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts);
+    void setRequires(const Meta::RequireSet &reqs, const Meta::RequireSet &conflicts);
     void setVolatile(bool volatile_);
     void setRecommended(bool recommended);
     void setProvidesRecommendations();
@@ -113,4 +117,4 @@ private:
 };
 }
 
-Q_DECLARE_METATYPE(Meta::VersionPtr)
+Q_DECLARE_METATYPE(Meta::Version::Ptr)

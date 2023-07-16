@@ -40,8 +40,11 @@
 #include "ui/pages/BasePage.h"
 #include <Application.h>
 
+#include "settings/Setting.h"
+
 class QFileSystemModel;
 class QIdentityProxyModel;
+class QItemSelection;
 namespace Ui
 {
 class ScreenshotsPage;
@@ -59,7 +62,8 @@ public:
     explicit ScreenshotsPage(QString path, QWidget *parent = 0);
     virtual ~ScreenshotsPage();
 
-    virtual void openedImpl() override;
+    void openedImpl() override;
+    void closedImpl() override;
 
     enum
     {
@@ -110,4 +114,6 @@ private:
     QString m_folder;
     bool m_valid = false;
     bool m_uploadActive = false;
+
+    std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 };

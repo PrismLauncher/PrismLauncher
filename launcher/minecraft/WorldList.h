@@ -21,6 +21,7 @@
 #include <QAbstractListModel>
 #include <QMimeData>
 #include "minecraft/World.h"
+#include "BaseInstance.h"
 
 class QFileSystemWatcher;
 
@@ -33,7 +34,8 @@ public:
         NameColumn,
         GameModeColumn,
         LastPlayedColumn,
-        SizeColumn
+        SizeColumn,
+        InfoColumn
     };
 
     enum Roles
@@ -48,13 +50,13 @@ public:
         IconFileRole
     };
 
-    WorldList(const QString &dir);
+    WorldList(const QString &dir, BaseInstance* instance);
 
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const
     {
-        return size();
+        return parent.isValid() ? 0 : static_cast<int>(size());
     };
     virtual QVariant headerData(int section, Qt::Orientation orientation,
                                 int role = Qt::DisplayRole) const;
@@ -112,6 +114,8 @@ public:
         return m_dir;
     }
 
+    QString instDirPath() const;
+
     const QList<World> &allWorlds() const
     {
         return worlds;
@@ -124,6 +128,7 @@ signals:
     void changed();
 
 protected:
+    BaseInstance* m_instance;
     QFileSystemWatcher *m_watcher;
     bool is_watching;
     QDir m_dir;

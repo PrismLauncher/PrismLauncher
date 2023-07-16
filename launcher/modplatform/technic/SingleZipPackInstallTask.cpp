@@ -44,12 +44,13 @@ void Technic::SingleZipPackInstallTask::executeTask()
     const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
     auto entry = APPLICATION->metacache()->resolveEntry("general", path);
     entry->setStale(true);
-    m_filesNetJob = new NetJob(tr("Modpack download"), APPLICATION->network());
+    m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
     m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
     m_archivePath = entry->getFullPath();
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SingleZipPackInstallTask::downloadSucceeded);
     connect(job, &NetJob::progress, this, &Technic::SingleZipPackInstallTask::downloadProgressChanged);
+    connect(job, &NetJob::stepProgress, this, &Technic::SingleZipPackInstallTask::propogateStepProgress);
     connect(job, &NetJob::failed, this, &Technic::SingleZipPackInstallTask::downloadFailed);
     m_filesNetJob->start();
 }
@@ -130,7 +131,7 @@ void Technic::SingleZipPackInstallTask::extractFinished()
         }
     }
 
-    shared_qobject_ptr<Technic::TechnicPackProcessor> packProcessor = new Technic::TechnicPackProcessor();
+    auto packProcessor = makeShared<Technic::TechnicPackProcessor>();
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::succeeded, this, &Technic::SingleZipPackInstallTask::emitSucceeded);
     connect(packProcessor.get(), &Technic::TechnicPackProcessor::failed, this, &Technic::SingleZipPackInstallTask::emitFailed);
     packProcessor->run(m_globalSettings, name(), m_instIcon, m_stagingPath, m_minecraftVersion);

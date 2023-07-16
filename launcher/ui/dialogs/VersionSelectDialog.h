@@ -44,7 +44,7 @@ public:
 
     int exec() override;
 
-    BaseVersionPtr selectedVersion() const;
+    BaseVersion::Ptr selectedVersion() const;
 
     void setCurrentVersion(const QString & version);
     void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);

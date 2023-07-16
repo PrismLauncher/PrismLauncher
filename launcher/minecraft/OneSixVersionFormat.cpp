@@ -39,6 +39,8 @@
 #include "minecraft/ParseUtils.h"
 #include <minecraft/MojangVersionFormat.h>
 
+#include <QRegularExpression>
+
 using namespace Json;
 
 static void readString(const QJsonObject &root, const QString &key, QString &variable)
@@ -63,13 +65,13 @@ LibraryPtr OneSixVersionFormat::libraryFromJson(ProblemContainer & problems, con
 QJsonObject OneSixVersionFormat::libraryToJson(Library *library)
 {
     QJsonObject libRoot = MojangVersionFormat::libraryToJson(library);
-    if (library->m_absoluteURL.size())
+    if (!library->m_absoluteURL.isEmpty())
         libRoot.insert("MMC-absoluteUrl", library->m_absoluteURL);
-    if (library->m_hint.size())
+    if (!library->m_hint.isEmpty())
         libRoot.insert("MMC-hint", library->m_hint);
-    if (library->m_filename.size())
+    if (!library->m_filename.isEmpty())
         libRoot.insert("MMC-filename", library->m_filename);
-    if (library->m_displayname.size())
+    if (!library->m_displayname.isEmpty())
         libRoot.insert("MMC-displayname", library->m_displayname);
     return libRoot;
 }
@@ -119,6 +121,15 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
     else
     {
         out->uid = root.value("fileId").toString();
+    }
+
+    const QRegularExpression valid_uid_regex{ QRegularExpression::anchoredPattern(QStringLiteral(R"([a-zA-Z0-9-_]+(?:\.[a-zA-Z0-9-_]+)*)")) };
+    if (!valid_uid_regex.match(out->uid).hasMatch()) {
+        qCritical() << "The component's 'uid' contains illegal characters! UID:" << out->uid;
+        out->addProblem(
+            ProblemSeverity::Error,
+            QObject::tr("The component's 'uid' contains illegal characters! This can cause security issues.")
+        );
     }
 
     out->version = root.value("version").toString();
@@ -225,11 +236,10 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         {
             QJsonObject agentObj = requireObject(agentVal);
             auto lib = libraryFromJson(*out, agentObj, filename);
+
             QString arg = "";
-            if (agentObj.contains("argument"))
-            {
-                readString(agentObj, "argument", arg);
-            }
+            readString(agentObj, "argument", arg);
+
             AgentPtr agent(new Agent(lib, arg));
             out->agents.append(agent);
         }
@@ -266,7 +276,7 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
 
     if (root.contains("requires"))
     {
-        Meta::parseRequires(root, &out->requires);
+        Meta::parseRequires(root, &out->m_requires);
     }
     QString dependsOnMinecraftVersion = root.value("mcVersion").toString();
     if(!dependsOnMinecraftVersion.isEmpty())
@@ -274,9 +284,9 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument &doc
         Meta::Require mcReq;
         mcReq.uid = "net.minecraft";
         mcReq.equalsVersion = dependsOnMinecraftVersion;
-        if (out->requires.count(mcReq) == 0)
+        if (out->m_requires.count(mcReq) == 0)
         {
-            out->requires.insert(mcReq);
+            out->m_requires.insert(mcReq);
         }
     }
     if (root.contains("conflicts"))
@@ -332,6 +342,20 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
     writeString(root, "appletClass", patch->appletClass);
     writeStringList(root, "+tweakers", patch->addTweakers);
     writeStringList(root, "+traits", patch->traits.values());
+    writeStringList(root, "+jvmArgs", patch->addnJvmArguments);
+    if (!patch->agents.isEmpty())
+    {
+        QJsonArray array;
+        for (auto value: patch->agents)
+        {
+            QJsonObject agentOut = OneSixVersionFormat::libraryToJson(value->library().get());
+            if (!value->argument().isEmpty())
+                agentOut.insert("argument", value->argument());
+
+            array.append(agentOut);
+        }
+        root.insert("+agents", array);
+    }
     if (!patch->libraries.isEmpty())
     {
         QJsonArray array;
@@ -368,9 +392,9 @@ QJsonDocument OneSixVersionFormat::versionFileToJson(const VersionFilePtr &patch
         }
         root.insert("mods", array);
     }
-    if(!patch->requires.empty())
+    if(!patch->m_requires.empty())
     {
-        Meta::serializeRequires(root, &patch->requires, "requires");
+        Meta::serializeRequires(root, &patch->m_requires, "requires");
     }
     if(!patch->conflicts.empty())
     {

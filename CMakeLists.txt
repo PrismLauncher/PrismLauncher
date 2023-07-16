@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.15)  # minimum version required by QuaZip
 
-if(WIN32)
-    # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-    cmake_policy(SET CMP0020 OLD)
-endif()
-
 project(Launcher)
 
 string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_BUILD_DIR}" IS_IN_SOURCE_BUILD)
@@ -32,15 +27,95 @@ set(CMAKE_C_STANDARD_REQUIRED true)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
-set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+if(MSVC)
+    # /GS Adds buffer security checks, default on but incuded anyway to mirror gcc's fstack-protector flag
+    # /permissive- specify standards-conforming compiler behavior, also enabled by Qt6, default on with std:c++20
+    # Use /W4 as /Wall includes unnesserey warnings such as added padding to structs
+    set(CMAKE_CXX_FLAGS "/GS /permissive- /W4 ${CMAKE_CXX_FLAGS}")
+
+    # LINK accepts /SUBSYSTEM whics sets if we are a WINDOWS (gui) or a CONSOLE programs
+    # This implicitly selects an entrypoint specific to the subsystem selected
+    # qtmain/QtEntryPointLib provides the correct entrypoint (wWinMain) for gui programs
+    # Additinaly LINK autodetects we use a GUI so we can omit /SUBSYSTEM
+    # This allows tests to still use have console without using seperate linker flags
+    # /LTCG allows for linking wholy optimizated programs
+    # /MANIFEST:NO disables generating a manifest file, we instead provide our own
+    # /STACK sets the stack reserve size, ATL's pack list needs 3-4 MiB as of November 2022, provide 8 MiB
+    set(CMAKE_EXE_LINKER_FLAGS "/LTCG /MANIFEST:NO /STACK:8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+
+    # /GL enables whole program optimizations
+    # /Gw helps reduce binary size
+    # /Gy allows the compiler to package individual functions
+    # /guard:cf enables control flow guard
+    foreach(lang C CXX)
+        set("CMAKE_${lang}_FLAGS_RELEASE" "/GL /Gw /Gy /guard:cf")
+    endforeach()
+
+    # See https://github.com/ccache/ccache/issues/1040
+    # Note, CMake 3.25 replaces this with CMAKE_MSVC_DEBUG_INFORMATION_FORMAT
+    # See https://cmake.org/cmake/help/v3.25/variable/CMAKE_MSVC_DEBUG_INFORMATION_FORMAT.html
+    foreach(config DEBUG RELWITHDEBINFO)
+        foreach(lang C CXX)
+            set(flags_var "CMAKE_${lang}_FLAGS_${config}")
+            string(REGEX REPLACE "/Z[Ii]" "/Z7" ${flags_var} "${${flags_var}}")
+        endforeach()
+    endforeach()
+
+    if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL")
+        set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release "")
+        set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release "")
+    endif()
+else()
+    set(CMAKE_CXX_FLAGS "-Wall -pedantic -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+
+    # ATL's pack list needs more than the default 1 Mib stack on windows
+    if(WIN32)
+        set(CMAKE_EXE_LINKER_FLAGS "-Wl,--stack,8388608 ${CMAKE_EXE_LINKER_FLAGS}")
+    endif()
+endif()
 
 # Fix build with Qt 5.13
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_DISABLE_DEPRECATED_BEFORE=0x050C00")
 
+# Fix aarch64 build for toml++
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTOML_ENABLE_FLOAT16=0")
+
 # set CXXFLAGS for build targets
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
+
+option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" on)
+
+# If this is a Debug build turn on address sanitiser
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND DEBUG_ADDRESS_SANITIZER)
+    message(STATUS "Address Sanitizer enabled for Debug builds, Turn it off with -DDEBUG_ADDRESS_SANITIZER=off")
+    if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+        if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+            # using clang with clang-cl front end 
+            message(STATUS "Address Sanitizer available on Clang MSVC frontend")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /O1 /Oy-")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address /O1 /Oy-")
+        else()
+            # AppleClang and Clang
+            message(STATUS "Address Sanitizer available on Clang")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
+        endif()
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        # GCC
+        message(STATUS "Address Sanitizer available on GCC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
+        link_libraries("asan")
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+        message(STATUS "Address Sanitizer available on MSVC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /O1 /Oy-")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address /O1 /Oy-")
+    else()
+        message(STATUS "Address Sanitizer not available on compiler ${CMAKE_CXX_COMPILER_ID}")
+    endif()
+endif()
 
 option(ENABLE_LTO "Enable Link Time Optimization" off)
 
@@ -48,11 +123,18 @@ if(ENABLE_LTO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
 
-    if(ipo_supported AND (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel"))
-        message(STATUS "IPO / LTO enabled")
-        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-    elseif(ipo_supported)
-        message(STATUS "Not enabling IPO / LTO on debug builds")
+    if(ipo_supported)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL TRUE)
+        if(CMAKE_BUILD_TYPE)
+            if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+                message(STATUS "IPO / LTO enabled")
+            else()
+                message(STATUS "Not enabling IPO / LTO on debug builds")
+            endif()
+        else()
+            message(STATUS "IPO / LTO will only be enabled for release builds")
+        endif()
     else()
         message(STATUS "IPO / LTO not supported: <${ipo_error}>")
     endif()
@@ -60,8 +142,20 @@ endif()
 
 option(BUILD_TESTING "Build the testing tree." ON)
 
-find_package(ECM REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+find_package(ECM QUIET NO_MODULE)
+if(NOT ECM_FOUND)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/CMakeLists.txt")
+        message(STATUS "Using bundled ECM")
+        set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/modules;${CMAKE_MODULE_PATH}")
+    else()
+        message(FATAL_ERROR
+            " Could not find ECM\n \n"
+            " Either install ECM using the system package manager or clone submodules\n"
+            " Submodules can be cloned with 'git submodule update --init --recursive'")
+    endif()
+else()
+    set(CMAKE_MODULE_PATH "${ECM_MODULE_PATH};${CMAKE_MODULE_PATH}")
+endif()
 include(CTest)
 include(ECMAddTests)
 if(BUILD_TESTING)
@@ -76,7 +170,7 @@ set(Launcher_NEWS_OPEN_URL "https://prismlauncher.org/news" CACHE STRING "URL th
 set(Launcher_HELP_URL "https://prismlauncher.org/wiki/help-pages/%1" CACHE STRING "URL (with arg %1 to be substituted with page-id) that gets opened when the user requests help")
 
 ######## Set version numbers ########
-set(Launcher_VERSION_MAJOR 5)
+set(Launcher_VERSION_MAJOR 8)
 set(Launcher_VERSION_MINOR 0)
 
 set(Launcher_VERSION_NAME "${Launcher_VERSION_MAJOR}.${Launcher_VERSION_MINOR}")
@@ -102,17 +196,17 @@ set(Launcher_BUG_TRACKER_URL "https://github.com/PrismLauncher/PrismLauncher/iss
 set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/prismlauncher/launcher/" CACHE STRING "URL for the translations platform.")
 
 # Matrix Space
-set(Launcher_MATRIX_URL "https://matrix.to/#/#prismlauncher:matrix.org" CACHE STRING "URL to the Matrix Space")
+set(Launcher_MATRIX_URL "https://prismlauncher.org/matrix" CACHE STRING "URL to the Matrix Space")
 
 # Discord URL
-set(Launcher_DISCORD_URL "https://discord.gg/prismlauncher" CACHE STRING "URL for the Discord guild.")
+set(Launcher_DISCORD_URL "https://prismlauncher.org/discord" CACHE STRING "URL for the Discord guild.")
 
 # Subreddit URL
-set(Launcher_SUBREDDIT_URL "https://www.reddit.com/r/PrismLauncher/" CACHE STRING "URL for the subreddit.")
+set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL for the subreddit.")
 
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
-set(Launcher_QT_VERSION_MAJOR "5" CACHE STRING "Major Qt version to build against")
+set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
 
 # API Keys
 # NOTE: These API keys are here for convenience. If you rebrand this software or intend to break the terms of service
@@ -146,6 +240,16 @@ set(Launcher_BUILD_TIMESTAMP "${TODAY}")
 
 ################################ 3rd Party Libs ################################
 
+# Successive configurations of cmake without cleaning the build dir will cause zlib fallback to fail due to cached values
+# Record when fallback triggered and skip this find_package
+if(NOT Launcher_FORCE_BUNDLED_LIBS AND NOT FORCE_BUNDLED_ZLIB)
+    find_package(ZLIB QUIET)
+endif()
+if(NOT ZLIB_FOUND)
+    set(FORCE_BUNDLED_ZLIB TRUE CACHE BOOL "")
+    mark_as_advanced(FORCE_BUNDLED_ZLIB)
+endif()
+
 # Find the required Qt parts
 include(QtVersionlessBackport)
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
@@ -164,7 +268,7 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
 elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
-    find_package(Qt6 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml Core5Compat)
+    find_package(Qt6 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml Core5Compat)
     list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
@@ -178,12 +282,16 @@ else()
     message(FATAL_ERROR "Qt version ${Launcher_QT_VERSION_MAJOR} is not supported")
 endif()
 
-include(ECMQueryQt)
-ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
-ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
-ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
-ecm_query_qt(QT_DATA_DIR     QT_HOST_DATA)
-set(QT_MKSPECS_DIR ${QT_DATA_DIR}/mkspecs)
+if(Launcher_QT_VERSION_MAJOR EQUAL 5)
+    include(ECMQueryQt)
+    ecm_query_qt(QT_PLUGINS_DIR  QT_INSTALL_PLUGINS)
+    ecm_query_qt(QT_LIBS_DIR     QT_INSTALL_LIBS)
+    ecm_query_qt(QT_LIBEXECS_DIR QT_INSTALL_LIBEXECS)
+else()
+    set(QT_PLUGINS_DIR  ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_PLUGINS})
+    set(QT_LIBS_DIR     ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBS})
+    set(QT_LIBEXECS_DIR ${QT${QT_VERSION_MAJOR}_INSTALL_PREFIX}/${QT${QT_VERSION_MAJOR}_INSTALL_LIBEXECS})
+endif()
 
 # NOTE: Qt 6 already sets this by default
 if (Qt5_POSITION_INDEPENDENT_CODE)
@@ -196,7 +304,12 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
 
     # Find ghc_filesystem
     find_package(ghc_filesystem QUIET)
+
+    # Find cmark
+    find_package(cmark QUIET)
 endif()
+
+include(ECMQtDeclareLoggingCategory)
 
 ####################################### Program Info #######################################
 
@@ -222,14 +335,14 @@ if(UNIX AND APPLE)
     set(APPS "\${CMAKE_INSTALL_PREFIX}/${Launcher_Name}.app")
 
     # Mac bundle settings
-    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_Name}")
-    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_Name}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
+    set(MACOSX_BUNDLE_BUNDLE_NAME "${Launcher_DisplayName}")
+    set(MACOSX_BUNDLE_INFO_STRING "${Launcher_DisplayName}: A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.prismlauncher.${Launcher_Name}")
     set(MACOSX_BUNDLE_BUNDLE_VERSION "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_LONG_VERSION_STRING "${Launcher_VERSION_NAME}")
     set(MACOSX_BUNDLE_ICON_FILE ${Launcher_Name}.icns)
-    set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2021-2022 ${Launcher_Copyright}")
+    set(MACOSX_BUNDLE_COPYRIGHT "© 2022 ${Launcher_Copyright_Mac}")
     set(MACOSX_SPARKLE_UPDATE_PUBLIC_KEY "v55ZWWD6QlPoXGV6VLzOTZxZUggWeE51X8cRQyQh6vA=")
     set(MACOSX_SPARKLE_UPDATE_FEED_URL "https://prismlauncher.org/feed/appcast.xml")
 
@@ -247,13 +360,11 @@ if(UNIX AND APPLE)
     install(FILES ${Launcher_Branding_ICNS} DESTINATION ${RESOURCES_DEST_DIR} RENAME ${Launcher_Name}.icns)
 
 elseif(UNIX)
+    include(KDEInstallDirs)
+
     set(BINARY_DEST_DIR "bin")
     set(LIBRARY_DEST_DIR "lib${LIB_SUFFIX}")
-    set(JARS_DEST_DIR "share/${Launcher_APP_BINARY_NAME}")
-    set(LAUNCHER_DESKTOP_DEST_DIR "share/applications" CACHE STRING "Path to the desktop file directory")
-    set(LAUNCHER_METAINFO_DEST_DIR "share/metainfo" CACHE STRING "Path to the metainfo directory")
-    set(LAUNCHER_ICON_DEST_DIR "share/icons/hicolor/scalable/apps" CACHE STRING "Path to the scalable icon directory")
-    set(LAUNCHER_MAN_DEST_DIR "share/man/man6" CACHE STRING "Path to the man page directory")
+    set(JARS_DEST_DIR "share/${Launcher_Name}")
 
     # install as bundle with no dependencies included
     set(INSTALL_BUNDLE "nodeps")
@@ -261,12 +372,15 @@ elseif(UNIX)
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
 
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${LAUNCHER_DESKTOP_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${LAUNCHER_METAINFO_DEST_DIR})
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION ${LAUNCHER_ICON_DEST_DIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_Desktop} DESTINATION ${KDE_INSTALL_APPDIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_MetaInfo} DESTINATION ${KDE_INSTALL_METAINFODIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_SVG} DESTINATION "${KDE_INSTALL_ICONDIR}/hicolor/scalable/apps")
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_mrpack_MIMEInfo} DESTINATION ${KDE_INSTALL_MIMEDIR})
 
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/launcher/qtlogging.ini" DESTINATION "share/${Launcher_Name}")
+    
     if(Launcher_ManPage)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION ${LAUNCHER_MAN_DEST_DIR})
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION "${KDE_INSTALL_MANDIR}/man6")
     endif()
 
     # Install basic runner script if component "portable" is selected
@@ -292,6 +406,8 @@ else()
     message(FATAL_ERROR "Platform not supported")
 endif()
 
+
+
 ################################ Included Libs ################################
 
 include(ExternalProject)
@@ -303,9 +419,34 @@ option(NBT_BUILD_TESTS "Build NBT library tests" OFF) #FIXME: fix unit tests.
 add_subdirectory(libraries/libnbtplusplus)
 
 add_subdirectory(libraries/systeminfo) # system information library
-add_subdirectory(libraries/hoedown) # markdown parser
 add_subdirectory(libraries/launcher) # java based launcher part for Minecraft
 add_subdirectory(libraries/javacheck) # java compatibility checker
+if(FORCE_BUNDLED_ZLIB)
+    message(STATUS "Using bundled zlib")
+
+    set(CMAKE_POLICY_DEFAULT_CMP0069 NEW) # Suppress cmake warnings and allow INTERPROCEDURAL_OPTIMIZATION for zlib
+    set(SKIP_INSTALL_ALL ON)
+    add_subdirectory(libraries/zlib EXCLUDE_FROM_ALL)
+
+    # On OS where unistd.h exists, zlib's generated header defines `Z_HAVE_UNISTD_H`, while the included header does not. 
+    # We cannot safely undo the rename on those systems, and they generally have packages for zlib anyway.
+    check_include_file(unistd.h NEED_GENERATED_ZCONF)
+    if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h.included" AND NOT NEED_GENERATED_ZCONF)
+        # zlib's cmake script renames a file, dirtying the submodule, see https://github.com/madler/zlib/issues/162
+        message(STATUS "Undoing Rename")
+        message(STATUS "    ${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h")
+        file(RENAME "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h.included" "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h")
+    endif()
+
+    set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/libraries/zlib" "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib" CACHE STRING "" FORCE)
+    set_target_properties(zlibstatic PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIR}")
+    add_library(ZLIB::ZLIB ALIAS zlibstatic)
+    set(ZLIB_LIBRARY ZLIB::ZLIB CACHE STRING "zlib library name")
+
+    find_package(ZLIB REQUIRED)
+else()
+    message(STATUS "Using system zlib")
+endif()
 if (FORCE_BUNDLED_QUAZIP)
     message(STATUS "Using bundled QuaZip")
     set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.
@@ -322,17 +463,26 @@ if(NOT tomlplusplus_FOUND)
 else()
     message(STATUS "Using system tomlplusplus")
 endif()
+if(NOT cmark_FOUND)
+    message(STATUS "Using bundled cmark")
+    set(CMARK_STATIC ON CACHE BOOL "Build static libcmark library" FORCE)
+    set(CMARK_SHARED OFF CACHE BOOL "Build shared libcmark library" FORCE)
+    set(CMARK_TESTS OFF CACHE BOOL "Build cmark tests and enable testing" FORCE)
+    add_subdirectory(libraries/cmark EXCLUDE_FROM_ALL) # Markdown parser
+    add_library(cmark::cmark ALIAS cmark_static)
+else()
+    message(STATUS "Using system cmark")
+endif()
 add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 if (NOT ghc_filesystem_FOUND)
     message(STATUS "Using bundled ghc_filesystem")
-    set(GHC_FILESYSTEM_WITH_INSTALL OFF) # Workaround ghc::filesystem bug
     add_subdirectory(libraries/filesystem) # Implementation of std::filesystem for old C++, for usage in old macOS
-    add_library(ghcFilesystem::ghc_filesystem ALIAS ghc_filesystem)
 else()
     message(STATUS "Using system ghc_filesystem")
 endif()
+add_subdirectory(libraries/qdcss) # css parser
 
 ############################### Built Artifacts ###############################
 

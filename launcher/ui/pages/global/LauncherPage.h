@@ -88,24 +88,13 @@ slots:
     void on_instDirBrowseBtn_clicked();
     void on_modsDirBrowseBtn_clicked();
     void on_iconsDirBrowseBtn_clicked();
+    void on_downloadsDirBrowseBtn_clicked();
     void on_metadataDisableBtn_clicked();
-
-    /*!
-     * Updates the list of update channels in the combo box.
-     */
-    void refreshUpdateChannelList();
-
-    /*!
-     * Updates the channel description label.
-     */
-    void refreshUpdateChannelDesc();
 
     /*!
      * Updates the font preview
      */
     void refreshFontPreview();
-
-    void updateChannelSelectionChanged(int index);
 
 private:
     Ui::LauncherPage *ui;

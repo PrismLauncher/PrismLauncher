@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Basic start script for running the launcher with the libs packaged with it.
 
 function printerror {

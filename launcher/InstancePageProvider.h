@@ -5,6 +5,7 @@
 #include "ui/pages/BasePageProvider.h"
 #include "ui/pages/instance/LogPage.h"
 #include "ui/pages/instance/VersionPage.h"
+#include "ui/pages/instance/ManagedPackPage.h"
 #include "ui/pages/instance/ModFolderPage.h"
 #include "ui/pages/instance/ResourcePackPage.h"
 #include "ui/pages/instance/TexturePackPage.h"
@@ -33,10 +34,12 @@ public:
         values.append(new LogPage(inst));
         std::shared_ptr<MinecraftInstance> onesix = std::dynamic_pointer_cast<MinecraftInstance>(inst);
         values.append(new VersionPage(onesix.get()));
+        values.append(ManagedPackPage::createPage(onesix.get()));
         auto modsPage = new ModFolderPage(onesix.get(), onesix->loaderModList());
-        modsPage->setFilter("%1 (*.zip *.jar *.litemod)");
+        modsPage->setFilter("%1 (*.zip *.jar *.litemod *.nilmod)");
         values.append(modsPage);
         values.append(new CoreModFolderPage(onesix.get(), onesix->coreModList()));
+        values.append(new NilModFolderPage(onesix.get(), onesix->nilModList()));
         values.append(new ResourcePackPage(onesix.get(), onesix->resourcePackList()));
         values.append(new TexturePackPage(onesix.get(), onesix->texturePackList()));
         values.append(new ShaderPackPage(onesix.get(), onesix->shaderPackList()));

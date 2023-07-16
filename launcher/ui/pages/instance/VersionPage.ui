@@ -28,9 +28,6 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="ModListView" name="packageView">
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOn</enum>
-        </property>
         <property name="horizontalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOff</enum>
         </property>
@@ -48,11 +45,7 @@
       <item>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="1">
-         <widget class="QLineEdit" name="filterEdit">
-          <property name="clearButtonEnabled">
-           <bool>true</bool>
-          </property>
-         </widget>
+         <widget class="QLineEdit" name="filterEdit"/>
         </item>
         <item row="0" column="0">
          <widget class="QLabel" name="filterLabel">
@@ -109,15 +102,15 @@
    <addaction name="actionInstall_Fabric"/>
    <addaction name="actionInstall_Quilt"/>
    <addaction name="actionInstall_LiteLoader"/>
-   <addaction name="actionInstall_mods"/>
    <addaction name="separator"/>
    <addaction name="actionAdd_to_Minecraft_jar"/>
    <addaction name="actionReplace_Minecraft_jar"/>
+   <addaction name="actionAdd_Agents"/>
    <addaction name="actionAdd_Empty"/>
+   <addaction name="actionImport_Components"/>
    <addaction name="separator"/>
    <addaction name="actionMinecraftFolder"/>
    <addaction name="actionLibrariesFolder"/>
-   <addaction name="separator"/>
    <addaction name="actionReload"/>
    <addaction name="actionDownload_All"/>
   </widget>
@@ -209,14 +202,6 @@
     <string>Install the LiteLoader package.</string>
    </property>
   </action>
-  <action name="actionInstall_mods">
-   <property name="text">
-    <string>Install mods</string>
-   </property>
-   <property name="toolTip">
-    <string>Install normal mods.</string>
-   </property>
-  </action>
   <action name="actionAdd_to_Minecraft_jar">
    <property name="text">
     <string>Add to Minecraft.jar</string>
@@ -228,6 +213,14 @@
   <action name="actionReplace_Minecraft_jar">
    <property name="text">
     <string>Replace Minecraft.jar</string>
+   </property>
+  </action>
+  <action name="actionAdd_Agents">
+   <property name="text">
+    <string>Add Agents</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Java agents.</string>
    </property>
   </action>
   <action name="actionAdd_Empty">
@@ -268,6 +261,14 @@
    </property>
    <property name="toolTip">
     <string>Open the instance's local libraries folder.</string>
+   </property>
+  </action>
+  <action name="actionImport_Components">
+   <property name="text">
+    <string>Import Components</string>
+   </property>
+   <property name="toolTip">
+    <string>Import existing component JSON files.</string>
    </property>
   </action>
  </widget>

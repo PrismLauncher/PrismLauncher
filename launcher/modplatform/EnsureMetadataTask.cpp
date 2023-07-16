@@ -10,37 +10,36 @@
 
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
+#include "modplatform/helpers/HashUtils.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
-
-#include "net/NetJob.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
 static ModrinthAPI modrinth_api;
 static FlameAPI flame_api;
 
-EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Provider prov)
+EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::ResourceProvider prov)
     : Task(nullptr), m_index_dir(dir), m_provider(prov), m_hashing_task(nullptr), m_current_task(nullptr)
 {
     auto hash_task = createNewHash(mod);
     if (!hash_task)
         return;
-    connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { m_mods.insert(hash_task->getResult(), mod); });
-    connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, "", RemoveFromList::No); });
+    connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) { m_mods.insert(hash, mod); });
+    connect(hash_task.get(), &Task::failed, [this, mod] { emitFail(mod, "", RemoveFromList::No); });
     hash_task->start();
 }
 
-EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform::Provider prov)
+EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform::ResourceProvider prov)
     : Task(nullptr), m_index_dir(dir), m_provider(prov), m_current_task(nullptr)
 {
-    m_hashing_task = new ConcurrentTask(this, "MakeHashesTask", 10);
+    m_hashing_task.reset(new ConcurrentTask(this, "MakeHashesTask", 10));
     for (auto* mod : mods) {
         auto hash_task = createNewHash(mod);
         if (!hash_task)
             continue;
-        connect(hash_task.get(), &Task::succeeded, [this, hash_task, mod] { m_mods.insert(hash_task->getResult(), mod); });
-        connect(hash_task.get(), &Task::failed, [this, hash_task, mod] { emitFail(mod, "", RemoveFromList::No); });
+        connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) { m_mods.insert(hash, mod); });
+        connect(hash_task.get(), &Task::failed, [this, mod] { emitFail(mod, "", RemoveFromList::No); });
         m_hashing_task->addTask(hash_task);
     }
 }
@@ -107,13 +106,13 @@ void EnsureMetadataTask::executeTask()
         }
     }
 
-    NetJob::Ptr version_task;
+    Task::Ptr version_task;
 
     switch (m_provider) {
-        case (ModPlatform::Provider::MODRINTH):
+        case (ModPlatform::ResourceProvider::MODRINTH):
             version_task = modrinthVersionsTask();
             break;
-        case (ModPlatform::Provider::FLAME):
+        case (ModPlatform::ResourceProvider::FLAME):
             version_task = flameVersionsTask();
             break;
     }
@@ -127,13 +126,13 @@ void EnsureMetadataTask::executeTask()
     };
 
     connect(version_task.get(), &Task::finished, this, [this, invalidade_leftover] {
-        NetJob::Ptr project_task;
+        Task::Ptr project_task;
 
         switch (m_provider) {
-            case (ModPlatform::Provider::MODRINTH):
+            case (ModPlatform::ResourceProvider::MODRINTH):
                 project_task = modrinthProjectsTask();
                 break;
-            case (ModPlatform::Provider::FLAME):
+            case (ModPlatform::ResourceProvider::FLAME):
                 project_task = flameProjectsTask();
                 break;
         }
@@ -146,16 +145,18 @@ void EnsureMetadataTask::executeTask()
         connect(project_task.get(), &Task::finished, this, [=] {
             invalidade_leftover();
             project_task->deleteLater();
-            m_current_task = nullptr;
+            if (m_current_task)
+                m_current_task.reset();
         });
 
-        m_current_task = project_task.get();
+        m_current_task = project_task;
         project_task->start();
     });
 
     connect(version_task.get(), &Task::finished, [=] {
         version_task->deleteLater();
-        m_current_task = nullptr;
+        if (m_current_task)
+            m_current_task.reset();
     });
 
     if (m_mods.size() > 1)
@@ -164,7 +165,7 @@ void EnsureMetadataTask::executeTask()
         setStatus(tr("Requesting metadata information from %1 for '%2'...")
                       .arg(ProviderCaps.readableName(m_provider), m_mods.begin().value()->name()));
 
-    m_current_task = version_task.get();
+    m_current_task = version_task;
     version_task->start();
 }
 
@@ -210,18 +211,18 @@ void EnsureMetadataTask::emitFail(Mod* m, QString key, RemoveFromList remove)
 
 // Modrinth
 
-NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
+Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
-    auto hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
+    auto hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
-    auto* response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto ver_task = modrinth_api.currentVersions(m_mods.keys(), hash_type, response);
 
     // Prevents unfortunate timings when aborting the task
     if (!ver_task)
-        return {};
+        return Task::Ptr{ nullptr };
 
-    connect(ver_task.get(), &NetJob::succeeded, this, [this, response] {
+    connect(ver_task.get(), &Task::succeeded, this, [this, response] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -260,14 +261,14 @@ NetJob::Ptr EnsureMetadataTask::modrinthVersionsTask()
     return ver_task;
 }
 
-NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
+Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 {
     QHash<QString, QString> addonIds;
     for (auto const& data : m_temp_versions)
         addonIds.insert(data.addonId.toString(), data.hash);
 
-    auto response = new QByteArray();
-    NetJob::Ptr proj_task;
+    auto response = std::make_shared<QByteArray>();
+    Task::Ptr proj_task;
 
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
@@ -279,9 +280,9 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
 
     // Prevents unfortunate timings when aborting the task
     if (!proj_task)
-        return {};
+        return Task::Ptr{ nullptr };
 
-    connect(proj_task.get(), &NetJob::succeeded, this, [this, response, addonIds] {
+    connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
         QJsonParseError parse_error{};
         auto doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -291,43 +292,53 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
             return;
         }
 
+        QJsonArray entries;
+
         try {
-            QJsonArray entries;
             if (addonIds.size() == 1)
                 entries = { doc.object() };
             else
                 entries = Json::requireArray(doc);
-
-            for (auto entry : entries) {
-                auto entry_obj = Json::requireObject(entry);
-
-                ModPlatform::IndexedPack pack;
-                Modrinth::loadIndexedPack(pack, entry_obj);
-
-                auto hash = addonIds.find(pack.addonId.toString()).value();
-
-                auto mod_iter = m_mods.find(hash);
-                if (mod_iter == m_mods.end()) {
-                    qWarning() << "Invalid project id from the API response.";
-                    continue;
-                }
-
-                auto* mod = mod_iter.value();
-
-                try {
-                    setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
-
-                    modrinthCallback(pack, m_temp_versions.find(hash).value(), mod);
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
-
-                    emitFail(mod);
-                }
-            }
         } catch (Json::JsonException& e) {
             qDebug() << e.cause();
             qDebug() << doc;
+        }
+
+        for (auto entry : entries) {
+            ModPlatform::IndexedPack pack;
+
+            try {
+                auto entry_obj = Json::requireObject(entry);
+
+                Modrinth::loadIndexedPack(pack, entry_obj);
+            } catch (Json::JsonException& e) {
+                qDebug() << e.cause();
+                qDebug() << doc;
+
+                // Skip this entry, since it has problems
+                continue;
+            }
+
+            auto hash = addonIds.find(pack.addonId.toString()).value();
+
+            auto mod_iter = m_mods.find(hash);
+            if (mod_iter == m_mods.end()) {
+                qWarning() << "Invalid project id from the API response.";
+                continue;
+            }
+
+            auto* mod = mod_iter.value();
+
+            try {
+                setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(mod->name()));
+
+                modrinthCallback(pack, m_temp_versions.find(hash).value(), mod);
+            } catch (Json::JsonException& e) {
+                qDebug() << e.cause();
+                qDebug() << entries;
+
+                emitFail(mod);
+            }
         }
     });
 
@@ -335,9 +346,9 @@ NetJob::Ptr EnsureMetadataTask::modrinthProjectsTask()
 }
 
 // Flame
-NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
+Task::Ptr EnsureMetadataTask::flameVersionsTask()
 {
-    auto* response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
 
     QList<uint> fingerprints;
     for (auto& murmur : m_mods.keys()) {
@@ -400,12 +411,12 @@ NetJob::Ptr EnsureMetadataTask::flameVersionsTask()
     return ver_task;
 }
 
-NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
+Task::Ptr EnsureMetadataTask::flameProjectsTask()
 {
     QHash<QString, QString> addonIds;
     for (auto const& hash : m_mods.keys()) {
         if (m_temp_versions.contains(hash)) {
-            auto const& data = m_temp_versions.find(hash).value();
+            auto data = m_temp_versions.find(hash).value();
 
             auto id_str = data.addonId.toString();
             if (!id_str.isEmpty())
@@ -413,8 +424,8 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
         }
     }
 
-    auto response = new QByteArray();
-    NetJob::Ptr proj_task;
+    auto response = std::make_shared<QByteArray>();
+    Task::Ptr proj_task;
 
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
@@ -426,9 +437,9 @@ NetJob::Ptr EnsureMetadataTask::flameProjectsTask()
 
     // Prevents unfortunate timings when aborting the task
     if (!proj_task)
-        return {};
+        return Task::Ptr{ nullptr };
 
-    connect(proj_task.get(), &NetJob::succeeded, this, [this, response, addonIds] {
+    connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
         QJsonParseError parse_error{};
         auto doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {

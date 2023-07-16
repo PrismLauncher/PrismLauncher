@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +36,7 @@
  */
 
 #include "ServersPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ServersPage.h"
 
 #include <FileSystem.h>
@@ -48,6 +50,7 @@
 
 #include <QFileSystemWatcher>
 #include <QMenu>
+#include <QTimer>
 
 static const int COLUMN_COUNT = 2; // 3 , TBD: latency and other nice things.
 
@@ -400,11 +403,11 @@ public:
 
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override
     {
-        return m_servers.size();
+        return parent.isValid() ? 0 : m_servers.size();
     }
     int columnCount(const QModelIndex & parent) const override
     {
-        return COLUMN_COUNT;
+        return parent.isValid() ? 0 : COLUMN_COUNT;
     }
 
     Server * at(int index)
@@ -765,11 +768,21 @@ void ServersPage::updateState()
 void ServersPage::openedImpl()
 {
     m_model->observe();
+
+    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    if (!APPLICATION->settings()->contains(setting_name))
+        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+    else
+        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+
+    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
 }
 
 void ServersPage::closedImpl()
 {
     m_model->unobserve();
+
+    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
 }
 
 void ServersPage::on_actionAdd_triggered()
@@ -789,6 +802,17 @@ void ServersPage::on_actionAdd_triggered()
 
 void ServersPage::on_actionRemove_triggered()
 {
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
+                                                 tr("You are about to remove \"%1\".\n"
+                                                    "This is permanent and the server will be gone from your list forever (A LONG TIME).\n\n"
+                                                    "Are you sure?")
+                                                     .arg(m_model->at(currentServer)->m_name),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+
+    if (response != QMessageBox::Yes)
+        return;
+
     m_model->removeRow(currentServer);
 }
 

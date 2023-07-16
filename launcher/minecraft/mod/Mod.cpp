@@ -41,8 +41,13 @@
 #include <QString>
 #include <QRegularExpression>
 
+#include "MTPixmapCache.h"
 #include "MetadataHandler.h"
 #include "Version.h"
+#include "minecraft/mod/ModDetails.h"
+#include "minecraft/mod/tasks/LocalModParseTask.h"
+
+static ModPlatform::ProviderCapabilities ProviderCaps;
 
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
@@ -68,6 +73,10 @@ void Mod::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
     m_local_details.metadata = metadata;
 }
 
+void Mod::setDetails(const ModDetails& details) {
+    m_local_details = details;
+}
+
 std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
 {
     auto cast_other = dynamic_cast<Mod const*>(&other);
@@ -82,6 +91,7 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
             auto res = Resource::compare(other, type);
             if (res.first != 0)
                 return res;
+            break;
         }
         case SortType::VERSION: {
             auto this_ver = Version(version());
@@ -90,6 +100,13 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
                 return { 1, type == SortType::VERSION };
             if (this_ver < other_ver)
                 return { -1, type == SortType::VERSION };
+            break;
+        }
+        case SortType::PROVIDER: {
+            auto compare_result = QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
+            if (compare_result != 0)
+                return { compare_result, type == SortType::PROVIDER };
+            break;
         }
     }
     return { 0, false };
@@ -109,7 +126,7 @@ bool Mod::applyFilter(QRegularExpression filter) const
     return Resource::applyFilter(filter);
 }
 
-auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
+auto Mod::destroy(QDir& index_dir, bool preserve_metadata, bool attempt_trash) -> bool
 {
     if (!preserve_metadata) {
         qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
@@ -122,7 +139,7 @@ auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
         }
     }
 
-    return Resource::destroy();
+    return Resource::destroy(attempt_trash);
 }
 
 auto Mod::details() const -> const ModDetails&
@@ -150,6 +167,13 @@ auto Mod::version() const -> QString
 auto Mod::homeurl() const -> QString
 {
     return details().homeurl;
+}
+
+auto Mod::metaurl() const -> QString
+{
+    if (metadata() == nullptr)
+        return homeurl();
+    return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
 }
 
 auto Mod::description() const -> QString
@@ -189,4 +213,69 @@ void Mod::finishResolvingWithDetails(ModDetails&& details)
     m_local_details = std::move(details);
     if (metadata)
         setMetadata(std::move(metadata));
+    if (!iconPath().isEmpty()) {
+        m_pack_image_cache_key.was_read_attempt = false;
+    }
+}
+
+auto Mod::provider() const -> std::optional<QString>
+{
+    if (metadata())
+        return ProviderCaps.readableName(metadata()->provider);
+    return {};
+}
+
+auto Mod::licenses() const -> const QList<ModLicense>&
+{
+    return details().licenses;
+}
+
+ auto Mod::issueTracker() const -> QString
+{
+    return details().issue_tracker;
+}
+
+void Mod::setIcon(QImage new_image) const
+{
+    QMutexLocker locker(&m_data_lock);
+
+    Q_ASSERT(!new_image.isNull());
+
+    if (m_pack_image_cache_key.key.isValid())
+        PixmapCache::remove(m_pack_image_cache_key.key);
+
+    // scale the image to avoid flooding the pixmapcache
+    auto pixmap = QPixmap::fromImage(new_image.scaled({64, 64}, Qt::AspectRatioMode::KeepAspectRatioByExpanding));
+
+    m_pack_image_cache_key.key = PixmapCache::insert(pixmap);
+    m_pack_image_cache_key.was_ever_used = true;
+    m_pack_image_cache_key.was_read_attempt = true;
+}
+
+QPixmap Mod::icon(QSize size, Qt::AspectRatioMode mode) const
+{
+    QPixmap cached_image;
+    if (PixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
+        if (size.isNull())
+            return cached_image;
+        return cached_image.scaled(size, mode);
+    }
+
+    // No valid image we can get
+    if ((!m_pack_image_cache_key.was_ever_used && m_pack_image_cache_key.was_read_attempt) || iconPath().isEmpty())
+        return {};
+
+    if (m_pack_image_cache_key.was_ever_used) {
+        qDebug() << "Mod" << name() << "Had it's icon evicted form the cache. reloading...";
+        PixmapCache::markCacheMissByEviciton();
+    }
+    // Image got evicted from the cache or an attempt to load it has not been made. load it and retry.
+    m_pack_image_cache_key.was_read_attempt = true;
+    ModUtils::loadIconFile(*this);
+    return icon(size);
+}
+
+bool Mod::valid() const
+{
+    return !m_local_details.mod_id.isEmpty();
 }

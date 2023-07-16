@@ -112,7 +112,15 @@ void LaunchController::decideAccount()
         }
     }
 
-    m_accountToUse = accounts->defaultAccount();
+    // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
+    auto instanceAccountId = m_instance->settings()->get("InstanceAccountId").toString();
+    auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId);
+    if (instanceAccountIndex == -1) {
+        m_accountToUse = accounts->defaultAccount();
+    } else {
+        m_accountToUse = accounts->at(instanceAccountIndex);
+    }
+
     if (!m_accountToUse)
     {
         // If no default account is set, ask the user which one to use.
@@ -179,8 +187,8 @@ void LaunchController::login() {
         switch(m_accountToUse->accountState()) {
             case AccountState::Offline: {
                 m_session->wants_online = false;
-                // NOTE: fallthrough is intentional
             }
+            /* fallthrough */
             case AccountState::Online: {
                 if(!m_session->wants_online) {
                     // we ask the user for a player name
@@ -259,8 +267,8 @@ void LaunchController::login() {
                 // This means some sort of soft error that we can fix with a refresh ... so let's refresh.
             case AccountState::Unchecked: {
                 m_accountToUse->refresh();
-                // NOTE: fallthrough intentional
             }
+            /* fallthrough */
             case AccountState::Working: {
                 // refresh is in progress, we need to wait for it to finish to proceed.
                 ProgressDialog progDialog(m_parentWidget);
@@ -374,15 +382,15 @@ void LaunchController::launchInstance()
             }
             resolved_servers = resolved_servers + "]\n\n";
         }
-        m_launcher->prependStep(new TextPrint(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
+        m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
     } else {
         online_mode = m_demo ? "demo" : "offline";
     }
 
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
+    m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
 
     // Prepend Version
-    m_launcher->prependStep(new TextPrint(m_launcher.get(), BuildConfig.LAUNCHER_DISPLAYNAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
+    m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), BuildConfig.LAUNCHER_DISPLAYNAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
     m_launcher->start();
 }
 

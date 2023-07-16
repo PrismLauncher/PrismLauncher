@@ -129,6 +129,16 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
     return mimeData;
 }
 
+QStringList InstanceList::getLinkedInstancesById(const QString &id) const
+{
+    QStringList linkedInstances;
+    for (auto inst : m_instances) {
+        if (inst->isLinkedToInstanceId(id))
+            linkedInstances.append(inst->id());
+    }
+    return linkedInstances;
+}
+
 int InstanceList::rowCount(const QModelIndex& parent) const
 {
     Q_UNUSED(parent);
@@ -787,7 +797,9 @@ class InstanceStaging : public Task {
         connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
         connect(child, &Task::abortStatusChanged, this, &InstanceStaging::setAbortable);
         connect(child, &Task::status, this, &InstanceStaging::setStatus);
+        connect(child, &Task::details, this, &InstanceStaging::setDetails);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
+        connect(child, &Task::stepProgress, this, &InstanceStaging::propogateStepProgress);
         connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
     }
 
@@ -816,7 +828,7 @@ class InstanceStaging : public Task {
     void childSucceded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, m_child->shouldOverride()))
+        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, *m_child.get()))
         {
             emitSucceeded();
             return;
@@ -865,7 +877,7 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath()
 {
-    QString key = QUuid::createUuid().toString();
+    QString key = QUuid::createUuid().toString(QUuid::WithoutBraces);
     QString tempDir = ".LAUNCHER_TEMP/";
     QString relPath = FS::PathCombine(tempDir, key);
     QDir rootPath(m_instDir);
@@ -880,24 +892,21 @@ QString InstanceList::getStagedInstancePath()
     return path;
 }
 
-bool InstanceList::commitStagedInstance(const QString& path, InstanceName const& instanceName, const QString& groupName, bool should_override)
+bool InstanceList::commitStagedInstance(const QString& path, InstanceName const& instanceName, const QString& groupName, InstanceTask const& commiting)
 {
     QDir dir;
     QString instID;
     InstancePtr inst;
 
+    auto should_override = commiting.shouldOverride();
+
     if (should_override) {
-        // This is to avoid problems when the instance folder gets manually renamed
-        if ((inst = getInstanceByManagedName(instanceName.originalName()))) {
-            instID = QFileInfo(inst->instanceRoot()).fileName();
-        } else if ((inst = getInstanceByManagedName(instanceName.modifiedName()))) {
-            instID = QFileInfo(inst->instanceRoot()).fileName();
-        } else {
-            instID = FS::RemoveInvalidFilenameChars(instanceName.modifiedName(), '-');
-        }
+        instID = commiting.originalInstanceID();
     } else {
         instID = FS::DirNameFromString(instanceName.modifiedName(), m_instDir);
     }
+
+    Q_ASSERT(!instID.isEmpty());
 
     {
         WatchLock lock(m_watcher, m_instDir);

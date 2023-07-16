@@ -48,29 +48,27 @@
 
 #include "JavaCommon.h"
 #include "Application.h"
+#include "minecraft/auth/AccountList.h"
 
 #include "JavaDownloader.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 #include "FileSystem.h"
 
-
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
     : QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
 {
     m_settings = inst->settings();
     ui->setupUi(this);
-    auto sysMB = Sys::getSystemRam() / Sys::mebibyte;
-    ui->maxMemSpinBox->setMaximum(sysMB);
+
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
     connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
+    connect(ui->instanceAccountSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &InstanceSettingsPage::changeInstanceAccount);
     loadSettings();
-}
 
-bool InstanceSettingsPage::shouldDisplay() const
-{
-    return !m_instance->isRunning();
+    updateThresholds();
 }
 
 InstanceSettingsPage::~InstanceSettingsPage()
@@ -84,11 +82,11 @@ void InstanceSettingsPage::globalSettingsButtonClicked(bool)
         case 0:
             APPLICATION->ShowGlobalSettings(this, "java-settings");
             return;
-        case 1:
-            APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
-            return;
         case 2:
             APPLICATION->ShowGlobalSettings(this, "custom-commands");
+            return;
+        default:
+            APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
             return;
     }
 }
@@ -276,6 +274,13 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("JoinServerOnLaunchAddress");
     }
 
+    // Use an account for this instance
+    bool useAccountForInstance = ui->instanceAccountGroupBox->isChecked();
+    m_settings->set("UseAccountForInstance", useAccountForInstance);
+    if (!useAccountForInstance) {
+        m_settings->reset("InstanceAccountId");
+    }
+
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -373,6 +378,9 @@ void InstanceSettingsPage::loadSettings()
 
     ui->serverJoinGroupBox->setChecked(m_settings->get("JoinServerOnLaunch").toBool());
     ui->serverJoinAddress->setText(m_settings->get("JoinServerOnLaunchAddress").toString());
+
+    ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
+    updateAccountsMenu();
 }
 
 void InstanceSettingsPage::on_javaDownloadBtn_clicked()
@@ -443,6 +451,44 @@ void InstanceSettingsPage::on_javaTestBtn_clicked()
     checker->run();
 }
 
+void InstanceSettingsPage::updateAccountsMenu()
+{
+    ui->instanceAccountSelector->clear();
+    auto accounts = APPLICATION->accounts();
+    int accountIndex = accounts->findAccountByProfileId(m_settings->get("InstanceAccountId").toString());
+
+    for (int i = 0; i < accounts->count(); i++) {
+        MinecraftAccountPtr account = accounts->at(i);
+        ui->instanceAccountSelector->addItem(getFaceForAccount(account), account->profileName(), i);
+        if (i == accountIndex)
+            ui->instanceAccountSelector->setCurrentIndex(i);
+    }
+
+}
+
+QIcon InstanceSettingsPage::getFaceForAccount(MinecraftAccountPtr account)
+{
+    if (auto face = account->getFace(); !face.isNull()) {
+        return face;
+    }
+
+    return APPLICATION->getThemedIcon("noaccount");
+}
+
+void InstanceSettingsPage::changeInstanceAccount(int index)
+{
+    auto accounts = APPLICATION->accounts();
+    if (index != -1 && accounts->at(index) && ui->instanceAccountGroupBox->isChecked()) {
+        auto account = accounts->at(index);
+        m_settings->set("InstanceAccountId", account->profileId());
+    }
+}
+
+void InstanceSettingsPage::on_maxMemSpinBox_valueChanged(int i)
+{
+    updateThresholds();
+}
+
 void InstanceSettingsPage::checkerFinished()
 {
     checker.reset();
@@ -452,4 +498,30 @@ void InstanceSettingsPage::retranslate()
 {
     ui->retranslateUi(this);
     ui->customCommands->retranslate();  // TODO: why is this seperate from the others?
+}
+
+void InstanceSettingsPage::updateThresholds()
+{
+    auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
+    unsigned int maxMem = ui->maxMemSpinBox->value();
+
+    QString iconName;
+
+    if (maxMem >= sysMiB) {
+        iconName = "status-bad";
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation exceeds your system memory capacity."));
+    } else if (maxMem > (sysMiB * 0.9)) {
+        iconName = "status-yellow";
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+    } else {
+        iconName = "status-good";
+        ui->labelMaxMemIcon->setToolTip("");
+    }
+
+    {
+        auto height = ui->labelMaxMemIcon->fontInfo().pixelSize();
+        QIcon icon = APPLICATION->getThemedIcon(iconName);
+        QPixmap pix = icon.pixmap(height, height);
+        ui->labelMaxMemIcon->setPixmap(pix);
+    }
 }

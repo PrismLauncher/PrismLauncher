@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022,2023 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 flowln <flowlnlnln@gmail.com> 
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,12 +44,8 @@ LoggedProcess::LoggedProcess(QObject *parent) : QProcess(parent)
     // QProcess has a strange interface... let's map a lot of those into a few.
     connect(this, &QProcess::readyReadStandardOutput, this, &LoggedProcess::on_stdOut);
     connect(this, &QProcess::readyReadStandardError, this, &LoggedProcess::on_stdErr);
-    connect(this, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(on_exit(int,QProcess::ExitStatus)));
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    connect(this, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(on_error(QProcess::ProcessError)));
-#else
-    connect(this, SIGNAL(error(QProcess::ProcessError)), this, SLOT(on_error(QProcess::ProcessError)));
-#endif
+    connect(this, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &LoggedProcess::on_exit);
+    connect(this, &QProcess::errorOccurred, this, &LoggedProcess::on_error);
     connect(this, &QProcess::stateChanged, this, &LoggedProcess::on_stateChange);
 }
 
@@ -60,14 +57,23 @@ LoggedProcess::~LoggedProcess()
     }
 }
 
-QStringList reprocess(const QByteArray& data, QTextDecoder& decoder)
+QStringList LoggedProcess::reprocess(const QByteArray& data, QTextDecoder& decoder)
 {
     auto str = decoder.toUnicode(data);
+
+    if (!m_leftover_line.isEmpty()) {
+        str.prepend(m_leftover_line);
+        m_leftover_line = "";
+    }
+
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, QString::SkipEmptyParts);
 #else
     auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, Qt::SkipEmptyParts);
 #endif
+
+    if (!str.endsWith(QChar::LineFeed))
+        m_leftover_line = lines.takeLast();
     return lines;
 }
 

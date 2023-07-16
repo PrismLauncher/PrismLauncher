@@ -56,11 +56,13 @@ public:
     int maxHeapSize() const;
     QString javaPath() const;
 
+    void updateThresholds();
+
 
 protected slots:
     void memoryValueChanged(int);
     void javaPathEdited(const QString &path);
-    void javaVersionSelected(BaseVersionPtr version);
+    void javaVersionSelected(BaseVersion::Ptr version);
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
     void on_javaDownloadBtn_clicked();
@@ -86,6 +88,7 @@ private: /* data */
     QSpinBox *m_maxMemSpinBox = nullptr;
     QLabel *m_labelMinMem = nullptr;
     QLabel *m_labelMaxMem = nullptr;
+    QLabel *m_labelMaxMemIcon = nullptr;
     QSpinBox *m_minMemSpinBox = nullptr;
     QLabel *m_labelPermGen = nullptr;
     QSpinBox *m_permGenSpinBox = nullptr;
@@ -95,9 +98,9 @@ private: /* data */
     QIcon yellowIcon;
     QIcon badIcon;
 
-    int observedMinMemory = 0;
-    int observedMaxMemory = 0;
-    int observedPermGenMemory = 0;
+    unsigned int observedMinMemory = 0;
+    unsigned int observedMaxMemory = 0;
+    unsigned int observedPermGenMemory = 0;
     QString queuedCheck;
     uint64_t m_availableMemory = 0ull;
     shared_qobject_ptr<JavaChecker> m_checker;

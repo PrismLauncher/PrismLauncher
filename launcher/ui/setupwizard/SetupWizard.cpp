@@ -13,7 +13,8 @@
 SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
 {
     setObjectName(QStringLiteral("SetupWizard"));
-    resize(615, 659);
+    resize(620, 660);
+    setMinimumSize(300, 400);
     // make it ugly everywhere to avoid variability in theming
     setWizardStyle(QWizard::ClassicStyle);
     setOptions(QWizard::NoCancelButton | QWizard::IndependentPages | QWizard::HaveCustomButton1);
@@ -58,7 +59,7 @@ void SetupWizard::pageChanged(int id)
     {
         setButtonLayout({QWizard::CustomButton1, QWizard::Stretch, QWizard::BackButton, QWizard::NextButton, QWizard::FinishButton});
         auto customButton = button(QWizard::CustomButton1);
-        connect(customButton, &QAbstractButton::pressed, [&](){
+        connect(customButton, &QAbstractButton::clicked, [&](){
             auto basePagePtr = getCurrentBasePage();
             if(basePagePtr)
             {

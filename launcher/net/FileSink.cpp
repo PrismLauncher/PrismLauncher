@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,6 +37,8 @@
 
 #include "FileSystem.h"
 
+#include "net/Logging.h"
+
 namespace Net {
 
 Task::State FileSink::init(QNetworkRequest& request)
@@ -48,14 +50,14 @@ Task::State FileSink::init(QNetworkRequest& request)
 
     // create a new save file and open it for writing
     if (!FS::ensureFilePathExists(m_filename)) {
-        qCritical() << "Could not create folder for " + m_filename;
+        qCCritical(taskNetLogC) << "Could not create folder for " + m_filename;
         return Task::State::Failed;
     }
 
     wroteAnyData = false;
     m_output_file.reset(new QSaveFile(m_filename));
     if (!m_output_file->open(QIODevice::WriteOnly)) {
-        qCritical() << "Could not open " + m_filename + " for writing";
+        qCCritical(taskNetLogC) << "Could not open " + m_filename + " for writing";
         return Task::State::Failed;
     }
 
@@ -67,7 +69,7 @@ Task::State FileSink::init(QNetworkRequest& request)
 Task::State FileSink::write(QByteArray& data)
 {
     if (!writeAllValidators(data) || m_output_file->write(data) != data.size()) {
-        qCritical() << "Failed writing into " + m_filename;
+        qCCritical(taskNetLogC) << "Failed writing into " + m_filename;
         m_output_file->cancelWriting();
         m_output_file.reset();
         wroteAnyData = false;
@@ -106,7 +108,7 @@ Task::State FileSink::finalize(QNetworkReply& reply)
 
         // nothing went wrong...
         if (!m_output_file->commit()) {
-            qCritical() << "Failed to commit changes to " << m_filename;
+            qCCritical(taskNetLogC) << "Failed to commit changes to " << m_filename;
             m_output_file->cancelWriting();
             return Task::State::Failed;
         }

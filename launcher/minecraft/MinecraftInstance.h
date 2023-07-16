@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -83,6 +84,7 @@ public:
     QString shaderPacksDir() const;
     QString modsRoot() const override;
     QString coreModsDir() const;
+    QString nilModsDir() const;
     QString modsCacheLocation() const;
     QString libDir() const;
     QString worldDir() const;
@@ -113,13 +115,14 @@ public:
     std::shared_ptr<PackProfile> getPackProfile() const;
 
     //////  Mod Lists  //////
-    std::shared_ptr<ModFolderModel> loaderModList() const;
-    std::shared_ptr<ModFolderModel> coreModList() const;
-    std::shared_ptr<ResourcePackFolderModel> resourcePackList() const;
-    std::shared_ptr<TexturePackFolderModel> texturePackList() const;
-    std::shared_ptr<ShaderPackFolderModel> shaderPackList() const;
-    std::shared_ptr<WorldList> worldList() const;
-    std::shared_ptr<GameOptions> gameOptionsModel() const;
+    std::shared_ptr<ModFolderModel> loaderModList();
+    std::shared_ptr<ModFolderModel> coreModList();
+    std::shared_ptr<ModFolderModel> nilModList();
+    std::shared_ptr<ResourcePackFolderModel> resourcePackList();
+    std::shared_ptr<TexturePackFolderModel> texturePackList();
+    std::shared_ptr<ShaderPackFolderModel> shaderPackList();
+    std::shared_ptr<WorldList> worldList();
+    std::shared_ptr<GameOptions> gameOptionsModel();
 
     //////  Launch stuff //////
     Task::Ptr createUpdateTask(Net::Mode mode) override;
@@ -130,6 +133,7 @@ public:
     QString createLaunchScript(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin);
     /// get arguments passed to java
     QStringList javaArguments();
+    QString getLauncher();
 
     /// get variables for launch command variable substitution/environment
     QMap<QString, QString> getVariables() override;
@@ -168,6 +172,7 @@ protected: // data
     std::shared_ptr<PackProfile> m_components;
     mutable std::shared_ptr<ModFolderModel> m_loader_mod_list;
     mutable std::shared_ptr<ModFolderModel> m_core_mod_list;
+    mutable std::shared_ptr<ModFolderModel> m_nil_mod_list;
     mutable std::shared_ptr<ResourcePackFolderModel> m_resource_pack_list;
     mutable std::shared_ptr<ShaderPackFolderModel> m_shader_pack_list;
     mutable std::shared_ptr<TexturePackFolderModel> m_texture_pack_list;

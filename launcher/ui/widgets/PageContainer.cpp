@@ -87,10 +87,16 @@ PageContainer::PageContainer(BasePageProvider *pageProvider, QString defaultId,
     auto pages = pageProvider->getPages();
     for (auto page : pages)
     {
-        page->stackIndex = m_pageStack->addWidget(dynamic_cast<QWidget *>(page));
+        auto widget = dynamic_cast<QWidget *>(page);
+        widget->setParent(this);
+        page->stackIndex = m_pageStack->addWidget(widget);
         page->listIndex = counter;
         page->setParentContainer(this);
         counter++;
+        page->updateExtraInfo = [this](QString id, QString info) {
+            if (m_currentPage && id == m_currentPage->id())
+                m_header->setText(m_currentPage->displayName() + info);
+        };
     }
     m_model->setPages(pages);
 
@@ -128,6 +134,16 @@ bool PageContainer::selectPage(QString pageId)
         return true;
     }
     return false;
+}
+
+BasePage* PageContainer::getPage(QString pageId)
+{
+    return m_model->findPageEntryById(pageId);
+}
+
+const QList<BasePage*> PageContainer::getPages() const
+{
+    return m_model->pages();
 }
 
 void PageContainer::refreshContainer()

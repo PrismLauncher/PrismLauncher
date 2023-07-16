@@ -18,7 +18,6 @@
         <file>scalable/jarmods.svg</file>
         <file>scalable/java.svg</file>
         <file>scalable/language.svg</file>
-        <file>scalable/launcher.svg</file>
         <file>scalable/loadermods.svg</file>
         <file>scalable/log.svg</file>
         <file>scalable/minecraft.svg</file>
@@ -35,6 +34,7 @@
         <file>scalable/screenshot-placeholder.svg</file>
         <file>scalable/screenshots.svg</file>
         <file>scalable/settings.svg</file>
+        <file>scalable/shortcut.svg</file>
         <file>scalable/star.svg</file>
         <file>scalable/status-bad.svg</file>
         <file>scalable/status-good.svg</file>
@@ -46,5 +46,7 @@
         <file>scalable/tag.svg</file>
         <file>scalable/export.svg</file>
         <file>scalable/rename.svg</file>
+        <file>scalable/server.svg</file>
+        <file>scalable/launch.svg</file>
     </qresource>
 </RCC>

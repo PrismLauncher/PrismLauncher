@@ -151,7 +151,7 @@ public:
     void copyManagedPack(BaseInstance& other);
 
     /// guess log level from a line of game log
-    virtual MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level)
+    virtual MessageLevel::Enum guessLevel([[maybe_unused]] const QString &line, MessageLevel::Enum level)
     {
         return level;
     };
@@ -281,6 +281,12 @@ public:
 
     int getConsoleMaxLines() const;
     bool shouldStopOnConsoleOverflow() const;
+
+    QStringList getLinkedInstances() const;
+    void setLinkedInstances(const QStringList& list);
+    void addLinkedInstanceId(const QString& id);
+    bool removeLinkedInstanceId(const QString& id);
+    bool isLinkedToInstanceId(const QString& id) const;
 
 protected:
     void changeStatus(Status newStatus);

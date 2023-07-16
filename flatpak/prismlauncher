@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# discord RPC
+for i in {0..9}; do
+    test -S "$XDG_RUNTIME_DIR"/discord-ipc-"$i" || ln -sf {app/com.discordapp.Discord,"$XDG_RUNTIME_DIR"}/discord-ipc-"$i";
+done
+
+export PATH="${PATH}${PATH:+:}/app/utils/gamescope/bin:/usr/lib/extensions/vulkan/MangoHud/bin"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}${LD_LIBRARY_PATH:+:}/usr/lib/extensions/vulkan/MangoHud/\$LIB/"
+
+exec /app/bin/prismrun "$@"

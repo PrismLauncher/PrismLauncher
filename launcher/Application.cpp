@@ -1,8 +1,14 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2022 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,10 +43,15 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "DataMigrationTask.h"
 #include "net/PasteUpload.h"
+#include "pathmatcher/MultiMatcher.h"
+#include "pathmatcher/SimplePrefixMatcher.h"
+#include "settings/INIFile.h"
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
 
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/AccessibleInstanceView.h"
 
 #include "ui/pages/BasePageProvider.h"
@@ -54,29 +65,24 @@
 #include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
 
-#include "ui/themes/ITheme.h"
-#include "ui/themes/SystemTheme.h"
-#include "ui/themes/DarkTheme.h"
-#include "ui/themes/BrightTheme.h"
-#include "ui/themes/CustomTheme.h"
-
-#ifdef Q_OS_WIN
-#include "ui/WinDarkmode.h"
-#endif
-
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
 #include "ui/setupwizard/PasteWizardPage.h"
+#include "ui/setupwizard/ThemeWizardPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 
 #include "ui/pagedialog/PageDialog.h"
 
+#include "ui/themes/ThemeManager.h"
+
 #include "ApplicationMessage.h"
 
 #include <iostream>
+#include <mutex>
 
+#include <QFileOpenEvent>
 #include <QAccessible>
 #include <QCommandLineParser>
 #include <QDir>
@@ -92,6 +98,7 @@
 #include <QIcon>
 
 #include "InstanceList.h"
+#include "MTPixmapCache.h"
 
 #include <minecraft/auth/AccountList.h>
 #include "icons/IconList.h"
@@ -99,7 +106,7 @@
 
 #include "java/JavaUtils.h"
 
-#include "updater/UpdateChecker.h"
+#include "updater/ExternalUpdater.h"
 
 #include "tools/JProfiler.h"
 #include "tools/JVisualVM.h"
@@ -120,6 +127,11 @@
 #ifdef Q_OS_LINUX
 #include <dlfcn.h>
 #include "gamemode_client.h"
+#include "MangoHud.h"
+#endif
+
+#ifdef Q_OS_MAC
+#include "updater/MacSparkleUpdater.h"
 #endif
 
 
@@ -136,64 +148,23 @@
 
 static const QLatin1String liveCheckFile("live.check");
 
+PixmapCache* PixmapCache::s_instance = nullptr;
+
 namespace {
+
+/** This is used so that we can output to the log file in addition to the CLI. */
 void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    const char *levels = "DWCFIS";
-    const QString format("%1 %2 %3\n");
+    static std::mutex loggerMutex;
+    const std::lock_guard<std::mutex> lock(loggerMutex); // synchronized, QFile logFile is not thread-safe
 
-    qint64 msecstotal = APPLICATION->timeSinceStart();
-    qint64 seconds = msecstotal / 1000;
-    qint64 msecs = msecstotal % 1000;
-    QString foo;
-    char buf[1025] = {0};
-    ::snprintf(buf, 1024, "%5lld.%03lld", seconds, msecs);
-
-    QString out = format.arg(buf).arg(levels[type]).arg(msg);
+    QString out = qFormatLogMessage(type, context, msg);
+    out += QChar::LineFeed;
 
     APPLICATION->logFile->write(out.toUtf8());
     APPLICATION->logFile->flush();
     QTextStream(stderr) << out.toLocal8Bit();
     fflush(stderr);
-}
-
-QString getIdealPlatform(QString currentPlatform) {
-    auto info = Sys::getKernelInfo();
-    switch(info.kernelType) {
-        case Sys::KernelType::Darwin: {
-            if(info.kernelMajor >= 17) {
-                // macOS 10.13 or newer
-                return "osx64-5.15.2";
-            }
-            else {
-                // macOS 10.12 or older
-                return "osx64";
-            }
-        }
-        case Sys::KernelType::Windows: {
-            // FIXME: 5.15.2 is not stable on Windows, due to a large number of completely unpredictable and hard to reproduce issues
-            break;
-/*
-            if(info.kernelMajor == 6 && info.kernelMinor >= 1) {
-                // Windows 7
-                return "win32-5.15.2";
-            }
-            else if (info.kernelMajor > 6) {
-                // Above Windows 7
-                return "win32-5.15.2";
-            }
-            else {
-                // Below Windows 7
-                return "win32";
-            }
-*/
-        }
-        case Sys::KernelType::Undetermined:
-        case Sys::KernelType::Linux: {
-            break;
-        }
-    }
-    return currentPlatform;
 }
 
 }
@@ -228,7 +199,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     setOrganizationDomain(BuildConfig.LAUNCHER_DOMAIN);
     setApplicationName(BuildConfig.LAUNCHER_NAME);
     setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
-    setApplicationVersion(BuildConfig.printableVersionString());
+    setApplicationVersion(BuildConfig.printableVersionString() + "\n" + BuildConfig.GIT_COMMIT);
     setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
     startTime = QDateTime::currentDateTime();
 
@@ -245,7 +216,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         {{"s", "server"}, "Join the specified server on launch (only valid in combination with --launch)", "address"},
         {{"a", "profile"}, "Use the account specified by its profile name (only valid in combination with --launch)", "profile"},
         {"alive", "Write a small '" + liveCheckFile + "' file after the launcher starts"},
-        {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"}
+        {{"I", "import"}, "Import instance from specified zip (local path or URL)", "file"},
+        {"show", "Opens the window for the specified instance (by instance ID)", "show"}
     });
     parser.addHelpOption();
     parser.addVersionOption();
@@ -256,7 +228,18 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     m_serverToJoin = parser.value("server");
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
-    m_zipToImport = parser.value("import");
+
+    m_instanceIdToShowWindowOf = parser.value("show");
+
+    for (auto zip_path : parser.values("import")){
+        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
+    }
+
+    // treat unspecified positional arguments as import urls
+    for (auto zip_path : parser.positionalArguments()) {
+        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
+    }
+
 
     // error if --launch is missing with --server or --profile
     if((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty())
@@ -301,26 +284,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
 
-        QDir polymcData(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "PolyMC"));
-        if (polymcData.exists()) {
-            dataPath = polymcData.absolutePath();
-            adjustedBy = "PolyMC data path";
-        }
-
-#ifdef Q_OS_LINUX
-        // TODO: this should be removed in a future version
-        // TODO: provide a migration path similar to macOS migration
-        QDir bar(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation), "polymc"));
-        if (bar.exists()) {
-            dataPath = bar.absolutePath();
-            adjustedBy = "Legacy data path";
-        }
-#endif
-
 #ifndef Q_OS_MACOS
         if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
             dataPath = m_rootPath;
             adjustedBy = "Portable data path";
+            m_portable = true;
         }
 #endif
     }
@@ -357,7 +325,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
 
     /*
-     * Establish the mechanism for communication with an already running PolyMC that uses the same data path.
+     * Establish the mechanism for communication with an already running PrismLauncher that uses the same data path.
      * If there is one, tell it what the user actually wanted to do and exit.
      * We want to initialize this before logging to avoid messing with the log of a potential already running copy.
      */
@@ -375,12 +343,14 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 activate.command = "activate";
                 m_peerInstance->sendMessage(activate.serialize(), timeout);
 
-                if(!m_zipToImport.isEmpty())
+                if(!m_zipsToImport.isEmpty())
                 {
-                    ApplicationMessage import;
-                    import.command = "import";
-                    import.args.insert("path", m_zipToImport.toString());
-                    m_peerInstance->sendMessage(import.serialize(), timeout);
+                    for (auto zip_url : m_zipsToImport) {
+                        ApplicationMessage import;
+                        import.command = "import";
+                        import.args.insert("path", zip_url.toString());
+                        m_peerInstance->sendMessage(import.serialize(), timeout);
+                    }
                 }
             }
             else
@@ -406,37 +376,99 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // init the logger
     {
-        static const QString logBase = BuildConfig.LAUNCHER_NAME + "-%0.log";
-        auto moveFile = [](const QString &oldName, const QString &newName)
-        {
+        static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "-%0.log";
+        static const QString logBase = FS::PathCombine("logs", baseLogFile);
+        auto moveFile = [](const QString& oldName, const QString& newName) {
             QFile::remove(newName);
             QFile::copy(oldName, newName);
             QFile::remove(oldName);
         };
+        if (FS::ensureFolderPathExists("logs")) {  // if this did not fail
+            for (auto i = 0; i <= 4; i++)
+                if (auto oldName = baseLogFile.arg(i);
+                    QFile::exists(oldName))  // do not pointlessly delete new files if the old ones are not there
+                    moveFile(oldName, logBase.arg(i));
+        }
 
-        moveFile(logBase.arg(3), logBase.arg(4));
-        moveFile(logBase.arg(2), logBase.arg(3));
-        moveFile(logBase.arg(1), logBase.arg(2));
-        moveFile(logBase.arg(0), logBase.arg(1));
+        for (auto i = 4; i > 0; i--)
+            moveFile(logBase.arg(i - 1), logBase.arg(i));
 
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
-        if(!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-        {
-            showFatalErrorMessage(
-                "The launcher data folder is not writable!",
-                QString(
-                    "The launcher couldn't create a log file - the data folder is not writable.\n"
-                    "\n"
-                    "Make sure you have write permissions to the data folder.\n"
-                    "(%1)\n"
-                    "\n"
-                    "The launcher cannot continue until you fix this problem."
-                ).arg(dataPath)
-            );
+        if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+            showFatalErrorMessage("The launcher data folder is not writable!",
+                                  QString("The launcher couldn't create a log file - the data folder is not writable.\n"
+                                          "\n"
+                                          "Make sure you have write permissions to the data folder.\n"
+                                          "(%1)\n"
+                                          "\n"
+                                          "The launcher cannot continue until you fix this problem.")
+                                      .arg(dataPath));
             return;
         }
         qInstallMessageHandler(appDebugOutput);
+
+        qSetMessagePattern(
+                "%{time process}" " "
+                "%{if-debug}D%{endif}" "%{if-info}I%{endif}" "%{if-warning}W%{endif}" "%{if-critical}C%{endif}" "%{if-fatal}F%{endif}"
+                " " "|" " "
+                "%{if-category}[%{category}]: %{endif}"
+                "%{message}");
+      
+        bool foundLoggingRules = false;
+        
+        auto logRulesFile = QStringLiteral("qtlogging.ini");
+        auto logRulesPath = FS::PathCombine(dataPath, logRulesFile);
+        
+        qDebug() << "Testing" << logRulesPath << "...";              
+        foundLoggingRules = QFile::exists(logRulesPath);
+
+        // search the dataPath()
+        // seach app data standard path
+        if(!foundLoggingRules && !isPortable() && dirParam.isEmpty()) {
+            logRulesPath = QStandardPaths::locate(QStandardPaths::AppDataLocation, FS::PathCombine("..", logRulesFile));
+            if(!logRulesPath.isEmpty()) {
+                qDebug() << "Found" << logRulesPath << "...";
+                foundLoggingRules = true;
+            }
+        }
+        // seach root path
+        if(!foundLoggingRules) {
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+           logRulesPath = FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME, logRulesFile); 
+#else
+           logRulesPath = FS::PathCombine(m_rootPath, logRulesFile); 
+#endif
+            qDebug() << "Testing" << logRulesPath << "...";
+            foundLoggingRules = QFile::exists(logRulesPath);
+        }
+        
+        if(foundLoggingRules) {
+            // load and set logging rules
+            qDebug() << "Loading logging rules from:" << logRulesPath;
+            QSettings loggingRules(logRulesPath, QSettings::IniFormat); 
+            loggingRules.beginGroup("Rules");
+            QStringList rule_names = loggingRules.childKeys();
+            QStringList rules;
+            qDebug() << "Setting log rules:";
+            for (auto rule_name : rule_names) {
+                auto rule = QString("%1=%2").arg(rule_name).arg(loggingRules.value(rule_name).toString());
+                rules.append(rule);
+                qDebug() << "    " << rule;
+            }
+            auto rules_str = rules.join("\n");
+            QLoggingCategory::setFilterRules(rules_str);
+        }
+
         qDebug() << "<> Log initialized.";
+    }
+
+    {
+        bool migrated = false;
+
+        if (!migrated)
+            migrated = handleDataMigration(dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../PolyMC"), "PolyMC", "polymc.cfg");
+        if (!migrated)
+            migrated = handleDataMigration(dataPath, FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), "../../multimc"), "MultiMC", "multimc.cfg");
     }
 
     {
@@ -490,14 +522,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     {
         // Provide a fallback for migration from PolyMC
         m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
-        // Updates
-        // Multiple channels are separated by spaces
-        m_settings->registerSetting("UpdateChannel", BuildConfig.VERSION_CHANNEL);
-        m_settings->registerSetting("AutoUpdate", true);
 
         // Theming
         m_settings->registerSetting("IconTheme", QString("pe_colored"));
-        m_settings->registerSetting("ApplicationTheme", QString("system"));
+        m_settings->registerSetting("ApplicationTheme", QString());
+        m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
         // Remembered state
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
@@ -535,12 +564,15 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("InstanceDir", "instances");
         m_settings->registerSetting({"CentralModsDir", "ModsDir"}, "mods");
         m_settings->registerSetting("IconsDir", "icons");
+        m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+        m_settings->registerSetting("DownloadsDirWatchRecursive", false);
 
         // Editors
         m_settings->registerSetting("JsonEditor", QString());
 
         // Language
         m_settings->registerSetting("Language", QString());
+        m_settings->registerSetting("UseSystemLocale", false);
 
         // Console
         m_settings->registerSetting("ShowConsole", false);
@@ -562,12 +594,12 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Memory
         m_settings->registerSetting({"MinMemAlloc", "MinMemoryAlloc"}, 512);
-        m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, 4096);
+        m_settings->registerSetting({"MaxMemAlloc", "MaxMemoryAlloc"}, suitableMaxMem());
         m_settings->registerSetting("PermGen", 128);
 
         // Java Settings
         m_settings->registerSetting("JavaPath", "");
-        m_settings->registerSetting("JavaTimestamp", 0);
+        m_settings->registerSetting("JavaSignature", "");
         m_settings->registerSetting("JavaArchitecture", "");
         m_settings->registerSetting("JavaRealArchitecture", "");
         m_settings->registerSetting("JavaVersion", "");
@@ -610,6 +642,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // The cat
         m_settings->registerSetting("TheCat", false);
 
+        m_settings->registerSetting("ToolbarsLocked", false);
+
         m_settings->registerSetting("InstSortMode", "Name");
         m_settings->registerSetting("SelectedInstance", QString());
 
@@ -629,6 +663,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("UpdateDialogGeometry", "");
 
         m_settings->registerSetting("ModDownloadGeometry", "");
+        m_settings->registerSetting("RPDownloadGeometry", "");
+        m_settings->registerSetting("TPDownloadGeometry", "");
+        m_settings->registerSetting("ShaderDownloadGeometry", "");
 
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {
@@ -655,8 +692,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 m_settings->reset("PastebinCustomAPIBase");
             }
         }
-        // meta URL
-        m_settings->registerSetting("MetaURLOverride", "");
+        {
+            // Meta URL
+            m_settings->registerSetting("MetaURLOverride", "");
+
+            QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
+
+            // get rid of invalid meta urls
+            if (!metaUrl.isValid() || metaUrl.scheme() != "http" || metaUrl.scheme() != "https")
+                m_settings->reset("MetaURLOverride");
+        }
 
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);
@@ -675,6 +720,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 m_settings->set("FlameKeyOverride", flameKey);
             m_settings->reset("CFKeyOverride");
         }
+        m_settings->registerSetting("ModrinthToken", "");
         m_settings->registerSetting("UserAgentOverride", "");
 
         // Init page provider
@@ -690,6 +736,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<AccountListPage>();
             m_globalSettingsProvider->addPage<APIPage>();
         }
+
+        PixmapCache::setInstance(new PixmapCache(this));
+
         qDebug() << "<> Settings loaded.";
     }
 
@@ -699,7 +748,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // initialize network access and proxy setup
     {
-        m_network = new QNetworkAccessManager();
+        m_network.reset(new QNetworkAccessManager());
         QString proxyTypeStr = settings()->get("ProxyType").toString();
         QString addr = settings()->get("ProxyAddr").toString();
         int port = settings()->get("ProxyPort").value<qint16>();
@@ -721,10 +770,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     // initialize the updater
     if(BuildConfig.UPDATER_ENABLED)
     {
-        auto platform = getIdealPlatform(BuildConfig.BUILD_PLATFORM);
-        auto channelUrl = BuildConfig.UPDATER_BASE + platform + "/channels.json";
-        qDebug() << "Initializing updater with platform: " << platform << " -- " << channelUrl;
-        m_updateChecker.reset(new UpdateChecker(m_network, channelUrl, BuildConfig.VERSION_CHANNEL));
+        qDebug() << "Initializing updater";
+#ifdef Q_OS_MAC
+        m_updater.reset(new MacSparkleUpdater());
+#endif
         qDebug() << "<> Updater started.";
     }
 
@@ -746,29 +795,8 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         qDebug() << "<> Instance icons intialized.";
     }
 
-    // Icon themes
-    {
-        // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
-        // set icon theme search path!
-        auto searchPaths = QIcon::themeSearchPaths();
-        searchPaths.append("iconthemes");
-        QIcon::setThemeSearchPaths(searchPaths);
-        qDebug() << "<> Icon themes initialized.";
-    }
-
-    // Initialize widget themes
-    {
-        auto insertTheme = [this](ITheme * theme)
-        {
-            m_themes.insert(std::make_pair(theme->id(), std::unique_ptr<ITheme>(theme)));
-        };
-        auto darkTheme = new DarkTheme();
-        insertTheme(new SystemTheme());
-        insertTheme(darkTheme);
-        insertTheme(new BrightTheme());
-        insertTheme(new CustomTheme(darkTheme, "custom"));
-        qDebug() << "<> Widget themes initialized.";
-    }
+    // Themes
+    m_themeManager = std::make_unique<ThemeManager>(m_mainWindow);
 
     // initialize and load all instances
     {
@@ -860,12 +888,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
     });
 
-    {
-        setIconTheme(settings()->get("IconTheme").toString());
-        qDebug() << "<> Icon theme set.";
-        setApplicationTheme(settings()->get("ApplicationTheme").toString(), true);
-        qDebug() << "<> Application theme set.";
-    }
+    applyCurrentlySelectedTheme(true);
 
     updateCapabilities();
 
@@ -900,14 +923,10 @@ bool Application::createSetupWizard()
         }
         return false;
     }();
-    bool languageRequired = [&]()
-    {
-        if (settings()->get("Language").toString().isEmpty())
-            return true;
-        return false;
-    }();
+    bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
-    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired;
+    bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
+    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
 
     if(wizardRequired)
     {
@@ -926,6 +945,12 @@ bool Application::createSetupWizard()
         {
             m_setupWizard->addPage(new PasteWizardPage(m_setupWizard));
         }
+
+        if (themeInterventionRequired)
+        {
+            settings()->set("ApplicationTheme", QString("system")); // set default theme after going into theme wizard
+            m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
+        }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
         return true;
@@ -933,18 +958,24 @@ bool Application::createSetupWizard()
     return false;
 }
 
-bool Application::event(QEvent* event) {
+bool Application::event(QEvent* event)
+{
 #ifdef Q_OS_MACOS
     if (event->type() == QEvent::ApplicationStateChange) {
         auto ev = static_cast<QApplicationStateChangeEvent*>(event);
 
-        if (m_prevAppState == Qt::ApplicationActive
-                && ev->applicationState() == Qt::ApplicationActive) {
+        if (m_prevAppState == Qt::ApplicationActive && ev->applicationState() == Qt::ApplicationActive) {
             emit clickedOnDock();
         }
         m_prevAppState = ev->applicationState();
     }
 #endif
+
+    if (event->type() == QEvent::FileOpen) {
+        auto ev = static_cast<QFileOpenEvent*>(event);
+        m_mainWindow->processURLs({ ev->url() });
+    }
+
     return QApplication::event(event);
 }
 
@@ -986,16 +1017,26 @@ void Application::performMainStartupAction()
             return;
         }
     }
+    if(!m_instanceIdToShowWindowOf.isEmpty())
+    {
+        auto inst = instances()->getInstanceById(m_instanceIdToShowWindowOf);
+        if(inst)
+        {
+            qDebug() << "<> Showing window of instance " << m_instanceIdToShowWindowOf;
+            showInstanceWindow(inst);
+            return;
+        }
+    }
     if(!m_mainWindow)
     {
         // normal main window
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
-    if(!m_zipToImport.isEmpty())
+    if(!m_zipsToImport.isEmpty())
     {
-        qDebug() << "<> Importing instance from zip:" << m_zipToImport;
-        m_mainWindow->droppedURLs({ m_zipToImport });
+        qDebug() << "<> Importing from zip:" << m_zipsToImport;
+        m_mainWindow->processURLs( m_zipsToImport );
     }
 }
 
@@ -1048,7 +1089,7 @@ void Application::messageReceived(const QByteArray& message)
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        m_mainWindow->droppedURLs({ QUrl(path) });
+        m_mainWindow->processURLs({ QUrl::fromLocalFile(QFileInfo(path).absoluteFilePath()) });
     }
     else if(command == "launch")
     {
@@ -1112,60 +1153,30 @@ std::shared_ptr<JavaInstallList> Application::javalist()
     return m_javalist;
 }
 
-std::vector<ITheme *> Application::getValidApplicationThemes()
+QList<ITheme*> Application::getValidApplicationThemes()
 {
-    std::vector<ITheme *> ret;
-    auto iter = m_themes.cbegin();
-    while (iter != m_themes.cend())
-    {
-        ret.push_back((*iter).second.get());
-        iter++;
-    }
-    return ret;
+    return m_themeManager->getValidApplicationThemes();
 }
 
-bool Application::isFlatpak()
+void Application::applyCurrentlySelectedTheme(bool initial)
 {
-    #ifdef Q_OS_LINUX
-    return QFile::exists("/.flatpak-info");
-    #else
-    return false;
-    #endif
+    m_themeManager->applyCurrentlySelectedTheme(initial);
 }
 
-void Application::setApplicationTheme(const QString& name, bool initial)
+void Application::setApplicationTheme(const QString& name)
 {
-    auto systemPalette = qApp->palette();
-    auto themeIter = m_themes.find(name);
-    if(themeIter != m_themes.end())
-    {
-        auto & theme = (*themeIter).second;
-        theme->apply(initial);
-#ifdef Q_OS_WIN
-        if (m_mainWindow) {
-            if (QString::compare(theme->id(), "dark") == 0) {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-            } else {
-                    WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-            }
-        }
-#endif
-    }
-    else
-    {
-        qWarning() << "Tried to set invalid theme:" << name;
-    }
+    m_themeManager->setApplicationTheme(name);
 }
 
 void Application::setIconTheme(const QString& name)
 {
-    QIcon::setThemeName(name);
+    m_themeManager->setIconTheme(name);
 }
 
 QIcon Application::getThemedIcon(const QString& name)
 {
     if(name == "logo") {
-        return QIcon(":/org.prismlauncher.PrismLauncher.svg");  // FIXME: Make this a BuildConfig variable
+        return QIcon(":/" + BuildConfig.LAUNCHER_SVGFILENAME);
     }
     return QIcon::fromTheme(name);
 }
@@ -1382,13 +1393,7 @@ MainWindow* Application::showMainWindow(bool minimized)
         m_mainWindow = new MainWindow();
         m_mainWindow->restoreState(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowState").toByteArray()));
         m_mainWindow->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("MainWindowGeometry").toByteArray()));
-#ifdef Q_OS_WIN
-        if (QString::compare(settings()->get("ApplicationTheme").toString(), "dark") == 0) {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), true);
-        } else {
-            WinDarkmode::setDarkWinTitlebar(m_mainWindow->winId(), false);
-        }
-#endif
+
         if(minimized)
         {
             m_mainWindow->showMinimized();
@@ -1553,17 +1558,8 @@ void Application::updateCapabilities()
     if (gamemode_query_status() >= 0)
         m_capabilities |= SupportsGameMode;
 
-    {
-        void *dummy = dlopen("libMangoHud_dlsym.so", RTLD_LAZY);
-        // try normal variant as well
-        if (dummy == NULL)
-            dummy = dlopen("libMangoHud.so", RTLD_LAZY);
-
-        if (dummy != NULL) {
-            dlclose(dummy);
-            m_capabilities |= SupportsMangoHud;
-        }
-    }
+    if (!MangoHud::getLibraryString().isEmpty())
+        m_capabilities |= SupportsMangoHud;
 #endif
 }
 
@@ -1571,10 +1567,11 @@ QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
+        FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"),
-        FS::PathCombine(applicationDirPath(), "jars")
+        FS::PathCombine(applicationDirPath(), "jars"),
+        FS::PathCombine(applicationDirPath(), "..", "jars") // from inside build dir, for debuging
     };
     for(QString p : potentialPaths)
     {
@@ -1605,6 +1602,15 @@ QString Application::getFlameAPIKey()
     return BuildConfig.FLAME_API_KEY;
 }
 
+QString Application::getModrinthAPIToken()
+{
+    QString tokenOverride = m_settings->get("ModrinthToken").toString();
+    if (!tokenOverride.isEmpty())
+        return tokenOverride;
+
+    return QString();
+}
+
 QString Application::getUserAgent()
 {
     QString uaOverride = m_settings->get("UserAgentOverride").toString();
@@ -1624,4 +1630,115 @@ QString Application::getUserAgentUncached()
     }
 
     return BuildConfig.USER_AGENT_UNCACHED;
+}
+
+int Application::suitableMaxMem()
+{
+    float totalRAM = (float)Sys::getSystemRam() / (float)Sys::mebibyte;
+    int maxMemoryAlloc;
+
+    // If totalRAM < 6GB, use (totalRAM / 1.5), else 4GB
+    if (totalRAM < (4096 * 1.5))
+        maxMemoryAlloc = (int) (totalRAM / 1.5);
+    else
+        maxMemoryAlloc = 4096;
+
+    return maxMemoryAlloc;
+}
+
+bool Application::handleDataMigration(const QString& currentData,
+                                      const QString& oldData,
+                                      const QString& name,
+                                      const QString& configFile) const
+{
+    QString nomigratePath = FS::PathCombine(currentData, name + "_nomigrate.txt");
+    QStringList configPaths = { FS::PathCombine(oldData, configFile), FS::PathCombine(oldData, BuildConfig.LAUNCHER_CONFIGFILE) };
+
+    QLocale locale;
+
+    // Is there a valid config at the old location?
+    bool configExists = false;
+    for (QString configPath : configPaths) {
+        configExists |= QFileInfo::exists(configPath);
+    }
+
+    if (!configExists || QFileInfo::exists(nomigratePath)) {
+        qDebug() << "<> No migration needed from" << name;
+        return false;
+    }
+
+    QString message;
+    bool currentExists = QFileInfo::exists(FS::PathCombine(currentData, BuildConfig.LAUNCHER_CONFIGFILE));
+
+    if (currentExists) {
+        message = tr("Old data from %1 was found, but you already have existing data for %2. Sadly you will need to migrate yourself. Do "
+                     "you want to be reminded of the pending data migration next time you start %2?")
+                      .arg(name, BuildConfig.LAUNCHER_DISPLAYNAME);
+    } else {
+        message = tr("It looks like you used %1 before. Do you want to migrate your data to the new location of %2?")
+                      .arg(name, BuildConfig.LAUNCHER_DISPLAYNAME);
+
+        QFileInfo logInfo(FS::PathCombine(oldData, name + "-0.log"));
+        if (logInfo.exists()) {
+            QString lastModified = logInfo.lastModified().toString(locale.dateFormat());
+            message = tr("It looks like you used %1 on %2 before. Do you want to migrate your data to the new location of %3?")
+                          .arg(name, lastModified, BuildConfig.LAUNCHER_DISPLAYNAME);
+        }
+    }
+
+    QMessageBox::StandardButton askMoveDialogue =
+        QMessageBox::question(nullptr, BuildConfig.LAUNCHER_DISPLAYNAME, message, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+    auto setDoNotMigrate = [&nomigratePath] {
+        QFile file(nomigratePath);
+        file.open(QIODevice::WriteOnly);
+    };
+
+    // create no-migrate file if user doesn't want to migrate
+    if (askMoveDialogue != QMessageBox::Yes) {
+        qDebug() << "<> Migration declined for" << name;
+        setDoNotMigrate();
+        return currentExists;  // cancel further migrations, if we already have a data directory
+    }
+
+    if (!currentExists) {
+        // Migrate!
+        auto matcher = std::make_shared<MultiMatcher>();
+        matcher->add(std::make_shared<SimplePrefixMatcher>(configFile));
+        matcher->add(std::make_shared<SimplePrefixMatcher>(
+            BuildConfig.LAUNCHER_CONFIGFILE));  // it's possible that we already used that directory before
+        matcher->add(std::make_shared<SimplePrefixMatcher>("logs/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("accounts.json"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("accounts/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("assets/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("icons/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("instances/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("libraries/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("mods/"));
+        matcher->add(std::make_shared<SimplePrefixMatcher>("themes/"));
+
+        ProgressDialog diag;
+        DataMigrationTask task(nullptr, oldData, currentData, matcher);
+        if (diag.execWithTask(&task)) {
+            qDebug() << "<> Migration succeeded";
+            setDoNotMigrate();
+        } else {
+            QString reason = task.failReason();
+            QMessageBox::critical(nullptr, BuildConfig.LAUNCHER_DISPLAYNAME, tr("Migration failed! Reason: %1").arg(reason));
+        }
+    } else {
+        qWarning() << "<> Migration was skipped, due to existing data";
+    }
+    return true;
+}
+
+void Application::triggerUpdateCheck()
+{
+    if (m_updater) {
+        qDebug() << "Checking for updates.";
+        m_updater->setBetaAllowed(false);  // There are no other channels than stable
+        m_updater->checkForUpdates();
+    } else {
+        qDebug() << "Updater not available.";
+    }
 }

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,7 +49,6 @@
 #include "BaseInstance.h"
 #include "minecraft/auth/MinecraftAccount.h"
 #include "net/NetJob.h"
-#include "updater/GoUpdate.h"
 
 class LaunchController;
 class NewsChecker;
@@ -61,12 +61,15 @@ class BaseProfilerFactory;
 class InstanceView;
 class KonamiCode;
 class InstanceTask;
+class LabeledToolButton;
 
+namespace Ui
+{
+class MainWindow;
+}
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
-    class Ui;
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -80,7 +83,7 @@ public:
 
     void updatesAllowedChanged(bool allowed);
 
-    void droppedURLs(QList<QUrl> urls);
+    void processURLs(QList<QUrl> urls);
 signals:
     void isClosing();
 
@@ -89,6 +92,8 @@ protected:
 
 private slots:
     void onCatToggled(bool);
+
+    void onCatChanged(int);
 
     void on_actionAbout_triggered();
 
@@ -105,12 +110,10 @@ private slots:
     void on_actionChangeInstGroup_triggered();
 
     void on_actionChangeInstIcon_triggered();
-    void on_changeIconButton_clicked(bool)
-    {
-        on_actionChangeInstIcon_triggered();
-    }
 
     void on_actionViewInstanceFolder_triggered();
+
+    void on_actionViewLauncherRootFolder_triggered();
 
     void on_actionViewSelectedInstFolder_triggered();
 
@@ -127,6 +130,10 @@ private slots:
     void on_actionReportBug_triggered();
 
     void on_actionClearMetadata_triggered();
+
+    #ifdef Q_OS_MAC
+    void on_actionAddToPATH_triggered();
+    #endif
 
     void on_actionOpenWiki_triggered();
 
@@ -147,15 +154,17 @@ private slots:
     void deleteGroup();
     void undoTrashInstance();
 
-    void on_actionExportInstance_triggered();
+    inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
+    void on_actionExportInstanceZip_triggered();
+    void on_actionExportInstanceMrPack_triggered();
+    void on_actionExportInstanceFlamePack_triggered();
+    void on_actionExportInstanceToModList_triggered();
 
     void on_actionRenameInstance_triggered();
-    void on_renameButton_clicked(bool)
-    {
-        on_actionRenameInstance_triggered();
-    }
 
     void on_actionEditInstance_triggered();
+
+    void on_actionCreateInstanceShortcut_triggered();
 
     void taskEnd();
 
@@ -170,6 +179,8 @@ private slots:
 
     void updateToolsMenu();
 
+    void updateThemeMenu();
+
     void instanceActivated(QModelIndex);
 
     void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
@@ -182,10 +193,6 @@ private slots:
 
     void startTask(Task *task);
 
-    void updateAvailable(GoUpdate::Status status);
-
-    void updateNotAvailable();
-
     void defaultAccountChanged();
 
     void changeActiveAccount();
@@ -194,14 +201,12 @@ private slots:
 
     void updateNewsLabel();
 
-    /*!
-     * Runs the DownloadTask and installs updates.
-     */
-    void downloadUpdates(GoUpdate::Status status);
 
     void konamiTriggered();
 
     void globalSettingsClosed();
+
+    void lockToolbars(bool);
 
 #ifndef Q_OS_MAC
     void keyReleaseEvent(QKeyEvent *event) override;
@@ -218,23 +223,26 @@ private:
     void updateInstanceToolIcon(QString new_icon);
     void setSelectedInstanceById(const QString &id);
     void updateStatusCenter();
+    void setInstanceActionsEnabled(bool enabled);
 
     void runModalTask(Task *task);
     void instanceFromInstanceTask(InstanceTask *task);
     void finalizeInstance(InstancePtr inst);
 
 private:
-    std::unique_ptr<Ui> ui;
-
+    Ui::MainWindow *ui;
     // these are managed by Qt's memory management model!
     InstanceView *view = nullptr;
     InstanceProxyModel *proxymodel = nullptr;
     QToolButton *newsLabel = nullptr;
     QLabel *m_statusLeft = nullptr;
     QLabel *m_statusCenter = nullptr;
-    QMenu *accountMenu = nullptr;
-    QToolButton *accountMenuButton = nullptr;
+    LabeledToolButton *changeIconButton = nullptr;
+    LabeledToolButton *renameButton = nullptr;
+    QToolButton *helpMenuButton = nullptr;
     KonamiCode * secretEventFilter = nullptr;
+
+    std::shared_ptr<Setting> instanceToolbarSetting = nullptr;
 
     unique_qobject_ptr<NewsChecker> m_newsChecker;
 
@@ -244,4 +252,3 @@ private:
     // managed by the application object
     Task *m_versionLoadTask = nullptr;
 };
-

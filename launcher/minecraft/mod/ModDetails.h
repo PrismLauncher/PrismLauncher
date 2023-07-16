@@ -39,6 +39,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QUrl>
 
 #include "minecraft/mod/MetadataHandler.h"
 
@@ -47,6 +48,84 @@ enum class ModStatus {
     NotInstalled,   // Only the Metadata is present
     NoMetadata,     // Only the JAR is present
     Unknown,        // Default status
+};
+
+struct ModLicense {
+    QString name = {};
+    QString id = {};
+    QString url = {};
+    QString description = {};
+
+    ModLicense() {}
+
+    ModLicense(const QString license) {
+        // FIXME: come up with a better license parseing. 
+        // handle SPDX identifiers? https://spdx.org/licenses/
+        auto parts = license.split(' ');
+        QStringList notNameParts  = {};
+        for (auto part : parts) {
+            auto url = QUrl(part);
+            if (part.startsWith("(") && part.endsWith(")"))
+                url = QUrl(part.mid(1, part.size() - 2));
+
+            if (url.isValid() && !url.scheme().isEmpty() && !url.host().isEmpty()) {
+                this->url = url.toString();
+                notNameParts.append(part);
+                continue;
+            }
+        }
+
+        for (auto part : notNameParts) {
+            parts.removeOne(part);
+        }
+        
+        auto licensePart = parts.join(' ');
+        this->name = licensePart;
+        this->description = licensePart;
+
+        if (parts.size() == 1) {
+            this->id = parts.first();
+        }
+        
+    }
+
+    ModLicense(const QString name, const QString id, const QString url, const QString description) {
+        this->name = name;
+        this->id = id;
+        this->url = url;
+        this->description = description;
+    }
+
+    ModLicense(const ModLicense& other)
+        : name(other.name)
+        , id(other.id)
+        , url(other.url)
+        , description(other.description)
+    {}
+
+    ModLicense& operator=(const ModLicense& other)
+    {
+        this->name = other.name;
+        this->id = other.id;
+        this->url = other.url;
+        this->description = other.description;
+
+        return *this;
+    }
+
+    ModLicense& operator=(const ModLicense&& other)
+    {
+        this->name = other.name;
+        this->id = other.id;
+        this->url = other.url;
+        this->description = other.description;
+
+        return *this;
+    }
+
+    bool isEmpty() {
+        return this->name.isEmpty() && this->id.isEmpty() && this->url.isEmpty() && this->description.isEmpty();
+    }
 };
 
 struct ModDetails
@@ -72,6 +151,15 @@ struct ModDetails
     /* List of the author's names */
     QStringList authors = {};
 
+    /* Issue Tracker URL */
+    QString issue_tracker = {};
+
+    /* License */
+    QList<ModLicense> licenses = {};
+
+    /* Path of mod logo */
+    QString icon_file = {};
+
     /* Installation status of the mod */
     ModStatus status = ModStatus::Unknown;
 
@@ -81,7 +169,7 @@ struct ModDetails
     ModDetails() = default;
 
     /** Metadata should be handled manually to properly set the mod status. */
-    ModDetails(ModDetails& other)
+    ModDetails(const ModDetails& other)
         : mod_id(other.mod_id)
         , name(other.name)
         , version(other.version)
@@ -89,10 +177,13 @@ struct ModDetails
         , homeurl(other.homeurl)
         , description(other.description)
         , authors(other.authors)
+        , issue_tracker(other.issue_tracker)
+        , licenses(other.licenses)
+        , icon_file(other.icon_file)
         , status(other.status)
     {}
 
-    ModDetails& operator=(ModDetails& other)
+    ModDetails& operator=(const ModDetails& other)
     {
         this->mod_id = other.mod_id;
         this->name = other.name;
@@ -101,12 +192,15 @@ struct ModDetails
         this->homeurl = other.homeurl;
         this->description = other.description;
         this->authors = other.authors;
+        this->issue_tracker = other.issue_tracker;
+        this->licenses = other.licenses;
+        this->icon_file = other.icon_file;
         this->status = other.status;
 
         return *this;
     }
 
-    ModDetails& operator=(ModDetails&& other)
+    ModDetails& operator=(const ModDetails&& other)
     {
         this->mod_id = other.mod_id;
         this->name = other.name;
@@ -115,6 +209,9 @@ struct ModDetails
         this->homeurl = other.homeurl;
         this->description = other.description;
         this->authors = other.authors;
+        this->issue_tracker = other.issue_tracker;
+        this->licenses = other.licenses;
+        this->icon_file = other.icon_file;
         this->status = other.status;
 
         return *this;

@@ -8,7 +8,7 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
 
    public:
-    ModrinthCheckUpdate(QList<Mod*>& mods, std::list<Version>& mcVersions, ModAPI::ModLoaderTypes loaders, std::shared_ptr<ModFolderModel> mods_folder)
+    ModrinthCheckUpdate(QList<Mod*>& mods, std::list<Version>& mcVersions, std::optional<ResourceAPI::ModLoaderTypes> loaders, std::shared_ptr<ModFolderModel> mods_folder)
         : CheckUpdateTask(mods, mcVersions, loaders, mods_folder)
     {}
 
@@ -19,5 +19,5 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
     void executeTask() override;
 
    private:
-    NetJob* m_net_job = nullptr;
+    NetJob::Ptr m_net_job = nullptr;
 };

@@ -273,6 +273,7 @@ void Yggdrasil::processReply() {
             AccountTaskState::STATE_FAILED_GONE,
             tr("The Mojang account no longer exists. It may have been migrated to a Microsoft account.")
         );
+        return;
     }
     default:
         changeState(

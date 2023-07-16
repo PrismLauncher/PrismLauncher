@@ -42,10 +42,9 @@
 #include "BuildConfig.h"
 #include "InstanceImportTask.h"
 #include "Json.h"
+#include "Markdown.h"
 
 #include "ui/widgets/ProjectItem.h"
-
-#include <HoeDown.h>
 
 #include <QComboBox>
 #include <QKeyEvent>
@@ -124,7 +123,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         qDebug() << "Loading modrinth modpack information";
 
         auto netJob = new NetJob(QString("Modrinth::PackInformation(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
 
         QString id = current.id;
 
@@ -163,10 +162,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         netJob->start();
     } else
         updateUI();
@@ -175,7 +171,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         qDebug() << "Loading modrinth modpack versions";
 
         auto netJob = new NetJob(QString("Modrinth::PackVersions(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
 
         QString id = current.id;
 
@@ -218,10 +214,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         netJob->start();
 
     } else {
@@ -261,10 +254,8 @@ void ModrinthPage::updateUI()
             text += donates.join(", ");
         }
 
-        if (!current.extra.issuesUrl.isEmpty()
-         || !current.extra.sourceUrl.isEmpty()
-         || !current.extra.wikiUrl.isEmpty()
-         || !current.extra.discordUrl.isEmpty()) {
+        if (!current.extra.issuesUrl.isEmpty() || !current.extra.sourceUrl.isEmpty() || !current.extra.wikiUrl.isEmpty() ||
+            !current.extra.discordUrl.isEmpty()) {
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 
@@ -280,8 +271,7 @@ void ModrinthPage::updateUI()
 
     text += "<hr>";
 
-    HoeDown h;
-    text += h.process(current.extra.body.toUtf8());
+    text += markdownToHTML(current.extra.body.toUtf8());
 
     ui->packDescription->setHtml(text + current.description);
     ui->packDescription->flush();
@@ -300,7 +290,11 @@ void ModrinthPage::suggestCurrent()
 
     for (auto& ver : current.versions) {
         if (ver.id == selectedVersion) {
-            dialog->setSuggestedPack(current.name, ver.version, new InstanceImportTask(ver.download_url, this));
+            QMap<QString, QString> extra_info;
+            extra_info.insert("pack_id", current.id);
+            extra_info.insert("pack_version_id", ver.id);
+
+            dialog->setSuggestedPack(current.name, ver.version, new InstanceImportTask(ver.download_url, this, std::move(extra_info)));
             auto iconName = current.iconName;
             m_model->getLogo(iconName, current.iconUrl.toString(),
                              [this, iconName](QString logo) { dialog->setSuggestedIconFromFile(logo, iconName); });

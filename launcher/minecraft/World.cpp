@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -54,6 +55,8 @@
 #include <QCoreApplication>
 
 #include <optional>
+
+#include "FileSystem.h"
 
 using std::optional;
 using std::nullopt;
@@ -545,6 +548,10 @@ bool World::replace(World &with)
 bool World::destroy()
 {
     if(!is_valid) return false;
+
+    if (FS::trash(m_containerFile.filePath()))
+        return true;
+
     if (m_containerFile.isDir())
     {
         QDir d(m_containerFile.filePath());
@@ -561,4 +568,26 @@ bool World::destroy()
 bool World::operator==(const World &other) const
 {
     return is_valid == other.is_valid && folderName() == other.folderName();
+}
+
+bool World::isSymLinkUnder(const QString& instPath) const
+{
+    if (isSymLink())
+        return true;
+
+    auto instDir = QDir(instPath);
+
+    auto relAbsPath = instDir.relativeFilePath(m_containerFile.absoluteFilePath());
+    auto relCanonPath = instDir.relativeFilePath(m_containerFile.canonicalFilePath());
+
+    return relAbsPath != relCanonPath;
+}
+
+bool World::isMoreThanOneHardLink() const
+{
+    if (m_containerFile.isDir())
+    {
+        return FS::hardLinkCount(QDir(m_containerFile.absoluteFilePath()).filePath("level.dat")) > 1;
+    }
+    return FS::hardLinkCount(m_containerFile.absoluteFilePath()) > 1;
 }

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +44,6 @@
 #include <QIcon>
 #include <QDateTime>
 #include <QUrl>
-#include <updater/GoUpdate.h>
 
 #include <BaseInstance.h>
 
@@ -62,12 +63,13 @@ class AccountList;
 class IconList;
 class QNetworkAccessManager;
 class JavaInstallList;
-class UpdateChecker;
+class ExternalUpdater;
 class BaseProfilerFactory;
 class BaseDetachedToolFactory;
 class TranslationsModel;
 class ITheme;
 class MCEditTool;
+class ThemeManager;
 
 namespace Meta {
     class Index;
@@ -116,17 +118,19 @@ public:
 
     QIcon getThemedIcon(const QString& name);
 
-    bool isFlatpak();
-
     void setIconTheme(const QString& name);
 
-    std::vector<ITheme *> getValidApplicationThemes();
+    void applyCurrentlySelectedTheme(bool initial = false);
 
-    void setApplicationTheme(const QString& name, bool initial);
+    QList<ITheme*> getValidApplicationThemes();
 
-    shared_qobject_ptr<UpdateChecker> updateChecker() {
-        return m_updateChecker;
+    void setApplicationTheme(const QString& name);
+
+    shared_qobject_ptr<ExternalUpdater> updater() {
+        return m_updater;
     }
+
+    void triggerUpdateCheck();
 
     std::shared_ptr<TranslationsModel> translations();
 
@@ -174,12 +178,17 @@ public:
 
     QString getMSAClientID();
     QString getFlameAPIKey();
+    QString getModrinthAPIToken();
     QString getUserAgent();
     QString getUserAgentUncached();
 
     /// this is the root of the 'installation'. Used for automatic updates
     const QString &root() {
         return m_rootPath;
+    }
+
+    bool isPortable() {
+        return m_portable;
     }
 
     const Capabilities capabilities() {
@@ -200,10 +209,13 @@ public:
 
     void ShowGlobalSettings(class QWidget * parent, QString open_page = QString());
 
+    int suitableMaxMem();
+
 signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
     void globalSettingsClosed();
+    int currentCatChanged(int index);
 
 #ifdef Q_OS_MACOS
     void clickedOnDock();
@@ -229,6 +241,7 @@ private slots:
     void setupWizardFinished(int status);
 
 private:
+    bool handleDataMigration(const QString & currentData, const QString & oldData, const QString & name, const QString & configFile) const;
     bool createSetupWizard();
     void performMainStartupAction();
 
@@ -245,7 +258,7 @@ private:
 
     shared_qobject_ptr<QNetworkAccessManager> m_network;
 
-    shared_qobject_ptr<UpdateChecker> m_updateChecker;
+    shared_qobject_ptr<ExternalUpdater> m_updater;
     shared_qobject_ptr<AccountList> m_accounts;
 
     shared_qobject_ptr<HttpMetaCache> m_metacache;
@@ -257,15 +270,16 @@ private:
     std::shared_ptr<JavaInstallList> m_javalist;
     std::shared_ptr<TranslationsModel> m_translations;
     std::shared_ptr<GenericPageProvider> m_globalSettingsProvider;
-    std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
+    std::unique_ptr<ThemeManager> m_themeManager;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 
     QString m_rootPath;
     Status m_status = Application::StartingUp;
     Capabilities m_capabilities;
+    bool m_portable = false; 
 
 #ifdef Q_OS_MACOS
     Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;
@@ -300,7 +314,7 @@ public:
     QString m_serverToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
-    QUrl m_zipToImport;
+    QList<QUrl> m_zipsToImport;
+    QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };
-

@@ -1,7 +1,11 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+
 /*
- *  PolyMC - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,8 +51,8 @@
 #include "Exception.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "FileSystem.h"
-#include "meta/Index.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/ProfileUtils.h"
 #include "Json.h"
 
 #include "PackProfile.h"
@@ -56,12 +60,13 @@
 #include "ComponentUpdateTask.h"
 
 #include "Application.h"
-#include "modplatform/ModAPI.h"
+#include "modplatform/ResourceAPI.h"
 
-static const QMap<QString, ModAPI::ModLoaderType> modloaderMapping{
-    {"net.minecraftforge", ModAPI::Forge},
-    {"net.fabricmc.fabric-loader", ModAPI::Fabric},
-    {"org.quiltmc.quilt-loader", ModAPI::Quilt}
+static const QMap<QString, ResourceAPI::ModLoaderType> modloaderMapping{
+    {"net.minecraftforge", ResourceAPI::Forge},
+    {"net.fabricmc.fabric-loader", ResourceAPI::Fabric},
+    {"org.quiltmc.quilt-loader", ResourceAPI::Quilt},
+    {"com.mumfrey.liteloader", ResourceAPI::LiteLoader}
 };
 
 PackProfile::PackProfile(MinecraftInstance * instance)
@@ -130,7 +135,7 @@ static ComponentPtr componentFromJsonV1(PackProfile * parent, const QString & co
     // critical
     auto uid = Json::requireString(obj.value("uid"));
     auto filePath = componentJsonPattern.arg(uid);
-    auto component = new Component(parent, uid);
+    auto component = makeShared<Component>(parent, uid);
     component->m_version = Json::ensureString(obj.value("version"));
     component->m_dependencyOnly = Json::ensureBoolean(obj.value("dependencyOnly"), false);
     component->m_important = Json::ensureBoolean(obj.value("important"), false);
@@ -518,23 +523,23 @@ bool PackProfile::revertToBase(int index)
     return true;
 }
 
-Component * PackProfile::getComponent(const QString &id)
+ComponentPtr PackProfile::getComponent(const QString &id)
 {
     auto iter = d->componentIndex.find(id);
     if (iter == d->componentIndex.end())
     {
         return nullptr;
     }
-    return (*iter).get();
+    return (*iter);
 }
 
-Component * PackProfile::getComponent(int index)
+ComponentPtr PackProfile::getComponent(int index)
 {
     if(index < 0 || index >= d->components.size())
     {
         return nullptr;
     }
-    return d->components[index].get();
+    return d->components[index];
 }
 
 QVariant PackProfile::data(const QModelIndex &index, int role) const
@@ -613,7 +618,7 @@ QVariant PackProfile::data(const QModelIndex &index, int role) const
 
 bool PackProfile::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount(index))
+    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount(index.parent()))
     {
         return false;
     }
@@ -675,12 +680,12 @@ Qt::ItemFlags PackProfile::flags(const QModelIndex &index) const
 
 int PackProfile::rowCount(const QModelIndex &parent) const
 {
-    return d->components.size();
+    return parent.isValid() ? 0 : d->components.size();
 }
 
 int PackProfile::columnCount(const QModelIndex &parent) const
 {
-    return NUM_COLUMNS;
+    return parent.isValid() ? 0 : NUM_COLUMNS;
 }
 
 void PackProfile::move(const int index, const MoveDirection direction)
@@ -730,12 +735,48 @@ void PackProfile::invalidateLaunchProfile()
 
 void PackProfile::installJarMods(QStringList selectedFiles)
 {
+    // FIXME: get rid of _internal
     installJarMods_internal(selectedFiles);
 }
 
 void PackProfile::installCustomJar(QString selectedFile)
 {
+    // FIXME: get rid of _internal
     installCustomJar_internal(selectedFile);
+}
+
+bool PackProfile::installComponents(QStringList selectedFiles)
+{
+    const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    if (!FS::ensureFolderPathExists(patchDir))
+        return false;
+
+    bool result = true;
+    for (const QString& source : selectedFiles) {
+        const QFileInfo sourceInfo(source);
+
+        auto versionFile = ProfileUtils::parseJsonFile(sourceInfo, false);
+        const QString target = FS::PathCombine(patchDir, versionFile->uid + ".json");
+
+        if (!QFile::copy(source, target)) {
+            qWarning() << "Component" << source << "could not be copied to target" << target;
+            result = false;
+            continue;
+        }
+
+        appendComponent(makeShared<Component>(this, versionFile->uid, versionFile));
+    }
+
+    scheduleSave();
+    invalidateLaunchProfile();
+
+    return result;
+}
+
+void PackProfile::installAgents(QStringList selectedFiles)
+{
+    // FIXME: get rid of _internal
+    installAgents_internal(selectedFiles);
 }
 
 bool PackProfile::installEmpty(const QString& uid, const QString& name)
@@ -760,7 +801,7 @@ bool PackProfile::installEmpty(const QString& uid, const QString& name)
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    appendComponent(new Component(this, f->uid, f));
+    appendComponent(makeShared<Component>(this, f->uid, f));
     scheduleSave();
     invalidateLaunchProfile();
     return true;
@@ -832,18 +873,14 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
     for(auto filepath:filepaths)
     {
         QFileInfo sourceInfo(filepath);
-        auto uuid = QUuid::createUuid();
-        QString id = uuid.toString().remove('{').remove('}');
+        QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
         QString target_filename = id + ".jar";
-        QString target_id = "org.multimc.jarmod." + id;
+        QString target_id = "custom.jarmod." + id;
         QString target_name = sourceInfo.completeBaseName() + " (jar mod)";
         QString finalPath = FS::PathCombine(d->m_instance->jarModsDir(), target_filename);
 
         QFileInfo targetInfo(finalPath);
-        if(targetInfo.exists())
-        {
-            return false;
-        }
+        Q_ASSERT(!targetInfo.exists());
 
         if (!QFile::copy(sourceInfo.absoluteFilePath(),QFileInfo(finalPath).absoluteFilePath()))
         {
@@ -852,7 +889,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
 
         auto f = std::make_shared<VersionFile>();
         auto jarMod = std::make_shared<Library>();
-        jarMod->setRawName(GradleSpecifier("org.multimc.jarmods:" + id + ":1"));
+        jarMod->setRawName(GradleSpecifier("custom.jarmods:" + id + ":1"));
         jarMod->setFilename(target_filename);
         jarMod->setDisplayName(sourceInfo.completeBaseName());
         jarMod->setHint("local");
@@ -871,7 +908,7 @@ bool PackProfile::installJarMods_internal(QStringList filepaths)
         file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
         file.close();
 
-        appendComponent(new Component(this, f->uid, f));
+        appendComponent(makeShared<Component>(this, f->uid, f));
     }
     scheduleSave();
     invalidateLaunchProfile();
@@ -892,7 +929,7 @@ bool PackProfile::installCustomJar_internal(QString filepath)
         return false;
     }
 
-    auto specifier = GradleSpecifier("org.multimc:customjar:1");
+    auto specifier = GradleSpecifier("custom:customjar:1");
     QFileInfo sourceInfo(filepath);
     QString target_filename = specifier.getFileName();
     QString target_id = specifier.artifactId();
@@ -932,10 +969,68 @@ bool PackProfile::installCustomJar_internal(QString filepath)
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    appendComponent(new Component(this, f->uid, f));
+    appendComponent(makeShared<Component>(this, f->uid, f));
 
     scheduleSave();
     invalidateLaunchProfile();
+    return true;
+}
+
+bool PackProfile::installAgents_internal(QStringList filepaths)
+{
+    // FIXME code duplication
+    const QString patchDir = FS::PathCombine(d->m_instance->instanceRoot(), "patches");
+    if (!FS::ensureFolderPathExists(patchDir))
+        return false;
+
+    const QString libDir = d->m_instance->getLocalLibraryPath();
+    if (!FS::ensureFolderPathExists(libDir))
+        return false;
+
+    for (const QString& source : filepaths) {
+        const QFileInfo sourceInfo(source);
+        const QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        const QString targetBaseName = id + ".jar";
+        const QString targetId = "custom.agent." + id;
+        const QString targetName = sourceInfo.completeBaseName() + " (agent)";
+        const QString target = FS::PathCombine(d->m_instance->getLocalLibraryPath(), targetBaseName);
+
+        const QFileInfo targetInfo(target);
+        Q_ASSERT(!targetInfo.exists());
+
+        if (!QFile::copy(source, target))
+            return false;
+
+        auto versionFile = std::make_shared<VersionFile>();
+
+        auto agent = std::make_shared<Library>();
+
+        agent->setRawName("custom.agents:" + id + ":1");
+        agent->setFilename(targetBaseName);
+        agent->setDisplayName(sourceInfo.completeBaseName());
+        agent->setHint("local");
+
+        versionFile->agents.append(std::make_shared<Agent>(agent, QString()));
+
+        versionFile->name = targetName;
+        versionFile->uid = targetId;
+
+        QFile patchFile(FS::PathCombine(patchDir, targetId + ".json"));
+
+        if (!patchFile.open(QFile::WriteOnly)) {
+            qCritical() << "Error opening" << patchFile.fileName() << "for reading:" << patchFile.errorString();
+            return false;
+        }
+
+        patchFile.write(OneSixVersionFormat::versionFileToJson(versionFile).toJson());
+        patchFile.close();
+
+        appendComponent(makeShared<Component>(this, versionFile->uid, versionFile));
+    }
+
+    scheduleSave();
+    invalidateLaunchProfile();
+
     return true;
 }
 
@@ -979,7 +1074,7 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
     else
     {
         // add new
-        auto component = new Component(this, uid);
+        auto component = makeShared<Component>(this, uid);
         component->m_version = version;
         component->m_important = important;
         appendComponent(component);
@@ -1008,19 +1103,22 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
-ModAPI::ModLoaderTypes PackProfile::getModLoaders()
+std::optional<ResourceAPI::ModLoaderTypes> PackProfile::getModLoaders()
 {
-    ModAPI::ModLoaderTypes result = ModAPI::Unspecified;
+    ResourceAPI::ModLoaderTypes result;
+    bool has_any_loader = false;
 
-    QMapIterator<QString, ModAPI::ModLoaderType> i(modloaderMapping);
+    QMapIterator<QString, ResourceAPI::ModLoaderType> i(modloaderMapping);
 
-    while (i.hasNext())
-    {
+    while (i.hasNext()) {
         i.next();
-        Component* c = getComponent(i.key());
-        if (c != nullptr && c->isEnabled()) {
+        if (auto c = getComponent(i.key()); c != nullptr && c->isEnabled()) {
             result |= i.value();
+            has_any_loader = true;
         }
     }
+
+    if (!has_any_loader)
+        return {};
     return result;
 }

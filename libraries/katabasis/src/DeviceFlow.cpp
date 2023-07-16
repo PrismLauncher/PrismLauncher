@@ -19,9 +19,11 @@
 #include "katabasis/PollServer.h"
 #include "katabasis/Globals.h"
 
+#include "KatabasisLogging.h"
 #include "JsonResponse.h"
 
 namespace {
+
 // ref: https://tools.ietf.org/html/rfc8628#section-3.2
 // Exception: Google sign-in uses "verification_url" instead of "*_uri" - we'll accept both.
 bool hasMandatoryDeviceAuthParams(const QVariantMap& params)
@@ -333,9 +335,7 @@ QString DeviceFlow::refreshToken() {
 }
 
 void DeviceFlow::setRefreshToken(const QString &v) {
-#ifndef NDEBUG
-    qDebug() << "DeviceFlow::setRefreshToken" << v << "...";
-#endif
+    qCDebug(katabasisCredentials) << "new refresh token:" << v;
     token_.refresh_token = v;
 }
 

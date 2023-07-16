@@ -1,0 +1,8 @@
+# EditorConfig specs and documentation: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# C++ Code Style settings
+[*.{c++,cc,cpp,cppm,cxx,h,h++,hh,hpp,hxx,inl,ipp,ixx,tlh,tli}]
+cpp_generate_documentation_comments = doxygen_slash_star

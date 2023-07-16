@@ -54,7 +54,7 @@ void Meta::Version::parse(const QJsonObject& obj)
     parseVersion(obj, this);
 }
 
-void Meta::Version::mergeFromList(const Meta::VersionPtr& other)
+void Meta::Version::mergeFromList(const Meta::Version::Ptr& other)
 {
     if(other->m_providesRecommendations)
     {
@@ -85,7 +85,7 @@ void Meta::Version::mergeFromList(const Meta::VersionPtr& other)
     }
 }
 
-void Meta::Version::merge(const VersionPtr &other)
+void Meta::Version::merge(const Version::Ptr &other)
 {
     mergeFromList(other);
     if(other->m_data)
@@ -97,6 +97,11 @@ void Meta::Version::merge(const VersionPtr &other)
 QString Meta::Version::localFilename() const
 {
     return m_uid + '/' + m_version + ".json";
+}
+
+::Version Meta::Version::toComparableVersion() const
+{
+    return { const_cast<Meta::Version*>(this)->descriptor() };
 }
 
 void Meta::Version::setType(const QString &type)
@@ -111,9 +116,9 @@ void Meta::Version::setTime(const qint64 time)
     emit timeChanged();
 }
 
-void Meta::Version::setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts)
+void Meta::Version::setRequires(const Meta::RequireSet &reqs, const Meta::RequireSet &conflicts)
 {
-    m_requires = requires;
+    m_requires = reqs;
     m_conflicts = conflicts;
     emit requiresChanged();
 }

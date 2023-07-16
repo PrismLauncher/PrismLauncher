@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +36,7 @@
  */
 
 #include "ScreenshotsPage.h"
+#include "BuildConfig.h"
 #include "ui_ScreenshotsPage.h"
 
 #include <QModelIndex>
@@ -95,37 +97,30 @@ public:
             return;
         if ((info.suffix().compare("png", Qt::CaseInsensitive) != 0))
             return;
-        int tries = 5;
-        while (tries)
-        {
-            if (!m_cache->stale(m_path))
-                return;
-            QImage image(m_path);
-            if (image.isNull())
-            {
-                QThread::msleep(500);
-                tries--;
-                continue;
-            }
-            QImage small;
-            if (image.width() > image.height())
-                small = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
-            else
-                small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
-            QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
-            QImage square(QSize(256, 256), QImage::Format_ARGB32);
-            square.fill(Qt::transparent);
-
-            QPainter painter(&square);
-            painter.drawImage(offset, small);
-            painter.end();
-
-            QIcon icon(QPixmap::fromImage(square));
-            m_cache->add(m_path, icon);
-            m_resultEmitter.emitResultsReady(m_path);
+        if (!m_cache->stale(m_path))
+            return;
+        QImage image(m_path);
+        if (image.isNull()) {
+            m_resultEmitter.emitResultsFailed(m_path);
+            qDebug() << "Error loading screenshot: " + m_path + ". Perhaps too large?";
             return;
         }
-        m_resultEmitter.emitResultsFailed(m_path);
+        QImage small;
+        if (image.width() > image.height())
+            small = image.scaledToWidth(512).scaledToWidth(256, Qt::SmoothTransformation);
+        else
+            small = image.scaledToHeight(512).scaledToHeight(256, Qt::SmoothTransformation);
+        QPoint offset((256 - small.width()) / 2, (256 - small.height()) / 2);
+        QImage square(QSize(256, 256), QImage::Format_ARGB32);
+        square.fill(Qt::transparent);
+
+        QPainter painter(&square);
+        painter.drawImage(offset, small);
+        painter.end();
+
+        QIcon icon(QPixmap::fromImage(square));
+        m_cache->add(m_path, icon);
+        m_resultEmitter.emitResultsReady(m_path);
     }
     QString m_path;
     SharedIconCachePtr m_cache;
@@ -144,9 +139,12 @@ public:
         m_thumbnailCache = std::make_shared<SharedIconCache>();
         m_thumbnailCache->add("placeholder", APPLICATION->getThemedIcon("screenshot-placeholder"));
         connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
-        // FIXME: the watched file set is not updated when files are removed
     }
-    virtual ~FilterModel() { m_thumbnailingPool.waitForDone(500); }
+    virtual ~FilterModel() {
+        m_thumbnailingPool.clear();
+        if (!m_thumbnailingPool.waitForDone(500))
+            qDebug() << "Thumbnail pool took longer than 500ms to finish";
+    }
     virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
     {
         auto model = sourceModel();
@@ -213,10 +211,12 @@ private slots:
     void fileChanged(QString filepath)
     {
         m_thumbnailCache->setStale(filepath);
-        thumbnailImage(filepath);
         // reinsert the path...
         watcher.removePath(filepath);
-        watcher.addPath(filepath);
+        if (QFile::exists(filepath)) {
+            watcher.addPath(filepath);
+            thumbnailImage(filepath);
+        }
     }
 
 private:
@@ -379,6 +379,26 @@ void ScreenshotsPage::on_actionUpload_triggered()
     if (selection.isEmpty())
         return;
 
+    QString text;
+    QUrl baseUrl(BuildConfig.IMGUR_BASE_URL);
+    if (selection.size() > 1)
+        text = tr("You are about to upload %1 screenshots to %2.\n"
+                  "You should double-check for personal information.\n\n"
+                  "Are you sure?")
+                   .arg(QString::number(selection.size()), baseUrl.host());
+    else
+        text = tr("You are about to upload the selected screenshot to %1.\n"
+                  "You should double-check for personal information.\n\n"
+                  "Are you sure?")
+                   .arg(baseUrl.host());
+
+    auto response = CustomMessageBox::selectable(this, "Confirm Upload", text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No,
+                                                 QMessageBox::No)
+                        ->exec();
+
+    if (response != QMessageBox::Yes)
+        return;
+
     QList<ScreenShot::Ptr> uploaded;
     auto job = NetJob::Ptr(new NetJob("Screenshot Upload", APPLICATION->network()));
     if(selection.size() < 2)
@@ -491,17 +511,32 @@ void ScreenshotsPage::on_actionCopy_File_s_triggered()
 
 void ScreenshotsPage::on_actionDelete_triggered()
 {
-    auto mbox = CustomMessageBox::selectable(
-        this, tr("Are you sure?"), tr("This will delete all selected screenshots."),
-        QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No);
-    std::unique_ptr<QMessageBox> box(mbox);
+    auto selected = ui->listView->selectionModel()->selectedIndexes();
 
-    if (box->exec() != QMessageBox::Yes)
+    int count = ui->listView->selectionModel()->selectedRows().size();
+    QString text;
+    if (count > 1)
+        text = tr("You are about to delete %1 screenshots.\n"
+                  "This may be permanent and they will be gone from the folder.\n\n"
+                  "Are you sure?")
+                   .arg(count);
+    else
+        text = tr("You are about to delete the selected screenshot.\n"
+                  "This may be permanent and it will be gone from the folder.\n\n"
+                  "Are you sure?")
+                   .arg(count);
+
+    auto response =
+        CustomMessageBox::selectable(this, tr("Confirm Deletion"), text, QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No)->exec();
+
+    if (response != QMessageBox::Yes)
         return;
 
-    auto selected = ui->listView->selectionModel()->selectedIndexes();
     for (auto item : selected)
     {
+        if (FS::trash(m_model->filePath(item)))
+            continue;
+
         m_model->remove(item);
     }
 }
@@ -537,6 +572,19 @@ void ScreenshotsPage::openedImpl()
             ui->listView->setModel(nullptr);
         }
     }
+
+    auto const setting_name = QString("WideBarVisibility_%1").arg(id());
+    if (!APPLICATION->settings()->contains(setting_name))
+        m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
+    else
+        m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
+
+    ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
+}
+
+void ScreenshotsPage::closedImpl()
+{
+    m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
 }
 
 #include "ScreenshotsPage.moc"

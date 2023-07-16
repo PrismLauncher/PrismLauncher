@@ -26,13 +26,22 @@
 #include "tasks/Task.h"
 
 namespace ResourcePackUtils {
-bool process(ResourcePack& pack);
 
-void processZIP(ResourcePack& pack);
-void processFolder(ResourcePack& pack);
+enum class ProcessingLevel { Full, BasicInfoOnly };
 
-void processMCMeta(ResourcePack& pack, QByteArray&& raw_data);
-void processPackPNG(ResourcePack& pack, QByteArray&& raw_data);
+bool process(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+
+bool processZIP(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+bool processFolder(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
+
+bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data);
+bool processPackPNG(const ResourcePack& pack, QByteArray&& raw_data);
+
+/// processes ONLY the pack.png (rest of the pack may be invalid)
+bool processPackPNG(const ResourcePack& pack);
+
+/** Checks whether a file is valid as a resource pack or not. */
+bool validate(QFileInfo file);
 }  // namespace ResourcePackUtils
 
 class LocalResourcePackParseTask : public Task {

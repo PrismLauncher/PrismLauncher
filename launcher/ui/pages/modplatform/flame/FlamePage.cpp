@@ -130,7 +130,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     if (current.versionsLoaded == false) {
         qDebug() << "Loading flame modpack versions";
         auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
         netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
 
@@ -170,10 +170,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             }
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         netJob->start();
     } else {
         for (auto version : current.versions) {
@@ -197,12 +194,18 @@ void FlamePage::suggestCurrent()
         return;
     }
 
-    if (selectedVersion.isEmpty() || selectedVersion == "-1") {
+    if (m_selected_version_index == -1) {
         dialog->setSuggestedPack();
         return;
     }
 
-    dialog->setSuggestedPack(current.name, new InstanceImportTask(selectedVersion,this));
+    auto version = current.versions.at(m_selected_version_index);
+
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", QString::number(current.addonId));
+    extra_info.insert("pack_version_id", QString::number(version.fileId));
+
+    dialog->setSuggestedPack(current.name, new InstanceImportTask(version.downloadUrl, this, std::move(extra_info)));
     QString editedLogoName;
     editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
     listModel->getLogo(current.logoName, current.logoUrl,
@@ -211,11 +214,18 @@ void FlamePage::suggestCurrent()
 
 void FlamePage::onVersionSelectionChanged(QString data)
 {
-    if (data.isNull() || data.isEmpty()) {
-        selectedVersion = "";
+    bool is_blocked = false;
+    ui->versionSelectionBox->currentData().toInt(&is_blocked);
+
+    if (data.isNull() || data.isEmpty() || is_blocked) {
+        m_selected_version_index = -1;
         return;
     }
-    selectedVersion = ui->versionSelectionBox->currentData().toString();
+
+    m_selected_version_index = ui->versionSelectionBox->currentIndex();
+
+    Q_ASSERT(current.versions.at(m_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
+
     suggestCurrent();
 }
 

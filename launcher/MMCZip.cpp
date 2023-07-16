@@ -39,6 +39,7 @@
 #include "MMCZip.h"
 #include "FileSystem.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 
 // ours
@@ -93,20 +94,28 @@ bool MMCZip::mergeZipFiles(QuaZip *into, QFileInfo from, QSet<QString> &containe
     return true;
 }
 
-bool MMCZip::compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files)
+bool MMCZip::compressDirFiles(QuaZip *zip, QString dir, QFileInfoList files, bool followSymlinks)
 {
     QDir directory(dir);
     if (!directory.exists()) return false;
 
     for (auto e : files) {
         auto filePath = directory.relativeFilePath(e.absoluteFilePath());
-        if( !JlCompress::compressFile(zip, e.absoluteFilePath(), filePath)) return false;
+        auto srcPath = e.absoluteFilePath();
+        if (followSymlinks) {
+            if (e.isSymLink()) {
+                srcPath = e.symLinkTarget();
+            } else {
+                srcPath = e.canonicalFilePath();
+            }
+        }
+        if( !JlCompress::compressFile(zip, srcPath, filePath)) return false;
     }
 
     return true;
 }
 
-bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files)
+bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks)
 {
     QuaZip zip(fileCompressed);
     QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
@@ -115,7 +124,7 @@ bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList
         return false;
     }
 
-    auto result = compressDirFiles(&zip, dir, files);
+    auto result = compressDirFiles(&zip, dir, files, followSymlinks);
 
     zip.close();
     if(zip.getZipError()!=0) {
@@ -228,23 +237,27 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
 }
 
 // ours
-QString MMCZip::findFolderOfFileInZip(QuaZip * zip, const QString & what, const QString &root)
+QString MMCZip::findFolderOfFileInZip(QuaZip* zip, const QString& what, const QStringList& ignore_paths, const QString& root)
 {
     QuaZipDir rootDir(zip, root);
-    for(auto fileName: rootDir.entryList(QDir::Files))
-    {
-        if(fileName == what)
+    for (auto&& fileName : rootDir.entryList(QDir::Files)) {
+        if (fileName == what)
             return root;
+
+        QCoreApplication::processEvents();
     }
-    for(auto fileName: rootDir.entryList(QDir::Dirs))
-    {
-        QString result = findFolderOfFileInZip(zip, what, root + fileName);
-        if(!result.isEmpty())
-        {
+
+    // Recurse the search to non-ignored subfolders
+    for (auto&& fileName : rootDir.entryList(QDir::Dirs)) {
+        if (ignore_paths.contains(fileName))
+            continue;
+
+        QString result = findFolderOfFileInZip(zip, what, ignore_paths, root + fileName);
+        if (!result.isEmpty())
             return result;
-        }
     }
-    return QString();
+
+    return {};
 }
 
 // ours
@@ -270,7 +283,8 @@ bool MMCZip::findFilesInZip(QuaZip * zip, const QString & what, QStringList & re
 // ours
 std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & subdir, const QString &target)
 {
-    QDir directory(target);
+    auto target_top_dir = QUrl::fromLocalFile(target);
+
     QStringList extracted;
 
     qDebug() << "Extracting subdir" << subdir << "from" << zip->getZipName() << "to" << target;
@@ -289,16 +303,17 @@ std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & su
         return std::nullopt;
     }
 
-    do
-    {
-        QString name = zip->getCurrentFileName();
-        if(!name.startsWith(subdir))
-        {
+    do {
+        QString file_name = zip->getCurrentFileName();
+        if (!file_name.startsWith(subdir))
             continue;
-        }
 
-        name.remove(0, subdir.size());
-        auto original_name = name;
+        auto relative_file_name = QDir::fromNativeSeparators(file_name.remove(0, subdir.size()));
+        auto original_name = relative_file_name;
+
+        // Fix subdirs/files ending with a / getting transformed into absolute paths
+        if (relative_file_name.startsWith('/'))
+            relative_file_name = relative_file_name.mid(1);
 
         // Fix subdirs/files ending with a / getting transformed into absolute paths
         if(name.startsWith('/')){
@@ -306,41 +321,40 @@ std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & su
         }
 
         // Fix weird "folders with a single file get squashed" thing
-        QString path;
-        if(name.contains('/') && !name.endsWith('/')){
-            path = name.section('/', 0, -2) + "/";
-            FS::ensureFolderPathExists(FS::PathCombine(target, path));
+        QString sub_path;
+        if (relative_file_name.contains('/') && !relative_file_name.endsWith('/')) {
+            sub_path = relative_file_name.section('/', 0, -2) + '/';
+            FS::ensureFolderPathExists(FS::PathCombine(target, sub_path));
 
-            name = name.split('/').last();
-        }
-
-        QString absFilePath;
-        if(name.isEmpty())
-        {
-            absFilePath = directory.absoluteFilePath(name) + "/";
-        }
-        else
-        {
-            absFilePath = directory.absoluteFilePath(path + name);
+            relative_file_name = relative_file_name.split('/').last();
         }
 
-        //Block potential file traversal issues
-        if(!absFilePath.startsWith(directory.absolutePath())){
-            qWarning() << "Potential file traversal issue, for path " << absFilePath << " with base name as " << directory.absolutePath();
-            continue;
+        QString target_file_path;
+        if (relative_file_name.isEmpty()) {
+            target_file_path = target + '/';
+        } else {
+            target_file_path = FS::PathCombine(target_top_dir.toLocalFile(), sub_path, relative_file_name);
+            if (relative_file_name.endsWith('/') && !target_file_path.endsWith('/'))
+                target_file_path += '/';
         }
-        if (!JlCompress::extractFile(zip, "", absFilePath))
-        {
-            qWarning() << "Failed to extract file" << original_name << "to" << absFilePath;
+
+        if (!target_top_dir.isParentOf(QUrl::fromLocalFile(target_file_path))) {
+            qWarning() << "Extracting" << relative_file_name << "was cancelled, because it was effectively outside of the target path" << target;
+            return std::nullopt;
+        }
+
+        if (!JlCompress::extractFile(zip, "", target_file_path)) {
+            qWarning() << "Failed to extract file" << original_name << "to" << target_file_path;
             JlCompress::removeFile(extracted);
             return std::nullopt;
         }
 
-        extracted.append(absFilePath);
-        QFile::setPermissions(absFilePath, QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser);
+        extracted.append(target_file_path);
+        QFile::setPermissions(target_file_path, QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser);
 
-        qDebug() << "Extracted file" << name << "to" << absFilePath;
+        qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
     } while (zip->goToNextFile());
+
     return extracted;
 }
 

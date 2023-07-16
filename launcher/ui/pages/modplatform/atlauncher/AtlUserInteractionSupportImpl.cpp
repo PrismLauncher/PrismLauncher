@@ -53,7 +53,7 @@ std::optional<QVector<QString>> AtlUserInteractionSupportImpl::chooseOptionalMod
     return optionalModDialog.getResult();
 }
 
-QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionListPtr vlist, QString minecraftVersion)
+QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlist, QString minecraftVersion)
 {
     VersionSelectDialog vselect(vlist.get(), "Choose Version", m_parent, false);
     if (minecraftVersion != nullptr) {
@@ -68,7 +68,7 @@ QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionListPtr vlist,
     // select recommended build
     for (int i = 0; i < vlist->versions().size(); i++) {
         auto version = vlist->versions().at(i);
-        auto reqs = version->requires();
+        auto reqs = version->requiredSet();
 
         // filter by minecraft version, if the loader depends on a certain version.
         if (minecraftVersion != nullptr) {

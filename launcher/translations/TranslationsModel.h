@@ -20,17 +20,16 @@
 
 struct Language;
 
-class TranslationsModel : public QAbstractListModel
-{
+class TranslationsModel : public QAbstractListModel {
     Q_OBJECT
-public:
-    explicit TranslationsModel(QString path, QObject *parent = 0);
+   public:
+    explicit TranslationsModel(QString path, QObject* parent = 0);
     virtual ~TranslationsModel();
 
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex & parent) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent) const override;
 
     bool selectLanguage(QString key);
     void updateLanguage(QString key);
@@ -38,27 +37,27 @@ public:
     QString selectedLanguage();
 
     void downloadIndex();
+    void setUseSystemLocale(bool useSystemLocale);
 
-private:
-    Language *findLanguage(const QString & key);
+   private:
+    Language* findLanguage(const QString& key);
     void reloadLocalFiles();
     void downloadTranslation(QString key);
     void downloadNext();
 
     // hide copy constructor
-    TranslationsModel(const TranslationsModel &) = delete;
+    TranslationsModel(const TranslationsModel&) = delete;
     // hide assign op
-    TranslationsModel &operator=(const TranslationsModel &) = delete;
+    TranslationsModel& operator=(const TranslationsModel&) = delete;
 
-private slots:
+   private slots:
     void indexReceived();
     void indexFailed(QString reason);
     void dlFailed(QString reason);
     void dlGood();
-    void translationDirChanged(const QString &path);
+    void translationDirChanged(const QString& path);
 
-
-private: /* data */
+   private: /* data */
     struct Private;
     std::unique_ptr<Private> d;
 };

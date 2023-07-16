@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
- *  Copyright (C) 2022 icelimetea, <fr3shtea@outlook.com>
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,113 +54,125 @@
 
 package org.prismlauncher;
 
-import org.prismlauncher.exception.ParseException;
-import org.prismlauncher.utils.Parameters;
-
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.prismlauncher.exception.ParseException;
+import org.prismlauncher.launcher.Launcher;
+import org.prismlauncher.launcher.impl.StandardLauncher;
+import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
+import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.logging.Log;
 
 public final class EntryPoint {
 
-    private static final Logger LOGGER = Logger.getLogger("EntryPoint");
-
-    private final Parameters params = new Parameters();
-
     public static void main(String[] args) {
-        EntryPoint listener = new EntryPoint();
+        ExitCode code = listen();
 
-        int retCode = listener.listen();
+        if (code != ExitCode.NORMAL) {
+            Log.fatal("Exiting with " + code);
 
-        if (retCode != 0) {
-            LOGGER.info("Exiting with " + retCode);
-
-            System.exit(retCode);
+            System.exit(code.numeric);
         }
     }
 
-    private Action parseLine(String inData) throws ParseException {
-        String[] tokens = inData.split("\\s+", 2);
+    private static ExitCode listen() {
+        Parameters params = new Parameters();
+        PreLaunchAction action = PreLaunchAction.PROCEED;
 
-        if (tokens.length == 0)
-            throw new ParseException("Unexpected empty string!");
-
-        switch (tokens[0]) {
-            case "launch": {
-                return Action.Launch;
-            }
-
-            case "abort": {
-                return Action.Abort;
-            }
-
-            default: {
-                if (tokens.length != 2)
-                    throw new ParseException("Error while parsing:" + inData);
-
-                params.add(tokens[0], tokens[1]);
-
-                return Action.Proceed;
-            }
-        }
-    }
-
-    public int listen() {
-        Action action = Action.Proceed;
-
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                System.in,
-                StandardCharsets.UTF_8
-        ))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
             String line;
 
-            while (action == Action.Proceed) {
-                if ((line = reader.readLine()) != null) {
-                    action = parseLine(line);
-                } else {
-                    action = Action.Abort;
-                }
+            while (action == PreLaunchAction.PROCEED) {
+                if ((line = reader.readLine()) != null)
+                    action = parseLine(line, params);
+                else
+                    action = PreLaunchAction.ABORT;
             }
-        } catch (IOException | ParseException e) {
-            LOGGER.log(Level.SEVERE, "Launcher ABORT due to exception:", e);
+        } catch (IllegalArgumentException e) {
+            Log.fatal("Aborting due to wrong argument", e);
 
-            return 1;
+            return ExitCode.ILLEGAL_ARGUMENT;
+        } catch (Throwable e) {
+            Log.fatal("Aborting due to exception", e);
+
+            return ExitCode.ABORT;
         }
 
-        // Main loop
-        if (action == Action.Abort) {
-            LOGGER.info("Launch aborted by the launcher.");
+        if (action == PreLaunchAction.ABORT) {
+            Log.fatal("Launch aborted by the launcher");
 
-            return 1;
+            return ExitCode.ABORT;
         }
 
         try {
-            Launcher launcher =
-                    LauncherFactory
-                            .getInstance()
-                            .createLauncher(params);
+            Launcher launcher;
+            String type = params.getString("launcher");
+
+            switch (type) {
+                case "standard":
+                    launcher = new StandardLauncher(params);
+                    break;
+
+                case "legacy":
+                    launcher = new LegacyLauncher(params);
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid launcher type: " + type);
+            }
 
             launcher.launch();
 
-            return 0;
+            return ExitCode.NORMAL;
         } catch (IllegalArgumentException e) {
-            LOGGER.log(Level.SEVERE, "Wrong argument.", e);
+            Log.fatal("Illegal argument", e);
 
-            return 1;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Exception caught from launcher.", e);
+            return ExitCode.ILLEGAL_ARGUMENT;
+        } catch (Throwable e) {
+            Log.fatal("Exception caught from launcher", e);
 
-            return 1;
+            return ExitCode.ERROR;
         }
     }
 
-    private enum Action {
-        Proceed,
-        Launch,
-        Abort
+    private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
+        switch (input) {
+            case "":
+                break;
+
+            case "launch":
+                return PreLaunchAction.LAUNCH;
+
+            case "abort":
+                return PreLaunchAction.ABORT;
+
+            default:
+                String[] pair = input.split(" ", 2);
+
+                if (pair.length != 2)
+                    throw new ParseException(input, "[key] [value]");
+
+                params.add(pair[0], pair[1]);
+        }
+
+        return PreLaunchAction.PROCEED;
+    }
+
+    private enum PreLaunchAction {
+        PROCEED, LAUNCH, ABORT
+    }
+
+    private enum ExitCode {
+        NORMAL(0), ABORT(1), ERROR(2), ILLEGAL_ARGUMENT(65);
+
+        private final int numeric;
+
+        ExitCode(int numeric) {
+            this.numeric = numeric;
+        }
+
     }
 
 }

@@ -42,6 +42,7 @@
 #include <QDir>
 #include <QLibraryInfo>
 #include <QDebug>
+#include <locale>
 
 #include "FileSystem.h"
 #include "net/NetJob.h"
@@ -82,6 +83,21 @@ struct Language
         }
         else if(key == "es_UY") {
             result = u8"español de Latinoamérica";
+        }
+        else if(key == "en_NZ") {
+            result = u8"New Zealand English"; // No idea why qt translates this to just english and not to New Zealand English
+        }
+        else if(key == "en@pirate") {
+            result = u8"Tongue of the High Seas";
+        }
+        else if(key == "en@uwu") {
+            result = u8"Cute Engwish";
+        }
+        else if(key == "tok") {
+            result = u8"toki pona";
+        }
+        else if(key == "nan") {
+            result = u8"閩南語";  // Using traditional Chinese script. Not sure if we should use simplified instead?
         }
         else {
             result = locale.nativeLanguageName();
@@ -175,7 +191,7 @@ struct TranslationsModel::Private
     std::unique_ptr<QTranslator> m_qt_translator;
     std::unique_ptr<QTranslator> m_app_translator;
 
-    Net::Download::Ptr m_index_task;
+    Net::Download* m_index_task;
     QString m_downloadingTranslation;
     NetJob::Ptr m_dl_job;
     NetJob::Ptr m_index_job;
@@ -439,6 +455,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
                 return QString("%1%").arg(lang.percentTranslated(), 3, 'f', 1);
             }
         }
+        qWarning("TranslationModel::data not implemented when role is DisplayRole");
     }
     case Qt::ToolTipRole:
     {
@@ -511,34 +528,34 @@ Language * TranslationsModel::findLanguage(const QString& key)
     }
 }
 
+void TranslationsModel::setUseSystemLocale(bool useSystemLocale)
+{
+    APPLICATION->settings()->set("UseSystemLocale", useSystemLocale);
+    QLocale::setDefault(QLocale(useSystemLocale ? QString::fromStdString(std::locale().name()) : defaultLangCode));
+}
+
 bool TranslationsModel::selectLanguage(QString key)
 {
-    QString &langCode = key;
+    QString& langCode = key;
     auto langPtr = findLanguage(key);
 
-    if (langCode.isEmpty())
-    {
+    if (langCode.isEmpty()) {
         d->no_language_set = true;
     }
 
-    if(!langPtr)
-    {
+    if (!langPtr) {
         qWarning() << "Selected invalid language" << key << ", defaulting to" << defaultLangCode;
         langCode = defaultLangCode;
-    }
-    else
-    {
+    } else {
         langCode = langPtr->key;
     }
 
     // uninstall existing translators if there are any
-    if (d->m_app_translator)
-    {
+    if (d->m_app_translator) {
         QCoreApplication::removeTranslator(d->m_app_translator.get());
         d->m_app_translator.reset();
     }
-    if (d->m_qt_translator)
-    {
+    if (d->m_qt_translator) {
         QCoreApplication::removeTranslator(d->m_qt_translator.get());
         d->m_qt_translator.reset();
     }
@@ -548,8 +565,9 @@ bool TranslationsModel::selectLanguage(QString key)
      * In a multithreaded application, the default locale should be set at application startup, before any non-GUI threads are created.
      * This function is not reentrant.
      */
-    QLocale locale = QLocale(langCode);
-    QLocale::setDefault(locale);
+    QLocale::setDefault(
+        QLocale(APPLICATION->settings()->get("UseSystemLocale").toBool() ? QString::fromStdString(std::locale().name()) : langCode));
+
 
     // if it's the default UI language, finish
     if(langCode == defaultLangCode)
@@ -655,11 +673,12 @@ void TranslationsModel::downloadIndex()
         return;
     }
     qDebug() << "Downloading Translations Index...";
-    d->m_index_job = new NetJob("Translations Index", APPLICATION->network());
+    d->m_index_job.reset(new NetJob("Translations Index", APPLICATION->network()));
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
-    d->m_index_task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
-    d->m_index_job->addNetAction(d->m_index_task);
+    auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
+    d->m_index_task = task.get();
+    d->m_index_job->addNetAction(task);
     connect(d->m_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
     connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexReceived);
     d->m_index_job->start();
@@ -707,7 +726,7 @@ void TranslationsModel::downloadTranslation(QString key)
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
     dl->setProgress(dl->getProgress(), lang->file_size);
 
-    d->m_dl_job = new NetJob("Translation for " + key, APPLICATION->network());
+    d->m_dl_job.reset(new NetJob("Translation for " + key, APPLICATION->network()));
     d->m_dl_job->addNetAction(dl);
 
     connect(d->m_dl_job.get(), &NetJob::succeeded, this, &TranslationsModel::dlGood);

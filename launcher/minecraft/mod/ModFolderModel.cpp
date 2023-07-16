@@ -37,21 +37,30 @@
 #include "ModFolderModel.h"
 
 #include <FileSystem.h>
+#include <qheaderview.h>
 #include <QDebug>
 #include <QFileSystemWatcher>
+#include <QIcon>
 #include <QMimeData>
 #include <QString>
+#include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
 #include <QUuid>
 #include <algorithm>
 
+#include "Application.h"
+
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
 
-ModFolderModel::ModFolderModel(const QString &dir, bool is_indexed) : ResourceFolderModel(QDir(dir)), m_is_indexed(is_indexed)
+ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
+    : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::VERSION, SortType::DATE };
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME , SortType::VERSION, SortType::DATE, SortType::PROVIDER};
+    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents};
 }
 
 QVariant ModFolderModel::data(const QModelIndex &index, int role) const
@@ -82,14 +91,41 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
         }
         case DateColumn:
             return m_resources[row]->dateTimeChanged();
+        case ProviderColumn: {
+            auto provider = at(row)->provider();
+            if (!provider.has_value()) {
+	            //: Unknown mod provider (i.e. not Modrinth, CurseForge, etc...)
+                return tr("Unknown");
+            }
 
+            return provider.value();
+        }
         default:
             return QVariant();
         }
 
     case Qt::ToolTipRole:
+        if (column == NAME_COLUMN) {
+            if (at(row)->isSymLinkUnder(instDirPath())) {
+                return m_resources[row]->internal_id() +
+                    tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original." 
+                       "\nCanonical Path: %1")
+                        .arg(at(row)->fileinfo().canonicalFilePath());
+            }
+            if (at(row)->isMoreThanOneHardLink()) {
+                return m_resources[row]->internal_id() +
+                    tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
+            }
+        }
         return m_resources[row]->internal_id();
-
+    case Qt::DecorationRole: {
+        if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
+            return APPLICATION->getThemedIcon("status-yellow");
+        if (column == ImageColumn) {
+            return at(row)->icon({32, 32}, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+        }
+        return {};
+    }
     case Qt::CheckStateRole:
         switch (column)
         {
@@ -111,13 +147,12 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
         switch (section)
         {
         case ActiveColumn:
-            return QString();
         case NameColumn:
-            return tr("Name");
         case VersionColumn:
-            return tr("Version");
         case DateColumn:
-            return tr("Last changed");
+        case ProviderColumn:
+        case ImageColumn:
+            return columnNames().at(section);
         default:
             return QVariant();
         }
@@ -133,6 +168,8 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
             return tr("The version of the mod.");
         case DateColumn:
             return tr("The date and time this mod was last changed (or added).");
+        case ProviderColumn:
+            return tr("Where the mod was downloaded from.");
         default:
             return QVariant();
         }
@@ -144,7 +181,7 @@ QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, in
 
 int ModFolderModel::columnCount(const QModelIndex &parent) const
 {
-    return NUM_COLUMNS;
+    return parent.isValid() ? 0 : NUM_COLUMNS;
 }
 
 Task* ModFolderModel::createUpdateTask()
@@ -162,10 +199,10 @@ Task* ModFolderModel::createParseTask(Resource& resource)
 
 bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadata)
 {
-    for(auto mod : allMods()){
-        if(mod->fileinfo().fileName() == filename){
+    for(auto mod : allMods()) {
+        if(mod->fileinfo().fileName() == filename) {
             auto index_dir = indexDir();
-            mod->destroy(index_dir, preserve_metadata);
+            mod->destroy(index_dir, preserve_metadata, false);
 
             update();
 
@@ -178,16 +215,11 @@ bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadat
 
 bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
 {
-    if(!m_can_interact) {
-        return false;
-    }
-
-    if(indexes.isEmpty())
+    if (indexes.isEmpty())
         return true;
 
-    for (auto i: indexes)
-    {
-        if(i.column() != 0) {
+    for (auto i : indexes) {
+        if (i.column() != 0) {
             continue;
         }
         auto m = at(i.row());

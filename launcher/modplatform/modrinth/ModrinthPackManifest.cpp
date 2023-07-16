@@ -128,6 +128,7 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
 
     file.name = Json::requireString(obj, "name");
     file.version = Json::requireString(obj, "version_number");
+    file.changelog = Json::ensureString(obj, "changelog");
 
     file.id = Json::requireString(obj, "id");
     file.project_id = Json::requireString(obj, "project_id");
@@ -140,7 +141,7 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
     for (auto file_iter : files) {
         File indexed_file;
         auto parent = Json::requireObject(file_iter);
-        auto is_primary = Json::ensureBoolean(parent, "primary", false);
+        auto is_primary = Json::ensureBoolean(parent, (const QString)QStringLiteral("primary"), false);
         if (!is_primary) {
             auto filename = Json::ensureString(parent, "filename");
             // Checking suffix here is fine because it's the response from Modrinth,

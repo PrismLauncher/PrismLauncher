@@ -412,8 +412,6 @@ QList<QString> JavaUtils::FindJavaPaths()
 #elif defined(Q_OS_LINUX)
 QList<QString> JavaUtils::FindJavaPaths()
 {
-    qDebug() << "Linux Java detection incomplete - defaulting to \"java\"";
-
     QList<QString> javas;
     javas.append(this->GetDefaultJava()->path);
     auto scanJavaDir = [&](const QString & dirPath)
@@ -421,37 +419,37 @@ QList<QString> JavaUtils::FindJavaPaths()
         QDir dir(dirPath);
         if(!dir.exists())
             return;
-        auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+        auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
         for(auto & entry: entries)
         {
-
             QString prefix;
-            if(entry.isAbsolute())
-            {
-                prefix = entry.absoluteFilePath();
-            }
-            else
-            {
-                prefix = entry.filePath();
-            }
-
+            prefix = entry.canonicalFilePath();
             javas.append(FS::PathCombine(prefix, "jre/bin/java"));
             javas.append(FS::PathCombine(prefix, "bin/java"));
         }
     };
+    // java installed in a snap is installed in the standard directory, but underneath $SNAP
+    auto snap = qEnvironmentVariable("SNAP");
+    auto scanJavaDirs = [&](const QString & dirPath)
+    {
+        scanJavaDir(dirPath);
+        if (!snap.isNull()) {
+            scanJavaDir(snap + dirPath);
+        }
+    };
     // oracle RPMs
-    scanJavaDir("/usr/java");
+    scanJavaDirs("/usr/java");
     // general locations used by distro packaging
-    scanJavaDir("/usr/lib/jvm");
-    scanJavaDir("/usr/lib64/jvm");
-    scanJavaDir("/usr/lib32/jvm");
+    scanJavaDirs("/usr/lib/jvm");
+    scanJavaDirs("/usr/lib64/jvm");
+    scanJavaDirs("/usr/lib32/jvm");
     // javas stored in Prism Launcher's folder
-    scanJavaDir("java");
+    scanJavaDirs("java");
     // manually installed JDKs in /opt
-    scanJavaDir("/opt/jdk");
-    scanJavaDir("/opt/jdks");
+    scanJavaDirs("/opt/jdk");
+    scanJavaDirs("/opt/jdks");
     // flatpak
-    scanJavaDir("/app/jdk");
+    scanJavaDirs("/app/jdk");
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;
