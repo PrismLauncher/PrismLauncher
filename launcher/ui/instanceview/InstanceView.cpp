@@ -35,32 +35,32 @@
 
 #include "InstanceView.h"
 
-#include <QPainter>
-#include <QApplication>
-#include <QtMath>
-#include <QMouseEvent>
-#include <QListView>
-#include <QPersistentModelIndex>
-#include <QDrag>
-#include <QMimeData>
-#include <QCache>
-#include <QScrollBar>
 #include <QAccessible>
+#include <QApplication>
+#include <QCache>
+#include <QDrag>
+#include <QFont>
+#include <QListView>
+#include <QMimeData>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QPersistentModelIndex>
+#include <QScrollBar>
+#include <QtMath>
 
+#include <QDebug>
+#include <cstddef>
 #include "VisualGroup.h"
 #include "ui/themes/ThemeManager.h"
-#include <QDebug>
 
 #include <Application.h>
 #include <InstanceList.h>
 
-
-template <typename T> bool listsIntersect(const QList<T> &l1, const QList<T> t2)
+template <typename T>
+bool listsIntersect(const QList<T>& l1, const QList<T> t2)
 {
-    for (auto &item : l1)
-    {
-        if (t2.contains(item))
-        {
+    for (auto& item : l1) {
+        if (t2.contains(item)) {
             return true;
         }
     }
@@ -536,11 +536,50 @@ void InstanceView::paintEvent(QPaintEvent* event)
 #endif
     option.widget = this;
 
+    if (model()->rowCount() == 0) {
+        painter.save();
+        const QString line1 = "Welcome!";
+        const QString line2 = "Add an instance to get started.";
+        auto rect = this->viewport()->rect();
+        auto font = option.font;
+        font.setPointSize(64);
+        painter.setFont(font);
+        auto fm = painter.fontMetrics();
+
+        if (rect.height() <= (fm.height() * 5) || rect.width() <= fm.horizontalAdvance(line2)) {
+            auto s = rect.height() / (5. * fm.height());
+            auto sx = rect.width() * 1. / fm.horizontalAdvance(line2);
+            if (s >= sx)
+                s = sx;
+            auto ps = font.pointSize() * s;
+            if (ps <= 0)
+                ps = 1;
+            font.setPointSize(ps);
+            painter.setFont(font);
+            fm = painter.fontMetrics();
+        }
+        // about icon
+        auto about = QIcon::fromTheme("about");
+        QRect aboutRect(0, 0, fm.height() * .75, fm.height() * .75);
+        aboutRect.moveCenter(rect.center());
+        aboutRect.moveTop(fm.height() * .75);
+        auto px = about.pixmap(about.actualSize(aboutRect.size()));
+        if (!px.isNull())
+            painter.drawPixmap(aboutRect, px);
+
+        // text
+        rect.setTop(rect.top() + fm.height() * 1.5);
+        painter.drawText(rect, Qt::AlignHCenter, line1);
+        rect.setTop(rect.top() + fm.height());
+        painter.drawText(rect, Qt::AlignHCenter, line2);
+        painter.restore();
+        return;
+    }
+
     int wpWidth = viewport()->width();
     option.rect.setWidth(wpWidth);
-    for (int i = 0; i < m_groups.size(); ++i)
-    {
-        VisualGroup *category = m_groups.at(i);
+    for (int i = 0; i < m_groups.size(); ++i) {
+        VisualGroup* category = m_groups.at(i);
         int y = category->verticalPosition();
         y -= verticalOffset();
         QRect backup = option.rect;
