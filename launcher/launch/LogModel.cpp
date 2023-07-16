@@ -113,13 +113,15 @@ QVector<std::tuple<int, int, int>> LogModel::search(QString text_to_search, bool
         QRegularExpression regex{text_to_search};
         regex.optimize();
 
-        if (!regex.errorString().isEmpty()) {
+        if (!regex.isValid()) {
             qCritical() << "Error in regex pattern:" << regex.errorString();
             return {};
         }
 
         for (int i = 0; i < m_numLines; i++) {
-            if (auto match = regex.match(m_content.at(i).line); match.hasMatch()) {
+            auto matches_on_line = regex.globalMatch(m_content.at(i).line);
+            while (matches_on_line.hasNext()) {
+                auto match = matches_on_line.next();
                 for (int k = 0; k <= match.lastCapturedIndex(); k++)
                     matches.append(std::make_tuple(i + 1, match.capturedStart(k), match.capturedEnd(k)));
             }
