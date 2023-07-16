@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,27 +75,16 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
     InstIconKey = "default";
     ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    auto groupList = APPLICATION->instances()->getGroups();
-    auto groups = QSet<QString>(groupList.begin(), groupList.end());
-    groupList = groups.values();
-#else
-    auto groups = APPLICATION->instances()->getGroups().toSet();
-    auto groupList = QStringList(groups.toList());
-#endif
-    groupList.sort(Qt::CaseInsensitive);
-    groupList.removeOne("");
-    groupList.push_front(initialGroup);
-    groupList.push_front("");
-    ui->groupBox->addItems(groupList);
-    int index = groupList.indexOf(initialGroup);
-    if(index == -1)
-    {
-        index = 0;
+    QStringList groups = APPLICATION->instances()->getGroups();
+    groups.prepend("");
+    int index = groups.indexOf(initialGroup);
+    if (index == -1) {
+        index = 1;
+        groups.insert(index, initialGroup);
     }
+    ui->groupBox->addItems(groups);
     ui->groupBox->setCurrentIndex(index);
     ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
-
 
     // NOTE: m_buttons must be initialized before PageContainer, because it indirectly accesses m_buttons through setSuggestedPack! Do not move this below.
     m_buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
