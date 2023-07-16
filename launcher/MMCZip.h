@@ -43,6 +43,7 @@
 #include <QSet>
 #include <QString>
 #include <functional>
+#include <memory>
 #include <optional>
 #include "minecraft/mod/Mod.h"
 #include "tasks/Task.h"
@@ -145,39 +146,28 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
 
 class ExportToZipTask : public Task {
    public:
-    ExportToZipTask(QuaZip* output,
+    ExportToZipTask(std::shared_ptr<QuaZip> output,
                     QDir dir,
                     QFileInfoList files,
                     QString destinationPrefix = "",
-                    bool followSymlinks = false,
-                    bool cleanUp = false)
-        : m_output(output)
-        , m_dir(dir)
-        , m_files(files)
-        , m_destinationPrefix(destinationPrefix)
-        , m_followSymlinks(followSymlinks)
-        , m_cleanUp(cleanUp)
+                    bool followSymlinks = false)
+        : m_output(output), m_dir(dir), m_files(files), m_destinationPrefix(destinationPrefix), m_followSymlinks(followSymlinks)
     {
         setAbortable(true);
     };
     ExportToZipTask(QString outputPath, QString dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
-        : ExportToZipTask(new QuaZip(outputPath), QDir(dir), files, destinationPrefix, followSymlinks, true){};
+        : ExportToZipTask(std::make_shared<QuaZip>(outputPath), QDir(dir), files, destinationPrefix, followSymlinks){};
 
-    virtual ~ExportToZipTask()
-    {
-        if (m_cleanUp)
-            delete m_output;
-    }
+    virtual ~ExportToZipTask() = default;
 
    protected:
     virtual void executeTask() override;
 
    private:
-    QuaZip* m_output;
+    std::shared_ptr<QuaZip> m_output;
     QDir m_dir;
     QFileInfoList m_files;
     QString m_destinationPrefix;
     bool m_followSymlinks;
-    bool m_cleanUp;
 };
 }  // namespace MMCZip

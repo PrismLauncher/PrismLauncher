@@ -451,7 +451,7 @@ void ExportToZipTask::executeTask()
                     absolute = file.canonicalFilePath();
             }
 
-            if (!JlCompress::compressFile(m_output, absolute, m_destinationPrefix + relative)) {
+            if (!JlCompress::compressFile(m_output.get(), absolute, m_destinationPrefix + relative)) {
                 emitFailed(tr("Could not read and compress %1").arg(relative));
                 return;
             }
