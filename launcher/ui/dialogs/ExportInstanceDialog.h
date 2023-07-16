@@ -38,39 +38,37 @@
 #include <QDialog>
 #include <QModelIndex>
 #include <memory>
-#include "FileIgnoreProxy.h"
 #include "FastFileIconProvider.h"
+#include "FileIgnoreProxy.h"
 
 class BaseInstance;
 typedef std::shared_ptr<BaseInstance> InstancePtr;
 
-namespace Ui
-{
+namespace Ui {
 class ExportInstanceDialog;
 }
 
-class ExportInstanceDialog : public QDialog
-{
+class ExportInstanceDialog : public QDialog {
     Q_OBJECT
 
-public:
-    explicit ExportInstanceDialog(InstancePtr instance, QWidget *parent = 0);
+   public:
+    explicit ExportInstanceDialog(InstancePtr instance, QWidget* parent = 0);
     ~ExportInstanceDialog();
 
     virtual void done(int result);
 
-private:
+   private:
     bool doExport();
     void loadPackIgnore();
     void savePackIgnore();
     QString ignoreFileName();
 
-private:
-    Ui::ExportInstanceDialog *ui;
+   private:
+    Ui::ExportInstanceDialog* ui;
     InstancePtr m_instance;
-    FileIgnoreProxy * proxyModel;
+    FileIgnoreProxy* proxyModel;
     FastFileIconProvider icons;
 
-private slots:
+   private slots:
     void rowsInserted(QModelIndex parent, int top, int bottom);
 };
