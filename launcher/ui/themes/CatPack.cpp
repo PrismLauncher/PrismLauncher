@@ -61,36 +61,23 @@ QString BasicCatPack::path()
 
 JsonCatPack::JsonCatPack(QFileInfo& manifestInfo) : BasicCatPack(manifestInfo.dir().dirName())
 {
-    QString path = FS::PathCombine("catpacks", m_id);
-
-    if (!FS::ensureFolderPathExists(path)) {
-        themeWarningLog() << "couldn't create folder for catpack!";
-        return;
-    }
-
-    if (manifestInfo.exists() && manifestInfo.isFile()) {
-        try {
-            auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "CatPack JSON file");
-            const auto root = doc.object();
-            m_name = Json::requireString(root, "name", "Catpack name");
-            auto id = Json::ensureString(root, "id", "", "Catpack ID");
-            if (!id.isEmpty())
-                m_id = id;
-            m_defaultPath = FS::PathCombine(path, Json::requireString(root, "default", "Deafult Cat"));
-            auto variants = Json::ensureArray(root, "variants", QJsonArray(), "Catpack Variants");
-            for (auto v : variants) {
-                auto variant = Json::ensureObject(v, QJsonObject(), "Cat variant");
-                m_variants << Variant{ FS::PathCombine(path, Json::requireString(variant, "path", "Variant path")),
-                                       PartialDate(Json::requireString(variant, "startTime", "Variant startTime")),
-                                       PartialDate(Json::requireString(variant, "endTime", "Variant endTime")) };
-            }
-
-        } catch (const Exception& e) {
-            themeWarningLog() << "Couldn't load catpack json: " << e.cause();
-            return;
+    QString path = manifestInfo.path();
+    try {
+        auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "CatPack JSON file");
+        const auto root = doc.object();
+        m_name = Json::requireString(root, "name", "Catpack name");
+        m_defaultPath = FS::PathCombine(path, Json::requireString(root, "default", "Default Cat"));
+        auto variants = Json::ensureArray(root, "variants", QJsonArray(), "Catpack Variants");
+        for (auto v : variants) {
+            auto variant = Json::ensureObject(v, QJsonObject(), "Cat variant");
+            m_variants << Variant{ FS::PathCombine(path, Json::requireString(variant, "path", "Variant path")),
+                                   PartialDate(Json::requireString(variant, "startTime", "Variant startTime")),
+                                   PartialDate(Json::requireString(variant, "endTime", "Variant endTime")) };
         }
-    } else {
-        themeDebugLog() << "No catpack json present.";
+
+    } catch (const Exception& e) {
+        themeWarningLog() << "Couldn't load catpack json:" << e.cause();
+        return;
     }
 }
 

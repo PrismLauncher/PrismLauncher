@@ -21,6 +21,7 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QIcon>
+#include <QImageReader>
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CatPack.h"
 #include "ui/themes/CustomTheme.h"
@@ -179,13 +180,17 @@ void ThemeManager::initializeCatPacks()
     for (auto [id, name] : defaultCats) {
         addCatPack(std::unique_ptr<CatPack>(new BasicCatPack(id, name)));
     }
-    QDir catpacksDir("./catpacks/");
+    QDir catpacksDir("catpacks");
     QString catpacksFolder = catpacksDir.absoluteFilePath("");
-    themeDebugLog() << "CatPacks Folder Path: " << catpacksFolder;
+    themeDebugLog() << "CatPacks Folder Path:" << catpacksFolder;
 
-    auto loadFiles = [this](QDir dir) {
+    QStringList supportedImageFormats;
+    for (auto format : QImageReader::supportedImageFormats()) {
+        supportedImageFormats.append("*." + format);
+    }
+    auto loadFiles = [this, supportedImageFormats](QDir dir) {
         // Load image files directly
-        QDirIterator ImageFileIterator(dir.absoluteFilePath(""), { "*.png", "*.gif", "*.jpg", "*.apng", "*.jxl", "*.avif" }, QDir::Files);
+        QDirIterator ImageFileIterator(dir.absoluteFilePath(""), supportedImageFormats, QDir::Files);
         while (ImageFileIterator.hasNext()) {
             QFile customCatFile(ImageFileIterator.next());
             QFileInfo customCatFileInfo(customCatFile);
@@ -200,7 +205,7 @@ void ThemeManager::initializeCatPacks()
     while (directoryIterator.hasNext()) {
         QDir dir(directoryIterator.next());
         QFileInfo manifest(dir.absoluteFilePath("catpack.json"));
-        if (manifest.exists()) {
+        if (manifest.isFile()) {
             // Load background manifest
             themeDebugLog() << "Loading background manifest from:" << manifest.absoluteFilePath();
             addCatPack(std::unique_ptr<CatPack>(new JsonCatPack(manifest)));
