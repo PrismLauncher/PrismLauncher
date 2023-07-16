@@ -1,0 +1,22 @@
+{
+    "colors": {
+        "AlternateBase": "#101010",
+        "Base": "#000000",
+        "BrightText": "#ff0000",
+        "Button": "#111111",
+        "ButtonText": "#ffffff",
+        "Highlight": "#cccccc",
+        "HighlightedText": "#000000",
+        "Link": "#2a82da",
+        "Text": "#ffffff",
+        "ToolTipBase": "#ffffff",
+        "ToolTipText": "#ffffff",
+        "Window": "#121212",
+        "WindowText": "#ffffff",
+        "fadeAmount": 0.5,
+        "fadeColor": "#444747"
+    },
+    "name": "Fluent",
+    "qssFilePath": "themeStyle.css",
+    "widgets": "Fusion"
+}

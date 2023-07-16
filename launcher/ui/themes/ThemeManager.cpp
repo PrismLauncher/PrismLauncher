@@ -199,6 +199,7 @@ void ThemeManager::bootstrapThemeEnvironment()
             qunsetenv("QT_QUICK_CONTROLS_CONF");
     } else {
         // Not system theme: May be an actual path (custom theme), or one of the built-in ones
+        s_is_qml_system_theme = false;
         if (current_conf_path == FusionTheme::USE_FUSION_QML_GLOBAL_THEME) {
             // One of the built-in themes, set the theme to Fusion
             QQuickStyle::setStyle("Fusion");

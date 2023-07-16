@@ -194,6 +194,8 @@ jobs:
         run: |
           sudo apt-get -y update
           sudo apt-get -y install ninja-build extra-cmake-modules scdoc appstream
+          # Test dependecies
+          sudo apt-get -y install xvfb x11-utils libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
@@ -324,8 +326,13 @@ jobs:
       # TEST
       ##
 
-      - name: Test
-        if: runner.os != 'Windows'
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          xvfb-run --auto-servernum ctest -E "^example64|example$" --test-dir build --output-on-failure
+
+      - name: Test (macOS)
+        if: runner.os == 'macOS'
         run: |
           ctest -E "^example64|example$" --test-dir build --output-on-failure
 
