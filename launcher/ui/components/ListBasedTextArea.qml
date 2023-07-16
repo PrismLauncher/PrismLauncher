@@ -57,6 +57,8 @@ Pane {
                 text += model.data(index);
             else
                 text += item.selectedText;
+
+            text += '\n';
         }
 
         return text;
