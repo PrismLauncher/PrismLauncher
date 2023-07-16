@@ -105,10 +105,12 @@ jobs:
             PrismLauncher-Windows-MSVC-Legacy-Setup-${{ env.VERSION }}.exe
             PrismLauncher-Windows-MSVC-arm64-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-arm64-Portable-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MSVC-arm64-Setup-${{ env.VERSION }}.exe
             PrismLauncher-Windows-MSVC-arm64-${{ env.VERSION }}.msix
             PrismLauncher-Windows-MSVC-arm64-${{ env.VERSION }}.msixbundle
             PrismLauncher-Windows-MSVC-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Portable-${{ env.VERSION }}.zip
+            PrismLauncher-Windows-MSVC-Setup-${{ env.VERSION }}.exe
             PrismLauncher-Windows-MSVC-${{ env.VERSION }}.msix
             PrismLauncher-Windows-MSVC-${{ env.VERSION }}.msixbundle
             PrismLauncher-Windows-MSVC-${{ env.VERSION }}.AppInstaller
