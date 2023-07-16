@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,9 +42,11 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QtConcurrentRun>
 
+namespace MMCZip {
 // ours
-bool MMCZip::mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction filter)
+bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction filter)
 {
     QuaZip modZip(from.filePath());
     modZip.open(QuaZip::mdUnzip);
@@ -86,7 +89,7 @@ bool MMCZip::mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& containe
     return true;
 }
 
-bool MMCZip::compressDirFiles(QuaZip* zip, QString dir, QFileInfoList files, bool followSymlinks)
+bool compressDirFiles(QuaZip* zip, QString dir, QFileInfoList files, bool followSymlinks)
 {
     QDir directory(dir);
     if (!directory.exists())
@@ -109,7 +112,7 @@ bool MMCZip::compressDirFiles(QuaZip* zip, QString dir, QFileInfoList files, boo
     return true;
 }
 
-bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks)
+bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks)
 {
     QuaZip zip(fileCompressed);
     QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
@@ -130,7 +133,7 @@ bool MMCZip::compressDirFiles(QString fileCompressed, QString dir, QFileInfoList
 }
 
 // ours
-bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
+bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
 {
     QuaZip zipOut(targetJarPath);
     if (!zipOut.open(QuaZip::mdCreate)) {
@@ -175,14 +178,14 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
             dir.cdUp();
             QString parent_dir = dir.absolutePath();
             auto files = QFileInfoList();
-            MMCZip::collectFileListRecursively(what_to_zip, nullptr, &files, nullptr);
+            collectFileListRecursively(what_to_zip, nullptr, &files, nullptr);
 
             for (auto e : files) {
                 if (addedFiles.contains(e.filePath()))
                     files.removeAll(e);
             }
 
-            if (!MMCZip::compressDirFiles(&zipOut, parent_dir, files)) {
+            if (!compressDirFiles(&zipOut, parent_dir, files)) {
                 zipOut.close();
                 QFile::remove(targetJarPath);
                 qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
@@ -216,7 +219,7 @@ bool MMCZip::createModdedJar(QString sourceJarPath, QString targetJarPath, const
 }
 
 // ours
-QString MMCZip::findFolderOfFileInZip(QuaZip* zip, const QString& what, const QStringList& ignore_paths, const QString& root)
+QString findFolderOfFileInZip(QuaZip* zip, const QString& what, const QStringList& ignore_paths, const QString& root)
 {
     QuaZipDir rootDir(zip, root);
     for (auto&& fileName : rootDir.entryList(QDir::Files)) {
@@ -240,7 +243,7 @@ QString MMCZip::findFolderOfFileInZip(QuaZip* zip, const QString& what, const QS
 }
 
 // ours
-bool MMCZip::findFilesInZip(QuaZip* zip, const QString& what, QStringList& result, const QString& root)
+bool findFilesInZip(QuaZip* zip, const QString& what, QStringList& result, const QString& root)
 {
     QuaZipDir rootDir(zip, root);
     for (auto fileName : rootDir.entryList(QDir::Files)) {
@@ -256,7 +259,7 @@ bool MMCZip::findFilesInZip(QuaZip* zip, const QString& what, QStringList& resul
 }
 
 // ours
-std::optional<QStringList> MMCZip::extractSubDir(QuaZip* zip, const QString& subdir, const QString& target)
+std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, const QString& target)
 {
     auto target_top_dir = QUrl::fromLocalFile(target);
 
@@ -328,13 +331,13 @@ std::optional<QStringList> MMCZip::extractSubDir(QuaZip* zip, const QString& sub
 }
 
 // ours
-bool MMCZip::extractRelFile(QuaZip* zip, const QString& file, const QString& target)
+bool extractRelFile(QuaZip* zip, const QString& file, const QString& target)
 {
     return JlCompress::extractFile(zip, file, target);
 }
 
 // ours
-std::optional<QStringList> MMCZip::extractDir(QString fileCompressed, QString dir)
+std::optional<QStringList> extractDir(QString fileCompressed, QString dir)
 {
     QuaZip zip(fileCompressed);
     if (!zip.open(QuaZip::mdUnzip)) {
@@ -347,11 +350,11 @@ std::optional<QStringList> MMCZip::extractDir(QString fileCompressed, QString di
         ;
         return std::nullopt;
     }
-    return MMCZip::extractSubDir(&zip, "", dir);
+    return extractSubDir(&zip, "", dir);
 }
 
 // ours
-std::optional<QStringList> MMCZip::extractDir(QString fileCompressed, QString subdir, QString dir)
+std::optional<QStringList> extractDir(QString fileCompressed, QString subdir, QString dir)
 {
     QuaZip zip(fileCompressed);
     if (!zip.open(QuaZip::mdUnzip)) {
@@ -364,11 +367,11 @@ std::optional<QStringList> MMCZip::extractDir(QString fileCompressed, QString su
         ;
         return std::nullopt;
     }
-    return MMCZip::extractSubDir(&zip, subdir, dir);
+    return extractSubDir(&zip, subdir, dir);
 }
 
 // ours
-bool MMCZip::extractFile(QString fileCompressed, QString file, QString target)
+bool extractFile(QString fileCompressed, QString file, QString target)
 {
     QuaZip zip(fileCompressed);
     if (!zip.open(QuaZip::mdUnzip)) {
@@ -380,13 +383,10 @@ bool MMCZip::extractFile(QString fileCompressed, QString file, QString target)
         qWarning() << "Could not open archive for unzipping:" << fileCompressed << "Error:" << zip.getZipError();
         return false;
     }
-    return MMCZip::extractRelFile(&zip, file, target);
+    return extractRelFile(&zip, file, target);
 }
 
-bool MMCZip::collectFileListRecursively(const QString& rootDir,
-                                        const QString& subDir,
-                                        QFileInfoList* files,
-                                        MMCZip::FilterFunction excludeFilter)
+bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter)
 {
     QDir rootDirectory(rootDir);
     if (!rootDirectory.exists())
@@ -417,7 +417,52 @@ bool MMCZip::collectFileListRecursively(const QString& rootDir,
             continue;
         }
 
-        files->append(e);  // we want the original paths for MMCZip::compressDirFiles
+        files->append(e);  // we want the original paths for compressDirFiles
     }
     return true;
 }
+
+void ExportToZipTask::executeTask()
+{
+    (void)QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
+        setStatus("Adding files...");
+        setProgress(0, m_files.length());
+        if (!m_dir.exists()) {
+            emitFailed(tr("Folder doesn't exist"));
+            return;
+        }
+        if (!m_output->isOpen() && !m_output->open(QuaZip::mdCreate)) {
+            emitFailed(tr("Could not create file"));
+            return;
+        }
+
+        for (const QFileInfo& file : m_files) {
+            if (!isRunning())
+                return;
+
+            auto absolute = file.absoluteFilePath();
+            auto relative = m_dir.relativeFilePath(absolute);
+            setStatus("Compresing: " + relative);
+            setProgress(m_progress + 1, m_progressTotal);
+            if (m_followSymlinks) {
+                if (file.isSymLink())
+                    absolute = file.symLinkTarget();
+                else
+                    absolute = file.canonicalFilePath();
+            }
+
+            if (!JlCompress::compressFile(m_output, absolute, m_destinationPrefix + relative)) {
+                emitFailed(tr("Could not read and compress %1").arg(relative));
+                return;
+            }
+        }
+
+        m_output->close();
+        if (m_output->getZipError() != 0) {
+            emitFailed(tr("A zip error occurred"));
+            return;
+        }
+        emitSucceeded();
+    });
+}
+}  // namespace MMCZip

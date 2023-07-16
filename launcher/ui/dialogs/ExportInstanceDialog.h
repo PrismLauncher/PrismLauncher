@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -58,7 +59,7 @@ class ExportInstanceDialog : public QDialog {
     virtual void done(int result);
 
    private:
-    bool doExport();
+    void doExport();
     void loadPackIgnore();
     void savePackIgnore();
     QString ignoreFileName();

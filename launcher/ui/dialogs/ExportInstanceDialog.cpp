@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,6 +42,9 @@
 #include <QFileSystemModel>
 #include <QMessageBox>
 #include "FileIgnoreProxy.h"
+#include "QObjectPtr.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui_ExportInstanceDialog.h"
 
 #include <FileSystem.h>
@@ -119,14 +123,15 @@ void SaveIcon(InstancePtr m_instance)
     pixmap.save(FS::PathCombine(m_instance->instanceRoot(), iconKey + ".png"));
 }
 
-bool ExportInstanceDialog::doExport()
+void ExportInstanceDialog::doExport()
 {
     auto name = FS::RemoveInvalidFilenameChars(m_instance->name());
 
     const QString output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(m_instance->name()),
                                                         FS::PathCombine(QDir::homePath(), name + ".zip"), "Zip (*.zip)", nullptr);
     if (output.isEmpty()) {
-        return false;
+        QDialog::done(QDialog::Rejected);
+        return;
     }
 
     SaveIcon(m_instance);
@@ -135,26 +140,31 @@ bool ExportInstanceDialog::doExport()
     if (!MMCZip::collectFileListRecursively(m_instance->instanceRoot(), nullptr, &files,
                                             std::bind(&FileIgnoreProxy::filterFile, proxyModel, std::placeholders::_1))) {
         QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
-        return false;
+        QDialog::done(QDialog::Rejected);
+        return;
     }
 
-    if (!MMCZip::compressDirFiles(output, m_instance->instanceRoot(), files, true)) {
-        QMessageBox::warning(this, tr("Error"), tr("Unable to export instance"));
-        return false;
-    }
-    return true;
+    auto task = makeShared<MMCZip::ExportToZipTask>(output, m_instance->instanceRoot(), files, "", true);
+
+    connect(task.get(), &Task::failed, this, [this, output](QString reason) {
+        CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+        QFile::remove(output);
+    });
+    connect(task.get(), &Task::aborted, this, [output] { QFile::remove(output); });
+    connect(task.get(), &Task::finished, this, [task] { task->deleteLater(); });
+
+    ProgressDialog progress(this);
+    progress.setSkipButton(true, tr("Abort"));
+    auto result = progress.execWithTask(task.get());
+    QDialog::done(result);
 }
 
 void ExportInstanceDialog::done(int result)
 {
     savePackIgnore();
     if (result == QDialog::Accepted) {
-        if (doExport()) {
-            QDialog::done(QDialog::Accepted);
-            return;
-        } else {
-            return;
-        }
+        doExport();
+        return;
     }
     QDialog::done(result);
 }

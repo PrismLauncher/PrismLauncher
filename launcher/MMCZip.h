@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,14 +36,16 @@
 
 #pragma once
 
+#include <quazip.h>
+#include <quazip/JlCompress.h>
+#include <QDir>
 #include <QFileInfo>
 #include <QSet>
 #include <QString>
 #include <functional>
-#include "minecraft/mod/Mod.h"
-
-#include <quazip/JlCompress.h>
 #include <optional>
+#include "minecraft/mod/Mod.h"
+#include "tasks/Task.h"
 
 namespace MMCZip {
 using FilterFunction = std::function<bool(const QString&)>;
@@ -139,4 +142,42 @@ bool extractFile(QString fileCompressed, QString file, QString dir);
  * \return true for success or false for failure
  */
 bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter);
+
+class ExportToZipTask : public Task {
+   public:
+    ExportToZipTask(QuaZip* output,
+                    QDir dir,
+                    QFileInfoList files,
+                    QString destinationPrefix = "",
+                    bool followSymlinks = false,
+                    bool cleanUp = false)
+        : m_output(output)
+        , m_dir(dir)
+        , m_files(files)
+        , m_destinationPrefix(destinationPrefix)
+        , m_followSymlinks(followSymlinks)
+        , m_cleanUp(cleanUp)
+    {
+        setAbortable(true);
+    };
+    ExportToZipTask(QString outputPath, QString dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
+        : ExportToZipTask(new QuaZip(outputPath), QDir(dir), files, destinationPrefix, followSymlinks, true){};
+
+    virtual ~ExportToZipTask()
+    {
+        if (m_cleanUp)
+            delete m_output;
+    }
+
+   protected:
+    virtual void executeTask() override;
+
+   private:
+    QuaZip* m_output;
+    QDir m_dir;
+    QFileInfoList m_files;
+    QString m_destinationPrefix;
+    bool m_followSymlinks;
+    bool m_cleanUp;
+};
 }  // namespace MMCZip
