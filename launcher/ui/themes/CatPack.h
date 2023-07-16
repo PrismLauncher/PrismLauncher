@@ -74,13 +74,6 @@ class FileCatPack : public BasicCatPack {
 class JsonCatPack : public BasicCatPack {
    public:
     struct PartialDate {
-        PartialDate(QString d)
-        {
-            auto sp = d.split("-");
-            day = sp[0].toInt();
-            if (sp.length() >= 2)
-                month = sp[1].toInt();
-        }
         int month;
         int day;
     };
