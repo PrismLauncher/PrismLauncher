@@ -154,6 +154,7 @@ Components.ThemedControl {
                 }
 
                 CheckBox {
+                    id: regexCheckBox
                     text: qsTr("Treat as RegEx")
 
                     checked: page.useRegexInSearch
@@ -162,7 +163,7 @@ Components.ThemedControl {
                     hoverEnabled: true
                     Components.ToolTip {
                         text: qsTr("If enabled, interpret the search input as a regular expression.<br>Otherwise, do a simple text search.")
-                        visible: CheckBox.hovered
+                        visible: regexCheckBox.hovered
                     }
                 }
 
