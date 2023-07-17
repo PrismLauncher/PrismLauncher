@@ -396,8 +396,11 @@ QStringList MinecraftInstance::extraArguments()
         agent->library()->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
         list.append("-javaagent:"+jar[0]+(agent->argument().isEmpty() ? "" : "="+agent->argument()));
     }
-    if (version->getModLoaders().value() & ResourceAPI::Quilt && settings()->get("DisableQuiltBeacon").toBool()) {
-        list.append("-Dloader.disable_beacon=true");
+
+    {
+        const auto& loaders = version->getModLoaders();
+        if (loaders.has_value() && loaders.value() & ResourceAPI::Quilt && settings()->get("DisableQuiltBeacon").toBool())
+            list.append("-Dloader.disable_beacon=true");
     }
     return list;
 }
