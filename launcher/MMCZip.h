@@ -40,6 +40,8 @@
 #include <quazip/JlCompress.h>
 #include <QDir>
 #include <QFileInfo>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <QHash>
 #include <QSet>
 #include <QString>
@@ -148,7 +150,12 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
 class ExportToZipTask : public Task {
    public:
     ExportToZipTask(QString outputPath, QDir dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
-        : m_output(outputPath), m_dir(dir), m_files(files), m_destination_prefix(destinationPrefix), m_follow_symlinks(followSymlinks)
+        : m_output_path(outputPath)
+        , m_output(outputPath)
+        , m_dir(dir)
+        , m_files(files)
+        , m_destination_prefix(destinationPrefix)
+        , m_follow_symlinks(followSymlinks)
     {
         setAbortable(true);
     };
@@ -160,11 +167,17 @@ class ExportToZipTask : public Task {
     void setExcludeFiles(QStringList excludeFiles) { m_exclude_files = excludeFiles; }
     void addExtraFile(QString fileName, QByteArray data) { m_extra_files.insert(fileName, data); }
 
+    typedef std::optional<QString> ZipResult;
+
    protected:
     virtual void executeTask() override;
-    void exportZip();
+    bool abort() override;
+
+    ZipResult exportZip();
+    void finish();
 
    private:
+    QString m_output_path;
     QuaZip m_output;
     QDir m_dir;
     QFileInfoList m_files;
@@ -172,5 +185,8 @@ class ExportToZipTask : public Task {
     bool m_follow_symlinks;
     QStringList m_exclude_files;
     QHash<QString, QByteArray> m_extra_files;
+
+    QFuture<ZipResult> m_build_zip_future;
+    QFutureWatcher<ZipResult> m_build_zip_watcher;
 };
 }  // namespace MMCZip
