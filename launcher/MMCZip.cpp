@@ -480,4 +480,15 @@ void ExportToZipTask::exportZip()
     emitSucceeded();
 }
 
+void ExportToZipTask::emitAborted()
+{
+    QFile::remove(m_output_path);
+    Task::emitAborted();
+}
+void ExportToZipTask::emitFailed(QString reason)
+{
+    QFile::remove(m_output_path);
+    Task::emitFailed(reason);
+}
+
 }  // namespace MMCZip

@@ -344,14 +344,10 @@ void FlamePackExportTask::buildZip()
     });
 
     connect(zipTask.get(), &Task::succeeded, this, &FlamePackExportTask::emitSucceeded);
-    connect(zipTask.get(), &Task::aborted, this, [this]() {
-        QFile::remove(output);
-        emitAborted();
-    });
+    connect(zipTask.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
     connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        QFile::remove(output);
         emitFailed(reason);
     });
     connect(zipTask.get(), &Task::stepProgress, this, &FlamePackExportTask::propogateStepProgress);

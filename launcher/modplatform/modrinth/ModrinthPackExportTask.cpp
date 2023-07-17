@@ -208,14 +208,10 @@ void ModrinthPackExportTask::buildZip()
     });
 
     connect(zipTask.get(), &Task::succeeded, this, &ModrinthPackExportTask::emitSucceeded);
-    connect(zipTask.get(), &Task::aborted, this, [this]() {
-        QFile::remove(output);
-        emitAborted();
-    });
+    connect(zipTask.get(), &Task::aborted, this, &ModrinthPackExportTask::emitAborted);
     connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
-        QFile::remove(output);
         emitFailed(reason);
     });
     connect(zipTask.get(), &Task::stepProgress, this, &ModrinthPackExportTask::propogateStepProgress);

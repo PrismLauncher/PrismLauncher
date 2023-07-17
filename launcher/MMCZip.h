@@ -148,7 +148,12 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
 class ExportToZipTask : public Task {
    public:
     ExportToZipTask(QString outputPath, QDir dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
-        : m_output(outputPath), m_dir(dir), m_files(files), m_destination_prefix(destinationPrefix), m_follow_symlinks(followSymlinks)
+        : m_output_path(outputPath)
+        , m_output(outputPath)
+        , m_dir(dir)
+        , m_files(files)
+        , m_destination_prefix(destinationPrefix)
+        , m_follow_symlinks(followSymlinks)
     {
         setAbortable(true);
     };
@@ -164,7 +169,12 @@ class ExportToZipTask : public Task {
     virtual void executeTask() override;
     void exportZip();
 
+   protected slots:
+    virtual void emitAborted() override;
+    virtual void emitFailed(QString reason = "") override;
+
    private:
+    QString m_output_path;
     QuaZip m_output;
     QDir m_dir;
     QFileInfoList m_files;
