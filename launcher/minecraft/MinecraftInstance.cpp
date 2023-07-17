@@ -389,6 +389,24 @@ QStringList MinecraftInstance::extraArguments()
         if (loaders.has_value() && loaders.value() & ResourceAPI::Quilt && settings()->get("DisableQuiltBeacon").toBool())
             list.append("-Dloader.disable_beacon=true");
     }
+
+#ifdef Q_OS_LINUX
+    {
+        QString openALPath;
+        QString glfwPath;
+
+        if (settings()->get("UseNativeOpenAL").toBool())
+            openALPath = MangoHud::findLibrary("libopenal.so");
+        if (settings()->get("UseNativeGLFW").toBool())
+            glfwPath = MangoHud::findLibrary("libglfw.so");
+
+        if (!openALPath.isEmpty())
+            list.append("-Dorg.lwjgl.openal.libname=" + openALPath);
+        if (!glfwPath.isEmpty())
+            list.append("-Dorg.lwjgl.glfw.libname=" + glfwPath);
+    }
+#endif
+
     return list;
 }
 
