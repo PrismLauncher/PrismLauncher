@@ -158,7 +158,7 @@ class ExportToZipTask : public Task {
     virtual ~ExportToZipTask() = default;
 
     void setExcludeFiles(QStringList excludeFiles) { m_exclude_files = excludeFiles; }
-    void addExtraFile(QString fileName, QByteArray data) { m_extra_files.emplace(fileName, data); }
+    void addExtraFile(QString fileName, QByteArray data) { m_extra_files.insert(fileName, data); }
 
    protected:
     virtual void executeTask() override;
