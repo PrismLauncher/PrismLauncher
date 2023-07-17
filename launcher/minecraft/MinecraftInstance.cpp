@@ -398,7 +398,7 @@ QStringList MinecraftInstance::extraArguments()
     }
 
     {
-        const auto& loaders = version->getModLoaders();
+        const auto loaders = version->getModLoaders();
         if (loaders.has_value() && loaders.value() & ResourceAPI::Quilt && settings()->get("DisableQuiltBeacon").toBool())
             list.append("-Dloader.disable_beacon=true");
     }
