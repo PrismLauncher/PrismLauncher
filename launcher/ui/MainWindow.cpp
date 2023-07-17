@@ -1097,9 +1097,7 @@ void MainWindow::on_actionChangeInstGroup_triggered()
     QString src(APPLICATION->instances()->getInstanceGroup(instId));
 
     QStringList groups = APPLICATION->instances()->getGroups();
-    if (!groups.isEmpty())
-        groups.prepend("");
-
+    groups.prepend("");
     int index = groups.indexOf(src);
     bool ok = false;
     QString dst = QInputDialog::getItem(this, tr("Group name"), tr("Enter a new group name."), groups, index, true, &ok);
