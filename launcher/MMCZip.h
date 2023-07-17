@@ -40,6 +40,8 @@
 #include <quazip/JlCompress.h>
 #include <QDir>
 #include <QFileInfo>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <QHash>
 #include <QSet>
 #include <QString>
@@ -165,13 +167,14 @@ class ExportToZipTask : public Task {
     void setExcludeFiles(QStringList excludeFiles) { m_exclude_files = excludeFiles; }
     void addExtraFile(QString fileName, QByteArray data) { m_extra_files.insert(fileName, data); }
 
+    typedef std::optional<QString> ZipResult;
+
    protected:
     virtual void executeTask() override;
-    void exportZip();
+    bool abort() override;
 
-   protected slots:
-    virtual void emitAborted() override;
-    virtual void emitFailed(QString reason = "") override;
+    ZipResult exportZip();
+    void finish();
 
    private:
     QString m_output_path;
@@ -182,5 +185,8 @@ class ExportToZipTask : public Task {
     bool m_follow_symlinks;
     QStringList m_exclude_files;
     QHash<QString, QByteArray> m_extra_files;
+
+    QFuture<ZipResult> m_build_zip_future;
+    QFutureWatcher<ZipResult> m_build_zip_watcher;
 };
 }  // namespace MMCZip

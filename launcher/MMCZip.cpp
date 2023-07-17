@@ -424,36 +424,35 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
 
 void ExportToZipTask::executeTask()
 {
-    (void)QtConcurrent::run(QThreadPool::globalInstance(), [this]() { exportZip(); });
-}
-
-void ExportToZipTask::exportZip()
-{
     setStatus("Adding files...");
     setProgress(0, m_files.length());
+    m_build_zip_future = QtConcurrent::run(QThreadPool::globalInstance(), [this]() { return exportZip(); });
+    connect(&m_build_zip_watcher, &QFutureWatcher<ZipResult>::finished, this, &ExportToZipTask::finish);
+    m_build_zip_watcher.setFuture(m_build_zip_future);
+}
+
+auto ExportToZipTask::exportZip() -> ZipResult
+{
     if (!m_dir.exists()) {
-        emitFailed(tr("Folder doesn't exist"));
-        return;
+        return ZipResult(tr("Folder doesn't exist"));
     }
     if (!m_output.isOpen() && !m_output.open(QuaZip::mdCreate)) {
-        emitFailed(tr("Could not create file"));
-        return;
+        return ZipResult(tr("Could not create file"));
     }
 
     for (auto fileName : m_extra_files.keys()) {
-        if (!isRunning())
-            return;
+        if (m_build_zip_future.isCanceled())
+            return ZipResult();
         QuaZipFile indexFile(&m_output);
         if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo(fileName))) {
-            emitFailed(tr("Could not create:") + fileName);
-            return;
+            return ZipResult(tr("Could not create:") + fileName);
         }
         indexFile.write(m_extra_files[fileName]);
     }
 
     for (const QFileInfo& file : m_files) {
-        if (!isRunning())
-            return;
+        if (m_build_zip_future.isCanceled())
+            return ZipResult();
 
         auto absolute = file.absoluteFilePath();
         auto relative = m_dir.relativeFilePath(absolute);
@@ -467,28 +466,39 @@ void ExportToZipTask::exportZip()
         }
 
         if (!m_exclude_files.contains(relative) && !JlCompress::compressFile(&m_output, absolute, m_destination_prefix + relative)) {
-            emitFailed(tr("Could not read and compress %1").arg(relative));
-            return;
+            return ZipResult(tr("Could not read and compress %1").arg(relative));
         }
     }
 
     m_output.close();
     if (m_output.getZipError() != 0) {
-        emitFailed(tr("A zip error occurred"));
-        return;
+        return ZipResult(tr("A zip error occurred"));
     }
-    emitSucceeded();
+    return ZipResult();
 }
 
-void ExportToZipTask::emitAborted()
+void ExportToZipTask::finish()
 {
-    QFile::remove(m_output_path);
-    Task::emitAborted();
+    if (m_build_zip_future.isCanceled()) {
+        QFile::remove(m_output_path);
+        emitAborted();
+    } else if (auto result = m_build_zip_future.result(); result.has_value()) {
+        QFile::remove(m_output_path);
+        emitFailed(result.value());
+    } else {
+        emitSucceeded();
+    }
 }
-void ExportToZipTask::emitFailed(QString reason)
+
+bool ExportToZipTask::abort()
 {
-    QFile::remove(m_output_path);
-    Task::emitFailed(reason);
+    if (m_build_zip_future.isRunning()) {
+        m_build_zip_future.cancel();
+        // NOTE: Here we don't do `emitAborted()` because it will be done when `m_build_zip_future` actually cancels, which may not occur
+        // immediately.
+        return true;
+    }
+    return false;
 }
 
 }  // namespace MMCZip
