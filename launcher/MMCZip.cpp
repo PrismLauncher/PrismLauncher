@@ -424,45 +424,60 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
 
 void ExportToZipTask::executeTask()
 {
-    (void)QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
-        setStatus("Adding files...");
-        setProgress(0, m_files.length());
-        if (!m_dir.exists()) {
-            emitFailed(tr("Folder doesn't exist"));
-            return;
-        }
-        if (!m_output->isOpen() && !m_output->open(QuaZip::mdCreate)) {
-            emitFailed(tr("Could not create file"));
-            return;
-        }
-
-        for (const QFileInfo& file : m_files) {
-            if (!isRunning())
-                return;
-
-            auto absolute = file.absoluteFilePath();
-            auto relative = m_dir.relativeFilePath(absolute);
-            setStatus("Compresing: " + relative);
-            setProgress(m_progress + 1, m_progressTotal);
-            if (m_followSymlinks) {
-                if (file.isSymLink())
-                    absolute = file.symLinkTarget();
-                else
-                    absolute = file.canonicalFilePath();
-            }
-
-            if (!JlCompress::compressFile(m_output.get(), absolute, m_destinationPrefix + relative)) {
-                emitFailed(tr("Could not read and compress %1").arg(relative));
-                return;
-            }
-        }
-
-        m_output->close();
-        if (m_output->getZipError() != 0) {
-            emitFailed(tr("A zip error occurred"));
-            return;
-        }
-        emitSucceeded();
-    });
+    (void)QtConcurrent::run(QThreadPool::globalInstance(), [this]() { exportZip(); });
 }
+
+void ExportToZipTask::exportZip()
+{
+    setStatus("Adding files...");
+    setProgress(0, m_files.length());
+    if (!m_dir.exists()) {
+        emitFailed(tr("Folder doesn't exist"));
+        return;
+    }
+    if (!m_output.isOpen() && !m_output.open(QuaZip::mdCreate)) {
+        emitFailed(tr("Could not create file"));
+        return;
+    }
+
+    for (auto fileName : m_extra_files.keys()) {
+        if (!isRunning())
+            return;
+        QuaZipFile indexFile(&m_output);
+        if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo(fileName))) {
+            emitFailed(tr("Could not create:") + fileName);
+            return;
+        }
+        indexFile.write(m_extra_files[fileName]);
+    }
+
+    for (const QFileInfo& file : m_files) {
+        if (!isRunning())
+            return;
+
+        auto absolute = file.absoluteFilePath();
+        auto relative = m_dir.relativeFilePath(absolute);
+        setStatus("Compresing: " + relative);
+        setProgress(m_progress + 1, m_progressTotal);
+        if (m_follow_symlinks) {
+            if (file.isSymLink())
+                absolute = file.symLinkTarget();
+            else
+                absolute = file.canonicalFilePath();
+        }
+
+        if (!m_exclude_files.contains(relative) && !JlCompress::compressFile(&m_output, absolute, m_destination_prefix + relative)) {
+            emitFailed(tr("Could not read and compress %1").arg(relative));
+            return;
+        }
+    }
+
+    m_output.close();
+    if (m_output.getZipError() != 0) {
+        emitFailed(tr("A zip error occurred"));
+        return;
+    }
+    emitSucceeded();
+}
+
 }  // namespace MMCZip
