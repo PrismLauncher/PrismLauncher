@@ -105,9 +105,9 @@ QString JsonCatPack::path()
         QDate endDate = ensureDay(now.year(), var.endTime.month, var.endTime.day);
         if (startDate > endDate) {  // it's spans over multiple years
             if (endDate <= now)     // end date is in the past so jump one year into the future for endDate
-                endDate = ensureDay(now.year() + 1, var.endTime.month, var.endTime.day);
+                endDate = endDate.addYears(1);
             else  // end date is in the future so jump one year into the past for startDate
-                startDate = ensureDay(now.year() - 1, var.startTime.month, var.startTime.day);
+                startDate = startDate.addYears(-1);
         }
 
         if (startDate >= now && now >= endDate)
