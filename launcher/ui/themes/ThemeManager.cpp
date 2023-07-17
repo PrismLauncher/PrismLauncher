@@ -209,6 +209,9 @@ void ThemeManager::bootstrapThemeEnvironment()
 
         qputenv("QT_QUICK_CONTROLS_CONF", current_conf_path.toLocal8Bit());
     }
+
+    // FIXME: This disallows setting a fallback style on qtquickcontrols2.conf.
+    QQuickStyle::setFallbackStyle("Fusion");
 }
 
 void ThemeManager::writeGlobalQMLTheme(QString const& conf_file_path)
