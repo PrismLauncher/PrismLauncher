@@ -65,6 +65,7 @@ class ManagedPackPage : public QWidget, public BasePage {
     virtual void suggestVersion();
 
     virtual void update(){};
+    virtual void updateFromFile(){};
 
    protected slots:
     /** Does the necessary UI changes for when something failed.
@@ -123,6 +124,7 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     void suggestVersion() override;
 
     void update() override;
+    void updateFromFile() override;
 
    private:
     NetJob::Ptr m_fetch_job = nullptr;
@@ -145,6 +147,7 @@ class FlameManagedPackPage final : public ManagedPackPage {
     void suggestVersion() override;
 
     void update() override;
+    void updateFromFile() override;
 
    private:
     NetJob::Ptr m_fetch_job = nullptr;
