@@ -73,10 +73,9 @@ void ThemeCustomizationWidget::showFeatures(ThemeFields features) {
 void ThemeCustomizationWidget::applyIconTheme(int index) {
     auto settings = APPLICATION->settings();
     auto originalIconTheme = settings->get("IconTheme").toString();
-    auto& newIconTheme = m_iconThemeOptions[index].first;
-    settings->set("IconTheme", newIconTheme);
-
+    auto newIconTheme = ui->iconsComboBox->currentData().toString();
     if (originalIconTheme != newIconTheme) {
+        settings->set("IconTheme", newIconTheme);
         APPLICATION->applyCurrentlySelectedTheme();
     }
 
@@ -112,12 +111,17 @@ void ThemeCustomizationWidget::loadSettings()
 {
     auto settings = APPLICATION->settings();
 
-    auto iconTheme = settings->get("IconTheme").toString();
-    for (auto& iconThemeFromList : m_iconThemeOptions) {
-        QIcon iconForComboBox = QIcon(QString(":/icons/%1/scalable/settings").arg(iconThemeFromList.first));
-        ui->iconsComboBox->addItem(iconForComboBox, iconThemeFromList.second);
-        if (iconTheme == iconThemeFromList.first) {
-            ui->iconsComboBox->setCurrentIndex(ui->iconsComboBox->count() - 1);
+    {
+        auto currentIconTheme = settings->get("IconTheme").toString();
+        auto iconThemes = APPLICATION->getValidIconThemes();
+        int idx = 0;
+        for (auto iconTheme : iconThemes) {
+            QIcon iconForComboBox = QIcon(iconTheme->path() + "/scalable/settings");
+            ui->iconsComboBox->addItem(iconForComboBox, iconTheme->name(), iconTheme->id());
+            if (currentIconTheme == iconTheme->id()) {
+                ui->iconsComboBox->setCurrentIndex(idx);
+            }
+            idx++;
         }
     }
 

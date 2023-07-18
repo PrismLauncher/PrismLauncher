@@ -55,50 +55,84 @@ ITheme* ThemeManager::getTheme(QString themeId)
 void ThemeManager::initializeThemes()
 {
     // Icon themes
-    {
-        // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
-        // set icon theme search path!
-        auto searchPaths = QIcon::themeSearchPaths();
-        searchPaths.append("iconthemes");
-        QIcon::setThemeSearchPaths(searchPaths);
-        themeDebugLog() << "<> Icon themes initialized.";
-    }
+    initializeIcons();
 
     // Initialize widget themes
-    {
-        themeDebugLog() << "<> Initializing Widget Themes";
-        themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
-        auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
-        themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
-        themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
+    initializeWidgets();
+}
 
-        // TODO: need some way to differentiate same name themes in different subdirectories (maybe smaller grey text next to theme name in
-        // dropdown?)
-        QString themeFolder = QDir("./themes/").absoluteFilePath("");
-        themeDebugLog() << "Theme Folder Path: " << themeFolder;
+void ThemeManager::initializeIcons()
+{
+    // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
+    // set icon theme search path!
 
-        QDirIterator directoryIterator(themeFolder, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-        while (directoryIterator.hasNext()) {
-            QDir dir(directoryIterator.next());
-            QFileInfo themeJson(dir.absoluteFilePath("theme.json"));
-            if (themeJson.exists()) {
-                // Load "theme.json" based themes
-                themeDebugLog() << "Loading JSON Theme from:" << themeJson.absoluteFilePath();
-                addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), themeJson, true));
-            } else {
-                // Load pure QSS Themes
-                QDirIterator stylesheetFileIterator(dir.absoluteFilePath(""), { "*.qss", "*.css" }, QDir::Files);
-                while (stylesheetFileIterator.hasNext()) {
-                    QFile customThemeFile(stylesheetFileIterator.next());
-                    QFileInfo customThemeFileInfo(customThemeFile);
-                    themeDebugLog() << "Loading QSS Theme from:" << customThemeFileInfo.absoluteFilePath();
-                    addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), customThemeFileInfo, false));
-                }
-            }
+    QString themeFolder = "iconthemes";
+
+    auto searchPaths = QIcon::themeSearchPaths();
+    searchPaths.append(themeFolder);
+    QIcon::setThemeSearchPaths(searchPaths);
+
+    themeDebugLog() << "<> Initializing Icon Themes";
+
+    for (const QString& id : builtinIcons) {
+        IconTheme theme(id, QString(":/icons/%1").arg(id));
+        if (!theme.load()) {
+            themeWarningLog() << "Couldn't load built-in icon theme" << id;
+            continue;
         }
 
-        themeDebugLog() << "<> Widget themes initialized.";
+        m_icons.append(theme);
+        themeDebugLog() << "Loaded Built-In Icon Theme" << id;
     }
+
+    QDirIterator directoryIterator(themeFolder, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (directoryIterator.hasNext()) {
+        QDir dir(directoryIterator.next());
+        IconTheme theme(dir.dirName(), dir.path());
+        if (!theme.load())
+            continue;
+
+        m_icons.append(theme);
+        themeDebugLog() << "Loaded Custom Icon Theme from" << dir.path();
+    }
+
+    themeDebugLog() << "<> Icon themes initialized.";
+}
+
+void ThemeManager::initializeWidgets()
+{
+    themeDebugLog() << "<> Initializing Widget Themes";
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
+    auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
+    themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
+
+    // TODO: need some way to differentiate same name themes in different subdirectories (maybe smaller grey text next to theme name in
+    // dropdown?)
+    QString themeFolder = QDir("./themes/").absoluteFilePath("");
+    themeDebugLog() << "Theme Folder Path: " << themeFolder;
+
+    QDirIterator directoryIterator(themeFolder, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (directoryIterator.hasNext()) {
+        QDir dir(directoryIterator.next());
+        QFileInfo themeJson(dir.absoluteFilePath("theme.json"));
+        if (themeJson.exists()) {
+            // Load "theme.json" based themes
+            themeDebugLog() << "Loading JSON Theme from:" << themeJson.absoluteFilePath();
+            addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), themeJson, true));
+        } else {
+            // Load pure QSS Themes
+            QDirIterator stylesheetFileIterator(dir.absoluteFilePath(""), { "*.qss", "*.css" }, QDir::Files);
+            while (stylesheetFileIterator.hasNext()) {
+                QFile customThemeFile(stylesheetFileIterator.next());
+                QFileInfo customThemeFileInfo(customThemeFile);
+                themeDebugLog() << "Loading QSS Theme from:" << customThemeFileInfo.absoluteFilePath();
+                addTheme(std::make_unique<CustomTheme>(getTheme(darkThemeId), customThemeFileInfo, false));
+            }
+        }
+    }
+
+    themeDebugLog() << "<> Widget themes initialized.";
 }
 
 QList<ITheme*> ThemeManager::getValidApplicationThemes()
@@ -108,6 +142,15 @@ QList<ITheme*> ThemeManager::getValidApplicationThemes()
     for (auto&& [id, theme] : m_themes) {
         ret.append(theme.get());
     }
+    return ret;
+}
+
+QList<IconTheme*> ThemeManager::getValidIconThemes()
+{
+    QList<IconTheme*> ret;
+    ret.reserve(m_icons.size());
+    for (IconTheme& theme : m_icons)
+        ret.append(&theme);
     return ret;
 }
 

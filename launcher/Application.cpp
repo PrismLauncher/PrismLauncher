@@ -1163,6 +1163,11 @@ QList<ITheme*> Application::getValidApplicationThemes()
     return m_themeManager->getValidApplicationThemes();
 }
 
+QList<IconTheme*> Application::getValidIconThemes()
+{
+    return m_themeManager->getValidIconThemes();
+}
+
 void Application::applyCurrentlySelectedTheme(bool initial)
 {
     m_themeManager->applyCurrentlySelectedTheme(initial);

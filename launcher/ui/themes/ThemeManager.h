@@ -19,6 +19,7 @@
 
 #include <QString>
 
+#include "IconTheme.h"
 #include "ui/MainWindow.h"
 #include "ui/themes/ITheme.h"
 
@@ -36,6 +37,7 @@ class ThemeManager {
     ThemeManager(MainWindow* mainWindow);
 
     QList<ITheme*> getValidApplicationThemes();
+    QList<IconTheme*> getValidIconThemes();
     void setIconTheme(const QString& name);
     void applyCurrentlySelectedTheme(bool initial = false);
     void setApplicationTheme(const QString& name, bool initial = false);
@@ -49,9 +51,15 @@ class ThemeManager {
 
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
+    QList<IconTheme> m_icons;
     MainWindow* m_mainWindow;
 
     void initializeThemes();
     QString addTheme(std::unique_ptr<ITheme> theme);
     ITheme* getTheme(QString themeId);
+    void initializeIcons();
+    void initializeWidgets();
+
+    const QStringList builtinIcons{ "pe_colored", "pe_light", "pe_dark", "pe_blue",    "breeze_light", "breeze_dark",
+                                    "OSX",        "iOS",      "flat",    "flat_white", "multimc" };
 };

@@ -70,6 +70,7 @@ class TranslationsModel;
 class ITheme;
 class MCEditTool;
 class ThemeManager;
+class IconTheme;
 
 namespace Meta {
     class Index;
@@ -123,6 +124,8 @@ public:
     void applyCurrentlySelectedTheme(bool initial = false);
 
     QList<ITheme*> getValidApplicationThemes();
+
+    QList<IconTheme*> getValidIconThemes();
 
     void setApplicationTheme(const QString& name);
 
