@@ -255,17 +255,23 @@ bool FlameCreationTask::updateInstance()
     return false;
 }
 
-QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion)
+QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, QString loaderVersion, QString mcVersion)
 {
-    if (version == "recommended") {
+    if (loaderVersion == "recommended") {
         auto vlist = APPLICATION->metadataIndex()->get(uid);
         if (!vlist) {
             setError(tr("Failed to get local metadata index for %1").arg(uid));
-            return Q_NULLPTR;
+            return {};
         }
 
         if (!vlist->isLoaded()) {
-            vlist->load(Net::Mode::Online);
+            QEventLoop loadVersionLoop;
+            auto task = vlist->getLoadTask();
+            connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+            if (!task->isRunning())
+                task->start();
+
+            loadVersionLoop.exec();
         }
 
         for (int i = 0; i < vlist->versions().size(); i++) {
@@ -289,15 +295,15 @@ QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, 
         }
 
         setError(tr("Failed to find version for %1 loader").arg(loaderType));
-        return Q_NULLPTR;
+        return {};
     }
 
-    if (version == Q_NULLPTR || version.isEmpty()) {
+    if (loaderVersion.isEmpty()) {
         emitFailed(tr("No loader version set for modpack!"));
-        return Q_NULLPTR;
+        return {};
     }
 
-    return version;
+    return loaderVersion;
 }
 
 bool FlameCreationTask::createInstance()
@@ -379,7 +385,7 @@ bool FlameCreationTask::createInstance()
     components->setComponentVersion("net.minecraft", mcVersion, true);
     if (!loaderType.isEmpty()) {
         auto version = getVersionForLoader(loaderUid, loaderType, loaderVersion, mcVersion);
-        if (version == Q_NULLPTR || version.isEmpty())
+        if (version.isEmpty())
             return false;
         components->setComponentVersion(loaderUid, version);
     }
