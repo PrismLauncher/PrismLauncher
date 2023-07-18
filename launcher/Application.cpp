@@ -6,9 +6,10 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -475,6 +476,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
+        qDebug() << "Platform                   : " << BuildConfig.BUILD_PLATFORM;
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
         if (adjustedBy.size())
@@ -608,6 +610,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("JvmArgs", "");
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
+
+        // Mod loader settings
+        m_settings->registerSetting("DisableQuiltBeacon", false);
 
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
