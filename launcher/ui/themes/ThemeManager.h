@@ -35,13 +35,15 @@ inline auto themeWarningLog()
 
 class ThemeManager {
    public:
-    ThemeManager(MainWindow* mainWindow);
+    ThemeManager();
 
     QList<ITheme*> getValidApplicationThemes();
     QList<IconTheme*> getValidIconThemes();
-    bool setIconTheme(const QString& name);
+    bool isValidApplicationTheme(const QString& id);
+    bool isValidIconTheme(const QString& id);
     void applyCurrentlySelectedTheme(bool initial = false);
-    bool setApplicationTheme(const QString& name, bool initial = false);
+    void setIconTheme(const QString& name);
+    void setApplicationTheme(const QString& name, bool initial = false);
 
     /// <summary>
     /// Returns the cat based on selected cat and with events (Birthday, XMas, etc.)
@@ -53,7 +55,6 @@ class ThemeManager {
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::map<QString, IconTheme> m_icons;
-    MainWindow* m_mainWindow;
 
     void initializeThemes();
     QString addTheme(std::unique_ptr<ITheme> theme);

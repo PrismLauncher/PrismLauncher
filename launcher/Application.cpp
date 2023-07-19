@@ -526,7 +526,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
 
         // Theming
-        m_settings->registerSetting("IconTheme", QString("pe_colored"));
+        m_settings->registerSetting("IconTheme", QString());
         m_settings->registerSetting("ApplicationTheme", QString());
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
@@ -801,7 +801,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
 
     // Themes
-    m_themeManager = std::make_unique<ThemeManager>(m_mainWindow);
+    m_themeManager = std::make_unique<ThemeManager>();
 
     // initialize and load all instances
     {
@@ -893,8 +893,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
     });
 
-    applyCurrentlySelectedTheme(true);
-
     updateCapabilities();
 
     if(createSetupWizard())
@@ -902,6 +900,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         return;
     }
 
+    applyCurrentlySelectedTheme(true);
     performMainStartupAction();
 }
 
@@ -930,11 +929,21 @@ bool Application::createSetupWizard()
     }();
     bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
-    bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
+    bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
+    bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
+    bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
 
     if(wizardRequired)
     {
+        // set default theme after going into theme wizard
+        if (!validIcons)
+            settings()->set("IconTheme", QString("pe_colored"));
+        if (!validWidgets)
+            settings()->set("ApplicationTheme", QString("system"));
+
+        applyCurrentlySelectedTheme(true);
+
         m_setupWizard = new SetupWizard(nullptr);
         if (languageRequired)
         {
@@ -953,9 +962,9 @@ bool Application::createSetupWizard()
 
         if (themeInterventionRequired)
         {
-            settings()->set("ApplicationTheme", QString("system")); // set default theme after going into theme wizard
             m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
         }
+
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
         return true;
