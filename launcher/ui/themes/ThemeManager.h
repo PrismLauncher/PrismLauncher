@@ -39,9 +39,9 @@ class ThemeManager {
 
     QList<ITheme*> getValidApplicationThemes();
     QList<IconTheme*> getValidIconThemes();
-    void setIconTheme(const QString& name);
+    bool setIconTheme(const QString& name);
     void applyCurrentlySelectedTheme(bool initial = false);
-    void setApplicationTheme(const QString& name, bool initial = false);
+    bool setApplicationTheme(const QString& name, bool initial = false);
 
     /// <summary>
     /// Returns the cat based on selected cat and with events (Birthday, XMas, etc.)
@@ -52,12 +52,13 @@ class ThemeManager {
 
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
-    QList<IconTheme> m_icons;
+    std::map<QString, IconTheme> m_icons;
     MainWindow* m_mainWindow;
 
     void initializeThemes();
     QString addTheme(std::unique_ptr<ITheme> theme);
     ITheme* getTheme(QString themeId);
+    QString addIconTheme(IconTheme theme);
     void initializeIcons();
     void initializeWidgets();
 

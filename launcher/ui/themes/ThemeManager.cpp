@@ -53,6 +53,13 @@ ITheme* ThemeManager::getTheme(QString themeId)
     return m_themes[themeId].get();
 }
 
+QString ThemeManager::addIconTheme(IconTheme theme)
+{
+    QString id = theme.id();
+    m_icons.emplace(id, std::move(theme));
+    return id;
+}
+
 void ThemeManager::initializeThemes()
 {
     // Icon themes
@@ -82,7 +89,7 @@ void ThemeManager::initializeIcons()
             continue;
         }
 
-        m_icons.append(theme);
+        addIconTheme(std::move(theme));
         themeDebugLog() << "Loaded Built-In Icon Theme" << id;
     }
 
@@ -93,7 +100,7 @@ void ThemeManager::initializeIcons()
         if (!theme.load())
             continue;
 
-        m_icons.append(theme);
+        addIconTheme(std::move(theme));
         themeDebugLog() << "Loaded Custom Icon Theme from" << dir.path();
     }
 
@@ -150,25 +157,39 @@ QList<IconTheme*> ThemeManager::getValidIconThemes()
 {
     QList<IconTheme*> ret;
     ret.reserve(m_icons.size());
-    for (IconTheme& theme : m_icons)
+    for (auto&& [id, theme] : m_icons) {
         ret.append(&theme);
+    }
     return ret;
 }
 
-void ThemeManager::setIconTheme(const QString& name)
+bool ThemeManager::setIconTheme(const QString& name)
 {
+    if (m_icons.find(name) == m_icons.end()) {
+        themeWarningLog() << "Tried to set invalid icon theme:" << name;
+        return false;
+    }
+
     QIcon::setThemeName(name);
+    return true;
 }
 
 void ThemeManager::applyCurrentlySelectedTheme(bool initial)
 {
-    setIconTheme(APPLICATION->settings()->get("IconTheme").toString());
+    auto settings = APPLICATION->settings();
+    if (!setIconTheme(settings->get("IconTheme").toString())) {
+        APPLICATION->settings()->reset("IconTheme");
+        setIconTheme(settings->get("IconTheme").toString());
+    }
     themeDebugLog() << "<> Icon theme set.";
-    setApplicationTheme(APPLICATION->settings()->get("ApplicationTheme").toString(), initial);
+    if (!setApplicationTheme(settings->get("ApplicationTheme").toString(), initial)) {
+        APPLICATION->settings()->reset("ApplicationTheme");
+        setApplicationTheme(settings->get("ApplicationTheme").toString(), initial);
+    }
     themeDebugLog() << "<> Application theme set.";
 }
 
-void ThemeManager::setApplicationTheme(const QString& name, bool initial)
+bool ThemeManager::setApplicationTheme(const QString& name, bool initial)
 {
     auto systemPalette = qApp->palette();
     auto themeIter = m_themes.find(name);
@@ -176,8 +197,10 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
         auto& theme = themeIter->second;
         themeDebugLog() << "applying theme" << theme->name();
         theme->apply(initial);
+        return true;
     } else {
         themeWarningLog() << "Tried to set invalid theme:" << name;
+        return false;
     }
 }
 

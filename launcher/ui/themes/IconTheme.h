@@ -23,6 +23,7 @@
 class IconTheme {
    public:
     IconTheme(const QString& id, const QString& path);
+    IconTheme() = default;
 
     bool load();
     QString id();
