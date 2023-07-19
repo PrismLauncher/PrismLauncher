@@ -55,7 +55,7 @@
    <item row="1" column="0">
     <widget class="QLabel" name="widgetThemeLabel">
      <property name="text">
-      <string>&amp;Colors</string>
+      <string>&amp;Widgets</string>
      </property>
      <property name="buddy">
       <cstring>widgetStyleComboBox</cstring>
