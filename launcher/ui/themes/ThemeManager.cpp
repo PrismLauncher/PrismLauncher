@@ -74,10 +74,13 @@ void ThemeManager::initializeIcons()
     // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
     // set icon theme search path!
 
-    QString themeFolder = "iconthemes";
+    QDir themeFolder("iconthemes");
+    if (!themeFolder.mkpath("."))
+        themeWarningLog() << "Couldn't create icon theme folder";
+    themeDebugLog() << "Icon Theme Folder Path: " << themeFolder.absolutePath();
 
     auto searchPaths = QIcon::themeSearchPaths();
-    searchPaths.append(themeFolder);
+    searchPaths.append(themeFolder.path());
     QIcon::setThemeSearchPaths(searchPaths);
 
     themeDebugLog() << "<> Initializing Icon Themes";
@@ -93,7 +96,7 @@ void ThemeManager::initializeIcons()
         themeDebugLog() << "Loaded Built-In Icon Theme" << id;
     }
 
-    QDirIterator directoryIterator(themeFolder, QDir::Dirs | QDir::NoDotAndDotDot);
+    QDirIterator directoryIterator(themeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
     while (directoryIterator.hasNext()) {
         QDir dir(directoryIterator.next());
         IconTheme theme(dir.dirName(), dir.path());
@@ -117,10 +120,13 @@ void ThemeManager::initializeWidgets()
 
     // TODO: need some way to differentiate same name themes in different subdirectories (maybe smaller grey text next to theme name in
     // dropdown?)
-    QString themeFolder = QDir("./themes/").absoluteFilePath("");
-    themeDebugLog() << "Theme Folder Path: " << themeFolder;
 
-    QDirIterator directoryIterator(themeFolder, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    QDir themeFolder("themes");
+    if (!themeFolder.mkpath("."))
+        themeWarningLog() << "Couldn't create theme folder";
+    themeDebugLog() << "Theme Folder Path: " << themeFolder.absolutePath();
+
+    QDirIterator directoryIterator(themeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     while (directoryIterator.hasNext()) {
         QDir dir(directoryIterator.next());
         QFileInfo themeJson(dir.absoluteFilePath("theme.json"));
