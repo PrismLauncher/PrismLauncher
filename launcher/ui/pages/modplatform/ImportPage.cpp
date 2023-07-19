@@ -38,6 +38,7 @@
 #include "ui_ImportPage.h"
 
 #include <QFileDialog>
+#include <QMimeDatabase>
 #include <QValidator>
 
 #include "ui/dialogs/NewInstanceDialog.h"

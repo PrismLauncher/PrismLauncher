@@ -35,64 +35,46 @@
 
 #pragma once
 
-#include "InstanceTask.h"
-#include "net/NetJob.h"
-#include <QUrl>
 #include <QFuture>
 #include <QFutureWatcher>
-#include "settings/SettingsObject.h"
-#include "QObjectPtr.h"
-#include "modplatform/flame/PackManifest.h"
+#include <QUrl>
+#include "InstanceTask.h"
 
+#include <memory>
 #include <optional>
 
 class QuaZip;
-namespace Flame
-{
-    class FileResolvingTask;
+namespace Flame {
+class FileResolvingTask;
 }
 
-class InstanceImportTask : public InstanceTask
-{
+class InstanceImportTask : public InstanceTask {
     Q_OBJECT
-public:
+   public:
     explicit InstanceImportTask(const QUrl sourceUrl, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
 
     bool abort() override;
-    const QVector<Flame::File> &getBlockedFiles() const
-    {
-        return m_blockedMods;
-    }
 
-protected:
+   protected:
     //! Entry point for tasks.
     virtual void executeTask() override;
 
-private:
-    void processZipPack();
+   private:
     void processMultiMC();
     void processTechnic();
     void processFlame();
     void processModrinth();
+    QString getRootFromZip(QuaZip* zip, const QString& root = "");
 
-private slots:
-    void downloadSucceeded();
-    void downloadFailed(QString reason);
-    void downloadProgressChanged(qint64 current, qint64 total);
-    void downloadAborted();
+   private slots:
+    void processZipPack();
     void extractFinished();
 
-private: /* data */
-    NetJob::Ptr m_filesNetJob;
-    shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
+   private: /* data */
     QUrl m_sourceUrl;
     QString m_archivePath;
-    bool m_downloadRequired = false;
-    std::unique_ptr<QuaZip> m_packZip;
-    QFuture<std::optional<QStringList>> m_extractFuture;
-    QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
-    QVector<Flame::File> m_blockedMods;
-    enum class ModpackType{
+    Task::Ptr task;
+    enum class ModpackType {
         Unknown,
         MultiMC,
         Technic,
@@ -104,6 +86,6 @@ private: /* data */
     // the source URL / the resource it points to alone.
     QMap<QString, QString> m_extra_info;
 
-    //FIXME: nuke
+    // FIXME: nuke
     QWidget* m_parent;
 };
