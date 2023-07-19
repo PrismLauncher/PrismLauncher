@@ -84,7 +84,7 @@ void ThemeManager::initializeThemes()
         QString themeFolder = QDir("./themes/").absoluteFilePath("");
         themeDebugLog() << "Theme Folder Path: " << themeFolder;
 
-        QDirIterator directoryIterator(themeFolder, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        QDirIterator directoryIterator(themeFolder, QDir::Dirs | QDir::NoDotAndDotDot);
         while (directoryIterator.hasNext()) {
             QDir dir(directoryIterator.next());
             QFileInfo themeJson(dir.absoluteFilePath("theme.json"));
@@ -208,7 +208,7 @@ void ThemeManager::initializeCatPacks()
 
     loadFiles(catpacksDir);
 
-    QDirIterator directoryIterator(catpacksFolder, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    QDirIterator directoryIterator(catpacksFolder, QDir::Dirs | QDir::NoDotAndDotDot);
     while (directoryIterator.hasNext()) {
         QDir dir(directoryIterator.next());
         QFileInfo manifest(dir.absoluteFilePath("catpack.json"));
