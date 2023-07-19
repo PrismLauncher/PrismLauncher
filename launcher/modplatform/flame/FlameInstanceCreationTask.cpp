@@ -274,8 +274,7 @@ QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, 
             loadVersionLoop.exec();
         }
 
-        for (int i = 0; i < vlist->versions().size(); i++) {
-            auto version = vlist->versions().at(i);
+        for (auto version : vlist->versions()) {
             // first recommended build we find, we use.
             if (!version->isRecommended())
                 continue;
