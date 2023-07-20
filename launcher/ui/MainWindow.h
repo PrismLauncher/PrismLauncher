@@ -113,6 +113,8 @@ private slots:
 
     void on_actionViewInstanceFolder_triggered();
 
+    void on_actionViewLauncherRootFolder_triggered();
+
     void on_actionViewSelectedInstFolder_triggered();
 
     void refreshInstances();
@@ -155,6 +157,8 @@ private slots:
     inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
     void on_actionExportInstanceZip_triggered();
     void on_actionExportInstanceMrPack_triggered();
+    void on_actionExportInstanceFlamePack_triggered();
+    void on_actionExportInstanceToModList_triggered();
 
     void on_actionRenameInstance_triggered();
 

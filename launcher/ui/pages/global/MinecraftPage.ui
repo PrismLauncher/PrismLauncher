@@ -51,7 +51,7 @@
           <item>
            <widget class="QCheckBox" name="maximizedCheckBox">
             <property name="text">
-             <string>Start Minecraft &amp;maximized?</string>
+             <string>Start Minecraft &amp;maximized</string>
             </property>
            </widget>
           </item>
@@ -190,6 +190,25 @@
        <string>Tweaks</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_12">
+       <item>
+        <widget class="QGroupBox" name="modLoaderSettingsGroupBox">
+         <property name="title">
+          <string>Mod loader settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_13">
+          <item>
+           <widget class="QCheckBox" name="disableQuiltBeaconCheckBox">
+            <property name="text">
+             <string>Disable Quilt Loader Beacon</string>
+            </property>
+            <property name="toolTip">
+             <string>Disable Quilt loader's beacon for counting monthly active users</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <widget class="QGroupBox" name="nativeLibWorkaroundGroupBox">
          <property name="title">

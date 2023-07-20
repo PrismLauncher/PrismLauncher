@@ -6,9 +6,10 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -376,33 +377,33 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // init the logger
     {
-        static const QString logBase = BuildConfig.LAUNCHER_NAME + "-%0.log";
-        auto moveFile = [](const QString &oldName, const QString &newName)
-        {
+        static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "-%0.log";
+        static const QString logBase = FS::PathCombine("logs", baseLogFile);
+        auto moveFile = [](const QString& oldName, const QString& newName) {
             QFile::remove(newName);
             QFile::copy(oldName, newName);
             QFile::remove(oldName);
         };
+        if (FS::ensureFolderPathExists("logs")) {  // if this did not fail
+            for (auto i = 0; i <= 4; i++)
+                if (auto oldName = baseLogFile.arg(i);
+                    QFile::exists(oldName))  // do not pointlessly delete new files if the old ones are not there
+                    moveFile(oldName, logBase.arg(i));
+        }
 
-        moveFile(logBase.arg(3), logBase.arg(4));
-        moveFile(logBase.arg(2), logBase.arg(3));
-        moveFile(logBase.arg(1), logBase.arg(2));
-        moveFile(logBase.arg(0), logBase.arg(1));
+        for (auto i = 4; i > 0; i--)
+            moveFile(logBase.arg(i - 1), logBase.arg(i));
 
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
-        if(!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
-        {
-            showFatalErrorMessage(
-                "The launcher data folder is not writable!",
-                QString(
-                    "The launcher couldn't create a log file - the data folder is not writable.\n"
-                    "\n"
-                    "Make sure you have write permissions to the data folder.\n"
-                    "(%1)\n"
-                    "\n"
-                    "The launcher cannot continue until you fix this problem."
-                ).arg(dataPath)
-            );
+        if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+            showFatalErrorMessage("The launcher data folder is not writable!",
+                                  QString("The launcher couldn't create a log file - the data folder is not writable.\n"
+                                          "\n"
+                                          "Make sure you have write permissions to the data folder.\n"
+                                          "(%1)\n"
+                                          "\n"
+                                          "The launcher cannot continue until you fix this problem.")
+                                      .arg(dataPath));
             return;
         }
         qInstallMessageHandler(appDebugOutput);
@@ -433,7 +434,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
         // seach root path
         if(!foundLoggingRules) {
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+           logRulesPath = FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME, logRulesFile); 
+#else
            logRulesPath = FS::PathCombine(m_rootPath, logRulesFile); 
+#endif
             qDebug() << "Testing" << logRulesPath << "...";
             foundLoggingRules = QFile::exists(logRulesPath);
         }
@@ -471,6 +476,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
+        qDebug() << "Platform                   : " << BuildConfig.BUILD_PLATFORM;
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
         if (adjustedBy.size())
@@ -568,6 +574,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Language
         m_settings->registerSetting("Language", QString());
+        m_settings->registerSetting("UseSystemLocale", false);
 
         // Console
         m_settings->registerSetting("ShowConsole", false);
@@ -594,7 +601,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Java Settings
         m_settings->registerSetting("JavaPath", "");
-        m_settings->registerSetting("JavaTimestamp", 0);
+        m_settings->registerSetting("JavaSignature", "");
         m_settings->registerSetting("JavaArchitecture", "");
         m_settings->registerSetting("JavaRealArchitecture", "");
         m_settings->registerSetting("JavaVersion", "");
@@ -603,6 +610,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("JvmArgs", "");
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
+
+        // Mod loader settings
+        m_settings->registerSetting("DisableQuiltBeacon", false);
 
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
@@ -687,8 +697,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
                 m_settings->reset("PastebinCustomAPIBase");
             }
         }
-        // meta URL
-        m_settings->registerSetting("MetaURLOverride", "");
+        {
+            // Meta URL
+            m_settings->registerSetting("MetaURLOverride", "");
+
+            QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
+
+            // get rid of invalid meta urls
+            if (!metaUrl.isValid() || metaUrl.scheme() != "http" || metaUrl.scheme() != "https")
+                m_settings->reset("MetaURLOverride");
+        }
 
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);
@@ -910,12 +928,7 @@ bool Application::createSetupWizard()
         }
         return false;
     }();
-    bool languageRequired = [&]()
-    {
-        if (settings()->get("Language").toString().isEmpty())
-            return true;
-        return false;
-    }();
+    bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
@@ -1559,7 +1572,7 @@ QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
+        FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"),
         FS::PathCombine(applicationDirPath(), "jars"),
@@ -1699,6 +1712,7 @@ bool Application::handleDataMigration(const QString& currentData,
         matcher->add(std::make_shared<SimplePrefixMatcher>(configFile));
         matcher->add(std::make_shared<SimplePrefixMatcher>(
             BuildConfig.LAUNCHER_CONFIGFILE));  // it's possible that we already used that directory before
+        matcher->add(std::make_shared<SimplePrefixMatcher>("logs/"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("accounts.json"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("accounts/"));
         matcher->add(std::make_shared<SimplePrefixMatcher>("assets/"));

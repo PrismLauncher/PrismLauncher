@@ -75,12 +75,11 @@ public:
     {
         return "Instance-settings";
     }
-    virtual bool shouldDisplay() const override;
     void retranslate() override;
 
     void updateThresholds();
 
-private slots:
+   private slots:
     void on_javaDetectBtn_clicked();
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();

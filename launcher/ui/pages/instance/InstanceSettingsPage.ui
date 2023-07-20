@@ -269,7 +269,7 @@
           <item>
            <widget class="QCheckBox" name="maximizedCheckBox">
             <property name="text">
-             <string>Start Minecraft maximized?</string>
+             <string>Start Minecraft maximized</string>
             </property>
            </widget>
           </item>
@@ -341,21 +341,21 @@
           <item>
            <widget class="QCheckBox" name="showConsoleCheck">
             <property name="text">
-             <string>Show console while the game is running?</string>
+             <string>Show console while the game is running</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="autoCloseConsoleCheck">
             <property name="text">
-             <string>Automatically close console when the game quits?</string>
+             <string>Automatically close console when the game quits</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="showConsoleErrorCheck">
             <property name="text">
-             <string>Show console when the game crashes?</string>
+             <string>Show console when the game crashes</string>
             </property>
            </widget>
           </item>
@@ -541,6 +541,31 @@
        <string>Miscellaneous</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QGroupBox" name="modLoaderSettingsGroupBox">
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <property name="title">
+          <string>Mod loader settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="VerticalLayout_16">
+          <item>
+           <widget class="QCheckBox" name="disableQuiltBeaconCheckBox">
+            <property name="text">
+             <string>Disable Quilt Loader Beacon</string>
+            </property>
+            <property name="toolTip">
+             <string>Disable Quilt loader's beacon for counting monthly active users</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <widget class="QGroupBox" name="gameTimeGroupBox">
          <property name="enabled">

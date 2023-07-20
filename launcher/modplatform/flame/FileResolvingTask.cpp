@@ -21,19 +21,24 @@ bool Flame::FileResolvingTask::abort()
 
 void Flame::FileResolvingTask::executeTask()
 {
+    if (m_toProcess.files.isEmpty()) {  // no file to resolve so leave it empty and emit success immediately
+        emitSucceeded();
+        return;
+    }
     setStatus(tr("Resolving mod IDs..."));
     setProgress(0, 3);
     m_dljob.reset(new NetJob("Mod id resolver", m_network));
     result.reset(new QByteArray());
-    //build json data to send
+    // build json data to send
     QJsonObject object;
 
-    object["fileIds"] = QJsonArray::fromVariantList(std::accumulate(m_toProcess.files.begin(), m_toProcess.files.end(), QVariantList(), [](QVariantList& l, const File& s) {
-        l.push_back(s.fileId);
-        return l;
-    }));
+    object["fileIds"] = QJsonArray::fromVariantList(
+        std::accumulate(m_toProcess.files.begin(), m_toProcess.files.end(), QVariantList(), [](QVariantList& l, const File& s) {
+            l.push_back(s.fileId);
+            return l;
+        }));
     QByteArray data = Json::toText(object);
-    auto dl = Net::Upload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result.get(), data);
+    auto dl = Net::Upload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result, data);
     m_dljob->addNetAction(dl);
 
     auto step_progress = std::make_shared<TaskStepProgress>();
@@ -87,17 +92,15 @@ void Flame::FileResolvingTask::netJobFinished()
         auto fileid = Json::requireInteger(Json::requireObject(file)["id"]);
         auto& out = m_toProcess.files[fileid];
         try {
-           out.parseFromObject(Json::requireObject(file));
+            out.parseFromObject(Json::requireObject(file));
         } catch (const JSONValidationError& e) {
             qDebug() << "Blocked mod on curseforge" << out.fileName;
             auto hash = out.hash;
-            if(!hash.isEmpty()) {
+            if (!hash.isEmpty()) {
                 auto url = QString("https://api.modrinth.com/v2/version_file/%1?algorithm=sha1").arg(hash);
                 auto output = std::make_shared<QByteArray>();
-                auto dl = Net::Download::makeByteArray(QUrl(url), output.get());
-                QObject::connect(dl.get(), &Net::Download::succeeded, [&out]() {
-                    out.resolved = true;
-                });
+                auto dl = Net::Download::makeByteArray(QUrl(url), output);
+                QObject::connect(dl.get(), &Net::Download::succeeded, [&out]() { out.resolved = true; });
 
                 m_checkJob->addNetAction(dl);
                 blockedProjects.insert(&out, output);
@@ -129,12 +132,13 @@ void Flame::FileResolvingTask::netJobFinished()
     m_checkJob->start();
 }
 
-void Flame::FileResolvingTask::modrinthCheckFinished() {
+void Flame::FileResolvingTask::modrinthCheckFinished()
+{
     setProgress(2, 3);
     qDebug() << "Finished with blocked mods : " << blockedProjects.size();
 
     for (auto it = blockedProjects.keyBegin(); it != blockedProjects.keyEnd(); it++) {
-        auto &out = *it;
+        auto& out = *it;
         auto bytes = blockedProjects[out];
         if (!out->resolved) {
             continue;
@@ -154,28 +158,26 @@ void Flame::FileResolvingTask::modrinthCheckFinished() {
             out->resolved = false;
         }
     }
-    //copy to an output list and filter out projects found on modrinth
+    // copy to an output list and filter out projects found on modrinth
     auto block = std::make_shared<QList<File*>>();
     auto it = blockedProjects.keys();
-    std::copy_if(it.begin(), it.end(), std::back_inserter(*block), [](File *f) {
-        return !f->resolved;
-    });
-    //Display not found mods early
+    std::copy_if(it.begin(), it.end(), std::back_inserter(*block), [](File* f) { return !f->resolved; });
+    // Display not found mods early
     if (!block->empty()) {
-        //blocked mods found, we need the slug for displaying.... we need another job :D !
+        // blocked mods found, we need the slug for displaying.... we need another job :D !
         m_slugJob.reset(new NetJob("Slug Job", m_network));
         int index = 0;
         for (auto mod : *block) {
             auto projectId = mod->projectId;
             auto output = std::make_shared<QByteArray>();
             auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(projectId);
-            auto dl = Net::Download::makeByteArray(url, output.get());
+            auto dl = Net::Download::makeByteArray(url, output);
             qDebug() << "Fetching url slug for file:" << mod->fileName;
             QObject::connect(dl.get(), &Net::Download::succeeded, [block, index, output]() {
                 auto mod = block->at(index);  // use the shared_ptr so it is captured and only freed when we are done
                 auto json = QJsonDocument::fromJson(*output);
-                auto base = Json::requireString(Json::requireObject(Json::requireObject(Json::requireObject(json),"data"),"links"),
-                        "websiteUrl");
+                auto base =
+                    Json::requireString(Json::requireObject(Json::requireObject(Json::requireObject(json), "data"), "links"), "websiteUrl");
                 auto link = QString("%1/download/%2").arg(base, QString::number(mod->fileId));
                 mod->websiteUrl = link;
             });

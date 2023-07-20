@@ -38,7 +38,9 @@ public:
     virtual void setSourceModel(QAbstractItemModel *sourceModel) override;
 
     const FilterMap &filters() const;
+    const QString &search() const;
     void setFilter(const BaseVersionList::ModelRoles column, Filter * filter);
+    void setSearch(const QString &search);
     void clearFilters();
     QModelIndex getRecommended() const;
     QModelIndex getVersion(const QString & version) const;
@@ -59,6 +61,7 @@ private slots:
 private:
     QList<Column> m_columns;
     FilterMap m_filters;
+    QString m_search;
     BaseVersionList::RoleList roles;
     VersionFilterModel * filterModel;
     bool hasRecommended = false;

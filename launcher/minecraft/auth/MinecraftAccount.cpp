@@ -37,6 +37,7 @@
 
 #include "MinecraftAccount.h"
 
+#include <QCryptographicHash>
 #include <QUuid>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -100,7 +101,7 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString &username)
     account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
     account->data.minecraftEntitlement.ownsMinecraft = true;
     account->data.minecraftEntitlement.canPlayMinecraft = true;
-    account->data.minecraftProfile.id = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    account->data.minecraftProfile.id = uuidFromUsername(username).toString().remove(QRegularExpression("[{}-]"));
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Katabasis::Validity::Certain;
     return account;
@@ -333,4 +334,33 @@ void MinecraftAccount::incrementUses()
         // FIXME: we now need a better way to identify accounts...
         qWarning() << "Profile" << data.profileId() << "is now in use.";
     }
+}
+
+QUuid MinecraftAccount::uuidFromUsername(QString username) {
+    auto input = QString("OfflinePlayer:%1").arg(username).toUtf8();
+
+    // basically a reimplementation of Java's UUID#nameUUIDFromBytes
+    QByteArray digest = QCryptographicHash::hash(input, QCryptographicHash::Md5);
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    auto bOr = [](QByteArray& array, int index, char value) {
+        array[index] = array.at(index) | value;
+    };
+    auto bAnd = [](QByteArray& array, int index, char value) {
+        array[index] = array.at(index) & value;
+    };
+#else
+    auto bOr = [](QByteArray& array, qsizetype index, char value) {
+        array[index] |= value;
+    };
+    auto bAnd = [](QByteArray& array, qsizetype index, char value) {
+        array[index] &= value;
+    };
+#endif
+    bAnd(digest, 6, (char) 0x0f); // clear version
+    bOr(digest, 6, (char) 0x30); // set to version 3
+    bAnd(digest, 8, (char) 0x3f); // clear variant
+    bOr(digest, 8, (char) 0x80); // set to IETF variant
+
+    return QUuid::fromRfc4122(digest);
 }
