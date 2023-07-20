@@ -40,6 +40,7 @@
 #include <QString>
 #include <QUrl>
 #include <QVector>
+#include "minecraft/mod/tasks/LocalResourceParse.h"
 
 namespace Flame
 {
@@ -71,6 +72,7 @@ struct File
         Modpack,
         Mod
     } type = Type::Mod;
+    PackedResourceType resourceType;
 };
 
 struct Modloader
