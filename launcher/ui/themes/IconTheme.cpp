@@ -25,7 +25,7 @@ IconTheme::IconTheme(const QString& id, const QString& path) : m_id(id), m_path(
 
 bool IconTheme::load()
 {
-    QString path = m_path + "/index.theme";
+    const QString path = m_path + "/index.theme";
 
     if (!QFile::exists(path))
         return false;

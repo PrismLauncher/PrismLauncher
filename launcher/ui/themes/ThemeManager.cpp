@@ -72,16 +72,11 @@ void ThemeManager::initializeIcons()
 {
     // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
     // set icon theme search path!
-
-    if (!m_iconThemeFolder.mkpath("."))
-        themeWarningLog() << "Couldn't create icon theme folder";
-    themeDebugLog() << "Icon Theme Folder Path: " << m_iconThemeFolder.absolutePath();
+    themeDebugLog() << "<> Initializing Icon Themes";
 
     auto searchPaths = QIcon::themeSearchPaths();
     searchPaths.append(m_iconThemeFolder.path());
     QIcon::setThemeSearchPaths(searchPaths);
-
-    themeDebugLog() << "<> Initializing Icon Themes";
 
     for (const QString& id : builtinIcons) {
         IconTheme theme(id, QString(":/icons/%1").arg(id));
@@ -93,6 +88,10 @@ void ThemeManager::initializeIcons()
         addIconTheme(std::move(theme));
         themeDebugLog() << "Loaded Built-In Icon Theme" << id;
     }
+
+    if (!m_iconThemeFolder.mkpath("."))
+        themeWarningLog() << "Couldn't create icon theme folder";
+    themeDebugLog() << "Icon Theme Folder Path: " << m_iconThemeFolder.absolutePath();
 
     QDirIterator directoryIterator(m_iconThemeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
     while (directoryIterator.hasNext()) {

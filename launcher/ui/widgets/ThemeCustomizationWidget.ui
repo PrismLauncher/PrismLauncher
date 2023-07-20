@@ -167,12 +167,6 @@
    </item>
   </layout>
  </widget>
- <tabstops>
-  <tabstop>iconsComboBox</tabstop>
-  <tabstop>widgetStyleComboBox</tabstop>
-  <tabstop>backgroundCatComboBox</tabstop>
-  <tabstop>catInfoLabel</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>
