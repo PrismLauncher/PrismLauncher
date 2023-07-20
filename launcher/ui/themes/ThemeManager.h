@@ -37,10 +37,12 @@ class ThemeManager {
    public:
     ThemeManager();
 
-    QList<ITheme*> getValidApplicationThemes();
     QList<IconTheme*> getValidIconThemes();
-    bool isValidApplicationTheme(const QString& id);
+    QList<ITheme*> getValidApplicationThemes();
     bool isValidIconTheme(const QString& id);
+    bool isValidApplicationTheme(const QString& id);
+    QDir getIconThemesFolder();
+    QDir getApplicationThemesFolder();
     void applyCurrentlySelectedTheme(bool initial = false);
     void setIconTheme(const QString& name);
     void setApplicationTheme(const QString& name, bool initial = false);
@@ -55,6 +57,8 @@ class ThemeManager {
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::map<QString, IconTheme> m_icons;
+    QDir m_iconThemeFolder{ "iconthemes" };
+    QDir m_applicationThemeFolder{ "themes" };
 
     void initializeThemes();
     QString addTheme(std::unique_ptr<ITheme> theme);

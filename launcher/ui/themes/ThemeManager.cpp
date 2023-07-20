@@ -73,13 +73,12 @@ void ThemeManager::initializeIcons()
     // TODO: icon themes and instance icons do not mesh well together. Rearrange and fix discrepancies!
     // set icon theme search path!
 
-    QDir themeFolder("iconthemes");
-    if (!themeFolder.mkpath("."))
+    if (!m_iconThemeFolder.mkpath("."))
         themeWarningLog() << "Couldn't create icon theme folder";
-    themeDebugLog() << "Icon Theme Folder Path: " << themeFolder.absolutePath();
+    themeDebugLog() << "Icon Theme Folder Path: " << m_iconThemeFolder.absolutePath();
 
     auto searchPaths = QIcon::themeSearchPaths();
-    searchPaths.append(themeFolder.path());
+    searchPaths.append(m_iconThemeFolder.path());
     QIcon::setThemeSearchPaths(searchPaths);
 
     themeDebugLog() << "<> Initializing Icon Themes";
@@ -95,7 +94,7 @@ void ThemeManager::initializeIcons()
         themeDebugLog() << "Loaded Built-In Icon Theme" << id;
     }
 
-    QDirIterator directoryIterator(themeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
+    QDirIterator directoryIterator(m_iconThemeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
     while (directoryIterator.hasNext()) {
         QDir dir(directoryIterator.next());
         IconTheme theme(dir.dirName(), dir.path());
@@ -120,12 +119,11 @@ void ThemeManager::initializeWidgets()
     // TODO: need some way to differentiate same name themes in different subdirectories (maybe smaller grey text next to theme name in
     // dropdown?)
 
-    QDir themeFolder("themes");
-    if (!themeFolder.mkpath("."))
+    if (!m_applicationThemeFolder.mkpath("."))
         themeWarningLog() << "Couldn't create theme folder";
-    themeDebugLog() << "Theme Folder Path: " << themeFolder.absolutePath();
+    themeDebugLog() << "Theme Folder Path: " << m_applicationThemeFolder.absolutePath();
 
-    QDirIterator directoryIterator(themeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    QDirIterator directoryIterator(m_applicationThemeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     while (directoryIterator.hasNext()) {
         QDir dir(directoryIterator.next());
         QFileInfo themeJson(dir.absoluteFilePath("theme.json"));
@@ -148,16 +146,6 @@ void ThemeManager::initializeWidgets()
     themeDebugLog() << "<> Widget themes initialized.";
 }
 
-QList<ITheme*> ThemeManager::getValidApplicationThemes()
-{
-    QList<ITheme*> ret;
-    ret.reserve(m_themes.size());
-    for (auto&& [id, theme] : m_themes) {
-        ret.append(theme.get());
-    }
-    return ret;
-}
-
 QList<IconTheme*> ThemeManager::getValidIconThemes()
 {
     QList<IconTheme*> ret;
@@ -168,14 +156,34 @@ QList<IconTheme*> ThemeManager::getValidIconThemes()
     return ret;
 }
 
-bool ThemeManager::isValidApplicationTheme(const QString& id)
+QList<ITheme*> ThemeManager::getValidApplicationThemes()
 {
-    return !id.isEmpty() && m_themes.find(id) != m_themes.end();
+    QList<ITheme*> ret;
+    ret.reserve(m_themes.size());
+    for (auto&& [id, theme] : m_themes) {
+        ret.append(theme.get());
+    }
+    return ret;
 }
 
 bool ThemeManager::isValidIconTheme(const QString& id)
 {
     return !id.isEmpty() && m_icons.find(id) != m_icons.end();
+}
+
+bool ThemeManager::isValidApplicationTheme(const QString& id)
+{
+    return !id.isEmpty() && m_themes.find(id) != m_themes.end();
+}
+
+QDir ThemeManager::getIconThemesFolder()
+{
+    return m_iconThemeFolder;
+}
+
+QDir ThemeManager::getApplicationThemesFolder()
+{
+    return m_applicationThemeFolder;
 }
 
 void ThemeManager::setIconTheme(const QString& name)

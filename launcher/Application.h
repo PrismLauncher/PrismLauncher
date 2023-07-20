@@ -119,15 +119,7 @@ public:
 
     QIcon getThemedIcon(const QString& name);
 
-    void setIconTheme(const QString& name);
-
-    void applyCurrentlySelectedTheme(bool initial = false);
-
-    QList<ITheme*> getValidApplicationThemes();
-
-    QList<IconTheme*> getValidIconThemes();
-
-    void setApplicationTheme(const QString& name);
+    ThemeManager* themeManager() { return m_themeManager.get(); }
 
     shared_qobject_ptr<ExternalUpdater> updater() {
         return m_updater;

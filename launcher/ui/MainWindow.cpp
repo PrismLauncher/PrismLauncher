@@ -627,7 +627,7 @@ void MainWindow::updateThemeMenu()
         themeMenu = new QMenu(this);
     }
 
-    auto themes = APPLICATION->getValidApplicationThemes();
+    auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
 
     QActionGroup* themesGroup = new QActionGroup(this);
 
@@ -641,7 +641,7 @@ void MainWindow::updateThemeMenu()
         themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->setApplicationTheme(theme->id());
+            APPLICATION->themeManager()->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
     }
@@ -1152,12 +1152,12 @@ void MainWindow::on_actionViewCentralModsFolder_triggered()
 
 void MainWindow::on_actionViewIconThemeFolder_triggered()
 {
-    DesktopServices::openDirectory("iconthemes");
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path());
 }
 
 void MainWindow::on_actionViewWidgetThemeFolder_triggered()
 {
-    DesktopServices::openDirectory("themes");
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path());
 }
 
 void MainWindow::refreshInstances()

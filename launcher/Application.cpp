@@ -900,7 +900,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         return;
     }
 
-    applyCurrentlySelectedTheme(true);
+    m_themeManager->applyCurrentlySelectedTheme(true);
     performMainStartupAction();
 }
 
@@ -942,7 +942,7 @@ bool Application::createSetupWizard()
         if (!validWidgets)
             settings()->set("ApplicationTheme", QString("system"));
 
-        applyCurrentlySelectedTheme(true);
+        m_themeManager->applyCurrentlySelectedTheme(true);
 
         m_setupWizard = new SetupWizard(nullptr);
         if (languageRequired)
@@ -1165,31 +1165,6 @@ std::shared_ptr<JavaInstallList> Application::javalist()
         m_javalist.reset(new JavaInstallList());
     }
     return m_javalist;
-}
-
-QList<ITheme*> Application::getValidApplicationThemes()
-{
-    return m_themeManager->getValidApplicationThemes();
-}
-
-QList<IconTheme*> Application::getValidIconThemes()
-{
-    return m_themeManager->getValidIconThemes();
-}
-
-void Application::applyCurrentlySelectedTheme(bool initial)
-{
-    m_themeManager->applyCurrentlySelectedTheme(initial);
-}
-
-void Application::setApplicationTheme(const QString& name)
-{
-    m_themeManager->setApplicationTheme(name);
-}
-
-void Application::setIconTheme(const QString& name)
-{
-    m_themeManager->setIconTheme(name);
 }
 
 QIcon Application::getThemedIcon(const QString& name)

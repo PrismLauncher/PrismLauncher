@@ -109,7 +109,7 @@ bool openDirectory(const QString &path, bool ensureExists)
     qDebug() << "Opening directory" << path;
     QDir parentPath;
     QDir dir(path);
-    if (!dir.exists())
+    if (ensureExists && !dir.exists())
     {
         parentPath.mkpath(dir.absolutePath());
     }
