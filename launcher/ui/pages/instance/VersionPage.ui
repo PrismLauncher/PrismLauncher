@@ -98,6 +98,7 @@
    <addaction name="actionEdit"/>
    <addaction name="actionRevert"/>
    <addaction name="separator"/>
+   <addaction name="actionInstall_AuthlibInjector"/>
    <addaction name="actionInstall_Forge"/>
    <addaction name="actionInstall_Fabric"/>
    <addaction name="actionInstall_Quilt"/>
@@ -168,6 +169,14 @@
    </property>
    <property name="toolTip">
     <string>Revert the selected package to default.</string>
+   </property>
+  </action>
+  <action name="actionInstall_AuthlibInjector">
+   <property name="text">
+    <string>Install authlib-injector</string>
+   </property>
+   <property name="toolTip">
+    <string>Install the authlib-injector package.</string>
    </property>
   </action>
   <action name="actionInstall_Forge">
