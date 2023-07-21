@@ -487,6 +487,8 @@ set(API_SOURCES
     modplatform/helpers/HashUtils.cpp
     modplatform/helpers/OverrideUtils.h
     modplatform/helpers/OverrideUtils.cpp
+    modplatform/helpers/GetModPackExtraInfoTask.h
+    modplatform/helpers/GetModPackExtraInfoTask.cpp
 
     modplatform/helpers/ExportToModList.h
     modplatform/helpers/ExportToModList.cpp

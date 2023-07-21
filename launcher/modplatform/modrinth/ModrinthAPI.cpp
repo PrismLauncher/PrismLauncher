@@ -6,6 +6,7 @@
 
 #include "Application.h"
 #include "Json.h"
+#include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "net/NetJob.h"
 #include "net/Upload.h"
 
@@ -118,4 +119,33 @@ static QList<ResourceAPI::SortingMethod> s_sorts = { { 1, "relevance", QObject::
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 {
     return s_sorts;
+}
+
+Task::Ptr ModrinthAPI::getVersionFromHash(QString hash, ModPlatform::IndexedVersion& output)
+{
+    static ModPlatform::ProviderCapabilities ProviderCaps;
+    auto hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    auto response = std::make_shared<QByteArray>();
+    auto ver_task = currentVersion(hash, hash_type, response);
+    QObject::connect(ver_task.get(), &Task::succeeded, [response, &output] {
+        QJsonParseError parse_error{};
+        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
+            qWarning() << *response;
+
+            // failed(parse_error.errorString());
+            return;
+        }
+
+        try {
+            auto entry = Json::requireObject(doc);
+            output = Modrinth::loadIndexedPackVersion(entry);
+        } catch (Json::JsonException& e) {
+            qDebug() << e.cause();
+            qDebug() << doc;
+        }
+    });
+    return ver_task;
 }

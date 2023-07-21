@@ -123,4 +123,6 @@ class FlameAPI : public NetworkResourceAPI {
             .arg(args.mcVersion.toString())
             .arg(mappedModLoader);
     };
+
+    virtual Task::Ptr getVersionFromHash(QString hash, ModPlatform::IndexedVersion&) override;
 };
