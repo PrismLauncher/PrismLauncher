@@ -2,6 +2,7 @@
 /*
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -99,6 +100,9 @@ void MinecraftPage::applySettings()
     // Miscellaneous
     s->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
     s->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
+
+    // Mod loader settings
+    s->set("DisableQuiltBeacon", ui->disableQuiltBeaconCheckBox->isChecked());
 }
 
 void MinecraftPage::loadSettings()
@@ -137,6 +141,8 @@ void MinecraftPage::loadSettings()
 
     ui->closeAfterLaunchCheck->setChecked(s->get("CloseAfterLaunch").toBool());
     ui->quitAfterGameStopCheck->setChecked(s->get("QuitAfterGameStop").toBool());
+
+    ui->disableQuiltBeaconCheckBox->setChecked(s->get("DisableQuiltBeacon").toBool());
 }
 
 void MinecraftPage::retranslate()

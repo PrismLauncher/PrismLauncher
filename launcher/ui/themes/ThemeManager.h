@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #include <QString>
 
 #include "ui/MainWindow.h"
+#include "ui/themes/CatPack.h"
 #include "ui/themes/ITheme.h"
 
 inline auto themeDebugLog()
@@ -40,18 +41,20 @@ class ThemeManager {
     void applyCurrentlySelectedTheme(bool initial = false);
     void setApplicationTheme(const QString& name, bool initial = false);
 
-    /// <summary>
-    /// Returns the cat based on selected cat and with events (Birthday, XMas, etc.)
-    /// </summary>
-    /// <param name="catName">Optional, if you need a specific cat.</param>
-    /// <returns></returns>
-    static QString getCatImage(QString catName = "");
+    /// @brief Returns the background based on selected and with events (Birthday, XMas, etc.)
+    /// @param catName Optional, if you need a specific background.
+    /// @return
+    QString getCatPack(QString catName = "");
+    QList<CatPack*> getValidCatPacks();
 
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
+    std::map<QString, std::unique_ptr<CatPack>> m_catPacks;
     MainWindow* m_mainWindow;
 
     void initializeThemes();
+    void initializeCatPacks();
     QString addTheme(std::unique_ptr<ITheme> theme);
     ITheme* getTheme(QString themeId);
+    QString addCatPack(std::unique_ptr<CatPack> catPack);
 };
