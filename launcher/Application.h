@@ -48,6 +48,7 @@
 #include <BaseInstance.h>
 
 #include "minecraft/launch/MinecraftServerTarget.h"
+#include "ui/themes/CatPack.h"
 
 class LaunchController;
 class LocalPeer;
@@ -126,9 +127,11 @@ public:
 
     void setApplicationTheme(const QString& name);
 
-    shared_qobject_ptr<ExternalUpdater> updater() {
-        return m_updater;
-    }
+    QList<CatPack*> getValidCatPacks();
+
+    QString getCatPack(QString catName = "");
+
+    shared_qobject_ptr<ExternalUpdater> updater() { return m_updater; }
 
     void triggerUpdateCheck();
 
