@@ -4,6 +4,7 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -189,6 +190,10 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerSetting("UseEnv", false);
         m_settings->registerSetting("OverrideEnv", false);
         m_settings->registerSetting("Env", QVariant(QMap<QString, QVariant>()));
+
+        // Mod loader specific options
+        auto modLoaderSettings = m_settings->registerSetting("OverrideModLoaderSettings", false);
+        m_settings->registerOverride(global_settings->getSetting("DisableQuiltBeacon"), modLoaderSettings);
 
         m_settings->set("InstanceType", "OneSix");
     }
@@ -394,6 +399,12 @@ QStringList MinecraftInstance::extraArguments()
         QStringList jar, temp1, temp2, temp3;
         agent->library()->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
         list.append("-javaagent:"+jar[0]+(agent->argument().isEmpty() ? "" : "="+agent->argument()));
+    }
+
+    {
+        const auto loaders = version->getModLoaders();
+        if (loaders.has_value() && loaders.value() & ResourceAPI::Quilt && settings()->get("DisableQuiltBeacon").toBool())
+            list.append("-Dloader.disable_beacon=true");
     }
     return list;
 }

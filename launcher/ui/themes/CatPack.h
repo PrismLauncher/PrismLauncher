@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,40 +35,57 @@
 
 #pragma once
 
-#include <QDialog>
-#include <QModelIndex>
-#include <memory>
-#include "FastFileIconProvider.h"
-#include "FileIgnoreProxy.h"
+#include <QDate>
+#include <QFileInfo>
+#include <QList>
+#include <QString>
 
-class BaseInstance;
-typedef std::shared_ptr<BaseInstance> InstancePtr;
-
-namespace Ui {
-class ExportInstanceDialog;
-}
-
-class ExportInstanceDialog : public QDialog {
-    Q_OBJECT
-
+class CatPack {
    public:
-    explicit ExportInstanceDialog(InstancePtr instance, QWidget* parent = 0);
-    ~ExportInstanceDialog();
+    virtual ~CatPack() {}
+    virtual QString id() = 0;
+    virtual QString name() = 0;
+    virtual QString path() = 0;
+};
 
-    virtual void done(int result);
+class BasicCatPack : public CatPack {
+   public:
+    BasicCatPack(QString id, QString name) : m_id(id), m_name(name) {}
+    BasicCatPack(QString id) : BasicCatPack(id, id) {}
+    virtual QString id() { return m_id; };
+    virtual QString name() { return m_name; };
+    virtual QString path();
+
+   protected:
+    QString m_id;
+    QString m_name;
+};
+
+class FileCatPack : public BasicCatPack {
+   public:
+    FileCatPack(QString id, QFileInfo& fileInfo) : BasicCatPack(id), m_path(fileInfo.absoluteFilePath()) {}
+    FileCatPack(QFileInfo& fileInfo) : FileCatPack(fileInfo.baseName(), fileInfo) {}
+    virtual QString path() { return m_path; }
 
    private:
-    void doExport();
-    void loadPackIgnore();
-    void savePackIgnore();
-    QString ignoreFileName();
+    QString m_path;
+};
+
+class JsonCatPack : public BasicCatPack {
+   public:
+    struct PartialDate {
+        int month;
+        int day;
+    };
+    struct Variant {
+        QString path;
+        PartialDate startTime;
+        PartialDate endTime;
+    };
+    JsonCatPack(QFileInfo& manifestInfo);
+    virtual QString path();
 
    private:
-    Ui::ExportInstanceDialog* ui;
-    InstancePtr m_instance;
-    FileIgnoreProxy* proxyModel;
-    FastFileIconProvider icons;
-
-   private slots:
-    void rowsInserted(QModelIndex parent, int top, int bottom);
+    QString m_defaultPath;
+    QList<Variant> m_variants;
 };

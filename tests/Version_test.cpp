@@ -20,6 +20,8 @@
 class VersionTest : public QObject {
     Q_OBJECT
 
+    QStringList m_flex_test_names = {};
+
     void addDataColumns()
     {
         QTest::addColumn<QString>("first");
@@ -101,8 +103,9 @@ class VersionTest : public QObject {
                 QString first{split_line.first().simplified()};
                 QString second{split_line.last().simplified()};
 
-                auto new_test_name = test_name_template.arg(QString::number(test_number), "lessThan").toLatin1().data();
-                QTest::newRow(new_test_name) << first << second << true << false;
+                auto new_test_name = test_name_template.arg(QString::number(test_number), "lessThan");
+                m_flex_test_names.append(new_test_name);
+                QTest::newRow(m_flex_test_names.last().toLatin1().data()) << first << second << true << false;
 
                 continue;
             }
@@ -112,8 +115,9 @@ class VersionTest : public QObject {
                 QString first{split_line.first().simplified()};
                 QString second{split_line.last().simplified()};
 
-                auto new_test_name = test_name_template.arg(QString::number(test_number), "equals").toLatin1().data();
-                QTest::newRow(new_test_name) << first << second << false << true;
+                auto new_test_name = test_name_template.arg(QString::number(test_number), "equals");
+                m_flex_test_names.append(new_test_name);
+                QTest::newRow(m_flex_test_names.last().toLatin1().data()) << first << second << false << true;
 
                 continue;
             }
@@ -123,8 +127,9 @@ class VersionTest : public QObject {
                 QString first{split_line.first().simplified()};
                 QString second{split_line.last().simplified()};
 
-                auto new_test_name = test_name_template.arg(QString::number(test_number), "greaterThan").toLatin1().data();
-                QTest::newRow(new_test_name) << first << second << false << false;
+                auto new_test_name = test_name_template.arg(QString::number(test_number), "greaterThan");
+                m_flex_test_names.append(new_test_name);
+                QTest::newRow(m_flex_test_names.last().toLatin1().data()) << first << second << false << false;
 
                 continue;
             }
