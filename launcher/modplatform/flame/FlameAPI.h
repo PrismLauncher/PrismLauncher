@@ -171,4 +171,6 @@ class FlameAPI : public ResourceAPI {
         }
         return url;
     }
+
+    virtual Task::Ptr getVersionFromHash(QString hash, ModPlatform::IndexedVersion&) override;
 };

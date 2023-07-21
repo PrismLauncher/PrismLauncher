@@ -225,4 +225,5 @@ class ModrinthAPI : public ResourceAPI {
         return Modrinth::loadIndexedPackVersion(obj);
     };
     void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { Modrinth::loadExtraPackData(m, obj); }
+    virtual Task::Ptr getVersionFromHash(QString hash, ModPlatform::IndexedVersion&) override;
 };

@@ -59,6 +59,7 @@ class InstanceImportTask : public InstanceTask {
 
    private slots:
     void processZipPack();
+    void processExtraInfoPack();
     void extractFinished();
 
    private: /* data */
