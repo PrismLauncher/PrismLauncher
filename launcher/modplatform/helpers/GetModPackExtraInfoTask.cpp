@@ -126,7 +126,7 @@ void GetModPackExtraInfoTask::getProjectInfo()
         emitFailed(tr("Version not found"));
         return;
     }
-    setStatus(tr("Get Project information"));
+    setStatus(tr("Get project information"));
     setProgress(3, 4);
     auto responseInfo = std::make_shared<QByteArray>();
     auto projectTask = m_api->getProject(m_version.addonId.toString(), responseInfo);

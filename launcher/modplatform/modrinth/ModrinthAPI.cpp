@@ -134,8 +134,6 @@ Task::Ptr ModrinthAPI::getVersionFromHash(QString hash, ModPlatform::IndexedVers
             qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
             qWarning() << *response;
-
-            // failed(parse_error.errorString());
             return;
         }
 
