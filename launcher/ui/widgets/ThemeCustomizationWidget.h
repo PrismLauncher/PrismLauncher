@@ -52,11 +52,4 @@ class ThemeCustomizationWidget : public QWidget {
 
    private:
     Ui::ThemeCustomizationWidget* ui;
-
-    QList<std::pair<QString, QString>> m_catOptions{
-        { "kitteh",     QObject::tr("Background Cat (from MultiMC)") }, 
-        { "rory",       QObject::tr("Rory ID 11 (drawn by Ashtaka)") }, 
-        { "rory-flat",  QObject::tr("Rory ID 11 (flat edition, drawn by Ashtaka)") },
-        { "teawie",     QObject::tr("Teawie (drawn by SympathyTea)") }
-    };
 };

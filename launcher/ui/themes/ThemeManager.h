@@ -22,6 +22,7 @@
 
 #include "IconTheme.h"
 #include "ui/MainWindow.h"
+#include "ui/themes/CatPack.h"
 #include "ui/themes/ITheme.h"
 
 inline auto themeDebugLog()
@@ -47,23 +48,25 @@ class ThemeManager {
     void setIconTheme(const QString& name);
     void setApplicationTheme(const QString& name, bool initial = false);
 
-    /// <summary>
-    /// Returns the cat based on selected cat and with events (Birthday, XMas, etc.)
-    /// </summary>
-    /// <param name="catName">Optional, if you need a specific cat.</param>
-    /// <returns></returns>
-    static QString getCatImage(QString catName = "");
+    /// @brief Returns the background based on selected and with events (Birthday, XMas, etc.)
+    /// @param catName Optional, if you need a specific background.
+    /// @return
+    QString getCatPack(QString catName = "");
+    QList<CatPack*> getValidCatPacks();
 
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::map<QString, IconTheme> m_icons;
     QDir m_iconThemeFolder{ "iconthemes" };
     QDir m_applicationThemeFolder{ "themes" };
+    std::map<QString, std::unique_ptr<CatPack>> m_catPacks;
 
     void initializeThemes();
+    void initializeCatPacks();
     QString addTheme(std::unique_ptr<ITheme> theme);
     ITheme* getTheme(QString themeId);
     QString addIconTheme(IconTheme theme);
+    QString addCatPack(std::unique_ptr<CatPack> catPack);
     void initializeIcons();
     void initializeWidgets();
 
