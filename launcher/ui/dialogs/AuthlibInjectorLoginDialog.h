@@ -23,20 +23,20 @@
 
 namespace Ui
 {
-class CustomYggdrasilLoginDialog;
+class AuthlibInjectorLoginDialog;
 }
 
-class CustomYggdrasilLoginDialog : public QDialog
+class AuthlibInjectorLoginDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    ~CustomYggdrasilLoginDialog();
+    ~AuthlibInjectorLoginDialog();
 
     static MinecraftAccountPtr newAccount(QWidget *parent, QString message);
 
 private:
-    explicit CustomYggdrasilLoginDialog(QWidget *parent = 0);
+    explicit AuthlibInjectorLoginDialog(QWidget *parent = 0);
 
     void setUserInputsEnabled(bool enable);
 
@@ -51,10 +51,11 @@ slots:
 
     void on_userTextBox_textEdited(const QString &newText);
     void on_passTextBox_textEdited(const QString &newText);
+    void on_authlibInjectorTextBox_textEdited(const QString &newText);
 
 private:
     QString fixUrl(QString url);
-    Ui::CustomYggdrasilLoginDialog *ui;
+    Ui::AuthlibInjectorLoginDialog *ui;
     MinecraftAccountPtr m_account;
     Task::Ptr m_loginTask;
 };

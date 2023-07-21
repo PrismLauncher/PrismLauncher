@@ -90,12 +90,9 @@ public: /* construction */
     explicit MinecraftAccount(QObject *parent = 0);
 
     static MinecraftAccountPtr createFromUsername(const QString &username);
-    static MinecraftAccountPtr createFromUsernameCustomYggdrasil(
+    static MinecraftAccountPtr createFromUsernameAuthlibInjector(
         const QString &username,
-        const QString &authServerUrl,
-        const QString &accountServerUrl,
-        const QString &sessionServerUrl,
-        const QString &servicesServerUrl
+        const QString &authlibInjectorUrl
     );
 
     static MinecraftAccountPtr createBlankMSA();
@@ -118,7 +115,7 @@ public: /* manipulation */
      */
     shared_qobject_ptr<AccountTask> login(QString password);
 
-    shared_qobject_ptr<AccountTask> loginCustomYggdrasil(QString password);
+    shared_qobject_ptr<AccountTask> loginAuthlibInjector(QString password);
 
     shared_qobject_ptr<AccountTask> loginMSA();
 
@@ -131,6 +128,10 @@ public: /* manipulation */
 public: /* queries */
     QString internalId() const {
         return data.internalId;
+    }
+
+    QString authlibInjectorUrl() const {
+        return data.authlibInjectorUrl;
     }
 
     QString authServerUrl() const {
@@ -204,8 +205,8 @@ public: /* queries */
                 return "Mojang";
             }
             break;
-            case AccountType::CustomYggdrasil: {
-                return "Custom Yggdrasil";
+            case AccountType::AuthlibInjector: {
+                return "authlib-injector";
             }
             break;
             case AccountType::MSA: {
@@ -232,7 +233,7 @@ public: /* queries */
                 return "mojang";
             }
             break;
-            case AccountType::CustomYggdrasil: {
+            case AccountType::AuthlibInjector: {
                 // This typeString gets passed to Minecraft; any Yggdrasil
                 // account should have the "mojang" type regardless of which
                 // servers are used.

@@ -27,6 +27,7 @@ struct AuthSession
     } status = Undetermined;
 
     // API URLs
+    QString authlib_injector_url;
     QString auth_server_url;
     QString account_server_url;
     QString session_server_url;

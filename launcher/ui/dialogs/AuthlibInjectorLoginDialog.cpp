@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#include "CustomYggdrasilLoginDialog.h"
-#include "ui_CustomYggdrasilLoginDialog.h"
+#include "AuthlibInjectorLoginDialog.h"
+#include "ui_AuthlibInjectorLoginDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
 #include "minecraft/auth/AccountTask.h"
 
 #include <QtWidgets/QPushButton>
 
-CustomYggdrasilLoginDialog::CustomYggdrasilLoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::CustomYggdrasilLoginDialog)
+AuthlibInjectorLoginDialog::AuthlibInjectorLoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::AuthlibInjectorLoginDialog)
 {
     ui->setupUi(this);
     ui->progressBar->setVisible(false);
@@ -31,12 +31,12 @@ CustomYggdrasilLoginDialog::CustomYggdrasilLoginDialog(QWidget *parent) : QDialo
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
-CustomYggdrasilLoginDialog::~CustomYggdrasilLoginDialog()
+AuthlibInjectorLoginDialog::~AuthlibInjectorLoginDialog()
 {
     delete ui;
 }
 
-QString CustomYggdrasilLoginDialog::fixUrl(QString url)
+QString AuthlibInjectorLoginDialog::fixUrl(QString url)
 {
     QString fixed(url);
     if (!fixed.contains("://")) {
@@ -49,9 +49,9 @@ QString CustomYggdrasilLoginDialog::fixUrl(QString url)
 }
 
 // Stage 1: User interaction
-void CustomYggdrasilLoginDialog::accept()
+void AuthlibInjectorLoginDialog::accept()
 {
-    auto fixedAuthUrl = CustomYggdrasilLoginDialog::fixUrl(ui->authServerTextBox->text());
+    auto fixedAuthlibInjectorUrl = AuthlibInjectorLoginDialog::fixUrl(ui->authlibInjectorTextBox->text());
 
     auto response = CustomMessageBox::selectable(this, QObject::tr("Confirm account creation"),
         QObject::tr(
@@ -60,7 +60,7 @@ void CustomYggdrasilLoginDialog::accept()
             "%1\n\n"
             "Never use your Mojang or Microsoft password for a third-party account!\n\n"
             "Are you sure you want to proceed?"
-        ).arg(fixedAuthUrl),
+        ).arg(fixedAuthlibInjectorUrl),
         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)->exec();
     if (response != QMessageBox::Yes)
         return;
@@ -69,52 +69,52 @@ void CustomYggdrasilLoginDialog::accept()
     ui->progressBar->setVisible(true);
 
     // Setup the login task and start it
-    m_account = MinecraftAccount::createFromUsernameCustomYggdrasil(
+    m_account = MinecraftAccount::createFromUsernameAuthlibInjector(
         ui->userTextBox->text(),
-        fixedAuthUrl,
-        CustomYggdrasilLoginDialog::fixUrl(ui->accountServerTextBox->text()),
-        CustomYggdrasilLoginDialog::fixUrl(ui->sessionServerTextBox->text()),
-        CustomYggdrasilLoginDialog::fixUrl(ui->servicesServerTextBox->text())
+        fixedAuthlibInjectorUrl
     );
 
-    m_loginTask = m_account->loginCustomYggdrasil(ui->passTextBox->text());
-    connect(m_loginTask.get(), &Task::failed, this, &CustomYggdrasilLoginDialog::onTaskFailed);
-    connect(m_loginTask.get(), &Task::succeeded, this, &CustomYggdrasilLoginDialog::onTaskSucceeded);
-    connect(m_loginTask.get(), &Task::status, this, &CustomYggdrasilLoginDialog::onTaskStatus);
-    connect(m_loginTask.get(), &Task::progress, this, &CustomYggdrasilLoginDialog::onTaskProgress);
+    m_loginTask = m_account->loginAuthlibInjector(ui->passTextBox->text());
+    connect(m_loginTask.get(), &Task::failed, this, &AuthlibInjectorLoginDialog::onTaskFailed);
+    connect(m_loginTask.get(), &Task::succeeded, this, &AuthlibInjectorLoginDialog::onTaskSucceeded);
+    connect(m_loginTask.get(), &Task::status, this, &AuthlibInjectorLoginDialog::onTaskStatus);
+    connect(m_loginTask.get(), &Task::progress, this, &AuthlibInjectorLoginDialog::onTaskProgress);
     m_loginTask->start();
 }
 
-void CustomYggdrasilLoginDialog::setUserInputsEnabled(bool enable)
+void AuthlibInjectorLoginDialog::setUserInputsEnabled(bool enable)
 {
     ui->userTextBox->setEnabled(enable);
     ui->passTextBox->setEnabled(enable);
-    ui->authServerTextBox->setEnabled(enable);
-    ui->accountServerTextBox->setEnabled(enable);
-    ui->sessionServerTextBox->setEnabled(enable);
-    ui->servicesServerTextBox->setEnabled(enable);
+    ui->authlibInjectorTextBox->setEnabled(enable);
     ui->buttonBox->setEnabled(enable);
 }
 
 // Enable the OK button only when all textboxes contain something.
-void CustomYggdrasilLoginDialog::on_userTextBox_textEdited(const QString &newText)
+void AuthlibInjectorLoginDialog::on_userTextBox_textEdited(const QString &newText)
 {
     ui->buttonBox->button(QDialogButtonBox::Ok)
         ->setEnabled(!newText.isEmpty() &&
                      !ui->passTextBox->text().isEmpty() &&
-                     !ui->authServerTextBox->text().isEmpty() &&
-                     !ui->accountServerTextBox->text().isEmpty() &&
-                     !ui->sessionServerTextBox->text().isEmpty() &&
-                     !ui->servicesServerTextBox->text().isEmpty());
+                     !ui->authlibInjectorTextBox->text().isEmpty());
 
 }
-void CustomYggdrasilLoginDialog::on_passTextBox_textEdited(const QString &newText)
+void AuthlibInjectorLoginDialog::on_passTextBox_textEdited(const QString &newText)
 {
     ui->buttonBox->button(QDialogButtonBox::Ok)
-        ->setEnabled(!newText.isEmpty() && !ui->userTextBox->text().isEmpty());
+        ->setEnabled(!newText.isEmpty() &&
+                     !ui->passTextBox->text().isEmpty() &&
+                     !ui->authlibInjectorTextBox->text().isEmpty());
+}
+void AuthlibInjectorLoginDialog::on_authlibInjectorTextBox_textEdited(const QString &newText)
+{
+    ui->buttonBox->button(QDialogButtonBox::Ok)
+        ->setEnabled(!newText.isEmpty() &&
+                     !ui->passTextBox->text().isEmpty() &&
+                     !ui->authlibInjectorTextBox->text().isEmpty());
 }
 
-void CustomYggdrasilLoginDialog::onTaskFailed(const QString &reason)
+void AuthlibInjectorLoginDialog::onTaskFailed(const QString &reason)
 {
     // Set message
     auto lines = reason.split('\n');
@@ -134,26 +134,26 @@ void CustomYggdrasilLoginDialog::onTaskFailed(const QString &reason)
     ui->progressBar->setVisible(false);
 }
 
-void CustomYggdrasilLoginDialog::onTaskSucceeded()
+void AuthlibInjectorLoginDialog::onTaskSucceeded()
 {
     QDialog::accept();
 }
 
-void CustomYggdrasilLoginDialog::onTaskStatus(const QString &status)
+void AuthlibInjectorLoginDialog::onTaskStatus(const QString &status)
 {
     ui->label->setText(status);
 }
 
-void CustomYggdrasilLoginDialog::onTaskProgress(qint64 current, qint64 total)
+void AuthlibInjectorLoginDialog::onTaskProgress(qint64 current, qint64 total)
 {
     ui->progressBar->setMaximum(total);
     ui->progressBar->setValue(current);
 }
 
 // Public interface
-MinecraftAccountPtr CustomYggdrasilLoginDialog::newAccount(QWidget *parent, QString msg)
+MinecraftAccountPtr AuthlibInjectorLoginDialog::newAccount(QWidget *parent, QString msg)
 {
-    CustomYggdrasilLoginDialog dlg(parent);
+    AuthlibInjectorLoginDialog dlg(parent);
     dlg.ui->label->setText(msg);
     if (dlg.exec() == QDialog::Accepted)
     {

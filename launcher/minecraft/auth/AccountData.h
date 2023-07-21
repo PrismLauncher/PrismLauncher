@@ -74,7 +74,7 @@ struct MinecraftProfile {
 enum class AccountType {
     MSA,
     Mojang,
-    CustomYggdrasil,
+    AuthlibInjector,
     Offline
 };
 
@@ -128,6 +128,7 @@ struct AccountData {
     QString customAccountServerUrl;
     QString customSessionServerUrl;
     QString customServicesServerUrl;
+    QString authlibInjectorUrl;
 
     QString msaClientID;
     Katabasis::Token msaToken;

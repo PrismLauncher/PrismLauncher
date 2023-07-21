@@ -54,7 +54,7 @@
    </attribute>
    <addaction name="actionAddMicrosoft"/>
    <addaction name="actionAddMojang"/>
-   <addaction name="actionAddCustomYggdrasil"/>
+   <addaction name="actionAddAuthlibInjector"/>
    <addaction name="actionAddOffline"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionRemove"/>
@@ -69,9 +69,9 @@
     <string>Add &amp;Mojang</string>
    </property>
   </action>
-  <action name="actionAddCustomYggdrasil">
+  <action name="actionAddAuthlibInjector">
    <property name="text">
-    <string>Add &amp;Custom Yggdrasil</string>
+    <string>Add &amp;authlib-injector</string>
    </property>
   </action>
   <action name="actionRemove">

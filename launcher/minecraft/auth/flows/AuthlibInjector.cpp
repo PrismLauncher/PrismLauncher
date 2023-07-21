@@ -1,10 +1,10 @@
-#include "CustomYggdrasil.h"
+#include "AuthlibInjector.h"
 
 #include "minecraft/auth/steps/YggdrasilStep.h"
 #include "minecraft/auth/steps/MinecraftProfileStepMojang.h"
 #include "minecraft/auth/steps/GetSkinStep.h"
 
-CustomYggdrasilRefresh::CustomYggdrasilRefresh(
+AuthlibInjectorRefresh::AuthlibInjectorRefresh(
     AccountData *data,
     QObject *parent
 ) : AuthFlow(data, parent) {
@@ -13,7 +13,7 @@ CustomYggdrasilRefresh::CustomYggdrasilRefresh(
     m_steps.append(makeShared<GetSkinStep>(m_data));
 }
 
-CustomYggdrasilLogin::CustomYggdrasilLogin(
+AuthlibInjectorLogin::AuthlibInjectorLogin(
     AccountData *data,
     QString password,
     QObject *parent

@@ -50,7 +50,7 @@
 
 #include "flows/MSA.h"
 #include "flows/Mojang.h"
-#include "flows/CustomYggdrasil.h"
+#include "flows/AuthlibInjector.h"
 #include "flows/Offline.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent) {
@@ -83,25 +83,23 @@ MinecraftAccountPtr MinecraftAccount::createFromUsername(const QString &username
     return account;
 }
 
-MinecraftAccountPtr MinecraftAccount::createFromUsernameCustomYggdrasil(
+MinecraftAccountPtr MinecraftAccount::createFromUsernameAuthlibInjector(
     const QString &username,
-    const QString &customAuthServerUrl,
-    const QString &customAccountServerUrl,
-    const QString &customSessionServerUrl,
-    const QString &customServicesServerUrl
+    const QString &authlibInjectorUrl
 )
 {
     auto account = makeShared<MinecraftAccount>();
-    account->data.type = AccountType::CustomYggdrasil;
+    account->data.type = AccountType::AuthlibInjector;
     account->data.yggdrasilToken.extra["userName"] = username;
     account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
     account->data.minecraftEntitlement.ownsMinecraft = true;
     account->data.minecraftEntitlement.canPlayMinecraft = true;
 
-    account->data.customAuthServerUrl = customAuthServerUrl;
-    account->data.customAccountServerUrl = customAccountServerUrl;
-    account->data.customSessionServerUrl = customSessionServerUrl;
-    account->data.customServicesServerUrl = customServicesServerUrl;
+    account->data.authlibInjectorUrl = authlibInjectorUrl;
+    account->data.customAuthServerUrl = authlibInjectorUrl + "/authserver";
+    account->data.customAccountServerUrl = authlibInjectorUrl + "/api";
+    account->data.customSessionServerUrl = authlibInjectorUrl + "/sessionserver";
+    account->data.customServicesServerUrl = authlibInjectorUrl + "/minecraftservices";
     return account;
 }
 
@@ -163,10 +161,10 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::login(QString password) {
     return m_currentTask;
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::loginCustomYggdrasil(QString password) {
+shared_qobject_ptr<AccountTask> MinecraftAccount::loginAuthlibInjector(QString password) {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
-    m_currentTask.reset(new CustomYggdrasilLogin(&data, password));
+    m_currentTask.reset(new AuthlibInjectorLogin(&data, password));
     connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
     connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
     connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
@@ -207,8 +205,8 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
     else if(data.type == AccountType::Offline) {
         m_currentTask.reset(new OfflineRefresh(&data));
     }
-    else if (data.type == AccountType::CustomYggdrasil) {
-        m_currentTask.reset(new CustomYggdrasilRefresh(&data));
+    else if (data.type == AccountType::AuthlibInjector) {
+        m_currentTask.reset(new AuthlibInjectorRefresh(&data));
     }
     else {
         m_currentTask.reset(new MojangRefresh(&data));
@@ -349,6 +347,7 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     }
 
     // API URLs
+    session->authlib_injector_url = data.authlibInjectorUrl;
     session->auth_server_url = data.authServerUrl();
     session->account_server_url = data.accountServerUrl();
     session->session_server_url = data.sessionServerUrl();

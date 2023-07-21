@@ -352,8 +352,8 @@ bool AccountData::resumeStateFromV3(QJsonObject data) {
         type = AccountType::MSA;
     } else if (typeS == "Mojang") {
         type = AccountType::Mojang;
-    } else if (typeS == "CustomYggdrasil") {
-        type = AccountType::CustomYggdrasil;
+    } else if (typeS == "AuthlibInjector") {
+        type = AccountType::AuthlibInjector;
     } else if (typeS == "Offline") {
         type = AccountType::Offline;
     } else {
@@ -366,11 +366,12 @@ bool AccountData::resumeStateFromV3(QJsonObject data) {
         canMigrateToMSA = data.value("canMigrateToMSA").toBool(false);
     }
 
-    if(type == AccountType::CustomYggdrasil) {
+    if(type == AccountType::AuthlibInjector) {
         customAuthServerUrl = data.value("customAuthServerUrl").toString();
         customAccountServerUrl = data.value("customAccountServerUrl").toString();
         customSessionServerUrl = data.value("customSessionServerUrl").toString();
         customServicesServerUrl = data.value("customServicesServerUrl").toString();
+        authlibInjectorUrl = data.value("authlibInjectorUrl").toString();
     }
 
     if(type == AccountType::MSA) {
@@ -417,12 +418,13 @@ QJsonObject AccountData::saveState() const {
         tokenToJSONV3(output, xboxApiToken, "xrp-main");
         tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
     }
-    else if (type == AccountType::CustomYggdrasil) {
-        output["type"] = "CustomYggdrasil";
+    else if (type == AccountType::AuthlibInjector) {
+        output["type"] = "AuthlibInjector";
         output["customAuthServerUrl"] = customAuthServerUrl;
         output["customAccountServerUrl"] = customAccountServerUrl;
         output["customSessionServerUrl"] = customSessionServerUrl;
         output["customServicesServerUrl"] = customServicesServerUrl;
+        output["authlibInjectorUrl"] = authlibInjectorUrl;
     }
     else if (type == AccountType::Offline) {
         output["type"] = "Offline";
@@ -435,7 +437,7 @@ QJsonObject AccountData::saveState() const {
 }
 
 bool AccountData::usesCustomApiServers() const {
-    return type == AccountType::CustomYggdrasil;
+    return type == AccountType::AuthlibInjector;
 }
 
 QString AccountData::authServerUrl() const {
@@ -482,14 +484,14 @@ QString AccountData::accessToken() const {
 }
 
 QString AccountData::clientToken() const {
-    if(type != AccountType::Mojang && type != AccountType::CustomYggdrasil) {
+    if(type != AccountType::Mojang && type != AccountType::AuthlibInjector) {
         return QString();
     }
     return yggdrasilToken.extra["clientToken"].toString();
 }
 
 void AccountData::setClientToken(QString clientToken) {
-    if(type != AccountType::Mojang && type != AccountType::CustomYggdrasil) {
+    if(type != AccountType::Mojang && type != AccountType::AuthlibInjector) {
         return;
     }
     yggdrasilToken.extra["clientToken"] = clientToken;
@@ -503,7 +505,7 @@ void AccountData::generateClientTokenIfMissing() {
 }
 
 void AccountData::invalidateClientToken() {
-    if(type != AccountType::Mojang && type != AccountType::CustomYggdrasil) {
+    if(type != AccountType::Mojang && type != AccountType::AuthlibInjector) {
         return;
     }
     yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{-}]"));
@@ -525,7 +527,7 @@ QString AccountData::profileName() const {
 QString AccountData::accountDisplayString() const {
     switch(type) {
         case AccountType::Mojang:
-        case AccountType::CustomYggdrasil: {
+        case AccountType::AuthlibInjector: {
             return userName();
         }
         case AccountType::Offline: {

@@ -47,7 +47,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/LoginDialog.h"
-#include "ui/dialogs/CustomYggdrasilLoginDialog.h"
+#include "ui/dialogs/AuthlibInjectorLoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/SkinUploadDialog.h"
@@ -158,7 +158,7 @@ void AccountListPage::on_actionAddMojang_triggered()
     }
 }
 
-void AccountListPage::on_actionAddCustomYggdrasil_triggered()
+void AccountListPage::on_actionAddAuthlibInjector_triggered()
 {
     if (!m_accounts->anyAccountIsValid()) {
         QMessageBox::warning(
@@ -173,7 +173,7 @@ void AccountListPage::on_actionAddCustomYggdrasil_triggered()
         return;
     }
 
-    MinecraftAccountPtr account = CustomYggdrasilLoginDialog::newAccount(
+    MinecraftAccountPtr account = AuthlibInjectorLoginDialog::newAccount(
         this,
         tr(
             "Please enter your username (sometimes an email address), password, and the URLs of your API servers."

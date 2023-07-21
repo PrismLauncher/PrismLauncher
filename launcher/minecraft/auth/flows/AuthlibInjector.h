@@ -1,21 +1,21 @@
 #pragma once
 #include "AuthFlow.h"
 
-class CustomYggdrasilRefresh : public AuthFlow
+class AuthlibInjectorRefresh : public AuthFlow
 {
     Q_OBJECT
 public:
-    explicit CustomYggdrasilRefresh(
+    explicit AuthlibInjectorRefresh(
         AccountData *data,
         QObject *parent = 0
     );
 };
 
-class CustomYggdrasilLogin : public AuthFlow
+class AuthlibInjectorLogin : public AuthFlow
 {
     Q_OBJECT
 public:
-    explicit CustomYggdrasilLogin(
+    explicit AuthlibInjectorLogin(
         AccountData *data,
         QString password,
         QObject *parent = 0

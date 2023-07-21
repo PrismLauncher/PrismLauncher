@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CustomYggdrasilLoginDialog</class>
- <widget class="QDialog" name="CustomYggdrasilLoginDialog">
+ <class>AuthlibInjectorLoginDialog</class>
+ <widget class="QDialog" name="AuthlibInjectorLoginDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -51,30 +51,9 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="authServerTextBox">
+    <widget class="QLineEdit" name="authlibInjectorTextBox">
      <property name="placeholderText">
-       <string>https://authserver.mojang.com</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="accountServerTextBox">
-     <property name="placeholderText">
-       <string>https://api.mojang.com</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="sessionServerTextBox">
-     <property name="placeholderText">
-       <string>https://sessionserver.mojang.com</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="servicesServerTextBox">
-     <property name="placeholderText">
-       <string>https://api.minecraftservices.com</string>
+       <string>https://example.com/authlib-injector</string>
      </property>
     </widget>
    </item>
