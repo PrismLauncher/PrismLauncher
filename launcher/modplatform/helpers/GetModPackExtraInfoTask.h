@@ -17,7 +17,6 @@
  */
 #pragma once
 
-#include <qtmetamacros.h>
 #include <memory>
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/NetworkResourceAPI.h"
