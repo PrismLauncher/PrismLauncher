@@ -62,7 +62,10 @@ ITheme* ThemeManager::getTheme(QString themeId)
 QString ThemeManager::addIconTheme(IconTheme theme)
 {
     QString id = theme.id();
-    m_icons.emplace(id, std::move(theme));
+    if (m_icons.find(id) == m_icons.end())
+        m_icons.emplace(id, std::move(theme));
+    else
+        themeWarningLog() << "IconTheme(" << id << ") not added to prevent id duplication";
     return id;
 }
 
@@ -129,7 +132,7 @@ void ThemeManager::initializeWidgets()
         themeWarningLog() << "Couldn't create theme folder";
     themeDebugLog() << "Theme Folder Path: " << m_applicationThemeFolder.absolutePath();
 
-    QDirIterator directoryIterator(m_applicationThemeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    QDirIterator directoryIterator(m_applicationThemeFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
     while (directoryIterator.hasNext()) {
         QDir dir(directoryIterator.next());
         QFileInfo themeJson(dir.absoluteFilePath("theme.json"));
