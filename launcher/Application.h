@@ -122,10 +122,6 @@ public:
 
     ThemeManager* themeManager() { return m_themeManager.get(); }
 
-    QList<CatPack*> getValidCatPacks();
-
-    QString getCatPack(QString catName = "");
-
     shared_qobject_ptr<ExternalUpdater> updater() { return m_updater; }
 
     void triggerUpdateCheck();

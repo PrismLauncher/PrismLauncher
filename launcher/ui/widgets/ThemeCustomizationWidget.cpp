@@ -152,7 +152,7 @@ void ThemeCustomizationWidget::loadSettings()
     }
 
     auto cat = settings->get("BackgroundCat").toString();
-    for (auto& catFromList : APPLICATION->getValidCatPacks()) {
+    for (auto& catFromList : APPLICATION->themeManager()->getValidCatPacks()) {
         QIcon catIcon = QIcon(QString("%1").arg(catFromList->path()));
         ui->backgroundCatComboBox->addItem(catIcon, catFromList->name(), catFromList->id());
         if (cat == catFromList->id()) {

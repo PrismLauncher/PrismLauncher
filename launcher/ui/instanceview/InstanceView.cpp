@@ -52,7 +52,7 @@
 
 #include <Application.h>
 #include <InstanceList.h>
-
+#include "ui/themes/ThemeManager.h"
 
 template <typename T> bool listsIntersect(const QList<T> &l1, const QList<T> t2)
 {
@@ -503,7 +503,7 @@ void InstanceView::setPaintCat(bool visible)
 {
     m_catVisible = visible;
     if (visible)
-        m_catPixmap.load(APPLICATION->getCatPack());
+        m_catPixmap.load(APPLICATION->themeManager()->getCatPack());
     else
         m_catPixmap = QPixmap();
 }
