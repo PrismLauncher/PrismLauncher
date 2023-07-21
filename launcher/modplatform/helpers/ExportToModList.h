@@ -15,31 +15,19 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 #pragma once
+#include <QList>
+#include <QString>
+#include "minecraft/mod/Mod.h"
 
-#include "BaseVersion.h"
-#include "JavaVersion.h"
+namespace ExportToModList {
 
-struct JavaInstall : public BaseVersion {
-    JavaInstall() {}
-    JavaInstall(QString id, QString arch, QString path) : id(id), arch(arch), path(path) {}
-    virtual QString descriptor() { return id.toString(); }
-
-    virtual QString name() { return id.toString(); }
-
-    virtual QString typeString() const { return arch; }
-
-    virtual bool operator<(BaseVersion& a) override;
-    virtual bool operator>(BaseVersion& a) override;
-    bool operator<(const JavaInstall& rhs);
-    bool operator==(const JavaInstall& rhs);
-    bool operator>(const JavaInstall& rhs);
-
-    JavaVersion id;
-    QString arch;
-    QString path;
-    bool recommended = false;
+enum Formats { HTML, MARKDOWN, PLAINTXT, JSON, CSV, CUSTOM };
+enum OptionalData {
+    Authors = 1 << 0,
+    Url = 1 << 1,
+    Version = 1 << 2,
 };
-
-typedef std::shared_ptr<JavaInstall> JavaInstallPtr;
+QString exportToModList(QList<Mod*> mods, Formats format, OptionalData extraData);
+QString exportToModList(QList<Mod*> mods, QString lineTemplate);
+}  // namespace ExportToModList
