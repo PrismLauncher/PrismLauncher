@@ -153,6 +153,8 @@ private slots:
     inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
     void on_actionExportInstanceZip_triggered();
     void on_actionExportInstanceMrPack_triggered();
+    void on_actionExportInstanceFlamePack_triggered();
+    void on_actionExportInstanceToModList_triggered();
 
     void on_actionRenameInstance_triggered();
 

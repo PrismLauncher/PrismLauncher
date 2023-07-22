@@ -116,12 +116,21 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
     if (iter == m_entries.end())
         return;
 
+    iter++;
+    // the action to insert after is present
+    // however, the element after it isn't valid
+    if (iter == m_entries.end()) {
+        // append the action instead of inserting it
+        addAction(action);
+        return;
+    }
+
     BarEntry entry;
-    entry.bar_action = insertWidget((iter + 1)->bar_action, new ActionButton(action, this, m_use_default_action));
+    entry.bar_action = insertWidget(iter->bar_action, new ActionButton(action, this, m_use_default_action));
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
-    m_entries.insert(iter + 1, entry);
+    m_entries.insert(iter, entry);
 
     m_menu_state = MenuState::Dirty;
 }

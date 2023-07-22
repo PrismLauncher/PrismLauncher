@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -95,9 +95,14 @@ void ThemeCustomizationWidget::applyWidgetTheme(int index) {
     emit currentWidgetThemeChanged(index);
 }
 
-void ThemeCustomizationWidget::applyCatTheme(int index) {
+void ThemeCustomizationWidget::applyCatTheme(int index)
+{
     auto settings = APPLICATION->settings();
-    settings->set("BackgroundCat", m_catOptions[index].first);
+    auto originalCat = settings->get("BackgroundCat").toString();
+    auto newCat = ui->backgroundCatComboBox->currentData().toString();
+    if (originalCat != newCat) {
+        settings->set("BackgroundCat", newCat);
+    }
 
     emit currentCatChanged(index);
 }
@@ -135,10 +140,10 @@ void ThemeCustomizationWidget::loadSettings()
     }
 
     auto cat = settings->get("BackgroundCat").toString();
-    for (auto& catFromList : m_catOptions) {
-        QIcon catIcon = QIcon(QString(":/backgrounds/%1").arg(ThemeManager::getCatImage(catFromList.first)));
-        ui->backgroundCatComboBox->addItem(catIcon, catFromList.second);
-        if (cat == catFromList.first) {
+    for (auto& catFromList : APPLICATION->getValidCatPacks()) {
+        QIcon catIcon = QIcon(QString("%1").arg(catFromList->path()));
+        ui->backgroundCatComboBox->addItem(catIcon, catFromList->name(), catFromList->id());
+        if (cat == catFromList->id()) {
             ui->backgroundCatComboBox->setCurrentIndex(ui->backgroundCatComboBox->count() - 1);
         }
     }

@@ -45,10 +45,10 @@ QVariant Index::data(const QModelIndex &index, int role) const
     switch (role)
     {
     case Qt::DisplayRole:
-        switch (index.column())
-        {
-        case 0: return list->humanReadable();
-        default: break;
+        if (index.column() == 0) {
+            return list->humanReadable();
+        } else {
+            break;
         }
     case UidRole: return list->uid();
     case NameRole: return list->name();
