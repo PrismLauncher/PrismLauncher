@@ -150,6 +150,10 @@ public: /* queries */
         return data.servicesServerUrl();
     }
 
+    bool usesCustomApiServers() const {
+        return data.usesCustomApiServers();
+    }
+
     QString accountDisplayString() const {
         return data.accountDisplayString();
     }

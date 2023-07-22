@@ -448,7 +448,7 @@ void VersionPage::on_actionDownload_All_triggered()
     m_container->refreshContainer();
 }
 
-void VersionPage::on_actionInstall_AuthlibInjector_triggered()
+void VersionPage::openInstallAuthlibInjector()
 {
     auto vlist = APPLICATION->metadataIndex()->get("moe.yushi.authlibinjector");
     if(!vlist)
@@ -473,6 +473,11 @@ void VersionPage::on_actionInstall_AuthlibInjector_triggered()
         preselect(m_profile->rowCount(QModelIndex())-1);
         m_container->refreshContainer();
     }
+}
+
+void VersionPage::on_actionInstall_AuthlibInjector_triggered()
+{
+    openInstallAuthlibInjector();
 }
 
 void VersionPage::on_actionInstall_Forge_triggered()

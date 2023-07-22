@@ -258,6 +258,11 @@ QString InstanceWindow::instanceId()
     return m_instance->id();
 }
 
+BasePage * InstanceWindow::getPage(QString pageId)
+{
+    return m_container->getPage(pageId);
+}
+
 bool InstanceWindow::selectPage(QString pageId)
 {
     return m_container->selectPage(pageId);

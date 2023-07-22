@@ -669,6 +669,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="suggestAuthlibInjector">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Suggest installing authlib-injector when using custom API servers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Suggest Authlib Injector</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacerMiscellaneous">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

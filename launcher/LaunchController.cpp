@@ -36,6 +36,7 @@
 #include "LaunchController.h"
 #include "minecraft/auth/AccountList.h"
 #include "Application.h"
+#include "ui/pages/instance/VersionPage.h"
 
 #include "ui/MainWindow.h"
 #include "ui/InstanceWindow.h"
@@ -52,6 +53,7 @@
 #include <QList>
 #include <QHostAddress>
 #include <QPushButton>
+#include <QCheckBox>
 
 #include "BuildConfig.h"
 #include "JavaCommon.h"
@@ -151,6 +153,49 @@ void LaunchController::login() {
     {
         emitFailed(tr("No account selected for launch."));
         return;
+    }
+
+    if (m_accountToUse->usesCustomApiServers()) {
+        MinecraftInstancePtr inst = std::dynamic_pointer_cast<MinecraftInstance>(m_instance);
+        if (inst->getPackProfile()->getComponentVersion("moe.yushi.authlibinjector") == "") {
+            // Account uses custom API servers, but authlib-injector is missing
+            // Prompt user to install authlib-injector on the instance before launching
+            QMessageBox msgBox{m_parentWidget};
+            msgBox.setWindowTitle(tr("Missing authlib-injector"));
+            msgBox.setText(tr("authlib-injector is not installed."));
+            msgBox.setInformativeText(tr(
+                "You are logging in using an account that uses custom API servers, but authlib-injector "
+                "is not installed on this instance.\n\n"
+                "Would you like to install authlib-injector now?"
+            ));
+            msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ignore | QMessageBox::Yes);
+            msgBox.setDefaultButton(QMessageBox::Yes);
+            msgBox.setModal(true);
+
+            QCheckBox* checkBox = new QCheckBox("Don't ask again", m_parentWidget);
+            checkBox->setChecked(!m_instance->settings()->get("SuggestAuthlibInjector").toBool());
+
+            msgBox.setCheckBox(checkBox);
+            const auto & result = msgBox.exec();
+
+            m_instance->settings()->set("SuggestAuthlibInjector", !checkBox->isChecked());
+
+            switch (result) {
+            case QMessageBox::Ignore:
+                break;
+            case QMessageBox::Cancel:
+                return;
+            case QMessageBox::Yes:
+                if (result == QMessageBox::Yes) {
+                    const auto & window = APPLICATION->showInstanceWindow(m_instance, "version");
+                    const auto & page = dynamic_cast<VersionPage *>(window->getPage("version"));
+                    if (page != nullptr) {
+                        page->openInstallAuthlibInjector();
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     // we loop until the user succeeds in logging in or gives up
