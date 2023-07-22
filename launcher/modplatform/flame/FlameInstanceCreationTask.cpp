@@ -57,13 +57,10 @@
 #include <QDebug>
 #include <QFileInfo>
 
+#include "meta/Index.h"
+#include "meta/VersionList.h"
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
-
-const static QMap<QString, QString> forgemap = { { "1.2.5", "3.4.9.171" },
-                                                 { "1.4.2", "6.0.1.355" },
-                                                 { "1.4.7", "6.6.2.534" },
-                                                 { "1.5.2", "7.8.1.737" } };
 
 static const FlameAPI api;
 
@@ -258,6 +255,56 @@ bool FlameCreationTask::updateInstance()
     return false;
 }
 
+QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, QString loaderVersion, QString mcVersion)
+{
+    if (loaderVersion == "recommended") {
+        auto vlist = APPLICATION->metadataIndex()->get(uid);
+        if (!vlist) {
+            setError(tr("Failed to get local metadata index for %1").arg(uid));
+            return {};
+        }
+
+        if (!vlist->isLoaded()) {
+            QEventLoop loadVersionLoop;
+            auto task = vlist->getLoadTask();
+            connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+            if (!task->isRunning())
+                task->start();
+
+            loadVersionLoop.exec();
+        }
+
+        for (auto version : vlist->versions()) {
+            // first recommended build we find, we use.
+            if (!version->isRecommended())
+                continue;
+            auto reqs = version->requiredSet();
+
+            // filter by minecraft version, if the loader depends on a certain version.
+            // not all mod loaders depend on a given Minecraft version, so we won't do this
+            // filtering for those loaders.
+            if (loaderType == "forge") {
+                auto iter = std::find_if(reqs.begin(), reqs.end(), [mcVersion](const Meta::Require& req) {
+                    return req.uid == "net.minecraft" && req.equalsVersion == mcVersion;
+                });
+                if (iter == reqs.end())
+                    continue;
+            }
+            return version->descriptor();
+        }
+
+        setError(tr("Failed to find version for %1 loader").arg(loaderType));
+        return {};
+    }
+
+    if (loaderVersion.isEmpty()) {
+        emitFailed(tr("No loader version set for modpack!"));
+        return {};
+    }
+
+    return loaderVersion;
+}
+
 bool FlameCreationTask::createInstance()
 {
     QEventLoop loop;
@@ -296,22 +343,29 @@ bool FlameCreationTask::createInstance()
         }
     }
 
-    QString forgeVersion;
-    QString fabricVersion;
-    // TODO: is Quilt relevant here?
+    QString loaderType;
+    QString loaderUid;
+    QString loaderVersion;
+
     for (auto& loader : m_pack.minecraft.modLoaders) {
         auto id = loader.id;
         if (id.startsWith("forge-")) {
             id.remove("forge-");
-            forgeVersion = id;
-            continue;
-        }
-        if (id.startsWith("fabric-")) {
+            loaderType = "forge";
+            loaderUid = "net.minecraftforge";
+        } else if (loaderType == "fabric") {
             id.remove("fabric-");
-            fabricVersion = id;
+            loaderType = "fabric";
+            loaderUid = "net.fabricmc.fabric-loader";
+        } else if (loaderType == "quilt") {
+            id.remove("quilt-");
+            loaderType = "quilt";
+            loaderUid = "org.quiltmc.quilt-loader";
+        } else {
+            logWarning(tr("Unknown mod loader in manifest: %1").arg(id));
             continue;
         }
-        logWarning(tr("Unknown mod loader in manifest: %1").arg(id));
+        loaderVersion = id;
     }
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
@@ -328,19 +382,12 @@ bool FlameCreationTask::createInstance()
     auto components = instance.getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", mcVersion, true);
-    if (!forgeVersion.isEmpty()) {
-        // FIXME: dirty, nasty, hack. Proper solution requires dependency resolution and knowledge of the metadata.
-        if (forgeVersion == "recommended") {
-            if (forgemap.contains(mcVersion)) {
-                forgeVersion = forgemap[mcVersion];
-            } else {
-                logWarning(tr("Could not map recommended Forge version for Minecraft %1").arg(mcVersion));
-            }
-        }
-        components->setComponentVersion("net.minecraftforge", forgeVersion);
+    if (!loaderType.isEmpty()) {
+        auto version = getVersionForLoader(loaderUid, loaderType, loaderVersion, mcVersion);
+        if (version.isEmpty())
+            return false;
+        components->setComponentVersion(loaderUid, version);
     }
-    if (!fabricVersion.isEmpty())
-        components->setComponentVersion("net.fabricmc.fabric-loader", fabricVersion);
 
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
