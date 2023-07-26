@@ -668,7 +668,7 @@ set(LOGIC_SOURCES
     ${ATLAUNCHER_SOURCES}
 )
 
-if(APPLE)
+if(APPLE AND NOT "${MACOSX_SPARKLE_UPDATE_FEED_URL}" STREQUAL "")
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${MAC_UPDATE_SOURCES})
 endif()
 
@@ -1141,17 +1141,22 @@ if(APPLE)
     set(CMAKE_MACOSX_RPATH 1)
     set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks/")
 
-    file(DOWNLOAD ${MACOSX_SPARKLE_DOWNLOAD_URL} ${CMAKE_BINARY_DIR}/Sparkle.tar.xz EXPECTED_HASH SHA256=${MACOSX_SPARKLE_SHA256})
-    file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
+    if(NOT "${MACOSX_SPARKLE_UPDATE_FEED_URL}" STREQUAL "")
+      file(DOWNLOAD ${MACOSX_SPARKLE_DOWNLOAD_URL} ${CMAKE_BINARY_DIR}/Sparkle.tar.xz EXPECTED_HASH SHA256=${MACOSX_SPARKLE_SHA256})
+      file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
 
-    find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
+      find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
+    endif()
+
     target_link_libraries(Launcher_logic
         "-framework AppKit"
         "-framework Carbon"
         "-framework Foundation"
         "-framework ApplicationServices"
     )
-    target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
+    if(NOT "${MACOSX_SPARKLE_UPDATE_FEED_URL}" STREQUAL "")
+      target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
+    endif()
 endif()
 
 target_link_libraries(Launcher_logic)
@@ -1213,7 +1218,7 @@ if(WIN32)
     )
 endif()
 
-if (UNIX AND APPLE)
+if (UNIX AND APPLE AND NOT "${MACOSX_SPARKLE_UPDATE_FEED_URL}" STREQUAL "")
     # Add Sparkle updater
     # It has to be copied here instead of just allowing fixup_bundle to install it, otherwise essential parts of
     # the framework aren't installed
