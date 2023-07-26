@@ -52,7 +52,7 @@ ExportMrPackDialog::ExportMrPackDialog(InstancePtr instance, QWidget* parent)
     // use the game root - everything outside cannot be exported
     const QDir root(instance->gameRoot());
     proxy = new FileIgnoreProxy(instance->gameRoot(), this);
-    proxy->ignoreFilesWithPath().insert({ "logs", "crash-reports" });
+    proxy->ignoreFilesWithPath().insert({ "logs", "crash-reports", ".cache", ".fabric", ".quilt" });
     proxy->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
     proxy->setSourceModel(model);
 
