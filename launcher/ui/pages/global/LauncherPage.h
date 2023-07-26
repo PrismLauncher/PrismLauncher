@@ -62,7 +62,7 @@ public:
 
     QString displayName() const override
     {
-        return "Launcher";
+        return tr("Launcher");
     }
     QIcon icon() const override
     {
