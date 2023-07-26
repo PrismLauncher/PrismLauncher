@@ -70,7 +70,7 @@ void LibrariesTask::executeTask()
     connect(downloadJob.get(), &NetJob::failed, this, &LibrariesTask::jarlibFailed);
     connect(downloadJob.get(), &NetJob::aborted, this, [this]{ emitFailed(tr("Aborted")); });
     connect(downloadJob.get(), &NetJob::progress, this, &LibrariesTask::progress);
-    connect(downloadJob.get(), &NetJob::stepProgress, this, &LibrariesTask::propogateStepProgress);
+    connect(downloadJob.get(), &NetJob::stepProgress, this, &LibrariesTask::propagateStepProgress);
 
     downloadJob->start();
 }

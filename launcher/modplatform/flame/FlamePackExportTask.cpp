@@ -166,7 +166,7 @@ void FlamePackExportTask::collectHashes()
         stepProgress(*progressStep);
         emitFailed(reason);
     });
-    connect(hashingTask.get(), &Task::stepProgress, this, &FlamePackExportTask::propogateStepProgress);
+    connect(hashingTask.get(), &Task::stepProgress, this, &FlamePackExportTask::propagateStepProgress);
 
     connect(hashingTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);
