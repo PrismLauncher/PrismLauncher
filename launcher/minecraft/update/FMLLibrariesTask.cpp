@@ -77,7 +77,7 @@ void FMLLibrariesTask::executeTask()
     connect(dljob.get(), &NetJob::failed, this, &FMLLibrariesTask::fmllibsFailed);
     connect(dljob.get(), &NetJob::aborted, this, [this]{ emitFailed(tr("Aborted")); });
     connect(dljob.get(), &NetJob::progress, this, &FMLLibrariesTask::progress);
-    connect(dljob.get(), &NetJob::stepProgress, this, &FMLLibrariesTask::propogateStepProgress);
+    connect(dljob.get(), &NetJob::stepProgress, this, &FMLLibrariesTask::propagateStepProgress);
     downloadJob.reset(dljob);
     downloadJob->start();
 }

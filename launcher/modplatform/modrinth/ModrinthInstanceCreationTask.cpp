@@ -268,7 +268,7 @@ bool ModrinthCreationTask::createInstance()
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total); 
     });
-    connect(m_files_job.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propogateStepProgress);
+    connect(m_files_job.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propagateStepProgress);
 
     setStatus(tr("Downloading mods..."));
     m_files_job->start();

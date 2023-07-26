@@ -1,0 +1,5 @@
+builds:
+  exclude: []
+  include:
+    - "devShells.*-linux.*"
+    - "packages.*-linux.*"
