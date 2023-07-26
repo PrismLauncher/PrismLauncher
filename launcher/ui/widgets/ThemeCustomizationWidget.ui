@@ -63,7 +63,8 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset theme="viewfolder"/>
+        <iconset theme="viewfolder">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="flat">
         <bool>true</bool>
@@ -106,7 +107,8 @@
         <string/>
        </property>
        <property name="icon">
-        <iconset theme="viewfolder"/>
+        <iconset theme="viewfolder">
+         <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="flat">
         <bool>true</bool>
@@ -147,15 +149,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="catInfoLabel">
+      <widget class="QPushButton" name="catPackFolder">
        <property name="toolTip">
-        <string>The cat appears in the background and is not shown by default. It is only made visible when pressing the Cat button in the Toolbar.</string>
+        <string>View cat packs folder.</string>
        </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
-        <iconset theme="about">
+        <iconset theme="viewfolder">
          <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="flat">

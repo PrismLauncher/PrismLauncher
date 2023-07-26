@@ -1160,6 +1160,11 @@ void MainWindow::on_actionViewWidgetThemeFolder_triggered()
     DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path());
 }
 
+void MainWindow::on_actionViewCatPackFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path());
+}
+
 void MainWindow::refreshInstances()
 {
     APPLICATION->instances()->loadList();

@@ -35,6 +35,7 @@ ThemeCustomizationWidget::ThemeCustomizationWidget(QWidget* parent) : QWidget(pa
 
     connect(ui->iconsFolder, &QPushButton::clicked, this, [] { DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path()); });
     connect(ui->widgetStyleFolder, &QPushButton::clicked, this, [] { DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path()); });
+    connect(ui->catPackFolder, &QPushButton::clicked, this, [] { DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path()); });
 }
 
 ThemeCustomizationWidget::~ThemeCustomizationWidget()

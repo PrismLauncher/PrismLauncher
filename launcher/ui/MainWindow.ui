@@ -131,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -193,6 +193,7 @@
     <addaction name="separator"/>
     <addaction name="actionViewIconThemeFolder"/>
     <addaction name="actionViewWidgetThemeFolder"/>
+    <addaction name="actionViewCatPackFolder"/>
    </widget>
    <widget class="QMenu" name="accountsMenu">
     <property name="title">
@@ -729,7 +730,8 @@
   </action>
   <action name="actionViewWidgetThemeFolder">
    <property name="icon">
-    <iconset theme="viewfolder"/>
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>View &amp;Widget Themes Folder</string>
@@ -740,13 +742,22 @@
   </action>
   <action name="actionViewIconThemeFolder">
    <property name="icon">
-    <iconset theme="viewfolder"/>
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>View I&amp;con Theme Folder</string>
    </property>
    <property name="toolTip">
     <string>View Icon Theme Folder</string>
+   </property>
+  </action>
+  <action name="actionViewCatPackFolder">
+   <property name="icon">
+    <iconset theme="viewfolder"/>
+   </property>
+   <property name="text">
+    <string>View Cat Packs Folder</string>
    </property>
   </action>
  </widget>

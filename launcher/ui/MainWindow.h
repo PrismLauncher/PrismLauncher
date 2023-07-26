@@ -118,6 +118,7 @@ private slots:
 
     void on_actionViewIconThemeFolder_triggered();
     void on_actionViewWidgetThemeFolder_triggered();
+    void on_actionViewCatPackFolder_triggered();
 
     void on_actionViewSelectedInstFolder_triggered();
 

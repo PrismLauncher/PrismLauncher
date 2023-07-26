@@ -44,6 +44,7 @@ class ThemeManager {
     bool isValidApplicationTheme(const QString& id);
     QDir getIconThemesFolder();
     QDir getApplicationThemesFolder();
+    QDir getCatPacksFolder();
     void applyCurrentlySelectedTheme(bool initial = false);
     void setIconTheme(const QString& name);
     void setApplicationTheme(const QString& name, bool initial = false);
@@ -59,6 +60,7 @@ class ThemeManager {
     std::map<QString, IconTheme> m_icons;
     QDir m_iconThemeFolder{ "iconthemes" };
     QDir m_applicationThemeFolder{ "themes" };
+    QDir m_catPacksFolder{ "catpacks" };
     std::map<QString, std::unique_ptr<CatPack>> m_catPacks;
 
     void initializeThemes();

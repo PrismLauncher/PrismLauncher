@@ -205,6 +205,11 @@ QDir ThemeManager::getApplicationThemesFolder()
     return m_applicationThemeFolder;
 }
 
+QDir ThemeManager::getCatPacksFolder()
+{
+    return m_catPacksFolder;
+}
+
 void ThemeManager::setIconTheme(const QString& name)
 {
     if (m_icons.find(name) == m_icons.end()) {
@@ -270,9 +275,9 @@ void ThemeManager::initializeCatPacks()
     for (auto [id, name] : defaultCats) {
         addCatPack(std::unique_ptr<CatPack>(new BasicCatPack(id, name)));
     }
-    QDir catpacksDir("catpacks");
-    QString catpacksFolder = catpacksDir.absoluteFilePath("");
-    themeDebugLog() << "CatPacks Folder Path:" << catpacksFolder;
+    if (!m_catPacksFolder.mkpath("."))
+        themeWarningLog() << "Couldn't create theme folder";
+    themeDebugLog() << "CatPacks Folder Path:" << m_catPacksFolder.absolutePath();
 
     QStringList supportedImageFormats;
     for (auto format : QImageReader::supportedImageFormats()) {
@@ -289,9 +294,9 @@ void ThemeManager::initializeCatPacks()
         }
     };
 
-    loadFiles(catpacksDir);
+    loadFiles(m_catPacksFolder);
 
-    QDirIterator directoryIterator(catpacksFolder, QDir::Dirs | QDir::NoDotAndDotDot);
+    QDirIterator directoryIterator(m_catPacksFolder.path(), QDir::Dirs | QDir::NoDotAndDotDot);
     while (directoryIterator.hasNext()) {
         QDir dir(directoryIterator.next());
         QFileInfo manifest(dir.absoluteFilePath("catpack.json"));
