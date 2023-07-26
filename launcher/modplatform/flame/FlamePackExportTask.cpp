@@ -350,7 +350,7 @@ void FlamePackExportTask::buildZip()
         stepProgress(*progressStep);
         emitFailed(reason);
     });
-    connect(zipTask.get(), &Task::stepProgress, this, &FlamePackExportTask::propogateStepProgress);
+    connect(zipTask.get(), &Task::stepProgress, this, &FlamePackExportTask::propagateStepProgress);
 
     connect(zipTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);
