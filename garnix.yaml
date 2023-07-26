@@ -1,5 +1,6 @@
 builds:
   exclude: []
   include:
-    - "devShells.*-linux.*"
-    - "packages.*-linux.*"
+    - "checks.x86_64-linux.*"
+    - "devShells.*.*"
+    - "packages.*.*"
