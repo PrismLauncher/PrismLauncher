@@ -354,7 +354,7 @@ if(UNIX AND APPLE)
     set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} ${MACOSX_SPARKLE_DIR})
 
     # install as bundle
-    set(INSTALL_BUNDLE "full")
+    set(INSTALL_BUNDLE "full" CACHE STRING "Use fixup_bundle to bundle dependencies")
 
     # Add the icon
     install(FILES ${Launcher_Branding_ICNS} DESTINATION ${RESOURCES_DEST_DIR} RENAME ${Launcher_Name}.icns)
@@ -367,7 +367,7 @@ elseif(UNIX)
     set(JARS_DEST_DIR "share/${Launcher_Name}")
 
     # install as bundle with no dependencies included
-    set(INSTALL_BUNDLE "nodeps")
+    set(INSTALL_BUNDLE "nodeps" CACHE STRING "Use fixup_bundle to bundle dependencies")
 
     # Set RPATH
     SET(Launcher_BINARY_RPATH "$ORIGIN/")
@@ -401,7 +401,7 @@ elseif(WIN32)
     set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
     # install as bundle
-    set(INSTALL_BUNDLE "full")
+    set(INSTALL_BUNDLE "full" CACHE STRING "Use fixup_bundle to bundle dependencies")
 else()
     message(FATAL_ERROR "Platform not supported")
 endif()
