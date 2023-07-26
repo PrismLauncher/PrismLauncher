@@ -1344,7 +1344,7 @@ void MainWindow::on_actionExportInstanceFlamePack_triggered()
         if (instance) {
             if (auto cmp = instance->getPackProfile()->getComponent("net.minecraft");
                 cmp && cmp->getVersionFile() && cmp->getVersionFile()->type == "snapshot") {
-                QMessageBox msgBox;
+                QMessageBox msgBox(this);
                 msgBox.setText("Snapshots are currently not supported by CurseForge modpacks.");
                 msgBox.exec();
                 return;
