@@ -103,7 +103,7 @@ void ModFolderLoadTask::executeTask()
         while (iter.hasNext()) {
             auto mod = iter.next().value();
             if (mod->status() == ModStatus::NotInstalled) {
-                mod->destroy(m_index_dir, false);
+                mod->destroy(m_index_dir, false, false);
                 iter.remove();
             }
         }

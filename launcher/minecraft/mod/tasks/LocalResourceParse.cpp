@@ -44,7 +44,11 @@ static const QMap<PackedResourceType, QString> s_packed_type_names = {
 namespace ResourceUtils {
 PackedResourceType identify(QFileInfo file){
     if (file.exists() && file.isFile()) {
-        if (ResourcePackUtils::validate(file)) {
+        if (ModUtils::validate(file)) {
+            // mods can contain resource and data packs so they must be tested first
+            qDebug() << file.fileName() << "is a mod";
+            return PackedResourceType::Mod;
+        } else if (ResourcePackUtils::validate(file)) {
             qDebug() << file.fileName() << "is a resource pack";
             return PackedResourceType::ResourcePack;
         } else if (TexturePackUtils::validate(file)) {
@@ -53,9 +57,6 @@ PackedResourceType identify(QFileInfo file){
         } else if (DataPackUtils::validate(file)) {
             qDebug() << file.fileName() << "is a data pack";
             return PackedResourceType::DataPack;
-        } else if (ModUtils::validate(file)) {
-            qDebug() << file.fileName() << "is a mod";
-            return PackedResourceType::Mod;
         } else if (WorldSaveUtils::validate(file)) {
             qDebug() << file.fileName() << "is a world save";
             return PackedResourceType::WorldSave;

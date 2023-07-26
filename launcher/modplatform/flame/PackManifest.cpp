@@ -76,13 +76,8 @@ bool Flame::File::parseFromObject(const QJsonObject& obj,  bool throw_on_blocked
     // It is also optional
     type = File::Type::SingleFile;
 
-    if (fileName.endsWith(".zip")) {
-        // this is probably a resource pack
-        targetFolder = "resourcepacks";
-    } else {
-        // this is probably a mod, dunno what else could modpacks download
-        targetFolder = "mods";
-    }
+    targetFolder = "mods";
+
     // get the hash
     hash = QString();
     auto hashes = Json::ensureArray(obj, "hashes");

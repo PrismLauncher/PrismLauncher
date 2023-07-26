@@ -266,13 +266,13 @@ void ModrinthPackExportTask::finish()
 
 QByteArray ModrinthPackExportTask::generateIndex()
 {
-    QJsonObject obj;
-    obj["formatVersion"] = 1;
-    obj["game"] = "minecraft";
-    obj["name"] = name;
-    obj["versionId"] = version;
+    QJsonObject out;
+    out["formatVersion"] = 1;
+    out["game"] = "minecraft";
+    out["name"] = name;
+    out["versionId"] = version;
     if (!summary.isEmpty())
-        obj["summary"] = summary;
+        out["summary"] = summary;
 
     if (mcInstance) {
         auto profile = mcInstance->getPackProfile();
@@ -293,30 +293,40 @@ QByteArray ModrinthPackExportTask::generateIndex()
         if (forge != nullptr)
             dependencies["forge"] = forge->m_version;
 
-        obj["dependencies"] = dependencies;
+        out["dependencies"] = dependencies;
     }
 
-    QJsonArray files;
-    QMapIterator<QString, ResolvedFile> iterator(resolvedFiles);
-    while (iterator.hasNext()) {
-        iterator.next();
+    QJsonArray filesOut;
+    for (auto iterator = resolvedFiles.constBegin(); iterator != resolvedFiles.constEnd(); iterator++) {
+        QJsonObject fileOut;
 
+        QString path = iterator.key();
         const ResolvedFile& value = iterator.value();
 
-        QJsonObject file;
-        file["path"] = iterator.key();
-        file["downloads"] = QJsonArray({ iterator.value().url });
+        // detect disabled mod
+        const QFileInfo pathInfo(path);
+        if (pathInfo.suffix() == "disabled") {
+            // rename it
+            path = pathInfo.dir().filePath(pathInfo.completeBaseName());
+            // ...and make it optional
+            QJsonObject env;
+            env["client"] = "optional";
+            env["server"] = "optional";
+            fileOut["env"] = env;
+        }
+
+        fileOut["path"] = path;
+        fileOut["downloads"] = QJsonArray{ iterator.value().url };
 
         QJsonObject hashes;
         hashes["sha1"] = value.sha1;
         hashes["sha512"] = value.sha512;
+        fileOut["hashes"] = hashes;
 
-        file["hashes"] = hashes;
-        file["fileSize"] = value.size;
-
-        files << file;
+        fileOut["fileSize"] = value.size;
+        filesOut << fileOut;
     }
-    obj["files"] = files;
+    out["files"] = filesOut;
 
-    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
+    return QJsonDocument(out).toJson(QJsonDocument::Compact);
 }
