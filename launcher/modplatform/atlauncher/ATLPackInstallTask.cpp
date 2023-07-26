@@ -684,7 +684,7 @@ void PackInstallTask::installConfigs()
         abortable = true;
         setProgress(current, total);
     });
-    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
+    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
     connect(jobPtr.get(), &NetJob::aborted, [&]{
         abortable = false;
         jobPtr.reset();
@@ -852,7 +852,7 @@ void PackInstallTask::downloadMods()
         abortable = true;
         setProgress(current, total);
     });
-    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
+    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
     connect(jobPtr.get(), &NetJob::aborted, [&]
     {
         abortable = false;
