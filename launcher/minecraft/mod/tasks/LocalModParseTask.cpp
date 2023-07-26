@@ -1,9 +1,9 @@
 #include "LocalModParseTask.h"
 
+#include <qdcss.h>
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 #include <toml++/toml.h>
-#include <qdcss.h>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -369,12 +369,11 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
                 details.icon_file = icon.toString();
             }
         }
-
     }
     return details;
 }
 
-ModDetails ReadForgeInfo(QString fileName)
+ModDetails ReadForgeInfo(QByteArray contents)
 {
     ModDetails details;
     // Read the data
@@ -382,7 +381,7 @@ ModDetails ReadForgeInfo(QString fileName)
     details.mod_id = "Forge";
     details.homeurl = "http://www.minecraftforge.net/forum/";
     INIFile ini;
-    if (!ini.loadFile(fileName))
+    if (!ini.loadFile(contents))
         return details;
 
     QString major = ini.get("forge.major.number", "0").toString();
@@ -554,7 +553,7 @@ bool processZIP(Mod& mod, ProcessingLevel level)
             return false;
         }
 
-        details = ReadForgeInfo(file.getFileName());
+        details = ReadForgeInfo(file.readAll());
         file.close();
         zip.close();
 
