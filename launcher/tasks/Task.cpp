@@ -161,7 +161,7 @@ void Task::emitSucceeded()
     emit finished();
 }
 
-void Task::propogateStepProgress(TaskStepProgress const& task_progress)
+void Task::propagateStepProgress(TaskStepProgress const& task_progress)
 {
     emit stepProgress(task_progress);
 }
