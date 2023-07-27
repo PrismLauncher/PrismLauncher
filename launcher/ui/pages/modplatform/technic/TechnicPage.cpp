@@ -129,14 +129,11 @@ void TechnicPage::suggestCurrent()
         return;
     }
 
-    QString editedLogoName = "technic_" + current.logoName.section(".", 0, 0);
-    model->getLogo(current.logoName, current.logoUrl, [this, editedLogoName](QString logo)
-    {
-        dialog->setSuggestedIconFromFile(logo, editedLogoName);
-    });
+    QString editedLogoName = "technic_" + current.logoName;
+    model->getLogo(current.logoName, current.logoUrl,
+                   [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 
-    if (current.metadataLoaded)
-    {
+    if (current.metadataLoaded) {
         metadataLoaded();
         return;
     }
