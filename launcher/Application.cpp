@@ -131,7 +131,7 @@
 #include "MangoHud.h"
 #endif
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
 #endif
 
@@ -776,7 +776,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     if(BuildConfig.UPDATER_ENABLED)
     {
         qDebug() << "Initializing updater";
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
         m_updater.reset(new MacSparkleUpdater());
 #endif
         qDebug() << "<> Updater started.";

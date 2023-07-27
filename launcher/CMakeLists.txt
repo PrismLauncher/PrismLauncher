@@ -1146,6 +1146,7 @@ if(APPLE)
       file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
 
       find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
+      add_compile_definitions(SPARKLE_ENABLED)
     endif()
 
     target_link_libraries(Launcher_logic
