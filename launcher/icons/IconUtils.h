@@ -45,4 +45,5 @@ QString findBestIconIn(const QString& folder, const QString& iconKey);
 // Get icon file type filter for file browser dialogs
 QString getIconFilter();
 
+bool isIconSuffix(QString suffix);
 }  // namespace IconUtils

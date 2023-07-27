@@ -51,8 +51,8 @@ IconType operator--(IconType& t, int)
         case IconType::FileBased:
             t = IconType::Transient;
             break;
-        default: {
-        }
+        default:
+            break;
     }
     return temp;
 }
