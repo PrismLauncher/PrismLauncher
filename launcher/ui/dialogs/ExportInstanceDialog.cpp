@@ -66,6 +66,8 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget* parent
     auto prefix = QDir(instance->instanceRoot()).relativeFilePath(instance->gameRoot());
     proxyModel->ignoreFilesWithPath().insert({ FS::PathCombine(prefix, "logs"), FS::PathCombine(prefix, "crash-reports") });
     proxyModel->ignoreFilesWithName().append({ ".DS_Store", "thumbs.db", "Thumbs.db" });
+    proxyModel->ignoreFilesWithPath().insert(
+        { FS::PathCombine(prefix, ".cache"), FS::PathCombine(prefix, ".fabric"), FS::PathCombine(prefix, ".quilt") });
     loadPackIgnore();
 
     ui->treeView->setModel(proxyModel);
