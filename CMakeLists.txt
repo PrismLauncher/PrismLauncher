@@ -318,6 +318,8 @@ add_subdirectory(program_info)
 
 ####################################### Install layout #######################################
 
+set(Launcher_ENABLE_UPDATER NO)
+
 if(NOT (UNIX AND APPLE))
     # Install "portable.txt" if selected component is "portable"
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_Portable_File}" DESTINATION "." COMPONENT portable EXCLUDE_FROM_ALL)
@@ -352,6 +354,10 @@ if(UNIX AND APPLE)
 
     # directories to look for dependencies
     set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} ${MACOSX_SPARKLE_DIR})
+
+    if(NOT MACOSX_SPARKLE_UPDATE_PUBLIC_KEY STREQUAL "" AND NOT MACOSX_SPARKLE_UPDATE_FEED_URL STREQUAL "")
+        set(Launcher_ENABLE_UPDATER YES)
+    endif()
 
     # install as bundle
     set(INSTALL_BUNDLE "full" CACHE STRING "Use fixup_bundle to bundle dependencies")
