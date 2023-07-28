@@ -427,5 +427,3 @@ QString IconList::getDirectory() const
 {
     return m_dir.absolutePath();
 }
-
-// #include "IconList.moc"
