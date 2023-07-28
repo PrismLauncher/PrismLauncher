@@ -304,7 +304,7 @@ void NewInstanceDialog::importIconNow()
 {
     if (importIcon) {
         APPLICATION->icons()->installIcon(importIconPath, importIconName);
-        InstIconKey = importIconName.section('.', 0, 0);
+        InstIconKey = importIconName.mid(0, importIconName.lastIndexOf('.');
         importIcon = false;
     }
     APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
