@@ -315,11 +315,6 @@ std::optional<QStringList> MMCZip::extractSubDir(QuaZip *zip, const QString & su
         if (relative_file_name.startsWith('/'))
             relative_file_name = relative_file_name.mid(1);
 
-        // Fix subdirs/files ending with a / getting transformed into absolute paths
-        if(name.startsWith('/')){
-            name = name.mid(1);
-        }
-
         // Fix weird "folders with a single file get squashed" thing
         QString sub_path;
         if (relative_file_name.contains('/') && !relative_file_name.endsWith('/')) {
