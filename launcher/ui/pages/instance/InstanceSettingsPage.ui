@@ -123,7 +123,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string notr="true">PermGen:</string>
+             <string>PermGen:</string>
             </property>
            </widget>
           </item>
@@ -548,6 +548,31 @@
        <string>Miscellaneous</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QGroupBox" name="modLoaderSettingsGroupBox">
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <property name="title">
+          <string>Mod loader settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="VerticalLayout_16">
+          <item>
+           <widget class="QCheckBox" name="disableQuiltBeaconCheckBox">
+            <property name="text">
+             <string>Disable Quilt Loader Beacon</string>
+            </property>
+            <property name="toolTip">
+             <string>Disable Quilt loader's beacon for counting monthly active users</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <widget class="QGroupBox" name="gameTimeGroupBox">
          <property name="enabled">

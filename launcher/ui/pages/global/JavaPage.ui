@@ -58,7 +58,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string notr="true">&amp;PermGen:</string>
+             <string>&amp;PermGen:</string>
             </property>
             <property name="buddy">
              <cstring>permGenSpinBox</cstring>
