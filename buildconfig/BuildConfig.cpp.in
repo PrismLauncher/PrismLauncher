@@ -70,6 +70,9 @@ Config::Config()
         UPDATER_ENABLED = true;
     }
 
+    LAUNCHER_APPCONTAINER_ENABLE = "@Launcher_APPCONTAINER_ENABLE@";
+    APPCONTAINER_ENABLED = BUILD_PLATFORM == "Windows-MSVC" && LAUNCHER_APPCONTAINER_ENABLE != "OFF";
+
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
     GIT_TAG = "@Launcher_GIT_TAG@";
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";

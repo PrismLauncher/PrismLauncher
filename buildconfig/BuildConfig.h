@@ -83,6 +83,10 @@ class Config {
     /// URL for the Sparkle updater's appcast
     QString MAC_SPARKLE_APPCAST_URL;
 
+    // AppContainer Support Enabled
+    QString LAUNCHER_APPCONTAINER_ENABLE;
+    bool APPCONTAINER_ENABLED;
+
     /// User-Agent to use.
     QString USER_AGENT;
 

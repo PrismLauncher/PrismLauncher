@@ -274,6 +274,13 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     QString dirParam = parser.value("dir");
     if (!dirParam.isEmpty())
     {
+        if (BuildConfig.APPCONTAINER_ENABLED) {
+            showFatalErrorMessage("-dir is disabled in builds using AppContainer.",
+                                  QString("-dir is disabled in builds using AppContainer.\n"
+                                          "\n"
+                                          "Please use the default data folder or a build without AppContainer.\n"));
+            return;
+        }
         // the dir param. it makes multimc data path point to whatever the user specified
         // on command line
         adjustedBy = "Command line";
@@ -281,9 +288,18 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        QStandardPaths::StandardLocation bar;
+        if (BuildConfig.APPCONTAINER_ENABLED) {
+            bar = QStandardPaths::AppLocalDataLocation;
+            adjustedBy = "AppContainer data path";
+        } else {
+            bar = QStandardPaths::AppDataLocation;
+            adjustedBy = "Persistent data path";
+        }
+
+        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(bar), ".."));
         dataPath = foo.absolutePath();
-        adjustedBy = "Persistent data path";
+
 
 #ifndef Q_OS_MACOS
         if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {

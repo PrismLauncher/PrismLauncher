@@ -55,11 +55,17 @@ jobs:
             ARM64="$(echo -n ${d} | grep -o arm64 || true)"
             INST="$(echo -n ${d} | grep -o Setup || true)"
             PORT="$(echo -n ${d} | grep -o Portable || true)"
+            MSIX="$(echo -n ${d} | grep -o 'msix$' || true)"
+            MSIXBUNDLE="$(echo -n ${d} | grep -o 'msixbundle$' || true)"
+            APPINSTALLER="$(echo -n ${d} | grep -o AppInstaller || true)"
             NAME="PrismLauncher-Windows-MSVC"
             test -z "${LEGACY}" || NAME="${NAME}-Legacy"
             test -z "${ARM64}" || NAME="${NAME}-arm64"
             test -z "${PORT}" || NAME="${NAME}-Portable"
             test -z "${INST}" || mv PrismLauncher-*.exe ../${NAME}-Setup-${{ env.VERSION }}.exe
+            test -z "${MSIX}" || mv prismlauncher-*.msix ../${NAME}-${{ env.VERSION }}.msix
+            test -z "${MSIXBUNDLE}" || mv prismlauncher-*.msixbundle ../${NAME}-${{ env.VERSION }}.msixbundle
+            test -z "${APPINSTALLER}" || mv prismlauncher-*.AppInstaller ../${NAME}-${{ env.VERSION }}.AppInstaller
             test -n "${INST}" || zip -r -9 "../${NAME}-${{ env.VERSION }}.zip" *
             cd ..
           done
@@ -99,10 +105,13 @@ jobs:
             PrismLauncher-Windows-MSVC-Legacy-Setup-${{ env.VERSION }}.exe
             PrismLauncher-Windows-MSVC-arm64-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-arm64-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MSVC-arm64-Setup-${{ env.VERSION }}.exe
+            PrismLauncher-Windows-MSVC-arm64-${{ env.VERSION }}.msix
+            PrismLauncher-Windows-MSVC-arm64-${{ env.VERSION }}.msixbundle
             PrismLauncher-Windows-MSVC-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MSVC-Setup-${{ env.VERSION }}.exe
+            PrismLauncher-Windows-MSVC-${{ env.VERSION }}.msix
+            PrismLauncher-Windows-MSVC-${{ env.VERSION }}.msixbundle
+            PrismLauncher-Windows-MSVC-${{ env.VERSION }}.AppInstaller
             PrismLauncher-macOS-${{ env.VERSION }}.tar.gz
             PrismLauncher-macOS-Legacy-${{ env.VERSION }}.tar.gz
             PrismLauncher-${{ env.VERSION }}.tar.gz

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AppInstaller
+  xmlns="http://schemas.microsoft.com/appx/appinstaller/2021"
+  Version="1.0.0.0"
+  Uri="https://prismlauncher.org/prismUpdate.AppInstaller" >
+
+  <MainBundle
+    Name="github.PrismLauncher.PrismLauncher"
+    Publisher="CN=PrismLauncher, O=PrismLauncher, L=MyCity, S=MyState, C=MyCountry"
+    Version="PRISM_VERSION_REPLACEME"
+    Uri="https://prismlauncher.org/prismlauncher-PRISM_VERSION_REPLACEME.msixbundle" />
+
+  <UpdateSettings>
+    <OnLaunch
+      HoursBetweenUpdateChecks="6"
+      ShowPrompt="true" />
+  </UpdateSettings>
+
+</AppInstaller>
+

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+	xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+	xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10"
+	xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6">
+<Identity Name="github.PrismLauncher.PrismLauncher" Version="PRISM_VERSION_REPLACEME" Publisher="CN=PrismLauncher, O=PrismLauncher, L=MyCity, S=MyState, C=MyCountry" ProcessorArchitecture="PRISM_ARCH_REPLACEME" />
+  <Properties>
+    <DisplayName>Prism Launcher</DisplayName>
+    <PublisherDisplayName>Prism Launcher</PublisherDisplayName>
+    <Description>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</Description>
+    <Logo>prismlauncher_150x150.png</Logo>
+
+    <virtualization:FileSystemWriteVirtualization>
+      <virtualization:ExcludedDirectories>
+        <virtualization:ExcludedDirectory>$(KnownFolder:RoamingAppData)\PrismLauncher</virtualization:ExcludedDirectory>
+      </virtualization:ExcludedDirectories>
+    </virtualization:FileSystemWriteVirtualization>
+  </Properties>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.22621.0" />
+    <PackageDependency
+      Name="Microsoft.VCLibs.140.00"
+      Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+      MinVersion="14.0.30035.0" />
+  </Dependencies>
+
+  <Capabilities>
+    <Capability Name="internetClientServer"/>
+    <rescap:Capability Name="unvirtualizedResources"/>
+
+    <DeviceCapability Name="humaninterfacedevice">
+      <!--
+      This allows for any
+      generic gaming device,
+      such as a controller or joystick
+      *and* any HID device.
+      -->
+      <Device Id="any">
+        <Function Type="usage:0004 *"/>
+        <Function Type="usage:0005 *"/>
+        <Function Type="usage:ffa0 0001"/>
+      </Device>
+    </DeviceCapability>
+  </Capabilities>
+
+  <Applications>
+    <Application
+      Id="PrismLauncher"
+      Executable="prismlauncher.exe"
+      EntryPoint="windows.partialTrustApplication"
+    >
+    <uap:VisualElements
+      DisplayName="Prism Launcher"
+      Description="A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once"
+      Square150x150Logo="prismlauncher_150x150.png"
+      Square44x44Logo="prismlauncher_44x44.png"
+      BackgroundColor="transparent"
+    />
+    </Application>
+  </Applications>
+</Package>
