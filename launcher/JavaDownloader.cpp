@@ -30,8 +30,8 @@ void JavaDownloader::executeTask()
 }
 void JavaDownloader::downloadMojangJavaList(const QString& OS, bool isLegacy)
 {
-    auto netJob = new NetJob(QString("JRE::QueryVersions"), APPLICATION->network());
-    auto response = new QByteArray();
+    auto netJob = makeShared<NetJob>(QString("JRE::QueryVersions"), APPLICATION->network());
+    auto response = std::make_shared<QByteArray>();
     setStatus(tr("Querying mojang meta"));
     netJob->addNetAction(Net::Download::makeByteArray(
         QUrl("https://piston-meta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json"), response));
@@ -41,18 +41,17 @@ void JavaDownloader::downloadMojangJavaList(const QString& OS, bool isLegacy)
             .removeRecursively();
     });
 
-    connect(netJob, &NetJob::finished, [netJob, response, this] {
+    connect(netJob.get(), &NetJob::finished, [netJob, response, this] {
         // delete so that it's not called on a deleted job
-        disconnect(this, &Task::aborted, netJob, &NetJob::abort);
-        netJob->deleteLater();
-        delete response;
+        // FIXME: is this needed? qt should handle this
+        disconnect(this, &Task::aborted, netJob.get(), &NetJob::abort);
     });
-    connect(netJob, &NetJob::progress, this, &JavaDownloader::progress);
-    connect(netJob, &NetJob::failed, this, &JavaDownloader::emitFailed);
+    connect(netJob.get(), &NetJob::progress, this, &JavaDownloader::progress);
+    connect(netJob.get(), &NetJob::failed, this, &JavaDownloader::emitFailed);
 
-    connect(this, &Task::aborted, netJob, &NetJob::abort);
+    connect(this, &Task::aborted, netJob.get(), &NetJob::abort);
 
-    connect(netJob, &NetJob::succeeded, [response, OS, isLegacy, this, netJob] {
+    connect(netJob.get(), &NetJob::succeeded, [response, OS, isLegacy, this, netJob] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -66,7 +65,7 @@ void JavaDownloader::downloadMojangJavaList(const QString& OS, bool isLegacy)
 
         } else {
             // mojang does not have a JRE for us, let's get azul zulu
-            downloadAzulMeta(OS, isLegacy, netJob);
+            downloadAzulMeta(OS, isLegacy, netJob.get());
         }
     });
 
@@ -76,21 +75,19 @@ void JavaDownloader::parseMojangManifest(bool isLegacy, const QJsonArray& versio
 {
     setStatus(tr("Downloading Java from Mojang"));
     auto url = Json::ensureString(Json::ensureObject(Json::ensureObject(versionArray[0]), "manifest"), "url");
-    auto download = new NetJob(QString("JRE::DownloadJava"), APPLICATION->network());
-    auto files = new QByteArray();
+    auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
+    auto files = std::make_shared<QByteArray>();
 
     download->addNetAction(Net::Download::makeByteArray(QUrl(url), files));
 
-    connect(download, &NetJob::finished, [download, files, this] {
-        disconnect(this, &Task::aborted, download, &NetJob::abort);
-        download->deleteLater();
-        delete files;
+    connect(download.get(), &NetJob::finished, [download, files, this] {
+        disconnect(this, &Task::aborted, download.get(), &NetJob::abort);
     });
-    connect(download, &NetJob::progress, this, &JavaDownloader::progress);
-    connect(download, &NetJob::failed, this, &JavaDownloader::emitFailed);
-    connect(this, &Task::aborted, download, &NetJob::abort);
+    connect(download.get(), &NetJob::progress, this, &JavaDownloader::progress);
+    connect(download.get(), &NetJob::failed, this, &JavaDownloader::emitFailed);
+    connect(this, &Task::aborted, download.get(), &NetJob::abort);
 
-    connect(download, &NetJob::succeeded, [files, isLegacy, this] {
+    connect(download.get(), &NetJob::succeeded, [files, isLegacy, this] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*files, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -166,8 +163,8 @@ void JavaDownloader::downloadAzulMeta(const QString& OS, bool isLegacy, const Ne
     QString bitness;
 
     mojangOStoAzul(OS, azulOS, arch, bitness);
-    auto metaResponse = new QByteArray();
-    auto downloadJob = new NetJob(QString("JRE::QueryAzulMeta"), APPLICATION->network());
+    auto metaResponse = std::make_shared<QByteArray>();
+    auto downloadJob = makeShared<NetJob>(QString("JRE::QueryAzulMeta"), APPLICATION->network());
     downloadJob->addNetAction(
         Net::Download::makeByteArray(QString("https://api.azul.com/zulu/download/community/v1.0/bundles/?"
                                              "java_version=%1"
@@ -180,15 +177,13 @@ void JavaDownloader::downloadAzulMeta(const QString& OS, bool isLegacy, const Ne
                                              )
                                          .arg(javaVersion, azulOS, arch, bitness),
                                      metaResponse));
-    connect(downloadJob, &NetJob::finished, [downloadJob, metaResponse, this] {
-        disconnect(this, &Task::aborted, downloadJob, &NetJob::abort);
-        downloadJob->deleteLater();
-        delete metaResponse;
+    connect(downloadJob.get(), &NetJob::finished, [downloadJob, metaResponse, this] {
+        disconnect(this, &Task::aborted, downloadJob.get(), &NetJob::abort);
     });
-    connect(this, &Task::aborted, downloadJob, &NetJob::abort);
+    connect(this, &Task::aborted, downloadJob.get(), &NetJob::abort);
     connect(netJob, &NetJob::failed, this, &JavaDownloader::emitFailed);
-    connect(downloadJob, &NetJob::progress, this, &JavaDownloader::progress);
-    connect(downloadJob, &NetJob::succeeded, [metaResponse, isLegacy, this] {
+    connect(downloadJob.get(), &NetJob::progress, this, &JavaDownloader::progress);
+    connect(downloadJob.get(), &NetJob::succeeded, [metaResponse, isLegacy, this] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*metaResponse, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
