@@ -799,7 +799,7 @@ class InstanceStaging : public Task {
         connect(child, &Task::status, this, &InstanceStaging::setStatus);
         connect(child, &Task::details, this, &InstanceStaging::setDetails);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
-        connect(child, &Task::stepProgress, this, &InstanceStaging::propogateStepProgress);
+        connect(child, &Task::stepProgress, this, &InstanceStaging::propagateStepProgress);
         connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
     }
 

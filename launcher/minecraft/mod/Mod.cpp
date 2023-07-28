@@ -91,6 +91,7 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
             auto res = Resource::compare(other, type);
             if (res.first != 0)
                 return res;
+            break;
         }
         case SortType::VERSION: {
             auto this_ver = Version(version());
@@ -99,11 +100,13 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
                 return { 1, type == SortType::VERSION };
             if (this_ver < other_ver)
                 return { -1, type == SortType::VERSION };
+            break;
         }
         case SortType::PROVIDER: {
             auto compare_result = QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
             if (compare_result != 0)
                 return { compare_result, type == SortType::PROVIDER };
+            break;
         }
     }
     return { 0, false };
@@ -123,7 +126,7 @@ bool Mod::applyFilter(QRegularExpression filter) const
     return Resource::applyFilter(filter);
 }
 
-auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
+auto Mod::destroy(QDir& index_dir, bool preserve_metadata, bool attempt_trash) -> bool
 {
     if (!preserve_metadata) {
         qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
@@ -136,7 +139,7 @@ auto Mod::destroy(QDir& index_dir, bool preserve_metadata) -> bool
         }
     }
 
-    return Resource::destroy();
+    return Resource::destroy(attempt_trash);
 }
 
 auto Mod::details() const -> const ModDetails&
@@ -164,6 +167,13 @@ auto Mod::version() const -> QString
 auto Mod::homeurl() const -> QString
 {
     return details().homeurl;
+}
+
+auto Mod::metaurl() const -> QString
+{
+    if (metadata() == nullptr)
+        return homeurl();
+    return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
 }
 
 auto Mod::description() const -> QString

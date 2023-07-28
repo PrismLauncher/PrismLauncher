@@ -70,11 +70,17 @@ auto ProviderCapabilities::hash(ResourceProvider p, QIODevice* device, QString t
     }
 
     QCryptographicHash hash(algo);
-    if(!hash.addData(device))
+    if (!hash.addData(device))
         qCritical() << "Failed to read JAR to create hash!";
 
     Q_ASSERT(hash.result().length() == hash.hashLength(algo));
     return { hash.result().toHex() };
+}
+
+QString getMetaURL(ResourceProvider provider, QVariant projectID)
+{
+    return ((provider == ModPlatform::ResourceProvider::FLAME) ? "https://www.curseforge.com/projects/" : "https://modrinth.com/mod/") +
+           projectID.toString();
 }
 
 }  // namespace ModPlatform

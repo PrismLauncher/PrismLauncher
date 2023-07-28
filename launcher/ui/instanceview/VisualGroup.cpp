@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,22 +36,18 @@
 
 #include "VisualGroup.h"
 
+#include <QApplication>
+#include <QDebug>
 #include <QModelIndex>
 #include <QPainter>
 #include <QtMath>
-#include <QApplication>
-#include <QDebug>
+#include <utility>
 
 #include "InstanceView.h"
 
-VisualGroup::VisualGroup(const QString &text, InstanceView *view) : view(view), text(text), collapsed(false)
-{
-}
+VisualGroup::VisualGroup(QString text, InstanceView* view) : view(view), text(std::move(text)), collapsed(false) {}
 
-VisualGroup::VisualGroup(const VisualGroup *other)
-    : view(other->view), text(other->text), collapsed(other->collapsed)
-{
-}
+VisualGroup::VisualGroup(const VisualGroup* other) : view(other->view), text(other->text), collapsed(other->collapsed) {}
 
 void VisualGroup::update()
 {
@@ -64,13 +61,11 @@ void VisualGroup::update()
     int positionInRow = 0;
     int currentRow = 0;
     int offsetFromTop = 0;
-    for (auto item: temp_items)
-    {
-        if(positionInRow == itemsPerRow)
-        {
+    for (auto item : temp_items) {
+        if (positionInRow == itemsPerRow) {
             rows[currentRow].height = maxRowHeight;
             rows[currentRow].top = offsetFromTop;
-            currentRow ++;
+            currentRow++;
             offsetFromTop += maxRowHeight + 5;
             positionInRow = 0;
             maxRowHeight = 0;
@@ -83,8 +78,7 @@ void VisualGroup::update()
 #endif
 
         auto itemHeight = view->itemDelegate()->sizeHint(viewItemOption, item).height();
-        if(itemHeight > maxRowHeight)
-        {
+        if (itemHeight > maxRowHeight) {
             maxRowHeight = itemHeight;
         }
         rows[currentRow].items.append(item);
@@ -94,16 +88,13 @@ void VisualGroup::update()
     rows[currentRow].top = offsetFromTop;
 }
 
-QPair<int, int> VisualGroup::positionOf(const QModelIndex &index) const
+QPair<int, int> VisualGroup::positionOf(const QModelIndex& index) const
 {
     int y = 0;
-    for (auto & row: rows)
-    {
-        for(auto x = 0; x < row.items.size(); x++)
-        {
-            if(row.items[x] == index)
-            {
-                return qMakePair(x,y);
+    for (auto& row : rows) {
+        for (auto x = 0; x < row.items.size(); x++) {
+            if (row.items[x] == index) {
+                return qMakePair(x, y);
             }
         }
         y++;
@@ -112,193 +103,109 @@ QPair<int, int> VisualGroup::positionOf(const QModelIndex &index) const
     return qMakePair(0, 0);
 }
 
-int VisualGroup::rowTopOf(const QModelIndex &index) const
+int VisualGroup::rowTopOf(const QModelIndex& index) const
 {
     auto position = positionOf(index);
     return rows[position.second].top;
 }
 
-int VisualGroup::rowHeightOf(const QModelIndex &index) const
+int VisualGroup::rowHeightOf(const QModelIndex& index) const
 {
     auto position = positionOf(index);
     return rows[position.second].height;
 }
 
-VisualGroup::HitResults VisualGroup::hitScan(const QPoint &pos) const
+VisualGroup::HitResults VisualGroup::hitScan(const QPoint& pos) const
 {
     VisualGroup::HitResults results = VisualGroup::NoHit;
     int y_start = verticalPosition();
     int body_start = y_start + headerHeight();
-    int body_end = body_start + contentHeight() + 5; // FIXME: wtf is this 5?
+    int body_end = body_start + contentHeight();
     int y = pos.y();
     // int x = pos.x();
-    if (y < y_start)
-    {
+    if (y < y_start) {
         results = VisualGroup::NoHit;
-    }
-    else if (y < body_start)
-    {
+    } else if (y < body_start) {
         results = VisualGroup::HeaderHit;
         int collapseSize = headerHeight() - 4;
 
         // the icon
-        QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y_start, collapseSize, collapseSize);
-        if (iconRect.contains(pos))
-        {
+        QRect iconRect = QRect(view->m_leftMargin + 2, 2 + y_start, view->width() - 4, collapseSize);
+        if (iconRect.contains(pos)) {
             results |= VisualGroup::CheckboxHit;
         }
-    }
-    else if (y < body_end)
-    {
+    } else if (y < body_end) {
         results |= VisualGroup::BodyHit;
     }
     return results;
 }
 
-void VisualGroup::drawHeader(QPainter *painter, const QStyleOptionViewItem &option)
+void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& option) const
 {
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    const QRect optRect = option.rect;
+    QRect optRect = option.rect;
+    optRect.setTop(optRect.top() + 7);
     QFont font(QApplication::font());
     font.setBold(true);
     const QFontMetrics fontMetrics = QFontMetrics(font);
+    painter->setFont(font);
 
-    QColor outlineColor = option.palette.text().color();
-    outlineColor.setAlphaF(0.35);
+    QPen pen;
+    pen.setWidth(2);
+    QColor penColor = option.palette.text().color();
+    penColor.setAlphaF(0.6);
+    pen.setColor(penColor);
+    painter->setPen(pen);
+    painter->setRenderHint(QPainter::Antialiasing);
 
-    //BEGIN: top left corner
+    // sizes and offsets, to keep things consistent below
+    int arrowOffsetLeft = fontMetrics.height() / 2 + 7;
+    int textOffsetLeft = arrowOffsetLeft * 2;
+    int arrowSize = 6;
+    int centerHeight = optRect.top() + fontMetrics.height() / 2;
+
+    // BEGIN: arrow
     {
-        painter->save();
-        painter->setPen(outlineColor);
-        const QPointF topLeft(optRect.topLeft());
-        QRectF arc(topLeft, QSizeF(4, 4));
-        arc.translate(0.5, 0.5);
-        painter->drawArc(arc, 1440, 1440);
-        painter->restore();
-    }
-    //END: top left corner
-
-    //BEGIN: left vertical line
-    {
-        QPoint start(optRect.topLeft());
-        start.ry() += 3;
-        QPoint verticalGradBottom(optRect.topLeft());
-        verticalGradBottom.ry() += fontMetrics.height() + 5;
-        QLinearGradient gradient(start, verticalGradBottom);
-        gradient.setColorAt(0, outlineColor);
-        gradient.setColorAt(1, Qt::transparent);
-        painter->fillRect(QRect(start, QSize(1, fontMetrics.height() + 5)), gradient);
-    }
-    //END: left vertical line
-
-    //BEGIN: horizontal line
-    {
-        QPoint start(optRect.topLeft());
-        start.rx() += 3;
-        QPoint horizontalGradTop(optRect.topLeft());
-        horizontalGradTop.rx() += optRect.width() - 6;
-        painter->fillRect(QRect(start, QSize(optRect.width() - 6, 1)), outlineColor);
-    }
-    //END: horizontal line
-
-    //BEGIN: top right corner
-    {
-        painter->save();
-        painter->setPen(outlineColor);
-        QPointF topRight(optRect.topRight());
-        topRight.rx() -= 4;
-        QRectF arc(topRight, QSizeF(4, 4));
-        arc.translate(0.5, 0.5);
-        painter->drawArc(arc, 0, 1440);
-        painter->restore();
-    }
-    //END: top right corner
-
-    //BEGIN: right vertical line
-    {
-        QPoint start(optRect.topRight());
-        start.ry() += 3;
-        QPoint verticalGradBottom(optRect.topRight());
-        verticalGradBottom.ry() += fontMetrics.height() + 5;
-        QLinearGradient gradient(start, verticalGradBottom);
-        gradient.setColorAt(0, outlineColor);
-        gradient.setColorAt(1, Qt::transparent);
-        painter->fillRect(QRect(start, QSize(1, fontMetrics.height() + 5)), gradient);
-    }
-    //END: right vertical line
-
-    //BEGIN: checkboxy thing
-    {
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing, false);
-        painter->setFont(font);
-        QColor penColor(option.palette.text().color());
-        penColor.setAlphaF(0.6);
-        painter->setPen(penColor);
-        QRect iconSubRect(option.rect);
-        iconSubRect.setTop(iconSubRect.top() + 7);
-        iconSubRect.setLeft(iconSubRect.left() + 7);
-
-        int sizing = fontMetrics.height();
-        int even = ( (sizing - 1) % 2 );
-
-        iconSubRect.setHeight(sizing - even);
-        iconSubRect.setWidth(sizing - even);
-        painter->drawRect(iconSubRect);
-
-
-        /*
-        if(collapsed)
-            painter->drawText(iconSubRect, Qt::AlignHCenter | Qt::AlignVCenter, "+");
-        else
-            painter->drawText(iconSubRect, Qt::AlignHCenter | Qt::AlignVCenter, "-");
-        */
-        painter->setBrush(option.palette.text());
-        painter->fillRect(iconSubRect.x(), iconSubRect.y() + iconSubRect.height() / 2,
-                          iconSubRect.width(), 2, penColor);
-        if (collapsed)
-        {
-            painter->fillRect(iconSubRect.x() + iconSubRect.width() / 2, iconSubRect.y(), 2,
-                              iconSubRect.height(), penColor);
+        QPolygon arrowPolygon;
+        if (collapsed) {
+            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
+                         << QPoint(arrowOffsetLeft + arrowSize / 2, centerHeight)
+                         << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight + arrowSize);
+            painter->drawPolyline(arrowPolygon);
+        } else {
+            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2)
+                         << QPoint(arrowOffsetLeft, centerHeight + arrowSize / 2)
+                         << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
+            painter->drawPolyline(arrowPolygon);
         }
-
-        painter->restore();
     }
-    //END: checkboxy thing
+    // END: arrow
 
-    //BEGIN: text
+    // BEGIN: text
     {
-        QRect textRect(option.rect);
-        textRect.setTop(textRect.top() + 7);
-        textRect.setLeft(textRect.left() + 7 + fontMetrics.height() + 7);
+        QRect textRect(optRect);
+        textRect.setTop(textRect.top());
+        textRect.setLeft(textOffsetLeft);
         textRect.setHeight(fontMetrics.height());
         textRect.setRight(textRect.right() - 7);
 
-        painter->save();
-        painter->setFont(font);
-        QColor penColor(option.palette.text().color());
-        penColor.setAlphaF(0.6);
-        painter->setPen(penColor);
-        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
-        painter->restore();
+        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, !text.isEmpty() ? text : QObject::tr("Ungrouped"));
     }
-    //END: text
+    // END: text
 }
 
 int VisualGroup::totalHeight() const
 {
-    return headerHeight() + 5 + contentHeight(); // FIXME: wtf is that '5'?
+    return headerHeight() + contentHeight();
 }
 
-int VisualGroup::headerHeight() const
+int VisualGroup::headerHeight()
 {
     QFont font(QApplication::font());
     font.setBold(true);
     QFontMetrics fontMetrics(font);
 
     const int height = fontMetrics.height() + 1 /* 1 pixel-width gradient */
-                                            + 11 /* top and bottom separation */;
+                       + 11 /* top and bottom separation */;
     return height;
     /*
     int raw = view->viewport()->fontMetrics().height() + 4;
@@ -311,8 +218,7 @@ int VisualGroup::headerHeight() const
 
 int VisualGroup::contentHeight() const
 {
-    if (collapsed)
-    {
+    if (collapsed) {
         return 0;
     }
     auto last = rows[numRows() - 1];
@@ -321,7 +227,7 @@ int VisualGroup::contentHeight() const
 
 int VisualGroup::numRows() const
 {
-    return rows.size();
+    return (int)rows.size();
 }
 
 int VisualGroup::verticalPosition() const
@@ -332,11 +238,9 @@ int VisualGroup::verticalPosition() const
 QList<QModelIndex> VisualGroup::items() const
 {
     QList<QModelIndex> indices;
-    for (int i = 0; i < view->model()->rowCount(); ++i)
-    {
+    for (int i = 0; i < view->model()->rowCount(); ++i) {
         const QModelIndex index = view->model()->index(i, 0);
-        if (index.data(InstanceViewRoles::GroupRole).toString() == text)
-        {
+        if (index.data(InstanceViewRoles::GroupRole).toString() == text) {
             indices.append(index);
         }
     }

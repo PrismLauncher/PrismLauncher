@@ -38,7 +38,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     static auto getModLoaderStrings(const ModLoaderTypes types) -> const QStringList
     {
         QStringList l;
-        for (auto loader : { Forge, Fabric, Quilt }) {
+        for (auto loader : { Forge, Fabric, Quilt, LiteLoader }) {
             if (types & loader) {
                 l << getModLoaderString(loader);
             }
@@ -92,7 +92,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     {
         if (args.loaders.has_value()) {
             if (!validateModLoaders(args.loaders.value())) {
-                qWarning() << "Modrinth only have Forge and Fabric-compatible mods!";
+                qWarning() << "Modrinth - or our interface - does not support any the provided mod loaders!";
                 return {};
             }
         }
@@ -141,7 +141,7 @@ class ModrinthAPI : public NetworkResourceAPI {
         return s.isEmpty() ? QString() : s;
     }
 
-    inline auto validateModLoaders(ModLoaderTypes loaders) const -> bool { return loaders & (Forge | Fabric | Quilt); }
+    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (Forge | Fabric | Quilt | LiteLoader); }
 
     [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
     {
