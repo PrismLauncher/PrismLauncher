@@ -257,8 +257,6 @@ bool IconList::dropMimeData(const QMimeData* data,
 Qt::ItemFlags IconList::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
-    if (index.isValid())
-        return Qt::ItemIsDropEnabled | defaultFlags;
     return Qt::ItemIsDropEnabled | defaultFlags;
 }
 
