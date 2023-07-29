@@ -1,16 +1,17 @@
 ---
-Language:        Cpp
-BasedOnStyle:  Chromium
+BasedOnStyle: Chromium
 IndentWidth: 4
+---
+Language: Cpp
 AlignConsecutiveMacros: false
 AlignConsecutiveAssignments: false
 AllowShortIfStatementsOnASingleLine: false
 BraceWrapping:
-  AfterFunction:   true
+  AfterFunction: true
   SplitEmptyFunction: false
   SplitEmptyRecord: false
   SplitEmptyNamespace: false
 BreakBeforeBraces: Custom
 BreakConstructorInitializers: BeforeComma
-ColumnLimit:     140
+ColumnLimit: 140
 Cpp11BracedListStyle: false

@@ -20,7 +20,7 @@
 
           clang-format = {
             enable = true;
-            types_or = ["c" "c++"];
+            types_or = ["c" "c++" "java" "json" "objective-c"];
           };
         };
       };
