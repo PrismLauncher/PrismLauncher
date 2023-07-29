@@ -1,11 +1,12 @@
 ---
 BasedOnStyle: Chromium
 IndentWidth: 4
+AllowShortIfStatementsOnASingleLine: false
+ColumnLimit: 140
 ---
 Language: Cpp
 AlignConsecutiveMacros: None
 AlignConsecutiveAssignments: None
-AllowShortIfStatementsOnASingleLine: false
 BraceWrapping:
   AfterFunction: true
   SplitEmptyFunction: false
@@ -13,5 +14,4 @@ BraceWrapping:
   SplitEmptyNamespace: false
 BreakBeforeBraces: Custom
 BreakConstructorInitializers: BeforeComma
-ColumnLimit: 140
 Cpp11BracedListStyle: false
