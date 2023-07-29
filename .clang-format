@@ -3,8 +3,8 @@ BasedOnStyle: Chromium
 IndentWidth: 4
 ---
 Language: Cpp
-AlignConsecutiveMacros: false
-AlignConsecutiveAssignments: false
+AlignConsecutiveMacros: None
+AlignConsecutiveAssignments: None
 AllowShortIfStatementsOnASingleLine: false
 BraceWrapping:
   AfterFunction: true
