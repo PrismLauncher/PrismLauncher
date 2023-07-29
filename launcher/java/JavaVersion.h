@@ -25,7 +25,7 @@ public:
 
     bool requiresPermGen();
 
-    QString toString();
+    QString toString() const;
 
     int major()
     {
