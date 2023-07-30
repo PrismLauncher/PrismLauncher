@@ -1100,6 +1100,14 @@ set(LAUNCHER_SOURCES
 )
 endif()
 
+if(WIN32)
+    set(LAUNCHER_SOURCES
+        WindowsConsole.cpp
+        WindowsConsole.h
+        ${LAUNCHER_SOURCES}
+    )
+endif()
+
 qt_wrap_ui(LAUNCHER_UI
     ui/MainWindow.ui
     ui/setupwizard/PasteWizardPage.ui

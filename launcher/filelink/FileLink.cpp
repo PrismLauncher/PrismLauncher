@@ -37,14 +37,7 @@
 #include <sys.h>
 
 #if defined Q_OS_WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <fcntl.h>
-#include <io.h>
-#include <stdio.h>
-#include <windows.h>
-#include <iostream>
+#include "WindowsConsole.h"
 #endif
 
 // Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
@@ -165,13 +158,9 @@ void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr
 FileLinkApp::FileLinkApp(int& argc, char** argv) : QCoreApplication(argc, argv), socket(new QLocalSocket(this))
 {
 #if defined Q_OS_WIN32
-    // attach the parent console if stdout not already captured
-    auto stdout_type = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
-    if (stdout_type == FILE_TYPE_CHAR || stdout_type == FILE_TYPE_UNKNOWN) {
-        if (AttachConsole(ATTACH_PARENT_PROCESS)) {
-            BindCrtHandlesToStdHandles(true, true, true);
-            consoleAttached = true;
-        }
+    // attach the parent console
+    if (AttachWindowsConsole()) {
+        consoleAttached = true;
     }
 #endif
     setOrganizationName(BuildConfig.LAUNCHER_NAME);
