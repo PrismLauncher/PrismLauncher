@@ -209,7 +209,7 @@ void ExportInstanceDialog::savePackIgnore()
     auto ignoreData = proxyModel->blockedPaths().toStringList().join('\n').toUtf8();
     auto filename = ignoreFileName();
     try {
-        FS::write(filename, data);
+        FS::write(filename, ignoreData);
     } catch (const Exception& e) {
         qWarning() << e.cause();
     }

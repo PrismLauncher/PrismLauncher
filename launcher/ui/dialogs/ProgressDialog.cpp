@@ -216,9 +216,9 @@ void ProgressDialog::onTaskSucceeded()
 
 void ProgressDialog::changeStatus([[maybe_unused]] const QString& status)
 {
-    ui->globalStatusLabel->setText(task->getStatus());
+    ui->globalStatusLabel->setText(m_task->getStatus());
     ui->globalStatusLabel->adjustSize();
-    ui->globalStatusDetailsLabel->setText(task->getDetails());
+    ui->globalStatusDetailsLabel->setText(m_task->getDetails());
     ui->globalStatusDetailsLabel->adjustSize();
 
 
