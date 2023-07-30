@@ -34,6 +34,7 @@
  */
 
 #include "ProgressDialog.h"
+#include <QPoint>
 #include "ui_ProgressDialog.h"
 
 #include <limits>
@@ -66,10 +67,9 @@ ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Pr
     ui->taskProgressScrollArea->setHidden(true);
     this->setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setAttribute(Qt::WidgetAttribute::WA_QuitOnClose, true);
-    setSkipButton(false);
     changeProgress(0, 100);
-    updateSize();
-    adjustSize();
+    updateSize(true);
+    setSkipButton(false);
 }
 
 void ProgressDialog::setSkipButton(bool present, QString label)
@@ -95,28 +95,39 @@ ProgressDialog::~ProgressDialog()
     delete ui;
 }
 
-void ProgressDialog::updateSize()
+void ProgressDialog::updateSize(bool recenterParent)
 {   
     QSize lastSize = this->size();
-    auto min_height = minimumSizeHint().height();
-    if (ui->taskProgressScrollArea->isHidden())
-        min_height -= ui->taskProgressScrollArea->minimumSizeHint().height();
-    min_height = std::max(min_height, 0);
-    QSize qSize = QSize(480, min_height);
+    QPoint lastPos = this->pos();
+    int minHeight = ui->globalStatusDetailsLabel->minimumSize().height() + (ui->verticalLayout->spacing() * 2);
+    minHeight += ui->globalProgressBar->minimumSize().height() + ui->verticalLayout->spacing();
+    if (!ui->taskProgressScrollArea->isHidden())
+        minHeight += ui->taskProgressScrollArea->minimumSizeHint().height() + ui->verticalLayout->spacing();
+    if (ui->skipButton->isVisible())
+        minHeight += ui->skipButton->height() + ui->verticalLayout->spacing();
+    minHeight = std::max(minHeight, 60);
+    QSize minSize = QSize(480, minHeight);
 
-    // if the current window is too small
-    if ((lastSize != qSize) && (lastSize.height() < qSize.height()))
+    setMinimumSize(minSize);
+    adjustSize();
+
+    QSize newSize = this->size();
+    // if the current window is a different size
+    auto parent = this->parentWidget();
+    if (recenterParent && parent) {
+        auto newX = std::max(0, parent->x() + ((parent->width() - newSize.width()) / 2));
+        auto newY = std::max(0, parent->y() + ((parent->height() - newSize.height()) / 2));
+        this->move(newX, newY);
+    }
+    else if (lastSize != newSize)
     {
-        resize(qSize);
-        
-        // keep the dialog in the center after a resize
-        this->move(
-            this->parentWidget()->x() + (this->parentWidget()->width() - this->width()) / 2,
-            this->parentWidget()->y() + (this->parentWidget()->height() - this->height()) / 2
-        );
+        // center on old position after resize
+        QSize sizeDiff = lastSize - newSize; // last size was smaller, the results should be negative
+        auto newX = std::max(0, lastPos.x() + (sizeDiff.width() / 2));
+        auto newY = std::max(0, lastPos.y() + (sizeDiff.height() / 2));
+        this->move(newX, newY);
     }
 
-    setMinimumSize(qSize);
 }
 
 int ProgressDialog::execWithTask(Task* task)
@@ -206,7 +217,9 @@ void ProgressDialog::onTaskSucceeded()
 void ProgressDialog::changeStatus(const QString& status)
 {
     ui->globalStatusLabel->setText(task->getStatus());
+    ui->globalStatusLabel->adjustSize();
     ui->globalStatusDetailsLabel->setText(task->getDetails());
+    ui->globalStatusDetailsLabel->adjustSize();
 
     updateSize();
 }

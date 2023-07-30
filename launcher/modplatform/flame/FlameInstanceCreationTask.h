@@ -57,10 +57,7 @@ class FlameCreationTask final : public InstanceCreationTask {
                       QString id,
                       QString version_id,
                       QString original_instance_id = {})
-        : InstanceCreationTask()
-        , m_parent(parent)
-        , m_managed_id(std::move(id))
-        , m_managed_version_id(std::move(version_id))
+        : InstanceCreationTask(), m_parent(parent), m_managed_id(std::move(id)), m_managed_version_id(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
@@ -78,6 +75,7 @@ class FlameCreationTask final : public InstanceCreationTask {
     void setupDownloadJob(QEventLoop&);
     void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
     void validateZIPResouces();
+    QString getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion);
 
    private:
     QWidget* m_parent = nullptr;

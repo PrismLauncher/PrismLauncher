@@ -68,7 +68,7 @@ class Config {
 
     bool UPDATER_ENABLED = false;
 
-    /// A short string identifying this build's platform. For example, "lin64" or "win32".
+    /// A short string identifying this build's platform or distribution.
     QString BUILD_PLATFORM;
 
     /// A short string identifying this build's valid artifacts int he updater. For example, "lin64" or "win32".

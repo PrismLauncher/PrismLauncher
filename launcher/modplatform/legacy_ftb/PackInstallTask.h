@@ -1,12 +1,12 @@
 #pragma once
-#include "InstanceTask.h"
-#include "net/NetJob.h"
 #include <quazip/quazip.h>
 #include <quazip/quazipdir.h>
+#include "InstanceTask.h"
+#include "PackHelpers.h"
 #include "meta/Index.h"
 #include "meta/Version.h"
 #include "meta/VersionList.h"
-#include "PackHelpers.h"
+#include "net/NetJob.h"
 
 #include "net/NetJob.h"
 
@@ -14,36 +14,31 @@
 
 namespace LegacyFTB {
 
-class PackInstallTask : public InstanceTask
-{
+class PackInstallTask : public InstanceTask {
     Q_OBJECT
 
-public:
+   public:
     explicit PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, Modpack pack, QString version);
-    virtual ~PackInstallTask(){}
+    virtual ~PackInstallTask() {}
 
     bool canAbort() const override { return true; }
     bool abort() override;
 
-protected:
+   protected:
     //! Entry point for tasks.
     virtual void executeTask() override;
 
-private:
+   private:
     void downloadPack();
     void unzip();
     void install();
 
-private slots:
-    void onDownloadSucceeded();
-    void onDownloadFailed(QString reason);
-    void onDownloadProgress(qint64 current, qint64 total);
-    void onDownloadAborted();
+   private slots:
 
     void onUnzipFinished();
     void onUnzipCanceled();
 
-private: /* data */
+   private: /* data */
     shared_qobject_ptr<QNetworkAccessManager> m_network;
     bool abortable = false;
     std::unique_ptr<QuaZip> m_packZip;
@@ -56,4 +51,4 @@ private: /* data */
     QString m_version;
 };
 
-}
+}  // namespace LegacyFTB

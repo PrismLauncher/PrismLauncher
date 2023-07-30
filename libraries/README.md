@@ -61,7 +61,7 @@ The `standard` and `legacy` launchers are available.
 
 Example (some parts have been censored):
 
-```
+```text
 mod legacyjavafixer-1.0
 mainClass net.minecraft.launchwrapper.Launch
 param --username

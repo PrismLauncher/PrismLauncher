@@ -3,6 +3,7 @@
  *  PolyMC - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,9 +51,9 @@
 #include "Application.h"
 #include "minecraft/auth/AccountList.h"
 
+#include "FileSystem.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
-#include "FileSystem.h"
 
 InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
     : QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
@@ -60,16 +61,12 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
     m_settings = inst->settings();
     ui->setupUi(this);
 
-    // As the signal will (probably) not be triggered once we click edit, let's update it manually instead.
-    updateRunningStatus(m_instance->isRunning());
-
-    connect(m_instance, &BaseInstance::runningStatusChanged, this, &InstanceSettingsPage::updateRunningStatus);
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
     connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
-    connect(ui->instanceAccountSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InstanceSettingsPage::changeInstanceAccount);
+    connect(ui->instanceAccountSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &InstanceSettingsPage::changeInstanceAccount);
     loadSettings();
-
 
     updateThresholds();
 }
@@ -284,6 +281,14 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("InstanceAccountId");
     }
 
+    bool overrideModLoaderSettings = ui->modLoaderSettingsGroupBox->isChecked();
+    m_settings->set("OverrideModLoaderSettings", overrideModLoaderSettings);
+    if (overrideModLoaderSettings) {
+        m_settings->set("DisableQuiltBeacon", ui->disableQuiltBeaconCheckBox->isChecked());
+    } else {
+        m_settings->reset("DisableQuiltBeacon");
+    }
+
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -384,6 +389,10 @@ void InstanceSettingsPage::loadSettings()
 
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
+
+    // Mod loader specific settings
+    ui->modLoaderSettingsGroupBox->setChecked(m_settings->get("OverrideModLoaderSettings").toBool());
+    ui->disableQuiltBeaconCheckBox->setChecked(m_settings->get("DisableQuiltBeacon").toBool());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
@@ -522,9 +531,4 @@ void InstanceSettingsPage::updateThresholds()
         QPixmap pix = icon.pixmap(height, height);
         ui->labelMaxMemIcon->setPixmap(pix);
     }
-}
-
-void InstanceSettingsPage::updateRunningStatus(bool running)
-{
-    setEnabled(!running);
 }

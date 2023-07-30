@@ -501,6 +501,9 @@ set(API_SOURCES
     modplatform/helpers/HashUtils.cpp
     modplatform/helpers/OverrideUtils.h
     modplatform/helpers/OverrideUtils.cpp
+
+    modplatform/helpers/ExportToModList.h
+    modplatform/helpers/ExportToModList.cpp
 )
 
 set(FTB_SOURCES
@@ -528,6 +531,8 @@ set(FLAME_SOURCES
     modplatform/flame/FlameCheckUpdate.h
     modplatform/flame/FlameInstanceCreationTask.h
     modplatform/flame/FlameInstanceCreationTask.cpp
+    modplatform/flame/FlamePackExportTask.h
+    modplatform/flame/FlamePackExportTask.cpp
 )
 
 set(MODRINTH_SOURCES
@@ -829,6 +834,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/SystemTheme.h
     ui/themes/ThemeManager.cpp
     ui/themes/ThemeManager.h
+    ui/themes/CatPack.cpp
+    ui/themes/CatPack.h
 
     # Processes
     LaunchController.h
@@ -980,8 +987,10 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/EditAccountDialog.h
     ui/dialogs/ExportInstanceDialog.cpp
     ui/dialogs/ExportInstanceDialog.h
-    ui/dialogs/ExportMrPackDialog.cpp
-    ui/dialogs/ExportMrPackDialog.h
+    ui/dialogs/ExportPackDialog.cpp
+    ui/dialogs/ExportPackDialog.h
+    ui/dialogs/ExportToModListDialog.cpp
+    ui/dialogs/ExportToModListDialog.h
     ui/dialogs/IconPickerDialog.cpp
     ui/dialogs/IconPickerDialog.h
     ui/dialogs/ImportResourceDialog.cpp
@@ -1137,7 +1146,8 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ProfileSelectDialog.ui
     ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
-    ui/dialogs/ExportMrPackDialog.ui
+    ui/dialogs/ExportPackDialog.ui
+    ui/dialogs/ExportToModListDialog.ui
     ui/dialogs/IconPickerDialog.ui
     ui/dialogs/ImportResourceDialog.ui
     ui/dialogs/MSALoginDialog.ui
