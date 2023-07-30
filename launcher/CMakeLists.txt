@@ -577,6 +577,9 @@ set(ATLAUNCHER_SOURCES
 )
 
 set(LINKEXE_SOURCES
+    WindowsConsole.cpp
+    WindowsConsole.h
+
     filelink/FileLink.h
     filelink/FileLink.cpp
     FileSystem.h
@@ -1206,7 +1209,6 @@ endif()
 
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
-target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_link_libraries(Launcher_logic

@@ -42,7 +42,11 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QUrl>
+
+#if defined(LAUNCHER_APPLICATION)
 #include <QtConcurrentRun>
+#endif
 
 namespace MMCZip {
 // ours
@@ -424,6 +428,7 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
     return true;
 }
 
+#if defined(LAUNCHER_APPLICATION)
 void ExportToZipTask::executeTask()
 {
     setStatus("Adding files...");
@@ -502,5 +507,7 @@ bool ExportToZipTask::abort()
     }
     return false;
 }
+#endif
 
 }  // namespace MMCZip
+

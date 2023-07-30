@@ -151,6 +151,8 @@ bool extractFile(QString fileCompressed, QString file, QString dir);
  */
 bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter);
 
+
+#if defined(LAUNCHER_APPLICATION)
 class ExportToZipTask : public Task {
    public:
     ExportToZipTask(QString outputPath, QDir dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
@@ -193,4 +195,5 @@ class ExportToZipTask : public Task {
     QFuture<ZipResult> m_build_zip_future;
     QFutureWatcher<ZipResult> m_build_zip_watcher;
 };
+#endif
 }  // namespace MMCZip
