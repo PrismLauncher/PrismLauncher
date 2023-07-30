@@ -104,6 +104,7 @@ void ResourcePage::openedImpl()
 
     updateSelectionButton();
     triggerSearch();
+    m_ui->searchEdit->setFocus();
 }
 
 auto ResourcePage::eventFilter(QObject* watched, QEvent* event) -> bool

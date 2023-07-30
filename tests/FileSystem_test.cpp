@@ -42,6 +42,10 @@ class LinkTask : public Task {
         m_lnk->debug(true);
     }
 
+    ~LinkTask() {
+        delete m_lnk;
+    }
+
     void matcher(const IPathMatcher *filter)
     {
         m_lnk->matcher(filter);
@@ -219,7 +223,8 @@ slots:
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
             FS::copy c(folder, target_dir.path());
-            c.matcher(new RegexpMatcher("[.]?mcmeta"));
+            RegexpMatcher re("[.]?mcmeta");
+            c.matcher(&re);
             c();
 
             for(auto entry: target_dir.entryList())
@@ -253,7 +258,8 @@ slots:
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
             FS::copy c(folder, target_dir.path());
-            c.matcher(new RegexpMatcher("[.]?mcmeta"));
+            RegexpMatcher re("[.]?mcmeta");
+            c.matcher(&re);
             c.whitelist(true);
             c();
 
@@ -460,7 +466,8 @@ slots:
             qDebug() << target_dir.path();
 
             LinkTask lnk_tsk(folder, target_dir.path());
-            lnk_tsk.matcher(new RegexpMatcher("[.]?mcmeta"));
+            RegexpMatcher re("[.]?mcmeta");
+            lnk_tsk.matcher(&re);
             lnk_tsk.linkRecursively(true);
             QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
                 QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
@@ -511,7 +518,8 @@ slots:
             qDebug() << target_dir.path();
 
             LinkTask lnk_tsk(folder, target_dir.path());
-            lnk_tsk.matcher(new RegexpMatcher("[.]?mcmeta"));
+            RegexpMatcher re("[.]?mcmeta");
+            lnk_tsk.matcher(&re);
             lnk_tsk.linkRecursively(true);
             lnk_tsk.whitelist(true);
             QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
