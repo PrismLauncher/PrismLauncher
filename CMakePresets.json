@@ -1,0 +1,99 @@
+{
+  "version": 5,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 15,
+    "patch": 0
+  },
+  "include": [],
+  "configurePresets": [
+    {
+      "name": "windows_default",
+      "displayName": "MSVC Debug",
+      "description": "MSVC build using Visual Studio generator",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "6",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/libraries/Qt/6.5.1/msvc2019_64/lib/cmake",
+        "Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "windows_debug_ninja",
+      "displayName": "MSVC Debug Ninja",
+      "description": "MSVC build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "6",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/libraries/Qt/6.5.1/msvc2019_64/lib/cmake",
+        "Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "windows_release",
+      "displayName": "MSVC Release",
+      "description": "MSVC build using Ninja generator",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "6",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/libraries/Qt/6.5.1/msvc2019_64/lib/cmake",
+        "Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows_default",
+      "configurePreset": "windows_default"
+    },
+    {
+      "name": "windows_release",
+      "configurePreset": "windows_release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "windows_default",
+      "configurePreset": "windows_default",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    }
+  ]
+}
