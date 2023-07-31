@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QList>
+#include <QString>
+
 enum class ProblemSeverity
 {
     None,
