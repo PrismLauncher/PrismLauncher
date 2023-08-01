@@ -92,37 +92,39 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DTOML_ENABLE_FLOAT16=0")
 # set CXXFLAGS for build targets
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
 
+
 option(DEBUG_ADDRESS_SANITIZER "Enable Address Sanitizer in Debug builds" on)
 
 # If this is a Debug build turn on address sanitiser
-if (CMAKE_BUILD_TYPE STREQUAL "Debug" AND DEBUG_ADDRESS_SANITIZER)
+if ((CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo") AND DEBUG_ADDRESS_SANITIZER)
     message(STATUS "Address Sanitizer enabled for Debug builds, Turn it off with -DDEBUG_ADDRESS_SANITIZER=off")
     if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
         if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
             # using clang with clang-cl front end 
             message(STATUS "Address Sanitizer available on Clang MSVC frontend")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /O1 /Oy-")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address /O1 /Oy-")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /Oy-")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address /Oy-")
         else()
             # AppleClang and Clang
             message(STATUS "Address Sanitizer available on Clang")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
         endif()
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         # GCC
         message(STATUS "Address Sanitizer available on GCC")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
         link_libraries("asan")
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         message(STATUS "Address Sanitizer available on MSVC")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /O1 /Oy-")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address /O1 /Oy-")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /Oy-")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address /Oy-")
     else()
         message(STATUS "Address Sanitizer not available on compiler ${CMAKE_CXX_COMPILER_ID}")
     endif()
 endif()
+
 
 option(ENABLE_LTO "Enable Link Time Optimization" off)
 
