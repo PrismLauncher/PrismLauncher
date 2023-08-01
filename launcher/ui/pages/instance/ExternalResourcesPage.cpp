@@ -83,7 +83,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     connect(selection_model, &QItemSelectionModel::currentChanged, this, &ExternalResourcesPage::current);
     auto updateExtra = [this]() {
         if (updateExtraInfo)
-            updateExtraInfo(extraHeaderInfoString());
+            updateExtraInfo(id(), extraHeaderInfoString());
     };
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
     connect(model.get(), &ResourceFolderModel::updateFinished, this, updateExtra);
@@ -151,9 +151,6 @@ void ExternalResourcesPage::retranslate()
 
 void ExternalResourcesPage::itemActivated(const QModelIndex&)
 {
-    if (!m_controlsEnabled)
-        return;
-
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
 }
 
@@ -197,9 +194,6 @@ bool ExternalResourcesPage::eventFilter(QObject* obj, QEvent* ev)
 
 void ExternalResourcesPage::addItem()
 {
-    if (!m_controlsEnabled)
-        return;
-
     auto list = GuiUtil::BrowseForFiles(
         helpPage(), tr("Select %1", "Select whatever type of files the page contains. Example: 'Loader Mods'").arg(displayName()),
         m_fileSelectionFilter.arg(displayName()), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
@@ -213,9 +207,6 @@ void ExternalResourcesPage::addItem()
 
 void ExternalResourcesPage::removeItem()
 {
-    if (!m_controlsEnabled)
-        return;
-
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
 
     int count = 0;
@@ -259,23 +250,37 @@ void ExternalResourcesPage::removeItem()
 
 void ExternalResourcesPage::removeItems(const QItemSelection& selection)
 {
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response = CustomMessageBox::selectable(this, "Confirm Delete",
+                                                     "If you remove this resource while the game is running it may crash your game.\n"
+                                                     "Are you sure you want to do this?",
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
     m_model->deleteResources(selection.indexes());
 }
 
 void ExternalResourcesPage::enableItem()
 {
-    if (!m_controlsEnabled)
-        return;
-
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->setResourceEnabled(selection.indexes(), EnableAction::ENABLE);
 }
 
 void ExternalResourcesPage::disableItem()
 {
-    if (!m_controlsEnabled)
-        return;
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response = CustomMessageBox::selectable(this, "Confirm disable",
+                                                     "If you disable this resource while the game is running it may crash your game.\n"
+                                                     "Are you sure you want to do this?",
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
 
+        if (response != QMessageBox::Yes)
+            return;
+    }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     m_model->setResourceEnabled(selection.indexes(), EnableAction::DISABLE);
 }

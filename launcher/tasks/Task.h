@@ -167,7 +167,7 @@ class Task : public QObject, public QRunnable {
     virtual void emitAborted();
     virtual void emitFailed(QString reason = "");
 
-    virtual void propogateStepProgress(TaskStepProgress const& task_progress);
+    virtual void propagateStepProgress(TaskStepProgress const& task_progress);
 
    public slots:
     void setStatus(const QString& status);

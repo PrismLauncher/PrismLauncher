@@ -40,6 +40,7 @@
 #include <QFileSystemModel>
 #include <QSortFilterProxyModel>
 #include <QStack>
+#include <algorithm>
 #include "FileSystem.h"
 #include "SeparatorPrefixTree.h"
 #include "StringUtils.h"
@@ -253,4 +254,26 @@ bool FileIgnoreProxy::filterAcceptsColumn(int source_column, const QModelIndex& 
         return false;
 
     return true;
+}
+
+bool FileIgnoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+{
+    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+    QFileSystemModel* fsm = qobject_cast<QFileSystemModel*>(sourceModel());
+
+    auto fileInfo = fsm->fileInfo(index);
+    return !ignoreFile(fileInfo);
+}
+
+bool FileIgnoreProxy::ignoreFile(QFileInfo fileInfo) const
+{
+    auto fileName = fileInfo.fileName();
+    auto path = relPath(fileInfo.absoluteFilePath());
+    return std::any_of(m_ignoreFiles.cbegin(), m_ignoreFiles.cend(), [fileName](auto iFileName) { return fileName == iFileName; }) ||
+           m_ignoreFilePaths.covers(path);
+}
+
+bool FileIgnoreProxy::filterFile(const QString& fileName) const
+{
+    return blocked.covers(fileName) || ignoreFile(QFileInfo(QDir(root), fileName));
 }
