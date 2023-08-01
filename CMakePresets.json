@@ -20,9 +20,7 @@
         "CMAKE_PREFIX_PATH": "${sourceDir}/libraries/Qt/6.5.1/msvc2019_64/lib/cmake",
         "Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6",
         "Launcher_BUILD_PLATFORM": "custom",
-        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL"
       },
       "environment": {
         "CXX_FLAGS": ""
@@ -43,7 +41,6 @@
         "Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6",
         "Launcher_BUILD_PLATFORM": "custom",
         "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
       },
       "environment": {
@@ -54,7 +51,7 @@
     {
       "name": "windows_release",
       "displayName": "MSVC Release",
-      "description": "MSVC build using Ninja generator",
+      "description": "MSVC release build Visual Studio generator",
       "generator": "Visual Studio 17 2022",
       "binaryDir": "${sourceDir}/build/",
       "cacheVariables": {
@@ -64,8 +61,7 @@
         "CMAKE_PREFIX_PATH": "${sourceDir}/libraries/Qt/6.5.1/msvc2019_64/lib/cmake",
         "Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6",
         "Launcher_BUILD_PLATFORM": "custom",
-        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL"
       },
       "environment": {
         "CXX_FLAGS": ""
@@ -77,6 +73,10 @@
     {
       "name": "windows_default",
       "configurePreset": "windows_default"
+    },
+    {
+      "name": "windows_debug_ninja",
+      "configurePreset": "windows_debug_ninja"
     },
     {
       "name": "windows_release",
