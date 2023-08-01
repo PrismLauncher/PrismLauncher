@@ -1,5 +1,5 @@
 $aqt_url = "https://github.com/miurahr/aqtinstall/releases/latest/download/aqt.exe"
-$qt_path = ( Join-Path -Path "$PSScriptRoot/libraries" -ChildPath "Qt" )
+$qt_path = ( Join-Path -Path "$PSScriptRoot" -ChildPath "Qt" )
 New-Item -ItemType Directory -Path $qt_path -ErrorAction SilentlyContinue
 $aqt_path = ( Join-Path -Path $qt_path -ChildPath "aqt.exe" )
 
