@@ -20,7 +20,8 @@
         "CMAKE_PREFIX_PATH": "${sourceDir}/libraries/Qt/6.5.1/msvc2019_64/lib/cmake",
         "Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6",
         "Launcher_BUILD_PLATFORM": "custom",
-        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL"
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
+        "FORCE_BUNDLED_LIBS": "ON"
       },
       "environment": {
         "CXX_FLAGS": ""
@@ -41,6 +42,7 @@
         "Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6",
         "Launcher_BUILD_PLATFORM": "custom",
         "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
+        "FORCE_BUNDLED_LIBS": "ON",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
       },
       "environment": {
@@ -61,7 +63,214 @@
         "CMAKE_PREFIX_PATH": "${sourceDir}/libraries/Qt/6.5.1/msvc2019_64/lib/cmake",
         "Launcher_BUILD_ARTIFACT": "Windows-MSVC-Qt6",
         "Launcher_BUILD_PLATFORM": "custom",
-        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL"
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
+        "ENABLE_LTO": "ON",
+        "FORCE_BUNDLED_LIBS": "ON"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "windows_legacy_debug",
+      "displayName": "MSVC x86 Qt5 Release",
+      "description": "MSVC x85 Qt5 release build Visual Studio generator",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "win32",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "5",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/libraries/Qt/5.15.2/msvc2019/lib/cmake",
+        "Launcher_BUILD_ARTIFACT": "Windows-Legacy-MSVC-Qt5",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
+        "FORCE_BUNDLED_LIBS": "ON"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "windows_legacy_release",
+      "displayName": "MSVC x86 Qt5 Release",
+      "description": "MSVC x85 Qt5 release build Visual Studio generator",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "win32",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "5",
+        "CMAKE_PREFIX_PATH": "${sourceDir}/libraries/Qt/5.15.2/msvc2019/lib/cmake",
+        "Launcher_BUILD_ARTIFACT": "Windows-Legacy-MSVC-Qt5",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreadedDLL",
+        "ENABLE_LTO": "ON",
+        "FORCE_BUNDLED_LIBS": "ON"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "macos_default",
+      "displayName": "MacOS Debug Ninja",
+      "description": "MacOS build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "6",
+        "Launcher_BUILD_ARTIFACT": "MacOS-Qt6",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_OSX_ARCHITECTURES": "x86_64;arm64",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "macos_release",
+      "displayName": "MacOS Debug Ninja",
+      "description": "MacOS build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "6",
+        "Launcher_BUILD_ARTIFACT": "MacOS-Qt6",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_OSX_ARCHITECTURES": "x86_64;arm64",
+        "ENABLE_LTO": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "macos_legacy_debug",
+      "displayName": "MacOS Qt5 Debug Ninja",
+      "description": "MacOS Qt5 build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "5",
+        "Launcher_BUILD_ARTIFACT": "MacOS-Qt6",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_OSX_ARCHITECTURES": "x86_64;arm64",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "macos_legacy_release",
+      "displayName": "MacOS Qt5 Release Ninja",
+      "description": "MacOS Qt5 release build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "5",
+        "Launcher_BUILD_ARTIFACT": "MacOS-Qt6",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_OSX_ARCHITECTURES": "x86_64;arm64",
+        "ENABLE_LTO": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "linux_default",
+      "displayName": "Linux Debug Ninja",
+      "description": "Linux build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "6",
+        "Launcher_BUILD_ARTIFACT": "Linux-Qt6",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "linux_release",
+      "displayName": "Linux Release Ninja",
+      "description": "Linux build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "6",
+        "Launcher_BUILD_ARTIFACT": "Linux-Qt6",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "ENABLE_LTO": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "linux_qt5_debug",
+      "displayName": "Linux Qt5 Debug Ninja",
+      "description": "Linux Qt5 build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "5",
+        "Launcher_BUILD_ARTIFACT": "Linux-Qt5",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
+      },
+      "environment": {
+        "CXX_FLAGS": ""
+      },
+      "vendor": {}
+    },
+    {
+      "name": "linux_qt5_release",
+      "displayName": "Linux Qt5 Release Ninja",
+      "description": "Linux Qt5 build using Ninja generator",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "install",
+        "Launcher_QT_VERSION_MAJOR": "5",
+        "Launcher_BUILD_ARTIFACT": "Linux-Qt5",
+        "Launcher_BUILD_PLATFORM": "custom",
+        "ENABLE_LTO": "ON",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "yes"
       },
       "environment": {
         "CXX_FLAGS": ""
@@ -81,12 +290,74 @@
     {
       "name": "windows_release",
       "configurePreset": "windows_release"
+    },
+    {
+      "name": "windows_legacy_debug",
+      "configurePreset": "windows_legacy_debug"
+    },
+    {
+      "name": "windows_legacy_release",
+      "configurePreset": "windows_legacy_release"
+    },
+    {
+      "name": "macos_default",
+      "configurePreset": "macos_default"
+    },
+    {
+      "name": "macos_release",
+      "configurePreset": "macos_release"
+    },
+    {
+      "name": "macos_legacy_debug",
+      "configurePreset": "macos_legacy_debug"
+    },
+    {
+      "name": "macos_legacy_release",
+      "configurePreset": "macos_legacy_release"
+    },
+    {
+      "name": "linux_default",
+      "configurePreset": "linux_default"
+    },
+    {
+      "name": "linux_release",
+      "configurePreset": "linux_release"
+    },
+    {
+      "name": "linux_qt5_debug",
+      "configurePreset": "linux_qt5_debug"
+    },
+    {
+      "name": "linux_qt5_release",
+      "configurePreset": "linux_qt5_release"
     }
   ],
   "testPresets": [
     {
       "name": "windows_default",
       "configurePreset": "windows_default",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "macos_default",
+      "configurePreset": "macos_default",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "linux_default",
+      "configurePreset": "linux_default",
       "output": {
         "outputOnFailure": true
       },

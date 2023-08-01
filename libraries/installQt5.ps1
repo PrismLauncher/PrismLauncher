@@ -7,14 +7,8 @@ if (!(Test-Path -Path $aqt_path)) {
   Invoke-WebRequest -Uri $aqt_url -OutFile $aqt_path
 }
 
-$qt_ver = "6.5.1"
-$system_arch = (Get-CimInstance -Class Win32_ComputerSystem).SystemType
-$qt_arch = Switch ($system_arch) {
-  {$_ -match "x64" } { "win64_msvc2019_64" }
-  {$_ -match "ARM" } { "win64_msvc2019_arm64" }
-  default { throw "System architecture unsupported by this script." }
-}
-
+$qt_ver = "5.15.2"
+$qt_arch = "win32_msvc2019"
 $aqt_install_args = @("install-qt", "windows", "desktop", $qt_ver, $qt_arch, "-m", "all", "--outputdir", $qt_path )
 
 $p = Start-Process -FilePath $aqt_path -ArgumentList $aqt_install_args -Wait
