@@ -1421,7 +1421,7 @@ void Application::detectLibraries()
 #ifdef Q_OS_LINUX
     m_detectedGLFWPath = MangoHud::findLibrary(BuildConfig.GLFW_LIBRARY_NAME);
     m_detectedOpenALPath = MangoHud::findLibrary(BuildConfig.OPENAL_LIBRARY_NAME);
-    qDebug() << m_detectedGLFWPath << m_detectedOpenALPath;
+    qDebug() << "Detected native libraries:" << m_detectedGLFWPath << m_detectedOpenALPath;
 #endif
 }
 
