@@ -27,7 +27,7 @@ namespace Net {
 
 class RawHeaderProxy : public HeaderProxy {
    public:
-    RawHeaderProxy() : HeaderProxy(){};
+    RawHeaderProxy() : HeaderProxy() {}
     virtual ~RawHeaderProxy() = default;
 
    public:
