@@ -33,11 +33,11 @@
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
    public:
     InstallLoaderPage(const QString& id,
-                      const QString& icon,
+                      const QString& iconName,
                       const QString& name,
                       const Version& oldestVersion,
                       const std::shared_ptr<PackProfile> profile)
-        : VersionSelectWidget(nullptr), uid(id), iconName(icon), name(name)
+        : VersionSelectWidget(nullptr), uid(id), iconName(iconName), name(name)
     {
         const QString minecraftVersion = profile->getComponentVersion("net.minecraft");
         setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
