@@ -69,7 +69,6 @@ class NoBigComboBoxStyle : public QProxyStyle {
 
    private:
     NoBigComboBoxStyle(QStyle* style) : QProxyStyle(style) {}
-
 };
 
 ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, QWidget* parent)
@@ -91,13 +90,13 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
 
     // NOTE: GTK2 themes crash with the proxy style.
     // This seems like an upstream bug, so there's not much else that can be done.
-    if (!QStyleFactory::keys().contains("gtk2")){
+    if (!QStyleFactory::keys().contains("gtk2")) {
         auto comboStyle = NoBigComboBoxStyle::getInstance(ui->versionsComboBox->style());
         ui->versionsComboBox->setStyle(comboStyle);
     }
 
     ui->reloadButton->setVisible(false);
-    connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool){
+    connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool) {
         ui->reloadButton->setVisible(false);
 
         m_loaded = false;
@@ -205,7 +204,7 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
-    connect(ui->updateButton, &QPushButton::pressed, this, &ModrinthManagedPackPage::update);
+    connect(ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
 }
 
 // MODRINTH
@@ -226,7 +225,8 @@ void ModrinthManagedPackPage::parseManagedPack()
 
     QString id = m_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response.get()));
+    m_fetch_job->addNetAction(
+        Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
     QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
@@ -267,7 +267,6 @@ void ModrinthManagedPackPage::parseManagedPack()
             if (version.version == m_inst->getManagedPackVersionName())
                 name = tr("%1 (Current)").arg(name);
 
-
             ui->versionsComboBox->addItem(name, QVariant(version.id));
         }
 
@@ -291,6 +290,10 @@ QString ModrinthManagedPackPage::url() const
 void ModrinthManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     ui->changelogTextBrowser->setHtml(markdownToHTML(version.changelog.toUtf8()));
@@ -301,6 +304,10 @@ void ModrinthManagedPackPage::suggestVersion()
 void ModrinthManagedPackPage::update()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     QMap<QString, QString> extra_info;
@@ -332,7 +339,7 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
-    connect(ui->updateButton, &QPushButton::pressed, this, &FlameManagedPackPage::update);
+    connect(ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
 }
 
 void FlameManagedPackPage::parseManagedPack()
@@ -369,7 +376,7 @@ void FlameManagedPackPage::parseManagedPack()
 
     QString id = m_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response.get()));
+    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response));
 
     QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
@@ -429,6 +436,10 @@ QString FlameManagedPackPage::url() const
 void FlameManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     ui->changelogTextBrowser->setHtml(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId));
@@ -439,6 +450,10 @@ void FlameManagedPackPage::suggestVersion()
 void FlameManagedPackPage::update()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     QMap<QString, QString> extra_info;

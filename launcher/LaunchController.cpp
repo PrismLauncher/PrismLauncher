@@ -187,8 +187,8 @@ void LaunchController::login() {
         switch(m_accountToUse->accountState()) {
             case AccountState::Offline: {
                 m_session->wants_online = false;
-                // NOTE: fallthrough is intentional
             }
+            /* fallthrough */
             case AccountState::Online: {
                 if(!m_session->wants_online) {
                     // we ask the user for a player name
@@ -267,8 +267,8 @@ void LaunchController::login() {
                 // This means some sort of soft error that we can fix with a refresh ... so let's refresh.
             case AccountState::Unchecked: {
                 m_accountToUse->refresh();
-                // NOTE: fallthrough intentional
             }
+            /* fallthrough */
             case AccountState::Working: {
                 // refresh is in progress, we need to wait for it to finish to proceed.
                 ProgressDialog progDialog(m_parentWidget);
@@ -390,7 +390,10 @@ void LaunchController::launchInstance()
     m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), "Launched instance in " + online_mode + " mode\n", MessageLevel::Launcher));
 
     // Prepend Version
-    m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), BuildConfig.LAUNCHER_DISPLAYNAME + " version: " + BuildConfig.printableVersionString() + "\n\n", MessageLevel::Launcher));
+    {
+        auto versionString = QString("%1 version: %2 (%3)").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString(), BuildConfig.BUILD_PLATFORM);
+        m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), versionString + "\n\n", MessageLevel::Launcher));
+    }
     m_launcher->start();
 }
 

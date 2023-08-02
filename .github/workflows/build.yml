@@ -191,7 +191,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y update
-          sudo apt-get -y install ninja-build extra-cmake-modules scdoc
+          sudo apt-get -y install ninja-build extra-cmake-modules scdoc appstream
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
@@ -250,6 +250,7 @@ jobs:
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
 
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
+          sudo apt install libopengl0
 
       - name: Add QT_HOST_PATH var (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
@@ -263,23 +264,23 @@ jobs:
       - name: Configure CMake (macOS)
         if: runner.os == 'macOS' && matrix.qt_ver == 6
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G Ninja
 
       - name: Configure CMake (macOS-Legacy)
         if: runner.os == 'macOS' && matrix.qt_ver == 5
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DMACOSX_SPARKLE_UPDATE_PUBLIC_KEY="" -DMACOSX_SPARKLE_UPDATE_FEED_URL="" -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DMACOSX_SPARKLE_UPDATE_PUBLIC_KEY="" -DMACOSX_SPARKLE_UPDATE_FEED_URL="" -G Ninja
 
       - name: Configure CMake (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=6 -DCMAKE_OBJDUMP=/mingw64/bin/objdump.exe -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=6 -DCMAKE_OBJDUMP=/mingw64/bin/objdump.exe -G Ninja
 
       - name: Configure CMake (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" -A${{ matrix.architecture}} -DLauncher_FORCE_BUNDLED_LIBS=ON
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" -A${{ matrix.architecture}} -DLauncher_FORCE_BUNDLED_LIBS=ON
           # https://github.com/ccache/ccache/wiki/MS-Visual-Studio (I coudn't figure out the compiler prefix)
           if ("${{ env.CCACHE_VAR }}")
           {
@@ -294,7 +295,7 @@ jobs:
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=Linux -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -G Ninja
 
       ##
       # BUILD
@@ -467,7 +468,8 @@ jobs:
         shell: bash
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
-
+          mv ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.metainfo.xml ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.appdata.xml
+          export "NO_APPSTREAM=1" # we have to skip appstream checking because appstream on ubuntu 20.04 is outdated
           export OUTPUT="PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
 
           chmod +x linuxdeploy-*.AppImage
@@ -482,7 +484,8 @@ jobs:
           cp -r /home/runner/work/PrismLauncher/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
           
           cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
-          cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}//usr/lib/
+          cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+          cp /usr/lib/x86_64-linux-gnu/libOpenGL.so.0* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
 
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib"
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk/lib/amd64/server"
@@ -583,33 +586,3 @@ jobs:
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
-
-  nix:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package:
-          - prismlauncher
-          - prismlauncher-qt5
-    steps:
-      - name: Clone repository
-        if: inputs.build_type == 'Debug'
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-      - name: Install nix
-        if: inputs.build_type == 'Debug'
-        uses: cachix/install-nix-action@v21
-        with:
-          install_url: https://nixos.org/nix/install
-          extra_nix_config: |
-            auto-optimise-store = true
-            experimental-features = nix-command flakes
-      - uses: cachix/cachix-action@v12
-        if: inputs.build_type == 'Debug'
-        with:
-          name: prismlauncher
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Build
-        if: inputs.build_type == 'Debug'
-        run: nix build .#${{ matrix.package }} --print-build-logs

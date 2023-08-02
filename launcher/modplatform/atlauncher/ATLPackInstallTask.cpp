@@ -82,9 +82,9 @@ void PackInstallTask::executeTask()
 {
     qDebug() << "PackInstallTask::executeTask: " << QThread::currentThreadId();
     NetJob::Ptr netJob{ new NetJob("ATLauncher::VersionFetch", APPLICATION->network()) };
-    auto searchUrl = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json")
-            .arg(m_pack_safe_name).arg(m_version_name);
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
+    auto searchUrl =
+        QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_pack_safe_name).arg(m_version_name);
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     QObject::connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
@@ -99,11 +99,12 @@ void PackInstallTask::onDownloadSucceeded()
     qDebug() << "PackInstallTask::onDownloadSucceeded: " << QThread::currentThreadId();
     jobPtr.reset();
 
-    QJsonParseError parse_error {};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
-    if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATLauncher at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+    QJsonParseError parse_error{};
+    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+    if (parse_error.error != QJsonParseError::NoError) {
+        qWarning() << "Error while parsing JSON response from ATLauncher at " << parse_error.offset
+                   << " reason: " << parse_error.errorString();
+        qWarning() << *response.get();
         return;
     }
     auto obj = doc.object();
@@ -683,7 +684,7 @@ void PackInstallTask::installConfigs()
         abortable = true;
         setProgress(current, total);
     });
-    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
+    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
     connect(jobPtr.get(), &NetJob::aborted, [&]{
         abortable = false;
         jobPtr.reset();
@@ -851,7 +852,7 @@ void PackInstallTask::downloadMods()
         abortable = true;
         setProgress(current, total);
     });
-    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
+    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
     connect(jobPtr.get(), &NetJob::aborted, [&]
     {
         abortable = false;

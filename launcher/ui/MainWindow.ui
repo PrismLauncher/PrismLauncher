@@ -479,6 +479,22 @@
     <string>Modrinth (mrpack)</string>
    </property>
   </action>
+  <action name="actionExportInstanceFlamePack">
+   <property name="icon">
+    <iconset theme="flame"/>
+   </property>
+   <property name="text">
+    <string>CurseForge (zip)</string>  
+   </property>
+  </action>
+  <action name="actionExportInstanceToModList">
+   <property name="icon">
+    <iconset theme="new"/>
+   </property>
+   <property name="text">
+    <string>Mod List</string>
+   </property>
+  </action>
   <action name="actionCreateInstanceShortcut">
    <property name="icon">
     <iconset theme="shortcut">
@@ -577,7 +593,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Report a &amp;Bug...</string>
+    <string>Report a Bug or Suggest a Feature</string>
    </property>
    <property name="toolTip">
     <string>Open the bug tracker to report a bug with %1.</string>

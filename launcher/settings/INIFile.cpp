@@ -37,11 +37,12 @@
 #include "settings/INIFile.h"
 #include <FileSystem.h>
 
-#include <QFile>
-#include <QTextStream>
-#include <QStringList>
-#include <QSaveFile>
 #include <QDebug>
+#include <QFile>
+#include <QSaveFile>
+#include <QStringList>
+#include <QTemporaryFile>
+#include <QTextStream>
 
 #include <QSettings>
 
@@ -50,7 +51,7 @@ INIFile::INIFile() {}
 bool INIFile::saveFile(QString fileName)
 {
     if (!contains("ConfigVersion"))
-        insert("ConfigVersion", "1.1");
+        insert("ConfigVersion", "1.2");
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
     _settings_obj.setFallbacksEnabled(false);
 
@@ -71,6 +72,7 @@ bool INIFile::saveFile(QString fileName)
 
     return true;
 }
+
 QString unescape(QString orig)
 {
     QString out;
@@ -97,6 +99,20 @@ QString unescape(QString orig)
     }
     return out;
 }
+
+QString unquote(QString str)
+{
+    if ((str.contains(QChar(';')) || str.contains(QChar('=')) || str.contains(QChar(','))) && str.endsWith("\"") && str.startsWith("\"")) {
+#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+        str = str.remove(0, 1);
+        str = str.remove(str.size() - 1, 1);
+#else
+        str = str.removeFirst().removeLast();
+#endif
+    }
+    return str;
+}
+
 bool parseOldFileFormat(QIODevice& device, QSettings::SettingsMap& map)
 {
     QTextStream in(device.readAll());
@@ -124,7 +140,7 @@ bool parseOldFileFormat(QIODevice& device, QSettings::SettingsMap& map)
         QString key = line.left(eqPos).trimmed();
         QString valueStr = line.right(line.length() - eqPos - 1).trimmed();
 
-        valueStr = unescape(valueStr);
+        valueStr = unquote(unescape(valueStr));
 
         QVariant value(valueStr);
         map.insert(key, value);
@@ -154,11 +170,34 @@ bool INIFile::loadFile(QString fileName)
         file.close();
         for (auto&& key : map.keys())
             insert(key, map.value(key));
-        insert("ConfigVersion", "1.1");
+        insert("ConfigVersion", "1.2");
+    } else if (_settings_obj.value("ConfigVersion").toString() == "1.1") {
+        for (auto&& key : _settings_obj.allKeys()) {
+            if (auto valueStr = _settings_obj.value(key).toString();
+                (valueStr.contains(QChar(';')) || valueStr.contains(QChar('=')) || valueStr.contains(QChar(','))) &&
+                valueStr.endsWith("\"") && valueStr.startsWith("\"")) {
+                insert(key, unquote(valueStr));
+            } else
+                insert(key, _settings_obj.value(key));
+        }
+        insert("ConfigVersion", "1.2");
     } else
         for (auto&& key : _settings_obj.allKeys())
             insert(key, _settings_obj.value(key));
     return true;
+}
+
+bool INIFile::loadFile(QByteArray data)
+{
+    QTemporaryFile file;
+    if (!file.open())
+        return false;
+    file.write(data);
+    file.flush();
+    file.close();
+    auto loaded = loadFile(file.fileName());
+    file.remove();
+    return loaded;
 }
 
 QVariant INIFile::get(QString key, QVariant def) const

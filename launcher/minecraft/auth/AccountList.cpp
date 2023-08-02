@@ -330,18 +330,21 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
                     case AccountState::Gone: {
                         return tr("Gone", "Account status");
                     }
+                    default: {
+                        return tr("Unknown", "Account status");
+                    }
                 }
             }
 
             case MigrationColumn: {
                 if(account->isMSA() || account->isOffline()) {
-                    return tr("N/A", "Can Migrate?");
+                    return tr("N/A", "Can Migrate");
                 }
                 if (account->canMigrate()) {
-                    return tr("Yes", "Can Migrate?");
+                    return tr("Yes", "Can Migrate");
                 }
                 else {
-                    return tr("No", "Can Migrate?");
+                    return tr("No", "Can Migrate");
                 }
             }
 
@@ -356,11 +359,12 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
             return QVariant::fromValue(account);
 
         case Qt::CheckStateRole:
-            switch (index.column())
-            {
-                case ProfileNameColumn:
-                    return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
+            if (index.column() == ProfileNameColumn) {
+                return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
+            } else {
+                return QVariant();
             }
+            
 
         default:
             return QVariant();
