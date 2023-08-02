@@ -262,8 +262,6 @@ set(MINECRAFT_SOURCES
     minecraft/launch/CreateGameFolders.h
     minecraft/launch/ModMinecraftJar.cpp
     minecraft/launch/ModMinecraftJar.h
-    minecraft/launch/DirectJavaLaunch.cpp
-    minecraft/launch/DirectJavaLaunch.h
     minecraft/launch/ExtractNatives.cpp
     minecraft/launch/ExtractNatives.h
     minecraft/launch/LauncherPartLaunch.cpp
