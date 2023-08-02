@@ -166,7 +166,9 @@ void MinecraftInstance::loadSpecificSettings()
         // Native library workarounds
         auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);
         m_settings->registerOverride(global_settings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("CustomOpenALPath"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("CustomGLFWPath"), nativeLibraryWorkaroundsOverride);
 
         // Peformance related options
         auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
@@ -390,22 +392,28 @@ QStringList MinecraftInstance::extraArguments()
             list.append("-Dloader.disable_beacon=true");
     }
 
-#ifdef Q_OS_LINUX
     {
         QString openALPath;
         QString glfwPath;
 
-        if (settings()->get("UseNativeOpenAL").toBool())
-            openALPath = MangoHud::findLibrary("libopenal.so");
-        if (settings()->get("UseNativeGLFW").toBool())
-            glfwPath = MangoHud::findLibrary("libglfw.so");
+        if (settings()->get("UseNativeOpenAL").toBool()) {
+            auto customPath = settings()->get("CustomOpenALPath").toString();
+            openALPath = APPLICATION->m_detectedOpenALPath;
+            if (!customPath.isEmpty())
+                openALPath = customPath;
+        }
+        if (settings()->get("UseNativeGLFW").toBool()) {
+            auto customPath = settings()->get("CustomGLFWPath").toString();
+            glfwPath = APPLICATION->m_detectedGLFWPath;
+            if (!customPath.isEmpty())
+                glfwPath = customPath;
+        }
 
         if (!openALPath.isEmpty())
             list.append("-Dorg.lwjgl.openal.libname=" + openALPath);
         if (!glfwPath.isEmpty())
             list.append("-Dorg.lwjgl.glfw.libname=" + glfwPath);
     }
-#endif
 
     return list;
 }

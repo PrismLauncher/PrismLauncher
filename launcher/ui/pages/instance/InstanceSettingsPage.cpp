@@ -66,6 +66,10 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance* inst, QWidget* parent)
     connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
     connect(ui->instanceAccountSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             &InstanceSettingsPage::changeInstanceAccount);
+
+    connect(ui->useNativeGLFWCheck, &QAbstractButton::toggled, this, &InstanceSettingsPage::onUseNativeGLFWChanged);
+    connect(ui->useNativeOpenALCheck, &QAbstractButton::toggled, this, &InstanceSettingsPage::onUseNativeOpenALChanged);
+
     loadSettings();
 
     updateThresholds();
@@ -198,11 +202,15 @@ void InstanceSettingsPage::applySettings()
     bool workarounds = ui->nativeWorkaroundsGroupBox->isChecked();
     m_settings->set("OverrideNativeWorkarounds", workarounds);
     if (workarounds) {
-        m_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
         m_settings->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
+        m_settings->set("CustomGLFWPath", ui->lineEditGLFWPath->text());
+        m_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
+        m_settings->set("CustomOpenALPath", ui->lineEditOpenALPath->text());
     } else {
-        m_settings->reset("UseNativeOpenAL");
         m_settings->reset("UseNativeGLFW");
+        m_settings->reset("CustomGLFWPath");
+        m_settings->reset("UseNativeOpenAL");
+        m_settings->reset("CustomOpenALPath");
     }
 
     // Performance
@@ -312,7 +320,19 @@ void InstanceSettingsPage::loadSettings()
     // Workarounds
     ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());
     ui->useNativeGLFWCheck->setChecked(m_settings->get("UseNativeGLFW").toBool());
+    ui->lineEditGLFWPath->setText(m_settings->get("CustomGLFWPath").toString());
+#ifdef Q_OS_LINUX
+    ui->lineEditGLFWPath->setPlaceholderText(APPLICATION->m_detectedGLFWPath);
+#else
+    ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.GLFW_LIBRARY_NAME));
+#endif
     ui->useNativeOpenALCheck->setChecked(m_settings->get("UseNativeOpenAL").toBool());
+    ui->lineEditOpenALPath->setText(m_settings->get("CustomOpenALPath").toString());
+#ifdef Q_OS_LINUX
+    ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
+#else
+    ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
+#endif
 
     // Performance
     ui->perfomanceGroupBox->setChecked(m_settings->get("OverridePerformance").toBool());
@@ -406,6 +426,16 @@ void InstanceSettingsPage::on_javaTestBtn_clicked()
                                             ui->minMemSpinBox->value(), ui->maxMemSpinBox->value(), ui->permGenSpinBox->value()));
     connect(checker.get(), SIGNAL(finished()), SLOT(checkerFinished()));
     checker->run();
+}
+
+void InstanceSettingsPage::onUseNativeGLFWChanged(bool checked)
+{
+    ui->lineEditGLFWPath->setEnabled(checked);
+}
+
+void InstanceSettingsPage::onUseNativeOpenALChanged(bool checked)
+{
+    ui->lineEditOpenALPath->setEnabled(checked);
 }
 
 void InstanceSettingsPage::updateAccountsMenu()
