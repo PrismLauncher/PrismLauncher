@@ -48,6 +48,7 @@
 #include "ui/widgets/CustomCommands.h"
 
 #include "Application.h"
+#include "BuildConfig.h"
 #include "JavaCommon.h"
 #include "minecraft/auth/AccountList.h"
 
