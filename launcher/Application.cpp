@@ -281,7 +281,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        QDir foo;
+        if (DesktopServices::isSnap())
+        {
+            foo = QDir(getenv("SNAP_USER_COMMON"));
+        }
+        else
+        {
+            foo = QDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        }
+        
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
 
