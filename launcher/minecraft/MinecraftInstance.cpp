@@ -397,22 +397,25 @@ QStringList MinecraftInstance::extraArguments()
         QString glfwPath;
 
         if (settings()->get("UseNativeOpenAL").toBool()) {
-            auto customPath = settings()->get("CustomOpenALPath").toString();
             openALPath = APPLICATION->m_detectedOpenALPath;
+            auto customPath = settings()->get("CustomOpenALPath").toString();
             if (!customPath.isEmpty())
                 openALPath = customPath;
         }
         if (settings()->get("UseNativeGLFW").toBool()) {
-            auto customPath = settings()->get("CustomGLFWPath").toString();
             glfwPath = APPLICATION->m_detectedGLFWPath;
+            auto customPath = settings()->get("CustomGLFWPath").toString();
             if (!customPath.isEmpty())
                 glfwPath = customPath;
         }
 
-        if (!openALPath.isEmpty())
-            list.append("-Dorg.lwjgl.openal.libname=" + openALPath);
-        if (!glfwPath.isEmpty())
-            list.append("-Dorg.lwjgl.glfw.libname=" + glfwPath);
+        QFileInfo openALInfo(openALPath);
+        QFileInfo glfwInfo(glfwPath);
+
+        if (!openALPath.isEmpty() && openALInfo.exists())
+            list.append("-Dorg.lwjgl.openal.libname=" + openALInfo.absoluteFilePath());
+        if (!glfwPath.isEmpty() && glfwInfo.exists())
+            list.append("-Dorg.lwjgl.glfw.libname=" + glfwInfo.absoluteFilePath());
     }
 
     return list;
