@@ -535,7 +535,7 @@ ComponentPtr PackProfile::getComponent(const QString &id)
 
 ComponentPtr PackProfile::getComponent(size_t index)
 {
-    if(index < 0 || index >= static_cast<size_t>(d->components.size()))
+    if(index >= static_cast<size_t>(d->components.size()))
     {
         return nullptr;
     }
