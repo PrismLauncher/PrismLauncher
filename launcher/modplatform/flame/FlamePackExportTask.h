@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <QFuture>
-#include <QFutureWatcher>
 #include "BaseInstance.h"
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
@@ -52,7 +50,6 @@ class FlamePackExportTask : public Task {
     const QString output;
     const MMCZip::FilterFunction filter;
 
-    typedef std::optional<QString> BuildZipResult;
     struct ResolvedFile {
         int addonId;
         int version;
@@ -76,15 +73,13 @@ class FlamePackExportTask : public Task {
     QMap<QString, HashInfo> pendingHashes{};
     QMap<QString, ResolvedFile> resolvedFiles{};
     Task::Ptr task;
-    QFuture<BuildZipResult> buildZipFuture;
-    QFutureWatcher<BuildZipResult> buildZipWatcher;
 
     void collectFiles();
     void collectHashes();
     void makeApiRequest();
     void getProjectsInfo();
     void buildZip();
-    void finish();
 
     QByteArray generateIndex();
+    QByteArray generateHTML();
 };

@@ -53,7 +53,8 @@ home.packages = [ pkgs.prismlauncher ];
 
 ### Without flakes-enabled nix
 
-#### Using channels
+<details>
+<summary>Using channels</summary>
 
 ```sh
 nix-channel --add https://github.com/PrismLauncher/PrismLauncher/archive/master.tar.gz prismlauncher
@@ -61,7 +62,10 @@ nix-channel --update prismlauncher
 nix-env -iA prismlauncher
 ```
 
-#### Using the overlay
+</details>
+
+<details>
+<summary>Using the overlay</summary>
 
 ```nix
 # In your configuration.nix:
@@ -73,6 +77,8 @@ nix-env -iA prismlauncher
   environment.systemPackages = with pkgs; [ prismlauncher ];
 }
 ```
+
+</details>
 
 ## Running ad-hoc
 
