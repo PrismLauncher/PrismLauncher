@@ -501,6 +501,11 @@ set(FTB_SOURCES
     modplatform/legacy_ftb/PrivatePackManager.cpp
 
     modplatform/legacy_ftb/PackHelpers.h
+
+    modplatform/import_ftb/PackInstallTask.h
+    modplatform/import_ftb/PackInstallTask.cpp
+    modplatform/import_ftb/PackHelpers.h
+    modplatform/import_ftb/PackHelpers.cpp
 )
 
 set(FLAME_SOURCES
@@ -872,6 +877,11 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/legacy_ftb/ListModel.h
     ui/pages/modplatform/legacy_ftb/ListModel.cpp
 
+    ui/pages/modplatform/import_ftb/ImportFTBPage.cpp
+    ui/pages/modplatform/import_ftb/ImportFTBPage.h
+    ui/pages/modplatform/import_ftb/ListModel.h
+    ui/pages/modplatform/import_ftb/ListModel.cpp
+
     ui/pages/modplatform/flame/FlameModel.cpp
     ui/pages/modplatform/flame/FlameModel.h
     ui/pages/modplatform/flame/FlamePage.cpp
@@ -1046,6 +1056,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/ResourcePage.ui
     ui/pages/modplatform/flame/FlamePage.ui
     ui/pages/modplatform/legacy_ftb/Page.ui
+    ui/pages/modplatform/import_ftb/ImportFTBPage.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
