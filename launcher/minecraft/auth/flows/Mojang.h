@@ -1,26 +1,17 @@
 #pragma once
 #include "AuthFlow.h"
 
-class MojangRefresh : public AuthFlow
-{
+class MojangRefresh : public AuthFlow {
     Q_OBJECT
-public:
-    explicit MojangRefresh(
-        AccountData *data,
-        QObject *parent = 0
-    );
+   public:
+    explicit MojangRefresh(AccountData* data, QObject* parent = 0);
 };
 
-class MojangLogin : public AuthFlow
-{
+class MojangLogin : public AuthFlow {
     Q_OBJECT
-public:
-    explicit MojangLogin(
-        AccountData *data,
-        QString password,
-        QObject *parent = 0
-    );
+   public:
+    explicit MojangLogin(AccountData* data, QString password, QObject* parent = 0);
 
-private:
+   private:
     QString m_password;
 };

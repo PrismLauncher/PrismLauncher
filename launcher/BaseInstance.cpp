@@ -36,23 +36,22 @@
 
 #include "BaseInstance.h"
 
-#include <QFileInfo>
-#include <QDir>
 #include <QDebug>
-#include <QRegularExpression>
+#include <QDir>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QRegularExpression>
 
 #include "settings/INISettingsObject.h"
-#include "settings/Setting.h"
 #include "settings/OverrideSetting.h"
+#include "settings/Setting.h"
 
-#include "FileSystem.h"
-#include "Commandline.h"
 #include "BuildConfig.h"
+#include "Commandline.h"
+#include "FileSystem.h"
 
-BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir)
-    : QObject()
+BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString& rootDir) : QObject()
 {
     m_settings = settings;
     m_global_settings = globalSettings;
@@ -79,7 +78,7 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
         m_settings->registerSetting("InstanceType", "");
 
     // Custom Commands
-    auto commandSetting = m_settings->registerSetting({"OverrideCommands","OverrideLaunchCmd"}, false);
+    auto commandSetting = m_settings->registerSetting({ "OverrideCommands", "OverrideLaunchCmd" }, false);
     m_settings->registerOverride(globalSettings->getSetting("PreLaunchCommand"), commandSetting);
     m_settings->registerOverride(globalSettings->getSetting("WrapperCommand"), commandSetting);
     m_settings->registerOverride(globalSettings->getSetting("PostExitCommand"), commandSetting);
@@ -148,7 +147,11 @@ QString BaseInstance::getManagedPackVersionName() const
     return m_settings->get("ManagedPackVersionName").toString();
 }
 
-void BaseInstance::setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version)
+void BaseInstance::setManagedPack(const QString& type,
+                                  const QString& id,
+                                  const QString& name,
+                                  const QString& versionId,
+                                  const QString& version)
 {
     m_settings->set("ManagedPack", true);
     m_settings->set("ManagedPackType", type);
@@ -173,8 +176,7 @@ int BaseInstance::getConsoleMaxLines() const
     auto lineSetting = m_settings->getSetting("ConsoleMaxLines");
     bool conversionOk = false;
     int maxLines = lineSetting->get().toInt(&conversionOk);
-    if(!conversionOk)
-    {
+    if (!conversionOk) {
         maxLines = lineSetting->defValue().toInt();
         qWarning() << "ConsoleMaxLines has nonsensical value, defaulting to" << maxLines;
     }
@@ -220,8 +222,7 @@ bool BaseInstance::isLinkedToInstanceId(const QString& id) const
 
 void BaseInstance::iconUpdated(QString key)
 {
-    if(iconKey() == key)
-    {
+    if (iconKey() == key) {
         emit propertiesChanged(this);
     }
 }
@@ -235,8 +236,7 @@ void BaseInstance::invalidate()
 void BaseInstance::changeStatus(BaseInstance::Status newStatus)
 {
     Status status = currentStatus();
-    if(status != newStatus)
-    {
+    if (status != newStatus) {
         m_status = newStatus;
         emit statusChanged(status, newStatus);
     }
@@ -259,23 +259,19 @@ bool BaseInstance::isRunning() const
 
 void BaseInstance::setRunning(bool running)
 {
-    if(running == m_isRunning)
+    if (running == m_isRunning)
         return;
 
     m_isRunning = running;
 
-    if(!m_settings->get("RecordGameTime").toBool())
-    {
+    if (!m_settings->get("RecordGameTime").toBool()) {
         emit runningStatusChanged(running);
         return;
     }
 
-    if(running)
-    {
+    if (running) {
         m_timeStarted = QDateTime::currentDateTime();
-    }
-    else
-    {
+    } else {
         QDateTime timeEnded = QDateTime::currentDateTime();
 
         qint64 current = settings()->get("totalTimePlayed").toLongLong();
@@ -291,8 +287,7 @@ void BaseInstance::setRunning(bool running)
 int64_t BaseInstance::totalTimePlayed() const
 {
     qint64 current = m_settings->get("totalTimePlayed").toLongLong();
-    if(m_isRunning)
-    {
+    if (m_isRunning) {
         QDateTime timeNow = QDateTime::currentDateTime();
         return current + m_timeStarted.secsTo(timeNow);
     }
@@ -301,8 +296,7 @@ int64_t BaseInstance::totalTimePlayed() const
 
 int64_t BaseInstance::lastTimePlayed() const
 {
-    if(m_isRunning)
-    {
+    if (m_isRunning) {
         QDateTime timeNow = QDateTime::currentDateTime();
         return m_timeStarted.secsTo(timeNow);
     }
@@ -349,14 +343,14 @@ qint64 BaseInstance::lastLaunch() const
 
 void BaseInstance::setLastLaunch(qint64 val)
 {
-    //FIXME: if no change, do not set. setting involves saving a file.
+    // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("lastLaunchTime", val);
     emit propertiesChanged(this);
 }
 
 void BaseInstance::setNotes(QString val)
 {
-    //FIXME: if no change, do not set. setting involves saving a file.
+    // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("notes", val);
 }
 
@@ -367,7 +361,7 @@ QString BaseInstance::notes() const
 
 void BaseInstance::setIconKey(QString val)
 {
-    //FIXME: if no change, do not set. setting involves saving a file.
+    // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("iconKey", val);
     emit propertiesChanged(this);
 }
@@ -379,7 +373,7 @@ QString BaseInstance::iconKey() const
 
 void BaseInstance::setName(QString val)
 {
-    //FIXME: if no change, do not set. setting involves saving a file.
+    // FIXME: if no change, do not set. setting involves saving a file.
     m_settings->set("name", val);
     emit propertiesChanged(this);
 }

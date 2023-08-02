@@ -37,18 +37,17 @@
 #include <QPoint>
 #include "ui_ProgressDialog.h"
 
-#include <limits>
 #include <QDebug>
 #include <QKeyEvent>
+#include <limits>
 
 #include "tasks/Task.h"
 
 #include "ui/widgets/SubTaskProgressBar.h"
 
-
 // map a value in a numeric range of an arbitrary type to between 0 and INT_MAX
 // for getting the best precision out of the qt progress bar
-template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+template <typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
 std::tuple<int, int> map_int_zero_max(T current, T range_max, T range_min)
 {
     int int_max = std::numeric_limits<int>::max();
@@ -57,9 +56,8 @@ std::tuple<int, int> map_int_zero_max(T current, T range_max, T range_min)
     double percentage = static_cast<double>(current - range_min) / static_cast<double>(type_range);
     int mapped_current = percentage * int_max;
 
-    return {mapped_current, int_max};
+    return { mapped_current, int_max };
 }
-
 
 ProgressDialog::ProgressDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ProgressDialog)
 {
@@ -96,7 +94,7 @@ ProgressDialog::~ProgressDialog()
 }
 
 void ProgressDialog::updateSize(bool recenterParent)
-{   
+{
     QSize lastSize = this->size();
     QPoint lastPos = this->pos();
     int minHeight = ui->globalStatusDetailsLabel->minimumSize().height() + (ui->verticalLayout->spacing() * 2);
@@ -118,16 +116,13 @@ void ProgressDialog::updateSize(bool recenterParent)
         auto newX = std::max(0, parent->x() + ((parent->width() - newSize.width()) / 2));
         auto newY = std::max(0, parent->y() + ((parent->height() - newSize.height()) / 2));
         this->move(newX, newY);
-    }
-    else if (lastSize != newSize)
-    {
+    } else if (lastSize != newSize) {
         // center on old position after resize
-        QSize sizeDiff = lastSize - newSize; // last size was smaller, the results should be negative
+        QSize sizeDiff = lastSize - newSize;  // last size was smaller, the results should be negative
         auto newX = std::max(0, lastPos.x() + (sizeDiff.width() / 2));
         auto newY = std::max(0, lastPos.y() + (sizeDiff.height() / 2));
         this->move(newX, newY);
     }
-
 }
 
 int ProgressDialog::execWithTask(Task* task)
@@ -139,7 +134,7 @@ int ProgressDialog::execWithTask(Task* task)
         return QDialog::DialogCode::Accepted;
     }
 
-    QDialog::DialogCode result {};
+    QDialog::DialogCode result{};
     if (handleImmediateResult(result)) {
         return result;
     }
@@ -234,15 +229,14 @@ void ProgressDialog::addTaskProgress(TaskStepProgress const& progress)
 void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
 {
     m_is_multi_step = true;
-    if(ui->taskProgressScrollArea->isHidden()) {
+    if (ui->taskProgressScrollArea->isHidden()) {
         ui->taskProgressScrollArea->setHidden(false);
         updateSize();
     }
-    
+
     if (!taskProgress.contains(task_progress.uid))
         addTaskProgress(task_progress);
     auto task_bar = taskProgress.value(task_progress.uid);
-
 
     auto const [mapped_current, mapped_total] = map_int_zero_max<qint64>(task_progress.current, task_progress.total, 0);
     if (task_progress.total <= 0) {
@@ -258,14 +252,12 @@ void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
     if (task_progress.isDone()) {
         task_bar->setVisible(false);
     }
-
 }
 
 void ProgressDialog::changeProgress(qint64 current, qint64 total)
 {
     ui->globalProgressBar->setMaximum(total);
     ui->globalProgressBar->setValue(current);
-
 }
 
 void ProgressDialog::keyPressEvent(QKeyEvent* e)

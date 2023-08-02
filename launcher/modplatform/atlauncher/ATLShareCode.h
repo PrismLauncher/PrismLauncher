@@ -18,9 +18,9 @@
 
 #pragma once
 
+#include <QJsonObject>
 #include <QString>
 #include <QVector>
-#include <QJsonObject>
 
 namespace ATLauncher {
 
@@ -44,4 +44,4 @@ struct ShareCodeResponse {
 
 void loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj);
 
-}
+}  // namespace ATLauncher

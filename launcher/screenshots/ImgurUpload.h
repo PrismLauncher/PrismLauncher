@@ -35,30 +35,26 @@
 
 #pragma once
 
-#include "net/NetAction.h"
 #include "Screenshot.h"
+#include "net/NetAction.h"
 
 class ImgurUpload : public NetAction {
-public:
+   public:
     using Ptr = shared_qobject_ptr<ImgurUpload>;
 
     explicit ImgurUpload(ScreenShot::Ptr shot);
-    static Ptr make(ScreenShot::Ptr shot) {
-        return Ptr(new ImgurUpload(shot));
-    }
+    static Ptr make(ScreenShot::Ptr shot) { return Ptr(new ImgurUpload(shot)); }
 
-protected
-slots:
+   protected slots:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
     void downloadError(QNetworkReply::NetworkError error) override;
     void downloadFinished() override;
     void downloadReadyRead() override {}
 
-public
-slots:
+   public slots:
     void executeTask() override;
 
-private:
+   private:
     ScreenShot::Ptr m_shot;
     bool finished = true;
 };

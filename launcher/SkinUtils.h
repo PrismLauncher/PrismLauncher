@@ -17,7 +17,6 @@
 
 #include <QPixmap>
 
-namespace SkinUtils
-{
+namespace SkinUtils {
 QPixmap getFaceFromCache(QString id, int height = 64, int width = 64);
 }

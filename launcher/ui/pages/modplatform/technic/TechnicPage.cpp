@@ -41,16 +41,15 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 
 #include "BuildConfig.h"
+#include "Json.h"
 #include "TechnicModel.h"
 #include "modplatform/technic/SingleZipPackInstallTask.h"
 #include "modplatform/technic/SolderPackInstallTask.h"
-#include "Json.h"
 
 #include "Application.h"
 #include "modplatform/technic/SolderPackManifest.h"
 
-TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget *parent)
-    : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
+TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &TechnicPage::triggerSearch);
@@ -96,7 +95,8 @@ void TechnicPage::openedImpl()
     triggerSearch();
 }
 
-void TechnicPage::triggerSearch() {
+void TechnicPage::triggerSearch()
+{
     model->searchWithTerm(ui->searchEdit->text());
 }
 
@@ -104,10 +104,8 @@ void TechnicPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 {
     ui->versionSelectionBox->clear();
 
-    if(!first.isValid())
-    {
-        if(isOpened)
-        {
+    if (!first.isValid()) {
+        if (isOpened) {
             dialog->setSuggestedPack();
         }
         return;
@@ -119,74 +117,60 @@ void TechnicPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
 void TechnicPage::suggestCurrent()
 {
-    if (!isOpened)
-    {
+    if (!isOpened) {
         return;
     }
-    if (current.broken)
-    {
+    if (current.broken) {
         dialog->setSuggestedPack();
         return;
     }
 
     QString editedLogoName = "technic_" + current.logoName.section(".", 0, 0);
-    model->getLogo(current.logoName, current.logoUrl, [this, editedLogoName](QString logo)
-    {
-        dialog->setSuggestedIconFromFile(logo, editedLogoName);
-    });
+    model->getLogo(current.logoName, current.logoUrl,
+                   [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 
-    if (current.metadataLoaded)
-    {
+    if (current.metadataLoaded) {
         metadataLoaded();
         return;
     }
 
     auto netJob = makeShared<NetJob>(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
     QString slug = current.slug;
-    netJob->addNetAction(Net::Download::makeByteArray(QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), response));
-    QObject::connect(netJob.get(), &NetJob::succeeded, this, [this, slug]
-    {
+    netJob->addNetAction(Net::Download::makeByteArray(
+        QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), response));
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, [this, slug] {
         jobPtr.reset();
 
-        if (current.slug != slug)
-        {
+        if (current.slug != slug) {
             return;
         }
 
-        QJsonParseError parse_error {};
+        QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         QJsonObject obj = doc.object();
-        if(parse_error.error != QJsonParseError::NoError)
-        {
-            qWarning() << "Error while parsing JSON response from Technic at " << parse_error.offset << " reason: " << parse_error.errorString();
+        if (parse_error.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from Technic at " << parse_error.offset
+                       << " reason: " << parse_error.errorString();
             qWarning() << *response;
             return;
         }
-        if (!obj.contains("url"))
-        {
+        if (!obj.contains("url")) {
             qWarning() << "Json doesn't contain an url key";
             return;
         }
         QJsonValueRef url = obj["url"];
-        if (url.isString())
-        {
+        if (url.isString()) {
             current.url = url.toString();
-        }
-        else
-        {
-            if (!obj.contains("solder"))
-            {
+        } else {
+            if (!obj.contains("solder")) {
                 qWarning() << "Json doesn't contain a valid url or solder key";
                 return;
             }
             QJsonValueRef solderUrl = obj["solder"];
-            if (solderUrl.isString())
-            {
+            if (solderUrl.isString()) {
                 current.url = solderUrl.toString();
                 current.isSolder = true;
-            }
-            else
-            {
+            } else {
                 qWarning() << "Json doesn't contain a valid url or solder key";
                 return;
             }
@@ -227,22 +211,21 @@ void TechnicPage::metadataLoaded()
 
     // Strip trailing forward-slashes from Solder URL's
     if (current.isSolder) {
-        while (current.url.endsWith('/')) current.url.chop(1);
+        while (current.url.endsWith('/'))
+            current.url.chop(1);
     }
 
     // Display versions from Solder
     if (!current.isSolder) {
         // If the pack isn't a Solder pack, it only has the single version
         ui->versionSelectionBox->addItem(current.currentVersion);
-    }
-    else if (current.versionsLoaded) {
+    } else if (current.versionsLoaded) {
         // reverse foreach, so that the newest versions are first
         for (auto i = current.versions.size(); i--;) {
             ui->versionSelectionBox->addItem(current.versions.at(i));
         }
         ui->versionSelectionBox->setCurrentText(current.recommended);
-    }
-    else {
+    } else {
         // For now, until the versions are pulled from the Solder instance, display the current
         // version so we can display something quicker
         ui->versionSelectionBox->addItem(current.currentVersion);
@@ -260,7 +243,8 @@ void TechnicPage::metadataLoaded()
     selectVersion();
 }
 
-void TechnicPage::selectVersion() {
+void TechnicPage::selectVersion()
+{
     if (!isOpened) {
         return;
     }
@@ -269,17 +253,18 @@ void TechnicPage::selectVersion() {
         return;
     }
 
-    if (!current.isSolder)
-    {
-        dialog->setSuggestedPack(current.name, selectedVersion, new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
-    }
-    else
-    {
-        dialog->setSuggestedPack(current.name, selectedVersion, new Technic::SolderPackInstallTask(APPLICATION->network(), current.url, current.slug, selectedVersion, current.minecraftVersion));
+    if (!current.isSolder) {
+        dialog->setSuggestedPack(current.name, selectedVersion,
+                                 new Technic::SingleZipPackInstallTask(current.url, current.minecraftVersion));
+    } else {
+        dialog->setSuggestedPack(current.name, selectedVersion,
+                                 new Technic::SolderPackInstallTask(APPLICATION->network(), current.url, current.slug, selectedVersion,
+                                                                    current.minecraftVersion));
     }
 }
 
-void TechnicPage::onSolderLoaded() {
+void TechnicPage::onSolderLoaded()
+{
     jobPtr.reset();
 
     auto fallback = [this]() {
@@ -319,7 +304,8 @@ void TechnicPage::onSolderLoaded() {
     metadataLoaded();
 }
 
-void TechnicPage::onVersionSelectionChanged(QString data) {
+void TechnicPage::onVersionSelectionChanged(QString data)
+{
     if (data.isNull() || data.isEmpty()) {
         selectedVersion = "";
         return;

@@ -45,9 +45,9 @@
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
 
-#include "modplatform/technic/TechnicPackProcessor.h"
-#include "modplatform/modrinth/ModrinthInstanceCreationTask.h"
 #include "modplatform/flame/FlameInstanceCreationTask.h"
+#include "modplatform/modrinth/ModrinthInstanceCreationTask.h"
+#include "modplatform/technic/TechnicPackProcessor.h"
 
 #include "settings/INISettingsObject.h"
 
@@ -138,8 +138,7 @@ void InstanceImportTask::processZipPack()
 
     // open the zip and find relevant files in it
     m_packZip.reset(new QuaZip(m_archivePath));
-    if (!m_packZip->open(QuaZip::mdUnzip))
-    {
+    if (!m_packZip->open(QuaZip::mdUnzip)) {
         emitFailed(tr("Unable to open supplied modpack zip file."));
         return;
     }
@@ -153,44 +152,40 @@ void InstanceImportTask::processZipPack()
 
     // NOTE: Prioritize modpack platforms that aren't searched for recursively.
     // Especially Flame has a very common filename for its manifest, which may appear inside overrides for example
-    if(modrinthFound)
-    {
+    if (modrinthFound) {
         // process as Modrinth pack
         qDebug() << "Modrinth:" << modrinthFound;
         m_modpackType = ModpackType::Modrinth;
-    }
-    else if (technicFound)
-    {
+    } else if (technicFound) {
         // process as Technic pack
         qDebug() << "Technic:" << technicFound;
         extractDir.mkpath(".minecraft");
         extractDir.cd(".minecraft");
         m_modpackType = ModpackType::Technic;
-    }
-    else
-    {
-        QStringList paths_to_ignore { "overrides/" };
+    } else {
+        QStringList paths_to_ignore{ "overrides/" };
 
         if (QString mmcRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "instance.cfg", paths_to_ignore); !mmcRoot.isNull()) {
             // process as MultiMC instance/pack
             qDebug() << "MultiMC:" << mmcRoot;
             root = mmcRoot;
             m_modpackType = ModpackType::MultiMC;
-        } else if (QString flameRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json", paths_to_ignore); !flameRoot.isNull()) {
+        } else if (QString flameRoot = MMCZip::findFolderOfFileInZip(m_packZip.get(), "manifest.json", paths_to_ignore);
+                   !flameRoot.isNull()) {
             // process as Flame pack
             qDebug() << "Flame:" << flameRoot;
             root = flameRoot;
             m_modpackType = ModpackType::Flame;
         }
     }
-    if(m_modpackType == ModpackType::Unknown)
-    {
+    if (m_modpackType == ModpackType::Unknown) {
         emitFailed(tr("Archive does not contain a recognized modpack type."));
         return;
     }
 
     // make sure we extract just the pack
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, m_packZip.get(), root, extractDir.absolutePath());
+    m_extractFuture =
+        QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, m_packZip.get(), root, extractDir.absolutePath());
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &InstanceImportTask::extractFinished);
     m_extractFutureWatcher.setFuture(m_extractFuture);
 }
@@ -210,37 +205,28 @@ void InstanceImportTask::extractFinished()
 
     qDebug() << "Fixing permissions for extracted pack files...";
     QDirIterator it(extractDir, QDirIterator::Subdirectories);
-    while (it.hasNext())
-    {
+    while (it.hasNext()) {
         auto filepath = it.next();
         QFileInfo file(filepath);
         auto permissions = QFile::permissions(filepath);
         auto origPermissions = permissions;
-        if(file.isDir())
-        {
+        if (file.isDir()) {
             // Folder +rwx for current user
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser;
-        }
-        else
-        {
+        } else {
             // File +rw for current user
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
         }
-        if(origPermissions != permissions)
-        {
-            if(!QFile::setPermissions(filepath, permissions))
-            {
+        if (origPermissions != permissions) {
+            if (!QFile::setPermissions(filepath, permissions)) {
                 logWarning(tr("Could not fix permissions for %1").arg(filepath));
-            }
-            else
-            {
+            } else {
                 qDebug() << "Fixed" << filepath;
             }
         }
     }
 
-    switch(m_modpackType)
-    {
+    switch (m_modpackType) {
         case ModpackType::MultiMC:
             processMultiMC();
             return;
@@ -276,7 +262,8 @@ void InstanceImportTask::processFlame()
         if (original_instance_id_it != m_extra_info.constEnd())
             original_instance_id = original_instance_id_it.value();
 
-        inst_creation_task = makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+        inst_creation_task =
+            makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
     } else {
         // FIXME: Find a way to get IDs in directly imported ZIPs
         inst_creation_task = makeShared<FlameCreationTask>(m_stagingPath, m_globalSettings, m_parent, QString(), QString());
@@ -286,7 +273,7 @@ void InstanceImportTask::processFlame()
     inst_creation_task->setIcon(m_instIcon);
     inst_creation_task->setGroup(m_instGroup);
     inst_creation_task->setConfirmUpdate(shouldConfirmUpdate());
-    
+
     connect(inst_creation_task.get(), &Task::succeeded, this, [this, inst_creation_task] {
         setOverride(inst_creation_task->shouldOverride(), inst_creation_task->originalInstanceID());
         emitSucceeded();
@@ -362,7 +349,8 @@ void InstanceImportTask::processModrinth()
         if (original_instance_id_it != m_extra_info.constEnd())
             original_instance_id = original_instance_id_it.value();
 
-        inst_creation_task = new ModrinthCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
+        inst_creation_task =
+            new ModrinthCreationTask(m_stagingPath, m_globalSettings, m_parent, pack_id, pack_version_id, original_instance_id);
     } else {
         QString pack_id;
         if (!m_sourceUrl.isEmpty()) {
@@ -378,7 +366,7 @@ void InstanceImportTask::processModrinth()
     inst_creation_task->setIcon(m_instIcon);
     inst_creation_task->setGroup(m_instGroup);
     inst_creation_task->setConfirmUpdate(shouldConfirmUpdate());
-    
+
     connect(inst_creation_task, &Task::succeeded, this, [this, inst_creation_task] {
         setOverride(inst_creation_task->shouldOverride(), inst_creation_task->originalInstanceID());
         emitSucceeded();

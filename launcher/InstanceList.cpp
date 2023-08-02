@@ -41,9 +41,9 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMimeData>
+#include <QPair>
 #include <QSet>
 #include <QStack>
-#include <QPair>
 #include <QTextStream>
 #include <QThread>
 #include <QTimer>
@@ -129,7 +129,7 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
     return mimeData;
 }
 
-QStringList InstanceList::getLinkedInstancesById(const QString &id) const
+QStringList InstanceList::getLinkedInstancesById(const QString& id) const
 {
     QStringList linkedInstances;
     for (auto inst : m_instances) {
@@ -158,42 +158,34 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
     if (!index.isValid()) {
         return QVariant();
     }
-    BaseInstance *pdata = static_cast<BaseInstance *>(index.internalPointer());
-    switch (role)
-    {
-    case InstancePointerRole:
-    {
-        QVariant v = QVariant::fromValue((void *)pdata);
-        return v;
-    }
-    case InstanceIDRole:
-    {
-        return pdata->id();
-    }
-    case Qt::EditRole:
-    case Qt::DisplayRole:
-    {
-        return pdata->name();
-    }
-    case Qt::AccessibleTextRole:
-    {
-        return tr("%1 Instance").arg(pdata->name());
-    }
-    case Qt::ToolTipRole:
-    {
-        return pdata->instanceRoot();
-    }
-    case Qt::DecorationRole:
-    {
-        return pdata->iconKey();
-    }
-    // HACK: see InstanceView.h in gui!
-    case GroupRole:
-    {
-        return getInstanceGroup(pdata->id());
-    }
-    default:
-        break;
+    BaseInstance* pdata = static_cast<BaseInstance*>(index.internalPointer());
+    switch (role) {
+        case InstancePointerRole: {
+            QVariant v = QVariant::fromValue((void*)pdata);
+            return v;
+        }
+        case InstanceIDRole: {
+            return pdata->id();
+        }
+        case Qt::EditRole:
+        case Qt::DisplayRole: {
+            return pdata->name();
+        }
+        case Qt::AccessibleTextRole: {
+            return tr("%1 Instance").arg(pdata->name());
+        }
+        case Qt::ToolTipRole: {
+            return pdata->instanceRoot();
+        }
+        case Qt::DecorationRole: {
+            return pdata->iconKey();
+        }
+        // HACK: see InstanceView.h in gui!
+        case GroupRole: {
+            return getInstanceGroup(pdata->id());
+        }
+        default:
+            break;
     }
     return QVariant();
 }
@@ -320,16 +312,18 @@ bool InstanceList::trashInstance(const InstanceId& id)
     }
 
     qDebug() << "Instance" << id << "has been trashed by the launcher.";
-    m_trashHistory.push({id, inst->instanceRoot(), trashedLoc, cachedGroupId});
-    
+    m_trashHistory.push({ id, inst->instanceRoot(), trashedLoc, cachedGroupId });
+
     return true;
 }
 
-bool InstanceList::trashedSomething() {
+bool InstanceList::trashedSomething()
+{
     return !m_trashHistory.empty();
 }
 
-void InstanceList::undoTrashInstance() {
+void InstanceList::undoTrashInstance()
+{
     if (m_trashHistory.empty()) {
         qWarning() << "Nothing to recover from trash.";
         return;
@@ -558,7 +552,7 @@ InstancePtr InstanceList::getInstanceByManagedName(const QString& managed_name) 
     return {};
 }
 
-QModelIndex InstanceList::getInstanceIndexById(const QString &id) const
+QModelIndex InstanceList::getInstanceIndexById(const QString& id) const
 {
     return index(getInstIndex(getInstanceById(id).get()));
 }
@@ -597,13 +591,11 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
 
     QString inst_type = instanceSettings->get("InstanceType").toString();
 
-    // NOTE: Some PolyMC versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a OneSix instance
-    if (inst_type == "OneSix" || inst_type.isEmpty())
-    {
+    // NOTE: Some PolyMC versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a OneSix
+    // instance
+    if (inst_type == "OneSix" || inst_type.isEmpty()) {
         inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
-    }
-    else
-    {
+    } else {
         inst.reset(new NullInstance(m_globalSettings, instanceSettings, instanceRoot));
     }
     qDebug() << "Loaded instance " << inst->name() << " from " << inst->instanceRoot();
@@ -787,9 +779,14 @@ class InstanceStaging : public Task {
     Q_OBJECT
     const unsigned minBackoff = 1;
     const unsigned maxBackoff = 16;
+
    public:
     InstanceStaging(InstanceList* parent, InstanceTask* child, QString stagingPath, InstanceName const& instanceName, QString groupName)
-        : m_parent(parent), backoff(minBackoff, maxBackoff), m_stagingPath(std::move(stagingPath)), m_instance_name(std::move(instanceName)), m_groupName(std::move(groupName))
+        : m_parent(parent)
+        , backoff(minBackoff, maxBackoff)
+        , m_stagingPath(std::move(stagingPath))
+        , m_instance_name(std::move(instanceName))
+        , m_groupName(std::move(groupName))
     {
         m_child.reset(child);
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
@@ -815,10 +812,7 @@ class InstanceStaging : public Task {
 
         return Task::abort();
     }
-    bool canAbort() const override
-    {
-        return (m_child && m_child->canAbort());
-    }
+    bool canAbort() const override { return (m_child && m_child->canAbort()); }
 
    protected:
     virtual void executeTask() override { m_child->start(); }
@@ -828,8 +822,7 @@ class InstanceStaging : public Task {
     void childSucceded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, *m_child.get()))
-        {
+        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, *m_child.get())) {
             emitSucceeded();
             return;
         }
@@ -847,13 +840,10 @@ class InstanceStaging : public Task {
         emitFailed(reason);
     }
 
-    void childAborted()
-    {
-        emitAborted();
-    }
+    void childAborted() { emitAborted(); }
 
-private:
-    InstanceList * m_parent;
+   private:
+    InstanceList* m_parent;
     /*
      * WHY: the whole reason why this uses an exponential backoff retry scheme is antivirus on Windows.
      * Basically, it starts messing things up while the launcher is extracting/creating instances
@@ -892,7 +882,10 @@ QString InstanceList::getStagedInstancePath()
     return path;
 }
 
-bool InstanceList::commitStagedInstance(const QString& path, InstanceName const& instanceName, const QString& groupName, InstanceTask const& commiting)
+bool InstanceList::commitStagedInstance(const QString& path,
+                                        InstanceName const& instanceName,
+                                        const QString& groupName,
+                                        InstanceTask const& commiting)
 {
     QDir dir;
     QString instID;

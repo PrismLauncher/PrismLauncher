@@ -34,11 +34,10 @@
  */
 
 #include "NotesPage.h"
-#include "ui_NotesPage.h"
 #include <QTabBar>
+#include "ui_NotesPage.h"
 
-NotesPage::NotesPage(BaseInstance *inst, QWidget *parent)
-    : QWidget(parent), ui(new Ui::NotesPage), m_inst(inst)
+NotesPage::NotesPage(BaseInstance* inst, QWidget* parent) : QWidget(parent), ui(new Ui::NotesPage), m_inst(inst)
 {
     ui->setupUi(this);
     ui->noteEditor->setText(m_inst->notes());

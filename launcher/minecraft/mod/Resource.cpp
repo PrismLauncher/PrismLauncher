@@ -1,8 +1,7 @@
 #include "Resource.h"
 
-
-#include <QRegularExpression>
 #include <QFileInfo>
+#include <QRegularExpression>
 
 #include "FileSystem.h"
 
@@ -105,7 +104,6 @@ bool Resource::enable(EnableAction action)
     if (m_type == ResourceType::UNKNOWN || m_type == ResourceType::FOLDER)
         return false;
 
-
     QString path = m_file_info.absoluteFilePath();
     QFile file(path);
 
@@ -154,7 +152,7 @@ bool Resource::destroy(bool attemptTrash)
     return (attemptTrash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
 }
 
-bool Resource::isSymLinkUnder(const QString& instPath) const 
+bool Resource::isSymLinkUnder(const QString& instPath) const
 {
     if (isSymLink())
         return true;
@@ -167,7 +165,7 @@ bool Resource::isSymLinkUnder(const QString& instPath) const
     return relAbsPath != relCanonPath;
 }
 
-bool Resource::isMoreThanOneHardLink() const 
+bool Resource::isMoreThanOneHardLink() const
 {
     return FS::hardLinkCount(m_file_info.absoluteFilePath()) > 1;
 }

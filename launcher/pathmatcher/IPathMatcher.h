@@ -1,13 +1,12 @@
 #pragma once
-#include <memory>
 #include <QString>
+#include <memory>
 
-class IPathMatcher
-{
-public:
+class IPathMatcher {
+   public:
     typedef std::shared_ptr<IPathMatcher> Ptr;
 
-public:
+   public:
     virtual ~IPathMatcher(){};
-    virtual bool matches(const QString &string) const = 0;
+    virtual bool matches(const QString& string) const = 0;
 };

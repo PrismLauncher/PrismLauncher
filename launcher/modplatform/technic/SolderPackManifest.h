@@ -18,9 +18,9 @@
 
 #pragma once
 
+#include <QJsonObject>
 #include <QString>
 #include <QVector>
-#include <QJsonObject>
 
 namespace TechnicSolder {
 
@@ -46,4 +46,4 @@ struct PackBuild {
 
 void loadPackBuild(PackBuild& v, QJsonObject& obj);
 
-}
+}  // namespace TechnicSolder

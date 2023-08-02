@@ -36,17 +36,16 @@
 
 #pragma once
 
+#include <QIODevice>
 #include <QString>
 #include <QVariant>
-#include <QIODevice>
 
-#include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonDocument>
 
 // Sectionless INI parser (for instance config files)
-class INIFile : public QMap<QString, QVariant>
-{
-public:
+class INIFile : public QMap<QString, QVariant> {
+   public:
     explicit INIFile();
 
     bool loadFile(QString fileName);

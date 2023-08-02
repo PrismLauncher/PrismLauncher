@@ -36,23 +36,20 @@
 
 #include "LanguagePage.h"
 
-#include "ui/widgets/LanguageSelectionWidget.h"
 #include <QVBoxLayout>
+#include "ui/widgets/LanguageSelectionWidget.h"
 
-LanguagePage::LanguagePage(QWidget* parent) :
-    QWidget(parent)
+LanguagePage::LanguagePage(QWidget* parent) : QWidget(parent)
 {
     setObjectName(QStringLiteral("languagePage"));
     auto layout = new QVBoxLayout(this);
     mainWidget = new LanguageSelectionWidget(this);
-    layout->setContentsMargins(0,0,0,0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(mainWidget);
     retranslate();
 }
 
-LanguagePage::~LanguagePage()
-{
-}
+LanguagePage::~LanguagePage() {}
 
 bool LanguagePage::apply()
 {

@@ -46,10 +46,7 @@
 
 #include <QMessageBox>
 
-AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent)
-    : QWidget(parent)
-    , ui(new Ui::AtlPage)
-    , dialog(dialog)
+AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::AtlPage), dialog(dialog)
 {
     ui->setupUi(this);
 
@@ -65,8 +62,7 @@ AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent)
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
-    for(int i = 0; i < filterModel->getAvailableSortings().size(); i++)
-    {
+    for (int i = 0; i < filterModel->getAvailableSortings().size(); i++) {
         ui->sortByBox->addItem(filterModel->getAvailableSortings().keys().at(i));
     }
     ui->sortByBox->setCurrentText(filterModel->translateCurrentSorting());
@@ -94,8 +90,7 @@ void AtlPage::retranslate()
 
 void AtlPage::openedImpl()
 {
-    if(!initialized)
-    {
+    if (!initialized) {
         listModel->request();
         initialized = true;
     }
@@ -105,13 +100,11 @@ void AtlPage::openedImpl()
 
 void AtlPage::suggestCurrent()
 {
-    if(!isOpened)
-    {
+    if (!isOpened) {
         return;
     }
 
-    if (selectedVersion.isEmpty())
-    {
+    if (selectedVersion.isEmpty()) {
         dialog->setSuggestedPack();
         return;
     }
@@ -121,10 +114,8 @@ void AtlPage::suggestCurrent()
 
     auto editedLogoName = selected.safeName;
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1.png").arg(selected.safeName.toLower());
-    listModel->getLogo(selected.safeName, url, [this, editedLogoName](QString logo)
-    {
-        dialog->setSuggestedIconFromFile(logo, editedLogoName);
-    });
+    listModel->getLogo(selected.safeName, url,
+                       [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }
 
 void AtlPage::triggerSearch()
@@ -142,10 +133,8 @@ void AtlPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 {
     ui->versionSelectionBox->clear();
 
-    if(!first.isValid())
-    {
-        if(isOpened)
-        {
+    if (!first.isValid()) {
+        if (isOpened) {
             dialog->setSuggestedPack();
         }
         return;
@@ -155,7 +144,7 @@ void AtlPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
     ui->packDescription->setHtml(selected.description.replace("\n", "<br>"));
 
-    for(const auto& version : selected.versions) {
+    for (const auto& version : selected.versions) {
         ui->versionSelectionBox->addItem(version.version);
     }
 
@@ -164,8 +153,7 @@ void AtlPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
 void AtlPage::onVersionSelectionChanged(QString data)
 {
-    if(data.isNull() || data.isEmpty())
-    {
+    if (data.isNull() || data.isEmpty()) {
         selectedVersion = "";
         return;
     }

@@ -18,9 +18,8 @@ unique_qobject_ptr<ModFilterWidget> ModFilterWidget::create(Version default_vers
 
         auto task = filter_widget->versionList()->getLoadTask();
 
-        connect(task.get(), &Task::failed, [filter_widget]{
-            filter_widget->disableVersionButton(VersionButtonID::Major, tr("failed to get version index"));
-        });
+        connect(task.get(), &Task::failed,
+                [filter_widget] { filter_widget->disableVersionButton(VersionButtonID::Major, tr("failed to get version index")); });
         connect(task.get(), &Task::finished, &load_version_list_loop, &QEventLoop::quit);
 
         if (!task->isRunning())
@@ -34,16 +33,15 @@ unique_qobject_ptr<ModFilterWidget> ModFilterWidget::create(Version default_vers
     return unique_qobject_ptr<ModFilterWidget>(filter_widget);
 }
 
-ModFilterWidget::ModFilterWidget(Version def, QWidget* parent)
-    : QTabWidget(parent), m_filter(new Filter()),  ui(new Ui::ModFilterWidget)
+ModFilterWidget::ModFilterWidget(Version def, QWidget* parent) : QTabWidget(parent), m_filter(new Filter()), ui(new Ui::ModFilterWidget)
 {
     ui->setupUi(this);
 
-    m_mcVersion_buttons.addButton(ui->strictVersionButton,   VersionButtonID::Strict);
+    m_mcVersion_buttons.addButton(ui->strictVersionButton, VersionButtonID::Strict);
     ui->strictVersionButton->click();
-    m_mcVersion_buttons.addButton(ui->majorVersionButton,    VersionButtonID::Major);
-    m_mcVersion_buttons.addButton(ui->allVersionsButton,     VersionButtonID::All);
-    //m_mcVersion_buttons.addButton(ui->betweenVersionsButton, VersionButtonID::Between);
+    m_mcVersion_buttons.addButton(ui->majorVersionButton, VersionButtonID::Major);
+    m_mcVersion_buttons.addButton(ui->allVersionsButton, VersionButtonID::All);
+    // m_mcVersion_buttons.addButton(ui->betweenVersionsButton, VersionButtonID::Between);
 
     connect(&m_mcVersion_buttons, SIGNAL(idClicked(int)), this, SLOT(onVersionFilterChanged(int)));
 
@@ -57,25 +55,19 @@ void ModFilterWidget::setInstance(MinecraftInstance* instance)
 {
     m_instance = instance;
 
-    ui->strictVersionButton->setText(
-        tr("Strict match (= %1)").arg(mcVersionStr()));
+    ui->strictVersionButton->setText(tr("Strict match (= %1)").arg(mcVersionStr()));
 
     // we can't do this for snapshots sadly
-    if(mcVersionStr().contains('.'))
-    {
+    if (mcVersionStr().contains('.')) {
         auto mcVersionSplit = mcVersionStr().split(".");
-        ui->majorVersionButton->setText(
-            tr("Major version match (= %1.%2.x)").arg(mcVersionSplit[0], mcVersionSplit[1]));
-    }
-    else
-    {
+        ui->majorVersionButton->setText(tr("Major version match (= %1.%2.x)").arg(mcVersionSplit[0], mcVersionSplit[1]));
+    } else {
         ui->majorVersionButton->setText(tr("Major version match (unsupported)"));
         disableVersionButton(Major);
     }
-    ui->allVersionsButton->setText(
-        tr("Any version"));
-    //ui->betweenVersionsButton->setText(
-    //    tr("Between two versions"));
+    ui->allVersionsButton->setText(tr("Any version"));
+    // ui->betweenVersionsButton->setText(
+    //     tr("Between two versions"));
 }
 
 auto ModFilterWidget::getFilter() -> std::shared_ptr<Filter>
@@ -89,19 +81,19 @@ void ModFilterWidget::disableVersionButton(VersionButtonID id, QString reason)
 {
     QAbstractButton* btn = nullptr;
 
-    switch(id){
-    case(VersionButtonID::Strict):
-        btn = ui->strictVersionButton;
-        break;
-    case(VersionButtonID::Major):
-        btn = ui->majorVersionButton;
-        break;
-    case(VersionButtonID::All):
-        btn = ui->allVersionsButton;
-        break;
-    case(VersionButtonID::Between):
-    default:
-        break;
+    switch (id) {
+        case (VersionButtonID::Strict):
+            btn = ui->strictVersionButton;
+            break;
+        case (VersionButtonID::Major):
+            btn = ui->majorVersionButton;
+            break;
+        case (VersionButtonID::All):
+            btn = ui->allVersionsButton;
+            break;
+        case (VersionButtonID::Between):
+        default:
+            break;
     }
 
     if (btn) {
@@ -113,12 +105,12 @@ void ModFilterWidget::disableVersionButton(VersionButtonID id, QString reason)
 
 void ModFilterWidget::onVersionFilterChanged(int id)
 {
-    //ui->lowerVersionComboBox->setEnabled(id == VersionButtonID::Between);
-    //ui->upperVersionComboBox->setEnabled(id == VersionButtonID::Between);
+    // ui->lowerVersionComboBox->setEnabled(id == VersionButtonID::Between);
+    // ui->upperVersionComboBox->setEnabled(id == VersionButtonID::Between);
 
     int index = 1;
 
-    auto cast_id = (VersionButtonID) id;
+    auto cast_id = (VersionButtonID)id;
     if (cast_id != m_version_id) {
         m_version_id = cast_id;
     } else {
@@ -127,32 +119,32 @@ void ModFilterWidget::onVersionFilterChanged(int id)
 
     m_filter->versions.clear();
 
-    switch(cast_id){
-    case(VersionButtonID::Strict):
-        m_filter->versions.push_front(mcVersion());
-        break;
-    case(VersionButtonID::Major): {
-        auto versionSplit = mcVersionStr().split(".");
+    switch (cast_id) {
+        case (VersionButtonID::Strict):
+            m_filter->versions.push_front(mcVersion());
+            break;
+        case (VersionButtonID::Major): {
+            auto versionSplit = mcVersionStr().split(".");
 
-        auto major_version = QString("%1.%2").arg(versionSplit[0], versionSplit[1]);
-        QString version_str = major_version;
+            auto major_version = QString("%1.%2").arg(versionSplit[0], versionSplit[1]);
+            QString version_str = major_version;
 
-        while (m_version_list->hasVersion(version_str)) {
-            m_filter->versions.emplace_back(version_str);
-            version_str = QString("%1.%2").arg(major_version, QString::number(index++));
+            while (m_version_list->hasVersion(version_str)) {
+                m_filter->versions.emplace_back(version_str);
+                version_str = QString("%1.%2").arg(major_version, QString::number(index++));
+            }
+
+            break;
         }
-
-        break;
-    }
-    case(VersionButtonID::All):
-        // Empty list to avoid enumerating all versions :P
-        break;
-    case(VersionButtonID::Between):
-        // TODO
-        break;
+        case (VersionButtonID::All):
+            // Empty list to avoid enumerating all versions :P
+            break;
+        case (VersionButtonID::Between):
+            // TODO
+            break;
     }
 
-    if(changed())
+    if (changed())
         emit filterChanged();
     else
         emit filterUnchanged();

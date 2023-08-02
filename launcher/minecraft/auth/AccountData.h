@@ -34,11 +34,11 @@
  */
 
 #pragma once
-#include <QString>
-#include <QByteArray>
-#include <QVector>
 #include <katabasis/Bits.h>
+#include <QByteArray>
 #include <QJsonObject>
+#include <QString>
+#include <QVector>
 
 struct Skin {
     QString id;
@@ -71,22 +71,9 @@ struct MinecraftProfile {
     Katabasis::Validity validity = Katabasis::Validity::None;
 };
 
-enum class AccountType {
-    MSA,
-    Mojang,
-    Offline
-};
+enum class AccountType { MSA, Mojang, Offline };
 
-enum class AccountState {
-    Unchecked,
-    Offline,
-    Working,
-    Online,
-    Disabled,
-    Errored,
-    Expired,
-    Gone
-};
+enum class AccountState { Unchecked, Offline, Working, Online, Disabled, Errored, Expired, Gone };
 
 struct AccountData {
     QJsonObject saveState() const;

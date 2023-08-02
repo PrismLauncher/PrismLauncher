@@ -20,16 +20,12 @@
 
 #include <launch/LaunchStep.h>
 
-class QuitAfterGameStop: public LaunchStep
-{
+class QuitAfterGameStop : public LaunchStep {
     Q_OBJECT
-public:
-    explicit QuitAfterGameStop(LaunchTask *parent) :LaunchStep(parent){};
-    virtual ~QuitAfterGameStop() {};
+   public:
+    explicit QuitAfterGameStop(LaunchTask* parent) : LaunchStep(parent){};
+    virtual ~QuitAfterGameStop(){};
 
     virtual void executeTask();
-    virtual bool canAbort() const
-    {
-        return false;
-    }
+    virtual bool canAbort() const { return false; }
 };

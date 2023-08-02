@@ -1,17 +1,15 @@
 #pragma once
-#include <QMap>
-#include <QString>
-#include <QSet>
 #include <QDateTime>
+#include <QMap>
+#include <QSet>
+#include <QString>
 
-struct FMLlib
-{
+struct FMLlib {
     QString filename;
     QString checksum;
 };
 
-struct VersionFilterData
-{
+struct VersionFilterData {
     VersionFilterData();
     // mapping between minecraft versions and FML libraries required
     QMap<QString, QList<FMLlib>> fmlLibsMapping;

@@ -125,8 +125,9 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
 
     // Get rid of old entries, to prevent cache problems
     auto current_time = QDateTime::currentSecsSinceEpoch();
-    if (entry->isExpired(current_time - ( file_last_changed / 1000 ))) {
-        qCWarning(taskNetLogC) << "[HttpMetaCache]" << "Removing cache entry because of old age!";
+    if (entry->isExpired(current_time - (file_last_changed / 1000))) {
+        qCWarning(taskNetLogC) << "[HttpMetaCache]"
+                               << "Removing cache entry because of old age!";
         selected_base.entry_list.remove(resource_path);
         return staleEntry(base, resource_path);
     }

@@ -37,8 +37,8 @@
 #include "PrivatePackManager.h"
 
 #include <QDomDocument>
-#include "BuildConfig.h"
 #include "Application.h"
+#include "BuildConfig.h"
 
 namespace LegacyFTB {
 
