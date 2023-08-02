@@ -26,6 +26,24 @@
 #include <windows.h>
 #include <iostream>
 
+void RedirectHandle(DWORD handle, FILE* stream, const char* mode ) {
+
+    HANDLE stdHandle = GetStdHandle(handle);
+    if (stdHandle != INVALID_HANDLE_VALUE) {
+        int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
+        if (fileDescriptor != -1) {
+            FILE* file = _fdopen(fileDescriptor, mode);
+            if (file != NULL) {
+                int dup2Result = _dup2(_fileno(file), _fileno(stream));
+                if (dup2Result == 0) {
+                    setvbuf(stream, NULL, _IONBF, 0);
+                }
+            }
+        }
+    }
+
+}
+
 // taken from https://stackoverflow.com/a/25927081
 // getting a proper output to console with redirection support on windows is apparently hell
 void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr)
@@ -52,53 +70,17 @@ void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr
 
     // Redirect unbuffered stdin from the current standard input handle
     if (bindStdIn) {
-        HANDLE stdHandle = GetStdHandle(STD_INPUT_HANDLE);
-        if (stdHandle != INVALID_HANDLE_VALUE) {
-            int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
-            if (fileDescriptor != -1) {
-                FILE* file = _fdopen(fileDescriptor, "r");
-                if (file != NULL) {
-                    int dup2Result = _dup2(_fileno(file), _fileno(stdin));
-                    if (dup2Result == 0) {
-                        setvbuf(stdin, NULL, _IONBF, 0);
-                    }
-                }
-            }
-        }
+        RedirectHandle(STD_INPUT_HANDLE, stdin, "r");
     }
 
     // Redirect unbuffered stdout to the current standard output handle
     if (bindStdOut) {
-        HANDLE stdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (stdHandle != INVALID_HANDLE_VALUE) {
-            int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
-            if (fileDescriptor != -1) {
-                FILE* file = _fdopen(fileDescriptor, "w");
-                if (file != NULL) {
-                    int dup2Result = _dup2(_fileno(file), _fileno(stdout));
-                    if (dup2Result == 0) {
-                        setvbuf(stdout, NULL, _IONBF, 0);
-                    }
-                }
-            }
-        }
+        RedirectHandle(STD_OUTPUT_HANDLE, stdout, "w");
     }
 
     // Redirect unbuffered stderr to the current standard error handle
     if (bindStdErr) {
-        HANDLE stdHandle = GetStdHandle(STD_ERROR_HANDLE);
-        if (stdHandle != INVALID_HANDLE_VALUE) {
-            int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
-            if (fileDescriptor != -1) {
-                FILE* file = _fdopen(fileDescriptor, "w");
-                if (file != NULL) {
-                    int dup2Result = _dup2(_fileno(file), _fileno(stderr));
-                    if (dup2Result == 0) {
-                        setvbuf(stderr, NULL, _IONBF, 0);
-                    }
-                }
-            }
-        }
+        RedirectHandle(STD_ERROR_HANDLE, stderr, "w");
     }
 
     // Clear the error state for each of the C++ standard stream objects. We need to do this, as attempts to access the
@@ -121,13 +103,29 @@ void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr
 
 
 bool AttachWindowsConsole() {
-    auto stdout_type = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
-    if (stdout_type == FILE_TYPE_CHAR || stdout_type == FILE_TYPE_UNKNOWN) {
-        if (AttachConsole(ATTACH_PARENT_PROCESS)) {
-            BindCrtHandlesToStdHandles(true, true, true);
-            return true;
-        }
+    auto stdinType = GetFileType(GetStdHandle(STD_INPUT_HANDLE));
+    auto stdoutType = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
+    auto stderrType = GetFileType(GetStdHandle(STD_ERROR_HANDLE));
+    
+    bool bindStdIn = false;
+    bool bindStdOut = false;
+    bool bindStdErr = false;
+
+    if (stdinType == FILE_TYPE_CHAR || stdinType == FILE_TYPE_UNKNOWN) {
+        bindStdIn = true;
     }
+    if (stdoutType == FILE_TYPE_CHAR || stdoutType == FILE_TYPE_UNKNOWN) {
+        bindStdOut = true;
+    }
+    if (stderrType == FILE_TYPE_CHAR || stderrType == FILE_TYPE_UNKNOWN) {
+        bindStdErr = true;
+    }
+
+    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+        BindCrtHandlesToStdHandles(bindStdIn, bindStdOut, bindStdErr);
+        return true;
+    }
+
     return false;
 }
 
