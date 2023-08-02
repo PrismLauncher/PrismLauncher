@@ -34,6 +34,8 @@
  */
 
 #include "AccountData.h"
+#include "BuildConfig.h"
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -350,6 +352,8 @@ bool AccountData::resumeStateFromV3(QJsonObject data) {
         type = AccountType::MSA;
     } else if (typeS == "Mojang") {
         type = AccountType::Mojang;
+    } else if (typeS == "CustomYggdrasil") {
+        type = AccountType::CustomYggdrasil;
     } else if (typeS == "Offline") {
         type = AccountType::Offline;
     } else {
@@ -360,6 +364,13 @@ bool AccountData::resumeStateFromV3(QJsonObject data) {
     if(type == AccountType::Mojang) {
         legacy = data.value("legacy").toBool(false);
         canMigrateToMSA = data.value("canMigrateToMSA").toBool(false);
+    }
+
+    if(type == AccountType::CustomYggdrasil) {
+        customAuthServerUrl = data.value("customAuthServerUrl").toString();
+        customAccountServerUrl = data.value("customAccountServerUrl").toString();
+        customSessionServerUrl = data.value("customSessionServerUrl").toString();
+        customServicesServerUrl = data.value("customServicesServerUrl").toString();
     }
 
     if(type == AccountType::MSA) {
@@ -410,6 +421,13 @@ QJsonObject AccountData::saveState() const {
         tokenToJSONV3(output, xboxApiToken, "xrp-main");
         tokenToJSONV3(output, mojangservicesToken, "xrp-mc");
     }
+    else if (type == AccountType::CustomYggdrasil) {
+        output["type"] = "CustomYggdrasil";
+        output["customAuthServerUrl"] = customAuthServerUrl;
+        output["customAccountServerUrl"] = customAccountServerUrl;
+        output["customSessionServerUrl"] = customSessionServerUrl;
+        output["customServicesServerUrl"] = customServicesServerUrl;
+    }
     else if (type == AccountType::Offline) {
         output["type"] = "Offline";
     }
@@ -418,6 +436,42 @@ QJsonObject AccountData::saveState() const {
     profileToJSONV3(output, minecraftProfile, "profile");
     entitlementToJSONV3(output, minecraftEntitlement);
     return output;
+}
+
+bool AccountData::usesCustomApiServers() const {
+    return type == AccountType::CustomYggdrasil;
+}
+
+QString AccountData::authServerUrl() const {
+    if(usesCustomApiServers()) {
+        return customAuthServerUrl;
+    } else {
+        return BuildConfig.MOJANG_AUTH_BASE;
+    }
+}
+
+QString AccountData::accountServerUrl() const {
+    if(usesCustomApiServers()) {
+        return customAccountServerUrl;
+    } else {
+        return BuildConfig.MOJANG_ACCOUNT_BASE;
+    }
+}
+
+QString AccountData::sessionServerUrl() const {
+    if(usesCustomApiServers()) {
+        return customSessionServerUrl;
+    } else {
+        return BuildConfig.MOJANG_SESSION_BASE;
+    }
+}
+
+QString AccountData::servicesServerUrl() const {
+    if(usesCustomApiServers()) {
+        return customServicesServerUrl;
+    } else {
+        return BuildConfig.MOJANG_SERVICES_BASE;
+    }
 }
 
 QString AccountData::userName() const {
@@ -432,14 +486,14 @@ QString AccountData::accessToken() const {
 }
 
 QString AccountData::clientToken() const {
-    if(type != AccountType::Mojang) {
+    if(type != AccountType::Mojang && type != AccountType::CustomYggdrasil) {
         return QString();
     }
     return yggdrasilToken.extra["clientToken"].toString();
 }
 
 void AccountData::setClientToken(QString clientToken) {
-    if(type != AccountType::Mojang) {
+    if(type != AccountType::Mojang && type != AccountType::CustomYggdrasil) {
         return;
     }
     yggdrasilToken.extra["clientToken"] = clientToken;
@@ -453,7 +507,7 @@ void AccountData::generateClientTokenIfMissing() {
 }
 
 void AccountData::invalidateClientToken() {
-    if(type != AccountType::Mojang) {
+    if(type != AccountType::Mojang && type != AccountType::CustomYggdrasil) {
         return;
     }
     yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{-}]"));
@@ -474,7 +528,8 @@ QString AccountData::profileName() const {
 
 QString AccountData::accountDisplayString() const {
     switch(type) {
-        case AccountType::Mojang: {
+        case AccountType::Mojang:
+        case AccountType::CustomYggdrasil: {
             return userName();
         }
         case AccountType::Offline: {

@@ -122,19 +122,23 @@ void AccountList::addAccount(const MinecraftAccountPtr account)
 
     // override/replace existing account with the same profileId
     auto profileId = account->profileId();
-    if(profileId.size()) {
-        auto existingAccount = findAccountByProfileId(profileId);
-        if(existingAccount != -1) {
+    if(profileId.size() && account->isMojangOrMSA()) {
+        auto iter = std::find_if(m_accounts.constBegin(), m_accounts.constEnd(), [&](const MinecraftAccountPtr & existing) {
+            return existing->profileId() == profileId && existing->isMojangOrMSA();
+        });
+
+        if(iter != m_accounts.constEnd()) {
             qDebug() << "Replacing old account with a new one with the same profile ID!";
 
-            MinecraftAccountPtr existingAccountPtr = m_accounts[existingAccount];
-            m_accounts[existingAccount] = account;
-            if(m_defaultAccount == existingAccountPtr) {
+            MinecraftAccountPtr existingAccount = *iter;
+            const auto existingAccountIndex = std::distance(m_accounts.constBegin(), iter);
+            m_accounts[existingAccountIndex] = account;
+            if(m_defaultAccount == existingAccount) {
                 m_defaultAccount = account;
             }
             // disconnect notifications for changes in the account being replaced
-            existingAccountPtr->disconnect(this);
-            emit dataChanged(index(existingAccount), index(existingAccount, columnCount(QModelIndex()) - 1));
+            existingAccount->disconnect(this);
+            emit dataChanged(index(existingAccountIndex), index(existingAccountIndex, columnCount(QModelIndex()) - 1));
             onListChanged();
             return;
         }
@@ -297,9 +301,7 @@ QVariant AccountList::data(const QModelIndex &index, int role) const
                 return account->accountDisplayString();
 
             case TypeColumn: {
-                auto typeStr = account->typeString();
-                typeStr[0] = typeStr[0].toUpper();
-                return typeStr;
+                return account->typeDisplayName();
             }
 
             case StatusColumn: {
@@ -531,9 +533,6 @@ bool AccountList::loadV2(QJsonObject& root) {
             if(!profileId.size()) {
                 continue;
             }
-            if(findAccountByProfileId(profileId) != -1) {
-                continue;
-            }
             connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
             connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
             m_accounts.append(account);
@@ -559,12 +558,6 @@ bool AccountList::loadV3(QJsonObject& root) {
         MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV3(accountObj);
         if (account.get() != nullptr)
         {
-            auto profileId = account->profileId();
-            if(profileId.size()) {
-                if(findAccountByProfileId(profileId) != -1) {
-                    continue;
-                }
-            }
             connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
             connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
             m_accounts.append(account);

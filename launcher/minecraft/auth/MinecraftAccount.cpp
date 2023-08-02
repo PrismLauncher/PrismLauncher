@@ -41,7 +41,6 @@
 #include <QUuid>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QRegularExpression>
 #include <QStringList>
 #include <QJsonDocument>
 
@@ -51,10 +50,11 @@
 
 #include "flows/MSA.h"
 #include "flows/Mojang.h"
+#include "flows/CustomYggdrasil.h"
 #include "flows/Offline.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent) {
-    data.internalId = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    data.internalId = QUuid::createUuid().toString(QUuid::Id128);
 }
 
 
@@ -79,7 +79,29 @@ MinecraftAccountPtr MinecraftAccount::createFromUsername(const QString &username
     auto account = makeShared<MinecraftAccount>();
     account->data.type = AccountType::Mojang;
     account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
+    return account;
+}
+
+MinecraftAccountPtr MinecraftAccount::createFromUsernameCustomYggdrasil(
+    const QString &username,
+    const QString &customAuthServerUrl,
+    const QString &customAccountServerUrl,
+    const QString &customSessionServerUrl,
+    const QString &customServicesServerUrl
+)
+{
+    auto account = makeShared<MinecraftAccount>();
+    account->data.type = AccountType::CustomYggdrasil;
+    account->data.yggdrasilToken.extra["userName"] = username;
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
+    account->data.minecraftEntitlement.ownsMinecraft = true;
+    account->data.minecraftEntitlement.canPlayMinecraft = true;
+
+    account->data.customAuthServerUrl = customAuthServerUrl;
+    account->data.customAccountServerUrl = customAccountServerUrl;
+    account->data.customSessionServerUrl = customSessionServerUrl;
+    account->data.customServicesServerUrl = customServicesServerUrl;
     return account;
 }
 
@@ -98,10 +120,10 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString &username)
     account->data.yggdrasilToken.validity = Katabasis::Validity::Certain;
     account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
     account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
     account->data.minecraftEntitlement.ownsMinecraft = true;
     account->data.minecraftEntitlement.canPlayMinecraft = true;
-    account->data.minecraftProfile.id = uuidFromUsername(username).toString().remove(QRegularExpression("[{}-]"));
+    account->data.minecraftProfile.id = uuidFromUsername(username).toString(QUuid::Id128);
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Katabasis::Validity::Certain;
     return account;
@@ -141,6 +163,17 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::login(QString password) {
     return m_currentTask;
 }
 
+shared_qobject_ptr<AccountTask> MinecraftAccount::loginCustomYggdrasil(QString password) {
+    Q_ASSERT(m_currentTask.get() == nullptr);
+
+    m_currentTask.reset(new CustomYggdrasilLogin(&data, password));
+    connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
+    connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
+    connect(m_currentTask.get(), &Task::aborted, this, [this]{ authFailed(tr("Aborted")); });
+    emit activityChanged(true);
+    return m_currentTask;
+}
+
 shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA() {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
@@ -173,6 +206,9 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh() {
     }
     else if(data.type == AccountType::Offline) {
         m_currentTask.reset(new OfflineRefresh(&data));
+    }
+    else if (data.type == AccountType::CustomYggdrasil) {
+        m_currentTask.reset(new CustomYggdrasilRefresh(&data));
     }
     else {
         m_currentTask.reset(new MojangRefresh(&data));
@@ -311,6 +347,13 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     {
         session->session = "-";
     }
+
+    // API URLs
+    session->auth_server_url = data.authServerUrl();
+    session->account_server_url = data.accountServerUrl();
+    session->session_server_url = data.sessionServerUrl();
+    session->services_server_url = data.servicesServerUrl();
+    session->uses_custom_api_servers = data.usesCustomApiServers();
 }
 
 void MinecraftAccount::decrementUses()

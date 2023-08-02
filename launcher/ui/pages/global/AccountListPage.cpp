@@ -47,6 +47,7 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/LoginDialog.h"
+#include "ui/dialogs/CustomYggdrasilLoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/SkinUploadDialog.h"
@@ -146,6 +147,39 @@ void AccountListPage::on_actionAddMojang_triggered()
     MinecraftAccountPtr account = LoginDialog::newAccount(
         this,
         tr("Please enter your Mojang account email and password to add your account.")
+    );
+
+    if (account)
+    {
+        m_accounts->addAccount(account);
+        if (m_accounts->count() == 1) {
+            m_accounts->setDefaultAccount(account);
+        }
+    }
+}
+
+void AccountListPage::on_actionAddCustomYggdrasil_triggered()
+{
+    if (!m_accounts->anyAccountIsValid()) {
+        QMessageBox::warning(
+            this,
+            tr("Error"),
+            tr(
+                "You must add a Microsoft or Mojang account that owns Minecraft before you can add an account on a custom authentication server."
+                "<br><br>"
+                "If you have lost your account you can contact Microsoft for support."
+            )
+        );
+        return;
+    }
+
+    MinecraftAccountPtr account = CustomYggdrasilLoginDialog::newAccount(
+        this,
+        tr(
+            "Please enter your username (sometimes an email address), password, and the URLs of your API servers."
+            "<br><br>"
+            "<b>Caution!</b> Your username and password will be sent to the authentication server you specify!"
+        )
     );
 
     if (account)
@@ -289,7 +323,7 @@ void AccountListPage::on_actionDeleteSkin_triggered()
     QModelIndex selected = selection.first();
     MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
     ProgressDialog prog(this);
-    auto deleteSkinTask = std::make_shared<SkinDelete>(this, account->accessToken());
+    auto deleteSkinTask = std::make_shared<SkinDelete>(this, account);
     if (prog.execWithTask((Task*)deleteSkinTask.get()) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Delete"), tr("Failed to delete current skin!"), QMessageBox::Warning)->exec();
         return;
