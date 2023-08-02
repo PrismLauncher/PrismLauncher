@@ -281,7 +281,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        QDir foo;
+        if (DesktopServices::isSnap())
+        {
+            foo = QDir(getenv("SNAP_USER_COMMON"));
+        }
+        else
+        {
+            foo = QDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        }
+        
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
 
@@ -628,9 +637,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
 
-        // Minecraft launch method
-        m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
-
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
 
@@ -704,7 +710,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
 
             // get rid of invalid meta urls
-            if (!metaUrl.isValid() || metaUrl.scheme() != "http" || metaUrl.scheme() != "https")
+            if (!metaUrl.isValid() || (metaUrl.scheme() != "http" && metaUrl.scheme() != "https"))
                 m_settings->reset("MetaURLOverride");
         }
 
