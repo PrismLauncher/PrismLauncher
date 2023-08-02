@@ -58,9 +58,7 @@ static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &he
     while (true)
     {
         QTextLine line = textLayout.createLine();
-        if (!line.isValid())
-            break;
-        if (line.textLength() == 0)
+        if (!line.isValid() || line.textLength() == 0)
             break;
         line.setLineWidth(lineWidth);
         line.setPosition(QPointF(0, height));
