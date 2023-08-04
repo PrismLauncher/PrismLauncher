@@ -136,6 +136,15 @@ set(NET_SOURCES
     net/Validator.h
     net/Upload.cpp
     net/Upload.h
+    net/HeaderProxy.h
+    net/RawHeaderProxy.h
+    net/ApiHeaderProxy.h
+    net/ApiDownload.h
+    net/ApiDownload.cpp
+    net/ApiUpload.cpp
+    net/ApiUpload.h
+    net/NetRequest.cpp
+    net/NetRequest.h
 )
 
 # Game launch logic
@@ -1111,6 +1120,7 @@ endif()
 
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Launcher_logic
     systeminfo

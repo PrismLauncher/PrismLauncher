@@ -38,26 +38,62 @@
 
 #pragma once
 
-#include "HttpMetaCache.h"
+#include <qloggingcategory.h>
+#include <chrono>
+
+#include "NetAction.h"
+#include "Sink.h"
+#include "Validator.h"
 
 #include "QObjectPtr.h"
-#include "net/NetRequest.h"
+#include "net/Logging.h"
 
 namespace Net {
-class Download : public NetRequest {
+class NetRequest : public NetAction {
     Q_OBJECT
+   protected:
+    explicit NetRequest() : NetAction(){};
+
    public:
-    using Ptr = shared_qobject_ptr<class Download>;
-    explicit Download() : NetRequest() { logCat = taskDownloadLogC; }
+    using Ptr = shared_qobject_ptr<class NetRequest>;
+    enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2 };
+    Q_DECLARE_FLAGS(Options, Option)
 
-#if defined(LAUNCHER_APPLICATION)
-    static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
-#endif
+   public:
+    ~NetRequest() override = default;
 
-    static auto makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options = Option::NoOptions) -> Download::Ptr;
-    static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
+    void init() override{};
+
+   public:
+    void addValidator(Validator* v);
+    auto abort() -> bool override;
+    auto canAbort() const -> bool override { return true; }
+
+   private:
+    auto handleRedirect() -> bool;
+    virtual QNetworkReply* getReply(QNetworkRequest&) = 0;
+
+   protected slots:
+    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
+    void downloadError(QNetworkReply::NetworkError error) override;
+    void sslErrors(const QList<QSslError>& errors) override;
+    void downloadFinished() override;
+    void downloadReadyRead() override;
+
+   public slots:
+    void executeTask() override;
 
    protected:
-    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    std::unique_ptr<Sink> m_sink;
+    Options m_options;
+
+    typedef const QLoggingCategory& (*logCatFunc)();
+    logCatFunc logCat = taskUploadLogC;
+
+    std::chrono::steady_clock m_clock;
+    std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;
+    qint64 m_last_progress_bytes;
 };
 }  // namespace Net
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(Net::NetRequest::Options)
