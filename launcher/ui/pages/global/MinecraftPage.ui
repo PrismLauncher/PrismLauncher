@@ -39,7 +39,7 @@
      </property>
      <widget class="QWidget" name="minecraftTab">
       <attribute name="title">
-       <string notr="true">General</string>
+       <string>General</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>

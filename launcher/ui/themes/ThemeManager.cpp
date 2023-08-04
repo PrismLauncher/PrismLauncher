@@ -21,7 +21,10 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QIcon>
+#include <QImageReader>
+#include "Exception.h"
 #include "ui/themes/BrightTheme.h"
+#include "ui/themes/CatPack.h"
 #include "ui/themes/CustomTheme.h"
 #include "ui/themes/DarkTheme.h"
 #include "ui/themes/SystemTheme.h"
@@ -32,6 +35,7 @@ ThemeManager::ThemeManager(MainWindow* mainWindow)
 {
     m_mainWindow = mainWindow;
     initializeThemes();
+    initializeCatPacks();
 }
 
 /// @brief Adds the Theme to the list of themes
@@ -40,7 +44,10 @@ ThemeManager::ThemeManager(MainWindow* mainWindow)
 QString ThemeManager::addTheme(std::unique_ptr<ITheme> theme)
 {
     QString id = theme->id();
-    m_themes.emplace(id, std::move(theme));
+    if (m_themes.find(id) == m_themes.end())
+        m_themes.emplace(id, std::move(theme));
+    else
+        themeWarningLog() << "Theme(" << id << ") not added to prevent id duplication";
     return id;
 }
 
@@ -77,7 +84,7 @@ void ThemeManager::initializeThemes()
         QString themeFolder = QDir("./themes/").absoluteFilePath("");
         themeDebugLog() << "Theme Folder Path: " << themeFolder;
 
-        QDirIterator directoryIterator(themeFolder, QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        QDirIterator directoryIterator(themeFolder, QDir::Dirs | QDir::NoDotAndDotDot);
         while (directoryIterator.hasNext()) {
             QDir dir(directoryIterator.next());
             QFileInfo themeJson(dir.absoluteFilePath("theme.json"));
@@ -111,6 +118,16 @@ QList<ITheme*> ThemeManager::getValidApplicationThemes()
     return ret;
 }
 
+QList<CatPack*> ThemeManager::getValidCatPacks()
+{
+    QList<CatPack*> ret;
+    ret.reserve(m_catPacks.size());
+    for (auto&& [id, theme] : m_catPacks) {
+        ret.append(theme.get());
+    }
+    return ret;
+}
+
 void ThemeManager::setIconTheme(const QString& name)
 {
     QIcon::setThemeName(name);
@@ -137,19 +154,74 @@ void ThemeManager::setApplicationTheme(const QString& name, bool initial)
     }
 }
 
-QString ThemeManager::getCatImage(QString catName)
+QString ThemeManager::getCatPack(QString catName)
 {
-    QDateTime now = QDateTime::currentDateTime();
-    QDateTime birthday(QDate(now.date().year(), 11, 30), QTime(0, 0));
-    QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-    QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
-    QString cat = !catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString();
-    if (std::abs(now.daysTo(xmas)) <= 4) {
-        cat += "-xmas";
-    } else if (std::abs(now.daysTo(halloween)) <= 4) {
-        cat += "-spooky";
-    } else if (std::abs(now.daysTo(birthday)) <= 12) {
-        cat += "-bday";
+    auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
+    if (catIter != m_catPacks.end()) {
+        auto& catPack = catIter->second;
+        themeDebugLog() << "applying catpack" << catPack->id();
+        return catPack->path();
+    } else {
+        themeWarningLog() << "Tried to get invalid catPack:" << catName;
     }
-    return cat;
+
+    return m_catPacks.begin()->second->path();
+}
+
+QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
+{
+    QString id = catPack->id();
+    if (m_catPacks.find(id) == m_catPacks.end())
+        m_catPacks.emplace(id, std::move(catPack));
+    else
+        themeWarningLog() << "CatPack(" << id << ") not added to prevent id duplication";
+    return id;
+}
+
+void ThemeManager::initializeCatPacks()
+{
+    QList<std::pair<QString, QString>> defaultCats{ { "kitteh", QObject::tr("Background Cat (from MultiMC)") },
+                                                    { "rory", QObject::tr("Rory ID 11 (drawn by Ashtaka)") },
+                                                    { "rory-flat", QObject::tr("Rory ID 11 (flat edition, drawn by Ashtaka)") },
+                                                    { "teawie", QObject::tr("Teawie (drawn by SympathyTea)") } };
+    for (auto [id, name] : defaultCats) {
+        addCatPack(std::unique_ptr<CatPack>(new BasicCatPack(id, name)));
+    }
+    QDir catpacksDir("catpacks");
+    QString catpacksFolder = catpacksDir.absoluteFilePath("");
+    themeDebugLog() << "CatPacks Folder Path:" << catpacksFolder;
+
+    QStringList supportedImageFormats;
+    for (auto format : QImageReader::supportedImageFormats()) {
+        supportedImageFormats.append("*." + format);
+    }
+    auto loadFiles = [this, supportedImageFormats](QDir dir) {
+        // Load image files directly
+        QDirIterator ImageFileIterator(dir.absoluteFilePath(""), supportedImageFormats, QDir::Files);
+        while (ImageFileIterator.hasNext()) {
+            QFile customCatFile(ImageFileIterator.next());
+            QFileInfo customCatFileInfo(customCatFile);
+            themeDebugLog() << "Loading CatPack from:" << customCatFileInfo.absoluteFilePath();
+            addCatPack(std::unique_ptr<CatPack>(new FileCatPack(customCatFileInfo)));
+        }
+    };
+
+    loadFiles(catpacksDir);
+
+    QDirIterator directoryIterator(catpacksFolder, QDir::Dirs | QDir::NoDotAndDotDot);
+    while (directoryIterator.hasNext()) {
+        QDir dir(directoryIterator.next());
+        QFileInfo manifest(dir.absoluteFilePath("catpack.json"));
+        if (manifest.isFile()) {
+            try {
+                // Load background manifest
+                themeDebugLog() << "Loading background manifest from:" << manifest.absoluteFilePath();
+                addCatPack(std::unique_ptr<CatPack>(new JsonCatPack(manifest)));
+            } catch (const Exception& e) {
+                themeWarningLog() << "Couldn't load catpack json:" << e.cause();
+            }
+        } else {
+            loadFiles(dir);
+        }
+    }
 }

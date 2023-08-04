@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2023 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,23 +35,57 @@
 
 #pragma once
 
+#include <QDate>
+#include <QFileInfo>
+#include <QList>
 #include <QString>
-#include <QVariant>
-#include <QIODevice>
 
-#include <QJsonDocument>
-#include <QJsonArray>
+class CatPack {
+   public:
+    virtual ~CatPack() {}
+    virtual QString id() = 0;
+    virtual QString name() = 0;
+    virtual QString path() = 0;
+};
 
-// Sectionless INI parser (for instance config files)
-class INIFile : public QMap<QString, QVariant>
-{
-public:
-    explicit INIFile();
+class BasicCatPack : public CatPack {
+   public:
+    BasicCatPack(QString id, QString name) : m_id(id), m_name(name) {}
+    BasicCatPack(QString id) : BasicCatPack(id, id) {}
+    virtual QString id() { return m_id; };
+    virtual QString name() { return m_name; };
+    virtual QString path();
 
-    bool loadFile(QString fileName);
-    bool loadFile(QByteArray data);
-    bool saveFile(QString fileName);
+   protected:
+    QString m_id;
+    QString m_name;
+};
 
-    QVariant get(QString key, QVariant def) const;
-    void set(QString key, QVariant val);
+class FileCatPack : public BasicCatPack {
+   public:
+    FileCatPack(QString id, QFileInfo& fileInfo) : BasicCatPack(id), m_path(fileInfo.absoluteFilePath()) {}
+    FileCatPack(QFileInfo& fileInfo) : FileCatPack(fileInfo.baseName(), fileInfo) {}
+    virtual QString path() { return m_path; }
+
+   private:
+    QString m_path;
+};
+
+class JsonCatPack : public BasicCatPack {
+   public:
+    struct PartialDate {
+        int month;
+        int day;
+    };
+    struct Variant {
+        QString path;
+        PartialDate startTime;
+        PartialDate endTime;
+    };
+    JsonCatPack(QFileInfo& manifestInfo);
+    virtual QString path();
+
+   private:
+    QString m_defaultPath;
+    QList<Variant> m_variants;
 };

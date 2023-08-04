@@ -131,7 +131,7 @@
 #include "MangoHud.h"
 #endif
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
 #endif
 
@@ -281,7 +281,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        QDir foo;
+        if (DesktopServices::isSnap())
+        {
+            foo = QDir(getenv("SNAP_USER_COMMON"));
+        }
+        else
+        {
+            foo = QDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        }
+        
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
 
@@ -631,9 +640,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
 
-        // Minecraft launch method
-        m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
-
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
 
@@ -707,7 +713,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
 
             // get rid of invalid meta urls
-            if (!metaUrl.isValid() || metaUrl.scheme() != "http" || metaUrl.scheme() != "https")
+            if (!metaUrl.isValid() || (metaUrl.scheme() != "http" && metaUrl.scheme() != "https"))
                 m_settings->reset("MetaURLOverride");
         }
 
@@ -779,7 +785,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     if(BuildConfig.UPDATER_ENABLED)
     {
         qDebug() << "Initializing updater";
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
         m_updater.reset(new MacSparkleUpdater());
 #endif
         qDebug() << "<> Updater started.";
@@ -1189,7 +1195,17 @@ QIcon Application::getThemedIcon(const QString& name)
     return QIcon::fromTheme(name);
 }
 
-bool Application::openJsonEditor(const QString &filename)
+QList<CatPack*> Application::getValidCatPacks()
+{
+    return m_themeManager->getValidCatPacks();
+}
+
+QString Application::getCatPack(QString catName)
+{
+    return m_themeManager->getCatPack(catName);
+}
+
+bool Application::openJsonEditor(const QString& filename)
 {
     const QString file = QDir::current().absoluteFilePath(filename);
     if (m_settings->get("JsonEditor").toString().isEmpty())

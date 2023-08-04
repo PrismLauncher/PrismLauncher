@@ -166,8 +166,6 @@ public:
 
 protected:
     QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
-    QStringList validLaunchMethods();
-    QString launchMethod();
 
 protected: // data
     std::shared_ptr<PackProfile> m_components;
