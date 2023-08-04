@@ -133,17 +133,16 @@ bool ModrinthCreationTask::updateInstance()
         }
     } else {
         // We don't have an old index file, so we may duplicate stuff!
-        auto dialog = CustomMessageBox::selectable(m_parent,
-                tr("No index file."),
-                tr("We couldn't find a suitable index file for the older version. This may cause some of the files to be duplicated. Do you want to continue?"),
-                QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
+        auto dialog = CustomMessageBox::selectable(m_parent, tr("No index file."),
+                                                   tr("We couldn't find a suitable index file for the older version. This may cause some "
+                                                      "of the files to be duplicated. Do you want to continue?"),
+                                                   QMessageBox::Warning, QMessageBox::Ok | QMessageBox::Cancel);
 
         if (dialog->exec() == QDialog::DialogCode::Rejected) {
             m_abort = true;
             return false;
         }
     }
-
 
     setOverride(true, inst->id());
     qDebug() << "Will override instance!";
@@ -233,7 +232,8 @@ bool ModrinthCreationTask::createInstance()
         auto file_path = FS::PathCombine(root_modpack_path, file.path);
         if (!root_modpack_url.isParentOf(QUrl::fromLocalFile(file_path))) {
             // This means we somehow got out of the root folder, so abort here to prevent exploits
-            setError(tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.").arg(file.path));
+            setError(tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.")
+                         .arg(file.path));
             return false;
         }
 
@@ -250,7 +250,8 @@ bool ModrinthCreationTask::createInstance()
                 auto ndl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 m_files_job->addNetAction(ndl);
-                if (auto shared = param.lock()) shared->succeeded();
+                if (auto shared = param.lock())
+                    shared->succeeded();
             });
         }
     }
@@ -263,9 +264,9 @@ bool ModrinthCreationTask::createInstance()
         setError(reason);
     });
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) { 
+    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
-        setProgress(current, total); 
+        setProgress(current, total);
     });
     connect(m_files_job.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propagateStepProgress);
 
@@ -293,7 +294,10 @@ bool ModrinthCreationTask::createInstance()
     return ended_well;
 }
 
-bool ModrinthCreationTask::parseManifest(const QString& index_path, std::vector<Modrinth::File>& files, bool set_internal_data, bool show_optional_dialog)
+bool ModrinthCreationTask::parseManifest(const QString& index_path,
+                                         std::vector<Modrinth::File>& files,
+                                         bool set_internal_data,
+                                         bool show_optional_dialog)
 {
     try {
         auto doc = Json::requireDocument(index_path);

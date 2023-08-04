@@ -14,32 +14,20 @@
  */
 
 #pragma once
-#include <QString>
 #include <QDateTime>
 #include <QIcon>
+#include <QString>
 
-enum IconType : unsigned
-{
-    Builtin,
-    Transient,
-    FileBased,
-    ICONS_TOTAL,
-    ToBeDeleted
-};
+enum IconType : unsigned { Builtin, Transient, FileBased, ICONS_TOTAL, ToBeDeleted };
 
-struct MMCImage
-{
+struct MMCImage {
     QIcon icon;
     QString key;
     QString filename;
-    bool present() const
-    {
-        return !icon.isNull() || !key.isEmpty();
-    }
+    bool present() const { return !icon.isNull() || !key.isEmpty(); }
 };
 
-struct MMCIcon
-{
+struct MMCIcon {
     QString m_key;
     QString m_name;
     MMCImage m_images[ICONS_TOTAL];
@@ -51,7 +39,7 @@ struct MMCIcon
     QIcon icon() const;
     void remove(IconType rm_type);
     void replace(IconType new_type, QIcon icon, QString path = QString());
-    void replace(IconType new_type, const QString &key);
+    void replace(IconType new_type, const QString& key);
     bool isBuiltIn() const;
     QString getFilePath() const;
 };

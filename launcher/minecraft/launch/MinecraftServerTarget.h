@@ -23,7 +23,7 @@ struct MinecraftServerTarget {
     QString address;
     quint16 port;
 
-    static MinecraftServerTarget parse(const QString &fullAddress);
+    static MinecraftServerTarget parse(const QString& fullAddress);
 };
 
 typedef std::shared_ptr<MinecraftServerTarget> MinecraftServerTargetPtr;

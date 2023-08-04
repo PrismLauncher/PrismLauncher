@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -43,13 +43,11 @@
 
 class MSAStep : public AuthStep {
     Q_OBJECT
-public:
-    enum Action {
-        Refresh,
-        Login
-    };
-public:
-    explicit MSAStep(AccountData *data, Action action);
+   public:
+    enum Action { Refresh, Login };
+
+   public:
+    explicit MSAStep(AccountData* data, Action action);
     virtual ~MSAStep() noexcept;
 
     void perform() override;
@@ -57,11 +55,11 @@ public:
 
     QString describe() override;
 
-private slots:
+   private slots:
     void onOAuthActivityChanged(Katabasis::Activity activity);
 
-private:
-    Katabasis::DeviceFlow *m_oauth2 = nullptr;
+   private:
+    Katabasis::DeviceFlow* m_oauth2 = nullptr;
     Action m_action;
     QString m_clientId;
 };

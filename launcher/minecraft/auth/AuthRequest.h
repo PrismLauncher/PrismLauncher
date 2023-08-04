@@ -1,27 +1,26 @@
 #pragma once
-#include <QObject>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QNetworkAccessManager>
-#include <QUrl>
 #include <QByteArray>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QObject>
+#include <QUrl>
 
 #include "katabasis/Reply.h"
 
 /// Makes authentication requests.
-class AuthRequest: public QObject {
+class AuthRequest : public QObject {
     Q_OBJECT
 
-public:
-    explicit AuthRequest(QObject *parent = 0);
+   public:
+    explicit AuthRequest(QObject* parent = 0);
     ~AuthRequest();
 
-public slots:
-    void get(const QNetworkRequest &req, int timeout = 60*1000);
-    void post(const QNetworkRequest &req, const QByteArray &data, int timeout = 60*1000);
+   public slots:
+    void get(const QNetworkRequest& req, int timeout = 60 * 1000);
+    void post(const QNetworkRequest& req, const QByteArray& data, int timeout = 60 * 1000);
 
-
-signals:
+   signals:
 
     /// Emitted when a request has been completed or failed.
     void finished(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers);
@@ -29,7 +28,7 @@ signals:
     /// Emitted when an upload has progressed.
     void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
-protected slots:
+   protected slots:
 
     /// Handle request finished.
     void onRequestFinished();
@@ -46,25 +45,23 @@ protected slots:
     /// Handle upload progress.
     void onUploadProgress(qint64 uploaded, qint64 total);
 
-public:
+   public:
     QNetworkReply::NetworkError error_;
     int httpStatus_ = 0;
     QString errorString_;
 
-protected:
-    void setup(const QNetworkRequest &request, QNetworkAccessManager::Operation operation, const QByteArray &verb = QByteArray());
+   protected:
+    void setup(const QNetworkRequest& request, QNetworkAccessManager::Operation operation, const QByteArray& verb = QByteArray());
 
-    enum Status {
-        Idle, Requesting, ReRequesting
-    };
+    enum Status { Idle, Requesting, ReRequesting };
 
     QNetworkRequest request_;
     QByteArray data_;
-    QNetworkReply *reply_;
+    QNetworkReply* reply_;
     Status status_;
     QNetworkAccessManager::Operation operation_;
     QUrl url_;
     Katabasis::ReplyList timedReplies_;
 
-    QTimer *timer_;
+    QTimer* timer_;
 };

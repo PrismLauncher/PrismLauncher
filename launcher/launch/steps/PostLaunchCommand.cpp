@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@
 #include "PostLaunchCommand.h"
 #include <launch/LaunchTask.h>
 
-PostLaunchCommand::PostLaunchCommand(LaunchTask *parent) : LaunchStep(parent)
+PostLaunchCommand::PostLaunchCommand(LaunchTask* parent) : LaunchStep(parent)
 {
     auto instance = m_parent->instance();
     m_command = instance->getPostExitCommand();
@@ -47,7 +47,7 @@ PostLaunchCommand::PostLaunchCommand(LaunchTask *parent) : LaunchStep(parent)
 
 void PostLaunchCommand::executeTask()
 {
-    //FIXME: where to put this?
+    // FIXME: where to put this?
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     auto args = QProcess::splitCommand(m_command);
     m_parent->substituteVariables(args);
@@ -65,31 +65,22 @@ void PostLaunchCommand::executeTask()
 
 void PostLaunchCommand::on_state(LoggedProcess::State state)
 {
-    auto getError = [&]()
-    {
-        return tr("Post-Launch command failed with code %1.\n\n").arg(m_process.exitCode());
-    };
-    switch(state)
-    {
+    auto getError = [&]() { return tr("Post-Launch command failed with code %1.\n\n").arg(m_process.exitCode()); };
+    switch (state) {
         case LoggedProcess::Aborted:
         case LoggedProcess::Crashed:
-        case LoggedProcess::FailedToStart:
-        {
+        case LoggedProcess::FailedToStart: {
             auto error = getError();
             emit logLine(error, MessageLevel::Fatal);
             emitFailed(error);
             return;
         }
-        case LoggedProcess::Finished:
-        {
-            if(m_process.exitCode() != 0)
-            {
+        case LoggedProcess::Finished: {
+            if (m_process.exitCode() != 0) {
                 auto error = getError();
                 emit logLine(error, MessageLevel::Fatal);
                 emitFailed(error);
-            }
-            else
-            {
+            } else {
                 emit logLine(tr("Post-Launch command ran successfully.\n\n"), MessageLevel::Launcher);
                 emitSucceeded();
             }
@@ -99,7 +90,7 @@ void PostLaunchCommand::on_state(LoggedProcess::State state)
     }
 }
 
-void PostLaunchCommand::setWorkingDirectory(const QString &wd)
+void PostLaunchCommand::setWorkingDirectory(const QString& wd)
 {
     m_process.setWorkingDirectory(wd);
 }
@@ -107,8 +98,7 @@ void PostLaunchCommand::setWorkingDirectory(const QString &wd)
 bool PostLaunchCommand::abort()
 {
     auto state = m_process.state();
-    if (state == LoggedProcess::Running || state == LoggedProcess::Starting)
-    {
+    if (state == LoggedProcess::Running || state == LoggedProcess::Starting) {
         m_process.kill();
     }
     return true;

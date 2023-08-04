@@ -779,7 +779,8 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     }
 #if defined(Q_OS_MACOS)
     // Create the Application
-    QDir applicationDirectory = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/" + BuildConfig.LAUNCHER_NAME + " Instances/";
+    QDir applicationDirectory =
+        QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/" + BuildConfig.LAUNCHER_NAME + " Instances/";
 
     if (!applicationDirectory.mkpath(".")) {
         qWarning() << "Couldn't create application directory";
@@ -843,7 +844,9 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
                   "    <key>CFBundleIconFile</key>\n"
                   "    <string>Icon.icns</string>\n"
                   "    <key>CFBundleName</key>\n"
-                  "    <string>" << name << "</string>\n"  // Name of the application
+                  "    <string>"
+               << name
+               << "</string>\n"  // Name of the application
                   "    <key>CFBundlePackageType</key>\n"
                   "    <string>APPL</string>\n"
                   "    <key>CFBundleShortVersionString</key>\n"

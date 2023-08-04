@@ -14,10 +14,10 @@
  */
 
 #include "ReconstructAssets.h"
+#include "launch/LaunchTask.h"
+#include "minecraft/AssetsUtils.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "minecraft/AssetsUtils.h"
-#include "launch/LaunchTask.h"
 
 void ReconstructAssets::executeTask()
 {
@@ -27,8 +27,7 @@ void ReconstructAssets::executeTask()
     auto profile = components->getProfile();
     auto assets = profile->getMinecraftAssets();
 
-    if(!AssetsUtils::reconstructAssets(assets->id, minecraftInstance->resourcesDir()))
-    {
+    if (!AssetsUtils::reconstructAssets(assets->id, minecraftInstance->resourcesDir())) {
         emit logLine("Failed to reconstruct Minecraft assets.", MessageLevel::Error);
     }
 

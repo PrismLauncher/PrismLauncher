@@ -17,7 +17,7 @@ class ImportResourceDialog : public QDialog {
     explicit ImportResourceDialog(QString file_path, PackedResourceType type, QWidget* parent = nullptr);
     ~ImportResourceDialog() override;
     QString selectedInstanceKey;
-    
+
    private:
     Ui::ImportResourceDialog* ui;
     PackedResourceType m_resource_type;

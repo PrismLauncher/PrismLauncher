@@ -39,37 +39,30 @@
 #include "APIPage.h"
 #include "ui_APIPage.h"
 
-#include <QMessageBox>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QTabBar>
 #include <QValidator>
 #include <QVariant>
 
+#include "Application.h"
+#include "BuildConfig.h"
+#include "net/PasteUpload.h"
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
-#include "Application.h"
-#include "net/PasteUpload.h"
-#include "BuildConfig.h"
 
-APIPage::APIPage(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::APIPage)
+APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
 {
     // This is here so you can reorder the entries in the combobox without messing stuff up
-    int comboBoxEntries[] = {
-        PasteUpload::PasteType::Mclogs,
-        PasteUpload::PasteType::NullPointer,
-        PasteUpload::PasteType::PasteGG,
-        PasteUpload::PasteType::Hastebin
-    };
+    int comboBoxEntries[] = { PasteUpload::PasteType::Mclogs, PasteUpload::PasteType::NullPointer, PasteUpload::PasteType::PasteGG,
+                              PasteUpload::PasteType::Hastebin };
 
     static QRegularExpression validUrlRegExp("https?://.+");
-    static QRegularExpression validMSAClientID(QRegularExpression::anchoredPattern(
-                "[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"));
-    static QRegularExpression validFlameKey(QRegularExpression::anchoredPattern(
-                "\\$2[ayb]\\$.{56}"));
+    static QRegularExpression validMSAClientID(
+        QRegularExpression::anchoredPattern("[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"));
+    static QRegularExpression validFlameKey(QRegularExpression::anchoredPattern("\\$2[ayb]\\$.{56}"));
 
     ui->setupUi(this);
 
@@ -77,7 +70,7 @@ APIPage::APIPage(QWidget *parent) :
         ui->pasteTypeComboBox->addItem(PasteUpload::PasteTypes.at(pasteType).name, pasteType);
     }
 
-    void (QComboBox::*currentIndexChangedSignal)(int) (&QComboBox::currentIndexChanged);
+    void (QComboBox::*currentIndexChangedSignal)(int)(&QComboBox::currentIndexChanged);
     connect(ui->pasteTypeComboBox, currentIndexChangedSignal, this, &APIPage::updateBaseURLPlaceholder);
     // This function needs to be called even when the ComboBox's index is still in its default state.
     updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
@@ -110,12 +103,9 @@ void APIPage::resetBaseURLNote()
 
 void APIPage::updateBaseURLNote(int index)
 {
-    if (baseURLPasteType == index)
-    {
+    if (baseURLPasteType == index) {
         ui->baseURLNote->hide();
-    }
-    else if (!ui->baseURLEntry->text().isEmpty())
-    {
+    } else if (!ui->baseURLEntry->text().isEmpty()) {
         ui->baseURLNote->show();
     }
 }
@@ -136,8 +126,7 @@ void APIPage::loadSettings()
 
     ui->baseURLEntry->setText(pastebinURL);
     int pasteTypeIndex = ui->pasteTypeComboBox->findData(pasteType);
-    if (pasteTypeIndex == -1)
-    {
+    if (pasteTypeIndex == -1) {
         pasteTypeIndex = ui->pasteTypeComboBox->findData(PasteUpload::PasteType::Mclogs);
         ui->baseURLEntry->clear();
     }
@@ -167,15 +156,13 @@ void APIPage::applySettings()
     s->set("MSAClientIDOverride", msaClientID);
     QUrl metaURL(ui->metaURL->text());
     // Add required trailing slash
-    if (!metaURL.isEmpty() && !metaURL.path().endsWith('/'))
-    {
+    if (!metaURL.isEmpty() && !metaURL.path().endsWith('/')) {
         QString path = metaURL.path();
         path.append('/');
         metaURL.setPath(path);
     }
     // Don't allow HTTP, since meta is basically RCE with all the jar files.
-    if(!metaURL.isEmpty() && metaURL.scheme() == "http")
-    {
+    if (!metaURL.isEmpty() && metaURL.scheme() == "http") {
         metaURL.setScheme("https");
     }
 

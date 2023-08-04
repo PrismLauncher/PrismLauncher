@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,17 +33,16 @@
  *      limitations under the License.
  */
 
-#include <QMessageBox>
 #include "AtlUserInteractionSupportImpl.h"
+#include <QMessageBox>
 
 #include "AtlOptionalModDialog.h"
 #include "ui/dialogs/VersionSelectDialog.h"
 
-AtlUserInteractionSupportImpl::AtlUserInteractionSupportImpl(QWidget *parent) : m_parent(parent)
-{
-}
+AtlUserInteractionSupportImpl::AtlUserInteractionSupportImpl(QWidget* parent) : m_parent(parent) {}
 
-std::optional<QVector<QString>> AtlUserInteractionSupportImpl::chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
+std::optional<QVector<QString>> AtlUserInteractionSupportImpl::chooseOptionalMods(ATLauncher::PackVersion version,
+                                                                                  QVector<ATLauncher::VersionMod> mods)
 {
     AtlOptionalModDialog optionalModDialog(m_parent, version, mods);
     auto result = optionalModDialog.exec();
@@ -59,8 +58,7 @@ QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlis
     if (minecraftVersion != nullptr) {
         vselect.setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         vselect.setEmptyString(tr("No versions are currently available for Minecraft %1").arg(minecraftVersion));
-    }
-    else {
+    } else {
         vselect.setEmptyString(tr("No versions are currently available"));
     }
     vselect.setEmptyErrorString(tr("Couldn't load or download the version lists!"));
@@ -72,9 +70,7 @@ QString AtlUserInteractionSupportImpl::chooseVersion(Meta::VersionList::Ptr vlis
 
         // filter by minecraft version, if the loader depends on a certain version.
         if (minecraftVersion != nullptr) {
-            auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require& req) {
-                return req.uid == "net.minecraft";
-            });
+            auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
             if (iter == reqs.end())
                 continue;
             if (iter->equalsVersion != minecraftVersion)

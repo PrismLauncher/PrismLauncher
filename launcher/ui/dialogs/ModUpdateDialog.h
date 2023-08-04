@@ -36,7 +36,9 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
    private slots:
     void onMetadataEnsured(Mod*);
-    void onMetadataFailed(Mod*, bool try_others = false, ModPlatform::ResourceProvider first_choice = ModPlatform::ResourceProvider::MODRINTH);
+    void onMetadataFailed(Mod*,
+                          bool try_others = false,
+                          ModPlatform::ResourceProvider first_choice = ModPlatform::ResourceProvider::MODRINTH);
 
    private:
     QWidget* m_parent;

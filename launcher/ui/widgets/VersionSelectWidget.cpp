@@ -13,8 +13,7 @@
 
 VersionSelectWidget::VersionSelectWidget(QWidget* parent) : VersionSelectWidget(false, parent) {}
 
-VersionSelectWidget::VersionSelectWidget(bool focusSearch, QWidget* parent)
-    : QWidget(parent), focusSearch(focusSearch)
+VersionSelectWidget::VersionSelectWidget(bool focusSearch, QWidget* parent) : QWidget(parent), focusSearch(focusSearch)
 {
     setObjectName(QStringLiteral("VersionSelectWidget"));
     verticalLayout = new QVBoxLayout(this);
@@ -81,9 +80,7 @@ void VersionSelectWidget::setEmptyMode(VersionListView::EmptyMode mode)
     listView->setEmptyMode(mode);
 }
 
-VersionSelectWidget::~VersionSelectWidget()
-{
-}
+VersionSelectWidget::~VersionSelectWidget() {}
 
 void VersionSelectWidget::setResizeOn(int column)
 {
@@ -92,7 +89,8 @@ void VersionSelectWidget::setResizeOn(int column)
     listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
 }
 
-bool VersionSelectWidget::eventFilter(QObject *watched, QEvent *event) {
+bool VersionSelectWidget::eventFilter(QObject* watched, QEvent* event)
+{
     if (watched == search && event->type() == QEvent::KeyPress) {
         const QKeyEvent* keyEvent = (QKeyEvent*)event;
         const bool up = keyEvent->key() == Qt::Key_Up;
@@ -109,7 +107,7 @@ bool VersionSelectWidget::eventFilter(QObject *watched, QEvent *event) {
     return QObject::eventFilter(watched, event);
 }
 
-void VersionSelectWidget::initialize(BaseVersionList *vlist)
+void VersionSelectWidget::initialize(BaseVersionList* vlist)
 {
     m_vlist = vlist;
     m_proxyModel->setSourceModel(vlist);
@@ -119,21 +117,17 @@ void VersionSelectWidget::initialize(BaseVersionList *vlist)
     if (focusSearch)
         search->setFocus();
 
-    if (!m_vlist->isLoaded())
-    {
+    if (!m_vlist->isLoaded()) {
         loadList();
-    }
-    else
-    {
-        if (m_proxyModel->rowCount() == 0)
-        {
+    } else {
+        if (m_proxyModel->rowCount() == 0) {
             listView->setEmptyMode(VersionListView::String);
         }
         preselect();
     }
 }
 
-void VersionSelectWidget::closeEvent(QCloseEvent * event)
+void VersionSelectWidget::closeEvent(QCloseEvent* event)
 {
     QWidget::closeEvent(event);
 }
@@ -141,16 +135,14 @@ void VersionSelectWidget::closeEvent(QCloseEvent * event)
 void VersionSelectWidget::loadList()
 {
     auto newTask = m_vlist->getLoadTask();
-    if (!newTask)
-    {
+    if (!newTask) {
         return;
     }
     loadTask = newTask.get();
     connect(loadTask, &Task::succeeded, this, &VersionSelectWidget::onTaskSucceeded);
     connect(loadTask, &Task::failed, this, &VersionSelectWidget::onTaskFailed);
     connect(loadTask, &Task::progress, this, &VersionSelectWidget::changeProgress);
-    if(!loadTask->isRunning())
-    {
+    if (!loadTask->isRunning()) {
         loadTask->start();
     }
     sneakyProgressBar->setHidden(false);
@@ -158,8 +150,7 @@ void VersionSelectWidget::loadList()
 
 void VersionSelectWidget::onTaskSucceeded()
 {
-    if (m_proxyModel->rowCount() == 0)
-    {
+    if (m_proxyModel->rowCount() == 0) {
         listView->setEmptyMode(VersionListView::String);
     }
     sneakyProgressBar->setHidden(true);
@@ -187,25 +178,23 @@ void VersionSelectWidget::currentRowChanged(const QModelIndex& current, const QM
 
 void VersionSelectWidget::preselect()
 {
-    if(preselectedAlready)
+    if (preselectedAlready)
         return;
     selectCurrent();
-    if(preselectedAlready)
+    if (preselectedAlready)
         return;
     selectRecommended();
 }
 
 void VersionSelectWidget::selectCurrent()
 {
-    if(m_currentVersion.isEmpty())
-    {
+    if (m_currentVersion.isEmpty()) {
         return;
     }
     auto idx = m_proxyModel->getVersion(m_currentVersion);
-    if(idx.isValid())
-    {
+    if (idx.isValid()) {
         preselectedAlready = true;
-        listView->selectionModel()->setCurrentIndex(idx,QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+        listView->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
         listView->scrollTo(idx, QAbstractItemView::PositionAtCenter);
     }
 }
@@ -213,10 +202,9 @@ void VersionSelectWidget::selectCurrent()
 void VersionSelectWidget::selectRecommended()
 {
     auto idx = m_proxyModel->getRecommended();
-    if(idx.isValid())
-    {
+    if (idx.isValid()) {
         preselectedAlready = true;
-        listView->selectionModel()->setCurrentIndex(idx,QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
+        listView->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
         listView->scrollTo(idx, QAbstractItemView::PositionAtCenter);
     }
 }
@@ -243,7 +231,7 @@ void VersionSelectWidget::setFuzzyFilter(BaseVersionList::ModelRoles role, QStri
     m_proxyModel->setFilter(role, new ContainsFilter(filter));
 }
 
-void VersionSelectWidget::setFilter(BaseVersionList::ModelRoles role, Filter *filter)
+void VersionSelectWidget::setFilter(BaseVersionList::ModelRoles role, Filter* filter)
 {
     m_proxyModel->setFilter(role, filter);
 }

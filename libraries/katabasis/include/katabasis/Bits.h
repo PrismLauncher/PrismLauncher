@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QString>
 #include <QDateTime>
 #include <QMap>
+#include <QString>
 #include <QVariantMap>
 
 namespace Katabasis {
@@ -11,17 +11,13 @@ enum class Activity {
     LoggingIn,
     LoggingOut,
     Refreshing,
-    FailedSoft, //!< soft failure. this generally means the user auth details haven't been invalidated
-    FailedHard, //!< hard failure. auth is invalid
-    FailedGone, //!< hard failure. auth is invalid, and the account no longer exists
+    FailedSoft,  //!< soft failure. this generally means the user auth details haven't been invalidated
+    FailedHard,  //!< hard failure. auth is invalid
+    FailedGone,  //!< hard failure. auth is invalid, and the account no longer exists
     Succeeded
 };
 
-enum class Validity {
-    None,
-    Assumed,
-    Certain
-};
+enum class Validity { None, Assumed, Certain };
 
 struct Token {
     QDateTime issueInstant;
@@ -34,4 +30,4 @@ struct Token {
     bool persistent = true;
 };
 
-}
+}  // namespace Katabasis
