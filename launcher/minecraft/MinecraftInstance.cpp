@@ -191,6 +191,10 @@ void MinecraftInstance::loadSpecificSettings()
         auto modLoaderSettings = m_settings->registerSetting("OverrideModLoaderSettings", false);
         m_settings->registerOverride(global_settings->getSetting("DisableQuiltBeacon"), modLoaderSettings);
 
+        // Legacy-related options
+        auto legacySettings = m_settings->registerSetting("OverrideLegacySettings", true);
+        m_settings->registerOverride(global_settings->getSetting("OnlineFixes"), legacySettings);
+
         m_settings->set("InstanceType", "OneSix");
     }
 
@@ -201,8 +205,6 @@ void MinecraftInstance::loadSpecificSettings()
     // Use account for instance, this does not have a global override
     m_settings->registerSetting("UseAccountForInstance", false);
     m_settings->registerSetting("InstanceAccountId", "");
-
-    m_settings->registerSetting("OnlineFixes", true);
 
     qDebug() << "Instance-type specific settings were loaded!";
 

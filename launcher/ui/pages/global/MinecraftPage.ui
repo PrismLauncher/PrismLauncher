@@ -198,11 +198,30 @@
          <layout class="QVBoxLayout" name="verticalLayout_13">
           <item>
            <widget class="QCheckBox" name="disableQuiltBeaconCheckBox">
+            <property name="toolTip">
+             <string>Disable Quilt loader's beacon for counting monthly active users</string>
+            </property>
             <property name="text">
              <string>Disable Quilt Loader Beacon</string>
             </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="legacySettingsGroupBox">
+         <property name="title">
+          <string>Legacy settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QCheckBox" name="onlineFixes">
             <property name="toolTip">
-             <string>Disable Quilt loader's beacon for counting monthly active users</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;This currently allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable online fixes</string>
             </property>
            </widget>
           </item>

@@ -614,6 +614,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         // Mod loader settings
         m_settings->registerSetting("DisableQuiltBeacon", false);
 
+        // Legacy settings
+        m_settings->registerSetting("OnlineFixes", true);
+
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
         m_settings->registerSetting("UseNativeGLFW", false);

@@ -290,8 +290,13 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("DisableQuiltBeacon");
     }
   
-    bool onlineFixes = ui->onlineFixes->isChecked();
-    m_settings->set("OnlineFixes", onlineFixes);
+    bool overrideLegacySettings = ui->legacySettingsGroupBox->isChecked();
+    m_settings->set("OverrideLegacySettings", overrideLegacySettings);
+    if (overrideLegacySettings) {
+        m_settings->set("OnlineFixes", ui->onlineFixes->isChecked());
+    } else {
+        m_settings->reset("OnlineFixes");
+    }
 
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
@@ -398,8 +403,8 @@ void InstanceSettingsPage::loadSettings()
     ui->modLoaderSettingsGroupBox->setChecked(m_settings->get("OverrideModLoaderSettings").toBool());
     ui->disableQuiltBeaconCheckBox->setChecked(m_settings->get("DisableQuiltBeacon").toBool());
 
+    ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
     ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
-    ui->onlineFixes->setVisible(m_instance->traits().contains("legacyServices"));
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

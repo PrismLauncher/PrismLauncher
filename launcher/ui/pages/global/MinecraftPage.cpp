@@ -103,6 +103,9 @@ void MinecraftPage::applySettings()
 
     // Mod loader settings
     s->set("DisableQuiltBeacon", ui->disableQuiltBeaconCheckBox->isChecked());
+
+    // Legacy settings
+    s->set("OnlineFixes", ui->onlineFixes->isChecked());
 }
 
 void MinecraftPage::loadSettings()
@@ -143,6 +146,8 @@ void MinecraftPage::loadSettings()
     ui->quitAfterGameStopCheck->setChecked(s->get("QuitAfterGameStop").toBool());
 
     ui->disableQuiltBeaconCheckBox->setChecked(s->get("DisableQuiltBeacon").toBool());
+
+    ui->onlineFixes->setChecked(s->get("OnlineFixes").toBool());
 }
 
 void MinecraftPage::retranslate()
