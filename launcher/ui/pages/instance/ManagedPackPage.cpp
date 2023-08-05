@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ManagedPackPage.h"
+#include <QDesktopServices>
+#include <QUrl>
+#include <QUrlQuery>
 #include "ui_ManagedPackPage.h"
 
 #include <QListView>
@@ -102,6 +105,19 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
         m_loaded = false;
         // Pretend we're opening the page again
         openedImpl();
+    });
+
+    connect(ui->changelogTextBrowser, &QTextBrowser::anchorClicked, this, [](const QUrl url) {
+        if (url.scheme().isEmpty()) {
+            auto querry =
+                QUrlQuery(url.query()).queryItemValue("remoteUrl", QUrl::FullyDecoded);  // curseforge workaround for linkout?remoteUrl=
+            auto decoded = QUrl::fromPercentEncoding(querry.toUtf8());
+            auto newUrl = QUrl(decoded);
+            if (newUrl.isValid() && (newUrl.scheme() == "http" || newUrl.scheme() == "https"))
+                QDesktopServices ::openUrl(newUrl);
+            return;
+        }
+        QDesktopServices::openUrl(url);
     });
 }
 
