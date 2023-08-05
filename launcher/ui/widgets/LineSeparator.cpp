@@ -1,11 +1,11 @@
 #include "LineSeparator.h"
 
-#include <QStyle>
-#include <QStyleOption>
 #include <QLayout>
 #include <QPainter>
+#include <QStyle>
+#include <QStyleOption>
 
-void LineSeparator::initStyleOption(QStyleOption *option) const
+void LineSeparator::initStyleOption(QStyleOption* option) const
 {
     option->initFrom(this);
     // in a horizontal layout, the line is vertical (and vice versa)
@@ -13,8 +13,7 @@ void LineSeparator::initStyleOption(QStyleOption *option) const
         option->state |= QStyle::State_Horizontal;
 }
 
-LineSeparator::LineSeparator(QWidget *parent, Qt::Orientation orientation)
-    : QWidget(parent), m_orientation(orientation)
+LineSeparator::LineSeparator(QWidget* parent, Qt::Orientation orientation) : QWidget(parent), m_orientation(orientation)
 {
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 }
@@ -23,12 +22,11 @@ QSize LineSeparator::sizeHint() const
 {
     QStyleOption opt;
     initStyleOption(&opt);
-    const int extent =
-        style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent, &opt, parentWidget());
+    const int extent = style()->pixelMetric(QStyle::PM_ToolBarSeparatorExtent, &opt, parentWidget());
     return QSize(extent, extent);
 }
 
-void LineSeparator::paintEvent(QPaintEvent *)
+void LineSeparator::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
     QStyleOption opt;

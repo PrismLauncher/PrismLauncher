@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,17 +35,16 @@
 
 #include <QTest>
 
-#include <minecraft/MojangVersionFormat.h>
-#include <minecraft/OneSixVersionFormat.h>
-#include <minecraft/Library.h>
-#include <net/HttpMetaCache.h>
 #include <FileSystem.h>
 #include <RuntimeContext.h>
+#include <minecraft/Library.h>
+#include <minecraft/MojangVersionFormat.h>
+#include <minecraft/OneSixVersionFormat.h>
+#include <net/HttpMetaCache.h>
 
-class LibraryTest : public QObject
-{
+class LibraryTest : public QObject {
     Q_OBJECT
-private:
+   private:
     LibraryPtr readMojangJson(const QString path)
     {
         QFile jsonFile(path);
@@ -56,20 +55,17 @@ private:
         return MojangVersionFormat::libraryFromJson(problems, QJsonDocument::fromJson(data).object(), path);
     }
     // get absolute path to expected storage, assuming default cache prefix
-    QStringList getStorage(QString relative)
-    {
-        return {FS::PathCombine(cache->getBasePath("libraries"), relative)};
-    }
+    QStringList getStorage(QString relative) { return { FS::PathCombine(cache->getBasePath("libraries"), relative) }; }
 
-    RuntimeContext dummyContext(QString system = "linux", QString arch = "64", QString realArch = "amd64") {
+    RuntimeContext dummyContext(QString system = "linux", QString arch = "64", QString realArch = "amd64")
+    {
         RuntimeContext r;
         r.javaArchitecture = arch;
         r.javaRealArchitecture = realArch;
         r.system = system;
         return r;
     }
-private
-slots:
+   private slots:
     void initTestCase()
     {
         cache.reset(new HttpMetaCache());
@@ -111,7 +107,7 @@ slots:
         test.setHint("local");
         auto downloads = test.getDownloads(r, cache.get(), failedFiles, QString());
         QCOMPARE(downloads.size(), 0);
-        QCOMPARE(failedFiles, {"testname-testversion.jar"});
+        QCOMPARE(failedFiles, { "testname-testversion.jar" });
     }
     void test_legacy_url_local_override()
     {
@@ -127,7 +123,7 @@ slots:
 
         QStringList jar, native, native32, native64;
         test.getApplicableFiles(r, jar, native, native32, native64, QFINDTESTDATA("testdata/Library"));
-        QCOMPARE(jar, {QFileInfo(QFINDTESTDATA("testdata/Library/codecwav-20101023.jar")).absoluteFilePath()});
+        QCOMPARE(jar, { QFileInfo(QFINDTESTDATA("testdata/Library/codecwav-20101023.jar")).absoluteFilePath() });
         QCOMPARE(native, {});
         QCOMPARE(native32, {});
         QCOMPARE(native64, {});
@@ -158,9 +154,9 @@ slots:
     {
         RuntimeContext r = dummyContext();
         Library test("test.package:testname:testversion");
-        test.m_nativeClassifiers["linux"]="linux-${arch}";
-        test.m_nativeClassifiers["osx"]="osx-${arch}";
-        test.m_nativeClassifiers["windows"]="windows-${arch}";
+        test.m_nativeClassifiers["linux"] = "linux-${arch}";
+        test.m_nativeClassifiers["osx"] = "osx-${arch}";
+        test.m_nativeClassifiers["windows"] = "windows-${arch}";
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");
         {
@@ -212,7 +208,7 @@ slots:
     {
         RuntimeContext r = dummyContext();
         Library test("test.package:testname:testversion");
-        test.m_nativeClassifiers["linux"]="linux-${arch}";
+        test.m_nativeClassifiers["linux"] = "linux-${arch}";
         test.setHint("local");
         QCOMPARE(test.isNative(), true);
         test.setRepositoryURL("file://foo/bar");
@@ -221,12 +217,13 @@ slots:
             test.getApplicableFiles(r, jar, native, native32, native64, QFINDTESTDATA("testdata/Library"));
             QCOMPARE(jar, {});
             QCOMPARE(native, {});
-            QCOMPARE(native32, {QFileInfo(QFINDTESTDATA("testdata/Library/testname-testversion-linux-32.jar")).absoluteFilePath()});
-            QCOMPARE(native64, {QFileInfo(QFINDTESTDATA("testdata/Library") + "/testname-testversion-linux-64.jar").absoluteFilePath()});
+            QCOMPARE(native32, { QFileInfo(QFINDTESTDATA("testdata/Library/testname-testversion-linux-32.jar")).absoluteFilePath() });
+            QCOMPARE(native64, { QFileInfo(QFINDTESTDATA("testdata/Library") + "/testname-testversion-linux-64.jar").absoluteFilePath() });
             QStringList failedFiles;
             auto dls = test.getDownloads(r, cache.get(), failedFiles, QFINDTESTDATA("testdata/Library"));
             QCOMPARE(dls.size(), 0);
-            QCOMPARE(failedFiles, {QFileInfo(QFINDTESTDATA("testdata/Library") + "/testname-testversion-linux-64.jar").absoluteFilePath()});
+            QCOMPARE(failedFiles,
+                     { QFileInfo(QFINDTESTDATA("testdata/Library") + "/testname-testversion-linux-64.jar").absoluteFilePath() });
         }
     }
     void test_onenine()
@@ -254,7 +251,7 @@ slots:
         {
             QStringList jar, native, native32, native64;
             test->getApplicableFiles(r, jar, native, native32, native64, QFINDTESTDATA("testdata/Library"));
-            QCOMPARE(jar, {QFileInfo(QFINDTESTDATA("testdata/Library/codecwav-20101023.jar")).absoluteFilePath()});
+            QCOMPARE(jar, { QFileInfo(QFINDTESTDATA("testdata/Library/codecwav-20101023.jar")).absoluteFilePath() });
             QCOMPARE(native, {});
             QCOMPARE(native32, {});
             QCOMPARE(native64, {});
@@ -275,7 +272,7 @@ slots:
         {
             QStringList jar, native, native32, native64;
             test->getApplicableFiles(r, jar, native, native32, native64, QFINDTESTDATA("testdata/Library"));
-            QCOMPARE(jar, {QFileInfo(QFINDTESTDATA("testdata/Library/codecwav-20101023.jar")).absoluteFilePath()});
+            QCOMPARE(jar, { QFileInfo(QFINDTESTDATA("testdata/Library/codecwav-20101023.jar")).absoluteFilePath() });
             QCOMPARE(native, {});
             QCOMPARE(native32, {});
             QCOMPARE(native64, {});
@@ -295,14 +292,16 @@ slots:
         QStringList jar, native, native32, native64;
         test->getApplicableFiles(r, jar, native, native32, native64, QString());
         QCOMPARE(jar, QStringList());
-        QCOMPARE(native, getStorage("org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"));
+        QCOMPARE(native,
+                 getStorage("org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"));
         QCOMPARE(native32, {});
         QCOMPARE(native64, {});
         QStringList failedFiles;
         auto dls = test->getDownloads(r, cache.get(), failedFiles, QString());
         QCOMPARE(dls.size(), 1);
         QCOMPARE(failedFiles, {});
-        QCOMPARE(dls[0]->m_url, QUrl("https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"));
+        QCOMPARE(dls[0]->m_url, QUrl("https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.4-nightly-20150209/"
+                                     "lwjgl-platform-2.9.4-nightly-20150209-natives-osx.jar"));
     }
     void test_onenine_native_arch()
     {
@@ -318,10 +317,13 @@ slots:
         auto dls = test->getDownloads(r, cache.get(), failedFiles, QString());
         QCOMPARE(dls.size(), 2);
         QCOMPARE(failedFiles, {});
-        QCOMPARE(dls[0]->m_url, QUrl("https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-32.jar"));
-        QCOMPARE(dls[1]->m_url, QUrl("https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-64.jar"));
+        QCOMPARE(dls[0]->m_url,
+                 QUrl("https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-32.jar"));
+        QCOMPARE(dls[1]->m_url,
+                 QUrl("https://libraries.minecraft.net/tv/twitch/twitch-platform/5.16/twitch-platform-5.16-natives-windows-64.jar"));
     }
-private:
+
+   private:
     std::unique_ptr<HttpMetaCache> cache;
     QString dataDir;
 };

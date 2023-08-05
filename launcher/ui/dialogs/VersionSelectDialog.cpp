@@ -35,20 +35,19 @@
 
 #include "VersionSelectDialog.h"
 
+#include <QDebug>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
-#include <QDebug>
 
 #include "ui/widgets/VersionSelectWidget.h"
 
 #include "BaseVersion.h"
 #include "BaseVersionList.h"
 
-VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, QWidget *parent, bool cancelable)
-    : QDialog(parent)
+VersionSelectDialog::VersionSelectDialog(BaseVersionList* vlist, QString title, QWidget* parent, bool cancelable) : QDialog(parent)
 {
     setObjectName(QStringLiteral("VersionSelectDialog"));
     resize(400, 347);
@@ -68,7 +67,7 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
     m_buttonBox = new QDialogButtonBox(this);
     m_buttonBox->setObjectName(QStringLiteral("buttonBox"));
     m_buttonBox->setOrientation(Qt::Horizontal);
-    m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+    m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
     m_horizontalLayout->addWidget(m_buttonBox);
 
     m_verticalLayout->addLayout(m_horizontalLayout);
@@ -84,8 +83,7 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
 
     m_vlist = vlist;
 
-    if (!cancelable)
-    {
+    if (!cancelable) {
         m_buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
     }
 }
@@ -123,8 +121,7 @@ int VersionSelectDialog::exec()
 {
     QDialog::open();
     m_versionWidget->initialize(m_vlist);
-    if(resizeOnColumn != -1)
-    {
+    if (resizeOnColumn != -1) {
         m_versionWidget->setResizeOn(resizeOnColumn);
     }
     return QDialog::exec();

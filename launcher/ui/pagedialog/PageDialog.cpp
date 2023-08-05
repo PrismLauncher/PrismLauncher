@@ -16,9 +16,9 @@
 #include "PageDialog.h"
 
 #include <QDialogButtonBox>
+#include <QKeyEvent>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QKeyEvent>
 
 #include "Application.h"
 #include "settings/SettingsObject.h"
@@ -26,19 +26,18 @@
 #include "ui/widgets/IconLabel.h"
 #include "ui/widgets/PageContainer.h"
 
-PageDialog::PageDialog(BasePageProvider *pageProvider, QString defaultId, QWidget *parent)
-    : QDialog(parent)
+PageDialog::PageDialog(BasePageProvider* pageProvider, QString defaultId, QWidget* parent) : QDialog(parent)
 {
     setWindowTitle(pageProvider->dialogTitle());
     m_container = new PageContainer(pageProvider, defaultId, this);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout;
+    QVBoxLayout* mainLayout = new QVBoxLayout;
     mainLayout->addWidget(m_container);
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(mainLayout);
 
-    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Close);
+    QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Close);
     buttons->button(QDialogButtonBox::Close)->setDefault(true);
     buttons->setContentsMargins(6, 0, 6, 0);
     m_container->addButtons(buttons);
@@ -49,11 +48,10 @@ PageDialog::PageDialog(BasePageProvider *pageProvider, QString defaultId, QWidge
     restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("PagedGeometry").toByteArray()));
 }
 
-void PageDialog::closeEvent(QCloseEvent *event)
+void PageDialog::closeEvent(QCloseEvent* event)
 {
     qDebug() << "Paged dialog close requested";
-    if (m_container->prepareToClose())
-    {
+    if (m_container->prepareToClose()) {
         qDebug() << "Paged dialog close approved";
         APPLICATION->settings()->set("PagedGeometry", saveGeometry().toBase64());
         qDebug() << "Paged dialog geometry saved";

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,11 +34,11 @@
  */
 
 #pragma once
-#include <QString>
-#include <QByteArray>
-#include <QVector>
 #include <katabasis/Bits.h>
+#include <QByteArray>
 #include <QJsonObject>
+#include <QString>
+#include <QVector>
 
 struct Skin {
     QString id;
@@ -71,22 +71,9 @@ struct MinecraftProfile {
     Katabasis::Validity validity = Katabasis::Validity::None;
 };
 
-enum class AccountType {
-    MSA,
-    Mojang,
-    Offline
-};
+enum class AccountType { MSA, Mojang, Offline };
 
-enum class AccountState {
-    Unchecked,
-    Offline,
-    Working,
-    Online,
-    Disabled,
-    Errored,
-    Expired,
-    Gone
-};
+enum class AccountState { Unchecked, Offline, Working, Online, Disabled, Errored, Expired, Gone };
 
 struct AccountData {
     QJsonObject saveState() const;

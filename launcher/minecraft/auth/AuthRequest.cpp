@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,44 +35,44 @@
 
 #include <cassert>
 
+#include <QBuffer>
 #include <QDebug>
 #include <QTimer>
-#include <QBuffer>
 #include <QUrlQuery>
 
 #include "Application.h"
 #include "AuthRequest.h"
 #include "katabasis/Globals.h"
 
-AuthRequest::AuthRequest(QObject *parent): QObject(parent) {
-}
+AuthRequest::AuthRequest(QObject* parent) : QObject(parent) {}
 
-AuthRequest::~AuthRequest() {
-}
+AuthRequest::~AuthRequest() {}
 
-void AuthRequest::get(const QNetworkRequest &req, int timeout/* = 60*1000*/) {
+void AuthRequest::get(const QNetworkRequest& req, int timeout /* = 60*1000*/)
+{
     setup(req, QNetworkAccessManager::GetOperation);
     reply_ = APPLICATION->network()->get(request_);
     status_ = Requesting;
     timedReplies_.add(new Katabasis::Reply(reply_, timeout));
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(reply_, &QNetworkReply::errorOccurred, this, &AuthRequest::onRequestError);
-#else // &QNetworkReply::error SIGNAL depricated
+#else  // &QNetworkReply::error SIGNAL depricated
     connect(reply_, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &AuthRequest::onRequestError);
 #endif
     connect(reply_, &QNetworkReply::finished, this, &AuthRequest::onRequestFinished);
     connect(reply_, &QNetworkReply::sslErrors, this, &AuthRequest::onSslErrors);
 }
 
-void AuthRequest::post(const QNetworkRequest &req, const QByteArray &data, int timeout/* = 60*1000*/) {
+void AuthRequest::post(const QNetworkRequest& req, const QByteArray& data, int timeout /* = 60*1000*/)
+{
     setup(req, QNetworkAccessManager::PostOperation);
     data_ = data;
     status_ = Requesting;
     reply_ = APPLICATION->network()->post(request_, data_);
     timedReplies_.add(new Katabasis::Reply(reply_, timeout));
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(reply_, &QNetworkReply::errorOccurred, this, &AuthRequest::onRequestError);
-#else // &QNetworkReply::error SIGNAL depricated
+#else  // &QNetworkReply::error SIGNAL depricated
     connect(reply_, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &AuthRequest::onRequestError);
 #endif
     connect(reply_, &QNetworkReply::finished, this, &AuthRequest::onRequestFinished);
@@ -80,35 +80,39 @@ void AuthRequest::post(const QNetworkRequest &req, const QByteArray &data, int t
     connect(reply_, &QNetworkReply::uploadProgress, this, &AuthRequest::onUploadProgress);
 }
 
-void AuthRequest::onRequestFinished() {
+void AuthRequest::onRequestFinished()
+{
     if (status_ == Idle) {
         return;
     }
-    if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
+    if (reply_ != qobject_cast<QNetworkReply*>(sender())) {
         return;
     }
     httpStatus_ = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     finish();
 }
 
-void AuthRequest::onRequestError(QNetworkReply::NetworkError error) {
+void AuthRequest::onRequestError(QNetworkReply::NetworkError error)
+{
     qWarning() << "AuthRequest::onRequestError: Error" << (int)error;
     if (status_ == Idle) {
         return;
     }
-    if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
+    if (reply_ != qobject_cast<QNetworkReply*>(sender())) {
         return;
     }
     errorString_ = reply_->errorString();
     httpStatus_ = reply_->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
     error_ = error;
     qWarning() << "AuthRequest::onRequestError: Error string: " << errorString_;
-    qWarning() << "AuthRequest::onRequestError: HTTP status" << httpStatus_ << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
+    qWarning() << "AuthRequest::onRequestError: HTTP status" << httpStatus_
+               << reply_->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString();
 
     // QTimer::singleShot(10, this, SLOT(finish()));
 }
 
-void AuthRequest::onSslErrors(QList<QSslError> errors) {
+void AuthRequest::onSslErrors(QList<QSslError> errors)
+{
     int i = 1;
     for (auto error : errors) {
         qCritical() << "LOGIN SSL Error #" << i << " : " << error.errorString();
@@ -118,23 +122,25 @@ void AuthRequest::onSslErrors(QList<QSslError> errors) {
     }
 }
 
-void AuthRequest::onUploadProgress(qint64 uploaded, qint64 total) {
+void AuthRequest::onUploadProgress(qint64 uploaded, qint64 total)
+{
     if (status_ == Idle) {
         qWarning() << "AuthRequest::onUploadProgress: No pending request";
         return;
     }
-    if (reply_ != qobject_cast<QNetworkReply *>(sender())) {
+    if (reply_ != qobject_cast<QNetworkReply*>(sender())) {
         return;
     }
     // Restart timeout because request in progress
-    Katabasis::Reply *o2Reply = timedReplies_.find(reply_);
-    if(o2Reply) {
+    Katabasis::Reply* o2Reply = timedReplies_.find(reply_);
+    if (o2Reply) {
         o2Reply->start();
     }
     emit uploadProgress(uploaded, total);
 }
 
-void AuthRequest::setup(const QNetworkRequest &req, QNetworkAccessManager::Operation operation, const QByteArray &verb) {
+void AuthRequest::setup(const QNetworkRequest& req, QNetworkAccessManager::Operation operation, const QByteArray& verb)
+{
     request_ = req;
     operation_ = operation;
     url_ = req.url();
@@ -152,7 +158,8 @@ void AuthRequest::setup(const QNetworkRequest &req, QNetworkAccessManager::Opera
     httpStatus_ = 0;
 }
 
-void AuthRequest::finish() {
+void AuthRequest::finish()
+{
     QByteArray data;
     if (status_ == Idle) {
         qWarning() << "AuthRequest::finish: No pending request";

@@ -37,11 +37,12 @@
 #include "settings/INIFile.h"
 #include <FileSystem.h>
 
-#include <QFile>
-#include <QTextStream>
-#include <QStringList>
-#include <QSaveFile>
 #include <QDebug>
+#include <QFile>
+#include <QSaveFile>
+#include <QStringList>
+#include <QTemporaryFile>
+#include <QTextStream>
 
 #include <QSettings>
 
@@ -71,6 +72,7 @@ bool INIFile::saveFile(QString fileName)
 
     return true;
 }
+
 QString unescape(QString orig)
 {
     QString out;
@@ -183,6 +185,19 @@ bool INIFile::loadFile(QString fileName)
         for (auto&& key : _settings_obj.allKeys())
             insert(key, _settings_obj.value(key));
     return true;
+}
+
+bool INIFile::loadFile(QByteArray data)
+{
+    QTemporaryFile file;
+    if (!file.open())
+        return false;
+    file.write(data);
+    file.flush();
+    file.close();
+    auto loaded = loadFile(file.fileName());
+    file.remove();
+    return loaded;
 }
 
 QVariant INIFile::get(QString key, QVariant def) const

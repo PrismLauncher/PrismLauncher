@@ -156,8 +156,9 @@ void InstanceCopyTask::copyFinished()
         allowed_symlinks.append(m_origInstance->gameRoot().toUtf8());
         allowed_symlinks.append("\n");
         if (allowed_symlinks_file.isSymLink())
-            FS::deletePath(allowed_symlinks_file
-                               .filePath());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
+            FS::deletePath(
+                allowed_symlinks_file
+                    .filePath());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
 
         FS::write(allowed_symlinks_file.filePath(), allowed_symlinks);
     }

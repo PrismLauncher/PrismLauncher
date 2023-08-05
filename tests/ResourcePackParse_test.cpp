@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -27,18 +27,20 @@
 class ResourcePackParseTest : public QObject {
     Q_OBJECT
 
-    private slots:
+   private slots:
     void test_parseZIP()
     {
         QString source = QFINDTESTDATA("testdata/ResourcePackParse");
 
         QString zip_rp = FS::PathCombine(source, "test_resource_pack_idk.zip");
-        ResourcePack pack { QFileInfo(zip_rp) };
+        ResourcePack pack{ QFileInfo(zip_rp) };
 
         bool valid = ResourcePackUtils::processZIP(pack, ResourcePackUtils::ProcessingLevel::BasicInfoOnly);
 
         QVERIFY(pack.packFormat() == 3);
-        QVERIFY(pack.description() == "um dois, feijão com arroz, três quatro, feijão no prato, cinco seis, café inglês, sete oito, comer biscoito, nove dez comer pastéis!!");
+        QVERIFY(pack.description() ==
+                "um dois, feijão com arroz, três quatro, feijão no prato, cinco seis, café inglês, sete oito, comer biscoito, nove dez "
+                "comer pastéis!!");
         QVERIFY(valid == true);
     }
 
@@ -47,7 +49,7 @@ class ResourcePackParseTest : public QObject {
         QString source = QFINDTESTDATA("testdata/ResourcePackParse");
 
         QString folder_rp = FS::PathCombine(source, "test_folder");
-        ResourcePack pack { QFileInfo(folder_rp) };
+        ResourcePack pack{ QFileInfo(folder_rp) };
 
         bool valid = ResourcePackUtils::processFolder(pack, ResourcePackUtils::ProcessingLevel::BasicInfoOnly);
 
@@ -61,13 +63,13 @@ class ResourcePackParseTest : public QObject {
         QString source = QFINDTESTDATA("testdata/ResourcePackParse");
 
         QString folder_rp = FS::PathCombine(source, "another_test_folder");
-        ResourcePack pack { QFileInfo(folder_rp) };
+        ResourcePack pack{ QFileInfo(folder_rp) };
 
         bool valid = ResourcePackUtils::process(pack, ResourcePackUtils::ProcessingLevel::BasicInfoOnly);
 
         QVERIFY(pack.packFormat() == 6);
         QVERIFY(pack.description() == "o quartel pegou fogo, policia deu sinal, acode acode acode a bandeira nacional");
-        QVERIFY(valid == false); // no assets dir
+        QVERIFY(valid == false);  // no assets dir
     }
 };
 
