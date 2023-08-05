@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@
 
 class BasePage {
    public:
-    using updateExtraInfoFunc = std::function<void(QString)>;
+    using updateExtraInfoFunc = std::function<void(QString, QString)>;
     virtual ~BasePage() {}
     virtual QString id() const = 0;
     virtual QString displayName() const = 0;

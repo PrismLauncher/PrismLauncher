@@ -5,7 +5,7 @@
 
 #include <QtWidgets/QPushButton>
 
-OfflineLoginDialog::OfflineLoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::OfflineLoginDialog)
+OfflineLoginDialog::OfflineLoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::OfflineLoginDialog)
 {
     ui->setupUi(this);
     ui->progressBar->setVisible(false);
@@ -52,22 +52,20 @@ void OfflineLoginDialog::on_allowLongUsernames_stateChanged(int value)
 }
 
 // Enable the OK button only when the textbox contains something.
-void OfflineLoginDialog::on_userTextBox_textEdited(const QString &newText)
+void OfflineLoginDialog::on_userTextBox_textEdited(const QString& newText)
 {
-    ui->buttonBox->button(QDialogButtonBox::Ok)
-        ->setEnabled(!newText.isEmpty());
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!newText.isEmpty());
 }
 
-void OfflineLoginDialog::onTaskFailed(const QString &reason)
+void OfflineLoginDialog::onTaskFailed(const QString& reason)
 {
     // Set message
     auto lines = reason.split('\n');
     QString processed;
-    for(auto line: lines) {
-        if(line.size()) {
+    for (auto line : lines) {
+        if (line.size()) {
             processed += "<font color='red'>" + line + "</font><br />";
-        }
-        else {
+        } else {
             processed += "<br />";
         }
     }
@@ -83,7 +81,7 @@ void OfflineLoginDialog::onTaskSucceeded()
     QDialog::accept();
 }
 
-void OfflineLoginDialog::onTaskStatus(const QString &status)
+void OfflineLoginDialog::onTaskStatus(const QString& status)
 {
     ui->label->setText(status);
 }
@@ -95,12 +93,11 @@ void OfflineLoginDialog::onTaskProgress(qint64 current, qint64 total)
 }
 
 // Public interface
-MinecraftAccountPtr OfflineLoginDialog::newAccount(QWidget *parent, QString msg)
+MinecraftAccountPtr OfflineLoginDialog::newAccount(QWidget* parent, QString msg)
 {
     OfflineLoginDialog dlg(parent);
     dlg.ui->label->setText(msg);
-    if (dlg.exec() == QDialog::Accepted)
-    {
+    if (dlg.exec() == QDialog::Accepted) {
         return dlg.m_account;
     }
     return nullptr;

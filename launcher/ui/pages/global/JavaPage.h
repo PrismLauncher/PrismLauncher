@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,62 +35,47 @@
 
 #pragma once
 
-#include <memory>
-#include <QDialog>
-#include "ui/pages/BasePage.h"
-#include "JavaCommon.h"
 #include <Application.h>
 #include <QObjectPtr.h>
+#include <QDialog>
+#include <memory>
+#include "JavaCommon.h"
+#include "ui/pages/BasePage.h"
 
 class SettingsObject;
 
-namespace Ui
-{
+namespace Ui {
 class JavaPage;
 }
 
-class JavaPage : public QWidget, public BasePage
-{
+class JavaPage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit JavaPage(QWidget *parent = 0);
+   public:
+    explicit JavaPage(QWidget* parent = 0);
     ~JavaPage();
 
-    QString displayName() const override
-    {
-        return tr("Java");
-    }
-    QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("java");
-    }
-    QString id() const override
-    {
-        return "java-settings";
-    }
-    QString helpPage() const override
-    {
-        return "Java-settings";
-    }
+    QString displayName() const override { return tr("Java"); }
+    QIcon icon() const override { return APPLICATION->getThemedIcon("java"); }
+    QString id() const override { return "java-settings"; }
+    QString helpPage() const override { return "Java-settings"; }
     bool apply() override;
     void retranslate() override;
 
     void updateThresholds();
 
-private:
+   private:
     void applySettings();
     void loadSettings();
 
-private
-slots:
+   private slots:
     void on_javaDetectBtn_clicked();
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();
     void on_maxMemSpinBox_valueChanged(int i);
     void checkerFinished();
 
-private:
-    Ui::JavaPage *ui;
+   private:
+    Ui::JavaPage* ui;
     unique_qobject_ptr<JavaCommon::TestCheck> checker;
 };

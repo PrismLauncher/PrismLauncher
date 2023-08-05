@@ -39,11 +39,10 @@
 
 #include "ExternalResourcesPage.h"
 
-class ShaderPackPage : public ExternalResourcesPage
-{
+class ShaderPackPage : public ExternalResourcesPage {
     Q_OBJECT
-public:
-    explicit ShaderPackPage(MinecraftInstance *instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget *parent = nullptr);
+   public:
+    explicit ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget* parent = nullptr);
     ~ShaderPackPage() override = default;
 
     QString displayName() const override { return tr("Shader packs"); }

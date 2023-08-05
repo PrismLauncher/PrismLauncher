@@ -8,7 +8,11 @@
 #include "settings/INISettingsObject.h"
 
 VanillaCreationTask::VanillaCreationTask(BaseVersion::Ptr version, QString loader, BaseVersion::Ptr loader_version)
-    : InstanceCreationTask(), m_version(std::move(version)), m_using_loader(true), m_loader(std::move(loader)), m_loader_version(std::move(loader_version))
+    : InstanceCreationTask()
+    , m_version(std::move(version))
+    , m_using_loader(true)
+    , m_loader(std::move(loader))
+    , m_loader_version(std::move(loader_version))
 {}
 
 bool VanillaCreationTask::createInstance()
@@ -22,7 +26,7 @@ bool VanillaCreationTask::createInstance()
         auto components = inst.getPackProfile();
         components->buildingFromScratch();
         components->setComponentVersion("net.minecraft", m_version->descriptor(), true);
-        if(m_using_loader)
+        if (m_using_loader)
             components->setComponentVersion(m_loader, m_loader_version->descriptor());
 
         inst.setName(name());

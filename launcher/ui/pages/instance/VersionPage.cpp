@@ -40,14 +40,13 @@
 
 #include "Application.h"
 
-#include <QMessageBox>
-#include <QLabel>
+#include <QAbstractItemModel>
 #include <QEvent>
 #include <QKeyEvent>
-#include <QMenu>
-#include <QAbstractItemModel>
-#include <QMessageBox>
+#include <QLabel>
 #include <QListView>
+#include <QMenu>
+#include <QMessageBox>
 #include <QString>
 #include <QUrl>
 
@@ -55,49 +54,42 @@
 #include "ui_VersionPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/VersionSelectDialog.h"
 #include "ui/dialogs/NewComponentDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
+#include "ui/dialogs/VersionSelectDialog.h"
 
 #include "ui/GuiUtil.h"
 
+#include "DesktopServices.h"
+#include "Exception.h"
+#include "Version.h"
+#include "icons/IconList.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/auth/AccountList.h"
 #include "minecraft/mod/Mod.h"
-#include "icons/IconList.h"
-#include "Exception.h"
-#include "Version.h"
-#include "DesktopServices.h"
 
 #include "meta/Index.h"
 #include "meta/VersionList.h"
 
-class IconProxy : public QIdentityProxyModel
-{
+class IconProxy : public QIdentityProxyModel {
     Q_OBJECT
-public:
-
-    IconProxy(QWidget *parentWidget) : QIdentityProxyModel(parentWidget)
+   public:
+    IconProxy(QWidget* parentWidget) : QIdentityProxyModel(parentWidget)
     {
         connect(parentWidget, &QObject::destroyed, this, &IconProxy::widgetGone);
         m_parentWidget = parentWidget;
     }
 
-    virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const override
+    virtual QVariant data(const QModelIndex& proxyIndex, int role = Qt::DisplayRole) const override
     {
         QVariant var = QIdentityProxyModel::data(proxyIndex, role);
         int column = proxyIndex.column();
-        if(column == 0 && role == Qt::DecorationRole && m_parentWidget)
-        {
-            if(!var.isNull())
-            {
+        if (column == 0 && role == Qt::DecorationRole && m_parentWidget) {
+            if (!var.isNull()) {
                 auto string = var.toString();
-                if(string == "warning")
-                {
+                if (string == "warning") {
                     return APPLICATION->getThemedIcon("status-yellow");
-                }
-                else if(string == "error")
-                {
+                } else if (string == "error") {
                     return APPLICATION->getThemedIcon("status-bad");
                 }
             }
@@ -105,14 +97,11 @@ public:
         }
         return var;
     }
-private slots:
-    void widgetGone()
-    {
-        m_parentWidget = nullptr;
-    }
+   private slots:
+    void widgetGone() { m_parentWidget = nullptr; }
 
-private:
-    QWidget *m_parentWidget = nullptr;
+   private:
+    QWidget* m_parentWidget = nullptr;
 };
 
 QIcon VersionPage::icon() const
@@ -144,15 +133,14 @@ void VersionPage::closedImpl()
     m_wide_bar_setting->set(ui->toolBar->getVisibilityState());
 }
 
-QMenu * VersionPage::createPopupMenu()
+QMenu* VersionPage::createPopupMenu()
 {
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
-    filteredMenu->removeAction( ui->toolBar->toggleViewAction() );
+    filteredMenu->removeAction(ui->toolBar->toggleViewAction());
     return filteredMenu;
 }
 
-VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::VersionPage), m_inst(inst)
+VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow(parent), ui(new Ui::VersionPage), m_inst(inst)
 {
     ui->setupUi(this);
 
@@ -182,10 +170,8 @@ VersionPage::VersionPage(MinecraftInstance *inst, QWidget *parent)
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
 
     connect(m_profile.get(), &PackProfile::minecraftChanged, this, &VersionPage::updateVersionControls);
-    controlsEnabled = !m_inst->isRunning();
     updateVersionControls();
     preselect(0);
-    connect(m_inst, &BaseInstance::runningStatusChanged, this, &VersionPage::updateRunningStatus);
     connect(ui->packageView, &ModListView::customContextMenuRequested, this, &VersionPage::showContextMenu);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &VersionPage::onFilterTextChanged);
 }
@@ -202,18 +188,16 @@ void VersionPage::showContextMenu(const QPoint& pos)
     delete menu;
 }
 
-void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &previous)
+void VersionPage::packageCurrent(const QModelIndex& current, const QModelIndex& previous)
 {
-    if (!current.isValid())
-    {
+    if (!current.isValid()) {
         ui->frame->clear();
         return;
     }
     int row = current.row();
     auto patch = m_profile->getComponent(row);
     auto severity = patch->getProblemSeverity();
-    switch(severity)
-    {
+    switch (severity) {
         case ProblemSeverity::Warning:
             ui->frame->setName(tr("%1 possibly has issues.").arg(patch->getName()));
             break;
@@ -226,16 +210,12 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
             return;
     }
 
-    auto &problems = patch->getProblems();
+    auto& problems = patch->getProblems();
     QString problemOut;
-    for (auto &problem: problems)
-    {
-        if(problem.m_severity == ProblemSeverity::Error)
-        {
+    for (auto& problem : problems) {
+        if (problem.m_severity == ProblemSeverity::Error) {
             problemOut += tr("Error: ");
-        }
-        else if(problem.m_severity == ProblemSeverity::Warning)
-        {
+        } else if (problem.m_severity == ProblemSeverity::Warning) {
             problemOut += tr("Warning: ");
         }
         problemOut += problem.m_description;
@@ -244,72 +224,47 @@ void VersionPage::packageCurrent(const QModelIndex &current, const QModelIndex &
     ui->frame->setDescription(problemOut);
 }
 
-void VersionPage::updateRunningStatus(bool running)
-{
-    if(controlsEnabled == running) {
-        controlsEnabled = !running;
-        updateVersionControls();
-    }
-}
-
 void VersionPage::updateVersionControls()
 {
     // FIXME: this is a dirty hack
     auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
 
-    ui->actionInstall_Forge->setEnabled(controlsEnabled);
-
     bool supportsFabric = minecraftVersion >= Version("1.14");
-    ui->actionInstall_Fabric->setEnabled(controlsEnabled && supportsFabric);
+    ui->actionInstall_Fabric->setEnabled(supportsFabric);
 
     bool supportsQuilt = minecraftVersion >= Version("1.14");
-    ui->actionInstall_Quilt->setEnabled(controlsEnabled && supportsQuilt);
+    ui->actionInstall_Quilt->setEnabled(supportsQuilt);
 
     bool supportsLiteLoader = minecraftVersion <= Version("1.12.2");
-    ui->actionInstall_LiteLoader->setEnabled(controlsEnabled && supportsLiteLoader);
+    ui->actionInstall_LiteLoader->setEnabled(supportsLiteLoader);
 
     updateButtons();
 }
 
 void VersionPage::updateButtons(int row)
 {
-    if(row == -1)
+    if (row == -1)
         row = currentRow();
     auto patch = m_profile->getComponent(row);
-    ui->actionRemove->setEnabled(controlsEnabled && patch && patch->isRemovable());
-    ui->actionMove_down->setEnabled(controlsEnabled && patch && patch->isMoveable());
-    ui->actionMove_up->setEnabled(controlsEnabled && patch && patch->isMoveable());
-    ui->actionChange_version->setEnabled(controlsEnabled && patch && patch->isVersionChangeable());
-    ui->actionEdit->setEnabled(controlsEnabled && patch && patch->isCustom());
-    ui->actionCustomize->setEnabled(controlsEnabled && patch && patch->isCustomizable());
-    ui->actionRevert->setEnabled(controlsEnabled && patch && patch->isRevertible());
-    ui->actionDownload_All->setEnabled(controlsEnabled);
-    ui->actionAdd_Empty->setEnabled(controlsEnabled);
-    ui->actionImport_Components->setEnabled(controlsEnabled);
-    ui->actionReload->setEnabled(controlsEnabled);
-    ui->actionInstall_mods->setEnabled(controlsEnabled);
-    ui->actionReplace_Minecraft_jar->setEnabled(controlsEnabled);
-    ui->actionAdd_to_Minecraft_jar->setEnabled(controlsEnabled);
-    ui->actionAdd_Agents->setEnabled(controlsEnabled);
+    ui->actionRemove->setEnabled(patch && patch->isRemovable());
+    ui->actionMove_down->setEnabled(patch && patch->isMoveable());
+    ui->actionMove_up->setEnabled(patch && patch->isMoveable());
+    ui->actionChange_version->setEnabled(patch && patch->isVersionChangeable());
+    ui->actionEdit->setEnabled(patch && patch->isCustom());
+    ui->actionCustomize->setEnabled(patch && patch->isCustomizable());
+    ui->actionRevert->setEnabled(patch && patch->isRevertible());
 }
 
 bool VersionPage::reloadPackProfile()
 {
-    try
-    {
+    try {
         m_profile->reload(Net::Mode::Online);
         return true;
-    }
-    catch (const Exception &e)
-    {
+    } catch (const Exception& e) {
         QMessageBox::critical(this, tr("Error"), e.cause());
         return false;
-    }
-    catch (...)
-    {
-        QMessageBox::critical(
-            this, tr("Error"),
-            tr("Couldn't load the instance profile."));
+    } catch (...) {
+        QMessageBox::critical(this, tr("Error"), tr("Couldn't load the instance profile."));
         return false;
     }
 }
@@ -322,14 +277,12 @@ void VersionPage::on_actionReload_triggered()
 
 void VersionPage::on_actionRemove_triggered()
 {
-    if (!ui->packageView->currentIndex().isValid())
-    {
+    if (!ui->packageView->currentIndex().isValid()) {
         return;
     }
     int index = ui->packageView->currentIndex().row();
     auto component = m_profile->getComponent(index);
-    if (component->isCustom())
-    {
+    if (component->isCustom()) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
                                                      tr("You are about to remove \"%1\".\n"
                                                         "This is permanent and will completely remove the custom component.\n\n"
@@ -342,8 +295,7 @@ void VersionPage::on_actionRemove_triggered()
             return;
     }
     // FIXME: use actual model, not reloading.
-    if (!m_profile->remove(index))
-    {
+    if (!m_profile->remove(index)) {
         QMessageBox::critical(this, tr("Error"), tr("Couldn't remove file"));
     }
     updateButtons();
@@ -353,17 +305,16 @@ void VersionPage::on_actionRemove_triggered()
 
 void VersionPage::on_actionInstall_mods_triggered()
 {
-    if(m_container)
-    {
+    if (m_container) {
         m_container->selectPage("mods");
     }
 }
 
 void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 {
-    auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
-    if(!list.empty())
-    {
+    auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"),
+                                        APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+    if (!list.empty()) {
         m_profile->installJarMods(list);
     }
     updateButtons();
@@ -371,9 +322,9 @@ void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 
 void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 {
-    auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement (*.jar)"), APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
-    if(!jarPath.isEmpty())
-    {
+    auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement (*.jar)"),
+                                          APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
+    if (!jarPath.isEmpty()) {
         m_profile->installCustomJar(jarPath);
     }
     updateButtons();
@@ -407,12 +358,9 @@ void VersionPage::on_actionAdd_Agents_triggered()
 
 void VersionPage::on_actionMove_up_triggered()
 {
-    try
-    {
+    try {
         m_profile->move(currentRow(), PackProfile::MoveUp);
-    }
-    catch (const Exception &e)
-    {
+    } catch (const Exception& e) {
         QMessageBox::critical(this, tr("Error"), e.cause());
     }
     updateButtons();
@@ -420,12 +368,9 @@ void VersionPage::on_actionMove_up_triggered()
 
 void VersionPage::on_actionMove_down_triggered()
 {
-    try
-    {
+    try {
         m_profile->move(currentRow(), PackProfile::MoveDown);
-    }
-    catch (const Exception &e)
-    {
+    } catch (const Exception& e) {
         QMessageBox::critical(this, tr("Error"), e.cause());
     }
     updateButtons();
@@ -434,39 +379,32 @@ void VersionPage::on_actionMove_down_triggered()
 void VersionPage::on_actionChange_version_triggered()
 {
     auto versionRow = currentRow();
-    if(versionRow == -1)
-    {
+    if (versionRow == -1) {
         return;
     }
     auto patch = m_profile->getComponent(versionRow);
     auto name = patch->getName();
     auto list = patch->getVersionList();
-    if(!list)
-    {
+    if (!list) {
         return;
     }
     auto uid = list->uid();
     // FIXME: this is a horrible HACK. Get version filtering information from the actual metadata...
-    if(uid == "net.minecraftforge")
-    {
+    if (uid == "net.minecraftforge") {
         on_actionInstall_Forge_triggered();
         return;
-    }
-    else if (uid == "com.mumfrey.liteloader")
-    {
+    } else if (uid == "com.mumfrey.liteloader") {
         on_actionInstall_LiteLoader_triggered();
         return;
     }
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
-    if (uid == "net.fabricmc.intermediary" || uid == "org.quiltmc.hashed")
-    {
+    if (uid == "net.fabricmc.intermediary" || uid == "org.quiltmc.hashed") {
         vselect.setEmptyString(tr("No intermediary mappings versions are currently available."));
         vselect.setEmptyErrorString(tr("Couldn't load or download the intermediary mappings version lists!"));
         vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
     }
     auto currentVersion = patch->getVersion();
-    if(!currentVersion.isEmpty())
-    {
+    if (!currentVersion.isEmpty()) {
         vselect.setCurrentVersion(currentVersion);
     }
     if (!vselect.exec() || !vselect.selectedVersion())
@@ -474,8 +412,7 @@ void VersionPage::on_actionChange_version_triggered()
 
     qDebug() << "Change" << uid << "to" << vselect.selectedVersion()->descriptor();
     bool important = false;
-    if(uid == "net.minecraft")
-    {
+    if (uid == "net.minecraft") {
         important = true;
     }
     m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);
@@ -485,19 +422,17 @@ void VersionPage::on_actionChange_version_triggered()
 
 void VersionPage::on_actionDownload_All_triggered()
 {
-    if (!APPLICATION->accounts()->anyAccountIsValid())
-    {
-        CustomMessageBox::selectable(
-            this, tr("Error"),
-            tr("Cannot download Minecraft or update instances unless you have at least "
-               "one account added.\nPlease add your Mojang or Minecraft account."),
-            QMessageBox::Warning)->show();
+    if (!APPLICATION->accounts()->anyAccountIsValid()) {
+        CustomMessageBox::selectable(this, tr("Error"),
+                                     tr("Cannot download Minecraft or update instances unless you have at least "
+                                        "one account added.\nPlease add your Mojang or Minecraft account."),
+                                     QMessageBox::Warning)
+            ->show();
         return;
     }
 
     auto updateTask = m_inst->createUpdateTask(Net::Mode::Online);
-    if (!updateTask)
-    {
+    if (!updateTask) {
         return;
     }
     ProgressDialog tDialog(this);
@@ -511,28 +446,26 @@ void VersionPage::on_actionDownload_All_triggered()
 void VersionPage::on_actionInstall_Forge_triggered()
 {
     auto vlist = APPLICATION->metadataIndex()->get("net.minecraftforge");
-    if(!vlist)
-    {
+    if (!vlist) {
         return;
     }
     VersionSelectDialog vselect(vlist.get(), tr("Select Forge version"), this);
     vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
-    vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") + m_profile->getComponentVersion("net.minecraft"));
+    vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
+                           m_profile->getComponentVersion("net.minecraft"));
     vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
 
     auto currentVersion = m_profile->getComponentVersion("net.minecraftforge");
-    if(!currentVersion.isEmpty())
-    {
+    if (!currentVersion.isEmpty()) {
         vselect.setCurrentVersion(currentVersion);
     }
 
-    if (vselect.exec() && vselect.selectedVersion())
-    {
+    if (vselect.exec() && vselect.selectedVersion()) {
         auto vsn = vselect.selectedVersion();
         m_profile->setComponentVersion("net.minecraftforge", vsn->descriptor());
         m_profile->resolve(Net::Mode::Online);
         // m_profile->installVersion();
-        preselect(m_profile->rowCount(QModelIndex())-1);
+        preselect(m_profile->rowCount(QModelIndex()) - 1);
         m_container->refreshContainer();
     }
 }
@@ -540,8 +473,7 @@ void VersionPage::on_actionInstall_Forge_triggered()
 void VersionPage::on_actionInstall_Fabric_triggered()
 {
     auto vlist = APPLICATION->metadataIndex()->get("net.fabricmc.fabric-loader");
-    if(!vlist)
-    {
+    if (!vlist) {
         return;
     }
     VersionSelectDialog vselect(vlist.get(), tr("Select Fabric Loader version"), this);
@@ -549,17 +481,15 @@ void VersionPage::on_actionInstall_Fabric_triggered()
     vselect.setEmptyErrorString(tr("Couldn't load or download the Fabric Loader version lists!"));
 
     auto currentVersion = m_profile->getComponentVersion("net.fabricmc.fabric-loader");
-    if(!currentVersion.isEmpty())
-    {
+    if (!currentVersion.isEmpty()) {
         vselect.setCurrentVersion(currentVersion);
     }
 
-    if (vselect.exec() && vselect.selectedVersion())
-    {
+    if (vselect.exec() && vselect.selectedVersion()) {
         auto vsn = vselect.selectedVersion();
         m_profile->setComponentVersion("net.fabricmc.fabric-loader", vsn->descriptor());
         m_profile->resolve(Net::Mode::Online);
-        preselect(m_profile->rowCount(QModelIndex())-1);
+        preselect(m_profile->rowCount(QModelIndex()) - 1);
         m_container->refreshContainer();
     }
 }
@@ -567,8 +497,7 @@ void VersionPage::on_actionInstall_Fabric_triggered()
 void VersionPage::on_actionInstall_Quilt_triggered()
 {
     auto vlist = APPLICATION->metadataIndex()->get("org.quiltmc.quilt-loader");
-    if(!vlist)
-    {
+    if (!vlist) {
         return;
     }
     VersionSelectDialog vselect(vlist.get(), tr("Select Quilt Loader version"), this);
@@ -576,17 +505,15 @@ void VersionPage::on_actionInstall_Quilt_triggered()
     vselect.setEmptyErrorString(tr("Couldn't load or download the Quilt Loader version lists!"));
 
     auto currentVersion = m_profile->getComponentVersion("org.quiltmc.quilt-loader");
-    if(!currentVersion.isEmpty())
-    {
+    if (!currentVersion.isEmpty()) {
         vselect.setCurrentVersion(currentVersion);
     }
 
-    if (vselect.exec() && vselect.selectedVersion())
-    {
+    if (vselect.exec() && vselect.selectedVersion()) {
         auto vsn = vselect.selectedVersion();
         m_profile->setComponentVersion("org.quiltmc.quilt-loader", vsn->descriptor());
         m_profile->resolve(Net::Mode::Online);
-        preselect(m_profile->rowCount(QModelIndex())-1);
+        preselect(m_profile->rowCount(QModelIndex()) - 1);
         m_container->refreshContainer();
     }
 }
@@ -595,14 +522,12 @@ void VersionPage::on_actionAdd_Empty_triggered()
 {
     NewComponentDialog compdialog(QString(), QString(), this);
     QStringList blacklist;
-    for(int i = 0; i < m_profile->rowCount(); i++)
-    {
+    for (int i = 0; i < m_profile->rowCount(); i++) {
         auto comp = m_profile->getComponent(i);
         blacklist.push_back(comp->getID());
     }
     compdialog.setBlacklist(blacklist);
-    if (compdialog.exec())
-    {
+    if (compdialog.exec()) {
         qDebug() << "name:" << compdialog.name();
         qDebug() << "uid:" << compdialog.uid();
         m_profile->installEmpty(compdialog.uid(), compdialog.name());
@@ -612,28 +537,26 @@ void VersionPage::on_actionAdd_Empty_triggered()
 void VersionPage::on_actionInstall_LiteLoader_triggered()
 {
     auto vlist = APPLICATION->metadataIndex()->get("com.mumfrey.liteloader");
-    if(!vlist)
-    {
+    if (!vlist) {
         return;
     }
     VersionSelectDialog vselect(vlist.get(), tr("Select LiteLoader version"), this);
     vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
-    vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") + m_profile->getComponentVersion("net.minecraft"));
+    vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") +
+                           m_profile->getComponentVersion("net.minecraft"));
     vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
 
     auto currentVersion = m_profile->getComponentVersion("com.mumfrey.liteloader");
-    if(!currentVersion.isEmpty())
-    {
+    if (!currentVersion.isEmpty()) {
         vselect.setCurrentVersion(currentVersion);
     }
 
-    if (vselect.exec() && vselect.selectedVersion())
-    {
+    if (vselect.exec() && vselect.selectedVersion()) {
         auto vsn = vselect.selectedVersion();
         m_profile->setComponentVersion("com.mumfrey.liteloader", vsn->descriptor());
         m_profile->resolve(Net::Mode::Online);
         // m_profile->installVersion(vselect.selectedVersion());
-        preselect(m_profile->rowCount(QModelIndex())-1);
+        preselect(m_profile->rowCount(QModelIndex()) - 1);
         m_container->refreshContainer();
     }
 }
@@ -648,7 +571,7 @@ void VersionPage::on_actionMinecraftFolder_triggered()
     DesktopServices::openDirectory(m_inst->gameRoot(), true);
 }
 
-void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &previous)
+void VersionPage::versionCurrent(const QModelIndex& current, const QModelIndex& previous)
 {
     currentIdx = current.row();
     updateButtons(currentIdx);
@@ -656,16 +579,13 @@ void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &
 
 void VersionPage::preselect(int row)
 {
-    if(row < 0)
-    {
+    if (row < 0) {
         row = 0;
     }
-    if(row >= m_profile->rowCount(QModelIndex()))
-    {
+    if (row >= m_profile->rowCount(QModelIndex())) {
         row = m_profile->rowCount(QModelIndex()) - 1;
     }
-    if(row < 0)
-    {
+    if (row < 0) {
         return;
     }
     auto model_index = m_profile->index(row);
@@ -681,8 +601,7 @@ void VersionPage::onGameUpdateError(QString error)
 ComponentPtr VersionPage::current()
 {
     auto row = currentRow();
-    if(row < 0)
-    {
+    if (row < 0) {
         return nullptr;
     }
     return m_profile->getComponent(row);
@@ -690,8 +609,7 @@ ComponentPtr VersionPage::current()
 
 int VersionPage::currentRow()
 {
-    if (ui->packageView->selectionModel()->selectedRows().isEmpty())
-    {
+    if (ui->packageView->selectionModel()->selectedRows().isEmpty()) {
         return -1;
     }
     return ui->packageView->selectionModel()->selectedRows().first().row();
@@ -700,18 +618,15 @@ int VersionPage::currentRow()
 void VersionPage::on_actionCustomize_triggered()
 {
     auto version = currentRow();
-    if(version == -1)
-    {
+    if (version == -1) {
         return;
     }
     auto patch = m_profile->getComponent(version);
-    if(!patch->getVersionFile())
-    {
+    if (!patch->getVersionFile()) {
         // TODO: wait for the update task to finish here...
         return;
     }
-    if(!m_profile->customize(version))
-    {
+    if (!m_profile->customize(version)) {
         // TODO: some error box here
     }
     updateButtons();
@@ -721,13 +636,11 @@ void VersionPage::on_actionCustomize_triggered()
 void VersionPage::on_actionEdit_triggered()
 {
     auto version = current();
-    if(!version)
-    {
+    if (!version) {
         return;
     }
     auto filename = version->getFilename();
-    if(!QFileInfo::exists(filename))
-    {
+    if (!QFileInfo::exists(filename)) {
         qWarning() << "file" << filename << "can't be opened for editing, doesn't exist!";
         return;
     }
@@ -737,8 +650,7 @@ void VersionPage::on_actionEdit_triggered()
 void VersionPage::on_actionRevert_triggered()
 {
     auto version = currentRow();
-    if(version == -1)
-    {
+    if (version == -1) {
         return;
     }
     auto component = m_profile->getComponent(version);
@@ -754,8 +666,7 @@ void VersionPage::on_actionRevert_triggered()
     if (response != QMessageBox::Yes)
         return;
 
-    if(!m_profile->revertToBase(version))
-    {
+    if (!m_profile->revertToBase(version)) {
         // TODO: some error box here
     }
     updateButtons();
@@ -763,7 +674,7 @@ void VersionPage::on_actionRevert_triggered()
     m_container->refreshContainer();
 }
 
-void VersionPage::onFilterTextChanged(const QString &newContents)
+void VersionPage::onFilterTextChanged(const QString& newContents)
 {
     m_filterModel->setFilterFixedString(newContents);
 }

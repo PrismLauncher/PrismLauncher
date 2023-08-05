@@ -14,26 +14,25 @@
  */
 
 #include "ExtractNatives.h"
-#include <minecraft/MinecraftInstance.h>
 #include <launch/LaunchTask.h>
+#include <minecraft/MinecraftInstance.h>
 
 #include <quazip/quazip.h>
 #include <quazip/quazipdir.h>
-#include "MMCZip.h"
-#include "FileSystem.h"
 #include <QDir>
+#include "FileSystem.h"
+#include "MMCZip.h"
 
 #ifdef major
-    #undef major
+#undef major
 #endif
 #ifdef minor
-    #undef minor
+#undef minor
 #endif
 
-static QString replaceSuffix (QString target, const QString &suffix, const QString &replacement)
+static QString replaceSuffix(QString target, const QString& suffix, const QString& replacement)
 {
-    if (!target.endsWith(suffix))
-    {
+    if (!target.endsWith(suffix)) {
         return target;
     }
     target.resize(target.length() - suffix.length());
@@ -43,17 +42,14 @@ static QString replaceSuffix (QString target, const QString &suffix, const QStri
 static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibHack, bool nativeOpenAL, bool nativeGLFW)
 {
     QuaZip zip(source);
-    if(!zip.open(QuaZip::mdUnzip))
-    {
+    if (!zip.open(QuaZip::mdUnzip)) {
         return false;
     }
     QDir directory(targetFolder);
-    if (!zip.goToFirstFile())
-    {
+    if (!zip.goToFirstFile()) {
         return false;
     }
-    do
-    {
+    do {
         QString name = zip.getCurrentFileName();
         auto lowercase = name.toLower();
         if (nativeGLFW && name.contains("glfw")) {
@@ -62,19 +58,16 @@ static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibH
         if (nativeOpenAL && name.contains("openal")) {
             continue;
         }
-        if(applyJnilibHack)
-        {
+        if (applyJnilibHack) {
             name = replaceSuffix(name, ".jnilib", ".dylib");
         }
         QString absFilePath = directory.absoluteFilePath(name);
-        if (!JlCompress::extractFile(&zip, "", absFilePath))
-        {
+        if (!JlCompress::extractFile(&zip, "", absFilePath)) {
             return false;
         }
     } while (zip.goToNextFile());
     zip.close();
-    if(zip.getZipError()!=0)
-    {
+    if (zip.getZipError() != 0) {
         return false;
     }
     return true;
@@ -85,8 +78,7 @@ void ExtractNatives::executeTask()
     auto instance = m_parent->instance();
     std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
     auto toExtract = minecraftInstance->getNativeJars();
-    if(toExtract.isEmpty())
-    {
+    if (toExtract.isEmpty()) {
         emitSucceeded();
         return;
     }
@@ -94,14 +86,12 @@ void ExtractNatives::executeTask()
     bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
     bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
 
-    auto outputPath  = minecraftInstance->getNativePath();
+    auto outputPath = minecraftInstance->getNativePath();
     auto javaVersion = minecraftInstance->getJavaVersion();
     bool jniHackEnabled = javaVersion.major() >= 8;
-    for(const auto &source: toExtract)
-    {
-        if(!unzipNatives(source, outputPath, jniHackEnabled, nativeOpenAL, nativeGLFW))
-        {
-            const char *reason = QT_TR_NOOP("Couldn't extract native jar '%1' to destination '%2'");
+    for (const auto& source : toExtract) {
+        if (!unzipNatives(source, outputPath, jniHackEnabled, nativeOpenAL, nativeGLFW)) {
+            const char* reason = QT_TR_NOOP("Couldn't extract native jar '%1' to destination '%2'");
             emit logLine(QString(reason).arg(source, outputPath), MessageLevel::Fatal);
             emitFailed(tr(reason).arg(source, outputPath));
         }

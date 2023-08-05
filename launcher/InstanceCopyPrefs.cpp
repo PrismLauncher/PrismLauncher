@@ -6,16 +6,9 @@
 
 bool InstanceCopyPrefs::allTrue() const
 {
-    return copySaves &&
-        keepPlaytime &&
-        copyGameOptions &&
-        copyResourcePacks &&
-        copyShaderPacks &&
-        copyServers &&
-        copyMods &&
-        copyScreenshots;
+    return copySaves && keepPlaytime && copyGameOptions && copyResourcePacks && copyShaderPacks && copyServers && copyMods &&
+           copyScreenshots;
 }
-
 
 // Returns a single RegEx string of the selected folders/files to filter out (ex: ".minecraft/saves|.minecraft/server.dat")
 QString InstanceCopyPrefs::getSelectedFiltersAsRegex() const
@@ -26,25 +19,30 @@ QString InstanceCopyPrefs::getSelectedFiltersAsRegex(const QStringList& addition
 {
     QStringList filters;
 
-    if(!copySaves)
+    if (!copySaves)
         filters << "saves";
 
-    if(!copyGameOptions)
+    if (!copyGameOptions)
         filters << "options.txt";
 
-    if(!copyResourcePacks)
-        filters << "resourcepacks" << "texturepacks";
+    if (!copyResourcePacks)
+        filters << "resourcepacks"
+                << "texturepacks";
 
-    if(!copyShaderPacks)
+    if (!copyShaderPacks)
         filters << "shaderpacks";
 
-    if(!copyServers)
-        filters << "servers.dat" << "servers.dat_old" << "server-resource-packs";
+    if (!copyServers)
+        filters << "servers.dat"
+                << "servers.dat_old"
+                << "server-resource-packs";
 
-    if(!copyMods)
-        filters << "coremods" << "mods" << "config";
+    if (!copyMods)
+        filters << "coremods"
+                << "mods"
+                << "config";
 
-    if(!copyScreenshots)
+    if (!copyScreenshots)
         filters << "screenshots";
 
     for (auto filter : additionalFilters) {

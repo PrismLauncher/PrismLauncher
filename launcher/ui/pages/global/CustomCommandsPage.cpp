@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -35,13 +35,12 @@
  */
 
 #include "CustomCommandsPage.h"
-#include <QVBoxLayout>
-#include <QTabWidget>
 #include <QTabBar>
+#include <QTabWidget>
+#include <QVBoxLayout>
 
-CustomCommandsPage::CustomCommandsPage(QWidget* parent): QWidget(parent)
+CustomCommandsPage::CustomCommandsPage(QWidget* parent) : QWidget(parent)
 {
-
     auto verticalLayout = new QVBoxLayout(this);
     verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
     verticalLayout->setContentsMargins(0, 0, 0, 0);
@@ -56,9 +55,7 @@ CustomCommandsPage::CustomCommandsPage(QWidget* parent): QWidget(parent)
     loadSettings();
 }
 
-CustomCommandsPage::~CustomCommandsPage()
-{
-}
+CustomCommandsPage::~CustomCommandsPage() {}
 
 bool CustomCommandsPage::apply()
 {
@@ -77,13 +74,8 @@ void CustomCommandsPage::applySettings()
 void CustomCommandsPage::loadSettings()
 {
     auto s = APPLICATION->settings();
-    commands->initialize(
-        false,
-        true,
-        s->get("PreLaunchCommand").toString(),
-        s->get("WrapperCommand").toString(),
-        s->get("PostExitCommand").toString()
-    );
+    commands->initialize(false, true, s->get("PreLaunchCommand").toString(), s->get("WrapperCommand").toString(),
+                         s->get("PostExitCommand").toString());
 }
 
 void CustomCommandsPage::retranslate()

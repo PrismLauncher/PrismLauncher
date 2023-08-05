@@ -55,19 +55,11 @@ void ModrinthPackExportTask::executeTask()
 
 bool ModrinthPackExportTask::abort()
 {
-    if (task != nullptr) {
+    if (task) {
         task->abort();
-        task = nullptr;
         emitAborted();
         return true;
     }
-
-    if (buildZipFuture.isRunning()) {
-        buildZipFuture.cancel();
-        // NOTE: Here we don't do `emitAborted()` because it will be done when `buildZipFuture` actually cancels, which may not occur immediately.
-        return true;
-    }
-
     return false;
 }
 
@@ -94,6 +86,7 @@ void ModrinthPackExportTask::collectFiles()
 
 void ModrinthPackExportTask::collectHashes()
 {
+    setStatus(tr("Finding file hashes..."));
     for (const QFileInfo& file : files) {
         QCoreApplication::processEvents();
 
@@ -157,6 +150,7 @@ void ModrinthPackExportTask::makeApiRequest()
     if (pendingHashes.isEmpty())
         buildZip();
     else {
+        setStatus(tr("Finding versions for hashes..."));
         auto response = std::make_shared<QByteArray>();
         task = api.currentVersions(pendingHashes.values(), "sha512", response);
         connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
@@ -202,74 +196,47 @@ void ModrinthPackExportTask::buildZip()
 {
     setStatus(tr("Adding files..."));
 
-    buildZipFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
-        QuaZip zip(output);
-        if (!zip.open(QuaZip::mdCreate)) {
-            QFile::remove(output);
-            return BuildZipResult(tr("Could not create file"));
-        }
+    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true);
+    zipTask->addExtraFile("modrinth.index.json", generateIndex());
 
-        if (buildZipFuture.isCanceled())
-            return BuildZipResult();
+    zipTask->setExcludeFiles(resolvedFiles.keys());
 
-        QuaZipFile indexFile(&zip);
-        if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
-            QFile::remove(output);
-            return BuildZipResult(tr("Could not create index"));
-        }
-        indexFile.write(generateIndex());
-
-        size_t progress = 0;
-        for (const QFileInfo& file : files) {
-            if (buildZipFuture.isCanceled()) {
-                QFile::remove(output);
-                return BuildZipResult();
-            }
-
-            setProgress(progress, files.length());
-            const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
-            if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative)) {
-                QFile::remove(output);
-                return BuildZipResult(tr("Could not read and compress %1").arg(relative));
-            }
-            progress++;
-        }
-
-        zip.close();
-
-        if (zip.getZipError() != 0) {
-            QFile::remove(output);
-            return BuildZipResult(tr("A zip error occurred"));
-        }
-
-        return BuildZipResult();
+    auto progressStep = std::make_shared<TaskStepProgress>();
+    connect(zipTask.get(), &Task::finished, this, [this, progressStep] {
+        progressStep->state = TaskStepState::Succeeded;
+        stepProgress(*progressStep);
     });
-    connect(&buildZipWatcher, &QFutureWatcher<BuildZipResult>::finished, this, &ModrinthPackExportTask::finish);
-    buildZipWatcher.setFuture(buildZipFuture);
-}
 
-void ModrinthPackExportTask::finish()
-{
-    if (buildZipFuture.isCanceled())
-        emitAborted();
-    else {
-        const BuildZipResult result = buildZipFuture.result();
-        if (result.has_value())
-            emitFailed(result.value());
-        else
-            emitSucceeded();
-    }
+    connect(zipTask.get(), &Task::succeeded, this, &ModrinthPackExportTask::emitSucceeded);
+    connect(zipTask.get(), &Task::aborted, this, &ModrinthPackExportTask::emitAborted);
+    connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
+        progressStep->state = TaskStepState::Failed;
+        stepProgress(*progressStep);
+        emitFailed(reason);
+    });
+    connect(zipTask.get(), &Task::stepProgress, this, &ModrinthPackExportTask::propagateStepProgress);
+
+    connect(zipTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
+        progressStep->update(current, total);
+        stepProgress(*progressStep);
+    });
+    connect(zipTask.get(), &Task::status, this, [this, progressStep](QString status) {
+        progressStep->status = status;
+        stepProgress(*progressStep);
+    });
+    task.reset(zipTask);
+    zipTask->start();
 }
 
 QByteArray ModrinthPackExportTask::generateIndex()
 {
-    QJsonObject obj;
-    obj["formatVersion"] = 1;
-    obj["game"] = "minecraft";
-    obj["name"] = name;
-    obj["versionId"] = version;
+    QJsonObject out;
+    out["formatVersion"] = 1;
+    out["game"] = "minecraft";
+    out["name"] = name;
+    out["versionId"] = version;
     if (!summary.isEmpty())
-        obj["summary"] = summary;
+        out["summary"] = summary;
 
     if (mcInstance) {
         auto profile = mcInstance->getPackProfile();
@@ -290,30 +257,40 @@ QByteArray ModrinthPackExportTask::generateIndex()
         if (forge != nullptr)
             dependencies["forge"] = forge->m_version;
 
-        obj["dependencies"] = dependencies;
+        out["dependencies"] = dependencies;
     }
 
-    QJsonArray files;
-    QMapIterator<QString, ResolvedFile> iterator(resolvedFiles);
-    while (iterator.hasNext()) {
-        iterator.next();
+    QJsonArray filesOut;
+    for (auto iterator = resolvedFiles.constBegin(); iterator != resolvedFiles.constEnd(); iterator++) {
+        QJsonObject fileOut;
 
+        QString path = iterator.key();
         const ResolvedFile& value = iterator.value();
 
-        QJsonObject file;
-        file["path"] = iterator.key();
-        file["downloads"] = QJsonArray({ iterator.value().url });
+        // detect disabled mod
+        const QFileInfo pathInfo(path);
+        if (pathInfo.suffix() == "disabled") {
+            // rename it
+            path = pathInfo.dir().filePath(pathInfo.completeBaseName());
+            // ...and make it optional
+            QJsonObject env;
+            env["client"] = "optional";
+            env["server"] = "optional";
+            fileOut["env"] = env;
+        }
+
+        fileOut["path"] = path;
+        fileOut["downloads"] = QJsonArray{ iterator.value().url };
 
         QJsonObject hashes;
         hashes["sha1"] = value.sha1;
         hashes["sha512"] = value.sha512;
+        fileOut["hashes"] = hashes;
 
-        file["hashes"] = hashes;
-        file["fileSize"] = value.size;
-
-        files << file;
+        fileOut["fileSize"] = value.size;
+        filesOut << fileOut;
     }
-    obj["files"] = files;
+    out["files"] = filesOut;
 
-    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
+    return QJsonDocument(out).toJson(QJsonDocument::Compact);
 }

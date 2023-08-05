@@ -1,21 +1,21 @@
 #pragma once
 
-#include <QHeaderView>
-#include <QAction>
-#include <QTreeView>
 #include <QAbstractListModel>
+#include <QAction>
 #include <QDir>
 #include <QFileSystemWatcher>
+#include <QHeaderView>
 #include <QMutex>
 #include <QSet>
 #include <QSortFilterProxyModel>
+#include <QTreeView>
 
 #include "Resource.h"
 
 #include "BaseInstance.h"
 
-#include "tasks/Task.h"
 #include "tasks/ConcurrentTask.h"
+#include "tasks/Task.h"
 
 class QSortFilterProxyModel;
 
@@ -120,7 +120,7 @@ class ResourceFolderModel : public QAbstractListModel {
     void saveHiddenColumn(int column, bool hidden);
     void loadHiddenColumns(QTreeView* tree);
     QMenu* createHeaderContextMenu(QTreeView* tree);
-    
+
     /** This creates a proxy model to filter / sort the model for a UI.
      *
      *  The actual comparisons and filtering are done directly by the Resource, so to modify behavior go there instead!
@@ -140,10 +140,6 @@ class ResourceFolderModel : public QAbstractListModel {
     };
 
     QString instDirPath() const;
-
-   public slots:
-    void enableInteraction(bool enabled);
-    void disableInteraction(bool disabled) { enableInteraction(!disabled); }
 
    signals:
     void updateFinished();
@@ -193,17 +189,20 @@ class ResourceFolderModel : public QAbstractListModel {
      *  if the resource is complex and has more stuff to parse.
      */
     virtual void onParseSucceeded(int ticket, QString resource_id);
-    virtual void onParseFailed(int ticket, QString resource_id) { Q_UNUSED(ticket); Q_UNUSED(resource_id); }
+    virtual void onParseFailed(int ticket, QString resource_id)
+    {
+        Q_UNUSED(ticket);
+        Q_UNUSED(resource_id);
+    }
 
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
     QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
-    QStringList m_column_names = {"Enable", "Name", "Last Modified"};
-    QStringList m_column_names_translated = {tr("Enable"), tr("Name"), tr("Last Modified")};
-    QList<QHeaderView::ResizeMode> m_column_resize_modes = {  QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents };
-
-    bool m_can_interact = true;
+    QStringList m_column_names = { "Enable", "Name", "Last Modified" };
+    QStringList m_column_names_translated = { tr("Enable"), tr("Name"), tr("Last Modified") };
+    QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Stretch,
+                                                             QHeaderView::ResizeToContents };
 
     QDir m_dir;
     BaseInstance* m_instance;
