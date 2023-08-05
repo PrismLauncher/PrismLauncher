@@ -18,19 +18,16 @@
 #include <launch/LaunchStep.h>
 #include <memory>
 
-class ModMinecraftJar: public LaunchStep
-{
+class ModMinecraftJar : public LaunchStep {
     Q_OBJECT
-public:
-    explicit ModMinecraftJar(LaunchTask *parent) : LaunchStep(parent) {};
+   public:
+    explicit ModMinecraftJar(LaunchTask* parent) : LaunchStep(parent){};
     virtual ~ModMinecraftJar(){};
 
     virtual void executeTask() override;
-    virtual bool canAbort() const override
-    {
-        return false;
-    }
+    virtual bool canAbort() const override { return false; }
     void finalize() override;
-private:
+
+   private:
     bool removeJar();
 };

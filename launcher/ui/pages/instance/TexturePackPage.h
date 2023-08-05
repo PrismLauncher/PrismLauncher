@@ -42,21 +42,17 @@
 
 #include "minecraft/mod/TexturePackFolderModel.h"
 
-class TexturePackPage : public ExternalResourcesPage
-{
+class TexturePackPage : public ExternalResourcesPage {
     Q_OBJECT
-public:
-    explicit TexturePackPage(MinecraftInstance *instance, std::shared_ptr<TexturePackFolderModel> model, QWidget* parent = nullptr);
+   public:
+    explicit TexturePackPage(MinecraftInstance* instance, std::shared_ptr<TexturePackFolderModel> model, QWidget* parent = nullptr);
 
     QString displayName() const override { return tr("Texture packs"); }
     QIcon icon() const override { return APPLICATION->getThemedIcon("resourcepacks"); }
     QString id() const override { return "texturepacks"; }
     QString helpPage() const override { return "Texture-packs"; }
 
-    virtual bool shouldDisplay() const override
-    {
-        return m_instance->traits().contains("texturepacks");
-    }
+    virtual bool shouldDisplay() const override { return m_instance->traits().contains("texturepacks"); }
 
    public slots:
     bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;

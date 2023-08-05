@@ -24,9 +24,9 @@
   # Supported systems.
   systems = [
     "x86_64-linux"
-    "x86_64-darwin"
     "aarch64-linux"
-    # Disabled due to qtbase being currently broken for "aarch64-darwin."
+    # Disabled due to our packages not supporting darwin yet.
+    # "x86_64-darwin"
     # "aarch64-darwin"
   ];
 }

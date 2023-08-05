@@ -15,41 +15,39 @@
 
 #pragma once
 
-#include <QObject>
 #include <QList>
+#include <QObject>
 #include <QUrl>
 
+#include <quazip/quazip.h>
+#include "minecraft/VersionFilterData.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
-#include "minecraft/VersionFilterData.h"
-#include <quazip/quazip.h>
 
 class MinecraftVersion;
 class MinecraftInstance;
 
 // FIXME: This looks very similar to a SequentialTask. Maybe we can reduce code duplications? :^)
 
-class MinecraftUpdate : public Task
-{
+class MinecraftUpdate : public Task {
     Q_OBJECT
-public:
-    explicit MinecraftUpdate(MinecraftInstance *inst, QObject *parent = 0);
-    virtual ~MinecraftUpdate() {};
+   public:
+    explicit MinecraftUpdate(MinecraftInstance* inst, QObject* parent = 0);
+    virtual ~MinecraftUpdate(){};
 
     void executeTask() override;
     bool canAbort() const override;
 
-private
-slots:
+   private slots:
     bool abort() override;
     void subtaskSucceeded();
     void subtaskFailed(QString error);
 
-private:
+   private:
     void next();
 
-private:
-    MinecraftInstance *m_inst = nullptr;
+   private:
+    MinecraftInstance* m_inst = nullptr;
     QList<Task::Ptr> m_tasks;
     QString m_preFailure;
     int m_currentTask = -1;

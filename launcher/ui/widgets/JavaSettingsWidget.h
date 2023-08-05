@@ -1,9 +1,9 @@
 #pragma once
 #include <QWidget>
 
-#include <java/JavaChecker.h>
 #include <BaseVersion.h>
 #include <QObjectPtr.h>
+#include <java/JavaChecker.h>
 #include <QIcon>
 
 class QLineEdit;
@@ -20,30 +20,16 @@ class QToolButton;
 /**
  * This is a widget for all the Java settings dialogs and pages.
  */
-class JavaSettingsWidget : public QWidget
-{
+class JavaSettingsWidget : public QWidget {
     Q_OBJECT
 
-public:
-    explicit JavaSettingsWidget(QWidget *parent);
-    virtual ~JavaSettingsWidget() {};
+   public:
+    explicit JavaSettingsWidget(QWidget* parent);
+    virtual ~JavaSettingsWidget(){};
 
-    enum class JavaStatus
-    {
-        NotSet,
-        Pending,
-        Good,
-        DoesNotExist,
-        DoesNotStart,
-        ReturnedInvalidData
-    } javaStatus = JavaStatus::NotSet;
+    enum class JavaStatus { NotSet, Pending, Good, DoesNotExist, DoesNotStart, ReturnedInvalidData } javaStatus = JavaStatus::NotSet;
 
-    enum class ValidationStatus
-    {
-        Bad,
-        JavaBad,
-        AllOK
-    };
+    enum class ValidationStatus { Bad, JavaBad, AllOK };
 
     void refresh();
     void initialize();
@@ -58,39 +44,38 @@ public:
 
     void updateThresholds();
 
-
-protected slots:
+   protected slots:
     void memoryValueChanged(int);
-    void javaPathEdited(const QString &path);
+    void javaPathEdited(const QString& path);
     void javaVersionSelected(BaseVersion::Ptr version);
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
     void checkFinished(JavaCheckResult result);
 
-protected: /* methods */
-    void checkJavaPathOnEdit(const QString &path);
-    void checkJavaPath(const QString &path);
+   protected: /* methods */
+    void checkJavaPathOnEdit(const QString& path);
+    void checkJavaPath(const QString& path);
     void setJavaStatus(JavaStatus status);
     void setupUi();
 
-private: /* data */
-    VersionSelectWidget *m_versionWidget = nullptr;
-    QVBoxLayout *m_verticalLayout = nullptr;
+   private: /* data */
+    VersionSelectWidget* m_versionWidget = nullptr;
+    QVBoxLayout* m_verticalLayout = nullptr;
 
-    QLineEdit * m_javaPathTextBox = nullptr;
-    QPushButton * m_javaBrowseBtn = nullptr;
-    QToolButton * m_javaStatusBtn = nullptr;
-    QHBoxLayout *m_horizontalLayout = nullptr;
+    QLineEdit* m_javaPathTextBox = nullptr;
+    QPushButton* m_javaBrowseBtn = nullptr;
+    QToolButton* m_javaStatusBtn = nullptr;
+    QHBoxLayout* m_horizontalLayout = nullptr;
 
-    QGroupBox *m_memoryGroupBox = nullptr;
-    QGridLayout *m_gridLayout_2 = nullptr;
-    QSpinBox *m_maxMemSpinBox = nullptr;
-    QLabel *m_labelMinMem = nullptr;
-    QLabel *m_labelMaxMem = nullptr;
-    QLabel *m_labelMaxMemIcon = nullptr;
-    QSpinBox *m_minMemSpinBox = nullptr;
-    QLabel *m_labelPermGen = nullptr;
-    QSpinBox *m_permGenSpinBox = nullptr;
+    QGroupBox* m_memoryGroupBox = nullptr;
+    QGridLayout* m_gridLayout_2 = nullptr;
+    QSpinBox* m_maxMemSpinBox = nullptr;
+    QLabel* m_labelMinMem = nullptr;
+    QLabel* m_labelMaxMem = nullptr;
+    QLabel* m_labelMaxMemIcon = nullptr;
+    QSpinBox* m_minMemSpinBox = nullptr;
+    QLabel* m_labelPermGen = nullptr;
+    QSpinBox* m_permGenSpinBox = nullptr;
     QIcon goodIcon;
     QIcon yellowIcon;
     QIcon badIcon;

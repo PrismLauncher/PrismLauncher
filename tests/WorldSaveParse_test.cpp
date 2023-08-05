@@ -31,13 +31,13 @@
 class WorldSaveParseTest : public QObject {
     Q_OBJECT
 
-    private slots:
+   private slots:
     void test_parseZIP()
     {
         QString source = QFINDTESTDATA("testdata/WorldSaveParse");
 
-        QString zip_ws = FS::PathCombine(source, "minecraft_save_1.zip") ;
-        WorldSave save { QFileInfo(zip_ws) };
+        QString zip_ws = FS::PathCombine(source, "minecraft_save_1.zip");
+        WorldSave save{ QFileInfo(zip_ws) };
 
         bool valid = WorldSaveUtils::processZIP(save);
 
@@ -45,13 +45,13 @@ class WorldSaveParseTest : public QObject {
         QVERIFY(save.saveDirName() == "world_1");
         QVERIFY(valid == true);
     }
-  
+
     void test_parse_ZIP2()
     {
         QString source = QFINDTESTDATA("testdata/WorldSaveParse");
 
-        QString zip_ws = FS::PathCombine(source, "minecraft_save_2.zip") ;
-        WorldSave save { QFileInfo(zip_ws) };
+        QString zip_ws = FS::PathCombine(source, "minecraft_save_2.zip");
+        WorldSave save{ QFileInfo(zip_ws) };
 
         bool valid = WorldSaveUtils::processZIP(save);
 
@@ -59,13 +59,13 @@ class WorldSaveParseTest : public QObject {
         QVERIFY(save.saveDirName() == "world_2");
         QVERIFY(valid == true);
     }
-  
+
     void test_parseFolder()
     {
         QString source = QFINDTESTDATA("testdata/WorldSaveParse");
 
         QString folder_ws = FS::PathCombine(source, "minecraft_save_3");
-        WorldSave save { QFileInfo(folder_ws) };
+        WorldSave save{ QFileInfo(folder_ws) };
 
         bool valid = WorldSaveUtils::processFolder(save);
 
@@ -79,7 +79,7 @@ class WorldSaveParseTest : public QObject {
         QString source = QFINDTESTDATA("testdata/WorldSaveParse");
 
         QString folder_ws = FS::PathCombine(source, "minecraft_save_4");
-        WorldSave save { QFileInfo(folder_ws) };
+        WorldSave save{ QFileInfo(folder_ws) };
 
         bool valid = WorldSaveUtils::process(save);
 

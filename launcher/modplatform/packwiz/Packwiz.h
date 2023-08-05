@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-*  PolyMC - Minecraft Launcher
-*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
-*
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, version 3.
-*
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #pragma once
 
@@ -36,22 +36,22 @@ auto getRealIndexName(QDir& index_dir, QString normalized_index_name, bool shoul
 class V1 {
    public:
     struct Mod {
-        QString slug {};
-        QString name {};
-        QString filename {};
+        QString slug{};
+        QString name{};
+        QString filename{};
         // FIXME: make side an enum
-        QString side {"both"};
+        QString side{ "both" };
 
         // [download]
-        QString mode {};
-        QUrl url {};
-        QString hash_format {};
-        QString hash {};
+        QString mode{};
+        QUrl url{};
+        QString hash_format{};
+        QString hash{};
 
         // [update]
-        ModPlatform::ResourceProvider provider {};
-        QVariant file_id {};
-        QVariant project_id {};
+        ModPlatform::ResourceProvider provider{};
+        QVariant file_id{};
+        QVariant project_id{};
 
        public:
         // This is a totally heuristic, but should work for now.
@@ -95,4 +95,4 @@ class V1 {
     static auto getIndexForMod(QDir& index_dir, QVariant& mod_id) -> Mod;
 };
 
-} // namespace Packwiz
+}  // namespace Packwiz
