@@ -1,26 +1,26 @@
-#include <QList>
-#include <QPair>
-#include <QDebug>
-#include <QTcpServer>
-#include <QMap>
-#include <QNetworkRequest>
-#include <QNetworkReply>
-#include <QNetworkAccessManager>
-#include <QDateTime>
 #include <QCryptographicHash>
-#include <QTimer>
-#include <QVariantMap>
-#include <QUuid>
 #include <QDataStream>
+#include <QDateTime>
+#include <QDebug>
+#include <QList>
+#include <QMap>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QPair>
+#include <QTcpServer>
+#include <QTimer>
+#include <QUuid>
+#include <QVariantMap>
 
 #include <QUrlQuery>
 
 #include "katabasis/DeviceFlow.h"
-#include "katabasis/PollServer.h"
 #include "katabasis/Globals.h"
+#include "katabasis/PollServer.h"
 
-#include "KatabasisLogging.h"
 #include "JsonResponse.h"
+#include "KatabasisLogging.h"
 
 namespace {
 
@@ -43,10 +43,11 @@ bool hasMandatoryDeviceAuthParams(const QVariantMap& params)
     return true;
 }
 
-QByteArray createQueryParameters(const QList<Katabasis::RequestParameter> &parameters) {
+QByteArray createQueryParameters(const QList<Katabasis::RequestParameter>& parameters)
+{
     QByteArray ret;
     bool first = true;
-    for( auto & h: parameters) {
+    for (auto& h : parameters) {
         if (first) {
             first = false;
         } else {
@@ -56,32 +57,35 @@ QByteArray createQueryParameters(const QList<Katabasis::RequestParameter> &param
     }
     return ret;
 }
-}
+}  // namespace
 
 namespace Katabasis {
 
-DeviceFlow::DeviceFlow(Options & opts, Token & token, QObject *parent, QNetworkAccessManager *manager) : QObject(parent), token_(token) {
+DeviceFlow::DeviceFlow(Options& opts, Token& token, QObject* parent, QNetworkAccessManager* manager) : QObject(parent), token_(token)
+{
     manager_ = manager ? manager : new QNetworkAccessManager(this);
     qRegisterMetaType<QNetworkReply::NetworkError>("QNetworkReply::NetworkError");
     options_ = opts;
 }
 
-bool DeviceFlow::linked() {
+bool DeviceFlow::linked()
+{
     return token_.validity != Validity::None;
 }
-void DeviceFlow::setLinked(bool v) {
-    qDebug() << "DeviceFlow::setLinked:" << (v? "true": "false");
+void DeviceFlow::setLinked(bool v)
+{
+    qDebug() << "DeviceFlow::setLinked:" << (v ? "true" : "false");
     token_.validity = v ? Validity::Certain : Validity::None;
 }
 
 void DeviceFlow::updateActivity(Activity activity)
 {
-    if(activity_ == activity) {
+    if (activity_ == activity) {
         return;
     }
 
     activity_ = activity;
-    switch(activity) {
+    switch (activity) {
         case Katabasis::Activity::Idle:
         case Katabasis::Activity::LoggingIn:
         case Katabasis::Activity::LoggingOut:
@@ -103,22 +107,26 @@ void DeviceFlow::updateActivity(Activity activity)
     emit activityChanged(activity_);
 }
 
-QString DeviceFlow::token() {
+QString DeviceFlow::token()
+{
     return token_.token;
 }
-void DeviceFlow::setToken(const QString &v) {
+void DeviceFlow::setToken(const QString& v)
+{
     token_.token = v;
 }
 
-QVariantMap DeviceFlow::extraTokens() {
+QVariantMap DeviceFlow::extraTokens()
+{
     return token_.extra;
 }
 
-void DeviceFlow::setExtraTokens(QVariantMap extraTokens) {
+void DeviceFlow::setExtraTokens(QVariantMap extraTokens)
+{
     token_.extra = extraTokens;
 }
 
-void DeviceFlow::setPollServer(PollServer *server)
+void DeviceFlow::setPollServer(PollServer* server)
 {
     if (pollServer_)
         pollServer_->deleteLater();
@@ -126,7 +134,7 @@ void DeviceFlow::setPollServer(PollServer *server)
     pollServer_ = server;
 }
 
-PollServer *DeviceFlow::pollServer() const
+PollServer* DeviceFlow::pollServer() const
 {
     return pollServer_;
 }
@@ -136,7 +144,7 @@ QVariantMap DeviceFlow::extraRequestParams()
     return extraReqParams_;
 }
 
-void DeviceFlow::setExtraRequestParams(const QVariantMap &value)
+void DeviceFlow::setExtraRequestParams(const QVariantMap& value)
 {
     extraReqParams_ = value;
 }
@@ -149,13 +157,14 @@ QString DeviceFlow::grantType()
     return OAUTH2_GRANT_TYPE_DEVICE;
 }
 
-void DeviceFlow::setGrantType(const QString &value)
+void DeviceFlow::setGrantType(const QString& value)
 {
     grantType_ = value;
 }
 
 // First get the URL and token to display to the user
-void DeviceFlow::login() {
+void DeviceFlow::login()
+{
     qDebug() << "DeviceFlow::link";
 
     updateActivity(Activity::LoggingIn);
@@ -173,7 +182,7 @@ void DeviceFlow::login() {
     QUrl url(options_.authorizationUrl);
     QNetworkRequest deviceRequest(url);
     deviceRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-    QNetworkReply *tokenReply = manager_->post(deviceRequest, payload);
+    QNetworkReply* tokenReply = manager_->post(deviceRequest, payload);
 
     connect(tokenReply, &QNetworkReply::finished, this, &DeviceFlow::onDeviceAuthReplyFinished, Qt::QueuedConnection);
 }
@@ -182,19 +191,18 @@ void DeviceFlow::login() {
 void DeviceFlow::onDeviceAuthReplyFinished()
 {
     qDebug() << "DeviceFlow::onDeviceAuthReplyFinished";
-    QNetworkReply *tokenReply = qobject_cast<QNetworkReply *>(sender());
-    if (!tokenReply)
-    {
-      qDebug() << "DeviceFlow::onDeviceAuthReplyFinished: reply is null";
-      return;
+    QNetworkReply* tokenReply = qobject_cast<QNetworkReply*>(sender());
+    if (!tokenReply) {
+        qDebug() << "DeviceFlow::onDeviceAuthReplyFinished: reply is null";
+        return;
     }
     if (tokenReply->error() == QNetworkReply::NoError) {
         QByteArray replyData = tokenReply->readAll();
 
         // Dump replyData
         // SENSITIVE DATA in RelWithDebInfo or Debug builds
-        //qDebug() << "DeviceFlow::onDeviceAuthReplyFinished: replyData\n";
-        //qDebug() << QString( replyData );
+        // qDebug() << "DeviceFlow::onDeviceAuthReplyFinished: replyData\n";
+        // qDebug() << QString( replyData );
 
         QVariantMap params = parseJsonResponse(replyData);
 
@@ -202,7 +210,7 @@ void DeviceFlow::onDeviceAuthReplyFinished()
         qDebug() << "DeviceFlow::onDeviceAuthReplyFinished: Tokens returned:\n";
         foreach (QString key, params.keys()) {
             // SENSITIVE DATA in RelWithDebInfo or Debug builds, so it is truncated first
-            qDebug() << key << ": "<< params.value( key ).toString();
+            qDebug() << key << ": " << params.value(key).toString();
         }
 
         // Check for mandatory parameters
@@ -237,7 +245,7 @@ void DeviceFlow::onDeviceAuthReplyFinished()
 }
 
 // Spin up polling for the user completing the login flow out of band
-void DeviceFlow::startPollServer(const QVariantMap &params, int expiresIn)
+void DeviceFlow::startPollServer(const QVariantMap& params, int expiresIn)
 {
     qDebug() << "DeviceFlow::startPollServer: device_ and user_code expires in" << expiresIn << "seconds";
 
@@ -250,14 +258,14 @@ void DeviceFlow::startPollServer(const QVariantMap &params, int expiresIn)
 
     QList<RequestParameter> parameters;
     parameters.append(RequestParameter(OAUTH2_CLIENT_ID, options_.clientIdentifier.toUtf8()));
-    if ( !options_.clientSecret.isEmpty() ) {
+    if (!options_.clientSecret.isEmpty()) {
         parameters.append(RequestParameter(OAUTH2_CLIENT_SECRET, options_.clientSecret.toUtf8()));
     }
     parameters.append(RequestParameter(OAUTH2_CODE, deviceCode.toUtf8()));
     parameters.append(RequestParameter(OAUTH2_GRANT_TYPE, grantType.toUtf8()));
     QByteArray payload = createQueryParameters(parameters);
 
-    PollServer * pollServer = new PollServer(manager_, authRequest, payload, expiresIn, this);
+    PollServer* pollServer = new PollServer(manager_, authRequest, payload, expiresIn, this);
     if (params.contains(OAUTH2_INTERVAL)) {
         bool ok = false;
         int interval = params[OAUTH2_INTERVAL].toInt(&ok);
@@ -272,7 +280,8 @@ void DeviceFlow::startPollServer(const QVariantMap &params, int expiresIn)
 }
 
 // Once the user completes the flow, update the internal state and report it to observers
-void DeviceFlow::onVerificationReceived(const QMap<QString, QString> response) {
+void DeviceFlow::onVerificationReceived(const QMap<QString, QString> response)
+{
     qDebug() << "DeviceFlow::onVerificationReceived: Emitting closeBrowser()";
     emit closeBrowser();
 
@@ -307,7 +316,7 @@ void DeviceFlow::onVerificationReceived(const QMap<QString, QString> response) {
 // Or if the flow fails or the polling times out, update the internal state with error and report it to observers
 void DeviceFlow::serverHasClosed(bool paramsfound)
 {
-    if ( !paramsfound ) {
+    if (!paramsfound) {
         // server has probably timed out after receiving first response
         updateActivity(Activity::FailedHard);
     }
@@ -315,7 +324,8 @@ void DeviceFlow::serverHasClosed(bool paramsfound)
     setPollServer(NULL);
 }
 
-void DeviceFlow::logout() {
+void DeviceFlow::logout()
+{
     qDebug() << "DeviceFlow::unlink";
     updateActivity(Activity::LoggingOut);
     // FIXME: implement logout flows... if they exist
@@ -323,24 +333,29 @@ void DeviceFlow::logout() {
     updateActivity(Activity::FailedHard);
 }
 
-QDateTime DeviceFlow::expires() {
+QDateTime DeviceFlow::expires()
+{
     return token_.notAfter;
 }
-void DeviceFlow::setExpires(QDateTime v) {
+void DeviceFlow::setExpires(QDateTime v)
+{
     token_.notAfter = v;
 }
 
-QString DeviceFlow::refreshToken() {
+QString DeviceFlow::refreshToken()
+{
     return token_.refresh_token;
 }
 
-void DeviceFlow::setRefreshToken(const QString &v) {
+void DeviceFlow::setRefreshToken(const QString& v)
+{
     qCDebug(katabasisCredentials) << "new refresh token:" << v;
     token_.refresh_token = v;
 }
 
 namespace {
-QByteArray buildRequestBody(const QMap<QString, QString> &parameters) {
+QByteArray buildRequestBody(const QMap<QString, QString>& parameters)
+{
     QByteArray body;
     bool first = true;
     foreach (QString key, parameters.keys()) {
@@ -354,9 +369,10 @@ QByteArray buildRequestBody(const QMap<QString, QString> &parameters) {
     }
     return body;
 }
-}
+}  // namespace
 
-bool DeviceFlow::refresh() {
+bool DeviceFlow::refresh()
+{
     qDebug() << "DeviceFlow::refresh: Token: ..." << refreshToken().right(7);
 
     updateActivity(Activity::Refreshing);
@@ -376,21 +392,22 @@ bool DeviceFlow::refresh() {
     refreshRequest.setHeader(QNetworkRequest::ContentTypeHeader, MIME_TYPE_XFORM);
     QMap<QString, QString> parameters;
     parameters.insert(OAUTH2_CLIENT_ID, options_.clientIdentifier);
-    if ( !options_.clientSecret.isEmpty() ) {
+    if (!options_.clientSecret.isEmpty()) {
         parameters.insert(OAUTH2_CLIENT_SECRET, options_.clientSecret);
     }
     parameters.insert(OAUTH2_REFRESH_TOKEN, refreshToken());
     parameters.insert(OAUTH2_GRANT_TYPE, OAUTH2_REFRESH_TOKEN);
 
     QByteArray data = buildRequestBody(parameters);
-    QNetworkReply *refreshReply = manager_->post(refreshRequest, data);
+    QNetworkReply* refreshReply = manager_->post(refreshRequest, data);
     timedReplies_.add(refreshReply);
     connect(refreshReply, &QNetworkReply::finished, this, &DeviceFlow::onRefreshFinished, Qt::QueuedConnection);
     return true;
 }
 
-void DeviceFlow::onRefreshFinished() {
-    QNetworkReply *refreshReply = qobject_cast<QNetworkReply *>(sender());
+void DeviceFlow::onRefreshFinished()
+{
+    QNetworkReply* refreshReply = qobject_cast<QNetworkReply*>(sender());
 
     auto networkError = refreshReply->error();
     if (networkError == QNetworkReply::NoError) {
@@ -399,10 +416,9 @@ void DeviceFlow::onRefreshFinished() {
         setToken(tokens.value(OAUTH2_ACCESS_TOKEN).toString());
         setExpires(QDateTime::currentDateTimeUtc().addSecs(tokens.value(OAUTH2_EXPIRES_IN).toInt()));
         QString refreshToken = tokens.value(OAUTH2_REFRESH_TOKEN).toString();
-        if(!refreshToken.isEmpty()) {
+        if (!refreshToken.isEmpty()) {
             setRefreshToken(refreshToken);
-        }
-        else {
+        } else {
             qDebug() << "No new refresh token. Keep the old one.";
         }
         timedReplies_.remove(refreshReply);
@@ -415,37 +431,37 @@ void DeviceFlow::onRefreshFinished() {
     }
 }
 
-void DeviceFlow::onRefreshError(QNetworkReply::NetworkError error, QNetworkReply *refreshReply) {
+void DeviceFlow::onRefreshError(QNetworkReply::NetworkError error, QNetworkReply* refreshReply)
+{
     QString errorString = "No Reply";
-    if(refreshReply) {
+    if (refreshReply) {
         timedReplies_.remove(refreshReply);
         errorString = refreshReply->errorString();
     }
 
-    switch (error)
-    {
-    // used for invalid credentials and similar errors. Fall through.
-    case QNetworkReply::AuthenticationRequiredError:
-    case QNetworkReply::ContentAccessDenied:
-    case QNetworkReply::ContentOperationNotPermittedError:
-    case QNetworkReply::ProtocolInvalidOperationError:
-        updateActivity(Activity::FailedHard);
-        break;
-    case QNetworkReply::ContentGoneError: {
-        updateActivity(Activity::FailedGone);
-        break;
+    switch (error) {
+        // used for invalid credentials and similar errors. Fall through.
+        case QNetworkReply::AuthenticationRequiredError:
+        case QNetworkReply::ContentAccessDenied:
+        case QNetworkReply::ContentOperationNotPermittedError:
+        case QNetworkReply::ProtocolInvalidOperationError:
+            updateActivity(Activity::FailedHard);
+            break;
+        case QNetworkReply::ContentGoneError: {
+            updateActivity(Activity::FailedGone);
+            break;
+        }
+        case QNetworkReply::TimeoutError:
+        case QNetworkReply::OperationCanceledError:
+        case QNetworkReply::SslHandshakeFailedError:
+        default:
+            updateActivity(Activity::FailedSoft);
+            return;
     }
-    case QNetworkReply::TimeoutError:
-    case QNetworkReply::OperationCanceledError:
-    case QNetworkReply::SslHandshakeFailedError:
-    default:
-        updateActivity(Activity::FailedSoft);
-        return;
-    }
-    if(refreshReply) {
+    if (refreshReply) {
         refreshReply->deleteLater();
     }
     qDebug() << "DeviceFlow::onRefreshFinished: Error" << static_cast<int>(error) << " - " << errorString;
 }
 
-}
+}  // namespace Katabasis

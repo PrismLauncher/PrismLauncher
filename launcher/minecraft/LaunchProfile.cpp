@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -55,9 +55,9 @@ void LaunchProfile::clear()
     m_problemSeverity = ProblemSeverity::None;
 }
 
-static void applyString(const QString & from, QString & to)
+static void applyString(const QString& from, QString& to)
 {
-    if(from.isEmpty())
+    if (from.isEmpty())
         return;
     to = from;
 }
@@ -94,8 +94,7 @@ void LaunchProfile::applyMinecraftVersionType(const QString& type)
 
 void LaunchProfile::applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets)
 {
-    if(assets)
-    {
+    if (assets) {
         m_minecraftAssets = assets;
     }
 }
@@ -109,10 +108,8 @@ void LaunchProfile::applyTweakers(const QStringList& tweakers)
 {
     // if the applied tweakers override an existing one, skip it. this effectively moves it later in the sequence
     QStringList newTweakers;
-    for(auto & tweaker: m_tweakers)
-    {
-        if (tweakers.contains(tweaker))
-        {
+    for (auto& tweaker : m_tweakers) {
+        if (tweakers.contains(tweaker)) {
             continue;
         }
         newTweakers.append(tweaker);
@@ -127,13 +124,11 @@ void LaunchProfile::applyJarMods(const QList<LibraryPtr>& jarMods)
     this->m_jarMods.append(jarMods);
 }
 
-static int findLibraryByName(QList<LibraryPtr> *haystack, const GradleSpecifier &needle)
+static int findLibraryByName(QList<LibraryPtr>* haystack, const GradleSpecifier& needle)
 {
     int retval = -1;
-    for (int i = 0; i < haystack->size(); ++i)
-    {
-        if (haystack->at(i)->rawName().matchName(needle))
-        {
+    for (int i = 0; i < haystack->size(); ++i) {
+        if (haystack->at(i)->rawName().matchName(needle)) {
             // only one is allowed.
             if (retval != -1)
                 return -1;
@@ -145,24 +140,21 @@ static int findLibraryByName(QList<LibraryPtr> *haystack, const GradleSpecifier 
 
 void LaunchProfile::applyMods(const QList<LibraryPtr>& mods)
 {
-    QList<LibraryPtr> * list = &m_mods;
-    for(auto & mod: mods)
-    {
+    QList<LibraryPtr>* list = &m_mods;
+    for (auto& mod : mods) {
         auto modCopy = Library::limitedCopy(mod);
 
         // find the mod by name.
         const int index = findLibraryByName(list, mod->rawName());
         // mod not found? just add it.
-        if (index < 0)
-        {
+        if (index < 0) {
             list->append(modCopy);
             return;
         }
 
         auto existingLibrary = list->at(index);
         // if we are higher it means we should update
-        if (Version(mod->version()) > Version(existingLibrary->version()))
-        {
+        if (Version(mod->version()) > Version(existingLibrary->version())) {
             list->replace(index, modCopy);
         }
     }
@@ -173,16 +165,14 @@ void LaunchProfile::applyCompatibleJavaMajors(QList<int>& javaMajor)
     m_compatibleJavaMajors.append(javaMajor);
 }
 
-void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext & runtimeContext)
+void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext& runtimeContext)
 {
-    if(!library->isActive(runtimeContext))
-    {
+    if (!library->isActive(runtimeContext)) {
         return;
     }
 
-    QList<LibraryPtr> * list = &m_libraries;
-    if(library->isNative())
-    {
+    QList<LibraryPtr>* list = &m_libraries;
+    if (library->isNative()) {
         list = &m_nativeLibraries;
     }
 
@@ -191,29 +181,25 @@ void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext & runt
     // find the library by name.
     const int index = findLibraryByName(list, library->rawName());
     // library not found? just add it.
-    if (index < 0)
-    {
+    if (index < 0) {
         list->append(libraryCopy);
         return;
     }
 
     auto existingLibrary = list->at(index);
     // if we are higher it means we should update
-    if (Version(library->version()) > Version(existingLibrary->version()))
-    {
+    if (Version(library->version()) > Version(existingLibrary->version())) {
         list->replace(index, libraryCopy);
     }
 }
 
-void LaunchProfile::applyMavenFile(LibraryPtr mavenFile, const RuntimeContext & runtimeContext)
+void LaunchProfile::applyMavenFile(LibraryPtr mavenFile, const RuntimeContext& runtimeContext)
 {
-    if(!mavenFile->isActive(runtimeContext))
-    {
+    if (!mavenFile->isActive(runtimeContext)) {
         return;
     }
 
-    if(mavenFile->isNative())
-    {
+    if (mavenFile->isNative()) {
         return;
     }
 
@@ -221,16 +207,14 @@ void LaunchProfile::applyMavenFile(LibraryPtr mavenFile, const RuntimeContext & 
     m_mavenFiles.append(Library::limitedCopy(mavenFile));
 }
 
-void LaunchProfile::applyAgent(AgentPtr agent, const RuntimeContext & runtimeContext)
+void LaunchProfile::applyAgent(AgentPtr agent, const RuntimeContext& runtimeContext)
 {
     auto lib = agent->library();
-    if(!lib->isActive(runtimeContext))
-    {
+    if (!lib->isActive(runtimeContext)) {
         return;
     }
 
-    if(lib->isNative())
-    {
+    if (lib->isNative()) {
         return;
     }
 
@@ -244,16 +228,14 @@ const LibraryPtr LaunchProfile::getMainJar() const
 
 void LaunchProfile::applyMainJar(LibraryPtr jar)
 {
-    if(jar)
-    {
+    if (jar) {
         m_mainJar = jar;
     }
 }
 
 void LaunchProfile::applyProblemSeverity(ProblemSeverity severity)
 {
-    if (m_problemSeverity < severity)
-    {
+    if (m_problemSeverity < severity) {
         m_problemSeverity = severity;
     }
 }
@@ -279,12 +261,12 @@ QString LaunchProfile::getMainClass() const
     return m_mainClass;
 }
 
-const QSet<QString> &LaunchProfile::getTraits() const
+const QSet<QString>& LaunchProfile::getTraits() const
 {
     return m_traits;
 }
 
-const QStringList & LaunchProfile::getTweakers() const
+const QStringList& LaunchProfile::getTweakers() const
 {
     return m_tweakers;
 }
@@ -306,8 +288,7 @@ QString LaunchProfile::getMinecraftVersionType() const
 
 std::shared_ptr<MojangAssetIndexInfo> LaunchProfile::getMinecraftAssets() const
 {
-    if(!m_minecraftAssets)
-    {
+    if (!m_minecraftAssets) {
         return std::make_shared<MojangAssetIndexInfo>("legacy");
     }
     return m_minecraftAssets;
@@ -318,80 +299,69 @@ QString LaunchProfile::getMinecraftArguments() const
     return m_minecraftArguments;
 }
 
-const QStringList & LaunchProfile::getAddnJvmArguments() const
+const QStringList& LaunchProfile::getAddnJvmArguments() const
 {
     return m_addnJvmArguments;
 }
 
-const QList<LibraryPtr> & LaunchProfile::getJarMods() const
+const QList<LibraryPtr>& LaunchProfile::getJarMods() const
 {
     return m_jarMods;
 }
 
-const QList<LibraryPtr> & LaunchProfile::getLibraries() const
+const QList<LibraryPtr>& LaunchProfile::getLibraries() const
 {
     return m_libraries;
 }
 
-const QList<LibraryPtr> & LaunchProfile::getNativeLibraries() const
+const QList<LibraryPtr>& LaunchProfile::getNativeLibraries() const
 {
     return m_nativeLibraries;
 }
 
-const QList<LibraryPtr> & LaunchProfile::getMavenFiles() const
+const QList<LibraryPtr>& LaunchProfile::getMavenFiles() const
 {
     return m_mavenFiles;
 }
 
-const QList<AgentPtr> & LaunchProfile::getAgents() const
+const QList<AgentPtr>& LaunchProfile::getAgents() const
 {
     return m_agents;
 }
 
-const QList<int> & LaunchProfile::getCompatibleJavaMajors() const
+const QList<int>& LaunchProfile::getCompatibleJavaMajors() const
 {
     return m_compatibleJavaMajors;
 }
 
-void LaunchProfile::getLibraryFiles(
-    const RuntimeContext & runtimeContext,
-    QStringList& jars,
-    QStringList& nativeJars,
-    const QString& overridePath,
-    const QString& tempPath
-) const
+void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,
+                                    QStringList& jars,
+                                    QStringList& nativeJars,
+                                    const QString& overridePath,
+                                    const QString& tempPath) const
 {
     QStringList native32, native64;
     jars.clear();
     nativeJars.clear();
-    for (auto lib : getLibraries())
-    {
+    for (auto lib : getLibraries()) {
         lib->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
     }
     // NOTE: order is important here, add main jar last to the lists
-    if(m_mainJar)
-    {
+    if (m_mainJar) {
         // FIXME: HACK!! jar modding is weird and unsystematic!
-        if(m_jarMods.size())
-        {
+        if (m_jarMods.size()) {
             QDir tempDir(tempPath);
             jars.append(tempDir.absoluteFilePath("minecraft.jar"));
-        }
-        else
-        {
+        } else {
             m_mainJar->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
         }
     }
-    for (auto lib : getNativeLibraries())
-    {
+    for (auto lib : getNativeLibraries()) {
         lib->getApplicableFiles(runtimeContext, jars, nativeJars, native32, native64, overridePath);
     }
-    if(runtimeContext.javaArchitecture == "32")
-    {
+    if (runtimeContext.javaArchitecture == "32") {
         nativeJars.append(native32);
-    }
-    else if(runtimeContext.javaArchitecture == "64")
-    {
+    } else if (runtimeContext.javaArchitecture == "64") {
         nativeJars.append(native64);
     }
 }

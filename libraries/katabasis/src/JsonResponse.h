@@ -6,7 +6,7 @@ class QByteArray;
 
 namespace Katabasis {
 
-    /// Parse JSON data into a QVariantMap
-QVariantMap parseJsonResponse(const QByteArray &data);
+/// Parse JSON data into a QVariantMap
+QVariantMap parseJsonResponse(const QByteArray& data);
 
-}
+}  // namespace Katabasis

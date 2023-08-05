@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -40,15 +40,14 @@
 // #define BREAK_RETURN
 
 #ifdef BREAK_INFINITE_LOOP
-#include <thread>
 #include <chrono>
+#include <thread>
 #endif
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 #ifdef BREAK_INFINITE_LOOP
-    while(true)
-    {
+    while (true) {
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 #endif
@@ -67,33 +66,31 @@ int main(int argc, char *argv[])
     // initialize Qt
     Application app(argc, argv);
 
-    switch (app.status())
-    {
-    case Application::StartingUp:
-    case Application::Initialized:
-    {
-        Q_INIT_RESOURCE(multimc);
-        Q_INIT_RESOURCE(backgrounds);
-        Q_INIT_RESOURCE(documents);
-        Q_INIT_RESOURCE(prismlauncher);
+    switch (app.status()) {
+        case Application::StartingUp:
+        case Application::Initialized: {
+            Q_INIT_RESOURCE(multimc);
+            Q_INIT_RESOURCE(backgrounds);
+            Q_INIT_RESOURCE(documents);
+            Q_INIT_RESOURCE(prismlauncher);
 
-        Q_INIT_RESOURCE(pe_dark);
-        Q_INIT_RESOURCE(pe_light);
-        Q_INIT_RESOURCE(pe_blue);
-        Q_INIT_RESOURCE(pe_colored);
-        Q_INIT_RESOURCE(breeze_dark);
-        Q_INIT_RESOURCE(breeze_light);
-        Q_INIT_RESOURCE(OSX);
-        Q_INIT_RESOURCE(iOS);
-        Q_INIT_RESOURCE(flat);
-        Q_INIT_RESOURCE(flat_white);
-        return app.exec();
-    }
-    case Application::Failed:
-        return 1;
-    case Application::Succeeded:
-        return 0;
-    default:
-        return -1;
+            Q_INIT_RESOURCE(pe_dark);
+            Q_INIT_RESOURCE(pe_light);
+            Q_INIT_RESOURCE(pe_blue);
+            Q_INIT_RESOURCE(pe_colored);
+            Q_INIT_RESOURCE(breeze_dark);
+            Q_INIT_RESOURCE(breeze_light);
+            Q_INIT_RESOURCE(OSX);
+            Q_INIT_RESOURCE(iOS);
+            Q_INIT_RESOURCE(flat);
+            Q_INIT_RESOURCE(flat_white);
+            return app.exec();
+        }
+        case Application::Failed:
+            return 1;
+        case Application::Succeeded:
+            return 0;
+        default:
+            return -1;
     }
 }

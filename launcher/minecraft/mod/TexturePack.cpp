@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -44,7 +44,7 @@ void TexturePack::setImage(QImage new_image) const
         PixmapCache::remove(m_pack_image_cache_key.key);
 
     // scale the image to avoid flooding the pixmapcache
-    auto pixmap = QPixmap::fromImage(new_image.scaled({64, 64}, Qt::AspectRatioMode::KeepAspectRatioByExpanding));
+    auto pixmap = QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding));
 
     m_pack_image_cache_key.key = PixmapCache::insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;
