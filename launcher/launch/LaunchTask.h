@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,54 +36,36 @@
  */
 
 #pragma once
-#include <QProcess>
 #include <QObjectPtr.h>
-#include "LogModel.h"
+#include <QProcess>
 #include "BaseInstance.h"
-#include "MessageLevel.h"
-#include "LoggedProcess.h"
 #include "LaunchStep.h"
+#include "LogModel.h"
+#include "LoggedProcess.h"
+#include "MessageLevel.h"
 
-class LaunchTask: public Task
-{
+class LaunchTask : public Task {
     Q_OBJECT
-protected:
+   protected:
     explicit LaunchTask(InstancePtr instance);
     void init();
 
-public:
-    enum State
-    {
-        NotStarted,
-        Running,
-        Waiting,
-        Failed,
-        Aborted,
-        Finished
-    };
+   public:
+    enum State { NotStarted, Running, Waiting, Failed, Aborted, Finished };
 
-public: /* methods */
+   public: /* methods */
     static shared_qobject_ptr<LaunchTask> create(InstancePtr inst);
-    virtual ~LaunchTask() {};
+    virtual ~LaunchTask(){};
 
     void appendStep(shared_qobject_ptr<LaunchStep> step);
     void prependStep(shared_qobject_ptr<LaunchStep> step);
     void setCensorFilter(QMap<QString, QString> filter);
 
-    InstancePtr instance()
-    {
-        return m_instance;
-    }
+    InstancePtr instance() { return m_instance; }
 
-    void setPid(qint64 pid)
-    {
-        m_pid = pid;
-    }
+    void setPid(qint64 pid) { m_pid = pid; }
 
-    qint64 pid()
-    {
-        return m_pid;
-    }
+    qint64 pid() { return m_pid; }
 
     /**
      * @brief prepare the process for launch (for multi-stage launch)
@@ -104,39 +86,39 @@ public: /* methods */
 
     shared_qobject_ptr<LogModel> getLogModel();
 
-public:
-    void substituteVariables(QStringList &args) const;
-    void substituteVariables(QString &cmd) const;
+   public:
+    void substituteVariables(QStringList& args) const;
+    void substituteVariables(QString& cmd) const;
     QString censorPrivateInfo(QString in);
 
-protected: /* methods */
+   protected: /* methods */
     virtual void emitFailed(QString reason) override;
     virtual void emitSucceeded() override;
 
-signals:
+   signals:
     /**
      * @brief emitted when the launch preparations are done
      */
     void readyForLaunch();
 
-    void requestProgress(Task *task);
+    void requestProgress(Task* task);
 
     void requestLogging();
 
-public slots:
+   public slots:
     void onLogLines(const QStringList& lines, MessageLevel::Enum defaultLevel = MessageLevel::Launcher);
     void onLogLine(QString line, MessageLevel::Enum defaultLevel = MessageLevel::Launcher);
     void onReadyForLaunch();
     void onStepFinished();
     void onProgressReportingRequested();
 
-private: /*methods */
-    void finalizeSteps(bool successful, const QString & error);
+   private: /*methods */
+    void finalizeSteps(bool successful, const QString& error);
 
-protected: /* data */
+   protected: /* data */
     InstancePtr m_instance;
     shared_qobject_ptr<LogModel> m_logModel;
-    QList <shared_qobject_ptr<LaunchStep>> m_steps;
+    QList<shared_qobject_ptr<LaunchStep>> m_steps;
     QMap<QString, QString> m_censorFilter;
     int currentStep = -1;
     State state = NotStarted;

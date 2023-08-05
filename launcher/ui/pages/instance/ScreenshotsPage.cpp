@@ -39,52 +39,50 @@
 #include "BuildConfig.h"
 #include "ui_ScreenshotsPage.h"
 
-#include <QModelIndex>
-#include <QMutableListIterator>
-#include <QMap>
-#include <QSet>
+#include <QClipboard>
+#include <QEvent>
 #include <QFileIconProvider>
 #include <QFileSystemModel>
-#include <QStyledItemDelegate>
-#include <QLineEdit>
-#include <QEvent>
-#include <QPainter>
-#include <QClipboard>
 #include <QKeyEvent>
+#include <QLineEdit>
+#include <QMap>
 #include <QMenu>
+#include <QModelIndex>
+#include <QMutableListIterator>
+#include <QPainter>
 #include <QRegularExpression>
+#include <QSet>
+#include <QStyledItemDelegate>
 
 #include <Application.h>
 
-#include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/ProgressDialog.h"
 
 #include "net/NetJob.h"
-#include "screenshots/ImgurUpload.h"
 #include "screenshots/ImgurAlbumCreation.h"
+#include "screenshots/ImgurUpload.h"
 #include "tasks/SequentialTask.h"
 
-#include "RWStorage.h"
-#include <FileSystem.h>
 #include <DesktopServices.h>
+#include <FileSystem.h>
+#include "RWStorage.h"
 
 typedef RWStorage<QString, QIcon> SharedIconCache;
 typedef std::shared_ptr<SharedIconCache> SharedIconCachePtr;
 
-class ThumbnailingResult : public QObject
-{
+class ThumbnailingResult : public QObject {
     Q_OBJECT
-public slots:
-    inline void emitResultsReady(const QString &path) { emit resultsReady(path); }
-    inline void emitResultsFailed(const QString &path) { emit resultsFailed(path); }
-signals:
-    void resultsReady(const QString &path);
-    void resultsFailed(const QString &path);
+   public slots:
+    inline void emitResultsReady(const QString& path) { emit resultsReady(path); }
+    inline void emitResultsFailed(const QString& path) { emit resultsFailed(path); }
+   signals:
+    void resultsReady(const QString& path);
+    void resultsFailed(const QString& path);
 };
 
-class ThumbnailRunnable : public QRunnable
-{
-public:
+class ThumbnailRunnable : public QRunnable {
+   public:
     ThumbnailRunnable(QString path, SharedIconCachePtr cache)
     {
         m_path = path;
@@ -129,57 +127,50 @@ public:
 
 // this is about as elegant and well written as a bag of bricks with scribbles done by insane
 // asylum patients.
-class FilterModel : public QIdentityProxyModel
-{
+class FilterModel : public QIdentityProxyModel {
     Q_OBJECT
-public:
-    explicit FilterModel(QObject *parent = 0) : QIdentityProxyModel(parent)
+   public:
+    explicit FilterModel(QObject* parent = 0) : QIdentityProxyModel(parent)
     {
         m_thumbnailingPool.setMaxThreadCount(4);
         m_thumbnailCache = std::make_shared<SharedIconCache>();
         m_thumbnailCache->add("placeholder", APPLICATION->getThemedIcon("screenshot-placeholder"));
         connect(&watcher, SIGNAL(fileChanged(QString)), SLOT(fileChanged(QString)));
     }
-    virtual ~FilterModel() {
+    virtual ~FilterModel()
+    {
         m_thumbnailingPool.clear();
         if (!m_thumbnailingPool.waitForDone(500))
             qDebug() << "Thumbnail pool took longer than 500ms to finish";
     }
-    virtual QVariant data(const QModelIndex &proxyIndex, int role = Qt::DisplayRole) const
+    virtual QVariant data(const QModelIndex& proxyIndex, int role = Qt::DisplayRole) const
     {
         auto model = sourceModel();
         if (!model)
             return QVariant();
-        if (role == Qt::DisplayRole || role == Qt::EditRole)
-        {
+        if (role == Qt::DisplayRole || role == Qt::EditRole) {
             QVariant result = sourceModel()->data(mapToSource(proxyIndex), role);
             return result.toString().remove(QRegularExpression("\\.png$"));
         }
-        if (role == Qt::DecorationRole)
-        {
-            QVariant result =
-                sourceModel()->data(mapToSource(proxyIndex), QFileSystemModel::FilePathRole);
+        if (role == Qt::DecorationRole) {
+            QVariant result = sourceModel()->data(mapToSource(proxyIndex), QFileSystemModel::FilePathRole);
             QString filePath = result.toString();
             QIcon temp;
-            if (!watched.contains(filePath))
-            {
-                ((QFileSystemWatcher &)watcher).addPath(filePath);
-                ((QSet<QString> &)watched).insert(filePath);
+            if (!watched.contains(filePath)) {
+                ((QFileSystemWatcher&)watcher).addPath(filePath);
+                ((QSet<QString>&)watched).insert(filePath);
             }
-            if (m_thumbnailCache->get(filePath, temp))
-            {
+            if (m_thumbnailCache->get(filePath, temp)) {
                 return temp;
             }
-            if (!m_failed.contains(filePath))
-            {
-                ((FilterModel *)this)->thumbnailImage(filePath);
+            if (!m_failed.contains(filePath)) {
+                ((FilterModel*)this)->thumbnailImage(filePath);
             }
             return (m_thumbnailCache->get("placeholder"));
         }
         return sourceModel()->data(mapToSource(proxyIndex), role);
     }
-    virtual bool setData(const QModelIndex &index, const QVariant &value,
-                         int role = Qt::EditRole)
+    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole)
     {
         auto model = sourceModel();
         if (!model)
@@ -189,23 +180,21 @@ public:
         // FIXME: this is a workaround for a bug in QFileSystemModel, where it doesn't
         // sort after renames
         {
-            ((QFileSystemModel *)model)->setNameFilterDisables(true);
-            ((QFileSystemModel *)model)->setNameFilterDisables(false);
+            ((QFileSystemModel*)model)->setNameFilterDisables(true);
+            ((QFileSystemModel*)model)->setNameFilterDisables(false);
         }
         return model->setData(mapToSource(index), value.toString() + ".png", role);
     }
 
-private:
+   private:
     void thumbnailImage(QString path)
     {
         auto runnable = new ThumbnailRunnable(path, m_thumbnailCache);
-        connect(&(runnable->m_resultEmitter), SIGNAL(resultsReady(QString)),
-                SLOT(thumbnailReady(QString)));
-        connect(&(runnable->m_resultEmitter), SIGNAL(resultsFailed(QString)),
-                SLOT(thumbnailFailed(QString)));
-        ((QThreadPool &)m_thumbnailingPool).start(runnable);
+        connect(&(runnable->m_resultEmitter), SIGNAL(resultsReady(QString)), SLOT(thumbnailReady(QString)));
+        connect(&(runnable->m_resultEmitter), SIGNAL(resultsFailed(QString)), SLOT(thumbnailFailed(QString)));
+        ((QThreadPool&)m_thumbnailingPool).start(runnable);
     }
-private slots:
+   private slots:
     void thumbnailReady(QString path) { emit layoutChanged(); }
     void thumbnailFailed(QString path) { m_failed.insert(path); }
     void fileChanged(QString filepath)
@@ -219,7 +208,7 @@ private slots:
         }
     }
 
-private:
+   private:
     SharedIconCachePtr m_thumbnailCache;
     QThreadPool m_thumbnailingPool;
     QSet<QString> m_failed;
@@ -227,18 +216,15 @@ private:
     QFileSystemWatcher watcher;
 };
 
-class CenteredEditingDelegate : public QStyledItemDelegate
-{
-public:
-    explicit CenteredEditingDelegate(QObject *parent = 0) : QStyledItemDelegate(parent) {}
+class CenteredEditingDelegate : public QStyledItemDelegate {
+   public:
+    explicit CenteredEditingDelegate(QObject* parent = 0) : QStyledItemDelegate(parent) {}
     virtual ~CenteredEditingDelegate() {}
-    virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                                  const QModelIndex &index) const
+    virtual QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
     {
         auto widget = QStyledItemDelegate::createEditor(parent, option, index);
-        auto foo = dynamic_cast<QLineEdit *>(widget);
-        if (foo)
-        {
+        auto foo = dynamic_cast<QLineEdit*>(widget);
+        if (foo) {
             foo->setAlignment(Qt::AlignHCenter);
             foo->setFrame(true);
             foo->setMaximumWidth(192);
@@ -247,15 +233,14 @@ public:
     }
 };
 
-ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::ScreenshotsPage)
+ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(parent), ui(new Ui::ScreenshotsPage)
 {
     m_model.reset(new QFileSystemModel());
     m_filterModel.reset(new FilterModel());
     m_filterModel->setSourceModel(m_model.get());
     m_model->setFilter(QDir::Files);
     m_model->setReadOnly(false);
-    m_model->setNameFilters({"*.png"});
+    m_model->setNameFilters({ "*.png" });
     m_model->setNameFilterDisables(false);
     m_folder = path;
     m_valid = FS::ensureFolderPathExists(m_folder);
@@ -278,31 +263,29 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
     connect(ui->listView, SIGNAL(activated(QModelIndex)), SLOT(onItemActivated(QModelIndex)));
 }
 
-bool ScreenshotsPage::eventFilter(QObject *obj, QEvent *evt)
+bool ScreenshotsPage::eventFilter(QObject* obj, QEvent* evt)
 {
     if (obj != ui->listView)
         return QWidget::eventFilter(obj, evt);
-    if (evt->type() != QEvent::KeyPress)
-    {
+    if (evt->type() != QEvent::KeyPress) {
         return QWidget::eventFilter(obj, evt);
     }
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evt);
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evt);
 
     if (keyEvent->matches(QKeySequence::Copy)) {
         on_actionCopy_File_s_triggered();
         return true;
     }
 
-    switch (keyEvent->key())
-    {
-    case Qt::Key_Delete:
-        on_actionDelete_triggered();
-        return true;
-    case Qt::Key_F2:
-        on_actionRename_triggered();
-        return true;
-    default:
-        break;
+    switch (keyEvent->key()) {
+        case Qt::Key_Delete:
+            on_actionDelete_triggered();
+            return true;
+        case Qt::Key_F2:
+            on_actionRename_triggered();
+            return true;
+        default:
+            break;
     }
     return QWidget::eventFilter(obj, evt);
 }
@@ -322,17 +305,17 @@ void ScreenshotsPage::ShowContextMenu(const QPoint& pos)
     auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
 
     if (ui->listView->selectionModel()->selectedRows().size() > 1) {
-        menu->removeAction( ui->actionCopy_Image );
+        menu->removeAction(ui->actionCopy_Image);
     }
 
     menu->exec(ui->listView->mapToGlobal(pos));
     delete menu;
 }
 
-QMenu * ScreenshotsPage::createPopupMenu()
+QMenu* ScreenshotsPage::createPopupMenu()
 {
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
-    filteredMenu->removeAction( ui->toolBar->toggleViewAction() );
+    filteredMenu->removeAction(ui->toolBar->toggleViewAction());
     return filteredMenu;
 }
 
@@ -345,13 +328,12 @@ void ScreenshotsPage::onItemActivated(QModelIndex index)
     DesktopServices::openFile(info.absoluteFilePath());
 }
 
-void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection &selected)
+void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection& selected)
 {
     bool allReadable = !selected.isEmpty();
     bool allWritable = !selected.isEmpty();
 
-    for (auto index : selected.indexes())
-    {
+    for (auto index : selected.indexes()) {
         if (!index.isValid())
             break;
         auto info = m_model->fileInfo(index);
@@ -478,15 +460,13 @@ void ScreenshotsPage::on_actionCopy_Image_triggered()
 void ScreenshotsPage::on_actionCopy_File_s_triggered()
 {
     auto selection = ui->listView->selectionModel()->selectedRows();
-    if(selection.size() < 1)
-    {
+    if (selection.size() < 1) {
         // Don't do anything so we don't empty the users clipboard
         return;
     }
 
     QString buf = "";
-    for (auto item : selection)
-    {
+    for (auto item : selection) {
         auto info = m_model->fileInfo(item);
         buf += "file:///" + info.absoluteFilePath() + "\r\n";
     }
@@ -518,8 +498,7 @@ void ScreenshotsPage::on_actionDelete_triggered()
     if (response != QMessageBox::Yes)
         return;
 
-    for (auto item : selected)
-    {
+    for (auto item : selected) {
         if (FS::trash(m_model->filePath(item)))
             continue;
 
@@ -538,23 +517,19 @@ void ScreenshotsPage::on_actionRename_triggered()
 
 void ScreenshotsPage::openedImpl()
 {
-    if(!m_valid)
-    {
+    if (!m_valid) {
         m_valid = FS::ensureFolderPathExists(m_folder);
     }
-    if (m_valid)
-    {
+    if (m_valid) {
         QString path = QDir(m_folder).absolutePath();
         auto idx = m_model->setRootPath(path);
-        if(idx.isValid())
-        {
+        if (idx.isValid()) {
             ui->listView->setModel(m_filterModel.get());
-            connect(ui->listView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ScreenshotsPage::onCurrentSelectionChanged);
-            onCurrentSelectionChanged(ui->listView->selectionModel()->selection()); // set initial button enable states
+            connect(ui->listView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+                    &ScreenshotsPage::onCurrentSelectionChanged);
+            onCurrentSelectionChanged(ui->listView->selectionModel()->selection());  // set initial button enable states
             ui->listView->setRootIndex(m_filterModel->mapFromSource(idx));
-        }
-        else
-        {
+        } else {
             ui->listView->setModel(nullptr);
         }
     }

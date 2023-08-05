@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (c) 2022 Lenny McLennington <lenny@sneed.church>
@@ -39,41 +39,28 @@
 
 #include <QWidget>
 
-#include "ui/pages/BasePage.h"
 #include <Application.h>
+#include "ui/pages/BasePage.h"
 
 namespace Ui {
 class APIPage;
 }
 
-class APIPage : public QWidget, public BasePage
-{
+class APIPage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit APIPage(QWidget *parent = 0);
+   public:
+    explicit APIPage(QWidget* parent = 0);
     ~APIPage();
 
-    QString displayName() const override
-    {
-        return tr("APIs");
-    }
-    QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("worlds");
-    }
-    QString id() const override
-    {
-        return "apis";
-    }
-    QString helpPage() const override
-    {
-        return "APIs";
-    }
+    QString displayName() const override { return tr("APIs"); }
+    QIcon icon() const override { return APPLICATION->getThemedIcon("worlds"); }
+    QString id() const override { return "apis"; }
+    QString helpPage() const override { return "APIs"; }
     virtual bool apply() override;
     void retranslate() override;
 
-private:
+   private:
     int baseURLPasteType;
     void resetBaseURLNote();
     void updateBaseURLNote(int index);
@@ -81,7 +68,6 @@ private:
     void loadSettings();
     void applySettings();
 
-private:
-    Ui::APIPage *ui;
+   private:
+    Ui::APIPage* ui;
 };
-

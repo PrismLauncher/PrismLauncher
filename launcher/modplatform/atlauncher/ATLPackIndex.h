@@ -18,21 +18,18 @@
 
 #include "ATLPackManifest.h"
 
+#include <QMetaType>
 #include <QString>
 #include <QVector>
-#include <QMetaType>
 
-namespace ATLauncher
-{
+namespace ATLauncher {
 
-struct IndexedVersion
-{
+struct IndexedVersion {
     QString version;
     QString minecraft;
 };
 
-struct IndexedPack
-{
+struct IndexedPack {
     int id;
     int position;
     QString name;
@@ -44,7 +41,7 @@ struct IndexedPack
     QString safeName;
 };
 
-void loadIndexedPack(IndexedPack & m, QJsonObject & obj);
-}
+void loadIndexedPack(IndexedPack& m, QJsonObject& obj);
+}  // namespace ATLauncher
 
 Q_DECLARE_METATYPE(ATLauncher::IndexedPack)

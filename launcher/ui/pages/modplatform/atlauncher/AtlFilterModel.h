@@ -20,10 +20,9 @@
 
 namespace Atl {
 
-class FilterModel : public QSortFilterProxyModel
-{
+class FilterModel : public QSortFilterProxyModel {
     Q_OBJECT
-public:
+   public:
     FilterModel(QObject* parent = Q_NULLPTR);
     enum Sorting {
         ByPopularity,
@@ -36,15 +35,14 @@ public:
     Sorting getCurrentSorting();
     void setSearchTerm(QString term);
 
-protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+   protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
-private:
+   private:
     QMap<QString, Sorting> sortings;
     Sorting currentSorting;
     QString searchTerm;
-
 };
 
-}
+}  // namespace Atl

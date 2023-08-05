@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,84 +38,67 @@
 
 #include "Json.h"
 
-static ATLauncher::DownloadType parseDownloadType(QString rawType) {
-    if(rawType == QString("server")) {
+static ATLauncher::DownloadType parseDownloadType(QString rawType)
+{
+    if (rawType == QString("server")) {
         return ATLauncher::DownloadType::Server;
-    }
-    else if(rawType == QString("browser")) {
+    } else if (rawType == QString("browser")) {
         return ATLauncher::DownloadType::Browser;
-    }
-    else if(rawType == QString("direct")) {
+    } else if (rawType == QString("direct")) {
         return ATLauncher::DownloadType::Direct;
     }
 
     return ATLauncher::DownloadType::Unknown;
 }
 
-static ATLauncher::ModType parseModType(QString rawType) {
+static ATLauncher::ModType parseModType(QString rawType)
+{
     // See https://wiki.atlauncher.com/mod_types
-    if(rawType == QString("root")) {
+    if (rawType == QString("root")) {
         return ATLauncher::ModType::Root;
-    }
-    else if(rawType == QString("forge")) {
+    } else if (rawType == QString("forge")) {
         return ATLauncher::ModType::Forge;
-    }
-    else if(rawType == QString("jar")) {
+    } else if (rawType == QString("jar")) {
         return ATLauncher::ModType::Jar;
-    }
-    else if(rawType == QString("mods")) {
+    } else if (rawType == QString("mods")) {
         return ATLauncher::ModType::Mods;
-    }
-    else if(rawType == QString("flan")) {
+    } else if (rawType == QString("flan")) {
         return ATLauncher::ModType::Flan;
-    }
-    else if(rawType == QString("dependency") || rawType == QString("depandency")) {
+    } else if (rawType == QString("dependency") || rawType == QString("depandency")) {
         return ATLauncher::ModType::Dependency;
-    }
-    else if(rawType == QString("ic2lib")) {
+    } else if (rawType == QString("ic2lib")) {
         return ATLauncher::ModType::Ic2Lib;
-    }
-    else if(rawType == QString("denlib")) {
+    } else if (rawType == QString("denlib")) {
         return ATLauncher::ModType::DenLib;
-    }
-    else if(rawType == QString("coremods")) {
+    } else if (rawType == QString("coremods")) {
         return ATLauncher::ModType::Coremods;
-    }
-    else if(rawType == QString("mcpc")) {
+    } else if (rawType == QString("mcpc")) {
         return ATLauncher::ModType::MCPC;
-    }
-    else if(rawType == QString("plugins")) {
+    } else if (rawType == QString("plugins")) {
         return ATLauncher::ModType::Plugins;
-    }
-    else if(rawType == QString("extract")) {
+    } else if (rawType == QString("extract")) {
         return ATLauncher::ModType::Extract;
-    }
-    else if(rawType == QString("decomp")) {
+    } else if (rawType == QString("decomp")) {
         return ATLauncher::ModType::Decomp;
-    }
-    else if(rawType == QString("texturepack")) {
+    } else if (rawType == QString("texturepack")) {
         return ATLauncher::ModType::TexturePack;
-    }
-    else if(rawType == QString("resourcepack")) {
+    } else if (rawType == QString("resourcepack")) {
         return ATLauncher::ModType::ResourcePack;
-    }
-    else if(rawType == QString("shaderpack")) {
+    } else if (rawType == QString("shaderpack")) {
         return ATLauncher::ModType::ShaderPack;
-    }
-    else if(rawType == QString("texturepackextract")) {
+    } else if (rawType == QString("texturepackextract")) {
         return ATLauncher::ModType::TexturePackExtract;
-    }
-    else if(rawType == QString("resourcepackextract")) {
+    } else if (rawType == QString("resourcepackextract")) {
         return ATLauncher::ModType::ResourcePackExtract;
-    }
-    else if(rawType == QString("millenaire")) {
+    } else if (rawType == QString("millenaire")) {
         return ATLauncher::ModType::Millenaire;
     }
 
     return ATLauncher::ModType::Unknown;
 }
 
-static void loadVersionLoader(ATLauncher::VersionLoader & p, QJsonObject & obj) {
+static void loadVersionLoader(ATLauncher::VersionLoader& p, QJsonObject& obj)
+{
     p.type = Json::requireString(obj, "type");
     p.choose = Json::ensureBoolean(obj, QString("choose"), false);
 
@@ -134,7 +117,8 @@ static void loadVersionLoader(ATLauncher::VersionLoader & p, QJsonObject & obj) 
     }
 }
 
-static void loadVersionLibrary(ATLauncher::VersionLibrary & p, QJsonObject & obj) {
+static void loadVersionLibrary(ATLauncher::VersionLibrary& p, QJsonObject& obj)
+{
     p.url = Json::requireString(obj, "url");
     p.file = Json::requireString(obj, "file");
     p.md5 = Json::requireString(obj, "md5");
@@ -145,12 +129,14 @@ static void loadVersionLibrary(ATLauncher::VersionLibrary & p, QJsonObject & obj
     p.server = Json::ensureString(obj, "server", "");
 }
 
-static void loadVersionConfigs(ATLauncher::VersionConfigs & p, QJsonObject & obj) {
+static void loadVersionConfigs(ATLauncher::VersionConfigs& p, QJsonObject& obj)
+{
     p.filesize = Json::requireInteger(obj, "filesize");
     p.sha1 = Json::requireString(obj, "sha1");
 }
 
-static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
+static void loadVersionMod(ATLauncher::VersionMod& p, QJsonObject& obj)
+{
     p.name = Json::requireString(obj, "name");
     p.version = Json::requireString(obj, "version");
     p.url = Json::requireString(obj, "url");
@@ -167,18 +153,18 @@ static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
     // when the mod represents Forge. As there is little difference between "Jar" and "Forge, some
     // packs regretfully use "Jar". This will correct the type to "Forge" in these cases (as best
     // it can).
-    if(p.name == QString("Minecraft Forge") && p.type == ATLauncher::ModType::Jar) {
+    if (p.name == QString("Minecraft Forge") && p.type == ATLauncher::ModType::Jar) {
         p.type_raw = "forge";
         p.type = ATLauncher::ModType::Forge;
     }
 
-    if(obj.contains("extractTo")) {
+    if (obj.contains("extractTo")) {
         p.extractTo_raw = Json::requireString(obj, "extractTo");
         p.extractTo = parseModType(p.extractTo_raw);
         p.extractFolder = Json::ensureString(obj, "extractFolder", "").replace("%s%", "/");
     }
 
-    if(obj.contains("decompType")) {
+    if (obj.contains("decompType")) {
         p.decompType_raw = Json::requireString(obj, "decompType");
         p.decompType = parseModType(p.decompType_raw);
         p.decompFile = Json::requireString(obj, "decompFile");
@@ -191,7 +177,7 @@ static void loadVersionMod(ATLauncher::VersionMod & p, QJsonObject & obj) {
     p.hidden = Json::ensureBoolean(obj, QString("hidden"), false);
     p.library = Json::ensureBoolean(obj, QString("library"), false);
     p.group = Json::ensureString(obj, QString("group"), "");
-    if(obj.contains("depends")) {
+    if (obj.contains("depends")) {
         auto dependsArr = Json::requireArray(obj, "depends");
         for (const auto depends : dependsArr) {
             p.depends.append(Json::requireString(depends));
@@ -282,31 +268,30 @@ static void loadVersionDeletes(ATLauncher::VersionDeletes& d, QJsonObject& obj)
     }
 }
 
-void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
+void ATLauncher::loadVersion(PackVersion& v, QJsonObject& obj)
 {
     v.version = Json::requireString(obj, "version");
     v.minecraft = Json::requireString(obj, "minecraft");
     v.noConfigs = Json::ensureBoolean(obj, QString("noConfigs"), false);
 
-    if(obj.contains("mainClass")) {
+    if (obj.contains("mainClass")) {
         auto main = Json::requireObject(obj, "mainClass");
         loadVersionMainClass(v.mainClass, main);
     }
 
-    if(obj.contains("extraArguments")) {
+    if (obj.contains("extraArguments")) {
         auto arguments = Json::requireObject(obj, "extraArguments");
         loadVersionExtraArguments(v.extraArguments, arguments);
     }
 
-    if(obj.contains("loader")) {
+    if (obj.contains("loader")) {
         auto loader = Json::requireObject(obj, "loader");
         loadVersionLoader(v.loader, loader);
     }
 
-    if(obj.contains("libraries")) {
+    if (obj.contains("libraries")) {
         auto libraries = Json::requireArray(obj, "libraries");
-        for (const auto libraryRaw : libraries)
-        {
+        for (const auto libraryRaw : libraries) {
             auto libraryObj = Json::requireObject(libraryRaw);
             ATLauncher::VersionLibrary target;
             loadVersionLibrary(target, libraryObj);
@@ -314,10 +299,9 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
         }
     }
 
-    if(obj.contains("mods")) {
+    if (obj.contains("mods")) {
         auto mods = Json::requireArray(obj, "mods");
-        for (const auto modRaw : mods)
-        {
+        for (const auto modRaw : mods) {
             auto modObj = Json::requireObject(modRaw);
             ATLauncher::VersionMod mod;
             loadVersionMod(mod, modObj);
@@ -325,18 +309,18 @@ void ATLauncher::loadVersion(PackVersion & v, QJsonObject & obj)
         }
     }
 
-    if(obj.contains("configs")) {
+    if (obj.contains("configs")) {
         auto configsObj = Json::requireObject(obj, "configs");
         loadVersionConfigs(v.configs, configsObj);
     }
 
     auto colourObj = Json::ensureObject(obj, "colours");
-    for (const auto &key : colourObj.keys()) {
+    for (const auto& key : colourObj.keys()) {
         v.colours[key] = Json::requireString(colourObj.value(key), "colour");
     }
 
     auto warningsObj = Json::ensureObject(obj, "warnings");
-    for (const auto &key : warningsObj.keys()) {
+    for (const auto& key : warningsObj.keys()) {
         v.warnings[key] = Json::requireString(warningsObj.value(key), "warning");
     }
 

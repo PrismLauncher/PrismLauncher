@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2021-2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -97,8 +97,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     TechnicSolder::PackBuild build;
     try {
         TechnicSolder::loadPackBuild(build, obj);
-    }
-    catch (const JSONValidationError& e) {
+    } catch (const JSONValidationError& e) {
         emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
         m_filesNetJob.reset();
         return;
@@ -139,17 +138,14 @@ void Technic::SolderPackInstallTask::downloadSucceeded()
 
     setStatus(tr("Extracting modpack"));
     m_filesNetJob.reset();
-    m_extractFuture = QtConcurrent::run([this]()
-    {
+    m_extractFuture = QtConcurrent::run([this]() {
         int i = 0;
         QString extractDir = FS::PathCombine(m_stagingPath, ".minecraft");
         FS::ensureFolderPathExists(extractDir);
 
-        while (m_modCount > i)
-        {
+        while (m_modCount > i) {
             auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
-            if (!MMCZip::extractDir(path, extractDir))
-            {
+            if (!MMCZip::extractDir(path, extractDir)) {
                 return false;
             }
             i++;
@@ -182,8 +178,7 @@ void Technic::SolderPackInstallTask::downloadAborted()
 
 void Technic::SolderPackInstallTask::extractFinished()
 {
-    if (!m_extractFuture.result())
-    {
+    if (!m_extractFuture.result()) {
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
@@ -191,30 +186,22 @@ void Technic::SolderPackInstallTask::extractFinished()
 
     qDebug() << "Fixing permissions for extracted pack files...";
     QDirIterator it(extractDir, QDirIterator::Subdirectories);
-    while (it.hasNext())
-    {
+    while (it.hasNext()) {
         auto filepath = it.next();
         QFileInfo file(filepath);
         auto permissions = QFile::permissions(filepath);
         auto origPermissions = permissions;
-        if(file.isDir())
-        {
+        if (file.isDir()) {
             // Folder +rwx for current user
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser;
-        }
-        else
-        {
+        } else {
             // File +rw for current user
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
         }
-        if(origPermissions != permissions)
-        {
-            if(!QFile::setPermissions(filepath, permissions))
-            {
+        if (origPermissions != permissions) {
+            if (!QFile::setPermissions(filepath, permissions)) {
                 logWarning(tr("Could not fix permissions for %1").arg(filepath));
-            }
-            else
-            {
+            } else {
                 qDebug() << "Fixed" << filepath;
             }
         }
@@ -230,4 +217,3 @@ void Technic::SolderPackInstallTask::extractAborted()
 {
     emitFailed(tr("Instance import has been aborted."));
 }
-

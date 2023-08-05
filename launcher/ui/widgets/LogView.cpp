@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,8 +34,8 @@
  */
 
 #include "LogView.h"
-#include <QTextBlock>
 #include <QScrollBar>
+#include <QTextBlock>
 
 LogView::LogView(QWidget* parent) : QPlainTextEdit(parent)
 {
@@ -50,13 +50,10 @@ LogView::~LogView()
 
 void LogView::setWordWrap(bool wrapping)
 {
-    if(wrapping)
-    {
+    if (wrapping) {
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setLineWrapMode(QPlainTextEdit::WidgetWidth);
-    }
-    else
-    {
+    } else {
         setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
         setLineWrapMode(QPlainTextEdit::NoWrap);
     }
@@ -64,16 +61,14 @@ void LogView::setWordWrap(bool wrapping)
 
 void LogView::setModel(QAbstractItemModel* model)
 {
-    if(m_model)
-    {
+    if (m_model) {
         disconnect(m_model, &QAbstractItemModel::modelReset, this, &LogView::repopulate);
         disconnect(m_model, &QAbstractItemModel::rowsInserted, this, &LogView::rowsInserted);
         disconnect(m_model, &QAbstractItemModel::rowsAboutToBeInserted, this, &LogView::rowsAboutToBeInserted);
         disconnect(m_model, &QAbstractItemModel::rowsRemoved, this, &LogView::rowsRemoved);
     }
     m_model = model;
-    if(m_model)
-    {
+    if (m_model) {
         connect(m_model, &QAbstractItemModel::modelReset, this, &LogView::repopulate);
         connect(m_model, &QAbstractItemModel::rowsInserted, this, &LogView::rowsInserted);
         connect(m_model, &QAbstractItemModel::rowsAboutToBeInserted, this, &LogView::rowsAboutToBeInserted);
@@ -83,15 +78,14 @@ void LogView::setModel(QAbstractItemModel* model)
     repopulate();
 }
 
-QAbstractItemModel * LogView::model() const
+QAbstractItemModel* LogView::model() const
 {
     return m_model;
 }
 
 void LogView::modelDestroyed(QObject* model)
 {
-    if(m_model == model)
-    {
+    if (m_model == model) {
         setModel(nullptr);
     }
 }
@@ -100,8 +94,7 @@ void LogView::repopulate()
 {
     auto doc = document();
     doc->clear();
-    if(!m_model)
-    {
+    if (!m_model) {
         return;
     }
     rowsInserted(QModelIndex(), 0, m_model->rowCount() - 1);
@@ -112,39 +105,32 @@ void LogView::rowsAboutToBeInserted(const QModelIndex& parent, int first, int la
     Q_UNUSED(parent)
     Q_UNUSED(first)
     Q_UNUSED(last)
-    QScrollBar *bar = verticalScrollBar();
+    QScrollBar* bar = verticalScrollBar();
     int max_bar = bar->maximum();
     int val_bar = bar->value();
-    if (m_scroll)
-    {
+    if (m_scroll) {
         m_scroll = (max_bar - val_bar) <= 1;
-    }
-    else
-    {
+    } else {
         m_scroll = val_bar == max_bar;
     }
 }
 
 void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
 {
-    for(int i = first; i <= last; i++)
-    {
+    for (int i = first; i <= last; i++) {
         auto idx = m_model->index(i, 0, parent);
         auto text = m_model->data(idx, Qt::DisplayRole).toString();
         QTextCharFormat format(*m_defaultFormat);
         auto font = m_model->data(idx, Qt::FontRole);
-        if(font.isValid())
-        {
+        if (font.isValid()) {
             format.setFont(font.value<QFont>());
         }
         auto fg = m_model->data(idx, Qt::ForegroundRole);
-        if(fg.isValid())
-        {
+        if (fg.isValid()) {
             format.setForeground(fg.value<QColor>());
         }
         auto bg = m_model->data(idx, Qt::BackgroundRole);
-        if(bg.isValid())
-        {
+        if (bg.isValid()) {
             format.setBackground(bg.value<QColor>());
         }
         auto workCursor = textCursor();
@@ -152,10 +138,9 @@ void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
         workCursor.insertText(text, format);
         workCursor.insertBlock();
     }
-    if(m_scroll && !m_scrolling)
-    {
+    if (m_scroll && !m_scrolling) {
         m_scrolling = true;
-        QMetaObject::invokeMethod( this, "scrollToBottom", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(this, "scrollToBottom", Qt::QueuedConnection);
     }
 }
 
