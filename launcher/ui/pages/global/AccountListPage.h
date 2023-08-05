@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
@@ -41,47 +41,35 @@
 
 #include "ui/pages/BasePage.h"
 
-#include "minecraft/auth/AccountList.h"
 #include "Application.h"
+#include "minecraft/auth/AccountList.h"
 
-namespace Ui
-{
+namespace Ui {
 class AccountListPage;
 }
 
 class AuthenticateTask;
 
-class AccountListPage : public QMainWindow, public BasePage
-{
+class AccountListPage : public QMainWindow, public BasePage {
     Q_OBJECT
-public:
-    explicit AccountListPage(QWidget *parent = 0);
+   public:
+    explicit AccountListPage(QWidget* parent = 0);
     ~AccountListPage();
 
-    QString displayName() const override
-    {
-        return tr("Accounts");
-    }
+    QString displayName() const override { return tr("Accounts"); }
     QIcon icon() const override
     {
         auto icon = APPLICATION->getThemedIcon("accounts");
-        if(icon.isNull())
-        {
+        if (icon.isNull()) {
             icon = APPLICATION->getThemedIcon("noaccount");
         }
         return icon;
     }
-    QString id() const override
-    {
-        return "accounts";
-    }
-    QString helpPage() const override
-    {
-        return "Getting-Started#adding-an-account";
-    }
+    QString id() const override { return "accounts"; }
+    QString helpPage() const override { return "Getting-Started#adding-an-account"; }
     void retranslate() override;
 
-public slots:
+   public slots:
     void on_actionAddMojang_triggered();
     void on_actionAddMicrosoft_triggered();
     void on_actionAddOffline_triggered();
@@ -97,12 +85,12 @@ public slots:
     //! Updates the states of the dialog's buttons.
     void updateButtonStates();
 
-protected slots:
-    void ShowContextMenu(const QPoint &pos);
+   protected slots:
+    void ShowContextMenu(const QPoint& pos);
 
-private:
-    void changeEvent(QEvent * event) override;
-    QMenu * createPopupMenu() override;
+   private:
+    void changeEvent(QEvent* event) override;
+    QMenu* createPopupMenu() override;
     shared_qobject_ptr<AccountList> m_accounts;
-    Ui::AccountListPage *ui;
+    Ui::AccountListPage* ui;
 };

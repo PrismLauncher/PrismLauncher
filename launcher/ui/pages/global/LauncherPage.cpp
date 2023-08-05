@@ -3,7 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (c) 2022 dada513 <dada513@protonmail.com>
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,17 +38,17 @@
 #include "LauncherPage.h"
 #include "ui_LauncherPage.h"
 
-#include <QFileDialog>
-#include <QMessageBox>
 #include <QDir>
-#include <QTextCharFormat>
+#include <QFileDialog>
 #include <QMenuBar>
+#include <QMessageBox>
+#include <QTextCharFormat>
 
-#include "settings/SettingsObject.h"
 #include <FileSystem.h>
 #include "Application.h"
 #include "BuildConfig.h"
 #include "DesktopServices.h"
+#include "settings/SettingsObject.h"
 #include "ui/themes/ITheme.h"
 #include "updater/ExternalUpdater.h"
 
@@ -56,15 +56,14 @@
 #include <QProcess>
 
 // FIXME: possibly move elsewhere
-enum InstSortMode
-{
+enum InstSortMode {
     // Sort alphabetically by name.
     Sort_Name,
     // Sort by which instance was launched most recently.
     Sort_LastLaunch
 };
 
-LauncherPage::LauncherPage(QWidget *parent) : QWidget(parent), ui(new Ui::LauncherPage)
+LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::LauncherPage)
 {
     ui->setupUi(this);
     auto origForeground = ui->fontPreview->palette().color(ui->fontPreview->foregroundRole());
@@ -104,46 +103,39 @@ void LauncherPage::on_instDirBrowseBtn_clicked()
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Instance Folder"), ui->instDirTextBox->text());
 
     // do not allow current dir - it's dirty. Do not allow dirs that don't exist
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists())
-    {
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
         QString cooked_dir = FS::NormalizePath(raw_dir);
-        if (FS::checkProblemticPathJava(QDir(cooked_dir)))
-        {
+        if (FS::checkProblemticPathJava(QDir(cooked_dir))) {
             QMessageBox warning;
-            warning.setText(tr("You're trying to specify an instance folder which\'s path "
-                               "contains at least one \'!\'. "
-                               "Java is known to cause problems if that is the case, your "
-                               "instances (probably) won't start!"));
+            warning.setText(
+                tr("You're trying to specify an instance folder which\'s path "
+                   "contains at least one \'!\'. "
+                   "Java is known to cause problems if that is the case, your "
+                   "instances (probably) won't start!"));
             warning.setInformativeText(
                 tr("Do you really want to use this path? "
                    "Selecting \"No\" will close this and not alter your instance path."));
             warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             int result = warning.exec();
-            if (result == QMessageBox::Ok)
-            {
+            if (result == QMessageBox::Ok) {
                 ui->instDirTextBox->setText(cooked_dir);
             }
-        }
-        else if(DesktopServices::isFlatpak() && raw_dir.startsWith("/run/user"))
-        {
+        } else if (DesktopServices::isFlatpak() && raw_dir.startsWith("/run/user")) {
             QMessageBox warning;
             warning.setText(tr("You're trying to specify an instance folder "
-                            "which was granted temporarily via Flatpak.\n"
-                            "This is known to cause problems. "
-                            "After a restart the launcher might break, "
-                            "because it will no longer have access to that directory.\n\n"
-                            "Granting %1 access to it via Flatseal is recommended.").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
-            warning.setInformativeText(
-             tr("Do you want to proceed anyway?"));
+                               "which was granted temporarily via Flatpak.\n"
+                               "This is known to cause problems. "
+                               "After a restart the launcher might break, "
+                               "because it will no longer have access to that directory.\n\n"
+                               "Granting %1 access to it via Flatseal is recommended.")
+                                .arg(BuildConfig.LAUNCHER_DISPLAYNAME));
+            warning.setInformativeText(tr("Do you want to proceed anyway?"));
             warning.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
             int result = warning.exec();
-            if (result == QMessageBox::Ok)
-            {
+            if (result == QMessageBox::Ok) {
                 ui->instDirTextBox->setText(cooked_dir);
             }
-        }
-        else
-        {
+        } else {
             ui->instDirTextBox->setText(cooked_dir);
         }
     }
@@ -154,8 +146,7 @@ void LauncherPage::on_iconsDirBrowseBtn_clicked()
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Icons Folder"), ui->iconsDirTextBox->text());
 
     // do not allow current dir - it's dirty. Do not allow dirs that don't exist
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists())
-    {
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
         QString cooked_dir = FS::NormalizePath(raw_dir);
         ui->iconsDirTextBox->setText(cooked_dir);
     }
@@ -166,8 +157,7 @@ void LauncherPage::on_modsDirBrowseBtn_clicked()
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Mods Folder"), ui->modsDirTextBox->text());
 
     // do not allow current dir - it's dirty. Do not allow dirs that don't exist
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists())
-    {
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
         QString cooked_dir = FS::NormalizePath(raw_dir);
         ui->modsDirTextBox->setText(cooked_dir);
     }
@@ -177,8 +167,7 @@ void LauncherPage::on_downloadsDirBrowseBtn_clicked()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Downloads Folder"), ui->downloadsDirTextBox->text());
 
-    if (!raw_dir.isEmpty() && QDir(raw_dir).exists())
-    {
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
         QString cooked_dir = FS::NormalizePath(raw_dir);
         ui->downloadsDirTextBox->setText(cooked_dir);
     }
@@ -194,8 +183,7 @@ void LauncherPage::applySettings()
     auto s = APPLICATION->settings();
 
     // Updates
-    if (APPLICATION->updater())
-    {
+    if (APPLICATION->updater()) {
         APPLICATION->updater()->setAutomaticallyChecksForUpdates(ui->autoUpdateCheckBox->isChecked());
     }
 
@@ -220,15 +208,14 @@ void LauncherPage::applySettings()
     s->set("DownloadsDirWatchRecursive", ui->downloadsDirWatchRecursiveCheckBox->isChecked());
 
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
-    switch (sortMode)
-    {
-    case Sort_LastLaunch:
-        s->set("InstSortMode", "LastLaunch");
-        break;
-    case Sort_Name:
-    default:
-        s->set("InstSortMode", "Name");
-        break;
+    switch (sortMode) {
+        case Sort_LastLaunch:
+            s->set("InstSortMode", "LastLaunch");
+            break;
+        case Sort_Name:
+        default:
+            s->set("InstSortMode", "Name");
+            break;
     }
 
     // Mods
@@ -238,11 +225,9 @@ void LauncherPage::loadSettings()
 {
     auto s = APPLICATION->settings();
     // Updates
-    if (APPLICATION->updater())
-    {
+    if (APPLICATION->updater()) {
         ui->autoUpdateCheckBox->setChecked(APPLICATION->updater()->getAutomaticallyChecksForUpdates());
     }
-
 
     // Toolbar/menu bar settings (not applicable if native menu bar is present)
     ui->toolsBox->setEnabled(!QMenuBar().isNativeMenuBar());
@@ -261,8 +246,7 @@ void LauncherPage::loadSettings()
 
     bool conversionOk = true;
     int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
-    if(!conversionOk)
-    {
+    if (!conversionOk) {
         fontSize = 11;
     }
     ui->fontSizeBox->setValue(fontSize);
@@ -279,12 +263,9 @@ void LauncherPage::loadSettings()
 
     QString sortMode = s->get("InstSortMode").toString();
 
-    if (sortMode == "LastLaunch")
-    {
+    if (sortMode == "LastLaunch") {
         ui->sortLastLaunchedBtn->setChecked(true);
-    }
-    else
-    {
+    } else {
         ui->sortByNameBtn->setChecked(true);
     }
 

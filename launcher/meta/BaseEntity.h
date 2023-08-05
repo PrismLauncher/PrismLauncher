@@ -22,30 +22,17 @@
 #include "net/Mode.h"
 #include "net/NetJob.h"
 
-namespace Meta
-{
-class BaseEntity
-{
-public: /* types */
+namespace Meta {
+class BaseEntity {
+   public: /* types */
     using Ptr = std::shared_ptr<BaseEntity>;
-    enum class LoadStatus
-    {
-        NotLoaded,
-        Local,
-        Remote
-    };
-    enum class UpdateStatus
-    {
-        NotDone,
-        InProgress,
-        Failed,
-        Succeeded
-    };
+    enum class LoadStatus { NotLoaded, Local, Remote };
+    enum class UpdateStatus { NotDone, InProgress, Failed, Succeeded };
 
-public:
+   public:
     virtual ~BaseEntity();
 
-    virtual void parse(const QJsonObject &obj) = 0;
+    virtual void parse(const QJsonObject& obj) = 0;
 
     virtual QString localFilename() const = 0;
     virtual QUrl url() const;
@@ -56,12 +43,12 @@ public:
     void load(Net::Mode loadType);
     Task::Ptr getCurrentTask();
 
-protected: /* methods */
+   protected: /* methods */
     bool loadLocalFile();
 
-private:
+   private:
     LoadStatus m_loadStatus = LoadStatus::NotLoaded;
     UpdateStatus m_updateStatus = UpdateStatus::NotDone;
     NetJob::Ptr m_updateTask;
 };
-}
+}  // namespace Meta

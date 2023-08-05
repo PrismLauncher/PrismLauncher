@@ -42,11 +42,10 @@
 
 #include "minecraft/mod/ResourcePackFolderModel.h"
 
-class ResourcePackPage : public ExternalResourcesPage
-{
+class ResourcePackPage : public ExternalResourcesPage {
     Q_OBJECT
-public:
-    explicit ResourcePackPage(MinecraftInstance *instance, std::shared_ptr<ResourcePackFolderModel> model, QWidget *parent = 0);
+   public:
+    explicit ResourcePackPage(MinecraftInstance* instance, std::shared_ptr<ResourcePackFolderModel> model, QWidget* parent = 0);
 
     QString displayName() const override { return tr("Resource packs"); }
     QIcon icon() const override { return APPLICATION->getThemedIcon("resourcepacks"); }
@@ -55,12 +54,10 @@ public:
 
     virtual bool shouldDisplay() const override
     {
-        return !m_instance->traits().contains("no-texturepacks") &&
-               !m_instance->traits().contains("texturepacks");
+        return !m_instance->traits().contains("no-texturepacks") && !m_instance->traits().contains("texturepacks");
     }
 
    public slots:
     bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
     void downloadRPs();
 };
-

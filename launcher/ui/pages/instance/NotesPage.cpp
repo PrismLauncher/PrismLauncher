@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,11 +34,10 @@
  */
 
 #include "NotesPage.h"
-#include "ui_NotesPage.h"
 #include <QTabBar>
+#include "ui_NotesPage.h"
 
-NotesPage::NotesPage(BaseInstance *inst, QWidget *parent)
-    : QWidget(parent), ui(new Ui::NotesPage), m_inst(inst)
+NotesPage::NotesPage(BaseInstance* inst, QWidget* parent) : QWidget(parent), ui(new Ui::NotesPage), m_inst(inst)
 {
     ui->setupUi(this);
     ui->noteEditor->setText(m_inst->notes());

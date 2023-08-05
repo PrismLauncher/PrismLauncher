@@ -15,12 +15,12 @@
 
 #pragma once
 
-#include <QObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QMap>
+#include <QObject>
 #include <QStringList>
 #include <QVariant>
-#include <QJsonDocument>
-#include <QJsonArray>
 #include <memory>
 
 class Setting;
@@ -41,27 +41,20 @@ typedef std::weak_ptr<SettingsObject> SettingsObjectWeakPtr;
  *
  * \sa Setting
  */
-class SettingsObject : public QObject
-{
+class SettingsObject : public QObject {
     Q_OBJECT
-public:
-    class Lock
-    {
-    public:
-        Lock(SettingsObjectPtr locked)
-            :m_locked(locked)
-        {
-            m_locked->suspendSave();
-        }
-        ~Lock()
-        {
-            m_locked->resumeSave();
-        }
-    private:
+   public:
+    class Lock {
+       public:
+        Lock(SettingsObjectPtr locked) : m_locked(locked) { m_locked->suspendSave(); }
+        ~Lock() { m_locked->resumeSave(); }
+
+       private:
         SettingsObjectPtr m_locked;
     };
-public:
-    explicit SettingsObject(QObject *parent = 0);
+
+   public:
+    explicit SettingsObject(QObject* parent = 0);
     virtual ~SettingsObject();
     /*!
      * Registers an override setting for the given original setting in this settings object
@@ -90,8 +83,7 @@ public:
      * the one that is being registered.
      * \return A valid Setting shared pointer if successful.
      */
-    std::shared_ptr<Setting> registerSetting(QStringList synonyms,
-                                             QVariant defVal = QVariant());
+    std::shared_ptr<Setting> registerSetting(QStringList synonyms, QVariant defVal = QVariant());
 
     /*!
      * Registers the given setting with this SettingsObject and connects the necessary signals.
@@ -100,10 +92,7 @@ public:
      * the one that is being registered.
      * \return A valid Setting shared pointer if successful.
      */
-    std::shared_ptr<Setting> registerSetting(QString id, QVariant defVal = QVariant())
-    {
-        return registerSetting(QStringList(id), defVal);
-    }
+    std::shared_ptr<Setting> registerSetting(QString id, QVariant defVal = QVariant()) { return registerSetting(QStringList(id), defVal); }
 
     /*!
      * \brief Gets the setting with the given ID.
@@ -112,7 +101,7 @@ public:
      * Returns null if there is no setting with the given ID.
      * \sa operator []()
      */
-    std::shared_ptr<Setting> getSetting(const QString &id) const;
+    std::shared_ptr<Setting> getSetting(const QString& id) const;
 
     /*!
      * \brief Gets the value of the setting with the given ID.
@@ -120,7 +109,7 @@ public:
      * \return The setting's value as a QVariant.
      * If no setting with the given ID exists, returns an invalid QVariant.
      */
-    QVariant get(const QString &id) const;
+    QVariant get(const QString& id) const;
 
     /*!
      * \brief Sets the value of the setting with the given ID.
@@ -129,20 +118,20 @@ public:
      * \param value The new value of the setting.
      * \return True if successful, false if it failed.
      */
-    bool set(const QString &id, QVariant value);
+    bool set(const QString& id, QVariant value);
 
     /*!
      * \brief Reverts the setting with the given ID to default.
      * \param id The ID of the setting to reset.
      */
-    void reset(const QString &id) const;
+    void reset(const QString& id) const;
 
     /*!
      * \brief Checks if this SettingsObject contains a setting with the given ID.
      * \param id The ID to check for.
      * \return True if the SettingsObject has a setting with the given ID.
      */
-    bool contains(const QString &id);
+    bool contains(const QString& id);
 
     /*!
      * \brief Reloads the settings and emit signals for changed settings
@@ -152,7 +141,7 @@ public:
 
     virtual void suspendSave() = 0;
     virtual void resumeSave() = 0;
-signals:
+   signals:
     /*!
      * \brief Signal emitted when one of this SettingsObject object's settings changes.
      * This is usually just connected directly to each Setting object's
@@ -160,7 +149,7 @@ signals:
      * \param setting A reference to the Setting object that changed.
      * \param value The Setting object's new value.
      */
-    void SettingChanged(const Setting &setting, QVariant value);
+    void SettingChanged(const Setting& setting, QVariant value);
 
     /*!
      * \brief Signal emitted when one of this SettingsObject object's settings resets.
@@ -168,10 +157,9 @@ signals:
      * settingReset() signals.
      * \param setting A reference to the Setting object that changed.
      */
-    void settingReset(const Setting &setting);
+    void settingReset(const Setting& setting);
 
-protected
-slots:
+   protected slots:
     /*!
      * \brief Changes a setting.
      * This slot is usually connected to each Setting object's
@@ -180,7 +168,7 @@ slots:
      * \param setting A reference to the Setting object that changed.
      * \param value The setting's new value.
      */
-    virtual void changeSetting(const Setting &setting, QVariant value) = 0;
+    virtual void changeSetting(const Setting& setting, QVariant value) = 0;
 
     /*!
      * \brief Resets a setting.
@@ -189,27 +177,28 @@ slots:
      * to update the setting's value in the config file.
      * \param setting A reference to the Setting object that changed.
      */
-    virtual void resetSetting(const Setting &setting) = 0;
+    virtual void resetSetting(const Setting& setting) = 0;
 
-protected:
+   protected:
     /*!
      * \brief Connects the necessary signals to the given Setting.
      * \param setting The setting to connect.
      */
-    void connectSignals(const Setting &setting);
+    void connectSignals(const Setting& setting);
 
     /*!
      * \brief Function used by Setting objects to get their values from the SettingsObject.
      * \param setting The
      * \return
      */
-    virtual QVariant retrieveValue(const Setting &setting) = 0;
+    virtual QVariant retrieveValue(const Setting& setting) = 0;
 
     friend class Setting;
 
-private:
+   private:
     QMap<QString, std::shared_ptr<Setting>> m_settings;
-protected:
+
+   protected:
     bool m_suspendSave = false;
     bool m_doSave = false;
 };

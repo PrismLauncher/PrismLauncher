@@ -21,6 +21,10 @@ bool Flame::FileResolvingTask::abort()
 
 void Flame::FileResolvingTask::executeTask()
 {
+    if (m_toProcess.files.isEmpty()) {  // no file to resolve so leave it empty and emit success immediately
+        emitSucceeded();
+        return;
+    }
     setStatus(tr("Resolving mod IDs..."));
     setProgress(0, 3);
     m_dljob.reset(new NetJob("Mod id resolver", m_network));
@@ -48,7 +52,7 @@ void Flame::FileResolvingTask::executeTask()
         stepProgress(*step_progress);
         emitFailed(reason);
     });
-    connect(m_dljob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propogateStepProgress);
+    connect(m_dljob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propagateStepProgress);
     connect(m_dljob.get(), &NetJob::progress, this, [this, step_progress](qint64 current, qint64 total) {
         qDebug() << "Resolve slug progress" << current << total;
         step_progress->update(current, total);
@@ -113,7 +117,7 @@ void Flame::FileResolvingTask::netJobFinished()
         step_progress->state = TaskStepState::Failed;
         stepProgress(*step_progress);
     });
-    connect(m_checkJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propogateStepProgress);
+    connect(m_checkJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propagateStepProgress);
     connect(m_checkJob.get(), &NetJob::progress, this, [this, step_progress](qint64 current, qint64 total) {
         qDebug() << "Resolve slug progress" << current << total;
         step_progress->update(current, total);
@@ -190,7 +194,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
             stepProgress(*step_progress);
             emitFailed(reason);
         });
-        connect(m_slugJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propogateStepProgress);
+        connect(m_slugJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propagateStepProgress);
         connect(m_slugJob.get(), &NetJob::progress, this, [this, step_progress](qint64 current, qint64 total) {
             qDebug() << "Resolve slug progress" << current << total;
             step_progress->update(current, total);
