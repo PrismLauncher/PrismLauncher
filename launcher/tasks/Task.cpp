@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (c) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
@@ -40,16 +40,15 @@
 
 Q_LOGGING_CATEGORY(taskLogC, "launcher.task")
 
-Task::Task(QObject *parent, bool show_debug) : QObject(parent), m_show_debug(show_debug)
+Task::Task(QObject* parent, bool show_debug) : QObject(parent), m_show_debug(show_debug)
 {
     m_uid = QUuid::createUuid();
     setAutoDelete(false);
 }
 
-void Task::setStatus(const QString &new_status)
+void Task::setStatus(const QString& new_status)
 {
-    if(m_status != new_status)
-    {
+    if (m_status != new_status) {
         m_status = new_status;
         emit status(m_status);
     }
@@ -57,8 +56,7 @@ void Task::setStatus(const QString &new_status)
 
 void Task::setDetails(const QString& new_details)
 {
-    if (m_details != new_details)
-    {
+    if (m_details != new_details) {
         m_details = new_details;
         emit details(m_details);
     }
@@ -69,41 +67,35 @@ void Task::setProgress(qint64 current, qint64 total)
     if ((m_progress != current) || (m_progressTotal != total)) {
         m_progress = current;
         m_progressTotal = total;
-        
+
         emit progress(m_progress, m_progressTotal);
-    } 
+    }
 }
 
 void Task::start()
 {
-    switch(m_state)
-    {
-        case State::Inactive:
-        {
+    switch (m_state) {
+        case State::Inactive: {
             if (m_show_debug)
                 qCDebug(taskLogC) << "Task" << describe() << "starting for the first time";
             break;
         }
-        case State::AbortedByUser:
-        {
+        case State::AbortedByUser: {
             if (m_show_debug)
                 qCDebug(taskLogC) << "Task" << describe() << "restarting for after being aborted by user";
             break;
         }
-        case State::Failed:
-        {
+        case State::Failed: {
             if (m_show_debug)
                 qCDebug(taskLogC) << "Task" << describe() << "restarting for after failing at first";
             break;
         }
-        case State::Succeeded:
-        {
+        case State::Succeeded: {
             if (m_show_debug)
                 qCDebug(taskLogC) << "Task" << describe() << "restarting for after succeeding at first";
             break;
         }
-        case State::Running:
-        {
+        case State::Running: {
             if (m_show_debug)
                 qCWarning(taskLogC) << "The launcher tried to start task" << describe() << "while it was already running!";
             return;
@@ -118,8 +110,7 @@ void Task::start()
 void Task::emitFailed(QString reason)
 {
     // Don't fail twice.
-    if (!isRunning())
-    {
+    if (!isRunning()) {
         qCCritical(taskLogC) << "Task" << describe() << "failed while not running!!!!: " << reason;
         return;
     }
@@ -133,8 +124,7 @@ void Task::emitFailed(QString reason)
 void Task::emitAborted()
 {
     // Don't abort twice.
-    if (!isRunning())
-    {
+    if (!isRunning()) {
         qCCritical(taskLogC) << "Task" << describe() << "aborted while not running!!!!";
         return;
     }
@@ -149,8 +139,7 @@ void Task::emitAborted()
 void Task::emitSucceeded()
 {
     // Don't succeed twice.
-    if (!isRunning())
-    {
+    if (!isRunning()) {
         qCCritical(taskLogC) << "Task" << describe() << "succeeded while not running!!!!";
         return;
     }
@@ -161,7 +150,7 @@ void Task::emitSucceeded()
     emit finished();
 }
 
-void Task::propogateStepProgress(TaskStepProgress const& task_progress)
+void Task::propagateStepProgress(TaskStepProgress const& task_progress)
 {
     emit stepProgress(task_progress);
 }
@@ -172,12 +161,9 @@ QString Task::describe()
     QTextStream out(&outStr);
     out << metaObject()->className() << QChar('(');
     auto name = objectName();
-    if(name.isEmpty())
-    {
+    if (name.isEmpty()) {
         out << QString("0x%1").arg(reinterpret_cast<quintptr>(this), 0, 16);
-    }
-    else
-    {
+    } else {
         out << name;
     }
     out << " ID: " << m_uid.toString(QUuid::WithoutBraces);

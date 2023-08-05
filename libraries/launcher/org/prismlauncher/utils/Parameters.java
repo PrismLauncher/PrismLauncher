@@ -54,15 +54,14 @@
 
 package org.prismlauncher.utils;
 
+import org.prismlauncher.exception.ParameterNotFoundException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.prismlauncher.exception.ParameterNotFoundException;
-
 public final class Parameters {
-
     private final Map<String, List<String>> map = new HashMap<>();
 
     public void add(String key, String value) {
@@ -112,5 +111,4 @@ public final class Parameters {
 
         return params.get(0);
     }
-
 }

@@ -68,7 +68,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.5.1'
+            qt_version: '6.5.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -80,7 +80,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.5.1'
+            qt_version: '6.5.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -90,7 +90,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
-            qt_version: '6.5.0'
+            qt_version: '6.5.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -586,33 +586,3 @@ jobs:
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
-
-  nix:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package:
-          - prismlauncher
-          - prismlauncher-qt5
-    steps:
-      - name: Clone repository
-        if: inputs.build_type == 'Debug'
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-      - name: Install nix
-        if: inputs.build_type == 'Debug'
-        uses: cachix/install-nix-action@v22
-        with:
-          install_url: https://nixos.org/nix/install
-          extra_nix_config: |
-            auto-optimise-store = true
-            experimental-features = nix-command flakes
-      - uses: cachix/cachix-action@v12
-        if: inputs.build_type == 'Debug'
-        with:
-          name: prismlauncher
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Build
-        if: inputs.build_type == 'Debug'
-        run: nix build .#${{ matrix.package }} --print-build-logs

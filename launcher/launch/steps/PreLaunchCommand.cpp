@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@
 #include "PreLaunchCommand.h"
 #include <launch/LaunchTask.h>
 
-PreLaunchCommand::PreLaunchCommand(LaunchTask *parent) : LaunchStep(parent)
+PreLaunchCommand::PreLaunchCommand(LaunchTask* parent) : LaunchStep(parent)
 {
     auto instance = m_parent->instance();
     m_command = instance->getPreLaunchCommand();
@@ -47,7 +47,7 @@ PreLaunchCommand::PreLaunchCommand(LaunchTask *parent) : LaunchStep(parent)
 
 void PreLaunchCommand::executeTask()
 {
-    //FIXME: where to put this?
+    // FIXME: where to put this?
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     auto args = QProcess::splitCommand(m_command);
     m_parent->substituteVariables(args);
@@ -65,31 +65,22 @@ void PreLaunchCommand::executeTask()
 
 void PreLaunchCommand::on_state(LoggedProcess::State state)
 {
-    auto getError = [&]()
-    {
-        return tr("Pre-Launch command failed with code %1.\n\n").arg(m_process.exitCode());
-    };
-    switch(state)
-    {
+    auto getError = [&]() { return tr("Pre-Launch command failed with code %1.\n\n").arg(m_process.exitCode()); };
+    switch (state) {
         case LoggedProcess::Aborted:
         case LoggedProcess::Crashed:
-        case LoggedProcess::FailedToStart:
-        {
+        case LoggedProcess::FailedToStart: {
             auto error = getError();
             emit logLine(error, MessageLevel::Fatal);
             emitFailed(error);
             return;
         }
-        case LoggedProcess::Finished:
-        {
-            if(m_process.exitCode() != 0)
-            {
+        case LoggedProcess::Finished: {
+            if (m_process.exitCode() != 0) {
                 auto error = getError();
                 emit logLine(error, MessageLevel::Fatal);
                 emitFailed(error);
-            }
-            else
-            {
+            } else {
                 emit logLine(tr("Pre-Launch command ran successfully.\n\n"), MessageLevel::Launcher);
                 emitSucceeded();
             }
@@ -99,7 +90,7 @@ void PreLaunchCommand::on_state(LoggedProcess::State state)
     }
 }
 
-void PreLaunchCommand::setWorkingDirectory(const QString &wd)
+void PreLaunchCommand::setWorkingDirectory(const QString& wd)
 {
     m_process.setWorkingDirectory(wd);
 }
@@ -107,8 +98,7 @@ void PreLaunchCommand::setWorkingDirectory(const QString &wd)
 bool PreLaunchCommand::abort()
 {
     auto state = m_process.state();
-    if (state == LoggedProcess::Running || state == LoggedProcess::Starting)
-    {
+    if (state == LoggedProcess::Running || state == LoggedProcess::Starting) {
         m_process.kill();
     }
     return true;
