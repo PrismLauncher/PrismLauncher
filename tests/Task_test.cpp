@@ -66,7 +66,10 @@ class BigConcurrentTaskThread : public QThread {
         }
 
         connect(&big_task, &Task::finished, this, &QThread::quit);
-        connect(&m_deadline, &QTimer::timeout, this, [&] { passed_the_deadline = true; quit(); });
+        connect(&m_deadline, &QTimer::timeout, this, [&] {
+            passed_the_deadline = true;
+            quit();
+        });
 
         m_deadline.start();
         big_task.run();

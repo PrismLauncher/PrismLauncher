@@ -35,10 +35,7 @@ class EnsureMetadataTask : public Task {
     auto flameProjectsTask() -> Task::Ptr;
 
     // Helpers
-    enum class RemoveFromList {
-        Yes,
-        No
-    };
+    enum class RemoveFromList { Yes, No };
     void emitReady(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
     void emitFail(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
 

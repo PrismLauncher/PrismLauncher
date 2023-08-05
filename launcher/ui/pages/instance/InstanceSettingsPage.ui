@@ -113,7 +113,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string notr="true">PermGen:</string>
+             <string>PermGen:</string>
             </property>
            </widget>
           </item>

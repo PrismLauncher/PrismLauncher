@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,76 +37,58 @@
 
 #include <QMainWindow>
 
-#include "minecraft/MinecraftInstance.h"
-#include "ui/pages/BasePage.h"
 #include <Application.h>
 #include <LoggedProcess.h>
+#include "minecraft/MinecraftInstance.h"
+#include "ui/pages/BasePage.h"
 
 #include "settings/Setting.h"
 
 class WorldList;
-namespace Ui
-{
+namespace Ui {
 class WorldListPage;
 }
 
-class WorldListPage : public QMainWindow, public BasePage
-{
+class WorldListPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
-public:
-    explicit WorldListPage(
-        BaseInstance *inst,
-        std::shared_ptr<WorldList> worlds,
-        QWidget *parent = 0
-    );
+   public:
+    explicit WorldListPage(BaseInstance* inst, std::shared_ptr<WorldList> worlds, QWidget* parent = 0);
     virtual ~WorldListPage();
 
-    virtual QString displayName() const override
-    {
-        return tr("Worlds");
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("worlds");
-    }
-    virtual QString id() const override
-    {
-        return "worlds";
-    }
-    virtual QString helpPage() const override
-    {
-        return "Worlds";
-    }
+    virtual QString displayName() const override { return tr("Worlds"); }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("worlds"); }
+    virtual QString id() const override { return "worlds"; }
+    virtual QString helpPage() const override { return "Worlds"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
     virtual void openedImpl() override;
     virtual void closedImpl() override;
 
-protected:
-    bool eventFilter(QObject *obj, QEvent *ev) override;
-    bool worldListFilter(QKeyEvent *ev);
-    QMenu * createPopupMenu() override;
+   protected:
+    bool eventFilter(QObject* obj, QEvent* ev) override;
+    bool worldListFilter(QKeyEvent* ev);
+    QMenu* createPopupMenu() override;
 
-protected:
-    BaseInstance *m_inst;
+   protected:
+    BaseInstance* m_inst;
 
-private:
+   private:
     QModelIndex getSelectedWorld();
     bool isWorldSafe(QModelIndex index);
-    bool worldSafetyNagQuestion(const QString &actionType);
+    bool worldSafetyNagQuestion(const QString& actionType);
     void mceditError();
 
-private:
-    Ui::WorldListPage *ui;
+   private:
+    Ui::WorldListPage* ui;
     std::shared_ptr<WorldList> m_worlds;
     unique_qobject_ptr<LoggedProcess> m_mceditProcess;
     bool m_mceditStarting = false;
 
     std::shared_ptr<Setting> m_wide_bar_setting = nullptr;
 
-private slots:
+   private slots:
     void on_actionCopy_Seed_triggered();
     void on_actionMCEdit_triggered();
     void on_actionRemove_triggered();
@@ -117,8 +99,8 @@ private slots:
     void on_actionView_Folder_triggered();
     void on_actionDatapacks_triggered();
     void on_actionReset_Icon_triggered();
-    void worldChanged(const QModelIndex &current, const QModelIndex &previous);
+    void worldChanged(const QModelIndex& current, const QModelIndex& previous);
     void mceditState(LoggedProcess::State state);
 
-    void ShowContextMenu(const QPoint &pos);
+    void ShowContextMenu(const QPoint& pos);
 };

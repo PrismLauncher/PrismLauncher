@@ -117,12 +117,14 @@ QDebug operator<<(QDebug debug, const Version& v)
 
     bool first = true;
     for (auto s : v.m_sections) {
-        if (!first) debug.nospace() << ", ";
+        if (!first)
+            debug.nospace() << ", ";
         debug.nospace() << s.m_fullString;
         first = false;
     }
-                    
-    debug.nospace() << " ]" << " }";
+
+    debug.nospace() << " ]"
+                    << " }";
 
     return debug;
 }

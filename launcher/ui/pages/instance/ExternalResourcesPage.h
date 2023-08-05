@@ -4,8 +4,8 @@
 #include <QSortFilterProxyModel>
 
 #include "Application.h"
-#include "settings/Setting.h"
 #include "minecraft/MinecraftInstance.h"
+#include "settings/Setting.h"
 #include "ui/pages/BasePage.h"
 
 class ResourceFolderModel;
@@ -52,7 +52,7 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
 
     virtual void addItem();
     void removeItem();
-    virtual void removeItems(const QItemSelection &selection);
+    virtual void removeItems(const QItemSelection& selection);
 
     virtual void enableItem();
     virtual void disableItem();

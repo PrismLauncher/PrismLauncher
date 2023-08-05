@@ -7,7 +7,8 @@
 
 namespace Katabasis {
 
-QVariantMap parseJsonResponse(const QByteArray &data) {
+QVariantMap parseJsonResponse(const QByteArray& data)
+{
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(data, &err);
     if (err.error != QJsonParseError::NoError) {
@@ -23,4 +24,4 @@ QVariantMap parseJsonResponse(const QByteArray &data) {
     return doc.object().toVariantMap();
 }
 
-}
+}  // namespace Katabasis
