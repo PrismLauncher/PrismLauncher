@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -81,7 +81,7 @@ void PackInstallTask::downloadPack()
 
     connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::unzip);
     connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::emitFailed);
-    connect(netJobContainer.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
+    connect(netJobContainer.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
     connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::emitAborted);
 
     netJobContainer->start();

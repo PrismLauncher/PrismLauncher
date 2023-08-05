@@ -4,12 +4,11 @@
 #include "QObjectPtr.h"
 #include "minecraft/auth/AuthStep.h"
 
-
 class EntitlementsStep : public AuthStep {
     Q_OBJECT
 
-public:
-    explicit EntitlementsStep(AccountData *data);
+   public:
+    explicit EntitlementsStep(AccountData* data);
     virtual ~EntitlementsStep() noexcept;
 
     void perform() override;
@@ -17,9 +16,9 @@ public:
 
     QString describe() override;
 
-private slots:
+   private slots:
     void onRequestDone(QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
 
-private:
+   private:
     QString m_entitlementsRequestId;
 };

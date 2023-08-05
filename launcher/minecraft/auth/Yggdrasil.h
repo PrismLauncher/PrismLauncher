@@ -17,10 +17,10 @@
 
 #include "AccountTask.h"
 
-#include <QString>
-#include <QJsonObject>
-#include <QTimer>
 #include <qsslerror.h>
+#include <QJsonObject>
+#include <QString>
+#include <QTimer>
 
 #include "MinecraftAccount.h"
 
@@ -30,35 +30,25 @@ class QNetworkReply;
 /**
  * A Yggdrasil task is a task that performs an operation on a given mojang account.
  */
-class Yggdrasil : public AccountTask
-{
+class Yggdrasil : public AccountTask {
     Q_OBJECT
-public:
-    explicit Yggdrasil(
-        AccountData *data,
-        QObject *parent = 0
-    );
+   public:
+    explicit Yggdrasil(AccountData* data, QObject* parent = 0);
     virtual ~Yggdrasil() = default;
 
     void refresh();
     void login(QString password);
 
-    struct Error
-    {
+    struct Error {
         QString m_errorMessageShort;
         QString m_errorMessageVerbose;
         QString m_cause;
     };
     std::shared_ptr<Error> m_error;
 
-    enum AbortedBy
-    {
-        BY_NOTHING,
-        BY_USER,
-        BY_TIMEOUT
-    } m_aborted = BY_NOTHING;
+    enum AbortedBy { BY_NOTHING, BY_USER, BY_TIMEOUT } m_aborted = BY_NOTHING;
 
-protected:
+   protected:
     void executeTask() override;
 
     /**
@@ -78,24 +68,24 @@ protected:
      */
     virtual void processError(QJsonObject responseData);
 
-protected slots:
+   protected slots:
     void processReply();
     void refreshTimers(qint64, qint64);
     void heartbeat();
     void sslErrors(QList<QSslError>);
     void abortByTimeout();
 
-public slots:
+   public slots:
     virtual bool abort() override;
 
-private:
+   private:
     void sendRequest(QUrl endpoint, QByteArray content);
 
-protected:
-    QNetworkReply *m_netReply = nullptr;
+   protected:
+    QNetworkReply* m_netReply = nullptr;
     QTimer timeout_keeper;
     QTimer counter;
-    int count = 0; // num msec since time reset
+    int count = 0;  // num msec since time reset
 
     const int timeout_max = 30000;
     const int time_step = 50;

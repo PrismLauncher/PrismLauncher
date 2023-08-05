@@ -40,14 +40,16 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
                 return edit;
             }
             return pack.description;
-        } case Qt::DecorationRole: {
+        }
+        case Qt::DecorationRole: {
             if (m_logoMap.contains(pack.logoName)) {
                 return (m_logoMap.value(pack.logoName));
             }
             QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
             ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
             return icon;
-        } case Qt::UserRole: {
+        }
+        case Qt::UserRole: {
             QVariant v;
             v.setValue(pack);
             return v;
@@ -68,7 +70,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-bool ListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ListModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     int pos = index.row();
     if (pos >= modpacks.size() || pos < 0 || !index.isValid())

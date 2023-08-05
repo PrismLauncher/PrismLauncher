@@ -15,13 +15,13 @@
 
 #pragma once
 
+#include <QAbstractListModel>
 #include <QObject>
 #include <QVariant>
-#include <QAbstractListModel>
 
 #include "BaseVersion.h"
-#include "tasks/Task.h"
 #include "QObjectPtr.h"
+#include "tasks/Task.h"
 
 /*!
  * \brief Class that each instance type's version list derives from.
@@ -35,12 +35,10 @@
  * all have a default implementation, but they can be overridden by plugins to
  * change the behavior of the list.
  */
-class BaseVersionList : public QAbstractListModel
-{
+class BaseVersionList : public QAbstractListModel {
     Q_OBJECT
-public:
-    enum ModelRoles
-    {
+   public:
+    enum ModelRoles {
         VersionPointerRole = Qt::UserRole,
         VersionRole,
         VersionIdRole,
@@ -55,7 +53,7 @@ public:
     };
     typedef QList<int> RoleList;
 
-    explicit BaseVersionList(QObject *parent = 0);
+    explicit BaseVersionList(QObject* parent = 0);
 
     /*!
      * \brief Gets a task that will reload the version list.
@@ -66,7 +64,7 @@ public:
     virtual Task::Ptr getLoadTask() = 0;
 
     //! Checks whether or not the list is loaded. If this returns false, the list should be
-    //loaded.
+    // loaded.
     virtual bool isLoaded() = 0;
 
     //! Gets the version at the given index.
@@ -76,9 +74,9 @@ public:
     virtual int count() const = 0;
 
     //////// List Model Functions ////////
-    QVariant data(const QModelIndex &index, int role) const override;
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    int rowCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent) const override;
     QHash<int, QByteArray> roleNames() const override;
 
     //! which roles are provided by this version list?
@@ -90,7 +88,7 @@ public:
      * \return A const pointer to the version with the given descriptor. NULL if
      * one doesn't exist.
      */
-    virtual BaseVersion::Ptr findVersion(const QString &descriptor);
+    virtual BaseVersion::Ptr findVersion(const QString& descriptor);
 
     /*!
      * \brief Gets the recommended version from this list
@@ -103,8 +101,7 @@ public:
      */
     virtual void sortVersions() = 0;
 
-protected
-slots:
+   protected slots:
     /*!
      * Updates this list with the given list of versions.
      * This is done by copying each version in the given list and inserting it

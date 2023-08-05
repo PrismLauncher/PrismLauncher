@@ -19,9 +19,8 @@
           nil.enable = true;
 
           clang-format = {
-            enable =
-              false; # As most of the codebase is **not** formatted, we don't want clang-format yet
-            types_or = ["c" "c++"];
+            enable = true;
+            types_or = ["c" "c++" "java" "json" "objective-c"];
           };
         };
       };

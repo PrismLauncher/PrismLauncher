@@ -65,7 +65,7 @@ void Flame::FileResolvingTask::executeTask()
         stepProgress(*step_progress);
         emitFailed(reason);
     });
-    connect(m_dljob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propogateStepProgress);
+    connect(m_dljob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propagateStepProgress);
     connect(m_dljob.get(), &NetJob::progress, this, [this, step_progress](qint64 current, qint64 total) {
         qDebug() << "Resolve slug progress" << current << total;
         step_progress->update(current, total);
@@ -170,7 +170,7 @@ void Flame::FileResolvingTask::netJobFinished()
         stepProgress(*step_progress);
         emitFailed(reason);
     });
-    connect(m_checkJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propogateStepProgress);
+    connect(m_checkJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propagateStepProgress);
     connect(m_checkJob.get(), &NetJob::progress, this, [this, step_progress](qint64 current, qint64 total) {
         qDebug() << "Resolve slug progress" << current << total;
         step_progress->update(current, total);
@@ -247,7 +247,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
             stepProgress(*step_progress);
             emitFailed(reason);
         });
-        connect(m_slugJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propogateStepProgress);
+        connect(m_slugJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propagateStepProgress);
         connect(m_slugJob.get(), &NetJob::progress, this, [this, step_progress](qint64 current, qint64 total) {
             qDebug() << "Resolve slug progress" << current << total;
             step_progress->update(current, total);

@@ -22,13 +22,14 @@
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
 
-ThemeCustomizationWidget::ThemeCustomizationWidget(QWidget *parent) : QWidget(parent), ui(new Ui::ThemeCustomizationWidget)
+ThemeCustomizationWidget::ThemeCustomizationWidget(QWidget* parent) : QWidget(parent), ui(new Ui::ThemeCustomizationWidget)
 {
     ui->setupUi(this);
     loadSettings();
 
     connect(ui->iconsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThemeCustomizationWidget::applyIconTheme);
-    connect(ui->widgetStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThemeCustomizationWidget::applyWidgetTheme);
+    connect(ui->widgetStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &ThemeCustomizationWidget::applyWidgetTheme);
     connect(ui->backgroundCatComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThemeCustomizationWidget::applyCatTheme);
 }
 
@@ -40,7 +41,7 @@ ThemeCustomizationWidget::~ThemeCustomizationWidget()
 /// <summary>
 /// The layout was not quite right, so currently this just disables the UI elements, which should be hidden instead
 /// TODO FIXME
-/// 
+///
 /// Original Method One:
 /// ui->iconsComboBox->setVisible(features& ThemeFields::ICONS);
 /// ui->iconsLabel->setVisible(features& ThemeFields::ICONS);
@@ -48,7 +49,7 @@ ThemeCustomizationWidget::~ThemeCustomizationWidget()
 /// ui->widgetThemeLabel->setVisible(features& ThemeFields::WIDGETS);
 /// ui->backgroundCatComboBox->setVisible(features& ThemeFields::CAT);
 /// ui->backgroundCatLabel->setVisible(features& ThemeFields::CAT);
-/// 
+///
 /// original Method Two:
 ///     if (!(features & ThemeFields::ICONS)) {
 ///         ui->formLayout->setRowVisible(0, false);
@@ -61,7 +62,8 @@ ThemeCustomizationWidget::~ThemeCustomizationWidget()
 ///     }
 /// </summary>
 /// <param name="features"></param>
-void ThemeCustomizationWidget::showFeatures(ThemeFields features) {
+void ThemeCustomizationWidget::showFeatures(ThemeFields features)
+{
     ui->iconsComboBox->setEnabled(features & ThemeFields::ICONS);
     ui->iconsLabel->setEnabled(features & ThemeFields::ICONS);
     ui->widgetStyleComboBox->setEnabled(features & ThemeFields::WIDGETS);
@@ -70,7 +72,8 @@ void ThemeCustomizationWidget::showFeatures(ThemeFields features) {
     ui->backgroundCatLabel->setEnabled(features & ThemeFields::CAT);
 }
 
-void ThemeCustomizationWidget::applyIconTheme(int index) {
+void ThemeCustomizationWidget::applyIconTheme(int index)
+{
     auto settings = APPLICATION->settings();
     auto originalIconTheme = settings->get("IconTheme").toString();
     auto& newIconTheme = m_iconThemeOptions[index].first;
@@ -83,7 +86,8 @@ void ThemeCustomizationWidget::applyIconTheme(int index) {
     emit currentIconThemeChanged(index);
 }
 
-void ThemeCustomizationWidget::applyWidgetTheme(int index) {
+void ThemeCustomizationWidget::applyWidgetTheme(int index)
+{
     auto settings = APPLICATION->settings();
     auto originalAppTheme = settings->get("ApplicationTheme").toString();
     auto newAppTheme = ui->widgetStyleComboBox->currentData().toString();

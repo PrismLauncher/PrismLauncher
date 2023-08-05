@@ -43,22 +43,12 @@
  * This is a basic process.
  * It has line-based logging support and hides some of the nasty bits.
  */
-class LoggedProcess : public QProcess
-{
-Q_OBJECT
-public:
-    enum State
-    {
-        NotRunning,
-        Starting,
-        FailedToStart,
-        Running,
-        Finished,
-        Crashed,
-        Aborted
-    };
+class LoggedProcess : public QProcess {
+    Q_OBJECT
+   public:
+    enum State { NotRunning, Starting, FailedToStart, Running, Finished, Crashed, Aborted };
 
-public:
+   public:
     explicit LoggedProcess(QObject* parent = 0);
     virtual ~LoggedProcess();
 
@@ -67,30 +57,29 @@ public:
 
     void setDetachable(bool detachable);
 
-signals:
+   signals:
     void log(QStringList lines, MessageLevel::Enum level);
     void stateChanged(LoggedProcess::State state);
 
-public slots:
+   public slots:
     /**
      * @brief kill the process - equivalent to kill -9
      */
     void kill();
 
-
-private slots:
+   private slots:
     void on_stdErr();
     void on_stdOut();
     void on_exit(int exit_code, QProcess::ExitStatus status);
     void on_error(QProcess::ProcessError error);
     void on_stateChange(QProcess::ProcessState);
 
-private:
+   private:
     void changeState(LoggedProcess::State state);
 
     QStringList reprocess(const QByteArray& data, QTextDecoder& decoder);
 
-private:
+   private:
     QTextDecoder m_err_decoder = QTextDecoder(QTextCodec::codecForLocale());
     QTextDecoder m_out_decoder = QTextDecoder(QTextCodec::codecForLocale());
     QString m_leftover_line;

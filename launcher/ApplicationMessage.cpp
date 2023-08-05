@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -39,7 +39,8 @@
 #include <QJsonObject>
 #include "Json.h"
 
-void ApplicationMessage::parse(const QByteArray & input) {
+void ApplicationMessage::parse(const QByteArray& input)
+{
     auto doc = Json::requireDocument(input, "ApplicationMessage");
     auto root = Json::requireObject(doc, "ApplicationMessage");
 
@@ -47,12 +48,13 @@ void ApplicationMessage::parse(const QByteArray & input) {
     args.clear();
 
     auto parsedArgs = root.value("args").toObject();
-    for(auto iter = parsedArgs.constBegin(); iter != parsedArgs.constEnd(); iter++) {
+    for (auto iter = parsedArgs.constBegin(); iter != parsedArgs.constEnd(); iter++) {
         args.insert(iter.key(), iter.value().toString());
     }
 }
 
-QByteArray ApplicationMessage::serialize() {
+QByteArray ApplicationMessage::serialize()
+{
     QJsonObject root;
     root.insert("command", command);
     QJsonObject outArgs;
