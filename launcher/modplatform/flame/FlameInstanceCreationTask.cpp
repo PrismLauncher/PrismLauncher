@@ -61,7 +61,6 @@
 #include "meta/VersionList.h"
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
-
 #include "net/ApiDownload.h"
 
 static const FlameAPI api;

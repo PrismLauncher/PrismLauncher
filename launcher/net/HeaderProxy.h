@@ -43,7 +43,7 @@ class HeaderProxy {
         for (auto header : headers(request)) {
             request.setRawHeader(header.headerName, header.headerValue);
         }
-    };
+    }
 };
 
 }  // namespace Net
