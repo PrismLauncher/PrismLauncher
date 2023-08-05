@@ -42,8 +42,8 @@
 
 #include "SolderPackManifest.h"
 #include "TechnicPackProcessor.h"
-#include "net/ChecksumValidator.h"
 #include "net/ApiDownload.h"
+#include "net/ChecksumValidator.h"
 
 Technic::SolderPackInstallTask::SolderPackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network,
                                                       const QUrl& solderUrl,

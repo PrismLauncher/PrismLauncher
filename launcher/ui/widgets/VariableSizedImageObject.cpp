@@ -25,8 +25,8 @@
 
 #include "Application.h"
 
-#include "net/NetJob.h"
 #include "net/ApiDownload.h"
+#include "net/NetJob.h"
 
 enum FormatProperties { ImageData = QTextFormat::UserProperty + 1 };
 

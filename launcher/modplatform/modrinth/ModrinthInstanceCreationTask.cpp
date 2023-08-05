@@ -11,8 +11,8 @@
 
 #include "net/ChecksumValidator.h"
 
-#include "net/NetJob.h"
 #include "net/ApiDownload.h"
+#include "net/NetJob.h"
 #include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
