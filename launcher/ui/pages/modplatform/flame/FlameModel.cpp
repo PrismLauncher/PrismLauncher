@@ -3,6 +3,8 @@
 #include "Application.h"
 #include "ui/widgets/ProjectItem.h"
 
+#include "net/ApiDownload.h"
+
 #include <Version.h>
 
 #include <QtMath>
@@ -106,7 +108,7 @@ void ListModel::requestLogo(QString logo, QString url)
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
@@ -173,7 +175,7 @@ void ListModel::performPaginatedSearch()
                          .arg(currentSearchTerm)
                          .arg(currentSort + 1);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
     jobPtr = netJob;
     jobPtr->start();
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);

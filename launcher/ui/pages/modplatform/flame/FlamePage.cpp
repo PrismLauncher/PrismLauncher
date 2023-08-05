@@ -46,6 +46,8 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
 
+#include "net/ApiDownload.h"
+
 static FlameAPI api;
 
 FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog)
@@ -132,7 +134,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
         auto response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
-        netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
+        netJob->addNetAction(Net::ApiDownload::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId, curr] {
             if (addonId != current.addonId) {

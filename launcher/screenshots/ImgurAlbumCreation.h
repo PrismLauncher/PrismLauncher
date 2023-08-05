@@ -57,6 +57,8 @@ public:
         return m_id;
     }
 
+    void init() override {};
+
 protected
 slots:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;

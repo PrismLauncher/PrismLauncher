@@ -8,6 +8,8 @@
 #include "BuildConfig.h"
 #include "Application.h"
 
+#include "net/ApiDownload.h"
+
 FMLLibrariesTask::FMLLibrariesTask(MinecraftInstance * inst)
 {
     m_inst = inst;
@@ -68,7 +70,7 @@ void FMLLibrariesTask::executeTask()
     {
         auto entry = metacache->resolveEntry("fmllibs", lib.filename);
         QString urlString = BuildConfig.FMLLIBS_BASE_URL + lib.filename;
-        dljob->addNetAction(Net::Download::makeCached(QUrl(urlString), entry, options));
+        dljob->addNetAction(Net::ApiDownload::makeCached(QUrl(urlString), entry, options));
     }
 
     connect(dljob.get(), &NetJob::succeeded, this, &FMLLibrariesTask::fmllibsFinished);
