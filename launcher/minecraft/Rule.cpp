@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,8 +33,8 @@
  *      limitations under the License.
  */
 
-#include <QJsonObject>
 #include <QJsonArray>
+#include <QJsonObject>
 
 #include "Rule.h"
 
@@ -47,7 +47,7 @@ RuleAction RuleAction_fromString(QString name)
     return Defer;
 }
 
-QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules)
+QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject& objectWithRules)
 {
     QList<std::shared_ptr<Rule>> rules;
     auto rulesVal = objectWithRules.value("rules");
@@ -55,8 +55,7 @@ QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules)
         return rules;
 
     QJsonArray ruleList = rulesVal.toArray();
-    for (auto ruleVal : ruleList)
-    {
+    for (auto ruleVal : ruleList) {
         std::shared_ptr<Rule> rule;
         if (!ruleVal.isObject())
             continue;
@@ -69,8 +68,7 @@ QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules)
             continue;
 
         auto osVal = ruleObj.value("os");
-        if (!osVal.isObject())
-        {
+        if (!osVal.isObject()) {
             // add a new implicit action rule
             rules.append(ImplicitRule::create(action));
             continue;
@@ -102,12 +100,10 @@ QJsonObject OsRule::toJson()
     QJsonObject osObj;
     {
         osObj.insert("name", m_system);
-        if(!m_version_regexp.isEmpty())
-        {
+        if (!m_version_regexp.isEmpty()) {
             osObj.insert("version", m_version_regexp);
         }
     }
     ruleObj.insert("os", osObj);
     return ruleObj;
 }
-

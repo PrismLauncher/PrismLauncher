@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,9 @@
 
 #pragma once
 
+#include <QJsonObject>
 #include <QString>
 #include <QVector>
-#include <QJsonObject>
 
 namespace ATLauncher {
 
@@ -44,4 +44,4 @@ struct ShareCodeResponse {
 
 void loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj);
 
-}
+}  // namespace ATLauncher

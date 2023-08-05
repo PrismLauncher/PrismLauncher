@@ -1,9 +1,9 @@
 #include "LocalModParseTask.h"
 
+#include <qdcss.h>
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 #include <toml++/toml.h>
-#include <qdcss.h>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -181,7 +181,7 @@ ModDetails ReadMCModTOML(QByteArray contents)
     QString license = "";
     if (auto licenseDatum = tomlData["license"].as_string()) {
         license = QString::fromStdString(licenseDatum->get());
-    } else if (auto licenseDatum =(*modsTable)["license"].as_string()) {
+    } else if (auto licenseDatum = (*modsTable)["license"].as_string()) {
         license = QString::fromStdString(licenseDatum->get());
     }
     if (!license.isEmpty())
@@ -190,7 +190,7 @@ ModDetails ReadMCModTOML(QByteArray contents)
     QString logoFile = "";
     if (auto logoFileDatum = tomlData["logoFile"].as_string()) {
         logoFile = QString::fromStdString(logoFileDatum->get());
-    } else if (auto logoFileDatum =(*modsTable)["logoFile"].as_string()) {
+    } else if (auto logoFileDatum = (*modsTable)["logoFile"].as_string()) {
         logoFile = QString::fromStdString(logoFileDatum->get());
     }
     details.icon_file = logoFile;
@@ -271,7 +271,7 @@ ModDetails ReadFabricModInfo(QByteArray contents)
                 if (largest > 0) {
                     auto key = QString::number(largest) + "x" + QString::number(largest);
                     details.icon_file = obj.value(key).toString();
-                } else { // parsing the sizes failed
+                } else {  // parsing the sizes failed
                     // take the first
                     for (auto i : obj) {
                         details.icon_file = i.toString();
@@ -358,7 +358,7 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
                 if (largest > 0) {
                     auto key = QString::number(largest) + "x" + QString::number(largest);
                     details.icon_file = obj.value(key).toString();
-                } else { // parsing the sizes failed
+                } else {  // parsing the sizes failed
                     // take the first
                     for (auto i : obj) {
                         details.icon_file = i.toString();
@@ -369,12 +369,11 @@ ModDetails ReadQuiltModInfo(QByteArray contents)
                 details.icon_file = icon.toString();
             }
         }
-
     }
     return details;
 }
 
-ModDetails ReadForgeInfo(QString fileName)
+ModDetails ReadForgeInfo(QByteArray contents)
 {
     ModDetails details;
     // Read the data
@@ -382,7 +381,7 @@ ModDetails ReadForgeInfo(QString fileName)
     details.mod_id = "Forge";
     details.homeurl = "http://www.minecraftforge.net/forum/";
     INIFile ini;
-    if (!ini.loadFile(fileName))
+    if (!ini.loadFile(contents))
         return details;
 
     QString major = ini.get("forge.major.number", "0").toString();
@@ -554,7 +553,7 @@ bool processZIP(Mod& mod, ProcessingLevel level)
             return false;
         }
 
-        details = ReadForgeInfo(file.getFileName());
+        details = ReadForgeInfo(file.readAll());
         file.close();
         zip.close();
 
@@ -659,7 +658,8 @@ bool processIconPNG(const Mod& mod, QByteArray&& raw_data)
     return true;
 }
 
-bool loadIconFile(const Mod& mod) {
+bool loadIconFile(const Mod& mod)
+{
     if (mod.iconPath().isEmpty()) {
         qWarning() << "No Iconfile set, be sure to parse the mod first";
         return false;
@@ -671,15 +671,14 @@ bool loadIconFile(const Mod& mod) {
     };
 
     switch (mod.type()) {
-        case ResourceType::FOLDER:
-        {
+        case ResourceType::FOLDER: {
             QFileInfo icon_info(FS::PathCombine(mod.fileinfo().filePath(), mod.iconPath()));
             if (icon_info.exists() && icon_info.isFile()) {
                 QFile icon(icon_info.filePath());
                 if (!icon.open(QIODevice::ReadOnly))
                     return false;
                 auto data = icon.readAll();
-                
+
                 bool icon_result = ModUtils::processIconPNG(mod, std::move(data));
 
                 icon.close();
@@ -689,8 +688,7 @@ bool loadIconFile(const Mod& mod) {
                 }
             }
         }
-        case ResourceType::ZIPFILE:
-        {
+        case ResourceType::ZIPFILE: {
             QuaZip zip(mod.fileinfo().filePath());
             if (!zip.open(QuaZip::mdUnzip))
                 return false;
@@ -716,9 +714,8 @@ bool loadIconFile(const Mod& mod) {
                 return png_invalid();  // could not set icon as current file.
             }
         }
-        case ResourceType::LITEMOD:
-        {
-            return false; // can lightmods even have icons?
+        case ResourceType::LITEMOD: {
+            return false;  // can lightmods even have icons?
         }
         default:
             qWarning() << "Invalid type for mod, can not load icon.";

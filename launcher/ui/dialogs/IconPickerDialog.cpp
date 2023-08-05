@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include <QFileDialog>
 #include <QKeyEvent>
 #include <QPushButton>
-#include <QFileDialog>
 
 #include "Application.h"
 
@@ -24,12 +24,11 @@
 
 #include "ui/instanceview/InstanceDelegate.h"
 
+#include <DesktopServices.h>
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
-#include <DesktopServices.h>
 
-IconPickerDialog::IconPickerDialog(QWidget *parent)
-    : QDialog(parent), ui(new Ui::IconPickerDialog)
+IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui::IconPickerDialog)
 {
     ui->setupUi(this);
     setWindowModality(Qt::WindowModal);
@@ -69,31 +68,30 @@ IconPickerDialog::IconPickerDialog(QWidget *parent)
 
     connect(contentsWidget, SIGNAL(doubleClicked(QModelIndex)), SLOT(activated(QModelIndex)));
 
-    connect(contentsWidget->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)), SLOT(selectionChanged(QItemSelection, QItemSelection)));
+    connect(contentsWidget->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+            SLOT(selectionChanged(QItemSelection, QItemSelection)));
 
     auto buttonFolder = ui->buttonBox->addButton(tr("Open Folder"), QDialogButtonBox::ResetRole);
     connect(buttonFolder, &QPushButton::clicked, this, &IconPickerDialog::openFolder);
 }
 
-bool IconPickerDialog::eventFilter(QObject *obj, QEvent *evt)
+bool IconPickerDialog::eventFilter(QObject* obj, QEvent* evt)
 {
     if (obj != ui->iconView)
         return QDialog::eventFilter(obj, evt);
-    if (evt->type() != QEvent::KeyPress)
-    {
+    if (evt->type() != QEvent::KeyPress) {
         return QDialog::eventFilter(obj, evt);
     }
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(evt);
-    switch (keyEvent->key())
-    {
-    case Qt::Key_Delete:
-        removeSelectedIcon();
-        return true;
-    case Qt::Key_Plus:
-        addNewIcon();
-        return true;
-    default:
-        break;
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(evt);
+    switch (keyEvent->key()) {
+        case Qt::Key_Delete:
+            removeSelectedIcon();
+            return true;
+        case Qt::Key_Plus:
+            addNewIcon();
+            return true;
+        default:
+            break;
     }
     return QDialog::eventFilter(obj, evt);
 }
@@ -142,8 +140,7 @@ int IconPickerDialog::execWithSelection(QString selection)
 
     int index_nr = list->getIconIndex(selection);
     auto model_index = list->index(index_nr);
-    contentsWidget->selectionModel()->select(
-        model_index, QItemSelectionModel::Current | QItemSelectionModel::Select);
+    contentsWidget->selectionModel()->select(model_index, QItemSelectionModel::Current | QItemSelectionModel::Select);
 
     QMetaObject::invokeMethod(this, "delayed_scroll", Qt::QueuedConnection, Q_ARG(QModelIndex, model_index));
     return QDialog::exec();

@@ -16,15 +16,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QStringList>
 #include <QDir>
 #include <QString>
+#include <QStringList>
 #include <QSysInfo>
 #include <QtGlobal>
 
-#include "MangoHud.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "MangoHud.h"
 
 namespace MangoHud {
 

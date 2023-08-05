@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -40,17 +40,11 @@
 #include <QString>
 #include <QVector>
 
-namespace ATLauncher
-{
+namespace ATLauncher {
 
-enum class PackType
-{
-    Public,
-    Private
-};
+enum class PackType { Public, Private };
 
-enum class ModType
-{
+enum class ModType {
     Root,
     Forge,
     Jar,
@@ -73,16 +67,9 @@ enum class ModType
     Unknown
 };
 
-enum class DownloadType
-{
-    Server,
-    Browser,
-    Direct,
-    Unknown
-};
+enum class DownloadType { Server, Browser, Direct, Unknown };
 
-struct VersionLoader
-{
+struct VersionLoader {
     QString type;
     bool latest;
     bool recommended;
@@ -91,8 +78,7 @@ struct VersionLoader
     QString version;
 };
 
-struct VersionLibrary
-{
+struct VersionLibrary {
     QString url;
     QString file;
     QString server;
@@ -101,8 +87,7 @@ struct VersionLibrary
     QString download_raw;
 };
 
-struct VersionMod
-{
+struct VersionMod {
     QString name;
     QString version;
     QString url;
@@ -138,14 +123,12 @@ struct VersionMod
     bool effectively_hidden;
 };
 
-struct VersionConfigs
-{
+struct VersionConfigs {
     int filesize;
     QString sha1;
 };
 
-struct VersionMessages
-{
+struct VersionMessages {
     QString install;
     QString update;
 };
@@ -170,20 +153,17 @@ struct VersionDeletes {
     QVector<VersionDelete> folders;
 };
 
-struct PackVersionMainClass
-{
+struct PackVersionMainClass {
     QString mainClass;
     QString depends;
 };
 
-struct PackVersionExtraArguments
-{
+struct PackVersionExtraArguments {
     QString arguments;
     QString depends;
 };
 
-struct PackVersion
-{
+struct PackVersion {
     QString version;
     QString minecraft;
     bool noConfigs;
@@ -203,6 +183,6 @@ struct PackVersion
     VersionDeletes deletes;
 };
 
-void loadVersion(PackVersion & v, QJsonObject & obj);
+void loadVersion(PackVersion& v, QJsonObject& obj);
 
-}
+}  // namespace ATLauncher

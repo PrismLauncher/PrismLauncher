@@ -313,7 +313,7 @@ bool BlockedModsDialog::checkValidPath(QString path)
     // efectivly compare two strings ignoring all separators and case
     auto laxCompare = [](QString fsfilename, QString metadataFilename) {
         // allowed character seperators
-        QList<QChar> allowedSeperators = { '-', '+', '.' , '_'};
+        QList<QChar> allowedSeperators = { '-', '+', '.', '_' };
 
         // copy in lowercase
         auto fsName = fsfilename.toLower();

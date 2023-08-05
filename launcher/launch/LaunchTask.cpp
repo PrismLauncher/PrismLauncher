@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,16 +36,16 @@
  */
 
 #include "launch/LaunchTask.h"
-#include "MessageLevel.h"
-#include "java/JavaChecker.h"
-#include "tasks/Task.h"
+#include <assert.h>
+#include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
 #include <QEventLoop>
 #include <QRegularExpression>
-#include <QCoreApplication>
 #include <QStandardPaths>
-#include <assert.h>
+#include "MessageLevel.h"
+#include "java/JavaChecker.h"
+#include "tasks/Task.h"
 
 void LaunchTask::init()
 {
@@ -59,9 +59,7 @@ shared_qobject_ptr<LaunchTask> LaunchTask::create(InstancePtr inst)
     return proc;
 }
 
-LaunchTask::LaunchTask(InstancePtr instance): m_instance(instance)
-{
-}
+LaunchTask::LaunchTask(InstancePtr instance) : m_instance(instance) {}
 
 void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step)
 {
@@ -76,8 +74,7 @@ void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step)
 void LaunchTask::executeTask()
 {
     m_instance->setCrashed(false);
-    if(!m_steps.size())
-    {
+    if (!m_steps.size()) {
         state = LaunchTask::Finished;
         emitSucceeded();
     }
@@ -94,46 +91,35 @@ void LaunchTask::onReadyForLaunch()
 void LaunchTask::onStepFinished()
 {
     // initial -> just start the first step
-    if(currentStep == -1)
-    {
-        currentStep ++;
+    if (currentStep == -1) {
+        currentStep++;
         m_steps[currentStep]->start();
         return;
     }
 
     auto step = m_steps[currentStep];
-    if(step->wasSuccessful())
-    {
+    if (step->wasSuccessful()) {
         // end?
-        if(currentStep == m_steps.size() - 1)
-        {
+        if (currentStep == m_steps.size() - 1) {
             finalizeSteps(true, QString());
-        }
-        else
-        {
-            currentStep ++;
+        } else {
+            currentStep++;
             step = m_steps[currentStep];
             step->start();
         }
-    }
-    else
-    {
+    } else {
         finalizeSteps(false, step->failReason());
     }
 }
 
 void LaunchTask::finalizeSteps(bool successful, const QString& error)
 {
-    for(auto step = currentStep; step >= 0; step--)
-    {
+    for (auto step = currentStep; step >= 0; step--) {
         m_steps[step]->finalize();
     }
-    if(successful)
-    {
+    if (successful) {
         emitSucceeded();
-    }
-    else
-    {
+    } else {
         emitFailed(error);
     }
 }
@@ -152,8 +138,7 @@ void LaunchTask::setCensorFilter(QMap<QString, QString> filter)
 QString LaunchTask::censorPrivateInfo(QString in)
 {
     auto iter = m_censorFilter.begin();
-    while (iter != m_censorFilter.end())
-    {
+    while (iter != m_censorFilter.end()) {
         in.replace(iter.key(), iter.value());
         iter++;
     }
@@ -162,8 +147,7 @@ QString LaunchTask::censorPrivateInfo(QString in)
 
 void LaunchTask::proceed()
 {
-    if(state != LaunchTask::Waiting)
-    {
+    if (state != LaunchTask::Waiting) {
         return;
     }
     m_steps[currentStep]->proceed();
@@ -171,8 +155,7 @@ void LaunchTask::proceed()
 
 bool LaunchTask::canAbort() const
 {
-    switch(state)
-    {
+    switch (state) {
         case LaunchTask::Aborted:
         case LaunchTask::Failed:
         case LaunchTask::Finished:
@@ -180,8 +163,7 @@ bool LaunchTask::canAbort() const
         case LaunchTask::NotStarted:
             return true;
         case LaunchTask::Running:
-        case LaunchTask::Waiting:
-        {
+        case LaunchTask::Waiting: {
             auto step = m_steps[currentStep];
             return step->canAbort();
         }
@@ -191,28 +173,23 @@ bool LaunchTask::canAbort() const
 
 bool LaunchTask::abort()
 {
-    switch(state)
-    {
+    switch (state) {
         case LaunchTask::Aborted:
         case LaunchTask::Failed:
         case LaunchTask::Finished:
             return true;
-        case LaunchTask::NotStarted:
-        {
+        case LaunchTask::NotStarted: {
             state = LaunchTask::Aborted;
             emitFailed("Aborted");
             return true;
         }
         case LaunchTask::Running:
-        case LaunchTask::Waiting:
-        {
+        case LaunchTask::Waiting: {
             auto step = m_steps[currentStep];
-            if(!step->canAbort())
-            {
+            if (!step->canAbort()) {
                 return false;
             }
-            if(step->abort())
-            {
+            if (step->abort()) {
                 state = LaunchTask::Aborted;
                 return true;
             }
@@ -225,23 +202,22 @@ bool LaunchTask::abort()
 
 shared_qobject_ptr<LogModel> LaunchTask::getLogModel()
 {
-    if(!m_logModel)
-    {
+    if (!m_logModel) {
         m_logModel.reset(new LogModel());
         m_logModel->setMaxLines(m_instance->getConsoleMaxLines());
         m_logModel->setStopOnOverflow(m_instance->shouldStopOnConsoleOverflow());
         // FIXME: should this really be here?
         m_logModel->setOverflowMessage(tr("Stopped watching the game log because the log length surpassed %1 lines.\n"
-            "You may have to fix your mods because the game is still logging to files and"
-            " likely wasting harddrive space at an alarming rate!").arg(m_logModel->getMaxLines()));
+                                          "You may have to fix your mods because the game is still logging to files and"
+                                          " likely wasting harddrive space at an alarming rate!")
+                                           .arg(m_logModel->getMaxLines()));
     }
     return m_logModel;
 }
 
-void LaunchTask::onLogLines(const QStringList &lines, MessageLevel::Enum defaultLevel)
+void LaunchTask::onLogLines(const QStringList& lines, MessageLevel::Enum defaultLevel)
 {
-    for (auto & line: lines)
-    {
+    for (auto& line : lines) {
         onLogLine(line, defaultLevel);
     }
 }
@@ -250,21 +226,19 @@ void LaunchTask::onLogLine(QString line, MessageLevel::Enum level)
 {
     // if the launcher part set a log level, use it
     auto innerLevel = MessageLevel::fromLine(line);
-    if(innerLevel != MessageLevel::Unknown)
-    {
+    if (innerLevel != MessageLevel::Unknown) {
         level = innerLevel;
     }
 
     // If the level is still undetermined, guess level
-    if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown)
-    {
+    if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown) {
         level = m_instance->guessLevel(line, level);
     }
 
     // censor private user info
     line = censorPrivateInfo(line);
 
-    auto &model = *getLogModel();
+    auto& model = *getLogModel();
     model.append(level, line);
 }
 
@@ -281,22 +255,20 @@ void LaunchTask::emitFailed(QString reason)
     Task::emitFailed(reason);
 }
 
-void LaunchTask::substituteVariables(QStringList &args) const
+void LaunchTask::substituteVariables(QStringList& args) const
 {
     auto env = m_instance->createEnvironment();
 
-    for (auto key : env.keys())
-    {
+    for (auto key : env.keys()) {
         args.replaceInStrings("$" + key, env.value(key));
     }
 }
 
-void LaunchTask::substituteVariables(QString &cmd) const
+void LaunchTask::substituteVariables(QString& cmd) const
 {
     auto env = m_instance->createEnvironment();
 
-    for (auto key : env.keys())
-    {
+    for (auto key : env.keys()) {
         cmd.replace("$" + key, env.value(key));
     }
 }
