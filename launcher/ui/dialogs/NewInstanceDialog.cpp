@@ -284,28 +284,27 @@ QString NewInstanceDialog::iconKey() const
 
 void NewInstanceDialog::on_iconButton_clicked()
 {
-    importIconNow(); //so the user can switch back
+    importIconNow();  // so the user can switch back
     IconPickerDialog dlg(this);
     dlg.execWithSelection(InstIconKey);
 
-    if (dlg.result() == QDialog::Accepted)
-    {
+    if (dlg.result() == QDialog::Accepted) {
         InstIconKey = dlg.selectedIconKey;
         ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
         importIcon = false;
     }
 }
 
-void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
+void NewInstanceDialog::on_instNameTextBox_textChanged(const QString& arg1)
 {
     updateDialogState();
 }
 
 void NewInstanceDialog::importIconNow()
 {
-    if(importIcon) {
+    if (importIcon) {
         APPLICATION->icons()->installIcon(importIconPath, importIconName);
-        InstIconKey = importIconName;
+        InstIconKey = importIconName.mid(0, importIconName.lastIndexOf('.'));
         importIcon = false;
     }
     APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
