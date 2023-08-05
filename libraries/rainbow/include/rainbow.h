@@ -29,8 +29,7 @@ class QColor;
 /**
  * A set of methods used to work with colors.
  */
-namespace Rainbow
-{
+namespace Rainbow {
 /**
  * Calculate the luma of a color. Luma is weighted sum of gamma-adjusted
  * R'G'B' components of a color. The result is similar to qGray. The range
@@ -41,14 +40,13 @@ namespace Rainbow
  *
  * @see http://en.wikipedia.org/wiki/Luma_(video)
  */
-qreal luma(const QColor &);
+qreal luma(const QColor&);
 
 /**
  * Calculate hue, chroma and luma of a color in one call.
  * @since 5.0
  */
-void getHcy(const QColor &, qreal *hue, qreal *chroma, qreal *luma,
-                           qreal *alpha = 0);
+void getHcy(const QColor&, qreal* hue, qreal* chroma, qreal* luma, qreal* alpha = 0);
 
 /**
  * Calculate the contrast ratio between two colors, according to the
@@ -62,7 +60,7 @@ void getHcy(const QColor &, qreal *hue, qreal *chroma, qreal *luma,
  *
  * @see Rainbow::luma
  */
-qreal contrastRatio(const QColor &, const QColor &);
+qreal contrastRatio(const QColor&, const QColor&);
 
 /**
  * Adjust the luma of a color by changing its distance from white.
@@ -79,8 +77,7 @@ qreal contrastRatio(const QColor &, const QColor &);
  * component of the color; 1.0 means no change, 0.0 maximizes chroma
  * @see Rainbow::shade
  */
-QColor
-lighten(const QColor &, qreal amount = 0.5, qreal chromaInverseGain = 1.0);
+QColor lighten(const QColor&, qreal amount = 0.5, qreal chromaInverseGain = 1.0);
 
 /**
  * Adjust the luma of a color by changing its distance from black.
@@ -97,7 +94,7 @@ lighten(const QColor &, qreal amount = 0.5, qreal chromaInverseGain = 1.0);
  * component of the color; 1.0 means no change, 0.0 minimizes chroma
  * @see Rainbow::shade
  */
-QColor darken(const QColor &, qreal amount = 0.5, qreal chromaGain = 1.0);
+QColor darken(const QColor&, qreal amount = 0.5, qreal chromaGain = 1.0);
 
 /**
  * Adjust the luma and chroma components of a color. The amount is added
@@ -111,7 +108,7 @@ QColor darken(const QColor &, qreal amount = 0.5, qreal chromaGain = 1.0);
  * 1.0 maximizes chroma
  * @see Rainbow::luma
  */
-QColor shade(const QColor &, qreal lumaAmount, qreal chromaAmount = 0.0);
+QColor shade(const QColor&, qreal lumaAmount, qreal chromaAmount = 0.0);
 
 /**
  * Create a new color by tinting one color with another. This function is
@@ -125,7 +122,7 @@ QColor shade(const QColor &, qreal lumaAmount, qreal chromaAmount = 0.0);
  * @param amount how strongly to tint the base; 0.0 gives @p base,
  * 1.0 gives @p color
  */
-QColor tint(const QColor &base, const QColor &color, qreal amount = 0.3);
+QColor tint(const QColor& base, const QColor& color, qreal amount = 0.3);
 
 /**
  * Blend two colors into a new color by linear combination.
@@ -138,7 +135,7 @@ QColor tint(const QColor &base, const QColor &color, qreal amount = 0.3);
  * @p bias >= 1 gives @p c2. @p bias == 0.5 gives a 50% blend of @p c1
  * and @p c2.
  */
-QColor mix(const QColor &c1, const QColor &c2, qreal bias = 0.5);
+QColor mix(const QColor& c1, const QColor& c2, qreal bias = 0.5);
 
 /**
  * Blend two colors into a new color by painting the second color over the
@@ -152,7 +149,5 @@ QColor mix(const QColor &c1, const QColor &c2, qreal bias = 0.5);
  * @param paint the color to be overlayed onto the base color.
  * @param comp the CompositionMode used to do the blending.
  */
-QColor
-overlayColors(const QColor &base, const QColor &paint,
-              QPainter::CompositionMode comp = QPainter::CompositionMode_SourceOver);
-}
+QColor overlayColors(const QColor& base, const QColor& paint, QPainter::CompositionMode comp = QPainter::CompositionMode_SourceOver);
+}  // namespace Rainbow

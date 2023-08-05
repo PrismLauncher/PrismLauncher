@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,11 +34,10 @@
  */
 
 #include "FoldersTask.h"
-#include "minecraft/MinecraftInstance.h"
 #include <QDir>
+#include "minecraft/MinecraftInstance.h"
 
-FoldersTask::FoldersTask(MinecraftInstance * inst)
-    :Task()
+FoldersTask::FoldersTask(MinecraftInstance* inst) : Task()
 {
     m_inst = inst;
 }
@@ -47,8 +46,7 @@ void FoldersTask::executeTask()
 {
     // Make directories
     QDir mcDir(m_inst->gameRoot());
-    if (!mcDir.exists() && !mcDir.mkpath("."))
-    {
+    if (!mcDir.exists() && !mcDir.mkpath(".")) {
         emitFailed(tr("Failed to create folder for Minecraft binaries."));
         return;
     }

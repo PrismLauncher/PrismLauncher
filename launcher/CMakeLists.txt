@@ -262,8 +262,6 @@ set(MINECRAFT_SOURCES
     minecraft/launch/CreateGameFolders.h
     minecraft/launch/ModMinecraftJar.cpp
     minecraft/launch/ModMinecraftJar.h
-    minecraft/launch/DirectJavaLaunch.cpp
-    minecraft/launch/DirectJavaLaunch.h
     minecraft/launch/ExtractNatives.cpp
     minecraft/launch/ExtractNatives.h
     minecraft/launch/LauncherPartLaunch.cpp
@@ -487,6 +485,9 @@ set(API_SOURCES
     modplatform/helpers/HashUtils.cpp
     modplatform/helpers/OverrideUtils.h
     modplatform/helpers/OverrideUtils.cpp
+
+    modplatform/helpers/ExportToModList.h
+    modplatform/helpers/ExportToModList.cpp
 )
 
 set(FTB_SOURCES
@@ -498,6 +499,11 @@ set(FTB_SOURCES
     modplatform/legacy_ftb/PrivatePackManager.cpp
 
     modplatform/legacy_ftb/PackHelpers.h
+
+    modplatform/import_ftb/PackInstallTask.h
+    modplatform/import_ftb/PackInstallTask.cpp
+    modplatform/import_ftb/PackHelpers.h
+    modplatform/import_ftb/PackHelpers.cpp
 )
 
 set(FLAME_SOURCES
@@ -665,7 +671,7 @@ set(LOGIC_SOURCES
     ${ATLAUNCHER_SOURCES}
 )
 
-if(APPLE)
+if(APPLE AND Launcher_ENABLE_UPDATER)
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${MAC_UPDATE_SOURCES})
 endif()
 
@@ -758,6 +764,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/SystemTheme.h
     ui/themes/ThemeManager.cpp
     ui/themes/ThemeManager.h
+    ui/themes/CatPack.cpp
+    ui/themes/CatPack.h
 
     # Processes
     LaunchController.h
@@ -867,6 +875,11 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/legacy_ftb/ListModel.h
     ui/pages/modplatform/legacy_ftb/ListModel.cpp
 
+    ui/pages/modplatform/import_ftb/ImportFTBPage.cpp
+    ui/pages/modplatform/import_ftb/ImportFTBPage.h
+    ui/pages/modplatform/import_ftb/ListModel.h
+    ui/pages/modplatform/import_ftb/ListModel.cpp
+
     ui/pages/modplatform/flame/FlameModel.cpp
     ui/pages/modplatform/flame/FlameModel.h
     ui/pages/modplatform/flame/FlamePage.cpp
@@ -911,6 +924,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ExportInstanceDialog.h
     ui/dialogs/ExportPackDialog.cpp
     ui/dialogs/ExportPackDialog.h
+    ui/dialogs/ExportToModListDialog.cpp
+    ui/dialogs/ExportToModListDialog.h
     ui/dialogs/IconPickerDialog.cpp
     ui/dialogs/IconPickerDialog.h
     ui/dialogs/ImportResourceDialog.cpp
@@ -1039,6 +1054,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/ResourcePage.ui
     ui/pages/modplatform/flame/FlamePage.ui
     ui/pages/modplatform/legacy_ftb/Page.ui
+    ui/pages/modplatform/import_ftb/ImportFTBPage.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
@@ -1058,6 +1074,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
     ui/dialogs/ExportPackDialog.ui
+    ui/dialogs/ExportToModListDialog.ui
     ui/dialogs/IconPickerDialog.ui
     ui/dialogs/ImportResourceDialog.ui
     ui/dialogs/MSALoginDialog.ui
@@ -1133,17 +1150,23 @@ if(APPLE)
     set(CMAKE_MACOSX_RPATH 1)
     set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks/")
 
-    file(DOWNLOAD ${MACOSX_SPARKLE_DOWNLOAD_URL} ${CMAKE_BINARY_DIR}/Sparkle.tar.xz EXPECTED_HASH SHA256=${MACOSX_SPARKLE_SHA256})
-    file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
+    if(Launcher_ENABLE_UPDATER)
+      file(DOWNLOAD ${MACOSX_SPARKLE_DOWNLOAD_URL} ${CMAKE_BINARY_DIR}/Sparkle.tar.xz EXPECTED_HASH SHA256=${MACOSX_SPARKLE_SHA256})
+      file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
 
-    find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
+      find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
+      add_compile_definitions(SPARKLE_ENABLED)
+    endif()
+
     target_link_libraries(Launcher_logic
         "-framework AppKit"
         "-framework Carbon"
         "-framework Foundation"
         "-framework ApplicationServices"
     )
-    target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
+    if(Launcher_ENABLE_UPDATER)
+      target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
+    endif()
 endif()
 
 target_link_libraries(Launcher_logic)
@@ -1205,7 +1228,7 @@ if(WIN32)
     )
 endif()
 
-if (UNIX AND APPLE)
+if (UNIX AND APPLE AND Launcher_ENABLE_UPDATER)
     # Add Sparkle updater
     # It has to be copied here instead of just allowing fixup_bundle to install it, otherwise essential parts of
     # the framework aren't installed

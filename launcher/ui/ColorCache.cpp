@@ -1,13 +1,11 @@
 #include "ColorCache.h"
 
-
 /**
  * Blend the color with the front color, adapting to the back color
  */
 QColor ColorCache::blend(QColor color)
 {
-    if (Rainbow::luma(m_front) > Rainbow::luma(m_back))
-    {
+    if (Rainbow::luma(m_front) > Rainbow::luma(m_back)) {
         // for dark color schemes, produce a fitting color first
         color = Rainbow::tint(m_front, color, 0.5);
     }
@@ -27,8 +25,7 @@ QColor ColorCache::blendBackground(QColor color)
 void ColorCache::recolorAll()
 {
     auto iter = m_colors.begin();
-    while(iter != m_colors.end())
-    {
+    while (iter != m_colors.end()) {
         iter->front = blend(iter->original);
         iter->back = blendBackground(iter->original);
     }

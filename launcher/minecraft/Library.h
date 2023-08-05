@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,20 +34,19 @@
  */
 
 #pragma once
-#include <QString>
 #include <net/NetAction.h>
-#include <QPair>
+#include <QDir>
 #include <QList>
+#include <QMap>
+#include <QPair>
 #include <QString>
 #include <QStringList>
-#include <QMap>
-#include <QDir>
 #include <QUrl>
 #include <memory>
 
-#include "Rule.h"
 #include "GradleSpecifier.h"
 #include "MojangDownloadInfo.h"
+#include "Rule.h"
 #include "RuntimeContext.h"
 
 class Library;
@@ -55,19 +54,14 @@ class MinecraftInstance;
 
 typedef std::shared_ptr<Library> LibraryPtr;
 
-class Library
-{
+class Library {
     friend class OneSixVersionFormat;
     friend class MojangVersionFormat;
     friend class LibraryTest;
-public:
-    Library()
-    {
-    }
-    Library(const QString &name)
-    {
-        m_name = name;
-    }
+
+   public:
+    Library() {}
+    Library(const QString& name) { m_name = name; }
     /// limited copy without some data. TODO: why?
     static LibraryPtr limitedCopy(LibraryPtr base)
     {
@@ -85,98 +79,60 @@ public:
         return newlib;
     }
 
-public: /* methods */
+   public: /* methods */
     /// Returns the raw name field
-    const GradleSpecifier & rawName() const
-    {
-        return m_name;
-    }
+    const GradleSpecifier& rawName() const { return m_name; }
 
-    void setRawName(const GradleSpecifier & spec)
-    {
-        m_name = spec;
-    }
+    void setRawName(const GradleSpecifier& spec) { m_name = spec; }
 
-    void setClassifier(const QString & spec)
-    {
-        m_name.setClassifier(spec);
-    }
+    void setClassifier(const QString& spec) { m_name.setClassifier(spec); }
 
     /// returns the full group and artifact prefix
-    QString artifactPrefix() const
-    {
-        return m_name.artifactPrefix();
-    }
+    QString artifactPrefix() const { return m_name.artifactPrefix(); }
 
     /// get the artifact ID
-    QString artifactId() const
-    {
-        return m_name.artifactId();
-    }
+    QString artifactId() const { return m_name.artifactId(); }
 
     /// get the artifact version
-    QString version() const
-    {
-        return m_name.version();
-    }
+    QString version() const { return m_name.version(); }
 
     /// Returns true if the library is native
-    bool isNative() const
-    {
-        return m_nativeClassifiers.size() != 0;
-    }
+    bool isNative() const { return m_nativeClassifiers.size() != 0; }
 
     void setStoragePrefix(QString prefix = QString());
 
     /// Set the url base for downloads
-    void setRepositoryURL(const QString &base_url)
-    {
-        m_repositoryURL = base_url;
-    }
+    void setRepositoryURL(const QString& base_url) { m_repositoryURL = base_url; }
 
-    void getApplicableFiles(const RuntimeContext & runtimeContext, QStringList & jar, QStringList & native,
-                            QStringList & native32, QStringList & native64, const QString & overridePath) const;
+    void getApplicableFiles(const RuntimeContext& runtimeContext,
+                            QStringList& jar,
+                            QStringList& native,
+                            QStringList& native32,
+                            QStringList& native64,
+                            const QString& overridePath) const;
 
-    void setAbsoluteUrl(const QString &absolute_url)
-    {
-        m_absoluteURL = absolute_url;
-    }
+    void setAbsoluteUrl(const QString& absolute_url) { m_absoluteURL = absolute_url; }
 
-    void setFilename(const QString &filename)
-    {
-        m_filename = filename;
-    }
+    void setFilename(const QString& filename) { m_filename = filename; }
 
     /// Get the file name of the library
-    QString filename(const RuntimeContext & runtimeContext) const;
+    QString filename(const RuntimeContext& runtimeContext) const;
 
     // DEPRECATED: set a display name, used by jar mods only
-    void setDisplayName(const QString & displayName)
-    {
-        m_displayname = displayName;
-    }
+    void setDisplayName(const QString& displayName) { m_displayname = displayName; }
 
     /// Get the file name of the library
-    QString displayName(const RuntimeContext & runtimeContext) const;
+    QString displayName(const RuntimeContext& runtimeContext) const;
 
-    void setMojangDownloadInfo(MojangLibraryDownloadInfo::Ptr info)
-    {
-        m_mojangDownloads = info;
-    }
+    void setMojangDownloadInfo(MojangLibraryDownloadInfo::Ptr info) { m_mojangDownloads = info; }
 
-    void setHint(const QString &hint)
-    {
-        m_hint = hint;
-    }
+    void setHint(const QString& hint) { m_hint = hint; }
 
     /// Set the load rules
-    void setRules(QList<std::shared_ptr<Rule>> rules)
-    {
-        m_rules = rules;
-    }
+    void setRules(QList<std::shared_ptr<Rule>> rules) { m_rules = rules; }
 
     /// Returns true if the library should be loaded (or extracted, in case of natives)
-    bool isActive(const RuntimeContext & runtimeContext) const;
+    bool isActive(const RuntimeContext& runtimeContext) const;
 
     /// Returns true if the library is contained in an instance and false if it is shared
     bool isLocal() const;
@@ -188,12 +144,14 @@ public: /* methods */
     bool isForge() const;
 
     // Get a list of downloads for this library
-    QList<NetAction::Ptr> getDownloads(const RuntimeContext & runtimeContext, class HttpMetaCache * cache,
-                                     QStringList & failedLocalFiles, const QString & overridePath) const;
+    QList<NetAction::Ptr> getDownloads(const RuntimeContext& runtimeContext,
+                                       class HttpMetaCache* cache,
+                                       QStringList& failedLocalFiles,
+                                       const QString& overridePath) const;
 
-    QString getCompatibleNative(const RuntimeContext & runtimeContext) const;
+    QString getCompatibleNative(const RuntimeContext& runtimeContext) const;
 
-private: /* methods */
+   private: /* methods */
     /// the default storage prefix used by Prism Launcher
     static QString defaultStoragePrefix();
 
@@ -201,14 +159,11 @@ private: /* methods */
     QString storagePrefix() const;
 
     /// Get the relative file path where the library should be saved
-    QString storageSuffix(const RuntimeContext & runtimeContext) const;
+    QString storageSuffix(const RuntimeContext& runtimeContext) const;
 
-    QString hint() const
-    {
-        return m_hint;
-    }
+    QString hint() const { return m_hint; }
 
-protected: /* data */
+   protected: /* data */
     /// the basic gradle dependency specifier.
     GradleSpecifier m_name;
 
@@ -253,4 +208,3 @@ protected: /* data */
     /// MOJANG: container with Mojang style download info
     MojangLibraryDownloadInfo::Ptr m_mojangDownloads;
 };
-

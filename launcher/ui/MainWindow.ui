@@ -484,7 +484,15 @@
     <iconset theme="flame"/>
    </property>
    <property name="text">
-    <string>CurseForge (zip)</string>
+    <string>CurseForge (zip)</string>  
+   </property>
+  </action>
+  <action name="actionExportInstanceToModList">
+   <property name="icon">
+    <iconset theme="new"/>
+   </property>
+   <property name="text">
+    <string>Mod List</string>
    </property>
   </action>
   <action name="actionCreateInstanceShortcut">

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,14 +36,11 @@
 #include "BaseVersionList.h"
 #include "BaseVersion.h"
 
-BaseVersionList::BaseVersionList(QObject *parent) : QAbstractListModel(parent)
-{
-}
+BaseVersionList::BaseVersionList(QObject* parent) : QAbstractListModel(parent) {}
 
-BaseVersion::Ptr BaseVersionList::findVersion(const QString &descriptor)
+BaseVersion::Ptr BaseVersionList::findVersion(const QString& descriptor)
 {
-    for (int i = 0; i < count(); i++)
-    {
+    for (int i = 0; i < count(); i++) {
         if (at(i)->descriptor() == descriptor)
             return at(i);
     }
@@ -58,7 +55,7 @@ BaseVersion::Ptr BaseVersionList::getRecommended() const
         return at(0);
 }
 
-QVariant BaseVersionList::data(const QModelIndex &index, int role) const
+QVariant BaseVersionList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -68,37 +65,36 @@ QVariant BaseVersionList::data(const QModelIndex &index, int role) const
 
     BaseVersion::Ptr version = at(index.row());
 
-    switch (role)
-    {
-    case VersionPointerRole:
-        return QVariant::fromValue(version);
+    switch (role) {
+        case VersionPointerRole:
+            return QVariant::fromValue(version);
 
-    case VersionRole:
-        return version->name();
+        case VersionRole:
+            return version->name();
 
-    case VersionIdRole:
-        return version->descriptor();
+        case VersionIdRole:
+            return version->descriptor();
 
-    case TypeRole:
-        return version->typeString();
+        case TypeRole:
+            return version->typeString();
 
-    default:
-        return QVariant();
+        default:
+            return QVariant();
     }
 }
 
 BaseVersionList::RoleList BaseVersionList::providesRoles() const
 {
-    return {VersionPointerRole, VersionRole, VersionIdRole, TypeRole};
+    return { VersionPointerRole, VersionRole, VersionIdRole, TypeRole };
 }
 
-int BaseVersionList::rowCount(const QModelIndex &parent) const
+int BaseVersionList::rowCount(const QModelIndex& parent) const
 {
     // Return count
     return parent.isValid() ? 0 : count();
 }
 
-int BaseVersionList::columnCount(const QModelIndex &parent) const
+int BaseVersionList::columnCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : 1;
 }

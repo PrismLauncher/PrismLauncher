@@ -1,0 +1,22 @@
+{
+    "name": "libdecor",
+    "buildsystem": "meson",
+    "config-opts": [
+        "-Ddemo=false"
+    ],
+    "sources": [
+        {
+            "type": "git",
+            "url": "https://gitlab.freedesktop.org/libdecor/libdecor.git",
+            "commit": "73260393a97291c887e1074ab7f318e031be0ac6"
+        },
+        {
+            "type": "patch",
+            "path": "patches/weird_libdecor.patch"
+        }
+    ],
+    "cleanup": [
+        "/include",
+        "/lib/pkgconfig"
+    ]
+}

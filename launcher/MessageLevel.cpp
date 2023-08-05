@@ -22,12 +22,11 @@ MessageLevel::Enum MessageLevel::getLevel(const QString& levelName)
         return MessageLevel::Unknown;
 }
 
-MessageLevel::Enum MessageLevel::fromLine(QString &line)
+MessageLevel::Enum MessageLevel::fromLine(QString& line)
 {
     // Level prefix
     int endmark = line.indexOf("]!");
-    if (line.startsWith("!![") && endmark != -1)
-    {
+    if (line.startsWith("!![") && endmark != -1) {
         auto level = MessageLevel::getLevel(line.left(endmark).mid(3));
         line = line.mid(endmark + 2);
         return level;

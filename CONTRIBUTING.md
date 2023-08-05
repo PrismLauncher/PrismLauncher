@@ -19,7 +19,7 @@ In an effort to ensure that the code you contribute is actually compatible with 
 
 This can be done by appending `-s` to your `git commit` call, or by manually appending the following text to your commit message:
 
-```
+```text
 <commit message>
 
 Signed-off-by: Author name <Author email>
@@ -27,7 +27,7 @@ Signed-off-by: Author name <Author email>
 
 By signing off your work, you agree to the terms below:
 
-```
+```text
 Developer's Certificate of Origin 1.1
 
 By making a contribution to this project, I certify that:
@@ -61,3 +61,9 @@ As a bonus, you can also [cryptographically sign your commits][gh-signing-commit
 
 [gh-signing-commits]: https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits
 [gh-vigilant-mode]: https://docs.github.com/en/authentication/managing-commit-signature-verification/displaying-verification-statuses-for-all-of-your-commits
+
+## Backporting to Release Branches
+
+We use [automated backports](https://github.com/PrismLauncher/PrismLauncher/blob/develop/.github/workflows/backport.yml) to merge specific contributions from develop into `release` branches.
+
+This is done when pull requests are merged and have labels such as `backport release-7.x` - which should be added along with the milestone for the release.
