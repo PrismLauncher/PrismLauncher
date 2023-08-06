@@ -23,7 +23,7 @@ class FlameAPI : public NetworkResourceAPI {
 
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
-    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (Forge | Fabric | Quilt); }
+    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (NeoForge | Forge | Fabric | Quilt); }
 
    private:
     static int getClassId(ModPlatform::ResourceType type)
