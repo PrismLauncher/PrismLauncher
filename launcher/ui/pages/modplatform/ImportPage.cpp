@@ -134,7 +134,7 @@ void ImportPage::updateState()
             QUrlQuery query(url);
             auto addonId = query.allQueryItemValues("addonId")[0];
             auto fileId = query.allQueryItemValues("fileId")[0];
-            auto array = new QByteArray();
+            auto array = std::make_shared<QByteArray>();
 
             auto api = FlameAPI();
             auto job = api.getFile(addonId, fileId, array);

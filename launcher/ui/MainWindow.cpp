@@ -1078,7 +1078,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 extra_info.insert("pack_id", addonId);
                 extra_info.insert("pack_version_id", fileId);
 
-                auto array = new QByteArray();
+                auto array = std::make_shared<QByteArray>();
 
                 auto api = FlameAPI();
                 auto job = api.getFile(addonId, fileId, array);
