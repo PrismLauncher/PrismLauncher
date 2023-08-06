@@ -28,7 +28,7 @@ on:
         description: Private key for AppImage signing
         required: false
       GPG_PRIVATE_KEY_ID:
-        description: ID for the GPG_PRIVATE_KEY, to select the signign key
+        description: ID for the GPG_PRIVATE_KEY, to select the signing key
         required: false
 
 jobs:
