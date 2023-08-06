@@ -43,6 +43,7 @@
 #include "SolderPackManifest.h"
 #include "TechnicPackProcessor.h"
 #include "net/ChecksumValidator.h"
+#include "net/ApiDownload.h"
 
 Technic::SolderPackInstallTask::SolderPackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network,
                                                       const QUrl& solderUrl,
@@ -71,7 +72,7 @@ void Technic::SolderPackInstallTask::executeTask()
 
     m_filesNetJob.reset(new NetJob(tr("Resolving modpack files"), m_network));
     auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
-    m_filesNetJob->addNetAction(Net::Download::makeByteArray(sourceUrl, m_response));
+    m_filesNetJob->addNetAction(Net::ApiDownload::makeByteArray(sourceUrl, m_response));
 
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::fileListSucceeded);
@@ -112,7 +113,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     for (const auto& mod : build.mods) {
         auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
 
-        auto dl = Net::Download::makeFile(mod.url, path);
+        auto dl = Net::ApiDownload::makeFile(mod.url, path);
         if (!mod.md5.isEmpty()) {
             auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
@@ -126,7 +127,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
 
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
-    connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &Technic::SolderPackInstallTask::propogateStepProgress);
+    connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &Technic::SolderPackInstallTask::propagateStepProgress);
     connect(m_filesNetJob.get(), &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
     connect(m_filesNetJob.get(), &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
     m_filesNetJob->start();

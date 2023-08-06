@@ -7,6 +7,8 @@
 
 #include "Application.h"
 
+#include "net/ApiDownload.h"
+
 AssetUpdateTask::AssetUpdateTask(MinecraftInstance * inst)
 {
     m_inst = inst;
@@ -34,7 +36,7 @@ void AssetUpdateTask::executeTask()
     entry->setStale(true);
     auto hexSha1 = assets->sha1.toLatin1();
     qDebug() << "Asset index SHA1:" << hexSha1;
-    auto dl = Net::Download::makeCached(indexUrl, entry);
+    auto dl = Net::ApiDownload::makeCached(indexUrl, entry);
     auto rawSha1 = QByteArray::fromHex(assets->sha1.toLatin1());
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
     job->addNetAction(dl);
@@ -45,7 +47,7 @@ void AssetUpdateTask::executeTask()
     connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetIndexFailed);
     connect(downloadJob.get(), &NetJob::aborted, this, [this]{ emitFailed(tr("Aborted")); });
     connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
-    connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propogateStepProgress);
+    connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propagateStepProgress);
 
     qDebug() << m_inst->name() << ": Starting asset index download";
     downloadJob->start();
@@ -84,7 +86,7 @@ void AssetUpdateTask::assetIndexFinished()
         connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetsFailed);
         connect(downloadJob.get(), &NetJob::aborted, this, [this]{ emitFailed(tr("Aborted")); });
         connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
-        connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propogateStepProgress);
+        connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propagateStepProgress);
         downloadJob->start();
         return;
     }

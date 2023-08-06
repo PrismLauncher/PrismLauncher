@@ -4,6 +4,7 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -60,7 +61,6 @@
 #include "launch/steps/QuitAfterGameStop.h"
 
 #include "minecraft/launch/LauncherPartLaunch.h"
-#include "minecraft/launch/DirectJavaLaunch.h"
 #include "minecraft/launch/ModMinecraftJar.h"
 #include "minecraft/launch/ClaimAccount.h"
 #include "minecraft/launch/ReconstructAssets.h"
@@ -166,10 +166,6 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("MaxMemAlloc"), memorySetting);
         m_settings->registerOverride(global_settings->getSetting("PermGen"), memorySetting);
 
-        // Minecraft launch method
-        auto launchMethodOverride = m_settings->registerSetting("OverrideMCLaunchMethod", false);
-        m_settings->registerOverride(global_settings->getSetting("MCLaunchMethod"), launchMethodOverride);
-
         // Native library workarounds
         auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);
         m_settings->registerOverride(global_settings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
@@ -185,6 +181,10 @@ void MinecraftInstance::loadSpecificSettings()
         auto miscellaneousOverride = m_settings->registerSetting("OverrideMiscellaneous", false);
         m_settings->registerOverride(global_settings->getSetting("CloseAfterLaunch"), miscellaneousOverride);
         m_settings->registerOverride(global_settings->getSetting("QuitAfterGameStop"), miscellaneousOverride);
+
+        // Mod loader specific options
+        auto modLoaderSettings = m_settings->registerSetting("OverrideModLoaderSettings", false);
+        m_settings->registerOverride(global_settings->getSetting("DisableQuiltBeacon"), modLoaderSettings);
 
         m_settings->set("InstanceType", "OneSix");
     }
@@ -390,6 +390,12 @@ QStringList MinecraftInstance::extraArguments()
         QStringList jar, temp1, temp2, temp3;
         agent->library()->getApplicableFiles(runtimeContext(), jar, temp1, temp2, temp3, getLocalLibraryPath());
         list.append("-javaagent:"+jar[0]+(agent->argument().isEmpty() ? "" : "="+agent->argument()));
+    }
+
+    {
+        const auto loaders = version->getModLoaders();
+        if (loaders.has_value() && loaders.value() & ResourceAPI::Quilt && settings()->get("DisableQuiltBeacon").toBool())
+            list.append("-Dloader.disable_beacon=true");
     }
     return list;
 }
@@ -832,7 +838,7 @@ QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSess
     {
         addToFilter(sessionRef.session, tr("<SESSION ID>"));
     }
-    if (sessionRef.access_token != "offline") {
+    if (sessionRef.access_token != "0") {
         addToFilter(sessionRef.access_token, tr("<ACCESS TOKEN>"));
     }
     if(sessionRef.client_token.size()) {
@@ -979,15 +985,6 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         process->appendStep(makeShared<CheckJava>(pptr));
     }
 
-    // check launch method
-    QStringList validMethods = {"LauncherPart", "DirectJava"};
-    QString method = launchMethod();
-    if(!validMethods.contains(method))
-    {
-        process->appendStep(makeShared<TextPrint>(pptr, "Selected launch method \"" + method + "\" is not valid.\n", MessageLevel::Fatal));
-        return process;
-    }
-
     // create the .minecraft folder and server-resource-packs (workaround for Minecraft bug MCL-3732)
     {
         process->appendStep(makeShared<CreateGameFolders>(pptr));
@@ -1061,23 +1058,11 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
 
     {
         // actually launch the game
-        auto method = launchMethod();
-        if(method == "LauncherPart")
-        {
-            auto step = makeShared<LauncherPartLaunch>(pptr);
-            step->setWorkingDirectory(gameRoot());
-            step->setAuthSession(session);
-            step->setServerToJoin(serverToJoin);
-            process->appendStep(step);
-        }
-        else if (method == "DirectJava")
-        {
-            auto step = makeShared<DirectJavaLaunch>(pptr);
-            step->setWorkingDirectory(gameRoot());
-            step->setAuthSession(session);
-            step->setServerToJoin(serverToJoin);
-            process->appendStep(step);
-        }
+        auto step = makeShared<LauncherPartLaunch>(pptr);
+        step->setWorkingDirectory(gameRoot());
+        step->setAuthSession(session);
+        step->setServerToJoin(serverToJoin);
+        process->appendStep(step);
     }
 
     // run post-exit command if that's needed
@@ -1098,11 +1083,6 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     m_launchProcess = process;
     emit launchTaskChanged(m_launchProcess);
     return m_launchProcess;
-}
-
-QString MinecraftInstance::launchMethod()
-{
-    return settings()->get("MCLaunchMethod").toString();
 }
 
 JavaVersion MinecraftInstance::getJavaVersion()

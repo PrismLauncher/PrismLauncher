@@ -38,6 +38,7 @@ class DummyResourceModel : public ResourceModel {
 
    public:
     DummyResourceModel() : ResourceModel(new DummyResourceAPI) {}
+    ~DummyResourceModel() {}
 
     [[nodiscard]] auto metaEntryBase() const -> QString override { return ""; };
 
@@ -58,7 +59,10 @@ class DummyResourceModel : public ResourceModel {
 class ResourceModelTest : public QObject {
     Q_OBJECT
    private slots:
-    void test_abstract_item_model() { [[maybe_unused]] auto tester = new QAbstractItemModelTester(new DummyResourceModel); }
+    void test_abstract_item_model() { 
+        auto dummy = DummyResourceModel();
+        auto tester = QAbstractItemModelTester(&dummy);
+    }
 
     void test_search()
     {
@@ -78,6 +82,8 @@ class ResourceModelTest : public QObject {
         QVERIFY(processed_pack->addonId.toString() == Json::requireString(processed_response, "project_id"));
         QVERIFY(processed_pack->description == Json::requireString(processed_response, "description"));
         QVERIFY(processed_pack->authors.first().name == Json::requireString(processed_response, "author"));
+
+        delete model;
     }
 };
 

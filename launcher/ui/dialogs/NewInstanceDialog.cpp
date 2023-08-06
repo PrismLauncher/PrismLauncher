@@ -33,35 +33,35 @@
  *      limitations under the License.
  */
 
-#include "Application.h"
 #include "NewInstanceDialog.h"
+#include "Application.h"
+#include "ui/pages/modplatform/import_ftb/ImportFTBPage.h"
 #include "ui_NewInstanceDialog.h"
 
 #include <BaseVersion.h>
+#include <InstanceList.h>
 #include <icons/IconList.h>
 #include <tasks/Task.h>
-#include <InstanceList.h>
 
-#include "VersionSelectDialog.h"
-#include "ProgressDialog.h"
 #include "IconPickerDialog.h"
+#include "ProgressDialog.h"
+#include "VersionSelectDialog.h"
 
+#include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QLayout>
 #include <QPushButton>
-#include <QFileDialog>
 #include <QValidator>
-#include <QDialogButtonBox>
 #include <utility>
 
-#include "ui/widgets/PageContainer.h"
 #include "ui/pages/modplatform/CustomPage.h"
-#include "ui/pages/modplatform/atlauncher/AtlPage.h"
-#include "ui/pages/modplatform/legacy_ftb/Page.h"
-#include "ui/pages/modplatform/flame/FlamePage.h"
 #include "ui/pages/modplatform/ImportPage.h"
+#include "ui/pages/modplatform/atlauncher/AtlPage.h"
+#include "ui/pages/modplatform/flame/FlamePage.h"
+#include "ui/pages/modplatform/legacy_ftb/Page.h"
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 #include "ui/pages/modplatform/technic/TechnicPage.h"
-
+#include "ui/widgets/PageContainer.h"
 NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
                                      const QString& url,
                                      const QMap<QString, QString>& extra_info,
@@ -170,6 +170,7 @@ QList<BasePage *> NewInstanceDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(new FlamePage(this));
     pages.append(new LegacyFTB::Page(this));
+    pages.append(new FTBImportAPP::ImportFTBPage(this));
     pages.append(new ModrinthPage(this));
     pages.append(new TechnicPage(this));
 
@@ -286,28 +287,27 @@ QString NewInstanceDialog::iconKey() const
 
 void NewInstanceDialog::on_iconButton_clicked()
 {
-    importIconNow(); //so the user can switch back
+    importIconNow();  // so the user can switch back
     IconPickerDialog dlg(this);
     dlg.execWithSelection(InstIconKey);
 
-    if (dlg.result() == QDialog::Accepted)
-    {
+    if (dlg.result() == QDialog::Accepted) {
         InstIconKey = dlg.selectedIconKey;
         ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
         importIcon = false;
     }
 }
 
-void NewInstanceDialog::on_instNameTextBox_textChanged(const QString &arg1)
+void NewInstanceDialog::on_instNameTextBox_textChanged(const QString& arg1)
 {
     updateDialogState();
 }
 
 void NewInstanceDialog::importIconNow()
 {
-    if(importIcon) {
+    if (importIcon) {
         APPLICATION->icons()->installIcon(importIconPath, importIconName);
-        InstIconKey = importIconName;
+        InstIconKey = importIconName.mid(0, importIconName.lastIndexOf('.'));
         importIcon = false;
     }
     APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());

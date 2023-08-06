@@ -6,9 +6,10 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -130,17 +131,12 @@
 #include "MangoHud.h"
 #endif
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
 #endif
 
-
 #if defined Q_OS_WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <stdio.h>
+#include "WindowsConsole.h"
 #endif
 
 #define STRINGIFY(x) #x
@@ -167,31 +163,15 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QSt
     fflush(stderr);
 }
 
-}
+}  // namespace
 
-Application::Application(int &argc, char **argv) : QApplication(argc, argv)
+
+
+Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
-    // attach the parent console
-    if(AttachConsole(ATTACH_PARENT_PROCESS))
-    {
-        // if attach succeeds, reopen and sync all the i/o
-        if(freopen("CON", "w", stdout))
-        {
-            std::cout.sync_with_stdio();
-        }
-        if(freopen("CON", "w", stderr))
-        {
-            std::cerr.sync_with_stdio();
-        }
-        if(freopen("CON", "r", stdin))
-        {
-            std::cin.sync_with_stdio();
-        }
-        auto out = GetStdHandle (STD_OUTPUT_HANDLE);
-        DWORD written;
-        const char * endline = "\n";
-        WriteConsole(out, endline, strlen(endline), &written, NULL);
+    // attach the parent console if stdout not already captured
+    if (AttachWindowsConsole()) {
         consoleAttached = true;
     }
 #endif
@@ -282,7 +262,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        QDir foo;
+        if (DesktopServices::isSnap())
+        {
+            foo = QDir(getenv("SNAP_USER_COMMON"));
+        }
+        else
+        {
+            foo = QDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        }
+        
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
 
@@ -434,7 +423,11 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         }
         // seach root path
         if(!foundLoggingRules) {
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+           logRulesPath = FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME, logRulesFile); 
+#else
            logRulesPath = FS::PathCombine(m_rootPath, logRulesFile); 
+#endif
             qDebug() << "Testing" << logRulesPath << "...";
             foundLoggingRules = QFile::exists(logRulesPath);
         }
@@ -472,6 +465,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
+        qDebug() << "Platform                   : " << BuildConfig.BUILD_PLATFORM;
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
         if (adjustedBy.size())
@@ -569,6 +563,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
         // Language
         m_settings->registerSetting("Language", QString());
+        m_settings->registerSetting("UseSystemLocale", false);
 
         // Console
         m_settings->registerSetting("ShowConsole", false);
@@ -605,6 +600,9 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
 
+        // Mod loader settings
+        m_settings->registerSetting("DisableQuiltBeacon", false);
+
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
         m_settings->registerSetting("UseNativeGLFW", false);
@@ -618,9 +616,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGameTime", true);
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
-
-        // Minecraft launch method
-        m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
 
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
@@ -695,7 +690,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
 
             // get rid of invalid meta urls
-            if (!metaUrl.isValid() || metaUrl.scheme() != "http" || metaUrl.scheme() != "https")
+            if (!metaUrl.isValid() || (metaUrl.scheme() != "http" && metaUrl.scheme() != "https"))
                 m_settings->reset("MetaURLOverride");
         }
 
@@ -767,7 +762,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     if(BuildConfig.UPDATER_ENABLED)
     {
         qDebug() << "Initializing updater";
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
         m_updater.reset(new MacSparkleUpdater());
 #endif
         qDebug() << "<> Updater started.";
@@ -919,12 +914,7 @@ bool Application::createSetupWizard()
         }
         return false;
     }();
-    bool languageRequired = [&]()
-    {
-        if (settings()->get("Language").toString().isEmpty())
-            return true;
-        return false;
-    }();
+    bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
@@ -1174,7 +1164,17 @@ QIcon Application::getThemedIcon(const QString& name)
     return QIcon::fromTheme(name);
 }
 
-bool Application::openJsonEditor(const QString &filename)
+QList<CatPack*> Application::getValidCatPacks()
+{
+    return m_themeManager->getValidCatPacks();
+}
+
+QString Application::getCatPack(QString catName)
+{
+    return m_themeManager->getCatPack(catName);
+}
+
+bool Application::openJsonEditor(const QString& filename)
 {
     const QString file = QDir::current().absoluteFilePath(filename);
     if (m_settings->get("JsonEditor").toString().isEmpty())
@@ -1560,7 +1560,7 @@ QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        FS::PathCombine(m_rootPath, "share/" + BuildConfig.LAUNCHER_APP_BINARY_NAME),
+        FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME),
 #endif
         FS::PathCombine(m_rootPath, "jars"),
         FS::PathCombine(applicationDirPath(), "jars"),

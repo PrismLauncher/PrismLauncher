@@ -5,7 +5,7 @@ for i in {0..9}; do
     test -S "$XDG_RUNTIME_DIR"/discord-ipc-"$i" || ln -sf {app/com.discordapp.Discord,"$XDG_RUNTIME_DIR"}/discord-ipc-"$i";
 done
 
-export PATH="${PATH}${PATH:+:}/app/utils/gamescope/bin:/usr/lib/extensions/vulkan/MangoHud/bin"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}${LD_LIBRARY_PATH:+:}/usr/lib/extensions/vulkan/MangoHud/\$LIB/"
+export PATH="${PATH}${PATH:+:}/usr/lib/extensions/vulkan/gamescope/bin:/usr/lib/extensions/vulkan/MangoHud/bin"
+export VK_LAYER_PATH="/usr/lib/extensions/vulkan/share/vulkan/implicit_layer.d/"
 
 exec /app/bin/prismrun "$@"

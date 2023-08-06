@@ -48,7 +48,6 @@
 #include <QAccessible>
 
 #include "VisualGroup.h"
-#include "ui/themes/ThemeManager.h"
 #include <QDebug>
 
 #include <Application.h>
@@ -504,7 +503,7 @@ void InstanceView::setPaintCat(bool visible)
 {
     m_catVisible = visible;
     if (visible)
-        m_catPixmap.load(QString(":/backgrounds/%1").arg(ThemeManager::getCatImage()));
+        m_catPixmap.load(APPLICATION->getCatPack());
     else
         m_catPixmap = QPixmap();
 }

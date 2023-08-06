@@ -50,6 +50,7 @@ public:
     explicit INIFile();
 
     bool loadFile(QString fileName);
+    bool loadFile(QByteArray data);
     bool saveFile(QString fileName);
 
     QVariant get(QString key, QVariant def) const;
