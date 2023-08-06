@@ -575,6 +575,9 @@ set(ATLAUNCHER_SOURCES
 )
 
 set(LINKEXE_SOURCES
+    WindowsConsole.cpp
+    WindowsConsole.h
+
     filelink/FileLink.h
     filelink/FileLink.cpp
     FileSystem.h
@@ -1034,6 +1037,14 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/VisualGroup.cpp
     ui/instanceview/VisualGroup.h
 )
+
+if(WIN32)
+    set(LAUNCHER_SOURCES
+        WindowsConsole.cpp
+        WindowsConsole.h
+        ${LAUNCHER_SOURCES}
+    )
+endif()
 
 qt_wrap_ui(LAUNCHER_UI
     ui/MainWindow.ui
