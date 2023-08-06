@@ -62,7 +62,8 @@
 #include "Application.h"
 #include "modplatform/ResourceAPI.h"
 
-static const QMap<QString, ResourceAPI::ModLoaderType> modloaderMapping{ { "net.minecraftforge", ResourceAPI::Forge },
+static const QMap<QString, ResourceAPI::ModLoaderType> modloaderMapping{ { "net.neoforged", ResourceAPI::NeoForge },
+                                                                         { "net.minecraftforge", ResourceAPI::Forge },
                                                                          { "net.fabricmc.fabric-loader", ResourceAPI::Fabric },
                                                                          { "org.quiltmc.quilt-loader", ResourceAPI::Quilt },
                                                                          { "com.mumfrey.liteloader", ResourceAPI::LiteLoader } };
