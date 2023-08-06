@@ -132,7 +132,7 @@ QList<BasePage*> InstallLoaderDialog::getPages()
     return { // Forge
              new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), {}, profile),
              // Fabric
-             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc-small", tr("Fabric"), Version("1.14"), profile),
+             new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc", tr("Fabric"), Version("1.14"), profile),
              // Quilt
              new InstallLoaderPage("org.quiltmc.quilt-loader", "quiltmc", tr("Quilt"), Version("1.14"), profile),
              // LiteLoader

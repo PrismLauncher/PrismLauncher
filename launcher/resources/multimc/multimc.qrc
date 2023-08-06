@@ -349,9 +349,8 @@
         <file>scalable/server.svg</file>
 
         <file>scalable/instances/quiltmc.svg</file>
-        <file>22x22/fabricmc-small.png</file>
+        <file>scalable/instances/fabricmc.svg</file>
         <file>128x128/instances/forge.png</file>
-        <file>128x128/instances/fabricmc.png</file>
         <file>128x128/instances/liteloader.png</file>
     </qresource>
 </RCC>
