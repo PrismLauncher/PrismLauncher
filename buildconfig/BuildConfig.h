@@ -36,8 +36,8 @@
  */
 
 #pragma once
-#include <QString>
 #include <QList>
+#include <QString>
 
 /**
  * \brief The Config class holds all the build-time information passed from the build system.
@@ -145,7 +145,7 @@ class Config {
     QString AUTH_BASE = "https://authserver.mojang.com/";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
     QString FMLLIBS_BASE_URL = "https://files.prismlauncher.org/fmllibs/";  // FIXME: move into CMakeLists
-    QString TRANSLATIONS_BASE_URL = "https://i18n.prismlauncher.org/";  // FIXME: move into CMakeLists
+    QString TRANSLATIONS_BASE_URL = "https://i18n.prismlauncher.org/";      // FIXME: move into CMakeLists
 
     QString MODPACKSCH_API_BASE_URL = "https://api.modpacks.ch/";
 
@@ -162,7 +162,7 @@ class Config {
 
     QString MODRINTH_STAGING_URL = "https://staging-api.modrinth.com/v2";
     QString MODRINTH_PROD_URL = "https://api.modrinth.com/v2";
-    QStringList MODRINTH_MRPACK_HOSTS{"cdn.modrinth.com", "github.com", "raw.githubusercontent.com", "gitlab.com"};
+    QStringList MODRINTH_MRPACK_HOSTS{ "cdn.modrinth.com", "github.com", "raw.githubusercontent.com", "gitlab.com" };
 
     QString FLAME_BASE_URL = "https://api.curseforge.com/v1";
 

@@ -23,37 +23,32 @@ class JavaCheckerJob;
 typedef shared_qobject_ptr<JavaCheckerJob> JavaCheckerJobPtr;
 
 // FIXME: this just seems horribly redundant
-class JavaCheckerJob : public Task
-{
+class JavaCheckerJob : public Task {
     Q_OBJECT
-public:
-    explicit JavaCheckerJob(QString job_name) : Task(), m_job_name(job_name) {};
-    virtual ~JavaCheckerJob() {};
+   public:
+    explicit JavaCheckerJob(QString job_name) : Task(), m_job_name(job_name){};
+    virtual ~JavaCheckerJob(){};
 
     bool addJavaCheckerAction(JavaCheckerPtr base)
     {
         javacheckers.append(base);
         // if this is already running, the action needs to be started right away!
-        if (isRunning())
-        {
+        if (isRunning()) {
             setProgress(num_finished, javacheckers.size());
             connect(base.get(), &JavaChecker::checkFinished, this, &JavaCheckerJob::partFinished);
             base->performCheck();
         }
         return true;
     }
-    QList<JavaCheckResult> getResults()
-    {
-        return javaresults;
-    }
+    QList<JavaCheckResult> getResults() { return javaresults; }
 
-private slots:
+   private slots:
     void partFinished(JavaCheckResult result);
 
-protected:
+   protected:
     virtual void executeTask() override;
 
-private:
+   private:
     QString m_job_name;
     QList<JavaCheckerPtr> javacheckers;
     QList<JavaCheckResult> javaresults;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Kenneth Chew <kenneth.c0@protonmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -31,11 +31,10 @@
  * The initializer of the new class should have the side effect of starting the automatic updater. That is,
  * once the class is initialized, the program should automatically check for updates if necessary.
  */
-class ExternalUpdater : public QObject
-{
+class ExternalUpdater : public QObject {
     Q_OBJECT
 
-public:
+   public:
     /*!
      * Check for updates manually, showing the user a progress bar and an alert if no updates are found.
      */
@@ -71,7 +70,7 @@ public:
      */
     virtual void setBetaAllowed(bool allowed) = 0;
 
-signals:
+   signals:
     /*!
      * Emits whenever the user's ability to check for updates changes.
      *
@@ -84,4 +83,4 @@ signals:
     void canCheckForUpdatesChanged(bool canCheck);
 };
 
-#endif //LAUNCHER_EXTERNALUPDATER_H
+#endif  // LAUNCHER_EXTERNALUPDATER_H

@@ -31,13 +31,13 @@
 class ShaderPackParseTest : public QObject {
     Q_OBJECT
 
-    private slots:
+   private slots:
     void test_parseZIP()
     {
         QString source = QFINDTESTDATA("testdata/ShaderPackParse");
 
         QString zip_sp = FS::PathCombine(source, "shaderpack1.zip");
-        ShaderPack pack { QFileInfo(zip_sp) };
+        ShaderPack pack{ QFileInfo(zip_sp) };
 
         bool valid = ShaderPackUtils::processZIP(pack);
 
@@ -50,7 +50,7 @@ class ShaderPackParseTest : public QObject {
         QString source = QFINDTESTDATA("testdata/ShaderPackParse");
 
         QString folder_sp = FS::PathCombine(source, "shaderpack2");
-        ShaderPack pack { QFileInfo(folder_sp) };
+        ShaderPack pack{ QFileInfo(folder_sp) };
 
         bool valid = ShaderPackUtils::processFolder(pack);
 
@@ -63,7 +63,7 @@ class ShaderPackParseTest : public QObject {
         QString source = QFINDTESTDATA("testdata/ShaderPackParse");
 
         QString folder_sp = FS::PathCombine(source, "shaderpack3.zip");
-        ShaderPack pack { QFileInfo(folder_sp) };
+        ShaderPack pack{ QFileInfo(folder_sp) };
 
         bool valid = ShaderPackUtils::process(pack);
 

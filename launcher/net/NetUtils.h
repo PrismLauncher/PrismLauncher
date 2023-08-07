@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- * PolyMC - Minecraft Launcher
+ * Prism Launcher - Minecraft Launcher
  * Copyright (c) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,23 +22,22 @@
 #include <QSet>
 
 namespace Net {
-    inline bool isApplicationError(QNetworkReply::NetworkError x) {
-        // Mainly taken from https://github.com/qt/qtbase/blob/dev/src/network/access/qhttpthreaddelegate.cpp
-        static QSet<QNetworkReply::NetworkError> errors = {
-            QNetworkReply::ProtocolInvalidOperationError,
-            QNetworkReply::AuthenticationRequiredError,
-            QNetworkReply::ContentAccessDenied,
-            QNetworkReply::ContentNotFoundError,
-            QNetworkReply::ContentOperationNotPermittedError,
-            QNetworkReply::ProxyAuthenticationRequiredError,
-            QNetworkReply::ContentConflictError,
-            QNetworkReply::ContentGoneError,
-            QNetworkReply::InternalServerError,
-            QNetworkReply::OperationNotImplementedError,
-            QNetworkReply::ServiceUnavailableError,
-            QNetworkReply::UnknownServerError,
-            QNetworkReply::UnknownContentError
-        };
-        return errors.contains(x);
-    }
+inline bool isApplicationError(QNetworkReply::NetworkError x)
+{
+    // Mainly taken from https://github.com/qt/qtbase/blob/dev/src/network/access/qhttpthreaddelegate.cpp
+    static QSet<QNetworkReply::NetworkError> errors = { QNetworkReply::ProtocolInvalidOperationError,
+                                                        QNetworkReply::AuthenticationRequiredError,
+                                                        QNetworkReply::ContentAccessDenied,
+                                                        QNetworkReply::ContentNotFoundError,
+                                                        QNetworkReply::ContentOperationNotPermittedError,
+                                                        QNetworkReply::ProxyAuthenticationRequiredError,
+                                                        QNetworkReply::ContentConflictError,
+                                                        QNetworkReply::ContentGoneError,
+                                                        QNetworkReply::InternalServerError,
+                                                        QNetworkReply::OperationNotImplementedError,
+                                                        QNetworkReply::ServiceUnavailableError,
+                                                        QNetworkReply::UnknownServerError,
+                                                        QNetworkReply::UnknownContentError };
+    return errors.contains(x);
+}
 }  // namespace Net

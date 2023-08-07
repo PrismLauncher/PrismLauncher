@@ -54,6 +54,8 @@
 
 package org.prismlauncher.utils;
 
+import org.prismlauncher.utils.logging.Log;
+
 import java.applet.Applet;
 import java.io.File;
 import java.lang.invoke.MethodHandle;
@@ -62,10 +64,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import org.prismlauncher.utils.logging.Log;
-
 public final class ReflectionUtils {
-
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     private static final ClassLoader LOADER = ClassLoader.getSystemClassLoader();
 
@@ -146,9 +145,7 @@ public final class ReflectionUtils {
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
      */
-    public static MethodHandle findMainMethod(String clazz)
-            throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException {
+    public static MethodHandle findMainMethod(String clazz) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException {
         return findMainMethod(LOADER.loadClass(clazz));
     }
-
 }

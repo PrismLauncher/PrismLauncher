@@ -2,9 +2,9 @@
 
 #include <sys/utsname.h>
 
+#include <QDebug>
 #include <QString>
 #include <QStringList>
-#include <QDebug>
 
 Sys::KernelInfo Sys::getKernelInfo()
 {
@@ -22,18 +22,16 @@ Sys::KernelInfo Sys::getKernelInfo()
     out.kernelMinor = 0;
     out.kernelPatch = 0;
     auto sections = release.split('-');
-    if(sections.size() >= 1) {
+    if (sections.size() >= 1) {
         auto versionParts = sections[0].split('.');
-        if(versionParts.size() >= 3) {
+        if (versionParts.size() >= 3) {
             out.kernelMajor = versionParts[0].toInt();
             out.kernelMinor = versionParts[1].toInt();
             out.kernelPatch = versionParts[2].toInt();
-        }
-        else {
+        } else {
             qWarning() << "Not enough version numbers in " << sections[0] << " found " << versionParts.size();
         }
-    }
-    else {
+    } else {
         qWarning() << "Not enough '-' sections in " << release << " found " << sections.size();
     }
     return out;
@@ -45,12 +43,9 @@ uint64_t Sys::getSystemRam()
 {
     uint64_t memsize;
     size_t memsizesize = sizeof(memsize);
-    if(!sysctlbyname("hw.memsize", &memsize, &memsizesize, NULL, 0))
-    {
+    if (!sysctlbyname("hw.memsize", &memsize, &memsizesize, NULL, 0)) {
         return memsize;
-    }
-    else
-    {
+    } else {
         return 0;
     }
 }

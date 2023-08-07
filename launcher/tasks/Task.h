@@ -36,25 +36,20 @@
 
 #pragma once
 
+#include <QLoggingCategory>
 #include <QRunnable>
 #include <QUuid>
-#include <QLoggingCategory>
 
 #include "QObjectPtr.h"
 
 Q_DECLARE_LOGGING_CATEGORY(taskLogC)
 
-enum class TaskStepState {
-    Waiting,
-    Running,
-    Failed,
-    Succeeded
-};
+enum class TaskStepState { Waiting, Running, Failed, Succeeded };
 
 Q_DECLARE_METATYPE(TaskStepState)
 
 struct TaskStepProgress {
-    QUuid uid; 
+    QUuid uid;
     qint64 current = 0;
     qint64 total = -1;
 
@@ -64,14 +59,11 @@ struct TaskStepProgress {
     QString status = "";
     QString details = "";
     TaskStepState state = TaskStepState::Waiting;
-    TaskStepProgress() {
-        this->uid = QUuid::createUuid();
-    }
-    TaskStepProgress(QUuid uid) {
-        this->uid = uid;
-    }
+    TaskStepProgress() { this->uid = QUuid::createUuid(); }
+    TaskStepProgress(QUuid uid) { this->uid = uid; }
     bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
-    void update(qint64 current, qint64 total) {
+    void update(qint64 current, qint64 total)
+    {
         this->old_current = this->current;
         this->old_total = this->total;
 
@@ -100,8 +92,8 @@ class Task : public QObject, public QRunnable {
     bool isFinished() const;
     bool wasSuccessful() const;
 
-    /*! 
-     * MultiStep tasks are combinations of multiple tasks into a single logical task. 
+    /*!
+     * MultiStep tasks are combinations of multiple tasks into a single logical task.
      * The main usage of this is in SequencialTask.
      */
     virtual auto isMultiStep() const -> bool { return false; }
@@ -124,8 +116,6 @@ class Task : public QObject, public QRunnable {
     qint64 getProgress() { return m_progress; }
     qint64 getTotalProgress() { return m_progressTotal; }
     virtual auto getStepProgress() const -> TaskStepProgressList { return {}; }
-
-     
 
     QUuid getUid() { return m_uid; }
 
@@ -155,9 +145,18 @@ class Task : public QObject, public QRunnable {
     void run() override { start(); }
 
     virtual void start();
-    virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); };
+    virtual bool abort()
+    {
+        if (canAbort())
+            emitAborted();
+        return canAbort();
+    };
 
-    void setAbortable(bool can_abort) { m_can_abort = can_abort; emit abortStatusChanged(can_abort); }
+    void setAbortable(bool can_abort)
+    {
+        m_can_abort = can_abort;
+        emit abortStatusChanged(can_abort);
+    }
 
    protected:
     virtual void executeTask() = 0;
@@ -190,5 +189,4 @@ class Task : public QObject, public QRunnable {
     // Change using setAbortStatus
     bool m_can_abort = false;
     QUuid m_uid;
-
 };

@@ -1,7 +1,7 @@
 #include "AuthSession.h"
-#include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QStringList>
 
 QString AuthSession::serializeUserProperties()
@@ -16,13 +16,11 @@ QString AuthSession::serializeUserProperties()
     */
     QJsonDocument value(userAttrs);
     return value.toJson(QJsonDocument::Compact);
-
 }
 
 bool AuthSession::MakeOffline(QString offline_playername)
 {
-    if (status != PlayableOffline && status != PlayableOnline)
-    {
+    if (status != PlayableOffline && status != PlayableOnline) {
         return false;
     }
     session = "-";
@@ -32,7 +30,8 @@ bool AuthSession::MakeOffline(QString offline_playername)
     return true;
 }
 
-void AuthSession::MakeDemo() {
+void AuthSession::MakeDemo()
+{
     player_name = "Player";
     demo = true;
 }
