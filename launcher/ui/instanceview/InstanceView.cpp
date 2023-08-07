@@ -47,8 +47,8 @@
 #include <QScrollBar>
 #include <QtMath>
 
-#include <QDebug>
 #include "VisualGroup.h"
+#include "ui/themes/ThemeManager.h"
 
 #include <Application.h>
 #include <InstanceList.h>
