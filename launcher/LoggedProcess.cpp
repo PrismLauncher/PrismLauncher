@@ -66,13 +66,12 @@ QStringList LoggedProcess::reprocess(const QByteArray& data, QTextDecoder& decod
     }
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, QString::SkipEmptyParts);
+    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed);
 #else
-    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, Qt::SkipEmptyParts);
+    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed);
 #endif
 
-    if (!str.endsWith(QChar::LineFeed))
-        m_leftover_line = lines.takeLast();
+    m_leftover_line = lines.takeLast();
     return lines;
 }
 
