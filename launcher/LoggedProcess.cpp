@@ -65,11 +65,7 @@ QStringList LoggedProcess::reprocess(const QByteArray& data, QTextDecoder& decod
         m_leftover_line = "";
     }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed);
-#else
-    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed);
-#endif
 
     m_leftover_line = lines.takeLast();
     return lines;
