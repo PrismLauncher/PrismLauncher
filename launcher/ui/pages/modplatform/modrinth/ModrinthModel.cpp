@@ -42,6 +42,8 @@
 #include "minecraft/PackProfile.h"
 #include "ui/widgets/ProjectItem.h"
 
+#include "net/ApiDownload.h"
+
 #include <QMessageBox>
 
 namespace Modrinth {
@@ -142,7 +144,7 @@ void ModpackListModel::performPaginatedSearch()
                             .arg(currentSearchTerm)
                             .arg(currentSort);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), m_all_response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchAllUrl), m_all_response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, this, [this] {
         QJsonParseError parse_error_all{};
@@ -216,9 +218,7 @@ void ModpackListModel::searchWithTerm(const QString& term, const int sort)
 void ModpackListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()
-                     ->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
-                     ->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo))->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
     }
@@ -230,10 +230,9 @@ void ModpackListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry =
-        APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {

@@ -15,7 +15,7 @@
 
 #include "BaseEntity.h"
 
-#include "net/Download.h"
+#include "net/ApiDownload.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
 #include "Json.h"
@@ -130,7 +130,7 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     auto url = this->url();
     auto entry = APPLICATION->metacache()->resolveEntry("meta", localFilename());
     entry->setStale(true);
-    auto dl = Net::Download::makeCached(url, entry);
+    auto dl = Net::ApiDownload::makeCached(url, entry);
     /*
      * The validator parses the file and loads it into the object.
      * If that fails, the file is not written to storage.

@@ -131,17 +131,12 @@
 #include "MangoHud.h"
 #endif
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
 #endif
 
-
 #if defined Q_OS_WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <stdio.h>
+#include "WindowsConsole.h"
 #endif
 
 #define STRINGIFY(x) #x
@@ -168,31 +163,15 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext &context, const QSt
     fflush(stderr);
 }
 
-}
+}  // namespace
 
-Application::Application(int &argc, char **argv) : QApplication(argc, argv)
+
+
+Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
-    // attach the parent console
-    if(AttachConsole(ATTACH_PARENT_PROCESS))
-    {
-        // if attach succeeds, reopen and sync all the i/o
-        if(freopen("CON", "w", stdout))
-        {
-            std::cout.sync_with_stdio();
-        }
-        if(freopen("CON", "w", stderr))
-        {
-            std::cerr.sync_with_stdio();
-        }
-        if(freopen("CON", "r", stdin))
-        {
-            std::cin.sync_with_stdio();
-        }
-        auto out = GetStdHandle (STD_OUTPUT_HANDLE);
-        DWORD written;
-        const char * endline = "\n";
-        WriteConsole(out, endline, strlen(endline), &written, NULL);
+    // attach the parent console if stdout not already captured
+    if (AttachWindowsConsole()) {
         consoleAttached = true;
     }
 #endif
@@ -281,7 +260,16 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        QDir foo;
+        if (DesktopServices::isSnap())
+        {
+            foo = QDir(getenv("SNAP_USER_COMMON"));
+        }
+        else
+        {
+            foo = QDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        }
+        
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
 
@@ -628,9 +616,6 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
 
-        // Minecraft launch method
-        m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
-
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
 
@@ -704,7 +689,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
             QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
 
             // get rid of invalid meta urls
-            if (!metaUrl.isValid() || metaUrl.scheme() != "http" || metaUrl.scheme() != "https")
+            if (!metaUrl.isValid() || (metaUrl.scheme() != "http" && metaUrl.scheme() != "https"))
                 m_settings->reset("MetaURLOverride");
         }
 
@@ -776,7 +761,7 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     if(BuildConfig.UPDATER_ENABLED)
     {
         qDebug() << "Initializing updater";
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
         m_updater.reset(new MacSparkleUpdater());
 #endif
         qDebug() << "<> Updater started.";

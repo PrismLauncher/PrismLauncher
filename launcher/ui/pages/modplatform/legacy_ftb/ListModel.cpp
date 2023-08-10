@@ -37,6 +37,7 @@
 #include "Application.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
+#include "net/ApiDownload.h"
 
 #include <Version.h>
 #include "StringUtils.h"
@@ -229,9 +230,9 @@ void ListModel::requestLogo(QString file)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file));
     NetJob* job = new NetJob(QString("FTB Icon Download for %1").arg(file), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::finished, this, [this, file, fullPath, job] {
@@ -255,7 +256,7 @@ void ListModel::requestLogo(QString file)
 void ListModel::getLogo(const QString& logo, LogoCallback callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo))->getFullPath());
     } else {
         requestLogo(logo);
     }

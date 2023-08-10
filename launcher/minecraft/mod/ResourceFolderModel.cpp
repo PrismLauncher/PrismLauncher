@@ -552,6 +552,8 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
     menu->addSeparator()->setText(tr("Show / Hide Columns"));
 
     for (int col = 0; col < columnCount(); ++col) {
+        // Skip creating actions for columns that should not be hidden
+        if (!m_columnsHideable.at(col)) continue;
         auto act = new QAction(menu);
         setupHeaderAction(act, col);
 

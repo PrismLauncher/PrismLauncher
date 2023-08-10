@@ -48,6 +48,8 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "net/ApiDownload.h"
+
 namespace LegacyFTB {
 
 PackInstallTask::PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, Modpack pack, QString version)
@@ -77,7 +79,7 @@ void PackInstallTask::downloadPack()
     } else {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "modpacks/%1").arg(archivePath);
     }
-    netJobContainer->addNetAction(Net::Download::makeFile(url, archivePath));
+    netJobContainer->addNetAction(Net::ApiDownload::makeFile(url, archivePath));
 
     connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::unzip);
     connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::emitFailed);

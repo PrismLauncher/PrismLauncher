@@ -24,6 +24,8 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 
+#include "net/ApiDownload.h"
+
 ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            ModPlatform::IndexedVersion version,
                                            const std::shared_ptr<ResourceFolderModel> packs,
@@ -51,7 +53,7 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
         }
     }
 
-    m_filesNetJob->addNetAction(Net::Download::makeFile(m_pack_version.downloadUrl, dir.absoluteFilePath(getFilename())));
+    m_filesNetJob->addNetAction(Net::ApiDownload::makeFile(m_pack_version.downloadUrl, dir.absoluteFilePath(getFilename())));
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &ResourceDownloadTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &ResourceDownloadTask::downloadProgressChanged);
     connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &ResourceDownloadTask::propagateStepProgress);
