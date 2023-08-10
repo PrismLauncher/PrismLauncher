@@ -105,19 +105,8 @@ public final class EntryPoint {
             return ExitCode.ABORT;
         }
 
-        // populate properties to provide mods with more info
-        String name = params.getString("instanceName", "");
-        String iconKey = params.getString("instanceIconKey", "default");
+        setProperties(params);
 
-        System.setProperty("org.prismlauncher.instance.name", name);
-        System.setProperty("org.prismlauncher.instance.icon.id", iconKey);
-        System.setProperty("org.prismlauncher.instance.icon.path", "icon.png");
-
-        // set multimc properties for compatibility
-        System.setProperty("multimc.instance.title", name);
-        System.setProperty("multimc.instance.icon", iconKey);
-
-        // launch the game
         String launcherType = params.getString("launcher");
 
         try {
@@ -148,6 +137,32 @@ public final class EntryPoint {
 
             return ExitCode.ERROR;
         }
+    }
+
+    private static void setProperties(Parameters params) {
+        String name = params.getString("instanceName", null);
+        String iconId = params.getString("instanceIconKey", null);
+        String iconPath = params.getString("instanceIconPath", null);
+        String windowTitle = params.getString("windowTitle", null);
+        String windowDimensions = params.getString("windowParams", null);
+
+        // set useful properties for mods
+        if (name != null)
+            System.setProperty("org.prismlauncher.instance.name", name);
+        if (iconId != null)
+            System.setProperty("org.prismlauncher.instance.icon.id", iconId);
+        if (iconPath != null)
+            System.setProperty("org.prismlauncher.instance.icon.path", iconPath);
+        if (windowTitle != null)
+            System.setProperty("org.prismlauncher.window.title", windowTitle);
+        if (windowDimensions != null)
+            System.setProperty("org.prismlauncher.window.dimensions", windowDimensions);
+
+        // set multimc properties for compatibility
+        if (name != null)
+            System.setProperty("multimc.instance.title", name);
+        if (iconId != null)
+            System.setProperty("multimc.instance.icon", iconId);
     }
 
     private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {

@@ -626,7 +626,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
     {
         QString windowParams;
         if (settings()->get("LaunchMaximized").toBool())
-            windowParams = "max";
+            windowParams = "maximized";
         else
             windowParams =
                 QString("%1x%2").arg(settings()->get("MinecraftWinWidth").toInt()).arg(settings()->get("MinecraftWinHeight").toInt());
@@ -637,7 +637,8 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
     // instance info
     {
         launchScript += "instanceName " + name() + "\n";
-        launchScript += "instanceIconKey " + iconKey() + "\n";
+        launchScript += "instanceIconKey " + name() + "\n";
+        launchScript += "instanceIconPath icon.png\n"; // we already save a copy here
     }
 
     // legacy auth
