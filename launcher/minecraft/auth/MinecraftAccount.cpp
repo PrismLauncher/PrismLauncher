@@ -126,6 +126,7 @@ QPixmap MinecraftAccount::getFace() const
         return QPixmap();
     }
     QPixmap skin = QPixmap(8, 8);
+    skin.fill(QColorConstants::Transparent);
     QPainter painter(&skin);
     painter.drawPixmap(0, 0, skinTexture.copy(8, 8, 8, 8));
     painter.drawPixmap(0, 0, skinTexture.copy(40, 8, 8, 8));

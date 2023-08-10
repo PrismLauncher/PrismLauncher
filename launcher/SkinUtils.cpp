@@ -35,6 +35,7 @@ QPixmap getFaceFromCache(QString username, int height, int width)
         QPixmap skinTexture(fskin.fileName());
         if (!skinTexture.isNull()) {
             QPixmap skin = QPixmap(8, 8);
+            skin.fill(QColorConstants::Transparent);
             QPainter painter(&skin);
             painter.drawPixmap(0, 0, skinTexture.copy(8, 8, 8, 8));
             painter.drawPixmap(0, 0, skinTexture.copy(40, 8, 8, 8));
