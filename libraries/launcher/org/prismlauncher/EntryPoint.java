@@ -105,11 +105,25 @@ public final class EntryPoint {
             return ExitCode.ABORT;
         }
 
+        // populate properties to provide mods with more info
+        String name = params.getString("instanceName", "");
+        String iconKey = params.getString("instanceIconKey", "default");
+
+        System.setProperty("org.prismlauncher.instance.name", name);
+        System.setProperty("org.prismlauncher.instance.icon.id", iconKey);
+        System.setProperty("org.prismlauncher.instance.icon.path", "icon.png");
+
+        // set multimc properties for compatibility
+        System.setProperty("multimc.instance.title", name);
+        System.setProperty("multimc.instance.icon", iconKey);
+
+        // launch the game
+        String launcherType = params.getString("launcher");
+
         try {
             Launcher launcher;
-            String type = params.getString("launcher");
 
-            switch (type) {
+            switch (launcherType) {
                 case "standard":
                     launcher = new StandardLauncher(params);
                     break;
@@ -119,7 +133,7 @@ public final class EntryPoint {
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid launcher type: " + type);
+                    throw new IllegalArgumentException("Invalid launcher type: " + launcherType);
             }
 
             launcher.launch();

@@ -634,6 +634,12 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "windowParams " + windowParams + "\n";
     }
 
+    // instance info
+    {
+        launchScript += "instanceName " + name() + "\n";
+        launchScript += "instanceIconKey " + iconKey() + "\n";
+    }
+
     // legacy auth
     if (session) {
         launchScript += "userName " + session->player_name + "\n";
