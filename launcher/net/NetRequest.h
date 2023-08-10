@@ -52,7 +52,7 @@ namespace Net {
 class NetRequest : public NetAction {
     Q_OBJECT
    protected:
-    explicit NetRequest() : NetAction(){};
+    explicit NetRequest() : NetAction(){}
 
    public:
     using Ptr = shared_qobject_ptr<class NetRequest>;
@@ -62,7 +62,7 @@ class NetRequest : public NetAction {
    public:
     ~NetRequest() override = default;
 
-    void init() override{};
+    void init() override{}
 
    public:
     void addValidator(Validator* v);

@@ -19,7 +19,7 @@ class BasicTask : public Task {
     BasicTask(bool show_debug_log = true) : Task(nullptr, show_debug_log) {}
 
    private:
-    void executeTask() override { emitSucceeded(); };
+    void executeTask() override { emitSucceeded(); }
 };
 
 /* Does nothing. Only used for testing. */

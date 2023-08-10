@@ -78,7 +78,7 @@ class ResourceFolderModel : public QAbstractListModel {
     /** Creates a new parse task, if needed, for 'res' and start it.*/
     virtual void resolveResource(Resource* res);
 
-    [[nodiscard]] int size() const { return m_resources.size(); }
+    [[nodiscard]] qsizetype size() const { return m_resources.size(); }
     [[nodiscard]] bool empty() const { return size() == 0; }
     [[nodiscard]] Resource& at(int index) { return *m_resources.at(index); }
     [[nodiscard]] Resource const& at(int index) const { return *m_resources.at(index); }
