@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -78,9 +79,10 @@ public:
         return false;
     }
 
-    virtual bool selectPage(QString pageId) override;
+    bool selectPage(QString pageId) override;
+    BasePage* selectedPage() const override;
     BasePage* getPage(QString pageId) override;
-    const QList<BasePage*> getPages() const;
+    const QList<BasePage*>& getPages() const;
 
     void refreshContainer() override;
     virtual void setParentContainer(BasePageContainer * container)
