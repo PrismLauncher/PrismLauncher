@@ -276,7 +276,7 @@ void ThemeManager::initializeCatPacks()
         addCatPack(std::unique_ptr<CatPack>(new BasicCatPack(id, name)));
     }
     if (!m_catPacksFolder.mkpath("."))
-        themeWarningLog() << "Couldn't create theme folder";
+        themeWarningLog() << "Couldn't create catpacks folder";
     themeDebugLog() << "CatPacks Folder Path:" << m_catPacksFolder.absolutePath();
 
     QStringList supportedImageFormats;
