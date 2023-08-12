@@ -11,10 +11,8 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-VersionSelectWidget::VersionSelectWidget(QWidget* parent) : VersionSelectWidget(false, parent) {}
-
-VersionSelectWidget::VersionSelectWidget(bool focusSearch, QWidget* parent)
-    : QWidget(parent), focusSearch(focusSearch)
+VersionSelectWidget::VersionSelectWidget(QWidget* parent)
+    : QWidget(parent)
 {
     setObjectName(QStringLiteral("VersionSelectWidget"));
     verticalLayout = new QVBoxLayout(this);
@@ -116,9 +114,6 @@ void VersionSelectWidget::initialize(BaseVersionList *vlist)
     listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
 
-    if (focusSearch)
-        search->setFocus();
-
     if (!m_vlist->isLoaded())
     {
         loadList();
@@ -210,6 +205,16 @@ void VersionSelectWidget::selectCurrent()
     }
 }
 
+void VersionSelectWidget::selectSearch()
+{
+    search->setFocus();
+}
+
+VersionListView* VersionSelectWidget::view()
+{
+    return listView;
+}
+
 void VersionSelectWidget::selectRecommended()
 {
     auto idx = m_proxyModel->getRecommended();
@@ -233,14 +238,19 @@ BaseVersion::Ptr VersionSelectWidget::selectedVersion() const
     return variant.value<BaseVersion::Ptr>();
 }
 
+void VersionSelectWidget::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)
+{
+    m_proxyModel->setFilter(role, new ContainsFilter(filter));
+}
+
 void VersionSelectWidget::setExactFilter(BaseVersionList::ModelRoles role, QString filter)
 {
     m_proxyModel->setFilter(role, new ExactFilter(filter));
 }
 
-void VersionSelectWidget::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)
+void VersionSelectWidget::setExactIfPresentFilter(BaseVersionList::ModelRoles role, QString filter)
 {
-    m_proxyModel->setFilter(role, new ContainsFilter(filter));
+    m_proxyModel->setFilter(role, new ExactIfPresentFilter(filter));
 }
 
 void VersionSelectWidget::setFilter(BaseVersionList::ModelRoles role, Filter *filter)
