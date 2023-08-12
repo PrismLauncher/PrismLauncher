@@ -638,7 +638,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
     {
         launchScript += "instanceName " + name() + "\n";
         launchScript += "instanceIconKey " + name() + "\n";
-        launchScript += "instanceIconPath icon.png\n"; // we already save a copy here
+        launchScript += "instanceIconPath icon.png\n";  // we already save a copy here
     }
 
     // legacy auth
