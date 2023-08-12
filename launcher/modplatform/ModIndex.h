@@ -159,6 +159,7 @@ struct IndexedPack {
         return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }
 };
+QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 struct OverrideDep {
     QString quilt;
@@ -175,6 +176,7 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
              { "qvIfYCYJ", "P7dR8mSH", "API", ModPlatform::ResourceProvider::MODRINTH },
              { "lwVhp9o5", "Ha28R6CL", "KotlinLibraries", ModPlatform::ResourceProvider::MODRINTH } };
 };
+QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 }  // namespace ModPlatform
 

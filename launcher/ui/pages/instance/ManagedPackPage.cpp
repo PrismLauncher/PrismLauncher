@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ManagedPackPage.h"
+#include <QDesktopServices>
+#include <QUrl>
+#include <QUrlQuery>
 #include "ui_ManagedPackPage.h"
 
 #include <QListView>
@@ -69,7 +72,6 @@ class NoBigComboBoxStyle : public QProxyStyle {
 
    private:
     NoBigComboBoxStyle(QStyle* style) : QProxyStyle(style) {}
-
 };
 
 ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, QWidget* parent)
@@ -91,18 +93,31 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
 
     // NOTE: GTK2 themes crash with the proxy style.
     // This seems like an upstream bug, so there's not much else that can be done.
-    if (!QStyleFactory::keys().contains("gtk2")){
+    if (!QStyleFactory::keys().contains("gtk2")) {
         auto comboStyle = NoBigComboBoxStyle::getInstance(ui->versionsComboBox->style());
         ui->versionsComboBox->setStyle(comboStyle);
     }
 
     ui->reloadButton->setVisible(false);
-    connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool){
+    connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool) {
         ui->reloadButton->setVisible(false);
 
         m_loaded = false;
         // Pretend we're opening the page again
         openedImpl();
+    });
+
+    connect(ui->changelogTextBrowser, &QTextBrowser::anchorClicked, this, [](const QUrl url) {
+        if (url.scheme().isEmpty()) {
+            auto querry =
+                QUrlQuery(url.query()).queryItemValue("remoteUrl", QUrl::FullyDecoded);  // curseforge workaround for linkout?remoteUrl=
+            auto decoded = QUrl::fromPercentEncoding(querry.toUtf8());
+            auto newUrl = QUrl(decoded);
+            if (newUrl.isValid() && (newUrl.scheme() == "http" || newUrl.scheme() == "https"))
+                QDesktopServices ::openUrl(newUrl);
+            return;
+        }
+        QDesktopServices::openUrl(url);
     });
 }
 
@@ -226,7 +241,8 @@ void ModrinthManagedPackPage::parseManagedPack()
 
     QString id = m_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+    m_fetch_job->addNetAction(
+        Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
     QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
@@ -267,7 +283,6 @@ void ModrinthManagedPackPage::parseManagedPack()
             if (version.version == m_inst->getManagedPackVersionName())
                 name = tr("%1 (Current)").arg(name);
 
-
             ui->versionsComboBox->addItem(name, QVariant(version.id));
         }
 
@@ -291,6 +306,10 @@ QString ModrinthManagedPackPage::url() const
 void ModrinthManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     ui->changelogTextBrowser->setHtml(markdownToHTML(version.changelog.toUtf8()));
@@ -301,6 +320,10 @@ void ModrinthManagedPackPage::suggestVersion()
 void ModrinthManagedPackPage::update()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     QMap<QString, QString> extra_info;
@@ -429,6 +452,10 @@ QString FlameManagedPackPage::url() const
 void FlameManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     ui->changelogTextBrowser->setHtml(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId));
@@ -439,6 +466,10 @@ void FlameManagedPackPage::suggestVersion()
 void FlameManagedPackPage::update()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     QMap<QString, QString> extra_info;

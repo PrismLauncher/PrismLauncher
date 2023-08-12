@@ -54,23 +54,22 @@ void Flame::loadIndexedInfo(IndexedPack& pack, QJsonObject& obj)
     auto links_obj = Json::ensureObject(obj, "links");
 
     pack.extra.websiteUrl = Json::ensureString(links_obj, "websiteUrl");
-    if(pack.extra.websiteUrl.endsWith('/'))
+    if (pack.extra.websiteUrl.endsWith('/'))
         pack.extra.websiteUrl.chop(1);
 
     pack.extra.issuesUrl = Json::ensureString(links_obj, "issuesUrl");
-    if(pack.extra.issuesUrl.endsWith('/'))
+    if (pack.extra.issuesUrl.endsWith('/'))
         pack.extra.issuesUrl.chop(1);
 
     pack.extra.sourceUrl = Json::ensureString(links_obj, "sourceUrl");
-    if(pack.extra.sourceUrl.endsWith('/'))
+    if (pack.extra.sourceUrl.endsWith('/'))
         pack.extra.sourceUrl.chop(1);
 
     pack.extra.wikiUrl = Json::ensureString(links_obj, "wikiUrl");
-    if(pack.extra.wikiUrl.endsWith('/'))
+    if (pack.extra.wikiUrl.endsWith('/'))
         pack.extra.wikiUrl.chop(1);
 
     pack.extraInfoLoaded = true;
-
 }
 
 void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)

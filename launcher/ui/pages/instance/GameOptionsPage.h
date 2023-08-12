@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,50 +35,36 @@
 
 #pragma once
 
-#include <QWidget>
 #include <QString>
+#include <QWidget>
 
-#include "ui/pages/BasePage.h"
 #include <Application.h>
+#include "ui/pages/BasePage.h"
 
-namespace Ui
-{
+namespace Ui {
 class GameOptionsPage;
 }
 
 class GameOptions;
 class MinecraftInstance;
 
-class GameOptionsPage : public QWidget, public BasePage
-{
+class GameOptionsPage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit GameOptionsPage(MinecraftInstance *inst, QWidget *parent = 0);
+   public:
+    explicit GameOptionsPage(MinecraftInstance* inst, QWidget* parent = 0);
     virtual ~GameOptionsPage();
 
     void openedImpl() override;
     void closedImpl() override;
 
-    virtual QString displayName() const override
-    {
-        return tr("Game Options");
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("settings");
-    }
-    virtual QString id() const override
-    {
-        return "gameoptions";
-    }
-    virtual QString helpPage() const override
-    {
-        return "Game-Options-management";
-    }
+    virtual QString displayName() const override { return tr("Game Options"); }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("settings"); }
+    virtual QString id() const override { return "gameoptions"; }
+    virtual QString helpPage() const override { return "Game-Options-management"; }
     void retranslate() override;
 
-private: // data
-    Ui::GameOptionsPage *ui = nullptr;
+   private:  // data
+    Ui::GameOptionsPage* ui = nullptr;
     std::shared_ptr<GameOptions> m_model;
 };

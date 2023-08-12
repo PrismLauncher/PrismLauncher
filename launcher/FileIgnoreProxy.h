@@ -36,6 +36,7 @@
 
 #pragma once
 
+#include <QFileInfo>
 #include <QSortFilterProxyModel>
 #include "SeparatorPrefixTree.h"
 
@@ -63,10 +64,22 @@ class FileIgnoreProxy : public QSortFilterProxyModel {
     inline const SeparatorPrefixTree<'/'>& blockedPaths() const { return blocked; }
     inline SeparatorPrefixTree<'/'>& blockedPaths() { return blocked; }
 
+    // list of file names that need to be removed completely from model
+    inline QStringList& ignoreFilesWithName() { return m_ignoreFiles; }
+    // list of relative paths that need to be removed completely from model
+    inline SeparatorPrefixTree<'/'>& ignoreFilesWithPath() { return m_ignoreFilePaths; }
+
+    bool filterFile(const QString& fileName) const;
+
    protected:
     bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const;
+    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
+
+    bool ignoreFile(QFileInfo file) const;
 
    private:
     const QString root;
     SeparatorPrefixTree<'/'> blocked;
+    QStringList m_ignoreFiles;
+    SeparatorPrefixTree<'/'> m_ignoreFilePaths;
 };

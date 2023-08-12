@@ -116,7 +116,6 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
         }
 
         int description_x = rect.x();
-        
 
         // Have the y-value be set based on the number of lines in the description, to centralize the
         // description text with the space between the base and the title.
@@ -127,8 +126,8 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
             description_y -= opt.fontMetrics.height();
 
         // On the bottom, aligned to the left after the icon, and featuring at most two lines of text (with some margin space to spare)
-        painter->drawText(description_x, description_y, remaining_width,
-                          cut_text.size() * opt.fontMetrics.height(), Qt::TextWordWrap, description);
+        painter->drawText(description_x, description_y, remaining_width, cut_text.size() * opt.fontMetrics.height(), Qt::TextWordWrap,
+                          description);
     }
 
     painter->restore();

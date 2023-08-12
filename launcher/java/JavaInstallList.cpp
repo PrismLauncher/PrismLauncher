@@ -39,14 +39,12 @@
 
 #include <QDebug>
 
-#include "java/JavaInstallList.h"
 #include "java/JavaCheckerJob.h"
+#include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 #include "minecraft/VersionFilterData.h"
 
-JavaInstallList::JavaInstallList(QObject *parent) : BaseVersionList(parent)
-{
-}
+JavaInstallList::JavaInstallList(QObject* parent) : BaseVersionList(parent) {}
 
 Task::Ptr JavaInstallList::getLoadTask()
 {
@@ -56,8 +54,7 @@ Task::Ptr JavaInstallList::getLoadTask()
 
 Task::Ptr JavaInstallList::getCurrentTask()
 {
-    if(m_status == Status::InProgress)
-    {
+    if (m_status == Status::InProgress) {
         return m_loadTask;
     }
     return nullptr;
@@ -65,8 +62,7 @@ Task::Ptr JavaInstallList::getCurrentTask()
 
 void JavaInstallList::load()
 {
-    if(m_status != Status::InProgress)
-    {
+    if (m_status != Status::InProgress) {
         m_status = Status::InProgress;
         m_loadTask.reset(new JavaListLoadTask(this));
         m_loadTask->start();
@@ -88,7 +84,7 @@ int JavaInstallList::count() const
     return m_vlist.count();
 }
 
-QVariant JavaInstallList::data(const QModelIndex &index, int role) const
+QVariant JavaInstallList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -97,8 +93,7 @@ QVariant JavaInstallList::data(const QModelIndex &index, int role) const
         return QVariant();
 
     auto version = std::dynamic_pointer_cast<JavaInstall>(m_vlist[index.row()]);
-    switch (role)
-    {
+    switch (role) {
         case SortRole:
             return -index.row();
         case VersionPointerRole:
@@ -120,17 +115,15 @@ QVariant JavaInstallList::data(const QModelIndex &index, int role) const
 
 BaseVersionList::RoleList JavaInstallList::providesRoles() const
 {
-    return {VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, ArchitectureRole};
+    return { VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, PathRole, ArchitectureRole };
 }
-
 
 void JavaInstallList::updateListData(QList<BaseVersion::Ptr> versions)
 {
     beginResetModel();
     m_vlist = versions;
     sortVersions();
-    if(m_vlist.size())
-    {
+    if (m_vlist.size()) {
         auto best = std::dynamic_pointer_cast<JavaInstall>(m_vlist[0]);
         best->recommended = true;
     }
@@ -153,15 +146,13 @@ void JavaInstallList::sortVersions()
     endResetModel();
 }
 
-JavaListLoadTask::JavaListLoadTask(JavaInstallList *vlist) : Task()
+JavaListLoadTask::JavaListLoadTask(JavaInstallList* vlist) : Task()
 {
     m_list = vlist;
     m_currentRecommended = NULL;
 }
 
-JavaListLoadTask::~JavaListLoadTask()
-{
-}
+JavaListLoadTask::~JavaListLoadTask() {}
 
 void JavaListLoadTask::executeTask()
 {
@@ -176,8 +167,7 @@ void JavaListLoadTask::executeTask()
 
     qDebug() << "Probing the following Java paths: ";
     int id = 0;
-    for(QString candidate : candidate_paths)
-    {
+    for (QString candidate : candidate_paths) {
         qDebug() << " " << candidate;
 
         auto candidate_checker = new JavaChecker();
@@ -197,10 +187,8 @@ void JavaListLoadTask::javaCheckerFinished()
     auto results = m_job->getResults();
 
     qDebug() << "Found the following valid Java installations:";
-    for(JavaCheckResult result : results)
-    {
-        if(result.validity == JavaCheckResult::Validity::Valid)
-        {
+    for (JavaCheckResult result : results) {
+        if (result.validity == JavaCheckResult::Validity::Valid) {
             JavaInstallPtr javaVersion(new JavaInstall());
 
             javaVersion->id = result.javaVersion;
@@ -213,13 +201,11 @@ void JavaListLoadTask::javaCheckerFinished()
     }
 
     QList<BaseVersion::Ptr> javas_bvp;
-    for (auto java : candidates)
-    {
-        //qDebug() << java->id << java->arch << " at " << java->path;
+    for (auto java : candidates) {
+        // qDebug() << java->id << java->arch << " at " << java->path;
         BaseVersion::Ptr bp_java = std::dynamic_pointer_cast<BaseVersion>(java);
 
-        if (bp_java)
-        {
+        if (bp_java) {
             javas_bvp.append(java);
         }
     }

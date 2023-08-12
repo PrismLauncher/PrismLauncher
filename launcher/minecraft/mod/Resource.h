@@ -15,20 +15,9 @@ enum class ResourceType {
     LITEMOD,     //!< The resource is a litemod
 };
 
-enum class SortType {
-    NAME,
-    DATE,
-    VERSION,
-    ENABLED,
-    PACK_FORMAT,
-    PROVIDER
-};
+enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER };
 
-enum class EnableAction {
-    ENABLE,
-    DISABLE,
-    TOGGLE
-};
+enum class EnableAction { ENABLE, DISABLE, TOGGLE };
 
 /** General class for managed resources. It mirrors a file in disk, with some more info
  *  for display and house-keeping purposes.
@@ -92,16 +81,16 @@ class Resource : public QObject {
     }
 
     // Delete all files of this resource.
-    bool destroy();
+    bool destroy(bool attemptTrash = true);
 
     [[nodiscard]] auto isSymLink() const -> bool { return m_file_info.isSymLink(); }
 
     /**
      * @brief Take a instance path, checks if the file pointed to by the resource is a symlink or under a symlink in that instance
-     * 
+     *
      * @param instPath path to an instance directory
-     * @return true 
-     * @return false 
+     * @return true
+     * @return false
      */
     [[nodiscard]] bool isSymLinkUnder(const QString& instPath) const;
 
