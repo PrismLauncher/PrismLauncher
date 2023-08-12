@@ -55,7 +55,7 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
     m_verticalLayout = new QVBoxLayout(this);
     m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
-    m_versionWidget = new VersionSelectWidget(true, parent);
+    m_versionWidget = new VersionSelectWidget(parent);
     m_verticalLayout->addWidget(m_versionWidget);
 
     m_horizontalLayout = new QHBoxLayout();
@@ -75,8 +75,9 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList *vlist, QString title, 
 
     retranslate();
 
-    QObject::connect(m_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    QObject::connect(m_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(m_buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(m_versionWidget->view(), &QAbstractItemView::doubleClicked, this, &QDialog::accept);
+    connect(m_buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     QMetaObject::connectSlotsByName(this);
     setWindowModality(Qt::WindowModal);
@@ -123,6 +124,7 @@ int VersionSelectDialog::exec()
 {
     QDialog::open();
     m_versionWidget->initialize(m_vlist);
+    m_versionWidget->selectSearch();
     if(resizeOnColumn != -1)
     {
         m_versionWidget->setResizeOn(resizeOnColumn);
@@ -148,6 +150,10 @@ void VersionSelectDialog::on_refreshButton_clicked()
 void VersionSelectDialog::setExactFilter(BaseVersionList::ModelRoles role, QString filter)
 {
     m_versionWidget->setExactFilter(role, filter);
+}
+
+void VersionSelectDialog::setExactIfPresentFilter(BaseVersionList::ModelRoles role, QString filter) {
+    m_versionWidget->setExactIfPresentFilter(role, filter);
 }
 
 void VersionSelectDialog::setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter)

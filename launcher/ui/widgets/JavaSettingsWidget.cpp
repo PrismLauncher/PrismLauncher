@@ -46,7 +46,7 @@ void JavaSettingsWidget::setupUi()
     m_verticalLayout = new QVBoxLayout(this);
     m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
-    m_versionWidget = new VersionSelectWidget(true, this);
+    m_versionWidget = new VersionSelectWidget(this);
     m_verticalLayout->addWidget(m_versionWidget);
 
     m_horizontalLayout = new QHBoxLayout();
@@ -126,6 +126,7 @@ void JavaSettingsWidget::setupUi()
 void JavaSettingsWidget::initialize()
 {
     m_versionWidget->initialize(APPLICATION->javalist().get());
+    m_versionWidget->selectSearch();
     m_versionWidget->setResizeOn(2);
     auto s = APPLICATION->settings();
     // Memory

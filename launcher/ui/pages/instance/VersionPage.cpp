@@ -6,7 +6,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022-2023 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@
 #include <QUrl>
 
 #include "VersionPage.h"
+#include "ui/dialogs/InstallLoaderDialog.h"
 #include "ui_VersionPage.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
@@ -227,18 +228,6 @@ void VersionPage::packageCurrent(const QModelIndex& current, [[maybe_unused]] co
 
 void VersionPage::updateVersionControls()
 {
-    // FIXME: this is a dirty hack
-    auto minecraftVersion = Version(m_profile->getComponentVersion("net.minecraft"));
-
-    bool supportsFabric = minecraftVersion >= Version("1.14");
-    ui->actionInstall_Fabric->setEnabled(supportsFabric);
-
-    bool supportsQuilt = minecraftVersion >= Version("1.14");
-    ui->actionInstall_Quilt->setEnabled(supportsQuilt);
-
-    bool supportsLiteLoader = minecraftVersion <= Version("1.12.2");
-    ui->actionInstall_LiteLoader->setEnabled(supportsLiteLoader);
-
     updateButtons();
 }
 
@@ -390,20 +379,14 @@ void VersionPage::on_actionChange_version_triggered()
         return;
     }
     auto uid = list->uid();
-    // FIXME: this is a horrible HACK. Get version filtering information from the actual metadata...
-    if (uid == "net.minecraftforge") {
-        on_actionInstall_Forge_triggered();
-        return;
-    } else if (uid == "com.mumfrey.liteloader") {
-        on_actionInstall_LiteLoader_triggered();
-        return;
-    }
+
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
     if (uid == "net.fabricmc.intermediary" || uid == "org.quiltmc.hashed") {
         vselect.setEmptyString(tr("No intermediary mappings versions are currently available."));
         vselect.setEmptyErrorString(tr("Couldn't load or download the intermediary mappings version lists!"));
-        vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
     }
+    vselect.setExactIfPresentFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
+
     auto currentVersion = patch->getVersion();
     if (!currentVersion.isEmpty()) {
         vselect.setCurrentVersion(currentVersion);
@@ -444,79 +427,11 @@ void VersionPage::on_actionDownload_All_triggered()
     m_container->refreshContainer();
 }
 
-void VersionPage::on_actionInstall_Forge_triggered()
+void VersionPage::on_actionInstall_Loader_triggered()
 {
-    auto vlist = APPLICATION->metadataIndex()->get("net.minecraftforge");
-    if (!vlist) {
-        return;
-    }
-    VersionSelectDialog vselect(vlist.get(), tr("Select Forge version"), this);
-    vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
-    vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
-                           m_profile->getComponentVersion("net.minecraft"));
-    vselect.setEmptyErrorString(tr("Couldn't load or download the Forge version lists!"));
-
-    auto currentVersion = m_profile->getComponentVersion("net.minecraftforge");
-    if (!currentVersion.isEmpty()) {
-        vselect.setCurrentVersion(currentVersion);
-    }
-
-    if (vselect.exec() && vselect.selectedVersion()) {
-        auto vsn = vselect.selectedVersion();
-        m_profile->setComponentVersion("net.minecraftforge", vsn->descriptor());
-        m_profile->resolve(Net::Mode::Online);
-        // m_profile->installVersion();
-        preselect(m_profile->rowCount(QModelIndex()) - 1);
-        m_container->refreshContainer();
-    }
-}
-
-void VersionPage::on_actionInstall_Fabric_triggered()
-{
-    auto vlist = APPLICATION->metadataIndex()->get("net.fabricmc.fabric-loader");
-    if (!vlist) {
-        return;
-    }
-    VersionSelectDialog vselect(vlist.get(), tr("Select Fabric Loader version"), this);
-    vselect.setEmptyString(tr("No Fabric Loader versions are currently available."));
-    vselect.setEmptyErrorString(tr("Couldn't load or download the Fabric Loader version lists!"));
-
-    auto currentVersion = m_profile->getComponentVersion("net.fabricmc.fabric-loader");
-    if (!currentVersion.isEmpty()) {
-        vselect.setCurrentVersion(currentVersion);
-    }
-
-    if (vselect.exec() && vselect.selectedVersion()) {
-        auto vsn = vselect.selectedVersion();
-        m_profile->setComponentVersion("net.fabricmc.fabric-loader", vsn->descriptor());
-        m_profile->resolve(Net::Mode::Online);
-        preselect(m_profile->rowCount(QModelIndex()) - 1);
-        m_container->refreshContainer();
-    }
-}
-
-void VersionPage::on_actionInstall_Quilt_triggered()
-{
-    auto vlist = APPLICATION->metadataIndex()->get("org.quiltmc.quilt-loader");
-    if (!vlist) {
-        return;
-    }
-    VersionSelectDialog vselect(vlist.get(), tr("Select Quilt Loader version"), this);
-    vselect.setEmptyString(tr("No Quilt Loader versions are currently available."));
-    vselect.setEmptyErrorString(tr("Couldn't load or download the Quilt Loader version lists!"));
-
-    auto currentVersion = m_profile->getComponentVersion("org.quiltmc.quilt-loader");
-    if (!currentVersion.isEmpty()) {
-        vselect.setCurrentVersion(currentVersion);
-    }
-
-    if (vselect.exec() && vselect.selectedVersion()) {
-        auto vsn = vselect.selectedVersion();
-        m_profile->setComponentVersion("org.quiltmc.quilt-loader", vsn->descriptor());
-        m_profile->resolve(Net::Mode::Online);
-        preselect(m_profile->rowCount(QModelIndex()) - 1);
-        m_container->refreshContainer();
-    }
+    InstallLoaderDialog dialog(m_inst->getPackProfile(), QString(), this);
+    dialog.exec();
+    m_container->refreshContainer();
 }
 
 void VersionPage::on_actionAdd_Empty_triggered()
@@ -532,33 +447,6 @@ void VersionPage::on_actionAdd_Empty_triggered()
         qDebug() << "name:" << compdialog.name();
         qDebug() << "uid:" << compdialog.uid();
         m_profile->installEmpty(compdialog.uid(), compdialog.name());
-    }
-}
-
-void VersionPage::on_actionInstall_LiteLoader_triggered()
-{
-    auto vlist = APPLICATION->metadataIndex()->get("com.mumfrey.liteloader");
-    if (!vlist) {
-        return;
-    }
-    VersionSelectDialog vselect(vlist.get(), tr("Select LiteLoader version"), this);
-    vselect.setExactFilter(BaseVersionList::ParentVersionRole, m_profile->getComponentVersion("net.minecraft"));
-    vselect.setEmptyString(tr("No LiteLoader versions are currently available for Minecraft ") +
-                           m_profile->getComponentVersion("net.minecraft"));
-    vselect.setEmptyErrorString(tr("Couldn't load or download the LiteLoader version lists!"));
-
-    auto currentVersion = m_profile->getComponentVersion("com.mumfrey.liteloader");
-    if (!currentVersion.isEmpty()) {
-        vselect.setCurrentVersion(currentVersion);
-    }
-
-    if (vselect.exec() && vselect.selectedVersion()) {
-        auto vsn = vselect.selectedVersion();
-        m_profile->setComponentVersion("com.mumfrey.liteloader", vsn->descriptor());
-        m_profile->resolve(Net::Mode::Online);
-        // m_profile->installVersion(vselect.selectedVersion());
-        preselect(m_profile->rowCount(QModelIndex()) - 1);
-        m_container->refreshContainer();
     }
 }
 
