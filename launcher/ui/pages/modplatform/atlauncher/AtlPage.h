@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,52 +38,38 @@
 #include "AtlFilterModel.h"
 #include "AtlListModel.h"
 
-#include <QWidget>
 #include <modplatform/atlauncher/ATLPackInstallTask.h>
+#include <QWidget>
 
 #include "Application.h"
-#include "ui/pages/BasePage.h"
 #include "tasks/Task.h"
+#include "ui/pages/BasePage.h"
 
-namespace Ui
-{
-    class AtlPage;
+namespace Ui {
+class AtlPage;
 }
 
 class NewInstanceDialog;
 
-class AtlPage : public QWidget, public BasePage
-{
-Q_OBJECT
+class AtlPage : public QWidget, public BasePage {
+    Q_OBJECT
 
-public:
-    explicit AtlPage(NewInstanceDialog* dialog, QWidget *parent = 0);
+   public:
+    explicit AtlPage(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~AtlPage();
-    virtual QString displayName() const override
-    {
-        return "ATLauncher";
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("atlauncher");
-    }
-    virtual QString id() const override
-    {
-        return "atl";
-    }
-    virtual QString helpPage() const override
-    {
-        return "ATL-platform";
-    }
+    virtual QString displayName() const override { return "ATLauncher"; }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("atlauncher"); }
+    virtual QString id() const override { return "atl"; }
+    virtual QString helpPage() const override { return "ATL-platform"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
     void openedImpl() override;
 
-private:
+   private:
     void suggestCurrent();
 
-private slots:
+   private slots:
     void triggerSearch();
 
     void onSortingSelectionChanged(QString data);
@@ -91,8 +77,8 @@ private slots:
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
 
-private:
-    Ui::AtlPage *ui = nullptr;
+   private:
+    Ui::AtlPage* ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
     Atl::ListModel* listModel = nullptr;
     Atl::FilterModel* filterModel = nullptr;

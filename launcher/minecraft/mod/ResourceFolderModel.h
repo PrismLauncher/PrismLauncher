@@ -1,18 +1,21 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QAction>
 #include <QDir>
 #include <QFileSystemWatcher>
+#include <QHeaderView>
 #include <QMutex>
 #include <QSet>
 #include <QSortFilterProxyModel>
+#include <QTreeView>
 
 #include "Resource.h"
 
 #include "BaseInstance.h"
 
-#include "tasks/Task.h"
 #include "tasks/ConcurrentTask.h"
+#include "tasks/Task.h"
 
 class QSortFilterProxyModel;
 
@@ -28,6 +31,8 @@ class ResourceFolderModel : public QAbstractListModel {
    public:
     ResourceFolderModel(QDir, BaseInstance* instance, QObject* parent = nullptr, bool create_dir = true);
     ~ResourceFolderModel() override;
+
+    virtual QString id() const { return "resource"; }
 
     /** Starts watching the paths for changes.
      *
@@ -92,6 +97,7 @@ class ResourceFolderModel : public QAbstractListModel {
 
     /* Basic columns */
     enum Columns { ACTIVE_COLUMN = 0, NAME_COLUMN, DATE_COLUMN, NUM_COLUMNS };
+    QStringList columnNames(bool translated = true) const { return translated ? m_column_names_translated : m_column_names; };
 
     [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
     [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; };
@@ -110,6 +116,11 @@ class ResourceFolderModel : public QAbstractListModel {
 
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+    void setupHeaderAction(QAction* act, int column);
+    void saveHiddenColumn(int column, bool hidden);
+    void loadHiddenColumns(QTreeView* tree);
+    QMenu* createHeaderContextMenu(QTreeView* tree);
+
     /** This creates a proxy model to filter / sort the model for a UI.
      *
      *  The actual comparisons and filtering are done directly by the Resource, so to modify behavior go there instead!
@@ -117,6 +128,7 @@ class ResourceFolderModel : public QAbstractListModel {
     QSortFilterProxyModel* createFilterProxyModel(QObject* parent = nullptr);
 
     [[nodiscard]] SortType columnToSortKey(size_t column) const;
+    [[nodiscard]] QList<QHeaderView::ResizeMode> columnResizeModes() const { return m_column_resize_modes; }
 
     class ProxyModel : public QSortFilterProxyModel {
        public:
@@ -128,10 +140,6 @@ class ResourceFolderModel : public QAbstractListModel {
     };
 
     QString instDirPath() const;
-
-   public slots:
-    void enableInteraction(bool enabled);
-    void disableInteraction(bool disabled) { enableInteraction(!disabled); }
 
    signals:
     void updateFinished();
@@ -181,14 +189,20 @@ class ResourceFolderModel : public QAbstractListModel {
      *  if the resource is complex and has more stuff to parse.
      */
     virtual void onParseSucceeded(int ticket, QString resource_id);
-    virtual void onParseFailed(int ticket, QString resource_id) { Q_UNUSED(ticket); Q_UNUSED(resource_id); }
+    virtual void onParseFailed(int ticket, QString resource_id)
+    {
+        Q_UNUSED(ticket);
+        Q_UNUSED(resource_id);
+    }
 
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
     QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
-
-    bool m_can_interact = true;
+    QStringList m_column_names = { "Enable", "Name", "Last Modified" };
+    QStringList m_column_names_translated = { tr("Enable"), tr("Name"), tr("Last Modified") };
+    QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Stretch,
+                                                             QHeaderView::ResizeToContents };
 
     QDir m_dir;
     BaseInstance* m_instance;

@@ -22,7 +22,7 @@ uint64_t Sys::getSystemRam()
 {
     MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
-    GlobalMemoryStatusEx( &status );
+    GlobalMemoryStatusEx(&status);
     // bytes
     return (uint64_t)status.ullTotalPhys;
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 Joshua Goins <josh@redstrate.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,29 +16,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include "Markdown.h"
 
-#include <QDialog>
-#include "BaseInstance.h"
-#include "FastFileIconProvider.h"
-#include "FileIgnoreProxy.h"
+QString markdownToHTML(const QString& markdown)
+{
+    const QByteArray markdownData = markdown.toUtf8();
+    char* buffer = cmark_markdown_to_html(markdownData.constData(), markdownData.length(), CMARK_OPT_NOBREAKS | CMARK_OPT_UNSAFE);
 
-namespace Ui {
-class ExportMrPackDialog;
+    QString htmlStr(buffer);
+
+    free(buffer);
+
+    return htmlStr;
 }
-
-class ExportMrPackDialog : public QDialog {
-    Q_OBJECT
-
-   public:
-    explicit ExportMrPackDialog(InstancePtr instance, QWidget* parent = nullptr);
-    ~ExportMrPackDialog();
-
-    void done(int result) override;
-
-   private:
-    const InstancePtr instance;
-    Ui::ExportMrPackDialog* ui;
-    FileIgnoreProxy* proxy;
-    FastFileIconProvider icons;
-};

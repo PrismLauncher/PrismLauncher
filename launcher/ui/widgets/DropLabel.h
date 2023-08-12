@@ -2,19 +2,18 @@
 
 #include <QLabel>
 
-class DropLabel : public QLabel
-{
+class DropLabel : public QLabel {
     Q_OBJECT
 
-public:
-    explicit DropLabel(QWidget *parent = nullptr);
+   public:
+    explicit DropLabel(QWidget* parent = nullptr);
 
-signals:
+   signals:
     void droppedURLs(QList<QUrl> urls);
 
-protected:
-    void dropEvent(QDropEvent *event) override;
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dragMoveEvent(QDragMoveEvent *event) override;
-    void dragLeaveEvent(QDragLeaveEvent *event) override;
+   protected:
+    void dropEvent(QDropEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
+    void dragLeaveEvent(QDragLeaveEvent* event) override;
 };

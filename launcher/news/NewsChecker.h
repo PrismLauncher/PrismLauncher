@@ -15,18 +15,17 @@
 
 #pragma once
 
+#include <QList>
 #include <QObject>
 #include <QString>
-#include <QList>
 
 #include <net/NetJob.h>
 
 #include "NewsEntry.h"
 
-class NewsChecker : public QObject
-{
+class NewsChecker : public QObject {
     Q_OBJECT
-public:
+   public:
     /*!
      * Constructs a news reader to read from the given RSS feed URL.
      */
@@ -57,7 +56,7 @@ public:
      */
     void Q_SLOT reloadNews();
 
-signals:
+   signals:
     /*!
      * Signal fired after the news has finished loading.
      */
@@ -68,11 +67,11 @@ signals:
      */
     void newsLoadingFailed(QString errorMsg);
 
-protected slots:
+   protected slots:
     void rssDownloadFinished();
     void rssDownloadFailed(QString reason);
 
-protected: /* data */
+   protected: /* data */
     //! The URL for the RSS feed to fetch.
     QString m_feedUrl;
 
@@ -85,7 +84,7 @@ protected: /* data */
     //! True if news has been loaded.
     bool m_loadedNews;
 
-    QByteArray newsData;
+    std::shared_ptr<QByteArray> newsData = std::make_shared<QByteArray>();
 
     /*!
      * Gets the error message that was given last time the news was loaded.
@@ -95,11 +94,10 @@ protected: /* data */
 
     shared_qobject_ptr<QNetworkAccessManager> m_network;
 
-protected slots:
+   protected slots:
     /// Emits newsLoaded() and sets m_lastLoadError to empty string.
     void succeed();
 
     /// Emits newsLoadingFailed() and sets m_lastLoadError to the given message.
     void fail(const QString& errorMsg);
 };
-

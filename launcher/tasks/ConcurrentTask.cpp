@@ -138,19 +138,18 @@ void ConcurrentTask::startNext()
     connect(next.get(), &Task::progress, this, [this, next](qint64 current, qint64 total) { subTaskProgress(next, current, total); });
 
     m_doing.insert(next.get(), next);
+    qsizetype num_starts = qMin(m_queue.size(), m_total_max_size - m_doing.size());
     auto task_progress = std::make_shared<TaskStepProgress>(next->getUid());
     m_task_progress.insert(next->getUid(), task_progress);
 
     updateState();
     updateStepProgress(*task_progress.get(), Operation::ADDED);
-    
 
     QCoreApplication::processEvents();
 
     QMetaObject::invokeMethod(next.get(), &Task::start, Qt::QueuedConnection);
 
     // Allow going up the number of concurrent tasks in case of tasks being added in the middle of a running task.
-    int num_starts = qMin(m_queue.size(), m_total_max_size - m_doing.size());
     for (int i = 0; i < num_starts; i++)
         QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
 }
@@ -195,7 +194,7 @@ void ConcurrentTask::subTaskStatus(Task::Ptr task, const QString& msg)
     auto task_progress = m_task_progress.value(task->getUid());
     task_progress->status = msg;
     task_progress->state = TaskStepState::Running;
-    
+
     emit stepProgress(*task_progress);
 
     if (totalSize() == 1) {
@@ -208,7 +207,7 @@ void ConcurrentTask::subTaskDetails(Task::Ptr task, const QString& msg)
     auto task_progress = m_task_progress.value(task->getUid());
     task_progress->details = msg;
     task_progress->state = TaskStepState::Running;
-    
+
     emit stepProgress(*task_progress);
 
     if (totalSize() == 1) {
@@ -221,7 +220,7 @@ void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 tota
     auto task_progress = m_task_progress.value(task->getUid());
 
     task_progress->update(current, total);
-        
+
     emit stepProgress(*task_progress);
     updateStepProgress(*task_progress, Operation::CHANGED);
     updateState();
@@ -234,7 +233,7 @@ void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 tota
 void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgress const& task_progress)
 {
     Operation op = Operation::ADDED;
-    
+
     if (!m_task_progress.contains(task_progress.uid)) {
         m_task_progress.insert(task_progress.uid, std::make_shared<TaskStepProgress>(task_progress));
         op = Operation::ADDED;
@@ -255,12 +254,10 @@ void ConcurrentTask::subTaskStepProgress(Task::Ptr task, TaskStepProgress const&
         emit stepProgress(*tp.get());
         updateStepProgress(*tp.get(), op);
     }
-
 }
 
 void ConcurrentTask::updateStepProgress(TaskStepProgress const& changed_progress, Operation op)
 {
-
     switch (op) {
         case Operation::ADDED:
             m_stepProgress += changed_progress.current;
@@ -275,9 +272,8 @@ void ConcurrentTask::updateStepProgress(TaskStepProgress const& changed_progress
             m_stepTotalProgress -= changed_progress.old_total;
             m_stepProgress += changed_progress.current;
             m_stepTotalProgress += changed_progress.total;
-            break;    
+            break;
     }
-
 }
 
 void ConcurrentTask::updateState()

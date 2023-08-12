@@ -1,29 +1,27 @@
 #include "JavaWizardPage.h"
 #include "Application.h"
 
-#include <QVBoxLayout>
+#include <QFileDialog>
 #include <QGroupBox>
-#include <QSpinBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QToolButton>
-#include <QFileDialog>
+#include <QVBoxLayout>
 
 #include <sys.h>
 
 #include "FileSystem.h"
+#include "JavaCommon.h"
 #include "java/JavaInstall.h"
 #include "java/JavaUtils.h"
-#include "JavaCommon.h"
 
-#include "ui/widgets/VersionSelectWidget.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/JavaSettingsWidget.h"
+#include "ui/widgets/VersionSelectWidget.h"
 
-
-JavaWizardPage::JavaWizardPage(QWidget *parent)
-    :BaseWizardPage(parent)
+JavaWizardPage::JavaWizardPage(QWidget* parent) : BaseWizardPage(parent)
 {
     setupUi();
 }
@@ -31,7 +29,7 @@ JavaWizardPage::JavaWizardPage(QWidget *parent)
 void JavaWizardPage::setupUi()
 {
     setObjectName(QStringLiteral("javaPage"));
-    QVBoxLayout * layout = new QVBoxLayout(this);
+    QVBoxLayout* layout = new QVBoxLayout(this);
 
     m_java_widget = new JavaSettingsWidget(this);
     layout->addWidget(m_java_widget);
@@ -59,29 +57,23 @@ bool JavaWizardPage::validatePage()
 {
     auto settings = APPLICATION->settings();
     auto result = m_java_widget->validate();
-    switch(result)
-    {
+    switch (result) {
         default:
-        case JavaSettingsWidget::ValidationStatus::Bad:
-        {
+        case JavaSettingsWidget::ValidationStatus::Bad: {
             return false;
         }
-        case JavaSettingsWidget::ValidationStatus::AllOK:
-        {
+        case JavaSettingsWidget::ValidationStatus::AllOK: {
             settings->set("JavaPath", m_java_widget->javaPath());
+            return true;
         }
-        case JavaSettingsWidget::ValidationStatus::JavaBad:
-        {
+        case JavaSettingsWidget::ValidationStatus::JavaBad: {
             // Memory
             auto s = APPLICATION->settings();
             s->set("MinMemAlloc", m_java_widget->minHeapSize());
             s->set("MaxMemAlloc", m_java_widget->maxHeapSize());
-            if (m_java_widget->permGenEnabled())
-            {
+            if (m_java_widget->permGenEnabled()) {
                 s->set("PermGen", m_java_widget->permGenSize());
-            }
-            else
-            {
+            } else {
                 s->reset("PermGen");
             }
             return true;
@@ -92,7 +84,8 @@ bool JavaWizardPage::validatePage()
 void JavaWizardPage::retranslate()
 {
     setTitle(tr("Java"));
-    setSubTitle(tr("You do not have a working Java set up yet or it went missing.\n"
-        "Please select one of the following or browse for a Java executable."));
+    setSubTitle(
+        tr("You do not have a working Java set up yet or it went missing.\n"
+           "Please select one of the following or browse for a Java executable."));
     m_java_widget->retranslate();
 }

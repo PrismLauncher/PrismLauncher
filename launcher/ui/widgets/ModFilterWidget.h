@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QTabWidget>
 #include <QButtonGroup>
+#include <QTabWidget>
 
 #include "Version.h"
 
@@ -17,16 +17,10 @@ namespace Ui {
 class ModFilterWidget;
 }
 
-class ModFilterWidget : public QTabWidget
-{
+class ModFilterWidget : public QTabWidget {
     Q_OBJECT
-public:
-    enum VersionButtonID {
-        Strict = 0,
-        Major = 1,
-        All = 2,
-        Between = 3
-    };
+   public:
+    enum VersionButtonID { Strict = 0, Major = 1, All = 2, Between = 3 };
 
     struct Filter {
         std::list<Version> versions;
@@ -37,7 +31,7 @@ public:
 
     std::shared_ptr<Filter> m_filter;
 
-public:
+   public:
     static unique_qobject_ptr<ModFilterWidget> create(Version default_version, QWidget* parent = nullptr);
     ~ModFilterWidget();
 
@@ -51,26 +45,29 @@ public:
 
     Meta::VersionList::Ptr versionList() { return m_version_list; }
 
-private:
+   private:
     ModFilterWidget(Version def, QWidget* parent = nullptr);
 
-    inline auto mcVersionStr() const -> QString { return m_instance ? m_instance->getPackProfile()->getComponentVersion("net.minecraft") : ""; }
+    inline auto mcVersionStr() const -> QString
+    {
+        return m_instance ? m_instance->getPackProfile()->getComponentVersion("net.minecraft") : "";
+    }
     inline auto mcVersion() const -> Version { return { mcVersionStr() }; }
 
-private slots:
+   private slots:
     void onVersionFilterChanged(int id);
 
-public: signals:
+   public:
+   signals:
     void filterChanged();
     void filterUnchanged();
 
-private:
+   private:
     Ui::ModFilterWidget* ui;
 
     MinecraftInstance* m_instance = nullptr;
 
-
-/* Version stuff */
+    /* Version stuff */
     QButtonGroup m_mcVersion_buttons;
 
     Meta::VersionList::Ptr m_version_list;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -131,6 +131,7 @@ bool processZIP(TexturePack& pack, ProcessingLevel level)
         bool packPNG_result = TexturePackUtils::processPackPNG(pack, std::move(data));
 
         file.close();
+        zip.close();
         if (!packPNG_result) {
             return false;
         }
@@ -147,7 +148,7 @@ bool processPackTXT(TexturePack& pack, QByteArray&& raw_data)
     return true;
 }
 
-bool processPackPNG(TexturePack& pack, QByteArray&& raw_data)
+bool processPackPNG(const TexturePack& pack, QByteArray&& raw_data)
 {
     auto img = QImage::fromData(raw_data);
     if (!img.isNull()) {
@@ -159,6 +160,68 @@ bool processPackPNG(TexturePack& pack, QByteArray&& raw_data)
     return true;
 }
 
+bool processPackPNG(const TexturePack& pack)
+{
+    auto png_invalid = [&pack]() {
+        qWarning() << "Texture pack at" << pack.fileinfo().filePath() << "does not have a valid pack.png";
+        return false;
+    };
+
+    switch (pack.type()) {
+        case ResourceType::FOLDER: {
+            QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
+            if (image_file_info.exists() && image_file_info.isFile()) {
+                QFile pack_png_file(image_file_info.filePath());
+                if (!pack_png_file.open(QIODevice::ReadOnly))
+                    return png_invalid();  // can't open pack.png file
+
+                auto data = pack_png_file.readAll();
+
+                bool pack_png_result = TexturePackUtils::processPackPNG(pack, std::move(data));
+
+                pack_png_file.close();
+                if (!pack_png_result) {
+                    return png_invalid();  // pack.png invalid
+                }
+            } else {
+                return png_invalid();  // pack.png does not exists or is not a valid file.
+            }
+        }
+        case ResourceType::ZIPFILE: {
+            Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
+
+            QuaZip zip(pack.fileinfo().filePath());
+            if (!zip.open(QuaZip::mdUnzip))
+                return false;  // can't open zip file
+
+            QuaZipFile file(&zip);
+            if (zip.setCurrentFile("pack.png")) {
+                if (!file.open(QIODevice::ReadOnly)) {
+                    qCritical() << "Failed to open file in zip.";
+                    zip.close();
+                    return png_invalid();
+                }
+
+                auto data = file.readAll();
+
+                bool pack_png_result = TexturePackUtils::processPackPNG(pack, std::move(data));
+
+                file.close();
+                if (!pack_png_result) {
+                    zip.close();
+                    return png_invalid();  // pack.png invalid
+                }
+            } else {
+                zip.close();
+                return png_invalid();  // could not set pack.mcmeta as current file.
+            }
+        }
+        default:
+            qWarning() << "Invalid type for resource pack parse task!";
+            return false;
+    }
+}
+
 bool validate(QFileInfo file)
 {
     TexturePack rp{ file };
@@ -167,8 +230,7 @@ bool validate(QFileInfo file)
 
 }  // namespace TexturePackUtils
 
-LocalTexturePackParseTask::LocalTexturePackParseTask(int token, TexturePack& rp)
-    : Task(nullptr, false), m_token(token), m_texture_pack(rp)
+LocalTexturePackParseTask::LocalTexturePackParseTask(int token, TexturePack& rp) : Task(nullptr, false), m_token(token), m_texture_pack(rp)
 {}
 
 bool LocalTexturePackParseTask::abort()

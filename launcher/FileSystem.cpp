@@ -36,6 +36,7 @@
  */
 
 #include "FileSystem.h"
+#include <QPair>
 
 #include "BuildConfig.h"
 
@@ -102,7 +103,7 @@ namespace fs = ghc::filesystem;
 #include <linux/fs.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_MACOS)
 #include <sys/attr.h>
 #include <sys/clonefile.h>
 #elif defined(Q_OS_WIN)
@@ -246,6 +247,7 @@ bool copy::operator()(const QString& offset, bool dryRun)
 {
     using copy_opts = fs::copy_options;
     m_copied = 0;  // reset counter
+    m_failedPaths.clear();
 
 // NOTE always deep copy on windows. the alternatives are too messy.
 #if defined Q_OS_WIN32
@@ -277,6 +279,9 @@ bool copy::operator()(const QString& offset, bool dryRun)
             qWarning() << "Failed to copy files:" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
+            m_failedPaths.append(dst_path);
+            emit copyFailed(relative_dst_path);
+            return;
         }
         m_copied++;
         emit fileCopied(relative_dst_path);
@@ -372,7 +377,7 @@ void create_link::make_link_list(const QString& offset)
                 auto src_path = source_it.next();
                 auto relative_path = src_dir.relativeFilePath(src_path);
 
-                if (m_max_depth >= 0 && pathDepth(relative_path) > m_max_depth){
+                if (m_max_depth >= 0 && pathDepth(relative_path) > m_max_depth) {
                     relative_path = pathTruncate(relative_path, m_max_depth);
                     src_path = src_dir.filePath(relative_path);
                     if (linkedPaths.contains(src_path)) {
@@ -663,7 +668,7 @@ QString pathTruncate(const QString& path, int depth)
 
     QString trunc = QFileInfo(path).path();
 
-    if (pathDepth(trunc) > depth ) {
+    if (pathDepth(trunc) > depth) {
         return pathTruncate(trunc, depth);
     }
 
@@ -769,10 +774,48 @@ QString getDesktopDir()
 // Cross-platform Shortcut creation
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
+    if (destination.isEmpty()) {
+        destination = PathCombine(getDesktopDir(), RemoveInvalidFilenameChars(name));
+    }
 #if defined(Q_OS_MACOS)
-    destination += ".command";
+    // Create the Application
+    QDir applicationDirectory =
+        QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/" + BuildConfig.LAUNCHER_NAME + " Instances/";
 
-    QFile f(destination);
+    if (!applicationDirectory.mkpath(".")) {
+        qWarning() << "Couldn't create application directory";
+        return false;
+    }
+
+    QDir application = applicationDirectory.path() + "/" + name + ".app/";
+
+    if (application.exists()) {
+        qWarning() << "Application already exists!";
+        return false;
+    }
+
+    if (!application.mkpath(".")) {
+        qWarning() << "Couldn't create application";
+        return false;
+    }
+
+    QDir content = application.path() + "/Contents/";
+    QDir resources = content.path() + "/Resources/";
+    QDir binaryDir = content.path() + "/MacOS/";
+    QFile info = content.path() + "/Info.plist";
+
+    if (!(content.mkpath(".") && resources.mkpath(".") && binaryDir.mkpath("."))) {
+        qWarning() << "Couldn't create directories within application";
+        return false;
+    }
+    info.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    QFile(icon).rename(resources.path() + "/Icon.icns");
+
+    // Create the Command file
+    QString exec = binaryDir.path() + "/Run.command";
+
+    QFile f(exec);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream stream(&f);
 
@@ -789,8 +832,34 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 
     f.setPermissions(f.permissions() | QFileDevice::ExeOwner | QFileDevice::ExeGroup | QFileDevice::ExeOther);
 
+    // Generate the Info.plist
+    QTextStream infoStream(&info);
+    infoStream << "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n"
+                  "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" "
+                  "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
+                  "<plist version=\"1.0\">\n"
+                  "<dict>\n"
+                  "    <key>CFBundleExecutable</key>\n"
+                  "    <string>Run.command</string>\n"  // The path to the executable
+                  "    <key>CFBundleIconFile</key>\n"
+                  "    <string>Icon.icns</string>\n"
+                  "    <key>CFBundleName</key>\n"
+                  "    <string>"
+               << name
+               << "</string>\n"  // Name of the application
+                  "    <key>CFBundlePackageType</key>\n"
+                  "    <string>APPL</string>\n"
+                  "    <key>CFBundleShortVersionString</key>\n"
+                  "    <string>1.0</string>\n"
+                  "    <key>CFBundleVersion</key>\n"
+                  "    <string>1.0</string>\n"
+                  "</dict>\n"
+                  "</plist>";
+
     return true;
 #elif defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+    if (!destination.endsWith(".desktop"))  // in case of isFlatpak destination is already populated
+        destination += ".desktop";
     QFile f(destination);
     f.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream stream(&f);
@@ -974,7 +1043,7 @@ FilesystemType getFilesystemType(const QString& name)
 {
     for (auto iter = s_filesystem_type_names.constBegin(); iter != s_filesystem_type_names.constEnd(); ++iter) {
         auto fs_names = iter.value();
-        if(fs_names.contains(name.toUpper())) 
+        if (fs_names.contains(name.toUpper()))
             return iter.key();
     }
     return FilesystemType::UNKNOWN;
@@ -1072,6 +1141,7 @@ bool clone::operator()(const QString& offset, bool dryRun)
     }
 
     m_cloned = 0;  // reset counter
+    m_failedClones.clear();
 
     auto src = PathCombine(m_src.absolutePath(), offset);
     auto dst = PathCombine(m_dst.absolutePath(), offset);
@@ -1092,6 +1162,9 @@ bool clone::operator()(const QString& offset, bool dryRun)
             qDebug() << "Failed to clone files: error" << err.value() << "message" << QString::fromStdString(err.message());
             qDebug() << "Source file:" << src_path;
             qDebug() << "Destination file:" << dst_path;
+            m_failedClones.append(qMakePair(src_path, dst_path));
+            emit cloneFailed(src_path, dst_path);
+            return;
         }
         m_cloned++;
         emit fileCloned(src_path, dst_path);
@@ -1151,7 +1224,7 @@ bool clone_file(const QString& src, const QString& dst, std::error_code& ec)
         return false;
     }
 
-#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_MACOS)
 
     if (!macos_bsd_clonefile(src_path, dst_path, ec)) {
         qDebug() << "failed macos_bsd_clonefile:";
@@ -1380,7 +1453,7 @@ bool linux_ficlone(const std::string& src_path, const std::string& dst_path, std
     return true;
 }
 
-#elif defined(Q_OS_MACOS) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#elif defined(Q_OS_MACOS)
 
 bool macos_bsd_clonefile(const std::string& src_path, const std::string& dst_path, std::error_code& ec)
 {

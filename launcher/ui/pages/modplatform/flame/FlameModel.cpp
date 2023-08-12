@@ -40,14 +40,16 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
                 return edit;
             }
             return pack.description;
-        } case Qt::DecorationRole: {
+        }
+        case Qt::DecorationRole: {
             if (m_logoMap.contains(pack.logoName)) {
                 return (m_logoMap.value(pack.logoName));
             }
             QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
             ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
             return icon;
-        } case Qt::UserRole: {
+        }
+        case Qt::UserRole: {
             QVariant v;
             v.setValue(pack);
             return v;
@@ -60,13 +62,15 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             return pack.description;
         case UserDataTypes::SELECTED:
             return false;
+        case UserDataTypes::INSTALLED:
+            return false;
         default:
             break;
     }
     return QVariant();
 }
 
-bool ListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ListModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     int pos = index.row();
     if (pos >= modpacks.size() || pos < 0 || !index.isValid())
@@ -169,7 +173,7 @@ void ListModel::performPaginatedSearch()
                          .arg(currentSearchTerm)
                          .arg(currentSort + 1);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
     jobPtr = netJob;
     jobPtr->start();
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
@@ -202,11 +206,11 @@ void Flame::ListModel::searchRequestFinished()
     jobPtr.reset();
 
     QJsonParseError parse_error;
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
+    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from CurseForge at " << parse_error.offset
                    << " reason: " << parse_error.errorString();
-        qWarning() << response;
+        qWarning() << *response;
         return;
     }
 

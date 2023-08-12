@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,17 +35,17 @@
 
 #pragma once
 
-#include <QString>
-#include <QStringList>
 #include <QDateTime>
 #include <QSet>
+#include <QString>
+#include <QStringList>
 
-#include <memory>
-#include "minecraft/Rule.h"
-#include "ProblemProvider.h"
-#include "Library.h"
-#include "Agent.h"
 #include <meta/JsonFormat.h>
+#include <memory>
+#include "Agent.h"
+#include "Library.h"
+#include "ProblemProvider.h"
+#include "minecraft/Rule.h"
 
 class PackProfile;
 class VersionFile;
@@ -54,14 +54,14 @@ struct MojangDownloadInfo;
 struct MojangAssetIndexInfo;
 
 using VersionFilePtr = std::shared_ptr<VersionFile>;
-class VersionFile : public ProblemContainer
-{
+class VersionFile : public ProblemContainer {
     friend class MojangVersionFormat;
     friend class OneSixVersionFormat;
-public: /* methods */
-    void applyTo(LaunchProfile* profile, const RuntimeContext & runtimeContext);
 
-public: /* data */
+   public: /* methods */
+    void applyTo(LaunchProfile* profile, const RuntimeContext& runtimeContext);
+
+   public: /* data */
     /// Prism Launcher: order hint for this version file if no explicit order is set
     int order = 0;
 
@@ -138,7 +138,7 @@ public: /* data */
      * Prism Launcher: set of packages this depends on
      * NOTE: this is shared with the meta format!!!
      */
-    Meta::RequireSet requires;
+    Meta::RequireSet m_requires;
 
     /**
      * Prism Launcher: set of packages this conflicts with
@@ -149,11 +149,10 @@ public: /* data */
     /// is volatile -- may be removed as soon as it is no longer needed by something else
     bool m_volatile = false;
 
-public:
+   public:
     // Mojang: DEPRECATED list of 'downloads' - client jar, server jar, windows server exe, maybe more.
-    QMap <QString, std::shared_ptr<MojangDownloadInfo>> mojangDownloads;
+    QMap<QString, std::shared_ptr<MojangDownloadInfo>> mojangDownloads;
 
     // Mojang: extended asset index download information
     std::shared_ptr<MojangAssetIndexInfo> mojangAssetIndex;
 };
-

@@ -46,6 +46,7 @@
 #include <QFlags>
 #include <QLocalServer>
 #include <QObject>
+#include <QPair>
 #include <QThread>
 
 namespace FS {
@@ -112,9 +113,12 @@ class copy : public QObject {
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
     int totalCopied() { return m_copied; }
+    int totalFailed() { return m_failedPaths.length(); }
+    QStringList failed() { return m_failedPaths; }
 
    signals:
     void fileCopied(const QString& relativeName);
+    void copyFailed(const QString& relativeName);
     // TODO: maybe add a "shouldCopy" signal in the future?
 
    private:
@@ -127,6 +131,7 @@ class copy : public QObject {
     QDir m_src;
     QDir m_dst;
     int m_copied;
+    QStringList m_failedPaths;
 };
 
 struct LinkPair {
@@ -360,25 +365,24 @@ enum class FilesystemType {
  * QMap is ordered
  *
  */
-static const QMap<FilesystemType, QStringList> s_filesystem_type_names = {
-    {FilesystemType::FAT,        { "FAT" }},
-    {FilesystemType::NTFS,       { "NTFS" }},
-    {FilesystemType::REFS,       { "REFS" }},
-    {FilesystemType::EXT_2_OLD,  { "EXT_2_OLD", "EXT2_OLD" }},
-    {FilesystemType::EXT_2_3_4,  { "EXT2/3/4", "EXT_2_3_4", "EXT2", "EXT3", "EXT4" }},
-    {FilesystemType::EXT,        { "EXT" }},
-    {FilesystemType::XFS,        { "XFS" }},
-    {FilesystemType::BTRFS,      { "BTRFS" }},
-    {FilesystemType::NFS,        { "NFS" }},
-    {FilesystemType::ZFS,        { "ZFS" }},
-    {FilesystemType::APFS,       { "APFS" }},
-    {FilesystemType::HFS,        { "HFS" }},
-    {FilesystemType::HFSPLUS,    { "HFSPLUS" }},
-    {FilesystemType::HFSX,       { "HFSX" }},
-    {FilesystemType::FUSEBLK,    { "FUSEBLK" }},
-    {FilesystemType::F2FS,       { "F2FS" }},
-    {FilesystemType::UNKNOWN,    { "UNKNOWN" }}
-};
+static const QMap<FilesystemType, QStringList> s_filesystem_type_names = { { FilesystemType::FAT, { "FAT" } },
+                                                                           { FilesystemType::NTFS, { "NTFS" } },
+                                                                           { FilesystemType::REFS, { "REFS" } },
+                                                                           { FilesystemType::EXT_2_OLD, { "EXT_2_OLD", "EXT2_OLD" } },
+                                                                           { FilesystemType::EXT_2_3_4,
+                                                                             { "EXT2/3/4", "EXT_2_3_4", "EXT2", "EXT3", "EXT4" } },
+                                                                           { FilesystemType::EXT, { "EXT" } },
+                                                                           { FilesystemType::XFS, { "XFS" } },
+                                                                           { FilesystemType::BTRFS, { "BTRFS" } },
+                                                                           { FilesystemType::NFS, { "NFS" } },
+                                                                           { FilesystemType::ZFS, { "ZFS" } },
+                                                                           { FilesystemType::APFS, { "APFS" } },
+                                                                           { FilesystemType::HFS, { "HFS" } },
+                                                                           { FilesystemType::HFSPLUS, { "HFSPLUS" } },
+                                                                           { FilesystemType::HFSX, { "HFSX" } },
+                                                                           { FilesystemType::FUSEBLK, { "FUSEBLK" } },
+                                                                           { FilesystemType::F2FS, { "F2FS" } },
+                                                                           { FilesystemType::UNKNOWN, { "UNKNOWN" } } };
 
 /**
  * @brief Get the string name of Filesystem enum object
@@ -471,6 +475,9 @@ class clone : public QObject {
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
     int totalCloned() { return m_cloned; }
+    int totalFailed() { return m_failedClones.length(); }
+
+    QList<QPair<QString, QString>> failed() { return m_failedClones; }
 
    signals:
     void fileCloned(const QString& src, const QString& dst);
@@ -485,6 +492,7 @@ class clone : public QObject {
     QDir m_src;
     QDir m_dst;
     int m_cloned;
+    QList<QPair<QString, QString>> m_failedClones;
 };
 
 /**

@@ -5,13 +5,6 @@ sdk: org.kde.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk17
   - org.freedesktop.Sdk.Extension.openjdk8
-add-extensions:
-  com.valvesoftware.Steam.Utility.gamescope:
-    version: stable
-    add-ld-path: lib
-    no-autodownload: true
-    autodelete: false
-    directory: utils/gamescope
 
 command: prismlauncher
 finish-args:
@@ -25,22 +18,34 @@ finish-args:
   - --filesystem=xdg-run/app/com.discordapp.Discord:create
     # Mod drag&drop
   - --filesystem=xdg-download:ro
+    # FTBApp import
+  - --filesystem=~/.ftba:ro
+
+cleanup:
+  - /lib/libGLU*
 
 modules:
+  # Might be needed by some Controller mods (see https://github.com/isXander/Controlify/issues/31)
+  - shared-modules/libusb/libusb.json
+
+  # Needed for proper Wayland support
+  - libdecor.json
+
   - name: prismlauncher
     buildsystem: cmake-ninja
+    builddir: true
     config-opts:
       - -DLauncher_BUILD_PLATFORM=flatpak
-      - -DCMAKE_BUILD_TYPE=Debug
+      - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - -DLauncher_QT_VERSION_MAJOR=5
     build-options:
       env:
         JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
         JAVA_COMPILER: /usr/lib/sdk/openjdk17/jvm/openjdk-17/bin/javac
     sources:
-        - type: dir
-          path: ../
-    builddir: true
+      - type: dir
+        path: ../
+
   - name: openjdk
     buildsystem: simple
     build-commands:
@@ -49,14 +54,45 @@ modules:
       - mv /app/jre /app/jdk/17
       - /usr/lib/sdk/openjdk8/install.sh
       - mv /app/jre /app/jdk/8
-    cleanup: [/jre]
+    cleanup:
+      - /jre
+
+  - name: glfw
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - -DBUILD_SHARED_LIBS:BOOL=ON
+      - -DGLFW_USE_WAYLAND=ON
+    sources:
+      - type: git
+        url: https://github.com/glfw/glfw.git
+        commit: 3fa2360720eeba1964df3c0ecf4b5df8648a8e52
+      - type: patch
+        path: patches/0003-Don-t-crash-on-calls-to-focus-or-icon.patch
+      - type: patch
+        path: patches/0005-Add-warning-about-being-an-unofficial-patch.patch
+      - type: patch
+        path: patches/0007-Platform-Prefer-Wayland-over-X11.patch
+    cleanup:
+      - /include
+      - /lib/cmake
+      - /lib/pkgconfig
+
   - name: xrandr
     buildsystem: autotools
     sources:
       - type: archive
-        url: https://xorg.freedesktop.org/archive/individual/app/xrandr-1.5.1.tar.xz
-        sha256: 7bc76daf9d72f8aff885efad04ce06b90488a1a169d118dea8a2b661832e8762
-    cleanup: [/share/man, /bin/xkeystone]
+        url: https://xorg.freedesktop.org/archive/individual/app/xrandr-1.5.2.tar.xz
+        sha256: c8bee4790d9058bacc4b6246456c58021db58a87ddda1a9d0139bf5f18f1f240
+        x-checker-data:
+          type: anitya
+          project-id: 14957
+          stable-only: true
+          url-template: https://xorg.freedesktop.org/archive/individual/app/xrandr-$version.tar.xz
+    cleanup:
+      - /share/man
+      - /bin/xkeystone
+
   - name: gamemode
     buildsystem: meson
     config-opts:
@@ -67,19 +103,56 @@ modules:
       # post-install is running inside the build dir, we need it from the source though
       - install -Dm755 ../data/gamemoderun -t /app/bin
     sources:
-      - type: git
-        url: https://github.com/FeralInteractive/gamemode
-        tag: "1.7"
-        commit: 4dc99dff76218718763a6b07fc1900fa6d1dafd9
+      - type: archive
+        archive-type: tar-gzip
+        url: https://api.github.com/repos/FeralInteractive/gamemode/tarball/1.7
+        sha256: 57ce73ba605d1cf12f8d13725006a895182308d93eba0f69f285648449641803
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/FeralInteractive/gamemode/releases/latest
+          version-query: .tag_name
+          url-query: .tarball_url
+          timestamp-query: .published_at
+    cleanup:
+      - /include
+      - /lib/pkgconfig
+      - /lib/libgamemodeauto.a
+
+  - name: glxinfo
+    buildsystem: meson
+    config-opts:
+      - --bindir=/app/mesa-demos
+      - -Degl=disabled
+      - -Dglut=disabled
+      - -Dosmesa=disabled
+      - -Dvulkan=disabled
+      - -Dwayland=disabled
+    post-install:
+      - mv -v /app/mesa-demos/glxinfo /app/bin
+    sources:
+      - type: archive
+        url: https://archive.mesa3d.org/demos/mesa-demos-9.0.0.tar.xz
+        sha256: 3046a3d26a7b051af7ebdd257a5f23bfeb160cad6ed952329cdff1e9f1ed496b
+        x-checker-data:
+          type: anitya
+          project-id: 16781
+          stable-only: true
+          url-template: https://archive.mesa3d.org/demos/mesa-demos-$version.tar.xz
+    cleanup:
+      - /include
+      - /mesa-demos
+      - /share
+    modules:
+      - shared-modules/glu/glu-9.json
+
   - name: enhance
     buildsystem: simple
     build-commands:
-      - mkdir -p /app/utils/gamescope
       - install -Dm755 prime-run /app/bin/prime-run
       - mv /app/bin/prismlauncher /app/bin/prismrun
       - install -Dm755 prismlauncher /app/bin/prismlauncher
     sources:
       - type: file
-        path: ../flatpak/prime-run
+        path: prime-run
       - type: file
-        path: ../flatpak/prismlauncher
+        path: prismlauncher

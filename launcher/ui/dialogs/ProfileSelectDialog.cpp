@@ -16,43 +16,38 @@
 #include "ProfileSelectDialog.h"
 #include "ui_ProfileSelectDialog.h"
 
-#include <QItemSelectionModel>
 #include <QDebug>
+#include <QItemSelectionModel>
 
-#include "SkinUtils.h"
 #include "Application.h"
+#include "SkinUtils.h"
 
 #include "ui/dialogs/ProgressDialog.h"
 
-ProfileSelectDialog::ProfileSelectDialog(const QString &message, int flags, QWidget *parent)
+ProfileSelectDialog::ProfileSelectDialog(const QString& message, int flags, QWidget* parent)
     : QDialog(parent), ui(new Ui::ProfileSelectDialog)
 {
     ui->setupUi(this);
 
     m_accounts = APPLICATION->accounts();
     auto view = ui->listView;
-    //view->setModel(m_accounts.get());
-    //view->hideColumn(AccountList::ActiveColumn);
+    // view->setModel(m_accounts.get());
+    // view->hideColumn(AccountList::ActiveColumn);
     view->setColumnCount(1);
     view->setRootIsDecorated(false);
     // FIXME: use a real model, not this
-    if(QTreeWidgetItem* header = view->headerItem())
-    {
+    if (QTreeWidgetItem* header = view->headerItem()) {
         header->setText(0, tr("Name"));
-    }
-    else
-    {
+    } else {
         view->setHeaderLabel(tr("Name"));
     }
-    QList <QTreeWidgetItem *> items;
-    for (int i = 0; i < m_accounts->count(); i++)
-    {
+    QList<QTreeWidgetItem*> items;
+    for (int i = 0; i < m_accounts->count(); i++) {
         MinecraftAccountPtr account = m_accounts->at(i);
         QString profileLabel;
-        if(account->isInUse()) {
+        if (account->isInUse()) {
             profileLabel = tr("%1 (in use)").arg(account->profileName());
-        }
-        else {
+        } else {
             profileLabel = account->profileName();
         }
         auto item = new QTreeWidgetItem(view);
@@ -101,8 +96,7 @@ bool ProfileSelectDialog::useAsInstDefaullt() const
 void ProfileSelectDialog::on_buttonBox_accepted()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() > 0)
-    {
+    if (selection.size() > 0) {
         QModelIndex selected = selection.first();
         m_selected = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
     }

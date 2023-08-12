@@ -54,17 +54,16 @@
 
 package org.prismlauncher.launcher.impl;
 
+import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.ReflectionUtils;
+
 import java.lang.invoke.MethodHandle;
 import java.util.Collections;
 import java.util.List;
 
-import org.prismlauncher.utils.Parameters;
-import org.prismlauncher.utils.ReflectionUtils;
-
 public final class StandardLauncher extends AbstractLauncher {
-
     private final boolean quickPlaySupported;
-
+  
     public StandardLauncher(Parameters params) {
         super(params);
 
@@ -100,5 +99,4 @@ public final class StandardLauncher extends AbstractLauncher {
         MethodHandle method = ReflectionUtils.findMainMethod(mainClassName);
         method.invokeExact(gameArgs.toArray(new String[0]));
     }
-
 }

@@ -41,6 +41,7 @@
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <memory>
 
 #include "ByteArraySink.h"
 #include "ChecksumValidator.h"
@@ -69,7 +70,7 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
     return dl;
 }
 
-auto Download::makeByteArray(QUrl url, QByteArray* output, Options options) -> Download::Ptr
+auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
 {
     auto dl = makeShared<Download>();
     dl->m_url = url;
@@ -145,7 +146,7 @@ void Download::executeTask()
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::downloadProgress, this, &Download::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &Download::downloadFinished);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &Download::downloadError);
 #else
     connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &Download::downloadError);
@@ -173,8 +174,7 @@ void Download::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
     if (elapsed_ms.count() > 0) {
         auto str_eta = bytesTotal > 0 ? Time::humanReadableDuration(remaing_time_s) : tr("unknown");
         //: Download speed, in bytes per second (remaining download time in parenthesis)
-        dl_speed_str =
-            tr("%1 /s (%2)").arg(StringUtils::humanReadableFileSize(dl_speed_bps)).arg(str_eta);
+        dl_speed_str = tr("%1 /s (%2)").arg(StringUtils::humanReadableFileSize(dl_speed_bps)).arg(str_eta);
     } else {
         //: Download speed at 0 bytes per second
         dl_speed_str = tr("0 B/s");

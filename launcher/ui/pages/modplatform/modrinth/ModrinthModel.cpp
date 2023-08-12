@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -106,6 +106,8 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
             return pack.description;
         case UserDataTypes::SELECTED:
             return false;
+        case UserDataTypes::INSTALLED:
+            return false;
         default:
             break;
     }
@@ -113,7 +115,7 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
     return {};
 }
 
-bool ModpackListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ModpackListModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     int pos = index.row();
     if (pos >= modpacks.size() || pos < 0 || !index.isValid())
@@ -129,27 +131,27 @@ void ModpackListModel::performPaginatedSearch()
     // TODO: Move to standalone API
     auto netJob = makeShared<NetJob>("Modrinth::SearchModpack", APPLICATION->network());
     auto searchAllUrl = QString(BuildConfig.MODRINTH_PROD_URL +
-                            "/search?"
-                            "offset=%1&"
-                            "limit=%2&"
-                            "query=%3&"
-                            "index=%4&"
-                            "facets=[[\"project_type:modpack\"]]")
+                                "/search?"
+                                "offset=%1&"
+                                "limit=%2&"
+                                "query=%3&"
+                                "index=%4&"
+                                "facets=[[\"project_type:modpack\"]]")
                             .arg(nextSearchOffset)
                             .arg(m_modpacks_per_page)
                             .arg(currentSearchTerm)
                             .arg(currentSort);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), &m_all_response));
+    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), m_all_response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, this, [this] {
         QJsonParseError parse_error_all{};
 
-        QJsonDocument doc_all = QJsonDocument::fromJson(m_all_response, &parse_error_all);
+        QJsonDocument doc_all = QJsonDocument::fromJson(*m_all_response, &parse_error_all);
         if (parse_error_all.error != QJsonParseError::NoError) {
             qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error_all.offset
                        << " reason: " << parse_error_all.errorString();
-            qWarning() << m_all_response;
+            qWarning() << *m_all_response;
             return;
         }
 
@@ -179,18 +181,18 @@ void ModpackListModel::refresh()
 
 static auto sortFromIndex(int index) -> QString
 {
-    switch(index){
-    default:
-    case 0:
-        return "relevance";
-    case 1:
-        return "downloads";
-    case 2:
-        return "follows";
-    case 3:
-        return "newest";
-    case 4:
-        return "updated";
+    switch (index) {
+        default:
+        case 0:
+            return "relevance";
+        case 1:
+            return "downloads";
+        case 2:
+            return "follows";
+        case 3:
+            return "newest";
+        case 4:
+            return "updated";
     }
 
     return {};
@@ -198,7 +200,7 @@ static auto sortFromIndex(int index) -> QString
 
 void ModpackListModel::searchWithTerm(const QString& term, const int sort)
 {
-    if(sort > 5 || sort < 0)
+    if (sort > 5 || sort < 0)
         return;
 
     auto sort_str = sortFromIndex(sort);
