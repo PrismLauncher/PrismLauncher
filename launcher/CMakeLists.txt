@@ -1131,8 +1131,14 @@ if(WIN32)
     set(LAUNCHER_RCS ${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_WindowsRC})
 endif()
 
+include(CompilerWarnings)
+
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+set_project_warnings(Launcher_logic
+    "${Launcher_MSVC_WARNINGS}"
+    "${Launcher_CLANG_WARNINGS}"
+    "${Launcher_GCC_WARNINGS}")
 target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Launcher_logic
@@ -1218,6 +1224,11 @@ install(TARGETS ${Launcher_Name}
 
 if(WIN32)
     add_library(filelink_logic STATIC ${LINKEXE_SOURCES})
+    set_project_warnings(filelink_logic
+    "${Launcher_MSVC_WARNINGS}"
+    "${Launcher_CLANG_WARNINGS}"
+    "${Launcher_GCC_WARNINGS}")
+
     target_include_directories(filelink_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(filelink_logic
         systeminfo

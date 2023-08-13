@@ -105,7 +105,7 @@ void RecursiveFileSystemWatcher::fileChange(const QString &path)
 {
     emit fileChanged(path);
 }
-void RecursiveFileSystemWatcher::directoryChange(const QString &path)
+void RecursiveFileSystemWatcher::directoryChange([[maybe_unused]] const QString& path)
 {
     setFiles(scanRecursive(m_root));
 }

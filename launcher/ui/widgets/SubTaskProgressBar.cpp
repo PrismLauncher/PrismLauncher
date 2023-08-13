@@ -27,7 +27,7 @@ unique_qobject_ptr<SubTaskProgressBar> SubTaskProgressBar::create(QWidget* paren
 }
 
 SubTaskProgressBar::SubTaskProgressBar(QWidget* parent)
-    : ui(new Ui::SubTaskProgressBar)
+    : QWidget(parent), ui(new Ui::SubTaskProgressBar)
 {
     ui->setupUi(this);
 }

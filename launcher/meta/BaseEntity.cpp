@@ -40,7 +40,7 @@ public: /* methods */
     }
     bool write(QByteArray & data) override
     {
-        this->data.append(data);
+        this->m_data.append(data);
         return true;
     }
     bool abort() override
@@ -52,7 +52,7 @@ public: /* methods */
         auto fname = m_entity->localFilename();
         try
         {
-            auto doc = Json::requireDocument(data, fname);
+            auto doc = Json::requireDocument(m_data, fname);
             auto obj = Json::requireObject(doc, fname);
             m_entity->parse(obj);
             return true;
@@ -65,7 +65,7 @@ public: /* methods */
     }
 
 private: /* data */
-    QByteArray data;
+    QByteArray m_data;
     Meta::BaseEntity *m_entity;
 };
 

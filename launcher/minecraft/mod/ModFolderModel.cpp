@@ -140,7 +140,7 @@ QVariant ModFolderModel::data(const QModelIndex &index, int role) const
     }
 }
 
-QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role)
     {

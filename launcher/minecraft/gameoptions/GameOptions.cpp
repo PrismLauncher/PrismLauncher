@@ -112,12 +112,11 @@ QVariant GameOptions::data(const QModelIndex& index, int role) const
     default:
         return QVariant();
     }
-    return QVariant();
 }
 
 int GameOptions::rowCount(const QModelIndex&) const
 {
-    return contents.size();
+    return static_cast<int>(contents.size());
 }
 
 int GameOptions::columnCount(const QModelIndex&) const

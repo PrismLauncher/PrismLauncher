@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QList>
+#include <QString>
+
 enum class ProblemSeverity
 {
     None,
@@ -16,7 +19,7 @@ struct PatchProblem
 class ProblemProvider
 {
 public:
-    virtual ~ProblemProvider() {};
+    virtual ~ProblemProvider() {}
     virtual const QList<PatchProblem> getProblems() const = 0;
     virtual ProblemSeverity getProblemSeverity() const = 0;
 };

@@ -4,7 +4,7 @@
 class RegexpMatcher : public IPathMatcher
 {
 public:
-    virtual ~RegexpMatcher() {};
+    virtual ~RegexpMatcher() {}
     RegexpMatcher(const QString &regexp)
     {
         m_regexp.setPattern(regexp);

@@ -84,9 +84,8 @@ AccountListPage::AccountListPage(QWidget *parent)
 
     QItemSelectionModel *selectionModel = ui->listView->selectionModel();
 
-    connect(selectionModel, &QItemSelectionModel::selectionChanged, [this](const QItemSelection &sel, const QItemSelection &dsel) {
-        updateButtonStates();
-    });
+    connect(selectionModel, &QItemSelectionModel::selectionChanged,
+            [this]([[maybe_unused]] const QItemSelection& sel, [[maybe_unused]] const QItemSelection& dsel) { updateButtonStates(); });
     connect(ui->listView, &VersionListView::customContextMenuRequested, this, &AccountListPage::ShowContextMenu);
 
     connect(m_accounts.get(), &AccountList::listChanged, this, &AccountListPage::listChanged);

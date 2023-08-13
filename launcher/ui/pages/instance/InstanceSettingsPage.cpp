@@ -491,7 +491,7 @@ void InstanceSettingsPage::changeInstanceAccount(int index)
     }
 }
 
-void InstanceSettingsPage::on_maxMemSpinBox_valueChanged(int i)
+void InstanceSettingsPage::on_maxMemSpinBox_valueChanged([[maybe_unused]] int i)
 {
     updateThresholds();
 }

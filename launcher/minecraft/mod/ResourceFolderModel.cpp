@@ -447,7 +447,7 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
     }
 }
 
-bool ResourceFolderModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool ResourceFolderModel::setData(const QModelIndex& index, [[maybe_unused]] const QVariant& value, int role)
 {
     int row = index.row();
     if (row < 0 || row >= rowCount(index.parent()) || !index.isValid())
@@ -471,7 +471,7 @@ bool ResourceFolderModel::setData(const QModelIndex& index, const QVariant& valu
     return false;
 }
 
-QVariant ResourceFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
         case Qt::DisplayRole:
@@ -588,7 +588,7 @@ SortType ResourceFolderModel::columnToSortKey(size_t column) const
 }
 
 /* Standard Proxy Model for createFilterProxyModel */
-[[nodiscard]] bool ResourceFolderModel::ProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
+[[nodiscard]] bool ResourceFolderModel::ProxyModel::filterAcceptsRow(int source_row, [[maybe_unused]] const QModelIndex& source_parent) const
 {
     auto* model = qobject_cast<ResourceFolderModel*>(sourceModel());
     if (!model)

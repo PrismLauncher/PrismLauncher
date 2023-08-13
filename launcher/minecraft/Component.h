@@ -27,7 +27,8 @@ public:
     Component(PackProfile * parent, std::shared_ptr<Meta::Version> version);
     Component(PackProfile * parent, const QString & uid, std::shared_ptr<VersionFile> file);
 
-    virtual ~Component(){};
+    virtual ~Component(){}
+
     void applyTo(LaunchProfile *profile);
 
     bool isEnabled();

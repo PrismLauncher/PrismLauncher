@@ -34,7 +34,7 @@ void JProfiler::profilerStarted()
     emit readyToLaunch(tr("Listening on port: %1").arg(listeningPort));
 }
 
-void JProfiler::profilerFinished(int exit, QProcess::ExitStatus status)
+void JProfiler::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus status)
 {
     if (status == QProcess::CrashExit)
     {

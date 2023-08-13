@@ -353,7 +353,7 @@ void WorldListPage::mceditState(LoggedProcess::State state)
     }
 }
 
-void WorldListPage::worldChanged(const QModelIndex &current, const QModelIndex &previous)
+void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex &current, [[maybe_unused]] const QModelIndex &previous)
 {
     QModelIndex index = getSelectedWorld();
     bool enable = index.isValid();

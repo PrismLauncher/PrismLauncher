@@ -107,16 +107,16 @@ bool parseXTokenResponse(QByteArray & data, Katabasis::Token &output, QString na
         if(!item.isObject()) {
             continue;
         }
-        auto obj = item.toObject();
-        if(obj.contains("uhs")) {
+        auto obj_ = item.toObject();
+        if(obj_.contains("uhs")) {
             foundUHS = true;
         } else {
             continue;
         }
         // consume all 'display claims' ... whatever that means
-        for(auto iter = obj.begin(); iter != obj.end(); iter++) {
+        for(auto iter = obj_.begin(); iter != obj_.end(); iter++) {
             QString claim;
-            if(!getString(obj.value(iter.key()), claim)) {
+            if(!getString(obj_.value(iter.key()), claim)) {
                 qWarning() << "display claim " << iter.key() << " is not a string...";
                 return false;
             }

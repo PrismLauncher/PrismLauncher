@@ -145,7 +145,7 @@ public:
     ComponentPtr getComponent(const QString &id);
 
     /// get the profile component by index
-    ComponentPtr getComponent(int index);
+    ComponentPtr getComponent(size_t index);
 
     /// Add the component to the internal list of patches
     // todo(merged): is this the best approach

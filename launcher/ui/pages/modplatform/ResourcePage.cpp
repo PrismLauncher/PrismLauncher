@@ -280,7 +280,7 @@ void ResourcePage::updateVersionList()
     updateSelectionButton();
 }
 
-void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void ResourcePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     if (!curr.isValid()) {
         return;
@@ -307,9 +307,9 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     updateUi();
 }
 
-void ResourcePage::onVersionSelectionChanged(QString data)
+void ResourcePage::onVersionSelectionChanged(QString versionData)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (versionData.isNull() || versionData.isEmpty()) {
         m_selected_version_index = -1;
         return;
     }

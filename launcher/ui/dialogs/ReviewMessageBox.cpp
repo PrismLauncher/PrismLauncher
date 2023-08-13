@@ -5,7 +5,7 @@
 
 #include <QPushButton>
 
-ReviewMessageBox::ReviewMessageBox(QWidget* parent, QString const& title, QString const& icon)
+ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString const& title, [[maybe_unused]] QString const& icon)
     : QDialog(parent), ui(new Ui::ReviewMessageBox)
 {
     ui->setupUi(this);

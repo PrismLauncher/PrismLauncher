@@ -115,7 +115,7 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
     }
 }
 
-QVariant TexturePackFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
         case Qt::DisplayRole:

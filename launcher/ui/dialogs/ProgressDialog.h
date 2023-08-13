@@ -98,7 +98,7 @@ private:
 private:
     Ui::ProgressDialog *ui;
 
-    Task *task;
+    Task *m_task;
 
     bool m_is_multi_step = false;
     QHash<QUuid, SubTaskProgressBar*> taskProgress;

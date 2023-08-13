@@ -88,7 +88,7 @@ public: /* types */
 
 public:
     /// virtual destructor to make sure the destruction is COMPLETE
-    virtual ~BaseInstance() {};
+    virtual ~BaseInstance() {}
 
     virtual void saveNow() = 0;
 
@@ -154,7 +154,7 @@ public:
     virtual MessageLevel::Enum guessLevel([[maybe_unused]] const QString &line, MessageLevel::Enum level)
     {
         return level;
-    };
+    }
 
     virtual QStringList extraArguments();
 
@@ -291,7 +291,7 @@ public:
 protected:
     void changeStatus(Status newStatus);
 
-    SettingsObjectPtr globalSettings() const { return m_global_settings.lock(); };
+    SettingsObjectPtr globalSettings() const { return m_global_settings.lock(); }
 
     bool isSpecificSettingsLoaded() const { return m_specific_settings_loaded; }
     void setSpecificSettingsLoaded(bool loaded) { m_specific_settings_loaded = loaded; }

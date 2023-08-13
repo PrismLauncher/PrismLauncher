@@ -95,10 +95,10 @@ class LinkTask : public Task {
             emitSucceeded();
         }
         
-    };
+    }
 
     FS::create_link *m_lnk;
-    bool m_useHard = false;
+    [[maybe_unused]] bool m_useHard = false;
     bool m_linkRecursive = true;
 };
 
@@ -352,7 +352,7 @@ slots:
     void test_link()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder, this]()
+        auto f = [&folder]()
         {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
@@ -648,7 +648,7 @@ slots:
     void test_link_with_max_depth()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder, this]()
+        auto f = [&folder]()
         {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);

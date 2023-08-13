@@ -87,7 +87,7 @@ void ProgressDialog::on_skipButton_clicked(bool checked)
 {
     Q_UNUSED(checked);
     if (ui->skipButton->isEnabled())  // prevent other triggers from aborting
-        task->abort();
+        m_task->abort();
 }
 
 ProgressDialog::~ProgressDialog()
@@ -132,7 +132,7 @@ void ProgressDialog::updateSize(bool recenterParent)
 
 int ProgressDialog::execWithTask(Task* task)
 {
-    this->task = task;
+    this->m_task = task;
 
     if (!task) {
         qDebug() << "Programmer error: Progress dialog created with null task.";
@@ -184,8 +184,8 @@ int ProgressDialog::execWithTask(std::unique_ptr<Task>& task)
 
 bool ProgressDialog::handleImmediateResult(QDialog::DialogCode& result)
 {
-    if (task->isFinished()) {
-        if (task->wasSuccessful()) {
+    if (m_task->isFinished()) {
+        if (m_task->wasSuccessful()) {
             result = QDialog::Accepted;
         } else {
             result = QDialog::Rejected;
@@ -197,12 +197,12 @@ bool ProgressDialog::handleImmediateResult(QDialog::DialogCode& result)
 
 Task* ProgressDialog::getTask()
 {
-    return task;
+    return m_task;
 }
 
 void ProgressDialog::onTaskStarted() {}
 
-void ProgressDialog::onTaskFailed(QString failure)
+void ProgressDialog::onTaskFailed([[maybe_unused]] QString failure)
 {
     reject();
     hide();
@@ -214,12 +214,13 @@ void ProgressDialog::onTaskSucceeded()
     hide();
 }
 
-void ProgressDialog::changeStatus(const QString& status)
+void ProgressDialog::changeStatus([[maybe_unused]] const QString& status)
 {
-    ui->globalStatusLabel->setText(task->getStatus());
+    ui->globalStatusLabel->setText(m_task->getStatus());
     ui->globalStatusLabel->adjustSize();
-    ui->globalStatusDetailsLabel->setText(task->getDetails());
+    ui->globalStatusDetailsLabel->setText(m_task->getDetails());
     ui->globalStatusDetailsLabel->adjustSize();
+
 
     updateSize();
 }
@@ -287,7 +288,7 @@ void ProgressDialog::keyPressEvent(QKeyEvent* e)
 
 void ProgressDialog::closeEvent(QCloseEvent* e)
 {
-    if (task && task->isRunning()) {
+    if (m_task && m_task->isRunning()) {
         e->ignore();
     } else {
         QDialog::closeEvent(e);

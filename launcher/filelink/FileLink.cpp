@@ -230,7 +230,7 @@ void FileLinkApp::readPathPairs()
     in >> numLinks;
     qDebug() << "numLinks" << numLinks;
 
-    for (unsigned int i = 0; i < numLinks; i++) {
+    for (quint32 i = 0; i < numLinks; i++) {
         FS::LinkPair pair;
         in >> pair.src;
         in >> pair.dst;

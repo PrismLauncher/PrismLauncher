@@ -64,19 +64,20 @@ struct TaskStepProgress {
     QString status = "";
     QString details = "";
     TaskStepState state = TaskStepState::Waiting;
+    
     TaskStepProgress() {
         this->uid = QUuid::createUuid();
     }
-    TaskStepProgress(QUuid uid) {
-        this->uid = uid;
-    }
+
+    TaskStepProgress(QUuid uid_): uid(uid_) {}
+
     bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
-    void update(qint64 current, qint64 total) {
+    void update(qint64 new_current, qint64 new_total) {
         this->old_current = this->current;
         this->old_total = this->total;
 
-        this->current = current;
-        this->total = total;
+        this->current = new_current;
+        this->total = new_total;
         this->state = TaskStepState::Running;
     }
 };
@@ -155,7 +156,7 @@ class Task : public QObject, public QRunnable {
     void run() override { start(); }
 
     virtual void start();
-    virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); };
+    virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); }
 
     void setAbortable(bool can_abort) { m_can_abort = can_abort; emit abortStatusChanged(can_abort); }
 
