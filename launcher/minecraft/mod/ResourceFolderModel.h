@@ -99,7 +99,7 @@ class ResourceFolderModel : public QAbstractListModel {
     enum Columns { ACTIVE_COLUMN = 0, NAME_COLUMN, DATE_COLUMN, NUM_COLUMNS };
     QStringList columnNames(bool translated = true) const { return translated ? m_column_names_translated : m_column_names; }
 
-    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : size(); }
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
     [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; }
 
     [[nodiscard]] Qt::DropActions supportedDropActions() const override;
