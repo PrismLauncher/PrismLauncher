@@ -40,7 +40,6 @@ namespace Net {
 class Validator {
    public: /* con/des */
     Validator() {}
-
     virtual ~Validator() {}
 
    public: /* methods */

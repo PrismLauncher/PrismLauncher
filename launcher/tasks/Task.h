@@ -61,7 +61,6 @@ struct TaskStepProgress {
     TaskStepState state = TaskStepState::Waiting;
 
     TaskStepProgress() { this->uid = QUuid::createUuid(); }
-
     TaskStepProgress(QUuid uid_) : uid(uid_) {}
 
     bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
