@@ -591,10 +591,7 @@ QVariant PackProfile::data(const QModelIndex &index, int role) const
     }
     case Qt::DecorationRole:
     {
-        switch(column)
-        {
-        case NameColumn:
-        {
+        if (column == NameColumn) {
             auto severity = patch->getProblemSeverity();
             switch (severity)
             {
@@ -606,11 +603,7 @@ QVariant PackProfile::data(const QModelIndex &index, int role) const
                     return QVariant();
             }
         }
-        default:
-        {
-            return QVariant();
-        }
-        }
+        return QVariant();
     }
     }
     return QVariant();

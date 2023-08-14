@@ -16,9 +16,8 @@
 #include "ui/pages/instance/OtherLogsPage.h"
 #include "ui/pages/instance/WorldListPage.h"
 #include "ui/pages/instance/ServersPage.h"
-#include "ui/pages/instance/GameOptionsPage.h"
 
-class InstancePageProvider : public QObject, public BasePageProvider
+class InstancePageProvider : protected QObject, public BasePageProvider
 {
     Q_OBJECT
 public:

@@ -28,7 +28,7 @@ struct GameType {
     enum
     {
         Unknown = -1,
-        Survival = 0,
+        Survival,
         Creative,
         Adventure,
         Spectator
