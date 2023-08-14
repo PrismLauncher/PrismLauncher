@@ -94,7 +94,7 @@ void ModFolderLoadTask::executeTask()
     }
 
     // Remove orphan metadata to prevent issues
-    // See https://github.com/PolyMC/PolyMC/issues/996
+    // See https://github.com/Prism LauncherMC/Prism LauncherMC/issues/996
     if (m_clean_orphan) {
         QMutableMapIterator iter(m_result->mods);
         while (iter.hasNext()) {

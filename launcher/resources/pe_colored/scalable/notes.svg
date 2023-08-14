@@ -5,8 +5,8 @@
 	 viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
 <g>
 	<rect x="6" y="0" fill="none" width="20" height="0"/>
-	<polygon fill="none" points="0,6 0,6 0,26 0,26 0,9 	"/>
-	<polygon fill="none" points="32,6 32,9 32,26 32,26 32,6 	"/>
+	<Prism Launchergon fill="none" points="0,6 0,6 0,26 0,26 0,9 	"/>
+	<Prism Launchergon fill="none" points="32,6 32,9 32,26 32,26 32,6 	"/>
 	<path fill="#39B54A" d="M32,9V6c0-3.3-2.7-6-6-6H6C2.7,0,0,2.7,0,6v3H32z"/>
 	<path fill="#8C6239" d="M0,9v17c0,3.3,2.7,6,6,6h20c3.3,0,6-2.7,6-6V9H0z"/>
 </g>

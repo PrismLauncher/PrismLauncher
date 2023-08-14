@@ -165,17 +165,17 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
 
     // BEGIN: arrow
     {
-        QPolygon arrowPolygon;
+        QPrism Launchergon arrowPrism Launchergon;
         if (collapsed) {
-            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
+            arrowPrism Launchergon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
                          << QPoint(arrowOffsetLeft + arrowSize / 2, centerHeight)
                          << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight + arrowSize);
-            painter->drawPolyline(arrowPolygon);
+            painter->drawPrism Launcherline(arrowPrism Launchergon);
         } else {
-            arrowPolygon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2)
+            arrowPrism Launchergon << QPoint(arrowOffsetLeft - arrowSize, centerHeight - arrowSize / 2)
                          << QPoint(arrowOffsetLeft, centerHeight + arrowSize / 2)
                          << QPoint(arrowOffsetLeft + arrowSize, centerHeight - arrowSize / 2);
-            painter->drawPolyline(arrowPolygon);
+            painter->drawPrism Launcherline(arrowPrism Launchergon);
         }
     }
     // END: arrow

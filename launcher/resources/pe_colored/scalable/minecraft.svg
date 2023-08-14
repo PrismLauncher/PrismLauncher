@@ -5,10 +5,10 @@
 	 viewBox="-463 265 32 32" enable-background="new -463 265 32 32" xml:space="preserve">
 <rect x="-463" y="265" fill-rule="evenodd" clip-rule="evenodd" fill="none" width="32" height="32"/>
 <g>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#754C24" points="-447,279.2 -433,272.1 -433,289.9 -447,297 	"/>
-	<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#8C6239" points="-447,279.2 -461,272.1 -461,289.9 -447,297 	"/>
+	<Prism Launchergon fill-rule="evenodd" clip-rule="evenodd" fill="#754C24" points="-447,279.2 -433,272.1 -433,289.9 -447,297 	"/>
+	<Prism Launchergon fill-rule="evenodd" clip-rule="evenodd" fill="#8C6239" points="-447,279.2 -461,272.1 -461,289.9 -447,297 	"/>
 	<g>
-		<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#39B54A" points="-461,272.1 -447,279.2 -433,272.1 -447,265 		"/>
+		<Prism Launchergon fill-rule="evenodd" clip-rule="evenodd" fill="#39B54A" points="-461,272.1 -447,279.2 -433,272.1 -447,265 		"/>
 	</g>
 </g>
 </svg>

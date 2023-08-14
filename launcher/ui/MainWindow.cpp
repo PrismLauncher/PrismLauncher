@@ -149,7 +149,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // instance toolbar stuff
     {
         // Qt doesn't like vertical moving toolbars, so we have to force them...
-        // See https://github.com/PolyMC/PolyMC/issues/493
+        // See https://github.com/Prism LauncherMC/Prism LauncherMC/issues/493
         connect(ui->instanceToolBar, &QToolBar::orientationChanged,
                 [=](Qt::Orientation) { ui->instanceToolBar->setOrientation(Qt::Vertical); });
 

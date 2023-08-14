@@ -32,10 +32,10 @@
          See the License for the specific language governing permissions and
          limitations under the License.
 
-## PolyMC
+## Prism LauncherMC
 
-     PolyMC - Minecraft Launcher
-     Copyright (C) 2021-2022 PolyMC Contributors
+     Prism LauncherMC - Minecraft Launcher
+     Copyright (C) 2021-2022 Prism LauncherMC Contributors
 
      This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -238,8 +238,8 @@
 
 ## launcher (`libraries/launcher`)
 
-     PolyMC - Minecraft Launcher
-     Copyright (C) 2021-2022 PolyMC Contributors
+     Prism LauncherMC - Minecraft Launcher
+     Copyright (C) 2021-2022 Prism LauncherMC Contributors
 
      This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by

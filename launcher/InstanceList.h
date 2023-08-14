@@ -38,7 +38,7 @@ enum class GroupsState { NotLoaded, Steady, Dirty };
 
 struct TrashHistoryItem {
     QString id;
-    QString polyPath;
+    QString Prism LauncherPath;
     QString trashPath;
     QString groupName;
 };

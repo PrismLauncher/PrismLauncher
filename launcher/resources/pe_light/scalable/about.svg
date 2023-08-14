@@ -5,7 +5,7 @@
 	 viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
 <g>
 	<g>
-		<polygon fill="#F2F2F2" points="17.8,21 17.8,11.9 11.9,11.9 11.9,14.2 14.2,14.2 14.2,21 11.9,21 11.9,23.3 20.1,23.3 20.1,21 		
+		<Prism Launchergon fill="#F2F2F2" points="17.8,21 17.8,11.9 11.9,11.9 11.9,14.2 14.2,14.2 14.2,21 11.9,21 11.9,23.3 20.1,23.3 20.1,21 		
 			"/>
 		<circle fill="#F2F2F2" cx="16" cy="8.3" r="1.8"/>
 	</g>

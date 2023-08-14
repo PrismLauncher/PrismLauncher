@@ -210,7 +210,7 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
 
         auto new_id = resource->internal_id();
         if (m_resources_index.contains(new_id)) {
-            // FIXME: https://github.com/PolyMC/PolyMC/issues/550
+            // FIXME: https://github.com/Prism LauncherMC/Prism LauncherMC/issues/550
         }
 
         m_resources_index.remove(old_id);
