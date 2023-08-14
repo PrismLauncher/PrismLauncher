@@ -1,19 +1,12 @@
 #pragma once
 #include <QString>
 
-namespace Sys
-{
+namespace Sys {
 const uint64_t mebibyte = 1024ull * 1024ull;
 
-enum class KernelType {
-    Undetermined,
-    Windows,
-    Darwin,
-    Linux
-};
+enum class KernelType { Undetermined, Windows, Darwin, Linux };
 
-struct KernelInfo
-{
+struct KernelInfo {
     QString kernelName;
     QString kernelVersion;
 
@@ -26,25 +19,18 @@ struct KernelInfo
 
 KernelInfo getKernelInfo();
 
-struct DistributionInfo
-{
+struct DistributionInfo {
     DistributionInfo operator+(const DistributionInfo& rhs) const
     {
         DistributionInfo out;
-        if(!distributionName.isEmpty())
-        {
+        if (!distributionName.isEmpty()) {
             out.distributionName = distributionName;
-        }
-        else
-        {
+        } else {
             out.distributionName = rhs.distributionName;
         }
-        if(!distributionVersion.isEmpty())
-        {
+        if (!distributionVersion.isEmpty()) {
             out.distributionVersion = distributionVersion;
-        }
-        else
-        {
+        } else {
             out.distributionVersion = rhs.distributionVersion;
         }
         return out;
@@ -56,4 +42,4 @@ struct DistributionInfo
 DistributionInfo getDistributionInfo();
 
 uint64_t getSystemRam();
-}
+}  // namespace Sys

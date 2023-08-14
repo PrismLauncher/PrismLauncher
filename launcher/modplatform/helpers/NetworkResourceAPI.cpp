@@ -148,4 +148,3 @@ Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, 
 
     return netJob;
 }
-

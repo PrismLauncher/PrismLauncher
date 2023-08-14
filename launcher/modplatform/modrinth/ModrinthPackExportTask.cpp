@@ -260,7 +260,6 @@ QByteArray ModrinthPackExportTask::generateIndex()
         out["dependencies"] = dependencies;
     }
 
-
     QJsonArray filesOut;
     for (auto iterator = resolvedFiles.constBegin(); iterator != resolvedFiles.constEnd(); iterator++) {
         QJsonObject fileOut;
@@ -287,7 +286,6 @@ QByteArray ModrinthPackExportTask::generateIndex()
         hashes["sha1"] = value.sha1;
         hashes["sha512"] = value.sha512;
         fileOut["hashes"] = hashes;
-
 
         fileOut["fileSize"] = value.size;
         filesOut << fileOut;

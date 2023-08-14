@@ -161,15 +161,14 @@ bool processPackPNG(const TexturePack& pack, QByteArray&& raw_data)
 }
 
 bool processPackPNG(const TexturePack& pack)
-{   
+{
     auto png_invalid = [&pack]() {
         qWarning() << "Texture pack at" << pack.fileinfo().filePath() << "does not have a valid pack.png";
         return false;
     };
 
     switch (pack.type()) {
-        case ResourceType::FOLDER: 
-        {
+        case ResourceType::FOLDER: {
             QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
             if (image_file_info.exists() && image_file_info.isFile()) {
                 QFile pack_png_file(image_file_info.filePath());
@@ -188,8 +187,7 @@ bool processPackPNG(const TexturePack& pack)
                 return png_invalid();  // pack.png does not exists or is not a valid file.
             }
         }
-        case ResourceType::ZIPFILE:
-        {
+        case ResourceType::ZIPFILE: {
             Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
 
             QuaZip zip(pack.fileinfo().filePath());
@@ -232,8 +230,7 @@ bool validate(QFileInfo file)
 
 }  // namespace TexturePackUtils
 
-LocalTexturePackParseTask::LocalTexturePackParseTask(int token, TexturePack& rp)
-    : Task(nullptr, false), m_token(token), m_texture_pack(rp)
+LocalTexturePackParseTask::LocalTexturePackParseTask(int token, TexturePack& rp) : Task(nullptr, false), m_token(token), m_texture_pack(rp)
 {}
 
 bool LocalTexturePackParseTask::abort()

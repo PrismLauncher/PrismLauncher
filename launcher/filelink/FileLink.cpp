@@ -170,7 +170,7 @@ void FileLinkApp::runLink()
             FS::LinkResult result = { src_path, dst_path, QString::fromStdString(os_err.message()), os_err.value() };
             m_path_results.append(result);
         } else {
-            FS::LinkResult result = { src_path, dst_path, "", 0};
+            FS::LinkResult result = { src_path, dst_path, "", 0 };
             m_path_results.append(result);
         }
     }

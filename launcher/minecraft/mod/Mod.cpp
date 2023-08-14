@@ -1,45 +1,45 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-*  PolyMC - Minecraft Launcher
-*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
-*  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
-*
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, version 3.
-*
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*
-* This file incorporates work covered by the following copyright and
-* permission notice:
-*
-*      Copyright 2013-2021 MultiMC Contributors
-*
-*      Licensed under the Apache License, Version 2.0 (the "License");
-*      you may not use this file except in compliance with the License.
-*      You may obtain a copy of the License at
-*
-*          http://www.apache.org/licenses/LICENSE-2.0
-*
-*      Unless required by applicable law or agreed to in writing, software
-*      distributed under the License is distributed on an "AS IS" BASIS,
-*      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*      See the License for the specific language governing permissions and
-*      limitations under the License.
-*/
+ *  PolyMC - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
 
 #include "Mod.h"
 
 #include <QDebug>
 #include <QDir>
-#include <QString>
 #include <QRegularExpression>
+#include <QString>
 
 #include "MTPixmapCache.h"
 #include "MetadataHandler.h"
@@ -54,8 +54,7 @@ Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
     m_enabled = (file.suffix() != "disabled");
 }
 
-Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata)
-    : Mod(mods_dir.absoluteFilePath(metadata.filename))
+Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata) : Mod(mods_dir.absoluteFilePath(metadata.filename))
 {
     m_name = metadata.name;
     m_local_details.metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
@@ -73,7 +72,8 @@ void Mod::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
     m_local_details.metadata = metadata;
 }
 
-void Mod::setDetails(const ModDetails& details) {
+void Mod::setDetails(const ModDetails& details)
+{
     m_local_details = details;
 }
 
@@ -103,7 +103,8 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
             break;
         }
         case SortType::PROVIDER: {
-            auto compare_result = QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
+            auto compare_result =
+                QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
             if (compare_result != 0)
                 return { compare_result, type == SortType::PROVIDER };
             break;
@@ -230,7 +231,7 @@ auto Mod::licenses() const -> const QList<ModLicense>&
     return details().licenses;
 }
 
- auto Mod::issueTracker() const -> QString
+auto Mod::issueTracker() const -> QString
 {
     return details().issue_tracker;
 }
@@ -245,7 +246,7 @@ void Mod::setIcon(QImage new_image) const
         PixmapCache::remove(m_pack_image_cache_key.key);
 
     // scale the image to avoid flooding the pixmapcache
-    auto pixmap = QPixmap::fromImage(new_image.scaled({64, 64}, Qt::AspectRatioMode::KeepAspectRatioByExpanding));
+    auto pixmap = QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding));
 
     m_pack_image_cache_key.key = PixmapCache::insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;

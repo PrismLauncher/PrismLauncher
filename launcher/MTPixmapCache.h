@@ -1,10 +1,10 @@
 #pragma once
 
 #include <QCoreApplication>
+#include <QDebug>
 #include <QPixmapCache>
 #include <QThread>
 #include <QTime>
-#include <QDebug>
 
 #define GET_TYPE()                                                          \
     Qt::ConnectionType type;                                                \
@@ -94,8 +94,8 @@ class PixmapCache final : public QObject {
         return true;
     }
 
-    /** 
-     *  Mark that a cache miss occurred because of a eviction if too many of these occur too fast the cache size is increased 
+    /**
+     *  Mark that a cache miss occurred because of a eviction if too many of these occur too fast the cache size is increased
      * @return if the cache size was increased
      */
     bool _markCacheMissByEviciton()

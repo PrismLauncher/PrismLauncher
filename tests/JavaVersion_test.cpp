@@ -2,11 +2,9 @@
 
 #include <java/JavaVersion.h>
 
-class JavaVersionTest : public QObject
-{
+class JavaVersionTest : public QObject {
     Q_OBJECT
-private
-slots:
+   private slots:
     void test_Parse_data()
     {
         QTest::addColumn<QString>("string");
@@ -50,33 +48,54 @@ slots:
         QTest::addColumn<bool>("bigger");
 
         // old format and new format equivalence
-        QTest::newRow("1.6.0_33 == 6.0.33") << "1.6.0_33" << "6.0.33" << false << true << false;
+        QTest::newRow("1.6.0_33 == 6.0.33") << "1.6.0_33"
+                                            << "6.0.33" << false << true << false;
         // old format major version
-        QTest::newRow("1.5.0_33 < 1.6.0_33") << "1.5.0_33" << "1.6.0_33" << true << false << false;
+        QTest::newRow("1.5.0_33 < 1.6.0_33") << "1.5.0_33"
+                                             << "1.6.0_33" << true << false << false;
         // new format - first release vs first security patch
-        QTest::newRow("9 < 9.0.1") << "9" << "9.0.1" << true << false << false;
-        QTest::newRow("9.0.1 > 9") << "9.0.1" << "9" << false << false << true;
+        QTest::newRow("9 < 9.0.1") << "9"
+                                   << "9.0.1" << true << false << false;
+        QTest::newRow("9.0.1 > 9") << "9.0.1"
+                                   << "9" << false << false << true;
         // new format - first minor vs first release/security patch
-        QTest::newRow("9.1 > 9.0.1") << "9.1" << "9.0.1" << false << false << true;
-        QTest::newRow("9.0.1 < 9.1") << "9.0.1" << "9.1" << true << false << false;
-        QTest::newRow("9.1 > 9") << "9.1" << "9" << false << false << true;
-        QTest::newRow("9 > 9.1") << "9" << "9.1" << true << false << false;
+        QTest::newRow("9.1 > 9.0.1") << "9.1"
+                                     << "9.0.1" << false << false << true;
+        QTest::newRow("9.0.1 < 9.1") << "9.0.1"
+                                     << "9.1" << true << false << false;
+        QTest::newRow("9.1 > 9") << "9.1"
+                                 << "9" << false << false << true;
+        QTest::newRow("9 > 9.1") << "9"
+                                 << "9.1" << true << false << false;
         // new format - omitted numbers
-        QTest::newRow("9 == 9.0") << "9" << "9.0" << false << true << false;
-        QTest::newRow("9 == 9.0.0") << "9" << "9.0.0" << false << true << false;
-        QTest::newRow("9.0 == 9.0.0") << "9.0" << "9.0.0" << false << true << false;
+        QTest::newRow("9 == 9.0") << "9"
+                                  << "9.0" << false << true << false;
+        QTest::newRow("9 == 9.0.0") << "9"
+                                    << "9.0.0" << false << true << false;
+        QTest::newRow("9.0 == 9.0.0") << "9.0"
+                                      << "9.0.0" << false << true << false;
         // early access and prereleases compared to final release
-        QTest::newRow("9-ea < 9") << "9-ea" << "9" << true << false << false;
-        QTest::newRow("9 < 9.0.1-ea") << "9" << "9.0.1-ea" << true << false << false;
-        QTest::newRow("9.0.1-ea > 9") << "9.0.1-ea" << "9" << false << false << true;
+        QTest::newRow("9-ea < 9") << "9-ea"
+                                  << "9" << true << false << false;
+        QTest::newRow("9 < 9.0.1-ea") << "9"
+                                      << "9.0.1-ea" << true << false << false;
+        QTest::newRow("9.0.1-ea > 9") << "9.0.1-ea"
+                                      << "9" << false << false << true;
         // prerelease difference only testing
-        QTest::newRow("9-1 == 9-1") << "9-1" << "9-1" << false << true << false;
-        QTest::newRow("9-1 < 9-2") << "9-1" << "9-2" << true << false << false;
-        QTest::newRow("9-5 < 9-20") << "9-5" << "9-20" << true << false << false;
-        QTest::newRow("9-rc1 < 9-rc2") << "9-rc1" << "9-rc2" << true << false << false;
-        QTest::newRow("9-rc5 < 9-rc20") << "9-rc5" << "9-rc20" << true << false << false;
-        QTest::newRow("9-rc < 9-rc2") << "9-rc" << "9-rc2" << true << false << false;
-        QTest::newRow("9-ea < 9-rc") << "9-ea" << "9-rc" << true << false << false;
+        QTest::newRow("9-1 == 9-1") << "9-1"
+                                    << "9-1" << false << true << false;
+        QTest::newRow("9-1 < 9-2") << "9-1"
+                                   << "9-2" << true << false << false;
+        QTest::newRow("9-5 < 9-20") << "9-5"
+                                    << "9-20" << true << false << false;
+        QTest::newRow("9-rc1 < 9-rc2") << "9-rc1"
+                                       << "9-rc2" << true << false << false;
+        QTest::newRow("9-rc5 < 9-rc20") << "9-rc5"
+                                        << "9-rc20" << true << false << false;
+        QTest::newRow("9-rc < 9-rc2") << "9-rc"
+                                      << "9-rc2" << true << false << false;
+        QTest::newRow("9-ea < 9-rc") << "9-ea"
+                                     << "9-rc" << true << false << false;
     }
     void test_Sort()
     {

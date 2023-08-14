@@ -34,33 +34,48 @@ class VersionTest : public QObject {
     {
         addDataColumns();
 
-        QTest::newRow("equal, explicit") << "1.2.0" << "1.2.0" << false << true;
-        QTest::newRow("equal, two-digit") << "1.42" << "1.42" << false << true;
+        QTest::newRow("equal, explicit") << "1.2.0"
+                                         << "1.2.0" << false << true;
+        QTest::newRow("equal, two-digit") << "1.42"
+                                          << "1.42" << false << true;
 
-        QTest::newRow("lessThan, explicit 1") << "1.2.0" << "1.2.1" << true << false;
-        QTest::newRow("lessThan, explicit 2") << "1.2.0" << "1.3.0" << true << false;
-        QTest::newRow("lessThan, explicit 3") << "1.2.0" << "2.2.0" << true << false;
-        QTest::newRow("lessThan, implicit 1") << "1.2" << "1.2.0" << true << false;
-        QTest::newRow("lessThan, implicit 2") << "1.2" << "1.2.1" << true << false;
-        QTest::newRow("lessThan, implicit 3") << "1.2" << "1.3.0" << true << false;
-        QTest::newRow("lessThan, implicit 4") << "1.2" << "2.2.0" << true << false;
-        QTest::newRow("lessThan, two-digit") << "1.41" << "1.42" << true << false;
+        QTest::newRow("lessThan, explicit 1") << "1.2.0"
+                                              << "1.2.1" << true << false;
+        QTest::newRow("lessThan, explicit 2") << "1.2.0"
+                                              << "1.3.0" << true << false;
+        QTest::newRow("lessThan, explicit 3") << "1.2.0"
+                                              << "2.2.0" << true << false;
+        QTest::newRow("lessThan, implicit 1") << "1.2"
+                                              << "1.2.0" << true << false;
+        QTest::newRow("lessThan, implicit 2") << "1.2"
+                                              << "1.2.1" << true << false;
+        QTest::newRow("lessThan, implicit 3") << "1.2"
+                                              << "1.3.0" << true << false;
+        QTest::newRow("lessThan, implicit 4") << "1.2"
+                                              << "2.2.0" << true << false;
+        QTest::newRow("lessThan, two-digit") << "1.41"
+                                             << "1.42" << true << false;
 
-        QTest::newRow("greaterThan, explicit 1") << "1.2.1" << "1.2.0" << false << false;
-        QTest::newRow("greaterThan, explicit 2") << "1.3.0" << "1.2.0" << false << false;
-        QTest::newRow("greaterThan, explicit 3") << "2.2.0" << "1.2.0" << false << false;
-        QTest::newRow("greaterThan, implicit 1") << "1.2.0" << "1.2" << false << false;
-        QTest::newRow("greaterThan, implicit 2") << "1.2.1" << "1.2" << false << false;
-        QTest::newRow("greaterThan, implicit 3") << "1.3.0" << "1.2" << false << false;
-        QTest::newRow("greaterThan, implicit 4") << "2.2.0" << "1.2" << false << false;
-        QTest::newRow("greaterThan, two-digit") << "1.42" << "1.41" << false << false;
+        QTest::newRow("greaterThan, explicit 1") << "1.2.1"
+                                                 << "1.2.0" << false << false;
+        QTest::newRow("greaterThan, explicit 2") << "1.3.0"
+                                                 << "1.2.0" << false << false;
+        QTest::newRow("greaterThan, explicit 3") << "2.2.0"
+                                                 << "1.2.0" << false << false;
+        QTest::newRow("greaterThan, implicit 1") << "1.2.0"
+                                                 << "1.2" << false << false;
+        QTest::newRow("greaterThan, implicit 2") << "1.2.1"
+                                                 << "1.2" << false << false;
+        QTest::newRow("greaterThan, implicit 3") << "1.3.0"
+                                                 << "1.2" << false << false;
+        QTest::newRow("greaterThan, implicit 4") << "2.2.0"
+                                                 << "1.2" << false << false;
+        QTest::newRow("greaterThan, two-digit") << "1.42"
+                                                << "1.41" << false << false;
     }
 
    private slots:
-    void test_versionCompare_data()
-    {
-        setupVersions();
-    }
+    void test_versionCompare_data() { setupVersions(); }
 
     void test_versionCompare()
     {
@@ -85,12 +100,12 @@ class VersionTest : public QObject {
 
         QDir test_vector_dir(QFINDTESTDATA("testdata/Version"));
 
-        QFile vector_file{test_vector_dir.absoluteFilePath("test_vectors.txt")};
+        QFile vector_file{ test_vector_dir.absoluteFilePath("test_vectors.txt") };
 
         vector_file.open(QFile::OpenModeFlag::ReadOnly);
 
         int test_number = 0;
-        const QString test_name_template { "FlexVer test #%1 (%2)" };
+        const QString test_name_template{ "FlexVer test #%1 (%2)" };
         for (auto line = vector_file.readLine(); !vector_file.atEnd(); line = vector_file.readLine()) {
             line = line.simplified();
             if (line.startsWith('#') || line.isEmpty())
@@ -100,8 +115,8 @@ class VersionTest : public QObject {
 
             auto split_line = line.split('<');
             if (split_line.size() == 2) {
-                QString first{split_line.first().simplified()};
-                QString second{split_line.last().simplified()};
+                QString first{ split_line.first().simplified() };
+                QString second{ split_line.last().simplified() };
 
                 auto new_test_name = test_name_template.arg(QString::number(test_number), "lessThan");
                 m_flex_test_names.append(new_test_name);
@@ -112,8 +127,8 @@ class VersionTest : public QObject {
 
             split_line = line.split('=');
             if (split_line.size() == 2) {
-                QString first{split_line.first().simplified()};
-                QString second{split_line.last().simplified()};
+                QString first{ split_line.first().simplified() };
+                QString second{ split_line.last().simplified() };
 
                 auto new_test_name = test_name_template.arg(QString::number(test_number), "equals");
                 m_flex_test_names.append(new_test_name);
@@ -124,8 +139,8 @@ class VersionTest : public QObject {
 
             split_line = line.split('>');
             if (split_line.size() == 2) {
-                QString first{split_line.first().simplified()};
-                QString second{split_line.last().simplified()};
+                QString first{ split_line.first().simplified() };
+                QString second{ split_line.last().simplified() };
 
                 auto new_test_name = test_name_template.arg(QString::number(test_number), "greaterThan");
                 m_flex_test_names.append(new_test_name);

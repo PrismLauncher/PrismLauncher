@@ -759,7 +759,7 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
     emit instancesChanged();
 }
 
-void InstanceList::on_InstFolderChanged( [[maybe_unused]] const Setting& setting, QVariant value)
+void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, QVariant value)
 {
     QString newInstDir = QDir(value.toString()).canonicalPath();
     if (newInstDir != m_instDir) {

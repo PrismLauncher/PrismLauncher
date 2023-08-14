@@ -43,13 +43,11 @@
 
 class MSAStep : public AuthStep {
     Q_OBJECT
-public:
-    enum Action {
-        Refresh,
-        Login
-    };
-public:
-    explicit MSAStep(AccountData *data, Action action);
+   public:
+    enum Action { Refresh, Login };
+
+   public:
+    explicit MSAStep(AccountData* data, Action action);
     virtual ~MSAStep() noexcept;
 
     void perform() override;
@@ -57,11 +55,11 @@ public:
 
     QString describe() override;
 
-private slots:
+   private slots:
     void onOAuthActivityChanged(Katabasis::Activity activity);
 
-private:
-    Katabasis::DeviceFlow *m_oauth2 = nullptr;
+   private:
+    Katabasis::DeviceFlow* m_oauth2 = nullptr;
     Action m_action;
     QString m_clientId;
 };

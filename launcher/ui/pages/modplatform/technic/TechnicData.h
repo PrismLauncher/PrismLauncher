@@ -63,6 +63,6 @@ struct Modpack {
     QString recommended;
     QVector<QString> versions;
 };
-}
+}  // namespace Technic
 
 Q_DECLARE_METATYPE(Technic::Modpack)

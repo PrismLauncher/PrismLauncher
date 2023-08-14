@@ -65,7 +65,7 @@ void SystemTheme::apply(bool initial)
     // See https://github.com/MultiMC/Launcher/issues/1790
     // or https://github.com/PrismLauncher/PrismLauncher/issues/490
     if (initial)
-        return; 
+        return;
     ITheme::apply(initial);
 }
 

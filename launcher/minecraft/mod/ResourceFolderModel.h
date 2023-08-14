@@ -1,14 +1,14 @@
 #pragma once
 
-#include <QHeaderView>
-#include <QAction>
-#include <QTreeView>
 #include <QAbstractListModel>
+#include <QAction>
 #include <QDir>
 #include <QFileSystemWatcher>
+#include <QHeaderView>
 #include <QMutex>
 #include <QSet>
 #include <QSortFilterProxyModel>
+#include <QTreeView>
 
 #include "Resource.h"
 
@@ -120,7 +120,7 @@ class ResourceFolderModel : public QAbstractListModel {
     void saveHiddenColumn(int column, bool hidden);
     void loadHiddenColumns(QTreeView* tree);
     QMenu* createHeaderContextMenu(QTreeView* tree);
-    
+
     /** This creates a proxy model to filter / sort the model for a UI.
      *
      *  The actual comparisons and filtering are done directly by the Resource, so to modify behavior go there instead!
@@ -199,9 +199,10 @@ class ResourceFolderModel : public QAbstractListModel {
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
     QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
-    QStringList m_column_names = {"Enable", "Name", "Last Modified"};
-    QStringList m_column_names_translated = {tr("Enable"), tr("Name"), tr("Last Modified")};
-    QList<QHeaderView::ResizeMode> m_column_resize_modes = {  QHeaderView::ResizeToContents, QHeaderView::Stretch, QHeaderView::ResizeToContents };
+    QStringList m_column_names = { "Enable", "Name", "Last Modified" };
+    QStringList m_column_names_translated = { tr("Enable"), tr("Name"), tr("Last Modified") };
+    QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Stretch,
+                                                             QHeaderView::ResizeToContents };
     QList<bool> m_columnsHideable = { false, false, true };
 
     QDir m_dir;
@@ -224,15 +225,15 @@ class ResourceFolderModel : public QAbstractListModel {
 
 /* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
 #define RESOURCE_HELPERS(T)                                                                       \
-    [[nodiscard]] T* operator[](int index)                                                     \
+    [[nodiscard]] T* operator[](int index)                                                        \
     {                                                                                             \
         return static_cast<T*>(m_resources[index].get());                                         \
     }                                                                                             \
-    [[nodiscard]] T* at(int index)                                                             \
+    [[nodiscard]] T* at(int index)                                                                \
     {                                                                                             \
         return static_cast<T*>(m_resources[index].get());                                         \
     }                                                                                             \
-    [[nodiscard]] const T* at(int index) const                                                 \
+    [[nodiscard]] const T* at(int index) const                                                    \
     {                                                                                             \
         return static_cast<const T*>(m_resources.at(index).get());                                \
     }                                                                                             \

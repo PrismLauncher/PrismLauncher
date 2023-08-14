@@ -189,7 +189,6 @@ void VersionPage::showContextMenu(const QPoint& pos)
     delete menu;
 }
 
-
 void VersionPage::packageCurrent(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     if (!current.isValid()) {

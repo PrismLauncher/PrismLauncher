@@ -1,9 +1,9 @@
 #include "FileResolvingTask.h"
 
 #include "Json.h"
+#include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
 #include "net/Upload.h"
-#include "net/ApiDownload.h"
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 

@@ -80,7 +80,7 @@ class ConcurrentTask : public Task {
 
    protected:
     // NOTE: This is not thread-safe.
- [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
+    [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
 
     enum class Operation { ADDED, REMOVED, CHANGED };
     void updateStepProgress(TaskStepProgress const& changed_progress, Operation);

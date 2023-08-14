@@ -57,4 +57,4 @@ void loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj)
     }
 }
 
-}
+}  // namespace ATLauncher

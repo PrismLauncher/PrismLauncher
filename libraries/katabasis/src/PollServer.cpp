@@ -1,30 +1,28 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#include "katabasis/PollServer.h"
 #include "JsonResponse.h"
+#include "katabasis/PollServer.h"
 
 namespace {
-QMap<QString, QString> toVerificationParams(const QVariantMap &map)
+QMap<QString, QString> toVerificationParams(const QVariantMap& map)
 {
     QMap<QString, QString> params;
-    for (QVariantMap::const_iterator i = map.constBegin();
-         i != map.constEnd(); ++i)
-    {
+    for (QVariantMap::const_iterator i = map.constBegin(); i != map.constEnd(); ++i) {
         params[i.key()] = i.value().toString();
     }
     return params;
 }
-}
+}  // namespace
 
 namespace Katabasis {
 
-PollServer::PollServer(QNetworkAccessManager *manager, const QNetworkRequest &request, const QByteArray &payload, int expiresIn, QObject *parent)
-    : QObject(parent)
-    , manager_(manager)
-    , request_(request)
-    , payload_(payload)
-    , expiresIn_(expiresIn)
+PollServer::PollServer(QNetworkAccessManager* manager,
+                       const QNetworkRequest& request,
+                       const QByteArray& payload,
+                       int expiresIn,
+                       QObject* parent)
+    : QObject(parent), manager_(manager), request_(request), payload_(payload), expiresIn_(expiresIn)
 {
     expirationTimer.setTimerType(Qt::VeryCoarseTimer);
     expirationTimer.setInterval(expiresIn * 1000);
@@ -58,7 +56,7 @@ void PollServer::startPolling()
 void PollServer::onPollTimeout()
 {
     qDebug() << "PollServer::onPollTimeout: retrying";
-    QNetworkReply * reply = manager_->post(request_, payload_);
+    QNetworkReply* reply = manager_->post(request_, payload_);
     connect(reply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
 }
 
@@ -70,7 +68,7 @@ void PollServer::onExpiration()
 
 void PollServer::onReplyFinished()
 {
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
 
     if (!reply) {
         qDebug() << "PollServer::onReplyFinished: reply is null";
@@ -93,8 +91,7 @@ void PollServer::onReplyFinished()
         // polling interval on each such connection timeout, is RECOMMENDED."
         setInterval(interval() * 2);
         pollTimer.start();
-    }
-    else {
+    } else {
         QString error = params.value("error");
         if (error == "slow_down") {
             // rfc8628#section-3.2
@@ -103,14 +100,12 @@ void PollServer::onReplyFinished()
             // be increased by 5 seconds for this and all subsequent requests."
             setInterval(interval() + 5);
             pollTimer.start();
-        }
-        else if (error == "authorization_pending") {
+        } else if (error == "authorization_pending") {
             // keep trying - rfc8628#section-3.2
             // "The authorization request is still pending as the end user hasn't
             // yet completed the user-interaction steps (Section 3.3)."
             pollTimer.start();
-        }
-        else {
+        } else {
             expirationTimer.stop();
             emit serverClosed(true);
             // let O2 handle the other cases
@@ -120,4 +115,4 @@ void PollServer::onReplyFinished()
     reply->deleteLater();
 }
 
-}
+}  // namespace Katabasis

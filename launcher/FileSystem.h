@@ -43,10 +43,10 @@
 #include <system_error>
 
 #include <QDir>
-#include <QPair>
 #include <QFlags>
 #include <QLocalServer>
 #include <QObject>
+#include <QPair>
 #include <QThread>
 
 namespace FS {
@@ -365,25 +365,24 @@ enum class FilesystemType {
  * QMap is ordered
  *
  */
-static const QMap<FilesystemType, QStringList> s_filesystem_type_names = {
-    {FilesystemType::FAT,        { "FAT" }},
-    {FilesystemType::NTFS,       { "NTFS" }},
-    {FilesystemType::REFS,       { "REFS" }},
-    {FilesystemType::EXT_2_OLD,  { "EXT_2_OLD", "EXT2_OLD" }},
-    {FilesystemType::EXT_2_3_4,  { "EXT2/3/4", "EXT_2_3_4", "EXT2", "EXT3", "EXT4" }},
-    {FilesystemType::EXT,        { "EXT" }},
-    {FilesystemType::XFS,        { "XFS" }},
-    {FilesystemType::BTRFS,      { "BTRFS" }},
-    {FilesystemType::NFS,        { "NFS" }},
-    {FilesystemType::ZFS,        { "ZFS" }},
-    {FilesystemType::APFS,       { "APFS" }},
-    {FilesystemType::HFS,        { "HFS" }},
-    {FilesystemType::HFSPLUS,    { "HFSPLUS" }},
-    {FilesystemType::HFSX,       { "HFSX" }},
-    {FilesystemType::FUSEBLK,    { "FUSEBLK" }},
-    {FilesystemType::F2FS,       { "F2FS" }},
-    {FilesystemType::UNKNOWN,    { "UNKNOWN" }}
-};
+static const QMap<FilesystemType, QStringList> s_filesystem_type_names = { { FilesystemType::FAT, { "FAT" } },
+                                                                           { FilesystemType::NTFS, { "NTFS" } },
+                                                                           { FilesystemType::REFS, { "REFS" } },
+                                                                           { FilesystemType::EXT_2_OLD, { "EXT_2_OLD", "EXT2_OLD" } },
+                                                                           { FilesystemType::EXT_2_3_4,
+                                                                             { "EXT2/3/4", "EXT_2_3_4", "EXT2", "EXT3", "EXT4" } },
+                                                                           { FilesystemType::EXT, { "EXT" } },
+                                                                           { FilesystemType::XFS, { "XFS" } },
+                                                                           { FilesystemType::BTRFS, { "BTRFS" } },
+                                                                           { FilesystemType::NFS, { "NFS" } },
+                                                                           { FilesystemType::ZFS, { "ZFS" } },
+                                                                           { FilesystemType::APFS, { "APFS" } },
+                                                                           { FilesystemType::HFS, { "HFS" } },
+                                                                           { FilesystemType::HFSPLUS, { "HFSPLUS" } },
+                                                                           { FilesystemType::HFSX, { "HFSX" } },
+                                                                           { FilesystemType::FUSEBLK, { "FUSEBLK" } },
+                                                                           { FilesystemType::F2FS, { "F2FS" } },
+                                                                           { FilesystemType::UNKNOWN, { "UNKNOWN" } } };
 
 /**
  * @brief Get the string name of Filesystem enum object

@@ -16,7 +16,6 @@
  *
  */
 
-
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -26,8 +25,8 @@
 #include <windows.h>
 #include <iostream>
 
-void RedirectHandle(DWORD handle, FILE* stream, const char* mode ) {
-
+void RedirectHandle(DWORD handle, FILE* stream, const char* mode)
+{
     HANDLE stdHandle = GetStdHandle(handle);
     if (stdHandle != INVALID_HANDLE_VALUE) {
         int fileDescriptor = _open_osfhandle((intptr_t)stdHandle, _O_TEXT);
@@ -41,7 +40,6 @@ void RedirectHandle(DWORD handle, FILE* stream, const char* mode ) {
             }
         }
     }
-
 }
 
 // taken from https://stackoverflow.com/a/25927081
@@ -101,12 +99,12 @@ void BindCrtHandlesToStdHandles(bool bindStdIn, bool bindStdOut, bool bindStdErr
     }
 }
 
-
-bool AttachWindowsConsole() {
+bool AttachWindowsConsole()
+{
     auto stdinType = GetFileType(GetStdHandle(STD_INPUT_HANDLE));
     auto stdoutType = GetFileType(GetStdHandle(STD_OUTPUT_HANDLE));
     auto stderrType = GetFileType(GetStdHandle(STD_ERROR_HANDLE));
-    
+
     bool bindStdIn = false;
     bool bindStdOut = false;
     bool bindStdErr = false;
@@ -128,5 +126,3 @@ bool AttachWindowsConsole() {
 
     return false;
 }
-
-

@@ -47,7 +47,7 @@
 class NetAction : public Task {
     Q_OBJECT
    protected:
-    explicit NetAction() : Task(){}
+    explicit NetAction() : Task() {}
 
    public:
     using Ptr = shared_qobject_ptr<NetAction>;
@@ -86,7 +86,7 @@ class NetAction : public Task {
     }
 
    protected:
-    void executeTask() override{}
+    void executeTask() override {}
 
    public:
     shared_qobject_ptr<QNetworkAccessManager> m_network;

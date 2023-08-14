@@ -514,8 +514,7 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
 
         QAction* actionCreateInstance = new QAction(tr("Create instance"), this);
         actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
-        if(!group.isNull())
-        {
+        if (!group.isNull()) {
             QVariantMap instance_action_data;
             instance_action_data["group"] = group;
             actionCreateInstance->setData(instance_action_data);
@@ -526,9 +525,8 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions.prepend(actionSep);
         actions.prepend(actionVoid);
         actions.append(actionCreateInstance);
-        if(!group.isNull())
-        {
-            QAction *actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
+        if (!group.isNull()) {
+            QAction* actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
             QVariantMap delete_group_action_data;
             delete_group_action_data["group"] = group;
             actionDeleteGroup->setData(delete_group_action_data);
@@ -749,7 +747,7 @@ void MainWindow::changeActiveAccount()
     QVariant action_data = sAction->data();
     bool valid = false;
     int index = action_data.toInt(&valid);
-    if(!valid) {
+    if (!valid) {
         index = -1;
     }
     auto accounts = APPLICATION->accounts();
@@ -1062,8 +1060,7 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 
 void MainWindow::iconUpdated(QString icon)
 {
-    if (icon == m_currentInstIcon)
-    {
+    if (icon == m_currentInstIcon) {
         auto new_icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
         ui->actionChangeInstIcon->setIcon(new_icon);
         changeIconButton->setIcon(new_icon);
@@ -1733,4 +1730,3 @@ void MainWindow::refreshCurrentInstance([[maybe_unused]] bool running)
     auto current = view->selectionModel()->currentIndex();
     instanceChanged(current, current);
 }
-

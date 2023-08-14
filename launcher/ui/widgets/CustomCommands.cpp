@@ -41,9 +41,7 @@ CustomCommands::~CustomCommands()
     delete ui;
 }
 
-CustomCommands::CustomCommands(QWidget* parent):
-    QWidget(parent),
-    ui(new Ui::CustomCommands)
+CustomCommands::CustomCommands(QWidget* parent) : QWidget(parent), ui(new Ui::CustomCommands)
 {
     ui->setupUi(this);
 }
@@ -51,8 +49,7 @@ CustomCommands::CustomCommands(QWidget* parent):
 void CustomCommands::initialize(bool checkable, bool checked, const QString& prelaunch, const QString& wrapper, const QString& postexit)
 {
     ui->customCommandsGroupBox->setCheckable(checkable);
-    if(checkable)
-    {
+    if (checkable) {
         ui->customCommandsGroupBox->setChecked(checked);
     }
     ui->preLaunchCmdTextBox->setText(prelaunch);
@@ -60,14 +57,14 @@ void CustomCommands::initialize(bool checkable, bool checked, const QString& pre
     ui->postExitCmdTextBox->setText(postexit);
 }
 
-
-void CustomCommands::retranslate() {
+void CustomCommands::retranslate()
+{
     ui->retranslateUi(this);
 }
 
 bool CustomCommands::checked() const
 {
-    if(!ui->customCommandsGroupBox->isCheckable())
+    if (!ui->customCommandsGroupBox->isCheckable())
         return true;
     return ui->customCommandsGroupBox->isChecked();
 }

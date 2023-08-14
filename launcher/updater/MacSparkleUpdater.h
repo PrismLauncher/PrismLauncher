@@ -26,11 +26,10 @@
 /*!
  * An implementation for the updater on macOS that uses the Sparkle framework.
  */
-class MacSparkleUpdater : public ExternalUpdater
-{
+class MacSparkleUpdater : public ExternalUpdater {
     Q_OBJECT
 
-public:
+   public:
     /*!
      * Start the Sparkle updater, which automatically checks for updates if necessary.
      */
@@ -115,10 +114,10 @@ public:
      */
     void setBetaAllowed(bool allowed) override;
 
-private:
+   private:
     class Private;
 
-    Private *priv;
+    Private* priv;
 };
 
-#endif //LAUNCHER_MACSPARKLEUPDATER_H
+#endif  // LAUNCHER_MACSPARKLEUPDATER_H
