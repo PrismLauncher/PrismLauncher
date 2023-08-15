@@ -71,6 +71,7 @@ class TranslationsModel;
 class ITheme;
 class MCEditTool;
 class ThemeManager;
+class IconTheme;
 
 namespace Meta {
 class Index;
@@ -109,17 +110,7 @@ class Application : public QApplication {
 
     QIcon getThemedIcon(const QString& name);
 
-    void setIconTheme(const QString& name);
-
-    void applyCurrentlySelectedTheme(bool initial = false);
-
-    QList<ITheme*> getValidApplicationThemes();
-
-    void setApplicationTheme(const QString& name);
-
-    QList<CatPack*> getValidCatPacks();
-
-    QString getCatPack(QString catName = "");
+    ThemeManager* themeManager() { return m_themeManager.get(); }
 
     shared_qobject_ptr<ExternalUpdater> updater() { return m_updater; }
 

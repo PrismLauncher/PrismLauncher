@@ -47,8 +47,8 @@
 #include <QScrollBar>
 #include <QtMath>
 
-#include <QDebug>
 #include "VisualGroup.h"
+#include "ui/themes/ThemeManager.h"
 
 #include <Application.h>
 #include <InstanceList.h>
@@ -446,7 +446,7 @@ void InstanceView::setPaintCat(bool visible)
 {
     m_catVisible = visible;
     if (visible)
-        m_catPixmap.load(APPLICATION->getCatPack());
+        m_catPixmap.load(APPLICATION->themeManager()->getCatPack());
     else
         m_catPixmap = QPixmap();
 }

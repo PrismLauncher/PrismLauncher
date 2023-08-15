@@ -101,7 +101,7 @@ bool openDirectory(const QString& path, [[maybe_unused]] bool ensureExists)
     qDebug() << "Opening directory" << path;
     QDir parentPath;
     QDir dir(path);
-    if (!dir.exists()) {
+    if (ensureExists && !dir.exists()) {
         parentPath.mkpath(dir.absolutePath());
     }
     auto f = [&]() { return QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath())); };

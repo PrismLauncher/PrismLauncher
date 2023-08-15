@@ -627,7 +627,7 @@ void MainWindow::updateThemeMenu()
         themeMenu = new QMenu(this);
     }
 
-    auto themes = APPLICATION->getValidApplicationThemes();
+    auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
 
     QActionGroup* themesGroup = new QActionGroup(this);
 
@@ -641,7 +641,7 @@ void MainWindow::updateThemeMenu()
         themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->setApplicationTheme(theme->id());
+            APPLICATION->themeManager()->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
     }
@@ -1134,26 +1134,40 @@ void MainWindow::undoTrashInstance()
     ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
 }
 
+void MainWindow::on_actionViewLauncherRootFolder_triggered()
+{
+    DesktopServices::openDirectory(".");
+}
+
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
     QString str = APPLICATION->settings()->get("InstanceDir").toString();
     DesktopServices::openDirectory(str);
 }
 
-void MainWindow::on_actionViewLauncherRootFolder_triggered()
+void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-    const QString dataPath = QDir::currentPath();
-    DesktopServices::openDirectory(dataPath);
+    DesktopServices::openDirectory(APPLICATION->settings()->get("CentralModsDir").toString(), true);
+}
+
+void MainWindow::on_actionViewIconThemeFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path());
+}
+
+void MainWindow::on_actionViewWidgetThemeFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path());
+}
+
+void MainWindow::on_actionViewCatPackFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path());
 }
 
 void MainWindow::refreshInstances()
 {
     APPLICATION->instances()->loadList();
-}
-
-void MainWindow::on_actionViewCentralModsFolder_triggered()
-{
-    DesktopServices::openDirectory(APPLICATION->settings()->get("CentralModsDir").toString(), true);
 }
 
 void MainWindow::checkForUpdates()
