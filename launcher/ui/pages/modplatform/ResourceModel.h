@@ -42,7 +42,10 @@ class ResourceModel : public QAbstractListModel {
     [[nodiscard]] virtual auto debugName() const -> QString;
     [[nodiscard]] virtual auto metaEntryBase() const -> QString = 0;
 
-    [[nodiscard]] inline int rowCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : m_packs.size(); }
+    [[nodiscard]] inline int rowCount(const QModelIndex& parent) const override
+    {
+        return parent.isValid() ? 0 : static_cast<int>(m_packs.size());
+    }
     [[nodiscard]] inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
     [[nodiscard]] inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
 

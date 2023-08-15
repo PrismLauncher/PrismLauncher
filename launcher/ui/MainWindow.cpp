@@ -515,9 +515,9 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         QAction* actionCreateInstance = new QAction(tr("Create instance"), this);
         actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
         if (!group.isNull()) {
-            QVariantMap data;
-            data["group"] = group;
-            actionCreateInstance->setData(data);
+            QVariantMap instance_action_data;
+            instance_action_data["group"] = group;
+            actionCreateInstance->setData(instance_action_data);
         }
 
         connect(actionCreateInstance, SIGNAL(triggered(bool)), SLOT(on_actionAddInstance_triggered()));
@@ -527,9 +527,9 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions.append(actionCreateInstance);
         if (!group.isNull()) {
             QAction* actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
-            QVariantMap data;
-            data["group"] = group;
-            actionDeleteGroup->setData(data);
+            QVariantMap delete_group_action_data;
+            delete_group_action_data["group"] = group;
+            actionDeleteGroup->setData(delete_group_action_data);
             connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
             actions.append(actionDeleteGroup);
         }
@@ -744,9 +744,9 @@ void MainWindow::changeActiveAccount()
     if (sAction->data().type() != QVariant::Type::Int)
         return;
 
-    QVariant data = sAction->data();
+    QVariant action_data = sAction->data();
     bool valid = false;
-    int index = data.toInt(&valid);
+    int index = action_data.toInt(&valid);
     if (!valid) {
         index = -1;
     }
@@ -1061,9 +1061,9 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 void MainWindow::iconUpdated(QString icon)
 {
     if (icon == m_currentInstIcon) {
-        auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
-        ui->actionChangeInstIcon->setIcon(icon);
-        changeIconButton->setIcon(icon);
+        auto new_icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
+        ui->actionChangeInstIcon->setIcon(new_icon);
+        changeIconButton->setIcon(new_icon);
     }
 }
 
@@ -1590,7 +1590,7 @@ void MainWindow::startTask(Task* task)
     task->start();
 }
 
-void MainWindow::instanceChanged(const QModelIndex& current, const QModelIndex& previous)
+void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     if (!current.isValid()) {
         APPLICATION->settings()->set("SelectedInstance", QString());
@@ -1725,7 +1725,7 @@ void MainWindow::setInstanceActionsEnabled(bool enabled)
     ui->actionCreateInstanceShortcut->setEnabled(enabled);
 }
 
-void MainWindow::refreshCurrentInstance(bool running)
+void MainWindow::refreshCurrentInstance([[maybe_unused]] bool running)
 {
     auto current = view->selectionModel()->currentIndex();
     instanceChanged(current, current);

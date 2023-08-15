@@ -62,6 +62,7 @@ ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool 
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive,      QHeaderView::Stretch,
                               QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents };
+    m_columnsHideable = { false, true, false, true, true, true };
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
@@ -137,7 +138,7 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
     }
 }
 
-QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
         case Qt::DisplayRole:

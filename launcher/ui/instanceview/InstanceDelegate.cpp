@@ -367,7 +367,9 @@ class NoReturnTextEdit : public QTextEdit {
     void editingDone();
 };
 
-void ListViewDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
+void ListViewDelegate::updateEditorGeometry(QWidget* editor,
+                                            const QStyleOptionViewItem& option,
+                                            [[maybe_unused]] const QModelIndex& index) const
 {
     const int iconSize = 48;
     QRect textRect = option.rect;
@@ -379,17 +381,17 @@ void ListViewDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionV
 void ListViewDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
     auto text = index.data(Qt::EditRole).toString();
-    QTextEdit* realeditor = qobject_cast<NoReturnTextEdit*>(editor);
-    realeditor->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
-    realeditor->append(text);
-    realeditor->selectAll();
-    realeditor->document()->clearUndoRedoStacks();
+    QTextEdit* realEditor = qobject_cast<NoReturnTextEdit*>(editor);
+    realEditor->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    realEditor->append(text);
+    realEditor->selectAll();
+    realEditor->document()->clearUndoRedoStacks();
 }
 
 void ListViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
-    QTextEdit* realeditor = qobject_cast<NoReturnTextEdit*>(editor);
-    QString text = realeditor->toPlainText();
+    QTextEdit* realEditor = qobject_cast<NoReturnTextEdit*>(editor);
+    QString text = realEditor->toPlainText();
     text.replace(QChar('\n'), QChar(' '));
     text = text.trimmed();
     // Prevent instance names longer than 128 chars
@@ -399,7 +401,9 @@ void ListViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
     }
 }
 
-QWidget* ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+QWidget* ListViewDelegate::createEditor(QWidget* parent,
+                                        [[maybe_unused]] const QStyleOptionViewItem& option,
+                                        [[maybe_unused]] const QModelIndex& index) const
 {
     auto editor = new NoReturnTextEdit(parent);
     connect(editor, &NoReturnTextEdit::editingDone, this, &ListViewDelegate::editingDone);

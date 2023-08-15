@@ -26,6 +26,8 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 
+#include "net/ApiDownload.h"
+
 /** This is just to override the combo box popup behavior so that the combo box doesn't take the whole screen.
  *  ... thanks Qt.
  */
@@ -242,7 +244,7 @@ void ModrinthManagedPackPage::parseManagedPack()
     QString id = m_inst->getManagedPackID();
 
     m_fetch_job->addNetAction(
-        Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+        Net::ApiDownload::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
     QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
@@ -392,7 +394,7 @@ void FlameManagedPackPage::parseManagedPack()
 
     QString id = m_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response));
+    m_fetch_job->addNetAction(Net::ApiDownload::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response));
 
     QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};

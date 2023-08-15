@@ -42,8 +42,6 @@ namespace Net {
 
 /*
  * Sink object for downloads that uses an external QByteArray it doesn't own as a target.
- * FIXME: It is possible that the QByteArray is freed while we're doing some operation on it,
- * causing a segmentation fault.
  */
 class ByteArraySink : public Sink {
    public:

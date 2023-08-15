@@ -96,7 +96,7 @@ bool IndirectOpen(T callable, qint64* pid_forked = nullptr)
 #endif
 
 namespace DesktopServices {
-bool openDirectory(const QString& path, bool ensureExists)
+bool openDirectory(const QString& path, [[maybe_unused]] bool ensureExists)
 {
     qDebug() << "Opening directory" << path;
     QDir parentPath;
