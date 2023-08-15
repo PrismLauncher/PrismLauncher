@@ -38,8 +38,8 @@
 
 #include <BuildConfig.h>
 #include <FileSystem.h>
+#include <net/ApiDownload.h>
 #include <net/ChecksumValidator.h>
-#include <net/Download.h>
 
 void Library::getApplicableFiles(const RuntimeContext& runtimeContext,
                                  QStringList& jar,
@@ -115,12 +115,12 @@ QList<NetAction::Ptr> Library::getDownloads(const RuntimeContext& runtimeContext
 
         if (sha1.size()) {
             auto rawSha1 = QByteArray::fromHex(sha1.toLatin1());
-            auto dl = Net::Download::makeCached(url, entry, options);
+            auto dl = Net::ApiDownload::makeCached(url, entry, options);
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
             qDebug() << "Checksummed Download for:" << rawName().serialize() << "storage:" << storage << "url:" << url;
             out.append(dl);
         } else {
-            out.append(Net::Download::makeCached(url, entry, options));
+            out.append(Net::ApiDownload::makeCached(url, entry, options));
             qDebug() << "Download for:" << rawName().serialize() << "storage:" << storage << "url:" << url;
         }
         return true;

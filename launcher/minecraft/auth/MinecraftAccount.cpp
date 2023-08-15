@@ -37,6 +37,7 @@
 
 #include "MinecraftAccount.h"
 
+#include <QColor>
 #include <QCryptographicHash>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -126,6 +127,11 @@ QPixmap MinecraftAccount::getFace() const
         return QPixmap();
     }
     QPixmap skin = QPixmap(8, 8);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    skin.fill(QColorConstants::Transparent);
+#else
+    skin.fill(QColor(0, 0, 0, 0));
+#endif
     QPainter painter(&skin);
     painter.drawPixmap(0, 0, skinTexture.copy(8, 8, 8, 8));
     painter.drawPixmap(0, 0, skinTexture.copy(40, 8, 8, 8));

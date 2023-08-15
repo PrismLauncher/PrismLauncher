@@ -53,7 +53,7 @@ LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent) : LaunchStep(parent)
     auto instance = parent->instance();
     if (instance->settings()->get("CloseAfterLaunch").toBool()) {
         std::shared_ptr<QMetaObject::Connection> connection{ new QMetaObject::Connection };
-        *connection = connect(&m_process, &LoggedProcess::log, this, [=](QStringList lines, MessageLevel::Enum level) {
+        *connection = connect(&m_process, &LoggedProcess::log, this, [=](QStringList lines, [[maybe_unused]] MessageLevel::Enum level) {
             qDebug() << lines;
             if (lines.filter(QRegularExpression(".*Setting user.+", QRegularExpression::CaseInsensitiveOption)).length() != 0) {
                 APPLICATION->closeAllWindows();

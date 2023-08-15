@@ -109,15 +109,18 @@ class MainWindow : public QMainWindow {
 
     void on_actionChangeInstIcon_triggered();
 
-    void on_actionViewInstanceFolder_triggered();
-
     void on_actionViewLauncherRootFolder_triggered();
+
+    void on_actionViewInstanceFolder_triggered();
+    void on_actionViewCentralModsFolder_triggered();
+
+    void on_actionViewIconThemeFolder_triggered();
+    void on_actionViewWidgetThemeFolder_triggered();
+    void on_actionViewCatPackFolder_triggered();
 
     void on_actionViewSelectedInstFolder_triggered();
 
     void refreshInstances();
-
-    void on_actionViewCentralModsFolder_triggered();
 
     void checkForUpdates();
 

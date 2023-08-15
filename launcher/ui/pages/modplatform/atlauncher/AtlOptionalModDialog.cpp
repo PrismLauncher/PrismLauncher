@@ -43,6 +43,8 @@
 #include "Json.h"
 #include "modplatform/atlauncher/ATLShareCode.h"
 
+#include "net/ApiDownload.h"
+
 AtlOptionalModListModel::AtlOptionalModListModel(QWidget* parent, ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
     : QAbstractListModel(parent), m_version(version), m_mods(mods)
 {
@@ -113,7 +115,7 @@ QVariant AtlOptionalModListModel::data(const QModelIndex& index, int role) const
     return {};
 }
 
-bool AtlOptionalModListModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool AtlOptionalModListModel::setData(const QModelIndex& index, [[maybe_unused]] const QVariant& value, int role)
 {
     if (role == Qt::CheckStateRole) {
         auto row = index.row();
@@ -155,7 +157,7 @@ void AtlOptionalModListModel::useShareCode(const QString& code)
 {
     m_jobPtr.reset(new NetJob("Atl::Request", APPLICATION->network()));
     auto url = QString(BuildConfig.ATL_API_BASE_URL + "share-codes/" + code);
-    m_jobPtr->addNetAction(Net::Download::makeByteArray(QUrl(url), m_response));
+    m_jobPtr->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), m_response));
 
     connect(m_jobPtr.get(), &NetJob::succeeded, this, &AtlOptionalModListModel::shareCodeSuccess);
     connect(m_jobPtr.get(), &NetJob::failed, this, &AtlOptionalModListModel::shareCodeFailure);
@@ -206,7 +208,7 @@ void AtlOptionalModListModel::shareCodeSuccess()
     emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn), AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
 }
 
-void AtlOptionalModListModel::shareCodeFailure(const QString& reason)
+void AtlOptionalModListModel::shareCodeFailure([[maybe_unused]] const QString& reason)
 {
     m_jobPtr.reset();
 
@@ -281,15 +283,15 @@ void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool
         // if the dependency is 'effectively hidden', then track which mods
         // depend on it - so we can efficiently disable it when no more dependents
         // depend on it.
-        auto dependants = m_dependants[dependencyName];
+        auto dependents = m_dependents[dependencyName];
 
         if (enable) {
-            dependants.append(mod.name);
+            dependents.append(mod.name);
         } else {
-            dependants.removeAll(mod.name);
+            dependents.removeAll(mod.name);
 
             // if there are no longer any dependents, let's disable the mod
-            if (dependencyMod.effectively_hidden && dependants.isEmpty()) {
+            if (dependencyMod.effectively_hidden && dependents.isEmpty()) {
                 setMod(dependencyMod, dependencyIndex, false, shouldEmit);
             }
         }
@@ -297,8 +299,8 @@ void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool
 
     // disable mods that depend on this one, if disabling
     if (!enable) {
-        auto dependants = m_dependants[mod.name];
-        for (const auto& dependencyName : dependants) {
+        auto dependents = m_dependents[mod.name];
+        for (const auto& dependencyName : dependents) {
             auto dependencyIndex = m_index[dependencyName];
             auto dependencyMod = m_mods.at(dependencyIndex);
 
