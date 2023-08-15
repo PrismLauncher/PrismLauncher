@@ -46,6 +46,8 @@
 
 #include "ui/widgets/ProjectItem.h"
 
+#include "net/ApiDownload.h"
+
 #include <QComboBox>
 #include <QKeyEvent>
 #include <QPushButton>
@@ -105,7 +107,7 @@ bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
     return QObject::eventFilter(watched, event);
 }
 
-void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
@@ -127,7 +129,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 
         QString id = current.id;
 
-        netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+        netJob->addNetAction(Net::ApiDownload::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
@@ -176,7 +178,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         QString id = current.id;
 
         netJob->addNetAction(
-            Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+            Net::ApiDownload::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
@@ -309,9 +311,9 @@ void ModrinthPage::triggerSearch()
     m_model->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
 }
 
-void ModrinthPage::onVersionSelectionChanged(QString data)
+void ModrinthPage::onVersionSelectionChanged(QString version)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }

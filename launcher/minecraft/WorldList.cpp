@@ -255,7 +255,7 @@ QVariant WorldList::data(const QModelIndex& index, int role) const
     }
 }
 
-QVariant WorldList::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant WorldList::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
         case Qt::DisplayRole:
@@ -294,7 +294,6 @@ QVariant WorldList::headerData(int section, Qt::Orientation orientation, int rol
         default:
             return QVariant();
     }
-    return QVariant();
 }
 
 QStringList WorldList::mimeTypes() const
@@ -339,19 +338,19 @@ QMimeData* WorldList::mimeData(const QModelIndexList& indexes) const
     if (indexes.size() == 0)
         return new QMimeData();
 
-    QList<World> worlds;
+    QList<World> worlds_;
     for (auto idx : indexes) {
         if (idx.column() != 0)
             continue;
         int row = idx.row();
         if (row < 0 || row >= this->worlds.size())
             continue;
-        worlds.append(this->worlds[row]);
+        worlds_.append(this->worlds[row]);
     }
-    if (!worlds.size()) {
+    if (!worlds_.size()) {
         return new QMimeData();
     }
-    return new WorldMimeData(worlds);
+    return new WorldMimeData(worlds_);
 }
 
 Qt::ItemFlags WorldList::flags(const QModelIndex& index) const

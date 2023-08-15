@@ -275,7 +275,7 @@ POTranslator::~POTranslator()
     delete d;
 }
 
-QString POTranslator::translate(const char* context, const char* sourceText, const char* disambiguation, int n) const
+QString POTranslator::translate(const char* context, const char* sourceText, const char* disambiguation, [[maybe_unused]] int n) const
 {
     if (disambiguation) {
         auto disambiguationKey = QByteArray(context) + "|" + QByteArray(sourceText) + "@" + QByteArray(disambiguation);

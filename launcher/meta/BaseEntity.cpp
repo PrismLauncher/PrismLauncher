@@ -16,7 +16,7 @@
 #include "BaseEntity.h"
 
 #include "Json.h"
-#include "net/Download.h"
+#include "net/ApiDownload.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
 
@@ -32,7 +32,7 @@ class ParsingValidator : public Net::Validator {
     bool init(QNetworkRequest&) override { return true; }
     bool write(QByteArray& data) override
     {
-        this->data.append(data);
+        this->m_data.append(data);
         return true;
     }
     bool abort() override { return true; }
@@ -40,7 +40,7 @@ class ParsingValidator : public Net::Validator {
     {
         auto fname = m_entity->localFilename();
         try {
-            auto doc = Json::requireDocument(data, fname);
+            auto doc = Json::requireDocument(m_data, fname);
             auto obj = Json::requireObject(doc, fname);
             m_entity->parse(obj);
             return true;
@@ -51,7 +51,7 @@ class ParsingValidator : public Net::Validator {
     }
 
    private: /* data */
-    QByteArray data;
+    QByteArray m_data;
     Meta::BaseEntity* m_entity;
 };
 
@@ -104,7 +104,7 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     auto url = this->url();
     auto entry = APPLICATION->metacache()->resolveEntry("meta", localFilename());
     entry->setStale(true);
-    auto dl = Net::Download::makeCached(url, entry);
+    auto dl = Net::ApiDownload::makeCached(url, entry);
     /*
      * The validator parses the file and loads it into the object.
      * If that fails, the file is not written to storage.
