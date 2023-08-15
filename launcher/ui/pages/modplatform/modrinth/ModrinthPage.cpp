@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -107,7 +107,7 @@ bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
     return QObject::eventFilter(watched, event);
 }
 
-void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
@@ -311,9 +311,9 @@ void ModrinthPage::triggerSearch()
     m_model->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
 }
 
-void ModrinthPage::onVersionSelectionChanged(QString data)
+void ModrinthPage::onVersionSelectionChanged(QString version)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }

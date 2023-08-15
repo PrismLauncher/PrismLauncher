@@ -2,19 +2,11 @@
 
 #include <minecraft/GradleSpecifier.h>
 
-class GradleSpecifierTest : public QObject
-{
+class GradleSpecifierTest : public QObject {
     Q_OBJECT
-private
-slots:
-    void initTestCase()
-    {
-
-    }
-    void cleanupTestCase()
-    {
-
-    }
+   private slots:
+    void initTestCase() {}
+    void cleanupTestCase() {}
 
     void test_Positive_data()
     {
@@ -40,8 +32,10 @@ slots:
         QTest::addColumn<QString>("spec");
         QTest::addColumn<QString>("expected");
 
-        QTest::newRow("3 parter") << "group.id:artifact:1.0" << "group/id/artifact/1.0/artifact-1.0.jar";
-        QTest::newRow("doom") << "id.software:doom:1.666:demons@wad" << "id/software/doom/1.666/doom-1.666-demons.wad";
+        QTest::newRow("3 parter") << "group.id:artifact:1.0"
+                                  << "group/id/artifact/1.0/artifact-1.0.jar";
+        QTest::newRow("doom") << "id.software:doom:1.666:demons@wad"
+                              << "id/software/doom/1.666/doom-1.666-demons.wad";
     }
     void test_Path()
     {

@@ -19,7 +19,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QObject> 
+#include <QObject>
 
 #include "LocalResourceParse.h"
 
@@ -30,19 +30,17 @@
 #include "LocalTexturePackParseTask.h"
 #include "LocalWorldSaveParseTask.h"
 
-
-static const QMap<PackedResourceType, QString> s_packed_type_names = {
-    {PackedResourceType::ResourcePack, QObject::tr("resource pack")},
-    {PackedResourceType::TexturePack,  QObject::tr("texture pack")},
-    {PackedResourceType::DataPack, QObject::tr("data pack")},
-    {PackedResourceType::ShaderPack, QObject::tr("shader pack")},
-    {PackedResourceType::WorldSave, QObject::tr("world save")},
-    {PackedResourceType::Mod , QObject::tr("mod")},
-    {PackedResourceType::UNKNOWN, QObject::tr("unknown")}
-};
+static const QMap<PackedResourceType, QString> s_packed_type_names = { { PackedResourceType::ResourcePack, QObject::tr("resource pack") },
+                                                                       { PackedResourceType::TexturePack, QObject::tr("texture pack") },
+                                                                       { PackedResourceType::DataPack, QObject::tr("data pack") },
+                                                                       { PackedResourceType::ShaderPack, QObject::tr("shader pack") },
+                                                                       { PackedResourceType::WorldSave, QObject::tr("world save") },
+                                                                       { PackedResourceType::Mod, QObject::tr("mod") },
+                                                                       { PackedResourceType::UNKNOWN, QObject::tr("unknown") } };
 
 namespace ResourceUtils {
-PackedResourceType identify(QFileInfo file){
+PackedResourceType identify(QFileInfo file)
+{
     if (file.exists() && file.isFile()) {
         if (ModUtils::validate(file)) {
             // mods can contain resource and data packs so they must be tested first
@@ -64,7 +62,7 @@ PackedResourceType identify(QFileInfo file){
             qDebug() << file.fileName() << "is a shader pack";
             return PackedResourceType::ShaderPack;
         } else {
-            qDebug() << "Can't Identify" << file.fileName() ;
+            qDebug() << "Can't Identify" << file.fileName();
         }
     } else {
         qDebug() << "Can't find" << file.absolutePath();
@@ -72,8 +70,9 @@ PackedResourceType identify(QFileInfo file){
     return PackedResourceType::UNKNOWN;
 }
 
-QString getPackedTypeName(PackedResourceType type) {
+QString getPackedTypeName(PackedResourceType type)
+{
     return s_packed_type_names.constFind(type).value();
 }
 
-}
+}  // namespace ResourceUtils

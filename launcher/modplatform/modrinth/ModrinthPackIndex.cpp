@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -95,7 +95,7 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
 
 void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        QJsonArray& arr,
-                                       const shared_qobject_ptr<QNetworkAccessManager>& network,
+                                       [[maybe_unused]] const shared_qobject_ptr<QNetworkAccessManager>& network,
                                        const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
@@ -218,7 +218,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     return {};
 }
 
-auto Modrinth::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto Modrinth::loadDependencyVersions([[maybe_unused]] const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     QVector<ModPlatform::IndexedVersion> versions;
 

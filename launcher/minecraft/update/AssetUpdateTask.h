@@ -1,28 +1,27 @@
 #pragma once
-#include "tasks/Task.h"
 #include "net/NetJob.h"
+#include "tasks/Task.h"
 class MinecraftInstance;
 
-class AssetUpdateTask : public Task
-{
+class AssetUpdateTask : public Task {
     Q_OBJECT
-public:
-    AssetUpdateTask(MinecraftInstance * inst);
+   public:
+    AssetUpdateTask(MinecraftInstance* inst);
     virtual ~AssetUpdateTask();
 
     void executeTask() override;
 
     bool canAbort() const override;
 
-private slots:
+   private slots:
     void assetIndexFinished();
     void assetIndexFailed(QString reason);
     void assetsFailed(QString reason);
 
-public slots:
+   public slots:
     bool abort() override;
 
-private:
-    MinecraftInstance *m_inst;
+   private:
+    MinecraftInstance* m_inst;
     NetJob::Ptr downloadJob;
 };

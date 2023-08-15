@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,12 +35,13 @@
 
 #include "SkinUpload.h"
 
-#include <QNetworkRequest>
 #include <QHttpMultiPart>
+#include <QNetworkRequest>
 
 #include "Application.h"
 
-QByteArray getVariant(SkinUpload::Model model) {
+QByteArray getVariant(SkinUpload::Model model)
+{
     switch (model) {
         default:
             qDebug() << "Unknown skin type!";
@@ -51,16 +52,15 @@ QByteArray getVariant(SkinUpload::Model model) {
     }
 }
 
-SkinUpload::SkinUpload(QObject *parent, QString token, QByteArray skin, SkinUpload::Model model)
+SkinUpload::SkinUpload(QObject* parent, QString token, QByteArray skin, SkinUpload::Model model)
     : Task(parent), m_model(model), m_skin(skin), m_token(token)
-{
-}
+{}
 
 void SkinUpload::executeTask()
 {
     QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/skins"));
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit());
-    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart skin;
     skin.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
@@ -74,12 +74,12 @@ void SkinUpload::executeTask()
     multiPart->append(skin);
     multiPart->append(model);
 
-    QNetworkReply *rep = APPLICATION->network()->post(request, multiPart);
+    QNetworkReply* rep = APPLICATION->network()->post(request, multiPart);
     m_reply = shared_qobject_ptr<QNetworkReply>(rep);
 
     setStatus(tr("Uploading skin"));
     connect(rep, &QNetworkReply::uploadProgress, this, &SkinUpload::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &SkinUpload::downloadError);
 #else
     connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &SkinUpload::downloadError);
@@ -109,8 +109,7 @@ void SkinUpload::sslErrors(const QList<QSslError>& errors)
 void SkinUpload::downloadFinished()
 {
     // if the download failed
-    if (m_reply->error() != QNetworkReply::NetworkError::NoError)
-    {
+    if (m_reply->error() != QNetworkReply::NetworkError::NoError) {
         emitFailed(QString("Network error: %1").arg(m_reply->errorString()));
         m_reply.reset();
         return;

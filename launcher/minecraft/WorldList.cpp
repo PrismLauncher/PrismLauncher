@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,18 +35,17 @@
 
 #include "WorldList.h"
 
-#include "Application.h"
 #include <FileSystem.h>
-#include <Qt>
+#include <QDebug>
+#include <QFileSystemWatcher>
 #include <QMimeData>
+#include <QString>
 #include <QUrl>
 #include <QUuid>
-#include <QString>
-#include <QFileSystemWatcher>
-#include <QDebug>
+#include <Qt>
+#include "Application.h"
 
-WorldList::WorldList(const QString &dir, BaseInstance* instance)
-    : QAbstractListModel(), m_instance(instance), m_dir(dir)
+WorldList::WorldList(const QString& dir, BaseInstance* instance) : QAbstractListModel(), m_instance(instance), m_dir(dir)
 {
     FS::ensureFolderPathExists(m_dir.absolutePath());
     m_dir.setFilter(QDir::Readable | QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
@@ -58,35 +57,27 @@ WorldList::WorldList(const QString &dir, BaseInstance* instance)
 
 void WorldList::startWatching()
 {
-    if(is_watching)
-    {
+    if (is_watching) {
         return;
     }
     update();
     is_watching = m_watcher->addPath(m_dir.absolutePath());
-    if (is_watching)
-    {
+    if (is_watching) {
         qDebug() << "Started watching " << m_dir.absolutePath();
-    }
-    else
-    {
+    } else {
         qDebug() << "Failed to start watching " << m_dir.absolutePath();
     }
 }
 
 void WorldList::stopWatching()
 {
-    if(!is_watching)
-    {
+    if (!is_watching) {
         return;
     }
     is_watching = !m_watcher->removePath(m_dir.absolutePath());
-    if (!is_watching)
-    {
+    if (!is_watching) {
         qDebug() << "Stopped watching " << m_dir.absolutePath();
-    }
-    else
-    {
+    } else {
         qDebug() << "Failed to stop watching " << m_dir.absolutePath();
     }
 }
@@ -100,14 +91,12 @@ bool WorldList::update()
     m_dir.refresh();
     auto folderContents = m_dir.entryInfoList();
     // if there are any untracked files...
-    for (QFileInfo entry : folderContents)
-    {
-        if(!entry.isDir())
+    for (QFileInfo entry : folderContents) {
+        if (!entry.isDir())
             continue;
 
         World w(entry);
-        if(w.isValid())
-        {
+        if (w.isValid()) {
             newWorlds.append(w);
         }
     }
@@ -127,7 +116,8 @@ bool WorldList::isValid()
     return m_dir.exists() && m_dir.isReadable();
 }
 
-QString WorldList::instDirPath() const {
+QString WorldList::instDirPath() const
+{
     return QFileInfo(m_instance->instanceRoot()).absoluteFilePath();
 }
 
@@ -135,9 +125,8 @@ bool WorldList::deleteWorld(int index)
 {
     if (index >= worlds.size() || index < 0)
         return false;
-    World &m = worlds[index];
-    if (m.destroy())
-    {
+    World& m = worlds[index];
+    if (m.destroy()) {
         beginRemoveRows(QModelIndex(), index, index);
         worlds.removeAt(index);
         endRemoveRows();
@@ -149,9 +138,8 @@ bool WorldList::deleteWorld(int index)
 
 bool WorldList::deleteWorlds(int first, int last)
 {
-    for (int i = first; i <= last; i++)
-    {
-        World &m = worlds[i];
+    for (int i = first; i <= last; i++) {
+        World& m = worlds[i];
         m.destroy();
     }
     beginRemoveRows(QModelIndex(), first, last);
@@ -165,21 +153,20 @@ bool WorldList::resetIcon(int row)
 {
     if (row >= worlds.size() || row < 0)
         return false;
-    World &m = worlds[row];
-    if(m.resetIcon()) {
-        emit dataChanged(index(row), index(row), {WorldList::IconFileRole});
+    World& m = worlds[row];
+    if (m.resetIcon()) {
+        emit dataChanged(index(row), index(row), { WorldList::IconFileRole });
         return true;
     }
     return false;
 }
 
-
-int WorldList::columnCount(const QModelIndex &parent) const
+int WorldList::columnCount(const QModelIndex& parent) const
 {
-    return parent.isValid()? 0 : 5;
+    return parent.isValid() ? 0 : 5;
 }
 
-QVariant WorldList::data(const QModelIndex &index, int role) const
+QVariant WorldList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -192,135 +179,121 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
 
     QLocale locale;
 
-    auto & world = worlds[row];
-    switch (role)
-    {
-    case Qt::DisplayRole:
-        switch (column)
-        {
-        case NameColumn:
+    auto& world = worlds[row];
+    switch (role) {
+        case Qt::DisplayRole:
+            switch (column) {
+                case NameColumn:
+                    return world.name();
+
+                case GameModeColumn:
+                    return world.gameType().toTranslatedString();
+
+                case LastPlayedColumn:
+                    return world.lastPlayed();
+
+                case SizeColumn:
+                    return locale.formattedDataSize(world.bytes());
+
+                case InfoColumn:
+                    if (world.isSymLinkUnder(instDirPath())) {
+                        return tr("This world is symbolically linked from elsewhere.");
+                    }
+                    if (world.isMoreThanOneHardLink()) {
+                        return tr("\nThis world is hard linked elsewhere.");
+                    }
+                    return "";
+                default:
+                    return QVariant();
+            }
+
+        case Qt::UserRole:
+            switch (column) {
+                case SizeColumn:
+                    return QVariant::fromValue<qlonglong>(world.bytes());
+
+                default:
+                    return data(index, Qt::DisplayRole);
+            }
+
+        case Qt::ToolTipRole: {
+            if (column == InfoColumn) {
+                if (world.isSymLinkUnder(instDirPath())) {
+                    return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original."
+                              "\nCanonical Path: %1")
+                        .arg(world.canonicalFilePath());
+                }
+                if (world.isMoreThanOneHardLink()) {
+                    return tr("Warning: This world is hard linked elsewhere. Editing it will also change the original.");
+                }
+            }
+            return world.folderName();
+        }
+        case ObjectRole: {
+            return QVariant::fromValue<void*>((void*)&world);
+        }
+        case FolderRole: {
+            return QDir::toNativeSeparators(dir().absoluteFilePath(world.folderName()));
+        }
+        case SeedRole: {
+            return QVariant::fromValue<qlonglong>(world.seed());
+        }
+        case NameRole: {
             return world.name();
-
-        case GameModeColumn:
-            return world.gameType().toTranslatedString();
-
-        case LastPlayedColumn:
+        }
+        case LastPlayedRole: {
             return world.lastPlayed();
-
-        case SizeColumn:
-            return locale.formattedDataSize(world.bytes());
-
-        case InfoColumn:
-            if (world.isSymLinkUnder(instDirPath())) {
-                return tr("This world is symbolically linked from elsewhere.");
-            }
-            if (world.isMoreThanOneHardLink()) {
-                return tr("\nThis world is hard linked elsewhere.");
-            }
-            return "";
+        }
+        case SizeRole: {
+            return QVariant::fromValue<qlonglong>(world.bytes());
+        }
+        case IconFileRole: {
+            return world.iconFile();
+        }
         default:
             return QVariant();
-        }
-
-    case Qt::UserRole:
-        switch (column)
-        {
-            case SizeColumn:
-                return QVariant::fromValue<qlonglong>(world.bytes());
-
-            default:
-                return data(index, Qt::DisplayRole);
-        }
-
-    case Qt::ToolTipRole:
-    {   
-        if (column == InfoColumn) {
-            if (world.isSymLinkUnder(instDirPath())) {
-                return tr("Warning: This world is symbolically linked from elsewhere. Editing it will also change the original." 
-                          "\nCanonical Path: %1").arg(world.canonicalFilePath());
-            }
-            if (world.isMoreThanOneHardLink()) {
-                return tr("Warning: This world is hard linked elsewhere. Editing it will also change the original.");
-            }
-        }
-        return world.folderName();
-    }
-    case ObjectRole:
-    {
-        return QVariant::fromValue<void *>((void *)&world);
-    }
-    case FolderRole:
-    {
-        return QDir::toNativeSeparators(dir().absoluteFilePath(world.folderName()));
-    }
-    case SeedRole:
-    {
-        return QVariant::fromValue<qlonglong>(world.seed());
-    }
-    case NameRole:
-    {
-        return world.name();
-    }
-    case LastPlayedRole:
-    {
-        return world.lastPlayed();
-    }
-    case SizeRole:
-    {
-        return QVariant::fromValue<qlonglong>(world.bytes());
-    }
-    case IconFileRole:
-    {
-        return world.iconFile();
-    }
-    default:
-        return QVariant();
     }
 }
 
-QVariant WorldList::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant WorldList::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
-    switch (role)
-    {
-    case Qt::DisplayRole:
-        switch (section)
-        {
-        case NameColumn:
-            return tr("Name");
-        case GameModeColumn:
-            return tr("Game Mode");
-        case LastPlayedColumn:
-            return tr("Last Played");
-        case SizeColumn:
-            //: World size on disk
-            return tr("Size");
-        case InfoColumn:
-            //: special warnings?
-            return tr("Info");
-        default:
-            return QVariant();
-        }
+    switch (role) {
+        case Qt::DisplayRole:
+            switch (section) {
+                case NameColumn:
+                    return tr("Name");
+                case GameModeColumn:
+                    return tr("Game Mode");
+                case LastPlayedColumn:
+                    return tr("Last Played");
+                case SizeColumn:
+                    //: World size on disk
+                    return tr("Size");
+                case InfoColumn:
+                    //: special warnings?
+                    return tr("Info");
+                default:
+                    return QVariant();
+            }
 
-    case Qt::ToolTipRole:
-        switch (section)
-        {
-        case NameColumn:
-            return tr("The name of the world.");
-        case GameModeColumn:
-            return tr("Game mode of the world.");
-        case LastPlayedColumn:
-            return tr("Date and time the world was last played.");
-        case SizeColumn:
-            return tr("Size of the world on disk.");
-        case InfoColumn:
-            return tr("Information and warnings about the world.");
+        case Qt::ToolTipRole:
+            switch (section) {
+                case NameColumn:
+                    return tr("The name of the world.");
+                case GameModeColumn:
+                    return tr("Game mode of the world.");
+                case LastPlayedColumn:
+                    return tr("Date and time the world was last played.");
+                case SizeColumn:
+                    return tr("Size of the world on disk.");
+                case InfoColumn:
+                    return tr("Information and warnings about the world.");
+                default:
+                    return QVariant();
+            }
         default:
             return QVariant();
-        }
-    default:
-        return QVariant();
     }
-    return QVariant();
 }
 
 QStringList WorldList::mimeTypes() const
@@ -330,32 +303,23 @@ QStringList WorldList::mimeTypes() const
     return types;
 }
 
-class WorldMimeData : public QMimeData
-{
-Q_OBJECT
+class WorldMimeData : public QMimeData {
+    Q_OBJECT
 
-public:
-    WorldMimeData(QList<World> worlds)
-    {
-        m_worlds = worlds;
+   public:
+    WorldMimeData(QList<World> worlds) { m_worlds = worlds; }
+    QStringList formats() const { return QMimeData::formats() << "text/uri-list"; }
 
-    }
-    QStringList formats() const
-    {
-        return QMimeData::formats() << "text/uri-list";
-    }
-
-protected:
+   protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    QVariant retrieveData(const QString &mimetype, QMetaType type) const
+    QVariant retrieveData(const QString& mimetype, QMetaType type) const
 #else
-    QVariant retrieveData(const QString &mimetype, QVariant::Type type) const
+    QVariant retrieveData(const QString& mimetype, QVariant::Type type) const
 #endif
     {
         QList<QUrl> urls;
-        for(auto &world: m_worlds)
-        {
-            if(!world.isValid() || !world.isOnFS())
+        for (auto& world : m_worlds) {
+            if (!world.isValid() || !world.isOnFS())
                 continue;
             QString worldPath = world.container().absoluteFilePath();
             qDebug() << worldPath;
@@ -364,38 +328,36 @@ protected:
         const_cast<WorldMimeData*>(this)->setUrls(urls);
         return QMimeData::retrieveData(mimetype, type);
     }
-private:
+
+   private:
     QList<World> m_worlds;
 };
 
-QMimeData *WorldList::mimeData(const QModelIndexList &indexes) const
+QMimeData* WorldList::mimeData(const QModelIndexList& indexes) const
 {
     if (indexes.size() == 0)
         return new QMimeData();
 
-    QList<World> worlds;
-    for(auto idx : indexes)
-    {
-        if(idx.column() != 0)
+    QList<World> worlds_;
+    for (auto idx : indexes) {
+        if (idx.column() != 0)
             continue;
         int row = idx.row();
         if (row < 0 || row >= this->worlds.size())
             continue;
-        worlds.append(this->worlds[row]);
+        worlds_.append(this->worlds[row]);
     }
-    if(!worlds.size())
-    {
+    if (!worlds_.size()) {
         return new QMimeData();
     }
-    return new WorldMimeData(worlds);
+    return new WorldMimeData(worlds_);
 }
 
-Qt::ItemFlags WorldList::flags(const QModelIndex &index) const
+Qt::ItemFlags WorldList::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
     if (index.isValid())
-        return Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled |
-               defaultFlags;
+        return Qt::ItemIsUserCheckable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | defaultFlags;
     else
         return Qt::ItemIsDropEnabled | defaultFlags;
 }
@@ -416,15 +378,17 @@ void WorldList::installWorld(QFileInfo filename)
 {
     qDebug() << "installing: " << filename.absoluteFilePath();
     World w(filename);
-    if(!w.isValid())
-    {
+    if (!w.isValid()) {
         return;
     }
     w.install(m_dir.absolutePath());
 }
 
-bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, [[maybe_unused]] int row, [[maybe_unused]] int column,
-                             [[maybe_unused]] const QModelIndex &parent)
+bool WorldList::dropMimeData(const QMimeData* data,
+                             Qt::DropAction action,
+                             [[maybe_unused]] int row,
+                             [[maybe_unused]] int column,
+                             [[maybe_unused]] const QModelIndex& parent)
 {
     if (action == Qt::IgnoreAction)
         return true;
@@ -432,14 +396,12 @@ bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, [[may
     if (!data || !(action & supportedDropActions()))
         return false;
     // files dropped from outside?
-    if (data->hasUrls())
-    {
+    if (data->hasUrls()) {
         bool was_watching = is_watching;
         if (was_watching)
             stopWatching();
         auto urls = data->urls();
-        for (auto url : urls)
-        {
+        for (auto url : urls) {
             // only local files may be dropped...
             if (!url.isLocalFile())
                 continue;
@@ -447,8 +409,7 @@ bool WorldList::dropMimeData(const QMimeData *data, Qt::DropAction action, [[may
 
             QFileInfo worldInfo(filename);
 
-            if(!m_dir.entryInfoList().contains(worldInfo))
-            {
+            if (!m_dir.entryInfoList().contains(worldInfo)) {
                 installWorld(worldInfo);
             }
         }

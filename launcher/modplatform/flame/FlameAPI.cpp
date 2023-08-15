@@ -8,9 +8,9 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
+#include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
 #include "net/NetJob.h"
-#include "net/ApiDownload.h"
 #include "net/Upload.h"
 
 Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response)
@@ -75,8 +75,8 @@ auto FlameAPI::getModDescription(int modId) -> QString
 
     auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"), APPLICATION->network());
     auto response = std::make_shared<QByteArray>();
-    netJob->addNetAction(
-        Net::ApiDownload::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/description").arg(QString::number(modId)), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
+        QString("https://api.curseforge.com/v1/mods/%1/description").arg(QString::number(modId)), response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [&netJob, response, &description] {
         QJsonParseError parse_error{};

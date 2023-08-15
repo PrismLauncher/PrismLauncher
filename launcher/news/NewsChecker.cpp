@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -49,8 +49,7 @@ NewsChecker::NewsChecker(shared_qobject_ptr<QNetworkAccessManager> network, cons
 void NewsChecker::reloadNews()
 {
     // Start a netjob to download the RSS feed and call rssDownloadFinished() when it's done.
-    if (isLoadingNews())
-    {
+    if (isLoadingNews()) {
         qDebug() << "Ignored request to reload news. Currently reloading already.";
         return;
     }
@@ -113,7 +112,6 @@ void NewsChecker::rssDownloadFailed(QString reason)
     fail(tr("Failed to load news RSS feed:\n%1").arg(reason));
 }
 
-
 QList<NewsEntryPtr> NewsChecker::getNewsEntries() const
 {
     return m_newsEntries;
@@ -144,4 +142,3 @@ void NewsChecker::fail(const QString& errorMsg)
     m_newsNetJob.reset();
     emit newsLoadingFailed(errorMsg);
 }
-

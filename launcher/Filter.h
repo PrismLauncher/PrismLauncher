@@ -1,42 +1,51 @@
 #pragma once
 
-#include <QString>
 #include <QRegularExpression>
+#include <QString>
 
-class Filter
-{
-public:
+class Filter {
+   public:
     virtual ~Filter();
-    virtual bool accepts(const QString & value) = 0;
+    virtual bool accepts(const QString& value) = 0;
 };
 
-class ContainsFilter: public Filter
-{
-public:
-    ContainsFilter(const QString &pattern);
+class ContainsFilter : public Filter {
+   public:
+    ContainsFilter(const QString& pattern);
     virtual ~ContainsFilter();
-    bool accepts(const QString & value) override;
-private:
+    bool accepts(const QString& value) override;
+
+   private:
     QString pattern;
 };
 
-class ExactFilter: public Filter
-{
-public:
-    ExactFilter(const QString &pattern);
+class ExactFilter : public Filter {
+   public:
+    ExactFilter(const QString& pattern);
     virtual ~ExactFilter();
-    bool accepts(const QString & value) override;
-private:
+    bool accepts(const QString& value) override;
+
+   private:
     QString pattern;
 };
 
-class RegexpFilter: public Filter
-{
-public:
-    RegexpFilter(const QString &regexp, bool invert);
+class ExactIfPresentFilter : public Filter {
+   public:
+    ExactIfPresentFilter(const QString& pattern);
+    ~ExactIfPresentFilter() override = default;
+    bool accepts(const QString& value) override;
+
+   private:
+    QString pattern;
+};
+
+class RegexpFilter : public Filter {
+   public:
+    RegexpFilter(const QString& regexp, bool invert);
     virtual ~RegexpFilter();
-    bool accepts(const QString & value) override;
-private:
+    bool accepts(const QString& value) override;
+
+   private:
     QRegularExpression pattern;
     bool invert = false;
 };

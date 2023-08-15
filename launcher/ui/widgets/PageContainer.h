@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,11 +36,11 @@
 
 #pragma once
 
-#include <QWidget>
 #include <QModelIndex>
+#include <QWidget>
 
-#include "ui/pages/BasePageProvider.h"
 #include "ui/pages/BasePageContainer.h"
+#include "ui/pages/BasePageProvider.h"
 
 class QLayout;
 class IconLabel;
@@ -51,16 +52,14 @@ class QLineEdit;
 class QStackedLayout;
 class QGridLayout;
 
-class PageContainer : public QWidget, public BasePageContainer
-{
+class PageContainer : public QWidget, public BasePageContainer {
     Q_OBJECT
-public:
-    explicit PageContainer(BasePageProvider *pageProvider, QString defaultId = QString(),
-                        QWidget *parent = 0);
+   public:
+    explicit PageContainer(BasePageProvider* pageProvider, QString defaultId = QString(), QWidget* parent = 0);
     virtual ~PageContainer() {}
 
-    void addButtons(QWidget * buttons);
-    void addButtons(QLayout * buttons);
+    void addButtons(QWidget* buttons);
+    void addButtons(QLayout* buttons);
     /*
      * Save any unsaved state and prepare to be closed.
      * @return true if everything can be saved, false if there is something that requires attention
@@ -71,48 +70,45 @@ public:
     /* request close - used by individual pages */
     bool requestClose() override
     {
-        if(m_container)
-        {
+        if (m_container) {
             return m_container->requestClose();
         }
         return false;
     }
 
-    virtual bool selectPage(QString pageId) override;
+    bool selectPage(QString pageId) override;
+    BasePage* selectedPage() const override;
     BasePage* getPage(QString pageId) override;
-    const QList<BasePage*> getPages() const;
+    const QList<BasePage*>& getPages() const;
 
     void refreshContainer() override;
-    virtual void setParentContainer(BasePageContainer * container)
-    {
-        m_container = container;
-    };
+    virtual void setParentContainer(BasePageContainer* container) { m_container = container; };
 
     void changeEvent(QEvent*) override;
 
-private:
+   private:
     void createUI();
     void retranslate();
 
-public slots:
+   public slots:
     void help();
 
-signals:
+   signals:
     /** Emitted when the currently selected page is changed */
     void selectedPageChanged(BasePage* previous, BasePage* selected);
 
-private slots:
-    void currentChanged(const QModelIndex &current);
+   private slots:
+    void currentChanged(const QModelIndex& current);
     void showPage(int row);
 
-private:
-    BasePageContainer * m_container = nullptr;
-    BasePage * m_currentPage = 0;
-    QSortFilterProxyModel *m_proxyModel;
-    PageModel *m_model;
-    QStackedLayout *m_pageStack;
-    QListView *m_pageList;
-    QLabel *m_header;
-    IconLabel *m_iconHeader;
-    QGridLayout *m_layout;
+   private:
+    BasePageContainer* m_container = nullptr;
+    BasePage* m_currentPage = 0;
+    QSortFilterProxyModel* m_proxyModel;
+    PageModel* m_model;
+    QStackedLayout* m_pageStack;
+    QListView* m_pageList;
+    QLabel* m_header;
+    IconLabel* m_iconHeader;
+    QGridLayout* m_layout;
 };

@@ -28,7 +28,7 @@ on:
         description: Private key for AppImage signing
         required: false
       GPG_PRIVATE_KEY_ID:
-        description: ID for the GPG_PRIVATE_KEY, to select the signign key
+        description: ID for the GPG_PRIVATE_KEY, to select the signing key
         required: false
 
 jobs:
@@ -74,7 +74,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.5.1'
+            qt_version: '6.5.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -86,7 +86,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.5.1'
+            qt_version: '6.5.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -96,7 +96,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
-            qt_version: '6.5.0'
+            qt_version: '6.5.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -158,7 +158,7 @@ jobs:
 
       - name: Setup ccache
         if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
-        uses: hendrikmuhs/ccache-action@v1.2.9
+        uses: hendrikmuhs/ccache-action@v1.2.10
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
 

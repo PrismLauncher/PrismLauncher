@@ -132,8 +132,10 @@
 #include "gamemode_client.h"
 #endif
 
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC)
+#if defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
+#endif
 #else
 #include "updater/PrismExternalUpdater.h"
 #endif
@@ -195,8 +197,6 @@ std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const Q
     }
     return std::make_tuple(timestamp, from, to, target, data_path);
 }
-
-
 
 Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 {
@@ -285,7 +285,13 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         adjustedBy = "Command line";
         dataPath = dirParam;
     } else {
-        QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        QDir foo;
+        if (DesktopServices::isSnap()) {
+            foo = QDir(getenv("SNAP_USER_COMMON"));
+        } else {
+            foo = QDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+        }
+
         dataPath = foo.absolutePath();
         adjustedBy = "Persistent data path";
 
@@ -432,11 +438,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             }
         }
         // seach root path
-        if(!foundLoggingRules) {
+        if (!foundLoggingRules) {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-           logRulesPath = FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME, logRulesFile); 
+            logRulesPath = FS::PathCombine(m_rootPath, "share", BuildConfig.LAUNCHER_NAME, logRulesFile);
 #else
-           logRulesPath = FS::PathCombine(m_rootPath, logRulesFile); 
+            logRulesPath = FS::PathCombine(m_rootPath, logRulesFile);
 #endif
             qDebug() << "Testing" << logRulesPath << "...";
             foundLoggingRules = QFile::exists(logRulesPath);
@@ -525,7 +531,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
 
         // Theming
-        m_settings->registerSetting("IconTheme", QString("pe_colored"));
+        m_settings->registerSetting("IconTheme", QString());
         m_settings->registerSetting("ApplicationTheme", QString());
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
@@ -627,9 +633,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
 
-        // Minecraft launch method
-        m_settings->registerSetting("MCLaunchMethod", "LauncherPart");
-
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
 
@@ -701,7 +704,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             QUrl metaUrl(m_settings->get("MetaURLOverride").toString());
 
             // get rid of invalid meta urls
-            if (!metaUrl.isValid() || metaUrl.scheme() != "http" || metaUrl.scheme() != "https")
+            if (!metaUrl.isValid() || (metaUrl.scheme() != "http" && metaUrl.scheme() != "https"))
                 m_settings->reset("MetaURLOverride");
         }
 
@@ -781,7 +784,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     // Themes
-    m_themeManager = std::make_unique<ThemeManager>(m_mainWindow);
+    m_themeManager = std::make_unique<ThemeManager>();
 
     // initialize and load all instances
     {
@@ -866,8 +869,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             logFile->close();
         }
     });
-
-    applyCurrentlySelectedTheme(true);
 
     updateCapabilities();
 
@@ -976,6 +977,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         return;
     }
 
+    m_themeManager->applyCurrentlySelectedTheme(true);
     performMainStartupAction();
 }
 
@@ -1001,10 +1003,20 @@ bool Application::createSetupWizard()
     }();
     bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
-    bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
+    bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
+    bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
+    bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
 
     if (wizardRequired) {
+        // set default theme after going into theme wizard
+        if (!validIcons)
+            settings()->set("IconTheme", QString("pe_colored"));
+        if (!validWidgets)
+            settings()->set("ApplicationTheme", QString("system"));
+
+        m_themeManager->applyCurrentlySelectedTheme(true);
+
         m_setupWizard = new SetupWizard(nullptr);
         if (languageRequired) {
             m_setupWizard->addPage(new LanguageWizardPage(m_setupWizard));
@@ -1019,9 +1031,9 @@ bool Application::createSetupWizard()
         }
 
         if (themeInterventionRequired) {
-            settings()->set("ApplicationTheme", QString("system"));  // set default theme after going into theme wizard
             m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
         }
+
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
         return true;
@@ -1079,7 +1091,6 @@ void Application::setupWizardFinished(int status)
 void Application::performMainStartupAction()
 {
     m_status = Application::Initialized;
-
     if (!m_instanceIdToLaunch.isEmpty()) {
         auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
         if (inst) {
@@ -1123,7 +1134,9 @@ void Application::performMainStartupAction()
     if (updaterEnabled()) {
         qDebug() << "Initializing updater";
 #ifdef Q_OS_MAC
+#if defined(SPARKLE_ENABLED)
         m_updater.reset(new MacSparkleUpdater());
+#endif
 #else
         m_updater.reset(new PrismExternalUpdater(m_mainWindow, m_rootPath, m_dataPath));
 #endif
@@ -1231,42 +1244,12 @@ std::shared_ptr<JavaInstallList> Application::javalist()
     return m_javalist;
 }
 
-QList<ITheme*> Application::getValidApplicationThemes()
-{
-    return m_themeManager->getValidApplicationThemes();
-}
-
-void Application::applyCurrentlySelectedTheme(bool initial)
-{
-    m_themeManager->applyCurrentlySelectedTheme(initial);
-}
-
-void Application::setApplicationTheme(const QString& name)
-{
-    m_themeManager->setApplicationTheme(name);
-}
-
-void Application::setIconTheme(const QString& name)
-{
-    m_themeManager->setIconTheme(name);
-}
-
 QIcon Application::getThemedIcon(const QString& name)
 {
     if (name == "logo") {
         return QIcon(":/" + BuildConfig.LAUNCHER_SVGFILENAME);
     }
     return QIcon::fromTheme(name);
-}
-
-QList<CatPack*> Application::getValidCatPacks()
-{
-    return m_themeManager->getValidCatPacks();
-}
-
-QString Application::getCatPack(QString catName)
-{
-    return m_themeManager->getCatPack(catName);
 }
 
 bool Application::openJsonEditor(const QString& filename)

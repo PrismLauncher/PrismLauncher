@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,27 +35,25 @@
 
 #include "CapeChange.h"
 
-#include <QNetworkRequest>
 #include <QHttpMultiPart>
+#include <QNetworkRequest>
 
 #include "Application.h"
 
-CapeChange::CapeChange(QObject *parent, QString token, QString cape)
-    : Task(parent), m_capeId(cape), m_token(token)
-{
-}
+CapeChange::CapeChange(QObject* parent, QString token, QString cape) : Task(parent), m_capeId(cape), m_token(token) {}
 
-void CapeChange::setCape(QString& cape) {
+void CapeChange::setCape([[maybe_unused]] QString& cape)
+{
     QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active"));
     auto requestString = QString("{\"capeId\":\"%1\"}").arg(m_capeId);
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit());
-    QNetworkReply *rep = APPLICATION->network()->put(request, requestString.toUtf8());
+    QNetworkReply* rep = APPLICATION->network()->put(request, requestString.toUtf8());
 
     setStatus(tr("Equipping cape"));
 
     m_reply = shared_qobject_ptr<QNetworkReply>(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &CapeChange::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &CapeChange::downloadError);
 #else
     connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &CapeChange::downloadError);
@@ -64,17 +62,18 @@ void CapeChange::setCape(QString& cape) {
     connect(rep, &QNetworkReply::finished, this, &CapeChange::downloadFinished);
 }
 
-void CapeChange::clearCape() {
+void CapeChange::clearCape()
+{
     QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active"));
     auto requestString = QString("{\"capeId\":\"%1\"}").arg(m_capeId);
     request.setRawHeader("Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit());
-    QNetworkReply *rep = APPLICATION->network()->deleteResource(request);
+    QNetworkReply* rep = APPLICATION->network()->deleteResource(request);
 
     setStatus(tr("Removing cape"));
 
     m_reply = shared_qobject_ptr<QNetworkReply>(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &CapeChange::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0) // QNetworkReply::errorOccurred added in 5.15
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &CapeChange::downloadError);
 #else
     connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &CapeChange::downloadError);
@@ -83,13 +82,11 @@ void CapeChange::clearCape() {
     connect(rep, &QNetworkReply::finished, this, &CapeChange::downloadFinished);
 }
 
-
 void CapeChange::executeTask()
 {
-    if(m_capeId.isEmpty()) {
+    if (m_capeId.isEmpty()) {
         clearCape();
-    }
-    else {
+    } else {
         setCape(m_capeId);
     }
 }
@@ -115,8 +112,7 @@ void CapeChange::sslErrors(const QList<QSslError>& errors)
 void CapeChange::downloadFinished()
 {
     // if the download failed
-    if (m_reply->error() != QNetworkReply::NetworkError::NoError)
-    {
+    if (m_reply->error() != QNetworkReply::NetworkError::NoError) {
         emitFailed(QString("Network error: %1").arg(m_reply->errorString()));
         m_reply.reset();
         return;
