@@ -72,7 +72,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-bool ListModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool ListModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)
 {
     int pos = index.row();
     if (pos >= modpacks.size() || pos < 0 || !index.isValid())
@@ -106,7 +106,7 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
@@ -132,7 +132,7 @@ void ListModel::requestLogo(QString logo, QString url)
 void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo))->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
     }
@@ -143,7 +143,7 @@ Qt::ItemFlags ListModel::flags(const QModelIndex& index) const
     return QAbstractListModel::flags(index);
 }
 
-bool ListModel::canFetchMore(const QModelIndex& parent) const
+bool ListModel::canFetchMore([[maybe_unused]] const QModelIndex& parent) const
 {
     return searchState == CanPossiblyFetchMore;
 }

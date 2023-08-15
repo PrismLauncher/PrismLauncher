@@ -576,6 +576,9 @@ set(ATLAUNCHER_SOURCES
 )
 
 set(LINKEXE_SOURCES
+    WindowsConsole.cpp
+    WindowsConsole.h
+
     filelink/FileLink.h
     filelink/FileLink.cpp
     FileSystem.h
@@ -772,6 +775,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/ITheme.h
     ui/themes/SystemTheme.cpp
     ui/themes/SystemTheme.h
+    ui/themes/IconTheme.cpp
+    ui/themes/IconTheme.h
     ui/themes/ThemeManager.cpp
     ui/themes/ThemeManager.h
     ui/themes/CatPack.cpp
@@ -972,6 +977,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ChooseProviderDialog.cpp
     ui/dialogs/ModUpdateDialog.cpp
     ui/dialogs/ModUpdateDialog.h
+    ui/dialogs/InstallLoaderDialog.cpp
+    ui/dialogs/InstallLoaderDialog.h
 
     # GUI - widgets
     ui/widgets/Common.cpp
@@ -1035,6 +1042,14 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/VisualGroup.cpp
     ui/instanceview/VisualGroup.h
 )
+
+if(WIN32)
+    set(LAUNCHER_SOURCES
+        WindowsConsole.cpp
+        WindowsConsole.h
+        ${LAUNCHER_SOURCES}
+    )
+endif()
 
 qt_wrap_ui(LAUNCHER_UI
     ui/MainWindow.ui
@@ -1119,8 +1134,14 @@ if(WIN32)
     set(LAUNCHER_RCS ${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_WindowsRC})
 endif()
 
+include(CompilerWarnings)
+
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+set_project_warnings(Launcher_logic
+    "${Launcher_MSVC_WARNINGS}"
+    "${Launcher_CLANG_WARNINGS}"
+    "${Launcher_GCC_WARNINGS}")
 target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Launcher_logic
@@ -1206,6 +1227,11 @@ install(TARGETS ${Launcher_Name}
 
 if(WIN32)
     add_library(filelink_logic STATIC ${LINKEXE_SOURCES})
+    set_project_warnings(filelink_logic
+    "${Launcher_MSVC_WARNINGS}"
+    "${Launcher_CLANG_WARNINGS}"
+    "${Launcher_GCC_WARNINGS}")
+
     target_include_directories(filelink_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(filelink_logic
         systeminfo

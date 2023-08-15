@@ -1,9 +1,9 @@
 #include "FileResolvingTask.h"
 
 #include "Json.h"
+#include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
 #include "net/Upload.h"
-#include "net/ApiDownload.h"
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
@@ -95,7 +95,7 @@ void Flame::FileResolvingTask::netJobFinished()
         auto& out = m_toProcess.files[fileid];
         try {
             out.parseFromObject(Json::requireObject(file));
-        } catch (const JSONValidationError& e) {
+        } catch ([[maybe_unused]] const JSONValidationError& e) {
             qDebug() << "Blocked mod on curseforge" << out.fileName;
             auto hash = out.hash;
             if (!hash.isEmpty()) {

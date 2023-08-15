@@ -98,11 +98,7 @@
    <addaction name="actionEdit"/>
    <addaction name="actionRevert"/>
    <addaction name="separator"/>
-   <addaction name="actionInstall_Forge"/>
-   <addaction name="actionInstall_Fabric"/>
-   <addaction name="actionInstall_Quilt"/>
-   <addaction name="actionInstall_LiteLoader"/>
-   <addaction name="separator"/>
+   <addaction name="actionInstall_Loader"/>
    <addaction name="actionAdd_to_Minecraft_jar"/>
    <addaction name="actionReplace_Minecraft_jar"/>
    <addaction name="actionAdd_Agents"/>
@@ -116,26 +112,26 @@
   </widget>
   <action name="actionChange_version">
    <property name="text">
-    <string>Change version</string>
+    <string>Change Version</string>
    </property>
    <property name="toolTip">
-    <string>Change version of the selected package.</string>
+    <string>Change version of the selected component.</string>
    </property>
   </action>
   <action name="actionMove_up">
    <property name="text">
-    <string>Move up</string>
+    <string>Move Up</string>
    </property>
    <property name="toolTip">
-    <string>Make the selected package apply sooner.</string>
+    <string>Make the selected component apply sooner.</string>
    </property>
   </action>
   <action name="actionMove_down">
    <property name="text">
-    <string>Move down</string>
+    <string>Move Down</string>
    </property>
    <property name="toolTip">
-    <string>Make the selected package apply later.</string>
+    <string>Make the selected component apply later.</string>
    </property>
   </action>
   <action name="actionRemove">
@@ -143,7 +139,7 @@
     <string>Remove</string>
    </property>
    <property name="toolTip">
-    <string>Remove selected package from the instance.</string>
+    <string>Remove selected component from the instance.</string>
    </property>
   </action>
   <action name="actionCustomize">
@@ -151,7 +147,7 @@
     <string>Customize</string>
    </property>
    <property name="toolTip">
-    <string>Customize selected package.</string>
+    <string>Customize selected component.</string>
    </property>
   </action>
   <action name="actionEdit">
@@ -159,7 +155,7 @@
     <string>Edit</string>
    </property>
    <property name="toolTip">
-    <string>Edit selected package.</string>
+    <string>Edit selected component.</string>
    </property>
   </action>
   <action name="actionRevert">
@@ -167,39 +163,15 @@
     <string>Revert</string>
    </property>
    <property name="toolTip">
-    <string>Revert the selected package to default.</string>
+    <string>Revert the selected component to default.</string>
    </property>
   </action>
-  <action name="actionInstall_Forge">
+  <action name="actionInstall_Loader">
    <property name="text">
-    <string>Install Forge</string>
+    <string>Install Loader</string>
    </property>
    <property name="toolTip">
-    <string>Install the Minecraft Forge package.</string>
-   </property>
-  </action>
-  <action name="actionInstall_Fabric">
-   <property name="text">
-    <string>Install Fabric</string>
-   </property>
-   <property name="toolTip">
-    <string>Install the Fabric Loader package.</string>
-   </property>
-  </action>
-  <action name="actionInstall_Quilt">
-   <property name="text">
-    <string>Install Quilt</string>
-   </property>
-   <property name="toolTip">
-    <string>Install the Quilt Loader package.</string>
-   </property>
-  </action>
-  <action name="actionInstall_LiteLoader">
-   <property name="text">
-    <string>Install LiteLoader</string>
-   </property>
-   <property name="toolTip">
-    <string>Install the LiteLoader package.</string>
+    <string>Install a mod loader.</string>
    </property>
   </action>
   <action name="actionAdd_to_Minecraft_jar">
@@ -228,7 +200,7 @@
     <string>Add Empty</string>
    </property>
    <property name="toolTip">
-    <string>Add an empty custom package.</string>
+    <string>Add an empty custom component.</string>
    </property>
   </action>
   <action name="actionReload">
@@ -236,12 +208,12 @@
     <string>Reload</string>
    </property>
    <property name="toolTip">
-    <string>Reload all packages.</string>
+    <string>Reload all components.</string>
    </property>
   </action>
   <action name="actionDownload_All">
    <property name="text">
-    <string>Download All</string>
+    <string>Download all</string>
    </property>
    <property name="toolTip">
     <string>Download the files needed to launch the instance now.</string>

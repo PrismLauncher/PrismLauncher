@@ -32,7 +32,7 @@ class ParsingValidator : public Net::Validator {
     bool init(QNetworkRequest&) override { return true; }
     bool write(QByteArray& data) override
     {
-        this->data.append(data);
+        this->m_data.append(data);
         return true;
     }
     bool abort() override { return true; }
@@ -40,7 +40,7 @@ class ParsingValidator : public Net::Validator {
     {
         auto fname = m_entity->localFilename();
         try {
-            auto doc = Json::requireDocument(data, fname);
+            auto doc = Json::requireDocument(m_data, fname);
             auto obj = Json::requireObject(doc, fname);
             m_entity->parse(obj);
             return true;
@@ -51,7 +51,7 @@ class ParsingValidator : public Net::Validator {
     }
 
    private: /* data */
-    QByteArray data;
+    QByteArray m_data;
     Meta::BaseEntity* m_entity;
 };
 

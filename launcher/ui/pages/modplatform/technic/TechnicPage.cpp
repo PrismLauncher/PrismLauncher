@@ -102,7 +102,7 @@ void TechnicPage::triggerSearch()
     model->searchWithTerm(ui->searchEdit->text());
 }
 
-void TechnicPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void TechnicPage::onSelectionChanged(QModelIndex first, [[maybe_unused]] QModelIndex second)
 {
     ui->versionSelectionBox->clear();
 
@@ -127,7 +127,7 @@ void TechnicPage::suggestCurrent()
         return;
     }
 
-    QString editedLogoName = "technic_" + current.logoName.section(".", 0, 0);
+    QString editedLogoName = "technic_" + current.logoName;
     model->getLogo(current.logoName, current.logoUrl,
                    [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 
@@ -306,13 +306,13 @@ void TechnicPage::onSolderLoaded()
     metadataLoaded();
 }
 
-void TechnicPage::onVersionSelectionChanged(QString data)
+void TechnicPage::onVersionSelectionChanged(QString version)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }
 
-    selectedVersion = data;
+    selectedVersion = version;
     selectVersion();
 }

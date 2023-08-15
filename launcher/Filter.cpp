@@ -16,6 +16,12 @@ bool ExactFilter::accepts(const QString& value)
     return value == pattern;
 }
 
+ExactIfPresentFilter::ExactIfPresentFilter(const QString& pattern) : pattern(pattern) {}
+bool ExactIfPresentFilter::accepts(const QString& value)
+{
+    return value.isEmpty() || value == pattern;
+}
+
 RegexpFilter::RegexpFilter(const QString& regexp, bool invert) : invert(invert)
 {
     pattern.setPattern(regexp);

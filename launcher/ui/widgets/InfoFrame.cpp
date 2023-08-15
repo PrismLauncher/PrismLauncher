@@ -348,7 +348,7 @@ void InfoFrame::setImage(QPixmap img)
     }
 }
 
-void InfoFrame::descriptionEllipsisHandler(QString link)
+void InfoFrame::descriptionEllipsisHandler([[maybe_unused]] QString link)
 {
     if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_description);
@@ -359,7 +359,7 @@ void InfoFrame::descriptionEllipsisHandler(QString link)
     }
 }
 
-void InfoFrame::licenseEllipsisHandler(QString link)
+void InfoFrame::licenseEllipsisHandler([[maybe_unused]] QString link)
 {
     if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_license);
@@ -370,7 +370,7 @@ void InfoFrame::licenseEllipsisHandler(QString link)
     }
 }
 
-void InfoFrame::boxClosed(int result)
+void InfoFrame::boxClosed([[maybe_unused]] int result)
 {
     m_current_box = nullptr;
 }

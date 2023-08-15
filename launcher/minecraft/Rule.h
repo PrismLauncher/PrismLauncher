@@ -55,7 +55,7 @@ class Rule {
 
    public:
     Rule(RuleAction result) : m_result(result) {}
-    virtual ~Rule(){};
+    virtual ~Rule() {}
     virtual QJsonObject toJson() = 0;
     RuleAction apply(const Library* parent, const RuntimeContext& runtimeContext)
     {

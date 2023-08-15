@@ -117,7 +117,7 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
     return {};
 }
 
-bool ModpackListModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool ModpackListModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)
 {
     int pos = index.row();
     if (pos >= modpacks.size() || pos < 0 || !index.isValid())
@@ -196,8 +196,6 @@ static auto sortFromIndex(int index) -> QString
         case 4:
             return "updated";
     }
-
-    return {};
 }
 
 void ModpackListModel::searchWithTerm(const QString& term, const int sort)
@@ -220,9 +218,7 @@ void ModpackListModel::searchWithTerm(const QString& term, const int sort)
 void ModpackListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()
-                     ->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
-                     ->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo))->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
     }
@@ -234,8 +230,7 @@ void ModpackListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry =
-        APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 

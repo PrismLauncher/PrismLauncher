@@ -354,11 +354,11 @@ bool FlameCreationTask::createInstance()
             id.remove("forge-");
             loaderType = "forge";
             loaderUid = "net.minecraftforge";
-        } else if (loaderType == "fabric") {
+        } else if (id.startsWith("fabric-")) {
             id.remove("fabric-");
             loaderType = "fabric";
             loaderUid = "net.fabricmc.fabric-loader";
-        } else if (loaderType == "quilt") {
+        } else if (id.startsWith("quilt-")) {
             id.remove("quilt-");
             loaderType = "quilt";
             loaderUid = "org.quiltmc.quilt-loader";

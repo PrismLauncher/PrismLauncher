@@ -290,7 +290,7 @@ void NewInstanceDialog::on_iconButton_clicked()
     }
 }
 
-void NewInstanceDialog::on_instNameTextBox_textChanged(const QString& arg1)
+void NewInstanceDialog::on_instNameTextBox_textChanged([[maybe_unused]] const QString& arg1)
 {
     updateDialogState();
 }
@@ -299,7 +299,7 @@ void NewInstanceDialog::importIconNow()
 {
     if (importIcon) {
         APPLICATION->icons()->installIcon(importIconPath, importIconName);
-        InstIconKey = importIconName;
+        InstIconKey = importIconName.mid(0, importIconName.lastIndexOf('.'));
         importIcon = false;
     }
     APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
