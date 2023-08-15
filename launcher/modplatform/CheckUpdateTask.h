@@ -24,6 +24,7 @@ class CheckUpdateTask : public Task {
         QString old_version;
         QString new_version;
         QString changelog;
+        bool enabled;
         ModPlatform::ResourceProvider provider;
         shared_qobject_ptr<ResourceDownloadTask> download;
 
@@ -33,9 +34,17 @@ class CheckUpdateTask : public Task {
                      QString old_v,
                      QString new_v,
                      QString changelog,
+                     bool enabled,
                      ModPlatform::ResourceProvider p,
                      shared_qobject_ptr<ResourceDownloadTask> t)
-            : name(name), old_hash(old_h), old_version(old_v), new_version(new_v), changelog(changelog), provider(p), download(t)
+            : name(name)
+            , old_hash(old_h)
+            , old_version(old_v)
+            , new_version(new_v)
+            , changelog(changelog)
+            , enabled(enabled)
+            , provider(p)
+            , download(t)
         {}
     };
 

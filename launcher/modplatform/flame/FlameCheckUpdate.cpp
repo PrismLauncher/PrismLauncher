@@ -124,11 +124,6 @@ void FlameCheckUpdate::executeTask()
 
     int i = 0;
     for (auto* mod : m_mods) {
-        if (!mod->enabled()) {
-            emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
-            continue;
-        }
-
         setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
         setProgress(i++, m_mods.size());
 
@@ -176,7 +171,7 @@ void FlameCheckUpdate::executeTask()
 
             auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver, m_mods_folder);
             m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver.version,
-                                     api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
+                                     api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()), mod->enabled(),
                                      ModPlatform::ResourceProvider::FLAME, download_task);
         }
     }

@@ -5,8 +5,6 @@
 #include "ScrollMessageBox.h"
 #include "ui_ReviewMessageBox.h"
 
-#include "FileSystem.h"
-#include "Json.h"
 #include "Markdown.h"
 
 #include "tasks/ConcurrentTask.h"
@@ -351,7 +349,7 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
 void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
 {
     auto item_top = new QTreeWidgetItem(ui->modTreeWidget);
-    item_top->setCheckState(0, Qt::CheckState::Checked);
+    item_top->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     item_top->setText(0, info.name);
     item_top->setExpanded(true);
 
