@@ -155,7 +155,10 @@ class MainWindow : public QMainWindow {
     void deleteGroup();
     void undoTrashInstance();
 
-    inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
+    inline void on_actionExportInstance_triggered()
+    {
+        on_actionExportInstanceZip_triggered();
+    }
     void on_actionExportInstanceZip_triggered();
     void on_actionExportInstanceMrPack_triggered();
     void on_actionExportInstanceFlamePack_triggered();
