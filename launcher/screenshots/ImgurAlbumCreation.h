@@ -50,6 +50,8 @@ class ImgurAlbumCreation : public NetAction {
     QString deleteHash() const { return m_deleteHash; }
     QString id() const { return m_id; }
 
+    void init() override{};
+
    protected slots:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
     void downloadError(QNetworkReply::NetworkError error) override;

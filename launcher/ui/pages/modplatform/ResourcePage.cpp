@@ -4,7 +4,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -280,7 +280,7 @@ void ResourcePage::updateVersionList()
     updateSelectionButton();
 }
 
-void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void ResourcePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     if (!curr.isValid()) {
         return;
@@ -307,9 +307,9 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     updateUi();
 }
 
-void ResourcePage::onVersionSelectionChanged(QString data)
+void ResourcePage::onVersionSelectionChanged(QString versionData)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (versionData.isNull() || versionData.isEmpty()) {
         m_selected_version_index = -1;
         return;
     }
@@ -395,7 +395,7 @@ void ResourcePage::openUrl(const QUrl& url)
         if (auto current_pack = getCurrentPack(); current_pack && slug != current_pack->slug) {
             m_parent_dialog->selectPage(page);
 
-            auto newPage = m_parent_dialog->getSelectedPage();
+            auto newPage = m_parent_dialog->selectedPage();
 
             QLineEdit* searchEdit = newPage->m_ui->searchEdit;
             auto model = newPage->m_model;

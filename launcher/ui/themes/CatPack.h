@@ -52,8 +52,8 @@ class BasicCatPack : public CatPack {
    public:
     BasicCatPack(QString id, QString name) : m_id(id), m_name(name) {}
     BasicCatPack(QString id) : BasicCatPack(id, id) {}
-    virtual QString id() { return m_id; };
-    virtual QString name() { return m_name; };
+    virtual QString id() { return m_id; }
+    virtual QString name() { return m_name; }
     virtual QString path();
 
    protected:

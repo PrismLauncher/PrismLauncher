@@ -136,11 +136,7 @@
 #endif
 
 #if defined Q_OS_WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <stdio.h>
-#include <windows.h>
+#include "WindowsConsole.h"
 #endif
 
 #define STRINGIFY(x) #x
@@ -172,22 +168,8 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
 Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 {
 #if defined Q_OS_WIN32
-    // attach the parent console
-    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
-        // if attach succeeds, reopen and sync all the i/o
-        if (freopen("CON", "w", stdout)) {
-            std::cout.sync_with_stdio();
-        }
-        if (freopen("CON", "w", stderr)) {
-            std::cerr.sync_with_stdio();
-        }
-        if (freopen("CON", "r", stdin)) {
-            std::cin.sync_with_stdio();
-        }
-        auto out = GetStdHandle(STD_OUTPUT_HANDLE);
-        DWORD written;
-        const char* endline = "\n";
-        WriteConsole(out, endline, strlen(endline), &written, NULL);
+    // attach the parent console if stdout not already captured
+    if (AttachWindowsConsole()) {
         consoleAttached = true;
     }
 #endif
@@ -510,7 +492,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings.reset(new INISettingsObject({ BuildConfig.LAUNCHER_CONFIGFILE, "polymc.cfg", "multimc.cfg" }, this));
 
         // Theming
-        m_settings->registerSetting("IconTheme", QString("pe_colored"));
+        m_settings->registerSetting("IconTheme", QString());
         m_settings->registerSetting("ApplicationTheme", QString());
         m_settings->registerSetting("BackgroundCat", QString("kitteh"));
 
@@ -772,7 +754,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     // Themes
-    m_themeManager = std::make_unique<ThemeManager>(m_mainWindow);
+    m_themeManager = std::make_unique<ThemeManager>();
 
     // initialize and load all instances
     {
@@ -858,14 +840,13 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
     });
 
-    applyCurrentlySelectedTheme(true);
-
     updateCapabilities();
 
     if (createSetupWizard()) {
         return;
     }
 
+    m_themeManager->applyCurrentlySelectedTheme(true);
     performMainStartupAction();
 }
 
@@ -891,10 +872,20 @@ bool Application::createSetupWizard()
     }();
     bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
-    bool themeInterventionRequired = settings()->get("ApplicationTheme") == "";
+    bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
+    bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
+    bool themeInterventionRequired = !validWidgets || !validIcons;
     bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
 
     if (wizardRequired) {
+        // set default theme after going into theme wizard
+        if (!validIcons)
+            settings()->set("IconTheme", QString("pe_colored"));
+        if (!validWidgets)
+            settings()->set("ApplicationTheme", QString("system"));
+
+        m_themeManager->applyCurrentlySelectedTheme(true);
+
         m_setupWizard = new SetupWizard(nullptr);
         if (languageRequired) {
             m_setupWizard->addPage(new LanguageWizardPage(m_setupWizard));
@@ -909,9 +900,9 @@ bool Application::createSetupWizard()
         }
 
         if (themeInterventionRequired) {
-            settings()->set("ApplicationTheme", QString("system"));  // set default theme after going into theme wizard
             m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
         }
+
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
         return true;
@@ -1088,42 +1079,12 @@ std::shared_ptr<JavaInstallList> Application::javalist()
     return m_javalist;
 }
 
-QList<ITheme*> Application::getValidApplicationThemes()
-{
-    return m_themeManager->getValidApplicationThemes();
-}
-
-void Application::applyCurrentlySelectedTheme(bool initial)
-{
-    m_themeManager->applyCurrentlySelectedTheme(initial);
-}
-
-void Application::setApplicationTheme(const QString& name)
-{
-    m_themeManager->setApplicationTheme(name);
-}
-
-void Application::setIconTheme(const QString& name)
-{
-    m_themeManager->setIconTheme(name);
-}
-
 QIcon Application::getThemedIcon(const QString& name)
 {
     if (name == "logo") {
         return QIcon(":/" + BuildConfig.LAUNCHER_SVGFILENAME);
     }
     return QIcon::fromTheme(name);
-}
-
-QList<CatPack*> Application::getValidCatPacks()
-{
-    return m_themeManager->getValidCatPacks();
-}
-
-QString Application::getCatPack(QString catName)
-{
-    return m_themeManager->getCatPack(catName);
 }
 
 bool Application::openJsonEditor(const QString& filename)

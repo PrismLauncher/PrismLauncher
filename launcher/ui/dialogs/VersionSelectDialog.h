@@ -46,6 +46,7 @@ class VersionSelectDialog : public QDialog {
     void setCurrentVersion(const QString& version);
     void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
     void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
+    void setExactIfPresentFilter(BaseVersionList::ModelRoles role, QString filter);
     void setEmptyString(QString emptyString);
     void setEmptyErrorString(QString emptyErrorString);
     void setResizeOn(int column);
