@@ -354,8 +354,14 @@ class ServersModel : public QAbstractListModel {
         }
     }
 
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override { return parent.isValid() ? 0 : m_servers.size(); }
-    int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : COLUMN_COUNT; }
+    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override
+    {
+        return parent.isValid() ? 0 : m_servers.size();
+    }
+    int columnCount(const QModelIndex& parent) const override
+    {
+        return parent.isValid() ? 0 : COLUMN_COUNT;
+    }
 
     Server* at(int index)
     {
@@ -439,7 +445,10 @@ class ServersModel : public QAbstractListModel {
         qDebug() << "Changed:" << path;
         load();
     }
-    void fileChanged(const QString& path) { qDebug() << "Changed:" << path; }
+    void fileChanged(const QString& path)
+    {
+        qDebug() << "Changed:" << path;
+    }
 
    private slots:
     void save_internal()
@@ -483,7 +492,10 @@ class ServersModel : public QAbstractListModel {
         m_saveTimer.stop();
     }
 
-    bool saveIsScheduled() const { return m_dirty; }
+    bool saveIsScheduled() const
+    {
+        return m_dirty;
+    }
 
     void updateFSObserver()
     {

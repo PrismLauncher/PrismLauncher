@@ -353,7 +353,10 @@ class FileSystemTest : public QObject {
         }
     }
 
-    void test_getDesktop() { QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)); }
+    void test_getDesktop()
+    {
+        QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
+    }
 
     void test_link()
     {
