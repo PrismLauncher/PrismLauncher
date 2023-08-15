@@ -40,17 +40,17 @@ class DummyResourceModel : public ResourceModel {
     DummyResourceModel() : ResourceModel(new DummyResourceAPI) {}
     ~DummyResourceModel() {}
 
-    [[nodiscard]] auto metaEntryBase() const -> QString override { return ""; };
+    [[nodiscard]] auto metaEntryBase() const -> QString override { return ""; }
 
-    ResourceAPI::SearchArgs createSearchArguments() override { return {}; };
-    ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override { return {}; };
-    ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) override { return {}; };
+    ResourceAPI::SearchArgs createSearchArguments() override { return {}; }
+    ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override { return {}; }
+    ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) override { return {}; }
 
     QJsonArray documentToArray(QJsonDocument& doc) const override { return doc.object().value("hits").toArray(); }
 
     void loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj) override
     {
-        pack.authors.append({ Json::requireString(obj, "author") });
+        pack.authors.append({ Json::requireString(obj, "author"), "" });
         pack.description = Json::requireString(obj, "description");
         pack.addonId = Json::requireString(obj, "project_id");
     }
@@ -59,7 +59,8 @@ class DummyResourceModel : public ResourceModel {
 class ResourceModelTest : public QObject {
     Q_OBJECT
    private slots:
-    void test_abstract_item_model() { 
+    void test_abstract_item_model()
+    {
         auto dummy = DummyResourceModel();
         auto tester = QAbstractItemModelTester(&dummy);
     }

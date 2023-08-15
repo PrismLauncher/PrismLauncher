@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -48,6 +48,8 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "net/ApiDownload.h"
+
 namespace LegacyFTB {
 
 PackInstallTask::PackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network, Modpack pack, QString version)
@@ -77,11 +79,11 @@ void PackInstallTask::downloadPack()
     } else {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "modpacks/%1").arg(archivePath);
     }
-    netJobContainer->addNetAction(Net::Download::makeFile(url, archivePath));
+    netJobContainer->addNetAction(Net::ApiDownload::makeFile(url, archivePath));
 
     connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::unzip);
     connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::emitFailed);
-    connect(netJobContainer.get(), &NetJob::stepProgress, this, &PackInstallTask::propogateStepProgress);
+    connect(netJobContainer.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
     connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::emitAborted);
 
     netJobContainer->start();

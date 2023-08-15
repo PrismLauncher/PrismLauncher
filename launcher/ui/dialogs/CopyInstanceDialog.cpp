@@ -100,8 +100,8 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget* parent)
 
 #if defined(Q_OS_WIN)
     ui->symbolicLinksCheckbox->setIcon(style()->standardIcon(QStyle::SP_VistaShield));
-    ui->symbolicLinksCheckbox->setToolTip(tr("Use symbolic links instead of copying files.") +
-                                          "\n" + tr("On Windows, symbolic links may require admin permission to create."));
+    ui->symbolicLinksCheckbox->setToolTip(tr("Use symbolic links instead of copying files.") + "\n" +
+                                          tr("On Windows, symbolic links may require admin permission to create."));
 #endif
 
     updateLinkOptions();
@@ -213,7 +213,7 @@ void CopyInstanceDialog::on_iconButton_clicked()
     }
 }
 
-void CopyInstanceDialog::on_instNameTextBox_textChanged(const QString& arg1)
+void CopyInstanceDialog::on_instNameTextBox_textChanged([[maybe_unused]] const QString& arg1)
 {
     updateDialogState();
 }

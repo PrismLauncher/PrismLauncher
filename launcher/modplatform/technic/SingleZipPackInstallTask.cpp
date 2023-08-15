@@ -17,21 +17,23 @@
 
 #include <QtConcurrent>
 
+#include "FileSystem.h"
 #include "MMCZip.h"
 #include "TechnicPackProcessor.h"
-#include "FileSystem.h"
 
 #include "Application.h"
 
-Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(const QUrl &sourceUrl, const QString &minecraftVersion)
+#include "net/ApiDownload.h"
+
+Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(const QUrl& sourceUrl, const QString& minecraftVersion)
 {
     m_sourceUrl = sourceUrl;
     m_minecraftVersion = minecraftVersion;
 }
 
-bool Technic::SingleZipPackInstallTask::abort() {
-    if(m_abortable)
-    {
+bool Technic::SingleZipPackInstallTask::abort()
+{
+    if (m_abortable) {
         return m_filesNetJob->abort();
     }
     return false;
@@ -45,12 +47,12 @@ void Technic::SingleZipPackInstallTask::executeTask()
     auto entry = APPLICATION->metacache()->resolveEntry("general", path);
     entry->setStale(true);
     m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
-    m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
+    m_filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
     m_archivePath = entry->getFullPath();
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SingleZipPackInstallTask::downloadSucceeded);
     connect(job, &NetJob::progress, this, &Technic::SingleZipPackInstallTask::downloadProgressChanged);
-    connect(job, &NetJob::stepProgress, this, &Technic::SingleZipPackInstallTask::propogateStepProgress);
+    connect(job, &NetJob::stepProgress, this, &Technic::SingleZipPackInstallTask::propagateStepProgress);
     connect(job, &NetJob::failed, this, &Technic::SingleZipPackInstallTask::downloadFailed);
     m_filesNetJob->start();
 }
@@ -65,12 +67,12 @@ void Technic::SingleZipPackInstallTask::downloadSucceeded()
 
     // open the zip and find relevant files in it
     m_packZip.reset(new QuaZip(m_archivePath));
-    if (!m_packZip->open(QuaZip::mdUnzip))
-    {
+    if (!m_packZip->open(QuaZip::mdUnzip)) {
         emitFailed(tr("Unable to open supplied modpack zip file."));
         return;
     }
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, m_packZip.get(), QString(""), extractDir.absolutePath());
+    m_extractFuture =
+        QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractSubDir, m_packZip.get(), QString(""), extractDir.absolutePath());
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &Technic::SingleZipPackInstallTask::extractFinished);
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &Technic::SingleZipPackInstallTask::extractAborted);
     m_extractFutureWatcher.setFuture(m_extractFuture);
@@ -93,8 +95,7 @@ void Technic::SingleZipPackInstallTask::downloadProgressChanged(qint64 current, 
 void Technic::SingleZipPackInstallTask::extractFinished()
 {
     m_packZip.reset();
-    if (!m_extractFuture.result())
-    {
+    if (!m_extractFuture.result()) {
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
@@ -102,30 +103,22 @@ void Technic::SingleZipPackInstallTask::extractFinished()
 
     qDebug() << "Fixing permissions for extracted pack files...";
     QDirIterator it(extractDir, QDirIterator::Subdirectories);
-    while (it.hasNext())
-    {
+    while (it.hasNext()) {
         auto filepath = it.next();
         QFileInfo file(filepath);
         auto permissions = QFile::permissions(filepath);
         auto origPermissions = permissions;
-        if (file.isDir())
-        {
+        if (file.isDir()) {
             // Folder +rwx for current user
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser;
-        }
-        else
-        {
+        } else {
             // File +rw for current user
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
         }
-        if (origPermissions != permissions)
-        {
-            if (!QFile::setPermissions(filepath, permissions))
-            {
+        if (origPermissions != permissions) {
+            if (!QFile::setPermissions(filepath, permissions)) {
                 logWarning(tr("Could not fix permissions for %1").arg(filepath));
-            }
-            else
-            {
+            } else {
                 qDebug() << "Fixed" << filepath;
             }
         }

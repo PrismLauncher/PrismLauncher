@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,28 +33,28 @@
  *      limitations under the License.
  */
 
-#include "Application.h"
 #include "NewComponentDialog.h"
+#include "Application.h"
 #include "ui_NewComponentDialog.h"
 
 #include <BaseVersion.h>
+#include <InstanceList.h>
 #include <icons/IconList.h>
 #include <tasks/Task.h>
-#include <InstanceList.h>
 
-#include "VersionSelectDialog.h"
-#include "ProgressDialog.h"
 #include "IconPickerDialog.h"
+#include "ProgressDialog.h"
+#include "VersionSelectDialog.h"
 
+#include <QFileDialog>
 #include <QLayout>
 #include <QPushButton>
-#include <QFileDialog>
 #include <QValidator>
 
 #include <meta/Index.h>
 #include <meta/VersionList.h>
 
-NewComponentDialog::NewComponentDialog(const QString & initialName, const QString & initialUid, QWidget *parent)
+NewComponentDialog::NewComponentDialog(const QString& initialName, const QString& initialUid, QWidget* parent)
     : QDialog(parent), ui(new Ui::NewComponentDialog)
 {
     ui->setupUi(this);
@@ -81,12 +81,9 @@ void NewComponentDialog::updateDialogState()
 {
     auto protoUid = ui->nameTextBox->text().toLower();
     protoUid.remove(QRegularExpression("[^a-z]"));
-    if(protoUid.isEmpty())
-    {
+    if (protoUid.isEmpty()) {
         ui->uidTextBox->setPlaceholderText(originalPlaceholderText);
-    }
-    else
-    {
+    } else {
         QString suggestedUid = "org.multimc.custom." + protoUid;
         ui->uidTextBox->setPlaceholderText(suggestedUid);
     }
@@ -97,8 +94,7 @@ void NewComponentDialog::updateDialogState()
 QString NewComponentDialog::name() const
 {
     auto result = ui->nameTextBox->text();
-    if(result.size())
-    {
+    if (result.size()) {
         return result.trimmed();
     }
     return QString();
@@ -107,13 +103,11 @@ QString NewComponentDialog::name() const
 QString NewComponentDialog::uid() const
 {
     auto result = ui->uidTextBox->text();
-    if(result.size())
-    {
+    if (result.size()) {
         return result.trimmed();
     }
     result = ui->uidTextBox->placeholderText();
-    if(result.size() && result != originalPlaceholderText)
-    {
+    if (result.size() && result != originalPlaceholderText) {
         return result.trimmed();
     }
     return QString();

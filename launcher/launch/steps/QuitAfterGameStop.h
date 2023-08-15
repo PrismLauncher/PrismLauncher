@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 dada513 <dada513@protonmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -20,16 +20,12 @@
 
 #include <launch/LaunchStep.h>
 
-class QuitAfterGameStop: public LaunchStep
-{
+class QuitAfterGameStop : public LaunchStep {
     Q_OBJECT
-public:
-    explicit QuitAfterGameStop(LaunchTask *parent) :LaunchStep(parent){};
-    virtual ~QuitAfterGameStop() {};
+   public:
+    explicit QuitAfterGameStop(LaunchTask* parent) : LaunchStep(parent){};
+    virtual ~QuitAfterGameStop(){};
 
     virtual void executeTask();
-    virtual bool canAbort() const
-    {
-        return false;
-    }
+    virtual bool canAbort() const { return false; }
 };

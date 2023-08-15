@@ -3,15 +3,14 @@
 #include "tasks/Task.h"
 
 class MinecraftInstance;
-class FoldersTask : public Task
-{
+class FoldersTask : public Task {
     Q_OBJECT
-public:
-    FoldersTask(MinecraftInstance * inst);
-    virtual ~FoldersTask() {};
+   public:
+    FoldersTask(MinecraftInstance* inst);
+    virtual ~FoldersTask(){};
 
     void executeTask() override;
-private:
-    MinecraftInstance *m_inst;
-};
 
+   private:
+    MinecraftInstance* m_inst;
+};

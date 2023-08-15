@@ -24,6 +24,12 @@ on:
       CACHIX_AUTH_TOKEN:
         description: Private token for authenticating against Cachix cache
         required: false
+      GPG_PRIVATE_KEY:
+        description: Private key for AppImage signing
+        required: false
+      GPG_PRIVATE_KEY_ID:
+        description: ID for the GPG_PRIVATE_KEY, to select the signing key
+        required: false
 
 jobs:
   build:
@@ -68,7 +74,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.5.1'
+            qt_version: '6.5.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -80,7 +86,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.5.1'
+            qt_version: '6.5.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -90,7 +96,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
-            qt_version: '6.5.0'
+            qt_version: '6.5.2'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -152,7 +158,7 @@ jobs:
 
       - name: Setup ccache
         if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
-        uses: hendrikmuhs/ccache-action@v1.2.9
+        uses: hendrikmuhs/ccache-action@v1.2.10
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
 
@@ -248,6 +254,8 @@ jobs:
           wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
+
+          wget "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-x86_64.AppImage"
 
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
           sudo apt install libopengl0
@@ -387,8 +395,8 @@ jobs:
           cd ${{ env.INSTALL_DIR }}
           if ("${{ matrix.qt_ver }}" -eq "5")
           {
-            Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll -Destination libcrypto-1_1.dll
-            Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
+            Copy-Item ${{ runner.workspace }}/Qt/Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll -Destination libcrypto-1_1.dll
+            Copy-Item ${{ runner.workspace }}/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
           }
           cd ${{ github.workspace }}
 
@@ -425,7 +433,7 @@ jobs:
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
-          
+
           Get-ChildItem ${{ env.INSTALL_PORTABLE_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_PORTABLE_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Package (Windows, installer)
@@ -466,11 +474,15 @@ jobs:
       - name: Package AppImage (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
         shell: bash
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
+
           mv ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.metainfo.xml ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.appdata.xml
           export "NO_APPSTREAM=1" # we have to skip appstream checking because appstream on ubuntu 20.04 is outdated
-          export OUTPUT="PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
+
+          export OUTPUT="PrismLauncher-Linux-x86_64.AppImage"
 
           chmod +x linuxdeploy-*.AppImage
 
@@ -481,8 +493,8 @@ jobs:
 
           cp -r ${{ github.workspace }}/JREs/jre17/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk
 
-          cp -r /home/runner/work/PrismLauncher/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
-          
+          cp -r ${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
+
           cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
           cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
           cp /usr/lib/x86_64-linux-gnu/libOpenGL.so.0* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
@@ -494,7 +506,32 @@ jobs:
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib"
           export LD_LIBRARY_PATH
 
+          chmod +x AppImageUpdate-x86_64.AppImage
+          ./AppImageUpdate-x86_64.AppImage --appimage-extract
+
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
+
+          cp -r squashfs-root/usr/bin/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
+          cp -r squashfs-root/usr/lib/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib
+          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
+          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
+
+          export UPDATE_INFORMATION="gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-Linux-x86_64.AppImage.zsync" 
+
+          if [ '${{ secrets.GPG_PRIVATE_KEY_ID }}' != '' ]; then
+            export SIGN=1
+            export SIGN_KEY=${{ secrets.GPG_PRIVATE_KEY_ID }}
+            mkdir -p ~/.gnupg/
+            printf "$GPG_PRIVATE_KEY" | base64 --decode > ~/.gnupg/private.key
+            gpg --import ~/.gnupg/private.key
+          else
+            echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $GITHUB_STEP_SUMMARY
+          fi
+
           ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
+
+          mv "PrismLauncher-Linux-x86_64.AppImage" "PrismLauncher-Linux-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
 
       ##
       # UPLOAD BUILDS
@@ -562,6 +599,13 @@ jobs:
         with:
           name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
           path: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
+      
+      - name: Upload AppImage Zsync (Linux)
+        if: runner.os == 'Linux' && matrix.qt_ver != 5
+        uses: actions/upload-artifact@v3
+        with:
+          name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage.zsync
+          path: PrismLauncher-Linux-x86_64.AppImage.zsync
 
       - name: ccache stats (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != ''
@@ -586,33 +630,3 @@ jobs:
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
-
-  nix:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package:
-          - prismlauncher
-          - prismlauncher-qt5
-    steps:
-      - name: Clone repository
-        if: inputs.build_type == 'Debug'
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-      - name: Install nix
-        if: inputs.build_type == 'Debug'
-        uses: cachix/install-nix-action@v22
-        with:
-          install_url: https://nixos.org/nix/install
-          extra_nix_config: |
-            auto-optimise-store = true
-            experimental-features = nix-command flakes
-      - uses: cachix/cachix-action@v12
-        if: inputs.build_type == 'Debug'
-        with:
-          name: prismlauncher
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Build
-        if: inputs.build_type == 'Debug'
-        run: nix build .#${{ matrix.package }} --print-build-logs

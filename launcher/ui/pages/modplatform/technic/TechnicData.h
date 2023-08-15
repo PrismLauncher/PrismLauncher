@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2021-2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -63,6 +63,6 @@ struct Modpack {
     QString recommended;
     QVector<QString> versions;
 };
-}
+}  // namespace Technic
 
 Q_DECLARE_METATYPE(Technic::Modpack)
