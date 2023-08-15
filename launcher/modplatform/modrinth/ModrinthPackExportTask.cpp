@@ -174,10 +174,10 @@ void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<QByteArray> 
             if (obj.isEmpty())
                 continue;
 
-            const QJsonArray files = obj["files"].toArray();
-            if (auto fileIter = std::find_if(files.begin(), files.end(),
+            const QJsonArray files_array = obj["files"].toArray();
+            if (auto fileIter = std::find_if(files_array.begin(), files_array.end(),
                                              [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
-                fileIter != files.end()) {
+                fileIter != files_array.end()) {
                 // map the file to the url
                 resolvedFiles[iterator.key()] =
                     ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), iterator.value(),

@@ -27,10 +27,9 @@
 QString stripVariableEntries(QString name, QString target, QString remove);
 QProcessEnvironment CleanEnviroment();
 
-class JavaUtils : public QObject
-{
+class JavaUtils : public QObject {
     Q_OBJECT
-public:
+   public:
     JavaUtils();
 
     JavaInstallPtr MakeJavaPtr(QString path, QString id = "unknown", QString arch = "unknown");

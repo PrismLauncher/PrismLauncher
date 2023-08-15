@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,9 +35,9 @@
 
 #include "ListModel.h"
 #include "Application.h"
+#include "net/ApiDownload.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
-#include "net/ApiDownload.h"
 
 #include <Version.h>
 #include "StringUtils.h"
@@ -77,7 +77,7 @@ bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
     return true;
 }
 
-bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+bool FilterModel::filterAcceptsRow([[maybe_unused]] int sourceRow, [[maybe_unused]] const QModelIndex& sourceParent) const
 {
     return true;
 }
@@ -174,10 +174,10 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void ListModel::fill(ModpackList modpacks)
+void ListModel::fill(ModpackList modpacks_)
 {
     beginResetModel();
-    this->modpacks = modpacks;
+    this->modpacks = modpacks_;
     endResetModel();
 }
 

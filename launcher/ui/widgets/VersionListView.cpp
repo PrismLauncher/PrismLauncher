@@ -34,35 +34,33 @@
  *      limitations under the License.
  */
 
-#include <QHeaderView>
-#include <QApplication>
-#include <QMouseEvent>
-#include <QDrag>
-#include <QPainter>
 #include "VersionListView.h"
+#include <QApplication>
+#include <QDrag>
+#include <QHeaderView>
+#include <QMouseEvent>
+#include <QPainter>
 
-VersionListView::VersionListView(QWidget *parent)
-    :QTreeView ( parent )
+VersionListView::VersionListView(QWidget* parent) : QTreeView(parent)
 {
     m_emptyString = tr("No versions are currently available.");
 }
 
-void VersionListView::rowsInserted(const QModelIndex &parent, int start, int end)
+void VersionListView::rowsInserted(const QModelIndex& parent, int start, int end)
 {
-    m_itemCount += end-start+1;
+    m_itemCount += end - start + 1;
     updateEmptyViewPort();
     QTreeView::rowsInserted(parent, start, end);
 }
 
-
-void VersionListView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
+void VersionListView::rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end)
 {
-    m_itemCount -= end-start+1;
+    m_itemCount -= end - start + 1;
     updateEmptyViewPort();
     QTreeView::rowsInserted(parent, start, end);
 }
 
-void VersionListView::setModel(QAbstractItemModel *model)
+void VersionListView::setModel(QAbstractItemModel* model)
 {
     m_itemCount = model->rowCount();
     updateEmptyViewPort();
@@ -71,11 +69,9 @@ void VersionListView::setModel(QAbstractItemModel *model)
 
 void VersionListView::reset()
 {
-    if(model())
-    {
+    if (model()) {
         m_itemCount = model()->rowCount();
-    }
-    else {
+    } else {
         m_itemCount = 0;
     }
     updateEmptyViewPort();
@@ -106,28 +102,23 @@ void VersionListView::updateEmptyViewPort()
     setAccessibleDescription(currentEmptyString());
 #endif /* !QT_NO_ACCESSIBILITY */
 
-    if(!m_itemCount)
-    {
+    if (!m_itemCount) {
         viewport()->update();
     }
 }
 
-void VersionListView::paintEvent(QPaintEvent *event)
+void VersionListView::paintEvent(QPaintEvent* event)
 {
-    if(m_itemCount)
-    {
+    if (m_itemCount) {
         QTreeView::paintEvent(event);
-    }
-    else
-    {
+    } else {
         paintInfoLabel(event);
     }
 }
 
 QString VersionListView::currentEmptyString() const
 {
-    switch(m_emptyMode)
-    {
+    switch (m_emptyMode) {
         default:
         case VersionListView::String:
             return m_emptyString;
@@ -136,12 +127,11 @@ QString VersionListView::currentEmptyString() const
     }
 }
 
-
-void VersionListView::paintInfoLabel(QPaintEvent *event) const
+void VersionListView::paintInfoLabel(QPaintEvent* event) const
 {
     QString emptyString = currentEmptyString();
 
-    //calculate the rect for the overlay
+    // calculate the rect for the overlay
     QPainter painter(viewport());
     painter.setRenderHint(QPainter::Antialiasing, true);
     QFont font("sans", 20);
@@ -163,7 +153,7 @@ void VersionListView::paintInfoLabel(QPaintEvent *event) const
     auto wrapRect = textRect;
     wrapRect.adjust(-10, -10, 10, 10);
 
-    //check if we are allowed to draw in our area
+    // check if we are allowed to draw in our area
     if (!event->rect().intersects(wrapRect)) {
         return;
     }

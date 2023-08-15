@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -43,8 +43,8 @@
 #include <QValidator>
 #include <utility>
 
-#include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/dialogs/NewInstanceDialog.h"
 
 #include "modplatform/flame/FlameAPI.h"
 
@@ -52,32 +52,24 @@
 
 #include "InstanceImportTask.h"
 
-
-class UrlValidator : public QValidator
-{
-public:
+class UrlValidator : public QValidator {
+   public:
     using QValidator::QValidator;
 
-    State validate(QString &in, int &pos) const
+    State validate(QString& in, [[maybe_unused]] int& pos) const
     {
         const QUrl url(in);
-        if (url.isValid() && !url.isRelative() && !url.isEmpty())
-        {
+        if (url.isValid() && !url.isRelative() && !url.isEmpty()) {
             return Acceptable;
-        }
-        else if (QFile::exists(in))
-        {
+        } else if (QFile::exists(in)) {
             return Acceptable;
-        }
-        else
-        {
+        } else {
             return Intermediate;
         }
     }
 };
 
-ImportPage::ImportPage(NewInstanceDialog* dialog, QWidget *parent)
-    : QWidget(parent), ui(new Ui::ImportPage), dialog(dialog)
+ImportPage::ImportPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::ImportPage), dialog(dialog)
 {
     ui->setupUi(this);
     ui->modpackEdit->setValidator(new UrlValidator(ui->modpackEdit));
@@ -138,7 +130,7 @@ void ImportPage::updateState()
 
             auto api = FlameAPI();
             auto job = api.getFile(addonId, fileId, array);
-            
+
             connect(job.get(), &NetJob::failed, this,
                     [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
             connect(job.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
@@ -201,7 +193,8 @@ void ImportPage::setUrl(const QString& url)
     updateState();
 }
 
-void ImportPage::setExtraInfo(const QMap<QString, QString>& extra_info) {
+void ImportPage::setExtraInfo(const QMap<QString, QString>& extra_info)
+{
     m_extra_info = extra_info;
     updateState();
 }
@@ -212,29 +205,21 @@ void ImportPage::on_modpackBtn_clicked()
     //: Option for filtering for *.mrpack files when importing
     filter += ";;" + tr("Modrinth pack") + " (*.mrpack)";
     const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), filter);
-    if (url.isValid())
-    {
-        if (url.isLocalFile())
-        {
+    if (url.isValid()) {
+        if (url.isLocalFile()) {
             ui->modpackEdit->setText(url.toLocalFile());
-        }
-        else
-        {
+        } else {
             ui->modpackEdit->setText(url.toString());
         }
     }
 }
 
-
 QUrl ImportPage::modpackUrl() const
 {
     const QUrl url(ui->modpackEdit->text());
-    if (url.isValid() && !url.isRelative() && !url.host().isEmpty())
-    {
+    if (url.isValid() && !url.isRelative() && !url.host().isEmpty()) {
         return url;
-    }
-    else
-    {
+    } else {
         return QUrl::fromLocalFile(ui->modpackEdit->text());
     }
 }

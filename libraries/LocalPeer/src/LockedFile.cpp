@@ -80,8 +80,7 @@
 
     \sa QFile::QFile()
 */
-LockedFile::LockedFile()
-    : QFile()
+LockedFile::LockedFile() : QFile()
 {
 #ifdef Q_OS_WIN
     wmutex = 0;
@@ -97,8 +96,7 @@ LockedFile::LockedFile()
 
     \sa QFile::QFile()
 */
-LockedFile::LockedFile(const QString &name)
-    : QFile(name)
+LockedFile::LockedFile(const QString& name) : QFile(name)
 {
 #ifdef Q_OS_WIN
     wmutex = 0;

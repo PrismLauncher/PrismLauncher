@@ -195,8 +195,8 @@ void ExportInstanceDialog::loadPackIgnore()
     if (!ignoreFile.open(QIODevice::ReadOnly)) {
         return;
     }
-    auto data = ignoreFile.readAll();
-    auto string = QString::fromUtf8(data);
+    auto ignoreData = ignoreFile.readAll();
+    auto string = QString::fromUtf8(ignoreData);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     proxyModel->setBlockedPaths(string.split('\n', Qt::SkipEmptyParts));
 #else
@@ -206,10 +206,10 @@ void ExportInstanceDialog::loadPackIgnore()
 
 void ExportInstanceDialog::savePackIgnore()
 {
-    auto data = proxyModel->blockedPaths().toStringList().join('\n').toUtf8();
+    auto ignoreData = proxyModel->blockedPaths().toStringList().join('\n').toUtf8();
     auto filename = ignoreFileName();
     try {
-        FS::write(filename, data);
+        FS::write(filename, ignoreData);
     } catch (const Exception& e) {
         qWarning() << e.cause();
     }

@@ -45,13 +45,12 @@
 #include <QVector>
 #endif
 
-class LockedFile : public QFile
-{
-public:
+class LockedFile : public QFile {
+   public:
     enum LockMode { NoLock = 0, ReadLock, WriteLock };
 
     LockedFile();
-    LockedFile(const QString &name);
+    LockedFile(const QString& name);
     ~LockedFile();
 
     bool open(OpenMode mode);
@@ -61,8 +60,7 @@ public:
     bool isLocked() const;
     LockMode lockMode() const;
 
-    private:
-
+   private:
 #ifdef Q_OS_WIN
     Qt::HANDLE wmutex;
     Qt::HANDLE rmutex;

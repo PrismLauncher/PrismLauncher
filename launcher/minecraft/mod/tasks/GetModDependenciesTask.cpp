@@ -61,7 +61,7 @@ GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
         if (auto meta = mod->metadata(); meta)
             m_mods.append(meta);
     prepare();
-};
+}
 
 void GetModDependenciesTask::prepare()
 {
@@ -130,7 +130,7 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
         c_dependencies.append(getOverride(ver_dep, providerName));
     }
     return c_dependencies;
-};
+}
 
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDependency> pDep)
 {
@@ -181,7 +181,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     ResourceAPI::DependencySearchArgs args = { dep, m_version, m_loaderType };
     ResourceAPI::DependencySearchCallbacks callbacks;
 
-    callbacks.on_succeed = [dep, provider, pDep, level, this](auto& doc, auto& pack) {
+    callbacks.on_succeed = [dep, provider, pDep, level, this](auto& doc, [[maybe_unused]] auto& pack) {
         try {
             QJsonArray arr;
             if (dep.version.length() != 0 && doc.isObject()) {
@@ -215,27 +215,27 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             return;
         }
         if (level == 0) {
-            qWarning() << "Dependency cycle exeeded";
+            qWarning() << "Dependency cycle exceeded";
             return;
         }
         if (dep.addonId.toString().isEmpty() && !pDep->version.addonId.toString().isEmpty()) {
             pDep->pack->addonId = pDep->version.addonId;
-            auto dep = getOverride({ pDep->version.addonId, pDep->dependency.type }, provider.name);
-            if (dep.addonId != pDep->version.addonId) {
+            auto dep_ = getOverride({ pDep->version.addonId, pDep->dependency.type }, provider.name);
+            if (dep_.addonId != pDep->version.addonId) {
                 removePack(pDep->version.addonId);
-                addTask(prepareDependencyTask(dep, provider.name, level));
+                addTask(prepareDependencyTask(dep_, provider.name, level));
             } else
                 addTask(getProjectInfoTask(pDep));
         }
-        for (auto dep : getDependenciesForVersion(pDep->version, provider.name)) {
-            addTask(prepareDependencyTask(dep, provider.name, level - 1));
+        for (auto dep_ : getDependenciesForVersion(pDep->version, provider.name)) {
+            addTask(prepareDependencyTask(dep_, provider.name, level - 1));
         }
     };
 
     auto version = provider.api->getDependencyVersion(std::move(args), std::move(callbacks));
     tasks->addTask(version);
     return tasks;
-};
+}
 
 void GetModDependenciesTask::removePack(const QVariant addonId)
 {

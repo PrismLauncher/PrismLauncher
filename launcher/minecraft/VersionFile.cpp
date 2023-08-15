@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
@@ -39,23 +39,22 @@
 
 #include <QDebug>
 
-#include "minecraft/VersionFile.h"
+#include "ParseUtils.h"
 #include "minecraft/Library.h"
 #include "minecraft/PackProfile.h"
-#include "ParseUtils.h"
+#include "minecraft/VersionFile.h"
 
 #include <Version.h>
 
-static bool isMinecraftVersion(const QString &uid)
+static bool isMinecraftVersion(const QString& uid)
 {
     return uid == "net.minecraft";
 }
 
-void VersionFile::applyTo(LaunchProfile *profile, const RuntimeContext & runtimeContext)
+void VersionFile::applyTo(LaunchProfile* profile, const RuntimeContext& runtimeContext)
 {
     // Only real Minecraft can set those. Don't let anything override them.
-    if (isMinecraftVersion(uid))
-    {
+    if (isMinecraftVersion(uid)) {
         profile->applyMinecraftVersion(version);
         profile->applyMinecraftVersionType(type);
         // HACK: ignore assets from other version files than Minecraft
@@ -75,16 +74,13 @@ void VersionFile::applyTo(LaunchProfile *profile, const RuntimeContext & runtime
     profile->applyTraits(traits);
     profile->applyCompatibleJavaMajors(compatibleJavaMajors);
 
-    for (auto library : libraries)
-    {
+    for (auto library : libraries) {
         profile->applyLibrary(library, runtimeContext);
     }
-    for (auto mavenFile : mavenFiles)
-    {
+    for (auto mavenFile : mavenFiles) {
         profile->applyMavenFile(mavenFile, runtimeContext);
     }
-    for (auto agent : agents)
-    {
+    for (auto agent : agents) {
         profile->applyAgent(agent, runtimeContext);
     }
     profile->applyProblemSeverity(getProblemSeverity());

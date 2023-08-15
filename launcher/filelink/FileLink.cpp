@@ -170,7 +170,7 @@ void FileLinkApp::runLink()
             FS::LinkResult result = { src_path, dst_path, QString::fromStdString(os_err.message()), os_err.value() };
             m_path_results.append(result);
         } else {
-            FS::LinkResult result = { src_path, dst_path, "", 0};
+            FS::LinkResult result = { src_path, dst_path, "", 0 };
             m_path_results.append(result);
         }
     }
@@ -230,7 +230,7 @@ void FileLinkApp::readPathPairs()
     in >> numLinks;
     qDebug() << "numLinks" << numLinks;
 
-    for (unsigned int i = 0; i < numLinks; i++) {
+    for (quint32 i = 0; i < numLinks; i++) {
         FS::LinkPair pair;
         in >> pair.src;
         in >> pair.dst;

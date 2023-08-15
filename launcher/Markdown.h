@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <QString>
 #include <cmark.h>
+#include <QString>
 
 QString markdownToHTML(const QString& markdown);

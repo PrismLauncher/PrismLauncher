@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -116,7 +116,7 @@ void FlamePage::triggerSearch()
     listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
 }
 
-void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
@@ -134,7 +134,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
         auto response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
-        netJob->addNetAction(Net::ApiDownload::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
+        netJob->addNetAction(
+            Net::ApiDownload::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId, curr] {
             if (addonId != current.addonId) {
@@ -214,12 +215,12 @@ void FlamePage::suggestCurrent()
                        [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }
 
-void FlamePage::onVersionSelectionChanged(QString data)
+void FlamePage::onVersionSelectionChanged(QString version)
 {
     bool is_blocked = false;
     ui->versionSelectionBox->currentData().toInt(&is_blocked);
 
-    if (data.isNull() || data.isEmpty() || is_blocked) {
+    if (version.isNull() || version.isEmpty() || is_blocked) {
         m_selected_version_index = -1;
         return;
     }

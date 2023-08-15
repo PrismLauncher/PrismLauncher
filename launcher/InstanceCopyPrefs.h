@@ -40,7 +40,7 @@ struct InstanceCopyPrefs {
     void enableDontLinkSaves(bool b);
     void enableUseClone(bool b);
 
-   protected: // data
+   protected:  // data
     bool copySaves = true;
     bool keepPlaytime = true;
     bool copyGameOptions = true;

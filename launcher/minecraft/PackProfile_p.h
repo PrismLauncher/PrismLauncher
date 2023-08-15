@@ -1,19 +1,18 @@
 #pragma once
 
-#include "Component.h"
-#include <map>
-#include <QTimer>
 #include <QList>
 #include <QMap>
+#include <QTimer>
+#include <map>
+#include "Component.h"
 
 class MinecraftInstance;
 using ComponentContainer = QList<ComponentPtr>;
 using ComponentIndex = QMap<QString, ComponentPtr>;
 
-struct PackProfileData
-{
+struct PackProfileData {
     // the instance this belongs to
-    MinecraftInstance *m_instance;
+    MinecraftInstance* m_instance;
 
     // the launch profile (volatile, temporary thing created on demand)
     std::shared_ptr<LaunchProfile> m_profile;
@@ -27,4 +26,3 @@ struct PackProfileData
     bool loaded = false;
     bool interactionDisabled = true;
 };
-

@@ -1,6 +1,6 @@
 #pragma once
-#include <QString>
 #include <QDateTime>
+#include <QString>
 
 /// take the timestamp used by S3 and turn it into QDateTime
 QDateTime timeFromS3Time(QString str);
