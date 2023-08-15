@@ -49,6 +49,8 @@
 #include "Application.h"
 #include "modplatform/technic/SolderPackManifest.h"
 
+#include "net/ApiDownload.h"
+
 TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
 {
     ui->setupUi(this);
@@ -100,7 +102,7 @@ void TechnicPage::triggerSearch()
     model->searchWithTerm(ui->searchEdit->text());
 }
 
-void TechnicPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void TechnicPage::onSelectionChanged(QModelIndex first, [[maybe_unused]] QModelIndex second)
 {
     ui->versionSelectionBox->clear();
 
@@ -125,7 +127,7 @@ void TechnicPage::suggestCurrent()
         return;
     }
 
-    QString editedLogoName = "technic_" + current.logoName.section(".", 0, 0);
+    QString editedLogoName = "technic_" + current.logoName;
     model->getLogo(current.logoName, current.logoUrl,
                    [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 
@@ -136,7 +138,7 @@ void TechnicPage::suggestCurrent()
 
     auto netJob = makeShared<NetJob>(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
     QString slug = current.slug;
-    netJob->addNetAction(Net::Download::makeByteArray(
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), response));
     QObject::connect(netJob.get(), &NetJob::succeeded, this, [this, slug] {
         jobPtr.reset();
@@ -232,7 +234,7 @@ void TechnicPage::metadataLoaded()
 
         auto netJob = makeShared<NetJob>(QString("Technic::SolderMeta(%1)").arg(current.name), APPLICATION->network());
         auto url = QString("%1/modpack/%2").arg(current.url, current.slug);
-        netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), response));
+        netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
 
         QObject::connect(netJob.get(), &NetJob::succeeded, this, &TechnicPage::onSolderLoaded);
 
@@ -304,13 +306,13 @@ void TechnicPage::onSolderLoaded()
     metadataLoaded();
 }
 
-void TechnicPage::onVersionSelectionChanged(QString data)
+void TechnicPage::onVersionSelectionChanged(QString version)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }
 
-    selectedVersion = data;
+    selectedVersion = version;
     selectVersion();
 }

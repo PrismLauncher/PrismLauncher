@@ -31,7 +31,7 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
                                         const QString& instIcon,
                                         const QString& stagingPath,
                                         const QString& minecraftVersion,
-                                        const bool isSolder)
+                                        [[maybe_unused]] const bool isSolder)
 {
     QString minecraftPath = FS::PathCombine(stagingPath, ".minecraft");
     QString configPath = FS::PathCombine(stagingPath, "instance.cfg");
@@ -138,15 +138,15 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
     try {
         QJsonDocument doc = Json::requireDocument(data);
         QJsonObject root = Json::requireObject(doc, "version.json");
-        QString minecraftVersion = Json::ensureString(root, "inheritsFrom", QString(), "");
-        if (minecraftVersion.isEmpty()) {
+        QString packMinecraftVersion = Json::ensureString(root, "inheritsFrom", QString(), "");
+        if (packMinecraftVersion.isEmpty()) {
             if (fmlMinecraftVersion.isEmpty()) {
                 emit failed(tr("Could not understand \"version.json\":\ninheritsFrom is missing"));
                 return;
             }
-            minecraftVersion = fmlMinecraftVersion;
+            packMinecraftVersion = fmlMinecraftVersion;
         }
-        components->setComponentVersion("net.minecraft", minecraftVersion, true);
+        components->setComponentVersion("net.minecraft", packMinecraftVersion, true);
         for (auto library : Json::ensureArray(root, "libraries", {})) {
             if (!library.isObject()) {
                 continue;

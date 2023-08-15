@@ -133,15 +133,15 @@ SkinUploadDialog::SkinUploadDialog(MinecraftAccountPtr acct, QWidget* parent) : 
     ui->setupUi(this);
 
     // FIXME: add a model for this, download/refresh the capes on demand
-    auto& data = *acct->accountData();
+    auto& accountData = *acct->accountData();
     int index = 0;
     ui->capeCombo->addItem(tr("No Cape"), QVariant());
-    auto currentCape = data.minecraftProfile.currentCape;
+    auto currentCape = accountData.minecraftProfile.currentCape;
     if (currentCape.isEmpty()) {
         ui->capeCombo->setCurrentIndex(index);
     }
 
-    for (auto& cape : data.minecraftProfile.capes) {
+    for (auto& cape : accountData.minecraftProfile.capes) {
         index++;
         if (cape.data.size()) {
             QPixmap capeImage;

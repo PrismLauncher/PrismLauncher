@@ -47,7 +47,7 @@
             <item>
              <widget class="QPushButton" name="jprofilerPathBtn">
               <property name="text">
-               <string notr="true">...</string>
+               <string>Browse</string>
               </property>
              </widget>
             </item>
@@ -84,7 +84,7 @@
             <item>
              <widget class="QPushButton" name="jvisualvmPathBtn">
               <property name="text">
-               <string notr="true">...</string>
+               <string>Browse</string>
               </property>
              </widget>
             </item>
@@ -121,7 +121,7 @@
             <item>
              <widget class="QPushButton" name="mceditPathBtn">
               <property name="text">
-               <string notr="true">...</string>
+               <string>Browse</string>
               </property>
              </widget>
             </item>
@@ -166,7 +166,7 @@
           <item row="0" column="2">
            <widget class="QToolButton" name="jsonEditorBrowseBtn">
             <property name="text">
-             <string notr="true">...</string>
+             <string>Browse</string>
             </property>
            </widget>
           </item>

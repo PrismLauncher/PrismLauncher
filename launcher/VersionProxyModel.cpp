@@ -194,12 +194,12 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
             switch (column) {
                 case Name: {
                     if (hasRecommended) {
-                        auto value = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
-                        if (value.toBool()) {
+                        auto recommenced = sourceModel()->data(parentIndex, BaseVersionList::RecommendedRole);
+                        if (recommenced.toBool()) {
                             return APPLICATION->getThemedIcon("star");
                         } else if (hasLatest) {
-                            auto value = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
-                            if (value.toBool()) {
+                            auto latest = sourceModel()->data(parentIndex, BaseVersionList::LatestRole);
+                            if (latest.toBool()) {
                                 return APPLICATION->getThemedIcon("bug");
                             }
                         }
@@ -228,7 +228,7 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
     }
 }
 
-QModelIndex VersionProxyModel::parent(const QModelIndex& child) const
+QModelIndex VersionProxyModel::parent([[maybe_unused]] const QModelIndex& child) const
 {
     return QModelIndex();
 }
@@ -408,7 +408,9 @@ void VersionProxyModel::sourceRowsAboutToBeInserted(const QModelIndex& parent, i
     beginInsertRows(parent, first, last);
 }
 
-void VersionProxyModel::sourceRowsInserted(const QModelIndex& parent, int first, int last)
+void VersionProxyModel::sourceRowsInserted([[maybe_unused]] const QModelIndex& parent,
+                                           [[maybe_unused]] int first,
+                                           [[maybe_unused]] int last)
 {
     endInsertRows();
 }
@@ -418,7 +420,7 @@ void VersionProxyModel::sourceRowsAboutToBeRemoved(const QModelIndex& parent, in
     beginRemoveRows(parent, first, last);
 }
 
-void VersionProxyModel::sourceRowsRemoved(const QModelIndex& parent, int first, int last)
+void VersionProxyModel::sourceRowsRemoved([[maybe_unused]] const QModelIndex& parent, [[maybe_unused]] int first, [[maybe_unused]] int last)
 {
     endRemoveRows();
 }

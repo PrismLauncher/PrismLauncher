@@ -63,7 +63,7 @@ class Version {
     struct Section {
         explicit Section(QString fullString) : m_fullString(std::move(fullString))
         {
-            int cutoff = m_fullString.size();
+            qsizetype cutoff = m_fullString.size();
             for (int i = 0; i < m_fullString.size(); i++) {
                 if (!m_fullString[i].isDigit()) {
                     cutoff = i;

@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,6 +43,7 @@
 #include <QMimeData>
 #include <QSet>
 #include <QUrl>
+#include "icons/IconUtils.h"
 
 #define MAX_SIZE 1024
 
@@ -128,7 +130,7 @@ void IconList::directoryChanged(const QString& path)
 
         QString suffix = rmfile.suffix();
         // The icon doesnt have a suffix, but it can have other .s in the name, so we account for those as well
-        if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico" && suffix != "svg" && suffix != "gif")
+        if (!IconUtils::isIconSuffix(suffix))
             key = rmfile.fileName();
 
         int idx = getIconIndex(key);
@@ -155,7 +157,7 @@ void IconList::directoryChanged(const QString& path)
 
         QString suffix = addfile.suffix();
         // The icon doesnt have a suffix, but it can have other .s in the name, so we account for those as well
-        if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico" && suffix != "svg" && suffix != "gif")
+        if (!IconUtils::isIconSuffix(suffix))
             key = addfile.fileName();
 
         if (addIcon(key, QString(), addfile.filePath(), IconType::FileBased)) {
@@ -255,10 +257,7 @@ bool IconList::dropMimeData(const QMimeData* data,
 Qt::ItemFlags IconList::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
-    if (index.isValid())
-        return Qt::ItemIsDropEnabled | defaultFlags;
-    else
-        return Qt::ItemIsDropEnabled | defaultFlags;
+    return Qt::ItemIsDropEnabled | defaultFlags;
 }
 
 QVariant IconList::data(const QModelIndex& index, int role) const
@@ -290,19 +289,8 @@ int IconList::rowCount(const QModelIndex& parent) const
 
 void IconList::installIcons(const QStringList& iconFiles)
 {
-    for (QString file : iconFiles) {
-        QFileInfo fileinfo(file);
-        if (!fileinfo.isReadable() || !fileinfo.isFile())
-            continue;
-        QString target = FS::PathCombine(getDirectory(), fileinfo.fileName());
-
-        QString suffix = fileinfo.suffix();
-        if (suffix != "jpeg" && suffix != "png" && suffix != "jpg" && suffix != "ico" && suffix != "svg" && suffix != "gif")
-            continue;
-
-        if (!QFile::copy(file, target))
-            continue;
-    }
+    for (QString file : iconFiles)
+        installIcon(file, {});
 }
 
 void IconList::installIcon(const QString& file, const QString& name)
@@ -311,18 +299,17 @@ void IconList::installIcon(const QString& file, const QString& name)
     if (!fileinfo.isReadable() || !fileinfo.isFile())
         return;
 
-    QString target = FS::PathCombine(getDirectory(), name);
+    if (!IconUtils::isIconSuffix(fileinfo.suffix()))
+        return;
 
+    QString target = FS::PathCombine(getDirectory(), name.isEmpty() ? fileinfo.fileName() : name);
     QFile::copy(file, target);
 }
 
 bool IconList::iconFileExists(const QString& key) const
 {
     auto iconEntry = icon(key);
-    if (!iconEntry) {
-        return false;
-    }
-    return iconEntry->has(IconType::FileBased);
+    return iconEntry && iconEntry->has(IconType::FileBased);
 }
 
 const MMCIcon* IconList::icon(const QString& key) const
@@ -335,18 +322,12 @@ const MMCIcon* IconList::icon(const QString& key) const
 
 bool IconList::deleteIcon(const QString& key)
 {
-    if (!iconFileExists(key))
-        return false;
-
-    return QFile::remove(icon(key)->getFilePath());
+    return iconFileExists(key) && QFile::remove(icon(key)->getFilePath());
 }
 
 bool IconList::trashIcon(const QString& key)
 {
-    if (!iconFileExists(key))
-        return false;
-
-    return FS::trash(icon(key)->getFilePath(), nullptr);
+    return iconFileExists(key) && FS::trash(icon(key)->getFilePath(), nullptr);
 }
 
 bool IconList::addThemeIcon(const QString& key)
@@ -357,20 +338,19 @@ bool IconList::addThemeIcon(const QString& key)
         oldOne.replace(Builtin, key);
         dataChanged(index(*iter), index(*iter));
         return true;
-    } else {
-        // add a new icon
-        beginInsertRows(QModelIndex(), icons.size(), icons.size());
-        {
-            MMCIcon mmc_icon;
-            mmc_icon.m_name = key;
-            mmc_icon.m_key = key;
-            mmc_icon.replace(Builtin, key);
-            icons.push_back(mmc_icon);
-            name_index[key] = icons.size() - 1;
-        }
-        endInsertRows();
-        return true;
     }
+    // add a new icon
+    beginInsertRows(QModelIndex(), icons.size(), icons.size());
+    {
+        MMCIcon mmc_icon;
+        mmc_icon.m_name = key;
+        mmc_icon.m_key = key;
+        mmc_icon.replace(Builtin, key);
+        icons.push_back(mmc_icon);
+        name_index[key] = icons.size() - 1;
+    }
+    endInsertRows();
+    return true;
 }
 
 bool IconList::addIcon(const QString& key, const QString& name, const QString& path, const IconType type)
@@ -385,20 +365,19 @@ bool IconList::addIcon(const QString& key, const QString& name, const QString& p
         oldOne.replace(type, icon, path);
         dataChanged(index(*iter), index(*iter));
         return true;
-    } else {
-        // add a new icon
-        beginInsertRows(QModelIndex(), icons.size(), icons.size());
-        {
-            MMCIcon mmc_icon;
-            mmc_icon.m_name = name;
-            mmc_icon.m_key = key;
-            mmc_icon.replace(type, icon, path);
-            icons.push_back(mmc_icon);
-            name_index[key] = icons.size() - 1;
-        }
-        endInsertRows();
-        return true;
     }
+    // add a new icon
+    beginInsertRows(QModelIndex(), icons.size(), icons.size());
+    {
+        MMCIcon mmc_icon;
+        mmc_icon.m_name = name;
+        mmc_icon.m_key = key;
+        mmc_icon.replace(type, icon, path);
+        icons.push_back(mmc_icon);
+        name_index[key] = icons.size() - 1;
+    }
+    endInsertRows();
+    return true;
 }
 
 void IconList::saveIcon(const QString& key, const QString& path, const char* format) const
@@ -446,5 +425,3 @@ QString IconList::getDirectory() const
 {
     return m_dir.absolutePath();
 }
-
-//#include "IconList.moc"
