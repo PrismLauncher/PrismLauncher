@@ -19,9 +19,9 @@
 
 #include "BaseProfiler.h"
 
-class WaitProfilerFactory : public BaseProfilerFactory {
+class GenericProfilerFactory : public BaseProfilerFactory {
    public:
-    QString name() const override { return "WaitProfiler"; }
+    QString name() const override { return "Generic"; }
     void registerSettings([[maybe_unused]] SettingsObjectPtr settings) override{};
     BaseExternalTool* createTool(InstancePtr instance, QObject* parent = 0) override;
     bool check([[maybe_unused]] QString* error) override { return true; };

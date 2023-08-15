@@ -15,30 +15,32 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "WaitProfiler.h"
+#include "GenericProfiler.h"
 
 #include "BaseInstance.h"
 #include "launch/LaunchTask.h"
 #include "settings/SettingsObject.h"
 
-class WaitProfiler : public BaseProfiler {
+class GenericProfiler : public BaseProfiler {
     Q_OBJECT
    public:
-    WaitProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject* parent = 0);
+    GenericProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject* parent = 0);
 
    protected:
     void beginProfilingImpl(shared_qobject_ptr<LaunchTask> process);
 };
 
-WaitProfiler::WaitProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject* parent) : BaseProfiler(settings, instance, parent) {}
+GenericProfiler::GenericProfiler(SettingsObjectPtr settings, InstancePtr instance, QObject* parent)
+    : BaseProfiler(settings, instance, parent)
+{}
 
-void WaitProfiler::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
+void GenericProfiler::beginProfilingImpl(shared_qobject_ptr<LaunchTask> process)
 {
     emit readyToLaunch(tr("Started process: %1").arg(process->pid()));
 }
 
-BaseExternalTool* WaitProfilerFactory::createTool(InstancePtr instance, QObject* parent)
+BaseExternalTool* GenericProfilerFactory::createTool(InstancePtr instance, QObject* parent)
 {
-    return new WaitProfiler(globalSettings, instance, parent);
+    return new GenericProfiler(globalSettings, instance, parent);
 }
-#include "WaitProfiler.moc"
+#include "GenericProfiler.moc"
