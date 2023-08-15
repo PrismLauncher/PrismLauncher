@@ -457,6 +457,8 @@ set(TOOLS_SOURCES
     tools/JVisualVM.h
     tools/MCEditTool.cpp
     tools/MCEditTool.h
+    tools/WaitProfiler.cpp
+    tools/WaitProfiler.h
 )
 
 set(META_SOURCES
