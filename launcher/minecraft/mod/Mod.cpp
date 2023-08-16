@@ -132,15 +132,21 @@ auto Mod::destroy(QDir& index_dir, bool preserve_metadata, bool attempt_trash) -
     if (!preserve_metadata) {
         qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
 
-        if (metadata()) {
-            Metadata::remove(index_dir, metadata()->slug);
-        } else {
-            auto n = name();
-            Metadata::remove(index_dir, n);
-        }
+        destroyMetadata(index_dir);
     }
 
     return Resource::destroy(attempt_trash);
+}
+
+void Mod::destroyMetadata(QDir& index_dir)
+{
+    if (metadata()) {
+        Metadata::remove(index_dir, metadata()->slug);
+    } else {
+        auto n = name();
+        Metadata::remove(index_dir, n);
+    }
+    m_local_details.metadata = nullptr;
 }
 
 auto Mod::details() const -> const ModDetails&

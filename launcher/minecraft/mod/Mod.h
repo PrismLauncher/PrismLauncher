@@ -93,6 +93,8 @@ class Mod : public Resource {
 
     // Delete all the files of this mod
     auto destroy(QDir& index_dir, bool preserve_metadata = false, bool attempt_trash = true) -> bool;
+    // Delete the metadata only
+    void destroyMetadata(QDir& index_dir);
 
     void finishResolvingWithDetails(ModDetails&& details);
 

@@ -128,7 +128,6 @@ struct IndexedPack {
         return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }
 };
-QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 struct OverrideDep {
     QString quilt;
