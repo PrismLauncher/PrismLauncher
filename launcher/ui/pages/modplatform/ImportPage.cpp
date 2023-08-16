@@ -114,7 +114,6 @@ void ImportPage::updateState()
             bool isMRPack = fi.suffix() == "mrpack";
 
             if (fi.exists() && (isZip || isMRPack)) {
-                QFileInfo fi(url.fileName());
                 auto extra_info = QMap(m_extra_info);
                 qDebug() << "Pack Extra Info" << extra_info << m_extra_info;
                 dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this, std::move(extra_info)));
