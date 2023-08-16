@@ -328,5 +328,5 @@ void ModFolderPage::deleteModMetadata()
                         ->exec();
 
     if (response == QMessageBox::Yes)
-        m_model->deleteModsMeatadata(selection);
+        m_model->deleteModsMetadata(selection);
 }

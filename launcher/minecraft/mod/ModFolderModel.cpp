@@ -228,7 +228,7 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
     return true;
 }
 
-bool ModFolderModel::deleteModsMeatadata(const QModelIndexList& indexes)
+bool ModFolderModel::deleteModsMetadata(const QModelIndexList& indexes)
 {
     if (indexes.isEmpty())
         return true;
