@@ -310,23 +310,20 @@ void ModFolderPage::visitModPages()
 void ModFolderPage::deleteModMetadata()
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    QString text;
     auto selectionCount = m_model->selectedMods(selection).length();
     if (selectionCount == 0)
         return;
-    else if (selectionCount > 1)
-        text = tr("You are about to remove the metadata for %1 mods.\n"
-                  "Are you sure?")
-                   .arg(selectionCount);
-    else
-        text = tr("You are about to remove the metadata for %1.\n"
-                  "Are you sure?")
-                   .arg(m_model->at(selection.at(0).row())->name());
+    if (selectionCount > 1) {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
+                                                     tr("You are about to remove the metadata for %1 mods.\n"
+                                                        "Are you sure?")
+                                                         .arg(selectionCount),
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
 
-    auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"), text, QMessageBox::Warning,
-                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                        ->exec();
+        if (response != QMessageBox::Yes)
+            return;
+    }
 
-    if (response == QMessageBox::Yes)
-        m_model->deleteModsMetadata(selection);
+    m_model->deleteModsMetadata(selection);
 }
