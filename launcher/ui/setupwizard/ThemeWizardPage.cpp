@@ -61,7 +61,7 @@ void ThemeWizardPage::updateIcons()
 void ThemeWizardPage::updateCat()
 {
     qDebug() << "Setting Cat";
-    ui->catImagePreviewButton->setIcon(QIcon(QString(R"(%1)").arg(APPLICATION->getCatPack())));
+    ui->catImagePreviewButton->setIcon(QIcon(QString(R"(%1)").arg(APPLICATION->themeManager()->getCatPack())));
 }
 
 void ThemeWizardPage::retranslate()

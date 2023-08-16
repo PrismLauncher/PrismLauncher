@@ -22,8 +22,7 @@ class JavaDownloader : public Task {
     void parseMojangManifest(bool isLegacy, const QJsonArray& versionArray);
     void downloadMojangJava(bool isLegacy, const QJsonDocument& doc);
 
-    static void mojangOStoAzul(const QString& OS, QString& azulOS, QString& arch, QString& bitness) ;
+    static void mojangOStoAzul(const QString& OS, QString& azulOS, QString& arch, QString& bitness);
     void downloadAzulMeta(const QString& OS, bool isLegacy, const NetJob* netJob);
     void downloadAzulJava(bool isLegacy, const QJsonArray& array);
-
 };

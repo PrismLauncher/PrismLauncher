@@ -43,9 +43,8 @@ class BaseVersion {
      * the kind of version this is (Stable, Beta, Snapshot, whatever)
      */
     virtual QString typeString() const = 0;
-
-    virtual bool operator<(BaseVersion& a) { return name() < a.name(); };
-    virtual bool operator>(BaseVersion& a) { return name() > a.name(); };
+    virtual bool operator<(BaseVersion& a) { return name() < a.name(); }
+    virtual bool operator>(BaseVersion& a) { return name() > a.name(); }
 };
 
 Q_DECLARE_METATYPE(BaseVersion::Ptr)

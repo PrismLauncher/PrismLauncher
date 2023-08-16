@@ -15,26 +15,23 @@
 
 #pragma once
 
-#include <QDialog>
 #include <net/NetJob.h>
+#include <QDialog>
 
-namespace Ui
-{
+namespace Ui {
 class AboutDialog;
 }
 
-class AboutDialog : public QDialog
-{
+class AboutDialog : public QDialog {
     Q_OBJECT
 
-public:
-    explicit AboutDialog(QWidget *parent = 0);
+   public:
+    explicit AboutDialog(QWidget* parent = 0);
     ~AboutDialog();
 
-private:
-    Ui::AboutDialog *ui;
+   private:
+    Ui::AboutDialog* ui;
 
     NetJob::Ptr netJob;
     QByteArray dataSink;
 };
-

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,12 +37,12 @@
 #include "InstanceWindow.h"
 #include "Application.h"
 
-#include <QScrollBar>
-#include <QMessageBox>
-#include <QHBoxLayout>
-#include <QPushButton>
 #include <qlayoutitem.h>
 #include <QCloseEvent>
+#include <QHBoxLayout>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QScrollBar>
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -51,8 +52,7 @@
 
 #include "icons/IconList.h"
 
-InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
-    : QMainWindow(parent), m_instance(instance)
+InstanceWindow::InstanceWindow(InstancePtr instance, QWidget* parent) : QMainWindow(parent), m_instance(instance)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
@@ -143,8 +143,7 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 
 void InstanceWindow::on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus)
 {
-    if(newStatus == BaseInstance::Status::Gone)
-    {
+    if (newStatus == BaseInstance::Status::Gone) {
         m_doNotSave = true;
         close();
     }
@@ -152,25 +151,20 @@ void InstanceWindow::on_instanceStatusChanged(BaseInstance::Status, BaseInstance
 
 void InstanceWindow::updateLaunchButtons()
 {
-    if(m_instance->isRunning())
-    {
+    if (m_instance->isRunning()) {
         m_launchOfflineButton->setEnabled(false);
         m_launchDemoButton->setEnabled(false);
         m_killButton->setText(tr("Kill"));
         m_killButton->setObjectName("killButton");
         m_killButton->setToolTip(tr("Kill the running instance"));
-    }
-    else if(!m_instance->canLaunch())
-    {
+    } else if (!m_instance->canLaunch()) {
         m_launchOfflineButton->setEnabled(false);
         m_launchDemoButton->setEnabled(false);
         m_killButton->setText(tr("Launch"));
         m_killButton->setObjectName("launchButton");
         m_killButton->setToolTip(tr("Launch the instance"));
         m_killButton->setEnabled(false);
-    }
-    else
-    {
+    } else {
         m_launchOfflineButton->setEnabled(true);
 
         // Disable demo-mode if not available.
@@ -207,7 +201,7 @@ void InstanceWindow::runningStateChanged(bool running)
 {
     updateLaunchButtons();
     m_container->refreshContainer();
-    if(running) {
+    if (running) {
         selectPage("log");
     }
 }
@@ -217,16 +211,14 @@ void InstanceWindow::on_closeButton_clicked()
     close();
 }
 
-void InstanceWindow::closeEvent(QCloseEvent *event)
+void InstanceWindow::closeEvent(QCloseEvent* event)
 {
     bool proceed = true;
-    if(!m_doNotSave)
-    {
+    if (!m_doNotSave) {
         proceed &= m_container->prepareToClose();
     }
 
-    if(!proceed)
-    {
+    if (!proceed) {
         return;
     }
 
@@ -243,12 +235,9 @@ bool InstanceWindow::saveAll()
 
 void InstanceWindow::on_btnKillMinecraft_clicked()
 {
-    if(m_instance->isRunning())
-    {
+    if (m_instance->isRunning()) {
         APPLICATION->kill(m_instance);
-    }
-    else
-    {
+    } else {
         APPLICATION->launch(m_instance, true, false, nullptr);
     }
 }
@@ -263,19 +252,21 @@ bool InstanceWindow::selectPage(QString pageId)
     return m_container->selectPage(pageId);
 }
 
+BasePage* InstanceWindow::selectedPage() const
+{
+    return m_container->selectedPage();
+}
+
 void InstanceWindow::refreshContainer()
 {
     m_container->refreshContainer();
 }
 
-InstanceWindow::~InstanceWindow()
-{
-}
+InstanceWindow::~InstanceWindow() {}
 
 bool InstanceWindow::requestClose()
 {
-    if(m_container->prepareToClose())
-    {
+    if (m_container->prepareToClose()) {
         close();
         return true;
     }

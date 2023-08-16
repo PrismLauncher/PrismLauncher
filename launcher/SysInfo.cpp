@@ -1,30 +1,28 @@
-#include <QString>
 #include <QDebug>
+#include <QString>
 #ifdef Q_OS_MACOS
 #include <sys/sysctl.h>
 #endif
-#include <QStandardPaths>
 #include <QFile>
-#include <QProcess>
 #include <QMap>
-#include "java/JavaUtils.h"
-#include "Commandline.h"
+#include <QProcess>
+#include <QStandardPaths>
 #include "Application.h"
+#include "Commandline.h"
+#include "java/JavaUtils.h"
 
 #ifdef Q_OS_MACOS
-bool rosettaDetect() {
+bool rosettaDetect()
+{
     int ret = 0;
     size_t size = sizeof(ret);
-    if (sysctlbyname("sysctl.proc_translated", &ret, &size, NULL, 0) == -1)
-    {
+    if (sysctlbyname("sysctl.proc_translated", &ret, &size, NULL, 0) == -1) {
         return false;
     }
-    if(ret == 0)
-    {
+    if (ret == 0) {
         return false;
     }
-    if(ret == 1)
-    {
+    if (ret == 1) {
         return true;
     }
     return false;
@@ -32,7 +30,8 @@ bool rosettaDetect() {
 #endif
 
 namespace SysInfo {
-QString currentSystem() {
+QString currentSystem()
+{
 #if defined(Q_OS_LINUX)
     return "linux";
 #elif defined(Q_OS_MACOS)
@@ -48,19 +47,16 @@ QString currentSystem() {
 #endif
 }
 
-QString useQTForArch(){
+QString useQTForArch()
+{
     auto qtArch = QSysInfo::currentCpuArchitecture();
 #if defined(Q_OS_MACOS) && !defined(Q_PROCESSOR_ARM)
-    if(rosettaDetect())
-    {
+    if (rosettaDetect()) {
         return "arm64";
-    }
-    else
-    {
+    } else {
         return "x86_64";
     }
 #endif
     return qtArch;
 }
-}
-
+}  // namespace SysInfo

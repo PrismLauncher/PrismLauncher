@@ -80,9 +80,8 @@ void JavaDownloader::parseMojangManifest(bool isLegacy, const QJsonArray& versio
 
     download->addNetAction(Net::Download::makeByteArray(QUrl(url), files));
 
-    connect(download.get(), &NetJob::finished, [download, files, this] {
-        disconnect(this, &Task::aborted, download.get(), &NetJob::abort);
-    });
+    connect(download.get(), &NetJob::finished,
+            [download, files, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
     connect(download.get(), &NetJob::progress, this, &JavaDownloader::progress);
     connect(download.get(), &NetJob::failed, this, &JavaDownloader::emitFailed);
     connect(this, &Task::aborted, download.get(), &NetJob::abort);
@@ -177,9 +176,8 @@ void JavaDownloader::downloadAzulMeta(const QString& OS, bool isLegacy, const Ne
                                              )
                                          .arg(javaVersion, azulOS, arch, bitness),
                                      metaResponse));
-    connect(downloadJob.get(), &NetJob::finished, [downloadJob, metaResponse, this] {
-        disconnect(this, &Task::aborted, downloadJob.get(), &NetJob::abort);
-    });
+    connect(downloadJob.get(), &NetJob::finished,
+            [downloadJob, metaResponse, this] { disconnect(this, &Task::aborted, downloadJob.get(), &NetJob::abort); });
     connect(this, &Task::aborted, downloadJob.get(), &NetJob::abort);
     connect(netJob, &NetJob::failed, this, &JavaDownloader::emitFailed);
     connect(downloadJob.get(), &NetJob::progress, this, &JavaDownloader::progress);

@@ -1,13 +1,12 @@
 #pragma once
-#include <QWriteLocker>
-#include <QReadLocker>
 #include <QMap>
+#include <QReadLocker>
 #include <QSet>
+#include <QWriteLocker>
 
 template <typename K, typename V>
-class RWStorage
-{
-public:
+class RWStorage {
+   public:
     void add(K key, V value)
     {
         QWriteLocker l(&lock);
@@ -17,21 +16,19 @@ public:
     V get(K key)
     {
         QReadLocker l(&lock);
-        if(cache.contains(key))
-        {
+        if (cache.contains(key)) {
             return cache[key];
-        }
-        else return V();
+        } else
+            return V();
     }
     bool get(K key, V& value)
     {
         QReadLocker l(&lock);
-        if(cache.contains(key))
-        {
+        if (cache.contains(key)) {
             value = cache[key];
             return true;
-        }
-        else return false;
+        } else
+            return false;
     }
     bool has(K key)
     {
@@ -41,15 +38,14 @@ public:
     bool stale(K key)
     {
         QReadLocker l(&lock);
-        if(!cache.contains(key))
+        if (!cache.contains(key))
             return true;
         return stale_entries.contains(key);
     }
     void setStale(K key)
     {
         QWriteLocker l(&lock);
-        if(cache.contains(key))
-        {
+        if (cache.contains(key)) {
             stale_entries.insert(key);
         }
     }
@@ -59,7 +55,8 @@ public:
         cache.clear();
         stale_entries.clear();
     }
-private:
+
+   private:
     QReadWriteLock lock;
     QMap<K, V> cache;
     QSet<K> stale_entries;

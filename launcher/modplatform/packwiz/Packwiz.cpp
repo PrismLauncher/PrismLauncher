@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -89,7 +89,8 @@ auto intEntry(toml::table table, QString entry_name) -> int
     return node.value_or(0);
 }
 
-auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod
+auto V1::createModFormat([[maybe_unused]] QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version)
+    -> Mod
 {
     Mod mod;
 
@@ -114,7 +115,7 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
     return mod;
 }
 
-auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod, QString slug) -> Mod
+auto V1::createModFormat(QDir& index_dir, [[maybe_unused]] ::Mod& internal_mod, QString slug) -> Mod
 {
     // Try getting metadata if it exists
     Mod mod{ getIndexForMod(index_dir, slug) };
@@ -241,12 +242,13 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
         return {};
     }
 #else
-    table = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
-    if (!table) {
+    toml::parse_result result = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
+    if (!result) {
         qWarning() << QString("Could not open file %1!").arg(normalized_fname);
-        qWarning() << "Reason: " << QString(table.error().what());
+        qWarning() << "Reason: " << result.error().description();
         return {};
     }
+    table = result.table();
 #endif
 
     // index_file.close();

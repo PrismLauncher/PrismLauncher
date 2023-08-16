@@ -1,6 +1,8 @@
 #include "FileResolvingTask.h"
 
 #include "Json.h"
+#include "net/ApiDownload.h"
+#include "net/ApiUpload.h"
 #include "net/Upload.h"
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
@@ -38,7 +40,7 @@ void Flame::FileResolvingTask::executeTask()
             return l;
         }));
     QByteArray data = Json::toText(object);
-    auto dl = Net::Upload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result, data);
+    auto dl = Net::ApiUpload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result, data);
     m_dljob->addNetAction(dl);
 
     auto step_progress = std::make_shared<TaskStepProgress>();
@@ -93,13 +95,13 @@ void Flame::FileResolvingTask::netJobFinished()
         auto& out = m_toProcess.files[fileid];
         try {
             out.parseFromObject(Json::requireObject(file));
-        } catch (const JSONValidationError& e) {
+        } catch ([[maybe_unused]] const JSONValidationError& e) {
             qDebug() << "Blocked mod on curseforge" << out.fileName;
             auto hash = out.hash;
             if (!hash.isEmpty()) {
                 auto url = QString("https://api.modrinth.com/v2/version_file/%1?algorithm=sha1").arg(hash);
                 auto output = std::make_shared<QByteArray>();
-                auto dl = Net::Download::makeByteArray(QUrl(url), output);
+                auto dl = Net::ApiDownload::makeByteArray(QUrl(url), output);
                 QObject::connect(dl.get(), &Net::Download::succeeded, [&out]() { out.resolved = true; });
 
                 m_checkJob->addNetAction(dl);
@@ -171,7 +173,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
             auto projectId = mod->projectId;
             auto output = std::make_shared<QByteArray>();
             auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(projectId);
-            auto dl = Net::Download::makeByteArray(url, output);
+            auto dl = Net::ApiDownload::makeByteArray(url, output);
             qDebug() << "Fetching url slug for file:" << mod->fileName;
             QObject::connect(dl.get(), &Net::Download::succeeded, [block, index, output]() {
                 auto mod = block->at(index);  // use the shared_ptr so it is captured and only freed when we are done

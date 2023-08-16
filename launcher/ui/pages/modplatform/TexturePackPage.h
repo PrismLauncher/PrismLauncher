@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "ui_ResourcePage.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/pages/modplatform/ResourcePackPage.h"
 #include "ui/pages/modplatform/TexturePackModel.h"
+#include "ui_ResourcePage.h"
 
 namespace Ui {
 class ResourcePage;
@@ -39,8 +39,7 @@ class TexturePackResourcePage : public ResourcePackResourcePage {
     [[nodiscard]] inline QString resourceString() const override { return tr("texture pack"); }
 
    protected:
-    TexturePackResourcePage(TexturePackDownloadDialog* dialog, BaseInstance& instance)
-        : ResourcePackResourcePage(dialog, instance)
+    TexturePackResourcePage(TexturePackDownloadDialog* dialog, BaseInstance& instance) : ResourcePackResourcePage(dialog, instance)
     {
         connect(m_ui->searchButton, &QPushButton::clicked, this, &TexturePackResourcePage::triggerSearch);
         connect(m_ui->packView, &QListView::doubleClicked, this, &TexturePackResourcePage::onResourceSelected);

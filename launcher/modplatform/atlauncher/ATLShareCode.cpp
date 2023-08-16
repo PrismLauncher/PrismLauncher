@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -57,4 +57,4 @@ void loadShareCodeResponse(ShareCodeResponse& r, QJsonObject& obj)
     }
 }
 
-}
+}  // namespace ATLauncher

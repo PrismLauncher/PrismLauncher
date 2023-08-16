@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -28,13 +28,13 @@
 class TexturePackParseTest : public QObject {
     Q_OBJECT
 
-    private slots:
+   private slots:
     void test_parseZIP()
     {
         QString source = QFINDTESTDATA("testdata/TexturePackParse");
 
         QString zip_rp = FS::PathCombine(source, "test_texture_pack_idk.zip");
-        TexturePack pack { QFileInfo(zip_rp) };
+        TexturePack pack{ QFileInfo(zip_rp) };
 
         bool valid = TexturePackUtils::processZIP(pack);
 
@@ -47,7 +47,7 @@ class TexturePackParseTest : public QObject {
         QString source = QFINDTESTDATA("testdata/TexturePackParse");
 
         QString folder_rp = FS::PathCombine(source, "test_texturefolder");
-        TexturePack pack { QFileInfo(folder_rp) };
+        TexturePack pack{ QFileInfo(folder_rp) };
 
         bool valid = TexturePackUtils::processFolder(pack, TexturePackUtils::ProcessingLevel::BasicInfoOnly);
 
@@ -60,7 +60,7 @@ class TexturePackParseTest : public QObject {
         QString source = QFINDTESTDATA("testdata/TexturePackParse");
 
         QString folder_rp = FS::PathCombine(source, "another_test_texturefolder");
-        TexturePack pack { QFileInfo(folder_rp) };
+        TexturePack pack{ QFileInfo(folder_rp) };
 
         bool valid = TexturePackUtils::process(pack, TexturePackUtils::ProcessingLevel::BasicInfoOnly);
 
