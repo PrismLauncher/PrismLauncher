@@ -1,36 +1,33 @@
-#include <QNetworkAccessManager>
-#include <QNetworkRequest>
-#include <QNetworkReply>
 #include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 
 #include "AuthFlow.h"
 #include "katabasis/Globals.h"
 
 #include <Application.h>
 
-AuthFlow::AuthFlow(AccountData * data, QObject *parent) :
-    AccountTask(data, parent)
+AuthFlow::AuthFlow(AccountData* data, QObject* parent) : AccountTask(data, parent) {}
+
+void AuthFlow::succeed()
 {
-}
-
-void AuthFlow::succeed() {
     m_data->validity_ = Katabasis::Validity::Certain;
-    changeState(
-        AccountTaskState::STATE_SUCCEEDED,
-        tr("Finished all authentication steps")
-    );
+    changeState(AccountTaskState::STATE_SUCCEEDED, tr("Finished all authentication steps"));
 }
 
-void AuthFlow::executeTask() {
-    if(m_currentStep) {
+void AuthFlow::executeTask()
+{
+    if (m_currentStep) {
         return;
     }
     changeState(AccountTaskState::STATE_WORKING, tr("Initializing"));
     nextStep();
 }
 
-void AuthFlow::nextStep() {
-    if(m_steps.size() == 0) {
+void AuthFlow::nextStep()
+{
+    if (m_steps.size() == 0) {
         // we got to the end without an incident... assume this is all.
         m_currentStep.reset();
         succeed();
@@ -46,15 +43,13 @@ void AuthFlow::nextStep() {
     m_currentStep->perform();
 }
 
-
-QString AuthFlow::getStateMessage() const {
-    switch (m_taskState)
-    {
+QString AuthFlow::getStateMessage() const
+{
+    switch (m_taskState) {
         case AccountTaskState::STATE_WORKING: {
-            if(m_currentStep) {
+            if (m_currentStep) {
                 return m_currentStep->describe();
-            }
-            else {
+            } else {
                 return tr("Working...");
             }
         }
@@ -64,8 +59,9 @@ QString AuthFlow::getStateMessage() const {
     }
 }
 
-void AuthFlow::stepFinished(AccountTaskState resultingState, QString message) {
-    if(changeState(resultingState, message)) {
+void AuthFlow::stepFinished(AccountTaskState resultingState, QString message)
+{
+    if (changeState(resultingState, message)) {
         nextStep();
     }
 }

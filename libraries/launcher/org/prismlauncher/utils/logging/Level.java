@@ -55,5 +55,4 @@ public enum Level {
         this.name = name;
         this.stderr = stderr;
     }
-
 }

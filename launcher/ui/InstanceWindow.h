@@ -49,15 +49,15 @@
 
 class QPushButton;
 class PageContainer;
-class InstanceWindow : public QMainWindow, public BasePageContainer
-{
+class InstanceWindow : public QMainWindow, public BasePageContainer {
     Q_OBJECT
 
 public:
-    explicit InstanceWindow(InstancePtr proc, QWidget *parent = 0);
+    explicit InstanceWindow(InstancePtr proc, QWidget* parent = 0);
     virtual ~InstanceWindow() = default;
 
     bool selectPage(QString pageId) override;
+    BasePage* selectedPage() const override;
     void refreshContainer() override;
 
     QString instanceId();
@@ -68,27 +68,26 @@ public:
     // request closing the window (from a page)
     bool requestClose() override;
 
-signals:
+   signals:
     void isClosing();
 
-private
-slots:
+   private slots:
     void instanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc);
     void runningStateChanged(bool running);
     void on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus);
 
-protected:
-    void closeEvent(QCloseEvent *) override;
+   protected:
+    void closeEvent(QCloseEvent*) override;
 
-private:
+   private:
     void updateButtons();
 
-private:
+   private:
     shared_qobject_ptr<LaunchTask> m_proc;
     InstancePtr m_instance;
     bool m_doNotSave = false;
-    PageContainer *m_container = nullptr;
-    QPushButton *m_closeButton = nullptr;
-    QToolButton *m_launchButton = nullptr;
-    QPushButton *m_killButton = nullptr;
+    PageContainer* m_container = nullptr;
+    QPushButton* m_closeButton = nullptr;
+    QToolButton* m_launchButton = nullptr;
+    QPushButton* m_killButton = nullptr;
 };

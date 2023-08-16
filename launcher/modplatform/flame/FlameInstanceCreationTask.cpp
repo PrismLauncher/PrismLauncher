@@ -61,6 +61,7 @@
 #include "meta/VersionList.h"
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
+#include "net/ApiDownload.h"
 
 static const FlameAPI api;
 
@@ -353,11 +354,11 @@ bool FlameCreationTask::createInstance()
             id.remove("forge-");
             loaderType = "forge";
             loaderUid = "net.minecraftforge";
-        } else if (loaderType == "fabric") {
+        } else if (id.startsWith("fabric-")) {
             id.remove("fabric-");
             loaderType = "fabric";
             loaderUid = "net.fabricmc.fabric-loader";
-        } else if (loaderType == "quilt") {
+        } else if (id.startsWith("quilt-")) {
             id.remove("quilt-");
             loaderType = "quilt";
             loaderUid = "org.quiltmc.quilt-loader";
@@ -432,7 +433,7 @@ bool FlameCreationTask::createInstance()
     });
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::progress, this, &FlameCreationTask::setProgress);
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::status, this, &FlameCreationTask::setStatus);
-    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::stepProgress, this, &FlameCreationTask::propogateStepProgress);
+    connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::stepProgress, this, &FlameCreationTask::propagateStepProgress);
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::details, this, &FlameCreationTask::setDetails);
     m_mod_id_resolver->start();
 
@@ -523,7 +524,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
             case Flame::File::Type::Mod: {
                 if (!result.url.isEmpty()) {
                     qDebug() << "Will download" << result.url << "to" << path;
-                    auto dl = Net::Download::makeFile(result.url, path);
+                    auto dl = Net::ApiDownload::makeFile(result.url, path);
                     m_files_job->addNetAction(dl);
                 }
                 break;
@@ -552,7 +553,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);
     });
-    connect(m_files_job.get(), &NetJob::stepProgress, this, &FlameCreationTask::propogateStepProgress);
+    connect(m_files_job.get(), &NetJob::stepProgress, this, &FlameCreationTask::propagateStepProgress);
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));

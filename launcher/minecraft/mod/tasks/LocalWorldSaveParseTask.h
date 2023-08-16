@@ -39,7 +39,7 @@ bool processFolder(WorldSave& pack, ProcessingLevel level = ProcessingLevel::Ful
 
 bool validate(QFileInfo file);
 
-} // namespace WorldSaveUtils
+}  // namespace WorldSaveUtils
 
 class LocalWorldSaveParseTask : public Task {
     Q_OBJECT

@@ -136,6 +136,15 @@ set(NET_SOURCES
     net/Validator.h
     net/Upload.cpp
     net/Upload.h
+    net/HeaderProxy.h
+    net/RawHeaderProxy.h
+    net/ApiHeaderProxy.h
+    net/ApiDownload.h
+    net/ApiDownload.cpp
+    net/ApiUpload.cpp
+    net/ApiUpload.h
+    net/NetRequest.cpp
+    net/NetRequest.h
 )
 
 # Game launch logic
@@ -262,8 +271,6 @@ set(MINECRAFT_SOURCES
     minecraft/launch/CreateGameFolders.h
     minecraft/launch/ModMinecraftJar.cpp
     minecraft/launch/ModMinecraftJar.h
-    minecraft/launch/DirectJavaLaunch.cpp
-    minecraft/launch/DirectJavaLaunch.h
     minecraft/launch/ExtractNatives.cpp
     minecraft/launch/ExtractNatives.h
     minecraft/launch/LauncherPartLaunch.cpp
@@ -501,6 +508,11 @@ set(FTB_SOURCES
     modplatform/legacy_ftb/PrivatePackManager.cpp
 
     modplatform/legacy_ftb/PackHelpers.h
+
+    modplatform/import_ftb/PackInstallTask.h
+    modplatform/import_ftb/PackInstallTask.cpp
+    modplatform/import_ftb/PackHelpers.h
+    modplatform/import_ftb/PackHelpers.cpp
 )
 
 set(FLAME_SOURCES
@@ -563,6 +575,9 @@ set(ATLAUNCHER_SOURCES
 )
 
 set(LINKEXE_SOURCES
+    WindowsConsole.cpp
+    WindowsConsole.h
+
     filelink/FileLink.h
     filelink/FileLink.cpp
     FileSystem.h
@@ -668,7 +683,7 @@ set(LOGIC_SOURCES
     ${ATLAUNCHER_SOURCES}
 )
 
-if(APPLE)
+if(APPLE AND Launcher_ENABLE_UPDATER)
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${MAC_UPDATE_SOURCES})
 endif()
 
@@ -759,6 +774,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/ITheme.h
     ui/themes/SystemTheme.cpp
     ui/themes/SystemTheme.h
+    ui/themes/IconTheme.cpp
+    ui/themes/IconTheme.h
     ui/themes/ThemeManager.cpp
     ui/themes/ThemeManager.h
     ui/themes/CatPack.cpp
@@ -872,6 +889,11 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/legacy_ftb/ListModel.h
     ui/pages/modplatform/legacy_ftb/ListModel.cpp
 
+    ui/pages/modplatform/import_ftb/ImportFTBPage.cpp
+    ui/pages/modplatform/import_ftb/ImportFTBPage.h
+    ui/pages/modplatform/import_ftb/ListModel.h
+    ui/pages/modplatform/import_ftb/ListModel.cpp
+
     ui/pages/modplatform/flame/FlameModel.cpp
     ui/pages/modplatform/flame/FlameModel.h
     ui/pages/modplatform/flame/FlamePage.cpp
@@ -954,6 +976,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ChooseProviderDialog.cpp
     ui/dialogs/ModUpdateDialog.cpp
     ui/dialogs/ModUpdateDialog.h
+    ui/dialogs/InstallLoaderDialog.cpp
+    ui/dialogs/InstallLoaderDialog.h
 
     # GUI - widgets
     ui/widgets/Common.cpp
@@ -1018,6 +1042,14 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/VisualGroup.h
 )
 
+if(WIN32)
+    set(LAUNCHER_SOURCES
+        WindowsConsole.cpp
+        WindowsConsole.h
+        ${LAUNCHER_SOURCES}
+    )
+endif()
+
 qt_wrap_ui(LAUNCHER_UI
     ui/MainWindow.ui
     ui/setupwizard/PasteWizardPage.ui
@@ -1046,6 +1078,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/ResourcePage.ui
     ui/pages/modplatform/flame/FlamePage.ui
     ui/pages/modplatform/legacy_ftb/Page.ui
+    ui/pages/modplatform/import_ftb/ImportFTBPage.ui
     ui/pages/modplatform/ImportPage.ui
     ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
@@ -1100,8 +1133,15 @@ if(WIN32)
     set(LAUNCHER_RCS ${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_WindowsRC})
 endif()
 
+include(CompilerWarnings)
+
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+set_project_warnings(Launcher_logic
+    "${Launcher_MSVC_WARNINGS}"
+    "${Launcher_CLANG_WARNINGS}"
+    "${Launcher_GCC_WARNINGS}")
+target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Launcher_logic
     systeminfo
@@ -1141,17 +1181,23 @@ if(APPLE)
     set(CMAKE_MACOSX_RPATH 1)
     set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks/")
 
-    file(DOWNLOAD ${MACOSX_SPARKLE_DOWNLOAD_URL} ${CMAKE_BINARY_DIR}/Sparkle.tar.xz EXPECTED_HASH SHA256=${MACOSX_SPARKLE_SHA256})
-    file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
+    if(Launcher_ENABLE_UPDATER)
+      file(DOWNLOAD ${MACOSX_SPARKLE_DOWNLOAD_URL} ${CMAKE_BINARY_DIR}/Sparkle.tar.xz EXPECTED_HASH SHA256=${MACOSX_SPARKLE_SHA256})
+      file(ARCHIVE_EXTRACT INPUT ${CMAKE_BINARY_DIR}/Sparkle.tar.xz DESTINATION ${CMAKE_BINARY_DIR}/frameworks/Sparkle)
 
-    find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
+      find_library(SPARKLE_FRAMEWORK Sparkle "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
+      add_compile_definitions(SPARKLE_ENABLED)
+    endif()
+
     target_link_libraries(Launcher_logic
         "-framework AppKit"
         "-framework Carbon"
         "-framework Foundation"
         "-framework ApplicationServices"
     )
-    target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
+    if(Launcher_ENABLE_UPDATER)
+      target_link_libraries(Launcher_logic ${SPARKLE_FRAMEWORK})
+    endif()
 endif()
 
 target_link_libraries(Launcher_logic)
@@ -1180,6 +1226,11 @@ install(TARGETS ${Launcher_Name}
 
 if(WIN32)
     add_library(filelink_logic STATIC ${LINKEXE_SOURCES})
+    set_project_warnings(filelink_logic
+    "${Launcher_MSVC_WARNINGS}"
+    "${Launcher_CLANG_WARNINGS}"
+    "${Launcher_GCC_WARNINGS}")
+
     target_include_directories(filelink_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(filelink_logic
         systeminfo
@@ -1213,7 +1264,7 @@ if(WIN32)
     )
 endif()
 
-if (UNIX AND APPLE)
+if (UNIX AND APPLE AND Launcher_ENABLE_UPDATER)
     # Add Sparkle updater
     # It has to be copied here instead of just allowing fixup_bundle to install it, otherwise essential parts of
     # the framework aren't installed

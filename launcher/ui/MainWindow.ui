@@ -186,9 +186,14 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
-    <addaction name="actionViewInstanceFolder"/>
     <addaction name="actionViewLauncherRootFolder"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewInstanceFolder"/>
     <addaction name="actionViewCentralModsFolder"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewIconThemeFolder"/>
+    <addaction name="actionViewWidgetThemeFolder"/>
+    <addaction name="actionViewCatPackFolder"/>
    </widget>
    <widget class="QMenu" name="accountsMenu">
     <property name="title">
@@ -467,15 +472,17 @@
   </action>
   <action name="actionExportInstanceFlamePack">
    <property name="icon">
-    <iconset theme="flame"/>
+    <iconset theme="flame">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>CurseForge (zip)</string>  
+    <string>CurseForge (zip)</string>
    </property>
   </action>
   <action name="actionExportInstanceToModList">
    <property name="icon">
-    <iconset theme="new"/>
+    <iconset theme="new">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Mod List</string>
@@ -538,7 +545,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>&amp;View Instance Folder</string>
+    <string>View &amp;Instance Folder</string>
    </property>
    <property name="toolTip">
     <string>Open the instance folder in a file browser.</string>
@@ -550,7 +557,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>&amp;View Launcher Root Folder</string>
+    <string>View Launcher &amp;Root Folder</string>
    </property>
    <property name="toolTip">
     <string>Open the launcher's root folder in a file browser.</string>
@@ -703,6 +710,38 @@
    </property>
    <property name="toolTip">
     <string>Open the %1 wiki</string>
+   </property>
+  </action>
+  <action name="actionViewWidgetThemeFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>View &amp;Widget Themes Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>View Widget Theme Folder</string>
+   </property>
+  </action>
+  <action name="actionViewIconThemeFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>View I&amp;con Theme Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>View Icon Theme Folder</string>
+   </property>
+  </action>
+  <action name="actionViewCatPackFolder">
+   <property name="icon">
+    <iconset theme="viewfolder"/>
+   </property>
+   <property name="text">
+    <string>View Cat Packs Folder</string>
    </property>
   </action>
  </widget>

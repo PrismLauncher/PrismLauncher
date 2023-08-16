@@ -2,25 +2,22 @@
 #include <Application.h>
 #include <translations/TranslationsModel.h>
 
-#include "ui/widgets/LanguageSelectionWidget.h"
-#include <QVBoxLayout>
 #include <BuildConfig.h>
+#include <QVBoxLayout>
+#include "ui/widgets/LanguageSelectionWidget.h"
 
-LanguageWizardPage::LanguageWizardPage(QWidget *parent)
-    : BaseWizardPage(parent)
+LanguageWizardPage::LanguageWizardPage(QWidget* parent) : BaseWizardPage(parent)
 {
     setObjectName(QStringLiteral("languagePage"));
     auto layout = new QVBoxLayout(this);
     mainWidget = new LanguageSelectionWidget(this);
-    layout->setContentsMargins(0,0,0,0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(mainWidget);
 
     retranslate();
 }
 
-LanguageWizardPage::~LanguageWizardPage()
-{
-}
+LanguageWizardPage::~LanguageWizardPage() {}
 
 bool LanguageWizardPage::wantsRefreshButton()
 {

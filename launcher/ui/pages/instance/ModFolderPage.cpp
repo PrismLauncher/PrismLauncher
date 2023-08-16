@@ -127,7 +127,7 @@ bool ModFolderPage::shouldDisplay() const
     return true;
 }
 
-bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+bool ModFolderPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();

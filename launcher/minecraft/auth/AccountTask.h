@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,10 +37,10 @@
 
 #include <tasks/Task.h>
 
-#include <QString>
-#include <QJsonObject>
-#include <QTimer>
 #include <qsslerror.h>
+#include <QJsonObject>
+#include <QString>
+#include <QTimer>
 
 #include "MinecraftAccount.h"
 
@@ -50,37 +50,32 @@ class QNetworkReply;
  * Enum for describing the state of the current task.
  * Used by the getStateMessage function to determine what the status message should be.
  */
-enum class AccountTaskState
-{
+enum class AccountTaskState {
     STATE_CREATED,
     STATE_WORKING,
     STATE_SUCCEEDED,
-    STATE_DISABLED, //!< MSA Client ID has changed. Tell user to reloginn
-    STATE_FAILED_SOFT, //!< soft failure. authentication went through partially
-    STATE_FAILED_HARD, //!< hard failure. main tokens are invalid
-    STATE_FAILED_GONE, //!< hard failure. main tokens are invalid, and the account no longer exists
-    STATE_OFFLINE //!< soft failure. authentication failed in the first step in a 'soft' way
+    STATE_DISABLED,     //!< MSA Client ID has changed. Tell user to reloginn
+    STATE_FAILED_SOFT,  //!< soft failure. authentication went through partially
+    STATE_FAILED_HARD,  //!< hard failure. main tokens are invalid
+    STATE_FAILED_GONE,  //!< hard failure. main tokens are invalid, and the account no longer exists
+    STATE_OFFLINE       //!< soft failure. authentication failed in the first step in a 'soft' way
 };
 
-class AccountTask : public Task
-{
+class AccountTask : public Task {
     Q_OBJECT
-public:
-    explicit AccountTask(AccountData * data, QObject *parent = 0);
-    virtual ~AccountTask() {};
+   public:
+    explicit AccountTask(AccountData* data, QObject* parent = 0);
+    virtual ~AccountTask(){};
 
     AccountTaskState m_taskState = AccountTaskState::STATE_CREATED;
 
-    AccountTaskState taskState() {
-        return m_taskState;
-    }
+    AccountTaskState taskState() { return m_taskState; }
 
-signals:
-    void showVerificationUriAndCode(const QUrl &uri, const QString &code, int expiresIn);
+   signals:
+    void showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn);
     void hideVerificationUriAndCode();
 
-protected:
-
+   protected:
     /**
      * Returns the state message for the given state.
      * Used to set the status message for the task.
@@ -88,10 +83,10 @@ protected:
      */
     virtual QString getStateMessage() const;
 
-protected slots:
+   protected slots:
     // NOTE: true -> non-terminal state, false -> terminal state
     bool changeState(AccountTaskState newState, QString reason = QString());
 
-protected:
-    AccountData *m_data = nullptr;
+   protected:
+    AccountData* m_data = nullptr;
 };

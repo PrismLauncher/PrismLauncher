@@ -46,32 +46,27 @@ namespace Net {
 /** Maximum time to hold a cache entry
  *  = 1 week in seconds
  */
-#define MAX_TIME_TO_EXPIRE 1*7*24*60*60
+#define MAX_TIME_TO_EXPIRE 1 * 7 * 24 * 60 * 60
 
-
-MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator * md5sum, bool is_eternal)
-    :Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum), m_is_eternal(is_eternal)
+MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator* md5sum, bool is_eternal)
+    : Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum), m_is_eternal(is_eternal)
 {
     addValidator(md5sum);
 }
 
 Task::State MetaCacheSink::initCache(QNetworkRequest& request)
 {
-    if (!m_entry->isStale())
-    {
+    if (!m_entry->isStale()) {
         return Task::State::Succeeded;
     }
 
     // check if file exists, if it does, use its information for the request
     QFile current(m_filename);
-    if(current.exists() && current.size() != 0)
-    {
-        if (m_entry->getRemoteChangedTimestamp().size())
-        {
+    if (current.exists() && current.size() != 0) {
+        if (m_entry->getRemoteChangedTimestamp().size()) {
             request.setRawHeader(QString("If-Modified-Since").toLatin1(), m_entry->getRemoteChangedTimestamp().toLatin1());
         }
-        if (m_entry->getETag().size())
-        {
+        if (m_entry->getETag().size()) {
             request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->getETag().toLatin1());
         }
     }
@@ -79,25 +74,23 @@ Task::State MetaCacheSink::initCache(QNetworkRequest& request)
     return Task::State::Running;
 }
 
-Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
+Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
 {
     QFileInfo output_file_info(m_filename);
 
-    if(wroteAnyData)
-    {
+    if (wroteAnyData) {
         m_entry->setMD5Sum(m_md5Node->hash().toHex().constData());
     }
 
     m_entry->setETag(reply.rawHeader("ETag").constData());
 
-    if (reply.hasRawHeader("Last-Modified"))
-    {
+    if (reply.hasRawHeader("Last-Modified")) {
         m_entry->setRemoteChangedTimestamp(reply.rawHeader("Last-Modified").constData());
     }
 
     m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
 
-    { // Cache lifetime
+    {  // Cache lifetime
         if (m_is_eternal) {
             qCDebug(taskMetaCacheLogC) << "Adding eternal cache entry:" << m_entry->getFullPath();
             m_entry->makeEternal(true);
@@ -141,4 +134,4 @@ bool MetaCacheSink::hasLocalData()
     QFileInfo info(m_filename);
     return info.exists() && info.size() != 0;
 }
-}
+}  // namespace Net

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -41,8 +41,7 @@
  * @file libutil/src/cmdutils.cpp
  */
 
-namespace Commandline
-{
+namespace Commandline {
 
 // commandline splitter
 QStringList splitArgs(QString args)
@@ -51,19 +50,15 @@ QStringList splitArgs(QString args)
     QString current;
     bool escape = false;
     QChar inquotes;
-    for (int i = 0; i < args.length(); i++)
-    {
+    for (int i = 0; i < args.length(); i++) {
         QChar cchar = args.at(i);
 
         // \ escaped
-        if (escape)
-        {
+        if (escape) {
             current += cchar;
             escape = false;
             // in "quotes"
-        }
-        else if (!inquotes.isNull())
-        {
+        } else if (!inquotes.isNull()) {
             if (cchar == '\\')
                 escape = true;
             else if (cchar == inquotes)
@@ -71,18 +66,13 @@ QStringList splitArgs(QString args)
             else
                 current += cchar;
             // otherwise
-        }
-        else
-        {
-            if (cchar == ' ')
-            {
-                if (!current.isEmpty())
-                {
+        } else {
+            if (cchar == ' ') {
+                if (!current.isEmpty()) {
                     argv << current;
                     current.clear();
                 }
-            }
-            else if (cchar == '"' || cchar == '\'')
+            } else if (cchar == '"' || cchar == '\'')
                 inquotes = cchar;
             else
                 current += cchar;
@@ -92,4 +82,4 @@ QStringList splitArgs(QString args)
         argv << current;
     return argv;
 }
-}
+}  // namespace Commandline

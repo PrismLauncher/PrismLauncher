@@ -63,34 +63,32 @@ class KonamiCode;
 class InstanceTask;
 class LabeledToolButton;
 
-namespace Ui
-{
+namespace Ui {
 class MainWindow;
 }
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = 0);
+   public:
+    explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
 
-    bool eventFilter(QObject *obj, QEvent *ev) override;
-    void closeEvent(QCloseEvent *event) override;
-    void changeEvent(QEvent * event) override;
+    bool eventFilter(QObject* obj, QEvent* ev) override;
+    void closeEvent(QCloseEvent* event) override;
+    void changeEvent(QEvent* event) override;
 
     void checkInstancePathForProblems();
 
     void updatesAllowedChanged(bool allowed);
 
     void processURLs(QList<QUrl> urls);
-signals:
+   signals:
     void isClosing();
 
-protected:
-    QMenu * createPopupMenu() override;
+   protected:
+    QMenu* createPopupMenu() override;
 
-private slots:
+   private slots:
     void onCatToggled(bool);
 
     void onCatChanged(int);
@@ -111,15 +109,18 @@ private slots:
 
     void on_actionChangeInstIcon_triggered();
 
-    void on_actionViewInstanceFolder_triggered();
-
     void on_actionViewLauncherRootFolder_triggered();
+
+    void on_actionViewInstanceFolder_triggered();
+    void on_actionViewCentralModsFolder_triggered();
+
+    void on_actionViewIconThemeFolder_triggered();
+    void on_actionViewWidgetThemeFolder_triggered();
+    void on_actionViewCatPackFolder_triggered();
 
     void on_actionViewSelectedInstFolder_triggered();
 
     void refreshInstances();
-
-    void on_actionViewCentralModsFolder_triggered();
 
     void checkForUpdates();
 
@@ -131,9 +132,9 @@ private slots:
 
     void on_actionClearMetadata_triggered();
 
-    #ifdef Q_OS_MAC
+#ifdef Q_OS_MAC
     void on_actionAddToPATH_triggered();
-    #endif
+#endif
 
     void on_actionOpenWiki_triggered();
 
@@ -150,7 +151,10 @@ private slots:
     void deleteGroup();
     void undoTrashInstance();
 
-    inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
+    inline void on_actionExportInstance_triggered()
+    {
+        on_actionExportInstanceZip_triggered();
+    }
     void on_actionExportInstanceZip_triggered();
     void on_actionExportInstanceMrPack_triggered();
     void on_actionExportInstanceFlamePack_triggered();
@@ -169,7 +173,7 @@ private slots:
      */
     void iconUpdated(QString);
 
-    void showInstanceContextMenu(const QPoint &);
+    void showInstanceContextMenu(const QPoint&);
 
     void updateMainToolBar();
 
@@ -179,15 +183,15 @@ private slots:
 
     void instanceActivated(QModelIndex);
 
-    void instanceChanged(const QModelIndex &current, const QModelIndex &previous);
+    void instanceChanged(const QModelIndex& current, const QModelIndex& previous);
 
     void instanceSelectRequest(QString id);
 
-    void instanceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+    void instanceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
     void selectionBad();
 
-    void startTask(Task *task);
+    void startTask(Task* task);
 
     void defaultAccountChanged();
 
@@ -197,7 +201,6 @@ private slots:
 
     void updateNewsLabel();
 
-
     void konamiTriggered();
 
     void globalSettingsClosed();
@@ -205,38 +208,38 @@ private slots:
     void lockToolbars(bool);
 
 #ifndef Q_OS_MAC
-    void keyReleaseEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
 #endif
 
     void refreshCurrentInstance();
 
-private:
+   private:
     void retranslateUi();
 
     void addInstance(QString url = QString());
     void activateInstance(InstancePtr instance);
     void setCatBackground(bool enabled);
     void updateInstanceToolIcon(QString new_icon);
-    void setSelectedInstanceById(const QString &id);
+    void setSelectedInstanceById(const QString& id);
     void updateStatusCenter();
     void setInstanceActionsEnabled(bool enabled);
 
-    void runModalTask(Task *task);
-    void instanceFromInstanceTask(InstanceTask *task);
+    void runModalTask(Task* task);
+    void instanceFromInstanceTask(InstanceTask* task);
     void finalizeInstance(InstancePtr inst);
 
-private:
-    Ui::MainWindow *ui;
+   private:
+    Ui::MainWindow* ui;
     // these are managed by Qt's memory management model!
-    InstanceView *view = nullptr;
-    InstanceProxyModel *proxymodel = nullptr;
-    QToolButton *newsLabel = nullptr;
-    QLabel *m_statusLeft = nullptr;
-    QLabel *m_statusCenter = nullptr;
-    LabeledToolButton *changeIconButton = nullptr;
-    LabeledToolButton *renameButton = nullptr;
-    QToolButton *helpMenuButton = nullptr;
-    KonamiCode * secretEventFilter = nullptr;
+    InstanceView* view = nullptr;
+    InstanceProxyModel* proxymodel = nullptr;
+    QToolButton* newsLabel = nullptr;
+    QLabel* m_statusLeft = nullptr;
+    QLabel* m_statusCenter = nullptr;
+    LabeledToolButton* changeIconButton = nullptr;
+    LabeledToolButton* renameButton = nullptr;
+    QToolButton* helpMenuButton = nullptr;
+    KonamiCode* secretEventFilter = nullptr;
 
     std::shared_ptr<Setting> instanceToolbarSetting = nullptr;
 
@@ -246,5 +249,5 @@ private:
     QString m_currentInstIcon;
 
     // managed by the application object
-    Task *m_versionLoadTask = nullptr;
+    Task* m_versionLoadTask = nullptr;
 };

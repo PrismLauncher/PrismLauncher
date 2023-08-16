@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,29 +34,27 @@
  */
 
 #include "InstanceDelegate.h"
-#include <QPainter>
-#include <QTextOption>
-#include <QTextLayout>
 #include <QApplication>
-#include <QtMath>
 #include <QDebug>
+#include <QPainter>
+#include <QTextLayout>
+#include <QTextOption>
+#include <QtMath>
 
-#include "InstanceView.h"
-#include "BaseInstance.h"
-#include "InstanceList.h"
 #include <QIcon>
 #include <QTextEdit>
+#include "BaseInstance.h"
+#include "InstanceList.h"
+#include "InstanceView.h"
 
 // Origin: Qt
-static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &height,
-                               qreal &widthUsed)
+static void viewItemTextLayout(QTextLayout& textLayout, int lineWidth, qreal& height, qreal& widthUsed)
 {
     height = 0;
     widthUsed = 0;
     textLayout.beginLayout();
     QString str = textLayout.text();
-    while (true)
-    {
+    while (true) {
         QTextLine line = textLayout.createLine();
         if (!line.isValid())
             break;
@@ -70,24 +68,20 @@ static void viewItemTextLayout(QTextLayout &textLayout, int lineWidth, qreal &he
     textLayout.endLayout();
 }
 
-ListViewDelegate::ListViewDelegate(QObject *parent) : QStyledItemDelegate(parent)
-{
-}
+ListViewDelegate::ListViewDelegate(QObject* parent) : QStyledItemDelegate(parent) {}
 
-void drawSelectionRect(QPainter *painter, const QStyleOptionViewItem &option,
-                       const QRect &rect)
+void drawSelectionRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
 {
     if ((option.state & QStyle::State_Selected))
         painter->fillRect(rect, option.palette.brush(QPalette::Highlight));
-    else
-    {
+    else {
         QColor backgroundColor = option.palette.color(QPalette::Window);
         backgroundColor.setAlpha(160);
         painter->fillRect(rect, QBrush(backgroundColor));
     }
 }
 
-void drawFocusRect(QPainter *painter, const QStyleOptionViewItem &option, const QRect &rect)
+void drawFocusRect(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect)
 {
     if (!(option.state & QStyle::State_HasFocus))
         return;
@@ -103,7 +97,7 @@ void drawFocusRect(QPainter *painter, const QStyleOptionViewItem &option, const 
     // Apparently some widget styles expect this hint to not be set
     painter->setRenderHint(QPainter::Antialiasing, false);
 
-    QStyle *style = option.widget ? option.widget->style() : QApplication::style();
+    QStyle* style = option.widget ? option.widget->style() : QApplication::style();
 
     style->drawPrimitive(QStyle::PE_FrameFocusRect, &opt, painter, option.widget);
 
@@ -111,11 +105,9 @@ void drawFocusRect(QPainter *painter, const QStyleOptionViewItem &option, const 
 }
 
 // TODO this can be made a lot prettier
-void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItem &option,
-                         const int value, const int maximum)
+void drawProgressOverlay(QPainter* painter, const QStyleOptionViewItem& option, const int value, const int maximum)
 {
-    if (maximum == 0 || value == maximum)
-    {
+    if (maximum == 0 || value == maximum) {
         return;
     }
 
@@ -131,19 +123,15 @@ void drawProgressOverlay(QPainter *painter, const QStyleOptionViewItem &option,
     painter->restore();
 }
 
-void drawBadges(QPainter *painter, const QStyleOptionViewItem &option, BaseInstance *instance, QIcon::Mode mode, QIcon::State state)
+void drawBadges(QPainter* painter, const QStyleOptionViewItem& option, BaseInstance* instance, QIcon::Mode mode, QIcon::State state)
 {
     QList<QString> pixmaps;
-    if (instance->isRunning())
-    {
+    if (instance->isRunning()) {
         pixmaps.append("status-running");
-    }
-    else if (instance->hasCrashed() || instance->hasVersionBroken())
-    {
+    } else if (instance->hasCrashed() || instance->hasVersionBroken()) {
         pixmaps.append("status-bad");
     }
-    if (instance->hasUpdateAvailable())
-    {
+    if (instance->hasUpdateAvailable()) {
         pixmaps.append("checkupdate");
     }
 
@@ -153,12 +141,9 @@ void drawBadges(QPainter *painter, const QStyleOptionViewItem &option, BaseInsta
     const int rows = qCeil((double)pixmaps.size() / (double)itemsPerRow);
     QListIterator<QString> it(pixmaps);
     painter->translate(option.rect.topLeft());
-    for (int y = 0; y < rows; ++y)
-    {
-        for (int x = 0; x < itemsPerRow; ++x)
-        {
-            if (!it.hasNext())
-            {
+    for (int y = 0; y < rows; ++y) {
+        for (int x = 0; x < itemsPerRow; ++x) {
+            if (!it.hasNext()) {
                 return;
             }
             // FIXME: inject this.
@@ -166,21 +151,17 @@ void drawBadges(QPainter *painter, const QStyleOptionViewItem &option, BaseInsta
             // opt.icon.paint(painter, iconbox, Qt::AlignCenter, mode, state);
             const QPixmap pixmap;
             // itemSide
-            QRect badgeRect(
-                option.rect.width() - x * itemSide + qMax(x - 1, 0) * spacing - itemSide,
-                y * itemSide + qMax(y - 1, 0) * spacing,
-                itemSide,
-                itemSide
-            );
+            QRect badgeRect(option.rect.width() - x * itemSide + qMax(x - 1, 0) * spacing - itemSide,
+                            y * itemSide + qMax(y - 1, 0) * spacing, itemSide, itemSide);
             icon.paint(painter, badgeRect, Qt::AlignCenter, mode, state);
         }
     }
     painter->translate(-option.rect.topLeft());
 }
 
-static QSize viewItemTextSize(const QStyleOptionViewItem *option)
+static QSize viewItemTextSize(const QStyleOptionViewItem* option)
 {
-    QStyle *style = option->widget ? option->widget->style() : QApplication::style();
+    QStyle* style = option->widget ? option->widget->style() : QApplication::style();
     QTextOption textOption;
     textOption.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     QTextLayout textLayout;
@@ -195,8 +176,7 @@ static QSize viewItemTextSize(const QStyleOptionViewItem *option)
     return QSize(size.width() + 2 * textMargin, size.height());
 }
 
-void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-                             const QModelIndex &index) const
+void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
@@ -208,7 +188,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     opt.textElideMode = Qt::ElideRight;
     opt.displayAlignment = Qt::AlignTop | Qt::AlignHCenter;
 
-    QStyle *style = opt.widget ? opt.widget->style() : QApplication::style();
+    QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
 
     // const int iconSize =  style->pixelMetric(QStyle::PM_IconViewIconSize);
     const int iconSize = 48;
@@ -296,16 +276,12 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
         opt.icon.paint(painter, iconbox, Qt::AlignCenter, mode, state);
     }
     // set the text colors
-    QPalette::ColorGroup cg =
-        opt.state & QStyle::State_Enabled ? QPalette::Normal : QPalette::Disabled;
+    QPalette::ColorGroup cg = opt.state & QStyle::State_Enabled ? QPalette::Normal : QPalette::Disabled;
     if (cg == QPalette::Normal && !(opt.state & QStyle::State_Active))
         cg = QPalette::Inactive;
-    if (opt.state & QStyle::State_Selected)
-    {
+    if (opt.state & QStyle::State_Selected) {
         painter->setPen(opt.palette.color(cg, QPalette::HighlightedText));
-    }
-    else
-    {
+    } else {
         painter->setPen(opt.palette.color(cg, QPalette::Text));
     }
 
@@ -324,20 +300,16 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 
     const int lineCount = textLayout.lineCount();
 
-    const QRect layoutRect = QStyle::alignedRect(
-        opt.direction, opt.displayAlignment, QSize(textRect.width(), int(height)), textRect);
+    const QRect layoutRect = QStyle::alignedRect(opt.direction, opt.displayAlignment, QSize(textRect.width(), int(height)), textRect);
     const QPointF position = layoutRect.topLeft();
-    for (int i = 0; i < lineCount; ++i)
-    {
+    for (int i = 0; i < lineCount; ++i) {
         const QTextLine line = textLayout.lineAt(i);
         line.draw(painter, position);
     }
 
     // FIXME: this really has no business of being here. Make generic.
-    auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole)
-            .value<void *>();
-    if (instance)
-    {
+    auto instance = (BaseInstance*)index.data(InstanceList::InstancePointerRole).value<void*>();
+    if (instance) {
         drawBadges(painter, opt, instance, mode, state);
     }
 
@@ -347,8 +319,7 @@ void ListViewDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
     painter->restore();
 }
 
-QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem &option,
-                                 const QModelIndex &index) const
+QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
@@ -357,9 +328,9 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem &option,
     opt.textElideMode = Qt::ElideRight;
     opt.displayAlignment = Qt::AlignTop | Qt::AlignHCenter;
 
-    QStyle *style = opt.widget ? opt.widget->style() : QApplication::style();
+    QStyle* style = opt.widget ? opt.widget->style() : QApplication::style();
     const int textMargin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, &option, opt.widget) + 1;
-    int height = 48 + textMargin * 2 + 5; // TODO: turn constants into variables
+    int height = 48 + textMargin * 2 + 5;  // TODO: turn constants into variables
     QSize szz = viewItemTextSize(&opt);
     height += szz.height();
     // FIXME: maybe the icon items could scale and keep proportions?
@@ -367,40 +338,38 @@ QSize ListViewDelegate::sizeHint(const QStyleOptionViewItem &option,
     return sz;
 }
 
-class NoReturnTextEdit: public QTextEdit
-{
+class NoReturnTextEdit : public QTextEdit {
     Q_OBJECT
-public:
-    explicit NoReturnTextEdit(QWidget *parent) : QTextEdit(parent)
+   public:
+    explicit NoReturnTextEdit(QWidget* parent) : QTextEdit(parent)
     {
         setTextInteractionFlags(Qt::TextEditorInteraction);
         setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
         setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
     }
-    bool event(QEvent * event) override
+    bool event(QEvent* event) override
     {
         auto eventType = event->type();
-        if(eventType == QEvent::KeyPress || eventType == QEvent::KeyRelease)
-        {
-            QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (eventType == QEvent::KeyPress || eventType == QEvent::KeyRelease) {
+            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
             auto key = keyEvent->key();
-            if ((key == Qt::Key_Return || key == Qt::Key_Enter) && eventType == QEvent::KeyPress)
-            {
+            if ((key == Qt::Key_Return || key == Qt::Key_Enter) && eventType == QEvent::KeyPress) {
                 emit editingDone();
                 return true;
             }
-            if(key == Qt::Key_Tab)
-            {
+            if (key == Qt::Key_Tab) {
                 return true;
             }
         }
         return QTextEdit::event(event);
     }
-signals:
+   signals:
     void editingDone();
 };
 
-void ListViewDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
+void ListViewDelegate::updateEditorGeometry(QWidget* editor,
+                                            const QStyleOptionViewItem& option,
+                                            [[maybe_unused]] const QModelIndex& index) const
 {
     const int iconSize = 48;
     QRect textRect = option.rect;
@@ -412,28 +381,29 @@ void ListViewDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionV
 void ListViewDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
     auto text = index.data(Qt::EditRole).toString();
-    QTextEdit * realeditor = qobject_cast<NoReturnTextEdit *>(editor);
-    realeditor->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
-    realeditor->append(text);
-    realeditor->selectAll();
-    realeditor->document()->clearUndoRedoStacks();
+    QTextEdit* realEditor = qobject_cast<NoReturnTextEdit*>(editor);
+    realEditor->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    realEditor->append(text);
+    realEditor->selectAll();
+    realEditor->document()->clearUndoRedoStacks();
 }
 
 void ListViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
-    QTextEdit * realeditor = qobject_cast<NoReturnTextEdit *>(editor);
-    QString text = realeditor->toPlainText();
+    QTextEdit* realEditor = qobject_cast<NoReturnTextEdit*>(editor);
+    QString text = realEditor->toPlainText();
     text.replace(QChar('\n'), QChar(' '));
     text = text.trimmed();
     // Prevent instance names longer than 128 chars
     text.truncate(128);
-    if(text.size() != 0)
-    {
+    if (text.size() != 0) {
         model->setData(index, text);
     }
 }
 
-QWidget * ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+QWidget* ListViewDelegate::createEditor(QWidget* parent,
+                                        [[maybe_unused]] const QStyleOptionViewItem& option,
+                                        [[maybe_unused]] const QModelIndex& index) const
 {
     auto editor = new NoReturnTextEdit(parent);
     connect(editor, &NoReturnTextEdit::editingDone, this, &ListViewDelegate::editingDone);
@@ -442,7 +412,7 @@ QWidget * ListViewDelegate::createEditor(QWidget* parent, const QStyleOptionView
 
 void ListViewDelegate::editingDone()
 {
-    NoReturnTextEdit *editor = qobject_cast<NoReturnTextEdit *>(sender());
+    NoReturnTextEdit* editor = qobject_cast<NoReturnTextEdit*>(sender());
     emit commitData(editor);
     emit closeEditor(editor);
 }

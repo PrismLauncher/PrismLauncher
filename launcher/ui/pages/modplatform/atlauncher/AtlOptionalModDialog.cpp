@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,15 +38,15 @@
 
 #include <QInputDialog>
 #include <QMessageBox>
+#include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
 #include "modplatform/atlauncher/ATLShareCode.h"
-#include "Application.h"
+
+#include "net/ApiDownload.h"
 
 AtlOptionalModListModel::AtlOptionalModListModel(QWidget* parent, ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
-    : QAbstractListModel(parent)
-    , m_version(version)
-    , m_mods(mods)
+    : QAbstractListModel(parent), m_version(version), m_mods(mods)
 {
     // fill mod index
     for (int i = 0; i < m_mods.size(); i++) {
@@ -62,7 +62,8 @@ AtlOptionalModListModel::AtlOptionalModListModel(QWidget* parent, ATLauncher::Pa
     }
 }
 
-QVector<QString> AtlOptionalModListModel::getResult() {
+QVector<QString> AtlOptionalModListModel::getResult()
+{
     QVector<QString> result;
 
     for (const auto& mod : m_mods) {
@@ -74,16 +75,19 @@ QVector<QString> AtlOptionalModListModel::getResult() {
     return result;
 }
 
-int AtlOptionalModListModel::rowCount(const QModelIndex &parent) const {
+int AtlOptionalModListModel::rowCount(const QModelIndex& parent) const
+{
     return parent.isValid() ? 0 : m_mods.size();
 }
 
-int AtlOptionalModListModel::columnCount(const QModelIndex &parent) const {
+int AtlOptionalModListModel::columnCount(const QModelIndex& parent) const
+{
     // Enabled, Name, Description
     return parent.isValid() ? 0 : 3;
 }
 
-QVariant AtlOptionalModListModel::data(const QModelIndex &index, int role) const {
+QVariant AtlOptionalModListModel::data(const QModelIndex& index, int role) const
+{
     auto row = index.row();
     auto mod = m_mods.at(row);
 
@@ -94,18 +98,15 @@ QVariant AtlOptionalModListModel::data(const QModelIndex &index, int role) const
         if (index.column() == DescriptionColumn) {
             return mod.description;
         }
-    }
-    else if (role == Qt::ToolTipRole) {
+    } else if (role == Qt::ToolTipRole) {
         if (index.column() == DescriptionColumn) {
             return mod.description;
         }
-    }
-    else if (role == Qt::ForegroundRole) {
+    } else if (role == Qt::ForegroundRole) {
         if (!mod.colour.isEmpty() && m_version.colours.contains(mod.colour)) {
             return QColor(QString("#%1").arg(m_version.colours[mod.colour]));
         }
-    }
-    else if (role == Qt::CheckStateRole) {
+    } else if (role == Qt::CheckStateRole) {
         if (index.column() == EnabledColumn) {
             return m_selection[mod.name] ? Qt::Checked : Qt::Unchecked;
         }
@@ -114,7 +115,8 @@ QVariant AtlOptionalModListModel::data(const QModelIndex &index, int role) const
     return {};
 }
 
-bool AtlOptionalModListModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+bool AtlOptionalModListModel::setData(const QModelIndex& index, [[maybe_unused]] const QVariant& value, int role)
+{
     if (role == Qt::CheckStateRole) {
         auto row = index.row();
         auto mod = m_mods.at(row);
@@ -126,7 +128,8 @@ bool AtlOptionalModListModel::setData(const QModelIndex &index, const QVariant &
     return false;
 }
 
-QVariant AtlOptionalModListModel::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant AtlOptionalModListModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
         switch (section) {
             case EnabledColumn:
@@ -141,7 +144,8 @@ QVariant AtlOptionalModListModel::headerData(int section, Qt::Orientation orient
     return {};
 }
 
-Qt::ItemFlags AtlOptionalModListModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags AtlOptionalModListModel::flags(const QModelIndex& index) const
+{
     auto flags = QAbstractListModel::flags(index);
     if (index.isValid() && index.column() == EnabledColumn) {
         flags |= Qt::ItemIsUserCheckable;
@@ -149,23 +153,23 @@ Qt::ItemFlags AtlOptionalModListModel::flags(const QModelIndex &index) const {
     return flags;
 }
 
-void AtlOptionalModListModel::useShareCode(const QString& code) {
+void AtlOptionalModListModel::useShareCode(const QString& code)
+{
     m_jobPtr.reset(new NetJob("Atl::Request", APPLICATION->network()));
     auto url = QString(BuildConfig.ATL_API_BASE_URL + "share-codes/" + code);
-    m_jobPtr->addNetAction(Net::Download::makeByteArray(QUrl(url), m_response));
+    m_jobPtr->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), m_response));
 
-    connect(m_jobPtr.get(), &NetJob::succeeded,
-            this, &AtlOptionalModListModel::shareCodeSuccess);
-    connect(m_jobPtr.get(), &NetJob::failed,
-            this, &AtlOptionalModListModel::shareCodeFailure);
+    connect(m_jobPtr.get(), &NetJob::succeeded, this, &AtlOptionalModListModel::shareCodeSuccess);
+    connect(m_jobPtr.get(), &NetJob::failed, this, &AtlOptionalModListModel::shareCodeFailure);
 
     m_jobPtr->start();
 }
 
-void AtlOptionalModListModel::shareCodeSuccess() {
+void AtlOptionalModListModel::shareCodeSuccess()
+{
     m_jobPtr.reset();
 
-    QJsonParseError parse_error {};
+    QJsonParseError parse_error{};
     auto doc = QJsonDocument::fromJson(*m_response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
         qWarning() << "Error while parsing JSON response from ATL at " << parse_error.offset << " reason: " << parse_error.errorString();
@@ -177,8 +181,7 @@ void AtlOptionalModListModel::shareCodeSuccess() {
     ATLauncher::ShareCodeResponse response;
     try {
         ATLauncher::loadShareCodeResponse(response, obj);
-    }
-    catch (const JSONValidationError& e) {
+    } catch (const JSONValidationError& e) {
         qDebug() << QString::fromUtf8(*m_response);
         qWarning() << "Error while reading response from ATLauncher: " << e.cause();
         return;
@@ -202,44 +205,44 @@ void AtlOptionalModListModel::shareCodeSuccess() {
         m_selection[mod.name] = mod.selected;
     }
 
-    emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn),
-                     AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
+    emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn), AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
 }
 
-void AtlOptionalModListModel::shareCodeFailure(const QString& reason) {
+void AtlOptionalModListModel::shareCodeFailure([[maybe_unused]] const QString& reason)
+{
     m_jobPtr.reset();
 
     // fixme: plumb in an error message
 }
 
-void AtlOptionalModListModel::selectRecommended() {
+void AtlOptionalModListModel::selectRecommended()
+{
     for (const auto& mod : m_mods) {
         m_selection[mod.name] = mod.recommended;
     }
 
-    emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn),
-                     AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
+    emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn), AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
 }
 
-void AtlOptionalModListModel::clearAll() {
+void AtlOptionalModListModel::clearAll()
+{
     for (const auto& mod : m_mods) {
         m_selection[mod.name] = false;
     }
 
-    emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn),
-                     AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
+    emit dataChanged(AtlOptionalModListModel::index(0, EnabledColumn), AtlOptionalModListModel::index(m_mods.size() - 1, EnabledColumn));
 }
 
-void AtlOptionalModListModel::toggleMod(ATLauncher::VersionMod mod, int index) {
+void AtlOptionalModListModel::toggleMod(ATLauncher::VersionMod mod, int index)
+{
     auto enable = !m_selection[mod.name];
 
     // If there is a warning for the mod, display that first (if we would be enabling the mod)
     if (enable && !mod.warning.isEmpty() && m_version.warnings.contains(mod.warning)) {
-        auto message = QString("%1<br><br>%2")
-                           .arg(m_version.warnings[mod.warning], tr("Are you sure that you want to enable this mod?"));
+        auto message = QString("%1<br><br>%2").arg(m_version.warnings[mod.warning], tr("Are you sure that you want to enable this mod?"));
 
         // fixme: avoid casting here
-        auto result = QMessageBox::warning((QWidget*) this->parent(), tr("Warning"), message, QMessageBox::Yes | QMessageBox::No);
+        auto result = QMessageBox::warning((QWidget*)this->parent(), tr("Warning"), message, QMessageBox::Yes | QMessageBox::No);
         if (result != QMessageBox::Yes) {
             return;
         }
@@ -248,15 +251,18 @@ void AtlOptionalModListModel::toggleMod(ATLauncher::VersionMod mod, int index) {
     setMod(mod, index, enable);
 }
 
-void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool enable, bool shouldEmit) {
-    if (m_selection[mod.name] == enable) return;
+void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool enable, bool shouldEmit)
+{
+    if (m_selection[mod.name] == enable)
+        return;
 
     m_selection[mod.name] = enable;
 
     // disable other mods in the group, if applicable
     if (enable && !mod.group.isEmpty()) {
         for (int i = 0; i < m_mods.size(); i++) {
-            if (index == i) continue;
+            if (index == i)
+                continue;
             auto other = m_mods.at(i);
 
             if (mod.group == other.group) {
@@ -277,16 +283,15 @@ void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool
         // if the dependency is 'effectively hidden', then track which mods
         // depend on it - so we can efficiently disable it when no more dependents
         // depend on it.
-        auto dependants = m_dependants[dependencyName];
+        auto dependents = m_dependents[dependencyName];
 
         if (enable) {
-            dependants.append(mod.name);
-        }
-        else {
-            dependants.removeAll(mod.name);
+            dependents.append(mod.name);
+        } else {
+            dependents.removeAll(mod.name);
 
             // if there are no longer any dependents, let's disable the mod
-            if (dependencyMod.effectively_hidden && dependants.isEmpty()) {
+            if (dependencyMod.effectively_hidden && dependents.isEmpty()) {
                 setMod(dependencyMod, dependencyIndex, false, shouldEmit);
             }
         }
@@ -294,8 +299,8 @@ void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool
 
     // disable mods that depend on this one, if disabling
     if (!enable) {
-        auto dependants = m_dependants[mod.name];
-        for (const auto& dependencyName : dependants) {
+        auto dependents = m_dependents[mod.name];
+        for (const auto& dependencyName : dependents) {
             auto dependencyIndex = m_index[dependencyName];
             auto dependencyMod = m_mods.at(dependencyIndex);
 
@@ -304,14 +309,12 @@ void AtlOptionalModListModel::setMod(ATLauncher::VersionMod mod, int index, bool
     }
 
     if (shouldEmit) {
-        emit dataChanged(AtlOptionalModListModel::index(index, EnabledColumn),
-                         AtlOptionalModListModel::index(index, EnabledColumn));
+        emit dataChanged(AtlOptionalModListModel::index(index, EnabledColumn), AtlOptionalModListModel::index(index, EnabledColumn));
     }
 }
 
 AtlOptionalModDialog::AtlOptionalModDialog(QWidget* parent, ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods)
-    : QDialog(parent)
-    , ui(new Ui::AtlOptionalModDialog)
+    : QDialog(parent), ui(new Ui::AtlOptionalModDialog)
 {
     ui->setupUi(this);
 
@@ -319,35 +322,24 @@ AtlOptionalModDialog::AtlOptionalModDialog(QWidget* parent, ATLauncher::PackVers
     ui->treeView->setModel(listModel);
 
     ui->treeView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->treeView->header()->setSectionResizeMode(
-            AtlOptionalModListModel::NameColumn, QHeaderView::ResizeToContents);
-    ui->treeView->header()->setSectionResizeMode(
-            AtlOptionalModListModel::DescriptionColumn, QHeaderView::Stretch);
+    ui->treeView->header()->setSectionResizeMode(AtlOptionalModListModel::NameColumn, QHeaderView::ResizeToContents);
+    ui->treeView->header()->setSectionResizeMode(AtlOptionalModListModel::DescriptionColumn, QHeaderView::Stretch);
 
-    connect(ui->shareCodeButton, &QPushButton::clicked,
-            this, &AtlOptionalModDialog::useShareCode);
-    connect(ui->selectRecommendedButton, &QPushButton::clicked,
-            listModel, &AtlOptionalModListModel::selectRecommended);
-    connect(ui->clearAllButton, &QPushButton::clicked,
-            listModel, &AtlOptionalModListModel::clearAll);
-    connect(ui->installButton, &QPushButton::clicked,
-            this, &QDialog::accept);
+    connect(ui->shareCodeButton, &QPushButton::clicked, this, &AtlOptionalModDialog::useShareCode);
+    connect(ui->selectRecommendedButton, &QPushButton::clicked, listModel, &AtlOptionalModListModel::selectRecommended);
+    connect(ui->clearAllButton, &QPushButton::clicked, listModel, &AtlOptionalModListModel::clearAll);
+    connect(ui->installButton, &QPushButton::clicked, this, &QDialog::accept);
 }
 
-AtlOptionalModDialog::~AtlOptionalModDialog() {
+AtlOptionalModDialog::~AtlOptionalModDialog()
+{
     delete ui;
 }
 
-void AtlOptionalModDialog::useShareCode() {
+void AtlOptionalModDialog::useShareCode()
+{
     bool ok;
-    auto shareCode = QInputDialog::getText(
-            this,
-            tr("Select a share code"),
-            tr("Share code:"),
-            QLineEdit::Normal,
-            "",
-            &ok
-            );
+    auto shareCode = QInputDialog::getText(this, tr("Select a share code"), tr("Share code:"), QLineEdit::Normal, "", &ok);
 
     if (!ok) {
         // If the user cancels the dialog, we don't need to show any error dialogs.
