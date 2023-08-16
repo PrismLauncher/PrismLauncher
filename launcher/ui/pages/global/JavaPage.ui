@@ -320,8 +320,14 @@
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>
   <tabstop>permGenSpinBox</tabstop>
-  <tabstop>javaBrowseBtn</tabstop>
   <tabstop>javaPathTextBox</tabstop>
+  <tabstop>javaBrowseBtn</tabstop>
+  <tabstop>javaDownloadBtn</tabstop>
+  <tabstop>javaDetectBtn</tabstop>
+  <tabstop>javaTestBtn</tabstop>
+  <tabstop>skipCompatibilityCheckbox</tabstop>
+  <tabstop>skipJavaWizardCheckbox</tabstop>
+  <tabstop>jvmArgsTextBox</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>
