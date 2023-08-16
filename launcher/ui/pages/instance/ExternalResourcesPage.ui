@@ -176,7 +176,7 @@
     <string>Remove metadata</string>
    </property>
    <property name="toolTip">
-    <string>Remove selected mod metadata</string>
+    <string>Remove mod's metadata</string>
    </property>
   </action>
  </widget>
