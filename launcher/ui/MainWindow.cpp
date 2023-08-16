@@ -43,6 +43,8 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
+#include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameModIndex.h"
 #include "ui/dialogs/ExportToModListDialog.h"
 #include "ui_MainWindow.h"
 
@@ -980,11 +982,12 @@ void MainWindow::processURLs(QList<QUrl> urls)
         if (url.scheme().isEmpty())
             url.setScheme("file");
 
+        ModPlatform::IndexedVersion version;
         QMap<QString, QString> extra_info;
         QUrl local_url;
         if (!url.isLocalFile()) {  // download the remote resource and identify
             QUrl dl_url;
-            if(url.scheme() == "curseforge") {
+            if (url.scheme() == "curseforge") {
                 // need to find the download link for the modpack / resource
                 // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
                 QUrlQuery query(url);
@@ -1000,20 +1003,19 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 auto api = FlameAPI();
                 auto job = api.getFile(addonId, fileId, array);
 
-                QString resource_name;
-
                 connect(job.get(), &Task::failed, this,
                         [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &resource_name] {
+                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
                     qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                     auto doc = Json::requireDocument(*array);
                     auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
-                    auto fileName = Json::ensureString(data, "fileName");
+                    version = FlameMod::loadIndexedPackVersion(data);
+                    auto fileName = version.fileName;
 
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
+                    dl_url = QUrl(version.downloadUrl);
                     if (!dl_url.isValid()) {
                         CustomMessageBox::selectable(
                             this, tr("Error"),
@@ -1024,22 +1026,20 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     }
 
                     QFileInfo dl_file(dl_url.fileName());
-                    resource_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
                 });
 
-                { // drop stack
+                {  // drop stack
                     ProgressDialog dlUrlDialod(this);
                     dlUrlDialod.setSkipButton(true, tr("Abort"));
                     dlUrlDialod.execWithTask(job.get());
                 }
-
 
             } else {
                 dl_url = url;
             }
 
             if (!dl_url.isValid()) {
-                continue; // no valid url to download this resource
+                continue;  // no valid url to download this resource
             }
 
             const QString path = dl_url.host() + '/' + dl_url.path();
@@ -1050,17 +1050,18 @@ void MainWindow::processURLs(QList<QUrl> urls)
             auto archivePath = entry->getFullPath();
 
             bool dl_success = false;
-            connect(dl_job.get(), &Task::failed, this, [this](QString reason){CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-            connect(dl_job.get(), &Task::succeeded, this, [&dl_success]{dl_success = true;});
+            connect(dl_job.get(), &Task::failed, this,
+                    [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+            connect(dl_job.get(), &Task::succeeded, this, [&dl_success] { dl_success = true; });
 
-            { // drop stack
+            {  // drop stack
                 ProgressDialog dlUrlDialod(this);
                 dlUrlDialod.setSkipButton(true, tr("Abort"));
                 dlUrlDialod.execWithTask(dl_job.get());
             }
 
             if (!dl_success) {
-                continue; // no local file to identify
+                continue;  // no local file to identify
             }
             local_url = QUrl::fromLocalFile(archivePath);
 
@@ -1099,7 +1100,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
                 break;
             case PackedResourceType::Mod:
-                minecraftInst->loaderModList()->installMod(localFileName);
+                minecraftInst->loaderModList()->installMod(localFileName, version);
                 break;
             case PackedResourceType::ShaderPack:
                 minecraftInst->shaderPackList()->installResource(localFileName);
