@@ -272,10 +272,7 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
         profilerAction->setChecked(settings()->get("Profiler").toString() == profiler.key());
 
         QString error;
-        if (profiler.value()->check(&error))
-            profilerAction->setIcon(APPLICATION->getThemedIcon("status-good"));
-        else
-            profilerAction->setIcon(APPLICATION->getThemedIcon("status-bad"));
+        profilerAction->setEnabled(profiler.value()->check(&error));
     }
 }
 
