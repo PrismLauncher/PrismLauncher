@@ -220,7 +220,7 @@ class MainWindow : public QMainWindow {
    private:
     void retranslateUi();
 
-    void addInstance(QString url = QString());
+    void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
     void activateInstance(InstancePtr instance);
     void setCatBackground(bool enabled);
     void updateInstanceToolIcon(QString new_icon);
