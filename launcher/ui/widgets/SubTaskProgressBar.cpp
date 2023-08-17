@@ -26,12 +26,11 @@ unique_qobject_ptr<SubTaskProgressBar> SubTaskProgressBar::create(QWidget* paren
     return unique_qobject_ptr<SubTaskProgressBar>(progress_bar);
 }
 
-SubTaskProgressBar::SubTaskProgressBar(QWidget* parent)
-    : ui(new Ui::SubTaskProgressBar)
+SubTaskProgressBar::SubTaskProgressBar(QWidget* parent) : QWidget(parent), ui(new Ui::SubTaskProgressBar)
 {
     ui->setupUi(this);
 }
-SubTaskProgressBar::~SubTaskProgressBar() 
+SubTaskProgressBar::~SubTaskProgressBar()
 {
     delete ui;
 }
@@ -55,4 +54,3 @@ void SubTaskProgressBar::setDetails(QString details)
 {
     ui->statusDetailsLabel->setText(details);
 }
-

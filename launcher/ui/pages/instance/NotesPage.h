@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,45 +37,34 @@
 
 #include <QWidget>
 
+#include <Application.h>
 #include "BaseInstance.h"
 #include "ui/pages/BasePage.h"
-#include <Application.h>
 
-namespace Ui
-{
+namespace Ui {
 class NotesPage;
 }
 
-class NotesPage : public QWidget, public BasePage
-{
+class NotesPage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit NotesPage(BaseInstance *inst, QWidget *parent = 0);
+   public:
+    explicit NotesPage(BaseInstance* inst, QWidget* parent = 0);
     virtual ~NotesPage();
-    virtual QString displayName() const override
-    {
-        return tr("Notes");
-    }
+    virtual QString displayName() const override { return tr("Notes"); }
     virtual QIcon icon() const override
     {
         auto icon = APPLICATION->getThemedIcon("notes");
-        if(icon.isNull())
+        if (icon.isNull())
             icon = APPLICATION->getThemedIcon("news");
         return icon;
     }
-    virtual QString id() const override
-    {
-        return "notes";
-    }
+    virtual QString id() const override { return "notes"; }
     virtual bool apply() override;
-    virtual QString helpPage() const override
-    {
-        return "Notes";
-    }
+    virtual QString helpPage() const override { return "Notes"; }
     void retranslate() override;
 
-private:
-    Ui::NotesPage *ui;
-    BaseInstance *m_inst;
+   private:
+    Ui::NotesPage* ui;
+    BaseInstance* m_inst;
 };

@@ -20,14 +20,9 @@
 #include "JsonFormat.h"
 #include "minecraft/PackProfile.h"
 
-Meta::Version::Version(const QString &uid, const QString &version)
-    : BaseVersion(), m_uid(uid), m_version(version)
-{
-}
+Meta::Version::Version(const QString& uid, const QString& version) : BaseVersion(), m_uid(uid), m_version(version) {}
 
-Meta::Version::~Version()
-{
-}
+Meta::Version::~Version() {}
 
 QString Meta::Version::descriptor()
 {
@@ -35,7 +30,7 @@ QString Meta::Version::descriptor()
 }
 QString Meta::Version::name()
 {
-    if(m_data)
+    if (m_data)
         return m_data->name;
     return m_uid;
 }
@@ -56,40 +51,32 @@ void Meta::Version::parse(const QJsonObject& obj)
 
 void Meta::Version::mergeFromList(const Meta::Version::Ptr& other)
 {
-    if(other->m_providesRecommendations)
-    {
-        if(m_recommended != other->m_recommended)
-        {
+    if (other->m_providesRecommendations) {
+        if (m_recommended != other->m_recommended) {
             setRecommended(other->m_recommended);
         }
     }
-    if (m_type != other->m_type)
-    {
+    if (m_type != other->m_type) {
         setType(other->m_type);
     }
-    if (m_time != other->m_time)
-    {
+    if (m_time != other->m_time) {
         setTime(other->m_time);
     }
-    if (m_requires != other->m_requires)
-    {
+    if (m_requires != other->m_requires) {
         m_requires = other->m_requires;
     }
-    if (m_conflicts != other->m_conflicts)
-    {
+    if (m_conflicts != other->m_conflicts) {
         m_conflicts = other->m_conflicts;
     }
-    if(m_volatile != other->m_volatile)
-    {
+    if (m_volatile != other->m_volatile) {
         setVolatile(other->m_volatile);
     }
 }
 
-void Meta::Version::merge(const Version::Ptr &other)
+void Meta::Version::merge(const Version::Ptr& other)
 {
     mergeFromList(other);
-    if(other->m_data)
-    {
+    if (other->m_data) {
         setData(other->m_data);
     }
 }
@@ -104,7 +91,7 @@ QString Meta::Version::localFilename() const
     return { const_cast<Meta::Version*>(this)->descriptor() };
 }
 
-void Meta::Version::setType(const QString &type)
+void Meta::Version::setType(const QString& type)
 {
     m_type = type;
     emit typeChanged();
@@ -116,7 +103,7 @@ void Meta::Version::setTime(const qint64 time)
     emit timeChanged();
 }
 
-void Meta::Version::setRequires(const Meta::RequireSet &reqs, const Meta::RequireSet &conflicts)
+void Meta::Version::setRequires(const Meta::RequireSet& reqs, const Meta::RequireSet& conflicts)
 {
     m_requires = reqs;
     m_conflicts = conflicts;
@@ -128,8 +115,7 @@ void Meta::Version::setVolatile(bool volatile_)
     m_volatile = volatile_;
 }
 
-
-void Meta::Version::setData(const VersionFilePtr &data)
+void Meta::Version::setData(const VersionFilePtr& data)
 {
     m_data = data;
 }

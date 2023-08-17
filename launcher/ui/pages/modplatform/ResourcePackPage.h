@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "ui/pages/modplatform/ResourcePage.h"
 #include "ui/pages/modplatform/ResourcePackModel.h"
+#include "ui/pages/modplatform/ResourcePage.h"
 
 namespace Ui {
 class ResourcePage;

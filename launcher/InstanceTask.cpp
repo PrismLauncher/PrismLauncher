@@ -18,13 +18,14 @@ InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& ol
     return InstanceNameChange::ShouldKeep;
 }
 
-ShouldUpdate askIfShouldUpdate(QWidget *parent, QString original_version_name)
+ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name)
 {
     auto info = CustomMessageBox::selectable(
         parent, QObject::tr("Similar modpack was found!"),
-        QObject::tr("One or more of your instances are from this same modpack%1. Do you want to create a "
-           "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
-           "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
+        QObject::tr(
+            "One or more of your instances are from this same modpack%1. Do you want to create a "
+            "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
+            "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
             .arg(original_version_name),
         QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
     info->setButtonText(QMessageBox::Ok, QObject::tr("Update existing instance"));
@@ -38,7 +39,6 @@ ShouldUpdate askIfShouldUpdate(QWidget *parent, QString original_version_name)
     if (info->clickedButton() == info->button(QMessageBox::Abort))
         return ShouldUpdate::SkipUpdating;
     return ShouldUpdate::Cancel;
-
 }
 
 QString InstanceName::name() const

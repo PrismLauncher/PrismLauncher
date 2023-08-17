@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2021-2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -42,6 +42,7 @@
 
 #include "SolderPackManifest.h"
 #include "TechnicPackProcessor.h"
+#include "net/ApiDownload.h"
 #include "net/ChecksumValidator.h"
 
 Technic::SolderPackInstallTask::SolderPackInstallTask(shared_qobject_ptr<QNetworkAccessManager> network,
@@ -71,7 +72,7 @@ void Technic::SolderPackInstallTask::executeTask()
 
     m_filesNetJob.reset(new NetJob(tr("Resolving modpack files"), m_network));
     auto sourceUrl = QString("%1/modpack/%2/%3").arg(m_solderUrl.toString(), m_pack, m_version);
-    m_filesNetJob->addNetAction(Net::Download::makeByteArray(sourceUrl, m_response));
+    m_filesNetJob->addNetAction(Net::ApiDownload::makeByteArray(sourceUrl, m_response));
 
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SolderPackInstallTask::fileListSucceeded);
@@ -96,8 +97,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     TechnicSolder::PackBuild build;
     try {
         TechnicSolder::loadPackBuild(build, obj);
-    }
-    catch (const JSONValidationError& e) {
+    } catch (const JSONValidationError& e) {
         emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
         m_filesNetJob.reset();
         return;
@@ -112,7 +112,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
     for (const auto& mod : build.mods) {
         auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
 
-        auto dl = Net::Download::makeFile(mod.url, path);
+        auto dl = Net::ApiDownload::makeFile(mod.url, path);
         if (!mod.md5.isEmpty()) {
             auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
             dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
@@ -126,7 +126,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
 
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &Technic::SolderPackInstallTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &Technic::SolderPackInstallTask::downloadProgressChanged);
-    connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &Technic::SolderPackInstallTask::propogateStepProgress);
+    connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &Technic::SolderPackInstallTask::propagateStepProgress);
     connect(m_filesNetJob.get(), &NetJob::failed, this, &Technic::SolderPackInstallTask::downloadFailed);
     connect(m_filesNetJob.get(), &NetJob::aborted, this, &Technic::SolderPackInstallTask::downloadAborted);
     m_filesNetJob->start();
@@ -138,17 +138,14 @@ void Technic::SolderPackInstallTask::downloadSucceeded()
 
     setStatus(tr("Extracting modpack"));
     m_filesNetJob.reset();
-    m_extractFuture = QtConcurrent::run([this]()
-    {
+    m_extractFuture = QtConcurrent::run([this]() {
         int i = 0;
         QString extractDir = FS::PathCombine(m_stagingPath, ".minecraft");
         FS::ensureFolderPathExists(extractDir);
 
-        while (m_modCount > i)
-        {
+        while (m_modCount > i) {
             auto path = FS::PathCombine(m_outputDir.path(), QString("%1").arg(i));
-            if (!MMCZip::extractDir(path, extractDir))
-            {
+            if (!MMCZip::extractDir(path, extractDir)) {
                 return false;
             }
             i++;
@@ -181,8 +178,7 @@ void Technic::SolderPackInstallTask::downloadAborted()
 
 void Technic::SolderPackInstallTask::extractFinished()
 {
-    if (!m_extractFuture.result())
-    {
+    if (!m_extractFuture.result()) {
         emitFailed(tr("Failed to extract modpack"));
         return;
     }
@@ -190,30 +186,22 @@ void Technic::SolderPackInstallTask::extractFinished()
 
     qDebug() << "Fixing permissions for extracted pack files...";
     QDirIterator it(extractDir, QDirIterator::Subdirectories);
-    while (it.hasNext())
-    {
+    while (it.hasNext()) {
         auto filepath = it.next();
         QFileInfo file(filepath);
         auto permissions = QFile::permissions(filepath);
         auto origPermissions = permissions;
-        if(file.isDir())
-        {
+        if (file.isDir()) {
             // Folder +rwx for current user
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser;
-        }
-        else
-        {
+        } else {
             // File +rw for current user
             permissions |= QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
         }
-        if(origPermissions != permissions)
-        {
-            if(!QFile::setPermissions(filepath, permissions))
-            {
+        if (origPermissions != permissions) {
+            if (!QFile::setPermissions(filepath, permissions)) {
                 logWarning(tr("Could not fix permissions for %1").arg(filepath));
-            }
-            else
-            {
+            } else {
                 qDebug() << "Fixed" << filepath;
             }
         }
@@ -229,4 +217,3 @@ void Technic::SolderPackInstallTask::extractAborted()
 {
     emitFailed(tr("Instance import has been aborted."));
 }
-

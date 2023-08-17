@@ -1,22 +1,14 @@
 #pragma once
 #include "AuthFlow.h"
 
-class OfflineRefresh : public AuthFlow
-{
+class OfflineRefresh : public AuthFlow {
     Q_OBJECT
-public:
-    explicit OfflineRefresh(
-        AccountData *data,
-        QObject *parent = 0
-    );
+   public:
+    explicit OfflineRefresh(AccountData* data, QObject* parent = 0);
 };
 
-class OfflineLogin : public AuthFlow
-{
+class OfflineLogin : public AuthFlow {
     Q_OBJECT
-public:
-    explicit OfflineLogin(
-        AccountData *data,
-        QObject *parent = 0
-    );
+   public:
+    explicit OfflineLogin(AccountData* data, QObject* parent = 0);
 };

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -128,28 +128,30 @@ class ResourceAPI {
    public slots:
     [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::searchProjects";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, std::shared_ptr<QByteArray> response) const
+    [[nodiscard]] virtual Task::Ptr getProject([[maybe_unused]] QString addonId,
+                                               [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProject";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const
+    [[nodiscard]] virtual Task::Ptr getProjects([[maybe_unused]] QStringList addonIds,
+                                                [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjects";
         return nullptr;
     }
 
     [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjectInfo";
         return nullptr;
     }
     [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjectVersions";
         return nullptr;
     }
 

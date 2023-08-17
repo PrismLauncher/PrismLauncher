@@ -2,9 +2,8 @@
 
 #include "FusionTheme.h"
 
-class DarkTheme: public FusionTheme
-{
-public:
+class DarkTheme : public FusionTheme {
+   public:
     virtual ~DarkTheme() {}
 
     QString id() override;

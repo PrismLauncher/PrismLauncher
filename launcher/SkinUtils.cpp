@@ -14,17 +14,16 @@
  */
 
 #include "SkinUtils.h"
-#include "net/HttpMetaCache.h"
 #include "Application.h"
+#include "net/HttpMetaCache.h"
 
 #include <QFile>
-#include <QPainter>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
+#include <QPainter>
 
-namespace SkinUtils
-{
+namespace SkinUtils {
 /*
  * Given a username, return a pixmap of the cached skin (if it exists), QPixmap() otherwise
  */
@@ -32,12 +31,15 @@ QPixmap getFaceFromCache(QString username, int height, int width)
 {
     QFile fskin(APPLICATION->metacache()->resolveEntry("skins", username + ".png")->getFullPath());
 
-    if (fskin.exists())
-    {
+    if (fskin.exists()) {
         QPixmap skinTexture(fskin.fileName());
-        if(!skinTexture.isNull())
-        {
+        if (!skinTexture.isNull()) {
             QPixmap skin = QPixmap(8, 8);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+            skin.fill(QColorConstants::Transparent);
+#else
+            skin.fill(QColor(0, 0, 0, 0));
+#endif
             QPainter painter(&skin);
             painter.drawPixmap(0, 0, skinTexture.copy(8, 8, 8, 8));
             painter.drawPixmap(0, 0, skinTexture.copy(40, 8, 8, 8));
@@ -47,4 +49,4 @@ QPixmap getFaceFromCache(QString username, int height, int width)
 
     return QPixmap();
 }
-}
+}  // namespace SkinUtils

@@ -45,7 +45,7 @@ const char OAUTH2_EXPIRES_IN[] = "expires_in";
 const char OAUTH2_DEVICE_CODE[] = "device_code";
 const char OAUTH2_USER_CODE[] = "user_code";
 const char OAUTH2_VERIFICATION_URI[] = "verification_uri";
-const char OAUTH2_VERIFICATION_URL[] = "verification_url"; // Google sign-in
+const char OAUTH2_VERIFICATION_URL[] = "verification_url";  // Google sign-in
 const char OAUTH2_VERIFICATION_URI_COMPLETE[] = "verification_uri_complete";
 const char OAUTH2_INTERVAL[] = "interval";
 
@@ -56,4 +56,4 @@ const char AUTHORIZATION_CODE[] = "authorization_code";
 const char HTTP_HTTP_HEADER[] = "HTTP";
 const char HTTP_AUTHORIZATION_HEADER[] = "Authorization";
 
-}
+}  // namespace Katabasis

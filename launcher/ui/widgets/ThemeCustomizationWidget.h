@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ class ThemeCustomizationWidget : public QWidget {
 
    public:
     explicit ThemeCustomizationWidget(QWidget* parent = nullptr);
-    ~ThemeCustomizationWidget();
+    ~ThemeCustomizationWidget() override;
 
     void showFeatures(ThemeFields features);
 
@@ -52,26 +52,4 @@ class ThemeCustomizationWidget : public QWidget {
 
    private:
     Ui::ThemeCustomizationWidget* ui;
-
-    //TODO finish implementing
-    QList<std::pair<QString, QString>> m_iconThemeOptions{ 
-        { "pe_colored",     QObject::tr("Simple (Colored Icons)") }, 
-        { "pe_light",       QObject::tr("Simple (Light Icons)") },     
-        { "pe_dark",        QObject::tr("Simple (Dark Icons)") },
-        { "pe_blue",        QObject::tr("Simple (Blue Icons)") },    
-        { "breeze_light",   QObject::tr("Breeze Light") }, 
-        { "breeze_dark",    QObject::tr("Breeze Dark") },
-        { "OSX",            QObject::tr("OSX") },        
-        { "iOS",            QObject::tr("iOS") },          
-        { "flat",           QObject::tr("Flat") },
-        { "flat_white",     QObject::tr("Flat (White)") }, 
-        { "multimc",        QObject::tr("Legacy") },      
-        { "custom",         QObject::tr("Custom") } 
-    };
-    QList<std::pair<QString, QString>> m_catOptions{ 
-        { "kitteh",     QObject::tr("Background Cat (from MultiMC)") }, 
-        { "rory",       QObject::tr("Rory ID 11 (drawn by Ashtaka)") }, 
-        { "rory-flat",  QObject::tr("Rory ID 11 (flat edition, drawn by Ashtaka)") },
-        { "teawie",     QObject::tr("Teawie (drawn by SympathyTea)") }
-    };
 };
