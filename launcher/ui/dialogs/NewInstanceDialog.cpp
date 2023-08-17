@@ -62,8 +62,10 @@
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 #include "ui/pages/modplatform/technic/TechnicPage.h"
 #include "ui/widgets/PageContainer.h"
-
-NewInstanceDialog::NewInstanceDialog(const QString& initialGroup, const QString& url, QWidget* parent)
+NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
+                                     const QString& url,
+                                     const QMap<QString, QString>& extra_info,
+                                     QWidget* parent)
     : QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
     ui->setupUi(this);
@@ -125,6 +127,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup, const QString&
         QUrl actualUrl(url);
         m_container->selectPage("import");
         importPage->setUrl(url);
+        importPage->setExtraInfo(extra_info);
     }
 
     updateDialogState();
@@ -290,7 +293,7 @@ void NewInstanceDialog::on_iconButton_clicked()
     }
 }
 
-void NewInstanceDialog::on_instNameTextBox_textChanged(const QString& arg1)
+void NewInstanceDialog::on_instNameTextBox_textChanged([[maybe_unused]] const QString& arg1)
 {
     updateDialogState();
 }
@@ -299,7 +302,7 @@ void NewInstanceDialog::importIconNow()
 {
     if (importIcon) {
         APPLICATION->icons()->installIcon(importIconPath, importIconName);
-        InstIconKey = importIconName;
+        InstIconKey = importIconName.mid(0, importIconName.lastIndexOf('.'));
         importIcon = false;
     }
     APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());

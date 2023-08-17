@@ -65,14 +65,9 @@ QStringList LoggedProcess::reprocess(const QByteArray& data, QTextDecoder& decod
         m_leftover_line = "";
     }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, QString::SkipEmptyParts);
-#else
-    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed, Qt::SkipEmptyParts);
-#endif
+    auto lines = str.remove(QChar::CarriageReturn).split(QChar::LineFeed);
 
-    if (!str.endsWith(QChar::LineFeed))
-        m_leftover_line = lines.takeLast();
+    m_leftover_line = lines.takeLast();
     return lines;
 }
 

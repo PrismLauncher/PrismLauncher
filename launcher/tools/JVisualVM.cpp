@@ -27,7 +27,7 @@ void JVisualVM::profilerStarted()
     emit readyToLaunch(tr("JVisualVM started"));
 }
 
-void JVisualVM::profilerFinished(int exit, QProcess::ExitStatus status)
+void JVisualVM::profilerFinished([[maybe_unused]] int exit, QProcess::ExitStatus status)
 {
     if (status == QProcess::CrashExit) {
         emit abortLaunch(tr("Profiler aborted"));

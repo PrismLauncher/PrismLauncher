@@ -96,7 +96,11 @@ Qt::DropActions InstanceList::supportedDropActions() const
     return Qt::MoveAction;
 }
 
-bool InstanceList::canDropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) const
+bool InstanceList::canDropMimeData(const QMimeData* data,
+                                   [[maybe_unused]] Qt::DropAction action,
+                                   [[maybe_unused]] int row,
+                                   [[maybe_unused]] int column,
+                                   [[maybe_unused]] const QModelIndex& parent) const
 {
     if (data && data->hasFormat("application/x-instanceid")) {
         return true;
@@ -104,7 +108,11 @@ bool InstanceList::canDropMimeData(const QMimeData* data, Qt::DropAction action,
     return false;
 }
 
-bool InstanceList::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+bool InstanceList::dropMimeData(const QMimeData* data,
+                                [[maybe_unused]] Qt::DropAction action,
+                                [[maybe_unused]] int row,
+                                [[maybe_unused]] int column,
+                                [[maybe_unused]] const QModelIndex& parent)
 {
     if (data && data->hasFormat("application/x-instanceid")) {
         return true;
@@ -751,7 +759,7 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
     emit instancesChanged();
 }
 
-void InstanceList::on_InstFolderChanged(const Setting& setting, QVariant value)
+void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, QVariant value)
 {
     QString newInstDir = QDir(value.toString()).canonicalPath();
     if (newInstDir != m_instDir) {
@@ -789,7 +797,7 @@ class InstanceStaging : public Task {
         , m_groupName(std::move(groupName))
     {
         m_child.reset(child);
-        connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
+        connect(child, &Task::succeeded, this, &InstanceStaging::childSucceeded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
         connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
         connect(child, &Task::abortStatusChanged, this, &InstanceStaging::setAbortable);
@@ -797,7 +805,7 @@ class InstanceStaging : public Task {
         connect(child, &Task::details, this, &InstanceStaging::setDetails);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
         connect(child, &Task::stepProgress, this, &InstanceStaging::propagateStepProgress);
-        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
+        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceeded);
     }
 
     virtual ~InstanceStaging(){};
@@ -819,7 +827,7 @@ class InstanceStaging : public Task {
     QStringList warnings() const override { return m_child->warnings(); }
 
    private slots:
-    void childSucceded()
+    void childSucceeded()
     {
         unsigned sleepTime = backoff();
         if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, *m_child.get())) {

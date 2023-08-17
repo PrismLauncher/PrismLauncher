@@ -368,11 +368,11 @@ optional<QString> read_string(nbt::value& parent, const char* name)
         }
         auto& tag_str = namedValue.as<nbt::tag_string>();
         return QString::fromStdString(tag_str.get());
-    } catch (const std::out_of_range& e) {
+    } catch ([[maybe_unused]] const std::out_of_range& e) {
         // fallback for old world formats
         qWarning() << "String NBT tag" << name << "could not be found.";
         return nullopt;
-    } catch (const std::bad_cast& e) {
+    } catch ([[maybe_unused]] const std::bad_cast& e) {
         // type mismatch
         qWarning() << "NBT tag" << name << "could not be converted to string.";
         return nullopt;
@@ -388,11 +388,11 @@ optional<int64_t> read_long(nbt::value& parent, const char* name)
         }
         auto& tag_str = namedValue.as<nbt::tag_long>();
         return tag_str.get();
-    } catch (const std::out_of_range& e) {
+    } catch ([[maybe_unused]] const std::out_of_range& e) {
         // fallback for old world formats
         qWarning() << "Long NBT tag" << name << "could not be found.";
         return nullopt;
-    } catch (const std::bad_cast& e) {
+    } catch ([[maybe_unused]] const std::bad_cast& e) {
         // type mismatch
         qWarning() << "NBT tag" << name << "could not be converted to long.";
         return nullopt;
@@ -408,11 +408,11 @@ optional<int> read_int(nbt::value& parent, const char* name)
         }
         auto& tag_str = namedValue.as<nbt::tag_int>();
         return tag_str.get();
-    } catch (const std::out_of_range& e) {
+    } catch ([[maybe_unused]] const std::out_of_range& e) {
         // fallback for old world formats
         qWarning() << "Int NBT tag" << name << "could not be found.";
         return nullopt;
-    } catch (const std::bad_cast& e) {
+    } catch ([[maybe_unused]] const std::bad_cast& e) {
         // type mismatch
         qWarning() << "NBT tag" << name << "could not be converted to int.";
         return nullopt;
