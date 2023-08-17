@@ -54,6 +54,7 @@ ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, BaseInstanc
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE };
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::ResizeToContents,
                               QHeaderView::ResizeToContents };
+    m_columnsHideable = { false, true, false, true, true };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
@@ -128,7 +129,7 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
     }
 }
 
-QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
         case Qt::DisplayRole:
@@ -165,7 +166,6 @@ QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orient
         default:
             return {};
     }
-    return {};
 }
 
 int ResourcePackFolderModel::columnCount(const QModelIndex& parent) const

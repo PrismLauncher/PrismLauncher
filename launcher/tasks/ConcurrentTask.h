@@ -53,7 +53,7 @@ class ConcurrentTask : public Task {
 
     bool canAbort() const override { return true; }
 
-    inline auto isMultiStep() const -> bool override { return totalSize() > 1; };
+    inline auto isMultiStep() const -> bool override { return totalSize() > 1; }
     auto getStepProgress() const -> TaskStepProgressList override;
 
     void addTask(Task::Ptr task);
@@ -80,7 +80,7 @@ class ConcurrentTask : public Task {
 
    protected:
     // NOTE: This is not thread-safe.
-    [[nodiscard]] unsigned int totalSize() const { return m_queue.size() + m_doing.size() + m_done.size(); }
+    [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
 
     enum class Operation { ADDED, REMOVED, CHANGED };
     void updateStepProgress(TaskStepProgress const& changed_progress, Operation);

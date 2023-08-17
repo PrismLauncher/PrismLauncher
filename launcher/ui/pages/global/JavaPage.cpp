@@ -166,7 +166,7 @@ void JavaPage::on_javaTestBtn_clicked()
     checker->run();
 }
 
-void JavaPage::on_maxMemSpinBox_valueChanged(int i)
+void JavaPage::on_maxMemSpinBox_valueChanged([[maybe_unused]] int i)
 {
     updateThresholds();
 }

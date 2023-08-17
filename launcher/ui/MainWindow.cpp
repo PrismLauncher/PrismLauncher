@@ -85,7 +85,7 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/auth/AccountList.h>
-#include <net/Download.h>
+#include <net/ApiDownload.h>
 #include <net/NetJob.h>
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
@@ -118,10 +118,14 @@
 #include "minecraft/mod/ShaderPackFolderModel.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 
+#include "modplatform/flame/FlameAPI.h"
+
 #include "KonamiCode.h"
 
 #include "InstanceCopyTask.h"
 #include "InstanceImportTask.h"
+
+#include "Json.h"
 
 #include "MMCTime.h"
 
@@ -515,9 +519,9 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         QAction* actionCreateInstance = new QAction(tr("Create instance"), this);
         actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
         if (!group.isNull()) {
-            QVariantMap data;
-            data["group"] = group;
-            actionCreateInstance->setData(data);
+            QVariantMap instance_action_data;
+            instance_action_data["group"] = group;
+            actionCreateInstance->setData(instance_action_data);
         }
 
         connect(actionCreateInstance, SIGNAL(triggered(bool)), SLOT(on_actionAddInstance_triggered()));
@@ -527,9 +531,9 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions.append(actionCreateInstance);
         if (!group.isNull()) {
             QAction* actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
-            QVariantMap data;
-            data["group"] = group;
-            actionDeleteGroup->setData(data);
+            QVariantMap delete_group_action_data;
+            delete_group_action_data["group"] = group;
+            actionDeleteGroup->setData(delete_group_action_data);
             connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
             actions.append(actionDeleteGroup);
         }
@@ -627,7 +631,7 @@ void MainWindow::updateThemeMenu()
         themeMenu = new QMenu(this);
     }
 
-    auto themes = APPLICATION->getValidApplicationThemes();
+    auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
 
     QActionGroup* themesGroup = new QActionGroup(this);
 
@@ -641,7 +645,7 @@ void MainWindow::updateThemeMenu()
         themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->setApplicationTheme(theme->id());
+            APPLICATION->themeManager()->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
     }
@@ -744,9 +748,9 @@ void MainWindow::changeActiveAccount()
     if (sAction->data().type() != QVariant::Type::Int)
         return;
 
-    QVariant data = sAction->data();
+    QVariant action_data = sAction->data();
     bool valid = false;
-    int index = data.toInt(&valid);
+    int index = action_data.toInt(&valid);
     if (!valid) {
         index = -1;
     }
@@ -929,7 +933,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
     }
 }
 
-void MainWindow::addInstance(QString url)
+void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info)
 {
     QString groupName;
     do {
@@ -949,7 +953,7 @@ void MainWindow::addInstance(QString url)
         groupName = APPLICATION->settings()->get("LastUsedGroupForNewInstance").toString();
     }
 
-    NewInstanceDialog newInstDlg(groupName, url, this);
+    NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
     if (!newInstDlg.exec())
         return;
 
@@ -976,18 +980,101 @@ void MainWindow::processURLs(QList<QUrl> urls)
         if (url.scheme().isEmpty())
             url.setScheme("file");
 
-        if (!url.isLocalFile()) {  // probably instance/modpack
-            addInstance(url.toString());
-            break;
+        QMap<QString, QString> extra_info;
+        QUrl local_url;
+        if (!url.isLocalFile()) {  // download the remote resource and identify
+            QUrl dl_url;
+            if (url.scheme() == "curseforge") {
+                // need to find the download link for the modpack / resource
+                // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
+                QUrlQuery query(url);
+
+                auto addonId = query.allQueryItemValues("addonId")[0];
+                auto fileId = query.allQueryItemValues("fileId")[0];
+
+                extra_info.insert("pack_id", addonId);
+                extra_info.insert("pack_version_id", fileId);
+
+                auto array = std::make_shared<QByteArray>();
+
+                auto api = FlameAPI();
+                auto job = api.getFile(addonId, fileId, array);
+
+                QString resource_name;
+
+                connect(job.get(), &Task::failed, this,
+                        [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &resource_name] {
+                    qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
+                    auto doc = Json::requireDocument(*array);
+                    auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
+                    // No way to find out if it's a mod or a modpack before here
+                    // And also we need to check if it ends with .zip, instead of any better way
+                    auto fileName = Json::ensureString(data, "fileName");
+
+                    // Have to use ensureString then use QUrl to get proper url encoding
+                    dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
+                    if (!dl_url.isValid()) {
+                        CustomMessageBox::selectable(
+                            this, tr("Error"),
+                            tr("The modpack, mod, or resource %1 is blocked for third-parties! Please download it manually.").arg(fileName),
+                            QMessageBox::Critical)
+                            ->show();
+                        return;
+                    }
+
+                    QFileInfo dl_file(dl_url.fileName());
+                    resource_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
+                });
+
+                {  // drop stack
+                    ProgressDialog dlUrlDialod(this);
+                    dlUrlDialod.setSkipButton(true, tr("Abort"));
+                    dlUrlDialod.execWithTask(job.get());
+                }
+
+            } else {
+                dl_url = url;
+            }
+
+            if (!dl_url.isValid()) {
+                continue;  // no valid url to download this resource
+            }
+
+            const QString path = dl_url.host() + '/' + dl_url.path();
+            auto entry = APPLICATION->metacache()->resolveEntry("general", path);
+            entry->setStale(true);
+            auto dl_job = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
+            dl_job->addNetAction(Net::ApiDownload::makeCached(dl_url, entry));
+            auto archivePath = entry->getFullPath();
+
+            bool dl_success = false;
+            connect(dl_job.get(), &Task::failed, this,
+                    [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+            connect(dl_job.get(), &Task::succeeded, this, [&dl_success] { dl_success = true; });
+
+            {  // drop stack
+                ProgressDialog dlUrlDialod(this);
+                dlUrlDialod.setSkipButton(true, tr("Abort"));
+                dlUrlDialod.execWithTask(dl_job.get());
+            }
+
+            if (!dl_success) {
+                continue;  // no local file to identify
+            }
+            local_url = QUrl::fromLocalFile(archivePath);
+
+        } else {
+            local_url = url;
         }
 
-        auto localFileName = QDir::toNativeSeparators(url.toLocalFile());
+        auto localFileName = QDir::toNativeSeparators(local_url.toLocalFile());
         QFileInfo localFileInfo(localFileName);
 
         auto type = ResourceUtils::identify(localFileInfo);
 
         if (ResourceUtils::ValidResourceTypes.count(type) == 0) {  // probably instance/modpack
-            addInstance(localFileName);
+            addInstance(localFileName, extra_info);
             continue;
         }
 
@@ -1061,9 +1148,9 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 void MainWindow::iconUpdated(QString icon)
 {
     if (icon == m_currentInstIcon) {
-        auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
-        ui->actionChangeInstIcon->setIcon(icon);
-        changeIconButton->setIcon(icon);
+        auto new_icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
+        ui->actionChangeInstIcon->setIcon(new_icon);
+        changeIconButton->setIcon(new_icon);
     }
 }
 
@@ -1134,26 +1221,40 @@ void MainWindow::undoTrashInstance()
     ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
 }
 
+void MainWindow::on_actionViewLauncherRootFolder_triggered()
+{
+    DesktopServices::openDirectory(".");
+}
+
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
     QString str = APPLICATION->settings()->get("InstanceDir").toString();
     DesktopServices::openDirectory(str);
 }
 
-void MainWindow::on_actionViewLauncherRootFolder_triggered()
+void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-    const QString dataPath = QDir::currentPath();
-    DesktopServices::openDirectory(dataPath);
+    DesktopServices::openDirectory(APPLICATION->settings()->get("CentralModsDir").toString(), true);
+}
+
+void MainWindow::on_actionViewIconThemeFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path());
+}
+
+void MainWindow::on_actionViewWidgetThemeFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path());
+}
+
+void MainWindow::on_actionViewCatPackFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path());
 }
 
 void MainWindow::refreshInstances()
 {
     APPLICATION->instances()->loadList();
-}
-
-void MainWindow::on_actionViewCentralModsFolder_triggered()
-{
-    DesktopServices::openDirectory(APPLICATION->settings()->get("CentralModsDir").toString(), true);
 }
 
 void MainWindow::checkForUpdates()
@@ -1590,7 +1691,7 @@ void MainWindow::startTask(Task* task)
     task->start();
 }
 
-void MainWindow::instanceChanged(const QModelIndex& current, const QModelIndex& previous)
+void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     if (!current.isValid()) {
         APPLICATION->settings()->set("SelectedInstance", QString());
@@ -1725,7 +1826,7 @@ void MainWindow::setInstanceActionsEnabled(bool enabled)
     ui->actionCreateInstanceShortcut->setEnabled(enabled);
 }
 
-void MainWindow::refreshCurrentInstance(bool running)
+void MainWindow::refreshCurrentInstance([[maybe_unused]] bool running)
 {
     auto current = view->selectionModel()->currentIndex();
     instanceChanged(current, current);

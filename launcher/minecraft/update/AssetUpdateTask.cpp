@@ -7,6 +7,8 @@
 
 #include "Application.h"
 
+#include "net/ApiDownload.h"
+
 AssetUpdateTask::AssetUpdateTask(MinecraftInstance* inst)
 {
     m_inst = inst;
@@ -29,7 +31,7 @@ void AssetUpdateTask::executeTask()
     entry->setStale(true);
     auto hexSha1 = assets->sha1.toLatin1();
     qDebug() << "Asset index SHA1:" << hexSha1;
-    auto dl = Net::Download::makeCached(indexUrl, entry);
+    auto dl = Net::ApiDownload::makeCached(indexUrl, entry);
     auto rawSha1 = QByteArray::fromHex(assets->sha1.toLatin1());
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
     job->addNetAction(dl);

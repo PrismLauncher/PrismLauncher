@@ -246,20 +246,20 @@ void OtherLogsPage::on_btnClean_clicked()
         }
     }
     if (!failed.empty()) {
-        QMessageBox* messageBox = new QMessageBox(this);
-        messageBox->setWindowTitle(tr("Error"));
+        QMessageBox* messageBoxFailure = new QMessageBox(this);
+        messageBoxFailure->setWindowTitle(tr("Error"));
         if (failed.size() > 5) {
-            messageBox->setText(tr("Couldn't delete some files!"));
-            messageBox->setDetailedText(failed.join('\n'));
+            messageBoxFailure->setText(tr("Couldn't delete some files!"));
+            messageBoxFailure->setDetailedText(failed.join('\n'));
         } else {
-            messageBox->setText(tr("Couldn't delete some files:\n%1").arg(failed.join('\n')));
+            messageBoxFailure->setText(tr("Couldn't delete some files:\n%1").arg(failed.join('\n')));
         }
-        messageBox->setStandardButtons(QMessageBox::Ok);
-        messageBox->setDefaultButton(QMessageBox::Ok);
-        messageBox->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        messageBox->setIcon(QMessageBox::Critical);
-        messageBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
-        messageBox->exec();
+        messageBoxFailure->setStandardButtons(QMessageBox::Ok);
+        messageBoxFailure->setDefaultButton(QMessageBox::Ok);
+        messageBoxFailure->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        messageBoxFailure->setIcon(QMessageBox::Critical);
+        messageBoxFailure->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        messageBoxFailure->exec();
     }
 }
 
