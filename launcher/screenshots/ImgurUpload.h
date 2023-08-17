@@ -44,6 +44,7 @@ class ImgurUpload : public NetAction {
 
     explicit ImgurUpload(ScreenShot::Ptr shot);
     static Ptr make(ScreenShot::Ptr shot) { return Ptr(new ImgurUpload(shot)); }
+    void init() override{};
 
    protected slots:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;

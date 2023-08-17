@@ -71,6 +71,7 @@ class TranslationsModel;
 class ITheme;
 class MCEditTool;
 class ThemeManager;
+class IconTheme;
 
 namespace Meta {
 class Index;
@@ -109,17 +110,7 @@ class Application : public QApplication {
 
     QIcon getThemedIcon(const QString& name);
 
-    void setIconTheme(const QString& name);
-
-    void applyCurrentlySelectedTheme(bool initial = false);
-
-    QList<ITheme*> getValidApplicationThemes();
-
-    void setApplicationTheme(const QString& name);
-
-    QList<CatPack*> getValidCatPacks();
-
-    QString getCatPack(QString catName = "");
+    ThemeManager* themeManager() { return m_themeManager.get(); }
 
     shared_qobject_ptr<ExternalUpdater> updater() { return m_updater; }
 
@@ -185,6 +176,8 @@ class Application : public QApplication {
     void ShowGlobalSettings(class QWidget* parent, QString open_page = QString());
 
     int suitableMaxMem();
+
+    QUrl normalizeImportUrl(QString const& url);
 
    signals:
     void updateAllowedChanged(bool status);
@@ -288,7 +281,7 @@ class Application : public QApplication {
     QString m_serverToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
-    QList<QUrl> m_zipsToImport;
+    QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };

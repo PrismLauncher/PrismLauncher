@@ -9,7 +9,8 @@
 namespace ResourceDownload {
 
 ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_inst, ResourceAPI* api)
-    : ResourceModel(api), m_base_instance(base_inst){};
+    : ResourceModel(api), m_base_instance(base_inst)
+{}
 
 /******** Make data requests ********/
 

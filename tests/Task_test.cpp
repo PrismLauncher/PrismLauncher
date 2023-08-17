@@ -19,7 +19,7 @@ class BasicTask : public Task {
     BasicTask(bool show_debug_log = true) : Task(nullptr, show_debug_log) {}
 
    private:
-    void executeTask() override { emitSucceeded(); };
+    void executeTask() override { emitSucceeded(); }
 };
 
 /* Does nothing. Only used for testing. */
@@ -31,7 +31,7 @@ class BasicTask_MultiStep : public Task {
    private:
     auto isMultiStep() const -> bool override { return true; }
 
-    void executeTask() override{};
+    void executeTask() override {}
 };
 
 class BigConcurrentTask : public ConcurrentTask {

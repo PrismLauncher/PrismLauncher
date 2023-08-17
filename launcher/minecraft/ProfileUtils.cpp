@@ -82,7 +82,7 @@ bool readOverrideOrders(QString path, PatchOrder& order)
         for (auto item : orderArray) {
             order.append(Json::requireString(item));
         }
-    } catch (const JSONValidationError& err) {
+    } catch ([[maybe_unused]] const JSONValidationError& err) {
         qCritical() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
         qWarning() << "Ignoring overriden order";
         order.clear();
