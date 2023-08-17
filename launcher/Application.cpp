@@ -585,7 +585,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
+        m_settings->registerSetting("CustomOpenALPath", "");
         m_settings->registerSetting("UseNativeGLFW", false);
+        m_settings->registerSetting("CustomGLFWPath", "");
 
         // Peformance related options
         m_settings->registerSetting("EnableFeralGamemode", false);
@@ -844,6 +846,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     });
 
     updateCapabilities();
+
+    detectLibraries();
 
     if (createSetupWizard()) {
         return;
@@ -1412,6 +1416,15 @@ void Application::updateCapabilities()
 
     if (!MangoHud::getLibraryString().isEmpty())
         m_capabilities |= SupportsMangoHud;
+#endif
+}
+
+void Application::detectLibraries()
+{
+#ifdef Q_OS_LINUX
+    m_detectedGLFWPath = MangoHud::findLibrary(BuildConfig.GLFW_LIBRARY_NAME);
+    m_detectedOpenALPath = MangoHud::findLibrary(BuildConfig.OPENAL_LIBRARY_NAME);
+    qDebug() << "Detected native libraries:" << m_detectedGLFWPath << m_detectedOpenALPath;
 #endif
 }
 

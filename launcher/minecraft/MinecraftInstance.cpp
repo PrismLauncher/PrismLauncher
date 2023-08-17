@@ -166,7 +166,9 @@ void MinecraftInstance::loadSpecificSettings()
         // Native library workarounds
         auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);
         m_settings->registerOverride(global_settings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("CustomOpenALPath"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("CustomGLFWPath"), nativeLibraryWorkaroundsOverride);
 
         // Peformance related options
         auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
@@ -389,6 +391,33 @@ QStringList MinecraftInstance::extraArguments()
         if (loaders.has_value() && loaders.value() & ResourceAPI::Quilt && settings()->get("DisableQuiltBeacon").toBool())
             list.append("-Dloader.disable_beacon=true");
     }
+
+    {
+        QString openALPath;
+        QString glfwPath;
+
+        if (settings()->get("UseNativeOpenAL").toBool()) {
+            openALPath = APPLICATION->m_detectedOpenALPath;
+            auto customPath = settings()->get("CustomOpenALPath").toString();
+            if (!customPath.isEmpty())
+                openALPath = customPath;
+        }
+        if (settings()->get("UseNativeGLFW").toBool()) {
+            glfwPath = APPLICATION->m_detectedGLFWPath;
+            auto customPath = settings()->get("CustomGLFWPath").toString();
+            if (!customPath.isEmpty())
+                glfwPath = customPath;
+        }
+
+        QFileInfo openALInfo(openALPath);
+        QFileInfo glfwInfo(glfwPath);
+
+        if (!openALPath.isEmpty() && openALInfo.exists())
+            list.append("-Dorg.lwjgl.openal.libname=" + openALInfo.absoluteFilePath());
+        if (!glfwPath.isEmpty() && glfwInfo.exists())
+            list.append("-Dorg.lwjgl.glfw.libname=" + glfwInfo.absoluteFilePath());
+    }
+
     return list;
 }
 
