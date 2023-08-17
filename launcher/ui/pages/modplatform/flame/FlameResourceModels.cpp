@@ -32,7 +32,7 @@ void FlameModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonAr
 auto FlameModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return FlameMod::loadDependencyVersions(m, arr);
-};
+}
 
 auto FlameModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {

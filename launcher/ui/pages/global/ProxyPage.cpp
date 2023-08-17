@@ -71,7 +71,7 @@ void ProxyPage::updateCheckboxStuff()
     ui->proxyAuthBox->setEnabled(enableEditing);
 }
 
-void ProxyPage::proxyGroupChanged(QAbstractButton* button)
+void ProxyPage::proxyGroupChanged([[maybe_unused]] QAbstractButton* button)
 {
     updateCheckboxStuff();
 }

@@ -53,7 +53,10 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
     Q_OBJECT
 
    public:
-    explicit NewInstanceDialog(const QString& initialGroup, const QString& url = QString(), QWidget* parent = 0);
+    explicit NewInstanceDialog(const QString& initialGroup,
+                               const QString& url = QString(),
+                               const QMap<QString, QString>& extra_info = {},
+                               QWidget* parent = 0);
     ~NewInstanceDialog();
 
     void updateDialogState();

@@ -32,7 +32,7 @@ class DummyResourceAPI : public ResourceAPI {
     }
 
     DummyResourceAPI() : ResourceAPI() {}
-    [[nodiscard]] auto getSortingMethods() const -> QList<SortingMethod> override { return {}; };
+    [[nodiscard]] auto getSortingMethods() const -> QList<SortingMethod> override { return {}; }
 
     [[nodiscard]] Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&& callbacks) const override
     {
