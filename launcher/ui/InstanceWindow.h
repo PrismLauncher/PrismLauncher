@@ -52,7 +52,7 @@ class PageContainer;
 class InstanceWindow : public QMainWindow, public BasePageContainer {
     Q_OBJECT
 
-public:
+   public:
     explicit InstanceWindow(InstancePtr proc, QWidget* parent = 0);
     virtual ~InstanceWindow() = default;
 

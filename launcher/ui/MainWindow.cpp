@@ -551,7 +551,7 @@ void MainWindow::updateMainToolBar()
 
 void MainWindow::updateLaunchButton()
 {
-    QMenu *launchMenu = ui->actionLaunchInstance->menu();
+    QMenu* launchMenu = ui->actionLaunchInstance->menu();
     if (launchMenu)
         launchMenu->clear();
     else

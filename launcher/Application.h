@@ -187,7 +187,7 @@ class Application : public QApplication {
     void clickedOnDock();
 #endif
 
-public slots:
+   public slots:
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,

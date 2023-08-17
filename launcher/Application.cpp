@@ -1104,18 +1104,13 @@ bool Application::launch(InstancePtr instance,
                          MinecraftServerTargetPtr serverToJoin,
                          MinecraftAccountPtr accountToUse)
 {
-    if(m_updateRunning)
-    {
+    if (m_updateRunning) {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
-    }
-    else if(instance->canLaunch())
-    {
-        auto & extras = m_instanceExtras[instance->id()];
+    } else if (instance->canLaunch()) {
+        auto& extras = m_instanceExtras[instance->id()];
         auto window = extras.window;
-        if(window)
-        {
-            if(!window->saveAll())
-            {
+        if (window) {
+            if (!window->saveAll()) {
                 return false;
             }
         }
