@@ -141,7 +141,10 @@ class ModrinthAPI : public NetworkResourceAPI {
         return s.isEmpty() ? QString() : s;
     }
 
-    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (NeoForge | Forge | Fabric | Quilt | LiteLoader); }
+    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool
+    {
+        return loaders & (NeoForge | Forge | Fabric | Quilt | LiteLoader);
+    }
 
     [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
     {
