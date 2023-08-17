@@ -50,6 +50,7 @@
 #include "modplatform/technic/TechnicPackProcessor.h"
 
 #include "settings/INISettingsObject.h"
+#include "tasks/Task.h"
 
 #include "net/ApiDownload.h"
 
@@ -83,23 +84,28 @@ void InstanceImportTask::executeTask()
     } else {
         setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
 
-        const QString path(m_sourceUrl.host() + '/' + m_sourceUrl.path());
-
-        auto entry = APPLICATION->metacache()->resolveEntry("general", path);
-        entry->setStale(true);
-        m_archivePath = entry->getFullPath();
-
-        auto filesNetJob = makeShared<NetJob>(tr("Modpack download"), APPLICATION->network());
-        filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
-
-        connect(filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::processZipPack);
-        connect(filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::setProgress);
-        connect(filesNetJob.get(), &NetJob::stepProgress, this, &InstanceImportTask::propagateStepProgress);
-        connect(filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::emitFailed);
-        connect(filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::emitAborted);
-        task.reset(filesNetJob);
-        filesNetJob->start();
+        downloadFromUrl();
     }
+}
+
+void InstanceImportTask::downloadFromUrl()
+{
+    const QString path(m_sourceUrl.host() + '/' + m_sourceUrl.path());
+
+    auto entry = APPLICATION->metacache()->resolveEntry("general", path);
+    entry->setStale(true);
+    m_archivePath = entry->getFullPath();
+
+    auto filesNetJob = makeShared<NetJob>(tr("Modpack download"), APPLICATION->network());
+    filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
+
+    connect(filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::processZipPack);
+    connect(filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::setProgress);
+    connect(filesNetJob.get(), &NetJob::stepProgress, this, &InstanceImportTask::propagateStepProgress);
+    connect(filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::emitFailed);
+    connect(filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::emitAborted);
+    task.reset(filesNetJob);
+    filesNetJob->start();
 }
 
 QString InstanceImportTask::getRootFromZip(QuaZip* zip, const QString& root)

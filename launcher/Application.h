@@ -177,6 +177,8 @@ class Application : public QApplication {
 
     int suitableMaxMem();
 
+    QUrl normalizeImportUrl(QString const& url);
+
    signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
@@ -279,7 +281,7 @@ class Application : public QApplication {
     QString m_serverToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
-    QList<QUrl> m_zipsToImport;
+    QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };

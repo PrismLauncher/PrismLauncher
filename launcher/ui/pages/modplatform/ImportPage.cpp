@@ -35,13 +35,21 @@
  */
 
 #include "ImportPage.h"
+
+#include "ui/dialogs/ProgressDialog.h"
 #include "ui_ImportPage.h"
 
 #include <QFileDialog>
 #include <QMimeDatabase>
 #include <QValidator>
+#include <utility>
 
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/NewInstanceDialog.h"
+
+#include "modplatform/flame/FlameAPI.h"
+
+#include "Json.h"
 
 #include "InstanceImportTask.h"
 
@@ -107,10 +115,61 @@ void ImportPage::updateState()
             bool isMRPack = fi.suffix() == "mrpack";
 
             if (fi.exists() && (isZip || isMRPack)) {
-                QFileInfo file_info(url.fileName());
-                dialog->setSuggestedPack(file_info.completeBaseName(), new InstanceImportTask(url, this));
+                auto extra_info = QMap(m_extra_info);
+                qDebug() << "Pack Extra Info" << extra_info << m_extra_info;
+                dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this, std::move(extra_info)));
                 dialog->setSuggestedIcon("default");
             }
+        } else if (url.scheme() == "curseforge") {
+            // need to find the download link for the modpack
+            // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
+            QUrlQuery query(url);
+            auto addonId = query.allQueryItemValues("addonId")[0];
+            auto fileId = query.allQueryItemValues("fileId")[0];
+            auto array = std::make_shared<QByteArray>();
+
+            auto api = FlameAPI();
+            auto job = api.getFile(addonId, fileId, array);
+
+            connect(job.get(), &NetJob::failed, this,
+                    [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+            connect(job.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
+                qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
+                auto doc = Json::requireDocument(*array);
+                auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
+                // No way to find out if it's a mod or a modpack before here
+                // And also we need to check if it ends with .zip, instead of any better way
+                auto fileName = Json::ensureString(data, "fileName");
+                if (fileName.endsWith(".zip")) {
+                    // Have to use ensureString then use QUrl to get proper url encoding
+                    auto dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
+                    if (!dl_url.isValid()) {
+                        CustomMessageBox::selectable(
+                            this, tr("Error"),
+                            tr("The modpack %1 is blocked for third-parties! Please download it manually.").arg(fileName),
+                            QMessageBox::Critical)
+                            ->show();
+                        return;
+                    }
+
+                    QFileInfo dl_file(dl_url.fileName());
+                    QString pack_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
+
+                    QMap<QString, QString> extra_info;
+                    extra_info.insert("pack_id", addonId);
+                    extra_info.insert("pack_version_id", fileId);
+
+                    dialog->setSuggestedPack(pack_name, new InstanceImportTask(dl_url, this, std::move(extra_info)));
+                    dialog->setSuggestedIcon("default");
+
+                } else {
+                    CustomMessageBox::selectable(this, tr("Error"), tr("This url isn't a valid modpack !"), QMessageBox::Critical)->show();
+                }
+            });
+            ProgressDialog dlUrlDialod(this);
+            dlUrlDialod.setSkipButton(true, tr("Abort"));
+            dlUrlDialod.execWithTask(job.get());
+            return;
         } else {
             if (input.endsWith("?client=y")) {
                 input.chop(9);
@@ -119,7 +178,8 @@ void ImportPage::updateState()
             }
             // hook, line and sinker.
             QFileInfo fi(url.fileName());
-            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this));
+            auto extra_info = QMap(m_extra_info);
+            dialog->setSuggestedPack(fi.completeBaseName(), new InstanceImportTask(url, this, std::move(extra_info)));
             dialog->setSuggestedIcon("default");
         }
     } else {
@@ -130,6 +190,12 @@ void ImportPage::updateState()
 void ImportPage::setUrl(const QString& url)
 {
     ui->modpackEdit->setText(url);
+    updateState();
+}
+
+void ImportPage::setExtraInfo(const QMap<QString, QString>& extra_info)
+{
+    m_extra_info = extra_info;
     updateState();
 }
 
