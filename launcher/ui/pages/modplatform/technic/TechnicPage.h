@@ -35,12 +35,12 @@
 
 #pragma once
 
+#include <QTimer>
 #include <QWidget>
 
 #include <Application.h>
 #include "TechnicData.h"
 #include "net/NetJob.h"
-#include "tasks/Task.h"
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
@@ -91,4 +91,7 @@ class TechnicPage : public QWidget, public BasePage {
 
     NetJob::Ptr jobPtr;
     std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
+
+    // Used to do instant searching with a delay to cache quick changes
+    QTimer m_search_timer;
 };

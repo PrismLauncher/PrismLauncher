@@ -34,6 +34,7 @@
  */
 
 #include "TechnicPage.h"
+#include "ui/widgets/ProjectItem.h"
 #include "ui_TechnicPage.h"
 
 #include <QKeyEvent>
@@ -59,8 +60,15 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(p
     model = new Technic::ListModel(this);
     ui->packView->setModel(model);
 
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &TechnicPage::triggerSearch);
+
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &TechnicPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &TechnicPage::onVersionSelectionChanged);
+
+    ui->packView->setItemDelegate(new ProjectItemDelegate(this));
 }
 
 bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
@@ -71,6 +79,11 @@ bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
             triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     }
     return QWidget::eventFilter(watched, event);

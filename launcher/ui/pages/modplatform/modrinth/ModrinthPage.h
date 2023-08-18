@@ -42,6 +42,7 @@
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -88,4 +89,7 @@ class ModrinthPage : public QWidget, public BasePage {
 
     Modrinth::Modpack current;
     QString selectedVersion;
+
+    // Used to do instant searching with a delay to cache quick changes
+    QTimer m_search_timer;
 };

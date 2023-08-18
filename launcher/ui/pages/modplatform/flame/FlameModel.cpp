@@ -1,6 +1,8 @@
 #include "FlameModel.h"
 #include <Json.h>
 #include "Application.h"
+#include "modplatform/ResourceAPI.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui/widgets/ProjectItem.h"
 
 #include "net/ApiDownload.h"
@@ -161,6 +163,25 @@ void ListModel::fetchMore(const QModelIndex& parent)
 
 void ListModel::performPaginatedSearch()
 {
+    if (currentSearchTerm.startsWith("#")) {
+        auto projectId = currentSearchTerm.removeFirst();
+        if (!projectId.isEmpty()) {
+            ResourceAPI::ProjectInfoCallbacks callbacks;
+
+            // Use defaults if no callbacks are set
+            if (!callbacks.on_fail)
+                callbacks.on_fail = [this](QString reason) { searchRequestFailed(reason); };
+
+            if (!callbacks.on_succeed)
+                callbacks.on_succeed = [this](auto& doc, auto pack) { searchRequestForOneSucceeded(doc); };
+            static const FlameAPI api;
+            if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {
+                jobPtr = job;
+                jobPtr->start();
+            }
+            return;
+        }
+    }
     auto netJob = makeShared<NetJob>("Flame::Search", APPLICATION->network());
     auto searchUrl = QString(
                          "https://api.curseforge.com/v1/mods/search?"
@@ -189,23 +210,24 @@ void ListModel::searchWithTerm(const QString& term, int sort)
     }
     currentSearchTerm = term;
     currentSort = sort;
-    if (jobPtr) {
+    if (hasActiveSearchJob()) {
         jobPtr->abort();
         searchState = ResetRequested;
         return;
-    } else {
-        beginResetModel();
-        modpacks.clear();
-        endResetModel();
-        searchState = None;
     }
+    beginResetModel();
+    modpacks.clear();
+    endResetModel();
+    searchState = None;
+
     nextSearchOffset = 0;
     performPaginatedSearch();
 }
 
 void Flame::ListModel::searchRequestFinished()
 {
-    jobPtr.reset();
+    if (hasActiveSearchJob())
+        return;
 
     QJsonParseError parse_error;
     QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
@@ -243,6 +265,25 @@ void Flame::ListModel::searchRequestFinished()
 
     beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + newList.size() - 1);
     modpacks.append(newList);
+    endInsertRows();
+}
+
+void Flame::ListModel::searchRequestForOneSucceeded(QJsonDocument& doc)
+{
+    jobPtr.reset();
+
+    auto packObj = Json::ensureObject(doc.object(), "data");
+
+    Flame::IndexedPack pack;
+    try {
+        Flame::loadIndexedPack(pack, packObj);
+    } catch (const JSONValidationError& e) {
+        qWarning() << "Error while loading pack from CurseForge: " << e.cause();
+        return;
+    }
+
+    beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + 1);
+    modpacks.append({ pack });
     endInsertRows();
 }
 

@@ -40,6 +40,8 @@ class ListModel : public QAbstractListModel {
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
     void searchWithTerm(const QString& term, const int sort);
 
+    [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
+
    private slots:
     void performPaginatedSearch();
 
@@ -48,6 +50,7 @@ class ListModel : public QAbstractListModel {
 
     void searchRequestFinished();
     void searchRequestFailed(QString reason);
+    void searchRequestForOneSucceeded(QJsonDocument&);
 
    private:
     void requestLogo(QString file, QString url);
@@ -63,7 +66,7 @@ class ListModel : public QAbstractListModel {
     int currentSort = 0;
     int nextSearchOffset = 0;
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
-    NetJob::Ptr jobPtr;
+    Task::Ptr jobPtr;
     std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
 };
 

@@ -73,6 +73,8 @@ class ModpackListModel : public QAbstractListModel {
     void refresh();
     void searchWithTerm(const QString& term, const int sort);
 
+    [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
+
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
     inline auto canFetchMore(const QModelIndex& parent) const -> bool override
@@ -83,6 +85,7 @@ class ModpackListModel : public QAbstractListModel {
    public slots:
     void searchRequestFinished(QJsonDocument& doc_all);
     void searchRequestFailed(QString reason);
+    void searchRequestForOneSucceeded(QJsonDocument&);
 
    protected slots:
 
@@ -111,7 +114,7 @@ class ModpackListModel : public QAbstractListModel {
     int nextSearchOffset = 0;
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
 
-    NetJob::Ptr jobPtr;
+    Task::Ptr jobPtr;
 
     std::shared_ptr<QByteArray> m_all_response = std::make_shared<QByteArray>();
     QByteArray m_specific_response;

@@ -61,6 +61,11 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &FlamePage::triggerSearch);
+
     // index is used to set the sorting with the curseforge api
     ui->sortByBox->addItem(tr("Sort by Featured"));
     ui->sortByBox->addItem(tr("Sort by Popularity"));
@@ -90,6 +95,11 @@ bool FlamePage::eventFilter(QObject* watched, QEvent* event)
             triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     }
     return QWidget::eventFilter(watched, event);
