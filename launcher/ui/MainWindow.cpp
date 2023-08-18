@@ -1810,7 +1810,9 @@ void MainWindow::updateStatusCenter()
 
     int timePlayed = APPLICATION->instances()->getTotalPlayTime();
     if (timePlayed > 0) {
-        m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
+        m_statusCenter->setText(
+            tr("Total playtime: %1")
+                .arg(Time::prettifyDuration(timePlayed, APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
     }
 }
 // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
