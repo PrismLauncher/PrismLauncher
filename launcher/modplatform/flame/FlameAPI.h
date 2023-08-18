@@ -24,7 +24,7 @@ class FlameAPI : public NetworkResourceAPI {
 
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
-    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (Forge | Fabric | Quilt); }
+    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (NeoForge | Forge | Fabric | Quilt); }
 
    private:
     static int getClassId(ModPlatform::ResourceType type)
@@ -47,7 +47,9 @@ class FlameAPI : public NetworkResourceAPI {
             return 4;
         // TODO: remove this once Quilt drops official Fabric support
         if (loaders & Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
-            return 4;         // Quilt would probably be 5
+            return 4;         // FIXME: implement multiple loaders filter
+        if (loaders & NeoForge)
+            return 6;
         return 0;
     }
 

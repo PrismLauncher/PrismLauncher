@@ -68,6 +68,10 @@ void PackInstallTask::copySettings()
     auto modloader = m_pack.loaderType;
     if (modloader.has_value())
         switch (modloader.value()) {
+            case ResourceAPI::NeoForge: {
+                components->setComponentVersion("net.neoforged", m_pack.version, true);
+                break;
+            }
             case ResourceAPI::Forge: {
                 components->setComponentVersion("net.minecraftforge", m_pack.version, true);
                 break;

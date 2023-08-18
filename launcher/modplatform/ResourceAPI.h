@@ -54,7 +54,7 @@ class ResourceAPI {
    public:
     virtual ~ResourceAPI() = default;
 
-    enum ModLoaderType { Forge = 1 << 0, Cauldron = 1 << 1, LiteLoader = 1 << 2, Fabric = 1 << 3, Quilt = 1 << 4 };
+    enum ModLoaderType { NeoForge = 1 << 0, Forge = 1 << 1, Cauldron = 1 << 2, LiteLoader = 1 << 3, Fabric = 1 << 4, Quilt = 1 << 5 };
     Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 
     struct SortingMethod {
@@ -164,6 +164,8 @@ class ResourceAPI {
     static auto getModLoaderString(ModLoaderType type) -> const QString
     {
         switch (type) {
+            case NeoForge:
+                return "neoforge";
             case Forge:
                 return "forge";
             case Cauldron:
