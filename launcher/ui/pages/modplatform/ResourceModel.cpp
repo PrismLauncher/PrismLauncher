@@ -152,7 +152,7 @@ void ResourceModel::search()
                 };
 
             if (!callbacks.on_succeed)
-                callbacks.on_succeed = [this](auto& doc, auto pack) {
+                callbacks.on_succeed = [this](auto& doc, auto& pack) {
                     if (!s_running_models.constFind(this).value())
                         return;
                     searchRequestForOneSucceeded(doc);
@@ -219,9 +219,10 @@ void ResourceModel::loadEntry(QModelIndex& entry)
 
         // Use default if no callbacks are set
         if (!callbacks.on_succeed)
-            callbacks.on_succeed = [this, entry](auto& doc, auto pack) {
+            callbacks.on_succeed = [this, entry](auto& doc, auto& newpack) {
                 if (!s_running_models.constFind(this).value())
                     return;
+                auto pack = newpack;
                 infoRequestSucceeded(doc, pack, entry);
             };
         if (!callbacks.on_fail)
