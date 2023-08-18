@@ -52,6 +52,7 @@
 #include "Json.h"
 
 #include "InstanceImportTask.h"
+#include "net/NetJob.h"
 
 class UrlValidator : public QValidator {
    public:
