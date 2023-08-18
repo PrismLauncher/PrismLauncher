@@ -35,12 +35,6 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>28</width>
-          <height>16777215</height>
-         </size>
-        </property>
         <property name="text">
          <string>Browse</string>
         </property>
