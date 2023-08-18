@@ -143,7 +143,7 @@ void ModpackListModel::performPaginatedSearch()
                 callbacks.on_fail = [this](QString reason) { searchRequestFailed(reason); };
 
             if (!callbacks.on_succeed)
-                callbacks.on_succeed = [this](auto& doc, auto pack) { searchRequestForOneSucceeded(doc); };
+                callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
             static const ModrinthAPI api;
             if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {
                 jobPtr = job;
