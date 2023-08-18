@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ class Version;
 namespace Modrinth {
 
 using LogoMap = QMap<QString, QIcon>;
-using LogoCallback = std::function<void (QString)>;
+using LogoCallback = std::function<void(QString)>;
 
 class ModpackListModel : public QAbstractListModel {
     Q_OBJECT
@@ -64,7 +64,7 @@ class ModpackListModel : public QAbstractListModel {
 
     /* Retrieve information from the model at a given index with the given role */
     auto data(const QModelIndex& index, int role) const -> QVariant override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
     inline void setActiveJob(NetJob::Ptr ptr) { jobPtr = ptr; }
 
@@ -75,7 +75,10 @@ class ModpackListModel : public QAbstractListModel {
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
-    inline auto canFetchMore(const QModelIndex& parent) const -> bool override { return parent.isValid() ? false : searchState == CanPossiblyFetchMore; };
+    inline auto canFetchMore(const QModelIndex& parent) const -> bool override
+    {
+        return parent.isValid() ? false : searchState == CanPossiblyFetchMore;
+    };
 
    public slots:
     void searchRequestFinished(QJsonDocument& doc_all);

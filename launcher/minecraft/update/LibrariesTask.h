@@ -1,26 +1,25 @@
 #pragma once
-#include "tasks/Task.h"
 #include "net/NetJob.h"
+#include "tasks/Task.h"
 class MinecraftInstance;
 
-class LibrariesTask : public Task
-{
+class LibrariesTask : public Task {
     Q_OBJECT
-public:
-    LibrariesTask(MinecraftInstance * inst);
-    virtual ~LibrariesTask() {};
+   public:
+    LibrariesTask(MinecraftInstance* inst);
+    virtual ~LibrariesTask(){};
 
     void executeTask() override;
 
     bool canAbort() const override;
 
-private slots:
+   private slots:
     void jarlibFailed(QString reason);
 
-public slots:
+   public slots:
     bool abort() override;
 
-private:
-    MinecraftInstance *m_inst;
+   private:
+    MinecraftInstance* m_inst;
     NetJob::Ptr downloadJob;
 };

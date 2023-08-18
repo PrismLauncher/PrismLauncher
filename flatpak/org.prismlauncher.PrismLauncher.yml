@@ -18,6 +18,8 @@ finish-args:
   - --filesystem=xdg-run/app/com.discordapp.Discord:create
     # Mod drag&drop
   - --filesystem=xdg-download:ro
+    # FTBApp import
+  - --filesystem=~/.ftba:ro
 
 cleanup:
   - /lib/libGLU*

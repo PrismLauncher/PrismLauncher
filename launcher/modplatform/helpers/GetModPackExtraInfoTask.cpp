@@ -73,7 +73,7 @@ void GetModPackExtraInfoTask::executeTask()
         stepProgress(*progressStep);
         emitFailed(reason);
     });
-    connect(hashTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propogateStepProgress);
+    connect(hashTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propagateStepProgress);
 
     connect(hashTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);
@@ -106,7 +106,7 @@ void GetModPackExtraInfoTask::hashDone(QString result)
         stepProgress(*progressStep);
         emitFailed(reason);
     });
-    connect(verTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propogateStepProgress);
+    connect(verTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propagateStepProgress);
 
     connect(verTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);
@@ -174,7 +174,7 @@ void GetModPackExtraInfoTask::getProjectInfo()
         stepProgress(*progressStep);
         emitFailed(reason);
     });
-    connect(projectTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propogateStepProgress);
+    connect(projectTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propagateStepProgress);
 
     connect(projectTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);
@@ -216,7 +216,7 @@ void GetModPackExtraInfoTask::getLogo()
         stepProgress(*progressStep);
         emitFailed(reason);
     });
-    connect(logoTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propogateStepProgress);
+    connect(logoTask.get(), &Task::stepProgress, this, &GetModPackExtraInfoTask::propagateStepProgress);
 
     connect(logoTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);

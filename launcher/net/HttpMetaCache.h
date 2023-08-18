@@ -74,7 +74,7 @@ class MetaEntry {
     auto getMaximumAge() -> qint64 { return m_max_age; }
     void setMaximumAge(qint64 age) { m_max_age = age; }
 
-    bool isExpired(qint64 offset) { return !m_is_eternal && (m_current_age >= m_max_age - offset); };
+    bool isExpired(qint64 offset) { return !m_is_eternal && (m_current_age >= m_max_age - offset); }
 
    protected:
     QString m_baseId;

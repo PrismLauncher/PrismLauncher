@@ -1,20 +1,20 @@
 #include "AssetUpdateTask.h"
 
+#include "minecraft/AssetsUtils.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "net/ChecksumValidator.h"
-#include "minecraft/AssetsUtils.h"
 
 #include "Application.h"
 
-AssetUpdateTask::AssetUpdateTask(MinecraftInstance * inst)
+#include "net/ApiDownload.h"
+
+AssetUpdateTask::AssetUpdateTask(MinecraftInstance* inst)
 {
     m_inst = inst;
 }
 
-AssetUpdateTask::~AssetUpdateTask()
-{
-}
+AssetUpdateTask::~AssetUpdateTask() {}
 
 void AssetUpdateTask::executeTask()
 {
@@ -24,17 +24,14 @@ void AssetUpdateTask::executeTask()
     auto assets = profile->getMinecraftAssets();
     QUrl indexUrl = assets->url;
     QString localPath = assets->id + ".json";
-    auto job = makeShared<NetJob>(
-        tr("Asset index for %1").arg(m_inst->name()),
-        APPLICATION->network()
-    );
+    auto job = makeShared<NetJob>(tr("Asset index for %1").arg(m_inst->name()), APPLICATION->network());
 
     auto metacache = APPLICATION->metacache();
     auto entry = metacache->resolveEntry("asset_indexes", localPath);
     entry->setStale(true);
     auto hexSha1 = assets->sha1.toLatin1();
     qDebug() << "Asset index SHA1:" << hexSha1;
-    auto dl = Net::Download::makeCached(indexUrl, entry);
+    auto dl = Net::ApiDownload::makeCached(indexUrl, entry);
     auto rawSha1 = QByteArray::fromHex(assets->sha1.toLatin1());
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
     job->addNetAction(dl);
@@ -43,9 +40,9 @@ void AssetUpdateTask::executeTask()
 
     connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::assetIndexFinished);
     connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetIndexFailed);
-    connect(downloadJob.get(), &NetJob::aborted, this, [this]{ emitFailed(tr("Aborted")); });
+    connect(downloadJob.get(), &NetJob::aborted, this, [this] { emitFailed(tr("Aborted")); });
     connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
-    connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propogateStepProgress);
+    connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propagateStepProgress);
 
     qDebug() << m_inst->name() << ": Starting asset index download";
     downloadJob->start();
@@ -67,8 +64,7 @@ void AssetUpdateTask::assetIndexFinished()
 
     QString asset_fname = "assets/indexes/" + assets->id + ".json";
     // FIXME: this looks like a job for a generic validator based on json schema?
-    if (!AssetsUtils::loadAssetsIndexJson(assets->id, asset_fname, index))
-    {
+    if (!AssetsUtils::loadAssetsIndexJson(assets->id, asset_fname, index)) {
         auto metacache = APPLICATION->metacache();
         auto entry = metacache->resolveEntry("asset_indexes", assets->id + ".json");
         metacache->evictEntry(entry);
@@ -76,15 +72,14 @@ void AssetUpdateTask::assetIndexFinished()
     }
 
     auto job = index.getDownloadJob();
-    if(job)
-    {
+    if (job) {
         setStatus(tr("Getting the assets files from Mojang..."));
         downloadJob = job;
         connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::emitSucceeded);
         connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetsFailed);
-        connect(downloadJob.get(), &NetJob::aborted, this, [this]{ emitFailed(tr("Aborted")); });
+        connect(downloadJob.get(), &NetJob::aborted, this, [this] { emitFailed(tr("Aborted")); });
         connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
-        connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propogateStepProgress);
+        connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propagateStepProgress);
         downloadJob->start();
         return;
     }
@@ -104,12 +99,9 @@ void AssetUpdateTask::assetsFailed(QString reason)
 
 bool AssetUpdateTask::abort()
 {
-    if(downloadJob)
-    {
+    if (downloadJob) {
         return downloadJob->abort();
-    }
-    else
-    {
+    } else {
         qWarning() << "Prematurely aborted AssetUpdateTask";
     }
     return true;

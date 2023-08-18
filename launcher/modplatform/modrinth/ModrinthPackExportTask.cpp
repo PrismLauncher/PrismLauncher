@@ -55,20 +55,11 @@ void ModrinthPackExportTask::executeTask()
 
 bool ModrinthPackExportTask::abort()
 {
-    if (task != nullptr) {
+    if (task) {
         task->abort();
-        task = nullptr;
         emitAborted();
         return true;
     }
-
-    if (buildZipFuture.isRunning()) {
-        buildZipFuture.cancel();
-        // NOTE: Here we don't do `emitAborted()` because it will be done when `buildZipFuture` actually cancels, which may not occur
-        // immediately.
-        return true;
-    }
-
     return false;
 }
 
@@ -183,10 +174,10 @@ void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<QByteArray> 
             if (obj.isEmpty())
                 continue;
 
-            const QJsonArray files = obj["files"].toArray();
-            if (auto fileIter = std::find_if(files.begin(), files.end(),
+            const QJsonArray files_array = obj["files"].toArray();
+            if (auto fileIter = std::find_if(files_array.begin(), files_array.end(),
                                              [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
-                fileIter != files.end()) {
+                fileIter != files_array.end()) {
                 // map the file to the url
                 resolvedFiles[iterator.key()] =
                     ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), iterator.value(),
@@ -205,63 +196,36 @@ void ModrinthPackExportTask::buildZip()
 {
     setStatus(tr("Adding files..."));
 
-    buildZipFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this]() {
-        QuaZip zip(output);
-        if (!zip.open(QuaZip::mdCreate)) {
-            QFile::remove(output);
-            return BuildZipResult(tr("Could not create file"));
-        }
+    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true);
+    zipTask->addExtraFile("modrinth.index.json", generateIndex());
 
-        if (buildZipFuture.isCanceled())
-            return BuildZipResult();
+    zipTask->setExcludeFiles(resolvedFiles.keys());
 
-        QuaZipFile indexFile(&zip);
-        if (!indexFile.open(QIODevice::WriteOnly, QuaZipNewInfo("modrinth.index.json"))) {
-            QFile::remove(output);
-            return BuildZipResult(tr("Could not create index"));
-        }
-        indexFile.write(generateIndex());
-
-        size_t progress = 0;
-        for (const QFileInfo& file : files) {
-            if (buildZipFuture.isCanceled()) {
-                QFile::remove(output);
-                return BuildZipResult();
-            }
-
-            setProgress(progress, files.length());
-            const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());
-            if (!resolvedFiles.contains(relative) && !JlCompress::compressFile(&zip, file.absoluteFilePath(), "overrides/" + relative)) {
-                QFile::remove(output);
-                return BuildZipResult(tr("Could not read and compress %1").arg(relative));
-            }
-            progress++;
-        }
-
-        zip.close();
-
-        if (zip.getZipError() != 0) {
-            QFile::remove(output);
-            return BuildZipResult(tr("A zip error occurred"));
-        }
-
-        return BuildZipResult();
+    auto progressStep = std::make_shared<TaskStepProgress>();
+    connect(zipTask.get(), &Task::finished, this, [this, progressStep] {
+        progressStep->state = TaskStepState::Succeeded;
+        stepProgress(*progressStep);
     });
-    connect(&buildZipWatcher, &QFutureWatcher<BuildZipResult>::finished, this, &ModrinthPackExportTask::finish);
-    buildZipWatcher.setFuture(buildZipFuture);
-}
 
-void ModrinthPackExportTask::finish()
-{
-    if (buildZipFuture.isCanceled())
-        emitAborted();
-    else {
-        const BuildZipResult result = buildZipFuture.result();
-        if (result.has_value())
-            emitFailed(result.value());
-        else
-            emitSucceeded();
-    }
+    connect(zipTask.get(), &Task::succeeded, this, &ModrinthPackExportTask::emitSucceeded);
+    connect(zipTask.get(), &Task::aborted, this, &ModrinthPackExportTask::emitAborted);
+    connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
+        progressStep->state = TaskStepState::Failed;
+        stepProgress(*progressStep);
+        emitFailed(reason);
+    });
+    connect(zipTask.get(), &Task::stepProgress, this, &ModrinthPackExportTask::propagateStepProgress);
+
+    connect(zipTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
+        progressStep->update(current, total);
+        stepProgress(*progressStep);
+    });
+    connect(zipTask.get(), &Task::status, this, [this, progressStep](QString status) {
+        progressStep->status = status;
+        stepProgress(*progressStep);
+    });
+    task.reset(zipTask);
+    zipTask->start();
 }
 
 QByteArray ModrinthPackExportTask::generateIndex()

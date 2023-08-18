@@ -21,21 +21,17 @@
 #include "minecraft/launch/MinecraftServerTarget.h"
 
 // FIXME: temporary wrapper for existing task.
-class PrintInstanceInfo: public LaunchStep
-{
+class PrintInstanceInfo : public LaunchStep {
     Q_OBJECT
-public:
-    explicit PrintInstanceInfo(LaunchTask *parent, AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) :
-        LaunchStep(parent), m_session(session), m_serverToJoin(serverToJoin) {};
+   public:
+    explicit PrintInstanceInfo(LaunchTask* parent, AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin)
+        : LaunchStep(parent), m_session(session), m_serverToJoin(serverToJoin){};
     virtual ~PrintInstanceInfo(){};
 
     virtual void executeTask();
-    virtual bool canAbort() const
-    {
-        return false;
-    }
-private:
+    virtual bool canAbort() const { return false; }
+
+   private:
     AuthSessionPtr m_session;
     MinecraftServerTargetPtr m_serverToJoin;
 };
-

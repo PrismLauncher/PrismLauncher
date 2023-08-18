@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2021 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,6 +37,8 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
+
+#include "net/ApiDownload.h"
 
 #include <QIcon>
 
@@ -116,7 +118,7 @@ void Technic::ListModel::performSearch()
             QString("%1search?build=%2&q=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, BuildConfig.TECHNIC_API_BUILD, currentSearchTerm);
         searchMode = List;
     }
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
     jobPtr = netJob;
     jobPtr->start();
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
@@ -157,7 +159,7 @@ void Technic::ListModel::searchRequestFinished()
                         pack.logoName = "null";
                     } else {
                         pack.logoUrl = rawURL;
-                        pack.logoName = rawURL.section(QLatin1Char('/'), -1).section(QLatin1Char('.'), 0, 0);
+                        pack.logoName = rawURL.section(QLatin1Char('/'), -1);
                     }
                     pack.broken = false;
                     newList.append(pack);
@@ -179,7 +181,7 @@ void Technic::ListModel::searchRequestFinished()
                     auto iconUrl = Json::requireString(iconObj, "url");
 
                     pack.logoUrl = iconUrl;
-                    pack.logoName = iconUrl.section(QLatin1Char('/'), -1).section(QLatin1Char('.'), 0, 0);
+                    pack.logoName = iconUrl.section(QLatin1Char('/'), -1);
                 } else {
                     pack.logoUrl = "null";
                     pack.logoName = "null";
@@ -254,7 +256,7 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Technic Icon Download %1").arg(logo), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
 

@@ -8,6 +8,8 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
+#include "net/ApiDownload.h"
+#include "net/ApiUpload.h"
 #include "net/NetJob.h"
 #include "net/Upload.h"
 
@@ -26,7 +28,7 @@ Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, std::shar
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/fingerprints"), response, body_raw));
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString("https://api.curseforge.com/v1/fingerprints"), response, body_raw));
 
     return netJob;
 }
@@ -38,7 +40,7 @@ auto FlameAPI::getModFileChangelog(int modId, int fileId) -> QString
 
     auto netJob = makeShared<NetJob>(QString("Flame::FileChangelog"), APPLICATION->network());
     auto response = std::make_shared<QByteArray>();
-    netJob->addNetAction(Net::Download::makeByteArray(
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString("https://api.curseforge.com/v1/mods/%1/files/%2/changelog")
             .arg(QString::fromStdString(std::to_string(modId)), QString::fromStdString(std::to_string(fileId))),
         response));
@@ -73,8 +75,8 @@ auto FlameAPI::getModDescription(int modId) -> QString
 
     auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"), APPLICATION->network());
     auto response = std::make_shared<QByteArray>();
-    netJob->addNetAction(
-        Net::Download::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/description").arg(QString::number(modId)), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
+        QString("https://api.curseforge.com/v1/mods/%1/description").arg(QString::number(modId)), response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [&netJob, response, &description] {
         QJsonParseError parse_error{};
@@ -113,7 +115,7 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
     auto response = std::make_shared<QByteArray>();
     ModPlatform::IndexedVersion ver;
 
-    netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [response, args, &ver] {
         QJsonParseError parse_error{};
@@ -173,7 +175,7 @@ Task::Ptr FlameAPI::getProjects(QStringList addonIds, std::shared_ptr<QByteArray
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods"), response, body_raw));
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString("https://api.curseforge.com/v1/mods"), response, body_raw));
 
     QObject::connect(netJob.get(), &NetJob::failed, [body_raw] { qDebug() << body_raw; });
 
@@ -195,9 +197,20 @@ Task::Ptr FlameAPI::getFiles(const QStringList& fileIds, std::shared_ptr<QByteAr
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString("https://api.curseforge.com/v1/mods/files"), response, body_raw));
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString("https://api.curseforge.com/v1/mods/files"), response, body_raw));
 
     QObject::connect(netJob.get(), &NetJob::failed, [body_raw] { qDebug() << body_raw; });
+
+    return netJob;
+}
+
+Task::Ptr FlameAPI::getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const
+{
+    auto netJob = makeShared<NetJob>(QString("Flame::GetFile"), APPLICATION->network());
+    netJob->addNetAction(
+        Net::ApiDownload::makeByteArray(QUrl(QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(addonId, fileId)), response));
+
+    QObject::connect(netJob.get(), &NetJob::failed, [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
 
     return netJob;
 }

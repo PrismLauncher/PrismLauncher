@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
@@ -53,6 +53,7 @@
 
 #include "settings/INISettingsObject.h"
 #include "tasks/MultipleOptionsTask.h"
+#include "tasks/Task.h"
 
 #include <QtConcurrentRun>
 #include <algorithm>
@@ -83,24 +84,28 @@ void InstanceImportTask::executeTask()
         processExtraInfoPack();
     } else {
         setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
-
-        const QString path(m_sourceUrl.host() + '/' + m_sourceUrl.path());
-
-        auto entry = APPLICATION->metacache()->resolveEntry("general", path);
-        entry->setStale(true);
-        m_archivePath = entry->getFullPath();
-
-        auto filesNetJob = makeShared<NetJob>(tr("Modpack download"), APPLICATION->network());
-        filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
-
-        connect(filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::processExtraInfoPack);
-        connect(filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::setProgress);
-        connect(filesNetJob.get(), &NetJob::stepProgress, this, &InstanceImportTask::propogateStepProgress);
-        connect(filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::emitFailed);
-        connect(filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::emitAborted);
-        task.reset(filesNetJob);
-        filesNetJob->start();
+        downloadFromUrl();
     }
+}
+
+void InstanceImportTask::downloadFromUrl()
+{
+    const QString path(m_sourceUrl.host() + '/' + m_sourceUrl.path());
+
+    auto entry = APPLICATION->metacache()->resolveEntry("general", path);
+    entry->setStale(true);
+    m_archivePath = entry->getFullPath();
+
+    auto filesNetJob = makeShared<NetJob>(tr("Modpack download"), APPLICATION->network());
+    filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
+
+    connect(filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::processExtraInfoPack);
+    connect(filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::setProgress);
+    connect(filesNetJob.get(), &NetJob::stepProgress, this, &InstanceImportTask::propagateStepProgress);
+    connect(filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::emitFailed);
+    connect(filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::emitAborted);
+    task.reset(filesNetJob);
+    filesNetJob->start();
 }
 
 QString InstanceImportTask::getRootFromZip(QuaZip* zip, const QString& root)
@@ -195,7 +200,7 @@ void InstanceImportTask::processZipPack()
         stepProgress(*progressStep);
         emitFailed(reason);
     });
-    connect(zipTask.get(), &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
+    connect(zipTask.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
 
     connect(zipTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);
@@ -290,7 +295,7 @@ void InstanceImportTask::processFlame()
     });
     connect(inst_creation_task.get(), &Task::failed, this, &InstanceImportTask::emitFailed);
     connect(inst_creation_task.get(), &Task::progress, this, &InstanceImportTask::setProgress);
-    connect(inst_creation_task.get(), &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
+    connect(inst_creation_task.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
     connect(inst_creation_task.get(), &Task::status, this, &InstanceImportTask::setStatus);
     connect(inst_creation_task.get(), &Task::details, this, &InstanceImportTask::setDetails);
 
@@ -383,7 +388,7 @@ void InstanceImportTask::processModrinth()
     });
     connect(inst_creation_task, &Task::failed, this, &InstanceImportTask::emitFailed);
     connect(inst_creation_task, &Task::progress, this, &InstanceImportTask::setProgress);
-    connect(inst_creation_task, &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
+    connect(inst_creation_task, &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
     connect(inst_creation_task, &Task::status, this, &InstanceImportTask::setStatus);
     connect(inst_creation_task, &Task::details, this, &InstanceImportTask::setDetails);
     connect(inst_creation_task, &Task::finished, inst_creation_task, &InstanceCreationTask::deleteLater);
@@ -425,7 +430,7 @@ void InstanceImportTask::processExtraInfoPack()
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
     });
-    connect(infoTask.get(), &Task::stepProgress, this, &InstanceImportTask::propogateStepProgress);
+    connect(infoTask.get(), &Task::stepProgress, this, &InstanceImportTask::propagateStepProgress);
 
     connect(infoTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);

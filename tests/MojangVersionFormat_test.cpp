@@ -1,10 +1,9 @@
-#include <QTest>
 #include <QDebug>
+#include <QTest>
 
 #include <minecraft/MojangVersionFormat.h>
 
-class MojangVersionFormatTest : public QObject
-{
+class MojangVersionFormatTest : public QObject {
     Q_OBJECT
 
     static QJsonDocument readJson(const QString path)
@@ -15,7 +14,7 @@ class MojangVersionFormatTest : public QObject
         jsonFile.close();
         return QJsonDocument::fromJson(data);
     }
-    static void writeJson(const char *file, QJsonDocument doc)
+    static void writeJson(const char* file, QJsonDocument doc)
     {
         QFile jsonFile(file);
         jsonFile.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -25,8 +24,7 @@ class MojangVersionFormatTest : public QObject
         jsonFile.close();
     }
 
-private
-slots:
+   private slots:
     void test_Through_Simple()
     {
         QJsonDocument doc = readJson(QFINDTESTDATA("testdata/MojangVersionFormat/1.9-simple.json"));
@@ -50,4 +48,3 @@ slots:
 QTEST_GUILESS_MAIN(MojangVersionFormatTest)
 
 #include "MojangVersionFormat_test.moc"
-

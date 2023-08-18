@@ -58,7 +58,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string notr="true">&amp;PermGen:</string>
+             <string>&amp;PermGen:</string>
             </property>
             <property name="buddy">
              <cstring>permGenSpinBox</cstring>
@@ -160,117 +160,7 @@
           <string>Java Runtime</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="3" column="1">
-           <widget class="QPushButton" name="javaDetectBtn">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>&amp;Auto-detect...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelJVMArgs">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>JVM arguments:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelJavaPath">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>&amp;Java path:</string>
-            </property>
-            <property name="buddy">
-             <cstring>javaPathTextBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2">
-           <widget class="QPushButton" name="javaTestBtn">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>&amp;Test</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" colspan="2">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLineEdit" name="javaPathTextBox"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="javaBrowseBtn">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>28</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string notr="true">...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="4" column="1">
-           <widget class="QCheckBox" name="skipCompatibilityCheckbox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="toolTip">
-             <string>If enabled, the launcher will not check if an instance is compatible with the selected Java version.</string>
-            </property>
-            <property name="text">
-             <string>&amp;Skip Java compatibility checks</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QCheckBox" name="skipJavaWizardCheckbox">
-            <property name="toolTip">
-             <string>If enabled, the launcher will not prompt you to choose a Java version if one isn't found.</string>
-            </property>
-            <property name="text">
-             <string>Skip Java &amp;Wizard</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1" colspan="2">
+          <item row="7" column="0" colspan="3">
            <widget class="QPlainTextEdit" name="jvmArgsTextBox">
             <property name="enabled">
              <bool>true</bool>
@@ -286,6 +176,114 @@
               <width>16777215</width>
               <height>100</height>
              </size>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="skipCompatibilityCheckbox">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>If enabled, the launcher will not check if an instance is compatible with the selected Java version.</string>
+            </property>
+            <property name="text">
+             <string>&amp;Skip Java compatibility checks</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="3">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QPushButton" name="javaDetectBtn">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>&amp;Auto-detect...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaTestBtn">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>&amp;Test</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="labelJVMArgs">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>JVM arguments:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="3">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="labelJavaPath">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>&amp;Java path:</string>
+              </property>
+              <property name="buddy">
+               <cstring>javaPathTextBox</cstring>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="javaPathTextBox"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaBrowseBtn">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="skipJavaWizardCheckbox">
+            <property name="toolTip">
+             <string>If enabled, the launcher will not prompt you to choose a Java version if one isn't found.</string>
+            </property>
+            <property name="text">
+             <string>Skip Java &amp;Wizard</string>
             </property>
            </widget>
           </item>
@@ -317,8 +315,6 @@
   <tabstop>permGenSpinBox</tabstop>
   <tabstop>javaBrowseBtn</tabstop>
   <tabstop>javaPathTextBox</tabstop>
-  <tabstop>javaDetectBtn</tabstop>
-  <tabstop>javaTestBtn</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>

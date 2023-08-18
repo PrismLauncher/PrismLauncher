@@ -3,6 +3,8 @@
 #include "Application.h"
 #include "ui/widgets/ProjectItem.h"
 
+#include "net/ApiDownload.h"
+
 #include <Version.h>
 
 #include <QtMath>
@@ -40,14 +42,16 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
                 return edit;
             }
             return pack.description;
-        } case Qt::DecorationRole: {
+        }
+        case Qt::DecorationRole: {
             if (m_logoMap.contains(pack.logoName)) {
                 return (m_logoMap.value(pack.logoName));
             }
             QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
             ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
             return icon;
-        } case Qt::UserRole: {
+        }
+        case Qt::UserRole: {
             QVariant v;
             v.setValue(pack);
             return v;
@@ -68,7 +72,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-bool ListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ListModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)
 {
     int pos = index.row();
     if (pos >= modpacks.size() || pos < 0 || !index.isValid())
@@ -102,9 +106,9 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
@@ -128,7 +132,7 @@ void ListModel::requestLogo(QString logo, QString url)
 void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo))->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
     }
@@ -139,7 +143,7 @@ Qt::ItemFlags ListModel::flags(const QModelIndex& index) const
     return QAbstractListModel::flags(index);
 }
 
-bool ListModel::canFetchMore(const QModelIndex& parent) const
+bool ListModel::canFetchMore([[maybe_unused]] const QModelIndex& parent) const
 {
     return searchState == CanPossiblyFetchMore;
 }
@@ -171,7 +175,7 @@ void ListModel::performPaginatedSearch()
                          .arg(currentSearchTerm)
                          .arg(currentSort + 1);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
     jobPtr = netJob;
     jobPtr->start();
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);

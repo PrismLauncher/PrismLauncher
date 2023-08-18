@@ -61,31 +61,7 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0" colspan="3">
-           <widget class="QLineEdit" name="javaPathTextBox"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="javaDetectBtn">
-            <property name="text">
-             <string>Auto-detect...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="javaBrowseBtn">
-            <property name="text">
-             <string>Browse...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="javaTestBtn">
-            <property name="text">
-             <string>Test</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
+          <item row="4" column="0">
            <widget class="QCheckBox" name="skipCompatibilityCheckbox">
             <property name="toolTip">
              <string>If enabled, the launcher will not check if an instance is compatible with the selected Java version.</string>
@@ -94,6 +70,38 @@
              <string>Skip Java compatibility checks</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLineEdit" name="javaPathTextBox"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaBrowseBtn">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QPushButton" name="javaDetectBtn">
+              <property name="text">
+               <string>Auto-detect...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaTestBtn">
+              <property name="text">
+               <string>Test</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -116,7 +124,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string notr="true">PermGen:</string>
+             <string>PermGen:</string>
             </property>
            </widget>
           </item>
@@ -699,10 +707,6 @@
   <tabstop>openGlobalJavaSettingsButton</tabstop>
   <tabstop>settingsTabs</tabstop>
   <tabstop>javaSettingsGroupBox</tabstop>
-  <tabstop>javaPathTextBox</tabstop>
-  <tabstop>javaDetectBtn</tabstop>
-  <tabstop>javaBrowseBtn</tabstop>
-  <tabstop>javaTestBtn</tabstop>
   <tabstop>memoryGroupBox</tabstop>
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>

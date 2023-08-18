@@ -3,18 +3,16 @@
 #include <GZip.h>
 #include <random>
 
-void fib(int &prev, int &cur)
+void fib(int& prev, int& cur)
 {
     auto ret = prev + cur;
     prev = cur;
     cur = ret;
 }
 
-class GZipTest : public QObject
-{
+class GZipTest : public QObject {
     Q_OBJECT
-private
-slots:
+   private slots:
 
     void test_Through()
     {
@@ -27,9 +25,8 @@ slots:
         std::uniform_int_distribution<uint16_t> idis(0, std::numeric_limits<uint8_t>::max());
 
         // initialize random buffer
-        for(int i = 0; i < size; i++)
-        {
-            random.append((char)idis(eng));
+        for (int i = 0; i < size; i++) {
+            random.append(static_cast<char>(idis(eng)));
         }
 
         // initialize fibonacci
@@ -37,8 +34,7 @@ slots:
         int cur = 1;
 
         // test if fibonacci long random buffers pass through GZip
-        do
-        {
+        do {
             QByteArray copy = random;
             copy.resize(cur);
             compressed.clear();
