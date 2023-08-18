@@ -134,7 +134,7 @@ void ModpackListModel::performPaginatedSearch()
         return;
 
     if (currentSearchTerm.startsWith("#")) {
-        auto projectId = currentSearchTerm.removeFirst();
+        auto projectId = currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
             ResourceAPI::ProjectInfoCallbacks callbacks;
 

@@ -133,7 +133,7 @@ void ResourceModel::search()
         return;
 
     if (m_search_term.startsWith("#")) {
-        auto projectId = m_search_term.removeFirst();
+        auto projectId = m_search_term.mid(1);
         if (!projectId.isEmpty()) {
             ResourceAPI::ProjectInfoCallbacks callbacks;
 

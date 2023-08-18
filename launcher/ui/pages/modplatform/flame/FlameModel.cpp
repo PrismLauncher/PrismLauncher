@@ -164,7 +164,7 @@ void ListModel::fetchMore(const QModelIndex& parent)
 void ListModel::performPaginatedSearch()
 {
     if (currentSearchTerm.startsWith("#")) {
-        auto projectId = currentSearchTerm.removeFirst();
+        auto projectId = currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
             ResourceAPI::ProjectInfoCallbacks callbacks;
 
