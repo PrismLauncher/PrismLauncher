@@ -233,6 +233,7 @@ QSet<QString> MinecraftInstance::traits() const
     return profile->getTraits();
 }
 
+// FIXME: move UI code out of MinecraftInstance
 void MinecraftInstance::populateLaunchMenu(QMenu* menu)
 {
     QAction* normalLaunch = menu->addAction(tr("&Launch"));
