@@ -47,9 +47,10 @@ class FlameAPI : public NetworkResourceAPI {
             return 4;
         // TODO: remove this once Quilt drops official Fabric support
         if (loaders & Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
-            return 4;         // FIXME: implement multiple loaders filter
-        if (loaders & NeoForge)
-            return 6;
+            return 4;         // FIXME: implement multiple loaders filter (this should be 5)
+        // TODO: remove this once NeoForge drops official Forge support
+        if (loaders & NeoForge)  // NOTE: Most if not all Forge mods should work *currently*
+            return 1;            // FIXME: implement multiple loaders filter (this should be 6)
         return 0;
     }
 
