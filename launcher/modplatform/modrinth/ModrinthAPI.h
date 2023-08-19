@@ -43,6 +43,8 @@ class ModrinthAPI : public NetworkResourceAPI {
                 l << getModLoaderString(loader);
             }
         }
+        if ((types & NeoForge) && (~types & Forge))  // Add Forge if NeoForge is in use, if Forge isn't already there
+            l << getModLoaderString(Forge);
         if ((types & Quilt) && (~types & Fabric))  // Add Fabric if Quilt is in use, if Fabric isn't already there
             l << getModLoaderString(Fabric);
         return l;
