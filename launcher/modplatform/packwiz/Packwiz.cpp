@@ -21,6 +21,8 @@
 #include <QDebug>
 #include <QDir>
 #include <QObject>
+#include <sstream>
+#include <string>
 
 #include "FileSystem.h"
 #include "StringUtils.h"
@@ -161,31 +163,36 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
 
     // Put TOML data into the file
     QTextStream in_stream(&index_file);
-    auto addToStream = [&in_stream](QString&& key, QString value) { in_stream << QString("%1 = \"%2\"\n").arg(key, value); };
-
     {
-        addToStream("name", mod.name);
-        addToStream("filename", mod.filename);
-        addToStream("side", mod.side);
-
-        in_stream << QString("\n[download]\n");
-        addToStream("mode", mod.mode);
-        addToStream("url", mod.url.toString());
-        addToStream("hash-format", mod.hash_format);
-        addToStream("hash", mod.hash);
-
-        in_stream << QString("\n[update]\n");
-        in_stream << QString("[update.%1]\n").arg(ProviderCaps.name(mod.provider));
+        toml::table update;
         switch (mod.provider) {
             case (ModPlatform::ResourceProvider::FLAME):
-                in_stream << QString("file-id = %1\n").arg(mod.file_id.toString());
-                in_stream << QString("project-id = %1\n").arg(mod.project_id.toString());
+                update = toml::table{
+                    { "file-id", mod.file_id.toInt() },
+                    { "project-id", mod.project_id.toInt() },
+                };
                 break;
             case (ModPlatform::ResourceProvider::MODRINTH):
-                addToStream("mod-id", mod.mod_id().toString());
-                addToStream("version", mod.version().toString());
+                update = toml::table{
+                    { "mod-id", mod.mod_id().toString().toStdString() },
+                    { "version", mod.version().toString().toStdString() },
+                };
                 break;
         }
+        auto tbl = toml::table{ { "name", mod.name.toStdString() },
+                                { "filename", mod.filename.toStdString() },
+                                { "side", mod.side.toStdString() },
+                                { "download",
+                                  toml::table{
+                                      { "mode", mod.mode.toStdString() },
+                                      { "url", mod.url.toString().toStdString() },
+                                      { "hash-format", mod.hash_format.toStdString() },
+                                      { "hash", mod.hash.toStdString() },
+                                  } },
+                                { "update", toml::table{ { ProviderCaps.name(mod.provider), update } } } };
+        std::stringstream ss;
+        ss << tbl;
+        in_stream << QString::fromStdString(ss.str());
     }
 
     index_file.flush();
