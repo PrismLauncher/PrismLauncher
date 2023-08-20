@@ -598,10 +598,7 @@
           <item>
            <widget class="QCheckBox" name="disableQuiltBeaconCheckBox">
             <property name="text">
-             <string>Disable Quilt Loader Beacon</string>
-            </property>
-            <property name="toolTip">
-             <string>Disable Quilt loader's beacon for counting monthly active users</string>
+             <string>Disable Quilt's Beacon</string>
             </property>
            </widget>
           </item>

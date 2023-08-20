@@ -3,7 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
- *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>\
  *  Copyright (c) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
