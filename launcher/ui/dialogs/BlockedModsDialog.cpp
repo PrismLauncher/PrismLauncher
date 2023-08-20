@@ -41,8 +41,8 @@
 #include <QPushButton>
 #include <QStandardPaths>
 
-BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
-    : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods)
+BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods, QString hash_type)
+    : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods), m_hash_type(hash_type)
 {
     m_hashing_task = shared_qobject_ptr<ConcurrentTask>(new ConcurrentTask(this, "MakeHashesTask", 10));
     connect(m_hashing_task.get(), &Task::finished, this, &BlockedModsDialog::hashTaskFinished);
@@ -254,7 +254,7 @@ void BlockedModsDialog::addHashTask(QString path)
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::buildHashTask(QString path)
 {
-    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::ResourceProvider::FLAME, "sha1");
+    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::ResourceProvider::FLAME, m_hash_type);
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
 
