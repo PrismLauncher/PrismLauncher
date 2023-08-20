@@ -3,7 +3,6 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -254,14 +253,6 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("InstanceAccountId");
     }
 
-    bool overrideModLoaderSettings = ui->modLoaderSettingsGroupBox->isChecked();
-    m_settings->set("OverrideModLoaderSettings", overrideModLoaderSettings);
-    if (overrideModLoaderSettings) {
-        m_settings->set("DisableQuiltBeacon", ui->disableQuiltBeaconCheckBox->isChecked());
-    } else {
-        m_settings->reset("DisableQuiltBeacon");
-    }
-
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -365,10 +356,6 @@ void InstanceSettingsPage::loadSettings()
 
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
-
-    // Mod loader specific settings
-    ui->modLoaderSettingsGroupBox->setChecked(m_settings->get("OverrideModLoaderSettings").toBool());
-    ui->disableQuiltBeaconCheckBox->setChecked(m_settings->get("DisableQuiltBeacon").toBool());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
