@@ -20,10 +20,11 @@ class FlameAPI : public NetworkResourceAPI {
     Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
     Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
     Task::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
+    Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
 
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
-    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (Forge | Fabric | Quilt); }
+    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (NeoForge | Forge | Fabric | Quilt); }
 
    private:
     static int getClassId(ModPlatform::ResourceType type)
@@ -46,7 +47,10 @@ class FlameAPI : public NetworkResourceAPI {
             return 4;
         // TODO: remove this once Quilt drops official Fabric support
         if (loaders & Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
-            return 4;         // Quilt would probably be 5
+            return 4;         // FIXME: implement multiple loaders filter (this should be 5)
+        // TODO: remove this once NeoForge drops official Forge support
+        if (loaders & NeoForge)  // NOTE: Most if not all Forge mods should work *currently*
+            return 1;            // FIXME: implement multiple loaders filter (this should be 6)
         return 0;
     }
 

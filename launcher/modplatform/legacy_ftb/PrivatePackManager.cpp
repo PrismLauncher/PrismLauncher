@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -43,8 +43,7 @@ namespace LegacyFTB {
 
 void PrivatePackManager::load()
 {
-    try
-    {
+    try {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         auto foo = QString::fromUtf8(FS::read(m_filename)).split('\n', Qt::SkipEmptyParts);
         currentPacks = QSet<QString>(foo.begin(), foo.end());
@@ -53,9 +52,7 @@ void PrivatePackManager::load()
 #endif
 
         dirty = false;
-    }
-    catch(...)
-    {
+    } catch (...) {
         currentPacks = {};
         qWarning() << "Failed to read third party FTB pack codes from" << m_filename;
     }
@@ -63,20 +60,16 @@ void PrivatePackManager::load()
 
 void PrivatePackManager::save() const
 {
-    if(!dirty)
-    {
+    if (!dirty) {
         return;
     }
-    try
-    {
+    try {
         QStringList list = currentPacks.values();
         FS::write(m_filename, list.join('\n').toUtf8());
         dirty = false;
-    }
-    catch(...)
-    {
+    } catch (...) {
         qWarning() << "Failed to write third party FTB pack codes to" << m_filename;
     }
 }
 
-}
+}  // namespace LegacyFTB

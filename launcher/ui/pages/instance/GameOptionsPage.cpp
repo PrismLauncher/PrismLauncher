@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,23 +34,20 @@
  */
 
 #include "GameOptionsPage.h"
-#include "ui_GameOptionsPage.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/gameoptions/GameOptions.h"
+#include "ui_GameOptionsPage.h"
 
-GameOptionsPage::GameOptionsPage(MinecraftInstance * inst, QWidget* parent)
-    : QWidget(parent), ui(new Ui::GameOptionsPage)
+GameOptionsPage::GameOptionsPage(MinecraftInstance* inst, QWidget* parent) : QWidget(parent), ui(new Ui::GameOptionsPage)
 {
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();
     m_model = inst->gameOptionsModel();
     ui->optionsView->setModel(m_model.get());
     auto head = ui->optionsView->header();
-    if(head->count())
-    {
+    if (head->count()) {
         head->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-        for(int i = 1; i < head->count(); i++)
-        {
+        for (int i = 1; i < head->count(); i++) {
             head->setSectionResizeMode(i, QHeaderView::Stretch);
         }
     }

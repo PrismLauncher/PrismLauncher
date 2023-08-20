@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -51,7 +51,7 @@ class LogPage : public QQuickWidget, public BasePage {
 
    public:
     explicit LogPage(InstancePtr instance, QWidget* parent = nullptr);
-    ~LogPage() override = default;
+    virtual ~LogPage() override = default;
 
     [[nodiscard]] QString displayName() const override { return tr("Minecraft Log"); }
     [[nodiscard]] QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
@@ -61,7 +61,7 @@ class LogPage : public QQuickWidget, public BasePage {
     [[nodiscard]] bool shouldDisplay() const override;
 
     bool apply() override;
-    void retranslate() override {};
+    void retranslate() override{};
 
    private slots:
     void onInstanceLaunchTaskChanged(LaunchTask::Ptr);

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,22 +35,15 @@
 
 #pragma once
 
+#include <QRegularExpression>
 #include <QString>
 #include <QStringList>
-#include <QRegularExpression>
 #include "DefaultVariable.h"
 
-struct GradleSpecifier
-{
-    GradleSpecifier()
-    {
-        m_valid = false;
-    }
-    GradleSpecifier(QString value)
-    {
-        operator=(value);
-    }
-    GradleSpecifier & operator =(const QString & value)
+struct GradleSpecifier {
+    GradleSpecifier() { m_valid = false; }
+    GradleSpecifier(QString value) { operator=(value); }
+    GradleSpecifier& operator=(const QString& value)
     {
         /*
         org.gradle.test.classifiers : service : 1.0 : jdk15 @ jar
@@ -61,10 +54,13 @@ struct GradleSpecifier
          4 "jdk15"
          5 "jar"
         */
-        QRegularExpression matcher(QRegularExpression::anchoredPattern("([^:@]+):([^:@]+):([^:@]+)" "(?::([^:@]+))?" "(?:@([^:@]+))?"));
+        QRegularExpression matcher(
+            QRegularExpression::anchoredPattern("([^:@]+):([^:@]+):([^:@]+)"
+                                                "(?::([^:@]+))?"
+                                                "(?:@([^:@]+))?"));
         QRegularExpressionMatch match = matcher.match(value);
         m_valid = match.hasMatch();
-        if(!m_valid) {
+        if (!m_valid) {
             m_invalidValue = value;
             return *this;
         }
@@ -73,53 +69,46 @@ struct GradleSpecifier
         m_artifactId = match.captured(2);
         m_version = match.captured(3);
         m_classifier = match.captured(4);
-        if(match.lastCapturedIndex() >= 5)
-        {
+        if (match.lastCapturedIndex() >= 5) {
             m_extension = match.captured(5);
         }
         return *this;
     }
     QString serialize() const
     {
-        if(!m_valid) {
+        if (!m_valid) {
             return m_invalidValue;
         }
         QString retval = m_groupId + ":" + m_artifactId + ":" + m_version;
-        if(!m_classifier.isEmpty())
-        {
+        if (!m_classifier.isEmpty()) {
             retval += ":" + m_classifier;
         }
-        if(m_extension.isExplicit())
-        {
+        if (m_extension.isExplicit()) {
             retval += "@" + m_extension;
         }
         return retval;
     }
     QString getFileName() const
     {
-        if(!m_valid) {
+        if (!m_valid) {
             return QString();
         }
         QString filename = m_artifactId + '-' + m_version;
-        if(!m_classifier.isEmpty())
-        {
+        if (!m_classifier.isEmpty()) {
             filename += "-" + m_classifier;
         }
         filename += "." + m_extension;
         return filename;
     }
-    QString toPath(const QString & filenameOverride = QString()) const
+    QString toPath(const QString& filenameOverride = QString()) const
     {
-        if(!m_valid) {
+        if (!m_valid) {
             return QString();
         }
         QString filename;
-        if(filenameOverride.isEmpty())
-        {
+        if (filenameOverride.isEmpty()) {
             filename = getFileName();
-        }
-        else
-        {
+        } else {
             filename = filenameOverride;
         }
         QString path = m_groupId;
@@ -127,57 +116,34 @@ struct GradleSpecifier
         path += '/' + m_artifactId + '/' + m_version + '/' + filename;
         return path;
     }
-    inline bool valid() const
-    {
-        return m_valid;
-    }
-    inline QString version() const
-    {
-        return m_version;
-    }
-    inline QString groupId() const
-    {
-        return m_groupId;
-    }
-    inline QString artifactId() const
-    {
-        return m_artifactId;
-    }
-    inline void setClassifier(const QString & classifier)
-    {
-        m_classifier = classifier;
-    }
-    inline QString classifier() const
-    {
-        return m_classifier;
-    }
-    inline QString extension() const
-    {
-        return m_extension;
-    }
-    inline QString artifactPrefix() const
-    {
-        return m_groupId + ":" + m_artifactId;
-    }
-    bool matchName(const GradleSpecifier & other) const
+    inline bool valid() const { return m_valid; }
+    inline QString version() const { return m_version; }
+    inline QString groupId() const { return m_groupId; }
+    inline QString artifactId() const { return m_artifactId; }
+    inline void setClassifier(const QString& classifier) { m_classifier = classifier; }
+    inline QString classifier() const { return m_classifier; }
+    inline QString extension() const { return m_extension; }
+    inline QString artifactPrefix() const { return m_groupId + ":" + m_artifactId; }
+    bool matchName(const GradleSpecifier& other) const
     {
         return other.artifactId() == artifactId() && other.groupId() == groupId() && other.classifier() == classifier();
     }
-    bool operator==(const GradleSpecifier & other) const
+    bool operator==(const GradleSpecifier& other) const
     {
-        if(m_groupId != other.m_groupId)
+        if (m_groupId != other.m_groupId)
             return false;
-        if(m_artifactId != other.m_artifactId)
+        if (m_artifactId != other.m_artifactId)
             return false;
-        if(m_version != other.m_version)
+        if (m_version != other.m_version)
             return false;
-        if(m_classifier != other.m_classifier)
+        if (m_classifier != other.m_classifier)
             return false;
-        if(m_extension != other.m_extension)
+        if (m_extension != other.m_extension)
             return false;
         return true;
     }
-private:
+
+   private:
     QString m_invalidValue;
     QString m_groupId;
     QString m_artifactId;

@@ -3,16 +3,16 @@
 
 class QStyleOption;
 
-class LineSeparator : public QWidget
-{
+class LineSeparator : public QWidget {
     Q_OBJECT
 
-public:
+   public:
     /// Create a line separator. orientation is the orientation of the line.
-    explicit LineSeparator(QWidget *parent, Qt::Orientation orientation = Qt::Horizontal);
+    explicit LineSeparator(QWidget* parent, Qt::Orientation orientation = Qt::Horizontal);
     QSize sizeHint() const;
-    void paintEvent(QPaintEvent *);
-    void initStyleOption(QStyleOption *option) const;
-private:
+    void paintEvent(QPaintEvent*);
+    void initStyleOption(QStyleOption* option) const;
+
+   private:
     Qt::Orientation m_orientation = Qt::Horizontal;
 };

@@ -40,22 +40,43 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QComboBox" name="iconsComboBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="iconsLayout">
+     <item>
+      <widget class="QComboBox" name="iconsComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="iconsFolder">
+       <property name="toolTip">
+        <string>View icon themes folder.</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset theme="viewfolder">
+         <normaloff>.</normaloff>.</iconset>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item row="1" column="0">
-    <widget class="QLabel" name="widgetThemeLabel">
+    <widget class="QLabel" name="widgetStyleLabel">
      <property name="text">
-      <string>&amp;Colors</string>
+      <string>&amp;Widgets</string>
      </property>
      <property name="buddy">
       <cstring>widgetStyleComboBox</cstring>
@@ -63,17 +84,38 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QComboBox" name="widgetStyleComboBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="widgetStyleLayout">
+     <item>
+      <widget class="QComboBox" name="widgetStyleComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="widgetStyleFolder">
+       <property name="toolTip">
+        <string>View widget themes folder.</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset theme="viewfolder">
+         <normaloff>.</normaloff>.</iconset>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item row="2" column="0">
     <widget class="QLabel" name="backgroundCatLabel">
@@ -89,7 +131,7 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="catLayout">
      <item>
       <widget class="QComboBox" name="backgroundCatComboBox">
        <property name="sizePolicy">
@@ -107,15 +149,15 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="catInfoLabel">
+      <widget class="QPushButton" name="catPackFolder">
        <property name="toolTip">
-        <string>The cat appears in the background and is not shown by default. It is only made visible when pressing the Cat button in the Toolbar.</string>
+        <string>View cat packs folder.</string>
        </property>
        <property name="text">
         <string/>
        </property>
        <property name="icon">
-        <iconset theme="about">
+        <iconset theme="viewfolder">
          <normaloff>.</normaloff>.</iconset>
        </property>
        <property name="flat">

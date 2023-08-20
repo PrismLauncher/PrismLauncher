@@ -16,8 +16,8 @@ class LogModel : public QAbstractListModel {
 
     [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
 
     void append(MessageLevel::Enum, QString line);
 
@@ -36,12 +36,9 @@ class LogModel : public QAbstractListModel {
     int getMaxLines();
     void setMaxLines(int maxLines);
     void setStopOnOverflow(bool stop);
-    void setOverflowMessage(const QString & overflowMessage);
+    void setOverflowMessage(const QString& overflowMessage);
 
-    enum Roles
-    {
-        LevelRole = Qt::UserRole
-    };
+    enum Roles { LevelRole = Qt::UserRole };
 
    private /* types */:
     struct entry {
@@ -51,7 +48,6 @@ class LogModel : public QAbstractListModel {
 
    private: /* data */
     QVector<entry> m_content;
-
     int m_maxLines = 1000;
     // first line in the circular buffer
     int m_firstLine = 0;
@@ -63,6 +59,6 @@ class LogModel : public QAbstractListModel {
 
     bool m_suspended = false;
 
-private:
+   private:
     Q_DISABLE_COPY(LogModel)
 };

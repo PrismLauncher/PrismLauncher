@@ -6,20 +6,20 @@
 
 #include <FileSystem.h>
 
-#include <ui/themes/ThemeManager.h>
 #include <ui/themes/FusionTheme.h>
+#include <ui/themes/ThemeManager.h>
 
 class TemporaryGlobalQMLConfigFile {
    public:
-    TemporaryGlobalQMLConfigFile(QString conf_file_path, bool append_conf) : conf_file_path(std::move(conf_file_path))
+    TemporaryGlobalQMLConfigFile(QString conf_file_path, bool append_conf) : m_conf_file_path(std::move(conf_file_path))
     {
         if (append_conf)
-            this->conf_file_path = FS::PathCombine(this->conf_file_path, "qtquickcontrols2.conf");
+            this->m_conf_file_path = FS::PathCombine(this->m_conf_file_path, "qtquickcontrols2.conf");
 
         if (QFile::exists(".qml_theme"))
             QFile::rename(".qml_theme", ".qml_theme.bkp");
 
-        ThemeManager::writeGlobalQMLTheme(this->conf_file_path);
+        ThemeManager::writeGlobalQMLTheme(this->m_conf_file_path);
     }
 
     ~TemporaryGlobalQMLConfigFile()
@@ -28,7 +28,7 @@ class TemporaryGlobalQMLConfigFile {
         QFile::rename(".qml_theme.bkp", ".qml_theme");
     }
 
-    QString conf_file_path;
+    QString m_conf_file_path;
 };
 
 void setupSystemTheme()

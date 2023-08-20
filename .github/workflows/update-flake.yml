@@ -25,4 +25,6 @@ jobs:
           pr-title: "chore(nix): update lockfile"
           pr-labels: |
             Linux
+            packaging
             simple change
+            changelog:omit

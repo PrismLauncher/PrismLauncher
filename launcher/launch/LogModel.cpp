@@ -2,8 +2,7 @@
 
 #include <QDebug>
 
-LogModel::LogModel(QObject *parent)
-    : QAbstractListModel(parent)
+LogModel::LogModel(QObject* parent) : QAbstractListModel(parent)
 {
     m_content.resize(m_maxLines);
 }
@@ -16,7 +15,7 @@ QHash<int, QByteArray> LogModel::roleNames() const
     return roles;
 }
 
-int LogModel::rowCount(const QModelIndex &parent) const
+int LogModel::rowCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
         return 0;
@@ -24,7 +23,7 @@ int LogModel::rowCount(const QModelIndex &parent) const
     return m_numLines;
 }
 
-QVariant LogModel::data(const QModelIndex &index, int role) const
+QVariant LogModel::data(const QModelIndex& index, int role) const
 {
     if (index.row() < 0 || index.row() >= m_numLines)
         return {};
@@ -42,12 +41,12 @@ QVariant LogModel::data(const QModelIndex &index, int role) const
 
 void LogModel::append(MessageLevel::Enum level, QString line)
 {
-    if(m_suspended)
+    if (m_suspended)
         return;
 
     // overflow
-    if(m_numLines == m_maxLines) {
-        if(m_stopOnOverflow) {
+    if (m_numLines == m_maxLines) {
+        if (m_stopOnOverflow) {
             // nothing more to do, the buffer is full
             return;
         }
@@ -66,7 +65,7 @@ void LogModel::append(MessageLevel::Enum level, QString line)
         level = MessageLevel::guessLevel(line, level);
 
     int lineNum = (m_firstLine + m_numLines) % m_maxLines;
-    entry line_entry { line, level };
+    entry line_entry{ line, level };
 
     beginInsertRows(QModelIndex(), m_numLines, m_numLines);
     m_content[lineNum] = line_entry;
@@ -96,9 +95,8 @@ QString LogModel::toPlainText()
 {
     QString out;
     out.reserve(m_numLines * 80);
-    for(int i = 0; i < m_numLines; i++)
-    {
-        QString & line = m_content[(m_firstLine + i) % m_maxLines].line;
+    for (int i = 0; i < m_numLines; i++) {
+        QString& line = m_content[(m_firstLine + i) % m_maxLines].line;
         out.append(line + '\n');
     }
     out.squeeze();
@@ -110,7 +108,7 @@ QVector<std::tuple<int, int, int>> LogModel::search(QString text_to_search, bool
     QVector<std::tuple<int, int, int>> matches;
 
     if (use_regex) {
-        QRegularExpression regex{text_to_search};
+        QRegularExpression regex{ text_to_search };
         regex.optimize();
 
         if (!regex.isValid()) {
@@ -144,13 +142,11 @@ QVector<std::tuple<int, int, int>> LogModel::search(QString text_to_search, bool
 void LogModel::setMaxLines(int maxLines)
 {
     // no-op
-    if(maxLines == m_maxLines)
-    {
+    if (maxLines == m_maxLines) {
         return;
     }
     // if it all still fits in the buffer, just resize it
-    if(m_firstLine + m_numLines < m_maxLines)
-    {
+    if (m_firstLine + m_numLines < m_maxLines) {
         m_maxLines = maxLines;
         m_content.resize(maxLines);
         return;
@@ -158,22 +154,17 @@ void LogModel::setMaxLines(int maxLines)
     // otherwise, we need to reorganize the data because it crosses the wrap boundary
     QVector<entry> newContent;
     newContent.resize(maxLines);
-    if(m_numLines <= maxLines)
-    {
+    if (m_numLines <= maxLines) {
         // if it all fits in the new buffer, just copy it over
-        for(int i = 0; i < m_numLines; i++)
-        {
+        for (int i = 0; i < m_numLines; i++) {
             newContent[i] = m_content[(m_firstLine + i) % m_maxLines];
         }
         m_content.swap(newContent);
-    }
-    else
-    {
+    } else {
         // if it doesn't fit, part of the data needs to be thrown away (the oldest log messages)
         int lead = m_numLines - maxLines;
         beginRemoveRows(QModelIndex(), 0, lead - 1);
-        for(int i = 0; i < maxLines; i++)
-        {
+        for (int i = 0; i < maxLines; i++) {
             newContent[i] = m_content[(m_firstLine + lead + i) % m_maxLines];
         }
         m_numLines = m_maxLines;

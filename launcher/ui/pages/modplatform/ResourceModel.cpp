@@ -17,7 +17,7 @@
 #include "BuildConfig.h"
 #include "Json.h"
 
-#include "net/Download.h"
+#include "net/ApiDownload.h"
 #include "net/NetJob.h"
 
 #include "modplatform/ModIndex.h"
@@ -102,7 +102,7 @@ QHash<int, QByteArray> ResourceModel::roleNames() const
     return roles;
 }
 
-bool ResourceModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool ResourceModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)
 {
     int pos = index.row();
     if (pos >= m_packs.size() || pos < 0 || !index.isValid())
@@ -281,7 +281,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     auto cache_entry = APPLICATION->metacache()->resolveEntry(
         metaEntryBase(),
         QString("logos/%1").arg(QString(QCryptographicHash::hash(url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
-    auto icon_fetch_action = Net::Download::makeCached(url, cache_entry);
+    auto icon_fetch_action = Net::ApiDownload::makeCached(url, cache_entry);
 
     auto full_file_path = cache_entry->getFullPath();
     connect(icon_fetch_action.get(), &NetAction::succeeded, this, [=] {
@@ -310,7 +310,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
 #define NEED_FOR_CALLBACK_ASSERT(name) \
     Q_ASSERT_X(0 != 0, #name, "You NEED to re-implement this if you intend on using the default callbacks.")
 
-QJsonArray ResourceModel::documentToArray(QJsonDocument& doc) const
+QJsonArray ResourceModel::documentToArray([[maybe_unused]] QJsonDocument& doc) const
 {
     NEED_FOR_CALLBACK_ASSERT("documentToArray");
     return {};
@@ -372,7 +372,7 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
     endInsertRows();
 }
 
-void ResourceModel::searchRequestFailed(QString reason, int network_error_code)
+void ResourceModel::searchRequestFailed([[maybe_unused]] QString reason, int network_error_code)
 {
     switch (network_error_code) {
         default:

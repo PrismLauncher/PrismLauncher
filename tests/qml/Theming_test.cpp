@@ -34,7 +34,7 @@ class ThemingBasicTest : public QObject {
         auto t = setupCustomTheme(theme_path);
 
         QVERIFY(!ThemeManager::usingQmlSystemTheme());
-        QCOMPARE(qgetenv("QT_QUICK_CONTROLS_CONF"), t.conf_file_path);
+        QCOMPARE(qgetenv("QT_QUICK_CONTROLS_CONF"), t.m_conf_file_path);
     }
 };
 

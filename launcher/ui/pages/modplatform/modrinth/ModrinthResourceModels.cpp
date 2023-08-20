@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@ void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJso
 auto ModrinthModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return ::Modrinth::loadDependencyVersions(m, arr);
-};
+}
 
 auto ModrinthModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {

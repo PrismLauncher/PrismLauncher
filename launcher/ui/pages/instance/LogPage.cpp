@@ -78,11 +78,11 @@ class LogFormatProxyModel final : public QIdentityProxyModel {
             case Qt::FontRole:
                 return m_font;
             case Qt::ForegroundRole: {
-                auto level = (MessageLevel::Enum) QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
+                auto level = (MessageLevel::Enum)QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
                 return m_colors.getFront(level);
             }
             case Qt::BackgroundRole: {
-                auto level = (MessageLevel::Enum) QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
+                auto level = (MessageLevel::Enum)QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
                 return m_colors.getBack(level);
             }
             default:
@@ -245,7 +245,10 @@ void LogPage::clearPressed()
     m_model->clear();
 }
 
-inline int positiveModulo(int a, int b) { return a >= 0 ? a % b : (a + b) % b; }
+inline int positiveModulo(int a, int b)
+{
+    return a >= 0 ? a % b : (a + b) % b;
+}
 
 void LogPage::searchRequested(QString search_string, bool reverse)
 {
@@ -279,7 +282,7 @@ void LogPage::searchRequested(QString search_string, bool reverse)
     }
 
     MUST_SUCCEED(QMetaObject::invokeMethod(rootObject(), "goToLine", Q_ARG(QVariant, next_line), Q_ARG(QVariant, begin_index),
-                                                    Q_ARG(QVariant, end_index)));
+                                           Q_ARG(QVariant, end_index)));
 }
 
 static const QString s_wrap_mode_setting_name{ "MinecraftLogWrapMode" };
