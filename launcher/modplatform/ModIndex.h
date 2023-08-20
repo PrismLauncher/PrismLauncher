@@ -57,32 +57,32 @@ struct DonationData {
 };
 
 struct IndexedVersionType {
-    enum class Enum { Release = 1, Beta, Alpha, UNKNOWN };
+    enum class VersionType { Release = 1, Beta, Alpha, Unknown };
     IndexedVersionType(const QString& type);
-    IndexedVersionType(int type);
-    IndexedVersionType(const IndexedVersionType::Enum& type);
+    IndexedVersionType(int flame_type);
+    IndexedVersionType(const IndexedVersionType::VersionType& type);
     IndexedVersionType(const IndexedVersionType& type);
-    IndexedVersionType() : IndexedVersionType(IndexedVersionType::Enum::UNKNOWN) {}
-    static const QString toString(const IndexedVersionType::Enum& type);
-    static IndexedVersionType::Enum enumFromString(const QString& type);
-    bool isValid() const { return m_type != IndexedVersionType::Enum::UNKNOWN; }
+    IndexedVersionType() : IndexedVersionType(IndexedVersionType::VersionType::Unknown) {}
+    static const QString toString(const IndexedVersionType::VersionType& type);
+    static IndexedVersionType::VersionType enumFromString(const QString& type);
+    bool isValid() const { return m_type != IndexedVersionType::VersionType::Unknown; }
     IndexedVersionType& operator=(const IndexedVersionType& other);
     bool operator==(const IndexedVersionType& other) const { return m_type == other.m_type; }
-    bool operator==(const IndexedVersionType::Enum& type) const { return m_type == type; }
+    bool operator==(const IndexedVersionType::VersionType& type) const { return m_type == type; }
     bool operator!=(const IndexedVersionType& other) const { return m_type != other.m_type; }
-    bool operator!=(const IndexedVersionType::Enum& type) const { return m_type != type; }
+    bool operator!=(const IndexedVersionType::VersionType& type) const { return m_type != type; }
     bool operator<(const IndexedVersionType& other) const { return m_type < other.m_type; }
-    bool operator<(const IndexedVersionType::Enum& type) const { return m_type < type; }
+    bool operator<(const IndexedVersionType::VersionType& type) const { return m_type < type; }
     bool operator<=(const IndexedVersionType& other) const { return m_type <= other.m_type; }
-    bool operator<=(const IndexedVersionType::Enum& type) const { return m_type <= type; }
+    bool operator<=(const IndexedVersionType::VersionType& type) const { return m_type <= type; }
     bool operator>(const IndexedVersionType& other) const { return m_type > other.m_type; }
-    bool operator>(const IndexedVersionType::Enum& type) const { return m_type > type; }
+    bool operator>(const IndexedVersionType::VersionType& type) const { return m_type > type; }
     bool operator>=(const IndexedVersionType& other) const { return m_type >= other.m_type; }
-    bool operator>=(const IndexedVersionType::Enum& type) const { return m_type >= type; }
+    bool operator>=(const IndexedVersionType::VersionType& type) const { return m_type >= type; }
 
     QString toString() const { return toString(m_type); }
 
-    IndexedVersionType::Enum m_type;
+    IndexedVersionType::VersionType m_type;
 };
 
 struct Dependency {
@@ -159,7 +159,6 @@ struct IndexedPack {
         return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }
 };
-QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 struct OverrideDep {
     QString quilt;

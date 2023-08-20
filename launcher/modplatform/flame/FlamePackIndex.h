@@ -6,8 +6,6 @@
 #include <QVector>
 #include "modplatform/ModIndex.h"
 
-#include "modplatform/ModIndex.h"
-
 namespace Flame {
 
 struct ModpackAuthor {

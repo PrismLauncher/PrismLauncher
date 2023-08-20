@@ -24,30 +24,32 @@
 
 namespace ModPlatform {
 
-static const QMap<QString, IndexedVersionType::Enum> s_indexed_version_type_names = { { "release", IndexedVersionType::Enum::Release },
-                                                                                      { "beta", IndexedVersionType::Enum::Beta },
-                                                                                      { "alpha", IndexedVersionType::Enum::Alpha } };
+static const QMap<QString, IndexedVersionType::VersionType> s_indexed_version_type_names = {
+    { "release", IndexedVersionType::VersionType::Release },
+    { "beta", IndexedVersionType::VersionType::Beta },
+    { "alpha", IndexedVersionType::VersionType::Alpha }
+};
 
 IndexedVersionType::IndexedVersionType(const QString& type) : IndexedVersionType(enumFromString(type)) {}
 
-IndexedVersionType::IndexedVersionType(int type)
+IndexedVersionType::IndexedVersionType(int flame_type)
 {
-    switch (type) {
+    switch (flame_type) {
         case 1:
-            m_type = IndexedVersionType::Enum::Release;
+            m_type = IndexedVersionType::VersionType::Release;
             break;
         case 2:
-            m_type = IndexedVersionType::Enum::Beta;
+            m_type = IndexedVersionType::VersionType::Beta;
             break;
         case 3:
-            m_type = IndexedVersionType::Enum::Alpha;
+            m_type = IndexedVersionType::VersionType::Alpha;
             break;
         default:
-            m_type = IndexedVersionType::Enum::UNKNOWN;
+            m_type = IndexedVersionType::VersionType::Unknown;
     }
 }
 
-IndexedVersionType::IndexedVersionType(const IndexedVersionType::Enum& type)
+IndexedVersionType::IndexedVersionType(const IndexedVersionType::VersionType& type)
 {
     m_type = type;
 }
@@ -63,24 +65,14 @@ IndexedVersionType& IndexedVersionType::operator=(const IndexedVersionType& othe
     return *this;
 }
 
-const QString IndexedVersionType::toString(const IndexedVersionType::Enum& type)
+const QString IndexedVersionType::toString(const IndexedVersionType::VersionType& type)
 {
-    switch (type) {
-        case IndexedVersionType::Enum::Release:
-            return "release";
-        case IndexedVersionType::Enum::Beta:
-            return "beta";
-        case IndexedVersionType::Enum::Alpha:
-            return "alpha";
-        case IndexedVersionType::Enum::UNKNOWN:
-        default:
-            return "unknown";
-    }
+    return s_indexed_version_type_names.key(type, "unknown");
 }
 
-IndexedVersionType::Enum IndexedVersionType::enumFromString(const QString& type)
+IndexedVersionType::VersionType IndexedVersionType::enumFromString(const QString& type)
 {
-    return s_indexed_version_type_names.value(type, IndexedVersionType::Enum::UNKNOWN);
+    return s_indexed_version_type_names.value(type, IndexedVersionType::VersionType::Unknown);
 }
 
 auto ProviderCapabilities::name(ResourceProvider p) -> const char*
