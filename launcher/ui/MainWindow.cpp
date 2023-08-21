@@ -870,7 +870,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
     } else {
         CustomMessageBox::selectable(this, tr("Error"),
                                      tr("The launcher cannot download Minecraft or update instances unless you have at least "
-                                        "one account added.\nPlease add your Mojang or Minecraft account."),
+                                        "one account added.\nPlease add your Microsoft or Mojang account."),
                                      QMessageBox::Warning)
             ->show();
     }
