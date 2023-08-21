@@ -8,7 +8,6 @@
 #include <QSpinBox>
 #include <QToolButton>
 #include <QVBoxLayout>
-#include <algorithm>
 
 #include <sys.h>
 
@@ -187,12 +186,20 @@ QString JavaSettingsWidget::javaPath() const
 
 int JavaSettingsWidget::maxHeapSize() const
 {
-    return std::max(m_minMemSpinBox->value(), m_maxMemSpinBox->value());
+    auto min = m_minMemSpinBox->value();
+    auto max = m_maxMemSpinBox->value();
+    if (max < min)
+        max = min;
+    return max;
 }
 
 int JavaSettingsWidget::minHeapSize() const
 {
-    return std::min(m_minMemSpinBox->value(), m_maxMemSpinBox->value());
+    auto min = m_minMemSpinBox->value();
+    auto max = m_maxMemSpinBox->value();
+    if (min > max)
+        min = max;
+    return min;
 }
 
 bool JavaSettingsWidget::permGenEnabled() const
