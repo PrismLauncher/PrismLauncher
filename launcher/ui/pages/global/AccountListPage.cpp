@@ -64,7 +64,8 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     ui->setupUi(this);
     ui->listView->setEmptyString(
         tr("Welcome!\n"
-           "If you're new here, you can click the \"Add\" button to add your Mojang or Minecraft account."));
+           "If you're new here, you can select the \"Add Microsoft\" or \"Add Mojang\" buttons to link your Microsoft and/or Mojang "
+           "accounts."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
