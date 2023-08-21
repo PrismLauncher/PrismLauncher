@@ -8,6 +8,7 @@
 #include <QSpinBox>
 #include <QToolButton>
 #include <QVBoxLayout>
+#include <algorithm>
 
 #include <sys.h>
 
@@ -186,12 +187,12 @@ QString JavaSettingsWidget::javaPath() const
 
 int JavaSettingsWidget::maxHeapSize() const
 {
-    return m_maxMemSpinBox->value();
+    return std::max(m_minMemSpinBox->value(), m_maxMemSpinBox->value());
 }
 
 int JavaSettingsWidget::minHeapSize() const
 {
-    return m_minMemSpinBox->value();
+    return std::min(m_minMemSpinBox->value(), m_maxMemSpinBox->value());
 }
 
 bool JavaSettingsWidget::permGenEnabled() const
@@ -214,17 +215,9 @@ void JavaSettingsWidget::memoryValueChanged(int)
     if (obj == m_minMemSpinBox && min != observedMinMemory) {
         observedMinMemory = min;
         actuallyChanged = true;
-        if (min > max) {
-            observedMaxMemory = min;
-            m_maxMemSpinBox->setValue(min);
-        }
     } else if (obj == m_maxMemSpinBox && max != observedMaxMemory) {
         observedMaxMemory = max;
         actuallyChanged = true;
-        if (min > max) {
-            observedMinMemory = max;
-            m_minMemSpinBox->setValue(max);
-        }
     } else if (obj == m_permGenSpinBox && permgen != observedPermGenMemory) {
         observedPermGenMemory = permgen;
         actuallyChanged = true;
