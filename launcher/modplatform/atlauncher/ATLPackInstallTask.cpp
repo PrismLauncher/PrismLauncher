@@ -842,7 +842,7 @@ void PackInstallTask::downloadMods()
                     continue;
                 }
                 auto modIter = std::find_if(blocked_mods.begin(), blocked_mods.end(),
-                                            [blocked](VersionMod mod) { return mod.url == blocked.websiteUrl; });
+                                            [blocked](const VersionMod& mod) { return mod.url == blocked.websiteUrl; });
                 if (modIter == blocked_mods.end())
                     continue;
                 auto mod = *modIter;
