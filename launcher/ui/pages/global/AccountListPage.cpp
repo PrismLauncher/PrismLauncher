@@ -85,6 +85,8 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     connect(selectionModel, &QItemSelectionModel::selectionChanged,
             [this]([[maybe_unused]] const QItemSelection& sel, [[maybe_unused]] const QItemSelection& dsel) { updateButtonStates(); });
     connect(ui->listView, &VersionListView::customContextMenuRequested, this, &AccountListPage::ShowContextMenu);
+    connect(ui->listView, &VersionListView::activated, this,
+            [this](const QModelIndex& index) { m_accounts->setDefaultAccount(m_accounts->at(index.row())); });
 
     connect(m_accounts.get(), &AccountList::listChanged, this, &AccountListPage::listChanged);
     connect(m_accounts.get(), &AccountList::listActivityChanged, this, &AccountListPage::listChanged);
