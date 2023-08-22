@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,7 @@
 #include "Json.h"
 
 #include <quazip/quazip.h>
+#include <quazip/quazipdir.h>
 #include <quazip/quazipfile.h>
 
 #include <QCryptographicHash>
@@ -32,99 +33,153 @@ bool process(ResourcePack& pack, ProcessingLevel level)
 {
     switch (pack.type()) {
         case ResourceType::FOLDER:
-            ResourcePackUtils::processFolder(pack, level);
-            return true;
+            return ResourcePackUtils::processFolder(pack, level);
         case ResourceType::ZIPFILE:
-            ResourcePackUtils::processZIP(pack, level);
-            return true;
+            return ResourcePackUtils::processZIP(pack, level);
         default:
             qWarning() << "Invalid type for resource pack parse task!";
             return false;
     }
 }
 
-void processFolder(ResourcePack& pack, ProcessingLevel level)
+bool processFolder(ResourcePack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::FOLDER);
 
+    auto mcmeta_invalid = [&pack]() {
+        qWarning() << "Resource pack at" << pack.fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        return false;  // the mcmeta is not optional
+    };
+
     QFileInfo mcmeta_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.mcmeta"));
-    if (mcmeta_file_info.isFile()) {
+    if (mcmeta_file_info.exists() && mcmeta_file_info.isFile()) {
         QFile mcmeta_file(mcmeta_file_info.filePath());
         if (!mcmeta_file.open(QIODevice::ReadOnly))
-            return;
+            return mcmeta_invalid();  // can't open mcmeta file
 
         auto data = mcmeta_file.readAll();
 
-        ResourcePackUtils::processMCMeta(pack, std::move(data));
+        bool mcmeta_result = ResourcePackUtils::processMCMeta(pack, std::move(data));
 
         mcmeta_file.close();
+        if (!mcmeta_result) {
+            return mcmeta_invalid();  // mcmeta invalid
+        }
+    } else {
+        return mcmeta_invalid();  // mcmeta file isn't a valid file
     }
 
-    if (level == ProcessingLevel::BasicInfoOnly)
-        return;
+    QFileInfo assets_dir_info(FS::PathCombine(pack.fileinfo().filePath(), "assets"));
+    if (!assets_dir_info.exists() || !assets_dir_info.isDir()) {
+        return false;  // assets dir does not exists or isn't valid
+    }
+
+    if (level == ProcessingLevel::BasicInfoOnly) {
+        return true;  // only need basic info already checked
+    }
+
+    auto png_invalid = [&pack]() {
+        qWarning() << "Resource pack at" << pack.fileinfo().filePath() << "does not have a valid pack.png";
+        return true;  // the png is optional
+    };
 
     QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
-    if (image_file_info.isFile()) {
-        QFile mcmeta_file(image_file_info.filePath());
-        if (!mcmeta_file.open(QIODevice::ReadOnly))
-            return;
+    if (image_file_info.exists() && image_file_info.isFile()) {
+        QFile pack_png_file(image_file_info.filePath());
+        if (!pack_png_file.open(QIODevice::ReadOnly))
+            return png_invalid();  // can't open pack.png file
 
-        auto data = mcmeta_file.readAll();
+        auto data = pack_png_file.readAll();
 
-        ResourcePackUtils::processPackPNG(pack, std::move(data));
+        bool pack_png_result = ResourcePackUtils::processPackPNG(pack, std::move(data));
 
-        mcmeta_file.close();
+        pack_png_file.close();
+        if (!pack_png_result) {
+            return png_invalid();  // pack.png invalid
+        }
+    } else {
+        return png_invalid();  // pack.png does not exists or is not a valid file.
     }
+
+    return true;  // all tests passed
 }
 
-void processZIP(ResourcePack& pack, ProcessingLevel level)
+bool processZIP(ResourcePack& pack, ProcessingLevel level)
 {
     Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
 
     QuaZip zip(pack.fileinfo().filePath());
     if (!zip.open(QuaZip::mdUnzip))
-        return;
+        return false;  // can't open zip file
 
     QuaZipFile file(&zip);
+
+    auto mcmeta_invalid = [&pack]() {
+        qWarning() << "Resource pack at" << pack.fileinfo().filePath() << "does not have a valid pack.mcmeta";
+        return false;  // the mcmeta is not optional
+    };
 
     if (zip.setCurrentFile("pack.mcmeta")) {
         if (!file.open(QIODevice::ReadOnly)) {
             qCritical() << "Failed to open file in zip.";
             zip.close();
-            return;
+            return mcmeta_invalid();
         }
 
         auto data = file.readAll();
 
-        ResourcePackUtils::processMCMeta(pack, std::move(data));
+        bool mcmeta_result = ResourcePackUtils::processMCMeta(pack, std::move(data));
 
         file.close();
+        if (!mcmeta_result) {
+            return mcmeta_invalid();  // mcmeta invalid
+        }
+    } else {
+        return mcmeta_invalid();  // could not set pack.mcmeta as current file.
+    }
+
+    QuaZipDir zipDir(&zip);
+    if (!zipDir.exists("/assets")) {
+        return false;  // assets dir does not exists at zip root
     }
 
     if (level == ProcessingLevel::BasicInfoOnly) {
         zip.close();
-        return;
+        return true;  // only need basic info already checked
     }
+
+    auto png_invalid = [&pack]() {
+        qWarning() << "Resource pack at" << pack.fileinfo().filePath() << "does not have a valid pack.png";
+        return true;  // the png is optional
+    };
 
     if (zip.setCurrentFile("pack.png")) {
         if (!file.open(QIODevice::ReadOnly)) {
             qCritical() << "Failed to open file in zip.";
             zip.close();
-            return;
+            return png_invalid();
         }
 
         auto data = file.readAll();
 
-        ResourcePackUtils::processPackPNG(pack, std::move(data));
+        bool pack_png_result = ResourcePackUtils::processPackPNG(pack, std::move(data));
 
         file.close();
+        zip.close();
+        if (!pack_png_result) {
+            return png_invalid();  // pack.png invalid
+        }
+    } else {
+        zip.close();
+        return png_invalid();  // could not set pack.mcmeta as current file.
     }
 
     zip.close();
+    return true;
 }
 
 // https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
-void processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
+bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
 {
     try {
         auto json_doc = QJsonDocument::fromJson(raw_data);
@@ -134,16 +189,80 @@ void processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
         pack.setDescription(Json::ensureString(pack_obj, "description", ""));
     } catch (Json::JsonException& e) {
         qWarning() << "JsonException: " << e.what() << e.cause();
+        return false;
     }
+    return true;
 }
 
-void processPackPNG(ResourcePack& pack, QByteArray&& raw_data)
+bool processPackPNG(const ResourcePack& pack, QByteArray&& raw_data)
 {
     auto img = QImage::fromData(raw_data);
     if (!img.isNull()) {
         pack.setImage(img);
     } else {
         qWarning() << "Failed to parse pack.png.";
+        return false;
+    }
+    return true;
+}
+
+bool processPackPNG(const ResourcePack& pack)
+{
+    auto png_invalid = [&pack]() {
+        qWarning() << "Resource pack at" << pack.fileinfo().filePath() << "does not have a valid pack.png";
+        return false;
+    };
+
+    switch (pack.type()) {
+        case ResourceType::FOLDER: {
+            QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
+            if (image_file_info.exists() && image_file_info.isFile()) {
+                QFile pack_png_file(image_file_info.filePath());
+                if (!pack_png_file.open(QIODevice::ReadOnly))
+                    return png_invalid();  // can't open pack.png file
+
+                auto data = pack_png_file.readAll();
+
+                bool pack_png_result = ResourcePackUtils::processPackPNG(pack, std::move(data));
+
+                pack_png_file.close();
+                if (!pack_png_result) {
+                    return png_invalid();  // pack.png invalid
+                }
+            } else {
+                return png_invalid();  // pack.png does not exists or is not a valid file.
+            }
+        }
+        case ResourceType::ZIPFILE: {
+            Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
+
+            QuaZip zip(pack.fileinfo().filePath());
+            if (!zip.open(QuaZip::mdUnzip))
+                return false;  // can't open zip file
+
+            QuaZipFile file(&zip);
+            if (zip.setCurrentFile("pack.png")) {
+                if (!file.open(QIODevice::ReadOnly)) {
+                    qCritical() << "Failed to open file in zip.";
+                    zip.close();
+                    return png_invalid();
+                }
+
+                auto data = file.readAll();
+
+                bool pack_png_result = ResourcePackUtils::processPackPNG(pack, std::move(data));
+
+                file.close();
+                if (!pack_png_result) {
+                    return png_invalid();  // pack.png invalid
+                }
+            } else {
+                return png_invalid();  // could not set pack.mcmeta as current file.
+            }
+        }
+        default:
+            qWarning() << "Invalid type for resource pack parse task!";
+            return false;
     }
 }
 

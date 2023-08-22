@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>341</width>
-    <height>399</height>
+    <width>575</width>
+    <height>695</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -113,93 +113,268 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="selectAllButtonLayout">
+    <widget class="QGroupBox" name="copyOptionsGroup">
+     <property name="title">
+      <string>Instance Copy Options</string>
+     </property>
+     <layout class="QGridLayout" name="copyOptionsLayout">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="keepPlaytimeCheckbox">
+        <property name="text">
+         <string>Keep play time</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QCheckBox" name="copyModsCheckbox">
+        <property name="toolTip">
+         <string>Disabling this will still keep the mod loader (ex: Fabric, Quilt, etc.) but erase the mods folder and their configs.</string>
+        </property>
+        <property name="text">
+         <string>Copy mods</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QCheckBox" name="copyResPacksCheckbox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Copy resource packs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QCheckBox" name="copyGameOptionsCheckbox">
+        <property name="toolTip">
+         <string>Copy the in-game options like FOV, max framerate, etc.</string>
+        </property>
+        <property name="text">
+         <string>Copy game options</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="copyShaderPacksCheckbox">
+        <property name="text">
+         <string>Copy shader packs</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCheckBox" name="copyServersCheckbox">
+        <property name="text">
+         <string>Copy servers</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="copySavesCheckbox">
+        <property name="text">
+         <string>Copy saves</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="copyScreenshotsCheckbox">
+        <property name="text">
+         <string>Copy screenshots</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QCheckBox" name="selectAllCheckbox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Select all</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="advancedOptionsLabel">
+     <property name="text">
+      <string>Advanced Copy Options</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="copyModeLayout">
      <item>
-      <widget class="QCheckBox" name="selectAllCheckbox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="QGroupBox" name="linkFilesGroup">
+       <property name="toolTip">
+        <string>Use symbolic or hard links instead of copying files.</string>
        </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
+       <property name="title">
+        <string>Symbolic and Hard Link Options</string>
        </property>
-       <property name="text">
-        <string>Select all</string>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
        </property>
        <property name="checked">
         <bool>false</bool>
        </property>
+       <layout class="QVBoxLayout" name="linkOptionsLayout">
+        <item>
+         <widget class="QLabel" name="linkOptionsLabel">
+          <property name="text">
+           <string>Links are supported on most filesystems except FAT</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QGridLayout" name="linkOptionsGridLayout" rowstretch="0,0,0,0" columnstretch="0,0" rowminimumheight="0,0,0,0" columnminimumwidth="0,0">
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
+          <property name="topMargin">
+           <number>6</number>
+          </property>
+          <property name="rightMargin">
+           <number>6</number>
+          </property>
+          <property name="bottomMargin">
+           <number>6</number>
+          </property>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="recursiveLinkCheckbox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Link each resource individually instead of linking whole folders at once</string>
+            </property>
+            <property name="text">
+             <string>Link files recursively</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="dontLinkSavesCheckbox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>If &quot;copy saves&quot; is selected world save data will be copied instead of linked and thus not shared between instances.</string>
+            </property>
+            <property name="text">
+             <string>Don't link saves</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="hardLinksCheckbox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Use hard links instead of copying files.</string>
+            </property>
+            <property name="text">
+             <string>Use hard links</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="symbolicLinksCheckbox">
+            <property name="toolTip">
+             <string>Use symbolic links instead of copying files.</string>
+            </property>
+            <property name="text">
+             <string>Use symbolic links</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="copyOptionsLayout">
-     <item row="6" column="1">
-      <widget class="QCheckBox" name="copyModsCheckbox">
-       <property name="toolTip">
-        <string>Disabling this will still keep the mod loader (ex: Fabric, Quilt, etc.) but erase the mods folder and their configs.</string>
+     <item>
+      <widget class="QGroupBox" name="horizontalGroupBox">
+       <property name="title">
+        <string>CoW (Copy-on-Write) Options</string>
        </property>
-       <property name="text">
-        <string>Copy mods</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QCheckBox" name="copyGameOptionsCheckbox">
-       <property name="toolTip">
-        <string>Copy the in-game options like FOV, max framerate, etc.</string>
-       </property>
-       <property name="text">
-        <string>Copy game options</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QCheckBox" name="copySavesCheckbox">
-       <property name="text">
-        <string>Copy saves</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QCheckBox" name="copyShaderPacksCheckbox">
-       <property name="text">
-        <string>Copy shader packs</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QCheckBox" name="copyServersCheckbox">
-       <property name="text">
-        <string>Copy servers</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QCheckBox" name="copyResPacksCheckbox">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Copy resource packs</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="keepPlaytimeCheckbox">
-       <property name="text">
-        <string>Keep play time</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QCheckBox" name="copyScreenshotsCheckbox">
-       <property name="text">
-        <string>Copy screenshots</string>
-       </property>
+       <layout class="QHBoxLayout" name="useCloneLayout">
+        <item>
+         <widget class="QCheckBox" name="useCloneCheckbox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Files cloned with reflinks take up no extra space until they are modified.</string>
+          </property>
+          <property name="text">
+           <string>Clone instead of copying</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="CoWSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="cloneSupportedLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Your filesystem and/or OS doesn't support reflinks</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+          <property name="margin">
+           <number>4</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
@@ -210,7 +385,7 @@
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
@@ -220,10 +395,21 @@
   <tabstop>iconButton</tabstop>
   <tabstop>instNameTextBox</tabstop>
   <tabstop>groupBox</tabstop>
+  <tabstop>keepPlaytimeCheckbox</tabstop>
+  <tabstop>copyScreenshotsCheckbox</tabstop>
+  <tabstop>copySavesCheckbox</tabstop>
+  <tabstop>copyShaderPacksCheckbox</tabstop>
+  <tabstop>copyGameOptionsCheckbox</tabstop>
+  <tabstop>copyServersCheckbox</tabstop>
+  <tabstop>copyResPacksCheckbox</tabstop>
+  <tabstop>copyModsCheckbox</tabstop>
+  <tabstop>symbolicLinksCheckbox</tabstop>
+  <tabstop>recursiveLinkCheckbox</tabstop>
+  <tabstop>hardLinksCheckbox</tabstop>
+  <tabstop>dontLinkSavesCheckbox</tabstop>
+  <tabstop>useCloneCheckbox</tabstop>
  </tabstops>
- <resources>
-  <include location="../../graphics.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
@@ -232,8 +418,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>254</x>
-     <y>316</y>
+     <x>269</x>
+     <y>692</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -248,8 +434,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>322</x>
-     <y>316</y>
+     <x>337</x>
+     <y>692</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

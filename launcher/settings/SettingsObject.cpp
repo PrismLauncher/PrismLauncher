@@ -14,30 +14,25 @@
  */
 
 #include "settings/SettingsObject.h"
-#include "settings/Setting.h"
-#include "settings/OverrideSetting.h"
-#include "PassthroughSetting.h"
 #include <QDebug>
+#include "PassthroughSetting.h"
+#include "settings/OverrideSetting.h"
+#include "settings/Setting.h"
 
 #include <QVariant>
 
-SettingsObject::SettingsObject(QObject *parent) : QObject(parent)
-{
-}
+SettingsObject::SettingsObject(QObject* parent) : QObject(parent) {}
 
 SettingsObject::~SettingsObject()
 {
     m_settings.clear();
 }
 
-std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Setting> original,
-                                                          std::shared_ptr<Setting> gate)
+std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate)
 {
-    if (contains(original->id()))
-    {
-        qCritical() << QString("Failed to register setting %1. ID already exists.")
-                   .arg(original->id());
-        return nullptr; // Fail
+    if (contains(original->id())) {
+        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(original->id());
+        return nullptr;  // Fail
     }
     auto override = std::make_shared<OverrideSetting>(original, gate);
     override->m_storage = this;
@@ -46,14 +41,11 @@ std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Settin
     return override;
 }
 
-std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Setting> original,
-                                                             std::shared_ptr<Setting> gate)
+std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate)
 {
-    if (contains(original->id()))
-    {
-        qCritical() << QString("Failed to register setting %1. ID already exists.")
-                   .arg(original->id());
-        return nullptr; // Fail
+    if (contains(original->id())) {
+        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(original->id());
+        return nullptr;  // Fail
     }
     auto passthrough = std::make_shared<PassthroughSetting>(original, gate);
     passthrough->m_storage = this;
@@ -66,11 +58,9 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, Q
 {
     if (synonyms.empty())
         return nullptr;
-    if (contains(synonyms.first()))
-    {
-        qCritical() << QString("Failed to register setting %1. ID already exists.")
-                   .arg(synonyms.first());
-        return nullptr; // Fail
+    if (contains(synonyms.first())) {
+        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(synonyms.first());
+        return nullptr;  // Fail
     }
     auto setting = std::make_shared<Setting>(synonyms, defVal);
     setting->m_storage = this;
@@ -79,7 +69,7 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, Q
     return setting;
 }
 
-std::shared_ptr<Setting> SettingsObject::getSetting(const QString &id) const
+std::shared_ptr<Setting> SettingsObject::getSetting(const QString& id) const
 {
     // Make sure there is a setting with the given ID.
     if (!m_settings.contains(id))
@@ -88,55 +78,49 @@ std::shared_ptr<Setting> SettingsObject::getSetting(const QString &id) const
     return m_settings[id];
 }
 
-QVariant SettingsObject::get(const QString &id) const
+QVariant SettingsObject::get(const QString& id) const
 {
     auto setting = getSetting(id);
     return (setting ? setting->get() : QVariant());
 }
 
-bool SettingsObject::set(const QString &id, QVariant value)
+bool SettingsObject::set(const QString& id, QVariant value)
 {
     auto setting = getSetting(id);
-    if (!setting)
-    {
+    if (!setting) {
         qCritical() << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
         return false;
-    }
-    else
-    {
+    } else {
         setting->set(value);
         return true;
     }
 }
 
-void SettingsObject::reset(const QString &id) const
+void SettingsObject::reset(const QString& id) const
 {
     auto setting = getSetting(id);
     if (setting)
         setting->reset();
 }
 
-bool SettingsObject::contains(const QString &id)
+bool SettingsObject::contains(const QString& id)
 {
     return m_settings.contains(id);
 }
 
 bool SettingsObject::reload()
 {
-    for (auto setting : m_settings.values())
-    {
+    for (auto setting : m_settings.values()) {
         setting->set(setting->get());
     }
     return true;
 }
 
-void SettingsObject::connectSignals(const Setting &setting)
+void SettingsObject::connectSignals(const Setting& setting)
 {
-    connect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)),
-            SLOT(changeSetting(const Setting &, QVariant)));
-    connect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)),
-            SIGNAL(SettingChanged(const Setting &, QVariant)));
+    connect(&setting, &Setting::SettingChanged, this, &SettingsObject::changeSetting);
+    connect(&setting, SIGNAL(SettingChanged(const Setting&, QVariant)), this, SIGNAL(SettingChanged(const Setting&, QVariant)));
 
-    connect(&setting, SIGNAL(settingReset(Setting)), SLOT(resetSetting(const Setting &)));
-    connect(&setting, SIGNAL(settingReset(Setting)), SIGNAL(settingReset(const Setting &)));
+    connect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
+    connect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting&)));
 }

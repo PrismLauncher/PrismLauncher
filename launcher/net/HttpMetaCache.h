@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -74,7 +74,7 @@ class MetaEntry {
     auto getMaximumAge() -> qint64 { return m_max_age; }
     void setMaximumAge(qint64 age) { m_max_age = age; }
 
-    bool isExpired(qint64 offset) { return !m_is_eternal && (m_current_age >= m_max_age - offset); };
+    bool isExpired(qint64 offset) { return !m_is_eternal && (m_current_age >= m_max_age - offset); }
 
    protected:
     QString m_baseId;

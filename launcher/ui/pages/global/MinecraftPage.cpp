@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,19 +34,25 @@
  */
 
 #include "MinecraftPage.h"
+#include "BuildConfig.h"
 #include "ui_MinecraftPage.h"
 
-#include <QMessageBox>
 #include <QDir>
+#include <QMessageBox>
 #include <QTabBar>
 
-#include "settings/SettingsObject.h"
 #include "Application.h"
+#include "settings/SettingsObject.h"
 
-MinecraftPage::MinecraftPage(QWidget *parent) : QWidget(parent), ui(new Ui::MinecraftPage)
+#ifdef Q_OS_LINUX
+#include "MangoHud.h"
+#endif
+
+MinecraftPage::MinecraftPage(QWidget* parent) : QWidget(parent), ui(new Ui::MinecraftPage)
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
+    connect(ui->useNativeGLFWCheck, &QAbstractButton::toggled, this, &MinecraftPage::onUseNativeGLFWChanged);
+    connect(ui->useNativeOpenALCheck, &QAbstractButton::toggled, this, &MinecraftPage::onUseNativeOpenALChanged);
     loadSettings();
     updateCheckboxStuff();
 }
@@ -74,6 +80,16 @@ void MinecraftPage::on_maximizedCheckBox_clicked(bool checked)
     updateCheckboxStuff();
 }
 
+void MinecraftPage::onUseNativeGLFWChanged(bool checked)
+{
+    ui->lineEditGLFWPath->setEnabled(checked);
+}
+
+void MinecraftPage::onUseNativeOpenALChanged(bool checked)
+{
+    ui->lineEditOpenALPath->setEnabled(checked);
+}
+
 void MinecraftPage::applySettings()
 {
     auto s = APPLICATION->settings();
@@ -84,8 +100,10 @@ void MinecraftPage::applySettings()
     s->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
 
     // Native library workarounds
-    s->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
     s->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
+    s->set("CustomGLFWPath", ui->lineEditGLFWPath->text());
+    s->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
+    s->set("CustomOpenALPath", ui->lineEditOpenALPath->text());
 
     // Peformance related options
     s->set("EnableFeralGamemode", ui->enableFeralGamemodeCheck->isChecked());
@@ -111,8 +129,20 @@ void MinecraftPage::loadSettings()
     ui->windowWidthSpinBox->setValue(s->get("MinecraftWinWidth").toInt());
     ui->windowHeightSpinBox->setValue(s->get("MinecraftWinHeight").toInt());
 
-    ui->useNativeOpenALCheck->setChecked(s->get("UseNativeOpenAL").toBool());
     ui->useNativeGLFWCheck->setChecked(s->get("UseNativeGLFW").toBool());
+    ui->lineEditGLFWPath->setText(s->get("CustomGLFWPath").toString());
+    ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.GLFW_LIBRARY_NAME));
+#ifdef Q_OS_LINUX
+    if (!APPLICATION->m_detectedGLFWPath.isEmpty())
+        ui->lineEditGLFWPath->setPlaceholderText(tr("Auto detected path: %1").arg(APPLICATION->m_detectedGLFWPath));
+#endif
+    ui->useNativeOpenALCheck->setChecked(s->get("UseNativeOpenAL").toBool());
+    ui->lineEditOpenALPath->setText(s->get("CustomOpenALPath").toString());
+    ui->lineEditOpenALPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
+#ifdef Q_OS_LINUX
+    if (!APPLICATION->m_detectedOpenALPath.isEmpty())
+        ui->lineEditOpenALPath->setPlaceholderText(tr("Auto detected path: %1").arg(APPLICATION->m_detectedOpenALPath));
+#endif
 
     ui->enableFeralGamemodeCheck->setChecked(s->get("EnableFeralGamemode").toBool());
     ui->enableMangoHud->setChecked(s->get("EnableMangoHud").toBool());

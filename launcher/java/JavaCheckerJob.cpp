@@ -20,14 +20,12 @@
 void JavaCheckerJob::partFinished(JavaCheckResult result)
 {
     num_finished++;
-    qDebug() << m_job_name.toLocal8Bit() << "progress:" << num_finished << "/"
-                << javacheckers.size();
+    qDebug() << m_job_name.toLocal8Bit() << "progress:" << num_finished << "/" << javacheckers.size();
     setProgress(num_finished, javacheckers.size());
 
     javaresults.replace(result.id, result);
 
-    if (num_finished == javacheckers.size())
-    {
+    if (num_finished == javacheckers.size()) {
         emitSucceeded();
     }
 }
@@ -35,10 +33,9 @@ void JavaCheckerJob::partFinished(JavaCheckResult result)
 void JavaCheckerJob::executeTask()
 {
     qDebug() << m_job_name.toLocal8Bit() << " started.";
-    for (auto iter : javacheckers)
-    {
+    for (auto iter : javacheckers) {
         javaresults.append(JavaCheckResult());
-        connect(iter.get(), SIGNAL(checkFinished(JavaCheckResult)), SLOT(partFinished(JavaCheckResult)));
+        connect(iter.get(), &JavaChecker::checkFinished, this, &JavaCheckerJob::partFinished);
         iter->performCheck();
     }
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
 
 #include "modplatform/ModIndex.h"
 
-#include "BaseInstance.h"
 #include <QNetworkAccessManager>
+#include "BaseInstance.h"
 
 namespace Modrinth {
 
@@ -29,7 +29,8 @@ void loadExtraPackData(ModPlatform::IndexedPack& m, QJsonObject& obj);
 void loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                              QJsonArray& arr,
                              const shared_qobject_ptr<QNetworkAccessManager>& network,
-                             BaseInstance* inst);
+                             const BaseInstance* inst);
 auto loadIndexedPackVersion(QJsonObject& obj, QString hash_type = "sha512", QString filename_prefer = "") -> ModPlatform::IndexedVersion;
+auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion;
 
 }  // namespace Modrinth

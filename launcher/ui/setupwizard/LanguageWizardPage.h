@@ -4,11 +4,10 @@
 
 class LanguageSelectionWidget;
 
-class LanguageWizardPage : public BaseWizardPage
-{
+class LanguageWizardPage : public BaseWizardPage {
     Q_OBJECT
-public:
-    explicit LanguageWizardPage(QWidget *parent = Q_NULLPTR);
+   public:
+    explicit LanguageWizardPage(QWidget* parent = Q_NULLPTR);
 
     virtual ~LanguageWizardPage();
 
@@ -18,9 +17,9 @@ public:
 
     bool validatePage() override;
 
-protected:
+   protected:
     void retranslate() override;
 
-private:
-    LanguageSelectionWidget *mainWidget = nullptr;
+   private:
+    LanguageSelectionWidget* mainWidget = nullptr;
 };

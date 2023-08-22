@@ -1,14 +1,44 @@
+// SPDX-FileCopyrightText: 2022 Sefa Eyeoglu <contact@scrumplex.net>
+// SPDX-FileCopyrightText: 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
+// SPDX-FileCopyrightText: 2022 kumquat-ir <66188216+kumquat-ir@users.noreply.github.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (C) 2022 kumquat-ir <66188216+kumquat-ir@users.noreply.github.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "BlockedModsDialog.h"
-#include <QDesktopServices>
-#include <QDialogButtonBox>
-#include <QPushButton>
-#include "Application.h"
 #include "ui_BlockedModsDialog.h"
 
+#include "Application.h"
+#include "modplatform/helpers/HashUtils.h"
+
 #include <QDebug>
+#include <QDesktopServices>
+#include <QDialogButtonBox>
+#include <QDir>
+#include <QDirIterator>
 #include <QDragEnterEvent>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMimeData>
+#include <QPushButton>
 #include <QStandardPaths>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
@@ -19,8 +49,8 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
 
     ui->setupUi(this);
 
-    auto openAllButton = ui->buttonBox->addButton(tr("Open All"), QDialogButtonBox::ActionRole);
-    connect(openAllButton, &QPushButton::clicked, this, &BlockedModsDialog::openAll);
+    m_openMissingButton = ui->buttonBox->addButton(tr("Open Missing"), QDialogButtonBox::ActionRole);
+    connect(m_openMissingButton, &QPushButton::clicked, this, [this]() { openAll(true); });
 
     auto downloadFolderButton = ui->buttonBox->addButton(tr("Add Download Folder"), QDialogButtonBox::ActionRole);
     connect(downloadFolderButton, &QPushButton::clicked, this, &BlockedModsDialog::addDownloadFolder);
@@ -34,15 +64,8 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
 
     this->setWindowTitle(title);
     ui->labelDescription->setText(text);
-    ui->labelExplain->setText(
-        QString(tr("Your configured global mods folder and default downloads folder "
-                   "are automatically checked for the downloaded mods and they will be copied to the instance if found.<br/>"
-                   "Optionally, you may drag and drop the downloaded mods onto this dialog or add a folder to watch "
-                   "if you did not download the mods to a default location."))
-            .arg(APPLICATION->settings()->get("CentralModsDir").toString(),
-                 QStandardPaths::writableLocation(QStandardPaths::DownloadLocation)));
 
-    // force all URL handeling as external
+    // force all URL handling as external
     connect(ui->textBrowserWatched, &QTextBrowser::anchorClicked, this, [](const QUrl url) { QDesktopServices::openUrl(url); });
 
     setAcceptDrops(true);
@@ -64,7 +87,15 @@ void BlockedModsDialog::dragEnterEvent(QDragEnterEvent* e)
 
 void BlockedModsDialog::dropEvent(QDropEvent* e)
 {
-    for (const QUrl& url : e->mimeData()->urls()) {
+    for (QUrl& url : e->mimeData()->urls()) {
+        if (url.scheme().isEmpty()) {  // ensure isLocalFile() works correctly
+            url.setScheme("file");
+        }
+
+        if (!url.isLocalFile()) {  // can't drop external files here.
+            continue;
+        }
+
         QString filePath = url.toLocalFile();
         qDebug() << "[Blocked Mods Dialog] Dropped file:" << filePath;
         addHashTask(filePath);
@@ -85,10 +116,12 @@ void BlockedModsDialog::done(int r)
     disconnect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &BlockedModsDialog::directoryChanged);
 }
 
-void BlockedModsDialog::openAll()
+void BlockedModsDialog::openAll(bool missingOnly)
 {
     for (auto& mod : m_mods) {
-        QDesktopServices::openUrl(mod.websiteUrl);
+        if (!missingOnly || !mod.matched) {
+            QDesktopServices::openUrl(mod.websiteUrl);
+        }
     }
 }
 
@@ -131,12 +164,14 @@ void BlockedModsDialog::update()
 
     if (allModsMatched()) {
         ui->labelModsFound->setText("<span style=\"color:green\">✔</span>" + tr("All mods found"));
+        m_openMissingButton->setDisabled(true);
     } else {
         ui->labelModsFound->setText(tr("Please download the missing mods."));
+        m_openMissingButton->setDisabled(false);
     }
 }
 
-/// @brief Signal fired when a watched direcotry has changed
+/// @brief Signal fired when a watched directory has changed
 /// @param path the path to the changed directory
 void BlockedModsDialog::directoryChanged(QString path)
 {
@@ -148,10 +183,31 @@ void BlockedModsDialog::directoryChanged(QString path)
 /// @brief add the user downloads folder and the global mods folder to the filesystem watcher
 void BlockedModsDialog::setupWatch()
 {
-    const QString downloadsFolder = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    const QString downloadsFolder = APPLICATION->settings()->get("DownloadsDir").toString();
     const QString modsFolder = APPLICATION->settings()->get("CentralModsDir").toString();
-    m_watcher.addPath(downloadsFolder);
-    m_watcher.addPath(modsFolder);
+    const bool downloadsFolderWatchRecursive = APPLICATION->settings()->get("DownloadsDirWatchRecursive").toBool();
+    watchPath(downloadsFolder, downloadsFolderWatchRecursive);
+    watchPath(modsFolder, true);
+}
+
+void BlockedModsDialog::watchPath(QString path, bool watch_recursive)
+{
+    auto to_watch = QFileInfo(path);
+    auto to_watch_path = to_watch.canonicalFilePath();
+    if (m_watcher.directories().contains(to_watch_path))
+        return;  // don't watch the same path twice (no loops!)
+
+    qDebug() << "[Blocked Mods Dialog] Adding Watch Path:" << path;
+    m_watcher.addPath(to_watch_path);
+
+    if (!to_watch.isDir() || !watch_recursive)
+        return;
+
+    QDirIterator it(to_watch_path, QDir::Filter::Dirs | QDir::Filter::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
+    while (it.hasNext()) {
+        QString watch_dir = QDir(it.next()).canonicalPath();  // resolve symlinks and relative paths
+        watchPath(watch_dir, watch_recursive);
+    }
 }
 
 /// @brief scan all watched folder
@@ -185,7 +241,7 @@ void BlockedModsDialog::scanPath(QString path, bool start_task)
     }
 }
 
-/// @brief add a hashing task for the file located at path, add the path to the pending set if the hasing task is already running
+/// @brief add a hashing task for the file located at path, add the path to the pending set if the hashing task is already running
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::addHashTask(QString path)
 {
@@ -198,7 +254,7 @@ void BlockedModsDialog::addHashTask(QString path)
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::buildHashTask(QString path)
 {
-    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::Provider::FLAME, "sha1");
+    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::ResourceProvider::FLAME, "sha1");
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
 
@@ -243,12 +299,46 @@ void BlockedModsDialog::checkMatchHash(QString hash, QString path)
 /// @return boolean: did the path match the name of a blocked mod?
 bool BlockedModsDialog::checkValidPath(QString path)
 {
-    QFileInfo file = QFileInfo(path);
-    QString filename = file.fileName();
+    const QFileInfo file = QFileInfo(path);
+    const QString filename = file.fileName();
+
+    auto compare = [](QString fsFilename, QString metadataFilename) {
+        return metadataFilename.compare(fsFilename, Qt::CaseInsensitive) == 0;
+    };
+
+    // super lax compare (but not fuzzy)
+    // convert to lowercase
+    // convert all speratores to whitespace
+    // simplify sequence of internal whitespace to a single space
+    // efectivly compare two strings ignoring all separators and case
+    auto laxCompare = [](QString fsfilename, QString metadataFilename) {
+        // allowed character seperators
+        QList<QChar> allowedSeperators = { '-', '+', '.', '_' };
+
+        // copy in lowercase
+        auto fsName = fsfilename.toLower();
+        auto metaName = metadataFilename.toLower();
+
+        // replace all potential allowed seperatores with whitespace
+        for (auto sep : allowedSeperators) {
+            fsName = fsName.replace(sep, ' ');
+            metaName = metaName.replace(sep, ' ');
+        }
+
+        // remove extraneous whitespace
+        fsName = fsName.simplified();
+        metaName = metaName.simplified();
+
+        return fsName.compare(metaName) == 0;
+    };
 
     for (auto& mod : m_mods) {
-        if (mod.name.compare(filename, Qt::CaseInsensitive) == 0) {
+        if (compare(filename, mod.name)) {
             qDebug() << "[Blocked Mods Dialog] Name match found:" << mod.name << "| From path:" << path;
+            return true;
+        }
+        if (laxCompare(filename, mod.name)) {
+            qDebug() << "[Blocked Mods Dialog] Lax name match found:" << mod.name << "| From path:" << path;
             return true;
         }
     }
@@ -282,7 +372,7 @@ void BlockedModsDialog::validateMatchedMods()
     }
 }
 
-/// @brief run hash task or mark a pending run if it is already runing
+/// @brief run hash task or mark a pending run if it is already running
 void BlockedModsDialog::runHashTask()
 {
     if (!m_hashing_task->isRunning()) {

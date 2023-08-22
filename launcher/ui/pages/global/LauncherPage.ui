@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>514</width>
+    <width>511</width>
     <height>629</height>
    </rect>
   </property>
@@ -58,33 +58,6 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="updateChannelLabel">
-            <property name="text">
-             <string>Up&amp;date Channel:</string>
-            </property>
-            <property name="buddy">
-             <cstring>updateChannelComboBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="updateChannelComboBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="updateChannelDescLabel">
-            <property name="text">
-             <string>No channel selected.</string>
-            </property>
-            <property name="wordWrap">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -94,42 +67,15 @@
           <string>Folders</string>
          </property>
          <layout class="QGridLayout" name="foldersBoxLayout">
-          <item row="1" column="2">
-           <widget class="QToolButton" name="modsDirBrowseBtn">
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelDownloadsDir">
             <property name="text">
-             <string notr="true">...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QToolButton" name="instDirBrowseBtn">
-            <property name="text">
-             <string notr="true">...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <widget class="QToolButton" name="iconsDirBrowseBtn">
-            <property name="text">
-             <string notr="true">...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="instDirTextBox"/>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelIconsDir">
-            <property name="text">
-             <string>&amp;Icons:</string>
+             <string>&amp;Downloads:</string>
             </property>
             <property name="buddy">
-             <cstring>iconsDirTextBox</cstring>
+             <cstring>downloadsDirTextBox</cstring>
             </property>
            </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="modsDirTextBox"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelInstDir">
@@ -141,8 +87,31 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="instDirTextBox"/>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="downloadsDirTextBox"/>
+          </item>
           <item row="2" column="1">
            <widget class="QLineEdit" name="iconsDirTextBox"/>
+          </item>
+          <item row="3" column="2">
+           <widget class="QToolButton" name="downloadsDirBrowseBtn">
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="modsDirTextBox"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="QToolButton" name="modsDirBrowseBtn">
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="labelModsDir">
@@ -151,6 +120,40 @@
             </property>
             <property name="buddy">
              <cstring>modsDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QToolButton" name="instDirBrowseBtn">
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QToolButton" name="iconsDirBrowseBtn">
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelIconsDir">
+            <property name="text">
+             <string>&amp;Icons:</string>
+            </property>
+            <property name="buddy">
+             <cstring>iconsDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1" colspan="2">
+           <widget class="QCheckBox" name="downloadsDirWatchRecursiveCheckBox">
+            <property name="toolTip">
+             <string>When enabled, in addition to the downloads folder, its sub folders will also be searched when looking for resources (e.g. when looking for blocked mods on CurseForge).</string>
+            </property>
+            <property name="text">
+             <string>Check downloads folder recursively</string>
             </property>
            </widget>
           </item>
@@ -166,10 +169,10 @@
           <item>
            <widget class="QCheckBox" name="metadataDisableBtn">
             <property name="toolTip">
-             <string>Disable using metadata provided by mod providers (like Modrinth or Curseforge) for mods.</string>
+             <string>Disable using metadata provided by mod providers (like Modrinth or CurseForge) for mods.</string>
             </property>
             <property name="text">
-             <string>Disable using metadata for mods?</string>
+             <string>Disable using metadata for mods</string>
             </property>
            </widget>
           </item>
@@ -243,150 +246,9 @@
          <property name="title">
           <string>Theme</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>&amp;Icons</string>
-            </property>
-            <property name="buddy">
-             <cstring>themeComboBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="themeComboBox">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::StrongFocus</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string>Simple (Colored Icons)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Simple (Light Icons)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Simple (Dark Icons)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Simple (Blue Icons)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Breeze Light</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Breeze Dark</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">OSX</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string notr="true">iOS</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Flat</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Flat (White)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Legacy</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Custom</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>&amp;Colors</string>
-            </property>
-            <property name="buddy">
-             <cstring>themeComboBoxColors</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="themeComboBoxColors">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::StrongFocus</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>C&amp;at</string>
-            </property>
-            <property name="buddy">
-             <cstring>themeBackgroundCat</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="themeBackgroundCat">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::StrongFocus</enum>
-            </property>
-            <item>
-             <property name="text">
-              <string>Background Cat (from MultiMC)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Rory ID 11 (drawn by Ashtaka)</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Rory ID 11 (flat edition, drawn by Ashtaka)</string>
-             </property>
-            </item>
-           </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="ThemeCustomizationWidget" name="themeCustomizationWidget" native="true"/>
           </item>
          </layout>
         </widget>
@@ -445,21 +307,21 @@
           <item>
            <widget class="QCheckBox" name="showConsoleCheck">
             <property name="text">
-             <string>Show console while the game is &amp;running?</string>
+             <string>Show console while the game is &amp;running</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="autoCloseConsoleCheck">
             <property name="text">
-             <string>&amp;Automatically close console when the game quits?</string>
+             <string>&amp;Automatically close console when the game quits</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="showConsoleErrorCheck">
             <property name="text">
-             <string>Show console when the game &amp;crashes?</string>
+             <string>Show console when the game &amp;crashes</string>
             </property>
            </widget>
           </item>
@@ -570,10 +432,17 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ThemeCustomizationWidget</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/ThemeCustomizationWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>autoUpdateCheckBox</tabstop>
-  <tabstop>updateChannelComboBox</tabstop>
   <tabstop>instDirTextBox</tabstop>
   <tabstop>instDirBrowseBtn</tabstop>
   <tabstop>modsDirTextBox</tabstop>
@@ -582,8 +451,6 @@
   <tabstop>iconsDirBrowseBtn</tabstop>
   <tabstop>sortLastLaunchedBtn</tabstop>
   <tabstop>sortByNameBtn</tabstop>
-  <tabstop>themeComboBox</tabstop>
-  <tabstop>themeComboBoxColors</tabstop>
   <tabstop>showConsoleCheck</tabstop>
   <tabstop>autoCloseConsoleCheck</tabstop>
   <tabstop>showConsoleErrorCheck</tabstop>

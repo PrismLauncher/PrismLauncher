@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -148,7 +148,7 @@ static bool writeThemeJson(const QString& path,
     try {
         Json::write(rootObj, path);
         return true;
-    } catch (const Exception& e) {
+    } catch ([[maybe_unused]] const Exception& e) {
         themeWarningLog() << "Failed to write theme json to" << path;
         return false;
     }
@@ -167,8 +167,6 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
 
         if (!FS::ensureFolderPathExists(path) || !FS::ensureFolderPathExists(pathResources)) {
             themeWarningLog() << "couldn't create folder for theme!";
-            m_palette = baseTheme->colorScheme();
-            m_styleSheet = baseTheme->appStyleSheet();
             return;
         }
 
@@ -177,18 +175,16 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
         bool jsonDataIncomplete = false;
 
         m_palette = baseTheme->colorScheme();
-        if (!readThemeJson(themeFilePath, m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath, jsonDataIncomplete)) {
-            themeDebugLog() << "Did not read theme json file correctly, writing new one to: " << themeFilePath;
-            m_name = "Custom";
-            m_palette = baseTheme->colorScheme();
-            m_fadeColor = baseTheme->fadeColor();
-            m_fadeAmount = baseTheme->fadeAmount();
-            m_widgets = baseTheme->qtTheme();
-            m_qssFilePath = "themeStyle.css";
-        } else {
+        if (readThemeJson(themeFilePath, m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath, jsonDataIncomplete)) {
+            // If theme data was found, fade "Disabled" color of each role according to FadeAmount
             m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
+        } else {
+            themeDebugLog() << "Did not read theme json file correctly, not changing theme, keeping previous.";
+            return;
         }
 
+        // FIXME: This is kinda jank, it only actually checks if the qss file path is not present. It should actually check for any relevant
+        // missing data (e.g. name, colors)
         if (jsonDataIncomplete) {
             writeThemeJson(fileInfo.absoluteFilePath(), m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath);
         }
@@ -197,20 +193,14 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
         QFileInfo info(qssFilePath);
         if (info.isFile()) {
             try {
-                // TODO: validate css?
+                // TODO: validate qss?
                 m_styleSheet = QString::fromUtf8(FS::read(qssFilePath));
             } catch (const Exception& e) {
-                themeWarningLog() << "Couldn't load css:" << e.cause() << "from" << qssFilePath;
-                m_styleSheet = baseTheme->appStyleSheet();
+                themeWarningLog() << "Couldn't load qss:" << e.cause() << "from" << qssFilePath;
+                return;
             }
         } else {
-            themeDebugLog() << "No theme css present.";
-            m_styleSheet = baseTheme->appStyleSheet();
-            try {
-                FS::write(qssFilePath, m_styleSheet.toUtf8());
-            } catch (const Exception& e) {
-                themeWarningLog() << "Couldn't write css:" << e.cause() << "to" << qssFilePath;
-            }
+            themeDebugLog() << "No theme qss present.";
         }
     } else {
         m_id = fileInfo.fileName();

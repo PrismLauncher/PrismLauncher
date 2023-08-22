@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,81 +34,61 @@
  */
 
 #pragma once
-#include <QObject>
 #include <BaseInstance.h>
 #include <tools/BaseProfiler.h>
+#include <QObject>
 
-#include "minecraft/launch/MinecraftServerTarget.h"
 #include "minecraft/auth/MinecraftAccount.h"
+#include "minecraft/launch/MinecraftServerTarget.h"
 
 class InstanceWindow;
-class LaunchController: public Task
-{
+class LaunchController : public Task {
     Q_OBJECT
-public:
+   public:
     void executeTask() override;
 
-    LaunchController(QObject * parent = nullptr);
+    LaunchController(QObject* parent = nullptr);
     virtual ~LaunchController(){};
 
-    void setInstance(InstancePtr instance) {
-        m_instance = instance;
-    }
+    void setInstance(InstancePtr instance) { m_instance = instance; }
 
-    InstancePtr instance() {
-        return m_instance;
-    }
+    InstancePtr instance() { return m_instance; }
 
-    void setOnline(bool online) {
-        m_online = online;
-    }
+    void setOnline(bool online) { m_online = online; }
 
-    void setDemo(bool demo) {
-        m_demo = demo;
-    }
+    void setDemo(bool demo) { m_demo = demo; }
 
-    void setProfiler(BaseProfilerFactory *profiler) {
-        m_profiler = profiler;
-    }
+    void setProfiler(BaseProfilerFactory* profiler) { m_profiler = profiler; }
 
-    void setParentWidget(QWidget * widget) {
-        m_parentWidget = widget;
-    }
+    void setParentWidget(QWidget* widget) { m_parentWidget = widget; }
 
-    void setServerToJoin(MinecraftServerTargetPtr serverToJoin) {
-        m_serverToJoin = std::move(serverToJoin);
-    }
+    void setServerToJoin(MinecraftServerTargetPtr serverToJoin) { m_serverToJoin = std::move(serverToJoin); }
 
-    void setAccountToUse(MinecraftAccountPtr accountToUse) {
-        m_accountToUse = std::move(accountToUse);
-    }
+    void setAccountToUse(MinecraftAccountPtr accountToUse) { m_accountToUse = std::move(accountToUse); }
 
-    QString id()
-    {
-        return m_instance->id();
-    }
+    QString id() { return m_instance->id(); }
 
     bool abort() override;
 
-private:
+   private:
     void login();
     void launchInstance();
     void decideAccount();
 
-private slots:
+   private slots:
     void readyForLaunch();
 
     void onSucceeded();
     void onFailed(QString reason);
-    void onProgressRequested(Task *task);
+    void onProgressRequested(Task* task);
 
-private:
-    BaseProfilerFactory *m_profiler = nullptr;
+   private:
+    BaseProfilerFactory* m_profiler = nullptr;
     bool m_online = true;
     bool m_demo = false;
     InstancePtr m_instance;
-    QWidget * m_parentWidget = nullptr;
-    InstanceWindow *m_console = nullptr;
+    QWidget* m_parentWidget = nullptr;
+    InstanceWindow* m_console = nullptr;
     MinecraftAccountPtr m_accountToUse = nullptr;
     AuthSessionPtr m_session;
     shared_qobject_ptr<LaunchTask> m_launcher;

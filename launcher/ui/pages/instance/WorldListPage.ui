@@ -109,7 +109,7 @@
   </action>
   <action name="actionRemove">
    <property name="text">
-    <string>Remove</string>
+    <string>Delete</string>
    </property>
   </action>
   <action name="actionMCEdit">

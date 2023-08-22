@@ -12,12 +12,12 @@ namespace Hashing {
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
-Hasher::Ptr createHasher(QString file_path, ModPlatform::Provider provider)
+Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider)
 {
     switch (provider) {
-        case ModPlatform::Provider::MODRINTH:
+        case ModPlatform::ResourceProvider::MODRINTH:
             return createModrinthHasher(file_path);
-        case ModPlatform::Provider::FLAME:
+        case ModPlatform::ResourceProvider::FLAME:
             return createFlameHasher(file_path);
         default:
             qCritical() << "[Hashing]"
@@ -28,22 +28,22 @@ Hasher::Ptr createHasher(QString file_path, ModPlatform::Provider provider)
 
 Hasher::Ptr createModrinthHasher(QString file_path)
 {
-    return new ModrinthHasher(file_path);
+    return makeShared<ModrinthHasher>(file_path);
 }
 
 Hasher::Ptr createFlameHasher(QString file_path)
 {
-    return new FlameHasher(file_path);
+    return makeShared<FlameHasher>(file_path);
 }
 
-Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::Provider provider)
+Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider)
 {
-    return new BlockedModHasher(file_path, provider);
+    return makeShared<BlockedModHasher>(file_path, provider);
 }
 
-Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::Provider provider, QString type)
+Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider, QString type)
 {
-    auto hasher = new BlockedModHasher(file_path, provider);
+    auto hasher = makeShared<BlockedModHasher>(file_path, provider);
     hasher->useHashType(type);
     return hasher;
 }
@@ -62,8 +62,8 @@ void ModrinthHasher::executeTask()
         return;
     }
 
-    auto hash_type = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH).first();
-    m_hash = ProviderCaps.hash(ModPlatform::Provider::MODRINTH, &file, hash_type);
+    auto hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    m_hash = ProviderCaps.hash(ModPlatform::ResourceProvider::MODRINTH, &file, hash_type);
 
     file.close();
 
@@ -71,6 +71,7 @@ void ModrinthHasher::executeTask()
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
+        emit resultsReady(m_hash);
     }
 }
 
@@ -79,7 +80,7 @@ void FlameHasher::executeTask()
     // CF-specific
     auto should_filter_out = [](char c) { return (c == 9 || c == 10 || c == 13 || c == 32); };
 
-    std::ifstream file_stream(StringUtils::toStdString(m_path), std::ifstream::binary);
+    std::ifstream file_stream(StringUtils::toStdString(m_path).c_str(), std::ifstream::binary);
     // TODO: This is very heavy work, but apparently QtConcurrent can't use move semantics, so we can't boop this to another thread.
     // How do we make this non-blocking then?
     m_hash = QString::number(MurmurHash2(std::move(file_stream), 4 * MiB, should_filter_out));
@@ -88,13 +89,13 @@ void FlameHasher::executeTask()
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
+        emit resultsReady(m_hash);
     }
 }
 
-
-BlockedModHasher::BlockedModHasher(QString file_path, ModPlatform::Provider provider) 
-    : Hasher(file_path), provider(provider) { 
-    setObjectName(QString("BlockedModHasher: %1").arg(file_path)); 
+BlockedModHasher::BlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider) : Hasher(file_path), provider(provider)
+{
+    setObjectName(QString("BlockedModHasher: %1").arg(file_path));
     hash_type = ProviderCaps.hashType(provider).first();
 }
 
@@ -120,14 +121,17 @@ void BlockedModHasher::executeTask()
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
+        emit resultsReady(m_hash);
     }
 }
 
-QStringList BlockedModHasher::getHashTypes() {
+QStringList BlockedModHasher::getHashTypes()
+{
     return ProviderCaps.hashType(provider);
 }
 
-bool BlockedModHasher::useHashType(QString type) {
+bool BlockedModHasher::useHashType(QString type)
+{
     auto types = ProviderCaps.hashType(provider);
     if (types.contains(type)) {
         hash_type = type;

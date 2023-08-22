@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -38,12 +38,26 @@
 
 #include "ResourceFolderModel.h"
 
-class TexturePackFolderModel : public ResourceFolderModel
-{
+#include "TexturePack.h"
+
+class TexturePackFolderModel : public ResourceFolderModel {
     Q_OBJECT
 
-public:
-    explicit TexturePackFolderModel(const QString &dir);
+   public:
+    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, DateColumn, NUM_COLUMNS };
+
+    explicit TexturePackFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance);
+
+    virtual QString id() const override { return "texturepacks"; }
+
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] int columnCount(const QModelIndex& parent) const override;
+
+    explicit TexturePackFolderModel(const QString& dir, BaseInstance* instance);
     [[nodiscard]] Task* createUpdateTask() override;
     [[nodiscard]] Task* createParseTask(Resource&) override;
+
+    RESOURCE_HELPERS(TexturePack)
 };

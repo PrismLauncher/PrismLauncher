@@ -6,21 +6,21 @@
 
 typedef shared_qobject_ptr<class SkinDelete> SkinDeletePtr;
 
-class SkinDelete : public Task
-{
+class SkinDelete : public Task {
     Q_OBJECT
-public:
-    SkinDelete(QObject *parent, QString token);
+   public:
+    SkinDelete(QObject* parent, QString token);
     virtual ~SkinDelete() = default;
 
-private:
+   private:
     QString m_token;
     shared_qobject_ptr<QNetworkReply> m_reply;
 
-protected:
+   protected:
     virtual void executeTask();
 
-public slots:
+   public slots:
     void downloadError(QNetworkReply::NetworkError);
+    void sslErrors(const QList<QSslError>& errors);
     void downloadFinished();
 };

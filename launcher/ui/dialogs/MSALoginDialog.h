@@ -15,49 +15,45 @@
 
 #pragma once
 
-#include <QtWidgets/QDialog>
-#include <QtCore/QEventLoop>
 #include <QTimer>
+#include <QtCore/QEventLoop>
+#include <QtWidgets/QDialog>
 
 #include "minecraft/auth/MinecraftAccount.h"
 
-namespace Ui
-{
+namespace Ui {
 class MSALoginDialog;
 }
 
-class MSALoginDialog : public QDialog
-{
+class MSALoginDialog : public QDialog {
     Q_OBJECT
 
-public:
+   public:
     ~MSALoginDialog();
 
-    static MinecraftAccountPtr newAccount(QWidget *parent, QString message);
+    static MinecraftAccountPtr newAccount(QWidget* parent, QString message);
     int exec() override;
 
-private:
-    explicit MSALoginDialog(QWidget *parent = 0);
+   private:
+    explicit MSALoginDialog(QWidget* parent = 0);
 
     void setUserInputsEnabled(bool enable);
 
-protected
-slots:
-    void onTaskFailed(const QString &reason);
+   protected slots:
+    void onTaskFailed(const QString& reason);
     void onTaskSucceeded();
-    void onTaskStatus(const QString &status);
+    void onTaskStatus(const QString& status);
     void onTaskProgress(qint64 current, qint64 total);
-    void showVerificationUriAndCode(const QUrl &uri, const QString &code, int expiresIn);
+    void showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn);
     void hideVerificationUriAndCode();
 
     void externalLoginTick();
 
-private:
-    Ui::MSALoginDialog *ui;
+   private:
+    Ui::MSALoginDialog* ui;
     MinecraftAccountPtr m_account;
     shared_qobject_ptr<AccountTask> m_loginTask;
     QTimer m_externalLoginTimer;
     int m_externalLoginElapsed = 0;
     int m_externalLoginTimeout = 0;
 };
-

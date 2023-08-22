@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,28 +38,20 @@
 #pragma once
 
 #include "ExternalResourcesPage.h"
-#include "ui_ExternalResourcesPage.h"
 
-#include "minecraft/mod/ShaderPackFolderModel.h"
-
-class ShaderPackPage : public ExternalResourcesPage
-{
+class ShaderPackPage : public ExternalResourcesPage {
     Q_OBJECT
-public:
-    explicit ShaderPackPage(MinecraftInstance *instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget *parent = 0)
-        : ExternalResourcesPage(instance, model, parent)
-    {
-        ui->actionViewConfigs->setVisible(false);
-    }
-    virtual ~ShaderPackPage() {}
+   public:
+    explicit ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget* parent = nullptr);
+    ~ShaderPackPage() override = default;
 
     QString displayName() const override { return tr("Shader packs"); }
     QIcon icon() const override { return APPLICATION->getThemedIcon("shaderpacks"); }
     QString id() const override { return "shaderpacks"; }
     QString helpPage() const override { return "Resource-packs"; }
 
-    virtual bool shouldDisplay() const override
-    {
-        return true;
-    }
+    bool shouldDisplay() const override { return true; }
+
+   public slots:
+    void downloadShaders();
 };

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -42,6 +42,8 @@
 #include <QMimeData>
 #include <QPair>
 #include <QSet>
+#include <QStack>
+#include <QTextStream>
 #include <QThread>
 #include <QTimer>
 #include <QUuid>
@@ -93,7 +95,11 @@ Qt::DropActions InstanceList::supportedDropActions() const
     return Qt::MoveAction;
 }
 
-bool InstanceList::canDropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) const
+bool InstanceList::canDropMimeData(const QMimeData* data,
+                                   [[maybe_unused]] Qt::DropAction action,
+                                   [[maybe_unused]] int row,
+                                   [[maybe_unused]] int column,
+                                   [[maybe_unused]] const QModelIndex& parent) const
 {
     if (data && data->hasFormat("application/x-instanceid")) {
         return true;
@@ -101,7 +107,11 @@ bool InstanceList::canDropMimeData(const QMimeData* data, Qt::DropAction action,
     return false;
 }
 
-bool InstanceList::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+bool InstanceList::dropMimeData(const QMimeData* data,
+                                [[maybe_unused]] Qt::DropAction action,
+                                [[maybe_unused]] int row,
+                                [[maybe_unused]] int column,
+                                [[maybe_unused]] const QModelIndex& parent)
 {
     if (data && data->hasFormat("application/x-instanceid")) {
         return true;
@@ -124,6 +134,16 @@ QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
         mimeData->setData("application/x-instanceid", instanceId.toUtf8());
     }
     return mimeData;
+}
+
+QStringList InstanceList::getLinkedInstancesById(const QString& id) const
+{
+    QStringList linkedInstances;
+    for (auto inst : m_instances) {
+        if (inst->isLinkedToInstanceId(id))
+            linkedInstances.append(inst->id());
+    }
+    return linkedInstances;
 }
 
 int InstanceList::rowCount(const QModelIndex& parent) const
@@ -861,7 +881,7 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
     emit instancesChanged();
 }
 
-void InstanceList::on_InstFolderChanged(const Setting& setting, QVariant value)
+void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, QVariant value)
 {
     QString newInstDir = QDir(value.toString()).canonicalPath();
     if (newInstDir != m_instDir) {
@@ -888,13 +908,15 @@ class InstanceStaging : public Task {
         , m_groupName(std::move(groupName))
     {
         m_child.reset(child);
-        connect(child, &Task::succeeded, this, &InstanceStaging::childSucceded);
+        connect(child, &Task::succeeded, this, &InstanceStaging::childSucceeded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
         connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
         connect(child, &Task::abortStatusChanged, this, &InstanceStaging::setAbortable);
         connect(child, &Task::status, this, &InstanceStaging::setStatus);
+        connect(child, &Task::details, this, &InstanceStaging::setDetails);
         connect(child, &Task::progress, this, &InstanceStaging::setProgress);
-        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceded);
+        connect(child, &Task::stepProgress, this, &InstanceStaging::propagateStepProgress);
+        connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceeded);
     }
 
     virtual ~InstanceStaging(){};
@@ -916,10 +938,10 @@ class InstanceStaging : public Task {
     QStringList warnings() const override { return m_child->warnings(); }
 
    private slots:
-    void childSucceded()
+    void childSucceeded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, m_child->shouldOverride())) {
+        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, *m_child.get())) {
             emitSucceeded();
             return;
         }
@@ -964,7 +986,7 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath()
 {
-    QString key = QUuid::createUuid().toString();
+    QString key = QUuid::createUuid().toString(QUuid::WithoutBraces);
     QString tempDir = ".LAUNCHER_TEMP/";
     QString relPath = FS::PathCombine(tempDir, key);
     QDir rootPath(m_instDir);
@@ -982,24 +1004,21 @@ QString InstanceList::getStagedInstancePath()
 bool InstanceList::commitStagedInstance(const QString& path,
                                         InstanceName const& instanceName,
                                         const QString& groupName,
-                                        bool should_override)
+                                        const InstanceTask& commiting)
 {
     QDir dir;
     QString instID;
     InstancePtr inst;
 
+    auto should_override = commiting.shouldOverride();
+
     if (should_override) {
-        // This is to avoid problems when the instance folder gets manually renamed
-        if ((inst = getInstanceByManagedName(instanceName.originalName()))) {
-            instID = QFileInfo(inst->instanceRoot()).fileName();
-        } else if ((inst = getInstanceByManagedName(instanceName.modifiedName()))) {
-            instID = QFileInfo(inst->instanceRoot()).fileName();
-        } else {
-            instID = FS::RemoveInvalidFilenameChars(instanceName.modifiedName(), '-');
-        }
+        instID = commiting.originalInstanceID();
     } else {
         instID = FS::DirNameFromString(instanceName.modifiedName(), m_instDir);
     }
+
+    Q_ASSERT(!instID.isEmpty());
 
     {
         WatchLock lock(m_watcher, m_instDir);

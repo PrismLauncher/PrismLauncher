@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Lenny McLennington <lenny@sneed.church>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,17 +35,16 @@
 
 #pragma once
 
-#include "tasks/Task.h"
+#include <QBuffer>
 #include <QNetworkReply>
 #include <QString>
-#include <QBuffer>
-#include <memory>
 #include <array>
+#include <memory>
+#include "tasks/Task.h"
 
-class PasteUpload : public Task
-{
+class PasteUpload : public Task {
     Q_OBJECT
-public:
+   public:
     enum PasteType : int {
         // 0x0.st
         NullPointer,
@@ -68,26 +67,23 @@ public:
 
     static std::array<PasteTypeInfo, 4> PasteTypes;
 
-    PasteUpload(QWidget *window, QString text, QString url, PasteType pasteType);
+    PasteUpload(QWidget* window, QString text, QString url, PasteType pasteType);
     virtual ~PasteUpload();
 
-    QString pasteLink()
-    {
-        return m_pasteLink;
-    }
-protected:
+    QString pasteLink() { return m_pasteLink; }
+
+   protected:
     virtual void executeTask();
 
-private:
-    QWidget *m_window;
+   private:
+    QWidget* m_window;
     QString m_pasteLink;
     QString m_baseUrl;
     QString m_uploadUrl;
     PasteType m_pasteType;
     QByteArray m_text;
     std::shared_ptr<QNetworkReply> m_reply;
-public
-slots:
+   public slots:
     void downloadError(QNetworkReply::NetworkError);
     void downloadFinished();
 };

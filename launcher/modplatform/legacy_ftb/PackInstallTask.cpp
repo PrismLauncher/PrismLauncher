@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,16 +37,18 @@
 
 #include <QtConcurrent>
 
-#include "MMCZip.h"
 #include "BaseInstance.h"
 #include "FileSystem.h"
-#include "settings/INISettingsObject.h"
+#include "MMCZip.h"
+#include "minecraft/GradleSpecifier.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "minecraft/GradleSpecifier.h"
+#include "settings/INISettingsObject.h"
 
-#include "BuildConfig.h"
 #include "Application.h"
+#include "BuildConfig.h"
+
+#include "net/ApiDownload.h"
 
 namespace LegacyFTB {
 
@@ -65,49 +67,29 @@ void PackInstallTask::executeTask()
 void PackInstallTask::downloadPack()
 {
     setStatus(tr("Downloading zip for %1").arg(m_pack.name));
+    setProgress(1, 4);
     setAbortable(false);
 
     archivePath = QString("%1/%2/%3").arg(m_pack.dir, m_version.replace(".", "_"), m_pack.file);
 
-    netJobContainer = new NetJob("Download FTB Pack", m_network);
+    netJobContainer.reset(new NetJob("Download FTB Pack", m_network));
     QString url;
     if (m_pack.type == PackType::Private) {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "privatepacks/%1").arg(archivePath);
     } else {
         url = QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "modpacks/%1").arg(archivePath);
     }
-    netJobContainer->addNetAction(Net::Download::makeFile(url, archivePath));
+    netJobContainer->addNetAction(Net::ApiDownload::makeFile(url, archivePath));
 
-    connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
-    connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
-    connect(netJobContainer.get(), &NetJob::progress, this, &PackInstallTask::onDownloadProgress);
-    connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
+    connect(netJobContainer.get(), &NetJob::succeeded, this, &PackInstallTask::unzip);
+    connect(netJobContainer.get(), &NetJob::failed, this, &PackInstallTask::emitFailed);
+    connect(netJobContainer.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
+    connect(netJobContainer.get(), &NetJob::aborted, this, &PackInstallTask::emitAborted);
 
     netJobContainer->start();
 
     setAbortable(true);
     progress(1, 4);
-}
-
-void PackInstallTask::onDownloadSucceeded()
-{
-    unzip();
-}
-
-void PackInstallTask::onDownloadFailed(QString reason)
-{
-    emitFailed(reason);
-}
-
-void PackInstallTask::onDownloadProgress(qint64 current, qint64 total)
-{
-    progress(current, total * 4);
-    setStatus(tr("Downloading zip for %1 (%2%)").arg(m_pack.name).arg(current / 10));
-}
-
-void PackInstallTask::onDownloadAborted()
-{
-    emitAborted();
 }
 
 void PackInstallTask::unzip()
@@ -119,16 +101,17 @@ void PackInstallTask::unzip()
     QDir extractDir(m_stagingPath);
 
     m_packZip.reset(new QuaZip(archivePath));
-    if(!m_packZip->open(QuaZip::mdUnzip))
-    {
+    if (!m_packZip->open(QuaZip::mdUnzip)) {
         emitFailed(tr("Failed to open modpack file %1!").arg(archivePath));
         return;
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath, extractDir.absolutePath() + "/unzip");
+    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath,
+                                        extractDir.absolutePath() + "/unzip");
 #else
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/unzip");
+    m_extractFuture =
+        QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/unzip");
 #endif
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onUnzipFinished);
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::onUnzipCanceled);
@@ -150,11 +133,9 @@ void PackInstallTask::install()
     setStatus(tr("Installing modpack"));
     progress(3, 4);
     QDir unzipMcDir(m_stagingPath + "/unzip/minecraft");
-    if(unzipMcDir.exists())
-    {
-        //ok, found minecraft dir, move contents to instance dir
-        if(!QDir().rename(m_stagingPath + "/unzip/minecraft", m_stagingPath + "/.minecraft"))
-        {
+    if (unzipMcDir.exists()) {
+        // ok, found minecraft dir, move contents to instance dir
+        if (!QDir().rename(m_stagingPath + "/unzip/minecraft", m_stagingPath + "/.minecraft")) {
             emitFailed(tr("Failed to move unzipped Minecraft!"));
             return;
         }
@@ -171,23 +152,20 @@ void PackInstallTask::install()
 
     bool fallback = true;
 
-    //handle different versions
+    // handle different versions
     QFile packJson(m_stagingPath + "/.minecraft/pack.json");
     QDir jarmodDir = QDir(m_stagingPath + "/unzip/instMods");
-    if(packJson.exists())
-    {
+    if (packJson.exists()) {
         packJson.open(QIODevice::ReadOnly | QIODevice::Text);
         QJsonDocument doc = QJsonDocument::fromJson(packJson.readAll());
         packJson.close();
 
-        //we only care about the libs
+        // we only care about the libs
         QJsonArray libs = doc.object().value("libraries").toArray();
 
-        foreach (const QJsonValue &value, libs)
-        {
+        foreach (const QJsonValue& value, libs) {
             QString nameValue = value.toObject().value("name").toString();
-            if(!nameValue.startsWith("net.minecraftforge"))
-            {
+            if (!nameValue.startsWith("net.minecraftforge")) {
                 continue;
             }
 
@@ -198,16 +176,13 @@ void PackInstallTask::install()
             fallback = false;
             break;
         }
-
     }
 
-    if(jarmodDir.exists())
-    {
+    if (jarmodDir.exists()) {
         qDebug() << "Found jarmods, installing...";
 
         QStringList jarmods;
-        for (auto info: jarmodDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files))
-        {
+        for (auto info : jarmodDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
             qDebug() << "Jarmod:" << info.fileName();
             jarmods.push_back(info.absoluteFilePath());
         }
@@ -216,12 +191,11 @@ void PackInstallTask::install()
         fallback = false;
     }
 
-    //just nuke unzip directory, it s not needed anymore
+    // just nuke unzip directory, it s not needed anymore
     FS::deletePath(m_stagingPath + "/unzip");
 
-    if(fallback)
-    {
-        //TODO: Some fallback mechanism... or just keep failing!
+    if (fallback) {
+        // TODO: Some fallback mechanism... or just keep failing!
         emitFailed(tr("No installation method found!"));
         return;
     }
@@ -231,8 +205,7 @@ void PackInstallTask::install()
     progress(4, 4);
 
     instance.setName(name());
-    if(m_instIcon == "default")
-    {
+    if (m_instIcon == "default") {
         m_instIcon = "ftb_logo";
     }
     instance.setIconKey(m_instIcon);
@@ -251,4 +224,4 @@ bool PackInstallTask::abort()
     return InstanceTask::abort();
 }
 
-}
+}  // namespace LegacyFTB

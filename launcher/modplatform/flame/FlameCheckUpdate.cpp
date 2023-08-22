@@ -3,11 +3,17 @@
 #include "FlameModIndex.h"
 
 #include <MurmurHash2.h>
+#include <memory>
 
 #include "FileSystem.h"
 #include "Json.h"
 
-#include "ModDownloadTask.h"
+#include "ResourceDownloadTask.h"
+
+#include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourceFolderModel.h"
+
+#include "net/ApiDownload.h"
 
 static FlameAPI api;
 
@@ -27,9 +33,9 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
 
     auto get_project_job = new NetJob("Flame::GetProjectJob", APPLICATION->network());
 
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(ver_info.addonId.toString());
-    auto dl = Net::Download::makeByteArray(url, response);
+    auto dl = Net::ApiDownload::makeByteArray(url, response);
     get_project_job->addNetAction(dl);
 
     QObject::connect(get_project_job, &NetJob::succeeded, [response, &pack]() {
@@ -71,9 +77,9 @@ ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
 
     auto get_file_info_job = new NetJob("Flame::GetFileInfoJob", APPLICATION->network());
 
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto url = QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(QString::number(addonId), QString::number(fileId));
-    auto dl = Net::Download::makeByteArray(url, response);
+    auto dl = Net::ApiDownload::makeByteArray(url, response);
     get_file_info_job->addNetAction(dl);
 
     QObject::connect(get_file_info_job, &NetJob::succeeded, [response, &ver]() {
@@ -126,7 +132,7 @@ void FlameCheckUpdate::executeTask()
         setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
         setProgress(i++, m_mods.size());
 
-        auto latest_ver = api.getLatestVersion({ mod->metadata()->project_id.toString(), m_game_versions, m_loaders });
+        auto latest_ver = api.getLatestVersion({ { mod->metadata()->project_id.toString() }, m_game_versions, m_loaders });
 
         // Check if we were aborted while getting the latest version
         if (m_was_aborted) {
@@ -152,15 +158,15 @@ void FlameCheckUpdate::executeTask()
 
         if (!latest_ver.hash.isEmpty() && (mod->metadata()->hash != latest_ver.hash || mod->status() == ModStatus::NotInstalled)) {
             // Fake pack with the necessary info to pass to the download task :)
-            ModPlatform::IndexedPack pack;
-            pack.name = mod->name();
-            pack.slug = mod->metadata()->slug;
-            pack.addonId = mod->metadata()->project_id;
-            pack.websiteUrl = mod->homeurl();
+            auto pack = std::make_shared<ModPlatform::IndexedPack>();
+            pack->name = mod->name();
+            pack->slug = mod->metadata()->slug;
+            pack->addonId = mod->metadata()->project_id;
+            pack->websiteUrl = mod->homeurl();
             for (auto& author : mod->authors())
-                pack.authors.append({ author });
-            pack.description = mod->description();
-            pack.provider = ModPlatform::Provider::FLAME;
+                pack->authors.append({ author });
+            pack->description = mod->description();
+            pack->provider = ModPlatform::ResourceProvider::FLAME;
 
             auto old_version = mod->version();
             if (old_version.isEmpty() && mod->status() != ModStatus::NotInstalled) {
@@ -168,10 +174,10 @@ void FlameCheckUpdate::executeTask()
                 old_version = current_ver.version;
             }
 
-            auto download_task = new ModDownloadTask(pack, latest_ver, m_mods_folder);
-            m_updatable.emplace_back(pack.name, mod->metadata()->hash, old_version, latest_ver.version,
+            auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver, m_mods_folder);
+            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver.version,
                                      api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
-                                     ModPlatform::Provider::FLAME, download_task);
+                                     ModPlatform::ResourceProvider::FLAME, download_task);
         }
     }
 

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -42,9 +42,11 @@
 #include "FlameModel.h"
 #include "InstanceImportTask.h"
 #include "Json.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
-#include "modplatform/flame/FlameAPI.h"
+
+#include "net/ApiDownload.h"
 
 static FlameAPI api;
 
@@ -114,7 +116,7 @@ void FlamePage::triggerSearch()
     listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
 }
 
-void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
@@ -130,9 +132,10 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     if (current.versionsLoaded == false) {
         qDebug() << "Loading flame modpack versions";
         auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
-        netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
+        netJob->addNetAction(
+            Net::ApiDownload::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId, curr] {
             if (addonId != current.addonId) {
@@ -170,10 +173,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             }
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         netJob->start();
     } else {
         for (auto version : current.versions) {
@@ -197,25 +197,38 @@ void FlamePage::suggestCurrent()
         return;
     }
 
-    if (selectedVersion.isEmpty() || selectedVersion == "-1") {
+    if (m_selected_version_index == -1) {
         dialog->setSuggestedPack();
         return;
     }
 
-    dialog->setSuggestedPack(current.name, new InstanceImportTask(selectedVersion,this));
+    auto version = current.versions.at(m_selected_version_index);
+
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", QString::number(current.addonId));
+    extra_info.insert("pack_version_id", QString::number(version.fileId));
+
+    dialog->setSuggestedPack(current.name, new InstanceImportTask(version.downloadUrl, this, std::move(extra_info)));
     QString editedLogoName;
-    editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
+    editedLogoName = "curseforge_" + current.logoName;
     listModel->getLogo(current.logoName, current.logoUrl,
                        [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }
 
-void FlamePage::onVersionSelectionChanged(QString data)
+void FlamePage::onVersionSelectionChanged(QString version)
 {
-    if (data.isNull() || data.isEmpty()) {
-        selectedVersion = "";
+    bool is_blocked = false;
+    ui->versionSelectionBox->currentData().toInt(&is_blocked);
+
+    if (version.isNull() || version.isEmpty() || is_blocked) {
+        m_selected_version_index = -1;
         return;
     }
-    selectedVersion = ui->versionSelectionBox->currentData().toString();
+
+    m_selected_version_index = ui->versionSelectionBox->currentIndex();
+
+    Q_ASSERT(current.versions.at(m_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
+
     suggestCurrent();
 }
 
@@ -242,10 +255,8 @@ void FlamePage::updateUi()
         text += "<br>" + tr(" by ") + authorStrs.join(", ");
     }
 
-    if(current.extraInfoLoaded) {
-        if (!current.extra.issuesUrl.isEmpty()
-         || !current.extra.sourceUrl.isEmpty()
-         || !current.extra.wikiUrl.isEmpty()) {
+    if (current.extraInfoLoaded) {
+        if (!current.extra.issuesUrl.isEmpty() || !current.extra.sourceUrl.isEmpty() || !current.extra.wikiUrl.isEmpty()) {
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 
@@ -256,7 +267,6 @@ void FlamePage::updateUi()
         if (!current.extra.sourceUrl.isEmpty())
             text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extra.sourceUrl) + "<br>";
     }
-
 
     text += "<hr>";
     text += api.getModDescription(current.addonId).toUtf8();

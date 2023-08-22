@@ -14,8 +14,8 @@ class EnsureMetadataTask : public Task {
     Q_OBJECT
 
    public:
-    EnsureMetadataTask(Mod*, QDir, ModPlatform::Provider = ModPlatform::Provider::MODRINTH);
-    EnsureMetadataTask(QList<Mod*>&, QDir, ModPlatform::Provider = ModPlatform::Provider::MODRINTH);
+    EnsureMetadataTask(Mod*, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
+    EnsureMetadataTask(QList<Mod*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
 
     ~EnsureMetadataTask() = default;
 
@@ -28,17 +28,14 @@ class EnsureMetadataTask : public Task {
 
    private:
     // FIXME: Move to their own namespace
-    auto modrinthVersionsTask() -> NetJob::Ptr;
-    auto modrinthProjectsTask() -> NetJob::Ptr;
+    auto modrinthVersionsTask() -> Task::Ptr;
+    auto modrinthProjectsTask() -> Task::Ptr;
 
-    auto flameVersionsTask() -> NetJob::Ptr;
-    auto flameProjectsTask() -> NetJob::Ptr;
+    auto flameVersionsTask() -> Task::Ptr;
+    auto flameProjectsTask() -> Task::Ptr;
 
     // Helpers
-    enum class RemoveFromList {
-        Yes,
-        No
-    };
+    enum class RemoveFromList { Yes, No };
     void emitReady(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
     void emitFail(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
 
@@ -57,9 +54,9 @@ class EnsureMetadataTask : public Task {
    private:
     QHash<QString, Mod*> m_mods;
     QDir m_index_dir;
-    ModPlatform::Provider m_provider;
+    ModPlatform::ResourceProvider m_provider;
 
     QHash<QString, ModPlatform::IndexedVersion> m_temp_versions;
-    ConcurrentTask* m_hashing_task;
-    NetJob* m_current_task;
+    ConcurrentTask::Ptr m_hashing_task;
+    Task::Ptr m_current_task;
 };

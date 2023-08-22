@@ -18,11 +18,13 @@ See [github repo](https://github.com/FeralInteractive/gamemode).
 
 BSD-3-Clause licensed
 
-## hoedown
+## cmark
 
-Hoedown is a revived fork of Sundown, the Markdown parser based on the original code of the Upskirt library by Natacha Porté.
+The C reference implementation of CommonMark, a standardized Markdown spec.
 
-See [github repo](https://github.com/hoedown/hoedown).
+See [github_repo](https://github.com/commonmark/cmark).
+
+BSD2 licensed.
 
 ## javacheck
 
@@ -59,7 +61,7 @@ The `standard` and `legacy` launchers are available.
 
 Example (some parts have been censored):
 
-```
+```text
 mod legacyjavafixer-1.0
 mainClass net.minecraft.launchwrapper.Launch
 param --username
@@ -138,3 +140,11 @@ A TOML language parser. Used by Forge 1.14+ to store mod metadata.
 See [github repo](https://github.com/marzer/tomlplusplus).
 
 Licenced under the MIT licence.
+
+## qdcss
+
+A quick and dirty css parser, used by NilLoader to store mod metadata.
+
+Translated (and heavily trimmed down) from [the original Java code](https://github.com/unascribed/NilLoader/blob/trunk/src/main/java/nilloader/api/lib/qdcss/QDCSS.java) from NilLoader
+
+Licensed under LGPL version 3.

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -42,15 +42,15 @@
 class AtlUserInteractionSupportImpl : public QObject, public ATLauncher::UserInteractionSupport {
     Q_OBJECT
 
-public:
+   public:
     AtlUserInteractionSupportImpl(QWidget* parent);
+    virtual ~AtlUserInteractionSupportImpl() = default;
 
-private:
+   private:
     QString chooseVersion(Meta::VersionList::Ptr vlist, QString minecraftVersion) override;
     std::optional<QVector<QString>> chooseOptionalMods(ATLauncher::PackVersion version, QVector<ATLauncher::VersionMod> mods) override;
     void displayMessage(QString message) override;
 
-private:
+   private:
     QWidget* m_parent;
-
 };

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  PrismLauncher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,9 +36,48 @@
 
 #pragma once
 
+#include <QLoggingCategory>
 #include <QRunnable>
+#include <QUuid>
 
 #include "QObjectPtr.h"
+
+Q_DECLARE_LOGGING_CATEGORY(taskLogC)
+
+enum class TaskStepState { Waiting, Running, Failed, Succeeded };
+
+Q_DECLARE_METATYPE(TaskStepState)
+
+struct TaskStepProgress {
+    QUuid uid;
+    qint64 current = 0;
+    qint64 total = -1;
+
+    qint64 old_current = 0;
+    qint64 old_total = -1;
+
+    QString status = "";
+    QString details = "";
+    TaskStepState state = TaskStepState::Waiting;
+
+    TaskStepProgress() { this->uid = QUuid::createUuid(); }
+    TaskStepProgress(QUuid uid_) : uid(uid_) {}
+
+    bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
+    void update(qint64 new_current, qint64 new_total)
+    {
+        this->old_current = this->current;
+        this->old_total = this->total;
+
+        this->current = new_current;
+        this->total = new_total;
+        this->state = TaskStepState::Running;
+    }
+};
+
+Q_DECLARE_METATYPE(TaskStepProgress)
+
+typedef QList<std::shared_ptr<TaskStepProgress>> TaskStepProgressList;
 
 class Task : public QObject, public QRunnable {
     Q_OBJECT
@@ -54,8 +94,8 @@ class Task : public QObject, public QRunnable {
     bool isFinished() const;
     bool wasSuccessful() const;
 
-    /*! 
-     * MultiStep tasks are combinations of multiple tasks into a single logical task. 
+    /*!
+     * MultiStep tasks are combinations of multiple tasks into a single logical task.
      * The main usage of this is in SequencialTask.
      */
     virtual auto isMultiStep() const -> bool { return false; }
@@ -73,12 +113,13 @@ class Task : public QObject, public QRunnable {
     auto getState() const -> State { return m_state; }
 
     QString getStatus() { return m_status; }
-    virtual auto getStepStatus() const -> QString { return m_status; }
+    QString getDetails() { return m_details; }
 
     qint64 getProgress() { return m_progress; }
     qint64 getTotalProgress() { return m_progressTotal; }
-    virtual auto getStepProgress() const -> qint64 { return 0; }
-    virtual auto getStepTotalProgress() const -> qint64 { return 100; }
+    virtual auto getStepProgress() const -> TaskStepProgressList { return {}; }
+
+    QUuid getUid() { return m_uid; }
 
    protected:
     void logWarning(const QString& line);
@@ -94,7 +135,8 @@ class Task : public QObject, public QRunnable {
     void aborted();
     void failed(QString reason);
     void status(QString status);
-    void stepStatus(QString status);
+    void details(QString details);
+    void stepProgress(TaskStepProgress const& task_progress);
 
     /** Emitted when the canAbort() status has changed.
      */
@@ -105,9 +147,18 @@ class Task : public QObject, public QRunnable {
     void run() override { start(); }
 
     virtual void start();
-    virtual bool abort() { if(canAbort()) emitAborted(); return canAbort(); };
+    virtual bool abort()
+    {
+        if (canAbort())
+            emitAborted();
+        return canAbort();
+    }
 
-    void setAbortable(bool can_abort) { m_can_abort = can_abort; emit abortStatusChanged(can_abort); }
+    void setAbortable(bool can_abort)
+    {
+        m_can_abort = can_abort;
+        emit abortStatusChanged(can_abort);
+    }
 
    protected:
     virtual void executeTask() = 0;
@@ -117,8 +168,11 @@ class Task : public QObject, public QRunnable {
     virtual void emitAborted();
     virtual void emitFailed(QString reason = "");
 
+    virtual void propagateStepProgress(TaskStepProgress const& task_progress);
+
    public slots:
     void setStatus(const QString& status);
+    void setDetails(const QString& details);
     void setProgress(qint64 current, qint64 total);
 
    protected:
@@ -126,6 +180,7 @@ class Task : public QObject, public QRunnable {
     QStringList m_Warnings;
     QString m_failReason = "";
     QString m_status;
+    QString m_details;
     int m_progress = 0;
     int m_progressTotal = 100;
 
@@ -135,4 +190,5 @@ class Task : public QObject, public QRunnable {
    private:
     // Change using setAbortStatus
     bool m_can_abort = false;
+    QUuid m_uid;
 };

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -40,27 +40,29 @@
 
 #include <quazip/quazip.h>
 
-#include "MMCZip.h"
-#include "minecraft/OneSixVersionFormat.h"
-#include "Version.h"
-#include "net/ChecksumValidator.h"
 #include "FileSystem.h"
 #include "Json.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
-#include "settings/INISettingsObject.h"
+#include "MMCZip.h"
+#include "Version.h"
 #include "meta/Index.h"
 #include "meta/Version.h"
 #include "meta/VersionList.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/OneSixVersionFormat.h"
+#include "minecraft/PackProfile.h"
+#include "net/ChecksumValidator.h"
+#include "settings/INISettingsObject.h"
 
-#include "BuildConfig.h"
+#include "net/ApiDownload.h"
+
 #include "Application.h"
+#include "BuildConfig.h"
 
 namespace ATLauncher {
 
 static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version);
 
-PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString packName, QString version, InstallMode installMode)
+PackInstallTask::PackInstallTask(UserInteractionSupport* support, QString packName, QString version, InstallMode installMode)
 {
     m_support = support;
     m_pack_name = packName;
@@ -71,8 +73,7 @@ PackInstallTask::PackInstallTask(UserInteractionSupport *support, QString packNa
 
 bool PackInstallTask::abort()
 {
-    if(abortable)
-    {
+    if (abortable) {
         return jobPtr->abort();
     }
     return false;
@@ -81,16 +82,17 @@ bool PackInstallTask::abort()
 void PackInstallTask::executeTask()
 {
     qDebug() << "PackInstallTask::executeTask: " << QThread::currentThreadId();
-    auto *netJob = new NetJob("ATLauncher::VersionFetch", APPLICATION->network());
-    auto searchUrl = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json")
-            .arg(m_pack_safe_name).arg(m_version_name);
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), &response));
+    NetJob::Ptr netJob{ new NetJob("ATLauncher::VersionFetch", APPLICATION->network()) };
+    auto searchUrl =
+        QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_pack_safe_name).arg(m_version_name);
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
+
+    QObject::connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
+    QObject::connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
+    QObject::connect(netJob.get(), &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
+
     jobPtr = netJob;
     jobPtr->start();
-
-    QObject::connect(netJob, &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
-    QObject::connect(netJob, &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
-    QObject::connect(netJob, &NetJob::aborted, this, &PackInstallTask::onDownloadAborted);
 }
 
 void PackInstallTask::onDownloadSucceeded()
@@ -98,22 +100,20 @@ void PackInstallTask::onDownloadSucceeded()
     qDebug() << "PackInstallTask::onDownloadSucceeded: " << QThread::currentThreadId();
     jobPtr.reset();
 
-    QJsonParseError parse_error {};
-    QJsonDocument doc = QJsonDocument::fromJson(response, &parse_error);
-    if(parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ATLauncher at " << parse_error.offset << " reason: " << parse_error.errorString();
-        qWarning() << response;
+    QJsonParseError parse_error{};
+    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+    if (parse_error.error != QJsonParseError::NoError) {
+        qWarning() << "Error while parsing JSON response from ATLauncher at " << parse_error.offset
+                   << " reason: " << parse_error.errorString();
+        qWarning() << *response.get();
         return;
     }
     auto obj = doc.object();
 
     ATLauncher::PackVersion version;
-    try
-    {
+    try {
         ATLauncher::loadVersion(version, obj);
-    }
-    catch (const JSONValidationError &e)
-    {
+    } catch (const JSONValidationError& e) {
         emitFailed(tr("Could not understand pack manifest:\n") + e.cause());
         return;
     }
@@ -124,20 +124,20 @@ void PackInstallTask::onDownloadSucceeded()
     bool resetDirectory;
 
     switch (m_install_mode) {
-    case InstallMode::Reinstall:
-    case InstallMode::Update:
-        message = m_version.messages.update;
-        resetDirectory = true;
-        break;
+        case InstallMode::Reinstall:
+        case InstallMode::Update:
+            message = m_version.messages.update;
+            resetDirectory = true;
+            break;
 
-    case InstallMode::Install:
-        message = m_version.messages.install;
-        resetDirectory = false;
-        break;
+        case InstallMode::Install:
+            message = m_version.messages.install;
+            resetDirectory = false;
+            break;
 
-    default:
-        emitFailed(tr("Unsupported installation mode"));
-        return;
+        default:
+            emitFailed(tr("Unsupported installation mode"));
+            return;
     }
 
     // Display message if one exists
@@ -155,10 +155,9 @@ void PackInstallTask::onDownloadSucceeded()
         deleteExistingFiles();
     }
 
-    if(m_version.noConfigs) {
+    if (m_version.noConfigs) {
         downloadMods();
-    }
-    else {
+    } else {
         installConfigs();
     }
 }
@@ -210,11 +209,9 @@ void PackInstallTask::deleteExistingFiles()
 
         if (base == "root") {
             return minecraftPath;
-        }
-        else if (base == "config") {
+        } else if (base == "config") {
             return FS::PathCombine(minecraftPath, "config");
-        }
-        else {
+        } else {
             qWarning() << "Unrecognised base path" << base;
             return minecraftPath;
         }
@@ -336,37 +333,37 @@ QString PackInstallTask::getDirForModType(ModType type, QString raw)
 
 QString PackInstallTask::getVersionForLoader(QString uid)
 {
-    if(m_version.loader.recommended || m_version.loader.latest || m_version.loader.choose) {
+    if (m_version.loader.recommended || m_version.loader.latest || m_version.loader.choose) {
         auto vlist = APPLICATION->metadataIndex()->get(uid);
-        if(!vlist)
-        {
+        if (!vlist) {
             emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
             return Q_NULLPTR;
         }
 
-        if(!vlist->isLoaded()) {
+        if (!vlist->isLoaded()) {
             vlist->load(Net::Mode::Online);
         }
 
-        if(m_version.loader.recommended || m_version.loader.latest) {
+        if (m_version.loader.recommended || m_version.loader.latest) {
             for (int i = 0; i < vlist->versions().size(); i++) {
                 auto version = vlist->versions().at(i);
-                auto reqs = version->requires();
+                auto reqs = version->requiredSet();
 
                 // filter by minecraft version, if the loader depends on a certain version.
                 // not all mod loaders depend on a given Minecraft version, so we won't do this
                 // filtering for those loaders.
                 if (m_version.loader.type != "fabric") {
-                    auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require &req) {
-                        return req.uid == "net.minecraft";
-                    });
-                    if (iter == reqs.end()) continue;
-                    if (iter->equalsVersion != m_version.minecraft) continue;
+                    auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
+                    if (iter == reqs.end())
+                        continue;
+                    if (iter->equalsVersion != m_version.minecraft)
+                        continue;
                 }
 
                 if (m_version.loader.recommended) {
                     // first recommended build we find, we use.
-                    if (!version->isRecommended()) continue;
+                    if (!version->isRecommended())
+                        continue;
                 }
 
                 return version->descriptor();
@@ -374,8 +371,7 @@ QString PackInstallTask::getVersionForLoader(QString uid)
 
             emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type));
             return Q_NULLPTR;
-        }
-        else if(m_version.loader.choose) {
+        } else if (m_version.loader.choose) {
             // Fabric Loader doesn't depend on a given Minecraft version.
             if (m_version.loader.type == "fabric") {
                 return m_support->chooseVersion(vlist, Q_NULLPTR);
@@ -412,15 +408,14 @@ QString PackInstallTask::detectLibrary(VersionLibrary library)
         return group + ":" + artefact + ":" + version;
     }
 
-    if(library.file.contains("-")) {
+    if (library.file.contains("-")) {
         auto lastSlash = library.file.lastIndexOf("-");
         auto name = library.file.mid(0, lastSlash);
         auto version = library.file.mid(lastSlash + 1).remove(".jar");
 
-        if(name == QString("guava")) {
+        if (name == QString("guava")) {
             return "com.google.guava:guava:" + version;
-        }
-        else if(name == QString("commons-lang3")) {
+        } else if (name == QString("commons-lang3")) {
             return "org.apache.commons:commons-lang3:" + version;
         }
     }
@@ -430,22 +425,22 @@ QString PackInstallTask::detectLibrary(VersionLibrary library)
 
 bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile)
 {
-    if(m_version.libraries.isEmpty()) {
+    if (m_version.libraries.isEmpty()) {
         return true;
     }
 
     QList<GradleSpecifier> exempt;
-    for(const auto & componentUid : componentsToInstall.keys()) {
+    for (const auto& componentUid : componentsToInstall.keys()) {
         auto componentVersion = componentsToInstall.value(componentUid);
 
-        for(const auto & library : componentVersion->data()->libraries) {
+        for (const auto& library : componentVersion->data()->libraries) {
             GradleSpecifier lib(library->rawName());
             exempt.append(lib);
         }
     }
 
     {
-        for(const auto & library : minecraftVersion->data()->libraries) {
+        for (const auto& library : minecraftVersion->data()->libraries) {
             GradleSpecifier lib(library->rawName());
             exempt.append(lib);
         }
@@ -456,8 +451,7 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
     auto target_id = "org.multimc.atlauncher." + id;
 
     auto patchDir = FS::PathCombine(instanceRoot, "patches");
-    if(!FS::ensureFolderPathExists(patchDir))
-    {
+    if (!FS::ensureFolderPathExists(patchDir)) {
         return false;
     }
     auto patchFileName = FS::PathCombine(patchDir, target_id + ".json");
@@ -466,38 +460,24 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
     f->name = m_pack_name + " " + m_version_name + " (libraries)";
 
     const static QMap<QString, QString> liteLoaderMap = {
-            { "61179803bcd5fb7790789b790908663d", "1.12-SNAPSHOT" },
-            { "1420785ecbfed5aff4a586c5c9dd97eb", "1.12.2-SNAPSHOT" },
-            { "073f68e2fcb518b91fd0d99462441714", "1.6.2_03" },
-            { "10a15b52fc59b1bfb9c05b56de1097d6", "1.6.2_02" },
-            { "b52f90f08303edd3d4c374e268a5acf1", "1.6.2_04" },
-            { "ea747e24e03e24b7cad5bc8a246e0319", "1.6.2_01" },
-            { "55785ccc82c07ff0ba038fe24be63ea2", "1.7.10_01" },
-            { "63ada46e033d0cb6782bada09ad5ca4e", "1.7.10_04" },
-            { "7983e4b28217c9ae8569074388409c86", "1.7.10_03" },
-            { "c09882458d74fe0697c7681b8993097e", "1.7.10_02" },
-            { "db7235aefd407ac1fde09a7baba50839", "1.7.10_00" },
-            { "6e9028816027f53957bd8fcdfabae064", "1.8" },
-            { "5e732dc446f9fe2abe5f9decaec40cde", "1.10-SNAPSHOT" },
-            { "3a98b5ed95810bf164e71c1a53be568d", "1.11.2-SNAPSHOT" },
-            { "ba8e6285966d7d988a96496f48cbddaa", "1.8.9-SNAPSHOT" },
-            { "8524af3ac3325a82444cc75ae6e9112f", "1.11-SNAPSHOT" },
-            { "53639d52340479ccf206a04f5e16606f", "1.5.2_01" },
-            { "1fcdcf66ce0a0806b7ad8686afdce3f7", "1.6.4_00" },
-            { "531c116f71ae2b11033f9a11a0f8e668", "1.6.4_01" },
-            { "4009eeb99c9068f608d3483a6439af88", "1.7.2_03" },
-            { "66f343354b8417abce1a10d557d2c6e9", "1.7.2_04" },
-            { "ab554c21f28fbc4ae9b098bcb5f4cceb", "1.7.2_05" },
-            { "e1d76a05a3723920e2f80a5e66c45f16", "1.7.2_02" },
-            { "00318cb0c787934d523f63cdfe8ddde4", "1.9-SNAPSHOT" },
-            { "986fd1ee9525cb0dcab7609401cef754", "1.9.4-SNAPSHOT" },
-            { "571ad5e6edd5ff40259570c9be588bb5", "1.9.4" },
-            { "1cdd72f7232e45551f16cc8ffd27ccf3", "1.10.2-SNAPSHOT" },
-            { "8a7c21f32d77ee08b393dd3921ced8eb", "1.10.2" },
-            { "b9bef8abc8dc309069aeba6fbbe58980", "1.12.1-SNAPSHOT" }
+        { "61179803bcd5fb7790789b790908663d", "1.12-SNAPSHOT" },   { "1420785ecbfed5aff4a586c5c9dd97eb", "1.12.2-SNAPSHOT" },
+        { "073f68e2fcb518b91fd0d99462441714", "1.6.2_03" },        { "10a15b52fc59b1bfb9c05b56de1097d6", "1.6.2_02" },
+        { "b52f90f08303edd3d4c374e268a5acf1", "1.6.2_04" },        { "ea747e24e03e24b7cad5bc8a246e0319", "1.6.2_01" },
+        { "55785ccc82c07ff0ba038fe24be63ea2", "1.7.10_01" },       { "63ada46e033d0cb6782bada09ad5ca4e", "1.7.10_04" },
+        { "7983e4b28217c9ae8569074388409c86", "1.7.10_03" },       { "c09882458d74fe0697c7681b8993097e", "1.7.10_02" },
+        { "db7235aefd407ac1fde09a7baba50839", "1.7.10_00" },       { "6e9028816027f53957bd8fcdfabae064", "1.8" },
+        { "5e732dc446f9fe2abe5f9decaec40cde", "1.10-SNAPSHOT" },   { "3a98b5ed95810bf164e71c1a53be568d", "1.11.2-SNAPSHOT" },
+        { "ba8e6285966d7d988a96496f48cbddaa", "1.8.9-SNAPSHOT" },  { "8524af3ac3325a82444cc75ae6e9112f", "1.11-SNAPSHOT" },
+        { "53639d52340479ccf206a04f5e16606f", "1.5.2_01" },        { "1fcdcf66ce0a0806b7ad8686afdce3f7", "1.6.4_00" },
+        { "531c116f71ae2b11033f9a11a0f8e668", "1.6.4_01" },        { "4009eeb99c9068f608d3483a6439af88", "1.7.2_03" },
+        { "66f343354b8417abce1a10d557d2c6e9", "1.7.2_04" },        { "ab554c21f28fbc4ae9b098bcb5f4cceb", "1.7.2_05" },
+        { "e1d76a05a3723920e2f80a5e66c45f16", "1.7.2_02" },        { "00318cb0c787934d523f63cdfe8ddde4", "1.9-SNAPSHOT" },
+        { "986fd1ee9525cb0dcab7609401cef754", "1.9.4-SNAPSHOT" },  { "571ad5e6edd5ff40259570c9be588bb5", "1.9.4" },
+        { "1cdd72f7232e45551f16cc8ffd27ccf3", "1.10.2-SNAPSHOT" }, { "8a7c21f32d77ee08b393dd3921ced8eb", "1.10.2" },
+        { "b9bef8abc8dc309069aeba6fbbe58980", "1.12.1-SNAPSHOT" }
     };
 
-    for(const auto & lib : m_version.libraries) {
+    for (const auto& lib : m_version.libraries) {
         // If the library is LiteLoader, we need to ignore it and handle it separately.
         if (liteLoaderMap.contains(lib.md5)) {
             auto ver = getComponentVersion("com.mumfrey.liteloader", liteLoaderMap.value(lib.md5));
@@ -511,18 +491,19 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
         GradleSpecifier libSpecifier(libName);
 
         bool libExempt = false;
-        for(const auto & existingLib : exempt) {
-            if(libSpecifier.matchName(existingLib)) {
+        for (const auto& existingLib : exempt) {
+            if (libSpecifier.matchName(existingLib)) {
                 // If the pack specifies a newer version of the lib, use that!
                 libExempt = Version(libSpecifier.version()) >= Version(existingLib.version());
             }
         }
-        if(libExempt) continue;
+        if (libExempt)
+            continue;
 
         auto library = std::make_shared<Library>();
         library->setRawName(libName);
 
-        switch(lib.download) {
+        switch (lib.download) {
             case DownloadType::Server:
                 library->setAbsoluteUrl(BuildConfig.ATL_DOWNLOAD_SERVER_URL + lib.url);
                 break;
@@ -538,21 +519,19 @@ bool PackInstallTask::createLibrariesComponent(QString instanceRoot, std::shared
         f->libraries.append(library);
     }
 
-    if(f->libraries.isEmpty()) {
+    if (f->libraries.isEmpty()) {
         return true;
     }
 
     QFile file(patchFileName);
-    if (!file.open(QFile::WriteOnly))
-    {
-        qCritical() << "Error opening" << file.fileName()
-                    << "for reading:" << file.errorString();
+    if (!file.open(QFile::WriteOnly)) {
+        qCritical() << "Error opening" << file.fileName() << "for reading:" << file.errorString();
         return false;
     }
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    profile->appendComponent(new Component(profile.get(), target_id, f));
+    profile->appendComponent(ComponentPtr{ new Component(profile.get(), target_id, f) });
     return true;
 }
 
@@ -591,18 +570,17 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
     auto target_id = "org.multimc.atlauncher." + id;
 
     auto patchDir = FS::PathCombine(instanceRoot, "patches");
-    if(!FS::ensureFolderPathExists(patchDir))
-    {
+    if (!FS::ensureFolderPathExists(patchDir)) {
         return false;
     }
     auto patchFileName = FS::PathCombine(patchDir, target_id + ".json");
 
     QStringList mainClasses;
     QStringList tweakers;
-    for(const auto & componentUid : componentsToInstall.keys()) {
+    for (const auto& componentUid : componentsToInstall.keys()) {
         auto componentVersion = componentsToInstall.value(componentUid);
 
-        if(componentVersion->data()->mainClass != QString("")) {
+        if (componentVersion->data()->mainClass != QString("")) {
             mainClasses.append(componentVersion->data()->mainClass);
         }
         tweakers.append(componentVersion->data()->addTweakers);
@@ -617,31 +595,30 @@ bool PackInstallTask::createPackComponent(QString instanceRoot, std::shared_ptr<
     // Parse out tweakers
     auto args = extraArguments.split(" ");
     QString previous;
-    for(auto arg : args) {
-        if(arg.startsWith("--tweakClass=") || previous == "--tweakClass") {
+    for (auto arg : args) {
+        if (arg.startsWith("--tweakClass=") || previous == "--tweakClass") {
             auto tweakClass = arg.remove("--tweakClass=");
-            if(tweakers.contains(tweakClass)) continue;
+            if (tweakers.contains(tweakClass))
+                continue;
 
             f->addTweakers.append(tweakClass);
         }
         previous = arg;
     }
 
-    if(f->mainClass == QString() && f->addTweakers.isEmpty()) {
+    if (f->mainClass == QString() && f->addTweakers.isEmpty()) {
         return true;
     }
 
     QFile file(patchFileName);
-    if (!file.open(QFile::WriteOnly))
-    {
-        qCritical() << "Error opening" << file.fileName()
-                    << "for reading:" << file.errorString();
+    if (!file.open(QFile::WriteOnly)) {
+        qCritical() << "Error opening" << file.fileName() << "for reading:" << file.errorString();
         return false;
     }
     file.write(OneSixVersionFormat::versionFileToJson(f).toJson());
     file.close();
 
-    profile->appendComponent(new Component(profile.get(), target_id, f));
+    profile->appendComponent(ComponentPtr{ new Component(profile.get(), target_id, f) });
     return true;
 }
 
@@ -649,15 +626,14 @@ void PackInstallTask::installConfigs()
 {
     qDebug() << "PackInstallTask::installConfigs: " << QThread::currentThreadId();
     setStatus(tr("Downloading configs..."));
-    jobPtr = new NetJob(tr("Config download"), APPLICATION->network());
+    jobPtr.reset(new NetJob(tr("Config download"), APPLICATION->network()));
 
     auto path = QString("Configs/%1/%2.zip").arg(m_pack_safe_name).arg(m_version_name);
-    auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.zip")
-            .arg(m_pack_safe_name).arg(m_version_name);
+    auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.zip").arg(m_pack_safe_name).arg(m_version_name);
     auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", path);
     entry->setStale(true);
 
-    auto dl = Net::Download::makeCached(url, entry);
+    auto dl = Net::ApiDownload::makeCached(url, entry);
     if (!m_version.configs.sha1.isEmpty()) {
         auto rawSha1 = QByteArray::fromHex(m_version.configs.sha1.toLatin1());
         dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
@@ -665,24 +641,22 @@ void PackInstallTask::installConfigs()
     jobPtr->addNetAction(dl);
     archivePath = entry->getFullPath();
 
-    connect(jobPtr.get(), &NetJob::succeeded, this, [&]()
-    {
+    connect(jobPtr.get(), &NetJob::succeeded, this, [&]() {
         abortable = false;
         jobPtr.reset();
         extractConfigs();
     });
-    connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
-    {
+    connect(jobPtr.get(), &NetJob::failed, [&](QString reason) {
         abortable = false;
         jobPtr.reset();
         emitFailed(reason);
     });
-    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
-    {
+    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
         abortable = true;
         setProgress(current, total);
     });
-    connect(jobPtr.get(), &NetJob::aborted, [&]{
+    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
+    connect(jobPtr.get(), &NetJob::aborted, [&] {
         abortable = false;
         jobPtr.reset();
         emitAborted();
@@ -699,25 +673,20 @@ void PackInstallTask::extractConfigs()
     QDir extractDir(m_stagingPath);
 
     QuaZip packZip(archivePath);
-    if(!packZip.open(QuaZip::mdUnzip))
-    {
+    if (!packZip.open(QuaZip::mdUnzip)) {
         emitFailed(tr("Failed to open pack configs %1!").arg(archivePath));
         return;
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath, extractDir.absolutePath() + "/minecraft");
+    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), QOverload<QString, QString>::of(MMCZip::extractDir), archivePath,
+                                        extractDir.absolutePath() + "/minecraft");
 #else
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/minecraft");
+    m_extractFuture =
+        QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/minecraft");
 #endif
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, [&]()
-    {
-        downloadMods();
-    });
-    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
-    {
-        emitAborted();
-    });
+    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, [&]() { downloadMods(); });
+    connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]() { emitAborted(); });
     m_extractFutureWatcher.setFuture(m_extractFuture);
 }
 
@@ -747,16 +716,18 @@ void PackInstallTask::downloadMods()
     setStatus(tr("Downloading mods..."));
 
     jarmods.clear();
-    jobPtr = new NetJob(tr("Mod download"), APPLICATION->network());
-    for(const auto& mod : m_version.mods) {
+    jobPtr.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
+    for (const auto& mod : m_version.mods) {
         // skip non-client mods
-        if(!mod.client) continue;
+        if (!mod.client)
+            continue;
 
         // skip optional mods that were not selected
-        if(mod.optional && !selectedMods.contains(mod.name)) continue;
+        if (mod.optional && !selectedMods.contains(mod.name))
+            continue;
 
         QString url;
-        switch(mod.download) {
+        switch (mod.download) {
             case DownloadType::Server:
                 url = BuildConfig.ATL_DOWNLOAD_SERVER_URL + mod.url;
                 break;
@@ -779,33 +750,32 @@ void PackInstallTask::downloadMods()
             entry->setStale(true);
             modsToExtract.insert(entry->getFullPath(), mod);
 
-            auto dl = Net::Download::makeCached(url, entry);
+            auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
             }
             jobPtr->addNetAction(dl);
-        }
-        else if(mod.type == ModType::Decomp) {
+        } else if (mod.type == ModType::Decomp) {
             auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
             modsToDecomp.insert(entry->getFullPath(), mod);
 
-            auto dl = Net::Download::makeCached(url, entry);
+            auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
             }
             jobPtr->addNetAction(dl);
-        }
-        else {
+        } else {
             auto relpath = getDirForModType(mod.type, mod.type_raw);
-            if(relpath == Q_NULLPTR) continue;
+            if (relpath == Q_NULLPTR)
+                continue;
 
             auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
 
-            auto dl = Net::Download::makeCached(url, entry);
+            auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
@@ -814,7 +784,7 @@ void PackInstallTask::downloadMods()
 
             auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
 
-            if(mod.type == ModType::Forge) {
+            if (mod.type == ModType::Forge) {
                 auto ver = getComponentVersion("net.minecraftforge", mod.version);
                 if (ver) {
                     componentsToInstall.insert("net.minecraftforge", ver);
@@ -825,7 +795,7 @@ void PackInstallTask::downloadMods()
                 jarmods.push_back(path);
             }
 
-            if(mod.type == ModType::Jar) {
+            if (mod.type == ModType::Jar) {
                 qDebug() << "Jarmod: " + path;
                 jarmods.push_back(path);
             }
@@ -837,19 +807,18 @@ void PackInstallTask::downloadMods()
     }
 
     connect(jobPtr.get(), &NetJob::succeeded, this, &PackInstallTask::onModsDownloaded);
-    connect(jobPtr.get(), &NetJob::failed, [&](QString reason)
-    {
+    connect(jobPtr.get(), &NetJob::failed, [&](QString reason) {
         abortable = false;
         jobPtr.reset();
         emitFailed(reason);
     });
-    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total)
-    {
+    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
+        setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         abortable = true;
         setProgress(current, total);
     });
-    connect(jobPtr.get(), &NetJob::aborted, [&]
-    {
+    connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
+    connect(jobPtr.get(), &NetJob::aborted, [&] {
         abortable = false;
         jobPtr.reset();
         emitAborted();
@@ -858,60 +827,56 @@ void PackInstallTask::downloadMods()
     jobPtr->start();
 }
 
-void PackInstallTask::onModsDownloaded() {
+void PackInstallTask::onModsDownloaded()
+{
     abortable = false;
 
     qDebug() << "PackInstallTask::onModsDownloaded: " << QThread::currentThreadId();
     jobPtr.reset();
 
-    if(!modsToExtract.empty() || !modsToDecomp.empty() || !modsToCopy.empty()) {
+    if (!modsToExtract.empty() || !modsToDecomp.empty() || !modsToCopy.empty()) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-        m_modExtractFuture = QtConcurrent::run(QThreadPool::globalInstance(), &PackInstallTask::extractMods, this, modsToExtract, modsToDecomp, modsToCopy);
+        m_modExtractFuture =
+            QtConcurrent::run(QThreadPool::globalInstance(), &PackInstallTask::extractMods, this, modsToExtract, modsToDecomp, modsToCopy);
 #else
-        m_modExtractFuture = QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy);
+        m_modExtractFuture =
+            QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy);
 #endif
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onModsExtracted);
-        connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]()
-        {
-            emitAborted();
-        });
+        connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]() { emitAborted(); });
         m_modExtractFutureWatcher.setFuture(m_modExtractFuture);
-    }
-    else {
+    } else {
         install();
     }
 }
 
-void PackInstallTask::onModsExtracted() {
+void PackInstallTask::onModsExtracted()
+{
     qDebug() << "PackInstallTask::onModsExtracted: " << QThread::currentThreadId();
-    if(m_modExtractFuture.result()) {
+    if (m_modExtractFuture.result()) {
         install();
-    }
-    else {
+    } else {
         emitFailed(tr("Failed to extract mods..."));
     }
 }
 
-bool PackInstallTask::extractMods(
-    const QMap<QString, VersionMod> &toExtract,
-    const QMap<QString, VersionMod> &toDecomp,
-    const QMap<QString, QString> &toCopy
-) {
+bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
+                                  const QMap<QString, VersionMod>& toDecomp,
+                                  const QMap<QString, QString>& toCopy)
+{
     qDebug() << "PackInstallTask::extractMods: " << QThread::currentThreadId();
 
     setStatus(tr("Extracting mods..."));
     for (auto iter = toExtract.begin(); iter != toExtract.end(); iter++) {
-        auto &modPath = iter.key();
-        auto &mod = iter.value();
+        auto& modPath = iter.key();
+        auto& mod = iter.value();
 
         QString extractToDir;
-        if(mod.type == ModType::Extract) {
+        if (mod.type == ModType::Extract) {
             extractToDir = getDirForModType(mod.extractTo, mod.extractTo_raw);
-        }
-        else if(mod.type == ModType::TexturePackExtract) {
+        } else if (mod.type == ModType::TexturePackExtract) {
             extractToDir = FS::PathCombine("texturepacks", "extracted");
-        }
-        else if(mod.type == ModType::ResourcePackExtract) {
+        } else if (mod.type == ModType::ResourcePackExtract) {
             extractToDir = FS::PathCombine("resourcepacks", "extracted");
         }
 
@@ -919,36 +884,36 @@ bool PackInstallTask::extractMods(
         auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir);
 
         QString folderToExtract = "";
-        if(mod.type == ModType::Extract) {
+        if (mod.type == ModType::Extract) {
             folderToExtract = mod.extractFolder;
             folderToExtract.remove(QRegularExpression("^/"));
         }
 
         qDebug() << "Extracting " + mod.file + " to " + extractToDir;
-        if(!MMCZip::extractDir(modPath, folderToExtract, extractToPath)) {
+        if (!MMCZip::extractDir(modPath, folderToExtract, extractToPath)) {
             // assume error
             return false;
         }
     }
 
     for (auto iter = toDecomp.begin(); iter != toDecomp.end(); iter++) {
-        auto &modPath = iter.key();
-        auto &mod = iter.value();
+        auto& modPath = iter.key();
+        auto& mod = iter.value();
         auto extractToDir = getDirForModType(mod.decompType, mod.decompType_raw);
 
         QDir extractDir(m_stagingPath);
         auto extractToPath = FS::PathCombine(extractDir.absolutePath(), "minecraft", extractToDir, mod.decompFile);
 
         qDebug() << "Extracting " + mod.decompFile + " to " + extractToDir;
-        if(!MMCZip::extractFile(modPath, mod.decompFile, extractToPath)) {
+        if (!MMCZip::extractFile(modPath, mod.decompFile, extractToPath)) {
             qWarning() << "Failed to extract" << mod.decompFile;
             return false;
         }
     }
 
     for (auto iter = toCopy.begin(); iter != toCopy.end(); iter++) {
-        auto &from = iter.key();
-        auto &to = iter.value();
+        auto& from = iter.key();
+        auto& to = iter.value();
 
         // If the file already exists, assume the mod is the correct copy - and remove
         // the copy from the Configs.zip
@@ -961,7 +926,7 @@ bool PackInstallTask::extractMods(
         }
 
         FS::copy fileCopyOperation(from, to);
-        if(!fileCopyOperation()) {
+        if (!fileCopyOperation()) {
             qWarning() << "Failed to copy" << from << "to" << to;
             return false;
         }
@@ -983,7 +948,7 @@ void PackInstallTask::install()
     components->buildingFromScratch();
 
     // Use a component to add libraries BEFORE Minecraft
-    if(!createLibrariesComponent(instance.instanceRoot(), components)) {
+    if (!createLibrariesComponent(instance.instanceRoot(), components)) {
         emitFailed(tr("Failed to create libraries component"));
         return;
     }
@@ -992,27 +957,24 @@ void PackInstallTask::install()
     components->setComponentVersion("net.minecraft", m_version.minecraft, true);
 
     // Loader
-    if(m_version.loader.type == QString("forge"))
-    {
+    if (m_version.loader.type == QString("forge")) {
         auto version = getVersionForLoader("net.minecraftforge");
-        if(version == Q_NULLPTR) return;
+        if (version == Q_NULLPTR)
+            return;
 
         components->setComponentVersion("net.minecraftforge", version);
-    }
-    else if(m_version.loader.type == QString("fabric"))
-    {
+    } else if (m_version.loader.type == QString("fabric")) {
         auto version = getVersionForLoader("net.fabricmc.fabric-loader");
-        if(version == Q_NULLPTR) return;
+        if (version == Q_NULLPTR)
+            return;
 
         components->setComponentVersion("net.fabricmc.fabric-loader", version);
-    }
-    else if(m_version.loader.type != QString())
-    {
+    } else if (m_version.loader.type != QString()) {
         emitFailed(tr("Unknown loader type: ") + m_version.loader.type);
         return;
     }
 
-    for(const auto & componentUid : componentsToInstall.keys()) {
+    for (const auto& componentUid : componentsToInstall.keys()) {
         auto version = componentsToInstall.value(componentUid);
         components->setComponentVersion(componentUid, version->version());
     }
@@ -1021,7 +983,7 @@ void PackInstallTask::install()
 
     // Use a component to fill in the rest of the data
     // todo: use more detection
-    if(!createPackComponent(instance.instanceRoot(), components)) {
+    if (!createPackComponent(instance.instanceRoot(), components)) {
         emitFailed(tr("Failed to create pack component"));
         return;
     }
@@ -1043,17 +1005,32 @@ static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString&
     if (!vlist)
         return {};
 
-    if (!vlist->isLoaded())
-        vlist->load(Net::Mode::Online);
+    if (!vlist->isLoaded()) {
+        QEventLoop loadVersionLoop;
+        auto task = vlist->getLoadTask();
+        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+        if (!task->isRunning())
+            task->start();
+
+        loadVersionLoop.exec();
+    }
 
     auto ver = vlist->getVersion(version);
     if (!ver)
         return {};
 
-    if (!ver->isLoaded())
+    if (!ver->isLoaded()) {
+        QEventLoop loadVersionLoop;
         ver->load(Net::Mode::Online);
+        auto task = ver->getCurrentTask();
+        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+        if (!task->isRunning())
+            task->start();
+
+        loadVersionLoop.exec();
+    }
 
     return ver;
 }
 
-}
+}  // namespace ATLauncher

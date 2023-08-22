@@ -51,11 +51,18 @@ class FlameCreationTask final : public InstanceCreationTask {
     Q_OBJECT
 
    public:
-    FlameCreationTask(const QString& staging_path, SettingsObjectPtr global_settings, QWidget* parent)
-        : InstanceCreationTask(), m_parent(parent)
+    FlameCreationTask(const QString& staging_path,
+                      SettingsObjectPtr global_settings,
+                      QWidget* parent,
+                      QString id,
+                      QString version_id,
+                      QString original_instance_id = {})
+        : InstanceCreationTask(), m_parent(parent), m_managed_id(std::move(id)), m_managed_version_id(std::move(version_id))
     {
         setStagingPath(staging_path);
         setParentSettings(global_settings);
+
+        m_original_instance_id = std::move(original_instance_id);
     }
 
     bool abort() override;
@@ -67,6 +74,8 @@ class FlameCreationTask final : public InstanceCreationTask {
     void idResolverSucceeded(QEventLoop&);
     void setupDownloadJob(QEventLoop&);
     void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
+    void validateZIPResouces();
+    QString getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion);
 
    private:
     QWidget* m_parent = nullptr;
@@ -75,8 +84,12 @@ class FlameCreationTask final : public InstanceCreationTask {
     Flame::Manifest m_pack;
 
     // Handle to allow aborting
-    NetJob* m_process_update_file_info_job = nullptr;
+    Task::Ptr m_process_update_file_info_job = nullptr;
     NetJob::Ptr m_files_job = nullptr;
+
+    QString m_managed_id, m_managed_version_id;
+
+    QList<std::pair<QString, QString>> m_ZIP_resources;
 
     std::optional<InstancePtr> m_instance;
 };

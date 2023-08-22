@@ -1,92 +1,54 @@
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
 #pragma once
 
 #include <QAbstractListModel>
 
-#include "modplatform/ModIndex.h"
-#include "net/NetJob.h"
+#include "BaseInstance.h"
 
-class ModPage;
+#include "modplatform/ModIndex.h"
+#include "modplatform/ResourceAPI.h"
+
+#include "ui/pages/modplatform/ResourceModel.h"
+#include "ui/widgets/ModFilterWidget.h"
+
 class Version;
 
-namespace ModPlatform {
+namespace ResourceDownload {
 
-using LogoMap = QMap<QString, QIcon>;
-using LogoCallback = std::function<void (QString)>;
+class ModPage;
 
-class ListModel : public QAbstractListModel {
+class ModModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ListModel(ModPage* parent);
-    ~ListModel() override;
-
-    inline auto rowCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : modpacks.size(); };
-    inline auto columnCount(const QModelIndex& parent) const -> int override { return parent.isValid() ? 0 : 1; };
-    inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); };
-
-    auto debugName() const -> QString;
-
-    /* Retrieve information from the model at a given index with the given role */
-    auto data(const QModelIndex& index, int role) const -> QVariant override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
-
-    inline void setActiveJob(NetJob::Ptr ptr) { jobPtr = ptr; }
-    inline NetJob* activeJob() { return jobPtr.get(); }
+    ModModel(BaseInstance&, ResourceAPI* api);
 
     /* Ask the API for more information */
-    void fetchMore(const QModelIndex& parent) override;
-    void refresh();
-    void searchWithTerm(const QString& term, const int sort, const bool filter_changed);
-    void requestModInfo(ModPlatform::IndexedPack& current, QModelIndex index);
-    void requestModVersions(const ModPlatform::IndexedPack& current, QModelIndex index);
+    void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
 
-    virtual void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
-    virtual void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) = 0;
-    virtual void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) = 0;
+    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override = 0;
+    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override = 0;
+    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override = 0;
+    virtual ModPlatform::IndexedVersion loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) = 0;
 
-    void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
-
-    inline auto canFetchMore(const QModelIndex& parent) const -> bool override { return parent.isValid() ? false : searchState == CanPossiblyFetchMore; };
+    void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = filter; }
 
    public slots:
-    void searchRequestFinished(QJsonDocument& doc);
-    void searchRequestFailed(QString reason);
-    void searchRequestAborted();
-
-    void infoRequestFinished(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index);
-
-    void versionRequestSucceeded(QJsonDocument doc, QString addonId, const QModelIndex& index);
-
-   protected slots:
-
-    void logoFailed(QString logo);
-    void logoLoaded(QString logo, QIcon out);
-
-    void performPaginatedSearch();
+    ResourceAPI::SearchArgs createSearchArguments() override;
+    ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override;
+    ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) override;
 
    protected:
-    virtual auto documentToArray(QJsonDocument& obj) const -> QJsonArray = 0;
-    virtual auto getSorts() const -> const char** = 0;
-
-    void requestLogo(QString file, QString url);
-
-    inline auto getMineVersions() const -> std::list<Version>;
+    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override = 0;
+    virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const override;
 
    protected:
-    ModPage* m_parent;
+    BaseInstance& m_base_instance;
 
-    QList<ModPlatform::IndexedPack> modpacks;
-
-    LogoMap m_logoMap;
-    QMap<QString, LogoCallback> waitingCallbacks;
-    QStringList m_failedLogos;
-    QStringList m_loadingLogos;
-
-    QString currentSearchTerm;
-    int currentSort = 0;
-    int nextSearchOffset = 0;
-    enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
-
-    NetJob::Ptr jobPtr;
+    std::shared_ptr<ModFilterWidget::Filter> m_filter = nullptr;
 };
-}  // namespace ModPlatform
+
+}  // namespace ResourceDownload

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,37 +35,29 @@
 
 #pragma once
 
-#include <QString>
-#include <QList>
 #include <QJsonObject>
+#include <QList>
+#include <QString>
 #include <memory>
 #include "RuntimeContext.h"
 
 class Library;
 class Rule;
 
-enum RuleAction
-{
-    Allow,
-    Disallow,
-    Defer
-};
+enum RuleAction { Allow, Disallow, Defer };
 
-QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject &objectWithRules);
+QList<std::shared_ptr<Rule>> rulesFromJsonV4(const QJsonObject& objectWithRules);
 
-class Rule
-{
-protected:
+class Rule {
+   protected:
     RuleAction m_result;
-    virtual bool applies(const Library *parent, const RuntimeContext & runtimeContext) = 0;
+    virtual bool applies(const Library* parent, const RuntimeContext& runtimeContext) = 0;
 
-public:
-    Rule(RuleAction result) : m_result(result)
-    {
-    }
-    virtual ~Rule() {};
+   public:
+    Rule(RuleAction result) : m_result(result) {}
+    virtual ~Rule() {}
     virtual QJsonObject toJson() = 0;
-    RuleAction apply(const Library *parent, const RuntimeContext & runtimeContext)
+    RuleAction apply(const Library* parent, const RuntimeContext& runtimeContext)
     {
         if (applies(parent, runtimeContext))
             return m_result;
@@ -74,48 +66,31 @@ public:
     }
 };
 
-class OsRule : public Rule
-{
-private:
+class OsRule : public Rule {
+   private:
     // the OS
     QString m_system;
     // the OS version regexp
     QString m_version_regexp;
 
-protected:
-    virtual bool applies(const Library *, const RuntimeContext & runtimeContext)
-    {
-        return runtimeContext.classifierMatches(m_system);
-    }
-    OsRule(RuleAction result, QString system, QString version_regexp)
-        : Rule(result), m_system(system), m_version_regexp(version_regexp)
-    {
-    }
+   protected:
+    virtual bool applies(const Library*, const RuntimeContext& runtimeContext) { return runtimeContext.classifierMatches(m_system); }
+    OsRule(RuleAction result, QString system, QString version_regexp) : Rule(result), m_system(system), m_version_regexp(version_regexp) {}
 
-public:
+   public:
     virtual QJsonObject toJson();
-    static std::shared_ptr<OsRule> create(RuleAction result, QString system,
-                                          QString version_regexp)
+    static std::shared_ptr<OsRule> create(RuleAction result, QString system, QString version_regexp)
     {
         return std::shared_ptr<OsRule>(new OsRule(result, system, version_regexp));
     }
 };
 
-class ImplicitRule : public Rule
-{
-protected:
-    virtual bool applies(const Library *, [[maybe_unused]] const RuntimeContext & runtimeContext)
-    {
-        return true;
-    }
-    ImplicitRule(RuleAction result) : Rule(result)
-    {
-    }
+class ImplicitRule : public Rule {
+   protected:
+    virtual bool applies(const Library*, [[maybe_unused]] const RuntimeContext& runtimeContext) { return true; }
+    ImplicitRule(RuleAction result) : Rule(result) {}
 
-public:
+   public:
     virtual QJsonObject toJson();
-    static std::shared_ptr<ImplicitRule> create(RuleAction result)
-    {
-        return std::shared_ptr<ImplicitRule>(new ImplicitRule(result));
-    }
+    static std::shared_ptr<ImplicitRule> create(RuleAction result) { return std::shared_ptr<ImplicitRule>(new ImplicitRule(result)); }
 };

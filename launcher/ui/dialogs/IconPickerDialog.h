@@ -17,30 +17,28 @@
 #include <QDialog>
 #include <QItemSelection>
 
-namespace Ui
-{
+namespace Ui {
 class IconPickerDialog;
 }
 
-class IconPickerDialog : public QDialog
-{
+class IconPickerDialog : public QDialog {
     Q_OBJECT
 
-public:
-    explicit IconPickerDialog(QWidget *parent = 0, int iconSize = 48);
+   public:
+    explicit IconPickerDialog(QWidget* parent = 0, int iconSize = 48);
     ~IconPickerDialog();
     int execWithSelection(QString selection);
     QString selectedIconKey;
 
-protected:
-    virtual bool eventFilter(QObject *, QEvent *);
+   protected:
+    virtual bool eventFilter(QObject*, QEvent*);
 
-private:
-    Ui::IconPickerDialog *ui;
+   private:
+    Ui::IconPickerDialog* ui;
     int m_iconSize;
+    QPushButton* buttonRemove;
 
-private
-slots:
+   private slots:
     void selectionChanged(QItemSelection, QItemSelection);
     void activated(QModelIndex);
     void delayed_scroll(QModelIndex);

@@ -6,41 +6,48 @@
 
 bool InstanceCopyPrefs::allTrue() const
 {
-    return copySaves &&
-        keepPlaytime &&
-        copyGameOptions &&
-        copyResourcePacks &&
-        copyShaderPacks &&
-        copyServers &&
-        copyMods &&
-        copyScreenshots;
+    return copySaves && keepPlaytime && copyGameOptions && copyResourcePacks && copyShaderPacks && copyServers && copyMods &&
+           copyScreenshots;
 }
 
 // Returns a single RegEx string of the selected folders/files to filter out (ex: ".minecraft/saves|.minecraft/server.dat")
 QString InstanceCopyPrefs::getSelectedFiltersAsRegex() const
 {
+    return getSelectedFiltersAsRegex({});
+}
+QString InstanceCopyPrefs::getSelectedFiltersAsRegex(const QStringList& additionalFilters) const
+{
     QStringList filters;
 
-    if(!copySaves)
+    if (!copySaves)
         filters << "saves";
 
-    if(!copyGameOptions)
+    if (!copyGameOptions)
         filters << "options.txt";
 
-    if(!copyResourcePacks)
-        filters << "resourcepacks" << "texturepacks";
+    if (!copyResourcePacks)
+        filters << "resourcepacks"
+                << "texturepacks";
 
-    if(!copyShaderPacks)
+    if (!copyShaderPacks)
         filters << "shaderpacks";
 
-    if(!copyServers)
-        filters << "servers.dat" << "servers.dat_old" << "server-resource-packs";
+    if (!copyServers)
+        filters << "servers.dat"
+                << "servers.dat_old"
+                << "server-resource-packs";
 
-    if(!copyMods)
-        filters << "coremods" << "mods" << "config";
+    if (!copyMods)
+        filters << "coremods"
+                << "mods"
+                << "config";
 
-    if(!copyScreenshots)
+    if (!copyScreenshots)
         filters << "screenshots";
+
+    for (auto filter : additionalFilters) {
+        filters << filter;
+    }
 
     // If we have any filters to add, join them as a single regex string to return:
     if (!filters.isEmpty()) {
@@ -93,6 +100,31 @@ bool InstanceCopyPrefs::isCopyScreenshotsEnabled() const
     return copyScreenshots;
 }
 
+bool InstanceCopyPrefs::isUseSymLinksEnabled() const
+{
+    return useSymLinks;
+}
+
+bool InstanceCopyPrefs::isUseHardLinksEnabled() const
+{
+    return useHardLinks;
+}
+
+bool InstanceCopyPrefs::isLinkRecursivelyEnabled() const
+{
+    return linkRecursively;
+}
+
+bool InstanceCopyPrefs::isDontLinkSavesEnabled() const
+{
+    return dontLinkSaves;
+}
+
+bool InstanceCopyPrefs::isUseCloneEnabled() const
+{
+    return useClone;
+}
+
 // ======= Setters =======
 void InstanceCopyPrefs::enableCopySaves(bool b)
 {
@@ -132,4 +164,29 @@ void InstanceCopyPrefs::enableCopyMods(bool b)
 void InstanceCopyPrefs::enableCopyScreenshots(bool b)
 {
     copyScreenshots = b;
+}
+
+void InstanceCopyPrefs::enableUseSymLinks(bool b)
+{
+    useSymLinks = b;
+}
+
+void InstanceCopyPrefs::enableLinkRecursively(bool b)
+{
+    linkRecursively = b;
+}
+
+void InstanceCopyPrefs::enableUseHardLinks(bool b)
+{
+    useHardLinks = b;
+}
+
+void InstanceCopyPrefs::enableDontLinkSaves(bool b)
+{
+    dontLinkSaves = b;
+}
+
+void InstanceCopyPrefs::enableUseClone(bool b)
+{
+    useClone = b;
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,18 +22,19 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "net/NetJob.h"
+#include "modplatform/ModIndex.h"
 
 static ModrinthAPI api;
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
+// https://docs.modrinth.com/api-spec/#tag/projects/operation/getProject
 void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
     pack.addonId = Json::ensureString(obj, "project_id");
     if (pack.addonId.toString().isEmpty())
         pack.addonId = Json::requireString(obj, "id");
 
-    pack.provider = ModPlatform::Provider::MODRINTH;
+    pack.provider = ModPlatform::ResourceProvider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
 
     pack.slug = Json::ensureString(obj, "slug", "");
@@ -44,7 +45,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 
     pack.description = Json::ensureString(obj, "description", "");
 
-    pack.logoUrl = Json::requireString(obj, "icon_url");
+    pack.logoUrl = Json::ensureString(obj, "icon_url", "");
     pack.logoName = pack.addonId.toString();
 
     ModPlatform::ModpackAuthor modAuthor;
@@ -87,18 +88,18 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
         pack.extraData.donate.append(donate);
     }
 
-    pack.extraData.body = Json::ensureString(obj, "body");
+    pack.extraData.body = Json::ensureString(obj, "body").remove("<br>");
 
     pack.extraDataLoaded = true;
 }
 
 void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        QJsonArray& arr,
-                                       const shared_qobject_ptr<QNetworkAccessManager>& network,
-                                       BaseInstance* inst)
+                                       [[maybe_unused]] const shared_qobject_ptr<QNetworkAccessManager>& network,
+                                       const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    QString mcVersion = (static_cast<MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
+    QString mcVersion = (static_cast<const MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
@@ -138,6 +139,28 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     file.version = Json::requireString(obj, "name");
     file.version_number = Json::requireString(obj, "version_number");
     file.changelog = Json::requireString(obj, "changelog");
+
+    auto dependencies = Json::ensureArray(obj, "dependencies");
+    for (auto d : dependencies) {
+        auto dep = Json::ensureObject(d);
+        ModPlatform::Dependency dependency;
+        dependency.addonId = Json::ensureString(dep, "project_id");
+        dependency.version = Json::ensureString(dep, "version_id");
+        auto depType = Json::requireString(dep, "dependency_type");
+
+        if (depType == "required")
+            dependency.type = ModPlatform::DependencyType::REQUIRED;
+        else if (depType == "optional")
+            dependency.type = ModPlatform::DependencyType::OPTIONAL;
+        else if (depType == "incompatible")
+            dependency.type = ModPlatform::DependencyType::INCOMPATIBLE;
+        else if (depType == "embedded")
+            dependency.type = ModPlatform::DependencyType::EMBEDDED;
+        else
+            dependency.type = ModPlatform::DependencyType::UNKNOWN;
+
+        file.dependencies.append(dependency);
+    }
 
     auto files = Json::requireArray(obj, "files");
     int i = 0;
@@ -179,7 +202,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
             file.hash = Json::requireString(hash_list, preferred_hash_type);
             file.hash_type = preferred_hash_type;
         } else {
-            auto hash_types = ProviderCaps.hashType(ModPlatform::Provider::MODRINTH);
+            auto hash_types = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH);
             for (auto& hash_type : hash_types) {
                 if (hash_list.contains(hash_type)) {
                     file.hash = Json::requireString(hash_list, hash_type);
@@ -193,4 +216,23 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     }
 
     return {};
+}
+
+auto Modrinth::loadDependencyVersions([[maybe_unused]] const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+{
+    QVector<ModPlatform::IndexedVersion> versions;
+
+    for (auto versionIter : arr) {
+        auto obj = versionIter.toObject();
+        auto file = loadIndexedPackVersion(obj);
+
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+            versions.append(file);
+    }
+    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        // dates are in RFC 3339 format
+        return a.date > b.date;
+    };
+    std::sort(versions.begin(), versions.end(), orderSortPredicate);
+    return versions.length() != 0 ? versions.front() : ModPlatform::IndexedVersion();
 }

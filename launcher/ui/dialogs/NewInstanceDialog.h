@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,11 +37,10 @@
 
 #include <QDialog>
 
-#include "ui/pages/BasePageProvider.h"
 #include "InstanceTask.h"
+#include "ui/pages/BasePageProvider.h"
 
-namespace Ui
-{
+namespace Ui {
 class NewInstanceDialog;
 }
 
@@ -50,45 +49,47 @@ class QDialogButtonBox;
 class ImportPage;
 class FlamePage;
 
-class NewInstanceDialog : public QDialog, public BasePageProvider
-{
+class NewInstanceDialog : public QDialog, public BasePageProvider {
     Q_OBJECT
 
-public:
-    explicit NewInstanceDialog(const QString & initialGroup, const QString & url = QString(), QWidget *parent = 0);
+   public:
+    explicit NewInstanceDialog(const QString& initialGroup,
+                               const QString& url = QString(),
+                               const QMap<QString, QString>& extra_info = {},
+                               QWidget* parent = 0);
     ~NewInstanceDialog();
 
     void updateDialogState();
 
-    void setSuggestedPack(const QString& name = QString(), InstanceTask * task = nullptr);
-    void setSuggestedPack(const QString& name, QString version, InstanceTask * task = nullptr);
-    void setSuggestedIconFromFile(const QString &path, const QString &name);
-    void setSuggestedIcon(const QString &key);
+    void setSuggestedPack(const QString& name = QString(), InstanceTask* task = nullptr);
+    void setSuggestedPack(const QString& name, QString version, InstanceTask* task = nullptr);
+    void setSuggestedIconFromFile(const QString& path, const QString& name);
+    void setSuggestedIcon(const QString& key);
 
-    InstanceTask * extractTask();
+    InstanceTask* extractTask();
 
     QString dialogTitle() override;
-    QList<BasePage *> getPages() override;
+    QList<BasePage*> getPages() override;
 
     QString instName() const;
     QString instGroup() const;
     QString iconKey() const;
 
-public slots:
+   public slots:
     void accept() override;
     void reject() override;
 
-private slots:
+   private slots:
     void on_iconButton_clicked();
-    void on_instNameTextBox_textChanged(const QString &arg1);
+    void on_instNameTextBox_textChanged(const QString& arg1);
 
-private:
-    Ui::NewInstanceDialog *ui = nullptr;
-    PageContainer * m_container = nullptr;
-    QDialogButtonBox * m_buttons = nullptr;
+   private:
+    Ui::NewInstanceDialog* ui = nullptr;
+    PageContainer* m_container = nullptr;
+    QDialogButtonBox* m_buttons = nullptr;
 
     QString InstIconKey;
-    ImportPage *importPage = nullptr;
+    ImportPage* importPage = nullptr;
     std::unique_ptr<InstanceTask> creationTask;
 
     bool importIcon = false;

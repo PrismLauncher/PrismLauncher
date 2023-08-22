@@ -1,15 +1,21 @@
 #include "ReviewMessageBox.h"
 #include "ui_ReviewMessageBox.h"
 
+#include "Application.h"
+
 #include <QPushButton>
 
-ReviewMessageBox::ReviewMessageBox(QWidget* parent, QString const& title, QString const& icon)
+ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString const& title, [[maybe_unused]] QString const& icon)
     : QDialog(parent), ui(new Ui::ReviewMessageBox)
 {
     ui->setupUi(this);
 
     auto back_button = ui->buttonBox->button(QDialogButtonBox::Cancel);
     back_button->setText(tr("Back"));
+
+    ui->modTreeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->modTreeWidget->header()->setStretchLastSection(false);
+    ui->modTreeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ReviewMessageBox::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ReviewMessageBox::reject);
@@ -25,7 +31,7 @@ auto ReviewMessageBox::create(QWidget* parent, QString&& title, QString&& icon) 
     return new ReviewMessageBox(parent, title, icon);
 }
 
-void ReviewMessageBox::appendMod(ModInformation&& info)
+void ReviewMessageBox::appendResource(ResourceInformation&& info)
 {
     auto itemTop = new QTreeWidgetItem(ui->modTreeWidget);
     itemTop->setCheckState(0, Qt::CheckState::Checked);
@@ -34,12 +40,47 @@ void ReviewMessageBox::appendMod(ModInformation&& info)
     auto filenameItem = new QTreeWidgetItem(itemTop);
     filenameItem->setText(0, tr("Filename: %1").arg(info.filename));
 
-    itemTop->insertChildren(0, { filenameItem });
+    auto childIndx = 0;
+    itemTop->insertChildren(childIndx++, { filenameItem });
+
+    if (!info.custom_file_path.isEmpty()) {
+        auto customPathItem = new QTreeWidgetItem(itemTop);
+        customPathItem->setText(0, tr("This download will be placed in: %1").arg(info.custom_file_path));
+
+        itemTop->insertChildren(1, { customPathItem });
+
+        itemTop->setIcon(1, QIcon(APPLICATION->getThemedIcon("status-yellow")));
+        itemTop->setToolTip(
+            childIndx++,
+            tr("This file will be downloaded to a folder location different from the default, possibly due to its loader requiring it."));
+    }
+
+    auto providerItem = new QTreeWidgetItem(itemTop);
+    providerItem->setText(0, tr("Provider: %1").arg(info.provider));
+
+    itemTop->insertChildren(childIndx++, { providerItem });
+
+    if (!info.required_by.isEmpty()) {
+        auto requiredByItem = new QTreeWidgetItem(itemTop);
+        if (info.required_by.length() == 1) {
+            requiredByItem->setText(0, tr("Required by: %1").arg(info.required_by.back()));
+        } else {
+            requiredByItem->setText(0, tr("Required by:"));
+            auto i = 0;
+            for (auto req : info.required_by) {
+                auto reqItem = new QTreeWidgetItem(requiredByItem);
+                reqItem->setText(0, req);
+                reqItem->insertChildren(i++, { reqItem });
+            }
+        }
+
+        itemTop->insertChildren(childIndx++, { requiredByItem });
+    }
 
     ui->modTreeWidget->addTopLevelItem(itemTop);
 }
 
-auto ReviewMessageBox::deselectedMods() -> QStringList
+auto ReviewMessageBox::deselectedResources() -> QStringList
 {
     QStringList list;
 
@@ -54,4 +95,12 @@ auto ReviewMessageBox::deselectedMods() -> QStringList
     }
 
     return list;
+}
+
+void ReviewMessageBox::retranslateUi(QString resources_name)
+{
+    setWindowTitle(tr("Confirm %1 selection").arg(resources_name));
+
+    ui->explainLabel->setText(tr("You're about to download the following %1:").arg(resources_name));
+    ui->onlyCheckedLabel->setText(tr("Only %1 with a check will be downloaded!").arg(resources_name));
 }

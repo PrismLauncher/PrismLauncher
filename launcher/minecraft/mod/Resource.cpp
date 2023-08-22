@@ -1,5 +1,6 @@
 #include "Resource.h"
 
+#include <QFileInfo>
 #include <QRegularExpression>
 
 #include "FileSystem.h"
@@ -37,6 +38,9 @@ void Resource::parseFile()
         if (file_name.endsWith(".zip") || file_name.endsWith(".jar")) {
             m_type = ResourceType::ZIPFILE;
             file_name.chop(4);
+        } else if (file_name.endsWith(".nilmod")) {
+            m_type = ResourceType::ZIPFILE;
+            file_name.chop(7);
         } else if (file_name.endsWith(".litemod")) {
             m_type = ResourceType::LITEMOD;
             file_name.chop(8);
@@ -66,6 +70,7 @@ std::pair<int, bool> Resource::compare(const Resource& other, SortType type) con
                 return { 1, type == SortType::ENABLED };
             if (!enabled() && other.enabled())
                 return { -1, type == SortType::ENABLED };
+            break;
         case SortType::NAME: {
             QString this_name{ name() };
             QString other_name{ other.name() };
@@ -76,12 +81,14 @@ std::pair<int, bool> Resource::compare(const Resource& other, SortType type) con
             auto compare_result = QString::compare(this_name, other_name, Qt::CaseInsensitive);
             if (compare_result != 0)
                 return { compare_result, type == SortType::NAME };
+            break;
         }
         case SortType::DATE:
             if (dateTimeChanged() > other.dateTimeChanged())
                 return { 1, type == SortType::DATE };
             if (dateTimeChanged() < other.dateTimeChanged())
                 return { -1, type == SortType::DATE };
+            break;
     }
 
     return { 0, false };
@@ -96,7 +103,6 @@ bool Resource::enable(EnableAction action)
 {
     if (m_type == ResourceType::UNKNOWN || m_type == ResourceType::FOLDER)
         return false;
-
 
     QString path = m_file_info.absoluteFilePath();
     QFile file(path);
@@ -140,8 +146,26 @@ bool Resource::enable(EnableAction action)
     return true;
 }
 
-bool Resource::destroy()
+bool Resource::destroy(bool attemptTrash)
 {
     m_type = ResourceType::UNKNOWN;
-    return FS::deletePath(m_file_info.filePath());
+    return (attemptTrash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
+}
+
+bool Resource::isSymLinkUnder(const QString& instPath) const
+{
+    if (isSymLink())
+        return true;
+
+    auto instDir = QDir(instPath);
+
+    auto relAbsPath = instDir.relativeFilePath(m_file_info.absoluteFilePath());
+    auto relCanonPath = instDir.relativeFilePath(m_file_info.canonicalFilePath());
+
+    return relAbsPath != relCanonPath;
+}
+
+bool Resource::isMoreThanOneHardLink() const
+{
+    return FS::hardLinkCount(m_file_info.absoluteFilePath()) > 1;
 }

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,10 +39,9 @@
 
 auto NetJob::addNetAction(NetAction::Ptr action) -> bool
 {
-    action->m_index_within_job = m_queue.size();
-    m_queue.append(action);
-
     action->setNetwork(m_network);
+
+    addTask(action);
 
     return true;
 }
@@ -123,7 +123,7 @@ auto NetJob::getFailedFiles() -> QList<QString>
 
 void NetJob::updateState()
 {
-    emit progress(m_done.count(), m_total_size);
+    emit progress(m_done.count(), totalSize());
     setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
-                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(m_total_size)));
+                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
 }

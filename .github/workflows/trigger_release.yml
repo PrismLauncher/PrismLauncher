@@ -15,6 +15,9 @@ jobs:
       is_qt_cached: false
     secrets:
       SPARKLE_ED25519_KEY: ${{ secrets.SPARKLE_ED25519_KEY }}
+      WINDOWS_CODESIGN_CERT: ${{ secrets.WINDOWS_CODESIGN_CERT }}
+      WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
+      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
   create_release:
     needs: build_release
@@ -40,11 +43,12 @@ jobs:
           mv PrismLauncher-Linux-Qt6*/PrismLauncher.tar.gz PrismLauncher-Linux-Qt6-${{ env.VERSION }}.tar.gz          
           mv PrismLauncher-Linux-Portable*/PrismLauncher-portable.tar.gz PrismLauncher-Linux-Portable-${{ env.VERSION }}.tar.gz
           mv PrismLauncher-Linux*/PrismLauncher.tar.gz PrismLauncher-Linux-${{ env.VERSION }}.tar.gz
-          mv PrismLauncher-*.AppImage/PrismLauncher-*.AppImage PrismLauncher-Linux-${{ env.VERSION }}-x86_64.AppImage
+          mv PrismLauncher-*.AppImage/PrismLauncher-*.AppImage PrismLauncher-Linux-x86_64.AppImage
+          mv PrismLauncher-*.AppImage.zsync/PrismLauncher-*.AppImage.zsync PrismLauncher-Linux-x86_64.AppImage.zsync
           mv PrismLauncher-macOS-Legacy*/PrismLauncher.tar.gz PrismLauncher-macOS-Legacy-${{ env.VERSION }}.tar.gz
           mv PrismLauncher-macOS*/PrismLauncher.tar.gz PrismLauncher-macOS-${{ env.VERSION }}.tar.gz
 
-          tar -czf PrismLauncher-${{ env.VERSION }}.tar.gz PrismLauncher-${{ env.VERSION }}
+          tar --exclude='.git' -czf PrismLauncher-${{ env.VERSION }}.tar.gz PrismLauncher-${{ env.VERSION }}
 
           for d in PrismLauncher-Windows-MSVC*; do
             cd "${d}" || continue
@@ -75,9 +79,8 @@ jobs:
       - name: Create release
         id: create_release
         uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.ref }}
           name: Prism Launcher ${{ env.VERSION }}
           draft: true
@@ -85,7 +88,8 @@ jobs:
           files: |
             PrismLauncher-Linux-${{ env.VERSION }}.tar.gz
             PrismLauncher-Linux-Portable-${{ env.VERSION }}.tar.gz
-            PrismLauncher-Linux-${{ env.VERSION }}-x86_64.AppImage
+            PrismLauncher-Linux-x86_64.AppImage
+            PrismLauncher-Linux-x86_64.AppImage.zsync
             PrismLauncher-Linux-Qt6-${{ env.VERSION }}.tar.gz
             PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
             PrismLauncher-Windows-MinGW-w64-${{ env.VERSION }}.zip

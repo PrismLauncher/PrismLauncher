@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,9 +34,9 @@
  */
 
 #include "ScanModFolders.h"
-#include "launch/LaunchTask.h"
-#include "MMCZip.h"
 #include "FileSystem.h"
+#include "MMCZip.h"
+#include "launch/LaunchTask.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/mod/ModFolderModel.h"
 
@@ -46,14 +46,20 @@ void ScanModFolders::executeTask()
 
     auto loaders = m_inst->loaderModList();
     connect(loaders.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::modsDone);
-    if(!loaders->update()) {
+    if (!loaders->update()) {
         m_modsDone = true;
     }
 
     auto cores = m_inst->coreModList();
     connect(cores.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::coreModsDone);
-    if(!cores->update()) {
+    if (!cores->update()) {
         m_coreModsDone = true;
+    }
+
+    auto nils = m_inst->nilModList();
+    connect(nils.get(), &ModFolderModel::updateFinished, this, &ScanModFolders::nilModsDone);
+    if (!nils->update()) {
+        m_nilModsDone = true;
     }
     checkDone();
 }
@@ -70,9 +76,15 @@ void ScanModFolders::coreModsDone()
     checkDone();
 }
 
+void ScanModFolders::nilModsDone()
+{
+    m_nilModsDone = true;
+    checkDone();
+}
+
 void ScanModFolders::checkDone()
 {
-    if(m_modsDone && m_coreModsDone) {
+    if (m_modsDone && m_coreModsDone && m_nilModsDone) {
         emitSucceeded();
     }
 }

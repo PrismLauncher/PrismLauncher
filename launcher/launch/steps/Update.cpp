@@ -18,17 +18,17 @@
 
 void Update::executeTask()
 {
-    if(m_aborted)
-    {
+    if (m_aborted) {
         emitFailed(tr("Task aborted."));
         return;
     }
     m_updateTask.reset(m_parent->instance()->createUpdateTask(m_mode));
-    if(m_updateTask)
-    {
-        connect(m_updateTask.get(), SIGNAL(finished()), this, SLOT(updateFinished()));
-        connect(m_updateTask.get(), &Task::progress, this, &Task::setProgress);
-        connect(m_updateTask.get(), &Task::status, this, &Task::setStatus);
+    if (m_updateTask) {
+        connect(m_updateTask.get(), &Task::finished, this, &Update::updateFinished);
+        connect(m_updateTask.get(), &Task::progress, this, &Update::setProgress);
+        connect(m_updateTask.get(), &Task::stepProgress, this, &Update::propagateStepProgress);
+        connect(m_updateTask.get(), &Task::status, this, &Update::setStatus);
+        connect(m_updateTask.get(), &Task::details, this, &Update::setDetails);
         emit progressReportingRequest();
         return;
     }
@@ -42,13 +42,10 @@ void Update::proceed()
 
 void Update::updateFinished()
 {
-    if(m_updateTask->wasSuccessful())
-    {
+    if (m_updateTask->wasSuccessful()) {
         m_updateTask.reset();
         emitSucceeded();
-    }
-    else
-    {
+    } else {
         QString reason = tr("Instance update failed because: %1\n\n").arg(m_updateTask->failReason());
         m_updateTask.reset();
         emit logLine(reason, MessageLevel::Fatal);
@@ -58,21 +55,17 @@ void Update::updateFinished()
 
 bool Update::canAbort() const
 {
-    if(m_updateTask)
-    {
+    if (m_updateTask) {
         return m_updateTask->canAbort();
     }
     return true;
 }
 
-
 bool Update::abort()
 {
     m_aborted = true;
-    if(m_updateTask)
-    {
-        if(m_updateTask->canAbort())
-        {
+    if (m_updateTask) {
+        if (m_updateTask->canAbort()) {
             return m_updateTask->abort();
         }
     }

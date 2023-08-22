@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,39 +36,37 @@
 #include "MetaCacheSink.h"
 #include <QFile>
 #include <QFileInfo>
+#include <QRegularExpression>
 #include "Application.h"
+
+#include "net/Logging.h"
 
 namespace Net {
 
 /** Maximum time to hold a cache entry
  *  = 1 week in seconds
  */
-#define MAX_TIME_TO_EXPIRE 1*7*24*60*60
+#define MAX_TIME_TO_EXPIRE 1 * 7 * 24 * 60 * 60
 
-
-MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator * md5sum, bool is_eternal)
-    :Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum), m_is_eternal(is_eternal)
+MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator* md5sum, bool is_eternal)
+    : Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum), m_is_eternal(is_eternal)
 {
     addValidator(md5sum);
 }
 
 Task::State MetaCacheSink::initCache(QNetworkRequest& request)
 {
-    if (!m_entry->isStale())
-    {
+    if (!m_entry->isStale()) {
         return Task::State::Succeeded;
     }
 
     // check if file exists, if it does, use its information for the request
     QFile current(m_filename);
-    if(current.exists() && current.size() != 0)
-    {
-        if (m_entry->getRemoteChangedTimestamp().size())
-        {
+    if (current.exists() && current.size() != 0) {
+        if (m_entry->getRemoteChangedTimestamp().size()) {
             request.setRawHeader(QString("If-Modified-Since").toLatin1(), m_entry->getRemoteChangedTimestamp().toLatin1());
         }
-        if (m_entry->getETag().size())
-        {
+        if (m_entry->getETag().size()) {
             request.setRawHeader(QString("If-None-Match").toLatin1(), m_entry->getETag().toLatin1());
         }
     }
@@ -76,31 +74,29 @@ Task::State MetaCacheSink::initCache(QNetworkRequest& request)
     return Task::State::Running;
 }
 
-Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
+Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
 {
     QFileInfo output_file_info(m_filename);
 
-    if(wroteAnyData)
-    {
+    if (wroteAnyData) {
         m_entry->setMD5Sum(m_md5Node->hash().toHex().constData());
     }
 
     m_entry->setETag(reply.rawHeader("ETag").constData());
 
-    if (reply.hasRawHeader("Last-Modified"))
-    {
+    if (reply.hasRawHeader("Last-Modified")) {
         m_entry->setRemoteChangedTimestamp(reply.rawHeader("Last-Modified").constData());
     }
 
     m_entry->setLocalChangedTimestamp(output_file_info.lastModified().toUTC().toMSecsSinceEpoch());
 
-    { // Cache lifetime
+    {  // Cache lifetime
         if (m_is_eternal) {
-            qDebug() << "[MetaCache] Adding eternal cache entry:" << m_entry->getFullPath();
+            qCDebug(taskMetaCacheLogC) << "Adding eternal cache entry:" << m_entry->getFullPath();
             m_entry->makeEternal(true);
         } else if (reply.hasRawHeader("Cache-Control")) {
             auto cache_control_header = reply.rawHeader("Cache-Control");
-            // qDebug() << "[MetaCache] Parsing 'Cache-Control' header with" << cache_control_header;
+            qCDebug(taskMetaCacheLogC) << "Parsing 'Cache-Control' header with" << cache_control_header;
 
             QRegularExpression max_age_expr("max-age=([0-9]+)");
             qint64 max_age = max_age_expr.match(cache_control_header).captured(1).toLongLong();
@@ -108,7 +104,7 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
 
         } else if (reply.hasRawHeader("Expires")) {
             auto expires_header = reply.rawHeader("Expires");
-            // qDebug() << "[MetaCache] Parsing 'Expires' header with" << expires_header;
+            qCDebug(taskMetaCacheLogC) << "Parsing 'Expires' header with" << expires_header;
 
             qint64 max_age = QDateTime::fromString(expires_header).toSecsSinceEpoch() - QDateTime::currentSecsSinceEpoch();
             m_entry->setMaximumAge(max_age);
@@ -118,7 +114,7 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply & reply)
 
         if (reply.hasRawHeader("Age")) {
             auto age_header = reply.rawHeader("Age");
-            // qDebug() << "[MetaCache] Parsing 'Age' header with" << age_header;
+            qCDebug(taskMetaCacheLogC) << "Parsing 'Age' header with" << age_header;
 
             qint64 current_age = age_header.toLongLong();
             m_entry->setCurrentAge(current_age);
@@ -138,4 +134,4 @@ bool MetaCacheSink::hasLocalData()
     QFileInfo info(m_filename);
     return info.exists() && info.size() != 0;
 }
-}
+}  // namespace Net

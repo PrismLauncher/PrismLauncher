@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -89,7 +89,8 @@ auto intEntry(toml::table table, QString entry_name) -> int
     return node.value_or(0);
 }
 
-auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod
+auto V1::createModFormat([[maybe_unused]] QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version)
+    -> Mod
 {
     Mod mod;
 
@@ -97,7 +98,7 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
     mod.name = mod_pack.name;
     mod.filename = mod_version.fileName;
 
-    if (mod_pack.provider == ModPlatform::Provider::FLAME) {
+    if (mod_pack.provider == ModPlatform::ResourceProvider::FLAME) {
         mod.mode = "metadata:curseforge";
     } else {
         mod.mode = "url";
@@ -114,7 +115,7 @@ auto V1::createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Mo
     return mod;
 }
 
-auto V1::createModFormat(QDir& index_dir, ::Mod& internal_mod, QString slug) -> Mod
+auto V1::createModFormat(QDir& index_dir, [[maybe_unused]] ::Mod& internal_mod, QString slug) -> Mod
 {
     // Try getting metadata if it exists
     Mod mod{ getIndexForMod(index_dir, slug) };
@@ -176,11 +177,11 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
         in_stream << QString("\n[update]\n");
         in_stream << QString("[update.%1]\n").arg(ProviderCaps.name(mod.provider));
         switch (mod.provider) {
-            case (ModPlatform::Provider::FLAME):
+            case (ModPlatform::ResourceProvider::FLAME):
                 in_stream << QString("file-id = %1\n").arg(mod.file_id.toString());
                 in_stream << QString("project-id = %1\n").arg(mod.project_id.toString());
                 break;
-            case (ModPlatform::Provider::MODRINTH):
+            case (ModPlatform::ResourceProvider::MODRINTH):
                 addToStream("mod-id", mod.mod_id().toString());
                 addToStream("version", mod.version().toString());
                 break;
@@ -241,12 +242,13 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
         return {};
     }
 #else
-    table = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
-    if (!table) {
+    toml::parse_result result = toml::parse_file(StringUtils::toStdString(index_dir.absoluteFilePath(real_fname)));
+    if (!result) {
         qWarning() << QString("Could not open file %1!").arg(normalized_fname);
-        qWarning() << "Reason: " << QString(table.error().what());
+        qWarning() << "Reason: " << result.error().description();
         return {};
     }
+    table = result.table();
 #endif
 
     // index_file.close();
@@ -273,7 +275,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     }
 
     {  // [update] info
-        using Provider = ModPlatform::Provider;
+        using Provider = ModPlatform::ResourceProvider;
 
         auto update_table = table["update"];
         if (!update_table || !update_table.is_table()) {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -42,11 +42,13 @@
 #include "minecraft/auth/Parsers.h"
 
 #include "Application.h"
+#include "Logging.h"
 
 using OAuth2 = Katabasis::DeviceFlow;
 using Activity = Katabasis::Activity;
 
-MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(action) {
+MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(action)
+{
     m_clientId = APPLICATION->getMSAClientID();
     OAuth2::Options opts;
     opts.scope = "XboxLive.signin offline_access";
@@ -63,13 +65,14 @@ MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(ac
 
 MSAStep::~MSAStep() noexcept = default;
 
-QString MSAStep::describe() {
+QString MSAStep::describe()
+{
     return tr("Logging in with Microsoft account.");
 }
 
-
-void MSAStep::rehydrate() {
-    switch(m_action) {
+void MSAStep::rehydrate()
+{
+    switch (m_action) {
         case Refresh: {
             // TODO: check the tokens and see if they are old (older than a day)
             return;
@@ -81,12 +84,14 @@ void MSAStep::rehydrate() {
     }
 }
 
-void MSAStep::perform() {
-    switch(m_action) {
+void MSAStep::perform()
+{
+    switch (m_action) {
         case Refresh: {
             if (m_data->msaClientID != m_clientId) {
                 emit hideVerificationUriAndCode();
-                emit finished(AccountTaskState::STATE_DISABLED, tr("Microsoft user authentication failed - client identification has changed."));
+                emit finished(AccountTaskState::STATE_DISABLED,
+                              tr("Microsoft user authentication failed - client identification has changed."));
             }
             m_oauth2->refresh();
             return;
@@ -104,8 +109,9 @@ void MSAStep::perform() {
     }
 }
 
-void MSAStep::onOAuthActivityChanged(Katabasis::Activity activity) {
-    switch(activity) {
+void MSAStep::onOAuthActivityChanged(Katabasis::Activity activity)
+{
+    switch (activity) {
         case Katabasis::Activity::Idle:
         case Katabasis::Activity::LoggingIn:
         case Katabasis::Activity::Refreshing:
@@ -117,14 +123,12 @@ void MSAStep::onOAuthActivityChanged(Katabasis::Activity activity) {
             // Succeeded or did not invalidate tokens
             emit hideVerificationUriAndCode();
             QVariantMap extraTokens = m_oauth2->extraTokens();
-#ifndef NDEBUG
             if (!extraTokens.isEmpty()) {
-                qDebug() << "Extra tokens in response:";
+                qCDebug(authCredentials()) << "Extra tokens in response:";
                 foreach (QString key, extraTokens.keys()) {
-                    qDebug() << "\t" << key << ":" << extraTokens.value(key);
+                    qCDebug(authCredentials()) << "\t" << key << ":" << extraTokens.value(key);
                 }
             }
-#endif
             emit finished(AccountTaskState::STATE_WORKING, tr("Got "));
             return;
         }
