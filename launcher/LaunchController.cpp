@@ -168,7 +168,26 @@ void LaunchController::login()
 
         switch (m_accountToUse->accountState()) {
             case AccountState::Offline: {
-                m_session->wants_online = false;
+                if (m_accountToUse->accountData()->type == AccountType::Offline) {
+                    m_session->wants_online = false;
+                } else {
+                    auto accounts = APPLICATION->accounts();
+                    accounts->requestRefresh(m_accountToUse->internalId());
+
+                    // Wait for the account to refresh
+                    ProgressDialog progDialog(m_parentWidget);
+                    progDialog.setSkipButton(true, tr("Play Offline"));
+                    auto task = m_accountToUse->currentTask();
+                    progDialog.execWithTask(task.get());
+                    
+                    // Check if the account is still offline
+                    if (m_accountToUse->accountState() == AccountState::Offline) {
+                        // If so, we fall through to the online case with wants_online set to false
+                        m_session->wants_online = false;
+                    } else if (m_accountToUse->accountState() != AccountState::Online) {
+                        continue; // Something went wrong, try again
+                    }
+                }
             }
             /* fallthrough */
             case AccountState::Online: {
