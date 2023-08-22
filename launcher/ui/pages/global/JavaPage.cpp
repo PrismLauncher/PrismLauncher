@@ -197,7 +197,7 @@ void JavaPage::updateThresholds()
         ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
     } else if (maxMem < minMem) {
         iconName = "status-yellow";
-        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller that the minimum value"));
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
     } else {
         iconName = "status-good";
         ui->labelMaxMemIcon->setToolTip("");
