@@ -560,7 +560,8 @@ void MainWindow::updateLaunchButton()
         launchMenu->clear();
     else
         launchMenu = new QMenu(this);
-    m_selectedInstance->populateLaunchMenu(launchMenu);
+    if (m_selectedInstance)
+        m_selectedInstance->populateLaunchMenu(launchMenu);
     ui->actionLaunchInstance->setMenu(launchMenu);
 }
 
@@ -1356,10 +1357,11 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     if (APPLICATION->instances()->trashInstance(id)) {
         ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        return;
+    } else {
+        APPLICATION->instances()->deleteInstance(id);
     }
-
-    APPLICATION->instances()->deleteInstance(id);
+    APPLICATION->settings()->set("SelectedInstance", QString());
+    selectionBad();
 }
 
 void MainWindow::on_actionExportInstanceZip_triggered()
@@ -1657,10 +1659,6 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
         connect(m_selectedInstance.get(), &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     } else {
-        ui->instanceToolBar->setEnabled(false);
-        setInstanceActionsEnabled(false);
-        ui->actionLaunchInstance->setEnabled(false);
-        ui->actionKillInstance->setEnabled(false);
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
         return;
@@ -1685,6 +1683,7 @@ void MainWindow::selectionBad()
 {
     // start by reseting everything...
     m_selectedInstance = nullptr;
+    m_statusLeft->setText(tr("No instance selected"));
 
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
