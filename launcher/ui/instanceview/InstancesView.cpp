@@ -62,8 +62,8 @@ void InstancesView::switchDisplayMode(InstancesView::DisplayMode mode)
                                                    QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
         setCurrentWidget(m_table);
     } else {
-        //m_grid->selectionModel()->setCurrentIndex(m_gridProxy->mapFromSource(sourceIndex),
-        //                                          QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+        // m_grid->selectionModel()->setCurrentIndex(m_gridProxy->mapFromSource(sourceIndex),
+        //                                           QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
         setCurrentWidget(m_grid);
     }
     m_displayMode = mode;
@@ -151,8 +151,8 @@ void InstancesView::createGrid()
     m_grid->setContextMenuPolicy(Qt::CustomContextMenu);
     m_grid->show();
 
-    //connect(m_grid, &QAbstractItemView::doubleClicked, this, &InstancesView::activateInstance);
-    //connect(m_grid->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstancesView::currentRowChanged);
+    // connect(m_grid, &QAbstractItemView::doubleClicked, this, &InstancesView::activateInstance);
+    // connect(m_grid->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &InstancesView::currentRowChanged);
     connect(m_grid, &QWidget::customContextMenuRequested, this, &InstancesView::contextMenuRequested);
 }
 

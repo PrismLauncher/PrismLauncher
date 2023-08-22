@@ -19,9 +19,9 @@
 
 #include <QAbstractItemView>
 #include <QListView>
+#include <QQuickWidget>
 #include <QStackedWidget>
 #include <QTableView>
-#include <QQuickWidget>
 
 #include "BaseInstance.h"
 #include "InstanceList.h"
@@ -42,7 +42,7 @@ class InstancesView : public QStackedWidget {
     QAbstractItemView* currentView()
     {
         if (m_displayMode == GridMode)
-            return nullptr; // TODO
+            return nullptr;  // TODO
         return m_table;
     }
 
@@ -71,7 +71,7 @@ class InstancesView : public QStackedWidget {
     void contextMenuRequested(const QPoint pos);
 
    protected:
-    bool eventFilter(QObject *obj, QEvent *event) override;
+    bool eventFilter(QObject* obj, QEvent* event) override;
 
    private:
     void createTable();
