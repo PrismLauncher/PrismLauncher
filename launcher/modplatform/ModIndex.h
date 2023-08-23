@@ -73,7 +73,7 @@ struct IndexedVersion {
     QString downloadUrl;
     QString date;
     QString fileName;
-    QStringList loaders = {};
+    ModLoaderTypes loaders = {};
     QString hash_type;
     QString hash;
     bool is_preferred = true;

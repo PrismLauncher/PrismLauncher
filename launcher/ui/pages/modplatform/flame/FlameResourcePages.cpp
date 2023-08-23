@@ -70,8 +70,7 @@ auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver,
                                    QString mineVer,
                                    std::optional<ModPlatform::ModLoaderTypes> loaders) const -> bool
 {
-    Q_UNUSED(loaders);
-    return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty();
+    return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty() && (!loaders.has_value() || loaders.value() & ver.loaders);
 }
 
 bool FlameModPage::optedOut(ModPlatform::IndexedVersion& ver) const

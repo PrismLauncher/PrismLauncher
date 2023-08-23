@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ShaderPackPage.h"
+#include "modplatform/ModIndex.h"
 #include "ui_ResourcePage.h"
 
 #include "ShaderPackModel.h"
@@ -48,7 +49,7 @@ void ShaderPackResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pac
                                                const std::shared_ptr<ResourceFolderModel> base_model)
 {
     QString custom_target_folder;
-    if (version.loaders.contains(QStringLiteral("canvas")))
+    if (version.loaders & ModPlatform::Cauldron)
         custom_target_folder = QStringLiteral("resourcepacks");
     m_model->addPack(pack, version, base_model, false, custom_target_folder);
 }

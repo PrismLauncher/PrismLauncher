@@ -1,5 +1,6 @@
 #include "FileResolvingTask.h"
 
+#include <bitset>
 #include "Json.h"
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
@@ -153,7 +154,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
         // If there's more than one mod loader for this version, we can't know for sure
         // which file is relative to each loader, so it's best to not use any one and
         // let the user download it manually.
-        if (file.loaders.size() <= 1) {
+        if (std::bitset<8>(file.loaders.toInt()).count() <= 1) {
             out->url = file.downloadUrl;
             qDebug() << "Found alternative on modrinth " << out->fileName;
         } else {

@@ -134,7 +134,18 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     }
     auto loaders = Json::requireArray(obj, "loaders");
     for (auto loader : loaders) {
-        file.loaders.append(loader.toString());
+        if (loader == "neoforge")
+            file.loaders |= ModPlatform::NeoForge;
+        if (loader == "forge")
+            file.loaders |= ModPlatform::Forge;
+        if (loader == "cauldron")
+            file.loaders |= ModPlatform::Cauldron;
+        if (loader == "liteloader")
+            file.loaders |= ModPlatform::LiteLoader;
+        if (loader == "fabric")
+            file.loaders |= ModPlatform::Fabric;
+        if (loader == "quilt")
+            file.loaders |= ModPlatform::Quilt;
     }
     file.version = Json::requireString(obj, "name");
     file.version_number = Json::requireString(obj, "version_number");
