@@ -81,6 +81,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
     auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
     QString mcVersion = profile->getComponentVersion("net.minecraft");
+    auto loaders = profile->getSupportedModLoaders();
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
@@ -89,7 +90,8 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         if (!file.addonId.isValid())
             file.addonId = pack.addonId;
 
-        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid() &&
+            (!loaders.has_value() || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
 
@@ -186,8 +188,11 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     return file;
 }
 
-ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr)
+ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr, const BaseInstance* inst)
 {
+    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
+    QString mcVersion = profile->getComponentVersion("net.minecraft");
+    auto loaders = profile->getSupportedModLoaders();
     QVector<ModPlatform::IndexedVersion> versions;
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
@@ -196,7 +201,8 @@ ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::
         if (!file.addonId.isValid())
             file.addonId = m.addonId;
 
-        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid() &&
+            (!loaders.has_value() || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
             versions.append(file);
     }
 

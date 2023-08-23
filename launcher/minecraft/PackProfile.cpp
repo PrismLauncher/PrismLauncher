@@ -58,9 +58,8 @@
 #include "ComponentUpdateTask.h"
 #include "PackProfile.h"
 #include "PackProfile_p.h"
-
-#include "Application.h"
-#include "modplatform/ResourceAPI.h"
+#include "minecraft/mod/Mod.h"
+#include "modplatform/ModIndex.h"
 
 static const QMap<QString, ModPlatform::ModLoaderType> modloaderMapping{ { "net.neoforged", ModPlatform::NeoForge },
                                                                          { "net.minecraftforge", ModPlatform::Forge },
@@ -1008,4 +1007,19 @@ std::optional<ModPlatform::ModLoaderTypes> PackProfile::getModLoaders()
     if (!has_any_loader)
         return {};
     return result;
+}
+
+std::optional<ModPlatform::ModLoaderTypes> PackProfile::getSupportedModLoaders()
+{
+    auto loadersOpt = getModLoaders();
+    if (!loadersOpt.has_value())
+        return loadersOpt;
+    auto loaders = loadersOpt.value();
+    // TODO: remove this or add version condition once Quilt drops official Fabric support
+    if (loaders & ModPlatform::Quilt)
+        loaders |= ModPlatform::Fabric;
+    // TODO: remove this or add version condition once NeoForge drops official Forge support
+    if (loaders & ModPlatform::NeoForge)
+        loaders |= ModPlatform::Forge;
+    return loaders;
 }

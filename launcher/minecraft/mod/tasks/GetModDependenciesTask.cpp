@@ -41,7 +41,8 @@ static Version mcVersion(BaseInstance* inst)
 
 static ModPlatform::ModLoaderTypes mcLoaders(BaseInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoaders().value();
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value_or(
+        ModPlatform::ModLoaderTypes::fromInt(0));
 }
 
 GetModDependenciesTask::GetModDependenciesTask(QObject* parent,

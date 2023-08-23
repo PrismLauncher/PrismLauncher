@@ -48,13 +48,27 @@ class FlameAPI : public NetworkResourceAPI {
             return 1;
         if (loaders & ModPlatform::Fabric)
             return 4;
-        // TODO: remove this once Quilt drops official Fabric support
-        if (loaders & ModPlatform::Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
-            return 4;                      // FIXME: implement multiple loaders filter (this should be 5)
-        // TODO: remove this once NeoForge drops official Forge support
-        if (loaders & ModPlatform::NeoForge)  // NOTE: Most if not all Forge mods should work *currently*
-            return 1;                         // FIXME: implement multiple loaders filter (this should be 6)
+        if (loaders & ModPlatform::Quilt)
+            return 5;
+        if (loaders & ModPlatform::NeoForge)
+            return 6;
         return 0;
+    }
+
+    static auto getModLoaderStrings(const ModPlatform::ModLoaderTypes types) -> const QStringList
+    {
+        QStringList l;
+        for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
+            if (types & loader) {
+                l << QString::number(getMappedModLoader(loader));
+            }
+        }
+        return l;
+    }
+
+    static auto getModLoaderFilters(ModPlatform::ModLoaderTypes types) -> const QString
+    {
+        return "[" + getModLoaderStrings(types).join(',') + "]";
     }
 
    private:
@@ -73,7 +87,7 @@ class FlameAPI : public NetworkResourceAPI {
             get_arguments.append(QString("sortField=%1").arg(args.sorting.value().index));
         get_arguments.append("sortOrder=desc");
         if (args.loaders.has_value())
-            get_arguments.append(QString("modLoaderType=%1").arg(getMappedModLoader(args.loaders.value())));
+            get_arguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(args.loaders.value())));
         get_arguments.append(gameVersionStr);
 
         return "https://api.curseforge.com/v1/mods/search?gameId=432&" + get_arguments.join('&');
@@ -92,23 +106,6 @@ class FlameAPI : public NetworkResourceAPI {
         QStringList get_parameters;
         if (args.mcVersions.has_value())
             get_parameters.append(QString("gameVersion=%1").arg(args.mcVersions.value().front().toString()));
-
-        if (args.loaders.has_value()) {
-            int mappedModLoader = getMappedModLoader(args.loaders.value());
-
-            if (args.loaders.value() & ModPlatform::Quilt) {
-                auto overide = ModPlatform::getOverrideDeps();
-                auto over = std::find_if(overide.cbegin(), overide.cend(), [addonId](auto dep) {
-                    return dep.provider == ModPlatform::ResourceProvider::FLAME && addonId == dep.quilt;
-                });
-                if (over != overide.cend()) {
-                    mappedModLoader = 5;
-                }
-            }
-
-            get_parameters.append(QString("modLoaderType=%1").arg(mappedModLoader));
-        }
-
         return url + get_parameters.join('&');
     };
 

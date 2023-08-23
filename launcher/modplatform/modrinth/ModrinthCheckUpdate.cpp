@@ -11,7 +11,6 @@
 #include "tasks/ConcurrentTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
-#include "minecraft/mod/ResourceFolderModel.h"
 
 static ModrinthAPI api;
 static ModPlatform::ProviderCapabilities ProviderCaps;

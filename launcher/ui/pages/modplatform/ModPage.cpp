@@ -124,7 +124,7 @@ void ModPage::updateVersionList()
         auto version = current_pack->versions[i];
         bool valid = false;
         for (auto& mcVer : m_filter->versions) {
-            if (validateVersion(version, mcVer.toString(), packProfile->getModLoaders())) {
+            if (validateVersion(version, mcVer.toString(), packProfile->getSupportedModLoaders())) {
                 valid = true;
                 break;
             }

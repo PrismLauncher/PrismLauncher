@@ -5,8 +5,6 @@
 #include "ScrollMessageBox.h"
 #include "ui_ReviewMessageBox.h"
 
-#include "FileSystem.h"
-#include "Json.h"
 #include "Markdown.h"
 
 #include "tasks/ConcurrentTask.h"
@@ -32,7 +30,7 @@ static std::list<Version> mcVersions(BaseInstance* inst)
 
 static std::optional<ModPlatform::ModLoaderTypes> mcLoaders(BaseInstance* inst)
 {
-    return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoaders() };
+    return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders() };
 }
 
 ModUpdateDialog::ModUpdateDialog(QWidget* parent,
