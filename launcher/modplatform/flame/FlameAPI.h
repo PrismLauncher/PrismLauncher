@@ -41,18 +41,23 @@ class FlameAPI : public NetworkResourceAPI {
         }
     }
 
-    static int getMappedModLoader(ModPlatform::ModLoaderTypes loaders)
+    static int getMappedModLoader(ModPlatform::ModLoaderType loaders)
     {
         // https://docs.curseforge.com/?http#tocS_ModLoaderType
-        if (loaders & ModPlatform::Forge)
-            return 1;
-        if (loaders & ModPlatform::Fabric)
-            return 4;
-        if (loaders & ModPlatform::Quilt)
-            return 5;
-        if (loaders & ModPlatform::NeoForge)
-            return 6;
-        return 0;
+        switch (loaders) {
+            case ModPlatform::Forge:
+                return 1;
+            case ModPlatform::Cauldron:
+                return 2;
+            case ModPlatform::LiteLoader:
+                return 3;
+            case ModPlatform::Fabric:
+                return 4;
+            case ModPlatform::Quilt:
+                return 5;
+            case ModPlatform::NeoForge:
+                return 6;
+        }
     }
 
     static auto getModLoaderStrings(const ModPlatform::ModLoaderTypes types) -> const QStringList
