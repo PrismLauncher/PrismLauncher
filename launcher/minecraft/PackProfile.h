@@ -44,6 +44,7 @@
 #include <QList>
 #include <QString>
 #include <memory>
+#include <optional>
 
 #include "Component.h"
 #include "LaunchProfile.h"
