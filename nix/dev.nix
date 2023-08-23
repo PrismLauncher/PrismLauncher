@@ -23,6 +23,8 @@
             types_or = ["c" "c++" "java" "json" "objective-c"];
           };
         };
+
+        tools.clang-tools = pkgs.clang-tools_16;
       };
     };
 
