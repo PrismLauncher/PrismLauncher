@@ -146,7 +146,7 @@ class PackProfile : public QAbstractListModel {
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
 
-    std::optional<ResourceAPI::ModLoaderTypes> getModLoaders();
+    std::optional<ModPlatform::ModLoaderTypes> getModLoaders();
 
    private:
     void scheduleSave();

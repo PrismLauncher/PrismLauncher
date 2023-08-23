@@ -62,11 +62,11 @@
 #include "Application.h"
 #include "modplatform/ResourceAPI.h"
 
-static const QMap<QString, ResourceAPI::ModLoaderType> modloaderMapping{ { "net.neoforged", ResourceAPI::NeoForge },
-                                                                         { "net.minecraftforge", ResourceAPI::Forge },
-                                                                         { "net.fabricmc.fabric-loader", ResourceAPI::Fabric },
-                                                                         { "org.quiltmc.quilt-loader", ResourceAPI::Quilt },
-                                                                         { "com.mumfrey.liteloader", ResourceAPI::LiteLoader } };
+static const QMap<QString, ModPlatform::ModLoaderType> modloaderMapping{ { "net.neoforged", ModPlatform::NeoForge },
+                                                                         { "net.minecraftforge", ModPlatform::Forge },
+                                                                         { "net.fabricmc.fabric-loader", ModPlatform::Fabric },
+                                                                         { "org.quiltmc.quilt-loader", ModPlatform::Quilt },
+                                                                         { "com.mumfrey.liteloader", ModPlatform::LiteLoader } };
 
 PackProfile::PackProfile(MinecraftInstance* instance) : QAbstractListModel()
 {
@@ -990,12 +990,12 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
-std::optional<ResourceAPI::ModLoaderTypes> PackProfile::getModLoaders()
+std::optional<ModPlatform::ModLoaderTypes> PackProfile::getModLoaders()
 {
-    ResourceAPI::ModLoaderTypes result;
+    ModPlatform::ModLoaderTypes result;
     bool has_any_loader = false;
 
-    QMapIterator<QString, ResourceAPI::ModLoaderType> i(modloaderMapping);
+    QMapIterator<QString, ModPlatform::ModLoaderType> i(modloaderMapping);
 
     while (i.hasNext()) {
         i.next();

@@ -24,7 +24,10 @@ class FlameAPI : public NetworkResourceAPI {
 
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
-    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (NeoForge | Forge | Fabric | Quilt); }
+    static inline auto validateModLoaders(ModPlatform::ModLoaderTypes loaders) -> bool
+    {
+        return loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
+    }
 
    private:
     static int getClassId(ModPlatform::ResourceType type)
@@ -38,19 +41,19 @@ class FlameAPI : public NetworkResourceAPI {
         }
     }
 
-    static int getMappedModLoader(ModLoaderTypes loaders)
+    static int getMappedModLoader(ModPlatform::ModLoaderTypes loaders)
     {
         // https://docs.curseforge.com/?http#tocS_ModLoaderType
-        if (loaders & Forge)
+        if (loaders & ModPlatform::Forge)
             return 1;
-        if (loaders & Fabric)
+        if (loaders & ModPlatform::Fabric)
             return 4;
         // TODO: remove this once Quilt drops official Fabric support
-        if (loaders & Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
-            return 4;         // FIXME: implement multiple loaders filter (this should be 5)
+        if (loaders & ModPlatform::Quilt)  // NOTE: Most if not all Fabric mods should work *currently*
+            return 4;                      // FIXME: implement multiple loaders filter (this should be 5)
         // TODO: remove this once NeoForge drops official Forge support
-        if (loaders & NeoForge)  // NOTE: Most if not all Forge mods should work *currently*
-            return 1;            // FIXME: implement multiple loaders filter (this should be 6)
+        if (loaders & ModPlatform::NeoForge)  // NOTE: Most if not all Forge mods should work *currently*
+            return 1;                         // FIXME: implement multiple loaders filter (this should be 6)
         return 0;
     }
 
@@ -93,7 +96,7 @@ class FlameAPI : public NetworkResourceAPI {
         if (args.loaders.has_value()) {
             int mappedModLoader = getMappedModLoader(args.loaders.value());
 
-            if (args.loaders.value() & Quilt) {
+            if (args.loaders.value() & ModPlatform::Quilt) {
                 auto overide = ModPlatform::getOverrideDeps();
                 auto over = std::find_if(overide.cbegin(), overide.cend(), [addonId](auto dep) {
                     return dep.provider == ModPlatform::ResourceProvider::FLAME && addonId == dep.quilt;
@@ -113,7 +116,7 @@ class FlameAPI : public NetworkResourceAPI {
     {
         auto mappedModLoader = getMappedModLoader(args.loader);
         auto addonId = args.dependency.addonId.toString();
-        if (args.loader & Quilt) {
+        if (args.loader & ModPlatform::Quilt) {
             auto overide = ModPlatform::getOverrideDeps();
             auto over = std::find_if(overide.cbegin(), overide.cend(), [addonId](auto dep) {
                 return dep.provider == ModPlatform::ResourceProvider::FLAME && addonId == dep.quilt;

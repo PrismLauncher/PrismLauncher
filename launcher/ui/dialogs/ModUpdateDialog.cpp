@@ -30,7 +30,7 @@ static std::list<Version> mcVersions(BaseInstance* inst)
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
 
-static std::optional<ResourceAPI::ModLoaderTypes> mcLoaders(BaseInstance* inst)
+static std::optional<ModPlatform::ModLoaderTypes> mcLoaders(BaseInstance* inst)
 {
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoaders() };
 }

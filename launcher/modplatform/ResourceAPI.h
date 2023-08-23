@@ -54,9 +54,6 @@ class ResourceAPI {
    public:
     virtual ~ResourceAPI() = default;
 
-    enum ModLoaderType { NeoForge = 1 << 0, Forge = 1 << 1, Cauldron = 1 << 2, LiteLoader = 1 << 3, Fabric = 1 << 4, Quilt = 1 << 5 };
-    Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
-
     struct SortingMethod {
         // The index of the sorting method. Used to allow for arbitrary ordering in the list of methods.
         // Used by Flame in the API request.
@@ -74,7 +71,7 @@ class ResourceAPI {
 
         std::optional<QString> search;
         std::optional<SortingMethod> sorting;
-        std::optional<ModLoaderTypes> loaders;
+        std::optional<ModPlatform::ModLoaderTypes> loaders;
         std::optional<std::list<Version> > versions;
     };
     struct SearchCallbacks {
@@ -87,7 +84,7 @@ class ResourceAPI {
         ModPlatform::IndexedPack pack;
 
         std::optional<std::list<Version> > mcVersions;
-        std::optional<ModLoaderTypes> loaders;
+        std::optional<ModPlatform::ModLoaderTypes> loaders;
 
         VersionSearchArgs(VersionSearchArgs const&) = default;
         void operator=(VersionSearchArgs other)
@@ -114,7 +111,7 @@ class ResourceAPI {
     struct DependencySearchArgs {
         ModPlatform::Dependency dependency;
         Version mcVersion;
-        ModLoaderTypes loader;
+        ModPlatform::ModLoaderTypes loader;
     };
 
     struct DependencySearchCallbacks {
@@ -159,27 +156,6 @@ class ResourceAPI {
     {
         qWarning() << "TODO";
         return nullptr;
-    }
-
-    static auto getModLoaderString(ModLoaderType type) -> const QString
-    {
-        switch (type) {
-            case NeoForge:
-                return "neoforge";
-            case Forge:
-                return "forge";
-            case Cauldron:
-                return "cauldron";
-            case LiteLoader:
-                return "liteloader";
-            case Fabric:
-                return "fabric";
-            case Quilt:
-                return "quilt";
-            default:
-                break;
-        }
-        return "";
     }
 
    protected:
