@@ -58,6 +58,7 @@ class FlameAPI : public NetworkResourceAPI {
             case ModPlatform::NeoForge:
                 return 6;
         }
+        return 0;
     }
 
     static auto getModLoaderStrings(const ModPlatform::ModLoaderTypes types) -> const QStringList
