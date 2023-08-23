@@ -30,13 +30,6 @@
 
     devShells.default = pkgs.mkShell {
       inherit (self.checks.${system}.pre-commit-check) shellHook;
-      packages = with pkgs; [
-        nodePackages.markdownlint-cli
-        alejandra
-        deadnix
-        clang-tools
-        nil
-      ];
 
       inputsFrom = [self.packages.${system}.prismlauncher-unwrapped];
       buildInputs = with pkgs; [ccache ninja];
