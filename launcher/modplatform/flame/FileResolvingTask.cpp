@@ -1,7 +1,8 @@
 #include "FileResolvingTask.h"
 
-#include <bitset>
+#include <bit>
 #include "Json.h"
+#include "modplatform/ModIndex.h"
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
 #include "net/Upload.h"
@@ -135,6 +136,11 @@ void Flame::FileResolvingTask::netJobFinished()
     m_checkJob->start();
 }
 
+constexpr bool has_single_bit(int x) noexcept
+{
+    return x && !(x & (x - 1));
+}
+
 void Flame::FileResolvingTask::modrinthCheckFinished()
 {
     setProgress(2, 3);
@@ -154,7 +160,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
         // If there's more than one mod loader for this version, we can't know for sure
         // which file is relative to each loader, so it's best to not use any one and
         // let the user download it manually.
-        if (std::bitset<8>(file.loaders).count() <= 1) {
+        if (!file.loaders || has_single_bit(file.loaders)) {
             out->url = file.downloadUrl;
             qDebug() << "Found alternative on modrinth " << out->fileName;
         } else {
