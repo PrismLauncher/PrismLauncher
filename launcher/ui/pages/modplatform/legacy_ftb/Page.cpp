@@ -173,11 +173,9 @@ void Page::suggestCurrent()
     }
 
     dialog->setSuggestedPack(selected.name, selectedVersion, new PackInstallTask(APPLICATION->network(), selected, selectedVersion));
-    QString editedLogoName;
-    if (selected.logo.toLower().startsWith("ftb")) {
-        editedLogoName = selected.logo;
-    } else {
-        editedLogoName = "ftb_" + selected.logo;
+    QString editedLogoName = selected.logo;
+    if (!selected.logo.toLower().startsWith("ftb")) {
+        editedLogoName = "ftb_" + editedLogoName;
     }
 
     if (selected.type == PackType::Public) {

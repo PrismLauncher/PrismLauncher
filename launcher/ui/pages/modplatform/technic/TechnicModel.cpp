@@ -34,14 +34,15 @@
  */
 
 #include "TechnicModel.h"
-#include <QUrl>
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
 
 #include "net/ApiDownload.h"
 
+#include <QFileInfo>
 #include <QIcon>
+#include <QUrl>
 
 Technic::ListModel::ListModel(QObject* parent) : QAbstractListModel(parent) {}
 
@@ -160,7 +161,7 @@ void Technic::ListModel::searchRequestFinished()
                         pack.logoName = "null";
                     } else {
                         pack.logoUrl = rawURL;
-                        pack.logoName = QUrl(rawURL).fileName();
+                        pack.logoName = pack.slug + "." + QFileInfo(QUrl(rawURL).fileName()).suffix();
                     }
                     pack.broken = false;
                     newList.append(pack);
@@ -182,7 +183,7 @@ void Technic::ListModel::searchRequestFinished()
                     auto iconUrl = Json::requireString(iconObj, "url");
 
                     pack.logoUrl = iconUrl;
-                    pack.logoName = QUrl(iconUrl).fileName();
+                    pack.logoName = pack.slug + "." + QFileInfo(QUrl(iconUrl).fileName()).suffix();
                 } else {
                     pack.logoUrl = "null";
                     pack.logoName = "null";
