@@ -322,7 +322,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
             bool had_optional = false;
             for (const auto& modInfo : jsonFiles) {
                 Modrinth::File file;
-                file.path = Json::requireString(modInfo, "path");
+                file.path = Json::requireString(modInfo, "path").replace("\\", "/");
 
                 auto env = Json::ensureObject(modInfo, "env");
                 // 'env' field is optional
