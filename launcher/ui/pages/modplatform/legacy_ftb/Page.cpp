@@ -180,8 +180,6 @@ void Page::suggestCurrent()
         editedLogoName = "ftb_" + selected.logo;
     }
 
-    editedLogoName = editedLogoName.left(editedLogoName.lastIndexOf(".png"));
-
     if (selected.type == PackType::Public) {
         publicListModel->getLogo(selected.logo,
                                  [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });

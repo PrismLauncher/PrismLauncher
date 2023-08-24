@@ -34,6 +34,7 @@
  */
 
 #include "TechnicModel.h"
+#include <QUrl>
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
@@ -159,7 +160,7 @@ void Technic::ListModel::searchRequestFinished()
                         pack.logoName = "null";
                     } else {
                         pack.logoUrl = rawURL;
-                        pack.logoName = rawURL.section(QLatin1Char('/'), -1);
+                        pack.logoName = QUrl(rawURL).fileName();
                     }
                     pack.broken = false;
                     newList.append(pack);
@@ -181,7 +182,7 @@ void Technic::ListModel::searchRequestFinished()
                     auto iconUrl = Json::requireString(iconObj, "url");
 
                     pack.logoUrl = iconUrl;
-                    pack.logoName = iconUrl.section(QLatin1Char('/'), -1);
+                    pack.logoName = QUrl(iconUrl).fileName();
                 } else {
                     pack.logoUrl = "null";
                     pack.logoName = "null";
