@@ -1,6 +1,5 @@
 #include "FileResolvingTask.h"
 
-#include <bit>
 #include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "net/ApiDownload.h"
