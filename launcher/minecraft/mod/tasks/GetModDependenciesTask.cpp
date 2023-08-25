@@ -201,6 +201,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
                         return;
                     }
                 }
+                removePack(dep.addonId);
                 qWarning() << "Error while reading mod version empty ";
                 qDebug() << doc;
                 return;

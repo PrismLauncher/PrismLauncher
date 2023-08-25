@@ -211,5 +211,7 @@ ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::
         return a.date > b.date;
     };
     std::sort(versions.begin(), versions.end(), orderSortPredicate);
-    return versions.front();
+    if (versions.size() != 0)
+        return versions.front();
+    return {};
 }
