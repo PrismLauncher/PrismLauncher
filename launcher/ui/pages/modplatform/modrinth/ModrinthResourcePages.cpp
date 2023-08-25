@@ -67,7 +67,7 @@ auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver,
                                       QString mineVer,
                                       std::optional<ModPlatform::ModLoaderTypes> loaders) const -> bool
 {
-    return ver.mcVersion.contains(mineVer) && (!loaders.has_value() || loaders.value() & ver.loaders);
+    return ver.mcVersion.contains(mineVer) && (!loaders.has_value() || !ver.loaders || loaders.value() & ver.loaders);
 }
 
 ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)

@@ -105,7 +105,7 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArra
         auto file = loadIndexedPackVersion(obj);
 
         if (file.fileId.isValid() &&
-            (!loaders.has_value() || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
+            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
@@ -242,7 +242,7 @@ auto Modrinth::loadDependencyVersions([[maybe_unused]] const ModPlatform::Depend
         auto file = loadIndexedPackVersion(obj);
 
         if (file.fileId.isValid() &&
-            (!loaders.has_value() || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
+            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
             versions.append(file);
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {

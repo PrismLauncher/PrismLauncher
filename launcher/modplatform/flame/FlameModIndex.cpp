@@ -91,7 +91,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
             file.addonId = pack.addonId;
 
         if (file.fileId.isValid() &&
-            (!loaders.has_value() || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
+            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
 
@@ -202,7 +202,7 @@ ModPlatform::IndexedVersion FlameMod::loadDependencyVersions(const ModPlatform::
             file.addonId = m.addonId;
 
         if (file.fileId.isValid() &&
-            (!loaders.has_value() || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
+            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
             versions.append(file);
     }
 
