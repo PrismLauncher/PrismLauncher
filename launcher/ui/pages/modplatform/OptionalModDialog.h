@@ -25,52 +25,15 @@ namespace Ui {
 class OptionalModDialog;
 }
 
-class OptionalModListModel : public QAbstractListModel {
-    Q_OBJECT
-   public:
-    enum Columns {
-        EnabledColumn = 0,
-        NameColumn,
-    };
-
-    OptionalModListModel(QWidget* parent, QStringList mods);
-
-    QStringList getResult();
-
-    int rowCount(const QModelIndex& parent) const override;
-    int columnCount(const QModelIndex& parent) const override;
-
-    QVariant data(const QModelIndex& index, int role) const override;
-    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
-
-   public slots:
-    void selectAll() { toggleAll(true); }
-    void clearAll() { toggleAll(false); };
-    void toggleAll(bool enabled);
-
-   private:
-    void toggleMod(QString mod, int index);
-    void setMod(QString mod, int index, bool enable, bool shouldEmit = true);
-
-   private:
-    QStringList m_mods;
-    QHash<QString, bool> m_selected;
-};
-
 class OptionalModDialog : public QDialog {
     Q_OBJECT
 
    public:
-    OptionalModDialog(QWidget* parent, QStringList mods);
+    OptionalModDialog(QWidget* parent, const QStringList& mods);
     ~OptionalModDialog() override;
 
-    QStringList getResult() { return listModel->getResult(); }
+    QStringList getResult();
 
    private:
     Ui::OptionalModDialog* ui;
-
-    OptionalModListModel* listModel;
 };
