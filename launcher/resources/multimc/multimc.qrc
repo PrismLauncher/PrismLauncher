@@ -347,5 +347,11 @@
         <file>scalable/export.svg</file>
         <file>scalable/launch.svg</file>
         <file>scalable/server.svg</file>
+
+        <file>scalable/instances/quiltmc.svg</file>  <!-- CC0 QuiltMC -->
+        <file>scalable/instances/fabricmc.svg</file>  <!-- CC0 unascribed, https://github.com/FabricMC/community/blob/main/media/unascribed/README.md -->
+        <file>scalable/instances/neoforged.svg</file>
+        <file>128x128/instances/forge.png</file>  <!-- LGPL3 Forge Development LLC -->
+        <file>128x128/instances/liteloader.png</file>  <!-- CC-BY-SA 4.0 LiteLoader -->
     </qresource>
 </RCC>

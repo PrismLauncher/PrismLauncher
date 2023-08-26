@@ -71,6 +71,7 @@ class TranslationsModel;
 class ITheme;
 class MCEditTool;
 class ThemeManager;
+class IconTheme;
 
 namespace Meta {
 class Index;
@@ -109,17 +110,7 @@ class Application : public QApplication {
 
     QIcon getThemedIcon(const QString& name);
 
-    void setIconTheme(const QString& name);
-
-    void applyCurrentlySelectedTheme(bool initial = false);
-
-    QList<ITheme*> getValidApplicationThemes();
-
-    void setApplicationTheme(const QString& name);
-
-    QList<CatPack*> getValidCatPacks();
-
-    QString getCatPack(QString catName = "");
+    ThemeManager* themeManager() { return m_themeManager.get(); }
 
     shared_qobject_ptr<ExternalUpdater> updater() { return m_updater; }
 
@@ -150,6 +141,8 @@ class Application : public QApplication {
     shared_qobject_ptr<Meta::Index> metadataIndex();
 
     void updateCapabilities();
+
+    void detectLibraries();
 
     /*!
      * Finds and returns the full path to a jar file.
@@ -186,6 +179,8 @@ class Application : public QApplication {
 
     int suitableMaxMem();
 
+    QUrl normalizeImportUrl(QString const& url);
+
    signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
@@ -200,7 +195,6 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
-                BaseProfilerFactory* profiler = nullptr,
                 MinecraftServerTargetPtr serverToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);
@@ -284,11 +278,13 @@ class Application : public QApplication {
     SetupWizard* m_setupWizard = nullptr;
 
    public:
+    QString m_detectedGLFWPath;
+    QString m_detectedOpenALPath;
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
-    QList<QUrl> m_zipsToImport;
+    QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };

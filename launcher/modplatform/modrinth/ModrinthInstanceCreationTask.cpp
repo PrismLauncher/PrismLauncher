@@ -11,6 +11,7 @@
 
 #include "net/ChecksumValidator.h"
 
+#include "net/ApiDownload.h"
 #include "net/NetJob.h"
 #include "settings/INISettingsObject.h"
 
@@ -210,6 +211,8 @@ bool ModrinthCreationTask::createInstance()
         components->setComponentVersion("org.quiltmc.quilt-loader", m_quilt_version);
     if (!m_forge_version.isEmpty())
         components->setComponentVersion("net.minecraftforge", m_forge_version);
+    if (!m_neoForge_version.isEmpty())
+        components->setComponentVersion("net.neoforged", m_neoForge_version);
 
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
@@ -238,7 +241,7 @@ bool ModrinthCreationTask::createInstance()
         }
 
         qDebug() << "Will try to download" << file.downloads.front() << "to" << file_path;
-        auto dl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
+        auto dl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
         m_files_job->addNetAction(dl);
 
@@ -247,7 +250,7 @@ bool ModrinthCreationTask::createInstance()
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
             connect(dl.get(), &NetAction::failed, [this, &file, file_path, param] {
-                auto ndl = Net::Download::makeFile(file.downloads.dequeue(), file_path);
+                auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 m_files_job->addNetAction(ndl);
                 if (auto shared = param.lock())
@@ -397,6 +400,8 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                         m_quilt_version = Json::requireString(*it, "Quilt Loader version");
                     } else if (name == "forge") {
                         m_forge_version = Json::requireString(*it, "Forge version");
+                    } else if (name == "neoforge") {
+                        m_neoForge_version = Json::requireString(*it, "NeoForge version");
                     } else {
                         throw JSONValidationError("Unknown dependency type: " + name);
                     }

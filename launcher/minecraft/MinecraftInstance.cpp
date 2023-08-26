@@ -3,8 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
- *  Copyright (c) 2023 seth <getchoo at tuta dot io>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -88,6 +87,10 @@
 #include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
 
+#include "tools/BaseProfiler.h"
+
+#include <QActionGroup>
+
 #ifdef Q_OS_LINUX
 #include "MangoHud.h"
 #endif
@@ -166,7 +169,9 @@ void MinecraftInstance::loadSpecificSettings()
         // Native library workarounds
         auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);
         m_settings->registerOverride(global_settings->getSetting("UseNativeOpenAL"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("CustomOpenALPath"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
+        m_settings->registerOverride(global_settings->getSetting("CustomGLFWPath"), nativeLibraryWorkaroundsOverride);
 
         // Peformance related options
         auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
@@ -182,10 +187,6 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerSetting("UseEnv", false);
         m_settings->registerSetting("OverrideEnv", false);
         m_settings->registerSetting("Env", QVariant(QMap<QString, QVariant>()));
-
-        // Mod loader specific options
-        auto modLoaderSettings = m_settings->registerSetting("OverrideModLoaderSettings", false);
-        m_settings->registerOverride(global_settings->getSetting("DisableQuiltBeacon"), modLoaderSettings);
 
         m_settings->set("InstanceType", "OneSix");
     }
@@ -231,6 +232,50 @@ QSet<QString> MinecraftInstance::traits() const
         return { "version-incomplete" };
     }
     return profile->getTraits();
+}
+
+// FIXME: move UI code out of MinecraftInstance
+void MinecraftInstance::populateLaunchMenu(QMenu* menu)
+{
+    QAction* normalLaunch = menu->addAction(tr("&Launch"));
+    normalLaunch->setShortcut(QKeySequence::Open);
+    QAction* normalLaunchOffline = menu->addAction(tr("Launch &Offline"));
+    normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
+    QAction* normalLaunchDemo = menu->addAction(tr("Launch &Demo"));
+    normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
+
+    normalLaunchDemo->setEnabled(supportsDemo());
+
+    connect(normalLaunch, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this()); });
+    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, false); });
+    connect(normalLaunchDemo, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, true); });
+
+    QString profilersTitle = tr("Profilers");
+    menu->addSeparator()->setText(profilersTitle);
+
+    auto profilers = new QActionGroup(menu);
+    profilers->setExclusive(true);
+    connect(profilers, &QActionGroup::triggered, [this](QAction* action) {
+        settings()->set("Profiler", action->data());
+        emit profilerChanged();
+    });
+
+    QAction* noProfilerAction = menu->addAction(tr("&No Profiler"));
+    noProfilerAction->setData("");
+    noProfilerAction->setCheckable(true);
+    noProfilerAction->setChecked(true);
+    profilers->addAction(noProfilerAction);
+
+    for (auto profiler = APPLICATION->profilers().begin(); profiler != APPLICATION->profilers().end(); profiler++) {
+        QAction* profilerAction = menu->addAction(profiler.value()->name());
+        profilers->addAction(profilerAction);
+        profilerAction->setData(profiler.key());
+        profilerAction->setCheckable(true);
+        profilerAction->setChecked(settings()->get("Profiler").toString() == profiler.key());
+
+        QString error;
+        profilerAction->setEnabled(profiler.value()->check(&error));
+    }
 }
 
 QString MinecraftInstance::gameRoot() const
@@ -389,10 +434,31 @@ QStringList MinecraftInstance::extraArguments()
     }
 
     {
-        const auto loaders = version->getModLoaders();
-        if (loaders.has_value() && loaders.value() & ResourceAPI::Quilt && settings()->get("DisableQuiltBeacon").toBool())
-            list.append("-Dloader.disable_beacon=true");
+        QString openALPath;
+        QString glfwPath;
+
+        if (settings()->get("UseNativeOpenAL").toBool()) {
+            openALPath = APPLICATION->m_detectedOpenALPath;
+            auto customPath = settings()->get("CustomOpenALPath").toString();
+            if (!customPath.isEmpty())
+                openALPath = customPath;
+        }
+        if (settings()->get("UseNativeGLFW").toBool()) {
+            glfwPath = APPLICATION->m_detectedGLFWPath;
+            auto customPath = settings()->get("CustomGLFWPath").toString();
+            if (!customPath.isEmpty())
+                glfwPath = customPath;
+        }
+
+        QFileInfo openALInfo(openALPath);
+        QFileInfo glfwInfo(glfwPath);
+
+        if (!openALPath.isEmpty() && openALInfo.exists())
+            list.append("-Dorg.lwjgl.openal.libname=" + openALInfo.absoluteFilePath());
+        if (!glfwPath.isEmpty() && glfwInfo.exists())
+            list.append("-Dorg.lwjgl.glfw.libname=" + glfwInfo.absoluteFilePath());
     }
+
     return list;
 }
 

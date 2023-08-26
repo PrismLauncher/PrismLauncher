@@ -64,7 +64,8 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     ui->setupUi(this);
     ui->listView->setEmptyString(
         tr("Welcome!\n"
-           "If you're new here, you can click the \"Add\" button to add your Mojang or Minecraft account."));
+           "If you're new here, you can select the \"Add Microsoft\" or \"Add Mojang\" buttons to link your Microsoft and/or Mojang "
+           "accounts."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -83,8 +84,10 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     QItemSelectionModel* selectionModel = ui->listView->selectionModel();
 
     connect(selectionModel, &QItemSelectionModel::selectionChanged,
-            [this](const QItemSelection& sel, const QItemSelection& dsel) { updateButtonStates(); });
+            [this]([[maybe_unused]] const QItemSelection& sel, [[maybe_unused]] const QItemSelection& dsel) { updateButtonStates(); });
     connect(ui->listView, &VersionListView::customContextMenuRequested, this, &AccountListPage::ShowContextMenu);
+    connect(ui->listView, &VersionListView::activated, this,
+            [this](const QModelIndex& index) { m_accounts->setDefaultAccount(m_accounts->at(index.row())); });
 
     connect(m_accounts.get(), &AccountList::listChanged, this, &AccountListPage::listChanged);
     connect(m_accounts.get(), &AccountList::listActivityChanged, this, &AccountListPage::listChanged);

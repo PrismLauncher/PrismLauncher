@@ -112,8 +112,8 @@ class copy : public QObject {
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    int totalCopied() { return m_copied; }
-    int totalFailed() { return m_failedPaths.length(); }
+    qsizetype totalCopied() { return m_copied; }
+    qsizetype totalFailed() { return m_failedPaths.length(); }
     QStringList failed() { return m_failedPaths; }
 
    signals:
@@ -130,7 +130,7 @@ class copy : public QObject {
     bool m_whitelist = false;
     QDir m_src;
     QDir m_dst;
-    int m_copied;
+    qsizetype m_copied;
     QStringList m_failedPaths;
 };
 
@@ -474,8 +474,8 @@ class clone : public QObject {
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    int totalCloned() { return m_cloned; }
-    int totalFailed() { return m_failedClones.length(); }
+    qsizetype totalCloned() { return m_cloned; }
+    qsizetype totalFailed() { return m_failedClones.length(); }
 
     QList<QPair<QString, QString>> failed() { return m_failedClones; }
 
@@ -491,7 +491,7 @@ class clone : public QObject {
     bool m_whitelist = false;
     QDir m_src;
     QDir m_dst;
-    int m_cloned;
+    qsizetype m_cloned;
     QList<QPair<QString, QString>> m_failedClones;
 };
 

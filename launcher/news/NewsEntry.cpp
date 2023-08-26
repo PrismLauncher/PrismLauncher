@@ -39,14 +39,14 @@ inline QString childValue(const QDomElement& element, const QString& childName, 
 {
     QDomNodeList nodes = element.elementsByTagName(childName);
     if (nodes.count() > 0) {
-        QDomElement element = nodes.at(0).toElement();
-        return element.text();
+        QDomElement elem = nodes.at(0).toElement();
+        return elem.text();
     } else {
         return defaultVal;
     }
 }
 
-bool NewsEntry::fromXmlElement(const QDomElement& element, NewsEntry* entry, QString* errorMsg)
+bool NewsEntry::fromXmlElement(const QDomElement& element, NewsEntry* entry, [[maybe_unused]] QString* errorMsg)
 {
     QString title = childValue(element, "title", tr("Untitled"));
     QString content = childValue(element, "content", tr("No content."));

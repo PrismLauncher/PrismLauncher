@@ -59,7 +59,11 @@ Modpack parseDirectory(QString path)
             auto obj = Json::requireObject(target, "target");
             auto name = Json::requireString(obj, "name", "name");
             auto version = Json::requireString(obj, "version", "version");
-            if (name == "forge") {
+            if (name == "neoforge") {
+                modpack.loaderType = ResourceAPI::NeoForge;
+                modpack.version = version;
+                break;
+            } else if (name == "forge") {
                 modpack.loaderType = ResourceAPI::Forge;
                 modpack.version = version;
                 break;

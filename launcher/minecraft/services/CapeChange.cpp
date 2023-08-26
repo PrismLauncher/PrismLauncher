@@ -42,7 +42,7 @@
 
 CapeChange::CapeChange(QObject* parent, QString token, QString cape) : Task(parent), m_capeId(cape), m_token(token) {}
 
-void CapeChange::setCape(QString& cape)
+void CapeChange::setCape([[maybe_unused]] QString& cape)
 {
     QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active"));
     auto requestString = QString("{\"capeId\":\"%1\"}").arg(m_capeId);

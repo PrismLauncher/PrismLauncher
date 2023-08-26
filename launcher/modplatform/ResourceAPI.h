@@ -54,7 +54,7 @@ class ResourceAPI {
    public:
     virtual ~ResourceAPI() = default;
 
-    enum ModLoaderType { Forge = 1 << 0, Cauldron = 1 << 1, LiteLoader = 1 << 2, Fabric = 1 << 3, Quilt = 1 << 4 };
+    enum ModLoaderType { NeoForge = 1 << 0, Forge = 1 << 1, Cauldron = 1 << 2, LiteLoader = 1 << 3, Fabric = 1 << 4, Quilt = 1 << 5 };
     Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 
     struct SortingMethod {
@@ -128,28 +128,30 @@ class ResourceAPI {
    public slots:
     [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::searchProjects";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, std::shared_ptr<QByteArray> response) const
+    [[nodiscard]] virtual Task::Ptr getProject([[maybe_unused]] QString addonId,
+                                               [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProject";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const
+    [[nodiscard]] virtual Task::Ptr getProjects([[maybe_unused]] QStringList addonIds,
+                                                [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjects";
         return nullptr;
     }
 
     [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjectInfo";
         return nullptr;
     }
     [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjectVersions";
         return nullptr;
     }
 
@@ -162,6 +164,8 @@ class ResourceAPI {
     static auto getModLoaderString(ModLoaderType type) -> const QString
     {
         switch (type) {
+            case NeoForge:
+                return "neoforge";
             case Forge:
                 return "forge";
             case Cauldron:

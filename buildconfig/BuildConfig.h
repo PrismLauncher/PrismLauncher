@@ -134,6 +134,9 @@ class Config {
      */
     QString META_URL;
 
+    QString GLFW_LIBRARY_NAME;
+    QString OPENAL_LIBRARY_NAME;
+
     QString BUG_TRACKER_URL;
     QString TRANSLATIONS_URL;
     QString MATRIX_URL;

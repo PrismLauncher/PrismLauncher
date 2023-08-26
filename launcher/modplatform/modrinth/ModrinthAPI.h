@@ -38,11 +38,13 @@ class ModrinthAPI : public NetworkResourceAPI {
     static auto getModLoaderStrings(const ModLoaderTypes types) -> const QStringList
     {
         QStringList l;
-        for (auto loader : { Forge, Fabric, Quilt, LiteLoader }) {
+        for (auto loader : { NeoForge, Forge, Fabric, Quilt, LiteLoader }) {
             if (types & loader) {
                 l << getModLoaderString(loader);
             }
         }
+        if ((types & NeoForge) && (~types & Forge))  // Add Forge if NeoForge is in use, if Forge isn't already there
+            l << getModLoaderString(Forge);
         if ((types & Quilt) && (~types & Fabric))  // Add Fabric if Quilt is in use, if Fabric isn't already there
             l << getModLoaderString(Fabric);
         return l;
@@ -141,7 +143,10 @@ class ModrinthAPI : public NetworkResourceAPI {
         return s.isEmpty() ? QString() : s;
     }
 
-    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool { return loaders & (Forge | Fabric | Quilt | LiteLoader); }
+    static inline auto validateModLoaders(ModLoaderTypes loaders) -> bool
+    {
+        return loaders & (NeoForge | Forge | Fabric | Quilt | LiteLoader);
+    }
 
     [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
     {

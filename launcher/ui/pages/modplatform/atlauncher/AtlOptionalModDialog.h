@@ -90,7 +90,7 @@ class AtlOptionalModListModel : public QAbstractListModel {
 
     QMap<QString, bool> m_selection;
     QMap<QString, int> m_index;
-    QMap<QString, QVector<QString>> m_dependants;
+    QMap<QString, QVector<QString>> m_dependents;
 };
 
 class AtlOptionalModDialog : public QDialog {
