@@ -152,6 +152,12 @@ QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 auto getModLoaderString(ModLoaderType type) -> const QString;
 
+constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
+{
+    auto x = static_cast<int>(l);
+    return x && !(x & (x - 1));
+}
+
 }  // namespace ModPlatform
 
 Q_DECLARE_METATYPE(ModPlatform::IndexedPack)

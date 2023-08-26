@@ -111,12 +111,23 @@ class FlameAPI : public NetworkResourceAPI {
 
         if (args.mcVersions.has_value())
             url += QString("&gameVersion=%1").arg(args.mcVersions.value().front().toString());
+
+        if (args.loaders.has_value() && ModPlatform::hasSingleModLoaderSelected(args.loaders.value())) {
+            int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loaders.value())));
+            url += QString("&modLoaderType=%1").arg(mappedModLoader);
+        }
         return url;
     };
 
     [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
     {
         auto addonId = args.dependency.addonId.toString();
-        return QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&gameVersion=%2").arg(addonId, args.mcVersion.toString());
+        auto url =
+            QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&gameVersion=%2").arg(addonId, args.mcVersion.toString());
+        if (args.loader && ModPlatform::hasSingleModLoaderSelected(args.loader)) {
+            int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loader)));
+            url += QString("&modLoaderType=%1").arg(mappedModLoader);
+        }
+        return url;
     };
 };
