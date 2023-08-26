@@ -156,29 +156,38 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
         FS::ensureFilePathExists(index_file.fileName());
     }
 
+    toml::table update;
+    switch (mod.provider) {
+        case (ModPlatform::ResourceProvider::FLAME):
+            if (mod.file_id.toInt() == 0 || mod.project_id.toInt() == 0) {
+                qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
+                return;
+            }
+            update = toml::table{
+                { "file-id", mod.file_id.toInt() },
+                { "project-id", mod.project_id.toInt() },
+            };
+            break;
+        case (ModPlatform::ResourceProvider::MODRINTH):
+            if (mod.mod_id().toString().isEmpty() || mod.version().toString().isEmpty()) {
+                qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
+                return;
+            }
+            update = toml::table{
+                { "mod-id", mod.mod_id().toString().toStdString() },
+                { "version", mod.version().toString().toStdString() },
+            };
+            break;
+    }
+
     if (!index_file.open(QIODevice::ReadWrite)) {
-        qCritical() << QString("Could not open file %1!").arg(indexFileName(mod.name));
+        qCritical() << QString("Could not open file %1!").arg(normalized_fname);
         return;
     }
 
     // Put TOML data into the file
     QTextStream in_stream(&index_file);
     {
-        toml::table update;
-        switch (mod.provider) {
-            case (ModPlatform::ResourceProvider::FLAME):
-                update = toml::table{
-                    { "file-id", mod.file_id.toInt() },
-                    { "project-id", mod.project_id.toInt() },
-                };
-                break;
-            case (ModPlatform::ResourceProvider::MODRINTH):
-                update = toml::table{
-                    { "mod-id", mod.mod_id().toString().toStdString() },
-                    { "version", mod.version().toString().toStdString() },
-                };
-                break;
-        }
         auto tbl = toml::table{ { "name", mod.name.toStdString() },
                                 { "filename", mod.filename.toStdString() },
                                 { "side", mod.side.toStdString() },
