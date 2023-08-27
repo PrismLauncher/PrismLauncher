@@ -30,6 +30,9 @@ class QIODevice;
 
 namespace ModPlatform {
 
+enum ModLoaderType { NeoForge = 1 << 0, Forge = 1 << 1, Cauldron = 1 << 2, LiteLoader = 1 << 3, Fabric = 1 << 4, Quilt = 1 << 5 };
+Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
+
 enum class ResourceProvider { MODRINTH, FLAME };
 
 enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
@@ -70,7 +73,7 @@ struct IndexedVersion {
     QString downloadUrl;
     QString date;
     QString fileName;
-    QStringList loaders = {};
+    ModLoaderTypes loaders = {};
     QString hash_type;
     QString hash;
     bool is_preferred = true;
@@ -128,7 +131,6 @@ struct IndexedPack {
         return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }
 };
-QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 struct OverrideDep {
     QString quilt;
@@ -147,6 +149,14 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
 }
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID);
+
+auto getModLoaderString(ModLoaderType type) -> const QString;
+
+constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
+{
+    auto x = static_cast<int>(l);
+    return x && !(x & (x - 1));
+}
 
 }  // namespace ModPlatform
 

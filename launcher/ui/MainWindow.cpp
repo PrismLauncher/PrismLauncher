@@ -43,9 +43,6 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
-#include "modplatform/ModIndex.h"
-#include "modplatform/flame/FlameModIndex.h"
-#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -92,17 +89,14 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
-#include "InstancePageProvider.h"
 #include "InstanceWindow.h"
-#include "JavaCommon.h"
-#include "LaunchController.h"
 
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
+#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -115,17 +109,22 @@
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/LabeledToolButton.h"
 
+#include "minecraft/PackProfile.h"
+#include "minecraft/VersionFile.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourcePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
 
 #include "KonamiCode.h"
 
 #include "InstanceCopyTask.h"
-#include "InstanceImportTask.h"
 
 #include "Json.h"
 
