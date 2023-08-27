@@ -168,12 +168,8 @@ void ListModel::performPaginatedSearch()
         if (!projectId.isEmpty()) {
             ResourceAPI::ProjectInfoCallbacks callbacks;
 
-            // Use defaults if no callbacks are set
-            if (!callbacks.on_fail)
-                callbacks.on_fail = [this](QString reason) { searchRequestFailed(reason); };
-
-            if (!callbacks.on_succeed)
-                callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
+            callbacks.on_fail = [this](QString reason) { searchRequestFailed(reason); };
+            callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
             static const FlameAPI api;
             if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {
                 jobPtr = job;

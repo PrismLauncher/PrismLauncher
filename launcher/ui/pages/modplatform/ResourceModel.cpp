@@ -137,26 +137,22 @@ void ResourceModel::search()
         if (!projectId.isEmpty()) {
             ResourceAPI::ProjectInfoCallbacks callbacks;
 
-            // Use defaults if no callbacks are set
-            if (!callbacks.on_fail)
-                callbacks.on_fail = [this](QString reason) {
-                    if (!s_running_models.constFind(this).value())
-                        return;
-                    searchRequestFailed(reason, -1);
-                };
-            if (!callbacks.on_abort)
-                callbacks.on_abort = [this] {
-                    if (!s_running_models.constFind(this).value())
-                        return;
-                    searchRequestAborted();
-                };
+            callbacks.on_fail = [this](QString reason) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                searchRequestFailed(reason, -1);
+            };
+            callbacks.on_abort = [this] {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                searchRequestAborted();
+            };
 
-            if (!callbacks.on_succeed)
-                callbacks.on_succeed = [this](auto& doc, auto& pack) {
-                    if (!s_running_models.constFind(this).value())
-                        return;
-                    searchRequestForOneSucceeded(doc);
-                };
+            callbacks.on_succeed = [this](auto& doc, auto& pack) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                searchRequestForOneSucceeded(doc);
+            };
             if (auto job = m_api->getProjectInfo({ projectId }, std::move(callbacks)); job)
                 runSearchJob(job);
             return;
