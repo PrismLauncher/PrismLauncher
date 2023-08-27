@@ -934,13 +934,16 @@ QString MinecraftInstance::getStatusbarDescription()
     if (m_settings->get("ShowGameTime").toBool()) {
         if (lastTimePlayed() > 0) {
             QDateTime lastLaunchTime = QDateTime::fromMSecsSinceEpoch(lastLaunch());
-            description.append(tr(", last played on %1 for %2")
-                                   .arg(QLocale().toString(lastLaunchTime, QLocale::ShortFormat))
-                                   .arg(Time::prettifyDuration(lastTimePlayed())));
+            description.append(
+                tr(", last played on %1 for %2")
+                    .arg(QLocale().toString(lastLaunchTime, QLocale::ShortFormat))
+                    .arg(Time::prettifyDuration(lastTimePlayed(), APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
         }
 
         if (totalTimePlayed() > 0) {
-            description.append(tr(", total played for %1").arg(Time::prettifyDuration(totalTimePlayed())));
+            description.append(
+                tr(", total played for %1")
+                    .arg(Time::prettifyDuration(totalTimePlayed(), APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
         }
     }
     if (hasCrashed()) {
