@@ -42,6 +42,7 @@
 #include "TechnicData.h"
 #include "net/NetJob.h"
 #include "ui/pages/BasePage.h"
+#include "ui/widgets/ProgressWidget.h"
 
 namespace Ui {
 class TechnicPage;
@@ -91,6 +92,8 @@ class TechnicPage : public QWidget, public BasePage {
 
     NetJob::Ptr jobPtr;
     std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
+
+    ProgressWidget m_fetch_progress;
 
     // Used to do instant searching with a delay to cache quick changes
     QTimer m_search_timer;

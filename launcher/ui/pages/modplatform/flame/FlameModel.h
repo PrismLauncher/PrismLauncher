@@ -41,6 +41,7 @@ class ListModel : public QAbstractListModel {
     void searchWithTerm(const QString& term, const int sort);
 
     [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
+    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
 
    private slots:
     void performPaginatedSearch();

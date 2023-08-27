@@ -52,7 +52,8 @@
 #include <QKeyEvent>
 #include <QPushButton>
 
-ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::ModrinthPage), dialog(dialog)
+ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
+    : QWidget(parent), ui(new Ui::ModrinthPage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
 
@@ -68,6 +69,12 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget
     m_search_timer.setSingleShot(true);
 
     connect(&m_search_timer, &QTimer::timeout, this, &ModrinthPage::triggerSearch);
+
+    m_fetch_progress.hideIfInactive(true);
+    m_fetch_progress.setFixedHeight(24);
+    m_fetch_progress.progressFormat("");
+
+    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
 
     ui->sortByBox->addItem(tr("Sort by Relevance"));
     ui->sortByBox->addItem(tr("Sort by Total Downloads"));
@@ -319,6 +326,7 @@ void ModrinthPage::suggestCurrent()
 void ModrinthPage::triggerSearch()
 {
     m_model->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+    m_fetch_progress.watch(m_model->activeSearchJob().get());
 }
 
 void ModrinthPage::onVersionSelectionChanged(QString version)

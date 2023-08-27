@@ -74,6 +74,7 @@ class ModpackListModel : public QAbstractListModel {
     void searchWithTerm(const QString& term, const int sort);
 
     [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
+    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
