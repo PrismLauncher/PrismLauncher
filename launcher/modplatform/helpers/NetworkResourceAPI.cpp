@@ -131,7 +131,7 @@ Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, 
     auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
     auto response = std::make_shared<QByteArray>();
 
-    netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [=] {
         QJsonParseError parse_error{};

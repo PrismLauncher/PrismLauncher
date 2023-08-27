@@ -65,21 +65,9 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instan
 
 auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver,
                                       QString mineVer,
-                                      std::optional<ResourceAPI::ModLoaderTypes> loaders) const -> bool
+                                      std::optional<ModPlatform::ModLoaderTypes> loaders) const -> bool
 {
-    auto loaderCompatible = !loaders.has_value();
-
-    if (!loaderCompatible) {
-        auto loaderStrings = ModrinthAPI::getModLoaderStrings(loaders.value());
-        for (auto remoteLoader : ver.loaders) {
-            if (loaderStrings.contains(remoteLoader)) {
-                loaderCompatible = true;
-                break;
-            }
-        }
-    }
-
-    return ver.mcVersion.contains(mineVer) && loaderCompatible;
+    return ver.mcVersion.contains(mineVer) && (!loaders.has_value() || !ver.loaders || loaders.value() & ver.loaders);
 }
 
 ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)

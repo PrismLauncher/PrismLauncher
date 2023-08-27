@@ -41,7 +41,7 @@ Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_f
 Task::Ptr ModrinthAPI::latestVersion(QString hash,
                                      QString hash_format,
                                      std::optional<std::list<Version>> mcVersions,
-                                     std::optional<ModLoaderTypes> loaders,
+                                     std::optional<ModPlatform::ModLoaderTypes> loaders,
                                      std::shared_ptr<QByteArray> response)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
@@ -71,7 +71,7 @@ Task::Ptr ModrinthAPI::latestVersion(QString hash,
 Task::Ptr ModrinthAPI::latestVersions(const QStringList& hashes,
                                       QString hash_format,
                                       std::optional<std::list<Version>> mcVersions,
-                                      std::optional<ModLoaderTypes> loaders,
+                                      std::optional<ModPlatform::ModLoaderTypes> loaders,
                                       std::shared_ptr<QByteArray> response)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());

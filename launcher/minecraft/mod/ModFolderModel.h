@@ -48,6 +48,7 @@
 
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
+#include "modplatform/ModIndex.h"
 
 class LegacyInstance;
 class BaseInstance;
@@ -75,6 +76,7 @@ class ModFolderModel : public ResourceFolderModel {
     [[nodiscard]] Task* createParseTask(Resource&) override;
 
     bool installMod(QString file_path) { return ResourceFolderModel::installResource(file_path); }
+    bool installMod(QString file_path, ModPlatform::IndexedVersion& vers);
     bool uninstallMod(const QString& filename, bool preserve_metadata = false);
 
     /// Deletes all the selected mods
