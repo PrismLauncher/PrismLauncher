@@ -381,6 +381,7 @@ QByteArray FlamePackExportTask::generateIndex()
         const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
         const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
         const ComponentPtr forge = profile->getComponent("net.minecraftforge");
+        const ComponentPtr neoforge = profile->getComponent("net.neoforged");
 
         // convert all available components to mrpack dependencies
         if (minecraft != nullptr)
@@ -392,6 +393,8 @@ QByteArray FlamePackExportTask::generateIndex()
             id = "fabric-" + fabric->getVersion();
         else if (forge != nullptr)
             id = "forge-" + forge->getVersion();
+        else if (neoforge != nullptr)
+            id = "neoforge-" + neoforge->getVersion();
         version["modLoaders"] = QJsonArray();
         if (!id.isEmpty()) {
             QJsonObject loader;

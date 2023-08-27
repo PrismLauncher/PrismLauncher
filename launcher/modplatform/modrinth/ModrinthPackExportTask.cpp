@@ -245,6 +245,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
         const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
         const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
         const ComponentPtr forge = profile->getComponent("net.minecraftforge");
+        const ComponentPtr neoForge = profile->getComponent("net.neoforged");
 
         // convert all available components to mrpack dependencies
         QJsonObject dependencies;
@@ -256,6 +257,8 @@ QByteArray ModrinthPackExportTask::generateIndex()
             dependencies["fabric-loader"] = fabric->m_version;
         if (forge != nullptr)
             dependencies["forge"] = forge->m_version;
+        if (neoForge != nullptr)
+            dependencies["neoforge"] = neoForge->m_version;
 
         out["dependencies"] = dependencies;
     }
