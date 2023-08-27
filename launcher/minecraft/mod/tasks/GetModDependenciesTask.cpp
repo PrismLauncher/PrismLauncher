@@ -39,9 +39,9 @@ static Version mcVersion(BaseInstance* inst)
     return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion();
 }
 
-static ResourceAPI::ModLoaderTypes mcLoaders(BaseInstance* inst)
+static ModPlatform::ModLoaderTypes mcLoaders(BaseInstance* inst)
 {
-    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoaders().value();
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value();
 }
 
 GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
@@ -75,7 +75,7 @@ void GetModDependenciesTask::prepare()
 ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::Dependency& dep,
                                                             const ModPlatform::ResourceProvider providerName)
 {
-    if (auto isQuilt = m_loaderType & ResourceAPI::Quilt; isQuilt || m_loaderType & ResourceAPI::Fabric) {
+    if (auto isQuilt = m_loaderType & ModPlatform::Quilt; isQuilt || m_loaderType & ModPlatform::Fabric) {
         auto overide = ModPlatform::getOverrideDeps();
         auto over = std::find_if(overide.cbegin(), overide.cend(), [dep, providerName, isQuilt](auto o) {
             return o.provider == providerName && dep.addonId == (isQuilt ? o.fabric : o.quilt);
@@ -191,7 +191,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             }
             pDep->version = provider.mod->loadDependencyVersions(dep, arr);
             if (!pDep->version.addonId.isValid()) {
-                if (m_loaderType & ResourceAPI::Quilt) {  // falback for quilt
+                if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
                     auto overide = ModPlatform::getOverrideDeps();
                     auto over = std::find_if(overide.cbegin(), overide.cend(),
                                              [dep, provider](auto o) { return o.provider == provider.name && dep.addonId == o.quilt; });
@@ -201,6 +201,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
                         return;
                     }
                 }
+                removePack(dep.addonId);
                 qWarning() << "Error while reading mod version empty ";
                 qDebug() << doc;
                 return;

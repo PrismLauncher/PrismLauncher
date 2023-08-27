@@ -9,7 +9,6 @@
  *  Copyright (C) 2022 Tayou <git@tayou.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
- *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -580,9 +579,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
 
-        // Mod loader settings
-        m_settings->registerSetting("DisableQuiltBeacon", false);
-
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
         m_settings->registerSetting("CustomOpenALPath", "");
@@ -598,6 +594,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGameTime", true);
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
+        m_settings->registerSetting("ShowGameTimeWithoutDays", false);
 
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
@@ -968,7 +965,7 @@ void Application::performMainStartupAction()
                 qDebug() << "   Launching with account" << m_profileToUse;
             }
 
-            launch(inst, true, false, nullptr, serverToJoin, accountToUse);
+            launch(inst, true, false, serverToJoin, accountToUse);
             return;
         }
     }
@@ -1067,7 +1064,7 @@ void Application::messageReceived(const QByteArray& message)
             }
         }
 
-        launch(instance, true, false, nullptr, serverObject, accountObject);
+        launch(instance, true, false, serverObject, accountObject);
     } else {
         qWarning() << "Received invalid message" << message;
     }
@@ -1108,7 +1105,6 @@ bool Application::openJsonEditor(const QString& filename)
 bool Application::launch(InstancePtr instance,
                          bool online,
                          bool demo,
-                         BaseProfilerFactory* profiler,
                          MinecraftServerTargetPtr serverToJoin,
                          MinecraftAccountPtr accountToUse)
 {
@@ -1116,7 +1112,7 @@ bool Application::launch(InstancePtr instance,
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
     } else if (instance->canLaunch()) {
         auto& extras = m_instanceExtras[instance->id()];
-        auto& window = extras.window;
+        auto window = extras.window;
         if (window) {
             if (!window->saveAll()) {
                 return false;
@@ -1127,7 +1123,7 @@ bool Application::launch(InstancePtr instance,
         controller->setInstance(instance);
         controller->setOnline(online);
         controller->setDemo(demo);
-        controller->setProfiler(profiler);
+        controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
         controller->setServerToJoin(serverToJoin);
         controller->setAccountToUse(accountToUse);
         if (window) {

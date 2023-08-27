@@ -68,25 +68,25 @@ void PackInstallTask::copySettings()
     auto modloader = m_pack.loaderType;
     if (modloader.has_value())
         switch (modloader.value()) {
-            case ResourceAPI::NeoForge: {
+            case ModPlatform::NeoForge: {
                 components->setComponentVersion("net.neoforged", m_pack.version, true);
                 break;
             }
-            case ResourceAPI::Forge: {
+            case ModPlatform::Forge: {
                 components->setComponentVersion("net.minecraftforge", m_pack.version, true);
                 break;
             }
-            case ResourceAPI::Fabric: {
+            case ModPlatform::Fabric: {
                 components->setComponentVersion("net.fabricmc.fabric-loader", m_pack.version, true);
                 break;
             }
-            case ResourceAPI::Quilt: {
+            case ModPlatform::Quilt: {
                 components->setComponentVersion("org.quiltmc.quilt-loader", m_pack.version, true);
                 break;
             }
-            case ResourceAPI::Cauldron:
+            case ModPlatform::Cauldron:
                 break;
-            case ResourceAPI::LiteLoader:
+            case ModPlatform::LiteLoader:
                 break;
         }
     components->saveNow();
