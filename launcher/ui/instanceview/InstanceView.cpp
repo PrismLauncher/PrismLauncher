@@ -482,10 +482,10 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
     if (model()->rowCount() == 0) {
         painter.save();
         const QString line1 = tr("Welcome!");
-        const QString line2 = tr("Add an instance to get started.");
+        const QString line2 = tr("Click \"Add Instance\" to get started.");
         auto rect = this->viewport()->rect();
         auto font = option.font;
-        font.setPointSize(53);
+        font.setPointSize(37);
         painter.setFont(font);
         auto fm = painter.fontMetrics();
 
