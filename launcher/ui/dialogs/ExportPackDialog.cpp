@@ -81,10 +81,9 @@ ExportPackDialog::ExportPackDialog(InstancePtr instance, QWidget* parent, ModPla
 
     MinecraftInstance* mcInstance = dynamic_cast<MinecraftInstance*>(instance.get());
     if (mcInstance) {
-        mcInstance->loaderModList()->update();
         const QDir index = mcInstance->loaderModList()->indexDir();
         if (index.exists())
-            proxy->blockedPaths().insert(root.relativeFilePath(index.absolutePath()));
+            proxy->ignoreFilesWithPath().insert(root.relativeFilePath(index.absolutePath()));
     }
 
     ui->files->setModel(proxy);
@@ -120,17 +119,18 @@ void ExportPackDialog::done(int result)
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
             output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
                                                   "Modrinth pack (*.mrpack *.zip)", nullptr);
+            if (output.isEmpty())
+                return;
             if (!(output.endsWith(".zip") || output.endsWith(".mrpack")))
                 output.append(".mrpack");
         } else {
             output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".zip"),
                                                   "CurseForge pack (*.zip)", nullptr);
+            if (output.isEmpty())
+                return;
             if (!output.endsWith(".zip"))
                 output.append(".zip");
         }
-
-        if (output.isEmpty())
-            return;
 
         Task* task;
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
