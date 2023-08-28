@@ -195,6 +195,12 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("UseAccountForInstance", false);
     m_settings->registerSetting("InstanceAccountId", "");
 
+    m_settings->registerSetting("ExportName", "");
+    m_settings->registerSetting("ExportVersion", "1.0.0");
+    m_settings->registerSetting("ExportSummary", "");
+    m_settings->registerSetting("ExportAuthor", "");
+    m_settings->registerSetting("ExportOptionalFiles", true);
+
     qDebug() << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);

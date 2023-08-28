@@ -43,12 +43,14 @@ const QStringList FlamePackExportTask::FILE_EXTENSIONS({ "jar", "zip" });
 FlamePackExportTask::FlamePackExportTask(const QString& name,
                                          const QString& version,
                                          const QString& author,
+                                         bool optionalFiles,
                                          InstancePtr instance,
                                          const QString& output,
                                          MMCZip::FilterFunction filter)
     : name(name)
     , version(version)
     , author(author)
+    , optionalFiles(optionalFiles)
     , instance(instance)
     , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
     , gameRoot(instance->gameRoot())
@@ -410,7 +412,7 @@ QByteArray FlamePackExportTask::generateIndex()
         QJsonObject file;
         file["projectID"] = mod.addonId;
         file["fileID"] = mod.version;
-        file["required"] = mod.enabled;
+        file["required"] = mod.enabled || !optionalFiles;
         files << file;
     }
     obj["files"] = files;
