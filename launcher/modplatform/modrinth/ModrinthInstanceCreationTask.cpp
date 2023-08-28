@@ -394,7 +394,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                 for (auto file : optionalFiles) {
                     if (selectedMods.contains(file.path)) {
                         file.required = true;
-                    } else if (file.path.endsWith(".jar")) {
+                    } else {
                         file.path += ".disabled";
                     }
                     files.push_back(file);
