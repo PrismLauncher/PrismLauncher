@@ -393,11 +393,18 @@ void ScreenshotsPage::on_actionUpload_triggered()
         auto screenshot = std::make_shared<ScreenShot>(info);
         job->addNetAction(ImgurUpload::make(screenshot));
 
+        connect(job.get(), &Task::failed, [this](QString reason) {
+            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
+        });
+        connect(job.get(), &Task::aborted, [this] {
+            CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
+                                         QMessageBox::Information)
+                ->show();
+        });
+
         m_uploadActive = true;
 
-        if (dialog.execWithTask(job.get()) != QDialog::Accepted) {
-            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), tr("Unknown error"), QMessageBox::Warning)->exec();
-        } else {
+        if (dialog.execWithTask(job.get()) == QDialog::Accepted) {
             auto link = screenshot->m_url;
             QClipboard* clipboard = QApplication::clipboard();
             qDebug() << "ImgurUpload link" << link;
@@ -426,18 +433,31 @@ void ScreenshotsPage::on_actionUpload_triggered()
     albumTask->addNetAction(imgurAlbum);
     task.addTask(job);
     task.addTask(albumTask);
-    m_uploadActive = true;
-    if (dialog.execWithTask(&task) != QDialog::Accepted || imgurResult->id.isEmpty()) {
-        CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), tr("Unknown error"), QMessageBox::Warning)->exec();
-    } else {
-        auto link = QString("https://imgur.com/a/%1").arg(imgurResult->id);
-        qDebug() << "ImgurUpload link" << link;
-        QClipboard* clipboard = QApplication::clipboard();
-        clipboard->setText(link);
-        CustomMessageBox::selectable(this, tr("Upload finished"),
-                                     tr("The <a href=\"%1\">link  to the uploaded album</a> has been placed in your clipboard.").arg(link),
+
+    connect(&task, &Task::failed, [this](QString reason) {
+        CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
+    });
+    connect(&task, &Task::aborted, [this] {
+        CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
                                      QMessageBox::Information)
-            ->exec();
+            ->show();
+    });
+
+    m_uploadActive = true;
+    if (dialog.execWithTask(&task) == QDialog::Accepted) {
+        if (imgurResult->id.isEmpty()) {
+            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), tr("Unknown error"), QMessageBox::Warning)->exec();
+        } else {
+            auto link = QString("https://imgur.com/a/%1").arg(imgurResult->id);
+            qDebug() << "ImgurUpload link" << link;
+            QClipboard* clipboard = QApplication::clipboard();
+            clipboard->setText(link);
+            CustomMessageBox::selectable(
+                this, tr("Upload finished"),
+                tr("The <a href=\"%1\">link  to the uploaded album</a> has been placed in your clipboard.").arg(link),
+                QMessageBox::Information)
+                ->exec();
+        }
     }
     m_uploadActive = false;
 }
