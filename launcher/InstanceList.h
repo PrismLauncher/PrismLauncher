@@ -106,7 +106,7 @@ class InstanceList : public QAbstractListModel {
     bool isGroupCollapsed(const QString& groupName);
 
     GroupId getInstanceGroup(const InstanceId& id) const;
-    void setInstanceGroup(const InstanceId& id, const GroupId& name);
+    void setInstanceGroup(const InstanceId& id, GroupId name);
 
     void deleteGroup(const GroupId& name);
     void renameGroup(const GroupId& src, const GroupId& dst);

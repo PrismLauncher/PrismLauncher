@@ -645,7 +645,6 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     return inst;
 }
 
-
 void InstanceList::increaseGroupCount(const QString& group)
 {
     if (group.isEmpty())

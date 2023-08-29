@@ -1149,12 +1149,13 @@ void MainWindow::deleteGroup(QString group)
     Q_ASSERT(!group.isEmpty());
 
     const int reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group '%1'?").arg(group),
-                                       QMessageBox::Yes | QMessageBox::No);
+                                            QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes)
         APPLICATION->instances()->deleteGroup(group);
 }
 
-void MainWindow::renameGroup(QString group) {
+void MainWindow::renameGroup(QString group)
+{
     Q_ASSERT(!group.isEmpty());
 
     QString name = QInputDialog::getText(this, tr("Rename group"), tr("Enter a new group name."), QLineEdit::Normal, group);
