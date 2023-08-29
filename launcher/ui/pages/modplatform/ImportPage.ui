@@ -40,7 +40,7 @@
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>- CurseForge modpacks (ZIP)</string>
+        <string>- CurseForge modpacks (ZIP / curseforge:// URL)</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

@@ -17,6 +17,7 @@
       mkPrism = qt:
         qt.callPackage ./package.nix {
           inherit (inputs) libnbtplusplus;
+          inherit (prev.darwin.apple_sdk.frameworks) Cocoa;
           inherit self version;
         };
     in {

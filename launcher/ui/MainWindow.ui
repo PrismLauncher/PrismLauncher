@@ -440,22 +440,6 @@
     <string>Ctrl+D</string>
    </property>
   </action>
-  <action name="actionLaunchInstanceOffline">
-   <property name="text">
-    <string>Launch &amp;Offline</string>
-   </property>
-   <property name="toolTip">
-    <string>Launch the selected instance in offline mode.</string>
-   </property>
-  </action>
-  <action name="actionLaunchInstanceDemo">
-   <property name="text">
-    <string>Launch &amp;Demo</string>
-   </property>
-   <property name="toolTip">
-    <string>Launch the selected instance in demo mode.</string>
-   </property>
-  </action>
   <action name="actionExportInstance">
    <property name="icon">
     <iconset theme="export">

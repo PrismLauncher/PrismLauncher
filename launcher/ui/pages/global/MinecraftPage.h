@@ -70,6 +70,9 @@ class MinecraftPage : public QWidget, public BasePage {
    private slots:
     void on_maximizedCheckBox_clicked(bool checked);
 
+    void onUseNativeGLFWChanged(bool checked);
+    void onUseNativeOpenALChanged(bool checked);
+
    private:
     Ui::MinecraftPage* ui;
 };

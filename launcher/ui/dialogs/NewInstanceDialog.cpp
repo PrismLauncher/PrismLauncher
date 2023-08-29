@@ -63,8 +63,10 @@
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 #include "ui/pages/modplatform/technic/TechnicPage.h"
 #include "ui/widgets/PageContainer.h"
-
-NewInstanceDialog::NewInstanceDialog(const QString& initialGroup, const QString& url, QWidget* parent)
+NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
+                                     const QString& url,
+                                     const QMap<QString, QString>& extra_info,
+                                     QWidget* parent)
     : QDialog(parent), ui(new Ui::NewInstanceDialog)
 {
     ui->setupUi(this);
@@ -117,6 +119,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup, const QString&
         QUrl actualUrl(url);
         m_container->selectPage("import");
         importPage->setUrl(url);
+        importPage->setExtraInfo(extra_info);
     }
 
     updateDialogState();
