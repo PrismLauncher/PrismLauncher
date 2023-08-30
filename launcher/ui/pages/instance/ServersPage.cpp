@@ -3,7 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -354,14 +354,8 @@ class ServersModel : public QAbstractListModel {
         }
     }
 
-    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override
-    {
-        return parent.isValid() ? 0 : m_servers.size();
-    }
-    int columnCount(const QModelIndex& parent) const override
-    {
-        return parent.isValid() ? 0 : COLUMN_COUNT;
-    }
+    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override { return parent.isValid() ? 0 : m_servers.size(); }
+    int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : COLUMN_COUNT; }
 
     Server* at(int index)
     {
@@ -445,10 +439,7 @@ class ServersModel : public QAbstractListModel {
         qDebug() << "Changed:" << path;
         load();
     }
-    void fileChanged(const QString& path)
-    {
-        qDebug() << "Changed:" << path;
-    }
+    void fileChanged(const QString& path) { qDebug() << "Changed:" << path; }
 
    private slots:
     void save_internal()
@@ -492,10 +483,7 @@ class ServersModel : public QAbstractListModel {
         m_saveTimer.stop();
     }
 
-    bool saveIsScheduled() const
-    {
-        return m_dirty;
-    }
+    bool saveIsScheduled() const { return m_dirty; }
 
     void updateFSObserver()
     {
@@ -743,7 +731,7 @@ void ServersPage::on_actionMove_Down_triggered()
 void ServersPage::on_actionJoin_triggered()
 {
     const auto& address = m_model->at(currentServer)->m_address;
-    APPLICATION->launch(m_inst, true, false, nullptr, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
+    APPLICATION->launch(m_inst, true, false, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
 }
 
 #include "ServersPage.moc"

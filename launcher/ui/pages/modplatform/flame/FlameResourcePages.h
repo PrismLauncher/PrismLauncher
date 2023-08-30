@@ -95,7 +95,7 @@ class FlameModPage : public ModPage {
 
     bool validateVersion(ModPlatform::IndexedVersion& ver,
                          QString mineVer,
-                         std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const override;
+                         std::optional<ModPlatform::ModLoaderTypes> loaders = {}) const override;
     bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     void openUrl(const QUrl& url) override;

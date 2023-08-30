@@ -219,6 +219,18 @@ set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL 
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
 set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
 
+# Native libraries
+if(UNIX AND APPLE)
+    set(Launcher_GLFW_LIBRARY_NAME "libglfw.dylib" CACHE STRING "Name of native glfw library")
+    set(Launcher_OPENAL_LIBRARY_NAME "libopenal.dylib" CACHE STRING "Name of native openal library")
+elseif(UNIX)
+    set(Launcher_GLFW_LIBRARY_NAME "libglfw.so" CACHE STRING "Name of native glfw library")
+    set(Launcher_OPENAL_LIBRARY_NAME "libopenal.so" CACHE STRING "Name of native openal library")
+elseif(WIN32)
+    set(Launcher_GLFW_LIBRARY_NAME "glfw.dll" CACHE STRING "Name of native glfw library")
+    set(Launcher_OPENAL_LIBRARY_NAME "OpenAL.dll" CACHE STRING "Name of native openal library")
+endif()
+
 # API Keys
 # NOTE: These API keys are here for convenience. If you rebrand this software or intend to break the terms of service
 # of these platforms, please change these API keys beforehand.

@@ -101,4 +101,5 @@ class InstanceImportTask : public InstanceTask {
 
     // FIXME: nuke
     QWidget* m_parent;
+    void downloadFromUrl();
 };
