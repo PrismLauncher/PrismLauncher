@@ -17,6 +17,7 @@
   gamemode,
   flite,
   mesa-demos,
+  udev,
   msaClientID ? null,
   gamemodeSupport ? stdenv.isLinux,
   textToSpeechSupport ? stdenv.isLinux,
@@ -58,11 +59,15 @@ in
           libXxf86vm
         ])
         ++ [
+          # lwjgl
           libpulseaudio
           libGL
           glfw
           openal
           stdenv.cc.cc.lib
+
+          # oshi
+          udev
         ]
         ++ lib.optional gamemodeSupport gamemode.lib
         ++ lib.optional textToSpeechSupport flite
