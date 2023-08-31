@@ -34,8 +34,8 @@ void ProjectItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
             icon_width = icon_size.width();
             icon_height = icon_size.height();
 
-            icon_x_margin = (rect.height() - icon_width) / 2;
             icon_y_margin = (rect.height() - icon_height) / 2;
+            icon_x_margin = icon_y_margin;  // use same margins for consistency
         }
 
         // Centralize icon with a margin to separate from the other elements

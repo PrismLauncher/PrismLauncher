@@ -50,7 +50,8 @@
 
 static FlameAPI api;
 
-FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog)
+FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
+    : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &FlamePage::triggerSearch);
@@ -60,6 +61,17 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
+
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &FlamePage::triggerSearch);
+
+    m_fetch_progress.hideIfInactive(true);
+    m_fetch_progress.setFixedHeight(24);
+    m_fetch_progress.progressFormat("");
+
+    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
 
     // index is used to set the sorting with the curseforge api
     ui->sortByBox->addItem(tr("Sort by Featured"));
@@ -90,6 +102,11 @@ bool FlamePage::eventFilter(QObject* watched, QEvent* event)
             triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     }
     return QWidget::eventFilter(watched, event);
@@ -114,6 +131,7 @@ void FlamePage::openedImpl()
 void FlamePage::triggerSearch()
 {
     listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+    m_fetch_progress.watch(listModel->activeSearchJob().get());
 }
 
 void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
