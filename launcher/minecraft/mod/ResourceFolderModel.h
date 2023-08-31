@@ -49,8 +49,8 @@ class ResourceFolderModel : public QAbstractListModel {
     bool stopWatching(const QStringList paths);
 
     /* Helper methods for subclasses, using a predetermined list of paths. */
-    virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); }
-    virtual bool stopWatching() { return stopWatching({ m_dir.absolutePath() }); }
+    virtual bool startWatching() { return startWatching({ indexDir().absolutePath(), m_dir.absolutePath() }); }
+    virtual bool stopWatching() { return stopWatching({ indexDir().absolutePath(), m_dir.absolutePath() }); }
 
     QDir indexDir() { return { QString("%1/.index").arg(dir().absolutePath()) }; }
 
@@ -61,11 +61,13 @@ class ResourceFolderModel : public QAbstractListModel {
      */
     virtual bool installResource(QString path);
 
+    virtual bool installResource(QString path, ModPlatform::IndexedVersion& vers);
+
     /** Uninstall (i.e. remove all data about it) a resource, given its file name.
      *
      *  Returns whether the removal was successful.
      */
-    virtual bool uninstallResource(QString file_name);
+    virtual bool uninstallResource(QString file_name, bool preserve_metadata = false);
     virtual bool deleteResources(const QModelIndexList&);
 
     /** Applies the given 'action' to the resources in 'indexes'.

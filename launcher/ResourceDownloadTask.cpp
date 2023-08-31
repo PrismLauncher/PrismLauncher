@@ -67,12 +67,8 @@ void ResourceDownloadTask::downloadSucceeded()
     m_filesNetJob.reset();
     auto name = std::get<0>(to_delete);
     auto filename = std::get<1>(to_delete);
-    if (!name.isEmpty() && filename != m_pack_version.fileName) {
-        if (auto model = dynamic_cast<ModFolderModel*>(m_pack_model.get()); model)
-            model->uninstallMod(filename, true);
-        else
-            m_pack_model->uninstallResource(filename);
-    }
+    if (!name.isEmpty() && filename != m_pack_version.fileName)
+        m_pack_model->uninstallResource(filename, true);
 }
 
 void ResourceDownloadTask::downloadFailed(QString reason)

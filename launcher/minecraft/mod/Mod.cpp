@@ -36,7 +36,6 @@
 
 #include "Mod.h"
 
-#include <QDebug>
 #include <QDir>
 #include <QRegularExpression>
 #include <QString>

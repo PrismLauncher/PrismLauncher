@@ -32,7 +32,7 @@
 
 namespace Packwiz {
 
-auto getRealIndexName(QDir& index_dir, QString normalized_fname, bool should_find_match) -> QString
+auto getRealIndexName(const QDir& index_dir, QString normalized_fname, bool should_find_match) -> QString
 {
     QFile index_file(index_dir.absoluteFilePath(normalized_fname));
 
@@ -89,7 +89,7 @@ auto intEntry(toml::table table, QString entry_name) -> int
     return node.value_or(0);
 }
 
-auto V1::createModFormat([[maybe_unused]] QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version)
+auto V1::createModFormat([[maybe_unused]] const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version)
     -> Mod
 {
     Mod mod;
@@ -115,7 +115,7 @@ auto V1::createModFormat([[maybe_unused]] QDir& index_dir, ModPlatform::IndexedP
     return mod;
 }
 
-auto V1::createModFormat(QDir& index_dir, [[maybe_unused]] ::Mod& internal_mod, QString slug) -> Mod
+auto V1::createModFormat(const QDir& index_dir, [[maybe_unused]] ::Mod& internal_mod, QString slug) -> Mod
 {
     // Try getting metadata if it exists
     Mod mod{ getIndexForMod(index_dir, slug) };
@@ -127,7 +127,7 @@ auto V1::createModFormat(QDir& index_dir, [[maybe_unused]] ::Mod& internal_mod, 
     return {};
 }
 
-void V1::updateModIndex(QDir& index_dir, Mod& mod)
+void V1::updateModIndex(const QDir& index_dir, Mod& mod)
 {
     if (!mod.isValid()) {
         qCritical() << QString("Tried to update metadata of an invalid mod!");
@@ -192,7 +192,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
     index_file.close();
 }
 
-void V1::deleteModIndex(QDir& index_dir, QString& mod_slug)
+void V1::deleteModIndex(const QDir& index_dir, QString& mod_slug)
 {
     auto normalized_fname = indexFileName(mod_slug);
     auto real_fname = getRealIndexName(index_dir, normalized_fname);
@@ -211,7 +211,7 @@ void V1::deleteModIndex(QDir& index_dir, QString& mod_slug)
     }
 }
 
-void V1::deleteModIndex(QDir& index_dir, QVariant& mod_id)
+void V1::deleteModIndex(const QDir& index_dir, QVariant& mod_id)
 {
     for (auto& file_name : index_dir.entryList(QDir::Filter::Files)) {
         auto mod = getIndexForMod(index_dir, file_name);
@@ -223,7 +223,7 @@ void V1::deleteModIndex(QDir& index_dir, QVariant& mod_id)
     }
 }
 
-auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
+auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
 {
     Mod mod;
 
@@ -301,7 +301,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     return mod;
 }
 
-auto V1::getIndexForMod(QDir& index_dir, QVariant& mod_id) -> Mod
+auto V1::getIndexForMod(const QDir& index_dir, QVariant& mod_id) -> Mod
 {
     for (auto& file_name : index_dir.entryList(QDir::Filter::Files)) {
         auto mod = getIndexForMod(index_dir, file_name);

@@ -150,7 +150,7 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
         if (response != QMessageBox::Yes)
             return;
     }
-    m_model->deleteMods(selection.indexes());
+    m_model->deleteResources(selection.indexes());
 }
 
 void ModFolderPage::installMods()

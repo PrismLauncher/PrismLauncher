@@ -172,15 +172,10 @@ bool Resource::enable(EnableAction action)
     return true;
 }
 
-bool Resource::destroy(bool attemptTrash)
+auto Resource::destroy(const QDir& index_dir, bool preserve_metadata, bool attempt_trash) -> bool
 {
     m_type = ResourceType::UNKNOWN;
-    return (attemptTrash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
-}
 
-
-auto Resource::destroy(QDir& index_dir, bool preserve_metadata, bool attempt_trash) -> bool
-{
     if (!preserve_metadata) {
         qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
 
@@ -192,7 +187,7 @@ auto Resource::destroy(QDir& index_dir, bool preserve_metadata, bool attempt_tra
         }
     }
 
-    return destroy(attempt_trash);
+    return (attempt_trash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
 }
 
 bool Resource::isSymLinkUnder(const QString& instPath) const

@@ -74,17 +74,7 @@ class ModFolderModel : public ResourceFolderModel {
     [[nodiscard]] Resource* createResource(const QFileInfo& file) override { return new Mod(file); }
     [[nodiscard]] Task* createParseTask(Resource&) override;
 
-    bool installMod(QString file_path) { return ResourceFolderModel::installResource(file_path); }
-    bool installMod(QString file_path, ModPlatform::IndexedVersion& vers);
-    bool uninstallMod(const QString& filename, bool preserve_metadata = false);
-
-    /// Deletes all the selected mods
-    bool deleteMods(const QModelIndexList& indexes);
-
     bool isValid();
-
-    bool startWatching() override;
-    bool stopWatching() override;
 
     auto selectedMods(QModelIndexList& indexes) -> QList<Mod*>;
     auto allMods() -> QList<Mod*>;

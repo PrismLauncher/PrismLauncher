@@ -51,13 +51,9 @@
 
 #include "Application.h"
 
-#include "Json.h"
 #include "Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/LocalModUpdateTask.h"
-#include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
-#include "modplatform/ModIndex.h"
-#include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 
 ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
@@ -184,56 +180,9 @@ Task* ModFolderModel::createParseTask(Resource& resource)
     return new LocalModParseTask(m_next_resolution_ticket, resource.type(), resource.fileinfo());
 }
 
-bool ModFolderModel::uninstallMod(const QString& filename, bool preserve_metadata)
-{
-    for (auto mod : allMods()) {
-        if (mod->fileinfo().fileName() == filename) {
-            auto index_dir = indexDir();
-            mod->destroy(index_dir, preserve_metadata, false);
-
-            update();
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
-{
-    if (indexes.isEmpty())
-        return true;
-
-    for (auto i : indexes) {
-        if (i.column() != 0) {
-            continue;
-        }
-        auto m = at(i.row());
-        auto index_dir = indexDir();
-        m->destroy(index_dir);
-    }
-
-    update();
-
-    return true;
-}
-
 bool ModFolderModel::isValid()
 {
     return m_dir.exists() && m_dir.isReadable();
-}
-
-bool ModFolderModel::startWatching()
-{
-    // Remove orphaned metadata next time
-    m_first_folder_load = true;
-    return ResourceFolderModel::startWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
-}
-
-bool ModFolderModel::stopWatching()
-{
-    return ResourceFolderModel::stopWatching({ m_dir.absolutePath(), indexDir().absolutePath() });
 }
 
 auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod*>
@@ -279,48 +228,4 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
         resource->finishResolvingWithDetails(std::move(result->details));
 
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
-}
-
-static const FlameAPI flameAPI;
-bool ModFolderModel::installMod(QString file_path, ModPlatform::IndexedVersion& vers)
-{
-    if (vers.addonId.isValid()) {
-        ModPlatform::IndexedPack pack{
-            vers.addonId,
-            ModPlatform::ResourceProvider::FLAME,
-        };
-
-        QEventLoop loop;
-
-        auto response = std::make_shared<QByteArray>();
-        auto job = flameAPI.getProject(vers.addonId.toString(), response);
-
-        QObject::connect(job.get(), &Task::failed, [&loop] { loop.quit(); });
-        QObject::connect(job.get(), &Task::aborted, &loop, &QEventLoop::quit);
-        QObject::connect(job.get(), &Task::succeeded, [response, this, &vers, &loop, &pack] {
-            QJsonParseError parse_error{};
-            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-            if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
-                           << " reason: " << parse_error.errorString();
-                qDebug() << *response;
-                return;
-            }
-            try {
-                auto obj = Json::requireObject(Json::requireObject(doc), "data");
-                FlameMod::loadIndexedPack(pack, obj);
-            } catch (const JSONValidationError& e) {
-                qDebug() << doc;
-                qWarning() << "Error while reading mod info: " << e.cause();
-            }
-            LocalModUpdateTask update_metadata(indexDir(), pack, vers);
-            QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);
-            update_metadata.start();
-        });
-
-        job->start();
-
-        loop.exec();
-    }
-    return ResourceFolderModel::installResource(file_path);
 }

@@ -10,6 +10,7 @@
 #include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
+#include <utility>
 
 #include "Application.h"
 #include "FileSystem.h"
@@ -17,6 +18,10 @@
 #include "QVariantUtils.h"
 #include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
+#include "Json.h"
+#include "minecraft/mod/tasks/LocalModUpdateTask.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
 #include "settings/Setting.h"
 #include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -43,6 +48,9 @@ ResourceFolderModel::~ResourceFolderModel()
 
 bool ResourceFolderModel::startWatching(const QStringList paths)
 {
+    // Remove orphaned metadata next time
+    m_first_folder_load = true;
+
     if (m_is_watching)
         return false;
 
@@ -153,11 +161,55 @@ bool ResourceFolderModel::installResource(QString original_path)
     return false;
 }
 
-bool ResourceFolderModel::uninstallResource(QString file_name)
+bool ResourceFolderModel::installResource(QString path, ModPlatform::IndexedVersion& vers)
+{
+    if (vers.addonId.isValid()) {
+        ModPlatform::IndexedPack pack{
+            vers.addonId,
+            ModPlatform::ResourceProvider::FLAME,
+        };
+
+        QEventLoop loop;
+
+        auto response = std::make_shared<QByteArray>();
+        auto job = FlameAPI().getProject(vers.addonId.toString(), response);
+
+        QObject::connect(job.get(), &Task::failed, [&loop] { loop.quit(); });
+        QObject::connect(job.get(), &Task::aborted, &loop, &QEventLoop::quit);
+        QObject::connect(job.get(), &Task::succeeded, [response, this, &vers, &loop, &pack] {
+            QJsonParseError parse_error{};
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                qDebug() << *response;
+                return;
+            }
+            try {
+                auto obj = Json::requireObject(Json::requireObject(doc), "data");
+                FlameMod::loadIndexedPack(pack, obj);
+            } catch (const JSONValidationError& e) {
+                qDebug() << doc;
+                qWarning() << "Error while reading mod info: " << e.cause();
+            }
+            LocalModUpdateTask update_metadata(indexDir(), pack, vers);
+            QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);
+            update_metadata.start();
+        });
+
+        job->start();
+
+        loop.exec();
+    }
+
+    return installResource(std::move(path));
+}
+
+bool ResourceFolderModel::uninstallResource(QString file_name, bool preserve_metadata)
 {
     for (auto& resource : m_resources) {
         if (resource->fileinfo().fileName() == file_name) {
-            auto res = resource->destroy(false);
+            auto res = resource->destroy(indexDir(), preserve_metadata, false);
 
             update();
 
@@ -179,7 +231,7 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
 
         auto& resource = m_resources.at(i.row());
 
-        resource->destroy();
+        resource->destroy(indexDir());
     }
 
     update();

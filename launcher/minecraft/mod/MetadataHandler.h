@@ -28,37 +28,37 @@ class Mod;
 namespace Metadata {
 using ModStruct = Packwiz::V1::Mod;
 
-inline auto create(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> ModStruct
+inline auto create(const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> ModStruct
 {
     return Packwiz::V1::createModFormat(index_dir, mod_pack, mod_version);
 }
 
-inline auto create(QDir& index_dir, Mod& internal_mod, QString mod_slug) -> ModStruct
+inline auto create(const QDir& index_dir, Mod& internal_mod, QString mod_slug) -> ModStruct
 {
     return Packwiz::V1::createModFormat(index_dir, internal_mod, std::move(mod_slug));
 }
 
-inline void update(QDir& index_dir, ModStruct& mod)
+inline void update(const QDir& index_dir, ModStruct& mod)
 {
     Packwiz::V1::updateModIndex(index_dir, mod);
 }
 
-inline void remove(QDir& index_dir, QString mod_slug)
+inline void remove(const QDir& index_dir, QString mod_slug)
 {
     Packwiz::V1::deleteModIndex(index_dir, mod_slug);
 }
 
-inline void remove(QDir& index_dir, QVariant& mod_id)
+inline void remove(const QDir& index_dir, QVariant& mod_id)
 {
     Packwiz::V1::deleteModIndex(index_dir, mod_id);
 }
 
-inline auto get(QDir& index_dir, QString mod_slug) -> ModStruct
+inline auto get(const QDir& index_dir, QString mod_slug) -> ModStruct
 {
     return Packwiz::V1::getIndexForMod(index_dir, std::move(mod_slug));
 }
 
-inline auto get(QDir& index_dir, QVariant& mod_id) -> ModStruct
+inline auto get(const QDir& index_dir, QVariant& mod_id) -> ModStruct
 {
     return Packwiz::V1::getIndexForMod(index_dir, mod_id);
 }
