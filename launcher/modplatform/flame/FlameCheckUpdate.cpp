@@ -154,7 +154,7 @@ void FlameCheckUpdate::executeTask()
             continue;
         }
 
-        if (!latest_ver.hash.isEmpty() && (mod->metadata()->hash != latest_ver.hash || mod->status() == ModStatus::NotInstalled)) {
+        if (!latest_ver.hash.isEmpty() && (mod->metadata()->hash != latest_ver.hash || mod->status() == ResourceStatus::NOT_INSTALLED)) {
             // Fake pack with the necessary info to pass to the download task :)
             auto pack = std::make_shared<ModPlatform::IndexedPack>();
             pack->name = mod->name();
@@ -167,7 +167,7 @@ void FlameCheckUpdate::executeTask()
             pack->provider = ModPlatform::ResourceProvider::FLAME;
 
             auto old_version = mod->version();
-            if (old_version.isEmpty() && mod->status() != ModStatus::NotInstalled) {
+            if (old_version.isEmpty() && mod->status() != ResourceStatus::NOT_INSTALLED) {
                 auto current_ver = getFileInfo(latest_ver.addonId.toInt(), mod->metadata()->file_id.toInt());
                 old_version = current_ver.version;
             }

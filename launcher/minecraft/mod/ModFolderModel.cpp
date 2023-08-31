@@ -52,15 +52,16 @@
 #include "Application.h"
 
 #include "Json.h"
+#include "Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/LocalModUpdateTask.h"
-#include "minecraft/mod/tasks/ModFolderLoadTask.h"
+#include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 
-ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
-    : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
+ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
+    : ResourceFolderModel(QDir(dir), instance, is_indexed, create_dir, parent)
 {
     m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider" });
     m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider") });
@@ -96,15 +97,8 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                 }
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
-                case ProviderColumn: {
-                    auto provider = at(row)->provider();
-                    if (!provider.has_value()) {
-                        //: Unknown mod provider (i.e. not Modrinth, CurseForge, etc...)
-                        return tr("Unknown");
-                    }
-
-                    return provider.value();
-                }
+                case ProviderColumn:
+                    return at(row)->provider();
                 default:
                     return QVariant();
             }
@@ -185,14 +179,6 @@ int ModFolderModel::columnCount(const QModelIndex& parent) const
     return parent.isValid() ? 0 : NUM_COLUMNS;
 }
 
-Task* ModFolderModel::createUpdateTask()
-{
-    auto index_dir = indexDir();
-    auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load);
-    m_first_folder_load = false;
-    return task;
-}
-
 Task* ModFolderModel::createParseTask(Resource& resource)
 {
     return new LocalModParseTask(m_next_resolution_ticket, resource.type(), resource.fileinfo());
@@ -271,26 +257,6 @@ auto ModFolderModel::allMods() -> QList<Mod*>
     }
 
     return mods;
-}
-
-void ModFolderModel::onUpdateSucceeded()
-{
-    auto update_results = static_cast<ModFolderLoadTask*>(m_current_update_task.get())->result();
-
-    auto& new_mods = update_results->mods;
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    auto current_list = m_resources_index.keys();
-    QSet<QString> current_set(current_list.begin(), current_list.end());
-
-    auto new_list = new_mods.keys();
-    QSet<QString> new_set(new_list.begin(), new_list.end());
-#else
-    QSet<QString> current_set(m_resources_index.keys().toSet());
-    QSet<QString> new_set(new_mods.keys().toSet());
-#endif
-
-    applyUpdates(current_set, new_set, new_mods);
 }
 
 void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)

@@ -15,14 +15,14 @@
 #include "FileSystem.h"
 
 #include "QVariantUtils.h"
-#include "minecraft/mod/tasks/BasicFolderLoadTask.h"
+#include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
 #include "settings/Setting.h"
 #include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, BaseInstance* instance, QObject* parent, bool create_dir)
-    : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this)
+ResourceFolderModel::ResourceFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
+    : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this), m_is_indexed(is_indexed)
 {
     if (create_dir) {
         FS::ensureFolderPathExists(m_dir.absolutePath());
@@ -290,7 +290,7 @@ void ResourceFolderModel::resolveResource(Resource* res)
 
 void ResourceFolderModel::onUpdateSucceeded()
 {
-    auto update_results = static_cast<BasicFolderLoadTask*>(m_current_update_task.get())->result();
+    auto update_results = static_cast<ResourceFolderLoadTask*>(m_current_update_task.get())->result();
 
     auto& new_resources = update_results->resources;
 
@@ -320,7 +320,11 @@ void ResourceFolderModel::onParseSucceeded(int ticket, QString resource_id)
 
 Task* ResourceFolderModel::createUpdateTask()
 {
-    return new BasicFolderLoadTask(m_dir);
+    auto index_dir = indexDir();
+    auto task = new ResourceFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load,
+                                           [this](const QFileInfo& file) { return createResource(file); });
+    m_first_folder_load = false;
+    return task;
 }
 
 bool ResourceFolderModel::hasPendingParseTasks() const

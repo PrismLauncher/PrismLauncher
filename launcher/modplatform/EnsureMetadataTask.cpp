@@ -94,7 +94,7 @@ void EnsureMetadataTask::executeTask()
         }
 
         // They already have the right metadata :o
-        if (mod->status() != ModStatus::NoMetadata && mod->metadata() && mod->metadata()->provider == m_provider) {
+        if (mod->status() != ResourceStatus::NO_METADATA && mod->metadata() && mod->metadata()->provider == m_provider) {
             qDebug() << "Mod" << mod->name() << "already has metadata!";
             emitReady(mod);
             continue;

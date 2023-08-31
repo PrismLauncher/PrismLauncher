@@ -39,10 +39,11 @@
 
 #include "TexturePackFolderModel.h"
 
-#include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 #include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
+#include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
-TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance* instance) : ResourceFolderModel(QDir(dir), instance)
+TexturePackFolderModel::TexturePackFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
+    : ResourceFolderModel(QDir(dir), instance, is_indexed, create_dir, parent)
 {
     m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified" });
     m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified") });
@@ -50,11 +51,6 @@ TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance*
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch,
                               QHeaderView::ResizeToContents };
     m_columnsHideable = { false, true, false, true };
-}
-
-Task* TexturePackFolderModel::createUpdateTask()
-{
-    return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return makeShared<TexturePack>(entry); });
 }
 
 Task* TexturePackFolderModel::createParseTask(Resource& resource)

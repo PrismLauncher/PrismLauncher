@@ -29,7 +29,7 @@ class QSortFilterProxyModel;
 class ResourceFolderModel : public QAbstractListModel {
     Q_OBJECT
    public:
-    ResourceFolderModel(QDir, BaseInstance* instance, QObject* parent = nullptr, bool create_dir = true);
+    ResourceFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent = nullptr);
     ~ResourceFolderModel() override;
 
     virtual QString id() const { return "resource"; }
@@ -51,6 +51,8 @@ class ResourceFolderModel : public QAbstractListModel {
     /* Helper methods for subclasses, using a predetermined list of paths. */
     virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); }
     virtual bool stopWatching() { return stopWatching({ m_dir.absolutePath() }); }
+
+    QDir indexDir() { return { QString("%1/.index").arg(dir().absolutePath()) }; }
 
     /** Given a path in the system, install that resource, moving it to its place in the
      *  instance file hierarchy.
@@ -152,7 +154,9 @@ class ResourceFolderModel : public QAbstractListModel {
      *  This Task is normally executed when opening a page, so it shouldn't contain much heavy work.
      *  If such work is needed, try using it in the Task create by createParseTask() instead!
      */
-    [[nodiscard]] virtual Task* createUpdateTask();
+    [[nodiscard]] Task* createUpdateTask();
+
+    [[nodiscard]] virtual Resource* createResource(const QFileInfo& info) { return new Resource(info); }
 
     /** This creates a new parse task to be executed by onUpdateSucceeded().
      *
@@ -209,6 +213,9 @@ class ResourceFolderModel : public QAbstractListModel {
     BaseInstance* m_instance;
     QFileSystemWatcher m_watcher;
     bool m_is_watching = false;
+
+    bool m_is_indexed;
+    bool m_first_folder_load = true;
 
     Task::Ptr m_current_update_task = nullptr;
     bool m_scheduled_update = false;

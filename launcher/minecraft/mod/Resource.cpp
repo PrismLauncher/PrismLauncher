@@ -5,6 +5,8 @@
 
 #include "FileSystem.h"
 
+static ModPlatform::ProviderCapabilities ProviderCaps;
+
 Resource::Resource(QObject* parent) : QObject(parent) {}
 
 Resource::Resource(QFileInfo file_info) : QObject()
@@ -54,11 +56,35 @@ void Resource::parseFile()
     m_changed_date_time = m_file_info.lastModified();
 }
 
+auto Resource::name() const -> QString
+{
+    if (metadata())
+        return metadata()->name;
+
+    return m_name;
+}
+
 static void removeThePrefix(QString& string)
 {
     QRegularExpression regex(QStringLiteral("^(?:the|teh) +"), QRegularExpression::CaseInsensitiveOption);
     string.remove(regex);
     string = string.trimmed();
+}
+
+auto Resource::provider() const -> QString
+{
+    if (metadata())
+        return ProviderCaps.readableName(metadata()->provider);
+
+    return tr("Unknown");
+}
+
+void Resource::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
+{
+    if (status() == ResourceStatus::NO_METADATA)
+        setStatus(ResourceStatus::INSTALLED);
+
+    m_metadata = metadata;
 }
 
 std::pair<int, bool> Resource::compare(const Resource& other, SortType type) const
@@ -150,6 +176,23 @@ bool Resource::destroy(bool attemptTrash)
 {
     m_type = ResourceType::UNKNOWN;
     return (attemptTrash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
+}
+
+
+auto Resource::destroy(QDir& index_dir, bool preserve_metadata, bool attempt_trash) -> bool
+{
+    if (!preserve_metadata) {
+        qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
+
+        if (metadata()) {
+            Metadata::remove(index_dir, metadata()->slug);
+        } else {
+            auto n = name();
+            Metadata::remove(index_dir, n);
+        }
+    }
+
+    return destroy(attempt_trash);
 }
 
 bool Resource::isSymLinkUnder(const QString& instPath) const

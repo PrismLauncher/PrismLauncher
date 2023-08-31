@@ -144,7 +144,7 @@ void ModrinthCheckUpdate::executeTask()
                 auto mod = *mod_iter;
 
                 auto key = project_ver.hash;
-                if ((key != hash && project_ver.is_preferred) || (mod->status() == ModStatus::NotInstalled)) {
+                if ((key != hash && project_ver.is_preferred) || (mod->status() == ResourceStatus::NOT_INSTALLED)) {
                     if (mod->version() == project_ver.version_number)
                         continue;
 

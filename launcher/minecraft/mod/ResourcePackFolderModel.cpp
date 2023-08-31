@@ -44,10 +44,11 @@
 #include "Application.h"
 #include "Version.h"
 
-#include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 #include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
+#include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
-ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, BaseInstance* instance) : ResourceFolderModel(QDir(dir), instance)
+ResourcePackFolderModel::ResourcePackFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
+    : ResourceFolderModel(dir, instance, is_indexed, create_dir, parent)
 {
     m_column_names = QStringList({ "Enable", "Image", "Name", "Pack Format", "Last Modified" });
     m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified") });
@@ -171,11 +172,6 @@ QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::O
 int ResourcePackFolderModel::columnCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : NUM_COLUMNS;
-}
-
-Task* ResourcePackFolderModel::createUpdateTask()
-{
-    return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return makeShared<ResourcePack>(entry); });
 }
 
 Task* ResourcePackFolderModel::createParseTask(Resource& resource)

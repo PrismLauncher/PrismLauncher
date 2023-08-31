@@ -228,7 +228,7 @@ auto ModUpdateDialog::ensureMetadata() -> bool
     };
 
     for (auto candidate : m_candidates) {
-        if (candidate->status() != ModStatus::NoMetadata) {
+        if (candidate->status() != ResourceStatus::NO_METADATA) {
             onMetadataEnsured(candidate);
             continue;
         }

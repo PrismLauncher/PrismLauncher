@@ -350,9 +350,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/TexturePackFolderModel.h
     minecraft/mod/TexturePackFolderModel.cpp
     minecraft/mod/ShaderPackFolderModel.h
-    minecraft/mod/tasks/BasicFolderLoadTask.h
-    minecraft/mod/tasks/ModFolderLoadTask.h
-    minecraft/mod/tasks/ModFolderLoadTask.cpp
+    minecraft/mod/tasks/ResourceFolderLoadTask.h
+    minecraft/mod/tasks/ResourceFolderLoadTask.cpp
     minecraft/mod/tasks/LocalModParseTask.h
     minecraft/mod/tasks/LocalModParseTask.cpp
     minecraft/mod/tasks/LocalModUpdateTask.h

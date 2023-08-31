@@ -35,6 +35,7 @@ auto getRealIndexName(QDir& index_dir, QString normalized_index_name, bool shoul
 
 class V1 {
    public:
+    // can also represent other resources beside loader mods - but this is what packwiz calls it
     struct Mod {
         QString slug{};
         QString name{};
