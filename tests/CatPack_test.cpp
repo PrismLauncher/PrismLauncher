@@ -12,45 +12,8 @@ class CatPackTest : public QObject {
    private slots:
     void test_catPack()
     {
-        QString fileContent = R"({
-  "name": "My Cute Cat",
-  "default": "maxwell.png",
-  "variants": [
-    {
-      "startTime": { "day": 12, "month": 4 },
-      "endTime": { "day": 12, "month": 4 },
-      "path": "oneDay.png"
-    },
-    {
-      "startTime": { "day": 20, "month": 12 },
-      "endTime": { "day": 28, "month": 12 },
-      "path": "christmas.png"
-    },
-     {
-      "startTime": { "day": 30, "month": 12 },
-      "endTime": { "day": 1, "month": 1 },
-      "path": "newyear2.png"
-    },
-    {
-      "startTime": { "day": 28, "month": 12 },
-      "endTime": { "day": 3, "month": 1 },
-      "path": "newyear.png"
-    }
-  ]
-})";
-#if defined(Q_OS_WIN)
-        QString fileName = "test_SaveAlreadyExistingFile.ini";
-        QFile file(fileName);
-        QCOMPARE(file.open(QFile::WriteOnly | QFile::Text), true);
-#else
-        QTemporaryFile file;
-        QCOMPARE(file.open(), true);
-        QCOMPARE(file.fileName().isEmpty(), false);
-        QString fileName = file.fileName();
-#endif
-        QTextStream stream(&file);
-        stream << fileContent;
-        file.close();
+        auto dataDir = QDir(QFINDTESTDATA("testdata/CatPacks")).absolutePath();
+        auto fileName = FS::PathCombine(dataDir, "index.json");
         auto fileinfo = QFileInfo(fileName);
         try {
             auto cat = JsonCatPack(fileinfo);
