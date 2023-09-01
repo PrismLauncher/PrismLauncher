@@ -17,11 +17,23 @@
  *
  */
 
-#include "net/Logging.h"
+#pragma once
 
-Q_LOGGING_CATEGORY(taskNetLogC, "launcher.task.net")
-Q_LOGGING_CATEGORY(taskDownloadLogC, "launcher.task.net.download")
-Q_LOGGING_CATEGORY(taskUploadLogC, "launcher.task.net.upload")
-Q_LOGGING_CATEGORY(taskMCServicesLogC, "launcher.task.minecraft.servicies")
-Q_LOGGING_CATEGORY(taskMetaCacheLogC, "launcher.task.net.metacache")
-Q_LOGGING_CATEGORY(taskHttpMetaCacheLogC, "launcher.task.net.metacache.http")
+#include "net/HeaderProxy.h"
+
+namespace Net {
+
+class StaticHeaderProxy : public HeaderProxy {
+   public:
+    StaticHeaderProxy(QList<HeaderPair> hdrs = {}) : HeaderProxy(), m_hdrs(hdrs){};
+    virtual ~StaticHeaderProxy() = default;
+
+   public:
+    virtual QList<HeaderPair> headers(const QNetworkRequest&) const override { return m_hdrs; };
+    void setHeaders(QList<HeaderPair> hdrs) { m_hdrs = hdrs; };
+
+   private:
+    QList<HeaderPair> m_hdrs;
+};
+
+}  // namespace Net

@@ -36,30 +36,17 @@
 #include "SkinUpload.h"
 
 #include <QHttpMultiPart>
-#include <QNetworkRequest>
 
-#include "Application.h"
+#include "net/ByteArraySink.h"
+#include "net/StaticHeaderProxy.h"
 
-QByteArray getVariant(SkinUpload::Model model)
+SkinUpload::SkinUpload(QString token, QByteArray skin, SkinUpload::Model model) : NetRequest(), m_model(model), m_skin(skin), m_token(token)
 {
-    switch (model) {
-        default:
-            qDebug() << "Unknown skin type!";
-        case SkinUpload::STEVE:
-            return "CLASSIC";
-        case SkinUpload::ALEX:
-            return "SLIM";
-    }
-}
+    logCat = taskMCServicesLogC;
+};
 
-SkinUpload::SkinUpload(QObject* parent, QString token, QByteArray skin, SkinUpload::Model model)
-    : Task(parent), m_model(model), m_skin(skin), m_token(token)
-{}
-
-void SkinUpload::executeTask()
+QNetworkReply* SkinUpload::getReply(QNetworkRequest& request)
 {
-    QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/skins"));
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit());
     QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart skin;
@@ -69,50 +56,37 @@ void SkinUpload::executeTask()
 
     QHttpPart model;
     model.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"variant\""));
-    model.setBody(getVariant(m_model));
+
+    switch (m_model) {
+        default:
+            qDebug() << "Unknown skin type!";
+            emitFailed("Unknown skin type!");
+            return nullptr;
+        case SkinUpload::STEVE:
+            model.setBody("CLASSIC");
+            break;
+        case SkinUpload::ALEX:
+            model.setBody("SLIM");
+            break;
+    }
 
     multiPart->append(skin);
     multiPart->append(model);
-
-    QNetworkReply* rep = APPLICATION->network()->post(request, multiPart);
-    m_reply = shared_qobject_ptr<QNetworkReply>(rep);
-
     setStatus(tr("Uploading skin"));
-    connect(rep, &QNetworkReply::uploadProgress, this, &SkinUpload::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
-    connect(rep, &QNetworkReply::errorOccurred, this, &SkinUpload::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &SkinUpload::downloadError);
-#endif
-    connect(rep, &QNetworkReply::sslErrors, this, &SkinUpload::sslErrors);
-    connect(rep, &QNetworkReply::finished, this, &SkinUpload::downloadFinished);
+    return m_network->post(request, multiPart);
 }
 
-void SkinUpload::downloadError(QNetworkReply::NetworkError error)
+void SkinUpload::init()
 {
-    // error happened during download.
-    qCritical() << "Network error: " << error;
-    emitFailed(m_reply->errorString());
+    addHeaderProxy(new Net::StaticHeaderProxy(QList<Net::HeaderPair>{
+        { "Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit() },
+    }));
 }
 
-void SkinUpload::sslErrors(const QList<QSslError>& errors)
+SkinUpload::Ptr SkinUpload::make(QString token, QByteArray skin, SkinUpload::Model model)
 {
-    int i = 1;
-    for (auto error : errors) {
-        qCritical() << "Skin Upload SSL Error #" << i << " : " << error.errorString();
-        auto cert = error.certificate();
-        qCritical() << "Certificate in question:\n" << cert.toText();
-        i++;
-    }
-}
-
-void SkinUpload::downloadFinished()
-{
-    // if the download failed
-    if (m_reply->error() != QNetworkReply::NetworkError::NoError) {
-        emitFailed(QString("Network error: %1").arg(m_reply->errorString()));
-        m_reply.reset();
-        return;
-    }
-    emitSucceeded();
+    auto up = makeShared<SkinUpload>(token, skin, model);
+    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins");
+    up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
+    return up;
 }

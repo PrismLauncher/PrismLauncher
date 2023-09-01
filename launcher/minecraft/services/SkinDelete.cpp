@@ -35,56 +35,31 @@
 
 #include "SkinDelete.h"
 
-#include <QHttpMultiPart>
-#include <QNetworkRequest>
+#include "net/ByteArraySink.h"
+#include "net/StaticHeaderProxy.h"
 
-#include "Application.h"
-
-SkinDelete::SkinDelete(QObject* parent, QString token) : Task(parent), m_token(token) {}
-
-void SkinDelete::executeTask()
+SkinDelete::SkinDelete(QString token) : NetRequest(), m_token(token)
 {
-    QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active"));
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit());
-    QNetworkReply* rep = APPLICATION->network()->deleteResource(request);
-    m_reply = shared_qobject_ptr<QNetworkReply>(rep);
+    logCat = taskMCServicesLogC;
+};
 
+QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)
+{
     setStatus(tr("Deleting skin"));
-    connect(rep, &QNetworkReply::uploadProgress, this, &SkinDelete::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
-    connect(rep, &QNetworkReply::errorOccurred, this, &SkinDelete::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &SkinDelete::downloadError);
-#endif
-    connect(rep, &QNetworkReply::sslErrors, this, &SkinDelete::sslErrors);
-    connect(rep, &QNetworkReply::finished, this, &SkinDelete::downloadFinished);
+    return m_network->deleteResource(request);
 }
 
-void SkinDelete::downloadError(QNetworkReply::NetworkError error)
+void SkinDelete::init()
 {
-    // error happened during download.
-    qCritical() << "Network error: " << error;
-    emitFailed(m_reply->errorString());
+    addHeaderProxy(new Net::StaticHeaderProxy(QList<Net::HeaderPair>{
+        { "Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit() },
+    }));
 }
 
-void SkinDelete::sslErrors(const QList<QSslError>& errors)
+SkinDelete::Ptr SkinDelete::make(QString token)
 {
-    int i = 1;
-    for (auto error : errors) {
-        qCritical() << "Skin Delete SSL Error #" << i << " : " << error.errorString();
-        auto cert = error.certificate();
-        qCritical() << "Certificate in question:\n" << cert.toText();
-        i++;
-    }
-}
-
-void SkinDelete::downloadFinished()
-{
-    // if the download failed
-    if (m_reply->error() != QNetworkReply::NetworkError::NoError) {
-        emitFailed(QString("Network error: %1").arg(m_reply->errorString()));
-        m_reply.reset();
-        return;
-    }
-    emitSucceeded();
+    auto up = makeShared<SkinDelete>(token);
+    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active");
+    up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
+    return up;
 }

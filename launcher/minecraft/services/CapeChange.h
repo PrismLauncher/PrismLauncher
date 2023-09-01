@@ -1,31 +1,21 @@
 #pragma once
 
-#include <QFile>
-#include <QtNetwork/QtNetwork>
-#include <memory>
-#include "QObjectPtr.h"
-#include "tasks/Task.h"
+#include "net/NetRequest.h"
 
-class CapeChange : public Task {
+class CapeChange : public Net::NetRequest {
     Q_OBJECT
    public:
-    CapeChange(QObject* parent, QString token, QString capeId);
-    virtual ~CapeChange() {}
+    using Ptr = shared_qobject_ptr<CapeChange>;
+    CapeChange(QString token, QString capeId);
+    virtual ~CapeChange() = default;
 
-   private:
-    void setCape(QString& cape);
-    void clearCape();
+    static CapeChange::Ptr make(QString token, QString capeId);
+    void init() override;
+
+   protected:
+    virtual QNetworkReply* getReply(QNetworkRequest&) override;
 
    private:
     QString m_capeId;
     QString m_token;
-    shared_qobject_ptr<QNetworkReply> m_reply;
-
-   protected:
-    virtual void executeTask();
-
-   public slots:
-    void downloadError(QNetworkReply::NetworkError);
-    void sslErrors(const QList<QSslError>& errors);
-    void downloadFinished();
 };

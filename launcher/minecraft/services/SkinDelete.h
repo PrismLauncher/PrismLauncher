@@ -1,26 +1,20 @@
 #pragma once
 
-#include <QFile>
-#include <QtNetwork/QtNetwork>
-#include "tasks/Task.h"
+#include "net/NetRequest.h"
 
-typedef shared_qobject_ptr<class SkinDelete> SkinDeletePtr;
-
-class SkinDelete : public Task {
+class SkinDelete : public Net::NetRequest {
     Q_OBJECT
    public:
-    SkinDelete(QObject* parent, QString token);
+    using Ptr = shared_qobject_ptr<SkinDelete>;
+    SkinDelete(QString token);
     virtual ~SkinDelete() = default;
+
+    static SkinDelete::Ptr make(QString token);
+    void init() override;
+
+   protected:
+    virtual QNetworkReply* getReply(QNetworkRequest&) override;
 
    private:
     QString m_token;
-    shared_qobject_ptr<QNetworkReply> m_reply;
-
-   protected:
-    virtual void executeTask();
-
-   public slots:
-    void downloadError(QNetworkReply::NetworkError);
-    void sslErrors(const QList<QSslError>& errors);
-    void downloadFinished();
 };

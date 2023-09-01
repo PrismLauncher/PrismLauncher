@@ -35,6 +35,7 @@
 
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMimeDatabase>
 #include <QPainter>
 
 #include <FileSystem.h>
@@ -101,12 +102,12 @@ void SkinUploadDialog::on_buttonBox_accepted()
         } else if (ui->alexBtn->isChecked()) {
             model = SkinUpload::ALEX;
         }
-        skinUpload.addTask(shared_qobject_ptr<SkinUpload>(new SkinUpload(this, m_acct->accessToken(), FS::read(fileName), model)));
+        skinUpload.addTask(SkinUpload::make(m_acct->accessToken(), FS::read(fileName), model));
     }
 
     auto selectedCape = ui->capeCombo->currentData().toString();
     if (selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
-        skinUpload.addTask(shared_qobject_ptr<CapeChange>(new CapeChange(this, m_acct->accessToken(), selectedCape)));
+        skinUpload.addTask(CapeChange::make(m_acct->accessToken(), selectedCape));
     }
     if (prog.execWithTask(&skinUpload) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Failed to upload skin!"), QMessageBox::Warning)->exec();

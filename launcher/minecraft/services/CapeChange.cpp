@@ -35,87 +35,38 @@
 
 #include "CapeChange.h"
 
-#include <QHttpMultiPart>
-#include <QNetworkRequest>
+#include <memory>
 
-#include "Application.h"
+#include "net/ByteArraySink.h"
+#include "net/StaticHeaderProxy.h"
 
-CapeChange::CapeChange(QObject* parent, QString token, QString cape) : Task(parent), m_capeId(cape), m_token(token) {}
-
-void CapeChange::setCape([[maybe_unused]] QString& cape)
+CapeChange::CapeChange(QString token, QString cape) : NetRequest(), m_capeId(cape), m_token(token)
 {
-    QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active"));
-    auto requestString = QString("{\"capeId\":\"%1\"}").arg(m_capeId);
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit());
-    QNetworkReply* rep = APPLICATION->network()->put(request, requestString.toUtf8());
+    logCat = taskMCServicesLogC;
+};
 
-    setStatus(tr("Equipping cape"));
-
-    m_reply = shared_qobject_ptr<QNetworkReply>(rep);
-    connect(rep, &QNetworkReply::uploadProgress, this, &CapeChange::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
-    connect(rep, &QNetworkReply::errorOccurred, this, &CapeChange::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &CapeChange::downloadError);
-#endif
-    connect(rep, &QNetworkReply::sslErrors, this, &CapeChange::sslErrors);
-    connect(rep, &QNetworkReply::finished, this, &CapeChange::downloadFinished);
-}
-
-void CapeChange::clearCape()
-{
-    QNetworkRequest request(QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active"));
-    auto requestString = QString("{\"capeId\":\"%1\"}").arg(m_capeId);
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit());
-    QNetworkReply* rep = APPLICATION->network()->deleteResource(request);
-
-    setStatus(tr("Removing cape"));
-
-    m_reply = shared_qobject_ptr<QNetworkReply>(rep);
-    connect(rep, &QNetworkReply::uploadProgress, this, &CapeChange::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
-    connect(rep, &QNetworkReply::errorOccurred, this, &CapeChange::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &CapeChange::downloadError);
-#endif
-    connect(rep, &QNetworkReply::sslErrors, this, &CapeChange::sslErrors);
-    connect(rep, &QNetworkReply::finished, this, &CapeChange::downloadFinished);
-}
-
-void CapeChange::executeTask()
+QNetworkReply* CapeChange::getReply(QNetworkRequest& request)
 {
     if (m_capeId.isEmpty()) {
-        clearCape();
+        setStatus(tr("Removing cape"));
+        return m_network->deleteResource(request);
     } else {
-        setCape(m_capeId);
+        setStatus(tr("Equipping cape"));
+        return m_network->post(request, QString("{\"capeId\":\"%1\"}").arg(m_capeId).toUtf8());
     }
 }
 
-void CapeChange::downloadError(QNetworkReply::NetworkError error)
+void CapeChange::init()
 {
-    // error happened during download.
-    qCritical() << "Network error: " << error;
-    emitFailed(m_reply->errorString());
+    addHeaderProxy(new Net::StaticHeaderProxy(QList<Net::HeaderPair>{
+        { "Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit() },
+    }));
 }
 
-void CapeChange::sslErrors(const QList<QSslError>& errors)
+CapeChange::Ptr CapeChange::make(QString token, QString capeId)
 {
-    int i = 1;
-    for (auto error : errors) {
-        qCritical() << "Cape change SSL Error #" << i << " : " << error.errorString();
-        auto cert = error.certificate();
-        qCritical() << "Certificate in question:\n" << cert.toText();
-        i++;
-    }
-}
-
-void CapeChange::downloadFinished()
-{
-    // if the download failed
-    if (m_reply->error() != QNetworkReply::NetworkError::NoError) {
-        emitFailed(QString("Network error: %1").arg(m_reply->errorString()));
-        m_reply.reset();
-        return;
-    }
-    emitSucceeded();
+    auto up = makeShared<CapeChange>(token, capeId);
+    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active");
+    up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
+    return up;
 }

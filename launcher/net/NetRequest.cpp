@@ -111,6 +111,8 @@ void NetRequest::executeTask()
     m_last_progress_bytes = 0;
 
     QNetworkReply* rep = getReply(request);
+    if (rep == nullptr)  // it failed
+        return;
     m_reply.reset(rep);
     connect(rep, &QNetworkReply::downloadProgress, this, &NetRequest::downloadProgress);
     connect(rep, &QNetworkReply::finished, this, &NetRequest::downloadFinished);
