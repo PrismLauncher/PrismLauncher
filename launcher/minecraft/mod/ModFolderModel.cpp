@@ -160,7 +160,7 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case DateColumn:
                     return tr("The date and time this mod was last changed (or added).");
                 case ProviderColumn:
-                    return tr("Where the mod was downloaded from.");
+                    return tr("The source provider of the mod.");
                 default:
                     return QVariant();
             }

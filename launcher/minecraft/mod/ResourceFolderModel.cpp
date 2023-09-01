@@ -466,6 +466,8 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                     return m_resources[row]->name();
                 case DATE_COLUMN:
                     return m_resources[row]->dateTimeChanged();
+                case PROVIDER_COLUMN:
+                    return m_resources[row]->provider();
                 default:
                     return {};
             }
@@ -535,21 +537,22 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                 case ACTIVE_COLUMN:
                 case NAME_COLUMN:
                 case DATE_COLUMN:
+                case PROVIDER_COLUMN:
                     return columnNames().at(section);
                 default:
                     return {};
             }
         case Qt::ToolTipRole: {
+            //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
             switch (section) {
                 case ACTIVE_COLUMN:
-                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
                     return tr("Is the resource enabled?");
                 case NAME_COLUMN:
-                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
                     return tr("The name of the resource.");
                 case DATE_COLUMN:
-                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
                     return tr("The date and time this resource was last changed (or added).");
+                case PROVIDER_COLUMN:
+                    return tr("The source provider of the resource.");
                 default:
                     return {};
             }
