@@ -9,7 +9,6 @@
  *  Copyright (C) 2022 Tayou <git@tayou.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
- *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -194,8 +193,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
           { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
           { "alive", "Write a small '" + liveCheckFile + "' file after the launcher starts" },
-          { { "I", "import" }, "Import instance from specified zip (local path or URL)", "file" },
+          { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
           { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
+    // Has to be positional for some OS to handle that properly
+    parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
+
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -208,13 +210,13 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     m_instanceIdToShowWindowOf = parser.value("show");
 
-    for (auto zip_path : parser.values("import")) {
-        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
+    for (auto url : parser.values("import")) {
+        m_urlsToImport.append(normalizeImportUrl(url));
     }
 
     // treat unspecified positional arguments as import urls
-    for (auto zip_path : parser.positionalArguments()) {
-        m_zipsToImport.append(QUrl::fromLocalFile(QFileInfo(zip_path).absoluteFilePath()));
+    for (auto url : parser.positionalArguments()) {
+        m_urlsToImport.append(normalizeImportUrl(url));
     }
 
     // error if --launch is missing with --server or --profile
@@ -313,11 +315,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                 activate.command = "activate";
                 m_peerInstance->sendMessage(activate.serialize(), timeout);
 
-                if (!m_zipsToImport.isEmpty()) {
-                    for (auto zip_url : m_zipsToImport) {
+                if (!m_urlsToImport.isEmpty()) {
+                    for (auto url : m_urlsToImport) {
                         ApplicationMessage import;
                         import.command = "import";
-                        import.args.insert("path", zip_url.toString());
+                        import.args.insert("url", url.toString());
                         m_peerInstance->sendMessage(import.serialize(), timeout);
                     }
                 }
@@ -577,12 +579,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
 
-        // Mod loader settings
-        m_settings->registerSetting("DisableQuiltBeacon", false);
-
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
+        m_settings->registerSetting("CustomOpenALPath", "");
         m_settings->registerSetting("UseNativeGLFW", false);
+        m_settings->registerSetting("CustomGLFWPath", "");
 
         // Peformance related options
         m_settings->registerSetting("EnableFeralGamemode", false);
@@ -593,6 +594,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGameTime", true);
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
+        m_settings->registerSetting("ShowGameTimeWithoutDays", false);
 
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
@@ -842,6 +844,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     updateCapabilities();
 
+    detectLibraries();
+
     if (createSetupWizard()) {
         return;
     }
@@ -961,7 +965,7 @@ void Application::performMainStartupAction()
                 qDebug() << "   Launching with account" << m_profileToUse;
             }
 
-            launch(inst, true, false, nullptr, serverToJoin, accountToUse);
+            launch(inst, true, false, serverToJoin, accountToUse);
             return;
         }
     }
@@ -978,9 +982,9 @@ void Application::performMainStartupAction()
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
-    if (!m_zipsToImport.isEmpty()) {
-        qDebug() << "<> Importing from zip:" << m_zipsToImport;
-        m_mainWindow->processURLs(m_zipsToImport);
+    if (!m_urlsToImport.isEmpty()) {
+        qDebug() << "<> Importing from url:" << m_urlsToImport;
+        m_mainWindow->processURLs(m_urlsToImport);
     }
 }
 
@@ -1022,12 +1026,12 @@ void Application::messageReceived(const QByteArray& message)
     if (command == "activate") {
         showMainWindow();
     } else if (command == "import") {
-        QString path = received.args["path"];
-        if (path.isEmpty()) {
+        QString url = received.args["url"];
+        if (url.isEmpty()) {
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
         }
-        m_mainWindow->processURLs({ QUrl::fromLocalFile(QFileInfo(path).absoluteFilePath()) });
+        m_mainWindow->processURLs({ normalizeImportUrl(url) });
     } else if (command == "launch") {
         QString id = received.args["id"];
         QString server = received.args["server"];
@@ -1060,7 +1064,7 @@ void Application::messageReceived(const QByteArray& message)
             }
         }
 
-        launch(instance, true, false, nullptr, serverObject, accountObject);
+        launch(instance, true, false, serverObject, accountObject);
     } else {
         qWarning() << "Received invalid message" << message;
     }
@@ -1101,7 +1105,6 @@ bool Application::openJsonEditor(const QString& filename)
 bool Application::launch(InstancePtr instance,
                          bool online,
                          bool demo,
-                         BaseProfilerFactory* profiler,
                          MinecraftServerTargetPtr serverToJoin,
                          MinecraftAccountPtr accountToUse)
 {
@@ -1109,7 +1112,7 @@ bool Application::launch(InstancePtr instance,
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
     } else if (instance->canLaunch()) {
         auto& extras = m_instanceExtras[instance->id()];
-        auto& window = extras.window;
+        auto window = extras.window;
         if (window) {
             if (!window->saveAll()) {
                 return false;
@@ -1120,7 +1123,7 @@ bool Application::launch(InstancePtr instance,
         controller->setInstance(instance);
         controller->setOnline(online);
         controller->setDemo(demo);
-        controller->setProfiler(profiler);
+        controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
         controller->setServerToJoin(serverToJoin);
         controller->setAccountToUse(accountToUse);
         if (window) {
@@ -1412,6 +1415,15 @@ void Application::updateCapabilities()
 #endif
 }
 
+void Application::detectLibraries()
+{
+#ifdef Q_OS_LINUX
+    m_detectedGLFWPath = MangoHud::findLibrary(BuildConfig.GLFW_LIBRARY_NAME);
+    m_detectedOpenALPath = MangoHud::findLibrary(BuildConfig.OPENAL_LIBRARY_NAME);
+    qDebug() << "Detected native libraries:" << m_detectedGLFWPath << m_detectedOpenALPath;
+#endif
+}
+
 QString Application::getJarPath(QString jarFile)
 {
     QStringList potentialPaths = {
@@ -1588,5 +1600,15 @@ void Application::triggerUpdateCheck()
         m_updater->checkForUpdates();
     } else {
         qDebug() << "Updater not available.";
+    }
+}
+
+QUrl Application::normalizeImportUrl(QString const& url)
+{
+    auto local_file = QFileInfo(url);
+    if (local_file.exists()) {
+        return QUrl::fromLocalFile(local_file.absoluteFilePath());
+    } else {
+        return QUrl::fromUserInput(url);
     }
 }

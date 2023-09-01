@@ -93,19 +93,19 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
     pack.extraDataLoaded = true;
 }
 
-void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
-                                       QJsonArray& arr,
-                                       [[maybe_unused]] const shared_qobject_ptr<QNetworkAccessManager>& network,
-                                       const BaseInstance* inst)
+void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr, const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    QString mcVersion = (static_cast<const MinecraftInstance*>(inst))->getPackProfile()->getComponentVersion("net.minecraft");
+    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
+    QString mcVersion = profile->getComponentVersion("net.minecraft");
+    auto loaders = profile->getSupportedModLoaders();
 
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
         auto file = loadIndexedPackVersion(obj);
 
-        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid() &&
+            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
@@ -134,7 +134,18 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     }
     auto loaders = Json::requireArray(obj, "loaders");
     for (auto loader : loaders) {
-        file.loaders.append(loader.toString());
+        if (loader == "neoforge")
+            file.loaders |= ModPlatform::NeoForge;
+        if (loader == "forge")
+            file.loaders |= ModPlatform::Forge;
+        if (loader == "cauldron")
+            file.loaders |= ModPlatform::Cauldron;
+        if (loader == "liteloader")
+            file.loaders |= ModPlatform::LiteLoader;
+        if (loader == "fabric")
+            file.loaders |= ModPlatform::Fabric;
+        if (loader == "quilt")
+            file.loaders |= ModPlatform::Quilt;
     }
     file.version = Json::requireString(obj, "name");
     file.version_number = Json::requireString(obj, "version_number");
@@ -218,15 +229,20 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     return {};
 }
 
-auto Modrinth::loadDependencyVersions([[maybe_unused]] const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
+auto Modrinth::loadDependencyVersions([[maybe_unused]] const ModPlatform::Dependency& m, QJsonArray& arr, const BaseInstance* inst)
+    -> ModPlatform::IndexedVersion
 {
-    QVector<ModPlatform::IndexedVersion> versions;
+    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
+    QString mcVersion = profile->getComponentVersion("net.minecraft");
+    auto loaders = profile->getSupportedModLoaders();
 
+    QVector<ModPlatform::IndexedVersion> versions;
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
         auto file = loadIndexedPackVersion(obj);
 
-        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid() &&
+            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
             versions.append(file);
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {

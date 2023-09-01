@@ -5,13 +5,11 @@
 #include <MurmurHash2.h>
 #include <memory>
 
-#include "FileSystem.h"
 #include "Json.h"
 
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
-#include "minecraft/mod/ResourceFolderModel.h"
 
 #include "net/ApiDownload.h"
 

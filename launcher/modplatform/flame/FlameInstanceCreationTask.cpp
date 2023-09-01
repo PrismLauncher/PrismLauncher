@@ -285,7 +285,7 @@ QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, 
             // filter by minecraft version, if the loader depends on a certain version.
             // not all mod loaders depend on a given Minecraft version, so we won't do this
             // filtering for those loaders.
-            if (loaderType == "forge") {
+            if (loaderType == "forge" || loaderType == "neoforge") {
                 auto iter = std::find_if(reqs.begin(), reqs.end(), [mcVersion](const Meta::Require& req) {
                     return req.uid == "net.minecraft" && req.equalsVersion == mcVersion;
                 });
@@ -351,7 +351,11 @@ bool FlameCreationTask::createInstance()
 
     for (auto& loader : m_pack.minecraft.modLoaders) {
         auto id = loader.id;
-        if (id.startsWith("forge-")) {
+        if (id.startsWith("neoforge-")) {
+            id.remove("neoforge-");
+            loaderType = "neoforge";
+            loaderUid = "net.neoforged";
+        } else if (id.startsWith("forge-")) {
             id.remove("forge-");
             loaderType = "forge";
             loaderUid = "net.minecraftforge";

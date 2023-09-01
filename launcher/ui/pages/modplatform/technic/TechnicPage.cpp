@@ -35,6 +35,7 @@
 
 #include "TechnicPage.h"
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/widgets/ProjectItem.h"
 #include "ui_TechnicPage.h"
 
 #include <QKeyEvent>
@@ -52,7 +53,8 @@
 
 #include "net/ApiDownload.h"
 
-TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
+TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
+    : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &TechnicPage::triggerSearch);
@@ -60,8 +62,21 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(p
     model = new Technic::ListModel(this);
     ui->packView->setModel(model);
 
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &TechnicPage::triggerSearch);
+
+    m_fetch_progress.hideIfInactive(true);
+    m_fetch_progress.setFixedHeight(24);
+    m_fetch_progress.progressFormat("");
+
+    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
+
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &TechnicPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &TechnicPage::onVersionSelectionChanged);
+
+    ui->packView->setItemDelegate(new ProjectItemDelegate(this));
 }
 
 bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
@@ -72,6 +87,11 @@ bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
             triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     }
     return QWidget::eventFilter(watched, event);
@@ -101,6 +121,7 @@ void TechnicPage::openedImpl()
 void TechnicPage::triggerSearch()
 {
     model->searchWithTerm(ui->searchEdit->text());
+    m_fetch_progress.watch(model->activeSearchJob().get());
 }
 
 void TechnicPage::onSelectionChanged(QModelIndex first, [[maybe_unused]] QModelIndex second)
