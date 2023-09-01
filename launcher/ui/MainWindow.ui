@@ -190,6 +190,7 @@
     <addaction name="separator"/>
     <addaction name="actionViewInstanceFolder"/>
     <addaction name="actionViewCentralModsFolder"/>
+    <addaction name="actionViewSkinsFolder"/>
     <addaction name="separator"/>
     <addaction name="actionViewIconThemeFolder"/>
     <addaction name="actionViewWidgetThemeFolder"/>
@@ -573,6 +574,18 @@
    </property>
    <property name="toolTip">
     <string>Open the central mods folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewSkinsFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>View &amp;Skins Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the skins folder in a file browser.</string>
    </property>
   </action>
   <action name="actionChangeTheme">

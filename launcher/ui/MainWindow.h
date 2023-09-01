@@ -118,6 +118,8 @@ class MainWindow : public QMainWindow {
     void on_actionViewWidgetThemeFolder_triggered();
     void on_actionViewCatPackFolder_triggered();
 
+    void on_actionViewSkinsFolder_triggered();
+
     void on_actionViewSelectedInstFolder_triggered();
 
     void refreshInstances();
