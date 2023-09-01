@@ -60,19 +60,19 @@ Modpack parseDirectory(QString path)
             auto name = Json::requireString(obj, "name", "name");
             auto version = Json::requireString(obj, "version", "version");
             if (name == "neoforge") {
-                modpack.loaderType = ResourceAPI::NeoForge;
+                modpack.loaderType = ModPlatform::NeoForge;
                 modpack.version = version;
                 break;
             } else if (name == "forge") {
-                modpack.loaderType = ResourceAPI::Forge;
+                modpack.loaderType = ModPlatform::Forge;
                 modpack.version = version;
                 break;
             } else if (name == "fabric") {
-                modpack.loaderType = ResourceAPI::Fabric;
+                modpack.loaderType = ModPlatform::Fabric;
                 modpack.version = version;
                 break;
             } else if (name == "quilt") {
-                modpack.loaderType = ResourceAPI::Quilt;
+                modpack.loaderType = ModPlatform::Quilt;
                 modpack.version = version;
                 break;
             }

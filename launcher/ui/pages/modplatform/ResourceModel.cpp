@@ -132,6 +132,32 @@ void ResourceModel::search()
     if (hasActiveSearchJob())
         return;
 
+    if (m_search_term.startsWith("#")) {
+        auto projectId = m_search_term.mid(1);
+        if (!projectId.isEmpty()) {
+            ResourceAPI::ProjectInfoCallbacks callbacks;
+
+            callbacks.on_fail = [this](QString reason) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                searchRequestFailed(reason, -1);
+            };
+            callbacks.on_abort = [this] {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                searchRequestAborted();
+            };
+
+            callbacks.on_succeed = [this](auto& doc, auto& pack) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                searchRequestForOneSucceeded(doc);
+            };
+            if (auto job = m_api->getProjectInfo({ projectId }, std::move(callbacks)); job)
+                runSearchJob(job);
+            return;
+        }
+    }
     auto args{ createSearchArguments() };
 
     auto callbacks{ createSearchCallbacks() };
@@ -189,10 +215,17 @@ void ResourceModel::loadEntry(QModelIndex& entry)
 
         // Use default if no callbacks are set
         if (!callbacks.on_succeed)
-            callbacks.on_succeed = [this, entry](auto& doc, auto pack) {
+            callbacks.on_succeed = [this, entry](auto& doc, auto& newpack) {
                 if (!s_running_models.constFind(this).value())
                     return;
+                auto pack = newpack;
                 infoRequestSucceeded(doc, pack, entry);
+            };
+        if (!callbacks.on_fail)
+            callbacks.on_fail = [this](QString reason) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info:%1").arg(reason));
             };
 
         if (auto job = m_api->getProjectInfo(std::move(args), std::move(callbacks)); job)
@@ -369,6 +402,27 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
 
     beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + newList.size() - 1);
     m_packs.append(newList);
+    endInsertRows();
+}
+
+void ResourceModel::searchRequestForOneSucceeded(QJsonDocument& doc)
+{
+    ModPlatform::IndexedPack::Ptr pack = std::make_shared<ModPlatform::IndexedPack>();
+
+    try {
+        auto obj = Json::requireObject(doc);
+        if (obj.contains("data"))
+            obj = Json::requireObject(obj, "data");
+        loadIndexedPack(*pack, obj);
+    } catch (const JSONValidationError& e) {
+        qDebug() << doc;
+        qWarning() << "Error while reading " << debugName() << " resource info: " << e.cause();
+    }
+
+    m_search_state = SearchState::Finished;
+
+    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + 1);
+    m_packs.append(pack);
     endInsertRows();
 }
 

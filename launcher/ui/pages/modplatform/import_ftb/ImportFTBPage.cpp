@@ -17,6 +17,7 @@
  */
 
 #include "ImportFTBPage.h"
+#include "ui/widgets/ProjectItem.h"
 #include "ui_ImportFTBPage.h"
 
 #include <QWidget>
@@ -32,17 +33,30 @@ ImportFTBPage::ImportFTBPage(NewInstanceDialog* dialog, QWidget* parent) : QWidg
     ui->setupUi(this);
 
     {
+        currentModel = new FilterModel(this);
         listModel = new ListModel(this);
+        currentModel->setSourceModel(listModel);
 
-        ui->modpackList->setModel(listModel);
+        ui->modpackList->setModel(currentModel);
         ui->modpackList->setSortingEnabled(true);
         ui->modpackList->header()->hide();
         ui->modpackList->setIndentation(0);
         ui->modpackList->setIconSize(QSize(42, 42));
+
+        for (int i = 0; i < currentModel->getAvailableSortings().size(); i++) {
+            ui->sortByBox->addItem(currentModel->getAvailableSortings().keys().at(i));
+        }
+
+        ui->sortByBox->setCurrentText(currentModel->translateCurrentSorting());
     }
 
     connect(ui->modpackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &ImportFTBPage::onPublicPackSelectionChanged);
 
+    connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &ImportFTBPage::onSortingSelectionChanged);
+
+    connect(ui->searchEdit, &QLineEdit::textChanged, this, &ImportFTBPage::triggerSearch);
+
+    ui->modpackList->setItemDelegate(new ProjectItemDelegate(this));
     ui->modpackList->selectionModel()->reset();
 }
 
@@ -86,7 +100,7 @@ void ImportFTBPage::onPublicPackSelectionChanged(QModelIndex now, QModelIndex pr
         onPackSelectionChanged();
         return;
     }
-    Modpack selectedPack = listModel->data(now, Qt::UserRole).value<Modpack>();
+    Modpack selectedPack = currentModel->data(now, Qt::UserRole).value<Modpack>();
     onPackSelectionChanged(&selectedPack);
 }
 
@@ -99,6 +113,17 @@ void ImportFTBPage::onPackSelectionChanged(Modpack* pack)
     }
     if (isOpened)
         dialog->setSuggestedPack();
+}
+
+void ImportFTBPage::onSortingSelectionChanged(QString sort)
+{
+    FilterModel::Sorting toSet = currentModel->getAvailableSortings().value(sort);
+    currentModel->setSorting(toSet);
+}
+
+void ImportFTBPage::triggerSearch()
+{
+    currentModel->setSearchTerm(ui->searchEdit->text());
 }
 
 }  // namespace FTBImportAPP

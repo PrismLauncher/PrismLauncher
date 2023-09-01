@@ -195,6 +195,12 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("UseAccountForInstance", false);
     m_settings->registerSetting("InstanceAccountId", "");
 
+    m_settings->registerSetting("ExportName", "");
+    m_settings->registerSetting("ExportVersion", "1.0.0");
+    m_settings->registerSetting("ExportSummary", "");
+    m_settings->registerSetting("ExportAuthor", "");
+    m_settings->registerSetting("ExportOptionalFiles", true);
+
     qDebug() << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);
@@ -934,13 +940,16 @@ QString MinecraftInstance::getStatusbarDescription()
     if (m_settings->get("ShowGameTime").toBool()) {
         if (lastTimePlayed() > 0) {
             QDateTime lastLaunchTime = QDateTime::fromMSecsSinceEpoch(lastLaunch());
-            description.append(tr(", last played on %1 for %2")
-                                   .arg(QLocale().toString(lastLaunchTime, QLocale::ShortFormat))
-                                   .arg(Time::prettifyDuration(lastTimePlayed())));
+            description.append(
+                tr(", last played on %1 for %2")
+                    .arg(QLocale().toString(lastLaunchTime, QLocale::ShortFormat))
+                    .arg(Time::prettifyDuration(lastTimePlayed(), APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
         }
 
         if (totalTimePlayed() > 0) {
-            description.append(tr(", total played for %1").arg(Time::prettifyDuration(totalTimePlayed())));
+            description.append(
+                tr(", total played for %1")
+                    .arg(Time::prettifyDuration(totalTimePlayed(), APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
         }
     }
     if (hasCrashed()) {
