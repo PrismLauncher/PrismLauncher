@@ -5,6 +5,7 @@
 
 #include "modplatform/helpers/HashUtils.h"
 
+#include "minecraft/mod/Resource.h"
 #include "tasks/ConcurrentTask.h"
 
 class Mod;
@@ -14,8 +15,8 @@ class EnsureMetadataTask : public Task {
     Q_OBJECT
 
    public:
-    EnsureMetadataTask(Mod*, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
-    EnsureMetadataTask(QList<Mod*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
+    EnsureMetadataTask(Resource*, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
+    EnsureMetadataTask(QList<Resource*>&, QDir, ModPlatform::ResourceProvider = ModPlatform::ResourceProvider::MODRINTH);
 
     ~EnsureMetadataTask() = default;
 
@@ -36,23 +37,23 @@ class EnsureMetadataTask : public Task {
 
     // Helpers
     enum class RemoveFromList { Yes, No };
-    void emitReady(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
-    void emitFail(Mod*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
+    void emitReady(Resource*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
+    void emitFail(Resource*, QString key = {}, RemoveFromList = RemoveFromList::Yes);
 
     // Hashes and stuff
-    auto createNewHash(Mod*) -> Hashing::Hasher::Ptr;
-    auto getExistingHash(Mod*) -> QString;
+    auto createNewHash(Resource*) -> Hashing::Hasher::Ptr;
+    auto getExistingHash(Resource*) -> QString;
 
    private slots:
-    void modrinthCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Mod*);
-    void flameCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Mod*);
+    void modrinthCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Resource*);
+    void flameCallback(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Resource*);
 
    signals:
-    void metadataReady(Mod*);
-    void metadataFailed(Mod*);
+    void metadataReady(Resource*);
+    void metadataFailed(Resource*);
 
    private:
-    QHash<QString, Mod*> m_mods;
+    QHash<QString, Resource*> m_resources;
     QDir m_index_dir;
     ModPlatform::ResourceProvider m_provider;
 

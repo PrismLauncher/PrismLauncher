@@ -354,8 +354,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/tasks/ResourceFolderLoadTask.cpp
     minecraft/mod/tasks/LocalModParseTask.h
     minecraft/mod/tasks/LocalModParseTask.cpp
-    minecraft/mod/tasks/LocalModUpdateTask.h
-    minecraft/mod/tasks/LocalModUpdateTask.cpp
+        minecraft/mod/tasks/LocalResourceUpdateTask.h
+        minecraft/mod/tasks/LocalResourceUpdateTask.cpp
     minecraft/mod/tasks/LocalDataPackParseTask.h
     minecraft/mod/tasks/LocalDataPackParseTask.cpp
     minecraft/mod/tasks/LocalResourcePackParseTask.h

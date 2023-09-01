@@ -53,7 +53,7 @@
 
 #include "Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
-#include "minecraft/mod/tasks/LocalModUpdateTask.h"
+#include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FlameModIndex.h"
 
 ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)

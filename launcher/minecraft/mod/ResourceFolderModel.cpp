@@ -19,7 +19,7 @@
 #include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
 #include "Json.h"
-#include "minecraft/mod/tasks/LocalModUpdateTask.h"
+#include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "settings/Setting.h"
@@ -192,7 +192,7 @@ bool ResourceFolderModel::installResource(QString path, ModPlatform::IndexedVers
                 qDebug() << doc;
                 qWarning() << "Error while reading mod info: " << e.cause();
             }
-            LocalModUpdateTask update_metadata(indexDir(), pack, vers);
+            LocalResourceUpdateTask update_metadata(indexDir(), pack, vers);
             QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);
             update_metadata.start();
         });

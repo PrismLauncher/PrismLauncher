@@ -17,7 +17,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "LocalModUpdateTask.h"
+#include "LocalResourceUpdateTask.h"
 
 #include "FileSystem.h"
 #include "minecraft/mod/MetadataHandler.h"
@@ -26,12 +26,12 @@
 #include <windows.h>
 #endif
 
-LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version)
-    : m_index_dir(index_dir), m_mod(mod), m_mod_version(mod_version)
+LocalResourceUpdateTask::LocalResourceUpdateTask(QDir index_dir, ModPlatform::IndexedPack& project, ModPlatform::IndexedVersion& version)
+    : m_index_dir(index_dir), m_project(project), m_version(version)
 {
     // Ensure a '.index' folder exists in the mods folder, and create it if it does not
     if (!FS::ensureFolderPathExists(index_dir.path())) {
-        emitFailed(QString("Unable to create index for mod %1!").arg(m_mod.name));
+        emitFailed(QString("Unable to create index directory at %1!").arg(index_dir.absolutePath()));
     }
 
 #ifdef Q_OS_WIN32
@@ -39,28 +39,28 @@ LocalModUpdateTask::LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack&
 #endif
 }
 
-void LocalModUpdateTask::executeTask()
+void LocalResourceUpdateTask::executeTask()
 {
-    setStatus(tr("Updating index for mod:\n%1").arg(m_mod.name));
+    setStatus(tr("Updating index for resource:\n%1").arg(m_project.name));
 
-    auto old_metadata = Metadata::get(m_index_dir, m_mod.addonId);
+    auto old_metadata = Metadata::get(m_index_dir, m_project.addonId);
     if (old_metadata.isValid()) {
-        emit hasOldMod(old_metadata.name, old_metadata.filename);
-        if (m_mod.slug.isEmpty())
-            m_mod.slug = old_metadata.slug;
+        emit hasOldResource(old_metadata.name, old_metadata.filename);
+        if (m_project.slug.isEmpty())
+            m_project.slug = old_metadata.slug;
     }
 
-    auto pw_mod = Metadata::create(m_index_dir, m_mod, m_mod_version);
+    auto pw_mod = Metadata::create(m_index_dir, m_project, m_version);
     if (pw_mod.isValid()) {
         Metadata::update(m_index_dir, pw_mod);
         emitSucceeded();
     } else {
-        qCritical() << "Tried to update an invalid mod!";
+        qCritical() << "Tried to update an invalid resource!";
         emitFailed(tr("Invalid metadata"));
     }
 }
 
-auto LocalModUpdateTask::abort() -> bool
+auto LocalResourceUpdateTask::abort() -> bool
 {
     emitAborted();
     return true;
