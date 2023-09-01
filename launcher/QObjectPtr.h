@@ -33,7 +33,11 @@ class shared_qobject_ptr : public QSharedPointer<T> {
     {}
 
     void reset() { QSharedPointer<T>::reset(); }
-    void reset(T* other) { QSharedPointer<T>::reset(other); }
+    void reset(T* other)
+    {
+        shared_qobject_ptr<T> t(other);
+        this->swap(t);
+    }
     void reset(const shared_qobject_ptr<T>& other)
     {
         shared_qobject_ptr<T> t(other);

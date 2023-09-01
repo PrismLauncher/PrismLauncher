@@ -73,14 +73,13 @@ class ResourceFolderLoadTask : public Task {
     void getFromMetadata();
 
    private:
-    QDir m_mods_dir, m_index_dir;
+    QDir m_resource_dir, m_index_dir;
     bool m_is_indexed;
     bool m_clean_orphan;
+    std::function<Resource*(QFileInfo const&)> m_create_func;
     ResultPtr m_result;
 
     std::atomic<bool> m_aborted = false;
-
-    std::function<Resource*(QFileInfo const&)> m_create_func;
 
     /** This is the thread in which we should put new mod objects */
     QThread* m_thread_to_spawn_into;

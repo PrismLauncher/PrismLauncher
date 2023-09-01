@@ -45,6 +45,14 @@ ResourceFolderLoadTask::ResourceFolderLoadTask(const QDir& resource_dir,
                                                bool is_indexed,
                                                bool clean_orphan,
                                                std::function<Resource*(const QFileInfo&)> create_function)
+    : Task(nullptr, false)
+    , m_resource_dir(resource_dir)
+    , m_index_dir(index_dir)
+    , m_is_indexed(is_indexed)
+    , m_clean_orphan(clean_orphan)
+    , m_create_func(create_function)
+    , m_result(new Result())
+    , m_thread_to_spawn_into(thread())
 {}
 
 void ResourceFolderLoadTask::executeTask()
@@ -58,8 +66,8 @@ void ResourceFolderLoadTask::executeTask()
     }
 
     // Read JAR files that don't have metadata
-    m_mods_dir.refresh();
-    for (auto entry : m_mods_dir.entryInfoList()) {
+    m_resource_dir.refresh();
+    for (auto entry : m_resource_dir.entryInfoList()) {
         Resource* resource = m_create_func(entry);
 
         if (resource->enabled()) {
@@ -121,7 +129,7 @@ void ResourceFolderLoadTask::getFromMetadata()
         if (!metadata.isValid())
             return;
 
-        auto* resource = m_create_func(QFileInfo(m_mods_dir.filePath(metadata.filename)));
+        auto* resource = m_create_func(QFileInfo(m_resource_dir.filePath(metadata.filename)));
         resource->setMetadata(metadata);
         resource->setStatus(ResourceStatus::NOT_INSTALLED);
         m_result->resources[resource->internal_id()].reset(resource);
