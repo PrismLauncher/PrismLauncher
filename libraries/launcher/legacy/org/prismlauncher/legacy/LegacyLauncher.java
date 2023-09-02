@@ -122,7 +122,6 @@ final class LegacyLauncher extends AbstractLauncher {
         MethodHandle method = ReflectionUtils.findMainMethod(main);
         method.invokeExact(gameArgs.toArray(new String[0]));
     }
-<<<<<<< HEAD:libraries/launcher/legacy/org/prismlauncher/legacy/LegacyLauncher.java
 
     private static Applet createAppletClass(String clazz) throws Throwable {
         Class<?> appletClass = ClassLoader.getSystemClassLoader().loadClass(clazz);
@@ -153,7 +152,4 @@ final class LegacyLauncher extends AbstractLauncher {
 
         return null;
     }
-
-=======
->>>>>>> upstream/develop:libraries/launcher/org/prismlauncher/launcher/impl/legacy/LegacyLauncher.java
 }
