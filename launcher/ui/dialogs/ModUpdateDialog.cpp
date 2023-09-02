@@ -5,8 +5,6 @@
 #include "ScrollMessageBox.h"
 #include "ui_ReviewMessageBox.h"
 
-#include "FileSystem.h"
-#include "Json.h"
 #include "Markdown.h"
 
 #include "tasks/ConcurrentTask.h"
@@ -30,9 +28,9 @@ static std::list<Version> mcVersions(BaseInstance* inst)
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
 
-static std::optional<ResourceAPI::ModLoaderTypes> mcLoaders(BaseInstance* inst)
+static std::optional<ModPlatform::ModLoaderTypes> mcLoaders(BaseInstance* inst)
 {
-    return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoaders() };
+    return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders() };
 }
 
 ModUpdateDialog::ModUpdateDialog(QWidget* parent,
@@ -89,15 +87,17 @@ void ModUpdateDialog::checkCandidates()
 
     if (!m_modrinth_to_update.empty()) {
         m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model));
-        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
+        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
+            m_failed_check_update.append({ mod, reason, recover_url });
+        });
         check_task.addTask(m_modrinth_check_task);
     }
 
     if (!m_flame_to_update.empty()) {
         m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model));
-        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this,
-                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({mod, reason, recover_url}); });
+        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
+            m_failed_check_update.append({ mod, reason, recover_url });
+        });
         check_task.addTask(m_flame_check_task);
     }
 
@@ -162,7 +162,7 @@ void ModUpdateDialog::checkCandidates()
             if (!recover_url.isEmpty())
                 //: %1 is the link to download it manually
                 text += tr("Possible solution: Getting the latest version manually:<br>%1<br>")
-                    .arg(QString("<a href='%1'>%1</a>").arg(recover_url.toString()));
+                            .arg(QString("<a href='%1'>%1</a>").arg(recover_url.toString()));
             text += "<br>";
         }
 
@@ -342,7 +342,7 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
     } else {
         QString reason{ tr("Couldn't find a valid version on the selected mod provider(s)") };
 
-        m_failed_metadata.append({mod, reason});
+        m_failed_metadata.append({ mod, reason });
     }
 }
 

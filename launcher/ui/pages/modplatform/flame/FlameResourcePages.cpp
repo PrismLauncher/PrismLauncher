@@ -49,8 +49,7 @@ static bool isOptedOut(ModPlatform::IndexedVersion const& ver)
     return ver.downloadUrl.isEmpty();
 }
 
-FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
-    : ModPage(dialog, instance)
+FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
     m_model = new FlameModModel(instance);
     m_ui->packView->setModel(m_model);
@@ -67,10 +66,12 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders) const -> bool
+auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver,
+                                   QString mineVer,
+                                   std::optional<ModPlatform::ModLoaderTypes> loaders) const -> bool
 {
-    Q_UNUSED(loaders);
-    return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty();
+    return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty() &&
+           (!loaders.has_value() || !ver.loaders || loaders.value() & ver.loaders);
 }
 
 bool FlameModPage::optedOut(ModPlatform::IndexedVersion& ver) const
@@ -86,7 +87,7 @@ void FlameModPage::openUrl(const QUrl& url)
         if (query.startsWith("remoteUrl=")) {
             // attempt to resolve url from warning page
             query.remove(0, 10);
-            ModPage::openUrl({QUrl::fromPercentEncoding(query.toUtf8())}); // double decoding is necessary
+            ModPage::openUrl({ QUrl::fromPercentEncoding(query.toUtf8()) });  // double decoding is necessary
             return;
         }
     }
@@ -125,7 +126,7 @@ void FlameResourcePackPage::openUrl(const QUrl& url)
         if (query.startsWith("remoteUrl=")) {
             // attempt to resolve url from warning page
             query.remove(0, 10);
-            ResourcePackResourcePage::openUrl({QUrl::fromPercentEncoding(query.toUtf8())}); // double decoding is necessary
+            ResourcePackResourcePage::openUrl({ QUrl::fromPercentEncoding(query.toUtf8()) });  // double decoding is necessary
             return;
         }
     }
@@ -164,7 +165,7 @@ void FlameTexturePackPage::openUrl(const QUrl& url)
         if (query.startsWith("remoteUrl=")) {
             // attempt to resolve url from warning page
             query.remove(0, 10);
-            ResourcePackResourcePage::openUrl({QUrl::fromPercentEncoding(query.toUtf8())}); // double decoding is necessary
+            ResourcePackResourcePage::openUrl({ QUrl::fromPercentEncoding(query.toUtf8()) });  // double decoding is necessary
             return;
         }
     }
@@ -175,8 +176,17 @@ void FlameTexturePackPage::openUrl(const QUrl& url)
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
-auto FlameModPage::shouldDisplay() const -> bool { return true; }
-auto FlameResourcePackPage::shouldDisplay() const -> bool { return true; }
-auto FlameTexturePackPage::shouldDisplay() const -> bool { return true; }
+auto FlameModPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto FlameResourcePackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto FlameTexturePackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
 
 }  // namespace ResourceDownload

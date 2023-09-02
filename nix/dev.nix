@@ -19,23 +19,17 @@
           nil.enable = true;
 
           clang-format = {
-            enable =
-              false; # As most of the codebase is **not** formatted, we don't want clang-format yet
-            types_or = ["c" "c++"];
+            enable = true;
+            types_or = ["c" "c++" "java" "json" "objective-c"];
           };
         };
+
+        tools.clang-tools = pkgs.clang-tools_16;
       };
     };
 
     devShells.default = pkgs.mkShell {
       inherit (self.checks.${system}.pre-commit-check) shellHook;
-      packages = with pkgs; [
-        nodePackages.markdownlint-cli
-        alejandra
-        deadnix
-        clang-tools
-        nil
-      ];
 
       inputsFrom = [self.packages.${system}.prismlauncher-unwrapped];
       buildInputs = with pkgs; [ccache ninja];

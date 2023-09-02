@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,23 +37,20 @@
 #include "InstanceWindow.h"
 #include "Application.h"
 
-#include <QScrollBar>
-#include <QMessageBox>
-#include <QHBoxLayout>
-#include <QPushButton>
 #include <qlayoutitem.h>
 #include <QCloseEvent>
+#include <QHBoxLayout>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QScrollBar>
 
-#include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/ProgressDialog.h"
 #include "ui/widgets/PageContainer.h"
 
 #include "InstancePageProvider.h"
 
 #include "icons/IconList.h"
 
-InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
-    : QMainWindow(parent), m_instance(instance)
+InstanceWindow::InstanceWindow(InstancePtr instance, QWidget* parent) : QMainWindow(parent), m_instance(instance)
 {
     setAttribute(Qt::WA_DeleteOnClose);
 
@@ -76,40 +74,44 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 
     // Add custom buttons to the page container layout.
     {
-        auto horizontalLayout = new QHBoxLayout();
+        auto horizontalLayout = new QHBoxLayout(this);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         horizontalLayout->setContentsMargins(6, -1, 6, -1);
 
-        auto btnHelp = new QPushButton();
+        auto btnHelp = new QPushButton(this);
         btnHelp->setText(tr("Help"));
         horizontalLayout->addWidget(btnHelp);
-        connect(btnHelp, SIGNAL(clicked(bool)), m_container, SLOT(help()));
+        connect(btnHelp, &QPushButton::clicked, m_container, &PageContainer::help);
 
         auto spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
         horizontalLayout->addSpacerItem(spacer);
 
-        m_killButton = new QPushButton();
+        m_launchButton = new QToolButton(this);
+        m_launchButton->setText(tr("&Launch"));
+        m_launchButton->setToolTip(tr("Launch the instance"));
+        m_launchButton->setPopupMode(QToolButton::MenuButtonPopup);
+        m_launchButton->setMinimumWidth(80);  // HACK!!
+        horizontalLayout->addWidget(m_launchButton);
+        connect(m_launchButton, &QPushButton::clicked, this, [this] { APPLICATION->launch(m_instance); });
+
+        m_killButton = new QPushButton(this);
+        m_killButton->setText(tr("&Kill"));
+        m_killButton->setToolTip(tr("Kill the running instance"));
+        m_killButton->setShortcut(QKeySequence(tr("Ctrl+K")));
         horizontalLayout->addWidget(m_killButton);
-        connect(m_killButton, SIGNAL(clicked(bool)), SLOT(on_btnKillMinecraft_clicked()));
+        connect(m_killButton, &QPushButton::clicked, this, [this] { APPLICATION->kill(m_instance); });
 
-        m_launchOfflineButton = new QPushButton();
-        horizontalLayout->addWidget(m_launchOfflineButton);
-        m_launchOfflineButton->setText(tr("Launch Offline"));
+        updateButtons();
 
-        m_launchDemoButton = new QPushButton();
-        horizontalLayout->addWidget(m_launchDemoButton);
-        m_launchDemoButton->setText(tr("Launch Demo"));
-
-        updateLaunchButtons();
-        connect(m_launchOfflineButton, SIGNAL(clicked(bool)), SLOT(on_btnLaunchMinecraftOffline_clicked()));
-        connect(m_launchDemoButton, SIGNAL(clicked(bool)), SLOT(on_btnLaunchMinecraftDemo_clicked()));
-
-        m_closeButton = new QPushButton();
+        m_closeButton = new QPushButton(this);
         m_closeButton->setText(tr("Close"));
         horizontalLayout->addWidget(m_closeButton);
-        connect(m_closeButton, SIGNAL(clicked(bool)), SLOT(on_closeButton_clicked()));
+        connect(m_closeButton, &QPushButton::clicked, this, &QMainWindow::close);
 
         m_container->addButtons(horizontalLayout);
+
+        connect(m_instance.get(), &BaseInstance::profilerChanged, this, &InstanceWindow::updateButtons);
+        connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceWindow::updateButtons);
     }
 
     // restore window state
@@ -143,59 +145,24 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget *parent)
 
 void InstanceWindow::on_instanceStatusChanged(BaseInstance::Status, BaseInstance::Status newStatus)
 {
-    if(newStatus == BaseInstance::Status::Gone)
-    {
+    if (newStatus == BaseInstance::Status::Gone) {
         m_doNotSave = true;
         close();
     }
 }
 
-void InstanceWindow::updateLaunchButtons()
+void InstanceWindow::updateButtons()
 {
-    if(m_instance->isRunning())
-    {
-        m_launchOfflineButton->setEnabled(false);
-        m_launchDemoButton->setEnabled(false);
-        m_killButton->setText(tr("Kill"));
-        m_killButton->setObjectName("killButton");
-        m_killButton->setToolTip(tr("Kill the running instance"));
-    }
-    else if(!m_instance->canLaunch())
-    {
-        m_launchOfflineButton->setEnabled(false);
-        m_launchDemoButton->setEnabled(false);
-        m_killButton->setText(tr("Launch"));
-        m_killButton->setObjectName("launchButton");
-        m_killButton->setToolTip(tr("Launch the instance"));
-        m_killButton->setEnabled(false);
-    }
+    m_launchButton->setEnabled(m_instance->canLaunch());
+    m_killButton->setEnabled(m_instance->isRunning());
+
+    QMenu* launchMenu = m_launchButton->menu();
+    if (launchMenu)
+        launchMenu->clear();
     else
-    {
-        m_launchOfflineButton->setEnabled(true);
-
-        // Disable demo-mode if not available.
-        auto instance = dynamic_cast<MinecraftInstance*>(m_instance.get());
-        if (instance) {
-            m_launchDemoButton->setEnabled(instance->supportsDemo());
-        }
-
-        m_killButton->setText(tr("Launch"));
-        m_killButton->setObjectName("launchButton");
-        m_killButton->setToolTip(tr("Launch the instance"));
-    }
-    // NOTE: this is a hack to force the button to recalculate its style
-    m_killButton->setStyleSheet("/* */");
-    m_killButton->setStyleSheet(QString());
-}
-
-void InstanceWindow::on_btnLaunchMinecraftOffline_clicked()
-{
-    APPLICATION->launch(m_instance, false, false, nullptr);
-}
-
-void InstanceWindow::on_btnLaunchMinecraftDemo_clicked()
-{
-    APPLICATION->launch(m_instance, false, true, nullptr);
+        launchMenu = new QMenu(this);
+    m_instance->populateLaunchMenu(launchMenu);
+    m_launchButton->setMenu(launchMenu);
 }
 
 void InstanceWindow::instanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc)
@@ -205,28 +172,21 @@ void InstanceWindow::instanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> pr
 
 void InstanceWindow::runningStateChanged(bool running)
 {
-    updateLaunchButtons();
+    updateButtons();
     m_container->refreshContainer();
-    if(running) {
+    if (running) {
         selectPage("log");
     }
 }
 
-void InstanceWindow::on_closeButton_clicked()
-{
-    close();
-}
-
-void InstanceWindow::closeEvent(QCloseEvent *event)
+void InstanceWindow::closeEvent(QCloseEvent* event)
 {
     bool proceed = true;
-    if(!m_doNotSave)
-    {
+    if (!m_doNotSave) {
         proceed &= m_container->prepareToClose();
     }
 
-    if(!proceed)
-    {
+    if (!proceed) {
         return;
     }
 
@@ -239,18 +199,6 @@ void InstanceWindow::closeEvent(QCloseEvent *event)
 bool InstanceWindow::saveAll()
 {
     return m_container->saveAll();
-}
-
-void InstanceWindow::on_btnKillMinecraft_clicked()
-{
-    if(m_instance->isRunning())
-    {
-        APPLICATION->kill(m_instance);
-    }
-    else
-    {
-        APPLICATION->launch(m_instance, true, false, nullptr);
-    }
 }
 
 QString InstanceWindow::instanceId()
@@ -268,14 +216,14 @@ void InstanceWindow::refreshContainer()
     m_container->refreshContainer();
 }
 
-InstanceWindow::~InstanceWindow()
+BasePage* InstanceWindow::selectedPage() const
 {
+    return m_container->selectedPage();
 }
 
 bool InstanceWindow::requestClose()
 {
-    if(m_container->prepareToClose())
-    {
+    if (m_container->prepareToClose()) {
         close();
         return true;
     }

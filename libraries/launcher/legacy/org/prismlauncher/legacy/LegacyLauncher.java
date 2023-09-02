@@ -55,6 +55,11 @@
 
 package org.prismlauncher.legacy;
 
+import org.prismlauncher.launcher.impl.AbstractLauncher;
+import org.prismlauncher.utils.Parameters;
+import org.prismlauncher.utils.ReflectionUtils;
+import org.prismlauncher.utils.logging.Log;
+
 import java.applet.Applet;
 import java.io.File;
 import java.lang.invoke.MethodHandle;
@@ -65,16 +70,10 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
 
-import org.prismlauncher.launcher.impl.AbstractLauncher;
-import org.prismlauncher.utils.Parameters;
-import org.prismlauncher.utils.ReflectionUtils;
-import org.prismlauncher.utils.logging.Log;
-
 /**
  * Used to launch old versions which support applets.
  */
 final class LegacyLauncher extends AbstractLauncher {
-
     private final String user, session;
     private final String title;
     private final String appletClass;
@@ -111,8 +110,7 @@ final class LegacyLauncher extends AbstractLauncher {
             try {
                 LegacyFrame window = new LegacyFrame(title, createAppletClass(appletClass));
 
-                window.start(user, session, width, height, maximize, serverAddress, serverPort,
-                        gameArgs.contains("--demo"));
+                window.start(user, session, width, height, maximize, serverAddress, serverPort, gameArgs.contains("--demo"));
                 return;
             } catch (Throwable e) {
                 Log.error("Running applet wrapper failed with exception; falling back to main class", e);
@@ -124,12 +122,12 @@ final class LegacyLauncher extends AbstractLauncher {
         MethodHandle method = ReflectionUtils.findMainMethod(main);
         method.invokeExact(gameArgs.toArray(new String[0]));
     }
+<<<<<<< HEAD:libraries/launcher/legacy/org/prismlauncher/legacy/LegacyLauncher.java
 
     private static Applet createAppletClass(String clazz) throws Throwable {
         Class<?> appletClass = ClassLoader.getSystemClassLoader().loadClass(clazz);
 
-        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(appletClass,
-                MethodType.methodType(void.class));
+        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(appletClass, MethodType.methodType(void.class));
         return (Applet) appletConstructor.invoke();
     }
 
@@ -156,4 +154,6 @@ final class LegacyLauncher extends AbstractLauncher {
         return null;
     }
 
+=======
+>>>>>>> upstream/develop:libraries/launcher/org/prismlauncher/launcher/impl/legacy/LegacyLauncher.java
 }

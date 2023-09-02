@@ -35,16 +35,15 @@
 
 package org.prismlauncher.legacy.fix.online;
 
+import org.prismlauncher.legacy.utils.url.UrlUtils;
+
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.prismlauncher.legacy.utils.url.UrlUtils;
-
 final class Handler extends URLStreamHandler {
-
     @Override
     protected URLConnection openConnection(URL address) throws IOException {
         return openConnection(address, null);
@@ -61,5 +60,4 @@ final class Handler extends URLStreamHandler {
 
         return UrlUtils.openConnection(address, proxy);
     }
-
 }

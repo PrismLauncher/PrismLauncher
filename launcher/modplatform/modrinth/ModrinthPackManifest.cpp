@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -66,23 +66,23 @@ void loadIndexedInfo(Modpack& pack, QJsonObject& obj)
     pack.extra.projectUrl = QString("https://modrinth.com/modpack/%1").arg(Json::ensureString(obj, "slug"));
 
     pack.extra.issuesUrl = Json::ensureString(obj, "issues_url");
-    if(pack.extra.issuesUrl.endsWith('/'))
+    if (pack.extra.issuesUrl.endsWith('/'))
         pack.extra.issuesUrl.chop(1);
 
     pack.extra.sourceUrl = Json::ensureString(obj, "source_url");
-    if(pack.extra.sourceUrl.endsWith('/'))
+    if (pack.extra.sourceUrl.endsWith('/'))
         pack.extra.sourceUrl.chop(1);
 
     pack.extra.wikiUrl = Json::ensureString(obj, "wiki_url");
-    if(pack.extra.wikiUrl.endsWith('/'))
+    if (pack.extra.wikiUrl.endsWith('/'))
         pack.extra.wikiUrl.chop(1);
 
     pack.extra.discordUrl = Json::ensureString(obj, "discord_url");
-    if(pack.extra.discordUrl.endsWith('/'))
+    if (pack.extra.discordUrl.endsWith('/'))
         pack.extra.discordUrl.chop(1);
 
     auto donate_arr = Json::ensureArray(obj, "donation_urls");
-    for(auto d : donate_arr){
+    for (auto d : donate_arr) {
         auto d_obj = Json::requireObject(d);
 
         DonationData donate;
@@ -107,7 +107,7 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
         auto obj = Json::requireObject(versionIter);
         auto file = loadIndexedVersion(obj);
 
-        if(!file.id.isEmpty()) // Heuristic to check if the returned value is valid
+        if (!file.id.isEmpty())  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModpackVersion& a, const ModpackVersion& b) -> bool {
@@ -122,7 +122,7 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
     pack.versionsLoaded = true;
 }
 
-auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
+auto loadIndexedVersion(QJsonObject& obj) -> ModpackVersion
 {
     ModpackVersion file;
 
@@ -132,11 +132,10 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
 
     file.id = Json::requireString(obj, "id");
     file.project_id = Json::requireString(obj, "project_id");
-    
+
     file.date = Json::requireString(obj, "date_published");
 
     auto files = Json::requireArray(obj, "files");
-
 
     for (auto file_iter : files) {
         File indexed_file;
@@ -146,21 +145,21 @@ auto loadIndexedVersion(QJsonObject &obj) -> ModpackVersion
             auto filename = Json::ensureString(parent, "filename");
             // Checking suffix here is fine because it's the response from Modrinth,
             // so one would assume it will always be in English.
-            if(!filename.endsWith("mrpack") && !filename.endsWith("zip"))
+            if (!filename.endsWith("mrpack") && !filename.endsWith("zip"))
                 continue;
         }
 
         auto url = Json::requireString(parent, "url");
 
         file.download_url = url;
-        if(is_primary)
+        if (is_primary)
             break;
     }
 
-    if(file.download_url.isEmpty())
+    if (file.download_url.isEmpty())
         return {};
 
     return file;
-}        
+}
 
 }  // namespace Modrinth

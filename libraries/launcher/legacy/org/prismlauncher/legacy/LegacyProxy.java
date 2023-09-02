@@ -58,7 +58,6 @@ import org.prismlauncher.utils.Parameters;
 
 // implementation of LegacyProxy
 public final class LegacyProxy {
-
     public static Launcher createLauncher(Parameters params) {
         return new LegacyLauncher(params);
     }
@@ -66,5 +65,4 @@ public final class LegacyProxy {
     public static void applyOnlineFixes(Parameters parameters) {
         OnlineFixes.apply(parameters);
     }
-
 }

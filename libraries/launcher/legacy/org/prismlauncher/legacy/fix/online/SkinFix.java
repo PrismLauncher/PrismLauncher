@@ -52,6 +52,11 @@
 
 package org.prismlauncher.legacy.fix.online;
 
+import org.prismlauncher.legacy.utils.api.MojangApi;
+import org.prismlauncher.legacy.utils.api.Texture;
+import org.prismlauncher.legacy.utils.url.CustomUrlConnection;
+import org.prismlauncher.legacy.utils.url.UrlUtils;
+
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -64,13 +69,7 @@ import java.net.URLConnection;
 
 import javax.imageio.ImageIO;
 
-import org.prismlauncher.legacy.utils.api.MojangApi;
-import org.prismlauncher.legacy.utils.api.Texture;
-import org.prismlauncher.legacy.utils.url.CustomUrlConnection;
-import org.prismlauncher.legacy.utils.url.UrlUtils;
-
 final class SkinFix {
-
     static URLConnection openConnection(URL address, Proxy proxy) throws IOException {
         String skinOwner = findSkinOwner(address);
         if (skinOwner != null)
@@ -154,7 +153,7 @@ final class SkinFix {
             case "www.minecraft.net":
                 if (!address.getPath().equals("/cloak/get.jsp"))
                     return null;
-                
+
                 return stripIfPrefixed(address.getQuery(), "user=");
 
             case "s3.amazonaws.com":
@@ -177,5 +176,4 @@ final class SkinFix {
 
         return null;
     }
-
 }

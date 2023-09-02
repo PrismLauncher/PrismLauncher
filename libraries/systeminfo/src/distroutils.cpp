@@ -29,14 +29,14 @@ SOFTWARE.
 
 #include "distroutils.h"
 
-#include <QStringList>
-#include <QMap>
-#include <QSettings>
-#include <QFile>
-#include <QProcess>
 #include <QDebug>
 #include <QDir>
+#include <QFile>
+#include <QMap>
+#include <QProcess>
 #include <QRegularExpression>
+#include <QSettings>
+#include <QStringList>
 
 #include <functional>
 
@@ -46,38 +46,27 @@ Sys::DistributionInfo Sys::read_os_release()
     QStringList files = { "/etc/os-release", "/usr/lib/os-release" };
     QString name;
     QString version;
-    for (auto &file: files)
-    {
-        if(!QFile::exists(file))
-        {
+    for (auto& file : files) {
+        if (!QFile::exists(file)) {
             continue;
         }
         QSettings settings(file, QSettings::IniFormat);
-        if(settings.contains("ID"))
-        {
+        if (settings.contains("ID")) {
             name = settings.value("ID").toString().toLower();
-        }
-        else if (settings.contains("NAME"))
-        {
+        } else if (settings.contains("NAME")) {
             name = settings.value("NAME").toString().toLower();
-        }
-        else
-        {
+        } else {
             continue;
         }
 
-        if(settings.contains("VERSION_ID"))
-        {
+        if (settings.contains("VERSION_ID")) {
             version = settings.value("VERSION_ID").toString().toLower();
-        }
-        else if(settings.contains("VERSION"))
-        {
+        } else if (settings.contains("VERSION")) {
             version = settings.value("VERSION").toString().toLower();
         }
         break;
     }
-    if(name.isEmpty())
-    {
+    if (name.isEmpty()) {
         return out;
     }
     out.distributionName = name;
@@ -85,33 +74,31 @@ Sys::DistributionInfo Sys::read_os_release()
     return out;
 }
 
-bool Sys::main_lsb_info(Sys::LsbInfo & out)
+bool Sys::main_lsb_info(Sys::LsbInfo& out)
 {
-    int status=0;
+    int status = 0;
     QProcess lsbProcess;
     QStringList arguments;
     arguments << "-a";
-    lsbProcess.start("lsb_release",  arguments);
+    lsbProcess.start("lsb_release", arguments);
     lsbProcess.waitForFinished();
     status = lsbProcess.exitStatus();
     QString output = lsbProcess.readAllStandardOutput();
     qDebug() << output;
     lsbProcess.close();
-    if(status == 0)
-    {
+    if (status == 0) {
         auto lines = output.split('\n');
-        for(auto line:lines)
-        {
+        for (auto line : lines) {
             int index = line.indexOf(':');
             auto key = line.left(index).trimmed();
             auto value = line.mid(index + 1).toLower().trimmed();
-            if(key == "Distributor ID")
+            if (key == "Distributor ID")
                 out.distributor = value;
-            else if(key == "Release")
+            else if (key == "Release")
                 out.version = value;
-            else if(key == "Description")
+            else if (key == "Description")
                 out.description = value;
-            else if(key == "Codename")
+            else if (key == "Codename")
                 out.codename = value;
         }
         return !out.distributor.isEmpty();
@@ -119,7 +106,7 @@ bool Sys::main_lsb_info(Sys::LsbInfo & out)
     return false;
 }
 
-bool Sys::fallback_lsb_info(Sys::LsbInfo & out)
+bool Sys::fallback_lsb_info(Sys::LsbInfo& out)
 {
     // running lsb_release failed, try to read the file instead
     // /etc/lsb-release format, if the file even exists, is non-standard.
@@ -127,15 +114,12 @@ bool Sys::fallback_lsb_info(Sys::LsbInfo & out)
     // distributions install an /etc/lsb-release as part of the base
     // distribution, but `lsb_release` remains optional.
     QString file = "/etc/lsb-release";
-    if (QFile::exists(file))
-    {
+    if (QFile::exists(file)) {
         QSettings settings(file, QSettings::IniFormat);
-        if(settings.contains("DISTRIB_ID"))
-        {
+        if (settings.contains("DISTRIB_ID")) {
             out.distributor = settings.value("DISTRIB_ID").toString().toLower();
         }
-        if(settings.contains("DISTRIB_RELEASE"))
-        {
+        if (settings.contains("DISTRIB_RELEASE")) {
             out.version = settings.value("DISTRIB_RELEASE").toString().toLower();
         }
         return !out.distributor.isEmpty();
@@ -143,48 +127,34 @@ bool Sys::fallback_lsb_info(Sys::LsbInfo & out)
     return false;
 }
 
-void Sys::lsb_postprocess(Sys::LsbInfo & lsb, Sys::DistributionInfo & out)
+void Sys::lsb_postprocess(Sys::LsbInfo& lsb, Sys::DistributionInfo& out)
 {
     QString dist = lsb.distributor;
     QString vers = lsb.version;
-    if(dist.startsWith("redhatenterprise"))
-    {
+    if (dist.startsWith("redhatenterprise")) {
         dist = "rhel";
-    }
-    else if(dist == "archlinux")
-    {
+    } else if (dist == "archlinux") {
         dist = "arch";
-    }
-    else if (dist.startsWith("suse"))
-    {
-        if(lsb.description.startsWith("opensuse"))
-        {
+    } else if (dist.startsWith("suse")) {
+        if (lsb.description.startsWith("opensuse")) {
             dist = "opensuse";
-        }
-        else if (lsb.description.startsWith("suse linux enterprise"))
-        {
+        } else if (lsb.description.startsWith("suse linux enterprise")) {
             dist = "sles";
         }
-    }
-    else if (dist == "debian" and vers == "testing")
-    {
+    } else if (dist == "debian" and vers == "testing") {
         vers = lsb.codename;
-    }
-    else
-    {
+    } else {
         // ubuntu, debian, gentoo, scientific, slackware, ... ?
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         auto parts = dist.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
 #else
         auto parts = dist.split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
 #endif
-        if(parts.size())
-        {
+        if (parts.size()) {
             dist = parts[0];
         }
     }
-    if(!dist.isEmpty())
-    {
+    if (!dist.isEmpty()) {
         out.distributionName = dist;
         out.distributionVersion = vers;
     }
@@ -193,10 +163,8 @@ void Sys::lsb_postprocess(Sys::LsbInfo & lsb, Sys::DistributionInfo & out)
 Sys::DistributionInfo Sys::read_lsb_release()
 {
     LsbInfo lsb;
-    if(!main_lsb_info(lsb))
-    {
-        if(!fallback_lsb_info(lsb))
-        {
+    if (!main_lsb_info(lsb)) {
+        if (!fallback_lsb_info(lsb)) {
             return Sys::DistributionInfo();
         }
     }
@@ -205,15 +173,13 @@ Sys::DistributionInfo Sys::read_lsb_release()
     return out;
 }
 
-QString Sys::_extract_distribution(const QString & x)
+QString Sys::_extract_distribution(const QString& x)
 {
     QString release = x.toLower();
-    if (release.startsWith("red hat enterprise"))
-    {
+    if (release.startsWith("red hat enterprise")) {
         return "rhel";
     }
-    if (release.startsWith("suse linux enterprise"))
-    {
+    if (release.startsWith("suse linux enterprise")) {
         return "sles";
     }
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
@@ -221,14 +187,13 @@ QString Sys::_extract_distribution(const QString & x)
 #else
     QStringList list = release.split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
 #endif
-    if(list.size())
-    {
+    if (list.size()) {
         return list[0];
     }
     return QString();
 }
 
-QString Sys::_extract_version(const QString & x)
+QString Sys::_extract_version(const QString& x)
 {
     QRegularExpression versionish_string(QRegularExpression::anchoredPattern("\\d+(?:\\.\\d+)*$"));
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
@@ -236,11 +201,9 @@ QString Sys::_extract_version(const QString & x)
 #else
     QStringList list = x.split(QRegularExpression("\\s+"), QString::SkipEmptyParts);
 #endif
-    for(int i = list.size() - 1; i >= 0; --i)
-    {
+    for (int i = list.size() - 1; i >= 0; --i) {
         QString chunk = list[i];
-        if(versionish_string.match(chunk).hasMatch())
-        {
+        if (versionish_string.match(chunk).hasMatch()) {
             return chunk;
         }
     }
@@ -249,43 +212,35 @@ QString Sys::_extract_version(const QString & x)
 
 Sys::DistributionInfo Sys::read_legacy_release()
 {
-    struct checkEntry
-    {
+    struct checkEntry {
         QString file;
-        std::function<QString(const QString &)> extract_distro;
-        std::function<QString(const QString &)> extract_version;
+        std::function<QString(const QString&)> extract_distro;
+        std::function<QString(const QString&)> extract_version;
     };
-    QList<checkEntry> checks =
-    {
-        {"/etc/arch-release", [](const QString &){ return "arch";}, [](const QString &){ return "rolling";}},
-        {"/etc/slackware-version", &Sys::_extract_distribution, &Sys::_extract_version},
-        {QString(), &Sys::_extract_distribution, &Sys::_extract_version},
-        {"/etc/debian_version", [](const QString &){ return "debian";}, [](const QString & x){ return x;}},
+    QList<checkEntry> checks = {
+        { "/etc/arch-release", [](const QString&) { return "arch"; }, [](const QString&) { return "rolling"; } },
+        { "/etc/slackware-version", &Sys::_extract_distribution, &Sys::_extract_version },
+        { QString(), &Sys::_extract_distribution, &Sys::_extract_version },
+        { "/etc/debian_version", [](const QString&) { return "debian"; }, [](const QString& x) { return x; } },
     };
-    for(auto & check: checks)
-    {
+    for (auto& check : checks) {
         QStringList files;
-        if(check.file.isNull())
-        {
+        if (check.file.isNull()) {
             QDir etcDir("/etc");
-            etcDir.setNameFilters({"*-release"});
+            etcDir.setNameFilters({ "*-release" });
             etcDir.setFilter(QDir::Files | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden);
             files = etcDir.entryList();
-        }
-        else
-        {
+        } else {
             files.append(check.file);
         }
-        for (auto file : files)
-        {
+        for (auto file : files) {
             QFile relfile(file);
-            if(!relfile.open(QIODevice::ReadOnly | QIODevice::Text))
+            if (!relfile.open(QIODevice::ReadOnly | QIODevice::Text))
                 continue;
             QString contents = QString::fromUtf8(relfile.readLine()).trimmed();
             QString dist = check.extract_distro(contents);
             QString vers = check.extract_version(contents);
-            if(!dist.isEmpty())
-            {
+            if (!dist.isEmpty()) {
                 Sys::DistributionInfo out;
                 out.distributionName = dist;
                 out.distributionVersion = vers;
@@ -295,4 +250,3 @@ Sys::DistributionInfo Sys::read_legacy_release()
     }
     return Sys::DistributionInfo();
 }
-

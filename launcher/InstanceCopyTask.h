@@ -11,19 +11,18 @@
 #include "settings/SettingsObject.h"
 #include "tasks/Task.h"
 
-class InstanceCopyTask : public InstanceTask
-{
+class InstanceCopyTask : public InstanceTask {
     Q_OBJECT
-public:
+   public:
     explicit InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs);
 
-protected:
+   protected:
     //! Entry point for tasks.
     virtual void executeTask() override;
     void copyFinished();
     void copyAborted();
 
-private:
+   private:
     /* data */
     InstancePtr m_origInstance;
     QFuture<bool> m_copyFuture;

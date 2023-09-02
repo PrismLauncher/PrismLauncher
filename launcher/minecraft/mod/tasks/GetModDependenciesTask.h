@@ -80,5 +80,5 @@ class GetModDependenciesTask : public SequentialTask {
     Provider m_modrinth_provider;
 
     Version m_version;
-    ResourceAPI::ModLoaderTypes m_loaderType;
+    ModPlatform::ModLoaderTypes m_loaderType;
 };

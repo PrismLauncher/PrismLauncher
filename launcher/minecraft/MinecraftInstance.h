@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,12 +35,12 @@
  */
 
 #pragma once
-#include "BaseInstance.h"
 #include <java/JavaVersion.h>
-#include "minecraft/mod/Mod.h"
-#include <QProcess>
 #include <QDir>
+#include <QProcess>
+#include "BaseInstance.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
+#include "minecraft/mod/Mod.h"
 
 class ModFolderModel;
 class ResourceFolderModel;
@@ -52,12 +52,11 @@ class GameOptions;
 class LaunchStep;
 class PackProfile;
 
-class MinecraftInstance: public BaseInstance
-{
+class MinecraftInstance : public BaseInstance {
     Q_OBJECT
-public:
-    MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
-    virtual ~MinecraftInstance() {};
+   public:
+    MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString& rootDir);
+    virtual ~MinecraftInstance(){};
     virtual void saveNow() override;
 
     void loadSpecificSettings() override;
@@ -67,15 +66,11 @@ public:
     // FIXME: remove
     QSet<QString> traits() const override;
 
-    bool canEdit() const override
-    {
-        return true;
-    }
+    bool canEdit() const override { return true; }
 
-    bool canExport() const override
-    {
-        return true;
-    }
+    bool canExport() const override { return true; }
+
+    void populateLaunchMenu(QMenu* menu) override;
 
     ////// Directories and files //////
     QString jarModsDir() const;
@@ -144,7 +139,7 @@ public:
     QProcessEnvironment createLaunchEnvironment() override;
 
     /// guess log level from a line of minecraft log
-    MessageLevel::Enum guessLevel(const QString &line, MessageLevel::Enum level) override;
+    MessageLevel::Enum guessLevel(const QString& line, MessageLevel::Enum level) override;
 
     IPathMatcher::Ptr getLogFileMatcher() override;
 
@@ -164,10 +159,10 @@ public:
 
     virtual JavaVersion getJavaVersion();
 
-protected:
+   protected:
     QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
 
-protected: // data
+   protected:  // data
     std::shared_ptr<PackProfile> m_components;
     mutable std::shared_ptr<ModFolderModel> m_loader_mod_list;
     mutable std::shared_ptr<ModFolderModel> m_core_mod_list;

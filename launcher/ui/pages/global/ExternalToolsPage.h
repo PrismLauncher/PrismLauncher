@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,54 +37,42 @@
 
 #include <QWidget>
 
-#include "ui/pages/BasePage.h"
 #include <Application.h>
+#include "ui/pages/BasePage.h"
 
 namespace Ui {
 class ExternalToolsPage;
 }
 
-class ExternalToolsPage : public QWidget, public BasePage
-{
+class ExternalToolsPage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit ExternalToolsPage(QWidget *parent = 0);
+   public:
+    explicit ExternalToolsPage(QWidget* parent = 0);
     ~ExternalToolsPage();
 
-    QString displayName() const override
-    {
-        return tr("External Tools");
-    }
+    QString displayName() const override { return tr("External Tools"); }
     QIcon icon() const override
     {
         auto icon = APPLICATION->getThemedIcon("externaltools");
-        if(icon.isNull())
-        {
+        if (icon.isNull()) {
             icon = APPLICATION->getThemedIcon("loadermods");
         }
         return icon;
     }
-    QString id() const override
-    {
-        return "external-tools";
-    }
-    QString helpPage() const override
-    {
-        return "Tools";
-    }
+    QString id() const override { return "external-tools"; }
+    QString helpPage() const override { return "Tools"; }
     virtual bool apply() override;
     void retranslate() override;
 
-private:
+   private:
     void loadSettings();
     void applySettings();
 
-private:
-    Ui::ExternalToolsPage *ui;
+   private:
+    Ui::ExternalToolsPage* ui;
 
-private
-slots:
+   private slots:
     void on_jprofilerPathBtn_clicked();
     void on_jprofilerCheckBtn_clicked();
     void on_jvisualvmPathBtn_clicked();

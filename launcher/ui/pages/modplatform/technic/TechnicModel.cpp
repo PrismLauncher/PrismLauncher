@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2021 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,6 +38,9 @@
 #include "BuildConfig.h"
 #include "Json.h"
 
+#include "net/ApiDownload.h"
+#include "ui/widgets/ProjectItem.h"
+
 #include <QIcon>
 
 Technic::ListModel::ListModel(QObject* parent) : QAbstractListModel(parent) {}
@@ -52,21 +55,47 @@ QVariant Technic::ListModel::data(const QModelIndex& index, int role) const
     }
 
     Modpack pack = modpacks.at(pos);
-    if (role == Qt::DisplayRole) {
-        return pack.name;
-    } else if (role == Qt::DecorationRole) {
-        if (m_logoMap.contains(pack.logoName)) {
-            return (m_logoMap.value(pack.logoName));
+    switch (role) {
+        case Qt::ToolTipRole: {
+            if (pack.description.length() > 100) {
+                // some magic to prevent to long tooltips and replace html linebreaks
+                QString edit = pack.description.left(97);
+                edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
+                return edit;
+            }
+            return pack.description;
         }
-        QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
-        ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
-        return icon;
-    } else if (role == Qt::UserRole) {
-        QVariant v;
-        v.setValue(pack);
-        return v;
+        case Qt::DecorationRole: {
+            if (m_logoMap.contains(pack.logoName)) {
+                return (m_logoMap.value(pack.logoName));
+            }
+            QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
+            ((ListModel*)this)->requestLogo(pack.logoName, pack.logoUrl);
+            return icon;
+        }
+        case Qt::UserRole: {
+            QVariant v;
+            v.setValue(pack);
+            return v;
+        }
+        case Qt::DisplayRole:
+            return pack.name;
+        case Qt::SizeHintRole:
+            return QSize(0, 58);
+        // Custom data
+        case UserDataTypes::TITLE:
+            return pack.name;
+        case UserDataTypes::DESCRIPTION:
+            return pack.description;
+        case UserDataTypes::SELECTED:
+            return false;
+        case UserDataTypes::INSTALLED:
+            return false;
+        default:
+            break;
     }
-    return QVariant();
+
+    return {};
 }
 
 int Technic::ListModel::columnCount(const QModelIndex& parent) const
@@ -85,21 +114,25 @@ void Technic::ListModel::searchWithTerm(const QString& term)
         return;
     }
     currentSearchTerm = term;
-    if (jobPtr) {
+    if (hasActiveSearchJob()) {
         jobPtr->abort();
         searchState = ResetRequested;
         return;
-    } else {
-        beginResetModel();
-        modpacks.clear();
-        endResetModel();
-        searchState = None;
     }
+
+    beginResetModel();
+    modpacks.clear();
+    endResetModel();
+    searchState = None;
+
     performSearch();
 }
 
 void Technic::ListModel::performSearch()
 {
+    if (hasActiveSearchJob())
+        return;
+
     auto netJob = makeShared<NetJob>("Technic::Search", APPLICATION->network());
     QString searchUrl = "";
     if (currentSearchTerm.isEmpty()) {
@@ -111,12 +144,15 @@ void Technic::ListModel::performSearch()
     } else if (currentSearchTerm.startsWith("https://api.technicpack.net/modpack/")) {
         searchUrl = QString("%1?build=%2").arg(currentSearchTerm, BuildConfig.TECHNIC_API_BUILD);
         searchMode = Single;
+    } else if (currentSearchTerm.startsWith("#")) {
+        searchUrl = QString("https://api.technicpack.net/modpack/%1?build=%2").arg(currentSearchTerm.mid(1), BuildConfig.TECHNIC_API_BUILD);
+        searchMode = Single;
     } else {
         searchUrl =
             QString("%1search?build=%2&q=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, BuildConfig.TECHNIC_API_BUILD, currentSearchTerm);
         searchMode = List;
     }
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
     jobPtr = netJob;
     jobPtr->start();
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
@@ -157,7 +193,7 @@ void Technic::ListModel::searchRequestFinished()
                         pack.logoName = "null";
                     } else {
                         pack.logoUrl = rawURL;
-                        pack.logoName = rawURL.section(QLatin1Char('/'), -1).section(QLatin1Char('.'), 0, 0);
+                        pack.logoName = rawURL.section(QLatin1Char('/'), -1);
                     }
                     pack.broken = false;
                     newList.append(pack);
@@ -179,7 +215,7 @@ void Technic::ListModel::searchRequestFinished()
                     auto iconUrl = Json::requireString(iconObj, "url");
 
                     pack.logoUrl = iconUrl;
-                    pack.logoName = iconUrl.section(QLatin1Char('/'), -1).section(QLatin1Char('.'), 0, 0);
+                    pack.logoName = iconUrl.section(QLatin1Char('/'), -1);
                 } else {
                     pack.logoUrl = "null";
                     pack.logoName = "null";
@@ -254,7 +290,7 @@ void Technic::ListModel::requestLogo(QString logo, QString url)
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("TechnicPacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Technic Icon Download %1").arg(logo), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
 

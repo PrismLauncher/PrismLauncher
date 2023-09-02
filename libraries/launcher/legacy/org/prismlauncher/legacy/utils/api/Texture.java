@@ -41,7 +41,6 @@ import java.net.URL;
  * Represents a texture from the Mojang API.
  */
 public final class Texture {
-
     private final URL url;
     private final boolean slim;
 
@@ -57,5 +56,4 @@ public final class Texture {
     public boolean isSlim() {
         return slim;
     }
-
 }

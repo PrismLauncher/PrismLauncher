@@ -41,7 +41,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 public final class CustomUrlConnection extends HttpURLConnection {
-
     private final InputStream in;
 
     public CustomUrlConnection(byte[] data) {
@@ -75,5 +74,4 @@ public final class CustomUrlConnection extends HttpURLConnection {
     public boolean usingProxy() {
         return false;
     }
-
 }

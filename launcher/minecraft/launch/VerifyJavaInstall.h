@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -41,13 +41,10 @@
 class VerifyJavaInstall : public LaunchStep {
     Q_OBJECT
 
-public:
-    explicit VerifyJavaInstall(LaunchTask *parent) : LaunchStep(parent) {
-    };
+   public:
+    explicit VerifyJavaInstall(LaunchTask* parent) : LaunchStep(parent){};
     ~VerifyJavaInstall() override = default;
 
     void executeTask() override;
-    bool canAbort() const override {
-        return false;
-    }
+    bool canAbort() const override { return false; }
 };

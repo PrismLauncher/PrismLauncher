@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,24 +38,25 @@
 #pragma once
 #include <cassert>
 
-#include <QObject>
-#include "QObjectPtr.h"
 #include <QDateTime>
-#include <QSet>
+#include <QMenu>
+#include <QObject>
 #include <QProcess>
+#include <QSet>
+#include "QObjectPtr.h"
 
 #include "settings/SettingsObject.h"
 
-#include "settings/INIFile.h"
 #include "BaseVersionList.h"
-#include "minecraft/auth/MinecraftAccount.h"
 #include "MessageLevel.h"
+#include "minecraft/auth/MinecraftAccount.h"
 #include "pathmatcher/IPathMatcher.h"
+#include "settings/INIFile.h"
 
 #include "net/Mode.h"
 
-#include "minecraft/launch/MinecraftServerTarget.h"
 #include "RuntimeContext.h"
+#include "minecraft/launch/MinecraftServerTarget.h"
 
 class QDir;
 class Task;
@@ -72,23 +74,21 @@ typedef std::shared_ptr<BaseInstance> InstancePtr;
  * To create a new instance type, create a new class inheriting from this class
  * and implement the pure virtual functions.
  */
-class BaseInstance : public QObject, public std::enable_shared_from_this<BaseInstance>
-{
+class BaseInstance : public QObject, public std::enable_shared_from_this<BaseInstance> {
     Q_OBJECT
-protected:
+   protected:
     /// no-touchy!
-    BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString &rootDir);
+    BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString& rootDir);
 
-public: /* types */
-    enum class Status
-    {
+   public: /* types */
+    enum class Status {
         Present,
-        Gone // either nuked or invalidated
+        Gone  // either nuked or invalidated
     };
 
-public:
+   public:
     /// virtual destructor to make sure the destruction is COMPLETE
-    virtual ~BaseInstance() {};
+    virtual ~BaseInstance() {}
 
     virtual void saveNow() = 0;
 
@@ -117,10 +117,7 @@ public:
     QString instanceRoot() const;
 
     /// Path to the instance's game root directory.
-    virtual QString gameRoot() const
-    {
-        return instanceRoot();
-    }
+    virtual QString gameRoot() const { return instanceRoot(); }
 
     /// Path to the instance's mods directory.
     virtual QString modsRoot() const = 0;
@@ -151,15 +148,12 @@ public:
     void copyManagedPack(BaseInstance& other);
 
     /// guess log level from a line of game log
-    virtual MessageLevel::Enum guessLevel([[maybe_unused]] const QString &line, MessageLevel::Enum level)
-    {
-        return level;
-    };
+    virtual MessageLevel::Enum guessLevel([[maybe_unused]] const QString& line, MessageLevel::Enum level) { return level; }
 
     virtual QStringList extraArguments();
 
     /// Traits. Normally inside the version, depends on instance implementation.
-    virtual QSet <QString> traits() const = 0;
+    virtual QSet<QString> traits() const = 0;
 
     /**
      * Gets the time that the instance was last launched.
@@ -189,8 +183,7 @@ public:
     virtual Task::Ptr createUpdateTask(Net::Mode mode) = 0;
 
     /// returns a valid launcher (task container)
-    virtual shared_qobject_ptr<LaunchTask> createLaunchTask(
-            AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) = 0;
+    virtual shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) = 0;
 
     /// returns the current launch task (if any)
     shared_qobject_ptr<LaunchTask> getLaunchTask();
@@ -222,45 +215,30 @@ public:
     virtual QString typeName() const = 0;
 
     void updateRuntimeContext();
-    RuntimeContext runtimeContext() const
-    {
-        return m_runtimeContext;
-    }
+    RuntimeContext runtimeContext() const { return m_runtimeContext; }
 
-    bool hasVersionBroken() const
-    {
-        return m_hasBrokenVersion;
-    }
+    bool hasVersionBroken() const { return m_hasBrokenVersion; }
     void setVersionBroken(bool value)
     {
-        if(m_hasBrokenVersion != value)
-        {
+        if (m_hasBrokenVersion != value) {
             m_hasBrokenVersion = value;
             emit propertiesChanged(this);
         }
     }
 
-    bool hasUpdateAvailable() const
-    {
-        return m_hasUpdate;
-    }
+    bool hasUpdateAvailable() const { return m_hasUpdate; }
     void setUpdateAvailable(bool value)
     {
-        if(m_hasUpdate != value)
-        {
+        if (m_hasUpdate != value) {
             m_hasUpdate = value;
             emit propertiesChanged(this);
         }
     }
 
-    bool hasCrashed() const
-    {
-        return m_crashed;
-    }
+    bool hasCrashed() const { return m_crashed; }
     void setCrashed(bool value)
     {
-        if(m_crashed != value)
-        {
+        if (m_crashed != value) {
             m_crashed = value;
             emit propertiesChanged(this);
         }
@@ -269,6 +247,8 @@ public:
     virtual bool canLaunch() const;
     virtual bool canEdit() const = 0;
     virtual bool canExport() const = 0;
+
+    virtual void populateLaunchMenu(QMenu* menu) = 0;
 
     bool reloadSettings();
 
@@ -288,30 +268,32 @@ public:
     bool removeLinkedInstanceId(const QString& id);
     bool isLinkedToInstanceId(const QString& id) const;
 
-protected:
+   protected:
     void changeStatus(Status newStatus);
 
-    SettingsObjectPtr globalSettings() const { return m_global_settings.lock(); };
+    SettingsObjectPtr globalSettings() const { return m_global_settings.lock(); }
 
     bool isSpecificSettingsLoaded() const { return m_specific_settings_loaded; }
     void setSpecificSettingsLoaded(bool loaded) { m_specific_settings_loaded = loaded; }
 
-signals:
+   signals:
     /*!
      * \brief Signal emitted when properties relevant to the instance view change
      */
-    void propertiesChanged(BaseInstance *inst);
+    void propertiesChanged(BaseInstance* inst);
 
     void launchTaskChanged(shared_qobject_ptr<LaunchTask>);
 
     void runningStatusChanged(bool running);
 
+    void profilerChanged();
+
     void statusChanged(Status from, Status to);
 
-protected slots:
+   protected slots:
     void iconUpdated(QString key);
 
-protected: /* data */
+   protected: /* data */
     QString m_rootDir;
     SettingsObjectPtr m_settings;
     // InstanceFlags m_flags;
@@ -320,7 +302,7 @@ protected: /* data */
     QDateTime m_timeStarted;
     RuntimeContext m_runtimeContext;
 
-private: /* data */
+   private: /* data */
     Status m_status = Status::Present;
     bool m_crashed = false;
     bool m_hasUpdate = false;
@@ -328,9 +310,8 @@ private: /* data */
 
     SettingsObjectWeakPtr m_global_settings;
     bool m_specific_settings_loaded = false;
-
 };
 
 Q_DECLARE_METATYPE(shared_qobject_ptr<BaseInstance>)
-//Q_DECLARE_METATYPE(BaseInstance::InstanceFlag)
-//Q_DECLARE_OPERATORS_FOR_FLAGS(BaseInstance::InstanceFlags)
+// Q_DECLARE_METATYPE(BaseInstance::InstanceFlag)
+// Q_DECLARE_OPERATORS_FOR_FLAGS(BaseInstance::InstanceFlags)

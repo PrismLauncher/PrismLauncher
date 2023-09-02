@@ -152,6 +152,7 @@ void ExternalResourcesPage::retranslate()
 void ExternalResourcesPage::itemActivated(const QModelIndex&)
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setResourceEnabled(selection.indexes(), EnableAction::TOGGLE);
 }
 
 void ExternalResourcesPage::filterTextChanged(const QString& newContents)
@@ -305,7 +306,7 @@ bool ExternalResourcesPage::current(const QModelIndex& current, const QModelInde
     return onSelectionChanged(current, previous);
 }
 
-bool ExternalResourcesPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+bool ExternalResourcesPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();

@@ -8,7 +8,10 @@ class FlameCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
 
    public:
-    FlameCheckUpdate(QList<Mod*>& mods, std::list<Version>& mcVersions, std::optional<ResourceAPI::ModLoaderTypes> loaders, std::shared_ptr<ModFolderModel> mods_folder)
+    FlameCheckUpdate(QList<Mod*>& mods,
+                     std::list<Version>& mcVersions,
+                     std::optional<ModPlatform::ModLoaderTypes> loaders,
+                     std::shared_ptr<ModFolderModel> mods_folder)
         : CheckUpdateTask(mods, mcVersions, loaders, mods_folder)
     {}
 

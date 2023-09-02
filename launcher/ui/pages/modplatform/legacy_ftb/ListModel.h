@@ -1,13 +1,13 @@
 #pragma once
 
-#include <modplatform/legacy_ftb/PackHelpers.h>
 #include <RWStorage.h>
+#include <modplatform/legacy_ftb/PackHelpers.h>
 
 #include <QAbstractListModel>
-#include <QSortFilterProxyModel>
-#include <QThreadPool>
 #include <QIcon>
+#include <QSortFilterProxyModel>
 #include <QStyledItemDelegate>
+#include <QThreadPool>
 
 #include <functional>
 
@@ -16,34 +16,30 @@ namespace LegacyFTB {
 typedef QMap<QString, QIcon> FTBLogoMap;
 typedef std::function<void(QString)> LogoCallback;
 
-class FilterModel : public QSortFilterProxyModel
-{
+class FilterModel : public QSortFilterProxyModel {
     Q_OBJECT
-public:
+   public:
     FilterModel(QObject* parent = Q_NULLPTR);
-    enum Sorting {
-        ByName,
-        ByGameVersion
-    };
+    enum Sorting { ByName, ByGameVersion };
     const QMap<QString, Sorting> getAvailableSortings();
     QString translateCurrentSorting();
     void setSorting(Sorting sorting);
     Sorting getCurrentSorting();
+    void setSearchTerm(QString term);
 
-protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+   protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
-private:
+   private:
     QMap<QString, Sorting> sortings;
     Sorting currentSorting;
-
+    QString searchTerm;
 };
 
-class ListModel : public QAbstractListModel
-{
+class ListModel : public QAbstractListModel {
     Q_OBJECT
-private:
+   private:
     ModpackList modpacks;
     QStringList m_failedLogos;
     QStringList m_loadingLogos;
@@ -53,18 +49,17 @@ private:
     void requestLogo(QString file);
     QString translatePackType(PackType type) const;
 
-
-private slots:
+   private slots:
     void logoFailed(QString logo);
     void logoLoaded(QString logo, QIcon out);
 
-public:
-    ListModel(QObject *parent);
+   public:
+    ListModel(QObject* parent);
     ~ListModel();
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
-    QVariant data(const QModelIndex &index, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    int rowCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     void fill(ModpackList modpacks);
     void addPack(Modpack modpack);
@@ -72,7 +67,7 @@ public:
     void remove(int row);
 
     Modpack at(int row);
-    void getLogo(const QString &logo, LogoCallback callback);
+    void getLogo(const QString& logo, LogoCallback callback);
 };
 
-}
+}  // namespace LegacyFTB

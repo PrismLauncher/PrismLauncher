@@ -1,37 +1,36 @@
 #pragma once
 
-#include <memory>
-#include <QList>
-#include <QJsonDocument>
 #include <QDateTime>
-#include "meta/JsonFormat.h"
+#include <QJsonDocument>
+#include <QList>
+#include <memory>
 #include "ProblemProvider.h"
 #include "QObjectPtr.h"
+#include "meta/JsonFormat.h"
 
 class PackProfile;
 class LaunchProfile;
-namespace Meta
-{
-    class Version;
-    class VersionList;
-}
+namespace Meta {
+class Version;
+class VersionList;
+}  // namespace Meta
 class VersionFile;
 
-class Component : public QObject, public ProblemProvider
-{
-Q_OBJECT
-public:
-    Component(PackProfile * parent, const QString &uid);
+class Component : public QObject, public ProblemProvider {
+    Q_OBJECT
+   public:
+    Component(PackProfile* parent, const QString& uid);
 
     // DEPRECATED: remove these constructors?
-    Component(PackProfile * parent, std::shared_ptr<Meta::Version> version);
-    Component(PackProfile * parent, const QString & uid, std::shared_ptr<VersionFile> file);
+    Component(PackProfile* parent, std::shared_ptr<Meta::Version> version);
+    Component(PackProfile* parent, const QString& uid, std::shared_ptr<VersionFile> file);
 
-    virtual ~Component(){};
-    void applyTo(LaunchProfile *profile);
+    virtual ~Component() {}
+
+    void applyTo(LaunchProfile* profile);
 
     bool isEnabled();
-    bool setEnabled (bool state);
+    bool setEnabled(bool state);
     bool canBeDisabled();
 
     bool isMoveable();
@@ -56,23 +55,22 @@ public:
     std::shared_ptr<class VersionFile> getVersionFile() const;
     std::shared_ptr<class Meta::VersionList> getVersionList() const;
 
-    void setImportant (bool state);
-
+    void setImportant(bool state);
 
     const QList<PatchProblem> getProblems() const override;
     ProblemSeverity getProblemSeverity() const override;
 
-    void setVersion(const QString & version);
+    void setVersion(const QString& version);
     bool customize();
     bool revert();
 
     void updateCachedData();
 
-signals:
+   signals:
     void dataChanged();
 
-public: /* data */
-    PackProfile * m_parent;
+   public: /* data */
+    PackProfile* m_parent;
 
     // BEGIN: persistent component list properties
     /// ID of the component

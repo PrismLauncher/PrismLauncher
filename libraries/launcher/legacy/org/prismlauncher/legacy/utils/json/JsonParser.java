@@ -51,7 +51,6 @@ import java.util.Map;
  * available in a lot of versions.
  */
 public final class JsonParser {
-
     private final Reader in;
     private char[] buffer;
     private int pos, length;
@@ -96,8 +95,8 @@ public final class JsonParser {
 
     private void assertCharacter(char character) throws JsonParseException {
         if (character() != character)
-            throw new JsonParseException("Expected '" + character + "' but got "
-                    + (character() != -1 ? ("'" + (char) character() + "'") : "EOF"));
+            throw new JsonParseException(
+                    "Expected '" + character + "' but got " + (character() != -1 ? ("'" + (char) character() + "'") : "EOF"));
     }
 
     private void assertNoEOF(String expected) throws JsonParseException {
@@ -106,8 +105,7 @@ public final class JsonParser {
     }
 
     private void skipWhitespace() throws IOException {
-        while (isWhitespace())
-            read();
+        while (isWhitespace()) read();
     }
 
     private boolean isWhitespace() {
@@ -407,5 +405,4 @@ public final class JsonParser {
     private boolean readNull() throws IOException {
         return character() == 'n' && read() == 'u' && read() == 'l' && read() == 'l';
     }
-
 }

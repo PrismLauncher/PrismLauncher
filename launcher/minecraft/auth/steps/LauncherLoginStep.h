@@ -4,12 +4,11 @@
 #include "QObjectPtr.h"
 #include "minecraft/auth/AuthStep.h"
 
-
 class LauncherLoginStep : public AuthStep {
     Q_OBJECT
 
-public:
-    explicit LauncherLoginStep(AccountData *data);
+   public:
+    explicit LauncherLoginStep(AccountData* data);
     virtual ~LauncherLoginStep() noexcept;
 
     void perform() override;
@@ -17,6 +16,6 @@ public:
 
     QString describe() override;
 
-private slots:
+   private slots:
     void onRequestDone(QNetworkReply::NetworkError, QByteArray, QList<QNetworkReply::RawHeaderPair>);
 };

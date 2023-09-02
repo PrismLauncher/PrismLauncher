@@ -35,6 +35,8 @@
 
 package org.prismlauncher.legacy.utils.url;
 
+import org.prismlauncher.utils.logging.Log;
+
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -44,14 +46,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import org.prismlauncher.utils.logging.Log;
-
 /**
  * A utility class for URLs which uses reflection to access constructors for
  * internal classes.
  */
 public final class UrlUtils {
-
     private static URLStreamHandler http;
     private static MethodHandle openConnection;
 
@@ -63,8 +62,7 @@ public final class UrlUtils {
             http = (URLStreamHandler) getURLStreamHandler.invoke(null, "http");
 
             // we next find the openConnection method
-            Method openConnectionReflect = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class,
-                    Proxy.class);
+            Method openConnectionReflect = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class, Proxy.class);
             openConnectionReflect.setAccessible(true);
             openConnection = MethodHandles.lookup().unreflect(openConnectionReflect);
         } catch (Throwable e) {
@@ -106,5 +104,4 @@ public final class UrlUtils {
             throw new AssertionError(e); // oh dear! this isn't meant to happen
         }
     }
-
 }

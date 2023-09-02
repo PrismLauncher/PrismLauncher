@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,11 +35,13 @@
 
 #include "ListModel.h"
 #include "Application.h"
+#include "net/ApiDownload.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
 
 #include <Version.h>
 #include "StringUtils.h"
+#include "ui/widgets/ProjectItem.h"
 
 #include <QLabel>
 #include <QtMath>
@@ -76,9 +78,22 @@ bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
     return true;
 }
 
-bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
+bool FilterModel::filterAcceptsRow([[maybe_unused]] int sourceRow, [[maybe_unused]] const QModelIndex& sourceParent) const
 {
-    return true;
+    if (searchTerm.isEmpty()) {
+        return true;
+    }
+    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+    Modpack pack = sourceModel()->data(index, Qt::UserRole).value<Modpack>();
+    if (searchTerm.startsWith("#"))
+        return pack.packCode == searchTerm.mid(1);
+    return pack.name.contains(searchTerm, Qt::CaseInsensitive);
+}
+
+void FilterModel::setSearchTerm(const QString term)
+{
+    searchTerm = term.trimmed();
+    invalidate();
 }
 
 const QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
@@ -138,45 +153,63 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     }
 
     Modpack pack = modpacks.at(pos);
-    if (role == Qt::DisplayRole) {
-        return pack.name + "\n" + translatePackType(pack.type);
-    } else if (role == Qt::ToolTipRole) {
-        if (pack.description.length() > 100) {
-            // some magic to prevent to long tooltips and replace html linebreaks
-            QString edit = pack.description.left(97);
-            edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
-            return edit;
+    switch (role) {
+        case Qt::ToolTipRole: {
+            if (pack.description.length() > 100) {
+                // some magic to prevent to long tooltips and replace html linebreaks
+                QString edit = pack.description.left(97);
+                edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
+                return edit;
+            }
+            return pack.description;
         }
-        return pack.description;
-    } else if (role == Qt::DecorationRole) {
-        if (m_logoMap.contains(pack.logo)) {
-            return (m_logoMap.value(pack.logo));
+        case Qt::DecorationRole: {
+            if (m_logoMap.contains(pack.logo)) {
+                return (m_logoMap.value(pack.logo));
+            }
+            QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
+            ((ListModel*)this)->requestLogo(pack.logo);
+            return icon;
         }
-        QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
-        ((ListModel*)this)->requestLogo(pack.logo);
-        return icon;
-    } else if (role == Qt::ForegroundRole) {
-        if (pack.broken) {
-            // FIXME: Hardcoded color
-            return QColor(255, 0, 50);
-        } else if (pack.bugged) {
-            // FIXME: Hardcoded color
-            // bugged pack, currently only indicates bugged xml
-            return QColor(244, 229, 66);
+        case Qt::UserRole: {
+            QVariant v;
+            v.setValue(pack);
+            return v;
         }
-    } else if (role == Qt::UserRole) {
-        QVariant v;
-        v.setValue(pack);
-        return v;
+        case Qt::ForegroundRole: {
+            if (pack.broken) {
+                // FIXME: Hardcoded color
+                return QColor(255, 0, 50);
+            } else if (pack.bugged) {
+                // FIXME: Hardcoded color
+                // bugged pack, currently only indicates bugged xml
+                return QColor(244, 229, 66);
+            }
+        }
+        case Qt::DisplayRole:
+            return pack.name;
+        case Qt::SizeHintRole:
+            return QSize(0, 58);
+        // Custom data
+        case UserDataTypes::TITLE:
+            return pack.name;
+        case UserDataTypes::DESCRIPTION:
+            return pack.description;
+        case UserDataTypes::SELECTED:
+            return false;
+        case UserDataTypes::INSTALLED:
+            return false;
+        default:
+            break;
     }
 
-    return QVariant();
+    return {};
 }
 
-void ListModel::fill(ModpackList modpacks)
+void ListModel::fill(ModpackList modpacks_)
 {
     beginResetModel();
-    this->modpacks = modpacks;
+    this->modpacks = modpacks_;
     endResetModel();
 }
 
@@ -229,9 +262,9 @@ void ListModel::requestLogo(QString file)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file));
     NetJob* job = new NetJob(QString("FTB Icon Download for %1").arg(file), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::finished, this, [this, file, fullPath, job] {
@@ -255,7 +288,7 @@ void ListModel::requestLogo(QString file)
 void ListModel::getLogo(const QString& logo, LogoCallback callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(logo))->getFullPath());
     } else {
         requestLogo(logo);
     }

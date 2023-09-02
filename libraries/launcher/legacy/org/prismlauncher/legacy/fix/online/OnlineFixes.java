@@ -35,14 +35,14 @@
 
 package org.prismlauncher.legacy.fix.online;
 
-import java.net.URL;
-import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
-
 import org.prismlauncher.legacy.utils.Base64;
 import org.prismlauncher.legacy.utils.url.UrlUtils;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.logging.Log;
+
+import java.net.URL;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 
 /**
  * Fixes skins by redirecting to other URLs.
@@ -51,7 +51,6 @@ import org.prismlauncher.utils.logging.Log;
  * @see {@link UrlUtils}
  */
 public final class OnlineFixes implements URLStreamHandlerFactory {
-
     public static void apply(Parameters params) {
         if (!"true".equals(params.getString("onlineFixes", null)))
             return;
@@ -77,5 +76,4 @@ public final class OnlineFixes implements URLStreamHandlerFactory {
 
         return null;
     }
-
 }

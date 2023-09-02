@@ -38,10 +38,10 @@
 **
 ****************************************************************************/
 
-#include <string.h>
 #include <errno.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "LockedFile.h"
 
@@ -75,11 +75,9 @@ bool LockedFile::lock(LockMode mode, bool block)
         return false;
     }
 
-
     m_lock_mode = mode;
     return true;
 }
-
 
 bool LockedFile::unlock()
 {
