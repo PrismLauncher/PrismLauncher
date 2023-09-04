@@ -81,6 +81,7 @@ class ModFolderModel : public ResourceFolderModel {
 
     /// Deletes all the selected mods
     bool deleteMods(const QModelIndexList& indexes);
+    bool deleteModsMetadata(const QModelIndexList& indexes);
 
     bool isValid();
 

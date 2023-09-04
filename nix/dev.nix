@@ -1,37 +1,33 @@
 {
-  inputs,
-  self,
-  ...
-}: {
   perSystem = {
-    system,
+    config,
+    lib,
     pkgs,
     ...
   }: {
-    checks = {
-      pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-        src = self;
-        hooks = {
-          markdownlint.enable = true;
+    pre-commit.settings = {
+      hooks = {
+        markdownlint.enable = true;
 
-          alejandra.enable = true;
-          deadnix.enable = true;
-          nil.enable = true;
+        alejandra.enable = true;
+        deadnix.enable = true;
+        nil.enable = true;
 
-          clang-format = {
-            enable = true;
-            types_or = ["c" "c++" "java" "json" "objective-c"];
-          };
+        clang-format = {
+          enable = true;
+          types_or = ["c" "c++" "java" "json" "objective-c"];
         };
-
-        tools.clang-tools = pkgs.clang-tools_16;
       };
+
+      tools.clang-tools = lib.mkForce pkgs.clang-tools_16;
     };
 
     devShells.default = pkgs.mkShell {
-      inherit (self.checks.${system}.pre-commit-check) shellHook;
+      shellHook = ''
+        ${config.pre-commit.installationScript}
+      '';
 
-      inputsFrom = [self.packages.${system}.prismlauncher-unwrapped];
+      inputsFrom = [config.packages.prismlauncher-unwrapped];
       buildInputs = with pkgs; [ccache ninja];
     };
 
