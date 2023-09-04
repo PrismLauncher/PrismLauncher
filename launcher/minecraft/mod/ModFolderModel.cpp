@@ -233,6 +233,25 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
     return true;
 }
 
+bool ModFolderModel::deleteModsMetadata(const QModelIndexList& indexes)
+{
+    if (indexes.isEmpty())
+        return true;
+
+    for (auto i : indexes) {
+        if (i.column() != 0) {
+            continue;
+        }
+        auto m = at(i.row());
+        auto index_dir = indexDir();
+        m->destroyMetadata(index_dir);
+    }
+
+    update();
+
+    return true;
+}
+
 bool ModFolderModel::isValid()
 {
     return m_dir.exists() && m_dir.isReadable();
