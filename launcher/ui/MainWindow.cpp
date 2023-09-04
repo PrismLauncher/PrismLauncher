@@ -77,7 +77,6 @@
 #include <DesktopServices.h>
 #include <InstanceList.h>
 #include <MMCZip.h>
-#include <SkinUtils.h>
 #include <icons/IconList.h>
 #include <java/JavaInstallList.h>
 #include <java/JavaUtils.h>

@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,12 +38,13 @@
 
 #include <QHttpMultiPart>
 
+#include "FileSystem.h"
 #include "net/ByteArraySink.h"
 #include "net/StaticHeaderProxy.h"
 
-SkinUpload::SkinUpload(QString token, QByteArray skin, SkinUpload::Model model) : NetRequest(), m_model(model), m_skin(skin), m_token(token)
+SkinUpload::SkinUpload(QString token, SkinModel* skin) : NetRequest(), m_skin(skin), m_token(token)
 {
-    logCat = taskMCServicesLogC;
+    logCat = taskUploadLogC;
 };
 
 QNetworkReply* SkinUpload::getReply(QNetworkRequest& request)
@@ -52,23 +54,12 @@ QNetworkReply* SkinUpload::getReply(QNetworkRequest& request)
     QHttpPart skin;
     skin.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));
     skin.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\"; filename=\"skin.png\""));
-    skin.setBody(m_skin);
+
+    skin.setBody(FS::read(m_skin->getPath()));
 
     QHttpPart model;
     model.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"variant\""));
-
-    switch (m_model) {
-        default:
-            qDebug() << "Unknown skin type!";
-            emitFailed("Unknown skin type!");
-            return nullptr;
-        case SkinUpload::STEVE:
-            model.setBody("CLASSIC");
-            break;
-        case SkinUpload::ALEX:
-            model.setBody("SLIM");
-            break;
-    }
+    model.setBody(m_skin->getModelString().toUtf8());
 
     multiPart->append(skin);
     multiPart->append(model);
@@ -83,10 +74,11 @@ void SkinUpload::init()
     }));
 }
 
-SkinUpload::Ptr SkinUpload::make(QString token, QByteArray skin, SkinUpload::Model model)
+SkinUpload::Ptr SkinUpload::make(QString token, SkinModel* skin)
 {
-    auto up = makeShared<SkinUpload>(token, skin, model);
+    auto up = makeShared<SkinUpload>(token, skin);
     up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins");
+    up->setObjectName(QString("BYTES:") + up->m_url.toString());
     up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
     return up;
 }

@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,7 +43,7 @@
 
 CapeChange::CapeChange(QString token, QString cape) : NetRequest(), m_capeId(cape), m_token(token)
 {
-    logCat = taskMCServicesLogC;
+    logCat = taskMCSkinsLogC;
 };
 
 QNetworkReply* CapeChange::getReply(QNetworkRequest& request)
@@ -52,7 +53,7 @@ QNetworkReply* CapeChange::getReply(QNetworkRequest& request)
         return m_network->deleteResource(request);
     } else {
         setStatus(tr("Equipping cape"));
-        return m_network->post(request, QString("{\"capeId\":\"%1\"}").arg(m_capeId).toUtf8());
+        return m_network->put(request, QString("{\"capeId\":\"%1\"}").arg(m_capeId).toUtf8());
     }
 }
 
@@ -67,6 +68,7 @@ CapeChange::Ptr CapeChange::make(QString token, QString capeId)
 {
     auto up = makeShared<CapeChange>(token, capeId);
     up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active");
+    up->setObjectName(QString("BYTES:") + up->m_url.toString());
     up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
     return up;
 }

@@ -52,8 +52,8 @@ class NetJob : public ConcurrentTask {
    public:
     using Ptr = shared_qobject_ptr<NetJob>;
 
-    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network)
-        : ConcurrentTask(nullptr, job_name), m_network(network)
+    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent = 6)
+        : ConcurrentTask(nullptr, job_name, max_concurrent), m_network(network)
     {}
     ~NetJob() override = default;
 
