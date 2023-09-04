@@ -25,6 +25,8 @@
     {inherit inputs;}
     {
       imports = [
+        inputs.pre-commit-hooks.flakeModule
+
         ./nix/dev.nix
         ./nix/distribution.nix
       ];
