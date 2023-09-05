@@ -44,8 +44,8 @@
 
 SkinUpload::SkinUpload(QString token, SkinModel* skin) : NetRequest(), m_skin(skin), m_token(token)
 {
-    logCat = taskUploadLogC;
-};
+    logCat = taskMCSkinsLogC;
+}
 
 QNetworkReply* SkinUpload::getReply(QNetworkRequest& request)
 {

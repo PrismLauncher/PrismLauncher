@@ -46,7 +46,7 @@ class SkinList : public QAbstractListModel {
     bool deleteSkin(const QString& key, const bool trash);
 
     void installSkins(const QStringList& iconFiles);
-    void installSkin(const QString& file, const QString& name);
+    QString installSkin(const QString& file, const QString& name = {});
 
     const SkinModel* skin(const QString& key) const;
     SkinModel* skin(const QString& key);
@@ -58,13 +58,13 @@ class SkinList : public QAbstractListModel {
     void save();
     int getSelectedAccountSkin();
 
+    void updateSkin(SkinModel s);
+
    private:
     // hide copy constructor
     SkinList(const SkinList&) = delete;
     // hide assign op
     SkinList& operator=(const SkinList&) = delete;
-
-    QVector<SkinModel> loadMinecraftSkins();
 
    protected slots:
     void directoryChanged(const QString& path);

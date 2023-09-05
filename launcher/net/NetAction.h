@@ -55,6 +55,7 @@ class NetAction : public Task {
     virtual ~NetAction() = default;
 
     QUrl url() { return m_url; }
+    void setUrl(QUrl url) { m_url = url; }
 
     void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
 

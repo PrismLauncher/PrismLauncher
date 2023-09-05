@@ -26,6 +26,7 @@ class SkinModel {
    public:
     enum Model { CLASSIC, SLIM };
 
+    SkinModel() = default;
     SkinModel(QString path);
     SkinModel(QDir skinDir, QJsonObject obj);
     virtual ~SkinModel() = default;
@@ -46,8 +47,6 @@ class SkinModel {
     void refresh() { m_texture = QPixmap(m_path); }
 
     QJsonObject toJSON() const;
-
-    QPixmap renderFrontBody() const;
 
    private:
     QString m_path;

@@ -42,7 +42,7 @@
 SkinDelete::SkinDelete(QString token) : NetRequest(), m_token(token)
 {
     logCat = taskMCSkinsLogC;
-};
+}
 
 QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)
 {

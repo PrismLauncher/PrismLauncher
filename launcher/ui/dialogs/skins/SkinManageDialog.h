@@ -40,7 +40,9 @@ class SkinManageDialog : public QDialog {
     void activated(QModelIndex);
     void delayed_scroll(QModelIndex);
     void on_openDirBtn_clicked();
-    void on_addBtn_clicked();
+    void on_fileBtn_clicked();
+    void on_urlBtn_clicked();
+    void on_userBtn_clicked();
     void accept() override;
     void on_capeCombo_currentIndexChanged(int index);
     void on_steveBtn_toggled(bool checked);

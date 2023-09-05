@@ -100,18 +100,11 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="buttonsHLayout" stretch="1,1,1,8">
+    <layout class="QHBoxLayout" name="buttonsHLayout" stretch="0,0,3,0,0,0,1">
      <item>
       <widget class="QPushButton" name="openDirBtn">
        <property name="text">
         <string>Open Folder</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="addBtn">
-       <property name="text">
-        <string>Import Skin</string>
        </property>
       </widget>
      </item>
@@ -123,7 +116,41 @@
       </widget>
      </item>
      <item>
+      <widget class="QLineEdit" name="urlLine">
+       <property name="placeholderText">
+        <string extracomment="URL or username"/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="urlBtn">
+       <property name="text">
+        <string>Import URL</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="userBtn">
+       <property name="text">
+        <string>Import user</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="fileBtn">
+       <property name="text">
+        <string>Import File</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="standardButtons">
         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
        </property>

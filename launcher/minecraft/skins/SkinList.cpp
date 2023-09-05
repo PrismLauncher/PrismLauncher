@@ -85,8 +85,6 @@ bool SkinList::update()
         } catch (const Exception& e) {
             qCritical() << "Couldn't load skins json:" << e.cause();
         }
-    } else {
-        newSkins = loadMinecraftSkins();
     }
 
     bool needsSave = false;
@@ -108,7 +106,7 @@ bool SkinList::update()
             auto path = m_dir.absoluteFilePath(name);
             if (skinTexture.loadFromData(skin.data, "PNG") && skinTexture.save(path)) {
                 SkinModel s(path);
-                s.setModel(SkinModel::CLASSIC);  // maybe better model detection
+                s.setModel(skin.variant == "slim" ? SkinModel::SLIM : SkinModel::CLASSIC);
                 s.setCapeId(m_acct->accountData()->minecraftProfile.currentCape);
                 s.setURL(skin.url);
                 newSkins << s;
@@ -116,6 +114,7 @@ bool SkinList::update()
             }
         } else {
             nskin->setCapeId(m_acct->accountData()->minecraftProfile.currentCape);
+            nskin->setModel(skin.variant == "slim" ? SkinModel::SLIM : SkinModel::CLASSIC);
         }
     }
 
@@ -207,14 +206,14 @@ bool SkinList::dropMimeData(const QMimeData* data,
     // files dropped from outside?
     if (data->hasUrls()) {
         auto urls = data->urls();
-        QStringList iconFiles;
+        QStringList skinFiles;
         for (auto url : urls) {
             // only local files may be dropped...
             if (!url.isLocalFile())
                 continue;
-            iconFiles += url.toLocalFile();
+            skinFiles << url.toLocalFile();
         }
-        installSkins(iconFiles);
+        installSkins(skinFiles);
         return true;
     }
     return false;
@@ -261,20 +260,26 @@ int SkinList::rowCount(const QModelIndex& parent) const
 void SkinList::installSkins(const QStringList& iconFiles)
 {
     for (QString file : iconFiles)
-        installSkin(file, {});
+        installSkin(file);
 }
 
-void SkinList::installSkin(const QString& file, const QString& name)
+QString SkinList::installSkin(const QString& file, const QString& name)
 {
+    if (file.isEmpty())
+        return tr("Path is empty.");
     QFileInfo fileinfo(file);
-    if (!fileinfo.isReadable() || !fileinfo.isFile())
-        return;
-
+    if (!fileinfo.exists())
+        return tr("File doesn't exist.");
+    if (!fileinfo.isFile())
+        return tr("Not a file.");
+    if (!fileinfo.isReadable())
+        return tr("File is not readable.");
     if (fileinfo.suffix() != "png" && !SkinModel(fileinfo.absoluteFilePath()).isValid())
-        return;
+        return tr("Skin images must be 64x64 or 64x32 pixel PNG files.");
 
     QString target = FS::PathCombine(m_dir.absolutePath(), name.isEmpty() ? fileinfo.fileName() : name);
-    QFile::copy(file, target);
+
+    return QFile::copy(file, target) ? "" : tr("Unable to copy file");
 }
 
 int SkinList::getSkinIndex(const QString& key) const
@@ -311,10 +316,12 @@ bool SkinList::deleteSkin(const QString& key, const bool trash)
         if (trash) {
             if (FS::trash(s.getPath(), nullptr)) {
                 m_skin_list.remove(idx);
+                save();
                 return true;
             }
         } else if (QFile::remove(s.getPath())) {
             m_skin_list.remove(idx);
+            save();
             return true;
         }
     }
@@ -361,33 +368,22 @@ bool SkinList::setData(const QModelIndex& idx, const QVariant& value, int role)
     return true;
 }
 
-QVector<SkinModel> SkinList::loadMinecraftSkins()
+void SkinList::updateSkin(SkinModel s)
 {
-    QString partialPath;
-#if defined(Q_OS_OSX)
-    partialPath = FS::PathCombine(QDir::homePath(), "Library/Application Support");
-#elif defined(Q_OS_WIN32)
-    partialPath = QProcessEnvironment::systemEnvironment().value("LOCALAPPDATA", "");
-#else
-    partialPath = QDir::homePath();
-#endif
-    QVector<SkinModel> newSkins;
-    auto path = FS::PathCombine(partialPath, ".minecraft", "launcher_custom_skins.json");
-    auto manifestInfo = QFileInfo(path);
-    if (!manifestInfo.exists())
-        return {};
-    try {
-        auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "SkinList JSON file");
-        const auto root = doc.object();
-        auto skins = Json::ensureObject(root, "customSkins");
-        for (auto key : skins.keys()) {
-            SkinModel s(m_dir, Json::ensureObject(skins, key));
-            if (s.isValid()) {
-                newSkins << s;
-            }
+    auto done = false;
+    for (auto i = 0; i < m_skin_list.size(); i++) {
+        if (m_skin_list[i].getPath() == s.getPath()) {
+            m_skin_list[i].setCapeId(s.getCapeId());
+            m_skin_list[i].setModel(s.getModel());
+            m_skin_list[i].setURL(s.getURL());
+            done = true;
+            break;
         }
-    } catch (const Exception& e) {
-        qCritical() << "Couldn't load minecraft skins json:" << e.cause();
     }
-    return newSkins;
+    if (!done) {
+        beginInsertRows(QModelIndex(), m_skin_list.count(), m_skin_list.count() + 1);
+        m_skin_list.append(s);
+        endInsertRows();
+    }
+    save();
 }

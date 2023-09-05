@@ -16,37 +16,41 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QFileDialog>
-#include <QFileInfo>
-#include <QMimeDatabase>
-#include <QPainter>
+#include "SkinManageDialog.h"
+#include "ui_SkinManageDialog.h"
 
 #include <FileSystem.h>
 #include <QAction>
 #include <QDialog>
+#include <QEventLoop>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QKeyEvent>
 #include <QListView>
+#include <QMimeDatabase>
+#include <QPainter>
+#include <QUrl>
 
 #include "Application.h"
 #include "DesktopServices.h"
+#include "Json.h"
 #include "QObjectPtr.h"
-#include "SkinManageDialog.h"
 
 #include "minecraft/auth/AccountTask.h"
+#include "minecraft/auth/Parsers.h"
 #include "minecraft/skins/CapeChange.h"
 #include "minecraft/skins/SkinDelete.h"
 #include "minecraft/skins/SkinList.h"
 #include "minecraft/skins/SkinModel.h"
 #include "minecraft/skins/SkinUpload.h"
 
+#include "net/Download.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/instanceview/InstanceDelegate.h"
-#include "ui_SkinManageDialog.h"
 
 SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
     : QDialog(parent), m_acct(acct), ui(new Ui::SkinManageDialog), m_list(this, APPLICATION->settings()->get("SkinsDir").toString(), acct)
@@ -132,20 +136,15 @@ void SkinManageDialog::on_openDirBtn_clicked()
     DesktopServices::openDirectory(m_list.getDir(), true);
 }
 
-void SkinManageDialog::on_addBtn_clicked()
+void SkinManageDialog::on_fileBtn_clicked()
 {
     auto filter = QMimeDatabase().mimeTypeForName("image/png").filterString();
     QString raw_path = QFileDialog::getOpenFileName(this, tr("Select Skin Texture"), QString(), filter);
-    if (raw_path.isEmpty() || !QFileInfo::exists(raw_path)) {
+    auto message = m_list.installSkin(raw_path, {});
+    if (!message.isEmpty()) {
+        CustomMessageBox::selectable(this, tr("Selected file is not a valid skin"), message, QMessageBox::Critical)->show();
         return;
     }
-    if (!SkinModel(raw_path).isValid()) {
-        CustomMessageBox::selectable(this, tr("Selected file is not a valid skin"),
-                                     tr("Skin images must be 64x64 or 64x32 pixel PNG files."), QMessageBox::Critical)
-            ->show();
-        return;
-    }
-    m_list.installSkin(raw_path, {});
 }
 
 QPixmap previewCape(QPixmap capeImage)
@@ -336,4 +335,133 @@ void SkinManageDialog::on_action_Delete_Skin_triggered(bool checked)
             m_list.deleteSkin(m_selected_skin, false);
         }
     }
+}
+
+void SkinManageDialog::on_urlBtn_clicked()
+{
+    auto url = QUrl(ui->urlLine->text());
+    if (!url.isValid()) {
+        CustomMessageBox::selectable(this, tr("Invalid url"), tr("Invalid url"), QMessageBox::Critical)->show();
+        return;
+    }
+    ui->urlLine->setText("");
+
+    NetJob::Ptr job{ new NetJob(tr("Download skin"), APPLICATION->network()) };
+
+    auto path = FS::PathCombine(m_list.getDir(), url.fileName());
+    job->addNetAction(Net::Download::makeFile(url, path));
+    ProgressDialog dlg(this);
+    dlg.execWithTask(job.get());
+    SkinModel s(path);
+    if (!s.isValid()) {
+        CustomMessageBox::selectable(this, tr("URL is not a valid skin"), tr("Skin images must be 64x64 or 64x32 pixel PNG files."),
+                                     QMessageBox::Critical)
+            ->show();
+        QFile::remove(path);
+        return;
+    }
+    if (QFileInfo(path).suffix().isEmpty()) {
+        QFile::rename(path, path + ".png");
+    }
+}
+
+class WaitTask : public Task {
+   public:
+    WaitTask() : m_loop(), m_done(false){};
+    virtual ~WaitTask() = default;
+
+   public slots:
+    void quit()
+    {
+        m_done = true;
+        m_loop.quit();
+    }
+
+   protected:
+    virtual void executeTask()
+    {
+        if (!m_done)
+            m_loop.exec();
+        emitSucceeded();
+    };
+
+   private:
+    QEventLoop m_loop;
+    bool m_done;
+};
+
+void SkinManageDialog::on_userBtn_clicked()
+{
+    auto user = ui->urlLine->text();
+    if (user.isEmpty()) {
+        return;
+    }
+    ui->urlLine->setText("");
+    MinecraftProfile mcProfile;
+    auto path = FS::PathCombine(m_list.getDir(), user + ".png");
+
+    NetJob::Ptr job{ new NetJob(tr("Download user skin"), APPLICATION->network(), 1) };
+
+    auto uuidOut = std::make_shared<QByteArray>();
+    auto profileOut = std::make_shared<QByteArray>();
+
+    auto uuidLoop = makeShared<WaitTask>();
+    auto profileLoop = makeShared<WaitTask>();
+
+    auto getUUID = Net::Download::makeByteArray("https://api.mojang.com/users/profiles/minecraft/" + user, uuidOut);
+    auto getProfile = Net::Download::makeByteArray(QUrl(), profileOut);
+    auto downloadSkin = Net::Download::makeFile(QUrl(), path);
+
+    connect(getUUID.get(), &Task::aborted, uuidLoop.get(), &WaitTask::quit);
+    connect(getUUID.get(), &Task::failed, uuidLoop.get(), &WaitTask::quit);
+    connect(getProfile.get(), &Task::aborted, profileLoop.get(), &WaitTask::quit);
+    connect(getProfile.get(), &Task::failed, profileLoop.get(), &WaitTask::quit);
+
+    connect(getUUID.get(), &Task::succeeded, this, [uuidLoop, uuidOut, job, getProfile] {
+        try {
+            QJsonParseError parse_error{};
+            QJsonDocument doc = QJsonDocument::fromJson(*uuidOut, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response from Minecraft skin service at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                uuidLoop->quit();
+                return;
+            }
+            const auto root = doc.object();
+            auto id = Json::ensureString(root, "id");
+            if (!id.isEmpty()) {
+                getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
+            } else {
+                job->abort();
+            }
+        } catch (const Exception& e) {
+            qCritical() << "Couldn't load skin json:" << e.cause();
+        }
+        uuidLoop->quit();
+    });
+
+    connect(getProfile.get(), &Task::succeeded, this, [profileLoop, profileOut, job, getProfile, &mcProfile, downloadSkin] {
+        if (Parsers::parseMinecraftProfileMojang(*profileOut, mcProfile)) {
+            downloadSkin->setUrl(mcProfile.skin.url);
+        } else {
+            job->abort();
+        }
+        profileLoop->quit();
+    });
+
+    job->addNetAction(getUUID);
+    job->addTask(uuidLoop);
+    job->addNetAction(getProfile);
+    job->addTask(profileLoop);
+    job->addNetAction(downloadSkin);
+    ProgressDialog dlg(this);
+    dlg.execWithTask(job.get());
+
+    SkinModel s(path);
+    s.setModel(mcProfile.skin.variant == "slim" ? SkinModel::SLIM : SkinModel::CLASSIC);
+    s.setURL(mcProfile.skin.url);
+    if (m_capes.contains(mcProfile.currentCape)) {
+        s.setCapeId(mcProfile.currentCape);
+    }
+    m_list.updateSkin(s);
 }
