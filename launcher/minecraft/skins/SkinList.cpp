@@ -368,21 +368,21 @@ bool SkinList::setData(const QModelIndex& idx, const QVariant& value, int role)
     return true;
 }
 
-void SkinList::updateSkin(SkinModel s)
+void SkinList::updateSkin(SkinModel* s)
 {
     auto done = false;
     for (auto i = 0; i < m_skin_list.size(); i++) {
-        if (m_skin_list[i].getPath() == s.getPath()) {
-            m_skin_list[i].setCapeId(s.getCapeId());
-            m_skin_list[i].setModel(s.getModel());
-            m_skin_list[i].setURL(s.getURL());
+        if (m_skin_list[i].getPath() == s->getPath()) {
+            m_skin_list[i].setCapeId(s->getCapeId());
+            m_skin_list[i].setModel(s->getModel());
+            m_skin_list[i].setURL(s->getURL());
             done = true;
             break;
         }
     }
     if (!done) {
         beginInsertRows(QModelIndex(), m_skin_list.count(), m_skin_list.count() + 1);
-        m_skin_list.append(s);
+        m_skin_list.append(*s);
         endInsertRows();
     }
     save();

@@ -463,5 +463,5 @@ void SkinManageDialog::on_userBtn_clicked()
     if (m_capes.contains(mcProfile.currentCape)) {
         s.setCapeId(mcProfile.currentCape);
     }
-    m_list.updateSkin(s);
+    m_list.updateSkin(&s);
 }

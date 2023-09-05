@@ -58,7 +58,7 @@ class SkinList : public QAbstractListModel {
     void save();
     int getSelectedAccountSkin();
 
-    void updateSkin(SkinModel s);
+    void updateSkin(SkinModel* s);
 
    private:
     // hide copy constructor
