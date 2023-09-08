@@ -242,7 +242,7 @@ void SkinManageDialog::accept()
         return;
     }
 
-    skinUpload->addNetAction(SkinUpload::make(m_acct->accessToken(), skin));
+    skinUpload->addNetAction(SkinUpload::make(m_acct->accessToken(), skin->getPath(), skin->getModelString()));
 
     auto selectedCape = skin->getCapeId();
     if (selectedCape != m_acct->accountData()->minecraftProfile.currentCape) {
