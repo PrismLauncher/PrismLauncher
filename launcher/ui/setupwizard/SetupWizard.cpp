@@ -1,16 +1,16 @@
 #include "SetupWizard.h"
 
-#include "LanguageWizardPage.h"
 #include "JavaWizardPage.h"
+#include "LanguageWizardPage.h"
 
-#include "translations/TranslationsModel.h"
 #include <Application.h>
 #include <FileSystem.h>
+#include "translations/TranslationsModel.h"
 
-#include <QAbstractButton>
 #include <BuildConfig.h>
+#include <QAbstractButton>
 
-SetupWizard::SetupWizard(QWidget *parent) : QWizard(parent)
+SetupWizard::SetupWizard(QWidget* parent) : QWizard(parent)
 {
     setObjectName(QStringLiteral("SetupWizard"));
     resize(620, 660);
@@ -33,17 +33,17 @@ void SetupWizard::retranslate()
     setWindowTitle(tr("%1 Quick Setup").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
 }
 
-BaseWizardPage * SetupWizard::getBasePage(int id)
+BaseWizardPage* SetupWizard::getBasePage(int id)
 {
-    if(id == -1)
+    if (id == -1)
         return nullptr;
     auto pagePtr = page(id);
-    if(!pagePtr)
+    if (!pagePtr)
         return nullptr;
-    return dynamic_cast<BaseWizardPage *>(pagePtr);
+    return dynamic_cast<BaseWizardPage*>(pagePtr);
 }
 
-BaseWizardPage * SetupWizard::getCurrentBasePage()
+BaseWizardPage* SetupWizard::getCurrentBasePage()
 {
     return getBasePage(currentId());
 }
@@ -51,38 +51,29 @@ BaseWizardPage * SetupWizard::getCurrentBasePage()
 void SetupWizard::pageChanged(int id)
 {
     auto basePagePtr = getBasePage(id);
-    if(!basePagePtr)
-    {
+    if (!basePagePtr) {
         return;
     }
-    if(basePagePtr->wantsRefreshButton())
-    {
-        setButtonLayout({QWizard::CustomButton1, QWizard::Stretch, QWizard::BackButton, QWizard::NextButton, QWizard::FinishButton});
+    if (basePagePtr->wantsRefreshButton()) {
+        setButtonLayout({ QWizard::CustomButton1, QWizard::Stretch, QWizard::BackButton, QWizard::NextButton, QWizard::FinishButton });
         auto customButton = button(QWizard::CustomButton1);
-        connect(customButton, &QAbstractButton::pressed, [&](){
+        connect(customButton, &QAbstractButton::clicked, [&]() {
             auto basePagePtr = getCurrentBasePage();
-            if(basePagePtr)
-            {
+            if (basePagePtr) {
                 basePagePtr->refresh();
             }
         });
-    }
-    else
-    {
-        setButtonLayout({QWizard::Stretch, QWizard::BackButton, QWizard::NextButton, QWizard::FinishButton});
+    } else {
+        setButtonLayout({ QWizard::Stretch, QWizard::BackButton, QWizard::NextButton, QWizard::FinishButton });
     }
 }
 
-
-void SetupWizard::changeEvent(QEvent *event)
+void SetupWizard::changeEvent(QEvent* event)
 {
-    if (event->type() == QEvent::LanguageChange)
-    {
+    if (event->type() == QEvent::LanguageChange) {
         retranslate();
     }
     QWizard::changeEvent(event);
 }
 
-SetupWizard::~SetupWizard()
-{
-}
+SetupWizard::~SetupWizard() {}

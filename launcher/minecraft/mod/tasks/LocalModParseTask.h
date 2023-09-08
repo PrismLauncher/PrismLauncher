@@ -26,6 +26,9 @@ bool processLitemod(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
 
 /** Checks whether a file is valid as a mod or not. */
 Mod::Ptr validate(QFileInfo file);
+
+bool processIconPNG(const Mod& mod, QByteArray&& raw_data);
+bool loadIconFile(const Mod& mod);
 }  // namespace ModUtils
 
 class LocalModParseTask : public Task {

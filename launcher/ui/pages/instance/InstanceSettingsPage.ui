@@ -61,31 +61,7 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0" colspan="3">
-           <widget class="QLineEdit" name="javaPathTextBox"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="javaDetectBtn">
-            <property name="text">
-             <string>Auto-detect...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="javaBrowseBtn">
-            <property name="text">
-             <string>Browse...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="javaTestBtn">
-            <property name="text">
-             <string>Test</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
+          <item row="4" column="0">
            <widget class="QCheckBox" name="skipCompatibilityCheckbox">
             <property name="toolTip">
              <string>If enabled, the launcher will not check if an instance is compatible with the selected Java version.</string>
@@ -94,6 +70,38 @@
              <string>Skip Java compatibility checks</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLineEdit" name="javaPathTextBox"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaBrowseBtn">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QPushButton" name="javaDetectBtn">
+              <property name="text">
+               <string>Auto-detect...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaTestBtn">
+              <property name="text">
+               <string>Test</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -116,7 +124,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string notr="true">PermGen:</string>
+             <string>PermGen:</string>
             </property>
            </widget>
           </item>
@@ -269,7 +277,7 @@
           <item>
            <widget class="QCheckBox" name="maximizedCheckBox">
             <property name="text">
-             <string>Start Minecraft maximized?</string>
+             <string>Start Minecraft maximized</string>
             </property>
            </widget>
           </item>
@@ -341,21 +349,21 @@
           <item>
            <widget class="QCheckBox" name="showConsoleCheck">
             <property name="text">
-             <string>Show console while the game is running?</string>
+             <string>Show console while the game is running</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="autoCloseConsoleCheck">
             <property name="text">
-             <string>Automatically close console when the game quits?</string>
+             <string>Automatically close console when the game quits</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="showConsoleErrorCheck">
             <property name="text">
-             <string>Show console when the game crashes?</string>
+             <string>Show console when the game crashes</string>
             </property>
            </widget>
           </item>
@@ -435,18 +443,52 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="useNativeOpenALCheck">
+            <property name="text">
+             <string>Use system installation of OpenAL</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelGLFWPath">
+            <property name="text">
+             <string>&amp;GLFW library path</string>
+            </property>
+            <property name="buddy">
+             <cstring>lineEditGLFWPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
            <widget class="QCheckBox" name="useNativeGLFWCheck">
             <property name="text">
              <string>Use system installation of GLFW</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QCheckBox" name="useNativeOpenALCheck">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditGLFWPath">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelOpenALPath">
             <property name="text">
-             <string>Use system installation of OpenAL</string>
+             <string>&amp;OpenAL library path</string>
+            </property>
+            <property name="buddy">
+             <cstring>lineEditOpenALPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="lineEditOpenALPath">
+            <property name="enabled">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -636,14 +678,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QToolButton" name="instanceAccountSelector">
-              <property name="popupMode">
-               <enum>QToolButton::InstantPopup</enum>
-              </property>
-              <property name="toolButtonStyle">
-               <enum>Qt::ToolButtonTextBesideIcon</enum>
-              </property>
-             </widget>
+             <widget class="QComboBox" name="instanceAccountSelector"/>
             </item>
            </layout>
           </item>
@@ -681,10 +716,6 @@
   <tabstop>openGlobalJavaSettingsButton</tabstop>
   <tabstop>settingsTabs</tabstop>
   <tabstop>javaSettingsGroupBox</tabstop>
-  <tabstop>javaPathTextBox</tabstop>
-  <tabstop>javaDetectBtn</tabstop>
-  <tabstop>javaBrowseBtn</tabstop>
-  <tabstop>javaTestBtn</tabstop>
   <tabstop>memoryGroupBox</tabstop>
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>

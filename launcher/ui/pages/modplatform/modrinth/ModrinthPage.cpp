@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -46,11 +46,14 @@
 
 #include "ui/widgets/ProjectItem.h"
 
+#include "net/ApiDownload.h"
+
 #include <QComboBox>
 #include <QKeyEvent>
 #include <QPushButton>
 
-ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::ModrinthPage), dialog(dialog)
+ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
+    : QWidget(parent), ui(new Ui::ModrinthPage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
 
@@ -61,6 +64,17 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
+
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &ModrinthPage::triggerSearch);
+
+    m_fetch_progress.hideIfInactive(true);
+    m_fetch_progress.setFixedHeight(24);
+    m_fetch_progress.progressFormat("");
+
+    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
 
     ui->sortByBox->addItem(tr("Sort by Relevance"));
     ui->sortByBox->addItem(tr("Sort by Total Downloads"));
@@ -100,12 +114,17 @@ bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
             this->triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     }
     return QObject::eventFilter(watched, event);
 }
 
-void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
@@ -123,11 +142,11 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         qDebug() << "Loading modrinth modpack information";
 
         auto netJob = new NetJob(QString("Modrinth::PackInformation(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
 
         QString id = current.id;
 
-        netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+        netJob->addNetAction(Net::ApiDownload::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
@@ -162,10 +181,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         netJob->start();
     } else
         updateUI();
@@ -174,12 +190,12 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         qDebug() << "Loading modrinth modpack versions";
 
         auto netJob = new NetJob(QString("Modrinth::PackVersions(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
 
         QString id = current.id;
 
         netJob->addNetAction(
-            Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+            Net::ApiDownload::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
@@ -217,10 +233,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
         netJob->start();
 
     } else {
@@ -260,10 +273,8 @@ void ModrinthPage::updateUI()
             text += donates.join(", ");
         }
 
-        if (!current.extra.issuesUrl.isEmpty()
-         || !current.extra.sourceUrl.isEmpty()
-         || !current.extra.wikiUrl.isEmpty()
-         || !current.extra.discordUrl.isEmpty()) {
+        if (!current.extra.issuesUrl.isEmpty() || !current.extra.sourceUrl.isEmpty() || !current.extra.wikiUrl.isEmpty() ||
+            !current.extra.discordUrl.isEmpty()) {
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 
@@ -315,11 +326,12 @@ void ModrinthPage::suggestCurrent()
 void ModrinthPage::triggerSearch()
 {
     m_model->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+    m_fetch_progress.watch(m_model->activeSearchJob().get());
 }
 
-void ModrinthPage::onVersionSelectionChanged(QString data)
+void ModrinthPage::onVersionSelectionChanged(QString version)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }

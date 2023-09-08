@@ -1,26 +1,25 @@
 #pragma once
-#include <QWidget>
 #include <QIcon>
+#include <QWidget>
 
 class QStyleOption;
 
 /**
  * This is a trivial widget that paints a QIcon of the specified size.
  */
-class IconLabel : public QWidget
-{
+class IconLabel : public QWidget {
     Q_OBJECT
 
-public:
+   public:
     /// Create a line separator. orientation is the orientation of the line.
-    explicit IconLabel(QWidget *parent, QIcon icon, QSize size);
+    explicit IconLabel(QWidget* parent, QIcon icon, QSize size);
 
     virtual QSize sizeHint() const;
-    virtual void paintEvent(QPaintEvent *);
+    virtual void paintEvent(QPaintEvent*);
 
     void setIcon(QIcon icon);
 
-private:
+   private:
     QSize m_size;
     QIcon m_icon;
 };

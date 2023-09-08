@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -39,12 +39,12 @@
 #include "DesktopServices.h"
 #include "minecraft/auth/AccountTask.h"
 
-#include <QtWidgets/QPushButton>
-#include <QUrl>
 #include <QApplication>
 #include <QClipboard>
+#include <QUrl>
+#include <QtWidgets/QPushButton>
 
-MSALoginDialog::MSALoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
+MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
 {
     ui->setupUi(this);
     ui->progressBar->setVisible(false);
@@ -55,7 +55,8 @@ MSALoginDialog::MSALoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MS
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
-int MSALoginDialog::exec() {
+int MSALoginDialog::exec()
+{
     setUserInputsEnabled(false);
     ui->progressBar->setVisible(true);
 
@@ -74,24 +75,24 @@ int MSALoginDialog::exec() {
     return QDialog::exec();
 }
 
-
 MSALoginDialog::~MSALoginDialog()
 {
     delete ui;
 }
 
-void MSALoginDialog::externalLoginTick() {
+void MSALoginDialog::externalLoginTick()
+{
     m_externalLoginElapsed++;
     ui->progressBar->setValue(m_externalLoginElapsed);
     ui->progressBar->repaint();
 
-    if(m_externalLoginElapsed >= m_externalLoginTimeout) {
+    if (m_externalLoginElapsed >= m_externalLoginTimeout) {
         m_externalLoginTimer.stop();
     }
 }
 
-
-void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn) {
+void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn)
+{
     m_externalLoginElapsed = 0;
     m_externalLoginTimeout = expiresIn;
 
@@ -104,7 +105,8 @@ void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& 
 
     QString urlString = uri.toString();
     QString linkString = QString("<a href=\"%1\">%2</a>").arg(urlString, urlString);
-    ui->label->setText(tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
+    ui->label->setText(
+        tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
     ui->actionButton->setVisible(true);
     connect(ui->actionButton, &QPushButton::clicked, [=]() {
         DesktopServices::openUrl(uri);
@@ -113,7 +115,8 @@ void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& 
     });
 }
 
-void MSALoginDialog::hideVerificationUriAndCode() {
+void MSALoginDialog::hideVerificationUriAndCode()
+{
     m_externalLoginTimer.stop();
     ui->actionButton->setVisible(false);
 }
@@ -123,16 +126,15 @@ void MSALoginDialog::setUserInputsEnabled(bool enable)
     ui->buttonBox->setEnabled(enable);
 }
 
-void MSALoginDialog::onTaskFailed(const QString &reason)
+void MSALoginDialog::onTaskFailed(const QString& reason)
 {
     // Set message
     auto lines = reason.split('\n');
     QString processed;
-    for(auto line: lines) {
-        if(line.size()) {
+    for (auto line : lines) {
+        if (line.size()) {
             processed += "<font color='red'>" + line + "</font><br />";
-        }
-        else {
+        } else {
             processed += "<br />";
         }
     }
@@ -149,7 +151,7 @@ void MSALoginDialog::onTaskSucceeded()
     QDialog::accept();
 }
 
-void MSALoginDialog::onTaskStatus(const QString &status)
+void MSALoginDialog::onTaskStatus(const QString& status)
 {
     ui->label->setText(status);
 }
@@ -161,12 +163,11 @@ void MSALoginDialog::onTaskProgress(qint64 current, qint64 total)
 }
 
 // Public interface
-MinecraftAccountPtr MSALoginDialog::newAccount(QWidget *parent, QString msg)
+MinecraftAccountPtr MSALoginDialog::newAccount(QWidget* parent, QString msg)
 {
     MSALoginDialog dlg(parent);
     dlg.ui->label->setText(msg);
-    if (dlg.exec() == QDialog::Accepted)
-    {
+    if (dlg.exec() == QDialog::Accepted) {
         return dlg.m_account;
     }
     return nullptr;

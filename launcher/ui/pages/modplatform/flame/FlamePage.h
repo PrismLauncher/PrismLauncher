@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,45 +37,32 @@
 
 #include <QWidget>
 
-#include "ui/pages/BasePage.h"
 #include <Application.h>
-#include "tasks/Task.h"
 #include <modplatform/flame/FlamePackIndex.h>
+#include <QTimer>
+#include "ui/pages/BasePage.h"
+#include "ui/widgets/ProgressWidget.h"
 
-namespace Ui
-{
+namespace Ui {
 class FlamePage;
 }
 
 class NewInstanceDialog;
 
 namespace Flame {
-    class ListModel;
+class ListModel;
 }
 
-class FlamePage : public QWidget, public BasePage
-{
+class FlamePage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit FlamePage(NewInstanceDialog* dialog, QWidget *parent = 0);
+   public:
+    explicit FlamePage(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~FlamePage();
-    virtual QString displayName() const override
-    {
-        return "CurseForge";
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("flame");
-    }
-    virtual QString id() const override
-    {
-        return "flame";
-    }
-    virtual QString helpPage() const override
-    {
-        return "Flame-platform";
-    }
+    virtual QString displayName() const override { return "CurseForge"; }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("flame"); }
+    virtual QString id() const override { return "flame"; }
+    virtual QString helpPage() const override { return "Flame-platform"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
@@ -83,21 +70,26 @@ public:
 
     void openedImpl() override;
 
-    bool eventFilter(QObject * watched, QEvent * event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
-private:
+   private:
     void suggestCurrent();
 
-private slots:
+   private slots:
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
 
-private:
-    Ui::FlamePage *ui = nullptr;
+   private:
+    Ui::FlamePage* ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
     Flame::ListModel* listModel = nullptr;
     Flame::IndexedPack current;
 
     int m_selected_version_index = -1;
+
+    ProgressWidget m_fetch_progress;
+
+    // Used to do instant searching with a delay to cache quick changes
+    QTimer m_search_timer;
 };

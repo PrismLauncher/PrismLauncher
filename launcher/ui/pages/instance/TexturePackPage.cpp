@@ -57,7 +57,7 @@ TexturePackPage::TexturePackPage(MinecraftInstance* instance, std::shared_ptr<Te
     ui->actionViewConfigs->setVisible(false);
 }
 
-bool TexturePackPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+bool TexturePackPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
@@ -69,8 +69,6 @@ bool TexturePackPage::onSelectionChanged(const QModelIndex& current, const QMode
 
 void TexturePackPage::downloadTPs()
 {
-    if (!m_controlsEnabled)
-        return;
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 

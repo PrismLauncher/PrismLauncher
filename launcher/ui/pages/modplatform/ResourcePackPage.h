@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "ui/pages/modplatform/ResourcePage.h"
 #include "ui/pages/modplatform/ResourcePackModel.h"
+#include "ui/pages/modplatform/ResourcePage.h"
 
 namespace Ui {
 class ResourcePage;
@@ -30,8 +30,6 @@ class ResourcePackResourcePage : public ResourcePage {
 
         return page;
     }
-
-    ~ResourcePackResourcePage() override = default;
 
     //: The plural version of 'resource pack'
     [[nodiscard]] inline QString resourcesString() const override { return tr("resource packs"); }

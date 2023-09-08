@@ -37,36 +37,21 @@
 
 #pragma once
 
-#include "NetAction.h"
-#include "Sink.h"
+#include "net/NetRequest.h"
 
 namespace Net {
 
-    class Upload : public NetAction {
-        Q_OBJECT
+class Upload : public NetRequest {
+    Q_OBJECT
+   public:
+    using Ptr = shared_qobject_ptr<Upload>;
+    explicit Upload() : NetRequest() { logCat = taskUploadLogC; };
 
-    public:
-        using Ptr = shared_qobject_ptr<Upload>;
+    static Upload::Ptr makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data);
 
-        static Upload::Ptr makeByteArray(QUrl url, QByteArray *output, QByteArray m_post_data);
-        auto abort() -> bool override;
-        auto canAbort() const -> bool override { return true; };
+   protected:
+    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+    QByteArray m_post_data;
+};
 
-    protected slots:
-        void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
-        void downloadError(QNetworkReply::NetworkError error) override;
-        void sslErrors(const QList<QSslError> & errors) override;
-        void downloadFinished() override;
-        void downloadReadyRead() override;
-
-    public slots:
-        void executeTask() override;
-    private:
-        std::unique_ptr<Sink> m_sink;
-        QByteArray m_post_data;
-
-        bool handleRedirect();
-    };
-
-} // Net
-
+}  // namespace Net

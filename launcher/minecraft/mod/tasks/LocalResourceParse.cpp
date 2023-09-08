@@ -19,7 +19,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <QObject> 
+#include <QObject>
 #include <utility>
 
 #include <memory>
@@ -33,25 +33,21 @@
 #include "LocalTexturePackParseTask.h"
 #include "LocalWorldSaveParseTask.h"
 
+static const QMap<PackedResourceType, QString> s_packed_type_names = { { PackedResourceType::ResourcePack, QObject::tr("resource pack") },
+                                                                       { PackedResourceType::TexturePack, QObject::tr("texture pack") },
+                                                                       { PackedResourceType::DataPack, QObject::tr("data pack") },
+                                                                       { PackedResourceType::ShaderPack, QObject::tr("shader pack") },
+                                                                       { PackedResourceType::WorldSave, QObject::tr("world save") },
+                                                                       { PackedResourceType::Mod, QObject::tr("mod") },
+                                                                       { PackedResourceType::UNKNOWN, QObject::tr("unknown") } };
 
-static const QMap<PackedResourceType, QString> s_packed_type_names = {
-    {PackedResourceType::ResourcePack, QObject::tr("resource pack")},
-    {PackedResourceType::TexturePack,  QObject::tr("texture pack")},
-    {PackedResourceType::DataPack, QObject::tr("data pack")},
-    {PackedResourceType::ShaderPack, QObject::tr("shader pack")},
-    {PackedResourceType::WorldSave, QObject::tr("world save")},
-    {PackedResourceType::Mod , QObject::tr("mod")},
-    {PackedResourceType::UNKNOWN, QObject::tr("unknown")}
-};
-
-static const QMap<ResourceManagmentType, QString> s_managment_type_names = {
-    {ResourceManagmentType::PackManaged, "PackManaged"},
-    {ResourceManagmentType::UserInstalled, "UserInstalled"},
-    {ResourceManagmentType::External, "External"}
-};
+static const QMap<ResourceManagmentType, QString> s_managment_type_names = { { ResourceManagmentType::PackManaged, "PackManaged" },
+                                                                             { ResourceManagmentType::UserInstalled, "UserInstalled" },
+                                                                             { ResourceManagmentType::External, "External" } };
 
 namespace ResourceUtils {
-std::pair<PackedResourceType, Resource::Ptr> identify(QFileInfo file){
+std::pair<PackedResourceType, Resource::Ptr> identify(QFileInfo file)
+{
     if (file.exists() && file.isFile()) {
         if (auto mod = ModUtils::validate(file); mod) {
             qDebug() << file.fileName() << "is a mod";
@@ -72,7 +68,7 @@ std::pair<PackedResourceType, Resource::Ptr> identify(QFileInfo file){
             qDebug() << file.fileName() << "is a shader pack";
             return std::make_pair(PackedResourceType::ShaderPack, sp);
         } else {
-            qDebug() << "Can't Identify" << file.fileName() ;
+            qDebug() << "Can't Identify" << file.fileName();
             return std::make_pair(PackedResourceType::UNKNOWN, makeShared<Resource>(file));
         }
     } else {
@@ -81,12 +77,13 @@ std::pair<PackedResourceType, Resource::Ptr> identify(QFileInfo file){
     return std::make_pair(PackedResourceType::INVALID, nullptr);
 }
 
-QString getPackedTypeName(PackedResourceType type) {
+QString getPackedTypeName(PackedResourceType type)
+{
     return s_packed_type_names.constFind(type).value();
 }
 
-QString getManagmentTypeName(ResourceManagmentType type) {
+QString getManagmentTypeName(ResourceManagmentType type)
+{
     return s_managment_type_names.constFind(type).value();
 }
-
-}
+}  // namespace ResourceUtils

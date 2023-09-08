@@ -41,14 +41,13 @@
 
 #include "ui/GuiUtil.h"
 
-#include "RecursiveFileSystemWatcher.h"
-#include <GZip.h>
 #include <FileSystem.h>
+#include <GZip.h>
 #include <QShortcut>
+#include "RecursiveFileSystemWatcher.h"
 
-OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget *parent)
-    : QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path), m_fileFilter(fileFilter),
-      m_watcher(new RecursiveFileSystemWatcher(this))
+OtherLogsPage::OtherLogsPage(QString path, IPathMatcher::Ptr fileFilter, QWidget* parent)
+    : QWidget(parent), ui(new Ui::OtherLogsPage), m_path(path), m_fileFilter(fileFilter), m_watcher(new RecursiveFileSystemWatcher(this))
 {
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();
@@ -94,21 +93,15 @@ void OtherLogsPage::populateSelectLogBox()
 {
     ui->selectLogBox->clear();
     ui->selectLogBox->addItems(m_watcher->files());
-    if (m_currentFile.isEmpty())
-    {
+    if (m_currentFile.isEmpty()) {
         setControlsEnabled(false);
         ui->selectLogBox->setCurrentIndex(-1);
-    }
-    else
-    {
+    } else {
         const int index = ui->selectLogBox->findText(m_currentFile);
-        if (index != -1)
-        {
+        if (index != -1) {
             ui->selectLogBox->setCurrentIndex(index);
             setControlsEnabled(true);
-        }
-        else
-        {
+        } else {
             setControlsEnabled(false);
         }
     }
@@ -117,19 +110,15 @@ void OtherLogsPage::populateSelectLogBox()
 void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 {
     QString file;
-    if (index != -1)
-    {
+    if (index != -1) {
         file = ui->selectLogBox->itemText(index);
     }
 
-    if (file.isEmpty() || !QFile::exists(FS::PathCombine(m_path, file)))
-    {
+    if (file.isEmpty() || !QFile::exists(FS::PathCombine(m_path, file))) {
         m_currentFile = QString();
         ui->text->clear();
         setControlsEnabled(false);
-    }
-    else
-    {
+    } else {
         m_currentFile = file;
         on_btnReload_clicked();
         setControlsEnabled(true);
@@ -138,64 +127,49 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
 
 void OtherLogsPage::on_btnReload_clicked()
 {
-    if(m_currentFile.isEmpty())
-    {
+    if (m_currentFile.isEmpty()) {
         setControlsEnabled(false);
         return;
     }
     QFile file(FS::PathCombine(m_path, m_currentFile));
-    if (!file.open(QFile::ReadOnly))
-    {
+    if (!file.open(QFile::ReadOnly)) {
         setControlsEnabled(false);
-        ui->btnReload->setEnabled(true); // allow reload
+        ui->btnReload->setEnabled(true);  // allow reload
         m_currentFile = QString();
-        QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2")
-                                                     .arg(m_currentFile, file.errorString()));
-    }
-    else
-    {
-        auto setPlainText = [&](const QString & text)
-        {
+        QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2").arg(m_currentFile, file.errorString()));
+    } else {
+        auto setPlainText = [&](const QString& text) {
             QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
             bool conversionOk = false;
             int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
-            if(!conversionOk)
-            {
+            if (!conversionOk) {
                 fontSize = 11;
             }
-            QTextDocument *doc = ui->text->document();
+            QTextDocument* doc = ui->text->document();
             doc->setDefaultFont(QFont(fontFamily, fontSize));
             ui->text->setPlainText(text);
         };
-        auto showTooBig = [&]()
-        {
-            setPlainText(
-                tr("The file (%1) is too big. You may want to open it in a viewer optimized "
-                   "for large files.").arg(file.fileName()));
+        auto showTooBig = [&]() {
+            setPlainText(tr("The file (%1) is too big. You may want to open it in a viewer optimized "
+                            "for large files.")
+                             .arg(file.fileName()));
         };
-        if(file.size() > (1024ll * 1024ll * 12ll))
-        {
+        if (file.size() > (1024ll * 1024ll * 12ll)) {
             showTooBig();
             return;
         }
         QString content;
-        if(file.fileName().endsWith(".gz"))
-        {
+        if (file.fileName().endsWith(".gz")) {
             QByteArray temp;
-            if(!GZip::unzip(file.readAll(), temp))
-            {
-                setPlainText(
-                    tr("The file (%1) is not readable.").arg(file.fileName()));
+            if (!GZip::unzip(file.readAll(), temp)) {
+                setPlainText(tr("The file (%1) is not readable.").arg(file.fileName()));
                 return;
             }
             content = QString::fromUtf8(temp);
-        }
-        else
-        {
+        } else {
             content = QString::fromUtf8(file.readAll());
         }
-        if (content.size() >= 50000000ll)
-        {
+        if (content.size() >= 50000000ll) {
             showTooBig();
             return;
         }
@@ -215,8 +189,7 @@ void OtherLogsPage::on_btnCopy_clicked()
 
 void OtherLogsPage::on_btnDelete_clicked()
 {
-    if(m_currentFile.isEmpty())
-    {
+    if (m_currentFile.isEmpty()) {
         setControlsEnabled(false);
         return;
     }
@@ -230,36 +203,27 @@ void OtherLogsPage::on_btnDelete_clicked()
     }
     QFile file(FS::PathCombine(m_path, m_currentFile));
 
-    if (FS::trash(file.fileName()))
-    {
+    if (FS::trash(file.fileName())) {
         return;
     }
 
-    if (!file.remove())
-    {
-        QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2")
-                                                     .arg(m_currentFile, file.errorString()));
+    if (!file.remove()) {
+        QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2").arg(m_currentFile, file.errorString()));
     }
 }
-
-
 
 void OtherLogsPage::on_btnClean_clicked()
 {
     auto toDelete = m_watcher->files();
-    if(toDelete.isEmpty())
-    {
+    if (toDelete.isEmpty()) {
         return;
     }
-    QMessageBox *messageBox = new QMessageBox(this);
+    QMessageBox* messageBox = new QMessageBox(this);
     messageBox->setWindowTitle(tr("Confirm Cleanup"));
-    if(toDelete.size() > 5)
-    {
+    if (toDelete.size() > 5) {
         messageBox->setText(tr("Are you sure you want to delete all log files?"));
         messageBox->setDetailedText(toDelete.join('\n'));
-    }
-    else
-    {
+    } else {
         messageBox->setText(tr("Are you sure you want to delete all these files?\n%1").arg(toDelete.join('\n')));
     }
     messageBox->setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
@@ -268,45 +232,36 @@ void OtherLogsPage::on_btnClean_clicked()
     messageBox->setIcon(QMessageBox::Question);
     messageBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
-    if (messageBox->exec() != QMessageBox::Ok)
-    {
+    if (messageBox->exec() != QMessageBox::Ok) {
         return;
     }
     QStringList failed;
-    for(auto item: toDelete)
-    {
+    for (auto item : toDelete) {
         QFile file(FS::PathCombine(m_path, item));
-        if (FS::trash(file.fileName()))
-        {
+        if (FS::trash(file.fileName())) {
             continue;
         }
-        if (!file.remove())
-        {
+        if (!file.remove()) {
             failed.push_back(item);
         }
     }
-    if(!failed.empty())
-    {
-        QMessageBox *messageBox = new QMessageBox(this);
-        messageBox->setWindowTitle(tr("Error"));
-        if(failed.size() > 5)
-        {
-            messageBox->setText(tr("Couldn't delete some files!"));
-            messageBox->setDetailedText(failed.join('\n'));
+    if (!failed.empty()) {
+        QMessageBox* messageBoxFailure = new QMessageBox(this);
+        messageBoxFailure->setWindowTitle(tr("Error"));
+        if (failed.size() > 5) {
+            messageBoxFailure->setText(tr("Couldn't delete some files!"));
+            messageBoxFailure->setDetailedText(failed.join('\n'));
+        } else {
+            messageBoxFailure->setText(tr("Couldn't delete some files:\n%1").arg(failed.join('\n')));
         }
-        else
-        {
-            messageBox->setText(tr("Couldn't delete some files:\n%1").arg(failed.join('\n')));
-        }
-        messageBox->setStandardButtons(QMessageBox::Ok);
-        messageBox->setDefaultButton(QMessageBox::Ok);
-        messageBox->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        messageBox->setIcon(QMessageBox::Critical);
-        messageBox->setTextInteractionFlags(Qt::TextBrowserInteraction);
-        messageBox->exec();
+        messageBoxFailure->setStandardButtons(QMessageBox::Ok);
+        messageBoxFailure->setDefaultButton(QMessageBox::Ok);
+        messageBoxFailure->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        messageBoxFailure->setIcon(QMessageBox::Critical);
+        messageBoxFailure->setTextInteractionFlags(Qt::TextBrowserInteraction);
+        messageBoxFailure->exec();
     }
 }
-
 
 void OtherLogsPage::setControlsEnabled(const bool enabled)
 {
@@ -319,7 +274,7 @@ void OtherLogsPage::setControlsEnabled(const bool enabled)
 }
 
 // FIXME: HACK, use LogView instead?
-static void findNext(QPlainTextEdit * _this, const QString& what, bool reverse)
+static void findNext(QPlainTextEdit* _this, const QString& what, bool reverse)
 {
     _this->find(what, reverse ? QTextDocument::FindFlag::FindBackward : QTextDocument::FindFlag(0));
 }
@@ -344,8 +299,7 @@ void OtherLogsPage::findPreviousActivated()
 void OtherLogsPage::findActivated()
 {
     // focus the search bar if it doesn't have focus
-    if (!ui->searchBar->hasFocus())
-    {
+    if (!ui->searchBar->hasFocus()) {
         ui->searchBar->setFocus();
         ui->searchBar->selectAll();
     }

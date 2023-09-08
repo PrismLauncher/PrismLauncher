@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2021 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -44,33 +44,35 @@ namespace Technic {
 
 typedef std::function<void(QString)> LogoCallback;
 
-class ListModel : public QAbstractListModel
-{
+class ListModel : public QAbstractListModel {
     Q_OBJECT
 
-public:
-    ListModel(QObject *parent);
+   public:
+    ListModel(QObject* parent);
     virtual ~ListModel();
 
     virtual QVariant data(const QModelIndex& index, int role) const;
     virtual int columnCount(const QModelIndex& parent) const;
     virtual int rowCount(const QModelIndex& parent) const;
 
-    void getLogo(const QString &logo, const QString &logoUrl, LogoCallback callback);
-    void searchWithTerm(const QString & term);
+    void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
+    void searchWithTerm(const QString& term);
 
-private slots:
+    [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
+    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
+
+   private slots:
     void searchRequestFinished();
     void searchRequestFailed();
 
     void logoFailed(QString logo);
     void logoLoaded(QString logo, QString out);
 
-private:
+   private:
     void performSearch();
     void requestLogo(QString logo, QString url);
 
-private:
+   private:
     QList<Modpack> modpacks;
     QStringList m_failedLogos;
     QStringList m_loadingLogos;
@@ -78,17 +80,13 @@ private:
     QMap<QString, LogoCallback> waitingCallbacks;
 
     QString currentSearchTerm;
-    enum SearchState {
-        None,
-        ResetRequested,
-        Finished
-    } searchState = None;
+    enum SearchState { None, ResetRequested, Finished } searchState = None;
     enum SearchMode {
         List,
         Single,
     } searchMode = List;
     NetJob::Ptr jobPtr;
-    QByteArray response;
+    std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
 };
 
-}
+}  // namespace Technic

@@ -186,8 +186,14 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
+    <addaction name="actionViewLauncherRootFolder"/>
+    <addaction name="separator"/>
     <addaction name="actionViewInstanceFolder"/>
     <addaction name="actionViewCentralModsFolder"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewIconThemeFolder"/>
+    <addaction name="actionViewWidgetThemeFolder"/>
+    <addaction name="actionViewCatPackFolder"/>
    </widget>
    <widget class="QMenu" name="accountsMenu">
     <property name="title">
@@ -434,22 +440,6 @@
     <string>Ctrl+D</string>
    </property>
   </action>
-  <action name="actionLaunchInstanceOffline">
-   <property name="text">
-    <string>Launch &amp;Offline</string>
-   </property>
-   <property name="toolTip">
-    <string>Launch the selected instance in offline mode.</string>
-   </property>
-  </action>
-  <action name="actionLaunchInstanceDemo">
-   <property name="text">
-    <string>Launch &amp;Demo</string>
-   </property>
-   <property name="toolTip">
-    <string>Launch the selected instance in demo mode.</string>
-   </property>
-  </action>
   <action name="actionExportInstance">
    <property name="icon">
     <iconset theme="export">
@@ -459,10 +449,43 @@
     <string>E&amp;xport...</string>
    </property>
    <property name="toolTip">
-    <string>Export the selected instance as a zip file.</string>
+    <string>Export the selected instance to supported formats.</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+E</string>
+  </action>
+  <action name="actionExportInstanceZip">
+   <property name="icon">
+    <iconset theme="launcher">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Prism Launcher (zip)</string>
+   </property>
+  </action>
+  <action name="actionExportInstanceMrPack">
+   <property name="icon">
+    <iconset theme="modrinth">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Modrinth (mrpack)</string>
+   </property>
+  </action>
+  <action name="actionExportInstanceFlamePack">
+   <property name="icon">
+    <iconset theme="flame">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>CurseForge (zip)</string>
+   </property>
+  </action>
+  <action name="actionExportInstanceToModList">
+   <property name="icon">
+    <iconset theme="new">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Mod List</string>
    </property>
   </action>
   <action name="actionCreateInstanceShortcut">
@@ -522,10 +545,22 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>&amp;View Instance Folder</string>
+    <string>View &amp;Instance Folder</string>
    </property>
    <property name="toolTip">
     <string>Open the instance folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewLauncherRootFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>View Launcher &amp;Root Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the launcher's root folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewCentralModsFolder">
@@ -551,7 +586,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Report a &amp;Bug...</string>
+    <string>Report a Bug or Suggest a Feature</string>
    </property>
    <property name="toolTip">
     <string>Open the bug tracker to report a bug with %1.</string>
@@ -675,6 +710,38 @@
    </property>
    <property name="toolTip">
     <string>Open the %1 wiki</string>
+   </property>
+  </action>
+  <action name="actionViewWidgetThemeFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>View &amp;Widget Themes Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>View Widget Theme Folder</string>
+   </property>
+  </action>
+  <action name="actionViewIconThemeFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>View I&amp;con Theme Folder</string>
+   </property>
+   <property name="toolTip">
+    <string>View Icon Theme Folder</string>
+   </property>
+  </action>
+  <action name="actionViewCatPackFolder">
+   <property name="icon">
+    <iconset theme="viewfolder"/>
+   </property>
+   <property name="text">
+    <string>View Cat Packs Folder</string>
    </property>
   </action>
  </widget>

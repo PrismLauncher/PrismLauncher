@@ -15,8 +15,8 @@
 
 #pragma once
 
-#include "BaseVersion.h"
 #include "../Version.h"
+#include "BaseVersion.h"
 
 #include <QJsonObject>
 #include <QStringList>
@@ -29,80 +29,54 @@
 
 #include "JsonFormat.h"
 
-namespace Meta
-{
+namespace Meta {
 
-class Version : public QObject, public BaseVersion, public BaseEntity
-{
+class Version : public QObject, public BaseVersion, public BaseEntity {
     Q_OBJECT
 
-public:
+   public:
     using Ptr = std::shared_ptr<Version>;
 
-    explicit Version(const QString &uid, const QString &version);
+    explicit Version(const QString& uid, const QString& version);
     virtual ~Version();
 
     QString descriptor() override;
     QString name() override;
     QString typeString() const override;
 
-    QString uid() const
-    {
-        return m_uid;
-    }
-    QString version() const
-    {
-        return m_version;
-    }
-    QString type() const
-    {
-        return m_type;
-    }
+    QString uid() const { return m_uid; }
+    QString version() const { return m_version; }
+    QString type() const { return m_type; }
     QDateTime time() const;
-    qint64 rawTime() const
-    {
-        return m_time;
-    }
-    const Meta::RequireSet &requires() const
-    {
-        return m_requires;
-    }
-    VersionFilePtr data() const
-    {
-        return m_data;
-    }
-    bool isRecommended() const
-    {
-        return m_recommended;
-    }
-    bool isLoaded() const
-    {
-        return m_data != nullptr;
-    }
+    qint64 rawTime() const { return m_time; }
+    const Meta::RequireSet& requiredSet() const { return m_requires; }
+    VersionFilePtr data() const { return m_data; }
+    bool isRecommended() const { return m_recommended; }
+    bool isLoaded() const { return m_data != nullptr; }
 
-    void merge(const Version::Ptr &other);
-    void mergeFromList(const Version::Ptr &other);
-    void parse(const QJsonObject &obj) override;
+    void merge(const Version::Ptr& other);
+    void mergeFromList(const Version::Ptr& other);
+    void parse(const QJsonObject& obj) override;
 
     QString localFilename() const override;
 
     [[nodiscard]] ::Version toComparableVersion() const;
 
-public: // for usage by format parsers only
-    void setType(const QString &type);
+   public:  // for usage by format parsers only
+    void setType(const QString& type);
     void setTime(const qint64 time);
-    void setRequires(const Meta::RequireSet &requires, const Meta::RequireSet &conflicts);
+    void setRequires(const Meta::RequireSet& reqs, const Meta::RequireSet& conflicts);
     void setVolatile(bool volatile_);
     void setRecommended(bool recommended);
     void setProvidesRecommendations();
-    void setData(const VersionFilePtr &data);
+    void setData(const VersionFilePtr& data);
 
-signals:
+   signals:
     void typeChanged();
     void timeChanged();
     void requiresChanged();
 
-private:
+   private:
     bool m_providesRecommendations = false;
     bool m_recommended = false;
     QString m_name;
@@ -115,6 +89,6 @@ private:
     bool m_volatile = false;
     VersionFilePtr m_data;
 };
-}
+}  // namespace Meta
 
 Q_DECLARE_METATYPE(Meta::Version::Ptr)

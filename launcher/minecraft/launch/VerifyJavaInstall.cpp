@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,10 +36,11 @@
 #include "VerifyJavaInstall.h"
 
 #include "java/JavaVersion.h"
-#include "minecraft/PackProfile.h"
 #include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 
-void VerifyJavaInstall::executeTask() {
+void VerifyJavaInstall::executeTask()
+{
     auto instance = std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance());
     auto packProfile = instance->getPackProfile();
     auto settings = instance->settings();
@@ -50,28 +51,27 @@ void VerifyJavaInstall::executeTask() {
 
     JavaVersion javaVersion(storedVersion);
 
-    if (compatibleMajors.isEmpty() || compatibleMajors.contains(javaVersion.major()))
-    {
+    if (compatibleMajors.isEmpty() || compatibleMajors.contains(javaVersion.major())) {
         emitSucceeded();
         return;
     }
 
-
-    if (ignoreCompatibility)
-    {
+    if (ignoreCompatibility) {
         emit logLine(tr("Java major version is incompatible. Things might break."), MessageLevel::Warning);
         emitSucceeded();
         return;
     }
 
     emit logLine(tr("This instance is not compatible with Java version %1.\n"
-                    "Please switch to one of the following Java versions for this instance:").arg(javaVersion.major()),
+                    "Please switch to one of the following Java versions for this instance:")
+                     .arg(javaVersion.major()),
                  MessageLevel::Error);
-    for (auto major : compatibleMajors)
-    {
+    for (auto major : compatibleMajors) {
         emit logLine(tr("Java version %1").arg(major), MessageLevel::Error);
     }
-    emit logLine(tr("Go to instance Java settings to change your Java version or disable the Java compatibility check if you know what you're doing."), MessageLevel::Error);
+    emit logLine(tr("Go to instance Java settings to change your Java version or disable the Java compatibility check if you know what "
+                    "you're doing."),
+                 MessageLevel::Error);
 
     emitFailed(QString("Incompatible Java major version"));
 }

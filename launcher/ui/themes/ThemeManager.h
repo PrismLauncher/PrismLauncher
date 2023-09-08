@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +20,9 @@
 
 #include <QString>
 
+#include "IconTheme.h"
 #include "ui/MainWindow.h"
+#include "ui/themes/CatPack.h"
 #include "ui/themes/ITheme.h"
 
 inline auto themeDebugLog()
@@ -33,25 +36,42 @@ inline auto themeWarningLog()
 
 class ThemeManager {
    public:
-    ThemeManager(MainWindow* mainWindow);
+    ThemeManager();
 
+    QList<IconTheme*> getValidIconThemes();
     QList<ITheme*> getValidApplicationThemes();
-    void setIconTheme(const QString& name);
+    bool isValidIconTheme(const QString& id);
+    bool isValidApplicationTheme(const QString& id);
+    QDir getIconThemesFolder();
+    QDir getApplicationThemesFolder();
+    QDir getCatPacksFolder();
     void applyCurrentlySelectedTheme(bool initial = false);
+    void setIconTheme(const QString& name);
     void setApplicationTheme(const QString& name, bool initial = false);
 
-    /// <summary>
-    /// Returns the cat based on selected cat and with events (Birthday, XMas, etc.)
-    /// </summary>
-    /// <param name="catName">Optional, if you need a specific cat.</param>
-    /// <returns></returns>
-    static QString getCatImage(QString catName = "");
+    /// @brief Returns the background based on selected and with events (Birthday, XMas, etc.)
+    /// @param catName Optional, if you need a specific background.
+    /// @return
+    QString getCatPack(QString catName = "");
+    QList<CatPack*> getValidCatPacks();
 
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
-    MainWindow* m_mainWindow;
+    std::map<QString, IconTheme> m_icons;
+    QDir m_iconThemeFolder{ "iconthemes" };
+    QDir m_applicationThemeFolder{ "themes" };
+    QDir m_catPacksFolder{ "catpacks" };
+    std::map<QString, std::unique_ptr<CatPack>> m_catPacks;
 
     void initializeThemes();
+    void initializeCatPacks();
     QString addTheme(std::unique_ptr<ITheme> theme);
     ITheme* getTheme(QString themeId);
+    QString addIconTheme(IconTheme theme);
+    QString addCatPack(std::unique_ptr<CatPack> catPack);
+    void initializeIcons();
+    void initializeWidgets();
+
+    const QStringList builtinIcons{ "pe_colored", "pe_light", "pe_dark", "pe_blue",    "breeze_light", "breeze_dark",
+                                    "OSX",        "iOS",      "flat",    "flat_white", "multimc" };
 };

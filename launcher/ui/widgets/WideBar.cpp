@@ -7,8 +7,8 @@
 class ActionButton : public QToolButton {
     Q_OBJECT
    public:
-    ActionButton(QAction* action, QWidget* parent = nullptr, bool use_default_action = false) : QToolButton(parent),
-    m_action(action), m_use_default_action(use_default_action)
+    ActionButton(QAction* action, QWidget* parent = nullptr, bool use_default_action = false)
+        : QToolButton(parent), m_action(action), m_use_default_action(use_default_action)
     {
         setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
         setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -116,12 +116,21 @@ void WideBar::insertActionAfter(QAction* after, QAction* action)
     if (iter == m_entries.end())
         return;
 
+    iter++;
+    // the action to insert after is present
+    // however, the element after it isn't valid
+    if (iter == m_entries.end()) {
+        // append the action instead of inserting it
+        addAction(action);
+        return;
+    }
+
     BarEntry entry;
-    entry.bar_action = insertWidget((iter + 1)->bar_action, new ActionButton(action, this, m_use_default_action));
+    entry.bar_action = insertWidget(iter->bar_action, new ActionButton(action, this, m_use_default_action));
     entry.menu_action = action;
     entry.type = BarEntry::Type::Action;
 
-    m_entries.insert(iter + 1, entry);
+    m_entries.insert(iter, entry);
 
     m_menu_state = MenuState::Dirty;
 }
@@ -195,8 +204,10 @@ static void copyAction(QAction* from, QAction* to)
 
 void WideBar::showVisibilityMenu(QPoint const& position)
 {
-    if (!m_bar_menu)
+    if (!m_bar_menu) {
         m_bar_menu = std::make_unique<QMenu>(this);
+        m_bar_menu->setTearOffEnabled(true);
+    }
 
     if (m_menu_state == MenuState::Dirty) {
         for (auto* old_action : m_bar_menu->actions())
@@ -218,7 +229,7 @@ void WideBar::showVisibilityMenu(QPoint const& position)
             act->setCheckable(true);
             act->setChecked(entry.bar_action->isVisible());
 
-            connect(act, &QAction::toggled, entry.bar_action, [this, &entry](bool toggled){
+            connect(act, &QAction::toggled, entry.bar_action, [this, &entry](bool toggled) {
                 entry.bar_action->setVisible(toggled);
 
                 // NOTE: This is needed so that disabled actions get reflected on the button when it is made visible.
@@ -234,7 +245,8 @@ void WideBar::showVisibilityMenu(QPoint const& position)
     m_bar_menu->popup(mapToGlobal(position));
 }
 
-void WideBar::addContextMenuAction(QAction* action) {
+void WideBar::addContextMenuAction(QAction* action)
+{
     m_context_menu_actions.append(action);
 }
 
@@ -296,6 +308,5 @@ bool WideBar::checkHash(QByteArray const& old_hash) const
 {
     return old_hash == getHash();
 }
-
 
 #include "WideBar.moc"

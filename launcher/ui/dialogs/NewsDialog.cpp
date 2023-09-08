@@ -32,7 +32,7 @@ NewsDialog::~NewsDialog()
 
 void NewsDialog::selectedArticleChanged(const QString& new_title)
 {
-    auto const& article_entry = m_entries.constFind(new_title).value();
+    auto article_entry = m_entries.constFind(new_title).value();
 
     ui->articleTitleLabel->setText(QString("<a href='%1'>%2</a>").arg(article_entry->link, new_title));
 

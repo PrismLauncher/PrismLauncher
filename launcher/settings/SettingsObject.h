@@ -259,11 +259,11 @@ class SettingsObject : public QObject {
      * \return
      */
     virtual QVariant retrieveValue(const Setting& setting) = 0;
-   
-   /*!
-    * \brief Function used by Settings object to clear their storage in the SettingsObject.
-    * \param setting The settig to clear storage for.
-    */ 
+
+    /*!
+     * \brief Function used by Settings object to clear their storage in the SettingsObject.
+     * \param setting The settig to clear storage for.
+     */
     virtual void removeValue(const Setting& setting) = 0;
 
     friend class Setting;

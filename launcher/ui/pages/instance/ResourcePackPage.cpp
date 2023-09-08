@@ -55,7 +55,7 @@ ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, std::shared_ptr<
     ui->actionViewConfigs->setVisible(false);
 }
 
-bool ResourcePackPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+bool ResourcePackPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
@@ -67,8 +67,6 @@ bool ResourcePackPage::onSelectionChanged(const QModelIndex& current, const QMod
 
 void ResourcePackPage::downloadRPs()
 {
-    if (!m_controlsEnabled)
-        return;
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 

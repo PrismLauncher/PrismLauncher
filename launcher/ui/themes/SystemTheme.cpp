@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ SystemTheme::SystemTheme()
 {
     themeDebugLog() << "Determining System Theme...";
     const auto& style = QApplication::style();
-    systemPalette = style->standardPalette();
+    systemPalette = QApplication::palette();
     QString lowerThemeName = style->objectName();
     themeDebugLog() << "System theme seems to be:" << lowerThemeName;
     QStringList styles = QStyleFactory::keys();
@@ -65,7 +65,7 @@ void SystemTheme::apply(bool initial)
     // See https://github.com/MultiMC/Launcher/issues/1790
     // or https://github.com/PrismLauncher/PrismLauncher/issues/490
     if (initial)
-        return; 
+        return;
     ITheme::apply(initial);
 }
 

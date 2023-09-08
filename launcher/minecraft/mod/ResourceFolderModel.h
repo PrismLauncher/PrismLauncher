@@ -1,21 +1,22 @@
 #pragma once
 
-#include <QTreeView>
-#include <QWidget>
 #include <QAbstractListModel>
+#include <QAction>
 #include <QDir>
 #include <QFileSystemWatcher>
+#include <QHeaderView>
 #include <QMutex>
 #include <QSet>
 #include <QSortFilterProxyModel>
-#include <memory>
+#include <QTreeView>
+#include <QWidget>
 
 #include "Resource.h"
 
 #include "BaseInstance.h"
 
-#include "tasks/Task.h"
 #include "tasks/ConcurrentTask.h"
+#include "tasks/Task.h"
 
 class QSortFilterProxyModel;
 
@@ -29,8 +30,10 @@ class QSortFilterProxyModel;
 class ResourceFolderModel : public QAbstractListModel {
     Q_OBJECT
    public:
-    ResourceFolderModel(QDir, std::shared_ptr<BaseInstance>, QObject* parent = nullptr, bool create_dir = true);
+    ResourceFolderModel(QDir, BaseInstance* instance, QObject* parent = nullptr, bool create_dir = true);
     ~ResourceFolderModel() override;
+
+    virtual QString id() const { return "resource"; }
 
     /** Starts watching the paths for changes.
      *
@@ -47,8 +50,8 @@ class ResourceFolderModel : public QAbstractListModel {
     bool stopWatching(const QStringList paths);
 
     /* Helper methods for subclasses, using a predetermined list of paths. */
-    virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); };
-    virtual bool stopWatching() { return stopWatching({ m_dir.absolutePath() }); };
+    virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); }
+    virtual bool stopWatching() { return stopWatching({ m_dir.absolutePath() }); }
 
     /** Given a path in the system, install that resource, moving it to its place in the
      *  instance file hierarchy.
@@ -76,7 +79,7 @@ class ResourceFolderModel : public QAbstractListModel {
     /** Creates a new parse task, if needed, for 'res' and start it.*/
     virtual void resolveResource(Resource* res);
 
-    [[nodiscard]] size_t size() const { return m_resources.size(); };
+    [[nodiscard]] qsizetype size() const { return m_resources.size(); }
     [[nodiscard]] bool empty() const { return size() == 0; }
     [[nodiscard]] Resource& at(int index) { return *m_resources.at(index); }
     [[nodiscard]] Resource const& at(int index) const { return *m_resources.at(index); }
@@ -95,9 +98,10 @@ class ResourceFolderModel : public QAbstractListModel {
 
     /* Basic columns */
     enum Columns { ACTIVE_COLUMN = 0, NAME_COLUMN, DATE_COLUMN, NUM_COLUMNS };
+    QStringList columnNames(bool translated = true) const { return translated ? m_column_names_translated : m_column_names; }
 
     [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
-    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; };
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; }
 
     [[nodiscard]] Qt::DropActions supportedDropActions() const override;
 
@@ -112,10 +116,11 @@ class ResourceFolderModel : public QAbstractListModel {
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
 
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-  
-    void setupHeaderAction(QAction* act, int column);
-    std::unique_ptr<QMenu> createHeaderContextMenu(QWidget* parent, QTreeView* tree); 
 
+    void setupHeaderAction(QAction* act, int column);
+    void saveHiddenColumn(int column, bool hidden);
+    void loadHiddenColumns(QTreeView* tree);
+    QMenu* createHeaderContextMenu(QTreeView* tree);
 
     /** This creates a proxy model to filter / sort the model for a UI.
      *
@@ -124,6 +129,7 @@ class ResourceFolderModel : public QAbstractListModel {
     QSortFilterProxyModel* createFilterProxyModel(QObject* parent = nullptr);
 
     [[nodiscard]] SortType columnToSortKey(size_t column) const;
+    [[nodiscard]] QList<QHeaderView::ResizeMode> columnResizeModes() const { return m_column_resize_modes; }
 
     class ProxyModel : public QSortFilterProxyModel {
        public:
@@ -135,10 +141,6 @@ class ResourceFolderModel : public QAbstractListModel {
     };
 
     QString instDirPath() const;
-
-   public slots:
-    void enableInteraction(bool enabled);
-    void disableInteraction(bool disabled) { enableInteraction(!disabled); }
 
    signals:
     void updateFinished();
@@ -158,7 +160,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *  This task should load and parse all heavy info needed by a resource, such as parsing a manifest. It gets executed
      *  in the background, so it slowly updates the UI as tasks get done.
      */
-    [[nodiscard]] virtual Task* createParseTask(Resource&) { return nullptr; };
+    [[nodiscard]] virtual Task* createParseTask(Resource&) { return nullptr; }
 
     /** Standard implementation of the model update logic.
      *
@@ -188,17 +190,24 @@ class ResourceFolderModel : public QAbstractListModel {
      *  if the resource is complex and has more stuff to parse.
      */
     virtual void onParseSucceeded(int ticket, QString resource_id);
-    virtual void onParseFailed(int ticket, QString resource_id) { Q_UNUSED(ticket); Q_UNUSED(resource_id); }
+    virtual void onParseFailed(int ticket, QString resource_id)
+    {
+        Q_UNUSED(ticket);
+        Q_UNUSED(resource_id);
+    }
 
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
     QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
-
-    bool m_can_interact = true;
+    QStringList m_column_names = { "Enable", "Name", "Last Modified" };
+    QStringList m_column_names_translated = { tr("Enable"), tr("Name"), tr("Last Modified") };
+    QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Stretch,
+                                                             QHeaderView::ResizeToContents };
+    QList<bool> m_columnsHideable = { false, false, true };
 
     QDir m_dir;
-    std::shared_ptr<BaseInstance> m_instance;
+    BaseInstance* m_instance;
     QFileSystemWatcher m_watcher;
     bool m_is_watching = false;
 
@@ -217,15 +226,15 @@ class ResourceFolderModel : public QAbstractListModel {
 
 /* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
 #define RESOURCE_HELPERS(T)                                                                       \
-    [[nodiscard]] T* operator[](size_t index)                                                     \
+    [[nodiscard]] T* operator[](int index)                                                        \
     {                                                                                             \
         return static_cast<T*>(m_resources[index].get());                                         \
     }                                                                                             \
-    [[nodiscard]] T* at(size_t index)                                                             \
+    [[nodiscard]] T* at(int index)                                                                \
     {                                                                                             \
         return static_cast<T*>(m_resources[index].get());                                         \
     }                                                                                             \
-    [[nodiscard]] const T* at(size_t index) const                                                 \
+    [[nodiscard]] const T* at(int index) const                                                    \
     {                                                                                             \
         return static_cast<const T*>(m_resources.at(index).get());                                \
     }                                                                                             \

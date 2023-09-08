@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -41,7 +41,9 @@
 #include "ui/pages/BasePage.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
+#include "ui/widgets/ProgressWidget.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -88,4 +90,9 @@ class ModrinthPage : public QWidget, public BasePage {
 
     Modrinth::Modpack current;
     QString selectedVersion;
+
+    ProgressWidget m_fetch_progress;
+
+    // Used to do instant searching with a delay to cache quick changes
+    QTimer m_search_timer;
 };

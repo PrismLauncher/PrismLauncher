@@ -35,7 +35,8 @@ class Resource : public QObject {
     Resource(QFileInfo file_info);
     Resource(QString file_path) : Resource(QFileInfo(file_path)) {}
     Resource(Resource& other)
-        : m_file_info(other.m_file_info)
+        : QObject(other.parent())
+        , m_file_info(other.m_file_info)
         , m_changed_date_time(other.m_changed_date_time)
         , m_internal_id(other.m_internal_id)
         , m_name(other.m_name)
@@ -92,7 +93,7 @@ class Resource : public QObject {
     }
 
     // Delete all files of this resource.
-    bool destroy();
+    bool destroy(bool attemptTrash = true);
 
     [[nodiscard]] auto isSymLink() const -> bool { return m_file_info.isSymLink(); }
 

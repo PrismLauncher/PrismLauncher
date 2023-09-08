@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,54 +35,49 @@
 
 #pragma once
 
-#include "InstanceTask.h"
-#include "net/NetJob.h"
-#include <QUrl>
 #include <QFuture>
 #include <QFutureWatcher>
-#include "settings/SettingsObject.h"
+#include <QUrl>
+#include "InstanceTask.h"
 #include "QObjectPtr.h"
 #include "modplatform/flame/PackManifest.h"
+#include "net/NetJob.h"
+#include "settings/SettingsObject.h"
 
 #include <optional>
 
 class QuaZip;
-namespace Flame
-{
-    class FileResolvingTask;
+namespace Flame {
+class FileResolvingTask;
 }
 
-class InstanceImportTask : public InstanceTask
-{
+class InstanceImportTask : public InstanceTask {
     Q_OBJECT
-public:
+   public:
     explicit InstanceImportTask(const QUrl sourceUrl, QWidget* parent = nullptr, QMap<QString, QString>&& extra_info = {});
 
     bool abort() override;
-    const QVector<Flame::File> &getBlockedFiles() const
-    {
-        return m_blockedMods;
-    }
+    const QVector<Flame::File>& getBlockedFiles() const { return m_blockedMods; }
 
-protected:
+   protected:
     //! Entry point for tasks.
     virtual void executeTask() override;
 
-private:
+   private:
     void processZipPack();
     void processMultiMC();
     void processTechnic();
     void processFlame();
     void processModrinth();
 
-private slots:
+   private slots:
     void downloadSucceeded();
     void downloadFailed(QString reason);
     void downloadProgressChanged(qint64 current, qint64 total);
     void downloadAborted();
     void extractFinished();
 
-private: /* data */
+   private: /* data */
     NetJob::Ptr m_filesNetJob;
     shared_qobject_ptr<Flame::FileResolvingTask> m_modIdResolver;
     QUrl m_sourceUrl;
@@ -92,7 +87,7 @@ private: /* data */
     QFuture<std::optional<QStringList>> m_extractFuture;
     QFutureWatcher<std::optional<QStringList>> m_extractFutureWatcher;
     QVector<Flame::File> m_blockedMods;
-    enum class ModpackType{
+    enum class ModpackType {
         Unknown,
         MultiMC,
         Technic,
@@ -104,6 +99,7 @@ private: /* data */
     // the source URL / the resource it points to alone.
     QMap<QString, QString> m_extra_info;
 
-    //FIXME: nuke
+    // FIXME: nuke
     QWidget* m_parent;
+    void downloadFromUrl();
 };

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,16 +37,15 @@
 
 #include <QMainWindow>
 
-#include "ui/pages/BasePage.h"
 #include <Application.h>
+#include "ui/pages/BasePage.h"
 
 #include "settings/Setting.h"
 
 class QFileSystemModel;
 class QIdentityProxyModel;
 class QItemSelection;
-namespace Ui
-{
+namespace Ui {
 class ScreenshotsPage;
 }
 
@@ -54,49 +53,30 @@ struct ScreenShot;
 class ScreenshotList;
 class ImgurAlbumCreation;
 
-class ScreenshotsPage : public QMainWindow, public BasePage
-{
+class ScreenshotsPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
-public:
-    explicit ScreenshotsPage(QString path, QWidget *parent = 0);
+   public:
+    explicit ScreenshotsPage(QString path, QWidget* parent = 0);
     virtual ~ScreenshotsPage();
 
     void openedImpl() override;
     void closedImpl() override;
 
-    enum
-    {
-        NothingDone = 0x42
-    };
+    enum { NothingDone = 0x42 };
 
-    virtual bool eventFilter(QObject *, QEvent *) override;
-    virtual QString displayName() const override
-    {
-        return tr("Screenshots");
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("screenshots");
-    }
-    virtual QString id() const override
-    {
-        return "screenshots";
-    }
-    virtual QString helpPage() const override
-    {
-        return "Screenshots-management";
-    }
-    virtual bool apply() override
-    {
-        return !m_uploadActive;
-    }
+    virtual bool eventFilter(QObject*, QEvent*) override;
+    virtual QString displayName() const override { return tr("Screenshots"); }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("screenshots"); }
+    virtual QString id() const override { return "screenshots"; }
+    virtual QString helpPage() const override { return "Screenshots-management"; }
+    virtual bool apply() override { return !m_uploadActive; }
     void retranslate() override;
 
-protected:
-    QMenu * createPopupMenu() override;
+   protected:
+    QMenu* createPopupMenu() override;
 
-private slots:
+   private slots:
     void on_actionUpload_triggered();
     void on_actionCopy_Image_triggered();
     void on_actionCopy_File_s_triggered();
@@ -104,11 +84,11 @@ private slots:
     void on_actionRename_triggered();
     void on_actionView_Folder_triggered();
     void onItemActivated(QModelIndex);
-    void onCurrentSelectionChanged(const QItemSelection &selected);
-    void ShowContextMenu(const QPoint &pos);
+    void onCurrentSelectionChanged(const QItemSelection& selected);
+    void ShowContextMenu(const QPoint& pos);
 
-private:
-    Ui::ScreenshotsPage *ui;
+   private:
+    Ui::ScreenshotsPage* ui;
     std::shared_ptr<QFileSystemModel> m_model;
     std::shared_ptr<QIdentityProxyModel> m_filterModel;
     QString m_folder;

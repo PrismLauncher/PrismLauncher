@@ -42,10 +42,12 @@
 #include "QObjectPtr.h"
 #include "tasks/Task.h"
 
+#include "HeaderProxy.h"
+
 class NetAction : public Task {
     Q_OBJECT
    protected:
-    explicit NetAction() : Task(){};
+    explicit NetAction() : Task() {}
 
    public:
     using Ptr = shared_qobject_ptr<NetAction>;
@@ -56,13 +58,17 @@ class NetAction : public Task {
 
     void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
 
+    void addHeaderProxy(Net::HeaderProxy* proxy) { m_headerProxies.push_back(std::shared_ptr<Net::HeaderProxy>(proxy)); }
+    virtual void init() = 0;
+
    protected slots:
     virtual void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) = 0;
     virtual void downloadError(QNetworkReply::NetworkError error) = 0;
     virtual void downloadFinished() = 0;
     virtual void downloadReadyRead() = 0;
 
-    virtual void sslErrors(const QList<QSslError>& errors) {
+    virtual void sslErrors(const QList<QSslError>& errors)
+    {
         int i = 1;
         for (auto error : errors) {
             qCritical() << "Network SSL Error #" << i << " : " << error.errorString();
@@ -70,8 +76,7 @@ class NetAction : public Task {
             qCritical() << "Certificate in question:\n" << cert.toText();
             i++;
         }
-
-    };
+    }
 
    public slots:
     void startAction(shared_qobject_ptr<QNetworkAccessManager> network)
@@ -81,7 +86,7 @@ class NetAction : public Task {
     }
 
    protected:
-    void executeTask() override{};
+    void executeTask() override {}
 
    public:
     shared_qobject_ptr<QNetworkAccessManager> m_network;
@@ -91,4 +96,5 @@ class NetAction : public Task {
 
     /// source URL
     QUrl m_url;
+    std::vector<std::shared_ptr<Net::HeaderProxy>> m_headerProxies;
 };

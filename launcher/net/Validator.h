@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,16 +37,15 @@
 #include "net/NetAction.h"
 
 namespace Net {
-class Validator
-{
-public: /* con/des */
-    Validator() {};
-    virtual ~Validator() {};
+class Validator {
+   public: /* con/des */
+    Validator() {}
+    virtual ~Validator() {}
 
-public: /* methods */
-    virtual bool init(QNetworkRequest & request) = 0;
-    virtual bool write(QByteArray & data) = 0;
+   public: /* methods */
+    virtual bool init(QNetworkRequest& request) = 0;
+    virtual bool write(QByteArray& data) = 0;
     virtual bool abort() = 0;
-    virtual bool validate(QNetworkReply & reply) = 0;
+    virtual bool validate(QNetworkReply& reply) = 0;
 };
-}
+}  // namespace Net

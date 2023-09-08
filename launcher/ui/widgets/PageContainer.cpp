@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,36 +39,33 @@
 #include "BuildConfig.h"
 #include "PageContainer_p.h"
 
-#include <QStackedLayout>
-#include <QPushButton>
-#include <QSortFilterProxyModel>
-#include <QUrl>
-#include <QStyledItemDelegate>
-#include <QListView>
-#include <QLineEdit>
-#include <QLabel>
 #include <QDialogButtonBox>
 #include <QGridLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListView>
+#include <QPushButton>
+#include <QSortFilterProxyModel>
+#include <QStackedLayout>
+#include <QStyledItemDelegate>
+#include <QUrl>
 
 #include "settings/SettingsObject.h"
 
 #include "ui/widgets/IconLabel.h"
 
-#include "DesktopServices.h"
 #include "Application.h"
+#include "DesktopServices.h"
 
-class PageEntryFilterModel : public QSortFilterProxyModel
-{
-public:
-    explicit PageEntryFilterModel(QObject *parent = 0) : QSortFilterProxyModel(parent)
-    {
-    }
+class PageEntryFilterModel : public QSortFilterProxyModel {
+   public:
+    explicit PageEntryFilterModel(QObject* parent = 0) : QSortFilterProxyModel(parent) {}
 
-protected:
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
+   protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const
     {
         const QString pattern = filterRegularExpression().pattern();
-        const auto model = static_cast<PageModel *>(sourceModel());
+        const auto model = static_cast<PageModel*>(sourceModel());
         const auto page = model->pages().at(sourceRow);
         if (!page->shouldDisplay())
             return false;
@@ -76,21 +74,24 @@ protected:
     }
 };
 
-PageContainer::PageContainer(BasePageProvider *pageProvider, QString defaultId,
-                             QWidget *parent)
-    : QWidget(parent)
+PageContainer::PageContainer(BasePageProvider* pageProvider, QString defaultId, QWidget* parent) : QWidget(parent)
 {
     createUI();
     m_model = new PageModel(this);
     m_proxyModel = new PageEntryFilterModel(this);
     int counter = 0;
     auto pages = pageProvider->getPages();
-    for (auto page : pages)
-    {
-        page->stackIndex = m_pageStack->addWidget(dynamic_cast<QWidget *>(page));
+    for (auto page : pages) {
+        auto widget = dynamic_cast<QWidget*>(page);
+        widget->setParent(this);
+        page->stackIndex = m_pageStack->addWidget(widget);
         page->listIndex = counter;
         page->setParentContainer(this);
         counter++;
+        page->updateExtraInfo = [this](QString id, QString info) {
+            if (m_currentPage && id == m_currentPage->id())
+                m_header->setText(m_currentPage->displayName() + info);
+        };
     }
     m_model->setPages(pages);
 
@@ -102,8 +103,7 @@ PageContainer::PageContainer(BasePageProvider *pageProvider, QString defaultId,
     m_pageList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_pageList->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     m_pageList->setModel(m_proxyModel);
-    connect(m_pageList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-            this, SLOT(currentChanged(QModelIndex)));
+    connect(m_pageList->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), this, SLOT(currentChanged(QModelIndex)));
     m_pageStack->setStackingMode(QStackedLayout::StackOne);
     m_pageList->setFocus();
     selectPage(defaultId);
@@ -114,16 +114,13 @@ bool PageContainer::selectPage(QString pageId)
     // now find what we want to have selected...
     auto page = m_model->findPageEntryById(pageId);
     QModelIndex index;
-    if (page)
-    {
+    if (page) {
         index = m_proxyModel->mapFromSource(m_model->index(page->listIndex));
     }
-    if(!index.isValid())
-    {
+    if (!index.isValid()) {
         index = m_proxyModel->index(0, 0);
     }
-    if (index.isValid())
-    {
+    if (index.isValid()) {
         m_pageList->setCurrentIndex(index);
         return true;
     }
@@ -135,18 +132,24 @@ BasePage* PageContainer::getPage(QString pageId)
     return m_model->findPageEntryById(pageId);
 }
 
+BasePage* PageContainer::selectedPage() const
+{
+    return m_currentPage;
+}
+
+const QList<BasePage*>& PageContainer::getPages() const
+{
+    return m_model->pages();
+}
+
 void PageContainer::refreshContainer()
 {
     m_proxyModel->invalidate();
-    if(!m_currentPage->shouldDisplay())
-    {
+    if (!m_currentPage->shouldDisplay()) {
         auto index = m_proxyModel->index(0, 0);
-        if(index.isValid())
-        {
+        if (index.isValid()) {
             m_pageList->setCurrentIndex(index);
-        }
-        else
-        {
+        } else {
             // FIXME: unhandled corner case: what to do when there's no page to select?
         }
     }
@@ -166,7 +169,7 @@ void PageContainer::createUI()
         headerLabelFont.setPointSize(pointSize + 2);
     m_header->setFont(headerLabelFont);
 
-    QHBoxLayout *headerHLayout = new QHBoxLayout;
+    QHBoxLayout* headerHLayout = new QHBoxLayout;
     const int leftMargin = APPLICATION->style()->pixelMetric(QStyle::PM_LayoutLeftMargin);
     headerHLayout->addSpacerItem(new QSpacerItem(leftMargin, 0, QSizePolicy::Fixed, QSizePolicy::Ignored));
     headerHLayout->addWidget(m_header);
@@ -184,7 +187,7 @@ void PageContainer::createUI()
     m_layout->addWidget(m_pageList, 0, 0, 2, 1);
     m_layout->addLayout(m_pageStack, 1, 1, 1, 1);
     m_layout->setColumnStretch(1, 4);
-    m_layout->setContentsMargins(0,0,0,6);
+    m_layout->setContentsMargins(0, 0, 0, 6);
     setLayout(m_layout);
 }
 
@@ -197,39 +200,32 @@ void PageContainer::retranslate()
         page->retranslate();
 }
 
-void PageContainer::addButtons(QWidget *buttons)
+void PageContainer::addButtons(QWidget* buttons)
 {
     m_layout->addWidget(buttons, 2, 0, 1, 2);
 }
 
-void PageContainer::addButtons(QLayout *buttons)
+void PageContainer::addButtons(QLayout* buttons)
 {
     m_layout->addLayout(buttons, 2, 0, 1, 2);
 }
 
 void PageContainer::showPage(int row)
 {
-    if (m_currentPage)
-    {
+    if (m_currentPage) {
         m_currentPage->closed();
     }
-    if (row != -1)
-    {
+    if (row != -1) {
         m_currentPage = m_model->pages().at(row);
-    }
-    else
-    {
+    } else {
         m_currentPage = nullptr;
     }
-    if (m_currentPage)
-    {
+    if (m_currentPage) {
         m_pageStack->setCurrentIndex(m_currentPage->stackIndex);
         m_header->setText(m_currentPage->displayName());
         m_iconHeader->setIcon(m_currentPage->icon());
         m_currentPage->opened();
-    }
-    else
-    {
+    } else {
         m_pageStack->setCurrentIndex(0);
         m_header->setText(QString());
         m_iconHeader->setIcon(APPLICATION->getThemedIcon("bug"));
@@ -238,8 +234,7 @@ void PageContainer::showPage(int row)
 
 void PageContainer::help()
 {
-    if (m_currentPage)
-    {
+    if (m_currentPage) {
         QString pageId = m_currentPage->helpPage();
         if (pageId.isEmpty())
             return;
@@ -247,7 +242,7 @@ void PageContainer::help()
     }
 }
 
-void PageContainer::currentChanged(const QModelIndex &current)
+void PageContainer::currentChanged(const QModelIndex& current)
 {
     int selected_index = current.isValid() ? m_proxyModel->mapToSource(current).row() : -1;
 
@@ -261,12 +256,10 @@ void PageContainer::currentChanged(const QModelIndex &current)
 
 bool PageContainer::prepareToClose()
 {
-    if(!saveAll())
-    {
+    if (!saveAll()) {
         return false;
     }
-    if (m_currentPage)
-    {
+    if (m_currentPage) {
         m_currentPage->closed();
     }
     return true;
@@ -274,8 +267,7 @@ bool PageContainer::prepareToClose()
 
 bool PageContainer::saveAll()
 {
-    for (auto page : m_model->pages())
-    {
+    for (auto page : m_model->pages()) {
         if (!page->apply())
             return false;
     }

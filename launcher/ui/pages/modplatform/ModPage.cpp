@@ -55,8 +55,7 @@
 
 namespace ResourceDownload {
 
-ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance)
-    : ResourcePage(dialog, instance)
+ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
 {
     connect(m_ui->searchButton, &QPushButton::clicked, this, &ModPage::triggerSearch);
     connect(m_ui->resourceFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
@@ -75,12 +74,10 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
     m_filter_widget->setInstance(&static_cast<MinecraftInstance&>(m_base_instance));
     m_filter = m_filter_widget->getFilter();
 
-    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, [&]{
-        m_ui->searchButton->setStyleSheet("text-decoration: underline");
-    });
-    connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this, [&]{
-        m_ui->searchButton->setStyleSheet("text-decoration: none");
-    });
+    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this,
+            [&] { m_ui->searchButton->setStyleSheet("text-decoration: underline"); });
+    connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this,
+            [&] { m_ui->searchButton->setStyleSheet("text-decoration: none"); });
 }
 
 /******** Callbacks to events in the UI (set up in the derived classes) ********/
@@ -92,17 +89,13 @@ void ModPage::filterMods()
 
 void ModPage::triggerSearch()
 {
-    auto changed = m_filter_widget->changed();
     m_filter = m_filter_widget->getFilter();
+    m_ui->packView->clearSelection();
+    m_ui->packDescription->clear();
+    m_ui->versionSelectionBox->clear();
+    updateSelectionButton();
 
-    if (changed) {
-        m_ui->packView->clearSelection();
-        m_ui->packDescription->clear();
-        m_ui->versionSelectionBox->clear();
-        updateSelectionButton();
-    }
-
-    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), changed);
+    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), m_filter_widget->changed());
     m_fetch_progress.watch(m_model->activeSearchJob().get());
 }
 
@@ -125,12 +118,13 @@ void ModPage::updateVersionList()
     QString mcVersion = packProfile->getComponentVersion("net.minecraft");
 
     auto current_pack = getCurrentPack();
-    for (int i = 0; i < current_pack.versions.size(); i++) {
-        auto version = current_pack.versions[i];
+    if (!current_pack)
+        return;
+    for (int i = 0; i < current_pack->versions.size(); i++) {
+        auto version = current_pack->versions[i];
         bool valid = false;
-        for(auto& mcVer : m_filter->versions){
-            //NOTE: Flame doesn't care about loader, so passing it changes nothing.
-            if (validateVersion(version, mcVer.toString(), packProfile->getModLoaders())) {
+        for (auto& mcVer : m_filter->versions) {
+            if (validateVersion(version, mcVer.toString(), packProfile->getSupportedModLoaders())) {
                 valid = true;
                 break;
             }
@@ -148,10 +142,12 @@ void ModPage::updateVersionList()
     updateSelectionButton();
 }
 
-void ModPage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
+void ModPage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
+                                ModPlatform::IndexedVersion& version,
+                                const std::shared_ptr<ResourceFolderModel> base_model)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_parent_dialog->addResource(pack, version, is_indexed);
+    m_model->addPack(pack, version, base_model, is_indexed);
 }
 
 }  // namespace ResourceDownload

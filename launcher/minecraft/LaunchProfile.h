@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,17 +34,16 @@
  */
 
 #pragma once
-#include <QString>
-#include "Library.h"
-#include "Agent.h"
 #include <ProblemProvider.h>
+#include <QString>
+#include "Agent.h"
+#include "Library.h"
 
-class LaunchProfile: public ProblemProvider
-{
-public:
-    virtual ~LaunchProfile() {};
+class LaunchProfile : public ProblemProvider {
+   public:
+    virtual ~LaunchProfile() {}
 
-public: /* application of profile variables from patches */
+   public: /* application of profile variables from patches */
     void applyMinecraftVersion(const QString& id);
     void applyMainClass(const QString& mainClass);
     void applyAppletClass(const QString& appletClass);
@@ -52,48 +51,46 @@ public: /* application of profile variables from patches */
     void applyAddnJvmArguments(const QStringList& minecraftArguments);
     void applyMinecraftVersionType(const QString& type);
     void applyMinecraftAssets(MojangAssetIndexInfo::Ptr assets);
-    void applyTraits(const QSet<QString> &traits);
-    void applyTweakers(const QStringList &tweakers);
-    void applyJarMods(const QList<LibraryPtr> &jarMods);
-    void applyMods(const QList<LibraryPtr> &jarMods);
-    void applyLibrary(LibraryPtr library, const RuntimeContext & runtimeContext);
-    void applyMavenFile(LibraryPtr library, const RuntimeContext & runtimeContext);
-    void applyAgent(AgentPtr agent, const RuntimeContext & runtimeContext);
+    void applyTraits(const QSet<QString>& traits);
+    void applyTweakers(const QStringList& tweakers);
+    void applyJarMods(const QList<LibraryPtr>& jarMods);
+    void applyMods(const QList<LibraryPtr>& jarMods);
+    void applyLibrary(LibraryPtr library, const RuntimeContext& runtimeContext);
+    void applyMavenFile(LibraryPtr library, const RuntimeContext& runtimeContext);
+    void applyAgent(AgentPtr agent, const RuntimeContext& runtimeContext);
     void applyCompatibleJavaMajors(QList<int>& javaMajor);
     void applyMainJar(LibraryPtr jar);
     void applyProblemSeverity(ProblemSeverity severity);
     /// clear the profile
     void clear();
 
-public: /* getters for profile variables */
+   public: /* getters for profile variables */
     QString getMinecraftVersion() const;
     QString getMainClass() const;
     QString getAppletClass() const;
     QString getMinecraftVersionType() const;
     MojangAssetIndexInfo::Ptr getMinecraftAssets() const;
     QString getMinecraftArguments() const;
-    const QStringList & getAddnJvmArguments() const;
-    const QSet<QString> & getTraits() const;
-    const QStringList & getTweakers() const;
-    const QList<LibraryPtr> & getJarMods() const;
-    const QList<LibraryPtr> & getLibraries() const;
-    const QList<LibraryPtr> & getNativeLibraries() const;
-    const QList<LibraryPtr> & getMavenFiles() const;
-    const QList<AgentPtr> & getAgents() const;
-    const QList<int> & getCompatibleJavaMajors() const;
+    const QStringList& getAddnJvmArguments() const;
+    const QSet<QString>& getTraits() const;
+    const QStringList& getTweakers() const;
+    const QList<LibraryPtr>& getJarMods() const;
+    const QList<LibraryPtr>& getLibraries() const;
+    const QList<LibraryPtr>& getNativeLibraries() const;
+    const QList<LibraryPtr>& getMavenFiles() const;
+    const QList<AgentPtr>& getAgents() const;
+    const QList<int>& getCompatibleJavaMajors() const;
     const LibraryPtr getMainJar() const;
-    void getLibraryFiles(
-        const RuntimeContext & runtimeContext,
-        QStringList & jars,
-        QStringList & nativeJars,
-        const QString & overridePath,
-        const QString & tempPath
-    ) const;
-    bool hasTrait(const QString & trait) const;
+    void getLibraryFiles(const RuntimeContext& runtimeContext,
+                         QStringList& jars,
+                         QStringList& nativeJars,
+                         const QString& overridePath,
+                         const QString& tempPath) const;
+    bool hasTrait(const QString& trait) const;
     ProblemSeverity getProblemSeverity() const override;
     const QList<PatchProblem> getProblems() const override;
 
-private:
+   private:
     /// the version of Minecraft - jar to use
     QString m_minecraftVersion;
 
@@ -154,5 +151,4 @@ private:
     QList<int> m_compatibleJavaMajors;
 
     ProblemSeverity m_problemSeverity = ProblemSeverity::None;
-
 };

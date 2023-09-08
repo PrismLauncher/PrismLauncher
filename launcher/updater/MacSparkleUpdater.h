@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Kenneth Chew <kenneth.c0@protonmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,11 +26,10 @@
 /*!
  * An implementation for the updater on macOS that uses the Sparkle framework.
  */
-class MacSparkleUpdater : public ExternalUpdater
-{
+class MacSparkleUpdater : public ExternalUpdater {
     Q_OBJECT
 
-public:
+   public:
     /*!
      * Start the Sparkle updater, which automatically checks for updates if necessary.
      */
@@ -115,10 +114,10 @@ public:
      */
     void setBetaAllowed(bool allowed) override;
 
-private:
+   private:
     class Private;
 
-    Private *priv;
+    Private* priv;
 };
 
-#endif //LAUNCHER_MACSPARKLEUPDATER_H
+#endif  // LAUNCHER_MACSPARKLEUPDATER_H

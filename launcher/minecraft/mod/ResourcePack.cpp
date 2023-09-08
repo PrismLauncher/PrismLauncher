@@ -18,7 +18,8 @@ static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
     { 5, { Version("1.15"), Version("1.16.1") } },    { 6, { Version("1.16.2"), Version("1.16.5") } },
     { 7, { Version("1.17"), Version("1.17.1") } },    { 8, { Version("1.18"), Version("1.18.2") } },
     { 9, { Version("1.19"), Version("1.19.2") } },    { 11, { Version("22w42a"), Version("22w44a") } },
-    { 12, { Version("1.19.3"), Version("1.19.3") } },
+    { 12, { Version("1.19.3"), Version("1.19.3") } }, { 13, { Version("1.19.4"), Version("1.19.4") } },
+    { 14, { Version("1.20"), Version("1.20") } }
 };
 
 void ResourcePack::setPackFormat(int new_format_id)
@@ -39,7 +40,7 @@ void ResourcePack::setDescription(QString new_description)
     m_description = new_description;
 }
 
-void ResourcePack::setImage(QImage new_image)
+void ResourcePack::setImage(QImage new_image) const
 {
     QMutexLocker locker(&m_data_lock);
 
@@ -48,7 +49,11 @@ void ResourcePack::setImage(QImage new_image)
     if (m_pack_image_cache_key.key.isValid())
         PixmapCache::instance().remove(m_pack_image_cache_key.key);
 
-    m_pack_image_cache_key.key = PixmapCache::instance().insert(QPixmap::fromImage(new_image));
+    // scale the image to avoid flooding the pixmapcache
+    auto pixmap =
+        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+
+    m_pack_image_cache_key.key = PixmapCache::instance().insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;
 
     // This can happen if the pixmap is too big to fit in the cache :c
@@ -58,21 +63,25 @@ void ResourcePack::setImage(QImage new_image)
     }
 }
 
-QPixmap ResourcePack::image(QSize size)
+QPixmap ResourcePack::image(QSize size, Qt::AspectRatioMode mode) const
 {
     QPixmap cached_image;
     if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull())
             return cached_image;
-        return cached_image.scaled(size);
+        return cached_image.scaled(size, mode, Qt::SmoothTransformation);
     }
 
     // No valid image we can get
-    if (!m_pack_image_cache_key.was_ever_used)
+    if (!m_pack_image_cache_key.was_ever_used) {
         return {};
+    } else {
+        qDebug() << "Resource Pack" << name() << "Had it's image evicted from the cache. reloading...";
+        PixmapCache::markCacheMissByEviciton();
+    }
 
     // Imaged got evicted from the cache. Re-process it and retry.
-    ResourcePackUtils::process(*this);
+    ResourcePackUtils::processPackPNG(*this);
     return image(size);
 }
 
@@ -94,6 +103,7 @@ std::pair<int, bool> ResourcePack::compare(const Resource& other, SortType type)
             auto res = Resource::compare(other, type);
             if (res.first != 0)
                 return res;
+            break;
         }
         case SortType::PACK_FORMAT: {
             auto this_ver = packFormat();
@@ -103,6 +113,7 @@ std::pair<int, bool> ResourcePack::compare(const Resource& other, SortType type)
                 return { 1, type == SortType::PACK_FORMAT };
             if (this_ver < other_ver)
                 return { -1, type == SortType::PACK_FORMAT };
+            break;
         }
     }
     return { 0, false };

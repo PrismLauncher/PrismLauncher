@@ -27,7 +27,11 @@
     <item row="4" column="1" colspan="3">
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="1">
-       <widget class="QLineEdit" name="filterEdit"/>
+       <widget class="QLineEdit" name="filterEdit">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="filterLabel">
@@ -61,6 +65,9 @@
       </property>
       <property name="dragDropMode">
        <enum>QAbstractItemView::DropOnly</enum>
+      </property>
+      <property name="uniformRowHeights">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -168,6 +175,28 @@
    </property>
    <property name="toolTip">
     <string>Mark resource to prevent it from being updated</string>
+   </property>
+  </action>
+  <action name="actionVisitItemPage">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Visit mod's page</string>
+   </property>
+   <property name="toolTip">
+    <string>Go to mods home page</string>
+   </property>
+  </action>
+  <action name="actionRemoveItemMetadata">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Remove metadata</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove mod's metadata</string>
    </property>
   </action>
  </widget>

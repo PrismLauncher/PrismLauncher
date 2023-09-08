@@ -6,24 +6,19 @@
 #include <QHash>
 #include <QList>
 #include <QMap>
+#include <QSettings>
+#include <QTemporaryFile>
 #include <QVariant>
 #include <memory>
+#include "FileSystem.h"
 
 #include <QVariantUtils.h>
 
-class IniFileTest : public QObject
-{
+class IniFileTest : public QObject {
     Q_OBJECT
-private
-slots:
-    void initTestCase()
-    {
-
-    }
-    void cleanupTestCase()
-    {
-
-    }
+   private slots:
+    void initTestCase() {}
+    void cleanupTestCase() {}
 
     void test_Escape_data()
     {
@@ -52,15 +47,15 @@ slots:
         // load
         INIFile f2;
         f2.loadFile(filename);
-        QCOMPARE(f2.get("a","NOT SET").toString(), a);
-        QCOMPARE(f2.get("b","NOT SET").toString(), b);
+        QCOMPARE(f2.get("a", "NOT SET").toString(), a);
+        QCOMPARE(f2.get("b", "NOT SET").toString(), b);
     }
 
     void test_SaveLoadLists()
     {
-        QStringList list_strings = {"a", "b", "c", "a,b", "c,d,e", "f\",", "\"g", "h"};
+        QStringList list_strings = { "a", "b", "c", "a,b", "c,d,e", "f\",", "\"g", "h" };
 
-        QList<int> list_numbers = {1, 2, 3, 10};
+        QList<int> list_numbers = { 1, 2, 3, 10 };
 
         QString filename = "test_SaveLoadLists.ini";
 
@@ -75,7 +70,7 @@ slots:
 
         QStringList out_list_strings = f2.get("list_strings", QStringList()).toStringList();
         qDebug() << "OutStringList" << out_list_strings;
-        
+
         QList<int> out_list_numbers = QVariantUtils::toList<int>(f2.get("list_numbers", QVariantUtils::fromList(QList<int>())));
         qDebug() << "OutNumbersList" << out_list_numbers;
 
@@ -88,15 +83,15 @@ slots:
         QMap<QString, QVariant> map;
         map.insert("key_int", 10);
         map.insert("key_str", "This is a String");
-        map.insert("key_int_list", QVariantList({1, 2, 3}));
-        map.insert("key_string_list", QVariantList({"a", "b", "c"}));
+        map.insert("key_int_list", QVariantList({ 1, 2, 3 }));
+        map.insert("key_string_list", QVariantList({ "a", "b", "c" }));
 
         QHash<QString, QVariant> hash;
         hash.insert("key_int", 20);
         hash.insert("key_str", "This is also String");
-        hash.insert("key_int_list", QVariantList({4, 5, 6}));
-        hash.insert("key_string_list", QVariantList({"e", "f", "g"}));
-        
+        hash.insert("key_int_list", QVariantList({ 4, 5, 6 }));
+        hash.insert("key_string_list", QVariantList({ "e", "f", "g" }));
+
         QString filename = "test_SaveLoadMapOrHash.ini";
         INIFile f;
         f.set("key_map", map);
@@ -105,9 +100,9 @@ slots:
         f.set("group1/key2", "a");
         f.set("group2/sub1/key1", 2);
         f.set("group2/sub2/key1", "b");
-        f.set({"group3", "key1"}, QVariantList({"This is a string", 1000, false}));
+        f.set({ "group3", "key1" }, QVariantList({ "This is a string", 1000, false }));
         f.saveFile(filename);
-        
+
         // load
         INIFile f2;
         f2.loadFile(filename);
@@ -121,14 +116,14 @@ slots:
         QCOMPARE(f2.get("group1/key2", "a").toString(), "a");
         QCOMPARE(f2.get("group2/sub1/key1", 2).toInt(), 2);
         QCOMPARE(f2.get("group2/sub2/key1", "b").toString(), "b");
-        QCOMPARE(f2.get({"group3", "key1"}, QVariantList({})).toList(), QVariantList({"This is a string", 1000, false}));
-
+        QCOMPARE(f2.get({ "group3", "key1" }, QVariantList({})).toList(), QVariantList({ "This is a string", 1000, false }));
     }
 
     void test_SettingsChildGroups()
     {
+        QString fileName = "test_settings.cfg";
         {
-            auto settings = std::make_shared<INISettingsObject>("test_settings.cfg");
+            auto settings = std::make_shared<INISettingsObject>(fileName);
 
             settings->setOrRegister("tl_key1", 1);
             settings->setOrRegister("tl_key2", "tld key 2");
@@ -192,25 +187,139 @@ slots:
         }
         qDebug() << "Check the resulting file, ensure correct settings are present";
         INIFile ini_settings;
-        ini_settings.loadFile("test_settings.cfg");
+        ini_settings.loadFile(fileName);
 
         QCOMPARE(ini_settings.get("tl_key1", 0), QVariant(1));
-        QCOMPARE(ini_settings.get("tl_key2", 0), QVariant(0)); // default, so removed
+        QCOMPARE(ini_settings.get("tl_key2", 0), QVariant(0));  // default, so removed
         QCOMPARE(ini_settings.get("group1/g1_key1", 0), QVariant("g1 key 1"));
-        QCOMPARE(ini_settings.get({ "group1", "g1_key2" }, 0), QVariant(0)); // default, so removed
+        QCOMPARE(ini_settings.get({ "group1", "g1_key2" }, 0), QVariant(0));  // default, so removed
         QCOMPARE(ini_settings.get({ "group2", "g2_key1" }, 0), QVariant("g2 key 1"));
         QCOMPARE(ini_settings.get({ "group2", "g2_key2" }, 0), QVariant("g2 key 2"));
         QCOMPARE(ini_settings.get("group3/g3_key1", 0), QVariant("g3 key 1"));
         QCOMPARE(ini_settings.get("group3/g3_key2", 0), QVariant("g3 key 2"));
         QCOMPARE(ini_settings.get("group3/subgroup1/g3_sg1_key1", 0), QVariant(1));
         QCOMPARE(ini_settings.get("group3/subgroup1/g3_sg1_key2", 0), QVariant(2));
-        QCOMPARE(ini_settings.get("group3/subgroup2/g3_sg2_key1", 0), QVariant(0)); // default, so removed
-        QCOMPARE(ini_settings.get("group3/subgroup2/g3_sg2_key2", 0), QVariant(0)); // default, so removed
+        QCOMPARE(ini_settings.get("group3/subgroup2/g3_sg2_key1", 0), QVariant(0));  // default, so removed
+        QCOMPARE(ini_settings.get("group3/subgroup2/g3_sg2_key2", 0), QVariant(0));  // default, so removed
         QCOMPARE(ini_settings.get("group3/subgroup3/g3_sg3_key1", 0), QVariant(5));
         QCOMPARE(ini_settings.get("group3/subgroup3/g3_sg3_key2", 0), QVariant(6));
         QCOMPARE(ini_settings.get("group4/sub1/sub2/sub3/sub4_key", 0), QVariant(100));
+    }
 
+    void test_SaveAlreadyExistingFile()
+    {
+        QString fileContent = R"(InstanceType=OneSix
+iconKey=vanillia_icon
+name=Minecraft Vanillia
+OverrideCommands=true
+PreLaunchCommand="$INST_JAVA" -jar packwiz-installer-bootstrap.jar link
+Wrapperommand=)";
+        fileContent += "\"";
+        fileContent += +R"(\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =)";
+        fileContent += "\"\n";
+#if defined(Q_OS_WIN)
+        QString fileName = "test_SaveAlreadyExistingFile.ini";
+        QFile file(fileName);
+        QCOMPARE(file.open(QFile::WriteOnly | QFile::Text), true);
+#else
+        QTemporaryFile file;
+        QCOMPARE(file.open(), true);
+        QCOMPARE(file.fileName().isEmpty(), false);
+        QString fileName = file.fileName();
+#endif
+        QTextStream stream(&file);
+        stream << fileContent;
+        file.close();
 
+        // load
+        INIFile f1;
+        f1.loadFile(fileName);
+        QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
+        QCOMPARE(f1.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
+        f1.saveFile(fileName);
+        INIFile f2;
+        f2.loadFile(fileName);
+        QCOMPARE(f2.get("PreLaunchCommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link");
+        QCOMPARE(f2.get("Wrapperommand", "NOT SET").toString(), "\"$INST_JAVA\" -jar packwiz-installer-bootstrap.jar link =");
+        QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.2");
+#if defined(Q_OS_WIN)
+        FS::deletePath(fileName);
+#endif
+    }
+
+    void test_SaveAlreadyExistingFileWithSpecialChars()
+    {
+#if defined(Q_OS_WIN)
+        QString fileName = "test_SaveAlreadyExistingFileWithSpecialChars.ini";
+#else
+        QTemporaryFile file;
+        QCOMPARE(file.open(), true);
+        QCOMPARE(file.fileName().isEmpty(), false);
+        QString fileName = file.fileName();
+        file.close();
+#endif
+        QSettings settings{ fileName, QSettings::Format::IniFormat };
+        settings.setFallbacksEnabled(false);
+
+        settings.setValue("simple", "value1");
+        settings.setValue("withQuotes", R"("value2" with quotes)");
+        settings.setValue("withSpecialCharacters", "env mesa=true");
+        settings.setValue("withSpecialCharacters2", "1,2,3,4");
+        settings.setValue("withSpecialCharacters2", "1;2;3;4");
+        settings.setValue("withAll", "val=\"$INST_JAVA\" -jar; ls ");
+
+        settings.sync();
+
+        QCOMPARE(settings.status(), QSettings::Status::NoError);
+
+        // load
+        INIFile f1;
+        f1.loadFile(fileName);
+        for (auto key : settings.allKeys())
+            QCOMPARE(f1.get(key, "NOT SET").toString(), settings.value(key).toString());
+        f1.saveFile(fileName);
+        INIFile f2;
+        f2.loadFile(fileName);
+        for (auto key : settings.allKeys())
+            QCOMPARE(f2.get(key, "NOT SET").toString(), settings.value(key).toString());
+        QCOMPARE(f2.get("ConfigVersion", "NOT SET").toString(), "1.2");
+#if defined(Q_OS_WIN)
+        FS::deletePath(fileName);
+#endif
+    }
+
+    void test_SaveAlreadyExistingFileWithSpecialCharsV1()
+    {
+        QString fileContent = R"(InstanceType=OneSix
+ConfigVersion=1.1
+iconKey=vanillia_icon
+name=Minecraft Vanillia
+OverrideCommands=true
+PreLaunchCommand=)";
+        fileContent += "\"\\\"env mesa=true\\\"\"\n";
+
+#if defined(Q_OS_WIN)
+        QString fileName = "test_SaveAlreadyExistingFileWithSpecialCharsV1.ini";
+        QFile file(fileName);
+        QCOMPARE(file.open(QFile::WriteOnly | QFile::Text), true);
+#else
+        QTemporaryFile file;
+        QCOMPARE(file.open(), true);
+        QCOMPARE(file.fileName().isEmpty(), false);
+        QString fileName = file.fileName();
+#endif
+        QTextStream stream(&file);
+        stream << fileContent;
+        file.close();
+
+        // load
+        INIFile f1;
+        f1.loadFile(fileName);
+        QCOMPARE(f1.get("PreLaunchCommand", "NOT SET").toString(), "env mesa=true");
+        QCOMPARE(f1.get("ConfigVersion", "NOT SET").toString(), "1.2");
+#if defined(Q_OS_WIN)
+        FS::deletePath(fileName);
+#endif
     }
 };
 

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "minecraft/mod/Mod.h"
-#include "modplatform/ResourceAPI.h"
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceAPI.h"
 #include "tasks/Task.h"
 
 class ResourceDownloadTask;
@@ -12,8 +12,11 @@ class CheckUpdateTask : public Task {
     Q_OBJECT
 
    public:
-    CheckUpdateTask(QList<Mod*>& mods, std::list<Version>& mcVersions, std::optional<ResourceAPI::ModLoaderTypes> loaders, std::shared_ptr<ModFolderModel> mods_folder)
-        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder) {};
+    CheckUpdateTask(QList<Mod*>& mods,
+                    std::list<Version>& mcVersions,
+                    std::optional<ModPlatform::ModLoaderTypes> loaders,
+                    std::shared_ptr<ModFolderModel> mods_folder)
+        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder){};
 
     struct UpdatableMod {
         QString name;
@@ -25,7 +28,13 @@ class CheckUpdateTask : public Task {
         shared_qobject_ptr<ResourceDownloadTask> download;
 
        public:
-        UpdatableMod(QString name, QString old_h, QString old_v, QString new_v, QString changelog, ModPlatform::ResourceProvider p, shared_qobject_ptr<ResourceDownloadTask> t)
+        UpdatableMod(QString name,
+                     QString old_h,
+                     QString old_v,
+                     QString new_v,
+                     QString changelog,
+                     ModPlatform::ResourceProvider p,
+                     shared_qobject_ptr<ResourceDownloadTask> t)
             : name(name), old_hash(old_h), old_version(old_v), new_version(new_v), changelog(changelog), provider(p), download(t)
         {}
     };
@@ -44,7 +53,7 @@ class CheckUpdateTask : public Task {
    protected:
     QList<Mod*>& m_mods;
     std::list<Version>& m_game_versions;
-    std::optional<ResourceAPI::ModLoaderTypes> m_loaders;
+    std::optional<ModPlatform::ModLoaderTypes> m_loaders;
     std::shared_ptr<ModFolderModel> m_mods_folder;
 
     std::vector<UpdatableMod> m_updatable;

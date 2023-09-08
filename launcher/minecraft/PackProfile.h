@@ -41,44 +41,36 @@
 
 #include <QAbstractListModel>
 
-#include <QString>
 #include <QList>
+#include <QString>
 #include <memory>
+#include <optional>
 
-#include "Library.h"
-#include "LaunchProfile.h"
 #include "Component.h"
-#include "ProfileUtils.h"
-#include "BaseVersion.h"
-#include "MojangDownloadInfo.h"
+#include "LaunchProfile.h"
+#include "modplatform/ModIndex.h"
 #include "net/Mode.h"
-#include "modplatform/ResourceAPI.h"
 
 class MinecraftInstance;
 struct PackProfileData;
 class ComponentUpdateTask;
 
-class PackProfile : public QAbstractListModel
-{
+class PackProfile : public QAbstractListModel {
     Q_OBJECT
     friend ComponentUpdateTask;
-public:
-    enum Columns
-    {
-        NameColumn = 0,
-        VersionColumn,
-        NUM_COLUMNS
-    };
 
-    explicit PackProfile(MinecraftInstance * instance);
+   public:
+    enum Columns { NameColumn = 0, VersionColumn, NUM_COLUMNS };
+
+    explicit PackProfile(MinecraftInstance* instance);
     virtual ~PackProfile();
 
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    virtual int columnCount(const QModelIndex &parent) const override;
-    virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+    virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    virtual int columnCount(const QModelIndex& parent) const override;
+    virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     /// call this to explicitly mark the component list as loaded - this is used to build a new component list from scratch.
     void buildingFromScratch();
@@ -121,15 +113,15 @@ public:
     std::shared_ptr<LaunchProfile> getProfile() const;
 
     // NOTE: used ONLY by MinecraftInstance to provide legacy version mappings from instance config
-    void setOldConfigVersion(const QString &uid, const QString &version);
+    void setOldConfigVersion(const QString& uid, const QString& version);
 
-    QString getComponentVersion(const QString &uid) const;
+    QString getComponentVersion(const QString& uid) const;
 
-    bool setComponentVersion(const QString &uid, const QString &version, bool important = false);
+    bool setComponentVersion(const QString& uid, const QString& version, bool important = false);
 
-    bool installEmpty(const QString &uid, const QString &name);
+    bool installEmpty(const QString& uid, const QString& name);
 
-    QString patchFilePathForUid(const QString &uid) const;
+    QString patchFilePathForUid(const QString& uid) const;
 
     /// if there is a save scheduled, do it now.
     void saveNow();
@@ -137,23 +129,25 @@ public:
     /// helper method, returns RuntimeContext of instance
     RuntimeContext runtimeContext();
 
-signals:
+   signals:
     void minecraftChanged();
 
-public:
+   public:
     /// get the profile component by id
-    ComponentPtr getComponent(const QString &id);
+    ComponentPtr getComponent(const QString& id);
 
     /// get the profile component by index
-    ComponentPtr getComponent(int index);
+    ComponentPtr getComponent(size_t index);
 
     /// Add the component to the internal list of patches
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
 
-    std::optional<ResourceAPI::ModLoaderTypes> getModLoaders();
+    std::optional<ModPlatform::ModLoaderTypes> getModLoaders();
+    // this returns aditional loaders(Quilt supports fabric and NeoForge supports Forge)
+    std::optional<ModPlatform::ModLoaderTypes> getSupportedModLoaders();
 
-private:
+   private:
     void scheduleSave();
     bool saveIsScheduled() const;
 
@@ -166,21 +160,20 @@ private:
     QString componentsFilePath() const;
     QString patchesPattern() const;
 
-private slots:
+   private slots:
     void save_internal();
     void updateSucceeded();
-    void updateFailed(const QString & error);
+    void updateFailed(const QString& error);
     void componentDataChanged();
     void disableInteraction(bool disable);
 
-private:
+   private:
     bool load();
     bool installJarMods_internal(QStringList filepaths);
     bool installCustomJar_internal(QString filepath);
     bool installAgents_internal(QStringList filepaths);
     bool removeComponent_internal(ComponentPtr patch);
 
-private: /* data */
-
+   private: /* data */
     std::unique_ptr<PackProfileData> d;
 };

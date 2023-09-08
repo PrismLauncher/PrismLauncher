@@ -14,32 +14,27 @@
  */
 
 #include "settings/SettingsObject.h"
-#include "settings/Setting.h"
-#include "settings/OverrideSetting.h"
-#include "PassthroughSetting.h"
 #include <QDebug>
+#include "PassthroughSetting.h"
+#include "settings/OverrideSetting.h"
+#include "settings/Setting.h"
 
 #include <QVariant>
 #include <memory>
 #include <random>
 
-SettingsObject::SettingsObject(QObject *parent) : QObject(parent)
-{
-}
+SettingsObject::SettingsObject(QObject* parent) : QObject(parent) {}
 
 SettingsObject::~SettingsObject()
 {
     m_settings.clear();
 }
 
-std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Setting> original,
-                                                          std::shared_ptr<Setting> gate)
+std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate)
 {
-    if (contains(original->id()))
-    {
-        qCritical() << QString("Failed to register setting %1. ID already exists.")
-                   .arg(original->id());
-        return nullptr; // Fail
+    if (contains(original->id())) {
+        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(original->id());
+        return nullptr;  // Fail
     }
     auto override = std::make_shared<OverrideSetting>(original, gate);
     override->m_storage = this;
@@ -48,14 +43,11 @@ std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Settin
     return override;
 }
 
-std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Setting> original,
-                                                             std::shared_ptr<Setting> gate)
+std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate)
 {
-    if (contains(original->id()))
-    {
-        qCritical() << QString("Failed to register setting %1. ID already exists.")
-                   .arg(original->id());
-        return nullptr; // Fail
+    if (contains(original->id())) {
+        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(original->id());
+        return nullptr;  // Fail
     }
     auto passthrough = std::make_shared<PassthroughSetting>(original, gate);
     passthrough->m_storage = this;
@@ -68,11 +60,9 @@ std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, Q
 {
     if (synonyms.empty())
         return nullptr;
-    if (contains(synonyms.first()))
-    {
-        qCritical() << QString("Failed to register setting %1. ID already exists.")
-                   .arg(synonyms.first());
-        return nullptr; // Fail
+    if (contains(synonyms.first())) {
+        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(synonyms.first());
+        return nullptr;  // Fail
     }
     auto setting = std::make_shared<Setting>(synonyms, defVal);
     setting->m_storage = this;
@@ -89,7 +79,7 @@ void SettingsObject::unregisterSetting(std::shared_ptr<Setting> setting)
     m_settings.remove(setting->id());
 }
 
-std::shared_ptr<Setting> SettingsObject::getSetting(const QString &id) const
+std::shared_ptr<Setting> SettingsObject::getSetting(const QString& id) const
 {
     // Make sure there is a setting with the given ID.
     if (!m_settings.contains(id))
@@ -98,22 +88,19 @@ std::shared_ptr<Setting> SettingsObject::getSetting(const QString &id) const
     return m_settings[id];
 }
 
-QVariant SettingsObject::get(const QString &id) const
+QVariant SettingsObject::get(const QString& id) const
 {
     auto setting = getSetting(id);
     return (setting ? setting->get() : QVariant());
 }
 
-bool SettingsObject::set(const QString &id, QVariant value)
+bool SettingsObject::set(const QString& id, QVariant value)
 {
     auto setting = getSetting(id);
-    if (!setting)
-    {
+    if (!setting) {
         qCritical() << QString("Error changing setting %1. Setting doesn't exist.").arg(id);
         return false;
-    }
-    else
-    {
+    } else {
         setting->set(value);
         return true;
     }
@@ -128,7 +115,7 @@ std::shared_ptr<Setting> SettingsObject::setOrRegister(const QString& id, QVaria
     return setting;
 }
 
-void SettingsObject::reset(const QString &id) const
+void SettingsObject::reset(const QString& id) const
 {
     auto setting = getSetting(id);
     if (setting)
@@ -176,15 +163,14 @@ bool SettingsObject::removeGroup(const QString& path)
     return !to_remove.isEmpty();
 }
 
-bool SettingsObject::contains(const QString &id)
+bool SettingsObject::contains(const QString& id)
 {
     return m_settings.contains(id);
 }
 
 bool SettingsObject::reload()
 {
-    for (auto setting : m_settings.values())
-    {
+    for (auto setting : m_settings.values()) {
         setting->set(setting->get());
     }
     return true;
@@ -200,8 +186,8 @@ QStringList SettingsObject::childGroups(const QString& path)
         auto id = setting->id();
         auto id_parts = id.split('/');
         bool match = true;
-        for (auto part: path_parts) {
-            if (match && !id_parts.isEmpty()){
+        for (auto part : path_parts) {
+            if (match && !id_parts.isEmpty()) {
                 auto cur = id_parts.takeFirst();
                 match = part == cur;
             } else {
@@ -210,8 +196,8 @@ QStringList SettingsObject::childGroups(const QString& path)
         }
         if ((match || path.isEmpty()) && !id_parts.isEmpty()) {
             auto key = id_parts.takeFirst();
-            if (!id_parts.isEmpty() && !child_groups.contains(key)) 
-                child_groups.append(key); // that was not the last section of the path so this is a group 
+            if (!id_parts.isEmpty() && !child_groups.contains(key))
+                child_groups.append(key);  // that was not the last section of the path so this is a group
         }
     }
     return child_groups;
@@ -223,12 +209,12 @@ QStringList SettingsObject::childKeys(const QString& path)
     auto path_parts = path.split('/');
     if (!path_parts.isEmpty() && (path_parts.first() == ""))
         path_parts.removeFirst();
-    for (auto setting: m_settings) {
+    for (auto setting : m_settings) {
         auto id = setting->id();
         auto id_parts = id.split('/');
         bool match = true;
-        for (auto part: path_parts) {
-            if (match && !id_parts.isEmpty()){
+        for (auto part : path_parts) {
+            if (match && !id_parts.isEmpty()) {
                 auto cur = id_parts.takeFirst();
                 match = part == cur;
             } else {
@@ -237,33 +223,31 @@ QStringList SettingsObject::childKeys(const QString& path)
         }
         if ((match || path.isEmpty()) && !id_parts.isEmpty()) {
             auto key = id_parts.takeFirst();
-            if (id_parts.isEmpty()  && !child_keys.contains(key)) 
-                child_keys.append(key); // that was the last section of the path so this is a key 
+            if (id_parts.isEmpty() && !child_keys.contains(key))
+                child_keys.append(key);  // that was the last section of the path so this is a key
         }
     }
     return child_keys;
 }
 
-void SettingsObject::connectSignals(const Setting &setting)
+void SettingsObject::connectSignals(const Setting& setting)
 {
     connect(&setting, &Setting::SettingChanged, this, &SettingsObject::changeSetting);
-    connect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)), this,
-            SIGNAL(SettingChanged(const Setting &, QVariant)));
+    connect(&setting, SIGNAL(SettingChanged(const Setting&, QVariant)), this, SIGNAL(SettingChanged(const Setting&, QVariant)));
 
     connect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
-    connect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting &)));
+    connect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting&)));
 
-    connect(&setting, SIGNAL(settingRemoved(Setting)), this, SIGNAL(settingRemoved(const Setting &)));
+    connect(&setting, SIGNAL(settingRemoved(Setting)), this, SIGNAL(settingRemoved(const Setting&)));
 }
 
 void SettingsObject::disconnectSignals(const Setting& setting)
 {
     disconnect(&setting, &Setting::SettingChanged, this, &SettingsObject::changeSetting);
-    disconnect(&setting, SIGNAL(SettingChanged(const Setting &, QVariant)), this,
-            SIGNAL(SettingChanged(const Setting &, QVariant)));
+    disconnect(&setting, SIGNAL(SettingChanged(const Setting&, QVariant)), this, SIGNAL(SettingChanged(const Setting&, QVariant)));
 
     disconnect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
-    disconnect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting &)));
+    disconnect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting&)));
 
-    disconnect(&setting, SIGNAL(settingRemoved(Setting)), this, SIGNAL(settingRemoved(const Setting &)));
+    disconnect(&setting, SIGNAL(settingRemoved(Setting)), this, SIGNAL(settingRemoved(const Setting&)));
 }

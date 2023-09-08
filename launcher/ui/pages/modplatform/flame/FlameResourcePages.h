@@ -49,12 +49,27 @@
 namespace ResourceDownload {
 
 namespace Flame {
-static inline QString displayName() { return "CurseForge"; }
-static inline QIcon icon() { return APPLICATION->getThemedIcon("flame"); }
-static inline QString id() { return "curseforge"; }
-static inline QString debugName() { return "Flame"; }
-static inline QString metaEntryBase() { return "FlameMods"; }
+static inline QString displayName()
+{
+    return "CurseForge";
 }
+static inline QIcon icon()
+{
+    return APPLICATION->getThemedIcon("flame");
+}
+static inline QString id()
+{
+    return "curseforge";
+}
+static inline QString debugName()
+{
+    return "Flame";
+}
+static inline QString metaEntryBase()
+{
+    return "FlameMods";
+}
+}  // namespace Flame
 
 class FlameModPage : public ModPage {
     Q_OBJECT
@@ -78,7 +93,9 @@ class FlameModPage : public ModPage {
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
-    bool validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const override;
+    bool validateVersion(ModPlatform::IndexedVersion& ver,
+                         QString mineVer,
+                         std::optional<ModPlatform::ModLoaderTypes> loaders = {}) const override;
     bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     void openUrl(const QUrl& url) override;

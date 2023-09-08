@@ -36,38 +36,36 @@
 
 #pragma once
 
-
-#include <qhash.h>
-#include <QVariant>
+#include <QHash>
 #include <QList>
 #include <QMap>
+#include <QVariant>
 
 namespace QVariantUtils {
 
-template <typename T> 
-inline QList<T> toList(QVariant src) {
+template <typename T>
+inline QList<T> toList(QVariant src)
+{
     QVariantList variant_l = src.toList();
 
     QList<T> list_t;
     list_t.reserve(variant_l.size());
-    for (const QVariant& v : variant_l)
-    {
+    for (const QVariant& v : variant_l) {
         list_t.append(v.value<T>());
     }
-    return list_t; 
+    return list_t;
 }
 
-template <typename T> 
-inline QVariant fromList(QList<T> val) {
+template <typename T>
+inline QVariant fromList(QList<T> val)
+{
     QVariantList variant_l;
     variant_l.reserve(val.size());
-    for (const T& v : val)
-    {
+    for (const T& v : val) {
         variant_l.append(v);
     }
 
     return variant_l;
 }
 
-}
-
+}  // namespace QVariantUtils

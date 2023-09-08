@@ -15,74 +15,55 @@
 
 #include "BaseEntity.h"
 
-#include "net/Download.h"
+#include "Json.h"
+#include "net/ApiDownload.h"
 #include "net/HttpMetaCache.h"
 #include "net/NetJob.h"
-#include "Json.h"
 
-#include "BuildConfig.h"
 #include "Application.h"
+#include "BuildConfig.h"
 
-class ParsingValidator : public Net::Validator
-{
-public: /* con/des */
-    ParsingValidator(Meta::BaseEntity *entity) : m_entity(entity)
-    {
-    };
-    virtual ~ParsingValidator()
-    {
-    };
+class ParsingValidator : public Net::Validator {
+   public: /* con/des */
+    ParsingValidator(Meta::BaseEntity* entity) : m_entity(entity){};
+    virtual ~ParsingValidator(){};
 
-public: /* methods */
-    bool init(QNetworkRequest &) override
+   public: /* methods */
+    bool init(QNetworkRequest&) override { return true; }
+    bool write(QByteArray& data) override
     {
+        this->m_data.append(data);
         return true;
     }
-    bool write(QByteArray & data) override
-    {
-        this->data.append(data);
-        return true;
-    }
-    bool abort() override
-    {
-        return true;
-    }
-    bool validate(QNetworkReply &) override
+    bool abort() override { return true; }
+    bool validate(QNetworkReply&) override
     {
         auto fname = m_entity->localFilename();
-        try
-        {
-            auto doc = Json::requireDocument(data, fname);
+        try {
+            auto doc = Json::requireDocument(m_data, fname);
             auto obj = Json::requireObject(doc, fname);
             m_entity->parse(obj);
             return true;
-        }
-        catch (const Exception &e)
-        {
+        } catch (const Exception& e) {
             qWarning() << "Unable to parse response:" << e.cause();
             return false;
         }
     }
 
-private: /* data */
-    QByteArray data;
-    Meta::BaseEntity *m_entity;
+   private: /* data */
+    QByteArray m_data;
+    Meta::BaseEntity* m_entity;
 };
 
-Meta::BaseEntity::~BaseEntity()
-{
-}
+Meta::BaseEntity::~BaseEntity() {}
 
 QUrl Meta::BaseEntity::url() const
 {
     auto s = APPLICATION->settings();
     QString metaOverride = s->get("MetaURLOverride").toString();
-    if(metaOverride.isEmpty())
-    {
+    if (metaOverride.isEmpty()) {
         return QUrl(BuildConfig.META_URL).resolved(localFilename());
-    }
-    else
-    {
+    } else {
         return QUrl(metaOverride).resolved(localFilename());
     }
 }
@@ -90,20 +71,16 @@ QUrl Meta::BaseEntity::url() const
 bool Meta::BaseEntity::loadLocalFile()
 {
     const QString fname = QDir("meta").absoluteFilePath(localFilename());
-    if (!QFile::exists(fname))
-    {
+    if (!QFile::exists(fname)) {
         return false;
     }
     // TODO: check if the file has the expected checksum
-    try
-    {
+    try {
         auto doc = Json::requireDocument(fname, fname);
         auto obj = Json::requireObject(doc, fname);
         parse(obj);
         return true;
-    }
-    catch (const Exception &e)
-    {
+    } catch (const Exception& e) {
         qDebug() << QString("Unable to parse file %1: %2").arg(fname, e.cause());
         // just make sure it's gone and we never consider it again.
         QFile::remove(fname);
@@ -114,23 +91,20 @@ bool Meta::BaseEntity::loadLocalFile()
 void Meta::BaseEntity::load(Net::Mode loadType)
 {
     // load local file if nothing is loaded yet
-    if(!isLoaded())
-    {
-        if(loadLocalFile())
-        {
+    if (!isLoaded()) {
+        if (loadLocalFile()) {
             m_loadStatus = LoadStatus::Local;
         }
     }
     // if we need remote update, run the update task
-    if(loadType == Net::Mode::Offline || !shouldStartRemoteUpdate())
-    {
+    if (loadType == Net::Mode::Offline || !shouldStartRemoteUpdate()) {
         return;
     }
     m_updateTask.reset(new NetJob(QObject::tr("Download of meta file %1").arg(localFilename()), APPLICATION->network()));
     auto url = this->url();
     auto entry = APPLICATION->metacache()->resolveEntry("meta", localFilename());
     entry->setStale(true);
-    auto dl = Net::Download::makeCached(url, entry);
+    auto dl = Net::ApiDownload::makeCached(url, entry);
     /*
      * The validator parses the file and loads it into the object.
      * If that fails, the file is not written to storage.
@@ -138,14 +112,12 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     dl->addValidator(new ParsingValidator(this));
     m_updateTask->addNetAction(dl);
     m_updateStatus = UpdateStatus::InProgress;
-    QObject::connect(m_updateTask.get(), &NetJob::succeeded, [&]()
-    {
+    QObject::connect(m_updateTask.get(), &NetJob::succeeded, [&]() {
         m_loadStatus = LoadStatus::Remote;
         m_updateStatus = UpdateStatus::Succeeded;
         m_updateTask.reset();
     });
-    QObject::connect(m_updateTask.get(), &NetJob::failed, [&]()
-    {
+    QObject::connect(m_updateTask.get(), &NetJob::failed, [&]() {
         m_updateStatus = UpdateStatus::Failed;
         m_updateTask.reset();
     });
@@ -165,8 +137,7 @@ bool Meta::BaseEntity::shouldStartRemoteUpdate() const
 
 Task::Ptr Meta::BaseEntity::getCurrentTask()
 {
-    if(m_updateStatus == UpdateStatus::InProgress)
-    {
+    if (m_updateStatus == UpdateStatus::InProgress) {
         return m_updateTask;
     }
     return nullptr;

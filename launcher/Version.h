@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2023 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -48,12 +48,12 @@ class Version {
     Version(QString str);
     Version() = default;
 
-    bool operator<(const Version &other) const;
-    bool operator<=(const Version &other) const;
-    bool operator>(const Version &other) const;
-    bool operator>=(const Version &other) const;
-    bool operator==(const Version &other) const;
-    bool operator!=(const Version &other) const;
+    bool operator<(const Version& other) const;
+    bool operator<=(const Version& other) const;
+    bool operator>(const Version& other) const;
+    bool operator>=(const Version& other) const;
+    bool operator==(const Version& other) const;
+    bool operator!=(const Version& other) const;
 
     QString toString() const { return m_string; }
 
@@ -63,7 +63,7 @@ class Version {
     struct Section {
         explicit Section(QString fullString) : m_fullString(std::move(fullString))
         {
-            int cutoff = m_fullString.size();
+            qsizetype cutoff = m_fullString.size();
             for (int i = 0; i < m_fullString.size(); i++) {
                 if (!m_fullString[i].isDigit()) {
                     cutoff = i;
@@ -72,7 +72,7 @@ class Version {
             }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            auto numPart = QStringView{m_fullString}.left(cutoff);
+            auto numPart = QStringView{ m_fullString }.left(cutoff);
 #else
             auto numPart = m_fullString.leftRef(cutoff);
 #endif
@@ -83,7 +83,7 @@ class Version {
             }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-            auto stringPart = QStringView{m_fullString}.mid(cutoff);
+            auto stringPart = QStringView{ m_fullString }.mid(cutoff);
 #else
             auto stringPart = m_fullString.midRef(cutoff);
 #endif
@@ -121,7 +121,7 @@ class Version {
         }
 
         inline bool operator<(const Section& other) const
-        {   
+        {
             static auto unequal_is_less = [](Section const& non_null) -> bool {
                 if (non_null.m_stringPart.isEmpty())
                     return non_null.m_numPart == 0;
@@ -150,14 +150,8 @@ class Version {
             return m_fullString < other.m_fullString;
         }
 
-        inline bool operator!=(const Section& other) const
-        {
-            return !(*this == other);
-        }
-        inline bool operator>(const Section &other) const
-        {
-            return !(*this < other || *this == other);
-        }
+        inline bool operator!=(const Section& other) const { return !(*this == other); }
+        inline bool operator>(const Section& other) const { return !(*this < other || *this == other); }
     };
 
    private:
@@ -166,5 +160,3 @@ class Version {
 
     void parse();
 };
-
-

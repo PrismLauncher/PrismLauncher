@@ -10,7 +10,7 @@ class FlameCheckUpdate : public CheckUpdateTask {
    public:
     FlameCheckUpdate(QList<Mod*>& mods,
                      std::list<Version>& mcVersions,
-                     std::optional<ResourceAPI::ModLoaderTypes> loaders,
+                     std::optional<ModPlatform::ModLoaderTypes> loaders,
                      std::shared_ptr<ModFolderModel> mods_folder,
                      QStringList blacklist = {})
         : CheckUpdateTask(mods, mcVersions, loaders, mods_folder), m_blacklist(blacklist)

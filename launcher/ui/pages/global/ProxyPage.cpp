@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -40,18 +40,17 @@
 #include <QButtonGroup>
 #include <QTabBar>
 
-#include "settings/SettingsObject.h"
 #include "Application.h"
+#include "settings/SettingsObject.h"
 
-ProxyPage::ProxyPage(QWidget *parent) : QWidget(parent), ui(new Ui::ProxyPage)
+ProxyPage::ProxyPage(QWidget* parent) : QWidget(parent), ui(new Ui::ProxyPage)
 {
     ui->setupUi(this);
     ui->tabWidget->tabBar()->hide();
     loadSettings();
     updateCheckboxStuff();
 
-    connect(ui->proxyGroup, QOverload<QAbstractButton *>::of(&QButtonGroup::buttonClicked),
-            this, &ProxyPage::proxyGroupChanged);
+    connect(ui->proxyGroup, QOverload<QAbstractButton*>::of(&QButtonGroup::buttonClicked), this, &ProxyPage::proxyGroupChanged);
 }
 
 ProxyPage::~ProxyPage()
@@ -67,13 +66,12 @@ bool ProxyPage::apply()
 
 void ProxyPage::updateCheckboxStuff()
 {
-    bool enableEditing = ui->proxyHTTPBtn->isChecked()
-        || ui->proxySOCKS5Btn->isChecked();
+    bool enableEditing = ui->proxyHTTPBtn->isChecked() || ui->proxySOCKS5Btn->isChecked();
     ui->proxyAddrBox->setEnabled(enableEditing);
     ui->proxyAuthBox->setEnabled(enableEditing);
 }
 
-void ProxyPage::proxyGroupChanged(QAbstractButton *button)
+void ProxyPage::proxyGroupChanged([[maybe_unused]] QAbstractButton* button)
 {
     updateCheckboxStuff();
 }
@@ -99,13 +97,8 @@ void ProxyPage::applySettings()
     s->set("ProxyUser", ui->proxyUserEdit->text());
     s->set("ProxyPass", ui->proxyPassEdit->text());
 
-    APPLICATION->updateProxySettings(
-        proxyType,
-        ui->proxyAddrEdit->text(),
-        ui->proxyPortEdit->value(),
-        ui->proxyUserEdit->text(),
-        ui->proxyPassEdit->text()
-    );
+    APPLICATION->updateProxySettings(proxyType, ui->proxyAddrEdit->text(), ui->proxyPortEdit->value(), ui->proxyUserEdit->text(),
+                                     ui->proxyPassEdit->text());
 }
 void ProxyPage::loadSettings()
 {

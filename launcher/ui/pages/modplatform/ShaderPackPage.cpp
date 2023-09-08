@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ShaderPackPage.h"
+#include "modplatform/ModIndex.h"
 #include "ui_ResourcePage.h"
 
 #include "ShaderPackModel.h"
@@ -13,8 +14,7 @@
 
 namespace ResourceDownload {
 
-ShaderPackResourcePage::ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
-    : ResourcePage(dialog, instance)
+ShaderPackResourcePage::ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
 {
     connect(m_ui->searchButton, &QPushButton::clicked, this, &ShaderPackResourcePage::triggerSearch);
     connect(m_ui->packView, &QListView::doubleClicked, this, &ShaderPackResourcePage::onResourceSelected);
@@ -38,17 +38,20 @@ QMap<QString, QString> ShaderPackResourcePage::urlHandlers() const
 {
     QMap<QString, QString> map;
     map.insert(QRegularExpression::anchoredPattern("(?:www\\.)?modrinth\\.com\\/shaders\\/([^\\/]+)\\/?"), "modrinth");
-    map.insert(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/customization\\/([^\\/]+)\\/?"), "curseforge");
+    map.insert(QRegularExpression::anchoredPattern("(?:www\\.)?curseforge\\.com\\/minecraft\\/customization\\/([^\\/]+)\\/?"),
+               "curseforge");
     map.insert(QRegularExpression::anchoredPattern("minecraft\\.curseforge\\.com\\/projects\\/([^\\/]+)\\/?"), "curseforge");
     return map;
 }
 
-void ShaderPackResourcePage::addResourceToDialog(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& version)
+void ShaderPackResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
+                                               ModPlatform::IndexedVersion& version,
+                                               const std::shared_ptr<ResourceFolderModel> base_model)
 {
-    if (version.loaders.contains(QStringLiteral("canvas")))
-        version.custom_target_folder = QStringLiteral("resourcepacks");
-
-    m_parent_dialog->addResource(pack, version);
+    QString custom_target_folder;
+    if (version.loaders & ModPlatform::Cauldron)
+        custom_target_folder = QStringLiteral("resourcepacks");
+    m_model->addPack(pack, version, base_model, false, custom_target_folder);
 }
 
 }  // namespace ResourceDownload

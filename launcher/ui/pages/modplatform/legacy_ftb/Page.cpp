@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -35,6 +35,7 @@
  */
 
 #include "Page.h"
+#include "ui/widgets/ProjectItem.h"
 #include "ui_Page.h"
 
 #include <QInputDialog>
@@ -44,15 +45,14 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 
+#include "ListModel.h"
 #include "modplatform/legacy_ftb/PackFetchTask.h"
 #include "modplatform/legacy_ftb/PackInstallTask.h"
 #include "modplatform/legacy_ftb/PrivatePackManager.h"
-#include "ListModel.h"
 
 namespace LegacyFTB {
 
-Page::Page(NewInstanceDialog* dialog, QWidget *parent)
-    : QWidget(parent), dialog(dialog), ui(new Ui::Page)
+Page::Page(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), dialog(dialog), ui(new Ui::Page)
 {
     ftbFetchTask.reset(new PackFetchTask(APPLICATION->network()));
     ftbPrivatePacks.reset(new PrivatePackManager());
@@ -70,8 +70,7 @@ Page::Page(NewInstanceDialog* dialog, QWidget *parent)
         ui->publicPackList->setIndentation(0);
         ui->publicPackList->setIconSize(QSize(42, 42));
 
-        for(int i = 0; i < publicFilterModel->getAvailableSortings().size(); i++)
-        {
+        for (int i = 0; i < publicFilterModel->getAvailableSortings().size(); i++) {
             ui->sortByBox->addItem(publicFilterModel->getAvailableSortings().keys().at(i));
         }
 
@@ -112,12 +111,14 @@ Page::Page(NewInstanceDialog* dialog, QWidget *parent)
     connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &Page::onSortingSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &Page::onVersionSelectionItemChanged);
 
+    connect(ui->searchEdit, &QLineEdit::textChanged, this, &Page::triggerSearch);
+
     connect(ui->publicPackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &Page::onPublicPackSelectionChanged);
     connect(ui->thirdPartyPackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &Page::onThirdPartyPackSelectionChanged);
     connect(ui->privatePackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &Page::onPrivatePackSelectionChanged);
 
-    connect(ui->addPackBtn, &QPushButton::pressed, this, &Page::onAddPackClicked);
-    connect(ui->removePackBtn, &QPushButton::pressed, this, &Page::onRemovePackClicked);
+    connect(ui->addPackBtn, &QPushButton::clicked, this, &Page::onAddPackClicked);
+    connect(ui->removePackBtn, &QPushButton::clicked, this, &Page::onRemovePackClicked);
 
     connect(ui->tabWidget, &QTabWidget::currentChanged, this, &Page::onTabChanged);
 
@@ -127,6 +128,9 @@ Page::Page(NewInstanceDialog* dialog, QWidget *parent)
     ui->thirdPartyPackList->selectionModel()->reset();
     ui->privatePackList->selectionModel()->reset();
 
+    ui->publicPackList->setItemDelegate(new ProjectItemDelegate(this));
+    ui->thirdPartyPackList->setItemDelegate(new ProjectItemDelegate(this));
+    ui->privatePackList->setItemDelegate(new ProjectItemDelegate(this));
     onTabChanged(ui->tabWidget->currentIndex());
 }
 
@@ -142,8 +146,7 @@ bool Page::shouldDisplay() const
 
 void Page::openedImpl()
 {
-    if(!initialized)
-    {
+    if (!initialized) {
         connect(ftbFetchTask.get(), &PackFetchTask::finished, this, &Page::ftbPackDataDownloadSuccessfully);
         connect(ftbFetchTask.get(), &PackFetchTask::failed, this, &Page::ftbPackDataDownloadFailed);
         connect(ftbFetchTask.get(), &PackFetchTask::aborted, this, &Page::ftbPackDataDownloadAborted);
@@ -166,50 +169,34 @@ void Page::retranslate()
 
 void Page::suggestCurrent()
 {
-    if(!isOpened)
-    {
+    if (!isOpened) {
         return;
     }
 
-    if(selected.broken || selectedVersion.isEmpty())
-    {
+    if (selected.broken || selectedVersion.isEmpty()) {
         dialog->setSuggestedPack();
         return;
     }
 
     dialog->setSuggestedPack(selected.name, selectedVersion, new PackInstallTask(APPLICATION->network(), selected, selectedVersion));
     QString editedLogoName;
-    if(selected.logo.toLower().startsWith("ftb"))
-    {
+    if (selected.logo.toLower().startsWith("ftb")) {
         editedLogoName = selected.logo;
-    }
-    else
-    {
+    } else {
         editedLogoName = "ftb_" + selected.logo;
     }
 
     editedLogoName = editedLogoName.left(editedLogoName.lastIndexOf(".png"));
 
-    if(selected.type == PackType::Public)
-    {
-        publicListModel->getLogo(selected.logo, [this, editedLogoName](QString logo)
-        {
-            dialog->setSuggestedIconFromFile(logo, editedLogoName);
-        });
-    }
-    else if (selected.type == PackType::ThirdParty)
-    {
-        thirdPartyModel->getLogo(selected.logo, [this, editedLogoName](QString logo)
-        {
-            dialog->setSuggestedIconFromFile(logo, editedLogoName);
-        });
-    }
-    else if (selected.type == PackType::Private)
-    {
-        privateListModel->getLogo(selected.logo, [this, editedLogoName](QString logo)
-        {
-            dialog->setSuggestedIconFromFile(logo, editedLogoName);
-        });
+    if (selected.type == PackType::Public) {
+        publicListModel->getLogo(selected.logo,
+                                 [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
+    } else if (selected.type == PackType::ThirdParty) {
+        thirdPartyModel->getLogo(selected.logo,
+                                 [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
+    } else if (selected.type == PackType::Private) {
+        privateListModel->getLogo(selected.logo,
+                                  [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
     }
 }
 
@@ -234,23 +221,18 @@ void Page::ftbPrivatePackDataDownloadSuccessfully(Modpack pack)
     privateListModel->addPack(pack);
 }
 
-void Page::ftbPrivatePackDataDownloadFailed(QString reason, QString packCode)
+void Page::ftbPrivatePackDataDownloadFailed([[maybe_unused]] QString reason, QString packCode)
 {
-    auto reply = QMessageBox::question(
-        this,
-        tr("FTB private packs"),
-        tr("Failed to download pack information for code %1.\nShould it be removed now?").arg(packCode)
-    );
-    if(reply == QMessageBox::Yes)
-    {
+    auto reply = QMessageBox::question(this, tr("FTB private packs"),
+                                       tr("Failed to download pack information for code %1.\nShould it be removed now?").arg(packCode));
+    if (reply == QMessageBox::Yes) {
         ftbPrivatePacks->remove(packCode);
     }
 }
 
-void Page::onPublicPackSelectionChanged(QModelIndex now, QModelIndex prev)
+void Page::onPublicPackSelectionChanged(QModelIndex now, [[maybe_unused]] QModelIndex prev)
 {
-    if(!now.isValid())
-    {
+    if (!now.isValid()) {
         onPackSelectionChanged();
         return;
     }
@@ -258,10 +240,9 @@ void Page::onPublicPackSelectionChanged(QModelIndex now, QModelIndex prev)
     onPackSelectionChanged(&selectedPack);
 }
 
-void Page::onThirdPartyPackSelectionChanged(QModelIndex now, QModelIndex prev)
+void Page::onThirdPartyPackSelectionChanged(QModelIndex now, [[maybe_unused]] QModelIndex prev)
 {
-    if(!now.isValid())
-    {
+    if (!now.isValid()) {
         onPackSelectionChanged();
         return;
     }
@@ -269,10 +250,9 @@ void Page::onThirdPartyPackSelectionChanged(QModelIndex now, QModelIndex prev)
     onPackSelectionChanged(&selectedPack);
 }
 
-void Page::onPrivatePackSelectionChanged(QModelIndex now, QModelIndex prev)
+void Page::onPrivatePackSelectionChanged(QModelIndex now, [[maybe_unused]] QModelIndex prev)
 {
-    if(!now.isValid())
-    {
+    if (!now.isValid()) {
         onPackSelectionChanged();
         return;
     }
@@ -283,34 +263,26 @@ void Page::onPrivatePackSelectionChanged(QModelIndex now, QModelIndex prev)
 void Page::onPackSelectionChanged(Modpack* pack)
 {
     ui->versionSelectionBox->clear();
-    if(pack)
-    {
-        currentModpackInfo->setHtml("Pack by <b>" + pack->author + "</b>" +
-                                    "<br>Minecraft " + pack->mcVersion + "<br>" + "<br>" + pack->description + "<ul><li>" + pack->mods.replace(";", "</li><li>")
-                                    + "</li></ul>");
+    if (pack) {
+        currentModpackInfo->setHtml("Pack by <b>" + pack->author + "</b>" + "<br>Minecraft " + pack->mcVersion + "<br>" + "<br>" +
+                                    pack->description + "<ul><li>" + pack->mods.replace(";", "</li><li>") + "</li></ul>");
         bool currentAdded = false;
 
-        for(int i = 0; i < pack->oldVersions.size(); i++)
-        {
-            if(pack->currentVersion == pack->oldVersions.at(i))
-            {
+        for (int i = 0; i < pack->oldVersions.size(); i++) {
+            if (pack->currentVersion == pack->oldVersions.at(i)) {
                 currentAdded = true;
             }
             ui->versionSelectionBox->addItem(pack->oldVersions.at(i));
         }
 
-        if(!currentAdded)
-        {
+        if (!currentAdded) {
             ui->versionSelectionBox->addItem(pack->currentVersion);
         }
         selected = *pack;
-    }
-    else
-    {
+    } else {
         currentModpackInfo->setHtml("");
         ui->versionSelectionBox->clear();
-        if(isOpened)
-        {
+        if (isOpened) {
             dialog->setSuggestedPack();
         }
         return;
@@ -318,21 +290,20 @@ void Page::onPackSelectionChanged(Modpack* pack)
     suggestCurrent();
 }
 
-void Page::onVersionSelectionItemChanged(QString data)
+void Page::onVersionSelectionItemChanged(QString version)
 {
-    if(data.isNull() || data.isEmpty())
-    {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }
 
-    selectedVersion = data;
+    selectedVersion = version;
     suggestCurrent();
 }
 
-void Page::onSortingSelectionChanged(QString data)
+void Page::onSortingSelectionChanged(QString sort)
 {
-    FilterModel::Sorting toSet = publicFilterModel->getAvailableSortings().value(data);
+    FilterModel::Sorting toSet = publicFilterModel->getAvailableSortings().value(sort);
     publicFilterModel->setSorting(toSet);
     thirdPartyFilterModel->setSorting(toSet);
     privateFilterModel->setSorting(toSet);
@@ -340,34 +311,28 @@ void Page::onSortingSelectionChanged(QString data)
 
 void Page::onTabChanged(int tab)
 {
-    if(tab == 1)
-    {
+    if (tab == 1) {
         currentModel = thirdPartyFilterModel;
         currentList = ui->thirdPartyPackList;
         currentModpackInfo = ui->thirdPartyPackDescription;
-    }
-    else if(tab == 2)
-    {
+    } else if (tab == 2) {
         currentModel = privateFilterModel;
         currentList = ui->privatePackList;
         currentModpackInfo = ui->privatePackDescription;
-    }
-    else
-    {
+    } else {
         currentModel = publicFilterModel;
         currentList = ui->publicPackList;
         currentModpackInfo = ui->publicPackDescription;
     }
 
+    triggerSearch();
+
     currentList->selectionModel()->reset();
     QModelIndex idx = currentList->currentIndex();
-    if(idx.isValid())
-    {
+    if (idx.isValid()) {
         auto pack = currentModel->data(idx, Qt::UserRole).value<Modpack>();
         onPackSelectionChanged(&pack);
-    }
-    else
-    {
+    } else {
         onPackSelectionChanged();
     }
 }
@@ -375,38 +340,24 @@ void Page::onTabChanged(int tab)
 void Page::onAddPackClicked()
 {
     bool ok;
-    QString text = QInputDialog::getText(
-        this,
-        tr("Add FTB pack"),
-        tr("Enter pack code:"),
-        QLineEdit::Normal,
-        QString(),
-        &ok
-    );
-    if(ok && !text.isEmpty())
-    {
+    QString text = QInputDialog::getText(this, tr("Add FTB pack"), tr("Enter pack code:"), QLineEdit::Normal, QString(), &ok);
+    if (ok && !text.isEmpty()) {
         ftbPrivatePacks->add(text);
-        ftbFetchTask->fetchPrivate({text});
+        ftbFetchTask->fetchPrivate({ text });
     }
 }
 
 void Page::onRemovePackClicked()
 {
     auto index = ui->privatePackList->currentIndex();
-    if(!index.isValid())
-    {
+    if (!index.isValid()) {
         return;
     }
     auto row = index.row();
     Modpack pack = privateListModel->at(row);
-    auto answer = QMessageBox::question(
-        this,
-        tr("Remove pack"),
-        tr("Are you sure you want to remove pack %1?").arg(pack.name),
-        QMessageBox::Yes | QMessageBox::No
-    );
-    if(answer != QMessageBox::Yes)
-    {
+    auto answer = QMessageBox::question(this, tr("Remove pack"), tr("Are you sure you want to remove pack %1?").arg(pack.name),
+                                        QMessageBox::Yes | QMessageBox::No);
+    if (answer != QMessageBox::Yes) {
         return;
     }
 
@@ -415,4 +366,9 @@ void Page::onRemovePackClicked()
     onPackSelectionChanged();
 }
 
+void Page::triggerSearch()
+{
+    currentModel->setSearchTerm(ui->searchEdit->text());
 }
+
+}  // namespace LegacyFTB

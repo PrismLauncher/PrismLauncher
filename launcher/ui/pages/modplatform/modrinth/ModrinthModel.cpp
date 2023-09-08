@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -38,9 +38,11 @@
 
 #include "BuildConfig.h"
 #include "Json.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
+#include "modplatform/modrinth/ModrinthAPI.h"
+#include "net/NetJob.h"
 #include "ui/widgets/ProjectItem.h"
+
+#include "net/ApiDownload.h"
 
 #include <QMessageBox>
 
@@ -106,6 +108,8 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
             return pack.description;
         case UserDataTypes::SELECTED:
             return false;
+        case UserDataTypes::INSTALLED:
+            return false;
         default:
             break;
     }
@@ -113,7 +117,7 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
     return {};
 }
 
-bool ModpackListModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ModpackListModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)
 {
     int pos = index.row();
     if (pos >= modpacks.size() || pos < 0 || !index.isValid())
@@ -126,30 +130,47 @@ bool ModpackListModel::setData(const QModelIndex &index, const QVariant &value, 
 
 void ModpackListModel::performPaginatedSearch()
 {
-    // TODO: Move to standalone API
+    if (hasActiveSearchJob())
+        return;
+
+    if (currentSearchTerm.startsWith("#")) {
+        auto projectId = currentSearchTerm.mid(1);
+        if (!projectId.isEmpty()) {
+            ResourceAPI::ProjectInfoCallbacks callbacks;
+
+            callbacks.on_fail = [this](QString reason) { searchRequestFailed(reason); };
+            callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
+            static const ModrinthAPI api;
+            if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {
+                jobPtr = job;
+                jobPtr->start();
+            }
+            return;
+        }
+    }  // TODO: Move to standalone API
     auto netJob = makeShared<NetJob>("Modrinth::SearchModpack", APPLICATION->network());
     auto searchAllUrl = QString(BuildConfig.MODRINTH_PROD_URL +
-                            "/search?"
-                            "offset=%1&"
-                            "limit=%2&"
-                            "query=%3&"
-                            "index=%4&"
-                            "facets=[[\"project_type:modpack\"]]")
+                                "/search?"
+                                "offset=%1&"
+                                "limit=%2&"
+                                "query=%3&"
+                                "index=%4&"
+                                "facets=[[\"project_type:modpack\"]]")
                             .arg(nextSearchOffset)
                             .arg(m_modpacks_per_page)
                             .arg(currentSearchTerm)
                             .arg(currentSort);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchAllUrl), &m_all_response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchAllUrl), m_all_response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, this, [this] {
         QJsonParseError parse_error_all{};
 
-        QJsonDocument doc_all = QJsonDocument::fromJson(m_all_response, &parse_error_all);
+        QJsonDocument doc_all = QJsonDocument::fromJson(*m_all_response, &parse_error_all);
         if (parse_error_all.error != QJsonParseError::NoError) {
             qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error_all.offset
                        << " reason: " << parse_error_all.errorString();
-            qWarning() << m_all_response;
+            qWarning() << *m_all_response;
             return;
         }
 
@@ -163,42 +184,41 @@ void ModpackListModel::performPaginatedSearch()
 
 void ModpackListModel::refresh()
 {
-    if (jobPtr) {
+    if (hasActiveSearchJob()) {
         jobPtr->abort();
         searchState = ResetRequested;
         return;
-    } else {
-        beginResetModel();
-        modpacks.clear();
-        endResetModel();
-        searchState = None;
     }
+
+    beginResetModel();
+    modpacks.clear();
+    endResetModel();
+    searchState = None;
+
     nextSearchOffset = 0;
     performPaginatedSearch();
 }
 
 static auto sortFromIndex(int index) -> QString
 {
-    switch(index){
-    default:
-    case 0:
-        return "relevance";
-    case 1:
-        return "downloads";
-    case 2:
-        return "follows";
-    case 3:
-        return "newest";
-    case 4:
-        return "updated";
+    switch (index) {
+        default:
+        case 0:
+            return "relevance";
+        case 1:
+            return "downloads";
+        case 2:
+            return "follows";
+        case 3:
+            return "newest";
+        case 4:
+            return "updated";
     }
-
-    return {};
 }
 
 void ModpackListModel::searchWithTerm(const QString& term, const int sort)
 {
-    if(sort > 5 || sort < 0)
+    if (sort > 5 || sort < 0)
         return;
 
     auto sort_str = sortFromIndex(sort);
@@ -216,9 +236,7 @@ void ModpackListModel::searchWithTerm(const QString& term, const int sort)
 void ModpackListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(APPLICATION->metacache()
-                     ->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)))
-                     ->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo))->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
     }
@@ -230,10 +248,9 @@ void ModpackListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry =
-        APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
@@ -308,9 +325,29 @@ void ModpackListModel::searchRequestFinished(QJsonDocument& doc_all)
     endInsertRows();
 }
 
+void ModpackListModel::searchRequestForOneSucceeded(QJsonDocument& doc)
+{
+    jobPtr.reset();
+
+    auto packObj = doc.object();
+
+    Modrinth::Modpack pack;
+    try {
+        Modrinth::loadIndexedPack(pack, packObj);
+        pack.id = Json::ensureString(packObj, "id", pack.id);
+    } catch (const JSONValidationError& e) {
+        qWarning() << "Error while loading mod from " << m_parent->debugName() << ": " << e.cause();
+        return;
+    }
+
+    beginInsertRows(QModelIndex(), modpacks.size(), modpacks.size() + 1);
+    modpacks.append({ pack });
+    endInsertRows();
+}
+
 void ModpackListModel::searchRequestFailed(QString reason)
 {
-    auto failed_action = jobPtr->getFailedActions().at(0);
+    auto failed_action = dynamic_cast<NetJob*>(jobPtr.get())->getFailedActions().at(0);
     if (!failed_action->m_reply) {
         // Network error
         QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load modpacks."));

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,6 +36,7 @@
  */
 
 #pragma once
+#include <QList>
 #include <QString>
 
 /**
@@ -66,7 +68,7 @@ class Config {
 
     bool UPDATER_ENABLED = false;
 
-    /// A short string identifying this build's platform. For example, "lin64" or "win32".
+    /// A short string identifying this build's platform or distribution.
     QString BUILD_PLATFORM;
 
     /// A string containing the build timestamp
@@ -132,6 +134,9 @@ class Config {
      */
     QString META_URL;
 
+    QString GLFW_LIBRARY_NAME;
+    QString OPENAL_LIBRARY_NAME;
+
     QString BUG_TRACKER_URL;
     QString TRANSLATIONS_URL;
     QString MATRIX_URL;
@@ -143,7 +148,7 @@ class Config {
     QString AUTH_BASE = "https://authserver.mojang.com/";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
     QString FMLLIBS_BASE_URL = "https://files.prismlauncher.org/fmllibs/";  // FIXME: move into CMakeLists
-    QString TRANSLATIONS_BASE_URL = "https://i18n.prismlauncher.org/";  // FIXME: move into CMakeLists
+    QString TRANSLATIONS_BASE_URL = "https://i18n.prismlauncher.org/";      // FIXME: move into CMakeLists
 
     QString MODPACKSCH_API_BASE_URL = "https://api.modpacks.ch/";
 
@@ -160,6 +165,7 @@ class Config {
 
     QString MODRINTH_STAGING_URL = "https://staging-api.modrinth.com/v2";
     QString MODRINTH_PROD_URL = "https://api.modrinth.com/v2";
+    QStringList MODRINTH_MRPACK_HOSTS{ "cdn.modrinth.com", "github.com", "raw.githubusercontent.com", "gitlab.com" };
 
     QString FLAME_BASE_URL = "https://api.curseforge.com/v1";
 

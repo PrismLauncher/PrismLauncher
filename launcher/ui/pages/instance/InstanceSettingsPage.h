@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -46,45 +46,33 @@
 #include "ui/pages/BasePage.h"
 
 class JavaChecker;
-namespace Ui
-{
+namespace Ui {
 class InstanceSettingsPage;
 }
 
-class InstanceSettingsPage : public QWidget, public BasePage
-{
+class InstanceSettingsPage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit InstanceSettingsPage(BaseInstance *inst, QWidget *parent = 0);
+   public:
+    explicit InstanceSettingsPage(BaseInstance* inst, QWidget* parent = 0);
     virtual ~InstanceSettingsPage();
-    virtual QString displayName() const override
-    {
-        return tr("Settings");
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("instance-settings");
-    }
-    virtual QString id() const override
-    {
-        return "settings";
-    }
+    virtual QString displayName() const override { return tr("Settings"); }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("instance-settings"); }
+    virtual QString id() const override { return "settings"; }
     virtual bool apply() override;
-    virtual QString helpPage() const override
-    {
-        return "Instance-settings";
-    }
-    virtual bool shouldDisplay() const override;
+    virtual QString helpPage() const override { return "Instance-settings"; }
     void retranslate() override;
 
     void updateThresholds();
 
-private slots:
+   private slots:
     void on_javaDetectBtn_clicked();
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();
     void on_maxMemSpinBox_valueChanged(int i);
+
+    void onUseNativeGLFWChanged(bool checked);
+    void onUseNativeOpenALChanged(bool checked);
 
     void applySettings();
     void loadSettings();
@@ -95,12 +83,11 @@ private slots:
 
     void updateAccountsMenu();
     QIcon getFaceForAccount(MinecraftAccountPtr account);
-    void changeInstanceAccount();
+    void changeInstanceAccount(int index);
 
-private:
-    Ui::InstanceSettingsPage *ui;
-    BaseInstance *m_instance;
+   private:
+    Ui::InstanceSettingsPage* ui;
+    BaseInstance* m_instance;
     SettingsObjectPtr m_settings;
     unique_qobject_ptr<JavaCommon::TestCheck> checker;
-    QMenu *accountMenu = nullptr;
 };

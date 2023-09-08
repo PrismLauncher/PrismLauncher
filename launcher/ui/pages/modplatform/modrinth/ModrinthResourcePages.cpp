@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -46,8 +46,7 @@
 
 namespace ResourceDownload {
 
-ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance)
-    : ModPage(dialog, instance)
+ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
     m_model = new ModrinthModModel(instance);
     m_ui->packView->setModel(m_model);
@@ -64,22 +63,11 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instan
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders) const -> bool
+auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver,
+                                      QString mineVer,
+                                      std::optional<ModPlatform::ModLoaderTypes> loaders) const -> bool
 {
-    auto loaderCompatible = !loaders.has_value();
-
-    if (!loaderCompatible) {
-        auto loaderStrings = ModrinthAPI::getModLoaderStrings(loaders.value());
-        for (auto remoteLoader : ver.loaders)
-        {
-            if (loaderStrings.contains(remoteLoader)) {
-                loaderCompatible = true;
-                break;
-            }
-        }
-    }
-
-    return ver.mcVersion.contains(mineVer) && loaderCompatible;
+    return ver.mcVersion.contains(mineVer) && (!loaders.has_value() || !ver.loaders || loaders.value() & ver.loaders);
 }
 
 ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
@@ -139,9 +127,21 @@ ModrinthShaderPackPage::ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog,
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
-auto ModrinthModPage::shouldDisplay() const -> bool { return true; }
-auto ModrinthResourcePackPage::shouldDisplay() const -> bool { return true; }
-auto ModrinthTexturePackPage::shouldDisplay() const -> bool { return true; }
-auto ModrinthShaderPackPage::shouldDisplay() const -> bool { return true; }
+auto ModrinthModPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto ModrinthResourcePackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto ModrinthTexturePackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto ModrinthShaderPackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
 
 }  // namespace ResourceDownload

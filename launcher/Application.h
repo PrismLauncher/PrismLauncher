@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 Tayou <tayou@gmx.net>
+ *  Copyright (C) 2022 Tayou <git@tayou.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -38,16 +38,17 @@
 #pragma once
 
 #include <QApplication>
-#include <memory>
+#include <QDateTime>
 #include <QDebug>
 #include <QFlag>
 #include <QIcon>
-#include <QDateTime>
 #include <QUrl>
+#include <memory>
 
 #include <BaseInstance.h>
 
 #include "minecraft/launch/MinecraftServerTarget.h"
+#include "ui/themes/CatPack.h"
 
 class LaunchController;
 class LocalPeer;
@@ -70,27 +71,22 @@ class TranslationsModel;
 class ITheme;
 class MCEditTool;
 class ThemeManager;
+class IconTheme;
 
 namespace Meta {
-    class Index;
+class Index;
 }
 
 #if defined(APPLICATION)
 #undef APPLICATION
 #endif
-#define APPLICATION (static_cast<Application *>(QCoreApplication::instance()))
+#define APPLICATION (static_cast<Application*>(QCoreApplication::instance()))
 
-class Application : public QApplication
-{
+class Application : public QApplication {
     // friends for the purpose of limiting access to deprecated stuff
     Q_OBJECT
-public:
-    enum Status {
-        StartingUp,
-        Failed,
-        Succeeded,
-        Initialized
-    };
+   public:
+    enum Status { StartingUp, Failed, Succeeded, Initialized };
 
     enum Capability {
         None = 0,
@@ -102,33 +98,21 @@ public:
     };
     Q_DECLARE_FLAGS(Capabilities, Capability)
 
-public:
-    Application(int &argc, char **argv);
+   public:
+    Application(int& argc, char** argv);
     virtual ~Application();
 
     bool event(QEvent* event) override;
 
-    std::shared_ptr<SettingsObject> settings() const {
-        return m_settings;
-    }
+    std::shared_ptr<SettingsObject> settings() const { return m_settings; }
 
-    qint64 timeSinceStart() const {
-        return startTime.msecsTo(QDateTime::currentDateTime());
-    }
+    qint64 timeSinceStart() const { return startTime.msecsTo(QDateTime::currentDateTime()); }
 
     QIcon getThemedIcon(const QString& name);
 
-    void setIconTheme(const QString& name);
+    ThemeManager* themeManager() { return m_themeManager.get(); }
 
-    void applyCurrentlySelectedTheme(bool initial = false);
-
-    QList<ITheme*> getValidApplicationThemes();
-
-    void setApplicationTheme(const QString& name);
-
-    shared_qobject_ptr<ExternalUpdater> updater() {
-        return m_updater;
-    }
+    shared_qobject_ptr<ExternalUpdater> updater() { return m_updater; }
 
     void triggerUpdateCheck();
 
@@ -136,29 +120,17 @@ public:
 
     std::shared_ptr<JavaInstallList> javalist();
 
-    std::shared_ptr<InstanceList> instances() const {
-        return m_instances;
-    }
+    std::shared_ptr<InstanceList> instances() const { return m_instances; }
 
-    std::shared_ptr<IconList> icons() const {
-        return m_icons;
-    }
+    std::shared_ptr<IconList> icons() const { return m_icons; }
 
-    MCEditTool *mcedit() const {
-        return m_mcedit.get();
-    }
+    MCEditTool* mcedit() const { return m_mcedit.get(); }
 
-    shared_qobject_ptr<AccountList> accounts() const {
-        return m_accounts;
-    }
+    shared_qobject_ptr<AccountList> accounts() const { return m_accounts; }
 
-    Status status() const {
-        return m_status;
-    }
+    Status status() const { return m_status; }
 
-    const QMap<QString, std::shared_ptr<BaseProfilerFactory>> &profilers() const {
-        return m_profilers;
-    }
+    const QMap<QString, std::shared_ptr<BaseProfilerFactory>>& profilers() const { return m_profilers; }
 
     void updateProxySettings(QString proxyTypeStr, QString addr, int port, QString user, QString password);
 
@@ -169,6 +141,8 @@ public:
     shared_qobject_ptr<Meta::Index> metadataIndex();
 
     void updateCapabilities();
+
+    void detectLibraries();
 
     /*!
      * Finds and returns the full path to a jar file.
@@ -183,35 +157,31 @@ public:
     QString getUserAgentUncached();
 
     /// this is the root of the 'installation'. Used for automatic updates
-    const QString &root() {
-        return m_rootPath;
-    }
+    const QString& root() { return m_rootPath; }
 
-    bool isPortable() {
-        return m_portable;
-    }
+    bool isPortable() { return m_portable; }
 
-    const Capabilities capabilities() {
-        return m_capabilities;
-    }
+    const Capabilities capabilities() { return m_capabilities; }
 
     /*!
      * Opens a json file using either a system default editor, or, if not empty, the editor
      * specified in the settings
      */
-    bool openJsonEditor(const QString &filename);
+    bool openJsonEditor(const QString& filename);
 
-    InstanceWindow *showInstanceWindow(InstancePtr instance, QString page = QString());
-    MainWindow *showMainWindow(bool minimized = false);
+    InstanceWindow* showInstanceWindow(InstancePtr instance, QString page = QString());
+    MainWindow* showMainWindow(bool minimized = false);
 
     void updateIsRunning(bool running);
     bool updatesAreAllowed();
 
-    void ShowGlobalSettings(class QWidget * parent, QString open_page = QString());
+    void ShowGlobalSettings(class QWidget* parent, QString open_page = QString());
 
     int suitableMaxMem();
 
-signals:
+    QUrl normalizeImportUrl(QString const& url);
+
+   signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
     void globalSettingsClosed();
@@ -221,39 +191,36 @@ signals:
     void clickedOnDock();
 #endif
 
-public slots:
-    bool launch(
-        InstancePtr instance,
-        bool online = true,
-        bool demo = false,
-        BaseProfilerFactory *profiler = nullptr,
-        MinecraftServerTargetPtr serverToJoin = nullptr,
-        MinecraftAccountPtr accountToUse = nullptr
-    );
+   public slots:
+    bool launch(InstancePtr instance,
+                bool online = true,
+                bool demo = false,
+                MinecraftServerTargetPtr serverToJoin = nullptr,
+                MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);
     void closeCurrentWindow();
 
-private slots:
+   private slots:
     void on_windowClose();
-    void messageReceived(const QByteArray & message);
+    void messageReceived(const QByteArray& message);
     void controllerSucceeded();
-    void controllerFailed(const QString & error);
+    void controllerFailed(const QString& error);
     void setupWizardFinished(int status);
 
-private:
-    bool handleDataMigration(const QString & currentData, const QString & oldData, const QString & name, const QString & configFile) const;
+   private:
+    bool handleDataMigration(const QString& currentData, const QString& oldData, const QString& name, const QString& configFile) const;
     bool createSetupWizard();
     void performMainStartupAction();
 
     // sets the fatal error message and m_status to Failed.
-    void showFatalErrorMessage(const QString & title, const QString & content);
+    void showFatalErrorMessage(const QString& title, const QString& content);
 
-private:
+   private:
     void addRunningInstance();
     void subRunningInstance();
     bool shouldExitNow() const;
 
-private:
+   private:
     QDateTime startTime;
 
     shared_qobject_ptr<QNetworkAccessManager> m_network;
@@ -279,7 +246,7 @@ private:
     QString m_rootPath;
     Status m_status = Application::StartingUp;
     Capabilities m_capabilities;
-    bool m_portable = false; 
+    bool m_portable = false;
 
 #ifdef Q_OS_MACOS
     Qt::ApplicationState m_prevAppState = Qt::ApplicationInactive;
@@ -292,7 +259,7 @@ private:
 
     // FIXME: attach to instances instead.
     struct InstanceXtras {
-        InstanceWindow * window = nullptr;
+        InstanceWindow* window = nullptr;
         shared_qobject_ptr<LaunchController> controller;
     };
     std::map<QString, InstanceXtras> m_instanceExtras;
@@ -303,18 +270,21 @@ private:
     bool m_updateRunning = false;
 
     // main window, if any
-    MainWindow * m_mainWindow = nullptr;
+    MainWindow* m_mainWindow = nullptr;
 
     // peer launcher instance connector - used to implement single instance launcher and signalling
-    LocalPeer * m_peerInstance = nullptr;
+    LocalPeer* m_peerInstance = nullptr;
 
-    SetupWizard * m_setupWizard = nullptr;
-public:
+    SetupWizard* m_setupWizard = nullptr;
+
+   public:
+    QString m_detectedGLFWPath;
+    QString m_detectedOpenALPath;
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
-    QList<QUrl> m_zipsToImport;
+    QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };

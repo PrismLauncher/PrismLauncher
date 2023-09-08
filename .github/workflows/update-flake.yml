@@ -1,0 +1,30 @@
+name: Update Flake Lockfile
+
+on:
+  schedule:
+    # run weekly on sunday
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-flake:
+    if: github.repository == 'PrismLauncher/PrismLauncher'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@6a9a9e84a173d90b3ffb42c5ddaf9ea033fad011 # v23
+
+      - uses: DeterminateSystems/update-flake-lock@v20
+        with:
+          commit-msg: "chore(nix): update lockfile"
+          pr-title: "chore(nix): update lockfile"
+          pr-labels: |
+            Linux
+            packaging
+            simple change
+            changelog:omit

@@ -12,51 +12,45 @@
 
 class ModrinthAPI : public NetworkResourceAPI {
    public:
-    auto currentVersion(QString hash,
-                        QString hash_format,
-                        QByteArray* response) -> Task::Ptr;
+    auto currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
-    auto currentVersions(const QStringList& hashes,
-                         QString hash_format,
-                         QByteArray* response) -> Task::Ptr;
+    auto currentVersions(const QStringList& hashes, QString hash_format, std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
     auto latestVersion(QString hash,
                        QString hash_format,
                        std::optional<std::list<Version>> mcVersions,
-                       std::optional<ModLoaderTypes> loaders,
-                       QByteArray* response) -> Task::Ptr;
+                       std::optional<ModPlatform::ModLoaderTypes> loaders,
+                       std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
     auto latestVersions(const QStringList& hashes,
                         QString hash_format,
-                       std::optional<std::list<Version>> mcVersions,
-                       std::optional<ModLoaderTypes> loaders,
-                        QByteArray* response) -> Task::Ptr;
+                        std::optional<std::list<Version>> mcVersions,
+                        std::optional<ModPlatform::ModLoaderTypes> loaders,
+                        std::shared_ptr<QByteArray> response) -> Task::Ptr;
 
-    Task::Ptr getProjects(QStringList addonIds, QByteArray* response) const override;
+    Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
 
    public:
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
     inline auto getAuthorURL(const QString& name) const -> QString { return "https://modrinth.com/user/" + name; };
 
-    static auto getModLoaderStrings(const ModLoaderTypes types) -> const QStringList
+    static auto getModLoaderStrings(const ModPlatform::ModLoaderTypes types) -> const QStringList
     {
         QStringList l;
-        for (auto loader : {Forge, Fabric, Quilt}) {
+        for (auto loader :
+             { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt, ModPlatform::LiteLoader }) {
             if (types & loader) {
                 l << getModLoaderString(loader);
             }
         }
-        if ((types & Quilt) && (~types & Fabric))  // Add Fabric if Quilt is in use, if Fabric isn't already there
-            l << getModLoaderString(Fabric);
         return l;
     }
 
-    static auto getModLoaderFilters(ModLoaderTypes types) -> const QString
+    static auto getModLoaderFilters(ModPlatform::ModLoaderTypes types) -> const QString
     {
         QStringList l;
-        for (auto loader : getModLoaderStrings(types))
-        {
+        for (auto loader : getModLoaderStrings(types)) {
             l << QString("\"categories:%1\"").arg(loader);
         }
         return l.join(',');
@@ -97,7 +91,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     {
         if (args.loaders.has_value()) {
             if (!validateModLoaders(args.loaders.value())) {
-                qWarning() << "Modrinth only have Forge and Fabric-compatible mods!";
+                qWarning() << "Modrinth - or our interface - does not support any the provided mod loaders!";
                 return {};
             }
         }
@@ -139,16 +133,25 @@ class ModrinthAPI : public NetworkResourceAPI {
     auto getGameVersionsArray(std::list<Version> mcVersions) const -> QString
     {
         QString s;
-        for(auto& ver : mcVersions){
+        for (auto& ver : mcVersions) {
             s += QString("\"versions:%1\",").arg(ver.toString());
         }
-        s.remove(s.length() - 1, 1); //remove last comma
+        s.remove(s.length() - 1, 1);  // remove last comma
         return s.isEmpty() ? QString() : s;
     }
 
-    inline auto validateModLoaders(ModLoaderTypes loaders) const -> bool
+    static inline auto validateModLoaders(ModPlatform::ModLoaderTypes loaders) -> bool
     {
-        return loaders & (Forge | Fabric | Quilt);
+        return loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt | ModPlatform::LiteLoader);
     }
 
+    [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
+    {
+        return args.dependency.version.length() != 0 ? QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.dependency.version)
+                                                     : QString("%1/project/%2/version?game_versions=[\"%3\"]&loaders=[\"%4\"]")
+                                                           .arg(BuildConfig.MODRINTH_PROD_URL)
+                                                           .arg(args.dependency.addonId.toString())
+                                                           .arg(args.mcVersion.toString())
+                                                           .arg(getModLoaderStrings(args.loader).join("\",\""));
+    };
 };

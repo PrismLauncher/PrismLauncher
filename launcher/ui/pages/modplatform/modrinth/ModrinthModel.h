@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ class Version;
 namespace Modrinth {
 
 using LogoMap = QMap<QString, QIcon>;
-using LogoCallback = std::function<void (QString)>;
+using LogoCallback = std::function<void(QString)>;
 
 class ModpackListModel : public QAbstractListModel {
     Q_OBJECT
@@ -64,7 +64,7 @@ class ModpackListModel : public QAbstractListModel {
 
     /* Retrieve information from the model at a given index with the given role */
     auto data(const QModelIndex& index, int role) const -> QVariant override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
     inline void setActiveJob(NetJob::Ptr ptr) { jobPtr = ptr; }
 
@@ -73,13 +73,20 @@ class ModpackListModel : public QAbstractListModel {
     void refresh();
     void searchWithTerm(const QString& term, const int sort);
 
+    [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
+    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
+
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
-    inline auto canFetchMore(const QModelIndex& parent) const -> bool override { return parent.isValid() ? false : searchState == CanPossiblyFetchMore; };
+    inline auto canFetchMore(const QModelIndex& parent) const -> bool override
+    {
+        return parent.isValid() ? false : searchState == CanPossiblyFetchMore;
+    };
 
    public slots:
     void searchRequestFinished(QJsonDocument& doc_all);
     void searchRequestFailed(QString reason);
+    void searchRequestForOneSucceeded(QJsonDocument&);
 
    protected slots:
 
@@ -108,11 +115,11 @@ class ModpackListModel : public QAbstractListModel {
     int nextSearchOffset = 0;
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
 
-    NetJob::Ptr jobPtr;
+    Task::Ptr jobPtr;
 
-    QByteArray m_all_response;
+    std::shared_ptr<QByteArray> m_all_response = std::make_shared<QByteArray>();
     QByteArray m_specific_response;
 
     int m_modpacks_per_page = 20;
 };
-}  // namespace ModPlatform
+}  // namespace Modrinth

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,55 +37,41 @@
 
 #include <QWidget>
 
-#include "ui/pages/BasePage.h"
 #include <Application.h>
 #include "tasks/Task.h"
+#include "ui/pages/BasePage.h"
 
-namespace Ui
-{
+namespace Ui {
 class ImportPage;
 }
 
 class NewInstanceDialog;
 
-class ImportPage : public QWidget, public BasePage
-{
+class ImportPage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit ImportPage(NewInstanceDialog* dialog, QWidget *parent = 0);
+   public:
+    explicit ImportPage(NewInstanceDialog* dialog, QWidget* parent = 0);
     virtual ~ImportPage();
-    virtual QString displayName() const override
-    {
-        return tr("Import from zip");
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("viewfolder");
-    }
-    virtual QString id() const override
-    {
-        return "import";
-    }
-    virtual QString helpPage() const override
-    {
-        return "Zip-import";
-    }
+    virtual QString displayName() const override { return tr("Import"); }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("viewfolder"); }
+    virtual QString id() const override { return "import"; }
+    virtual QString helpPage() const override { return "Zip-import"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
-    void setUrl(const QString & url);
+    void setUrl(const QString& url);
     void openedImpl() override;
-
-private slots:
+    void setExtraInfo(const QMap<QString, QString>& extra_info);
+   private slots:
     void on_modpackBtn_clicked();
     void updateState();
 
-private:
+   private:
     QUrl modpackUrl() const;
 
-private:
-    Ui::ImportPage *ui = nullptr;
+   private:
+    Ui::ImportPage* ui = nullptr;
     NewInstanceDialog* dialog = nullptr;
+    QMap<QString, QString> m_extra_info = {};
 };
-
