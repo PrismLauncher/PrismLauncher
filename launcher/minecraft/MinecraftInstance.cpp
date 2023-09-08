@@ -200,7 +200,7 @@ void MinecraftInstance::loadSpecificSettings()
     // Use account for instance, this does not have a global override
     m_settings->registerSetting("UseAccountForInstance", false);
     m_settings->registerSetting("InstanceAccountId", "");
-    
+
     // Mod group settings
     m_settings->registerSetting("Mods/UpdateIgnoreList", QVariantList({}));
 
@@ -213,7 +213,7 @@ void MinecraftInstance::loadSpecificSettings()
     qDebug() << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);
-    
+
     updateRuntimeContext();
 }
 

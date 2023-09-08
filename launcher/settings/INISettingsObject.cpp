@@ -123,6 +123,4 @@ void INISettingsObject::removeValue(const Setting& setting)
     for (auto iter : setting.configKeys())
         m_ini.remove(iter);
     doSave();
-
 }
-

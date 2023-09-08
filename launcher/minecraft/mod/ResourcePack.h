@@ -22,10 +22,7 @@ class ResourcePack : public Resource {
     ResourcePack(QObject* parent = nullptr) : Resource(parent) {}
     ResourcePack(QFileInfo file_info) : Resource(file_info) {}
     ResourcePack(ResourcePack& rp)
-        : Resource(rp)
-        , m_pack_format(rp.m_pack_format)
-        , m_description(rp.m_description)
-        , m_pack_image_cache_key(rp.m_pack_image_cache_key)
+        : Resource(rp), m_pack_format(rp.m_pack_format), m_description(rp.m_description), m_pack_image_cache_key(rp.m_pack_image_cache_key)
     {}
 
     /** Gets the numerical ID of the pack format. */
