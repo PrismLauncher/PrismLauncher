@@ -189,9 +189,13 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
 
         // description could either be string, or array of dictionaries
         auto desc_val = pack_obj.value("description");
+        if (desc_val.isUndefined()) {
+            qWarning() << "No resource pack description found.";
+            return false;
+        }
 
         if (desc_val.isString()) { 
-            pack.setDescription(Json::ensureString(pack_obj, "description", ""));
+            pack.setDescription(desc_val.toString());
         } else if (desc_val.isArray()) {
 
             // rebuild the description from the dictionaries without colors
@@ -200,20 +204,27 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
 
             for(const QJsonValue& dict : arr) {
                 // must be an object, for a dictionary
-                if (!dict.isObject()) throw Json::JsonException("Invalid value description.");
+                if (!dict.isObject()) 
+                {
+                    qWarning() << "Invalid component object.";
+                    continue;
+                }
 
                 auto obj = dict.toObject();
                 auto val = obj.value(obj.keys()[0]);
 
-                // value must be a string type
-                if (!val.isString()) throw Json::JsonException("Invalid value description type.");
+                if (!val.isString()) 
+                {
+                    qWarning() << "Invalid text description type in components.";
+                    continue;
+                }
 
                 build_desc.append(val.toString());
             };
 
             pack.setDescription(build_desc);
         } else {
-            throw Json::JsonException("Invalid description type.");
+            qWarning() << "Invalid description type.";
         }
     } catch (Json::JsonException& e) {
         qWarning() << "JsonException: " << e.what() << e.cause();
