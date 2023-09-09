@@ -194,7 +194,7 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
             return false;
         }
 
-        if (desc_val.isString()) { 
+        if (desc_val.isString()) {
             pack.setDescription(desc_val.toString());
         } else if (desc_val.isArray()) {
             // rebuild the description from the dictionaries without colors
