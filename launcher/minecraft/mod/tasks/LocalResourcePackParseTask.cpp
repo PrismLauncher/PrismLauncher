@@ -202,10 +202,9 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
             QString build_desc;
             auto arr = desc_val.toArray();
 
-            for(const QJsonValue& dict : arr) {
+            for (const QJsonValue& dict : arr) {
                 // must be an object, for a dictionary
-                if (!dict.isObject()) 
-                {
+                if (!dict.isObject()) {
                     qWarning() << "Invalid component object.";
                     continue;
                 }
@@ -213,8 +212,7 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
                 auto obj = dict.toObject();
                 auto val = obj.value(obj.keys()[0]);
 
-                if (!val.isString()) 
-                {
+                if (!val.isString()) {
                     qWarning() << "Invalid text description type in components.";
                     continue;
                 }
