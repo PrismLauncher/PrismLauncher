@@ -20,12 +20,14 @@
     };
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake
-    {inherit inputs;}
-    {
+  outputs = {
+    flake-parts,
+    pre-commit-hooks,
+    ...
+  } @ inputs:
+    flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
-        inputs.pre-commit-hooks.flakeModule
+        pre-commit-hooks.flakeModule
 
         ./nix/dev.nix
         ./nix/distribution.nix
