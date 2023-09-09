@@ -186,7 +186,35 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
         auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
 
         pack.setPackFormat(Json::ensureInteger(pack_obj, "pack_format", 0));
-        pack.setDescription(Json::ensureString(pack_obj, "description", ""));
+
+        // description could either be string, or array of dictionaries
+        auto desc_val = pack_obj.value("description");
+
+        if (desc_val.isString()) { 
+            pack.setDescription(Json::ensureString(pack_obj, "description", ""));
+        } else if (desc_val.isArray()) {
+
+            // rebuild the description from the dictionaries without colors
+            QString build_desc;
+            auto arr = desc_val.toArray();
+
+            for(const QJsonValue& dict : arr) {
+                // must be an object, for a dictionary
+                if (!dict.isObject()) throw Json::JsonException("Invalid value description.");
+
+                auto obj = dict.toObject();
+                auto val = obj.value(obj.keys()[0]);
+
+                // value must be a string type
+                if (!val.isString()) throw Json::JsonException("Invalid value description type.");
+
+                build_desc.append(val.toString());
+            };
+
+            pack.setDescription(build_desc);
+        } else {
+            throw Json::JsonException("Invalid description type.");
+        }
     } catch (Json::JsonException& e) {
         qWarning() << "JsonException: " << e.what() << e.cause();
         return false;
