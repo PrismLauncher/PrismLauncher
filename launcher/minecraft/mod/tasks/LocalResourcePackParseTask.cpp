@@ -221,7 +221,6 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
 
                 build_desc.append(val.toString());
             };
-
             pack.setDescription(build_desc);
         } else {
             qWarning() << "Invalid description type.";
