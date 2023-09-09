@@ -9,7 +9,7 @@
     ...
   }: {
     packages = let
-      ourPackages = lib.fix (final: self.overlays.default ({inherit (pkgs) darwin;} // final) pkgs);
+      ourPackages = lib.fix (final: self.overlays.default final pkgs);
     in {
       inherit
         (ourPackages)
@@ -29,16 +29,21 @@
       # common args for prismlauncher evaluations
       unwrappedArgs = {
         inherit (inputs) libnbtplusplus;
-        inherit (final.darwin.apple_sdk.frameworks) Cocoa;
+        inherit ((final.darwin or prev.darwin).apple_sdk.frameworks) Cocoa;
         inherit self version;
       };
     in {
       prismlauncher-qt5-unwrapped = prev.libsForQt5.callPackage ./pkg unwrappedArgs;
+
       prismlauncher-qt5 = prev.libsForQt5.callPackage ./pkg/wrapper.nix {
         prismlauncher-unwrapped = final.prismlauncher-qt5-unwrapped;
       };
+
       prismlauncher-unwrapped = prev.qt6Packages.callPackage ./pkg unwrappedArgs;
-      prismlauncher = prev.qt6Packages.callPackage ./pkg/wrapper.nix {inherit (final) prismlauncher-unwrapped;};
+
+      prismlauncher = prev.qt6Packages.callPackage ./pkg/wrapper.nix {
+        inherit (final) prismlauncher-unwrapped;
+      };
     };
   };
 }
