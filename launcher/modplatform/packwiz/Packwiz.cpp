@@ -113,6 +113,7 @@ auto V1::createModFormat([[maybe_unused]] QDir& index_dir, ModPlatform::IndexedP
     mod.provider = mod_pack.provider;
     mod.file_id = mod_version.fileId;
     mod.project_id = mod_pack.addonId;
+    mod.side = stringToSide(mod_pack.side);
 
     return mod;
 }
@@ -190,7 +191,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
     {
         auto tbl = toml::table{ { "name", mod.name.toStdString() },
                                 { "filename", mod.filename.toStdString() },
-                                { "side", mod.side.toStdString() },
+                                { "side", sideToString(mod.side).toStdString() },
                                 { "download",
                                   toml::table{
                                       { "mode", mod.mode.toStdString() },
@@ -274,7 +275,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     {  // Basic info
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
-        mod.side = stringEntry(table, "side");
+        mod.side = stringToSide(stringEntry(table, "side"));
     }
 
     {  // [download] info
@@ -327,6 +328,30 @@ auto V1::getIndexForMod(QDir& index_dir, QVariant& mod_id) -> Mod
     }
 
     return {};
+}
+
+auto V1::sideToString(Side side) -> QString
+{
+    switch (side) {
+        case Side::ClientSide:
+            return "client";
+        case Side::ServerSide:
+            return "server";
+        case Side::UniversalSide:
+            return "both";
+    }
+    return {};
+}
+
+auto V1::stringToSide(QString side) -> Side
+{
+    if (side == "client")
+        return Side::ClientSide;
+    if (side == "server")
+        return Side::ServerSide;
+    if (side == "both")
+        return Side::UniversalSide;
+    return Side::UniversalSide;
 }
 
 }  // namespace Packwiz
