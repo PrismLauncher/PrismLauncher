@@ -209,14 +209,8 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
                 }
 
                 auto obj = dict.toObject();
-                auto val = obj.value(obj.keys()[0]);
 
-                if (!val.isString()) {
-                    qWarning() << "Invalid text description type in components.";
-                    continue;
-                }
-
-                build_desc.append(val.toString());
+                build_desc.append(Json::ensureString(obj, "text", {}));
             };
             pack.setDescription(build_desc);
         } else {
