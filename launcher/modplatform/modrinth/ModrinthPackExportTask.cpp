@@ -34,12 +34,14 @@ const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "z
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
                                                const QString& summary,
+                                               bool optionalFiles,
                                                InstancePtr instance,
                                                const QString& output,
                                                MMCZip::FilterFunction filter)
     : name(name)
     , version(version)
     , summary(summary)
+    , optionalFiles(optionalFiles)
     , instance(instance)
     , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
     , gameRoot(instance->gameRoot())
@@ -272,11 +274,11 @@ QByteArray ModrinthPackExportTask::generateIndex()
         QString path = iterator.key();
         const ResolvedFile& value = iterator.value();
 
+        QJsonObject env;
+
         // detect disabled mod
         const QFileInfo pathInfo(path);
-
-        QJsonObject env;
-        if (pathInfo.suffix() == "disabled") {
+        if (optionalFiles && pathInfo.suffix() == "disabled") {
             // rename it
             path = pathInfo.dir().filePath(pathInfo.completeBaseName());
             env["client"] = "optional";

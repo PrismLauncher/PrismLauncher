@@ -195,7 +195,6 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
-                BaseProfilerFactory* profiler = nullptr,
                 MinecraftServerTargetPtr serverToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);

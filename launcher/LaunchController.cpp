@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -361,22 +362,21 @@ void LaunchController::readyForLaunch()
     QString error;
     if (!m_profiler->check(&error)) {
         m_launcher->abort();
-        QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Couldn't start profiler: %1").arg(error));
         emitFailed("Profiler startup failed!");
+        QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Profiler check for %1 failed: %2").arg(m_profiler->name(), error));
         return;
     }
     BaseProfiler* profilerInstance = m_profiler->createProfiler(m_launcher->instance(), this);
 
     connect(profilerInstance, &BaseProfiler::readyToLaunch, [this](const QString& message) {
-        QMessageBox msg;
+        QMessageBox msg(m_parentWidget);
         msg.setText(tr("The game launch is delayed until you press the "
                        "button. This is the right time to setup the profiler, as the "
                        "profiler server is running now.\n\n%1")
                         .arg(message));
         msg.setWindowTitle(tr("Waiting."));
         msg.setIcon(QMessageBox::Information);
-        msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
-        msg.setModal(true);
+        msg.addButton(tr("&Launch"), QMessageBox::AcceptRole);
         msg.exec();
         m_launcher->proceed();
     });

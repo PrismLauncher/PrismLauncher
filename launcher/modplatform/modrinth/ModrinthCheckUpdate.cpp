@@ -11,7 +11,6 @@
 #include "tasks/ConcurrentTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
-#include "minecraft/mod/ResourceFolderModel.h"
 
 static ModrinthAPI api;
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -111,11 +110,11 @@ void ModrinthCheckUpdate::executeTask()
                 // so we may want to filter it
                 QString loader_filter;
                 if (m_loaders.has_value()) {
-                    static auto flags = { ResourceAPI::ModLoaderType::NeoForge, ResourceAPI::ModLoaderType::Forge,
-                                          ResourceAPI::ModLoaderType::Fabric, ResourceAPI::ModLoaderType::Quilt };
+                    static auto flags = { ModPlatform::ModLoaderType::NeoForge, ModPlatform::ModLoaderType::Forge,
+                                          ModPlatform::ModLoaderType::Fabric, ModPlatform::ModLoaderType::Quilt };
                     for (auto flag : flags) {
                         if (m_loaders.value().testFlag(flag)) {
-                            loader_filter = api.getModLoaderString(flag);
+                            loader_filter = ModPlatform::getModLoaderString(flag);
                             break;
                         }
                     }
