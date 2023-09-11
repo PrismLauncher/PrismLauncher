@@ -26,6 +26,7 @@
 #include <quazip/quazipfile.h>
 
 #include <QCryptographicHash>
+#include <QRegularExpression>
 
 namespace ResourcePackUtils {
 
@@ -236,7 +237,7 @@ bool getBoolOrFromText(const QJsonValue& val, bool& result)
     }
 }
 
-bool readFormat(const QJsonObject& obj, TextFormat& format) 
+bool readFormat(const QJsonObject& obj, TextFormat& format)
 {
     auto text = obj.value("text");
     auto color = obj.value("color");
@@ -247,7 +248,7 @@ bool readFormat(const QJsonObject& obj, TextFormat& format)
     auto extra = obj.value("extra");
 
     if (color.isString()) {
-        // colors can either be a hex code or one of a few text colors 
+        // colors can either be a hex code or one of a few text colors
         auto col_str = color.toString();
 
         const QRegularExpression hex_expression("^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$");
@@ -263,13 +264,11 @@ bool readFormat(const QJsonObject& obj, TextFormat& format)
         }
     }
 
-    return getBoolOrFromText(bold, format.bold) &&
-            getBoolOrFromText(italic, format.italic) &&
-            getBoolOrFromText(underlined, format.underlined) &&
-            getBoolOrFromText(strikethrough, format.strikethrough);
+    return getBoolOrFromText(bold, format.bold) && getBoolOrFromText(italic, format.italic) &&
+           getBoolOrFromText(underlined, format.underlined) && getBoolOrFromText(strikethrough, format.strikethrough);
 }
 
-void appendBeginFormat(TextFormat& format, QString& toAppend) 
+void appendBeginFormat(TextFormat& format, QString& toAppend)
 {
     toAppend.append("<font color=\"" + format.color + "\">");
     if (format.bold)
@@ -282,7 +281,8 @@ void appendBeginFormat(TextFormat& format, QString& toAppend)
         toAppend.append("<s>");
 }
 
-void appendEndFormat(TextFormat& format, QString& toAppend) {
+void appendEndFormat(TextFormat& format, QString& toAppend)
+{
     toAppend.append("</font>");
     if (format.bold)
         toAppend.append("</b>");
@@ -296,7 +296,8 @@ void appendEndFormat(TextFormat& format, QString& toAppend) {
 
 bool processComponent(const QJsonValue& value, QString& result, TextFormat* parentFormat = nullptr);
 
-bool processComponentList(const QJsonArray& arr, QString& result, TextFormat* parentFormat = nullptr) {
+bool processComponentList(const QJsonArray& arr, QString& result, TextFormat* parentFormat = nullptr)
+{
 
     for (const QJsonValue& val : arr) {
         if (!processComponent(val, result, parentFormat))
@@ -306,7 +307,8 @@ bool processComponentList(const QJsonArray& arr, QString& result, TextFormat* pa
     return true;
 }
 
-bool processComponent(const QJsonValue& value, QString& result, TextFormat* parentFormat) {
+bool processComponent(const QJsonValue& value, QString& result, TextFormat* parentFormat)
+{
     if (value.isString()) {
         result.append(value.toString());
     } else if (value.isObject()) {
@@ -340,9 +342,8 @@ bool processComponent(const QJsonValue& value, QString& result, TextFormat* pare
 }
 
 // https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
-bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data) {
-
-
+bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
+{
     try {
         auto json_doc = QJsonDocument::fromJson(raw_data);
         auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
@@ -351,7 +352,7 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data) {
 
         // description could either be string, or array of dictionaries
         auto desc_val = pack_obj.value("description");
-        
+
         if (desc_val.isString()) {
             pack.setDescription(desc_val.toString());
         } else if (desc_val.isArray()) {
