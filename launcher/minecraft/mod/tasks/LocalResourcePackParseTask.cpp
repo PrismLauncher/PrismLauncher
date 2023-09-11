@@ -178,9 +178,143 @@ bool processZIP(ResourcePack& pack, ProcessingLevel level)
     return true;
 }
 
-// https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
-bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
+struct TextFormat {
+    QString color = "#000000";
+    bool bold = false;
+    bool italic = false;
+    bool underlined = false;
+    bool strikethrough = false;
+
+    TextFormat() = default;
+    ~TextFormat() = default;
+
+    void clear() {
+        color = "#00000";
+        bold = false;
+        italic = false;
+        underlined = false;
+        strikethrough = false;
+    }
+};
+
+QString textColorToHexColor(const QString& color)
 {
+    static const std::unordered_map<QString, QString> str_to_hex = {
+        { "black", "#000000" },
+        { "dark_blue", "#0000AA" },
+        { "dark_green", "#00AA00" },
+        { "dark_aqua", "#00AAAA" },
+        { "dark_red", "#AA0000" },
+        { "dark_purple", "#AA00AA" },
+        { "gold", "#FFAA00" },
+        { "gray", "#AAAAAA" },
+        { "dark_gray", "#555555" },
+        { "blue", "#5555FF" },
+        { "green", "#55FF55" },
+        { "aqua", "#55FFFF" },
+        { "red", "#FF5555" },
+        { "light_purple", "#FF55FF" },
+        { "yellow", "#FFFF55" },
+        { "white", "#FFFFFF" },
+    };
+
+    auto it = str_to_hex.find(color);
+    return (it != str_to_hex.end()) ? it->second : QString("#000000"); // return black if color not found
+}
+
+bool readFormat(const QJsonObject& obj, TextFormat& format) {
+    auto text = obj.value("text");
+    auto color = obj.value("color");
+    auto bold = obj.value("bold");
+    auto italic = obj.value("italic");
+    auto underlined = obj.value("underlined");
+    auto strikethrough = obj.value("strikethrough");
+    auto extra = obj.value("extra");
+
+    if (color.isString()) {
+        format.color = textColorToHexColor(color.toString());
+    }
+    if (bold.isBool())
+        format.bold = bold.toBool();
+    if (italic.isBool())
+        format.italic = italic.toBool();
+    if (underlined.isBool())
+        format.underlined = underlined.toBool();
+    if (strikethrough.isBool())
+        format.strikethrough = strikethrough.toBool();
+
+    return true;
+}
+
+void appendBeginFormat(TextFormat& format, QString& toAppend) {
+    toAppend.append("<font color=\"" + format.color + "\">");
+    if (format.bold)
+        toAppend.append("<b>");
+    if (format.italic)
+        toAppend.append("<i>");
+    if (format.underlined)
+        toAppend.append("<u>");
+    if (format.strikethrough)
+        toAppend.append("<s>");
+}
+
+void appendEndFormat(TextFormat& format, QString& toAppend) {
+    toAppend.append("</font>");
+    if (format.bold)
+        toAppend.append("</b>");
+    if (format.italic)
+        toAppend.append("</i>");
+    if (format.underlined)
+        toAppend.append("</u>");
+    if (format.strikethrough)
+        toAppend.append("</s>");
+}
+
+bool processComponent(const QJsonValue& value, QString& result, TextFormat* parentFormat = nullptr);
+
+bool processComponentList(const QJsonArray& arr, QString& result, TextFormat* parentFormat = nullptr) {
+
+    for (const QJsonValue& val : arr) {
+        processComponent(val, result, parentFormat);
+    }
+
+    return true;
+}
+
+bool processComponent(const QJsonValue& value, QString& result, TextFormat* parentFormat) {
+    if (value.isString()) {
+        result.append(value.toString());
+    } else if (value.isObject()) {
+        auto obj = value.toObject();
+
+        TextFormat format{};
+        if (parentFormat)
+            format = *parentFormat;
+
+        if (!readFormat(obj, format))
+            return false;
+        
+        appendBeginFormat(format, result);
+        
+        auto text = obj.value("text");
+        if (text.isString())
+            result.append(text.toString());
+
+        auto extra = obj.value("extra");
+        if (extra.isArray())
+            if (!processComponentList(extra.toArray(), result, &format))
+                return false;
+
+        appendEndFormat(format, result);
+    }
+
+    return true;
+}
+
+// https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
+bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data) {
+
+
     try {
         auto json_doc = QJsonDocument::fromJson(raw_data);
         auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
@@ -189,33 +323,15 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
 
         // description could either be string, or array of dictionaries
         auto desc_val = pack_obj.value("description");
-        if (desc_val.isUndefined()) {
-            qWarning() << "No resource pack description found.";
-            return false;
-        }
-
-        if (desc_val.isString()) {
+        
+        if (desc_val.isString())
             pack.setDescription(desc_val.toString());
-        } else if (desc_val.isArray()) {
-            // rebuild the description from the dictionaries without colors
-            QString build_desc;
-            auto arr = desc_val.toArray();
-
-            for (const QJsonValue& dict : arr) {
-                // must be an object, for a dictionary
-                if (!dict.isObject()) {
-                    qWarning() << "Invalid component object.";
-                    continue;
-                }
-
-                auto obj = dict.toObject();
-
-                build_desc.append(Json::ensureString(obj, "text", {}));
-            };
-            pack.setDescription(build_desc);
-        } else {
-            qWarning() << "Invalid description type.";
+        else if (desc_val.isArray()) {
+            QString desc{};
+            processComponentList(desc_val.toArray(), desc);
+            pack.setDescription(desc);
         }
+
     } catch (Json::JsonException& e) {
         qWarning() << "JsonException: " << e.what() << e.cause();
         return false;
