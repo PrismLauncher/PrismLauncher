@@ -179,96 +179,138 @@ bool processZIP(ResourcePack& pack, ProcessingLevel level)
     return true;
 }
 
-struct TextFormat {
-    QString color = "#000000";
-    bool bold = false;
-    bool italic = false;
-    bool underlined = false;
-    bool strikethrough = false;
-    bool is_linked = false;
-    QString link_url = "";
-};
+struct TextFormatter {
+    // left is value, right is if the value was explicitly written
+    QPair<QString, bool> color = { "#000000", false };
+    QPair<bool, bool> bold = { false, false };
+    QPair<bool, bool> italic = { false, false };
+    QPair<bool, bool> underlined = { false, false };
+    QPair<bool, bool> strikethrough = { false, false };
+    QPair<bool, bool> is_linked = { false, false };
+    QPair<QString, bool> link_url = { "", false };
 
-bool readFormat(const QJsonObject& obj, TextFormat& format)
-{
-    format.color = Json::ensureString(obj, "color");
-    format.bold = Json::ensureBoolean(obj, "bold", false);
-    format.italic = Json::ensureBoolean(obj, "italic", false);
-    format.underlined = Json::ensureBoolean(obj, "underlined", false);
-    format.strikethrough = Json::ensureBoolean(obj, "strikethrough", false);
+    void setColor(const QString& new_color, bool written) { color = { new_color, written}; }
+    void setBold(bool new_bold, bool written) { bold = { new_bold, written}; }
+    void setItalic(bool new_italic, bool written) { italic = { new_italic, written}; }
+    void setUnderlined(bool new_underlined, bool written) { underlined = { new_underlined, written}; }
+    void setStrikethrough(bool new_strikethrough, bool written) { strikethrough = { new_strikethrough, written}; }
+    void setIsLinked(bool new_is_linked, bool written) { is_linked = { new_is_linked, written}; }
+    void setLinkURL(const QString& new_url, bool written) { link_url = { new_url, written}; }
 
-    auto click_event = Json::ensureObject(obj, "clickEvent");
-    format.is_linked = Json::ensureBoolean(click_event, "open_url", false);
-    format.link_url = Json::ensureString(click_event, "value");
-
-    return true;
-}
-
-void appendBeginFormat(TextFormat& format, QString& toAppend)
-{
-    toAppend.append("<font color=\"" + format.color + "\">");
-    if (format.bold)
-        toAppend.append("<b>");
-    if (format.italic)
-        toAppend.append("<i>");
-    if (format.underlined)
-        toAppend.append("<u>");
-    if (format.strikethrough)
-        toAppend.append("<s>");
-    if (format.is_linked)
-        toAppend.append("<a href=\"" + format.link_url + "\">");
-}
-
-void appendEndFormat(TextFormat& format, QString& toAppend)
-{
-    if (format.is_linked)
-        toAppend.append("</a>");
-    if (format.strikethrough)
-        toAppend.append("</s>");
-    if (format.italic)
-        toAppend.append("</i>");
-    if (format.underlined)
-        toAppend.append("</u>");
-    if (format.bold)
-        toAppend.append("</b>");
-    toAppend.append("</font>");
-}
-
-bool processComponentList(const QJsonArray& arr, QString& result)
-{
-    for (const QJsonValue& val : arr) {
-        if (!processComponent(val, result))
-            return false;
+    void overrideFrom(const TextFormatter& child)
+    {
+        if (child.color.second)
+            color.first = child.color.first;    
+        if (child.bold.second)
+            bold.first = child.bold.first;
+        if (child.italic.second)
+            italic.first = child.italic.first;
+        if (child.underlined.second)
+            underlined.first = child.underlined.first;
+        if (child.strikethrough.second)
+            strikethrough.first = child.strikethrough.first;
+        if (child.is_linked.second)
+            is_linked.first = child.is_linked.first;
+        if (child.link_url.second)
+            link_url.first = child.link_url.first;
     }
 
-    return true;
-}
+    QString format(QString text)
+    {
+        if (text.isEmpty())
+            return QString();
 
-bool processComponent(const QJsonValue& value, QString& result)
+        QString result;
+
+        if (color.first != "#000000")
+            result.append("<font color=\"" + color.first + "\">");
+        if (bold.first)
+            result.append("<b>");
+        if (italic.first)
+            result.append("<i>");
+        if (underlined.first)
+            result.append("<u>");
+        if (strikethrough.first)
+            result.append("<s>");
+        if (is_linked.first)
+            result.append("<a href=\"" + link_url.first + "\">");
+
+        result.append(text);
+
+        if (is_linked.first)
+            result.append("</a>");
+        if (strikethrough.first)
+            result.append("</s>");
+        if (underlined.first)
+            result.append("</u>");
+        if (italic.first)
+            result.append("</i>");
+        if (bold.first)
+            result.append("</b>");
+        if (color.first != "#000000")
+            result.append("</font>");
+
+        return result;
+    }
+
+    bool readFormat(const QJsonObject& obj)
+    {
+        setColor(Json::ensureString(obj, "color", "#000000"), obj.contains("color"));
+        setBold(Json::ensureBoolean(obj, "bold", false), obj.contains("bold"));
+        setItalic(Json::ensureBoolean(obj, "italic", false), obj.contains("italic"));
+        setUnderlined(Json::ensureBoolean(obj, "underlined", false), obj.contains("underlined"));
+        setStrikethrough(Json::ensureBoolean(obj, "strikethrough", false), obj.contains("strikethrough"));
+
+        auto click_event = Json::ensureObject(obj, "clickEvent");
+        setIsLinked(Json::ensureBoolean(click_event, "open_url", false), click_event.contains("open_url"));
+        setLinkURL(Json::ensureString(click_event, "value"), click_event.contains("value"));
+
+        return true;
+    }
+};
+
+bool processComponent(const QJsonValue& value, QString& result, const TextFormatter* parentFormat)
 {
+    TextFormatter formatter;
+
+    if (parentFormat)
+        formatter = *parentFormat;
+
     if (value.isString()) {
-        result.append(value.toString());
-    } else if (value.isObject()) {
+        result.append(formatter.format(value.toString()));
+    } else if (value.isBool()) {
+        result.append(formatter.format(value.toBool() ? "true" : "false"));
+    } else if (value.isDouble()) {
+        result.append(formatter.format(QString::number(value.toDouble())));
+    } else if (value.isObject()) { 
         auto obj = value.toObject();
 
-        TextFormat format{};
-
-        if (!readFormat(obj, format))
+        if (not formatter.readFormat(obj))
             return false;
-        
-        appendBeginFormat(format, result);
-        
-        auto text = obj.value("text");
-        if (text.isString())
-            result.append(text.toString());
 
+        // override the parent format with our new one
+        TextFormatter mixed;
+        if (parentFormat)
+            mixed = *parentFormat;
+
+        mixed.overrideFrom(formatter);
+    
+        result.append(mixed.format(Json::ensureString(obj, "text")));
+
+        // process any 'extra' children with this format
         auto extra = obj.value("extra");
-        if (extra.isArray())
-            if (!processComponentList(extra.toArray(), result))
-                return false;
+        if (not extra.isUndefined())
+            return processComponent(extra, result, &mixed);
 
-        appendEndFormat(format, result);
-    } else {
+    } else if (value.isArray()) {
+        auto array = value.toArray();
+
+        for (const QJsonValue& current : array) {
+            if (not processComponent(current, result, parentFormat)) {
+                return false;
+            }
+        }
+    } else {            
         qWarning() << "Invalid component type!";
         return false;
     }
@@ -286,29 +328,12 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
 
         pack.setPackFormat(Json::ensureInteger(pack_obj, "pack_format", 0));
 
-        // description could be many things according to minecraft
         auto desc_val = pack_obj.value("description");
-
-        QString desc;
-        if (desc_val.isString()) {
-            desc = desc_val.toString();
-        } else if (desc_val.isArray()) {
-            if (!processComponentList(desc_val.toArray(), desc))
-                return false;
-        } else if (desc_val.isObject()) {
-            if (!processComponent(desc_val, desc))
-                return false;
-        } else if (desc_val.isBool()) {
-            desc = desc_val.toBool() ? "true" : "false";
-        } else if (desc_val.isDouble()) {
-            desc = QString::number(desc_val.toDouble());
-        } else {
-            qWarning() << "Invalid description type!";
+        QString desc{};
+        if (not processComponent(desc_val, desc))
             return false;
-        }
 
         qInfo() << desc;
-
         pack.setDescription(desc);
 
     } catch (Json::JsonException& e) {
