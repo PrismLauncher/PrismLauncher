@@ -189,18 +189,18 @@ struct TextFormatter {
     QPair<bool, bool> is_linked = { false, false };
     QPair<QString, bool> link_url = { "", false };
 
-    void setColor(const QString& new_color, bool written) { color = { new_color, written}; }
-    void setBold(bool new_bold, bool written) { bold = { new_bold, written}; }
-    void setItalic(bool new_italic, bool written) { italic = { new_italic, written}; }
-    void setUnderlined(bool new_underlined, bool written) { underlined = { new_underlined, written}; }
-    void setStrikethrough(bool new_strikethrough, bool written) { strikethrough = { new_strikethrough, written}; }
-    void setIsLinked(bool new_is_linked, bool written) { is_linked = { new_is_linked, written}; }
-    void setLinkURL(const QString& new_url, bool written) { link_url = { new_url, written}; }
+    void setColor(const QString& new_color, bool written) { color = { new_color, written }; }
+    void setBold(bool new_bold, bool written) { bold = { new_bold, written }; }
+    void setItalic(bool new_italic, bool written) { italic = { new_italic, written }; }
+    void setUnderlined(bool new_underlined, bool written) { underlined = { new_underlined, written }; }
+    void setStrikethrough(bool new_strikethrough, bool written) { strikethrough = { new_strikethrough, written }; }
+    void setIsLinked(bool new_is_linked, bool written) { is_linked = { new_is_linked, written }; }
+    void setLinkURL(const QString& new_url, bool written) { link_url = { new_url, written }; }
 
     void overrideFrom(const TextFormatter& child)
     {
         if (child.color.second)
-            color.first = child.color.first;    
+            color.first = child.color.first;
         if (child.bold.second)
             bold.first = child.bold.first;
         if (child.italic.second)
@@ -282,7 +282,7 @@ bool processComponent(const QJsonValue& value, QString& result, const TextFormat
         result.append(formatter.format(value.toBool() ? "true" : "false"));
     } else if (value.isDouble()) {
         result.append(formatter.format(QString::number(value.toDouble())));
-    } else if (value.isObject()) { 
+    } else if (value.isObject()) {
         auto obj = value.toObject();
 
         if (not formatter.readFormat(obj))
@@ -294,7 +294,7 @@ bool processComponent(const QJsonValue& value, QString& result, const TextFormat
             mixed = *parentFormat;
 
         mixed.overrideFrom(formatter);
-    
+
         result.append(mixed.format(Json::ensureString(obj, "text")));
 
         // process any 'extra' children with this format
@@ -310,7 +310,7 @@ bool processComponent(const QJsonValue& value, QString& result, const TextFormat
                 return false;
             }
         }
-    } else {            
+    } else {
         qWarning() << "Invalid component type!";
         return false;
     }
