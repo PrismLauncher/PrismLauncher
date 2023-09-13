@@ -272,7 +272,6 @@ struct TextFormatter {
 bool processComponent(const QJsonValue& value, QString& result, const TextFormatter* parentFormat)
 {
     TextFormatter formatter;
-
     if (parentFormat)
         formatter = *parentFormat;
 
