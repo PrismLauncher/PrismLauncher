@@ -333,7 +333,6 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
         if (not processComponent(desc_val, desc))
             return false;
 
-        qInfo() << desc;
         pack.setDescription(desc);
 
     } catch (Json::JsonException& e) {
