@@ -36,8 +36,9 @@
 
 #include <QLabel>
 #include <QMessageBox>
-#include <QToolTip>
 #include <QTextCursor>
+#include <QTextDocument>
+#include <QToolTip>
 
 #include "InfoFrame.h"
 #include "ui_InfoFrame.h"
@@ -276,16 +277,14 @@ void InfoFrame::setDescription(QString text)
     QString labeltext;
     labeltext.reserve(300);
 
-
     // elide rich text by getting characters without formatting
     const int maxCharacterElide = 290;
     QTextDocument doc;
     doc.setHtml(text);
 
     if (doc.characterCount() > maxCharacterElide) {
-        
         ui->descriptionLabel->setOpenExternalLinks(false);
-        ui->descriptionLabel->setTextFormat(Qt::TextFormat::RichText); // This allows injecting HTML here.
+        ui->descriptionLabel->setTextFormat(Qt::TextFormat::RichText);  // This allows injecting HTML here.
         m_description = text;
 
         const QString elidedPostfix = "<a href=\"#mod_desc\">...</a>";
@@ -298,7 +297,7 @@ void InfoFrame::setDescription(QString text)
 
         // insert the post fix at the cursor
         cursor.insertHtml(elidedPostfix);
-        
+
         labeltext.append(doc.toHtml());
         QObject::connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
     } else {
