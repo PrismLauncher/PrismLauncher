@@ -1,18 +1,18 @@
 {
-  "description": [
-    {
-      "text": "Hello, ",
-      "color": "red",
-      "bold": true,
-      "italic": true,
-      "extra": [
+    "description": [
         {
-          "extra": "Component!",
-          "bold": false,
-          "italic": false
+            "text": "Hello, ",
+            "color": "red",
+            "bold": true,
+            "italic": true,
+            "extra": [
+                {
+                    "extra": "Component!",
+                    "bold": false,
+                    "italic": false
+                }
+            ]
         }
-      ]
-    }
-  ],
-  "expected_output": "<font color=\"red\"><b><i>Hello, </i></b></font><font color=\"red\">Component!</font>"
+    ],
+    "expected_output": "<font color=\"red\"><b><i>Hello, </i></b></font><font color=\"red\">Component!</font>"
 }
