@@ -9,5 +9,5 @@
             "strikethrough": true
         }
     ],
-    "expected_output": "<font color=\"blue\"><b><i><u><s>Hello, Component!</s></u></i></b></font>"
+    "expected_output": "<span style=\"color: blue; font-weight: bold; font-style: italic;\"><s><u>Hello, Component!</u></s></span>"
 }

@@ -179,142 +179,85 @@ bool processZIP(ResourcePack& pack, ProcessingLevel level)
     return true;
 }
 
-struct TextFormatter {
-    // left is value, right is if the value was explicitly written
-    QPair<QString, bool> color = { "#000000", false };
-    QPair<bool, bool> bold = { false, false };
-    QPair<bool, bool> italic = { false, false };
-    QPair<bool, bool> underlined = { false, false };
-    QPair<bool, bool> strikethrough = { false, false };
-    QPair<bool, bool> is_linked = { false, false };
-    QPair<QString, bool> link_url = { "", false };
-
-    void setColor(const QString& new_color, bool written) { color = { new_color, written }; }
-    void setBold(bool new_bold, bool written) { bold = { new_bold, written }; }
-    void setItalic(bool new_italic, bool written) { italic = { new_italic, written }; }
-    void setUnderlined(bool new_underlined, bool written) { underlined = { new_underlined, written }; }
-    void setStrikethrough(bool new_strikethrough, bool written) { strikethrough = { new_strikethrough, written }; }
-    void setIsLinked(bool new_is_linked, bool written) { is_linked = { new_is_linked, written }; }
-    void setLinkURL(const QString& new_url, bool written) { link_url = { new_url, written }; }
-
-    void overrideFrom(const TextFormatter& child)
-    {
-        if (child.color.second)
-            color.first = child.color.first;
-        if (child.bold.second)
-            bold.first = child.bold.first;
-        if (child.italic.second)
-            italic.first = child.italic.first;
-        if (child.underlined.second)
-            underlined.first = child.underlined.first;
-        if (child.strikethrough.second)
-            strikethrough.first = child.strikethrough.first;
-        if (child.is_linked.second)
-            is_linked.first = child.is_linked.first;
-        if (child.link_url.second)
-            link_url.first = child.link_url.first;
-    }
-
-    QString format(QString text)
-    {
-        if (text.isEmpty())
-            return QString();
-
-        QString result;
-
-        if (color.first != "#000000")
-            result.append("<font color=\"" + color.first + "\">");
-        if (bold.first)
-            result.append("<b>");
-        if (italic.first)
-            result.append("<i>");
-        if (underlined.first)
-            result.append("<u>");
-        if (strikethrough.first)
-            result.append("<s>");
-        if (is_linked.first)
-            result.append("<a href=\"" + link_url.first + "\">");
-
-        result.append(text);
-
-        if (is_linked.first)
-            result.append("</a>");
-        if (strikethrough.first)
-            result.append("</s>");
-        if (underlined.first)
-            result.append("</u>");
-        if (italic.first)
-            result.append("</i>");
-        if (bold.first)
-            result.append("</b>");
-        if (color.first != "#000000")
-            result.append("</font>");
-
-        return result;
-    }
-
-    bool readFormat(const QJsonObject& obj)
-    {
-        setColor(Json::ensureString(obj, "color", "#000000"), obj.contains("color"));
-        setBold(Json::ensureBoolean(obj, "bold", false), obj.contains("bold"));
-        setItalic(Json::ensureBoolean(obj, "italic", false), obj.contains("italic"));
-        setUnderlined(Json::ensureBoolean(obj, "underlined", false), obj.contains("underlined"));
-        setStrikethrough(Json::ensureBoolean(obj, "strikethrough", false), obj.contains("strikethrough"));
-
-        auto click_event = Json::ensureObject(obj, "clickEvent");
-        setIsLinked(Json::ensureBoolean(click_event, "open_url", false), click_event.contains("open_url"));
-        setLinkURL(Json::ensureString(click_event, "value"), click_event.contains("value"));
-
-        return true;
-    }
-};
-
-bool processComponent(const QJsonValue& value, QString& result, const TextFormatter* parentFormat)
+QString buildStyle(const QJsonObject& obj)
 {
-    TextFormatter formatter;
-    if (parentFormat)
-        formatter = *parentFormat;
-
-    if (value.isString()) {
-        result.append(formatter.format(value.toString()));
-    } else if (value.isBool()) {
-        result.append(formatter.format(value.toBool() ? "true" : "false"));
-    } else if (value.isDouble()) {
-        result.append(formatter.format(QString::number(value.toDouble())));
-    } else if (value.isObject()) {
-        auto obj = value.toObject();
-
-        if (not formatter.readFormat(obj))
-            return false;
-
-        // override the parent format with our new one
-        TextFormatter mixed;
-        if (parentFormat)
-            mixed = *parentFormat;
-
-        mixed.overrideFrom(formatter);
-
-        result.append(mixed.format(Json::ensureString(obj, "text")));
-
-        // process any 'extra' children with this format
-        auto extra = obj.value("extra");
-        if (not extra.isUndefined())
-            return processComponent(extra, result, &mixed);
-
-    } else if (value.isArray()) {
-        auto array = value.toArray();
-
-        for (const QJsonValue& current : array) {
-            if (not processComponent(current, result, parentFormat)) {
-                return false;
-            }
+    QStringList styles;
+    if (auto color = Json::ensureString(obj, "color"); !color.isEmpty()) {
+        styles << QString("color: %1;").arg(color);
+    }
+    if (obj.contains("bold")) {
+        QString weight = "normal";
+        if (Json::ensureBoolean(obj, "bold", false)) {
+            weight = "bold";
         }
-    } else {
-        qWarning() << "Invalid component type!";
-        return false;
+        styles << QString("font-weight: %1;").arg(weight);
+    }
+    if (obj.contains("italic")) {
+        QString style = "normal";
+        if (Json::ensureBoolean(obj, "italic", false)) {
+            style = "italic";
+        }
+        styles << QString("font-style: %1;").arg(style);
     }
 
-    return true;
+    return styles.isEmpty() ? "" : QString("style=\"%1\"").arg(styles.join(" "));
+}
+
+QString processComponent(const QJsonArray& value, bool strikethrough, bool underline)
+{
+    QString result;
+    for (auto current : value)
+        result += processComponent(current, strikethrough, underline);
+    return result;
+}
+
+QString processComponent(const QJsonObject& obj, bool strikethrough, bool underline)
+{
+    underline = Json::ensureBoolean(obj, "underlined", underline);
+    strikethrough = Json::ensureBoolean(obj, "strikethrough", strikethrough);
+
+    QString result = Json::ensureString(obj, "text");
+    if (underline) {
+        result = QString("<u>%1</u>").arg(result);
+    }
+    if (strikethrough) {
+        result = QString("<s>%1</s>").arg(result);
+    }
+    // the extra needs to be a array
+    result += processComponent(Json::ensureArray(obj, "extra"), strikethrough, underline);
+    if (auto style = buildStyle(obj); !style.isEmpty()) {
+        result = QString("<span %1>%2</span>").arg(style, result);
+    }
+    if (obj.contains("clickEvent")) {
+        auto click_event = Json::ensureObject(obj, "clickEvent");
+        auto action = Json::ensureString(click_event, "action");
+        auto value = Json::ensureString(click_event, "value");
+        if (action == "open_url" && !value.isEmpty()) {
+            result = QString("<a href=\"%1\">%2</a>").arg(value, result);
+        }
+    }
+    return result;
+}
+
+QString processComponent(const QJsonValue& value, bool strikethrough, bool underline)
+{
+    if (value.isString()) {
+        return value.toString();
+    }
+    if (value.isBool()) {
+        return value.toBool() ? "true" : "false";
+    }
+    if (value.isDouble()) {
+        return QString::number(value.toDouble());
+    }
+    if (value.isArray()) {
+        return processComponent(value.toArray(), strikethrough, underline);
+    }
+    if (value.isObject()) {
+        return processComponent(value.toObject(), strikethrough, underline);
+    }
+    qWarning() << "Invalid component type!";
+    return {};
 }
 
 // https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
@@ -327,12 +270,7 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
 
         pack.setPackFormat(Json::ensureInteger(pack_obj, "pack_format", 0));
 
-        auto desc_val = pack_obj.value("description");
-        QString desc{};
-        if (not processComponent(desc_val, desc))
-            return false;
-
-        pack.setDescription(desc);
+        pack.setDescription(processComponent(pack_obj.value("description")));
 
     } catch (Json::JsonException& e) {
         qWarning() << "JsonException: " << e.what() << e.cause();

@@ -34,8 +34,7 @@ bool process(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
 bool processZIP(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
 bool processFolder(ResourcePack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
-struct TextFormatter;
-bool processComponent(const QJsonValue& value, QString& result, const TextFormatter* parentFormat = nullptr);
+QString processComponent(const QJsonValue& value, bool strikethrough = false, bool underline = false);
 bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data);
 bool processPackPNG(const ResourcePack& pack, QByteArray&& raw_data);
 

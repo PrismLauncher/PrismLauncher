@@ -3,7 +3,7 @@
         {
             "text": "Hello, Component!",
             "clickEvent": {
-                "open_url": true,
+                "action": "open_url",
                 "value": "https://google.com"
             }
         }

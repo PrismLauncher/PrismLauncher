@@ -64,16 +64,14 @@ class MetaComponentParseTest : public QObject {
         QJsonValue description_json = obj.value("description");
         QJsonValue expected_json = obj.value("expected_output");
 
-        QVERIFY(description_json.isUndefined() == false);
-        QVERIFY(expected_json.isString() == true);
+        QVERIFY(!description_json.isUndefined());
+        QVERIFY(expected_json.isString());
 
         QString expected = expected_json.toString();
 
-        QString processed;
-        bool valid = ResourcePackUtils::processComponent(description_json, processed);
+        QString processed = ResourcePackUtils::processComponent(description_json);
 
-        QVERIFY(processed == expected);
-        QVERIFY(valid == true);
+        QCOMPARE(processed, expected);
     }
 
    private slots:

@@ -287,8 +287,6 @@ void InfoFrame::setDescription(QString text)
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::RichText);  // This allows injecting HTML here.
         m_description = text;
 
-        const QString elidedPostfix = "<a href=\"#mod_desc\">...</a>";
-
         // move the cursor to the character elide, doesn't see html
         QTextCursor cursor(&doc);
         cursor.movePosition(QTextCursor::End);
@@ -296,7 +294,7 @@ void InfoFrame::setDescription(QString text)
         cursor.removeSelectedText();
 
         // insert the post fix at the cursor
-        cursor.insertHtml(elidedPostfix);
+        cursor.insertHtml("<a href=\"#mod_desc\">...</a>");
 
         labeltext.append(doc.toHtml());
         QObject::connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
@@ -335,7 +333,7 @@ void InfoFrame::setLicense(QString text)
     if (finaltext.length() > 290) {
         ui->licenseLabel->setOpenExternalLinks(false);
         ui->licenseLabel->setTextFormat(Qt::TextFormat::RichText);
-        m_description = text;
+        m_license = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
         QObject::connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
