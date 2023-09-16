@@ -26,7 +26,6 @@
 #include <quazip/quazipfile.h>
 
 #include <QCryptographicHash>
-#include <QRegularExpression>
 
 namespace ResourcePackUtils {
 
