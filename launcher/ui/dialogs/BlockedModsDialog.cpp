@@ -334,6 +334,13 @@ bool BlockedModsDialog::checkValidPath(QString path)
 
     for (auto& mod : m_mods) {
         if (compare(filename, mod.name)) {
+            // if the mod is not yet matched and doesn't have a hash then
+            // just match it with the file that has the exact same name
+            if (!mod.matched && mod.hash.isEmpty()) {
+                mod.matched = true;
+                mod.localPath = path;
+                return false;
+            }
             qDebug() << "[Blocked Mods Dialog] Name match found:" << mod.name << "| From path:" << path;
             return true;
         }
