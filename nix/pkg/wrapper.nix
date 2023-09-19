@@ -18,9 +18,11 @@
   flite,
   mesa-demos,
   udev,
+  libusb1,
   msaClientID ? null,
   gamemodeSupport ? stdenv.isLinux,
   textToSpeechSupport ? stdenv.isLinux,
+  controllerSupport ? stdenv.isLinux,
   jdks ? [jdk17 jdk8],
   additionalLibs ? [],
   additionalPrograms ? [],
@@ -71,6 +73,7 @@ in
         ]
         ++ lib.optional gamemodeSupport gamemode.lib
         ++ lib.optional textToSpeechSupport flite
+        ++ lib.optional controllerSupport libusb1
         ++ additionalLibs;
 
       runtimePrograms =
