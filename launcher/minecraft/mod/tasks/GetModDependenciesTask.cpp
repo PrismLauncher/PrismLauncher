@@ -256,7 +256,7 @@ QHash<QString, QStringList> GetModDependenciesTask::getRequiredBy()
 {
     QHash<QString, QStringList> rby;
     auto fullList = m_selected + m_pack_dependencies;
-    for (auto mod : fullList) {
+    for (auto& mod : fullList) {
         auto addonId = mod->pack->addonId;
         auto provider = mod->pack->provider;
         auto version = mod->version.fileId;
