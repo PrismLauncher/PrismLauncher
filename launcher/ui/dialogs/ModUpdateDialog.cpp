@@ -236,6 +236,11 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         if (skip_rest)
             continue;
 
+        if (candidate->type() == ResourceType::FOLDER) {
+            m_failed_metadata.append({ candidate, tr("This is a folder.") });
+            continue;
+        }
+
         if (confirm_rest) {
             addToTmp(candidate, provider_rest);
             should_try_others.insert(candidate->internal_id(), try_others_rest);
