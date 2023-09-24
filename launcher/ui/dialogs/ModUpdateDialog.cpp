@@ -237,7 +237,6 @@ auto ModUpdateDialog::ensureMetadata() -> bool
             continue;
 
         if (candidate->type() == ResourceType::FOLDER) {
-            m_failed_metadata.append({ candidate, tr("This is a folder.") });
             continue;
         }
 
