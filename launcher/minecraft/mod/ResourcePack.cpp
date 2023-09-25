@@ -11,7 +11,7 @@
 #include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
 
 // Values taken from:
-// https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
+// https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
 static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
     { 1, { Version("1.6.1"), Version("1.8.9") } },    { 2, { Version("1.9"), Version("1.10.2") } },
     { 3, { Version("1.11"), Version("1.12.2") } },    { 4, { Version("1.13"), Version("1.14.4") } },
