@@ -45,7 +45,6 @@
 #include "net/NetJob.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/LoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -64,8 +63,7 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     ui->setupUi(this);
     ui->listView->setEmptyString(
         tr("Welcome!\n"
-           "If you're new here, you can select the \"Add Microsoft\" or \"Add Mojang\" buttons to link your Microsoft and/or Mojang "
-           "accounts."));
+           "If you're new here, you can select the \"Add Microsoft\" button to link your Microsoft account."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -74,7 +72,6 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     ui->listView->setModel(m_accounts.get());
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::ProfileNameColumn, QHeaderView::Stretch);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::NameColumn, QHeaderView::Stretch);
-    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::MigrationColumn, QHeaderView::ResizeToContents);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::TypeColumn, QHeaderView::ResizeToContents);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::StatusColumn, QHeaderView::ResizeToContents);
     ui->listView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -137,19 +134,6 @@ QMenu* AccountListPage::createPopupMenu()
 void AccountListPage::listChanged()
 {
     updateButtonStates();
-}
-
-void AccountListPage::on_actionAddMojang_triggered()
-{
-    MinecraftAccountPtr account =
-        LoginDialog::newAccount(this, tr("Please enter your Mojang account email and password to add your account."));
-
-    if (account) {
-        m_accounts->addAccount(account);
-        if (m_accounts->count() == 1) {
-            m_accounts->setDefaultAccount(account);
-        }
-    }
 }
 
 void AccountListPage::on_actionAddMicrosoft_triggered()
