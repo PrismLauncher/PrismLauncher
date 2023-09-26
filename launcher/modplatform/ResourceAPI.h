@@ -105,7 +105,9 @@ class ResourceAPI {
         void operator=(ProjectInfoArgs other) { pack = other.pack; }
     };
     struct ProjectInfoCallbacks {
-        std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
+        std::function<void(QJsonDocument&, const ModPlatform::IndexedPack&)> on_succeed;
+        std::function<void(QString const& reason)> on_fail;
+        std::function<void()> on_abort;
     };
 
     struct DependencySearchArgs {

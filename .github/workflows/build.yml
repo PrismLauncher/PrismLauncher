@@ -125,7 +125,7 @@ jobs:
       # PREPARE
       ##
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'true'
 
@@ -164,7 +164,7 @@ jobs:
 
       - name: Retrieve ccache cache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
@@ -620,7 +620,7 @@ jobs:
       options: --privileged
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: inputs.build_type == 'Debug'
         with:
           submodules: 'true'

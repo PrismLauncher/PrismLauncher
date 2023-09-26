@@ -311,7 +311,7 @@ QString MinecraftInstance::getLocalLibraryPath() const
 bool MinecraftInstance::supportsDemo() const
 {
     Version instance_ver{ getPackProfile()->getComponentVersion("net.minecraft") };
-    // Demo mode was introduced in 1.3.1: https://minecraft.fandom.com/wiki/Demo_mode#History
+    // Demo mode was introduced in 1.3.1: https://minecraft.wiki/w/Demo_mode#History
     // FIXME: Due to Version constraints atm, this can't handle well non-release versions
     return instance_ver >= Version("1.3.1");
 }

@@ -370,6 +370,8 @@ QList<BasePage*> ShaderPackDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
     pages.append(ModrinthShaderPackPage::create(this, *m_instance));
+    if (APPLICATION->capabilities() & Application::SupportsFlame)
+        pages.append(FlameShaderPackPage::create(this, *m_instance));
     return pages;
 }
 

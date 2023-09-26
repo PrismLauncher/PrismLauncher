@@ -38,6 +38,8 @@ class FlameAPI : public NetworkResourceAPI {
                 return 6;
             case ModPlatform::ResourceType::RESOURCE_PACK:
                 return 12;
+            case ModPlatform::ResourceType::SHADER_PACK:
+                return 6552;
         }
     }
 
