@@ -875,7 +875,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     updateCapabilities();
 
     detectLibraries();
-  
+
     // check update locks
     {
         auto update_log_path = FS::PathCombine(m_dataPath, "logs", "prism_launcher_update.log");

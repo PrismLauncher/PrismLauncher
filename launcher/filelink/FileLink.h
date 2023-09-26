@@ -41,17 +41,10 @@ class FileLinkApp : public QCoreApplication {
     // friends for the purpose of limiting access to deprecated stuff
     Q_OBJECT
    public:
-    enum Status {
-        Starting,
-        Failed,
-        Succeeded,
-        Initialized
-    };
+    enum Status { Starting, Failed, Succeeded, Initialized };
     FileLinkApp(int& argc, char** argv);
     virtual ~FileLinkApp();
-    Status status() const {
-        return m_status;
-    }
+    Status status() const { return m_status; }
 
    private:
     void joinServer(QString server);

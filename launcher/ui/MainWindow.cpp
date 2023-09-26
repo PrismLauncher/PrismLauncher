@@ -676,8 +676,7 @@ void MainWindow::repopulateAccountsMenu()
 
 void MainWindow::updatesAllowedChanged(bool allowed)
 {
-    if(!APPLICATION->updaterEnabled())
-    {
+    if (!APPLICATION->updaterEnabled()) {
         return;
     }
     ui->actionCheckUpdate->setEnabled(allowed);
@@ -1209,8 +1208,7 @@ void MainWindow::refreshInstances()
 
 void MainWindow::checkForUpdates()
 {
-    if(APPLICATION->updaterEnabled())
-    {
+    if (APPLICATION->updaterEnabled()) {
         APPLICATION->triggerUpdateCheck();
     } else {
         qWarning() << "Updater not set up. Cannot check for updates.";

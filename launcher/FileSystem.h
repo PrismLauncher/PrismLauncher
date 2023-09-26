@@ -61,7 +61,6 @@ class FileSystemException : public ::Exception {
  */
 void write(const QString& filename, const QByteArray& data);
 
-
 /**
  * append data to a file safely
  */
@@ -71,7 +70,6 @@ void appendSafe(const QString& filename, const QByteArray& data);
  * append data to a file
  */
 void append(const QString& filename, const QByteArray& data);
-
 
 /**
  * read data from a file safely\

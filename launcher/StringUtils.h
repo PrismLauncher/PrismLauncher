@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <QString>
 #include <QPair>
+#include <QString>
 #include <QUrl>
 #include <utility>
 

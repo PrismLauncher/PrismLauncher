@@ -10,7 +10,6 @@
 #include "net/ApiUpload.h"
 #include "net/NetJob.h"
 #include "net/Upload.h"
-#include "net/ApiDownload.h"
 
 Task::Ptr ModrinthAPI::currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response)
 {

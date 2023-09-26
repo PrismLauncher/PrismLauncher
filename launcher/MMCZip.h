@@ -151,7 +151,6 @@ bool extractFile(QString fileCompressed, QString file, QString dir);
  */
 bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter);
 
-
 #if defined(LAUNCHER_APPLICATION)
 class ExportToZipTask : public Task {
    public:

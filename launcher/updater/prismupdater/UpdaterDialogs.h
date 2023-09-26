@@ -25,8 +25,8 @@
 #include <QDialog>
 #include <QTreeWidgetItem>
 
-#include "Version.h"
 #include "GitHubRelease.h"
+#include "Version.h"
 
 namespace Ui {
 class SelectReleaseDialog;
