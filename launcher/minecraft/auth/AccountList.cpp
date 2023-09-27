@@ -366,7 +366,7 @@ QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation o
                 case NameColumn:
                     return tr("User name of the account.");
                 case TypeColumn:
-                    return tr("Type of the account - Mojang or MSA.");
+                    return tr("Type of the account (currently only MSA is supported.)");
                 case StatusColumn:
                     return tr("Current status of the account.");
                 default:
