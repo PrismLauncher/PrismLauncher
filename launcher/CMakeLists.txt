@@ -1137,6 +1137,9 @@ include(CompilerWarnings)
 
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+if(BUILD_TESTING)
+target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_TEST)
+endif()
 set_project_warnings(Launcher_logic
     "${Launcher_MSVC_WARNINGS}"
     "${Launcher_CLANG_WARNINGS}"
