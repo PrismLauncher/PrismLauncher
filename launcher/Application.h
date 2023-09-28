@@ -142,6 +142,8 @@ class Application : public QApplication {
 
     void updateCapabilities();
 
+    void detectLibraries();
+
     /*!
      * Finds and returns the full path to a jar file.
      * Returns a null-string if it could not be found.
@@ -193,7 +195,6 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
-                BaseProfilerFactory* profiler = nullptr,
                 MinecraftServerTargetPtr serverToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);
@@ -277,6 +278,8 @@ class Application : public QApplication {
     SetupWizard* m_setupWizard = nullptr;
 
    public:
+    QString m_detectedGLFWPath;
+    QString m_detectedOpenALPath;
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
     QString m_profileToUse;

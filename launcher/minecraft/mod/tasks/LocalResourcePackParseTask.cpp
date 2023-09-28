@@ -178,7 +178,7 @@ bool processZIP(ResourcePack& pack, ProcessingLevel level)
     return true;
 }
 
-// https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
+// https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
 bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
 {
     try {

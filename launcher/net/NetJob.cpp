@@ -36,8 +36,13 @@
  */
 
 #include "NetJob.h"
+#include "Application.h"
 #include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
+
+NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network)
+    : ConcurrentTask(nullptr, job_name, APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt()), m_network(network)
+{}
 
 auto NetJob::addNetAction(NetAction::Ptr action) -> bool
 {
