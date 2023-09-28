@@ -900,7 +900,7 @@ bool PrismUpdaterApp::callAppImageUpdate()
     auto appimage_path = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
     QProcess proc = QProcess();
     qDebug() << "Calling: AppImageUpdate" << appimage_path;
-    proc.setProgram("AppImageUpdate");
+    proc.setProgram("bin/AppImageUpdate");
     proc.setArguments({ appimage_path });
     auto result = proc.startDetached();
     if (!result)
@@ -1213,8 +1213,14 @@ bool PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
     }
     auto out = proc.readAllStandardOutput();
     auto lines = out.split('\n');
+    lines.removeAll("");
     if (lines.length() < 2)
         return false;
+    else if (lines.length() > 2) {
+        auto line1 = lines.takeLast();
+        auto line2 = lines.takeLast();
+        lines = { line2, line1 };
+    }
     auto first = lines.takeFirst();
     auto first_parts = first.split(' ');
     if (first_parts.length() < 2)
@@ -1230,6 +1236,8 @@ bool PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
         m_prsimVersionChannel = "stable";
     }
     auto version_parts = version.split('.');
+    if (version_parts.length() < 2)
+        return false;
     m_prismVersionMajor = version_parts.takeFirst().toInt();
     m_prismVersionMinor = version_parts.takeFirst().toInt();
     m_prismGitCommit = lines.takeFirst().simplified();

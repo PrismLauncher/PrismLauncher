@@ -338,6 +338,8 @@ void PrismExternalUpdater::performUpdate(const QString& version_tag)
     auto env = QProcessEnvironment::systemEnvironment();
     env.insert("__COMPAT_LAYER", "RUNASINVOKER");
     proc.setProcessEnvironment(env);
+#else
+    exe_name = QString("bin/%1").arg(exe_name);
 #endif
 
     QStringList args = { "--dir", priv->dataDir.absolutePath(), "--install-version", version_tag };
