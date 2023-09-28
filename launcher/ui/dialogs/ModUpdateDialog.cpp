@@ -3,6 +3,9 @@
 #include "CustomMessageBox.h"
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
+#include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui_ReviewMessageBox.h"
 
 #include "Markdown.h"
@@ -125,6 +128,8 @@ void ModUpdateDialog::checkCandidates()
         return;
     }
 
+    QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
+
     // Add found updates for Modrinth
     if (m_modrinth_check_task) {
         auto modrinth_updates = m_modrinth_check_task->getUpdatable();
@@ -134,6 +139,7 @@ void ModUpdateDialog::checkCandidates()
             appendMod(updatable);
             m_tasks.insert(updatable.name, updatable.download);
         }
+        selectedVers.append(m_modrinth_check_task->getDependencies());
     }
 
     // Add found updated for Flame
@@ -145,6 +151,7 @@ void ModUpdateDialog::checkCandidates()
             appendMod(updatable);
             m_tasks.insert(updatable.name, updatable.download);
         }
+        selectedVers.append(m_flame_check_task->getDependencies());
     }
 
     // Report failed update checking
@@ -176,6 +183,47 @@ void ModUpdateDialog::checkCandidates()
             m_aborted = true;
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
+        }
+    }
+
+    {  // dependencies
+        auto depTask = makeShared<GetModDependenciesTask>(this, m_instance, m_mod_model.get(), selectedVers);
+
+        connect(depTask.get(), &Task::failed, this,
+                [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+
+        connect(depTask.get(), &Task::succeeded, this, [&]() {
+            QStringList warnings = depTask->warnings();
+            if (warnings.count()) {
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+            }
+        });
+
+        ProgressDialog progress_dialog_deps(m_parent);
+        progress_dialog_deps.setSkipButton(true, tr("Abort"));
+        progress_dialog_deps.setWindowTitle(tr("Checking for dependencies..."));
+        auto dret = progress_dialog_deps.execWithTask(depTask.get());
+
+        // If the dialog was skipped / some download error happened
+        if (dret == QDialog::DialogCode::Rejected) {
+            m_aborted = true;
+            QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
+            return;
+        }
+        static FlameAPI api;
+
+        auto getRequiredBy = depTask->getRequiredBy();
+
+        for (auto dep : depTask->getDependecies()) {
+            auto changelog = dep->version.changelog;
+            if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
+                changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
+            auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_mod_model);
+            CheckUpdateTask::UpdatableMod updatable = { dep->pack->name, dep->version.hash,   "",           dep->version.version,
+                                                        changelog,       dep->pack->provider, download_task };
+
+            appendMod(updatable, getRequiredBy.value(dep->version.addonId.toString()));
+            m_tasks.insert(updatable.name, updatable.download);
         }
     }
 
@@ -351,7 +399,7 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
     }
 }
 
-void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
+void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStringList requiredBy)
 {
     auto item_top = new QTreeWidgetItem(ui->modTreeWidget);
     item_top->setCheckState(0, Qt::CheckState::Checked);
@@ -366,6 +414,21 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info)
 
     auto new_version_item = new QTreeWidgetItem(item_top);
     new_version_item->setText(0, tr("New version: %1").arg(info.new_version));
+
+    if (!requiredBy.isEmpty()) {
+        auto requiredByItem = new QTreeWidgetItem(item_top);
+        if (requiredBy.length() == 1) {
+            requiredByItem->setText(0, tr("Required by: %1").arg(requiredBy.back()));
+        } else {
+            requiredByItem->setText(0, tr("Required by:"));
+            auto i = 0;
+            for (auto req : requiredBy) {
+                auto reqItem = new QTreeWidgetItem(requiredByItem);
+                reqItem->setText(0, req);
+                reqItem->insertChildren(i++, { reqItem });
+            }
+        }
+    }
 
     auto changelog_item = new QTreeWidgetItem(item_top);
     changelog_item->setText(0, tr("Changelog of the latest version"));
