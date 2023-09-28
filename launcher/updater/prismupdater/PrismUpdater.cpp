@@ -27,20 +27,20 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <QAccessible>
-#include <QCommandLineParser>
-#include <QNetworkReply>
-
 #include <QDebug>
 
+#include <QAccessible>
+#include <QCommandLineParser>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QNetworkProxy>
+#include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QProcess>
+#include <QProgressDialog>
 #include <memory>
 
 #include <sys.h>
-#include <QProgressDialog>
 
 #if defined Q_OS_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -660,28 +660,42 @@ void PrismUpdaterApp::moveAndFinishUpdate(QDir target)
 
     bool error = false;
 
-    QProgressDialog progress(tr("Backing up install at %1").arg(m_rootPath), "", 0, file_list.length());
+    QProgressDialog progress(tr("Installing from %1").arg(m_rootPath), "", 0, file_list.length());
     progress.setCancelButton(nullptr);
     progress.setMinimumWidth(400);
     progress.adjustSize();
     progress.show();
     QCoreApplication::processEvents();
 
+    logUpdate(tr("Installing from %1").arg(m_rootPath));
+
+    auto copy = [this, app_dir, target](QString to_install_file) {
+        auto rel_path = app_dir.relativeFilePath(to_install_file);
+        auto install_path = FS::PathCombine(target.absolutePath(), rel_path);
+        logUpdate(tr("Installing %1 from %2").arg(install_path).arg(to_install_file));
+        FS::ensureFilePathExists(install_path);
+        auto result = FS::copy(to_install_file, install_path).overwrite(true)();
+        if (!result) {
+            logUpdate(tr("Failed copy %1 to %2").arg(to_install_file).arg(install_path));
+            return true;
+        }
+        return false;
+    };
+
     int i = 0;
     for (auto glob : file_list) {
         QDirIterator iter(m_rootPath, QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
         progress.setValue(i);
         QCoreApplication::processEvents();
-        while (iter.hasNext()) {
-            auto to_install_file = iter.next();
-            auto rel_path = app_dir.relativeFilePath(to_install_file);
-            auto install_path = FS::PathCombine(target.absolutePath(), rel_path);
-            logUpdate(tr("Installing %1 from %2").arg(install_path).arg(to_install_file));
-            FS::ensureFilePathExists(install_path);
-            auto result = FS::copy(to_install_file, install_path).overwrite(true)();
-            if (!result) {
-                error = true;
-                logUpdate(tr("Failed copy %1 to %2").arg(to_install_file).arg(install_path));
+        if (!iter.hasNext() && !glob.isEmpty()) {
+            if (auto file_info = QFileInfo(FS::PathCombine(m_rootPath, glob)); file_info.exists()) {
+                error |= copy(file_info.absoluteFilePath());
+            } else {
+                logUpdate(tr("File doesn't exist, ignoring: %1").arg(FS::PathCombine(m_rootPath, glob)));
+            }
+        } else {
+            while (iter.hasNext()) {
+                error |= copy(iter.next());
             }
         }
         i++;
@@ -1124,23 +1138,37 @@ void PrismUpdaterApp::backupAppDir()
     progress.adjustSize();
     progress.show();
     QCoreApplication::processEvents();
+
+    logUpdate(tr("Backing up install at %1").arg(m_rootPath));
+
+    auto copy = [this, app_dir, backup_dir](QString to_bak_file) {
+        auto rel_path = app_dir.relativeFilePath(to_bak_file);
+        auto bak_path = FS::PathCombine(backup_dir, rel_path);
+        logUpdate(tr("Backing up and then removing %1").arg(to_bak_file));
+        FS::ensureFilePathExists(bak_path);
+        auto result = FS::copy(to_bak_file, bak_path).overwrite(true)();
+        if (!result) {
+            logUpdate(tr("Failed to backup %1 to %2").arg(to_bak_file).arg(bak_path));
+        } else {
+            if (!FS::deletePath(to_bak_file))
+                logUpdate(tr("Failed to remove %1").arg(to_bak_file));
+        }
+    };
+
     int i = 0;
     for (auto glob : file_list) {
         QDirIterator iter(app_dir.absolutePath(), QStringList({ glob }), QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
         progress.setValue(i);
         QCoreApplication::processEvents();
-        while (iter.hasNext()) {
-            auto to_bak_file = iter.next();
-            auto rel_path = app_dir.relativeFilePath(to_bak_file);
-            auto bak_path = FS::PathCombine(backup_dir, rel_path);
-            logUpdate(tr("Backing up and then removing %1").arg(to_bak_file));
-            FS::ensureFilePathExists(bak_path);
-            auto result = FS::copy(to_bak_file, bak_path).overwrite(true)();
-            if (!result) {
-                logUpdate(tr("Failed to backup %1 to %2").arg(to_bak_file).arg(bak_path));
+        if (!iter.hasNext() && !glob.isEmpty()) {
+            if (auto file_info = QFileInfo(FS::PathCombine(m_rootPath, glob)); file_info.exists()) {
+                copy(file_info.absoluteFilePath());
             } else {
-                if (!FS::deletePath(to_bak_file))
-                    logUpdate(tr("Failed to remove %1").arg(to_bak_file));
+                logUpdate(tr("File doesn't exist, ignoring: %1").arg(FS::PathCombine(m_rootPath, glob)));
+            }
+        } else {
+            while (iter.hasNext()) {
+                copy(iter.next());
             }
         }
         i++;
