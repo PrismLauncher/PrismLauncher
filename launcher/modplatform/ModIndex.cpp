@@ -32,23 +32,6 @@ static const QMap<QString, IndexedVersionType::VersionType> s_indexed_version_ty
 
 IndexedVersionType::IndexedVersionType(const QString& type) : IndexedVersionType(enumFromString(type)) {}
 
-IndexedVersionType::IndexedVersionType(int flame_type)
-{
-    switch (flame_type) {
-        case 1:
-            m_type = IndexedVersionType::VersionType::Release;
-            break;
-        case 2:
-            m_type = IndexedVersionType::VersionType::Beta;
-            break;
-        case 3:
-            m_type = IndexedVersionType::VersionType::Alpha;
-            break;
-        default:
-            m_type = IndexedVersionType::VersionType::Unknown;
-    }
-}
-
 IndexedVersionType::IndexedVersionType(const IndexedVersionType::VersionType& type)
 {
     m_type = type;

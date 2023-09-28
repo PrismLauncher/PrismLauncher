@@ -62,7 +62,6 @@ struct DonationData {
 struct IndexedVersionType {
     enum class VersionType { Release = 1, Beta, Alpha, Unknown };
     IndexedVersionType(const QString& type);
-    IndexedVersionType(int flame_type);
     IndexedVersionType(const IndexedVersionType::VersionType& type);
     IndexedVersionType(const IndexedVersionType& type);
     IndexedVersionType() : IndexedVersionType(IndexedVersionType::VersionType::Unknown) {}
