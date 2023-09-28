@@ -900,7 +900,7 @@ bool PrismUpdaterApp::callAppImageUpdate()
     auto appimage_path = QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));
     QProcess proc = QProcess();
     qDebug() << "Calling: AppImageUpdate" << appimage_path;
-    proc.setProgram("bin/AppImageUpdate");
+    proc.setProgram(FS::PathCombine(m_rootPath, "bin", "AppImageUpdate-x86_64.AppImage"));
     proc.setArguments({ appimage_path });
     auto result = proc.startDetached();
     if (!result)

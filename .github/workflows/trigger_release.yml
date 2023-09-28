@@ -3,10 +3,9 @@ name: Build Application and Make Release
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
-
   build_release:
     name: Build Release
     uses: ./.github/workflows/build.yml
@@ -18,6 +17,8 @@ jobs:
       WINDOWS_CODESIGN_CERT: ${{ secrets.WINDOWS_CODESIGN_CERT }}
       WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
       CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PRIVATE_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY_ID }}
 
   create_release:
     needs: build_release
@@ -28,8 +29,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: 'true'
-          path: 'PrismLauncher-source'
+          submodules: "true"
+          path: "PrismLauncher-source"
       - name: Download artifacts
         uses: actions/download-artifact@v3
       - name: Grab and store version

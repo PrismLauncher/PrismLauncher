@@ -37,7 +37,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-
           - os: ubuntu-20.04
             qt_ver: 5
 
@@ -127,9 +126,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: 'true'
+          submodules: "true"
 
-      - name: 'Setup MSYS2'
+      - name: "Setup MSYS2"
         if: runner.os == 'Windows' && matrix.msystem != ''
         uses: msys2/setup-msys2@v2
         with:
@@ -169,7 +168,7 @@ jobs:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
           restore-keys: |
-              ${{ matrix.os }}-mingw-w64-ccache
+            ${{ matrix.os }}-mingw-w64-ccache
 
       - name: Setup ccache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
@@ -214,35 +213,35 @@ jobs:
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         uses: jurplel/install-qt-action@v3
         with:
-           aqtversion: '==3.1.*'
-           py7zrversion: '>=0.20.2'
-           version: ${{ matrix.qt_version }}
-           host: 'windows'
-           target: 'desktop'
-           arch: ''
-           modules: ${{ matrix.qt_modules }}
-           tools: ${{ matrix.qt_tools }}
-           cache: ${{ inputs.is_qt_cached }}
-           cache-key-prefix: host-qt-arm64-windows
-           dir: ${{ github.workspace }}\HostQt
-           set-env: false
+          aqtversion: "==3.1.*"
+          py7zrversion: ">=0.20.2"
+          version: ${{ matrix.qt_version }}
+          host: "windows"
+          target: "desktop"
+          arch: ""
+          modules: ${{ matrix.qt_modules }}
+          tools: ${{ matrix.qt_tools }}
+          cache: ${{ inputs.is_qt_cached }}
+          cache-key-prefix: host-qt-arm64-windows
+          dir: ${{ github.workspace }}\HostQt
+          set-env: false
 
       - name: Install Qt (macOS, Linux, Qt 6 & Windows MSVC)
         if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
-           aqtversion: '==3.1.*'
-           py7zrversion: '>=0.20.2'
-           version: ${{ matrix.qt_version }}
-           host: ${{ matrix.qt_host }}
-           target: 'desktop'
-           arch: ${{ matrix.qt_arch }}
-           modules: ${{ matrix.qt_modules }}
-           tools: ${{ matrix.qt_tools }}
-           cache: ${{ inputs.is_qt_cached }}
+          aqtversion: "==3.1.*"
+          py7zrversion: ">=0.20.2"
+          version: ${{ matrix.qt_version }}
+          host: ${{ matrix.qt_host }}
+          target: "desktop"
+          arch: ${{ matrix.qt_arch }}
+          modules: ${{ matrix.qt_modules }}
+          tools: ${{ matrix.qt_tools }}
+          cache: ${{ inputs.is_qt_cached }}
 
       - name: Install MSVC (Windows MSVC)
-        if: runner.os == 'Windows'  # We want this for MinGW builds as well, as we need SignTool
+        if: runner.os == 'Windows' # We want this for MinGW builds as well, as we need SignTool
         uses: ilammy/msvc-dev-cmd@v1
         with:
           vsversion: 2022
@@ -343,7 +342,7 @@ jobs:
       - name: Test (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != 'arm64'
         run: |
-          ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }} 
+          ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }}
 
       ##
       # PACKAGE BUILDS
@@ -385,7 +384,7 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }}
           touch ${{ env.INSTALL_DIR }}/manifest.txt
-          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt 
+          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
@@ -402,10 +401,9 @@ jobs:
 
           Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
-
       - name: Fetch codesign certificate (Windows)
         if: runner.os == 'Windows'
-        shell: bash  # yes, we are not using MSYS2 or PowerShell here
+        shell: bash # yes, we are not using MSYS2 or PowerShell here
         run: |
           echo '${{ secrets.WINDOWS_CODESIGN_CERT }}' | base64 --decode > codesign.pfx
 
@@ -507,15 +505,7 @@ jobs:
           export LD_LIBRARY_PATH
 
           chmod +x AppImageUpdate-x86_64.AppImage
-          ./AppImageUpdate-x86_64.AppImage --appimage-extract
-
-          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
-          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
-
-          cp -r squashfs-root/usr/bin/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
-          cp -r squashfs-root/usr/lib/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib
-          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
-          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
+          cp AppImageUpdate-x86_64.AppImage ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
 
           export UPDATE_INFORMATION="gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-Linux-x86_64.AppImage.zsync" 
 
@@ -599,7 +589,7 @@ jobs:
         with:
           name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
           path: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
-      
+
       - name: Upload AppImage Zsync (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
         uses: actions/upload-artifact@v3
@@ -623,10 +613,10 @@ jobs:
         uses: actions/checkout@v4
         if: inputs.build_type == 'Debug'
         with:
-          submodules: 'true'
+          submodules: "true"
       - name: Build Flatpak (Linux)
         if: inputs.build_type == 'Debug'
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: "Prism Launcher.flatpak"
-          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
+          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml
