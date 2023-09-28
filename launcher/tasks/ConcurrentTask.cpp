@@ -88,6 +88,7 @@ bool ConcurrentTask::abort()
     QMutableHashIterator<Task*, Task::Ptr> doing_iter(m_doing);
     while (doing_iter.hasNext()) {
         auto task = doing_iter.next();
+        disconnect(task->get(), &Task::aborted, this, 0);
         suceedeed &= (task.value())->abort();
     }
 
@@ -130,6 +131,7 @@ void ConcurrentTask::startNext()
 
     connect(next.get(), &Task::succeeded, this, [this, next]() { subTaskSucceeded(next); });
     connect(next.get(), &Task::failed, this, [this, next](QString msg) { subTaskFailed(next, msg); });
+    connect(next.get(), &Task::aborted, this, [this, next] { subTaskFailed(next, "Aborted"); });
 
     connect(next.get(), &Task::status, this, [this, next](QString msg) { subTaskStatus(next, msg); });
     connect(next.get(), &Task::details, this, [this, next](QString msg) { subTaskDetails(next, msg); });
@@ -171,7 +173,7 @@ void ConcurrentTask::subTaskSucceeded(Task::Ptr task)
     startNext();
 }
 
-void ConcurrentTask::subTaskFailed(Task::Ptr task, const QString& msg)
+void ConcurrentTask::subTaskFailed(Task::Ptr task, [[maybe_unused]] const QString& msg)
 {
     m_done.insert(task.get(), task);
     m_failed.insert(task.get(), task);

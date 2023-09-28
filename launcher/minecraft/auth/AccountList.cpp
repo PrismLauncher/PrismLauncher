@@ -353,7 +353,7 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
     }
 }
 
-QVariant AccountList::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
         case Qt::DisplayRole:
@@ -415,7 +415,7 @@ Qt::ItemFlags AccountList::flags(const QModelIndex& index) const
 
 bool AccountList::setData(const QModelIndex& idx, const QVariant& value, int role)
 {
-    if (idx.row() < 0 || idx.row() >= rowCount(idx) || !idx.isValid()) {
+    if (idx.row() < 0 || idx.row() >= rowCount(idx.parent()) || !idx.isValid()) {
         return false;
     }
 
@@ -423,7 +423,8 @@ bool AccountList::setData(const QModelIndex& idx, const QVariant& value, int rol
         if (value == Qt::Checked) {
             MinecraftAccountPtr account = at(idx.row());
             setDefaultAccount(account);
-        }
+        } else if (m_defaultAccount == at(idx.row()))
+            setDefaultAccount(nullptr);
     }
 
     emit dataChanged(idx, index(idx.row(), columnCount(QModelIndex()) - 1));

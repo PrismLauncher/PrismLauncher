@@ -34,6 +34,7 @@
  */
 
 #include "TechnicPage.h"
+#include "ui/widgets/ProjectItem.h"
 #include "ui_TechnicPage.h"
 
 #include <QKeyEvent>
@@ -49,7 +50,10 @@
 #include "Application.h"
 #include "modplatform/technic/SolderPackManifest.h"
 
-TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog)
+#include "net/ApiDownload.h"
+
+TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
+    : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &TechnicPage::triggerSearch);
@@ -57,8 +61,21 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(p
     model = new Technic::ListModel(this);
     ui->packView->setModel(model);
 
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &TechnicPage::triggerSearch);
+
+    m_fetch_progress.hideIfInactive(true);
+    m_fetch_progress.setFixedHeight(24);
+    m_fetch_progress.progressFormat("");
+
+    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
+
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &TechnicPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &TechnicPage::onVersionSelectionChanged);
+
+    ui->packView->setItemDelegate(new ProjectItemDelegate(this));
 }
 
 bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
@@ -69,6 +86,11 @@ bool TechnicPage::eventFilter(QObject* watched, QEvent* event)
             triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     }
     return QWidget::eventFilter(watched, event);
@@ -98,9 +120,10 @@ void TechnicPage::openedImpl()
 void TechnicPage::triggerSearch()
 {
     model->searchWithTerm(ui->searchEdit->text());
+    m_fetch_progress.watch(model->activeSearchJob().get());
 }
 
-void TechnicPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void TechnicPage::onSelectionChanged(QModelIndex first, [[maybe_unused]] QModelIndex second)
 {
     ui->versionSelectionBox->clear();
 
@@ -125,7 +148,7 @@ void TechnicPage::suggestCurrent()
         return;
     }
 
-    QString editedLogoName = "technic_" + current.logoName.section(".", 0, 0);
+    QString editedLogoName = "technic_" + current.logoName;
     model->getLogo(current.logoName, current.logoUrl,
                    [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 
@@ -136,7 +159,7 @@ void TechnicPage::suggestCurrent()
 
     auto netJob = makeShared<NetJob>(QString("Technic::PackMeta(%1)").arg(current.name), APPLICATION->network());
     QString slug = current.slug;
-    netJob->addNetAction(Net::Download::makeByteArray(
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString("%1modpack/%2?build=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, slug, BuildConfig.TECHNIC_API_BUILD), response));
     QObject::connect(netJob.get(), &NetJob::succeeded, this, [this, slug] {
         jobPtr.reset();
@@ -232,7 +255,7 @@ void TechnicPage::metadataLoaded()
 
         auto netJob = makeShared<NetJob>(QString("Technic::SolderMeta(%1)").arg(current.name), APPLICATION->network());
         auto url = QString("%1/modpack/%2").arg(current.url, current.slug);
-        netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), response));
+        netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
 
         QObject::connect(netJob.get(), &NetJob::succeeded, this, &TechnicPage::onSolderLoaded);
 
@@ -304,13 +327,13 @@ void TechnicPage::onSolderLoaded()
     metadataLoaded();
 }
 
-void TechnicPage::onVersionSelectionChanged(QString data)
+void TechnicPage::onVersionSelectionChanged(QString version)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }
 
-    selectedVersion = data;
+    selectedVersion = version;
     selectVersion();
 }

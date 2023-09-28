@@ -33,12 +33,14 @@ const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "z
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
                                                const QString& summary,
+                                               bool optionalFiles,
                                                InstancePtr instance,
                                                const QString& output,
                                                MMCZip::FilterFunction filter)
     : name(name)
     , version(version)
     , summary(summary)
+    , optionalFiles(optionalFiles)
     , instance(instance)
     , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
     , gameRoot(instance->gameRoot())
@@ -174,10 +176,10 @@ void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<QByteArray> 
             if (obj.isEmpty())
                 continue;
 
-            const QJsonArray files = obj["files"].toArray();
-            if (auto fileIter = std::find_if(files.begin(), files.end(),
+            const QJsonArray files_array = obj["files"].toArray();
+            if (auto fileIter = std::find_if(files_array.begin(), files_array.end(),
                                              [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
-                fileIter != files.end()) {
+                fileIter != files_array.end()) {
                 // map the file to the url
                 resolvedFiles[iterator.key()] =
                     ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), iterator.value(),
@@ -245,6 +247,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
         const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
         const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
         const ComponentPtr forge = profile->getComponent("net.minecraftforge");
+        const ComponentPtr neoForge = profile->getComponent("net.neoforged");
 
         // convert all available components to mrpack dependencies
         QJsonObject dependencies;
@@ -256,6 +259,8 @@ QByteArray ModrinthPackExportTask::generateIndex()
             dependencies["fabric-loader"] = fabric->m_version;
         if (forge != nullptr)
             dependencies["forge"] = forge->m_version;
+        if (neoForge != nullptr)
+            dependencies["neoforge"] = neoForge->m_version;
 
         out["dependencies"] = dependencies;
     }
@@ -267,16 +272,18 @@ QByteArray ModrinthPackExportTask::generateIndex()
         QString path = iterator.key();
         const ResolvedFile& value = iterator.value();
 
-        // detect disabled mod
-        const QFileInfo pathInfo(path);
-        if (pathInfo.suffix() == "disabled") {
-            // rename it
-            path = pathInfo.dir().filePath(pathInfo.completeBaseName());
-            // ...and make it optional
-            QJsonObject env;
-            env["client"] = "optional";
-            env["server"] = "optional";
-            fileOut["env"] = env;
+        if (optionalFiles) {
+            // detect disabled mod
+            const QFileInfo pathInfo(path);
+            if (pathInfo.suffix() == "disabled") {
+                // rename it
+                path = pathInfo.dir().filePath(pathInfo.completeBaseName());
+                // ...and make it optional
+                QJsonObject env;
+                env["client"] = "optional";
+                env["server"] = "optional";
+                fileOut["env"] = env;
+            }
         }
 
         fileOut["path"] = path;

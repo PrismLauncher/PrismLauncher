@@ -53,6 +53,8 @@
 #include "net/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
 
+#include "net/ApiDownload.h"
+
 #include "Application.h"
 #include "BuildConfig.h"
 
@@ -83,7 +85,7 @@ void PackInstallTask::executeTask()
     NetJob::Ptr netJob{ new NetJob("ATLauncher::VersionFetch", APPLICATION->network()) };
     auto searchUrl =
         QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_pack_safe_name).arg(m_version_name);
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     QObject::connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
@@ -631,7 +633,7 @@ void PackInstallTask::installConfigs()
     auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", path);
     entry->setStale(true);
 
-    auto dl = Net::Download::makeCached(url, entry);
+    auto dl = Net::ApiDownload::makeCached(url, entry);
     if (!m_version.configs.sha1.isEmpty()) {
         auto rawSha1 = QByteArray::fromHex(m_version.configs.sha1.toLatin1());
         dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
@@ -748,7 +750,7 @@ void PackInstallTask::downloadMods()
             entry->setStale(true);
             modsToExtract.insert(entry->getFullPath(), mod);
 
-            auto dl = Net::Download::makeCached(url, entry);
+            auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
@@ -759,7 +761,7 @@ void PackInstallTask::downloadMods()
             entry->setStale(true);
             modsToDecomp.insert(entry->getFullPath(), mod);
 
-            auto dl = Net::Download::makeCached(url, entry);
+            auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
@@ -773,7 +775,7 @@ void PackInstallTask::downloadMods()
             auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
 
-            auto dl = Net::Download::makeCached(url, entry);
+            auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
@@ -1003,15 +1005,30 @@ static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString&
     if (!vlist)
         return {};
 
-    if (!vlist->isLoaded())
-        vlist->load(Net::Mode::Online);
+    if (!vlist->isLoaded()) {
+        QEventLoop loadVersionLoop;
+        auto task = vlist->getLoadTask();
+        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+        if (!task->isRunning())
+            task->start();
+
+        loadVersionLoop.exec();
+    }
 
     auto ver = vlist->getVersion(version);
     if (!ver)
         return {};
 
-    if (!ver->isLoaded())
+    if (!ver->isLoaded()) {
+        QEventLoop loadVersionLoop;
         ver->load(Net::Mode::Online);
+        auto task = ver->getCurrentTask();
+        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+        if (!task->isRunning())
+            task->start();
+
+        loadVersionLoop.exec();
+    }
 
     return ver;
 }

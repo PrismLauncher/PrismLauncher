@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +39,7 @@
 #include <cassert>
 
 #include <QDateTime>
+#include <QMenu>
 #include <QObject>
 #include <QProcess>
 #include <QSet>
@@ -86,7 +88,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
 
    public:
     /// virtual destructor to make sure the destruction is COMPLETE
-    virtual ~BaseInstance(){};
+    virtual ~BaseInstance() {}
 
     virtual void saveNow() = 0;
 
@@ -146,7 +148,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     void copyManagedPack(BaseInstance& other);
 
     /// guess log level from a line of game log
-    virtual MessageLevel::Enum guessLevel([[maybe_unused]] const QString& line, MessageLevel::Enum level) { return level; };
+    virtual MessageLevel::Enum guessLevel([[maybe_unused]] const QString& line, MessageLevel::Enum level) { return level; }
 
     virtual QStringList extraArguments();
 
@@ -246,6 +248,8 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     virtual bool canEdit() const = 0;
     virtual bool canExport() const = 0;
 
+    virtual void populateLaunchMenu(QMenu* menu) = 0;
+
     bool reloadSettings();
 
     /**
@@ -267,7 +271,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
    protected:
     void changeStatus(Status newStatus);
 
-    SettingsObjectPtr globalSettings() const { return m_global_settings.lock(); };
+    SettingsObjectPtr globalSettings() const { return m_global_settings.lock(); }
 
     bool isSpecificSettingsLoaded() const { return m_specific_settings_loaded; }
     void setSpecificSettingsLoaded(bool loaded) { m_specific_settings_loaded = loaded; }
@@ -281,6 +285,8 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     void launchTaskChanged(shared_qobject_ptr<LaunchTask>);
 
     void runningStatusChanged(bool running);
+
+    void profilerChanged();
 
     void statusChanged(Status from, Status to);
 

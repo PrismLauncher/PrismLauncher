@@ -43,7 +43,6 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
-#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -85,22 +84,19 @@
 #include <launch/LaunchTask.h>
 #include <minecraft/MinecraftInstance.h>
 #include <minecraft/auth/AccountList.h>
-#include <net/Download.h>
+#include <net/ApiDownload.h>
 #include <net/NetJob.h>
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
-#include "InstancePageProvider.h"
 #include "InstanceWindow.h"
-#include "JavaCommon.h"
-#include "LaunchController.h"
 
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
+#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -113,15 +109,24 @@
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/LabeledToolButton.h"
 
+#include "minecraft/PackProfile.h"
+#include "minecraft/VersionFile.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourcePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
+
+#include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
 
 #include "KonamiCode.h"
 
 #include "InstanceCopyTask.h"
-#include "InstanceImportTask.h"
+
+#include "Json.h"
 
 #include "MMCTime.h"
 
@@ -515,9 +520,9 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         QAction* actionCreateInstance = new QAction(tr("Create instance"), this);
         actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
         if (!group.isNull()) {
-            QVariantMap data;
-            data["group"] = group;
-            actionCreateInstance->setData(data);
+            QVariantMap instance_action_data;
+            instance_action_data["group"] = group;
+            actionCreateInstance->setData(instance_action_data);
         }
 
         connect(actionCreateInstance, SIGNAL(triggered(bool)), SLOT(on_actionAddInstance_triggered()));
@@ -527,9 +532,9 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions.append(actionCreateInstance);
         if (!group.isNull()) {
             QAction* actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
-            QVariantMap data;
-            data["group"] = group;
-            actionDeleteGroup->setData(data);
+            QVariantMap delete_group_action_data;
+            delete_group_action_data["group"] = group;
+            actionDeleteGroup->setData(delete_group_action_data);
             connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
             actions.append(actionDeleteGroup);
         }
@@ -549,71 +554,15 @@ void MainWindow::updateMainToolBar()
     ui->mainToolBar->setVisible(ui->menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
 }
 
-void MainWindow::updateToolsMenu()
+void MainWindow::updateLaunchButton()
 {
-    bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
-
-    ui->actionLaunchInstance->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceOffline->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceDemo->setDisabled(!m_selectedInstance || currentInstanceRunning);
-
     QMenu* launchMenu = ui->actionLaunchInstance->menu();
-    if (launchMenu) {
+    if (launchMenu)
         launchMenu->clear();
-    } else {
+    else
         launchMenu = new QMenu(this);
-    }
-    QAction* normalLaunch = launchMenu->addAction(tr("Launch"));
-    normalLaunch->setShortcut(QKeySequence::Open);
-    QAction* normalLaunchOffline = launchMenu->addAction(tr("Launch Offline"));
-    normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
-    QAction* normalLaunchDemo = launchMenu->addAction(tr("Launch Demo"));
-    normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
-    if (m_selectedInstance) {
-        normalLaunch->setEnabled(m_selectedInstance->canLaunch());
-        normalLaunchOffline->setEnabled(m_selectedInstance->canLaunch());
-        normalLaunchDemo->setEnabled(m_selectedInstance->canLaunch());
-
-        connect(normalLaunch, &QAction::triggered, [this]() { APPLICATION->launch(m_selectedInstance, true, false); });
-        connect(normalLaunchOffline, &QAction::triggered, [this]() { APPLICATION->launch(m_selectedInstance, false, false); });
-        connect(normalLaunchDemo, &QAction::triggered, [this]() { APPLICATION->launch(m_selectedInstance, false, true); });
-    } else {
-        normalLaunch->setDisabled(true);
-        normalLaunchOffline->setDisabled(true);
-        normalLaunchDemo->setDisabled(true);
-    }
-
-    // Disable demo-mode if not available.
-    auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
-    if (instance) {
-        normalLaunchDemo->setEnabled(instance->supportsDemo());
-    }
-
-    QString profilersTitle = tr("Profilers");
-    launchMenu->addSeparator()->setText(profilersTitle);
-    for (auto profiler : APPLICATION->profilers().values()) {
-        QAction* profilerAction = launchMenu->addAction(profiler->name());
-        QAction* profilerOfflineAction = launchMenu->addAction(tr("%1 Offline").arg(profiler->name()));
-        QString error;
-        if (!profiler->check(&error)) {
-            profilerAction->setDisabled(true);
-            profilerOfflineAction->setDisabled(true);
-            QString profilerToolTip = tr("Profiler not setup correctly. Go into settings, \"External Tools\".");
-            profilerAction->setToolTip(profilerToolTip);
-            profilerOfflineAction->setToolTip(profilerToolTip);
-        } else if (m_selectedInstance) {
-            profilerAction->setEnabled(m_selectedInstance->canLaunch());
-            profilerOfflineAction->setEnabled(m_selectedInstance->canLaunch());
-
-            connect(profilerAction, &QAction::triggered,
-                    [this, profiler]() { APPLICATION->launch(m_selectedInstance, true, false, profiler.get()); });
-            connect(profilerOfflineAction, &QAction::triggered,
-                    [this, profiler]() { APPLICATION->launch(m_selectedInstance, false, false, profiler.get()); });
-        } else {
-            profilerAction->setDisabled(true);
-            profilerOfflineAction->setDisabled(true);
-        }
-    }
+    if (m_selectedInstance)
+        m_selectedInstance->populateLaunchMenu(launchMenu);
     ui->actionLaunchInstance->setMenu(launchMenu);
 }
 
@@ -627,7 +576,7 @@ void MainWindow::updateThemeMenu()
         themeMenu = new QMenu(this);
     }
 
-    auto themes = APPLICATION->getValidApplicationThemes();
+    auto themes = APPLICATION->themeManager()->getValidApplicationThemes();
 
     QActionGroup* themesGroup = new QActionGroup(this);
 
@@ -641,7 +590,7 @@ void MainWindow::updateThemeMenu()
         themeAction->setActionGroup(themesGroup);
 
         connect(themeAction, &QAction::triggered, [theme]() {
-            APPLICATION->setApplicationTheme(theme->id());
+            APPLICATION->themeManager()->setApplicationTheme(theme->id());
             APPLICATION->settings()->set("ApplicationTheme", theme->id());
         });
     }
@@ -744,9 +693,9 @@ void MainWindow::changeActiveAccount()
     if (sAction->data().type() != QVariant::Type::Int)
         return;
 
-    QVariant data = sAction->data();
+    QVariant action_data = sAction->data();
     bool valid = false;
-    int index = data.toInt(&valid);
+    int index = action_data.toInt(&valid);
     if (!valid) {
         index = -1;
     }
@@ -923,13 +872,13 @@ void MainWindow::finalizeInstance(InstancePtr inst)
     } else {
         CustomMessageBox::selectable(this, tr("Error"),
                                      tr("The launcher cannot download Minecraft or update instances unless you have at least "
-                                        "one account added.\nPlease add your Mojang or Minecraft account."),
+                                        "one account added.\nPlease add your Microsoft or Mojang account."),
                                      QMessageBox::Warning)
             ->show();
     }
 }
 
-void MainWindow::addInstance(QString url)
+void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info)
 {
     QString groupName;
     do {
@@ -949,7 +898,7 @@ void MainWindow::addInstance(QString url)
         groupName = APPLICATION->settings()->get("LastUsedGroupForNewInstance").toString();
     }
 
-    NewInstanceDialog newInstDlg(groupName, url, this);
+    NewInstanceDialog newInstDlg(groupName, url, extra_info, this);
     if (!newInstDlg.exec())
         return;
 
@@ -976,18 +925,105 @@ void MainWindow::processURLs(QList<QUrl> urls)
         if (url.scheme().isEmpty())
             url.setScheme("file");
 
-        if (!url.isLocalFile()) {  // probably instance/modpack
-            addInstance(url.toString());
-            break;
+        ModPlatform::IndexedVersion version;
+        QMap<QString, QString> extra_info;
+        QUrl local_url;
+        if (!url.isLocalFile()) {  // download the remote resource and identify
+            QUrl dl_url;
+            if (url.scheme() == "curseforge") {
+                // need to find the download link for the modpack / resource
+                // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
+                QUrlQuery query(url);
+
+                if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
+                    qDebug() << "Invalid curseforge link:" << url;
+                    continue;
+                }
+
+                auto addonId = query.allQueryItemValues("addonId")[0];
+                auto fileId = query.allQueryItemValues("fileId")[0];
+
+                extra_info.insert("pack_id", addonId);
+                extra_info.insert("pack_version_id", fileId);
+
+                auto array = std::make_shared<QByteArray>();
+
+                auto api = FlameAPI();
+                auto job = api.getFile(addonId, fileId, array);
+
+                connect(job.get(), &Task::failed, this,
+                        [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
+                    qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
+                    auto doc = Json::requireDocument(*array);
+                    auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
+                    // No way to find out if it's a mod or a modpack before here
+                    // And also we need to check if it ends with .zip, instead of any better way
+                    version = FlameMod::loadIndexedPackVersion(data);
+                    auto fileName = version.fileName;
+
+                    // Have to use ensureString then use QUrl to get proper url encoding
+                    dl_url = QUrl(version.downloadUrl);
+                    if (!dl_url.isValid()) {
+                        CustomMessageBox::selectable(
+                            this, tr("Error"),
+                            tr("The modpack, mod, or resource %1 is blocked for third-parties! Please download it manually.").arg(fileName),
+                            QMessageBox::Critical)
+                            ->show();
+                        return;
+                    }
+
+                    QFileInfo dl_file(dl_url.fileName());
+                });
+
+                {  // drop stack
+                    ProgressDialog dlUrlDialod(this);
+                    dlUrlDialod.setSkipButton(true, tr("Abort"));
+                    dlUrlDialod.execWithTask(job.get());
+                }
+
+            } else {
+                dl_url = url;
+            }
+
+            if (!dl_url.isValid()) {
+                continue;  // no valid url to download this resource
+            }
+
+            const QString path = dl_url.host() + '/' + dl_url.path();
+            auto entry = APPLICATION->metacache()->resolveEntry("general", path);
+            entry->setStale(true);
+            auto dl_job = unique_qobject_ptr<NetJob>(new NetJob(tr("Modpack download"), APPLICATION->network()));
+            dl_job->addNetAction(Net::ApiDownload::makeCached(dl_url, entry));
+            auto archivePath = entry->getFullPath();
+
+            bool dl_success = false;
+            connect(dl_job.get(), &Task::failed, this,
+                    [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
+            connect(dl_job.get(), &Task::succeeded, this, [&dl_success] { dl_success = true; });
+
+            {  // drop stack
+                ProgressDialog dlUrlDialod(this);
+                dlUrlDialod.setSkipButton(true, tr("Abort"));
+                dlUrlDialod.execWithTask(dl_job.get());
+            }
+
+            if (!dl_success) {
+                continue;  // no local file to identify
+            }
+            local_url = QUrl::fromLocalFile(archivePath);
+
+        } else {
+            local_url = url;
         }
 
-        auto localFileName = QDir::toNativeSeparators(url.toLocalFile());
+        auto localFileName = QDir::toNativeSeparators(local_url.toLocalFile());
         QFileInfo localFileInfo(localFileName);
 
         auto type = ResourceUtils::identify(localFileInfo);
 
         if (ResourceUtils::ValidResourceTypes.count(type) == 0) {  // probably instance/modpack
-            addInstance(localFileName);
+            addInstance(localFileName, extra_info);
             continue;
         }
 
@@ -1012,7 +1048,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
                 break;
             case PackedResourceType::Mod:
-                minecraftInst->loaderModList()->installMod(localFileName);
+                minecraftInst->loaderModList()->installMod(localFileName, version);
                 break;
             case PackedResourceType::ShaderPack:
                 minecraftInst->shaderPackList()->installResource(localFileName);
@@ -1061,9 +1097,9 @@ void MainWindow::on_actionChangeInstIcon_triggered()
 void MainWindow::iconUpdated(QString icon)
 {
     if (icon == m_currentInstIcon) {
-        auto icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
-        ui->actionChangeInstIcon->setIcon(icon);
-        changeIconButton->setIcon(icon);
+        auto new_icon = APPLICATION->icons()->getIcon(m_currentInstIcon);
+        ui->actionChangeInstIcon->setIcon(new_icon);
+        changeIconButton->setIcon(new_icon);
     }
 }
 
@@ -1134,26 +1170,40 @@ void MainWindow::undoTrashInstance()
     ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
 }
 
+void MainWindow::on_actionViewLauncherRootFolder_triggered()
+{
+    DesktopServices::openDirectory(".");
+}
+
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
     QString str = APPLICATION->settings()->get("InstanceDir").toString();
     DesktopServices::openDirectory(str);
 }
 
-void MainWindow::on_actionViewLauncherRootFolder_triggered()
+void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-    const QString dataPath = QDir::currentPath();
-    DesktopServices::openDirectory(dataPath);
+    DesktopServices::openDirectory(APPLICATION->settings()->get("CentralModsDir").toString(), true);
+}
+
+void MainWindow::on_actionViewIconThemeFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path());
+}
+
+void MainWindow::on_actionViewWidgetThemeFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path());
+}
+
+void MainWindow::on_actionViewCatPackFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path());
 }
 
 void MainWindow::refreshInstances()
 {
     APPLICATION->instances()->loadList();
-}
-
-void MainWindow::on_actionViewCentralModsFolder_triggered()
-{
-    DesktopServices::openDirectory(APPLICATION->settings()->get("CentralModsDir").toString(), true);
 }
 
 void MainWindow::checkForUpdates()
@@ -1177,7 +1227,7 @@ void MainWindow::globalSettingsClosed()
     proxymodel->invalidate();
     proxymodel->sort(0);
     updateMainToolBar();
-    updateToolsMenu();
+    updateLaunchButton();
     updateThemeMenu();
     updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
@@ -1307,10 +1357,11 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     if (APPLICATION->instances()->trashInstance(id)) {
         ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        return;
+    } else {
+        APPLICATION->instances()->deleteInstance(id);
     }
-
-    APPLICATION->instances()->deleteInstance(id);
+    APPLICATION->settings()->set("SelectedInstance", QString());
+    selectionBad();
 }
 
 void MainWindow::on_actionExportInstanceZip_triggered()
@@ -1410,20 +1461,6 @@ void MainWindow::on_actionLaunchInstance_triggered()
 void MainWindow::activateInstance(InstancePtr instance)
 {
     APPLICATION->launch(instance);
-}
-
-void MainWindow::on_actionLaunchInstanceOffline_triggered()
-{
-    if (m_selectedInstance) {
-        APPLICATION->launch(m_selectedInstance, false);
-    }
-}
-
-void MainWindow::on_actionLaunchInstanceDemo_triggered()
-{
-    if (m_selectedInstance) {
-        APPLICATION->launch(m_selectedInstance, false, true);
-    }
 }
 
 void MainWindow::on_actionKillInstance_triggered()
@@ -1590,7 +1627,7 @@ void MainWindow::startTask(Task* task)
     task->start();
 }
 
-void MainWindow::instanceChanged(const QModelIndex& current, const QModelIndex& previous)
+void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     if (!current.isValid()) {
         APPLICATION->settings()->set("SelectedInstance", QString());
@@ -1599,6 +1636,7 @@ void MainWindow::instanceChanged(const QModelIndex& current, const QModelIndex& 
     }
     if (m_selectedInstance) {
         disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+        disconnect(m_selectedInstance.get(), &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     }
     QString id = current.data(InstanceList::InstanceIDRole).toString();
     m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
@@ -1606,14 +1644,6 @@ void MainWindow::instanceChanged(const QModelIndex& current, const QModelIndex& 
         ui->instanceToolBar->setEnabled(true);
         setInstanceActionsEnabled(true);
         ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
-        ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
-        ui->actionLaunchInstanceDemo->setEnabled(m_selectedInstance->canLaunch());
-
-        // Disable demo-mode if not available.
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
-        if (instance) {
-            ui->actionLaunchInstanceDemo->setEnabled(instance->supportsDemo());
-        }
 
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
@@ -1622,18 +1652,13 @@ void MainWindow::instanceChanged(const QModelIndex& current, const QModelIndex& 
         updateStatusCenter();
         updateInstanceToolIcon(m_selectedInstance->iconKey());
 
-        updateToolsMenu();
+        updateLaunchButton();
 
         APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
 
         connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+        connect(m_selectedInstance.get(), &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     } else {
-        ui->instanceToolBar->setEnabled(false);
-        setInstanceActionsEnabled(false);
-        ui->actionLaunchInstance->setEnabled(false);
-        ui->actionLaunchInstanceOffline->setEnabled(false);
-        ui->actionLaunchInstanceDemo->setEnabled(false);
-        ui->actionKillInstance->setEnabled(false);
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
         return;
@@ -1658,11 +1683,12 @@ void MainWindow::selectionBad()
 {
     // start by reseting everything...
     m_selectedInstance = nullptr;
+    m_statusLeft->setText(tr("No instance selected"));
 
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
     setInstanceActionsEnabled(false);
-    updateToolsMenu();
+    updateLaunchButton();
     renameButton->setText(tr("Rename Instance"));
     updateInstanceToolIcon("grass");
 
@@ -1709,7 +1735,9 @@ void MainWindow::updateStatusCenter()
 
     int timePlayed = APPLICATION->instances()->getTotalPlayTime();
     if (timePlayed > 0) {
-        m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
+        m_statusCenter->setText(
+            tr("Total playtime: %1")
+                .arg(Time::prettifyDuration(timePlayed, APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
     }
 }
 // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
@@ -1725,7 +1753,7 @@ void MainWindow::setInstanceActionsEnabled(bool enabled)
     ui->actionCreateInstanceShortcut->setEnabled(enabled);
 }
 
-void MainWindow::refreshCurrentInstance(bool running)
+void MainWindow::refreshCurrentInstance()
 {
     auto current = view->selectionModel()->currentIndex();
     instanceChanged(current, current);

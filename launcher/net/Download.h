@@ -38,57 +38,26 @@
 
 #pragma once
 
-#include <chrono>
-
 #include "HttpMetaCache.h"
-#include "NetAction.h"
-#include "Sink.h"
-#include "Validator.h"
 
 #include "QObjectPtr.h"
+#include "net/NetRequest.h"
 
 namespace Net {
-class Download : public NetAction {
+class Download : public NetRequest {
     Q_OBJECT
-
    public:
     using Ptr = shared_qobject_ptr<class Download>;
-    enum class Option { NoOptions = 0, AcceptLocalFiles = 1, MakeEternal = 2 };
-    Q_DECLARE_FLAGS(Options, Option)
+    explicit Download() : NetRequest() { logCat = taskDownloadLogC; }
 
-   public:
-    ~Download() override = default;
-
+#if defined(LAUNCHER_APPLICATION)
     static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
+#endif
+
     static auto makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options = Option::NoOptions) -> Download::Ptr;
     static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
 
-   public:
-    void addValidator(Validator* v);
-    auto abort() -> bool override;
-    auto canAbort() const -> bool override { return true; };
-
-   private:
-    auto handleRedirect() -> bool;
-
-   protected slots:
-    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
-    void downloadError(QNetworkReply::NetworkError error) override;
-    void sslErrors(const QList<QSslError>& errors) override;
-    void downloadFinished() override;
-    void downloadReadyRead() override;
-
-   public slots:
-    void executeTask() override;
-
-   private:
-    std::unique_ptr<Sink> m_sink;
-    Options m_options;
-
-    std::chrono::steady_clock m_clock;
-    std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;
-    qint64 m_last_progress_bytes;
+   protected:
+    virtual QNetworkReply* getReply(QNetworkRequest&) override;
 };
 }  // namespace Net
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(Net::Download::Options)

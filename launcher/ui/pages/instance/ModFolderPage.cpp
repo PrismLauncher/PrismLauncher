@@ -92,6 +92,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
 
+        ui->actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
+        ui->actionsToolbar->insertActionAfter(ui->actionRemoveItem, ui->actionRemoveItemMetadata);
+        connect(ui->actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
+
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
         connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
@@ -104,11 +108,16 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
             if (selected <= 1) {
                 ui->actionVisitItemPage->setText(tr("Visit mod's page"));
                 ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
+
+                ui->actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
             } else {
                 ui->actionVisitItemPage->setText(tr("Visit mods' pages"));
                 ui->actionVisitItemPage->setToolTip(tr("Go to the pages of the selected mods"));
+
+                ui->actionRemoveItemMetadata->setToolTip(tr("Remove mods' metadata"));
             }
             ui->actionVisitItemPage->setEnabled(selected != 0);
+            ui->actionRemoveItemMetadata->setEnabled(selected != 0);
         });
 
         connect(mods.get(), &ModFolderModel::rowsInserted, this,
@@ -127,7 +136,7 @@ bool ModFolderPage::shouldDisplay() const
     return true;
 }
 
-bool ModFolderPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+bool ModFolderPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
@@ -296,4 +305,25 @@ void ModFolderPage::visitModPages()
         if (!url.isEmpty())
             DesktopServices::openUrl(url);
     }
+}
+
+void ModFolderPage::deleteModMetadata()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selectionCount = m_model->selectedMods(selection).length();
+    if (selectionCount == 0)
+        return;
+    if (selectionCount > 1) {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
+                                                     tr("You are about to remove the metadata for %1 mods.\n"
+                                                        "Are you sure?")
+                                                         .arg(selectionCount),
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+
+    m_model->deleteModsMetadata(selection);
 }

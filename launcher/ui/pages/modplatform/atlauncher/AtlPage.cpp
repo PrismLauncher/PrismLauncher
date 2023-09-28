@@ -35,11 +35,11 @@
  */
 
 #include "AtlPage.h"
+#include "ui/widgets/ProjectItem.h"
 #include "ui_AtlPage.h"
 
 #include "BuildConfig.h"
 
-#include "AtlOptionalModDialog.h"
 #include "AtlUserInteractionSupportImpl.h"
 #include "modplatform/atlauncher/ATLPackInstallTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -71,6 +71,8 @@ AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), 
     connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &AtlPage::onSortingSelectionChanged);
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &AtlPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &AtlPage::onVersionSelectionChanged);
+
+    ui->packView->setItemDelegate(new ProjectItemDelegate(this));
 }
 
 AtlPage::~AtlPage()
@@ -123,13 +125,13 @@ void AtlPage::triggerSearch()
     filterModel->setSearchTerm(ui->searchEdit->text());
 }
 
-void AtlPage::onSortingSelectionChanged(QString data)
+void AtlPage::onSortingSelectionChanged(QString sort)
 {
-    auto toSet = filterModel->getAvailableSortings().value(data);
+    auto toSet = filterModel->getAvailableSortings().value(sort);
     filterModel->setSorting(toSet);
 }
 
-void AtlPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void AtlPage::onSelectionChanged(QModelIndex first, [[maybe_unused]] QModelIndex second)
 {
     ui->versionSelectionBox->clear();
 
@@ -151,13 +153,13 @@ void AtlPage::onSelectionChanged(QModelIndex first, QModelIndex second)
     suggestCurrent();
 }
 
-void AtlPage::onVersionSelectionChanged(QString data)
+void AtlPage::onVersionSelectionChanged(QString version)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }
 
-    selectedVersion = data;
+    selectedVersion = version;
     suggestCurrent();
 }

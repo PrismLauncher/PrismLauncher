@@ -43,12 +43,14 @@ const QStringList FlamePackExportTask::FILE_EXTENSIONS({ "jar", "zip" });
 FlamePackExportTask::FlamePackExportTask(const QString& name,
                                          const QString& version,
                                          const QString& author,
+                                         bool optionalFiles,
                                          InstancePtr instance,
                                          const QString& output,
                                          MMCZip::FilterFunction filter)
     : name(name)
     , version(version)
     , author(author)
+    , optionalFiles(optionalFiles)
     , instance(instance)
     , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
     , gameRoot(instance->gameRoot())
@@ -381,6 +383,7 @@ QByteArray FlamePackExportTask::generateIndex()
         const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
         const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
         const ComponentPtr forge = profile->getComponent("net.minecraftforge");
+        const ComponentPtr neoforge = profile->getComponent("net.neoforged");
 
         // convert all available components to mrpack dependencies
         if (minecraft != nullptr)
@@ -392,6 +395,8 @@ QByteArray FlamePackExportTask::generateIndex()
             id = "fabric-" + fabric->getVersion();
         else if (forge != nullptr)
             id = "forge-" + forge->getVersion();
+        else if (neoforge != nullptr)
+            id = "neoforge-" + neoforge->getVersion();
         version["modLoaders"] = QJsonArray();
         if (!id.isEmpty()) {
             QJsonObject loader;
@@ -407,7 +412,7 @@ QByteArray FlamePackExportTask::generateIndex()
         QJsonObject file;
         file["projectID"] = mod.addonId;
         file["fileID"] = mod.version;
-        file["required"] = mod.enabled;
+        file["required"] = mod.enabled || !optionalFiles;
         files << file;
     }
     obj["files"] = files;

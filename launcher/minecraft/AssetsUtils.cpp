@@ -46,8 +46,8 @@
 #include "AssetsUtils.h"
 #include "BuildConfig.h"
 #include "FileSystem.h"
+#include "net/ApiDownload.h"
 #include "net/ChecksumValidator.h"
-#include "net/Download.h"
 
 #include "Application.h"
 
@@ -279,7 +279,7 @@ NetAction::Ptr AssetObject::getDownloadAction()
 {
     QFileInfo objectFile(getLocalPath());
     if ((!objectFile.isFile()) || (objectFile.size() != size)) {
-        auto objectDL = Net::Download::makeFile(getUrl(), objectFile.filePath());
+        auto objectDL = Net::ApiDownload::makeFile(getUrl(), objectFile.filePath());
         if (hash.size()) {
             auto rawHash = QByteArray::fromHex(hash.toLatin1());
             objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));

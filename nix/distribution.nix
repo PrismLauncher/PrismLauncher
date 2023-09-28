@@ -1,29 +1,65 @@
 {
   inputs,
   self,
-  version,
   ...
 }: {
-  perSystem = {pkgs, ...}: {
-    packages = {
-      inherit (pkgs) prismlauncher-qt5-unwrapped prismlauncher-qt5 prismlauncher-unwrapped prismlauncher;
-      default = pkgs.prismlauncher;
+  perSystem = {
+    lib,
+    pkgs,
+    ...
+  }: {
+    packages = let
+      ourPackages = lib.fix (final: self.overlays.default final pkgs);
+    in {
+      inherit
+        (ourPackages)
+        prismlauncher-qt5-unwrapped
+        prismlauncher-qt5
+        prismlauncher-unwrapped
+        prismlauncher
+        ;
+      default = ourPackages.prismlauncher;
     };
   };
 
   flake = {
     overlays.default = final: prev: let
-      # Helper function to build prism against different versions of Qt.
-      mkPrism = qt:
-        qt.callPackage ./package.nix {
-          inherit (inputs) libnbtplusplus;
-          inherit self version;
-        };
+      version = builtins.substring 0 8 self.lastModifiedDate or "dirty";
+
+      filteredSelf = inputs.nix-filter.lib.filter {
+        root = ../.;
+        include = [
+          "buildconfig"
+          "cmake"
+          "launcher"
+          "libraries"
+          "program_info"
+          "tests"
+          ../COPYING.md
+          ../CMakeLists.txt
+        ];
+      };
+
+      # common args for prismlauncher evaluations
+      unwrappedArgs = {
+        self = filteredSelf;
+
+        inherit (inputs) libnbtplusplus;
+        inherit ((final.darwin or prev.darwin).apple_sdk.frameworks) Cocoa;
+        inherit version;
+      };
     in {
-      prismlauncher-qt5-unwrapped = mkPrism final.libsForQt5;
-      prismlauncher-qt5 = prev.prismlauncher-qt5.override {prismlauncher-unwrapped = final.prismlauncher-qt5-unwrapped;};
-      prismlauncher-unwrapped = mkPrism final.qt6Packages;
-      prismlauncher = prev.prismlauncher.override {inherit (final) prismlauncher-unwrapped;};
+      prismlauncher-qt5-unwrapped = prev.libsForQt5.callPackage ./pkg unwrappedArgs;
+
+      prismlauncher-qt5 = prev.libsForQt5.callPackage ./pkg/wrapper.nix {
+        prismlauncher-unwrapped = final.prismlauncher-qt5-unwrapped;
+      };
+
+      prismlauncher-unwrapped = prev.qt6Packages.callPackage ./pkg unwrappedArgs;
+
+      prismlauncher = prev.qt6Packages.callPackage ./pkg/wrapper.nix {
+        inherit (final) prismlauncher-unwrapped;
+      };
     };
   };
 }

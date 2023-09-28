@@ -63,7 +63,7 @@ class Version {
     struct Section {
         explicit Section(QString fullString) : m_fullString(std::move(fullString))
         {
-            int cutoff = m_fullString.size();
+            qsizetype cutoff = m_fullString.size();
             for (int i = 0; i < m_fullString.size(); i++) {
                 if (!m_fullString[i].isDigit()) {
                     cutoff = i;
@@ -103,14 +103,8 @@ class Version {
 
         QString m_fullString;
 
-        [[nodiscard]] inline bool isAppendix() const
-        {
-            return m_stringPart.startsWith('+');
-        }
-        [[nodiscard]] inline bool isPreRelease() const
-        {
-            return m_stringPart.startsWith('-') && m_stringPart.length() > 1;
-        }
+        [[nodiscard]] inline bool isAppendix() const { return m_stringPart.startsWith('+'); }
+        [[nodiscard]] inline bool isPreRelease() const { return m_stringPart.startsWith('-') && m_stringPart.length() > 1; }
 
         inline bool operator==(const Section& other) const
         {
@@ -156,14 +150,8 @@ class Version {
             return m_fullString < other.m_fullString;
         }
 
-        inline bool operator!=(const Section& other) const
-        {
-            return !(*this == other);
-        }
-        inline bool operator>(const Section& other) const
-        {
-            return !(*this < other || *this == other);
-        }
+        inline bool operator!=(const Section& other) const { return !(*this == other); }
+        inline bool operator>(const Section& other) const { return !(*this < other || *this == other); }
     };
 
    private:

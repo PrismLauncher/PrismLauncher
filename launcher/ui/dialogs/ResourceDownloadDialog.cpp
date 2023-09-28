@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -210,15 +210,17 @@ bool ResourceDownloadDialog::selectPage(QString pageId)
     return m_container->selectPage(pageId);
 }
 
-ResourcePage* ResourceDownloadDialog::getSelectedPage()
+ResourcePage* ResourceDownloadDialog::selectedPage()
 {
-    return m_selectedPage;
+    ResourcePage* result = dynamic_cast<ResourcePage*>(m_container->selectedPage());
+    Q_ASSERT(result != nullptr);
+    return result;
 }
 
 void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver)
 {
     removeResource(pack->name);
-    m_selectedPage->addResourceToPage(pack, ver, getBaseModel());
+    selectedPage()->addResourceToPage(pack, ver, getBaseModel());
     setButtonStatus();
 }
 
@@ -258,14 +260,8 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
         return;
     }
 
-    m_selectedPage = dynamic_cast<ResourcePage*>(selected);
-    if (!m_selectedPage) {
-        qCritical() << "Page '" << selected->displayName() << "' in ResourceDownloadDialog is not a ResourcePage!";
-        return;
-    }
-
     // Same effect as having a global search bar
-    m_selectedPage->setSearchTerm(prev_page->getSearchTerm());
+    selectedPage()->setSearchTerm(prev_page->getSearchTerm());
 }
 
 ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
@@ -284,14 +280,12 @@ QList<BasePage*> ModDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
 
-    auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getModLoaders().value();
+    auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getSupportedModLoaders().value();
 
     if (ModrinthAPI::validateModLoaders(loaders))
         pages.append(ModrinthModPage::create(this, *m_instance));
     if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders))
         pages.append(FlameModPage::create(this, *m_instance));
-
-    m_selectedPage = dynamic_cast<ModPage*>(pages[0]);
 
     return pages;
 }
@@ -307,7 +301,7 @@ GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
         return makeShared<GetModDependenciesTask>(this, m_instance, model, selectedVers);
     }
     return nullptr;
-};
+}
 
 ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
                                                        const std::shared_ptr<ResourcePackFolderModel>& resource_packs,
@@ -330,8 +324,6 @@ QList<BasePage*> ResourcePackDownloadDialog::getPages()
     pages.append(ModrinthResourcePackPage::create(this, *m_instance));
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameResourcePackPage::create(this, *m_instance));
-
-    m_selectedPage = dynamic_cast<ResourcePackResourcePage*>(pages[0]);
 
     return pages;
 }
@@ -358,8 +350,6 @@ QList<BasePage*> TexturePackDownloadDialog::getPages()
     if (APPLICATION->capabilities() & Application::SupportsFlame)
         pages.append(FlameTexturePackPage::create(this, *m_instance));
 
-    m_selectedPage = dynamic_cast<TexturePackResourcePage*>(pages[0]);
-
     return pages;
 }
 
@@ -380,11 +370,9 @@ ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent,
 QList<BasePage*> ShaderPackDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
-
     pages.append(ModrinthShaderPackPage::create(this, *m_instance));
-
-    m_selectedPage = dynamic_cast<ShaderPackResourcePage*>(pages[0]);
-
+    if (APPLICATION->capabilities() & Application::SupportsFlame)
+        pages.append(FlameShaderPackPage::create(this, *m_instance));
     return pages;
 }
 
