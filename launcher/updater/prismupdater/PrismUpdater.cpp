@@ -1161,10 +1161,10 @@ void PrismUpdaterApp::backupAppDir()
         progress.setValue(i);
         QCoreApplication::processEvents();
         if (!iter.hasNext() && !glob.isEmpty()) {
-            if (auto file_info = QFileInfo(FS::PathCombine(m_rootPath, glob)); file_info.exists()) {
+            if (auto file_info = QFileInfo(FS::PathCombine(app_dir.absolutePath(), glob)); file_info.exists()) {
                 copy(file_info.absoluteFilePath());
             } else {
-                logUpdate(tr("File doesn't exist, ignoring: %1").arg(FS::PathCombine(m_rootPath, glob)));
+                logUpdate(tr("File doesn't exist, ignoring: %1").arg(FS::PathCombine(app_dir.absolutePath(), glob)));
             }
         } else {
             while (iter.hasNext()) {
