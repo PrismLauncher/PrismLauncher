@@ -1,6 +1,7 @@
 #pragma once
 
 #include "minecraft/mod/Mod.h"
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "tasks/Task.h"
@@ -40,6 +41,7 @@ class CheckUpdateTask : public Task {
     };
 
     auto getUpdatable() -> std::vector<UpdatableMod>&& { return std::move(m_updatable); }
+    auto getDependencies() -> QList<std::shared_ptr<GetModDependenciesTask::PackDependency>>&& { return std::move(m_deps); }
 
    public slots:
     bool abort() override = 0;
@@ -57,4 +59,5 @@ class CheckUpdateTask : public Task {
     std::shared_ptr<ModFolderModel> m_mods_folder;
 
     std::vector<UpdatableMod> m_updatable;
+    QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> m_deps;
 };
