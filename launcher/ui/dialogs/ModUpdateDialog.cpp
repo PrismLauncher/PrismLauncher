@@ -219,8 +219,10 @@ void ModUpdateDialog::checkCandidates()
             if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
                 changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
             auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_mod_model);
-            CheckUpdateTask::UpdatableMod updatable = { dep->pack->name, dep->version.hash,   "",           dep->version.version,
-                                                        changelog,       dep->pack->provider, download_task };
+            CheckUpdateTask::UpdatableMod updatable = {
+                dep->pack->name, dep->version.hash,   "",           dep->version.version, dep->version.version_type,
+                changelog,       dep->pack->provider, download_task
+            };
 
             appendMod(updatable, getRequiredBy.value(dep->version.addonId.toString()));
             m_tasks.insert(updatable.name, updatable.download);
