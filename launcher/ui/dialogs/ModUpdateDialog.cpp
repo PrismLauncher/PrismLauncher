@@ -219,8 +219,10 @@ void ModUpdateDialog::checkCandidates()
             if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
                 changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
             auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_mod_model);
-            CheckUpdateTask::UpdatableMod updatable = { dep->pack->name, dep->version.hash,   "",           dep->version.version,
-                                                        changelog,       dep->pack->provider, download_task };
+            CheckUpdateTask::UpdatableMod updatable = {
+                dep->pack->name, dep->version.hash,   "",           dep->version.version, dep->version.version_type,
+                changelog,       dep->pack->provider, download_task
+            };
 
             appendMod(updatable, getRequiredBy.value(dep->version.addonId.toString()));
             m_tasks.insert(updatable.name, updatable.download);
@@ -414,6 +416,11 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStri
 
     auto new_version_item = new QTreeWidgetItem(item_top);
     new_version_item->setText(0, tr("New version: %1").arg(info.new_version));
+
+    if (info.new_version_type.has_value()) {
+        auto new_version_type_itme = new QTreeWidgetItem(item_top);
+        new_version_type_itme->setText(0, tr("New Version Type: %1").arg(info.new_version_type.value().toString()));
+    }
 
     if (!requiredBy.isEmpty()) {
         auto requiredByItem = new QTreeWidgetItem(item_top);
