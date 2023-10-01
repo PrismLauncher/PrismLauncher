@@ -38,7 +38,7 @@ void ModrinthCheckUpdate::executeTask()
     QStringList hashes;
     auto best_hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
-    ConcurrentTask hashing_task(this, "MakeModrinthHashesTask", 10);
+    ConcurrentTask hashing_task(this, "MakeModrinthHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     for (auto* mod : m_mods) {
         if (!mod->enabled()) {
             emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
@@ -144,26 +144,27 @@ void ModrinthCheckUpdate::executeTask()
                 auto mod = *mod_iter;
 
                 auto key = project_ver.hash;
+
+                // Fake pack with the necessary info to pass to the download task :)
+                auto pack = std::make_shared<ModPlatform::IndexedPack>();
+                pack->name = mod->name();
+                pack->slug = mod->metadata()->slug;
+                pack->addonId = mod->metadata()->project_id;
+                pack->websiteUrl = mod->homeurl();
+                for (auto& author : mod->authors())
+                    pack->authors.append({ author });
+                pack->description = mod->description();
+                pack->provider = ModPlatform::ResourceProvider::MODRINTH;
                 if ((key != hash && project_ver.is_preferred) || (mod->status() == ModStatus::NotInstalled)) {
                     if (mod->version() == project_ver.version_number)
                         continue;
 
-                    // Fake pack with the necessary info to pass to the download task :)
-                    auto pack = std::make_shared<ModPlatform::IndexedPack>();
-                    pack->name = mod->name();
-                    pack->slug = mod->metadata()->slug;
-                    pack->addonId = mod->metadata()->project_id;
-                    pack->websiteUrl = mod->homeurl();
-                    for (auto& author : mod->authors())
-                        pack->authors.append({ author });
-                    pack->description = mod->description();
-                    pack->provider = ModPlatform::ResourceProvider::MODRINTH;
-
                     auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_mods_folder);
 
-                    m_updatable.emplace_back(pack->name, hash, mod->version(), project_ver.version_number, project_ver.changelog,
-                                             ModPlatform::ResourceProvider::MODRINTH, download_task);
+                    m_updatable.emplace_back(pack->name, hash, mod->version(), project_ver.version_number, project_ver.version_type,
+                                             project_ver.changelog, ModPlatform::ResourceProvider::MODRINTH, download_task);
                 }
+                m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, project_ver));
             }
         } catch (Json::JsonException& e) {
             failed(e.cause() + " : " + e.what());
