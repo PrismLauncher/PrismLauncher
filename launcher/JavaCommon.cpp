@@ -122,7 +122,7 @@ void JavaCommon::TestCheck::run()
     checker->performCheck();
 }
 
-void JavaCommon::TestCheck::checkFinished(JavaCheckResult result)
+void JavaCommon::TestCheck::checkFinished(const JavaCheckResult& result)
 {
     if (result.validity != JavaCheckResult::Validity::Valid) {
         javaBinaryWasBad(m_parent, result);
@@ -141,7 +141,7 @@ void JavaCommon::TestCheck::checkFinished(JavaCheckResult result)
     checker->performCheck();
 }
 
-void JavaCommon::TestCheck::checkFinishedWithArgs(JavaCheckResult result)
+void JavaCommon::TestCheck::checkFinishedWithArgs(const JavaCheckResult& result)
 {
     if (result.validity == JavaCheckResult::Validity::Valid) {
         javaWasOk(m_parent, result);

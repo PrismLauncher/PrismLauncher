@@ -262,6 +262,30 @@ int AccountList::count() const
     return m_accounts.count();
 }
 
+QString getAccountStatus(AccountState status)
+{
+    switch (status) {
+        case AccountState::Unchecked:
+            return QObject::tr("Unchecked", "Account status");
+        case AccountState::Offline:
+            return QObject::tr("Offline", "Account status");
+        case AccountState::Online:
+            return QObject::tr("Ready", "Account status");
+        case AccountState::Working:
+            return QObject::tr("Working", "Account status");
+        case AccountState::Errored:
+            return QObject::tr("Errored", "Account status");
+        case AccountState::Expired:
+            return QObject::tr("Expired", "Account status");
+        case AccountState::Disabled:
+            return QObject::tr("Disabled", "Account status");
+        case AccountState::Gone:
+            return QObject::tr("Gone", "Account status");
+        default:
+            return QObject::tr("Unknown", "Account status");
+    }
+}
+
 QVariant AccountList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
@@ -275,51 +299,17 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
     switch (role) {
         case Qt::DisplayRole:
             switch (index.column()) {
-                case ProfileNameColumn: {
+                case ProfileNameColumn:
                     return account->profileName();
-                }
-
                 case NameColumn:
                     return account->accountDisplayString();
-
                 case TypeColumn: {
                     auto typeStr = account->typeString();
                     typeStr[0] = typeStr[0].toUpper();
                     return typeStr;
                 }
-
-                case StatusColumn: {
-                    switch (account->accountState()) {
-                        case AccountState::Unchecked: {
-                            return tr("Unchecked", "Account status");
-                        }
-                        case AccountState::Offline: {
-                            return tr("Offline", "Account status");
-                        }
-                        case AccountState::Online: {
-                            return tr("Ready", "Account status");
-                        }
-                        case AccountState::Working: {
-                            return tr("Working", "Account status");
-                        }
-                        case AccountState::Errored: {
-                            return tr("Errored", "Account status");
-                        }
-                        case AccountState::Expired: {
-                            return tr("Expired", "Account status");
-                        }
-                        case AccountState::Disabled: {
-                            return tr("Disabled", "Account status");
-                        }
-                        case AccountState::Gone: {
-                            return tr("Gone", "Account status");
-                        }
-                        default: {
-                            return tr("Unknown", "Account status");
-                        }
-                    }
-                }
-
+                case StatusColumn:
+                    return getAccountStatus(account->accountState());
                 default:
                     return QVariant();
             }
@@ -331,11 +321,9 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
             return QVariant::fromValue(account);
 
         case Qt::CheckStateRole:
-            if (index.column() == ProfileNameColumn) {
+            if (index.column() == ProfileNameColumn)
                 return account == m_defaultAccount ? Qt::Checked : Qt::Unchecked;
-            } else {
-                return QVariant();
-            }
+            return QVariant();
 
         default:
             return QVariant();
@@ -457,18 +445,14 @@ bool AccountList::loadList()
 
     // Make sure the format version matches.
     auto listVersion = root.value("formatVersion").toVariant().toInt();
-    switch (listVersion) {
-        case AccountListVersion::MojangMSA: {
-            return loadV3(root);
-        } break;
-        default: {
-            QString newName = "accounts-old.json";
-            qWarning() << "Unknown format version when loading account list. Existing one will be renamed to" << newName;
-            // Attempt to rename the old version.
-            file.rename(newName);
-            return false;
-        }
-    }
+    if (listVersion == AccountListVersion::MojangMSA)
+        return loadV3(root);
+
+    QString newName = "accounts-old.json";
+    qWarning() << "Unknown format version when loading account list. Existing one will be renamed to" << newName;
+    // Attempt to rename the old version.
+    file.rename(newName);
+    return false;
 }
 
 bool AccountList::loadV3(QJsonObject& root)

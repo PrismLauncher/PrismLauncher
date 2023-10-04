@@ -43,7 +43,7 @@ QString JavaVersion::toString() const
     return m_string;
 }
 
-bool JavaVersion::requiresPermGen()
+bool JavaVersion::requiresPermGen() const
 {
     if (m_parseable) {
         return m_major < 8;

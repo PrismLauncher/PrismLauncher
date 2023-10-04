@@ -38,7 +38,7 @@ class JavaChecker : public QObject {
     int m_permGen = 64;
 
    signals:
-    void checkFinished(JavaCheckResult result);
+    void checkFinished(const JavaCheckResult& result);
 
    private:
     QProcessPtr process;
