@@ -43,9 +43,6 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
-#include "ui/dialogs/ExportPackDialog.h"
-#include "ui/dialogs/ExportToModListDialog.h"
-#include "ui/dialogs/ImportResourceDialog.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -93,17 +90,16 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
-#include "InstancePageProvider.h"
 #include "InstanceWindow.h"
-#include "JavaCommon.h"
-#include "LaunchController.h"
 
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
+#include "ui/dialogs/ExportPackDialog.h"
+#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
+#include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/ImportResourcePackDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
@@ -114,15 +110,20 @@
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/LabeledToolButton.h"
 
+#include "minecraft/PackProfile.h"
+#include "minecraft/VersionFile.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourcePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
 
 #include "InstanceCopyTask.h"
-#include "InstanceImportTask.h"
 
 #include "Json.h"
 
@@ -1112,7 +1113,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
     // Template hell sucks...
     connect(APPLICATION->accounts().get(), &AccountList::defaultAccountChanged, [this] { defaultAccountChanged(); });
-    connect(APPLICATION->accounts().get(), &AccountList::listChanged, [this] { repopulateAccountsMenu(); });
+    connect(APPLICATION->accounts().get(), &AccountList::listChanged, [this] { defaultAccountChanged(); });
 
     // Show initial account
     defaultAccountChanged();
@@ -1549,7 +1550,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
     } else {
         CustomMessageBox::selectable(this, tr("Error"),
                                      tr("The launcher cannot download Minecraft or update instances unless you have at least "
-                                        "one account added.\nPlease add your Microsoft or Mojang account."),
+                                        "one account added.\nPlease add a Microsoft account."),
                                      QMessageBox::Warning)
             ->show();
     }
@@ -1602,6 +1603,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
         if (url.scheme().isEmpty())
             url.setScheme("file");
 
+        ModPlatform::IndexedVersion version;
         QMap<QString, QString> extra_info;
         QUrl local_url;
         if (!url.isLocalFile()) {  // download the remote resource and identify
@@ -1627,20 +1629,19 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 auto api = FlameAPI();
                 auto job = api.getFile(addonId, fileId, array);
 
-                QString resource_name;
-
                 connect(job.get(), &Task::failed, this,
                         [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &resource_name] {
+                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
                     qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                     auto doc = Json::requireDocument(*array);
                     auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
-                    auto fileName = Json::ensureString(data, "fileName");
+                    version = FlameMod::loadIndexedPackVersion(data);
+                    auto fileName = version.fileName;
 
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
+                    dl_url = QUrl(version.downloadUrl);
                     if (!dl_url.isValid()) {
                         CustomMessageBox::selectable(
                             this, tr("Error"),
@@ -1651,7 +1652,6 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     }
 
                     QFileInfo dl_file(dl_url.fileName());
-                    resource_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
                 });
 
                 {  // drop stack
@@ -1726,7 +1726,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
                 break;
             case PackedResourceType::Mod:
-                minecraftInst->loaderModList()->installMod(localFileName);
+                minecraftInst->loaderModList()->installMod(localFileName, version);
                 break;
             case PackedResourceType::ShaderPack:
                 minecraftInst->shaderPackList()->installResource(localFileName);

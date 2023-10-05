@@ -138,6 +138,13 @@
             </property>
            </widget>
           </item>
+           <item>
+           <widget class="QCheckBox" name="showGameTimeWithoutDays">
+            <property name="text">
+             <string>Show time spent playing in hours</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

@@ -1,6 +1,7 @@
 {
   lib,
   stdenv,
+  canonicalize-jars-hook,
   cmake,
   cmark,
   Cocoa,
@@ -26,7 +27,7 @@ assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is on
 
     src = lib.cleanSource self;
 
-    nativeBuildInputs = [extra-cmake-modules cmake jdk17 ninja];
+    nativeBuildInputs = [extra-cmake-modules cmake jdk17 ninja canonicalize-jars-hook];
     buildInputs =
       [
         qtbase
@@ -57,6 +58,7 @@ assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is on
     dontWrapQtApps = true;
 
     meta = with lib; {
+      mainProgram = "prismlauncher";
       homepage = "https://prismlauncher.org/";
       description = "A free, open source launcher for Minecraft";
       longDescription = ''

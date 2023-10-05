@@ -133,7 +133,7 @@ bool processZIP(DataPack& pack, ProcessingLevel level)
     return true;
 }
 
-// https://minecraft.fandom.com/wiki/Data_pack#pack.mcmeta
+// https://minecraft.wiki/w/Data_pack#pack.mcmeta
 bool processMCMeta(DataPack& pack, QByteArray&& raw_data)
 {
     try {

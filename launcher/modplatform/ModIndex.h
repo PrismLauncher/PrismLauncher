@@ -25,10 +25,14 @@
 #include <QVariant>
 #include <QVector>
 #include <memory>
+#include <optional>
 
 class QIODevice;
 
 namespace ModPlatform {
+
+enum ModLoaderType { NeoForge = 1 << 0, Forge = 1 << 1, Cauldron = 1 << 2, LiteLoader = 1 << 3, Fabric = 1 << 4, Quilt = 1 << 5 };
+Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 
 enum class ResourceProvider { MODRINTH, FLAME };
 
@@ -55,6 +59,34 @@ struct DonationData {
     QString url;
 };
 
+struct IndexedVersionType {
+    enum class VersionType { Release = 1, Beta, Alpha, Unknown };
+    IndexedVersionType(const QString& type);
+    IndexedVersionType(const IndexedVersionType::VersionType& type);
+    IndexedVersionType(const IndexedVersionType& type);
+    IndexedVersionType() : IndexedVersionType(IndexedVersionType::VersionType::Unknown) {}
+    static const QString toString(const IndexedVersionType::VersionType& type);
+    static IndexedVersionType::VersionType enumFromString(const QString& type);
+    bool isValid() const { return m_type != IndexedVersionType::VersionType::Unknown; }
+    IndexedVersionType& operator=(const IndexedVersionType& other);
+    bool operator==(const IndexedVersionType& other) const { return m_type == other.m_type; }
+    bool operator==(const IndexedVersionType::VersionType& type) const { return m_type == type; }
+    bool operator!=(const IndexedVersionType& other) const { return m_type != other.m_type; }
+    bool operator!=(const IndexedVersionType::VersionType& type) const { return m_type != type; }
+    bool operator<(const IndexedVersionType& other) const { return m_type < other.m_type; }
+    bool operator<(const IndexedVersionType::VersionType& type) const { return m_type < type; }
+    bool operator<=(const IndexedVersionType& other) const { return m_type <= other.m_type; }
+    bool operator<=(const IndexedVersionType::VersionType& type) const { return m_type <= type; }
+    bool operator>(const IndexedVersionType& other) const { return m_type > other.m_type; }
+    bool operator>(const IndexedVersionType::VersionType& type) const { return m_type > type; }
+    bool operator>=(const IndexedVersionType& other) const { return m_type >= other.m_type; }
+    bool operator>=(const IndexedVersionType::VersionType& type) const { return m_type >= type; }
+
+    QString toString() const { return toString(m_type); }
+
+    IndexedVersionType::VersionType m_type;
+};
+
 struct Dependency {
     QVariant addonId;
     DependencyType type;
@@ -66,11 +98,12 @@ struct IndexedVersion {
     QVariant fileId;
     QString version;
     QString version_number = {};
+    IndexedVersionType version_type;
     QStringList mcVersion;
     QString downloadUrl;
     QString date;
     QString fileName;
-    QStringList loaders = {};
+    ModLoaderTypes loaders = {};
     QString hash_type;
     QString hash;
     bool is_preferred = true;
@@ -128,7 +161,6 @@ struct IndexedPack {
         return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }
 };
-QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 struct OverrideDep {
     QString quilt;
@@ -147,6 +179,14 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
 }
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID);
+
+auto getModLoaderString(ModLoaderType type) -> const QString;
+
+constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
+{
+    auto x = static_cast<int>(l);
+    return x && !(x & (x - 1));
+}
 
 }  // namespace ModPlatform
 

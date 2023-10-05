@@ -89,6 +89,22 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
         // pick the latest version supported
         file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(version, "displayName");
+
+        ModPlatform::IndexedVersionType::VersionType ver_type;
+        switch (Json::requireInteger(version, "releaseType")) {
+            case 1:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Release;
+                break;
+            case 2:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Beta;
+                break;
+            case 3:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Alpha;
+                break;
+            default:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Unknown;
+        }
+        file.version_type = ModPlatform::IndexedVersionType(ver_type);
         file.downloadUrl = Json::ensureString(version, "downloadUrl");
 
         // only add if we have a download URL (third party distribution is enabled)

@@ -58,15 +58,14 @@
 #include "ComponentUpdateTask.h"
 #include "PackProfile.h"
 #include "PackProfile_p.h"
+#include "minecraft/mod/Mod.h"
+#include "modplatform/ModIndex.h"
 
-#include "Application.h"
-#include "modplatform/ResourceAPI.h"
-
-static const QMap<QString, ResourceAPI::ModLoaderType> modloaderMapping{ { "net.neoforged", ResourceAPI::NeoForge },
-                                                                         { "net.minecraftforge", ResourceAPI::Forge },
-                                                                         { "net.fabricmc.fabric-loader", ResourceAPI::Fabric },
-                                                                         { "org.quiltmc.quilt-loader", ResourceAPI::Quilt },
-                                                                         { "com.mumfrey.liteloader", ResourceAPI::LiteLoader } };
+static const QMap<QString, ModPlatform::ModLoaderType> modloaderMapping{ { "net.neoforged", ModPlatform::NeoForge },
+                                                                         { "net.minecraftforge", ModPlatform::Forge },
+                                                                         { "net.fabricmc.fabric-loader", ModPlatform::Fabric },
+                                                                         { "org.quiltmc.quilt-loader", ModPlatform::Quilt },
+                                                                         { "com.mumfrey.liteloader", ModPlatform::LiteLoader } };
 
 PackProfile::PackProfile(MinecraftInstance* instance) : QAbstractListModel()
 {
@@ -990,12 +989,12 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
-std::optional<ResourceAPI::ModLoaderTypes> PackProfile::getModLoaders()
+std::optional<ModPlatform::ModLoaderTypes> PackProfile::getModLoaders()
 {
-    ResourceAPI::ModLoaderTypes result;
+    ModPlatform::ModLoaderTypes result;
     bool has_any_loader = false;
 
-    QMapIterator<QString, ResourceAPI::ModLoaderType> i(modloaderMapping);
+    QMapIterator<QString, ModPlatform::ModLoaderType> i(modloaderMapping);
 
     while (i.hasNext()) {
         i.next();
@@ -1008,4 +1007,19 @@ std::optional<ResourceAPI::ModLoaderTypes> PackProfile::getModLoaders()
     if (!has_any_loader)
         return {};
     return result;
+}
+
+std::optional<ModPlatform::ModLoaderTypes> PackProfile::getSupportedModLoaders()
+{
+    auto loadersOpt = getModLoaders();
+    if (!loadersOpt.has_value())
+        return loadersOpt;
+    auto loaders = loadersOpt.value();
+    // TODO: remove this or add version condition once Quilt drops official Fabric support
+    if (loaders & ModPlatform::Quilt)
+        loaders |= ModPlatform::Fabric;
+    // TODO: remove this or add version condition once NeoForge drops official Forge support
+    if (loaders & ModPlatform::NeoForge)
+        loaders |= ModPlatform::Forge;
+    return loaders;
 }
