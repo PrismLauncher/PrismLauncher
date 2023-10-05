@@ -35,11 +35,11 @@
  */
 
 #include "AtlPage.h"
+#include "ui/widgets/ProjectItem.h"
 #include "ui_AtlPage.h"
 
 #include "BuildConfig.h"
 
-#include "AtlOptionalModDialog.h"
 #include "AtlUserInteractionSupportImpl.h"
 #include "modplatform/atlauncher/ATLPackInstallTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -71,6 +71,8 @@ AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), 
     connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &AtlPage::onSortingSelectionChanged);
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &AtlPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &AtlPage::onVersionSelectionChanged);
+
+    ui->packView->setItemDelegate(new ProjectItemDelegate(this));
 }
 
 AtlPage::~AtlPage()

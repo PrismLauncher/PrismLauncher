@@ -17,6 +17,7 @@ struct IndexedVersion {
     int addonId;
     int fileId;
     QString version;
+    ModPlatform::IndexedVersionType version_type;
     QString mcVersion;
     QString downloadUrl;
 };

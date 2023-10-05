@@ -20,7 +20,7 @@
 
 namespace Time {
 
-QString prettifyDuration(int64_t duration);
+QString prettifyDuration(int64_t duration, bool noDays = false);
 
 /**
  * @brief Returns a string with short form time duration ie. `2days 1h3m4s56.0ms`.
