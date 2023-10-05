@@ -30,6 +30,7 @@
 #include "icons/IconImageProvider.h"
 #include "ui/instanceview/InstanceGridProxyModel.h"
 #include "ui/instanceview/InstanceTableProxyModel.h"
+#include "ui/themes/ThemeManager.h"
 
 #include <QHeaderView>
 #include <QKeyEvent>
@@ -254,28 +255,16 @@ void InstancesView::setFilterQuery(const QString& query)
 void InstancesView::setCatDisplayed(bool enabled)
 {
     if (enabled) {
-        QDateTime now = QDateTime::currentDateTime();
-        QDateTime xmas(QDate(now.date().year(), 12, 25), QTime(0, 0));
-        QDateTime halloween(QDate(now.date().year(), 10, 31), QTime(0, 0));
-        QDateTime birthday(QDate(now.date().year(), 10, 17), QTime(00, 0));
-        QString cat = APPLICATION->settings()->get("BackgroundCat").toString();
-        if (std::abs(now.daysTo(xmas)) <= 4) {
-            cat += "-xmas";
-        } else if (std::abs(now.daysTo(halloween)) <= 12) {
-            cat += "-spooky";
-        } else if (std::abs(now.daysTo(birthday)) <= 12) {
-            cat += "-bday";
-        }
         setStyleSheet(QString(R"(
 * {
-    background-image: url(:/backgrounds/%1);
+    background-image: url(%1);
     background-attachment: fixed;
     background-clip: padding;
     background-position: bottom right;
     background-repeat: none;
     background-color: palette(base);
 })")
-                          .arg(cat));
+                          .arg(APPLICATION->themeManager()->getCatPack()));
         m_table->setAlternatingRowColors(false);
     } else {
         setStyleSheet(QString());
