@@ -579,9 +579,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
 
-        // Mod loader settings
-        m_settings->registerSetting("DisableQuiltBeacon", false);
-
         // Legacy settings
         m_settings->registerSetting("OnlineFixes", true);
 
