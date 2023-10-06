@@ -335,7 +335,7 @@ QList<QString> JavaUtils::FindJavaPaths()
         }
     }
 
-    javas.append(getMinecraftJavaBundle());
+    candidates.append(getMinecraftJavaBundle());
     candidates = addJavasFromEnv(candidates);
     candidates.removeDuplicates();
     return candidates;
