@@ -536,6 +536,7 @@ QMap<QString, QString> MinecraftInstance::getVariables()
     out.insert("INST_MC_DIR", QDir::toNativeSeparators(QDir(gameRoot()).absolutePath()));
     out.insert("INST_JAVA", settings()->get("JavaPath").toString());
     out.insert("INST_JAVA_ARGS", javaArguments().join(' '));
+    out.insert("NO_COLOR", "1");
     return out;
 }
 
