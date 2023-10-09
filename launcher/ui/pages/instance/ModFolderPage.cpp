@@ -175,7 +175,7 @@ void ModFolderPage::installMods()
 
     ResourceDownload::ModDownloadDialog mdownload(this, m_model, m_instance);
     if (mdownload.exec()) {
-        ConcurrentTask* tasks = new ConcurrentTask(this);
+        auto tasks = new ConcurrentTask(this, "Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -206,6 +206,14 @@ void ModFolderPage::installMods()
 
 void ModFolderPage::updateMods()
 {
+    if (m_instance->typeName() != "Minecraft")
+        return;  // this is a null instance or a legacy instance
+
+    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    if (!profile->getModLoaders().has_value()) {
+        QMessageBox::critical(this, tr("Error"), tr("Please install a mod loader first!"));
+        return;
+    }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
     auto mods_list = m_model->selectedMods(selection);
@@ -234,7 +242,7 @@ void ModFolderPage::updateMods()
     }
 
     if (update_dialog.exec()) {
-        ConcurrentTask* tasks = new ConcurrentTask(this);
+        auto tasks = new ConcurrentTask(this, "Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();

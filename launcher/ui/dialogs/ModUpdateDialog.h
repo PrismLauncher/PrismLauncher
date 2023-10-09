@@ -23,7 +23,7 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
     void checkCandidates();
 
-    void appendMod(const CheckUpdateTask::UpdatableMod& info);
+    void appendMod(const CheckUpdateTask::UpdatableMod& info, QStringList requiredBy = {});
 
     const QList<ResourceDownloadTask::Ptr> getTasks();
     auto indexDir() const -> QDir { return m_mod_model->indexDir(); }

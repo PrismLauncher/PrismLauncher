@@ -89,6 +89,10 @@ function(
         -Wdouble-promotion # warn if float is implicit promoted to double
         -Wformat=2 # warn on security issues around functions that format output (ie printf)
         -Wimplicit-fallthrough # warn on statements that fallthrough without an explicit annotation
+        # -Wgnu-zero-variadic-macro-arguments (part of -pedantic) is triggered by every qCDebug() call and therefore results
+        # in a lot of noise. This warning is only notifying us that clang is emulating the GCC behaviour
+        # instead of the exact standard wording so we can safely ignore it
+        -Wno-gnu-zero-variadic-macro-arguments
     )
   endif()
 

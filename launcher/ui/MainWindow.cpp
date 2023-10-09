@@ -363,7 +363,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
     // Template hell sucks...
     connect(APPLICATION->accounts().get(), &AccountList::defaultAccountChanged, [this] { defaultAccountChanged(); });
-    connect(APPLICATION->accounts().get(), &AccountList::listChanged, [this] { repopulateAccountsMenu(); });
+    connect(APPLICATION->accounts().get(), &AccountList::listChanged, [this] { defaultAccountChanged(); });
 
     // Show initial account
     defaultAccountChanged();
@@ -872,7 +872,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
     } else {
         CustomMessageBox::selectable(this, tr("Error"),
                                      tr("The launcher cannot download Minecraft or update instances unless you have at least "
-                                        "one account added.\nPlease add your Microsoft or Mojang account."),
+                                        "one account added.\nPlease add a Microsoft account."),
                                      QMessageBox::Warning)
             ->show();
     }

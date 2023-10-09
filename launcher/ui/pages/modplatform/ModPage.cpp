@@ -131,8 +131,10 @@ void ModPage::updateVersionList()
         }
 
         // Only add the version if it's valid or using the 'Any' filter, but never if the version is opted out
-        if ((valid || m_filter->versions.empty()) && !optedOut(version))
-            m_ui->versionSelectionBox->addItem(version.version, QVariant(i));
+        if ((valid || m_filter->versions.empty()) && !optedOut(version)) {
+            auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
+            m_ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(i));
+        }
     }
     if (m_ui->versionSelectionBox->count() == 0) {
         m_ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1));
