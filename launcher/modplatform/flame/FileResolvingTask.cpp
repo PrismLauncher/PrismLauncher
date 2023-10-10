@@ -1,6 +1,7 @@
 #include "FileResolvingTask.h"
 
 #include "Json.h"
+#include "modplatform/ModIndex.h"
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
 #include "net/Upload.h"
@@ -102,7 +103,7 @@ void Flame::FileResolvingTask::netJobFinished()
                 auto url = QString("https://api.modrinth.com/v2/version_file/%1?algorithm=sha1").arg(hash);
                 auto output = std::make_shared<QByteArray>();
                 auto dl = Net::ApiDownload::makeByteArray(QUrl(url), output);
-                QObject::connect(dl.get(), &Net::Download::succeeded, [&out]() { out.resolved = true; });
+                QObject::connect(dl.get(), &Net::ApiDownload::succeeded, [&out]() { out.resolved = true; });
 
                 m_checkJob->addNetAction(dl);
                 blockedProjects.insert(&out, output);
@@ -153,7 +154,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
         // If there's more than one mod loader for this version, we can't know for sure
         // which file is relative to each loader, so it's best to not use any one and
         // let the user download it manually.
-        if (file.loaders.size() <= 1) {
+        if (!file.loaders || hasSingleModLoaderSelected(file.loaders)) {
             out->url = file.downloadUrl;
             qDebug() << "Found alternative on modrinth " << out->fileName;
         } else {
@@ -175,7 +176,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
             auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(projectId);
             auto dl = Net::ApiDownload::makeByteArray(url, output);
             qDebug() << "Fetching url slug for file:" << mod->fileName;
-            QObject::connect(dl.get(), &Net::Download::succeeded, [block, index, output]() {
+            QObject::connect(dl.get(), &Net::ApiDownload::succeeded, [block, index, output]() {
                 auto mod = block->at(index);  // use the shared_ptr so it is captured and only freed when we are done
                 auto json = QJsonDocument::fromJson(*output);
                 auto base =

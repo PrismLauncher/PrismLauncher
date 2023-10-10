@@ -24,10 +24,6 @@ struct AuthSession {
         GoneOrMigrated
     } status = Undetermined;
 
-    // client token
-    QString client_token;
-    // account user name
-    QString username;
     // combined session ID
     QString session;
     // volatile auth token

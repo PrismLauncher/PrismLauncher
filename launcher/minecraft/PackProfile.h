@@ -44,14 +44,11 @@
 #include <QList>
 #include <QString>
 #include <memory>
+#include <optional>
 
-#include "BaseVersion.h"
 #include "Component.h"
 #include "LaunchProfile.h"
-#include "Library.h"
-#include "MojangDownloadInfo.h"
-#include "ProfileUtils.h"
-#include "modplatform/ResourceAPI.h"
+#include "modplatform/ModIndex.h"
 #include "net/Mode.h"
 
 class MinecraftInstance;
@@ -146,7 +143,9 @@ class PackProfile : public QAbstractListModel {
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
 
-    std::optional<ResourceAPI::ModLoaderTypes> getModLoaders();
+    std::optional<ModPlatform::ModLoaderTypes> getModLoaders();
+    // this returns aditional loaders(Quilt supports fabric and NeoForge supports Forge)
+    std::optional<ModPlatform::ModLoaderTypes> getSupportedModLoaders();
 
    private:
     void scheduleSave();
