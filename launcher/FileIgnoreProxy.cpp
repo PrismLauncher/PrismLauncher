@@ -267,10 +267,7 @@ bool FileIgnoreProxy::filterAcceptsRow(int sourceRow, const QModelIndex& sourceP
 
 bool FileIgnoreProxy::ignoreFile(QFileInfo fileInfo) const
 {
-    auto fileName = fileInfo.fileName();
-    auto path = relPath(fileInfo.absoluteFilePath());
-    return std::any_of(m_ignoreFiles.cbegin(), m_ignoreFiles.cend(), [fileName](auto iFileName) { return fileName == iFileName; }) ||
-           m_ignoreFilePaths.covers(path);
+    return m_ignoreFiles.contains(fileInfo.fileName()) || m_ignoreFilePaths.covers(relPath(fileInfo.absoluteFilePath()));
 }
 
 bool FileIgnoreProxy::filterFile(const QString& fileName) const

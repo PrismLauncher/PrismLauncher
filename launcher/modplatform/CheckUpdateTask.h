@@ -1,6 +1,7 @@
 #pragma once
 
 #include "minecraft/mod/Mod.h"
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "tasks/Task.h"
@@ -14,7 +15,7 @@ class CheckUpdateTask : public Task {
    public:
     CheckUpdateTask(QList<Mod*>& mods,
                     std::list<Version>& mcVersions,
-                    std::optional<ResourceAPI::ModLoaderTypes> loaders,
+                    std::optional<ModPlatform::ModLoaderTypes> loaders,
                     std::shared_ptr<ModFolderModel> mods_folder)
         : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder){};
 
@@ -23,6 +24,7 @@ class CheckUpdateTask : public Task {
         QString old_hash;
         QString old_version;
         QString new_version;
+        std::optional<ModPlatform::IndexedVersionType> new_version_type;
         QString changelog;
         bool enabled;
         ModPlatform::ResourceProvider provider;
@@ -33,6 +35,7 @@ class CheckUpdateTask : public Task {
                      QString old_h,
                      QString old_v,
                      QString new_v,
+                     std::optional<ModPlatform::IndexedVersionType> new_v_type,
                      QString changelog,
                      bool enabled,
                      ModPlatform::ResourceProvider p,
@@ -41,6 +44,7 @@ class CheckUpdateTask : public Task {
             , old_hash(old_h)
             , old_version(old_v)
             , new_version(new_v)
+            , new_version_type(new_v_type)
             , changelog(changelog)
             , enabled(enabled)
             , provider(p)
@@ -49,6 +53,7 @@ class CheckUpdateTask : public Task {
     };
 
     auto getUpdatable() -> std::vector<UpdatableMod>&& { return std::move(m_updatable); }
+    auto getDependencies() -> QList<std::shared_ptr<GetModDependenciesTask::PackDependency>>&& { return std::move(m_deps); }
 
    public slots:
     bool abort() override = 0;
@@ -62,8 +67,9 @@ class CheckUpdateTask : public Task {
    protected:
     QList<Mod*>& m_mods;
     std::list<Version>& m_game_versions;
-    std::optional<ResourceAPI::ModLoaderTypes> m_loaders;
+    std::optional<ModPlatform::ModLoaderTypes> m_loaders;
     std::shared_ptr<ModFolderModel> m_mods_folder;
 
     std::vector<UpdatableMod> m_updatable;
+    QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> m_deps;
 };

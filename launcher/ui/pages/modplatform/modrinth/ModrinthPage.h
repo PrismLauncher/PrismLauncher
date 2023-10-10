@@ -41,7 +41,9 @@
 #include "ui/pages/BasePage.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
+#include "ui/widgets/ProgressWidget.h"
 
+#include <QTimer>
 #include <QWidget>
 
 namespace Ui {
@@ -88,4 +90,9 @@ class ModrinthPage : public QWidget, public BasePage {
 
     Modrinth::Modpack current;
     QString selectedVersion;
+
+    ProgressWidget m_fetch_progress;
+
+    // Used to do instant searching with a delay to cache quick changes
+    QTimer m_search_timer;
 };

@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +39,7 @@
 #include <cassert>
 
 #include <QDateTime>
+#include <QMenu>
 #include <QObject>
 #include <QProcess>
 #include <QSet>
@@ -246,6 +248,8 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     virtual bool canEdit() const = 0;
     virtual bool canExport() const = 0;
 
+    virtual void populateLaunchMenu(QMenu* menu) = 0;
+
     bool reloadSettings();
 
     /**
@@ -281,6 +285,8 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     void launchTaskChanged(shared_qobject_ptr<LaunchTask>);
 
     void runningStatusChanged(bool running);
+
+    void profilerChanged();
 
     void statusChanged(Status from, Status to);
 

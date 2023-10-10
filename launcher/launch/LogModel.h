@@ -30,7 +30,7 @@ class LogModel : public QAbstractListModel {
 
     enum Roles { LevelRole = Qt::UserRole };
 
-    private /* types */:
+   private /* types */:
     struct entry {
         MessageLevel::Enum level;
         QString line;
