@@ -206,6 +206,14 @@ void ModFolderPage::installMods()
 
 void ModFolderPage::updateMods()
 {
+    if (m_instance->typeName() != "Minecraft")
+        return;  // this is a null instance or a legacy instance
+
+    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    if (!profile->getModLoaders().has_value()) {
+        QMessageBox::critical(this, tr("Error"), tr("Please install a mod loader first!"));
+        return;
+    }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
     auto mods_list = m_model->selectedMods(selection);

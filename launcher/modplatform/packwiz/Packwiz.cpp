@@ -21,6 +21,8 @@
 #include <QDebug>
 #include <QDir>
 #include <QObject>
+#include <sstream>
+#include <string>
 
 #include "FileSystem.h"
 #include "StringUtils.h"
@@ -111,6 +113,7 @@ auto V1::createModFormat([[maybe_unused]] QDir& index_dir, ModPlatform::IndexedP
     mod.provider = mod_pack.provider;
     mod.file_id = mod_version.fileId;
     mod.project_id = mod_pack.addonId;
+    mod.side = stringToSide(mod_pack.side);
 
     return mod;
 }
@@ -154,38 +157,52 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
         FS::ensureFilePathExists(index_file.fileName());
     }
 
+    toml::table update;
+    switch (mod.provider) {
+        case (ModPlatform::ResourceProvider::FLAME):
+            if (mod.file_id.toInt() == 0 || mod.project_id.toInt() == 0) {
+                qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
+                return;
+            }
+            update = toml::table{
+                { "file-id", mod.file_id.toInt() },
+                { "project-id", mod.project_id.toInt() },
+            };
+            break;
+        case (ModPlatform::ResourceProvider::MODRINTH):
+            if (mod.mod_id().toString().isEmpty() || mod.version().toString().isEmpty()) {
+                qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
+                return;
+            }
+            update = toml::table{
+                { "mod-id", mod.mod_id().toString().toStdString() },
+                { "version", mod.version().toString().toStdString() },
+            };
+            break;
+    }
+
     if (!index_file.open(QIODevice::ReadWrite)) {
-        qCritical() << QString("Could not open file %1!").arg(indexFileName(mod.name));
+        qCritical() << QString("Could not open file %1!").arg(normalized_fname);
         return;
     }
 
     // Put TOML data into the file
     QTextStream in_stream(&index_file);
-    auto addToStream = [&in_stream](QString&& key, QString value) { in_stream << QString("%1 = \"%2\"\n").arg(key, value); };
-
     {
-        addToStream("name", mod.name);
-        addToStream("filename", mod.filename);
-        addToStream("side", mod.side);
-
-        in_stream << QString("\n[download]\n");
-        addToStream("mode", mod.mode);
-        addToStream("url", mod.url.toString());
-        addToStream("hash-format", mod.hash_format);
-        addToStream("hash", mod.hash);
-
-        in_stream << QString("\n[update]\n");
-        in_stream << QString("[update.%1]\n").arg(ProviderCaps.name(mod.provider));
-        switch (mod.provider) {
-            case (ModPlatform::ResourceProvider::FLAME):
-                in_stream << QString("file-id = %1\n").arg(mod.file_id.toString());
-                in_stream << QString("project-id = %1\n").arg(mod.project_id.toString());
-                break;
-            case (ModPlatform::ResourceProvider::MODRINTH):
-                addToStream("mod-id", mod.mod_id().toString());
-                addToStream("version", mod.version().toString());
-                break;
-        }
+        auto tbl = toml::table{ { "name", mod.name.toStdString() },
+                                { "filename", mod.filename.toStdString() },
+                                { "side", sideToString(mod.side).toStdString() },
+                                { "download",
+                                  toml::table{
+                                      { "mode", mod.mode.toStdString() },
+                                      { "url", mod.url.toString().toStdString() },
+                                      { "hash-format", mod.hash_format.toStdString() },
+                                      { "hash", mod.hash.toStdString() },
+                                  } },
+                                { "update", toml::table{ { ProviderCaps.name(mod.provider), update } } } };
+        std::stringstream ss;
+        ss << tbl;
+        in_stream << QString::fromStdString(ss.str());
     }
 
     index_file.flush();
@@ -258,7 +275,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
     {  // Basic info
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
-        mod.side = stringEntry(table, "side");
+        mod.side = stringToSide(stringEntry(table, "side"));
     }
 
     {  // [download] info
@@ -311,6 +328,30 @@ auto V1::getIndexForMod(QDir& index_dir, QVariant& mod_id) -> Mod
     }
 
     return {};
+}
+
+auto V1::sideToString(Side side) -> QString
+{
+    switch (side) {
+        case Side::ClientSide:
+            return "client";
+        case Side::ServerSide:
+            return "server";
+        case Side::UniversalSide:
+            return "both";
+    }
+    return {};
+}
+
+auto V1::stringToSide(QString side) -> Side
+{
+    if (side == "client")
+        return Side::ClientSide;
+    if (side == "server")
+        return Side::ServerSide;
+    if (side == "both")
+        return Side::UniversalSide;
+    return Side::UniversalSide;
 }
 
 }  // namespace Packwiz

@@ -94,7 +94,7 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
     for (auto ver_dep : version.dependencies) {
         if (ver_dep.type != ModPlatform::DependencyType::REQUIRED)
             continue;
-
+        ver_dep = getOverride(ver_dep, providerName);
         auto isOnlyVersion = providerName == ModPlatform::ResourceProvider::MODRINTH && ver_dep.addonId.toString().isEmpty();
         if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
                                     [&ver_dep, isOnlyVersion](const ModPlatform::Dependency& i) {
@@ -127,7 +127,7 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
             dep != m_pack_dependencies.end())  // check loaded dependencies
             continue;
 
-        c_dependencies.append(getOverride(ver_dep, providerName));
+        c_dependencies.append(ver_dep);
     }
     return c_dependencies;
 }

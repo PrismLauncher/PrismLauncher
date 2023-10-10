@@ -217,12 +217,13 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
                 qDebug() << *response;
                 qWarning() << "Error while reading modrinth modpack version: " << e.cause();
             }
-
             for (auto version : current.versions) {
+                auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
                 if (!version.name.contains(version.version))
-                    ui->versionSelectionBox->addItem(QString("%1 — %2").arg(version.name, version.version), QVariant(version.id));
+                    ui->versionSelectionBox->addItem(QString("%1 — %2%3").arg(version.name, version.version, release_type),
+                                                     QVariant(version.id));
                 else
-                    ui->versionSelectionBox->addItem(version.name, QVariant(version.id));
+                    ui->versionSelectionBox->addItem(QString("%1%2").arg(version.name, release_type), QVariant(version.id));
             }
 
             QVariant current_updated;
