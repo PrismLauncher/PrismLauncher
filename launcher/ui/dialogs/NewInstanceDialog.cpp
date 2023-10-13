@@ -237,8 +237,7 @@ void NewInstanceDialog::setSuggestedIcon(const QString& key)
 
 InstanceTask* NewInstanceDialog::extractTask()
 {
-    InstanceTask* extracted = creationTask.get();
-    creationTask.release();
+    InstanceTask* extracted = creationTask.release();
 
     InstanceName inst_name(ui->instNameTextBox->placeholderText().trimmed(), importVersion);
     inst_name.setName(ui->instNameTextBox->text().trimmed());

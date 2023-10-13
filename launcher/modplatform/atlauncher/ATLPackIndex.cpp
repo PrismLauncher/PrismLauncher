@@ -43,5 +43,5 @@ void ATLauncher::loadIndexedPack(ATLauncher::IndexedPack& m, QJsonObject& obj)
     m.system = Json::ensureBoolean(obj, QString("system"), false);
     m.description = Json::ensureString(obj, "description", "");
 
-    m.safeName = Json::requireString(obj, "name").replace(QRegularExpression("[^A-Za-z0-9]"), "");
+    m.safeName = Json::requireString(obj, "name").replace(QRegularExpression("[^A-Za-z0-9]"), "").toLower() + ".png";
 }
