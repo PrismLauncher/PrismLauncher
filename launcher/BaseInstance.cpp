@@ -278,6 +278,8 @@ void BaseInstance::setRunning(bool running)
         QDateTime timeEnded = QDateTime::currentDateTime();
 
         qint64 current = settings()->get("totalTimePlayed").toLongLong();
+        if (current < 0)
+            current = 0;
         settings()->set("totalTimePlayed", current + m_timeStarted.secsTo(timeEnded));
         settings()->set("lastTimePlayed", m_timeStarted.secsTo(timeEnded));
 
@@ -290,6 +292,8 @@ void BaseInstance::setRunning(bool running)
 int64_t BaseInstance::totalTimePlayed() const
 {
     qint64 current = m_settings->get("totalTimePlayed").toLongLong();
+    if (current < 0)
+        current = 0;
     if (m_isRunning) {
         QDateTime timeNow = QDateTime::currentDateTime();
         return current + m_timeStarted.secsTo(timeNow);
