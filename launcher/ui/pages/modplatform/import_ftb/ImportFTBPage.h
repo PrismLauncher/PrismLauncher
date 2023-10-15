@@ -53,12 +53,15 @@ class ImportFTBPage : public QWidget, public BasePage {
     void suggestCurrent();
     void onPackSelectionChanged(Modpack* pack = nullptr);
    private slots:
+    void onSortingSelectionChanged(QString data);
     void onPublicPackSelectionChanged(QModelIndex first, QModelIndex second);
+    void triggerSearch();
 
    private:
     bool initialized = false;
     Modpack selected;
     ListModel* listModel = nullptr;
+    FilterModel* currentModel = nullptr;
 
     NewInstanceDialog* dialog = nullptr;
     Ui::ImportFTBPage* ui = nullptr;

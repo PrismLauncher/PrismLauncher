@@ -55,18 +55,6 @@ jobs:
             vcvars_arch: 'amd64_x86'
 
           - os: windows-2022
-            name: "Windows-MSVC-Legacy"
-            msystem: ''
-            architecture: 'win32'
-            vcvars_arch: 'amd64_x86'
-            qt_ver: 5
-            qt_host: windows
-            qt_arch: 'win32_msvc2019'
-            qt_version: '5.15.2'
-            qt_modules: ''
-            qt_tools: 'tools_openssl_x86'
-
-          - os: windows-2022
             name: "Windows-MSVC"
             msystem: ''
             architecture: 'x64'
@@ -125,7 +113,7 @@ jobs:
       # PREPARE
       ##
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: 'true'
 
@@ -164,7 +152,7 @@ jobs:
 
       - name: Retrieve ccache cache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v3.3.2
         with:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
@@ -620,7 +608,7 @@ jobs:
       options: --privileged
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: inputs.build_type == 'Debug'
         with:
           submodules: 'true'

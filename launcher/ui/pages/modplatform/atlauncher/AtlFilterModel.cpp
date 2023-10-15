@@ -67,9 +67,10 @@ bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParen
     if (searchTerm.isEmpty()) {
         return true;
     }
-
     QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
     ATLauncher::IndexedPack pack = sourceModel()->data(index, Qt::UserRole).value<ATLauncher::IndexedPack>();
+    if (searchTerm.startsWith("#"))
+        return QString::number(pack.id) == searchTerm.mid(1);
     return pack.name.contains(searchTerm, Qt::CaseInsensitive);
 }
 
