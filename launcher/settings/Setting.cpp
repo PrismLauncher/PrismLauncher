@@ -45,3 +45,12 @@ void Setting::reset()
 {
     emit settingReset(*this);
 }
+
+void Setting::remove()
+{
+    SettingsObject* sbase = m_storage;
+    if (sbase) {
+        sbase->removeValue(*this);
+    }
+    emit settingRemoved(*this);
+}

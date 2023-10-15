@@ -175,6 +175,16 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     virtual SettingsObjectPtr settings();
 
     /*!
+     * \brief Get this instance's settings object.
+     * This settings object *may* store instance-specific settings.
+     *
+     * Note that this method *is* const and *will not* call loadSpecificSettings()
+     *
+     * \return A pointer to this instance's settings object.
+     */
+    virtual SettingsObjectPtr getSettingsConst() const { return m_settings; }
+
+    /*!
      * \brief Loads settings specific to an instance type if they're not already loaded.
      */
     virtual void loadSpecificSettings() = 0;

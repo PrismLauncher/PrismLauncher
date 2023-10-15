@@ -55,6 +55,7 @@ class INISettingsObject : public SettingsObject {
 
    protected:
     virtual QVariant retrieveValue(const Setting& setting) override;
+    virtual void removeValue(const Setting& setting) override;
     void doSave();
 
    protected:

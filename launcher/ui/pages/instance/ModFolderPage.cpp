@@ -88,6 +88,11 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
+        ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionEnableUpdates);
+        ui->actionsToolbar->insertActionAfter(ui->actionEnableUpdates, ui->actionDisableUpdates);
+        connect(ui->actionEnableUpdates, &QAction::triggered, this, &ModFolderPage::enableUpdates);
+        connect(ui->actionDisableUpdates, &QAction::triggered, this, &ModFolderPage::disableUpdates);
+
         ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
@@ -221,7 +226,7 @@ void ModFolderPage::updateMods()
     if (use_all)
         mods_list = m_model->allMods();
 
-    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list);
+    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list, !use_all);
     update_dialog.checkCandidates();
 
     if (update_dialog.aborted()) {
@@ -269,6 +274,18 @@ void ModFolderPage::updateMods()
 
         m_model->update();
     }
+}
+
+void ModFolderPage::enableUpdates()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setModUpdate(selection.indexes(), EnableAction::ENABLE);
+}
+
+void ModFolderPage::disableUpdates()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setModUpdate(selection.indexes(), EnableAction::DISABLE);
 }
 
 CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)

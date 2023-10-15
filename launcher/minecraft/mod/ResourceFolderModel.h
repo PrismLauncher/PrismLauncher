@@ -9,6 +9,7 @@
 #include <QSet>
 #include <QSortFilterProxyModel>
 #include <QTreeView>
+#include <QWidget>
 
 #include "Resource.h"
 

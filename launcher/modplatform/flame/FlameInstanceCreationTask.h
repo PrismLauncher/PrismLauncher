@@ -45,6 +45,7 @@
 
 #include "net/NetJob.h"
 
+#include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "ui/dialogs/BlockedModsDialog.h"
 
 class FlameCreationTask final : public InstanceCreationTask {
@@ -74,7 +75,7 @@ class FlameCreationTask final : public InstanceCreationTask {
     void idResolverSucceeded(QEventLoop&);
     void setupDownloadJob(QEventLoop&);
     void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
-    void validateZIPResouces();
+    void finalizeResouces();
     QString getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion);
 
    private:
@@ -89,7 +90,8 @@ class FlameCreationTask final : public InstanceCreationTask {
 
     QString m_managed_id, m_managed_version_id;
 
-    QList<std::pair<QString, QString>> m_ZIP_resources;
+    QList<std::tuple<QString, QString, QString, QUrl>> m_resources;
 
-    std::optional<InstancePtr> m_instance;
+    std::shared_ptr<MinecraftInstance> m_instance = nullptr;
+    std::optional<InstancePtr> m_update_instance;
 };

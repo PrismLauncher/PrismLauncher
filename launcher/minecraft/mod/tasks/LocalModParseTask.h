@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QObject>
+#include <mutex>
 
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/ModDetails.h"
@@ -24,7 +25,7 @@ bool processFolder(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
 bool processLitemod(Mod& mod, ProcessingLevel level = ProcessingLevel::Full);
 
 /** Checks whether a file is valid as a mod or not. */
-bool validate(QFileInfo file);
+Mod::Ptr validate(QFileInfo file);
 
 bool processIconPNG(const Mod& mod, QByteArray&& raw_data);
 bool loadIconFile(const Mod& mod);

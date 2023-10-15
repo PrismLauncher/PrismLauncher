@@ -23,6 +23,7 @@
 #include "LocalWorldSaveParseTask.h"
 
 #include "FileSystem.h"
+#include "minecraft/mod/WorldSave.h"
 
 #include <quazip/quazip.h>
 #include <quazip/quazipdir.h>
@@ -30,6 +31,7 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <memory>
 
 namespace WorldSaveUtils {
 
@@ -162,10 +164,13 @@ bool processZIP(WorldSave& save, ProcessingLevel level)
     return true;
 }
 
-bool validate(QFileInfo file)
+WorldSave::Ptr validate(QFileInfo file)
 {
-    WorldSave sp{ file };
-    return WorldSaveUtils::process(sp, ProcessingLevel::BasicInfoOnly) && sp.valid();
+    auto world = makeShared<WorldSave>(file);
+    bool valid = WorldSaveUtils::process(*world, ProcessingLevel::BasicInfoOnly) && world->valid();
+    if (!valid)
+        return nullptr;
+    return world;
 }
 
 }  // namespace WorldSaveUtils

@@ -128,6 +128,11 @@ void FlameCheckUpdate::executeTask()
             continue;
         }
 
+        if (m_blacklist.contains(mod->name())) {
+            qDebug() << "Ignoring" << mod->fileinfo().fileName() << "Because it is in blacklist";
+            continue;
+        }
+
         setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
         setProgress(i++, m_mods.size());
 

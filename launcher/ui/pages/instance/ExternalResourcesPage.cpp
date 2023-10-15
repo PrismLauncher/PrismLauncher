@@ -34,6 +34,9 @@
  */
 
 #include "ExternalResourcesPage.h"
+
+#include <QHeaderView>
+
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ExternalResourcesPage.h"
 

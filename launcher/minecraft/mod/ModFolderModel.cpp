@@ -51,6 +51,8 @@
 
 #include "Application.h"
 
+#include "QVariantUtils.h"
+
 #include "Json.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/LocalModUpdateTask.h"
@@ -62,9 +64,11 @@
 ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider" });
-    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider") });
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Update" });
+    m_column_names_translated =
+        QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Update") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME,     SortType::NAME,  SortType::VERSION,
+                           SortType::DATE,    SortType::PROVIDER, SortType::UPDATE };
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive,      QHeaderView::Stretch,
                               QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents };
     m_columnsHideable = { false, true, false, true, true, true };
@@ -135,6 +139,11 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             switch (column) {
                 case ActiveColumn:
                     return at(row)->enabled() ? Qt::Checked : Qt::Unchecked;
+                case UpdateColumn: {
+                    auto update_ignore_list = QVariantUtils::toList<QString>(
+                        m_instance->getSettingsConst()->get(QStringList({ "Mods", "UpdateIgnoreList" }).join('/')));
+                    return !update_ignore_list.contains(at(row)->name()) ? Qt::Checked : Qt::Unchecked;
+                }
                 default:
                     return QVariant();
             }
@@ -154,6 +163,7 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case DateColumn:
                 case ProviderColumn:
                 case ImageColumn:
+                case UpdateColumn:
                     return columnNames().at(section);
                 default:
                     return QVariant();
@@ -171,6 +181,8 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                     return tr("The date and time this mod was last changed (or added).");
                 case ProviderColumn:
                     return tr("Where the mod was downloaded from.");
+                case UpdateColumn:
+                    return tr("Should this mod be updated?");
                 default:
                     return QVariant();
             }
@@ -178,6 +190,73 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
             return QVariant();
     }
     return QVariant();
+}
+
+bool ModFolderModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    int row = index.row();
+    if (row < 0 || row >= rowCount(index.parent()) || !index.isValid())
+        return false;
+
+    if (role == Qt::CheckStateRole) {
+        if (index.column() == UpdateColumn) {
+            return setModUpdate({ index }, EnableAction::TOGGLE);
+        }
+        return setResourceEnabled({ index }, EnableAction::TOGGLE);
+    }
+
+    return false;
+}
+
+bool ModFolderModel::setModUpdate(const QModelIndexList& indexes, EnableAction action)
+{
+    if (indexes.isEmpty())
+        return true;
+
+    bool succeeded = true;
+    for (auto const& idx : indexes) {
+        if (!validateIndex(idx) || idx.column() != UpdateColumn)
+            continue;
+
+        int row = idx.row();
+        auto& resource = m_resources[row];
+
+        auto update_ignore_list =
+            QVariantUtils::toList<QString>(m_instance->getSettingsConst()->get(QStringList({ "Mods", "UpdateIgnoreList" }).join('/')));
+
+        bool in_ignore_list = update_ignore_list.contains(resource->name());
+
+        bool update = true;
+        switch (action) {
+            case EnableAction::ENABLE:
+                update = true;
+                break;
+            case EnableAction::DISABLE:
+                update = false;
+                break;
+            case EnableAction::TOGGLE:
+            default:
+                update = in_ignore_list;
+                break;
+        }
+
+        if (!in_ignore_list == update) {
+            succeeded = false;
+            continue;
+        }
+
+        if (in_ignore_list && update) {
+            update_ignore_list.removeOne(resource->name());
+        } else if (!in_ignore_list && !update) {
+            update_ignore_list.append(resource->name());
+        }
+
+        m_instance->settings()->set(QStringList({ "Mods", "UpdateIgnoreList" }).join('/'), QVariantUtils::fromList(update_ignore_list));
+
+        emit dataChanged(index(row, UpdateColumn), index(row, columnCount(QModelIndex()) - 1));
+    }
+
+    return succeeded;
 }
 
 int ModFolderModel::columnCount(const QModelIndex& parent) const

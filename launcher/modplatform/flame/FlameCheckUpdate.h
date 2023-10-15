@@ -11,8 +11,9 @@ class FlameCheckUpdate : public CheckUpdateTask {
     FlameCheckUpdate(QList<Mod*>& mods,
                      std::list<Version>& mcVersions,
                      std::optional<ModPlatform::ModLoaderTypes> loaders,
-                     std::shared_ptr<ModFolderModel> mods_folder)
-        : CheckUpdateTask(mods, mcVersions, loaders, mods_folder)
+                     std::shared_ptr<ModFolderModel> mods_folder,
+                     QStringList blacklist = {})
+        : CheckUpdateTask(mods, mcVersions, loaders, mods_folder), m_blacklist(blacklist)
     {}
 
    public slots:
@@ -23,6 +24,7 @@ class FlameCheckUpdate : public CheckUpdateTask {
 
    private:
     NetJob* m_net_job = nullptr;
+    QStringList m_blacklist = {};
 
     bool m_was_aborted = false;
 };

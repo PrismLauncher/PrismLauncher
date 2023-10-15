@@ -27,11 +27,16 @@
 #include <QFileInfo>
 #include <QObject>
 
-enum class PackedResourceType { DataPack, ResourcePack, TexturePack, ShaderPack, WorldSave, Mod, UNKNOWN };
+#include "minecraft/mod/Resource.h"
+
+enum class PackedResourceType { DataPack, ResourcePack, TexturePack, ShaderPack, WorldSave, Mod, UNKNOWN, INVALID };
+enum class ResourceManagmentType { PackManaged, UserInstalled, External };
+
 namespace ResourceUtils {
 static const std::set<PackedResourceType> ValidResourceTypes = { PackedResourceType::DataPack,    PackedResourceType::ResourcePack,
                                                                  PackedResourceType::TexturePack, PackedResourceType::ShaderPack,
                                                                  PackedResourceType::WorldSave,   PackedResourceType::Mod };
-PackedResourceType identify(QFileInfo file);
+std::pair<PackedResourceType, Resource::Ptr> identify(QFileInfo file);
 QString getPackedTypeName(PackedResourceType type);
+QString getManagmentTypeName(ResourceManagmentType type);
 }  // namespace ResourceUtils

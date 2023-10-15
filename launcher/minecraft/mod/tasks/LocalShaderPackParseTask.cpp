@@ -22,10 +22,12 @@
 #include "LocalShaderPackParseTask.h"
 
 #include "FileSystem.h"
+#include "minecraft/mod/ShaderPack.h"
 
 #include <quazip/quazip.h>
 #include <quazip/quazipdir.h>
 #include <quazip/quazipfile.h>
+#include <memory>
 
 namespace ShaderPackUtils {
 
@@ -85,10 +87,13 @@ bool processZIP(ShaderPack& pack, ProcessingLevel level)
     return true;
 }
 
-bool validate(QFileInfo file)
+ShaderPack::Ptr validate(QFileInfo file)
 {
-    ShaderPack sp{ file };
-    return ShaderPackUtils::process(sp, ProcessingLevel::BasicInfoOnly) && sp.valid();
+    auto sp = makeShared<ShaderPack>(file);
+    bool valid = ShaderPackUtils::process(*sp, ProcessingLevel::BasicInfoOnly) && sp->valid();
+    if (!valid)
+        return nullptr;
+    return sp;
 }
 
 }  // namespace ShaderPackUtils

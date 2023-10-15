@@ -116,3 +116,11 @@ QVariant INISettingsObject::retrieveValue(const Setting& setting)
     }
     return QVariant();
 }
+
+void INISettingsObject::removeValue(const Setting& setting)
+{
+    qDebug() << "Remove setting" << setting.id();
+    for (auto iter : setting.configKeys())
+        m_ini.remove(iter);
+    doSave();
+}

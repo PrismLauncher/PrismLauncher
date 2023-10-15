@@ -95,6 +95,12 @@ class SettingsObject : public QObject {
     std::shared_ptr<Setting> registerSetting(QString id, QVariant defVal = QVariant()) { return registerSetting(QStringList(id), defVal); }
 
     /*!
+     * Un-Registers the given setting with this SettingsObject and disconnects the necessary signals.
+     *
+     */
+    void unregisterSetting(std::shared_ptr<Setting> setting);
+
+    /*!
      * \brief Gets the setting with the given ID.
      * \param id The ID of the setting to get.
      * \return A pointer to the setting with the given ID.
@@ -110,6 +116,7 @@ class SettingsObject : public QObject {
      * If no setting with the given ID exists, returns an invalid QVariant.
      */
     QVariant get(const QString& id) const;
+    QVariant get(const QStringList& id_parts) { return get(id_parts.join('/')); }
 
     /*!
      * \brief Sets the value of the setting with the given ID.
@@ -119,12 +126,41 @@ class SettingsObject : public QObject {
      * \return True if successful, false if it failed.
      */
     bool set(const QString& id, QVariant value);
+    bool set(const QStringList& id_parts, QVariant value) { return set(id_parts.join('/'), value); }
+
+    /*!
+     * \brief Sets the value of the setting with the given ID.
+     * If no setting with the given ID exists the setting is created with the id as the only synonym.
+     * \param id The ID of the setting to change.
+     * \param value The new value of the setting.
+     * \return a valid Setting shared pointer
+     */
+    std::shared_ptr<Setting> setOrRegister(const QString& id, QVariant value);
+    std::shared_ptr<Setting> setOrRegister(const QStringList& id_parts, QVariant value) { return setOrRegister(id_parts.join('/'), value); }
 
     /*!
      * \brief Reverts the setting with the given ID to default.
      * \param id The ID of the setting to reset.
      */
     void reset(const QString& id) const;
+
+    /*!
+     * \brief Removes a setting from the backing storage and this container.
+     *
+     * If id is a leagin path for some existing setting instead of a fully
+     * qualified ID removes all settings under that path.
+     * \param id The ID of the setting to remove.
+     * \return True if successful, false if it failed
+     */
+    bool remove(const QString& id);
+    bool remove(const QStringList& path_parts) { return remove(path_parts.join('/')); }
+
+    /*!
+     * \brief Removes all settings that fall under the given path.
+     * \param path the leading path of the settings to remove.
+     * \return True if successful, false if it failed
+     */
+    bool removeGroup(const QString& path);
 
     /*!
      * \brief Checks if this SettingsObject contains a setting with the given ID.
@@ -141,6 +177,23 @@ class SettingsObject : public QObject {
 
     virtual void suspendSave() = 0;
     virtual void resumeSave() = 0;
+
+    /*!
+     * \brief Returns a list of all paths that begin with the given path.
+     * if the path is empty returns the top level groups
+     * \return A list of string setting paths/
+     */
+    QStringList childGroups(const QString& path = "");
+    QStringList childGroups(const QStringList& path_parts) { return childGroups(path_parts.join('/')); }
+
+    /*!
+     * \brief Returns a list of all keys that begin with the given path.
+     * If the path is empty returns all top level keys.
+     * \return A list of string key ids.
+     */
+    QStringList childKeys(const QString& path = "");
+    QStringList childKeys(const QStringList& path_parts) { return childKeys(path_parts.join('/')); }
+
    signals:
     /*!
      * \brief Signal emitted when one of this SettingsObject object's settings changes.
@@ -158,6 +211,14 @@ class SettingsObject : public QObject {
      * \param setting A reference to the Setting object that changed.
      */
     void settingReset(const Setting& setting);
+
+    /*!
+     * \brief Signal emitten when one of this SettingsObject object's settings is removed.
+     * This is usually just connected directly to each Settings object's
+     * SettingRemoved signals.
+     * \paral settings A reference to the Setting object that was removed.
+     */
+    void settingRemoved(const Setting& setting);
 
    protected slots:
     /*!
@@ -187,11 +248,23 @@ class SettingsObject : public QObject {
     void connectSignals(const Setting& setting);
 
     /*!
+     * \brief Disconnects the necessary signals to the given Setting.
+     * \param setting The setting to disconnect.
+     */
+    void disconnectSignals(const Setting& setting);
+
+    /*!
      * \brief Function used by Setting objects to get their values from the SettingsObject.
      * \param setting The
      * \return
      */
     virtual QVariant retrieveValue(const Setting& setting) = 0;
+
+    /*!
+     * \brief Function used by Settings object to clear their storage in the SettingsObject.
+     * \param setting The settig to clear storage for.
+     */
+    virtual void removeValue(const Setting& setting) = 0;
 
     friend class Setting;
 

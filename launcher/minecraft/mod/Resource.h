@@ -15,7 +15,7 @@ enum class ResourceType {
     LITEMOD,     //!< The resource is a litemod
 };
 
-enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER };
+enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER, UPDATE };
 
 enum class EnableAction { ENABLE, DISABLE, TOGGLE };
 
@@ -34,6 +34,18 @@ class Resource : public QObject {
     Resource(QObject* parent = nullptr);
     Resource(QFileInfo file_info);
     Resource(QString file_path) : Resource(QFileInfo(file_path)) {}
+    Resource(Resource& other)
+        : QObject(other.parent())
+        , m_file_info(other.m_file_info)
+        , m_changed_date_time(other.m_changed_date_time)
+        , m_internal_id(other.m_internal_id)
+        , m_name(other.m_name)
+        , m_type(other.m_type)
+        , m_enabled(other.m_enabled)
+        , m_is_resolving(other.m_is_resolving)
+        , m_is_resolved(other.m_is_resolved)
+        , m_resolution_ticket(other.m_resolution_ticket)
+    {}
 
     ~Resource() override = default;
 

@@ -20,11 +20,13 @@
 #include "LocalTexturePackParseTask.h"
 
 #include "FileSystem.h"
+#include "minecraft/mod/TexturePack.h"
 
 #include <quazip/quazip.h>
 #include <quazip/quazipfile.h>
 
 #include <QCryptographicHash>
+#include <memory>
 
 namespace TexturePackUtils {
 
@@ -222,10 +224,13 @@ bool processPackPNG(const TexturePack& pack)
     }
 }
 
-bool validate(QFileInfo file)
+TexturePack::Ptr validate(QFileInfo file)
 {
-    TexturePack rp{ file };
-    return TexturePackUtils::process(rp, ProcessingLevel::BasicInfoOnly) && rp.valid();
+    auto tp = makeShared<TexturePack>(file);
+    bool valid = TexturePackUtils::process(*tp, ProcessingLevel::BasicInfoOnly) && tp->valid();
+    if (!valid)
+        return nullptr;
+    return tp;
 }
 
 }  // namespace TexturePackUtils

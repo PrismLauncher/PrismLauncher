@@ -21,6 +21,7 @@
 
 #include <QDebug>
 #include <QObject>
+#include <memory>
 
 #include "minecraft/mod/TexturePack.h"
 
@@ -42,7 +43,7 @@ bool processPackPNG(const TexturePack& pack, QByteArray&& raw_data);
 bool processPackPNG(const TexturePack& pack);
 
 /** Checks whether a file is valid as a texture pack or not. */
-bool validate(QFileInfo file);
+TexturePack::Ptr validate(QFileInfo file);
 }  // namespace TexturePackUtils
 
 class LocalTexturePackParseTask : public Task {

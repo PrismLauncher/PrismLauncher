@@ -481,6 +481,7 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
         case Qt::DisplayRole:
             switch (section) {
                 case ACTIVE_COLUMN:
+                    return tr("Enable");
                 case NAME_COLUMN:
                 case DATE_COLUMN:
                     return columnNames().at(section);
@@ -512,7 +513,6 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
 void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
 {
     Q_ASSERT(act);
-
     act->setText(columnNames().at(column));
 }
 

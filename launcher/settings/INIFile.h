@@ -53,5 +53,7 @@ class INIFile : public QMap<QString, QVariant> {
     bool saveFile(QString fileName);
 
     QVariant get(QString key, QVariant def) const;
+    QVariant get(QStringList key, QVariant def) const;
     void set(QString key, QVariant val);
+    void set(QStringList key, QVariant val);
 };

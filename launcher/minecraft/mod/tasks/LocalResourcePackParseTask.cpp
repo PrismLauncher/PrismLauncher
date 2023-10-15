@@ -266,10 +266,13 @@ bool processPackPNG(const ResourcePack& pack)
     }
 }
 
-bool validate(QFileInfo file)
+ResourcePack::Ptr validate(QFileInfo file)
 {
-    ResourcePack rp{ file };
-    return ResourcePackUtils::process(rp, ProcessingLevel::BasicInfoOnly) && rp.valid();
+    auto rp = makeShared<ResourcePack>(file);
+    bool valid = ResourcePackUtils::process(*rp, ProcessingLevel::BasicInfoOnly) && rp->valid();
+    if (!valid)
+        return nullptr;
+    return rp;
 }
 
 }  // namespace ResourcePackUtils

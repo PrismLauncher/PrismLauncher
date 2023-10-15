@@ -19,6 +19,9 @@
 #include "modplatform/flame/FlameCheckUpdate.h"
 #include "modplatform/modrinth/ModrinthCheckUpdate.h"
 
+#include "QVariantUtils.h"
+
+#include <QString>
 #include <QTextBrowser>
 #include <QTreeWidgetItem>
 
@@ -39,7 +42,8 @@ static std::optional<ModPlatform::ModLoaderTypes> mcLoaders(BaseInstance* inst)
 ModUpdateDialog::ModUpdateDialog(QWidget* parent,
                                  BaseInstance* instance,
                                  const std::shared_ptr<ModFolderModel> mods,
-                                 QList<Mod*>& search_for)
+                                 QList<Mod*>& search_for,
+                                 bool use_blacklist)
     : ReviewMessageBox(parent, tr("Confirm mods to update"), "")
     , m_parent(parent)
     , m_mod_model(mods)
@@ -47,6 +51,7 @@ ModUpdateDialog::ModUpdateDialog(QWidget* parent,
     , m_second_try_metadata(
           new ConcurrentTask(nullptr, "Second Metadata Search", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
     , m_instance(instance)
+    , m_use_blacklist(use_blacklist)
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
@@ -87,10 +92,15 @@ void ModUpdateDialog::checkCandidates()
     auto versions = mcVersions(m_instance);
     auto loaders = mcLoaders(m_instance);
 
+    auto update_ignore_list =
+        QVariantUtils::toList<QString>(m_instance->getSettingsConst()->get(QStringList({ "Mods", "UpdateIgnoreList" }).join('/')));
+    if (!m_use_blacklist)
+        update_ignore_list.clear();  // clear the list
+
     SequentialTask check_task(m_parent, tr("Checking for updates"));
 
     if (!m_modrinth_to_update.empty()) {
-        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model));
+        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model, update_ignore_list));
         connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
             m_failed_check_update.append({ mod, reason, recover_url });
         });
@@ -98,7 +108,7 @@ void ModUpdateDialog::checkCandidates()
     }
 
     if (!m_flame_to_update.empty()) {
-        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model));
+        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model, update_ignore_list));
         connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
             m_failed_check_update.append({ mod, reason, recover_url });
         });

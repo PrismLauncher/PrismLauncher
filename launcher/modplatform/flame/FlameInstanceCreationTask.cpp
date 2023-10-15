@@ -35,6 +35,10 @@
 
 #include "FlameInstanceCreationTask.h"
 
+#include "minecraft/mod/DataPack.h"
+#include "minecraft/mod/ResourcePack.h"
+#include "minecraft/mod/ShaderPack.h"
+#include "minecraft/mod/TexturePack.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/PackManifest.h"
@@ -251,7 +255,7 @@ bool FlameCreationTask::updateInstance()
     setOverride(true, inst->id());
     qDebug() << "Will override instance!";
 
-    m_instance = inst;
+    m_update_instance = inst;
 
     // We let it go through the createInstance() stage, just with a couple modifications for updating
     return false;
@@ -376,7 +380,7 @@ bool FlameCreationTask::createInstance()
 
     QString configPath = FS::PathCombine(m_stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
-    MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
+    m_instance = std::make_shared<MinecraftInstance>(m_globalSettings, instanceSettings, m_stagingPath);
     auto mcVersion = m_pack.minecraft.version;
 
     // Hack to correct some 'special sauce'...
@@ -385,7 +389,7 @@ bool FlameCreationTask::createInstance()
         logWarning(tr("Mysterious trailing dots removed from Minecraft version while importing pack."));
     }
 
-    auto components = instance.getPackProfile();
+    auto components = m_instance->getPackProfile();
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", mcVersion, true);
     if (!loaderType.isEmpty()) {
@@ -396,14 +400,14 @@ bool FlameCreationTask::createInstance()
     }
 
     if (m_instIcon != "default") {
-        instance.setIconKey(m_instIcon);
+        m_instance->setIconKey(m_instIcon);
     } else {
         if (m_pack.name.contains("Direwolf20")) {
-            instance.setIconKey("steve");
+            m_instance->setIconKey("steve");
         } else if (m_pack.name.contains("FTB") || m_pack.name.contains("Feed The Beast")) {
-            instance.setIconKey("ftb_logo");
+            m_instance->setIconKey("ftb_logo");
         } else {
-            instance.setIconKey("flame");
+            m_instance->setIconKey("flame");
         }
     }
 
@@ -418,7 +422,7 @@ bool FlameCreationTask::createInstance()
             qDebug() << info.fileName();
             jarMods.push_back(info.absoluteFilePath());
         }
-        auto profile = instance.getPackProfile();
+        auto profile = m_instance->getPackProfile();
         profile->installJarMods(jarMods);
         // nuke the original files
         FS::deletePath(jarmodsPath);
@@ -426,8 +430,8 @@ bool FlameCreationTask::createInstance()
 
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managed_id.isEmpty())
-        instance.setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
-    instance.setName(name());
+        m_instance->setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
+    m_instance->setName(name());
 
     m_mod_id_resolver.reset(new Flame::FileResolvingTask(APPLICATION->network(), m_pack));
     connect(m_mod_id_resolver.get(), &Flame::FileResolvingTask::succeeded, this, [this, &loop] { idResolverSucceeded(loop); });
@@ -447,11 +451,11 @@ bool FlameCreationTask::createInstance()
     bool did_succeed = getError().isEmpty();
 
     // Update information of the already installed instance, if any.
-    if (m_instance && did_succeed) {
+    if (m_update_instance && did_succeed) {
         setAbortable(false);
-        auto inst = m_instance.value();
+        auto inst = m_update_instance.value();
 
-        inst->copyManagedPack(instance);
+        inst->copyManagedPack(*m_instance);
     }
 
     return did_succeed;
@@ -465,9 +469,8 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
-        if (result.fileName.endsWith(".zip")) {
-            m_ZIP_resources.append(std::make_pair(result.fileName, result.targetFolder));
-        }
+        m_resources.append(
+            std::make_tuple(result.fileName, result.targetFolder, result.hash, result.url.isEmpty() ? result.websiteUrl : result.url));
 
         if (!result.resolved || result.url.isEmpty()) {
             BlockedMod blocked_mod;
@@ -568,7 +571,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     m_mod_id_resolver.reset();
     connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
         m_files_job.reset();
-        validateZIPResouces();
+        finalizeResouces();
     });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
@@ -595,6 +598,8 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     int total = blocked_mods.length();
     setProgress(i, total);
     for (auto const& mod : blocked_mods) {
+        QCoreApplication::processEvents();  // keep UI updated
+
         if (!mod.matched) {
             qDebug() << mod.name << "was not matched to a local file, skipping copy";
             continue;
@@ -617,10 +622,18 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     setAbortable(true);
 }
 
-void FlameCreationTask::validateZIPResouces()
+void FlameCreationTask::finalizeResouces()
 {
-    qDebug() << "Validating whether resources stored as .zip are in the right place";
-    for (auto [fileName, targetFolder] : m_ZIP_resources) {
+    auto num_resources = m_resources.length();
+    int num_checked = 0;
+    setAbortable(false);
+    setStatus(tr("Verifying and identifying resources"));
+
+    for (auto [fileName, targetFolder, hash, url] : m_resources) {
+        QCoreApplication::processEvents();  // keep the UI updated
+        setDetails(tr("%1 out of %2 complete").arg(num_checked).arg(num_resources));
+        setProgress(num_checked, num_resources);
+
         qDebug() << "Checking" << fileName << "...";
         auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
 
@@ -652,7 +665,8 @@ void FlameCreationTask::validateZIPResouces()
         };
 
         QFileInfo localFileInfo(localPath);
-        auto type = ResourceUtils::identify(localFileInfo);
+        auto [type, resource] = ResourceUtils::identify(localFileInfo);
+        m_instance->setupManagedResource(resource, type, ResourceManagmentType::PackManaged, url, hash);
 
         QString worldPath;
 
@@ -671,7 +685,7 @@ void FlameCreationTask::validateZIPResouces()
                 break;
             case PackedResourceType::ShaderPack:
                 // in theroy flame API can't do this but who knows, that *may* change ?
-                // better to handle it if it *does* occure in the future
+                // better to handle it if it *does* occur in the future
                 validatePath(fileName, targetFolder, "shaderpacks");
                 break;
             case PackedResourceType::WorldSave:
@@ -683,5 +697,7 @@ void FlameCreationTask::validateZIPResouces()
                 qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
                 break;
         }
+
+        ++num_checked;
     }
 }

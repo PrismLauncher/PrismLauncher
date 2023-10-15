@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1042</width>
+    <width>620</width>
     <height>501</height>
    </rect>
   </property>
@@ -27,7 +27,11 @@
     <item row="4" column="1" colspan="3">
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="1">
-       <widget class="QLineEdit" name="filterEdit"/>
+       <widget class="QLineEdit" name="filterEdit">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="filterLabel">
@@ -155,6 +159,22 @@
    </property>
    <property name="toolTip">
     <string>Try to check or update all selected resources (all resources if none are selected)</string>
+   </property>
+  </action>
+  <action name="actionEnableUpdates">
+   <property name="text">
+    <string>Ena&amp;ble Updates</string>
+   </property>
+   <property name="toolTip">
+    <string>Mark resource to be updated</string>
+   </property>
+  </action>
+  <action name="actionDisableUpdates">
+   <property name="text">
+    <string>Disable U&amp;pdates</string>
+   </property>
+   <property name="toolTip">
+    <string>Mark resource to prevent it from being updated</string>
    </property>
   </action>
   <action name="actionVisitItemPage">

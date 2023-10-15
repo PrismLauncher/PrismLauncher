@@ -38,7 +38,7 @@ bool processZIP(ShaderPack& pack, ProcessingLevel level = ProcessingLevel::Full)
 bool processFolder(ShaderPack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
 /** Checks whether a file is valid as a shader pack or not. */
-bool validate(QFileInfo file);
+ShaderPack::Ptr validate(QFileInfo file);
 }  // namespace ShaderPackUtils
 
 class LocalShaderPackParseTask : public Task {

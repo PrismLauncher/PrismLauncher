@@ -45,6 +45,11 @@ void ModrinthCheckUpdate::executeTask()
             continue;
         }
 
+        if (m_blacklist.contains(mod->name())) {
+            qDebug() << "Ignoring" << mod->fileinfo().fileName() << "Because it is in blacklist";
+            continue;
+        }
+
         auto hash = mod->metadata()->hash;
 
         // Sadly the API can only handle one hash type per call, se we

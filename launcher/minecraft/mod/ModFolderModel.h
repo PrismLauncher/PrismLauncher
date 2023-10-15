@@ -61,7 +61,7 @@ class QFileSystemWatcher;
 class ModFolderModel : public ResourceFolderModel {
     Q_OBJECT
    public:
-    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, VersionColumn, DateColumn, ProviderColumn, NUM_COLUMNS };
+    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, VersionColumn, DateColumn, ProviderColumn, UpdateColumn, NUM_COLUMNS };
     enum ModStatusAction { Disable, Enable, Toggle };
     ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed = false, bool create_dir = true);
 
@@ -70,6 +70,11 @@ class ModFolderModel : public ResourceFolderModel {
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
+    bool setModUpdate(const QModelIndexList& indexes, EnableAction action);
+
     int columnCount(const QModelIndex& parent) const override;
 
     [[nodiscard]] Task* createUpdateTask() override;

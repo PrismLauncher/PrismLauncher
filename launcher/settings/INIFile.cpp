@@ -54,6 +54,7 @@ bool INIFile::saveFile(QString fileName)
         insert("ConfigVersion", "1.2");
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
     _settings_obj.setFallbacksEnabled(false);
+    _settings_obj.clear();  // clean up old settings that would otherwise persist;
 
     for (Iterator iter = begin(); iter != end(); iter++)
         _settings_obj.setValue(iter.key(), iter.value());
@@ -208,7 +209,17 @@ QVariant INIFile::get(QString key, QVariant def) const
         return this->operator[](key);
 }
 
+QVariant INIFile::get(QStringList key, QVariant def) const
+{
+    return this->get(key.join('/'), def);
+}
+
 void INIFile::set(QString key, QVariant val)
 {
     this->operator[](key) = val;
+}
+
+void INIFile::set(QStringList key, QVariant val)
+{
+    this->set(key.join('/'), val);
 }

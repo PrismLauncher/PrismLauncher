@@ -20,6 +20,9 @@
  */
 
 #include <QObject>
+#include <utility>
+
+#include <memory>
 
 #include "LocalResourceParse.h"
 
@@ -38,36 +41,40 @@ static const QMap<PackedResourceType, QString> s_packed_type_names = { { PackedR
                                                                        { PackedResourceType::Mod, QObject::tr("mod") },
                                                                        { PackedResourceType::UNKNOWN, QObject::tr("unknown") } };
 
+static const QMap<ResourceManagmentType, QString> s_managment_type_names = { { ResourceManagmentType::PackManaged, "PackManaged" },
+                                                                             { ResourceManagmentType::UserInstalled, "UserInstalled" },
+                                                                             { ResourceManagmentType::External, "External" } };
+
 namespace ResourceUtils {
-PackedResourceType identify(QFileInfo file)
+std::pair<PackedResourceType, Resource::Ptr> identify(QFileInfo file)
 {
     if (file.exists() && file.isFile()) {
-        if (ModUtils::validate(file)) {
-            // mods can contain resource and data packs so they must be tested first
+        if (auto mod = ModUtils::validate(file); mod) {
             qDebug() << file.fileName() << "is a mod";
-            return PackedResourceType::Mod;
-        } else if (ResourcePackUtils::validate(file)) {
+            return std::make_pair(PackedResourceType::Mod, mod);
+        } else if (auto rp = ResourcePackUtils::validate(file); rp) {
             qDebug() << file.fileName() << "is a resource pack";
-            return PackedResourceType::ResourcePack;
-        } else if (TexturePackUtils::validate(file)) {
+            return std::make_pair(PackedResourceType::ResourcePack, rp);
+        } else if (auto tp = TexturePackUtils::validate(file); tp) {
             qDebug() << file.fileName() << "is a pre 1.6 texture pack";
-            return PackedResourceType::TexturePack;
-        } else if (DataPackUtils::validate(file)) {
+            return std::make_pair(PackedResourceType::TexturePack, tp);
+        } else if (auto dp = DataPackUtils::validate(file); dp) {
             qDebug() << file.fileName() << "is a data pack";
-            return PackedResourceType::DataPack;
-        } else if (WorldSaveUtils::validate(file)) {
+            return std::make_pair(PackedResourceType::DataPack, dp);
+        } else if (auto world = WorldSaveUtils::validate(file); world) {
             qDebug() << file.fileName() << "is a world save";
-            return PackedResourceType::WorldSave;
-        } else if (ShaderPackUtils::validate(file)) {
+            return std::make_pair(PackedResourceType::WorldSave, world);
+        } else if (auto sp = ShaderPackUtils::validate(file); sp) {
             qDebug() << file.fileName() << "is a shader pack";
-            return PackedResourceType::ShaderPack;
+            return std::make_pair(PackedResourceType::ShaderPack, sp);
         } else {
             qDebug() << "Can't Identify" << file.fileName();
+            return std::make_pair(PackedResourceType::UNKNOWN, makeShared<Resource>(file));
         }
     } else {
         qDebug() << "Can't find" << file.absolutePath();
     }
-    return PackedResourceType::UNKNOWN;
+    return std::make_pair(PackedResourceType::INVALID, nullptr);
 }
 
 QString getPackedTypeName(PackedResourceType type)
@@ -75,4 +82,8 @@ QString getPackedTypeName(PackedResourceType type)
     return s_packed_type_names.constFind(type).value();
 }
 
+QString getManagmentTypeName(ResourceManagmentType type)
+{
+    return s_managment_type_names.constFind(type).value();
+}
 }  // namespace ResourceUtils

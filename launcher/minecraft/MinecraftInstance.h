@@ -41,6 +41,8 @@
 #include "BaseInstance.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
 #include "minecraft/mod/Mod.h"
+#include "minecraft/mod/tasks/LocalResourceParse.h"
+#include "modplatform/helpers/HashUtils.h"
 
 class ModFolderModel;
 class ResourceFolderModel;
@@ -146,6 +148,13 @@ class MinecraftInstance : public BaseInstance {
     QString getLogFileRoot() override;
 
     QString getStatusbarDescription() override;
+
+    bool setupManagedResource(Resource::Ptr resource,
+                              PackedResourceType type,
+                              ResourceManagmentType managment_type,
+                              const QUrl& url,
+                              const QString& hash,
+                              Hashing::HashType hash_type = Hashing::HashType::UNKNOWN);
 
     // FIXME: remove
     virtual QStringList getClassPath();

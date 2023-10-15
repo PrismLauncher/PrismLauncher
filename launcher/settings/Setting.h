@@ -85,6 +85,11 @@ class Setting : public QObject {
      */
     void settingReset(const Setting& setting);
 
+    /*!
+     * \brief Signal emitted when this Setting object has been removed from it's container.
+     */
+    void settingRemoved(const Setting& setting);
+
    public slots:
     /*!
      * \brief Changes the setting's value.
@@ -100,6 +105,11 @@ class Setting : public QObject {
      * handled by the SettingsObject object and cause the setting to change.
      */
     virtual void reset();
+
+    /*!
+     * \brief Remove the setting and clear it's storage.
+     */
+    virtual void remove();
 
    protected:
     friend class SettingsObject;

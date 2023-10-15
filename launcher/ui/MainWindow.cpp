@@ -1021,7 +1021,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
         auto localFileName = QDir::toNativeSeparators(local_url.toLocalFile());
         QFileInfo localFileInfo(localFileName);
 
-        auto type = ResourceUtils::identify(localFileInfo);
+        [[maybe_unused]] auto [type, resource] = ResourceUtils::identify(localFileInfo);
 
         if (ResourceUtils::ValidResourceTypes.count(type) == 0) {  // probably instance/modpack
             addInstance(localFileName, extra_info);

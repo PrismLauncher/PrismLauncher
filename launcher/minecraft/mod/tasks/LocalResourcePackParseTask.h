@@ -41,7 +41,7 @@ bool processPackPNG(const ResourcePack& pack, QByteArray&& raw_data);
 bool processPackPNG(const ResourcePack& pack);
 
 /** Checks whether a file is valid as a resource pack or not. */
-bool validate(QFileInfo file);
+ResourcePack::Ptr validate(QFileInfo file);
 }  // namespace ResourcePackUtils
 
 class LocalResourcePackParseTask : public Task {

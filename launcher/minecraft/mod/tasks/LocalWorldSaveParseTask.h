@@ -37,7 +37,7 @@ bool process(WorldSave& save, ProcessingLevel level = ProcessingLevel::Full);
 bool processZIP(WorldSave& pack, ProcessingLevel level = ProcessingLevel::Full);
 bool processFolder(WorldSave& pack, ProcessingLevel level = ProcessingLevel::Full);
 
-bool validate(QFileInfo file);
+WorldSave::Ptr validate(QFileInfo file);
 
 }  // namespace WorldSaveUtils
 

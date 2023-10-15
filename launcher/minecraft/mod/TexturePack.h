@@ -35,6 +35,7 @@ class TexturePack : public Resource {
 
     TexturePack(QObject* parent = nullptr) : Resource(parent) {}
     TexturePack(QFileInfo file_info) : Resource(file_info) {}
+    TexturePack(TexturePack& tp) : Resource(tp), m_description(tp.m_description), m_pack_image_cache_key(tp.m_pack_image_cache_key) {}
 
     /** Gets the description of the texture pack. */
     [[nodiscard]] QString description() const { return m_description; }
