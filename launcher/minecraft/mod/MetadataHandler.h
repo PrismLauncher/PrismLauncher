@@ -52,4 +52,6 @@ class Metadata {
     static auto get(QDir& index_dir, QString mod_slug) -> ModStruct { return Packwiz::V1::getIndexForMod(index_dir, mod_slug); }
 
     static auto get(QDir& index_dir, QVariant& mod_id) -> ModStruct { return Packwiz::V1::getIndexForMod(index_dir, mod_id); }
+
+    static auto modSideToString(ModSide side) -> QString { return Packwiz::V1::sideToString(side); }
 };

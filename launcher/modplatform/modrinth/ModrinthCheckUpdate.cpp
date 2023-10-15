@@ -114,7 +114,7 @@ void ModrinthCheckUpdate::executeTask()
                                           ModPlatform::ModLoaderType::Fabric, ModPlatform::ModLoaderType::Quilt };
                     for (auto flag : flags) {
                         if (m_loaders.value().testFlag(flag)) {
-                            loader_filter = ModPlatform::getModLoaderString(flag);
+                            loader_filter = ModPlatform::getModLoaderAsString(flag);
                             break;
                         }
                     }

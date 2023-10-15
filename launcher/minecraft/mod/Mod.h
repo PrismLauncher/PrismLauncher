@@ -47,6 +47,7 @@
 
 #include "ModDetails.h"
 #include "Resource.h"
+#include "modplatform/ModIndex.h"
 
 class Mod : public Resource {
     Q_OBJECT
@@ -70,6 +71,8 @@ class Mod : public Resource {
     auto licenses() const -> const QList<ModLicense>&;
     auto issueTracker() const -> QString;
     auto metaurl() const -> QString;
+    auto side() const -> Metadata::ModSide;
+    auto loaders() const -> ModPlatform::ModLoaderTypes;
 
     /** Get the intneral path to the mod's icon file*/
     QString iconPath() const { return m_local_details.icon_file; }

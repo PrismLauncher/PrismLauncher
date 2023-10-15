@@ -186,7 +186,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
     for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Cauldron, ModPlatform::LiteLoader, ModPlatform::Fabric,
                          ModPlatform::Quilt }) {
         if (mod.loaders & loader) {
-            loaders.push_back(getModLoaderAsString(loader));
+            loaders.push_back(getModLoaderAsString(loader).toStdString());
         }
     }
 
@@ -201,7 +201,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
         auto tbl = toml::table{ { "name", mod.name.toStdString() },
                                 { "filename", mod.filename.toStdString() },
                                 { "side", sideToString(mod.side).toStdString() },
-                                { "loader", loaders },
+                                { "loaders", loaders },
                                 { "download",
                                   toml::table{
                                       { "mode", mod.mode.toStdString() },

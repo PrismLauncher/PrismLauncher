@@ -52,6 +52,8 @@
 #include "Application.h"
 
 #include "Json.h"
+#include "minecraft/mod/MetadataHandler.h"
+#include "minecraft/mod/Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/LocalModUpdateTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
@@ -62,12 +64,15 @@
 ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider" });
-    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider") });
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Side", "Loaders" });
+    m_column_names_translated = QStringList(
+        { tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Side"), tr("Loaders") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME,     SortType::NAME, SortType::VERSION,
+                           SortType::DATE,    SortType::PROVIDER, SortType::SIDE, SortType::LOADERS };
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive,      QHeaderView::Stretch,
-                              QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents };
-    m_columnsHideable = { false, true, false, true, true, true };
+                              QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents,
+                              QHeaderView::ResizeToContents, QHeaderView::ResizeToContents };
+    m_columnsHideable = { false, true, false, true, true, true, true, true };
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
@@ -104,6 +109,20 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                     }
 
                     return provider.value();
+                }
+                case SideColumn: {
+                    return Metadata::modSideToString(at(row)->side());
+                }
+                case LoadersColumn: {
+                    QStringList loaders;
+                    auto modLoaders = at(row)->loaders();
+                    for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Cauldron, ModPlatform::LiteLoader,
+                                         ModPlatform::Fabric, ModPlatform::Quilt }) {
+                        if (modLoaders & loader) {
+                            loaders << getModLoaderAsString(loader);
+                        }
+                    }
+                    return loaders.join(",");
                 }
                 default:
                     return QVariant();
@@ -154,6 +173,8 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case DateColumn:
                 case ProviderColumn:
                 case ImageColumn:
+                case SideColumn:
+                case LoadersColumn:
                     return columnNames().at(section);
                 default:
                     return QVariant();
@@ -171,6 +192,10 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                     return tr("The date and time this mod was last changed (or added).");
                 case ProviderColumn:
                     return tr("Where the mod was downloaded from.");
+                case SideColumn:
+                    return tr("On what environment the mod is running.");
+                case LoadersColumn:
+                    return tr("The mod loader.");
                 default:
                     return QVariant();
             }

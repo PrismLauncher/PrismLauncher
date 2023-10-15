@@ -45,6 +45,7 @@
 #include "MetadataHandler.h"
 #include "Version.h"
 #include "minecraft/mod/ModDetails.h"
+#include "minecraft/mod/Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -107,6 +108,20 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
                 QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
             if (compare_result != 0)
                 return { compare_result, type == SortType::PROVIDER };
+            break;
+        }
+        case SortType::SIDE: {
+            if (side() > cast_other->side())
+                return { 1, type == SortType::SIDE };
+            else if (side() < cast_other->side())
+                return { -1, type == SortType::SIDE };
+            break;
+        }
+        case SortType::LOADERS: {
+            if (loaders() > cast_other->loaders())
+                return { 1, type == SortType::LOADERS };
+            else if (loaders() < cast_other->loaders())
+                return { -1, type == SortType::LOADERS };
             break;
         }
     }
@@ -229,6 +244,20 @@ auto Mod::provider() const -> std::optional<QString>
 {
     if (metadata())
         return ProviderCaps.readableName(metadata()->provider);
+    return {};
+}
+
+auto Mod::side() const -> Metadata::ModSide
+{
+    if (metadata())
+        return metadata()->side;
+    return Metadata::ModSide::UniversalSide;
+}
+
+auto Mod::loaders() const -> ModPlatform::ModLoaderTypes
+{
+    if (metadata())
+        return metadata()->loaders;
     return {};
 }
 
