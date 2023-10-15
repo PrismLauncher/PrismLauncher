@@ -74,7 +74,8 @@ void TexturePackPage::downloadTPs()
 
     ResourceDownload::TexturePackDownloadDialog mdownload(this, std::static_pointer_cast<TexturePackFolderModel>(m_model), m_instance);
     if (mdownload.exec()) {
-        auto tasks = new ConcurrentTask(this);
+        auto tasks =
+            new ConcurrentTask(this, "Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();

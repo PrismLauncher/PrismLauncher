@@ -149,6 +149,7 @@ class ResourceModel : public QAbstractListModel {
    private:
     /* Default search request callbacks */
     void searchRequestSucceeded(QJsonDocument&);
+    void searchRequestForOneSucceeded(QJsonDocument&);
     void searchRequestFailed(QString reason, int network_error_code);
     void searchRequestAborted();
 

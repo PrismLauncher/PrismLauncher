@@ -39,12 +39,12 @@ void ModrinthModModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObjec
 
 void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr, &m_base_instance);
 }
 
 auto ModrinthModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
-    return ::Modrinth::loadDependencyVersions(m, arr);
+    return ::Modrinth::loadDependencyVersions(m, arr, &m_base_instance);
 }
 
 auto ModrinthModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
@@ -66,7 +66,7 @@ void ModrinthResourcePackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, Q
 
 void ModrinthResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr, &m_base_instance);
 }
 
 auto ModrinthResourcePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
@@ -88,7 +88,7 @@ void ModrinthTexturePackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJ
 
 void ModrinthTexturePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr, &m_base_instance);
 }
 
 auto ModrinthTexturePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
@@ -110,7 +110,7 @@ void ModrinthShaderPackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJs
 
 void ModrinthShaderPackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
-    ::Modrinth::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
+    ::Modrinth::loadIndexedPackVersions(m, arr, &m_base_instance);
 }
 
 auto ModrinthShaderPackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray

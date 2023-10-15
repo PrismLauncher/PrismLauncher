@@ -132,15 +132,21 @@ auto Mod::destroy(QDir& index_dir, bool preserve_metadata, bool attempt_trash) -
     if (!preserve_metadata) {
         qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
 
-        if (metadata()) {
-            Metadata::remove(index_dir, metadata()->slug);
-        } else {
-            auto n = name();
-            Metadata::remove(index_dir, n);
-        }
+        destroyMetadata(index_dir);
     }
 
     return Resource::destroy(attempt_trash);
+}
+
+void Mod::destroyMetadata(QDir& index_dir)
+{
+    if (metadata()) {
+        Metadata::remove(index_dir, metadata()->slug);
+    } else {
+        auto n = name();
+        Metadata::remove(index_dir, n);
+    }
+    m_local_details.metadata = nullptr;
 }
 
 auto Mod::details() const -> const ModDetails&
@@ -246,7 +252,8 @@ void Mod::setIcon(QImage new_image) const
         PixmapCache::remove(m_pack_image_cache_key.key);
 
     // scale the image to avoid flooding the pixmapcache
-    auto pixmap = QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding));
+    auto pixmap =
+        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
 
     m_pack_image_cache_key.key = PixmapCache::insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;
@@ -259,7 +266,7 @@ QPixmap Mod::icon(QSize size, Qt::AspectRatioMode mode) const
     if (PixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull())
             return cached_image;
-        return cached_image.scaled(size, mode);
+        return cached_image.scaled(size, mode, Qt::SmoothTransformation);
     }
 
     // No valid image we can get

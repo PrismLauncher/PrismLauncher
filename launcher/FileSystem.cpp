@@ -238,6 +238,28 @@ bool ensureFolderPathExists(QString foldernamepath)
     return success;
 }
 
+bool copyFileAttributes(QString src, QString dst)
+{
+#ifdef Q_OS_WIN32
+    auto attrs = GetFileAttributesW(src.toStdWString().c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES)
+        return false;
+    return SetFileAttributesW(dst.toStdWString().c_str(), attrs);
+#endif
+    return true;
+}
+
+// needs folders to exists
+void copyFolderAttributes(QString src, QString dst, QString relative)
+{
+    auto path = PathCombine(src, relative);
+    QDir dsrc(src);
+    while ((path = QFileInfo(path).path()).length() >= src.length()) {
+        auto dst_path = PathCombine(dst, dsrc.relativeFilePath(path));
+        copyFileAttributes(path, dst_path);
+    }
+}
+
 /**
  * @brief Copies a directory and it's contents from src to dest
  * @param offset subdirectory form src to copy to dest
@@ -273,6 +295,9 @@ bool copy::operator()(const QString& offset, bool dryRun)
         auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
             ensureFilePathExists(dst_path);
+#ifdef Q_OS_WIN32
+            copyFolderAttributes(src, dst, relative_dst_path);
+#endif
             fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
         }
         if (err) {

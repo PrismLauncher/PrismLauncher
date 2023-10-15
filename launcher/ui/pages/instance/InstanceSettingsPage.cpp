@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -261,6 +262,14 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("InstanceAccountId");
     }
 
+    bool overrideLegacySettings = ui->legacySettingsGroupBox->isChecked();
+    m_settings->set("OverrideLegacySettings", overrideLegacySettings);
+    if (overrideLegacySettings) {
+        m_settings->set("OnlineFixes", ui->onlineFixes->isChecked());
+    } else {
+        m_settings->reset("OnlineFixes");
+    }
+
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -368,6 +377,9 @@ void InstanceSettingsPage::loadSettings()
 
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
+
+    ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
+    ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

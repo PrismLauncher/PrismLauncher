@@ -31,6 +31,7 @@ class Mod;
 class Metadata {
    public:
     using ModStruct = Packwiz::V1::Mod;
+    using ModSide = Packwiz::V1::Side;
 
     static auto create(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> ModStruct
     {

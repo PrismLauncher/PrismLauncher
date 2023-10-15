@@ -43,7 +43,6 @@
 #include "QObjectPtr.h"
 #include "modplatform/legacy_ftb/PackFetchTask.h"
 #include "modplatform/legacy_ftb/PackHelpers.h"
-#include "tasks/Task.h"
 #include "ui/pages/BasePage.h"
 
 class NewInstanceDialog;
@@ -56,8 +55,6 @@ class Page;
 
 class ListModel;
 class FilterModel;
-class PrivatePackListModel;
-class PrivatePackFilterModel;
 class PrivatePackManager;
 
 class Page : public QWidget, public BasePage {
@@ -97,6 +94,8 @@ class Page : public QWidget, public BasePage {
 
     void onAddPackClicked();
     void onRemovePackClicked();
+
+    void triggerSearch();
 
    private:
     FilterModel* currentModel = nullptr;
