@@ -503,6 +503,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("MenuBarInsteadOfToolBar", false);
 
+        m_settings->registerSetting("NumberOfConcurrentTasks", 10);
+        m_settings->registerSetting("NumberOfConcurrentDownloads", 6);
+
         QString defaultMonospace;
         int defaultSize = 11;
 #ifdef Q_OS_WIN32
@@ -594,6 +597,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGameTime", true);
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
+        m_settings->registerSetting("ShowGameTimeWithoutDays", false);
 
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);

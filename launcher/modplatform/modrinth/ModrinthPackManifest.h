@@ -45,6 +45,8 @@
 #include <QUrl>
 #include <QVector>
 
+#include "modplatform/ModIndex.h"
+
 class MinecraftInstance;
 
 namespace Modrinth {
@@ -55,6 +57,7 @@ struct File {
     QCryptographicHash::Algorithm hashAlgorithm;
     QByteArray hash;
     QQueue<QUrl> downloads;
+    bool required = true;
 };
 
 struct DonationData {
@@ -79,6 +82,7 @@ struct ModpackExtra {
 struct ModpackVersion {
     QString name;
     QString version;
+    ModPlatform::IndexedVersionType version_type;
     QString changelog;
 
     QString id;

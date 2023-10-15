@@ -43,7 +43,6 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
-#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -90,17 +89,14 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
-#include "InstancePageProvider.h"
 #include "InstanceWindow.h"
-#include "JavaCommon.h"
-#include "LaunchController.h"
 
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
+#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -113,17 +109,22 @@
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/LabeledToolButton.h"
 
+#include "minecraft/PackProfile.h"
+#include "minecraft/VersionFile.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourcePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
 
 #include "KonamiCode.h"
 
 #include "InstanceCopyTask.h"
-#include "InstanceImportTask.h"
 
 #include "Json.h"
 
@@ -362,7 +363,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
     // Template hell sucks...
     connect(APPLICATION->accounts().get(), &AccountList::defaultAccountChanged, [this] { defaultAccountChanged(); });
-    connect(APPLICATION->accounts().get(), &AccountList::listChanged, [this] { repopulateAccountsMenu(); });
+    connect(APPLICATION->accounts().get(), &AccountList::listChanged, [this] { defaultAccountChanged(); });
 
     // Show initial account
     defaultAccountChanged();
@@ -560,7 +561,8 @@ void MainWindow::updateLaunchButton()
         launchMenu->clear();
     else
         launchMenu = new QMenu(this);
-    m_selectedInstance->populateLaunchMenu(launchMenu);
+    if (m_selectedInstance)
+        m_selectedInstance->populateLaunchMenu(launchMenu);
     ui->actionLaunchInstance->setMenu(launchMenu);
 }
 
@@ -870,7 +872,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
     } else {
         CustomMessageBox::selectable(this, tr("Error"),
                                      tr("The launcher cannot download Minecraft or update instances unless you have at least "
-                                        "one account added.\nPlease add your Mojang or Minecraft account."),
+                                        "one account added.\nPlease add a Microsoft account."),
                                      QMessageBox::Warning)
             ->show();
     }
@@ -923,6 +925,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
         if (url.scheme().isEmpty())
             url.setScheme("file");
 
+        ModPlatform::IndexedVersion version;
         QMap<QString, QString> extra_info;
         QUrl local_url;
         if (!url.isLocalFile()) {  // download the remote resource and identify
@@ -931,6 +934,11 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 // need to find the download link for the modpack / resource
                 // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
                 QUrlQuery query(url);
+
+                if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
+                    qDebug() << "Invalid curseforge link:" << url;
+                    continue;
+                }
 
                 auto addonId = query.allQueryItemValues("addonId")[0];
                 auto fileId = query.allQueryItemValues("fileId")[0];
@@ -943,20 +951,19 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 auto api = FlameAPI();
                 auto job = api.getFile(addonId, fileId, array);
 
-                QString resource_name;
-
                 connect(job.get(), &Task::failed, this,
                         [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &resource_name] {
+                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
                     qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                     auto doc = Json::requireDocument(*array);
                     auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
-                    auto fileName = Json::ensureString(data, "fileName");
+                    version = FlameMod::loadIndexedPackVersion(data);
+                    auto fileName = version.fileName;
 
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
+                    dl_url = QUrl(version.downloadUrl);
                     if (!dl_url.isValid()) {
                         CustomMessageBox::selectable(
                             this, tr("Error"),
@@ -967,7 +974,6 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     }
 
                     QFileInfo dl_file(dl_url.fileName());
-                    resource_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
                 });
 
                 {  // drop stack
@@ -1042,7 +1048,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
                 break;
             case PackedResourceType::Mod:
-                minecraftInst->loaderModList()->installMod(localFileName);
+                minecraftInst->loaderModList()->installMod(localFileName, version);
                 break;
             case PackedResourceType::ShaderPack:
                 minecraftInst->shaderPackList()->installResource(localFileName);
@@ -1351,10 +1357,11 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     if (APPLICATION->instances()->trashInstance(id)) {
         ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        return;
+    } else {
+        APPLICATION->instances()->deleteInstance(id);
     }
-
-    APPLICATION->instances()->deleteInstance(id);
+    APPLICATION->settings()->set("SelectedInstance", QString());
+    selectionBad();
 }
 
 void MainWindow::on_actionExportInstanceZip_triggered()
@@ -1652,10 +1659,6 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
         connect(m_selectedInstance.get(), &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     } else {
-        ui->instanceToolBar->setEnabled(false);
-        setInstanceActionsEnabled(false);
-        ui->actionLaunchInstance->setEnabled(false);
-        ui->actionKillInstance->setEnabled(false);
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
         return;
@@ -1680,6 +1683,7 @@ void MainWindow::selectionBad()
 {
     // start by reseting everything...
     m_selectedInstance = nullptr;
+    m_statusLeft->setText(tr("No instance selected"));
 
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
@@ -1731,7 +1735,9 @@ void MainWindow::updateStatusCenter()
 
     int timePlayed = APPLICATION->instances()->getTotalPlayTime();
     if (timePlayed > 0) {
-        m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
+        m_statusCenter->setText(
+            tr("Total playtime: %1")
+                .arg(Time::prettifyDuration(timePlayed, APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
     }
 }
 // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
