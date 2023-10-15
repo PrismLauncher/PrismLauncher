@@ -8,6 +8,7 @@
 #include <QUrlQuery>
 #include "ui_ManagedPackPage.h"
 
+#include <QFileDialog>
 #include <QListView>
 #include <QProxyStyle>
 #include <QStyleFactory>
@@ -223,6 +224,7 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
     connect(ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
+    connect(ui->updateFromFileButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::updateFromFile);
 }
 
 // MODRINTH
@@ -350,6 +352,27 @@ void ModrinthManagedPackPage::update()
         m_instance_window->close();
 }
 
+void ModrinthManagedPackPage::updateFromFile()
+{
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "Modrinth pack (*.mrpack *.zip)");
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", m_inst->getManagedPackID());
+    extra_info.insert("pack_version_id", QString());
+    extra_info.insert("original_instance_id", m_inst->id());
+
+    auto extracted = new InstanceImportTask(output, this, std::move(extra_info));
+
+    extracted->setName(m_inst->name());
+    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
+    extracted->setIcon(m_inst->iconKey());
+    extracted->setConfirmUpdate(false);
+
+    auto did_succeed = runUpdateTask(extracted);
+
+    if (m_instance_window && did_succeed)
+        m_instance_window->close();
+}
+
 // FLAME
 
 FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
@@ -358,6 +381,7 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
     connect(ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
+    connect(ui->updateFromFileButton, &QPushButton::clicked, this, &FlameManagedPackPage::updateFromFile);
 }
 
 void FlameManagedPackPage::parseManagedPack()
@@ -492,4 +516,25 @@ void FlameManagedPackPage::update()
         m_instance_window->close();
 }
 
+void FlameManagedPackPage::updateFromFile()
+{
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "CurseForge pack (*.zip)");
+
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", m_inst->getManagedPackID());
+    extra_info.insert("pack_version_id", QString());
+    extra_info.insert("original_instance_id", m_inst->id());
+
+    auto extracted = new InstanceImportTask(output, this, std::move(extra_info));
+
+    extracted->setName(m_inst->name());
+    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
+    extracted->setIcon(m_inst->iconKey());
+    extracted->setConfirmUpdate(false);
+
+    auto did_succeed = runUpdateTask(extracted);
+
+    if (m_instance_window && did_succeed)
+        m_instance_window->close();
+}
 #include "ManagedPackPage.moc"

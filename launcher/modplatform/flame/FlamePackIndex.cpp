@@ -1,4 +1,6 @@
 #include "FlamePackIndex.h"
+#include <QFileInfo>
+#include <QUrl>
 
 #include "Json.h"
 
@@ -9,8 +11,8 @@ void Flame::loadIndexedPack(Flame::IndexedPack& pack, QJsonObject& obj)
     pack.description = Json::ensureString(obj, "summary", "");
 
     auto logo = Json::requireObject(obj, "logo");
-    pack.logoName = Json::requireString(logo, "title");
     pack.logoUrl = Json::requireString(logo, "thumbnailUrl");
+    pack.logoName = Json::requireString(obj, "slug") + "." + QFileInfo(QUrl(pack.logoUrl).fileName()).suffix();
 
     auto authors = Json::requireArray(obj, "authors");
     for (auto authorIter : authors) {
