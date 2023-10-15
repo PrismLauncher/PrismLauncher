@@ -112,9 +112,8 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModpackVersion& a, const ModpackVersion& b) -> bool {
-        bool a_better_release = a.version_type <= b.version_type;
         // dates are in RFC 3339 format
-        return a.date > b.date && a_better_release;
+        return a.date > b.date;
     };
 
     std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
