@@ -48,7 +48,7 @@ struct File {
 
     int projectId = 0;
     int fileId = 0;
-    // NOTE: the opposite to 'optional'. This is at the time of writing unused.
+    // NOTE: the opposite to 'optional'
     bool required = true;
     QString hash;
     // NOTE: only set on blocked files ! Empty otherwise.

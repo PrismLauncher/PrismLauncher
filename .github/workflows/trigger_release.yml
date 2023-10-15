@@ -3,10 +3,9 @@ name: Build Application and Make Release
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
-
   build_release:
     name: Build Release
     uses: ./.github/workflows/build.yml
@@ -28,8 +27,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: 'true'
-          path: 'PrismLauncher-source'
+          submodules: "true"
+          path: "PrismLauncher-source"
       - name: Download artifacts
         uses: actions/download-artifact@v3
       - name: Grab and store version
@@ -95,9 +94,6 @@ jobs:
             PrismLauncher-Windows-MinGW-w64-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MinGW-w64-Setup-${{ env.VERSION }}.exe
-            PrismLauncher-Windows-MSVC-Legacy-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MSVC-Legacy-Portable-${{ env.VERSION }}.zip
-            PrismLauncher-Windows-MSVC-Legacy-Setup-${{ env.VERSION }}.exe
             PrismLauncher-Windows-MSVC-arm64-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-arm64-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-arm64-Setup-${{ env.VERSION }}.exe

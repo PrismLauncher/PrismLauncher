@@ -906,6 +906,9 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ImportPage.cpp
     ui/pages/modplatform/ImportPage.h
 
+    ui/pages/modplatform/OptionalModDialog.cpp
+    ui/pages/modplatform/OptionalModDialog.h
+
     ui/pages/modplatform/modrinth/ModrinthResourceModels.cpp
     ui/pages/modplatform/modrinth/ModrinthResourceModels.h
     ui/pages/modplatform/modrinth/ModrinthResourcePages.cpp
@@ -1068,6 +1071,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/legacy_ftb/Page.ui
     ui/pages/modplatform/import_ftb/ImportFTBPage.ui
     ui/pages/modplatform/ImportPage.ui
+    ui/pages/modplatform/OptionalModDialog.ui
     ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/InstanceCardWidget.ui
