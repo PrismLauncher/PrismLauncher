@@ -138,7 +138,7 @@
             </property>
            </widget>
           </item>
-           <item>
+          <item>
            <widget class="QCheckBox" name="showGameTimeWithoutDays">
             <property name="text">
              <string>Show time spent playing in hours</string>
@@ -209,7 +209,7 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;This currently allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>Enable online fixes</string>
+             <string>Enable online fixes (experimental)</string>
             </property>
            </widget>
           </item>
