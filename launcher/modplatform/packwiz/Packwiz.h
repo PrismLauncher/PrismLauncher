@@ -41,6 +41,7 @@ class V1 {
         QString name{};
         QString filename{};
         Side side{ Side::UniversalSide };
+        ModPlatform::ModLoaderTypes loaders;
 
         // [download]
         QString mode{};

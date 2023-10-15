@@ -113,7 +113,8 @@ auto V1::createModFormat([[maybe_unused]] QDir& index_dir, ModPlatform::IndexedP
     mod.provider = mod_pack.provider;
     mod.file_id = mod_version.fileId;
     mod.project_id = mod_pack.addonId;
-    mod.side = stringToSide(mod_pack.side);
+    mod.side = stringToSide(mod_version.side.isEmpty() ? mod_pack.side : mod_version.side);
+    mod.loaders = mod_version.loaders;
 
     return mod;
 }
@@ -181,6 +182,14 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
             break;
     }
 
+    toml::array loaders;
+    for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Cauldron, ModPlatform::LiteLoader, ModPlatform::Fabric,
+                         ModPlatform::Quilt }) {
+        if (mod.loaders & loader) {
+            loaders.push_back(getModLoaderAsString(loader));
+        }
+    }
+
     if (!index_file.open(QIODevice::ReadWrite)) {
         qCritical() << QString("Could not open file %1!").arg(normalized_fname);
         return;
@@ -192,6 +201,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
         auto tbl = toml::table{ { "name", mod.name.toStdString() },
                                 { "filename", mod.filename.toStdString() },
                                 { "side", sideToString(mod.side).toStdString() },
+                                { "loader", loaders },
                                 { "download",
                                   toml::table{
                                       { "mode", mod.mode.toStdString() },
@@ -276,6 +286,13 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
         mod.side = stringToSide(stringEntry(table, "side"));
+        if (auto loaders = table["loaders"]; loaders && loaders.is_array()) {
+            for (auto&& loader : *loaders.as_array()) {
+                if (loader.is_string()) {
+                    mod.loaders |= ModPlatform::getModLoaderFromString(QString::fromStdString(loader.as_string()->value_or("")));
+                }
+            }
+        }
     }
 
     {  // [download] info

@@ -117,7 +117,7 @@ QString getMetaURL(ResourceProvider provider, QVariant projectID)
            projectID.toString();
 }
 
-auto getModLoaderString(ModLoaderType type) -> const QString
+auto getModLoaderAsString(ModLoaderType type) -> const QString
 {
     switch (type) {
         case NeoForge:
@@ -136,6 +136,23 @@ auto getModLoaderString(ModLoaderType type) -> const QString
             break;
     }
     return "";
+}
+
+auto getModLoaderFromString(QString type) -> const ModLoaderType
+{
+    if (type == "neoforge")
+        return NeoForge;
+    if (type == "forge")
+        return Forge;
+    if (type == "cauldron")
+        return Cauldron;
+    if (type == "liteloader")
+        return LiteLoader;
+    if (type == "fabric")
+        return Fabric;
+    if (type == "quilt")
+        return Quilt;
+    return {};
 }
 
 }  // namespace ModPlatform

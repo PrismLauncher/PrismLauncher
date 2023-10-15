@@ -130,6 +130,12 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
             file.loaders |= ModPlatform::Fabric;
         if (loader == "quilt")
             file.loaders |= ModPlatform::Quilt;
+        if (loader == "server" || loader == "client") {
+            if (file.side.isEmpty())
+                file.side = loader;
+            else if (file.side != loader)
+                file.side = "both";
+        }
     }
 
     file.addonId = Json::requireInteger(obj, "modId");

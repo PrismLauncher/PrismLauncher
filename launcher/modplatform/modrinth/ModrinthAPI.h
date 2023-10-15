@@ -41,7 +41,7 @@ class ModrinthAPI : public NetworkResourceAPI {
         for (auto loader :
              { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt, ModPlatform::LiteLoader }) {
             if (types & loader) {
-                l << getModLoaderString(loader);
+                l << getModLoaderAsString(loader);
             }
         }
         return l;
