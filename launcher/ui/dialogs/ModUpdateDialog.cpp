@@ -220,8 +220,8 @@ void ModUpdateDialog::checkCandidates()
                 changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
             auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_mod_model);
             CheckUpdateTask::UpdatableMod updatable = {
-                dep->pack->name, dep->version.hash,   "",           dep->version.version, dep->version.version_type,
-                changelog,       dep->pack->provider, download_task
+                dep->pack->name,     dep->version.hash, "", dep->version.version, dep->version.version_type, changelog, true,
+                dep->pack->provider, download_task
             };
 
             appendMod(updatable, getRequiredBy.value(dep->version.addonId.toString()));
