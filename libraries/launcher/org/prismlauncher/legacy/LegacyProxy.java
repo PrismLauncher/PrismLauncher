@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 icelimetea <fr3shtea@outlook.com>
- *  Copyright (C) 2022 solonovamax <solonovamax@12oclockpoint.com>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -52,45 +50,17 @@
  *      limitations under the License.
  */
 
-package org.prismlauncher.utils;
+package org.prismlauncher.legacy;
 
-import org.prismlauncher.utils.logging.Log;
+import org.prismlauncher.launcher.Launcher;
+import org.prismlauncher.utils.Parameters;
 
-import java.applet.Applet;
-import java.io.File;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
-public final class ReflectionUtils {
-    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-    private static final ClassLoader LOADER = ClassLoader.getSystemClassLoader();
-
-    /**
-     * Gets the main method within a class.
-     *
-     * @param clazz The class
-     * @return A method matching the descriptor of a main method
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws IllegalAccessException
-     */
-    public static MethodHandle findMainMethod(Class<?> clazz) throws NoSuchMethodException, IllegalAccessException {
-        return LOOKUP.findStatic(clazz, "main", MethodType.methodType(void.class, String[].class));
+// used as a fallback if NewLaunchLegacy is not on the classpath
+// if it is, this class will be replaced
+public final class LegacyProxy {
+    public static Launcher createLauncher(Parameters params) {
+        throw new AssertionError("NewLaunchLegacy is not loaded");
     }
 
-    /**
-     * Gets the main method within a class by its name.
-     *
-     * @param clazz The class name
-     * @return A method matching the descriptor of a main method
-     * @throws ClassNotFoundException
-     * @throws NoSuchMethodException
-     * @throws IllegalAccessException
-     */
-    public static MethodHandle findMainMethod(String clazz) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException {
-        return findMainMethod(LOADER.loadClass(clazz));
-    }
+    public static void applyOnlineFixes(Parameters params) {}
 }

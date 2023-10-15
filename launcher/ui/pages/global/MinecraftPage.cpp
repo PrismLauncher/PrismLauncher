@@ -119,6 +119,9 @@ void MinecraftPage::applySettings()
     // Miscellaneous
     s->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
     s->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
+
+    // Legacy settings
+    s->set("OnlineFixes", ui->onlineFixes->isChecked());
 }
 
 void MinecraftPage::loadSettings()
@@ -170,6 +173,8 @@ void MinecraftPage::loadSettings()
 
     ui->closeAfterLaunchCheck->setChecked(s->get("CloseAfterLaunch").toBool());
     ui->quitAfterGameStopCheck->setChecked(s->get("QuitAfterGameStop").toBool());
+
+    ui->onlineFixes->setChecked(s->get("OnlineFixes").toBool());
 }
 
 void MinecraftPage::retranslate()
