@@ -218,6 +218,12 @@ set(Launcher_DISCORD_URL "https://prismlauncher.org/discord" CACHE STRING "URL f
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL for the subreddit.")
 
+# Minecraft Resources URL
+set(Launcher_RESOURCE_BASE "https://resources.download.minecraft.net/" CACHE STRING "URL for the Minecraft resources.")
+
+# Minecraft Libraries URL
+set(Launcher_LIBRARY_BASE "https://libraries.minecraft.net/" CACHE STRING "URL for the Minecraft Libraries.")
+
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
 set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")

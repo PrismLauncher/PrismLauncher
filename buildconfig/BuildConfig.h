@@ -143,8 +143,8 @@ class Config {
     QString DISCORD_URL;
     QString SUBREDDIT_URL;
 
-    QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
-    QString LIBRARY_BASE = "https://libraries.minecraft.net/";
+    QString RESOURCE_BASE;
+    QString LIBRARY_BASE;
     QString AUTH_BASE = "https://authserver.mojang.com/";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
     QString FMLLIBS_BASE_URL;

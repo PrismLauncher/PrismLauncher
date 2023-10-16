@@ -297,7 +297,12 @@ QString AssetObject::getLocalPath()
 
 QUrl AssetObject::getUrl()
 {
-    return BuildConfig.RESOURCE_BASE + getRelPath();
+    QString resourceOverride = APPLICATION->settings()->get("MinecraftResourceURLOverride").toString();
+    if (resourceOverride.isEmpty()) {
+        return BuildConfig.RESOURCE_BASE + getRelPath();
+    } else {
+        return resourceOverride + getRelPath();
+    }
 }
 
 QString AssetObject::getRelPath()

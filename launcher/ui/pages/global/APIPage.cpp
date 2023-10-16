@@ -76,11 +76,15 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
     // NOTE: this allows http://, but we replace that with https later anyway
     ui->metaURL->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->metaURL));
+    ui->resourceURL->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->resourceURL));
+    ui->librariesURL->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->librariesURL));
     ui->baseURLEntry->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->baseURLEntry));
     ui->msaClientID->setValidator(new QRegularExpressionValidator(validMSAClientID, ui->msaClientID));
     ui->flameKey->setValidator(new QRegularExpressionValidator(validFlameKey, ui->flameKey));
 
     ui->metaURL->setPlaceholderText(BuildConfig.META_URL);
+    ui->resourceURL->setPlaceholderText(BuildConfig.RESOURCE_BASE);
+    ui->librariesURL->setPlaceholderText(BuildConfig.LIBRARY_BASE);
     ui->userAgentLineEdit->setPlaceholderText(BuildConfig.USER_AGENT);
 
     loadSettings();
@@ -137,6 +141,10 @@ void APIPage::loadSettings()
     ui->msaClientID->setText(msaClientID);
     QString metaURL = s->get("MetaURLOverride").toString();
     ui->metaURL->setText(metaURL);
+    QString resourceURL = s->get("MinecraftResourceURLOverride").toString();
+    ui->resourceURL->setText(resourceURL);
+    QString librariesURL = s->get("MinecraftLibrariesURLOverride").toString();
+    ui->librariesURL->setText(librariesURL);
     QString flameKey = s->get("FlameKeyOverride").toString();
     ui->flameKey->setText(flameKey);
     QString modrinthToken = s->get("ModrinthToken").toString();
@@ -165,8 +173,34 @@ void APIPage::applySettings()
     if (!metaURL.isEmpty() && metaURL.scheme() == "http") {
         metaURL.setScheme("https");
     }
-
     s->set("MetaURLOverride", metaURL.toString());
+
+    QUrl resourceURL(ui->resourceURL->text());
+    // Add required trailing slash
+    if (!resourceURL.isEmpty() && !resourceURL.path().endsWith('/')) {
+        QString path = resourceURL.path();
+        path.append('/');
+        resourceURL.setPath(path);
+    }
+    // HTTP may not be allowed either?
+    if (!resourceURL.isEmpty() && resourceURL.scheme() == "http") {
+        resourceURL.setScheme("https");
+    }
+    s->set("MinecraftResourceURLOverride", resourceURL.toString());
+
+    QUrl librariesURL(ui->librariesURL->text());
+    // Add required trailing slash
+    if (!librariesURL.isEmpty() && !librariesURL.path().endsWith('/')) {
+        QString path = librariesURL.path();
+        path.append('/');
+        librariesURL.setPath(path);
+    }
+    // HTTP may not be allowed either?
+    if (!librariesURL.isEmpty() && librariesURL.scheme() == "http") {
+        librariesURL.setScheme("https");
+    }
+    s->set("MinecraftLibrariesURLOverride", librariesURL.toString());
+
     QString flameKey = ui->flameKey->text();
     s->set("FlameKeyOverride", flameKey);
     QString modrinthToken = ui->modrinthToken->text();
