@@ -9,7 +9,6 @@
  *  Copyright (C) 2022 Tayou <git@tayou.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
- *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -123,6 +122,7 @@
 #include <FileSystem.h>
 #include <LocalPeer.h>
 
+#include <stdlib.h>
 #include <sys.h>
 
 #ifdef Q_OS_LINUX
@@ -131,8 +131,12 @@
 #include "gamemode_client.h"
 #endif
 
-#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
+#if defined(Q_OS_MAC)
+#if defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
+#endif
+#else
+#include "updater/PrismExternalUpdater.h"
 #endif
 
 #if defined Q_OS_WIN32
@@ -164,6 +168,34 @@ void appDebugOutput(QtMsgType type, const QMessageLogContext& context, const QSt
 }
 
 }  // namespace
+
+std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const QString& path)
+{
+    auto contents = QString(FS::read(path));
+    auto lines = contents.split('\n');
+
+    QDateTime timestamp;
+    QString from, to, target, data_path;
+    for (auto line : lines) {
+        auto index = line.indexOf("=");
+        if (index < 0)
+            continue;
+        auto left = line.left(index);
+        auto right = line.mid(index + 1);
+        if (left.toLower() == "timestamp") {
+            timestamp = QDateTime::fromString(right, Qt::ISODate);
+        } else if (left.toLower() == "from") {
+            from = right;
+        } else if (left.toLower() == "to") {
+            to = right;
+        } else if (left.toLower() == "target") {
+            target = right;
+        } else if (left.toLower() == "data_path") {
+            data_path = right;
+        }
+    }
+    return std::make_tuple(timestamp, from, to, target, data_path);
+}
 
 Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 {
@@ -297,6 +329,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                                   .arg(dataPath));
         return;
     }
+    m_dataPath = dataPath;
 
     /*
      * Establish the mechanism for communication with an already running PrismLauncher that uses the same data path.
@@ -451,11 +484,16 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     {
-        qDebug() << BuildConfig.LAUNCHER_DISPLAYNAME << ", (c) 2013-2021 " << BuildConfig.LAUNCHER_COPYRIGHT;
+        qDebug() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME) << ", (c) 2022-2023 "
+                 << qPrintable(QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
         qDebug() << "Platform                   : " << BuildConfig.BUILD_PLATFORM;
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
         qDebug() << "Git refspec                : " << BuildConfig.GIT_REFSPEC;
+        qDebug() << "Compiled for               : " << BuildConfig.systemID();
+        qDebug() << "Compiled by                : " << BuildConfig.compilerID();
+        qDebug() << "Build Artifact             : " << BuildConfig.BUILD_ARTIFACT;
+        qDebug() << "Updates Enabled           : " << (updaterEnabled() ? "Yes" : "No");
         if (adjustedBy.size()) {
             qDebug() << "Work dir before adjustment : " << origcwdPath;
             qDebug() << "Work dir after adjustment  : " << QDir::currentPath();
@@ -503,6 +541,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("LastUsedGroupForNewInstance", QString());
 
         m_settings->registerSetting("MenuBarInsteadOfToolBar", false);
+
+        m_settings->registerSetting("NumberOfConcurrentTasks", 10);
+        m_settings->registerSetting("NumberOfConcurrentDownloads", 6);
 
         QString defaultMonospace;
         int defaultSize = 11;
@@ -580,12 +621,14 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
 
-        // Mod loader settings
-        m_settings->registerSetting("DisableQuiltBeacon", false);
+        // Legacy settings
+        m_settings->registerSetting("OnlineFixes", false);
 
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
+        m_settings->registerSetting("CustomOpenALPath", "");
         m_settings->registerSetting("UseNativeGLFW", false);
+        m_settings->registerSetting("CustomGLFWPath", "");
 
         // Peformance related options
         m_settings->registerSetting("EnableFeralGamemode", false);
@@ -596,6 +639,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("ShowGameTime", true);
         m_settings->registerSetting("ShowGlobalGameTime", true);
         m_settings->registerSetting("RecordGameTime", true);
+        m_settings->registerSetting("ShowGameTimeWithoutDays", false);
 
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
@@ -736,15 +780,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         qDebug() << "<> Translations loaded.";
     }
 
-    // initialize the updater
-    if (BuildConfig.UPDATER_ENABLED) {
-        qDebug() << "Initializing updater";
-#if defined(Q_OS_MAC) && defined(SPARKLE_ENABLED)
-        m_updater.reset(new MacSparkleUpdater());
-#endif
-        qDebug() << "<> Updater started.";
-    }
-
     // Instance icons
     {
         auto setting = APPLICATION->settings()->getSetting("IconsDir");
@@ -845,6 +880,109 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     updateCapabilities();
 
+    detectLibraries();
+
+    // check update locks
+    {
+        auto update_log_path = FS::PathCombine(m_dataPath, "logs", "prism_launcher_update.log");
+
+        auto update_lock = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.lock"));
+        if (update_lock.exists()) {
+            auto [timestamp, from, to, target, data_path] = read_lock_File(update_lock.absoluteFilePath());
+            auto infoMsg = tr("This installation has a update lock file present at: %1\n"
+                              "\n"
+                              "Timestamp: %2\n"
+                              "Updating from version %3 to %4\n"
+                              "Target install path: %5\n"
+                              "Data Path: %6"
+                              "\n"
+                              "This likely means that a update attempt failed. Please ensure your installation is in working order before "
+                              "proceeding.\n"
+                              "Check the Prism Launcher updater log at: \n"
+                              "%7\n"
+                              "for details on the last update attempt.\n"
+                              "\n"
+                              "To delete this lock and proceed select \"Ignore\" below.")
+                               .arg(update_lock.absoluteFilePath())
+                               .arg(timestamp.toString(Qt::ISODate), from, to, target, data_path)
+                               .arg(update_log_path);
+            auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update In Progress"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
+            msgBox.setDefaultButton(QMessageBox::Abort);
+            msgBox.setModal(true);
+            msgBox.setDetailedText(FS::read(update_log_path));
+            msgBox.setMinimumWidth(460);
+            msgBox.adjustSize();
+            auto res = msgBox.exec();
+            switch (res) {
+                case QMessageBox::Ignore: {
+                    FS::deletePath(update_lock.absoluteFilePath());
+                    break;
+                }
+                case QMessageBox::Abort:
+                    [[fallthrough]];
+                default: {
+                    qDebug() << "Exiting because update lockfile is present";
+                    QMetaObject::invokeMethod(
+                        this, []() { exit(1); }, Qt::QueuedConnection);
+                    return;
+                }
+            }
+        }
+
+        auto update_fail_marker = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.fail"));
+        if (update_fail_marker.exists()) {
+            auto infoMsg = tr("An update attempt failed\n"
+                              "\n"
+                              "Please ensure your installation is in working order before "
+                              "proceeding.\n"
+                              "Check the Prism Launcher updater log at: \n"
+                              "%1\n"
+                              "for details on the last update attempt.")
+                               .arg(update_log_path);
+            auto msgBox = QMessageBox(QMessageBox::Warning, tr("Update Failed"), infoMsg, QMessageBox::Ignore | QMessageBox::Abort);
+            msgBox.setDefaultButton(QMessageBox::Abort);
+            msgBox.setModal(true);
+            msgBox.setDetailedText(FS::read(update_log_path));
+            msgBox.setMinimumWidth(460);
+            msgBox.adjustSize();
+            auto res = msgBox.exec();
+            switch (res) {
+                case QMessageBox::Ignore: {
+                    FS::deletePath(update_fail_marker.absoluteFilePath());
+                    break;
+                }
+                case QMessageBox::Abort:
+                    [[fallthrough]];
+                default: {
+                    qDebug() << "Exiting because update lockfile is present";
+                    QMetaObject::invokeMethod(
+                        this, []() { exit(1); }, Qt::QueuedConnection);
+                    return;
+                }
+            }
+        }
+
+        auto update_success_marker = QFileInfo(FS::PathCombine(m_dataPath, ".prism_launcher_update.success"));
+        if (update_success_marker.exists()) {
+            auto infoMsg = tr("Update succeeded\n"
+                              "\n"
+                              "You are now running %1 .\n"
+                              "Check the Prism Launcher updater log at: \n"
+                              "%1\n"
+                              "for details.")
+                               .arg(BuildConfig.printableVersionString())
+                               .arg(update_log_path);
+            auto msgBox = new QMessageBox(QMessageBox::Information, tr("Update Succeeded"), infoMsg, QMessageBox::Ok);
+            msgBox->setDefaultButton(QMessageBox::Ok);
+            msgBox->setDetailedText(FS::read(update_log_path));
+            msgBox->setAttribute(Qt::WA_DeleteOnClose);
+            msgBox->setMinimumWidth(460);
+            msgBox->adjustSize();
+            msgBox->open();
+            FS::deletePath(update_success_marker.absoluteFilePath());
+        }
+    }
+
     if (createSetupWizard()) {
         return;
     }
@@ -913,6 +1051,26 @@ bool Application::createSetupWizard()
     return false;
 }
 
+bool Application::updaterEnabled()
+{
+#if defined(Q_OS_MAC)
+    return BuildConfig.UPDATER_ENABLED;
+#else
+    return BuildConfig.UPDATER_ENABLED && QFileInfo(FS::PathCombine(m_rootPath, updaterBinaryName())).isFile();
+#endif
+}
+
+QString Application::updaterBinaryName()
+{
+    auto exe_name = QStringLiteral("%1_updater").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+#if defined Q_OS_WIN32
+    exe_name.append(".exe");
+#else
+    exe_name.prepend("bin/");
+#endif
+    return exe_name;
+}
+
 bool Application::event(QEvent* event)
 {
 #ifdef Q_OS_MACOS
@@ -964,7 +1122,7 @@ void Application::performMainStartupAction()
                 qDebug() << "   Launching with account" << m_profileToUse;
             }
 
-            launch(inst, true, false, nullptr, serverToJoin, accountToUse);
+            launch(inst, true, false, serverToJoin, accountToUse);
             return;
         }
     }
@@ -981,6 +1139,20 @@ void Application::performMainStartupAction()
         showMainWindow(false);
         qDebug() << "<> Main window shown.";
     }
+
+    // initialize the updater
+    if (updaterEnabled()) {
+        qDebug() << "Initializing updater";
+#ifdef Q_OS_MAC
+#if defined(SPARKLE_ENABLED)
+        m_updater.reset(new MacSparkleUpdater());
+#endif
+#else
+        m_updater.reset(new PrismExternalUpdater(m_mainWindow, m_rootPath, m_dataPath));
+#endif
+        qDebug() << "<> Updater started.";
+    }
+
     if (!m_urlsToImport.isEmpty()) {
         qDebug() << "<> Importing from url:" << m_urlsToImport;
         m_mainWindow->processURLs(m_urlsToImport);
@@ -1063,7 +1235,7 @@ void Application::messageReceived(const QByteArray& message)
             }
         }
 
-        launch(instance, true, false, nullptr, serverObject, accountObject);
+        launch(instance, true, false, serverObject, accountObject);
     } else {
         qWarning() << "Received invalid message" << message;
     }
@@ -1104,7 +1276,6 @@ bool Application::openJsonEditor(const QString& filename)
 bool Application::launch(InstancePtr instance,
                          bool online,
                          bool demo,
-                         BaseProfilerFactory* profiler,
                          MinecraftServerTargetPtr serverToJoin,
                          MinecraftAccountPtr accountToUse)
 {
@@ -1112,7 +1283,7 @@ bool Application::launch(InstancePtr instance,
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
     } else if (instance->canLaunch()) {
         auto& extras = m_instanceExtras[instance->id()];
-        auto& window = extras.window;
+        auto window = extras.window;
         if (window) {
             if (!window->saveAll()) {
                 return false;
@@ -1123,7 +1294,7 @@ bool Application::launch(InstancePtr instance,
         controller->setInstance(instance);
         controller->setOnline(online);
         controller->setDemo(demo);
-        controller->setProfiler(profiler);
+        controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
         controller->setServerToJoin(serverToJoin);
         controller->setAccountToUse(accountToUse);
         if (window) {
@@ -1412,6 +1583,15 @@ void Application::updateCapabilities()
 
     if (!MangoHud::getLibraryString().isEmpty())
         m_capabilities |= SupportsMangoHud;
+#endif
+}
+
+void Application::detectLibraries()
+{
+#ifdef Q_OS_LINUX
+    m_detectedGLFWPath = MangoHud::findLibrary(BuildConfig.GLFW_LIBRARY_NAME);
+    m_detectedOpenALPath = MangoHud::findLibrary(BuildConfig.OPENAL_LIBRARY_NAME);
+    qDebug() << "Detected native libraries:" << m_detectedGLFWPath << m_detectedOpenALPath;
 #endif
 }
 

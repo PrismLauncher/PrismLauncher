@@ -43,7 +43,6 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
-#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -90,17 +89,14 @@
 #include <news/NewsChecker.h>
 #include <tools/BaseProfiler.h>
 #include <updater/ExternalUpdater.h>
-#include "InstancePageProvider.h"
 #include "InstanceWindow.h"
-#include "JavaCommon.h"
-#include "LaunchController.h"
 
 #include "ui/dialogs/AboutDialog.h"
 #include "ui/dialogs/CopyInstanceDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
+#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -113,17 +109,22 @@
 #include "ui/themes/ThemeManager.h"
 #include "ui/widgets/LabeledToolButton.h"
 
+#include "minecraft/PackProfile.h"
+#include "minecraft/VersionFile.h"
 #include "minecraft/WorldList.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/ResourcePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
+#include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
 
 #include "KonamiCode.h"
 
 #include "InstanceCopyTask.h"
-#include "InstanceImportTask.h"
 
 #include "Json.h"
 
@@ -218,7 +219,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->actionDISCORD->setVisible(!BuildConfig.DISCORD_URL.isEmpty());
         ui->actionREDDIT->setVisible(!BuildConfig.SUBREDDIT_URL.isEmpty());
 
-        ui->actionCheckUpdate->setVisible(BuildConfig.UPDATER_ENABLED);
+        ui->actionCheckUpdate->setVisible(APPLICATION->updaterEnabled());
 
 #ifndef Q_OS_MAC
         ui->actionAddToPATH->setVisible(false);
@@ -362,7 +363,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     // Shouldn't have to use lambdas here like this, but if I don't, the compiler throws a fit.
     // Template hell sucks...
     connect(APPLICATION->accounts().get(), &AccountList::defaultAccountChanged, [this] { defaultAccountChanged(); });
-    connect(APPLICATION->accounts().get(), &AccountList::listChanged, [this] { repopulateAccountsMenu(); });
+    connect(APPLICATION->accounts().get(), &AccountList::listChanged, [this] { defaultAccountChanged(); });
 
     // Show initial account
     defaultAccountChanged();
@@ -376,7 +377,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         updateNewsLabel();
     }
 
-    if (BuildConfig.UPDATER_ENABLED) {
+    if (APPLICATION->updaterEnabled()) {
         bool updatesAllowed = APPLICATION->updatesAreAllowed();
         updatesAllowedChanged(updatesAllowed);
 
@@ -513,10 +514,10 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
     } else {
         auto group = view->groupNameAt(pos);
 
-        QAction* actionVoid = new QAction(BuildConfig.LAUNCHER_DISPLAYNAME, this);
+        QAction* actionVoid = new QAction(group.isNull() ? BuildConfig.LAUNCHER_DISPLAYNAME : group, this);
         actionVoid->setEnabled(false);
 
-        QAction* actionCreateInstance = new QAction(tr("Create instance"), this);
+        QAction* actionCreateInstance = new QAction(tr("&Create instance"), this);
         actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
         if (!group.isNull()) {
             QVariantMap instance_action_data;
@@ -530,12 +531,13 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions.prepend(actionVoid);
         actions.append(actionCreateInstance);
         if (!group.isNull()) {
-            QAction* actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
-            QVariantMap delete_group_action_data;
-            delete_group_action_data["group"] = group;
-            actionDeleteGroup->setData(delete_group_action_data);
-            connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
+            QAction* actionDeleteGroup = new QAction(tr("&Delete group"), this);
+            connect(actionDeleteGroup, &QAction::triggered, this, [this, group] { deleteGroup(group); });
             actions.append(actionDeleteGroup);
+
+            QAction* actionRenameGroup = new QAction(tr("&Rename group"), this);
+            connect(actionRenameGroup, &QAction::triggered, this, [this, group] { renameGroup(group); });
+            actions.append(actionRenameGroup);
         }
     }
     QMenu myMenu;
@@ -553,71 +555,15 @@ void MainWindow::updateMainToolBar()
     ui->mainToolBar->setVisible(ui->menuBar->isNativeMenuBar() || !APPLICATION->settings()->get("MenuBarInsteadOfToolBar").toBool());
 }
 
-void MainWindow::updateToolsMenu()
+void MainWindow::updateLaunchButton()
 {
-    bool currentInstanceRunning = m_selectedInstance && m_selectedInstance->isRunning();
-
-    ui->actionLaunchInstance->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceOffline->setDisabled(!m_selectedInstance || currentInstanceRunning);
-    ui->actionLaunchInstanceDemo->setDisabled(!m_selectedInstance || currentInstanceRunning);
-
     QMenu* launchMenu = ui->actionLaunchInstance->menu();
-    if (launchMenu) {
+    if (launchMenu)
         launchMenu->clear();
-    } else {
+    else
         launchMenu = new QMenu(this);
-    }
-    QAction* normalLaunch = launchMenu->addAction(tr("Launch"));
-    normalLaunch->setShortcut(QKeySequence::Open);
-    QAction* normalLaunchOffline = launchMenu->addAction(tr("Launch Offline"));
-    normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
-    QAction* normalLaunchDemo = launchMenu->addAction(tr("Launch Demo"));
-    normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
-    if (m_selectedInstance) {
-        normalLaunch->setEnabled(m_selectedInstance->canLaunch());
-        normalLaunchOffline->setEnabled(m_selectedInstance->canLaunch());
-        normalLaunchDemo->setEnabled(m_selectedInstance->canLaunch());
-
-        connect(normalLaunch, &QAction::triggered, [this]() { APPLICATION->launch(m_selectedInstance, true, false); });
-        connect(normalLaunchOffline, &QAction::triggered, [this]() { APPLICATION->launch(m_selectedInstance, false, false); });
-        connect(normalLaunchDemo, &QAction::triggered, [this]() { APPLICATION->launch(m_selectedInstance, false, true); });
-    } else {
-        normalLaunch->setDisabled(true);
-        normalLaunchOffline->setDisabled(true);
-        normalLaunchDemo->setDisabled(true);
-    }
-
-    // Disable demo-mode if not available.
-    auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
-    if (instance) {
-        normalLaunchDemo->setEnabled(instance->supportsDemo());
-    }
-
-    QString profilersTitle = tr("Profilers");
-    launchMenu->addSeparator()->setText(profilersTitle);
-    for (auto profiler : APPLICATION->profilers().values()) {
-        QAction* profilerAction = launchMenu->addAction(profiler->name());
-        QAction* profilerOfflineAction = launchMenu->addAction(tr("%1 Offline").arg(profiler->name()));
-        QString error;
-        if (!profiler->check(&error)) {
-            profilerAction->setDisabled(true);
-            profilerOfflineAction->setDisabled(true);
-            QString profilerToolTip = tr("Profiler not setup correctly. Go into settings, \"External Tools\".");
-            profilerAction->setToolTip(profilerToolTip);
-            profilerOfflineAction->setToolTip(profilerToolTip);
-        } else if (m_selectedInstance) {
-            profilerAction->setEnabled(m_selectedInstance->canLaunch());
-            profilerOfflineAction->setEnabled(m_selectedInstance->canLaunch());
-
-            connect(profilerAction, &QAction::triggered,
-                    [this, profiler]() { APPLICATION->launch(m_selectedInstance, true, false, profiler.get()); });
-            connect(profilerOfflineAction, &QAction::triggered,
-                    [this, profiler]() { APPLICATION->launch(m_selectedInstance, false, false, profiler.get()); });
-        } else {
-            profilerAction->setDisabled(true);
-            profilerOfflineAction->setDisabled(true);
-        }
-    }
+    if (m_selectedInstance)
+        m_selectedInstance->populateLaunchMenu(launchMenu);
     ui->actionLaunchInstance->setMenu(launchMenu);
 }
 
@@ -731,7 +677,7 @@ void MainWindow::repopulateAccountsMenu()
 
 void MainWindow::updatesAllowedChanged(bool allowed)
 {
-    if (!BuildConfig.UPDATER_ENABLED) {
+    if (!APPLICATION->updaterEnabled()) {
         return;
     }
     ui->actionCheckUpdate->setEnabled(allowed);
@@ -927,7 +873,7 @@ void MainWindow::finalizeInstance(InstancePtr inst)
     } else {
         CustomMessageBox::selectable(this, tr("Error"),
                                      tr("The launcher cannot download Minecraft or update instances unless you have at least "
-                                        "one account added.\nPlease add your Mojang or Minecraft account."),
+                                        "one account added.\nPlease add a Microsoft account."),
                                      QMessageBox::Warning)
             ->show();
     }
@@ -980,6 +926,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
         if (url.scheme().isEmpty())
             url.setScheme("file");
 
+        ModPlatform::IndexedVersion version;
         QMap<QString, QString> extra_info;
         QUrl local_url;
         if (!url.isLocalFile()) {  // download the remote resource and identify
@@ -988,6 +935,11 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 // need to find the download link for the modpack / resource
                 // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
                 QUrlQuery query(url);
+
+                if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
+                    qDebug() << "Invalid curseforge link:" << url;
+                    continue;
+                }
 
                 auto addonId = query.allQueryItemValues("addonId")[0];
                 auto fileId = query.allQueryItemValues("fileId")[0];
@@ -1000,20 +952,19 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 auto api = FlameAPI();
                 auto job = api.getFile(addonId, fileId, array);
 
-                QString resource_name;
-
                 connect(job.get(), &Task::failed, this,
                         [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &resource_name] {
+                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
                     qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
                     auto doc = Json::requireDocument(*array);
                     auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
-                    auto fileName = Json::ensureString(data, "fileName");
+                    version = FlameMod::loadIndexedPackVersion(data);
+                    auto fileName = version.fileName;
 
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
+                    dl_url = QUrl(version.downloadUrl);
                     if (!dl_url.isValid()) {
                         CustomMessageBox::selectable(
                             this, tr("Error"),
@@ -1024,7 +975,6 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     }
 
                     QFileInfo dl_file(dl_url.fileName());
-                    resource_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
                 });
 
                 {  // drop stack
@@ -1099,7 +1049,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
                 break;
             case PackedResourceType::Mod:
-                minecraftInst->loaderModList()->installMod(localFileName);
+                minecraftInst->loaderModList()->installMod(localFileName, version);
                 break;
             case PackedResourceType::ShaderPack:
                 minecraftInst->shaderPackList()->installResource(localFileName);
@@ -1179,40 +1129,49 @@ void MainWindow::on_actionChangeInstGroup_triggered()
     if (!m_selectedInstance)
         return;
 
-    bool ok = false;
     InstanceId instId = m_selectedInstance->id();
-    QString name(APPLICATION->instances()->getInstanceGroup(instId));
-    auto groups = APPLICATION->instances()->getGroups();
-    groups.insert(0, "");
-    groups.sort(Qt::CaseInsensitive);
-    int foo = groups.indexOf(name);
+    QString src(APPLICATION->instances()->getInstanceGroup(instId));
 
-    name = QInputDialog::getItem(this, tr("Group name"), tr("Enter a new group name."), groups, foo, true, &ok);
-    name = name.simplified();
+    QStringList groups = APPLICATION->instances()->getGroups();
+    groups.prepend("");
+    int index = groups.indexOf(src);
+    bool ok = false;
+    QString dst = QInputDialog::getItem(this, tr("Group name"), tr("Enter a new group name."), groups, index, true, &ok);
+    dst = dst.simplified();
+
     if (ok) {
-        APPLICATION->instances()->setInstanceGroup(instId, name);
+        APPLICATION->instances()->setInstanceGroup(instId, dst);
     }
 }
 
-void MainWindow::deleteGroup()
+void MainWindow::deleteGroup(QString group)
 {
-    QObject* obj = sender();
-    if (!obj)
+    Q_ASSERT(!group.isEmpty());
+
+    const int reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group '%1'?").arg(group),
+                                            QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+        APPLICATION->instances()->deleteGroup(group);
+}
+
+void MainWindow::renameGroup(QString group)
+{
+    Q_ASSERT(!group.isEmpty());
+
+    QString name = QInputDialog::getText(this, tr("Rename group"), tr("Enter a new group name."), QLineEdit::Normal, group);
+    name = name.simplified();
+    if (name.isNull() || name == group)
         return;
-    QAction* action = qobject_cast<QAction*>(obj);
-    if (!action)
+
+    const bool empty = name.isEmpty();
+    const bool duplicate = APPLICATION->instances()->getGroups().contains(name, Qt::CaseInsensitive) && group.toLower() != name.toLower();
+
+    if (empty || duplicate) {
+        QMessageBox::warning(this, tr("Cannot rename group"), empty ? tr("Cannot set empty name.") : tr("Group already exists. :/"));
         return;
-    auto map = action->data().toMap();
-    if (!map.contains("group"))
-        return;
-    QString groupName = map["group"].toString();
-    if (!groupName.isEmpty()) {
-        auto reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group %1?").arg(groupName),
-                                           QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes) {
-            APPLICATION->instances()->deleteGroup(groupName);
-        }
     }
+
+    APPLICATION->instances()->renameGroup(group, name);
 }
 
 void MainWindow::undoTrashInstance()
@@ -1259,7 +1218,7 @@ void MainWindow::refreshInstances()
 
 void MainWindow::checkForUpdates()
 {
-    if (BuildConfig.UPDATER_ENABLED) {
+    if (APPLICATION->updaterEnabled()) {
         APPLICATION->triggerUpdateCheck();
     } else {
         qWarning() << "Updater not set up. Cannot check for updates.";
@@ -1278,7 +1237,7 @@ void MainWindow::globalSettingsClosed()
     proxymodel->invalidate();
     proxymodel->sort(0);
     updateMainToolBar();
-    updateToolsMenu();
+    updateLaunchButton();
     updateThemeMenu();
     updateStatusCenter();
     // This needs to be done to prevent UI elements disappearing in the event the config is changed
@@ -1408,10 +1367,11 @@ void MainWindow::on_actionDeleteInstance_triggered()
 
     if (APPLICATION->instances()->trashInstance(id)) {
         ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());
-        return;
+    } else {
+        APPLICATION->instances()->deleteInstance(id);
     }
-
-    APPLICATION->instances()->deleteInstance(id);
+    APPLICATION->settings()->set("SelectedInstance", QString());
+    selectionBad();
 }
 
 void MainWindow::on_actionExportInstanceZip_triggered()
@@ -1511,20 +1471,6 @@ void MainWindow::on_actionLaunchInstance_triggered()
 void MainWindow::activateInstance(InstancePtr instance)
 {
     APPLICATION->launch(instance);
-}
-
-void MainWindow::on_actionLaunchInstanceOffline_triggered()
-{
-    if (m_selectedInstance) {
-        APPLICATION->launch(m_selectedInstance, false);
-    }
-}
-
-void MainWindow::on_actionLaunchInstanceDemo_triggered()
-{
-    if (m_selectedInstance) {
-        APPLICATION->launch(m_selectedInstance, false, true);
-    }
 }
 
 void MainWindow::on_actionKillInstance_triggered()
@@ -1700,6 +1646,7 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
     }
     if (m_selectedInstance) {
         disconnect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+        disconnect(m_selectedInstance.get(), &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     }
     QString id = current.data(InstanceList::InstanceIDRole).toString();
     m_selectedInstance = APPLICATION->instances()->getInstanceById(id);
@@ -1707,14 +1654,6 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         ui->instanceToolBar->setEnabled(true);
         setInstanceActionsEnabled(true);
         ui->actionLaunchInstance->setEnabled(m_selectedInstance->canLaunch());
-        ui->actionLaunchInstanceOffline->setEnabled(m_selectedInstance->canLaunch());
-        ui->actionLaunchInstanceDemo->setEnabled(m_selectedInstance->canLaunch());
-
-        // Disable demo-mode if not available.
-        auto instance = dynamic_cast<MinecraftInstance*>(m_selectedInstance.get());
-        if (instance) {
-            ui->actionLaunchInstanceDemo->setEnabled(instance->supportsDemo());
-        }
 
         ui->actionKillInstance->setEnabled(m_selectedInstance->isRunning());
         ui->actionExportInstance->setEnabled(m_selectedInstance->canExport());
@@ -1723,18 +1662,13 @@ void MainWindow::instanceChanged(const QModelIndex& current, [[maybe_unused]] co
         updateStatusCenter();
         updateInstanceToolIcon(m_selectedInstance->iconKey());
 
-        updateToolsMenu();
+        updateLaunchButton();
 
         APPLICATION->settings()->set("SelectedInstance", m_selectedInstance->id());
 
         connect(m_selectedInstance.get(), &BaseInstance::runningStatusChanged, this, &MainWindow::refreshCurrentInstance);
+        connect(m_selectedInstance.get(), &BaseInstance::profilerChanged, this, &MainWindow::refreshCurrentInstance);
     } else {
-        ui->instanceToolBar->setEnabled(false);
-        setInstanceActionsEnabled(false);
-        ui->actionLaunchInstance->setEnabled(false);
-        ui->actionLaunchInstanceOffline->setEnabled(false);
-        ui->actionLaunchInstanceDemo->setEnabled(false);
-        ui->actionKillInstance->setEnabled(false);
         APPLICATION->settings()->set("SelectedInstance", QString());
         selectionBad();
         return;
@@ -1759,11 +1693,12 @@ void MainWindow::selectionBad()
 {
     // start by reseting everything...
     m_selectedInstance = nullptr;
+    m_statusLeft->setText(tr("No instance selected"));
 
     statusBar()->clearMessage();
     ui->instanceToolBar->setEnabled(false);
     setInstanceActionsEnabled(false);
-    updateToolsMenu();
+    updateLaunchButton();
     renameButton->setText(tr("Rename Instance"));
     updateInstanceToolIcon("grass");
 
@@ -1810,7 +1745,9 @@ void MainWindow::updateStatusCenter()
 
     int timePlayed = APPLICATION->instances()->getTotalPlayTime();
     if (timePlayed > 0) {
-        m_statusCenter->setText(tr("Total playtime: %1").arg(Time::prettifyDuration(timePlayed)));
+        m_statusCenter->setText(
+            tr("Total playtime: %1")
+                .arg(Time::prettifyDuration(timePlayed, APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
     }
 }
 // "Instance actions" are actions that require an instance to be selected (i.e. "new instance" is not here)
@@ -1826,7 +1763,7 @@ void MainWindow::setInstanceActionsEnabled(bool enabled)
     ui->actionCreateInstanceShortcut->setEnabled(enabled);
 }
 
-void MainWindow::refreshCurrentInstance([[maybe_unused]] bool running)
+void MainWindow::refreshCurrentInstance()
 {
     auto current = view->selectionModel()->currentIndex();
     instanceChanged(current, current);

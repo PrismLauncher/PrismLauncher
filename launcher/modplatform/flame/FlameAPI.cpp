@@ -6,7 +6,6 @@
 #include "FlameModIndex.h"
 
 #include "Application.h"
-#include "BuildConfig.h"
 #include "Json.h"
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
@@ -131,19 +130,13 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
             auto obj = Json::requireObject(doc);
             auto arr = Json::requireArray(obj, "data");
 
-            QJsonObject latest_file_obj;
-            ModPlatform::IndexedVersion ver_tmp;
-
             for (auto file : arr) {
                 auto file_obj = Json::requireObject(file);
                 auto file_tmp = FlameMod::loadIndexedPackVersion(file_obj);
-                if (file_tmp.date > ver_tmp.date) {
-                    ver_tmp = file_tmp;
-                    latest_file_obj = file_obj;
-                }
+                if (file_tmp.date > ver.date && (!args.loaders.has_value() || !file_tmp.loaders || args.loaders.value() & file_tmp.loaders))
+                    ver = file_tmp;
             }
 
-            ver = FlameMod::loadIndexedPackVersion(latest_file_obj);
         } catch (Json::JsonException& e) {
             qCritical() << "Failed to parse response from a version request.";
             qCritical() << e.what();

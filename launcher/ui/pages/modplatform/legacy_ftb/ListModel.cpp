@@ -41,6 +41,7 @@
 
 #include <Version.h>
 #include "StringUtils.h"
+#include "ui/widgets/ProjectItem.h"
 
 #include <QLabel>
 #include <QtMath>
@@ -79,7 +80,20 @@ bool FilterModel::lessThan(const QModelIndex& left, const QModelIndex& right) co
 
 bool FilterModel::filterAcceptsRow([[maybe_unused]] int sourceRow, [[maybe_unused]] const QModelIndex& sourceParent) const
 {
-    return true;
+    if (searchTerm.isEmpty()) {
+        return true;
+    }
+    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+    Modpack pack = sourceModel()->data(index, Qt::UserRole).value<Modpack>();
+    if (searchTerm.startsWith("#"))
+        return pack.packCode == searchTerm.mid(1);
+    return pack.name.contains(searchTerm, Qt::CaseInsensitive);
+}
+
+void FilterModel::setSearchTerm(const QString term)
+{
+    searchTerm = term.trimmed();
+    invalidate();
 }
 
 const QMap<QString, FilterModel::Sorting> FilterModel::getAvailableSortings()
@@ -139,39 +153,57 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     }
 
     Modpack pack = modpacks.at(pos);
-    if (role == Qt::DisplayRole) {
-        return pack.name + "\n" + translatePackType(pack.type);
-    } else if (role == Qt::ToolTipRole) {
-        if (pack.description.length() > 100) {
-            // some magic to prevent to long tooltips and replace html linebreaks
-            QString edit = pack.description.left(97);
-            edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
-            return edit;
+    switch (role) {
+        case Qt::ToolTipRole: {
+            if (pack.description.length() > 100) {
+                // some magic to prevent to long tooltips and replace html linebreaks
+                QString edit = pack.description.left(97);
+                edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
+                return edit;
+            }
+            return pack.description;
         }
-        return pack.description;
-    } else if (role == Qt::DecorationRole) {
-        if (m_logoMap.contains(pack.logo)) {
-            return (m_logoMap.value(pack.logo));
+        case Qt::DecorationRole: {
+            if (m_logoMap.contains(pack.logo)) {
+                return (m_logoMap.value(pack.logo));
+            }
+            QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
+            ((ListModel*)this)->requestLogo(pack.logo);
+            return icon;
         }
-        QIcon icon = APPLICATION->getThemedIcon("screenshot-placeholder");
-        ((ListModel*)this)->requestLogo(pack.logo);
-        return icon;
-    } else if (role == Qt::ForegroundRole) {
-        if (pack.broken) {
-            // FIXME: Hardcoded color
-            return QColor(255, 0, 50);
-        } else if (pack.bugged) {
-            // FIXME: Hardcoded color
-            // bugged pack, currently only indicates bugged xml
-            return QColor(244, 229, 66);
+        case Qt::UserRole: {
+            QVariant v;
+            v.setValue(pack);
+            return v;
         }
-    } else if (role == Qt::UserRole) {
-        QVariant v;
-        v.setValue(pack);
-        return v;
+        case Qt::ForegroundRole: {
+            if (pack.broken) {
+                // FIXME: Hardcoded color
+                return QColor(255, 0, 50);
+            } else if (pack.bugged) {
+                // FIXME: Hardcoded color
+                // bugged pack, currently only indicates bugged xml
+                return QColor(244, 229, 66);
+            }
+        }
+        case Qt::DisplayRole:
+            return pack.name;
+        case Qt::SizeHintRole:
+            return QSize(0, 58);
+        // Custom data
+        case UserDataTypes::TITLE:
+            return pack.name;
+        case UserDataTypes::DESCRIPTION:
+            return pack.description;
+        case UserDataTypes::SELECTED:
+            return false;
+        case UserDataTypes::INSTALLED:
+            return false;
+        default:
+            break;
     }
 
-    return QVariant();
+    return {};
 }
 
 void ListModel::fill(ModpackList modpacks_)

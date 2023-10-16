@@ -218,9 +218,24 @@ void HttpMetaCache::Load()
     if (!index.open(QIODevice::ReadOnly))
         return;
 
-    QJsonDocument json = QJsonDocument::fromJson(index.readAll());
+    QJsonParseError parseError;
+    QJsonDocument json = QJsonDocument::fromJson(index.readAll(), &parseError);
 
-    auto root = Json::requireObject(json, "HttpMetaCache root");
+    // Fail if the JSON is invalid.
+    if (parseError.error != QJsonParseError::NoError) {
+        qCritical() << QString("Failed to parse HttpMetaCache file: %1 at offset %2")
+                           .arg(parseError.errorString(), QString::number(parseError.offset))
+                           .toUtf8();
+        return;
+    }
+
+    // Make sure the root is an object.
+    if (!json.isObject()) {
+        qCritical() << "HttpMetaCache root should be an object.";
+        return;
+    }
+
+    auto root = json.object();
 
     // check file version first
     auto version_val = Json::ensureString(root, "version");

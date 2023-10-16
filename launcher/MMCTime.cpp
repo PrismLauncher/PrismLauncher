@@ -16,19 +16,20 @@
  */
 
 #include <MMCTime.h>
+#include <qobject.h>
 
 #include <QDateTime>
 #include <QObject>
 #include <QTextStream>
 
-QString Time::prettifyDuration(int64_t duration)
+QString Time::prettifyDuration(int64_t duration, bool noDays)
 {
     int seconds = (int)(duration % 60);
     duration /= 60;
     int minutes = (int)(duration % 60);
     duration /= 60;
-    int hours = (int)(duration % 24);
-    int days = (int)(duration / 24);
+    int hours = (int)(noDays ? duration : (duration % 24));
+    int days = (int)(noDays ? 0 : (duration / 24));
     if ((hours == 0) && (days == 0)) {
         return QObject::tr("%1min %2s").arg(minutes).arg(seconds);
     }
