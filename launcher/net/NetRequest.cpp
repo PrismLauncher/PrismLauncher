@@ -47,6 +47,7 @@
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
 #endif
+#include "BuildConfig.h"
 
 #include "net/NetAction.h"
 

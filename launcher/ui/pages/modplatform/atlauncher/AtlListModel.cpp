@@ -63,7 +63,7 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
             }
             auto icon = APPLICATION->getThemedIcon("atlauncher-placeholder");
 
-            auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1.png").arg(pack.safeName.toLower());
+            auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1").arg(pack.safeName);
             ((ListModel*)this)->requestLogo(pack.safeName, url);
 
             return icon;

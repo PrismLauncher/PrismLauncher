@@ -114,8 +114,8 @@ void AtlPage::suggestCurrent()
     auto uiSupport = new AtlUserInteractionSupportImpl(this);
     dialog->setSuggestedPack(selected.name, selectedVersion, new ATLauncher::PackInstallTask(uiSupport, selected.name, selectedVersion));
 
-    auto editedLogoName = selected.safeName;
-    auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1.png").arg(selected.safeName.toLower());
+    auto editedLogoName = "atl_" + selected.safeName;
+    auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1").arg(selected.safeName);
     listModel->getLogo(selected.safeName, url,
                        [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }

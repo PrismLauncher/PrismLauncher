@@ -48,7 +48,10 @@
 #include <functional>
 #include <memory>
 #include <optional>
+
+#if defined(LAUNCHER_APPLICATION)
 #include "minecraft/mod/Mod.h"
+#endif
 #include "tasks/Task.h"
 
 namespace MMCZip {
@@ -79,11 +82,12 @@ bool compressDirFiles(QuaZip* zip, QString dir, QFileInfoList files, bool follow
  */
 bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks = false);
 
+#if defined(LAUNCHER_APPLICATION)
 /**
  * take a source jar, add mods to it, resulting in target jar
  */
 bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods);
-
+#endif
 /**
  * Find a single file in archive by file name (not path)
  *
@@ -147,6 +151,7 @@ bool extractFile(QString fileCompressed, QString file, QString dir);
  */
 bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter);
 
+#if defined(LAUNCHER_APPLICATION)
 class ExportToZipTask : public Task {
    public:
     ExportToZipTask(QString outputPath, QDir dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
@@ -189,4 +194,5 @@ class ExportToZipTask : public Task {
     QFuture<ZipResult> m_build_zip_future;
     QFutureWatcher<ZipResult> m_build_zip_watcher;
 };
+#endif
 }  // namespace MMCZip

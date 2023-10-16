@@ -184,6 +184,10 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("CloseAfterLaunch"), miscellaneousOverride);
         m_settings->registerOverride(global_settings->getSetting("QuitAfterGameStop"), miscellaneousOverride);
 
+        // Legacy-related options
+        auto legacySettings = m_settings->registerSetting("OverrideLegacySettings", false);
+        m_settings->registerOverride(global_settings->getSetting("OnlineFixes"), legacySettings);
+
         m_settings->set("InstanceType", "OneSix");
     }
 
@@ -513,18 +517,26 @@ QStringList MinecraftInstance::javaArguments()
 
     args << "-Duser.language=en";
 
+    if (javaVersion.isModular() && shouldApplyOnlineFixes())
+        // allow reflective access to java.net - required by the skin fix
+        args << "--add-opens"
+             << "java.base/java.net=ALL-UNNAMED";
+
     return args;
 }
 
 QString MinecraftInstance::getLauncher()
 {
-    auto profile = m_components->getProfile();
-
     // use legacy launcher if the traits are set
-    if (profile->getTraits().contains("legacyLaunch") || profile->getTraits().contains("alphaLaunch"))
+    if (traits().contains("legacyLaunch") || traits().contains("alphaLaunch"))
         return "legacy";
 
     return "standard";
+}
+
+bool MinecraftInstance::shouldApplyOnlineFixes()
+{
+    return traits().contains("legacyServices") && settings()->get("OnlineFixes").toBool();
 }
 
 QMap<QString, QString> MinecraftInstance::getVariables()
@@ -715,6 +727,9 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
     for (auto trait : profile->getTraits()) {
         launchScript += "traits " + trait + "\n";
     }
+
+    if (shouldApplyOnlineFixes())
+        launchScript += "onlineFixes true\n";
 
     launchScript += "launcher " + getLauncher() + "\n";
 
