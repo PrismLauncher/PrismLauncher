@@ -194,6 +194,12 @@ set(Launcher_UPDATER_BASE "" CACHE STRING "Base URL for the updater.")
 # The metadata server
 set(Launcher_META_URL "https://meta.prismlauncher.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
 
+# The fmllibs server
+set(Launcher_FMLLIBS_BASE_URL "https://files.prismlauncher.org/fmllibs/" CACHE STRING "URL to fetch Launcher's meta files from.")
+
+# The i18n server
+set(Launcher_TRANSLATIONS_BASE_URL "https://i18n.prismlauncher.org/" CACHE STRING "URL to fetch Launcher's i18n files from.")
+
 # Imgur API Client ID
 set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
 
