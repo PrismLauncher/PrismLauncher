@@ -194,6 +194,40 @@ void write(const QString& filename, const QByteArray& data)
     }
 }
 
+void appendSafe(const QString& filename, const QByteArray& data)
+{
+    ensureExists(QFileInfo(filename).dir());
+    QByteArray buffer;
+    try {
+        buffer = read(filename);
+    } catch (FileSystemException&) {
+        buffer = QByteArray();
+    }
+    buffer.append(data);
+    QSaveFile file(filename);
+    if (!file.open(QSaveFile::WriteOnly)) {
+        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+    }
+    if (buffer.size() != file.write(buffer)) {
+        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+    }
+    if (!file.commit()) {
+        throw FileSystemException("Error while committing data to " + filename + ": " + file.errorString());
+    }
+}
+
+void append(const QString& filename, const QByteArray& data)
+{
+    ensureExists(QFileInfo(filename).dir());
+    QFile file(filename);
+    if (!file.open(QFile::Append)) {
+        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+    }
+    if (data.size() != file.write(data)) {
+        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+    }
+}
+
 QByteArray read(const QString& filename)
 {
     QFile file(filename);
@@ -286,6 +320,9 @@ bool copy::operator()(const QString& offset, bool dryRun)
     // The default behavior is to follow symlinks
     if (!m_followSymlinks)
         opt |= copy_opts::copy_symlinks;
+
+    if (m_overwrite)
+        opt |= copy_opts::overwrite_existing;
 
     // Function that'll do the actual copying
     auto copy_file = [&](QString src_path, QString relative_dst_path) {

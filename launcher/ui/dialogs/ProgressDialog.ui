@@ -48,6 +48,9 @@
        <property name="text">
         <string>Global Task Status...</string>
        </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
@@ -109,8 +112,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>464</width>
-        <height>96</height>
+        <width>460</width>
+        <height>108</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="taskProgressLayout">

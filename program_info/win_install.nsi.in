@@ -350,6 +350,7 @@ Section "@Launcher_DisplayName@"
 
   File "@Launcher_APP_BINARY_NAME@.exe"
   File "@Launcher_APP_BINARY_NAME@_filelink.exe"
+  File "@Launcher_APP_BINARY_NAME@_updater.exe"
   File "qt.conf"
   File "qtlogging.ini"
   File *.dll
@@ -435,6 +436,7 @@ Section "Uninstall"
 
   Delete $INSTDIR\@Launcher_APP_BINARY_NAME@.exe
   Delete $INSTDIR\@Launcher_APP_BINARY_NAME@_filelink.exe
+  Delete $INSTDIR\@Launcher_APP_BINARY_NAME@_updater.exe
   Delete $INSTDIR\qt.conf
   Delete $INSTDIR\*.dll
 
@@ -472,7 +474,6 @@ Function .onInit
 ${GetParameters} $R0
 ${GetOptions} $R0 "/NoShortcuts" $R1
 ${IfNot} ${Errors}
-${OrIf} ${FileExists} "$InstDir\@Launcher_APP_BINARY_NAME@.exe"
   !insertmacro UnselectSection ${SM_SHORTCUTS}
   !insertmacro UnselectSection ${DESKTOP_SHORTCUTS}
 ${EndIf}
