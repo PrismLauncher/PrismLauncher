@@ -26,5 +26,16 @@ int main(int argc, char* argv[])
 {
     FileLinkApp ldh(argc, argv);
 
-    return ldh.exec();
+    switch (ldh.status()) {
+        case FileLinkApp::Starting:
+        case FileLinkApp::Initialized: {
+            return ldh.exec();
+        }
+        case FileLinkApp::Failed:
+            return 1;
+        case FileLinkApp::Succeeded:
+            return 0;
+        default:
+            return -1;
+    }
 }
