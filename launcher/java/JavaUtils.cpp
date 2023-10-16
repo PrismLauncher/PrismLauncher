@@ -403,6 +403,14 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs("/opt/jdks");
     // flatpak
     scanJavaDirs("/app/jdk");
+
+    auto home = qEnvironmentVariable("HOME");
+
+    // javas downloaded by IntelliJ
+    scanJavaDirs(FS::PathCombine(home, ".jdks"));
+    // javas downloaded by sdkman
+    scanJavaDirs(FS::PathCombine(home, ".sdkman/candidates/java"));
+
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;

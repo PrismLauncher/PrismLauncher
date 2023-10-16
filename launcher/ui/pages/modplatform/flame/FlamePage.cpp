@@ -176,7 +176,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             }
 
             for (auto version : current.versions) {
-                ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+                auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
+                ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(version.downloadUrl));
             }
 
             QVariant current_updated;
@@ -227,8 +228,7 @@ void FlamePage::suggestCurrent()
     extra_info.insert("pack_version_id", QString::number(version.fileId));
 
     dialog->setSuggestedPack(current.name, new InstanceImportTask(version.downloadUrl, this, std::move(extra_info)));
-    QString editedLogoName;
-    editedLogoName = "curseforge_" + current.logoName;
+    QString editedLogoName = "curseforge_" + current.logoName;
     listModel->getLogo(current.logoName, current.logoUrl,
                        [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }

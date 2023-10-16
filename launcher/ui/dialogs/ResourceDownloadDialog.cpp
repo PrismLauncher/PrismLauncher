@@ -167,8 +167,8 @@ void ResourceDownloadDialog::confirm()
     });
     for (auto& task : selected) {
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ProviderCaps.name(task->getProvider()),
-                                         getRequiredBy.value(task->getPack()->addonId.toString()) });
+                                         ProviderCaps.name(task->getProvider()), getRequiredBy.value(task->getPack()->addonId.toString()),
+                                         task->getVersion().version_type.toString() });
     }
 
     if (confirm_dialog->exec()) {

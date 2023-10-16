@@ -22,7 +22,7 @@
 
 #include "ShaderPack.h"
 
-#include "minecraft/mod/tasks/LocalShaderPackParseTask.h"
+#include <QRegularExpression>
 
 void ShaderPack::setPackFormat(ShaderPackFormat new_format)
 {
@@ -34,4 +34,9 @@ void ShaderPack::setPackFormat(ShaderPackFormat new_format)
 bool ShaderPack::valid() const
 {
     return m_pack_format != ShaderPackFormat::INVALID;
+}
+
+bool ShaderPack::applyFilter(QRegularExpression filter) const
+{
+    return valid() && Resource::applyFilter(filter);
 }
