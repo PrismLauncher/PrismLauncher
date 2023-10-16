@@ -36,12 +36,17 @@
  */
 
 #include "NetJob.h"
-#include "Application.h"
 #include "tasks/ConcurrentTask.h"
+#if defined(LAUNCHER_APPLICATION)
+#include "Application.h"
+#endif
 
-NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network)
-    : ConcurrentTask(nullptr, job_name, APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt()), m_network(network)
-{}
+NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network) : ConcurrentTask(nullptr, job_name), m_network(network)
+{
+#if defined(LAUNCHER_APPLICATION)
+    setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+#endif
+}
 
 auto NetJob::addNetAction(NetAction::Ptr action) -> bool
 {

@@ -35,6 +35,7 @@
  */
 
 #include "ModrinthPackManifest.h"
+#include <QFileInfo>
 #include "Json.h"
 
 #include "modplatform/modrinth/ModrinthAPI.h"
@@ -56,8 +57,8 @@ void loadIndexedPack(Modpack& pack, QJsonObject& obj)
     pack.description = Json::ensureString(obj, "description");
     auto temp_author_name = Json::ensureString(obj, "author");
     pack.author = std::make_tuple(temp_author_name, api.getAuthorURL(temp_author_name));
-    pack.iconName = QString("modrinth_%1").arg(Json::ensureString(obj, "slug"));
     pack.iconUrl = Json::ensureString(obj, "icon_url");
+    pack.iconName = QString("modrinth_%1.%2").arg(Json::ensureString(obj, "slug"), QFileInfo(pack.iconUrl.fileName()).suffix());
 }
 
 void loadIndexedInfo(Modpack& pack, QJsonObject& obj)
@@ -111,9 +112,8 @@ void loadIndexedVersions(Modpack& pack, QJsonDocument& doc)
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModpackVersion& a, const ModpackVersion& b) -> bool {
-        bool a_better_release = a.version_type <= b.version_type;
         // dates are in RFC 3339 format
-        return a.date > b.date && a_better_release;
+        return a.date > b.date;
     };
 
     std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);

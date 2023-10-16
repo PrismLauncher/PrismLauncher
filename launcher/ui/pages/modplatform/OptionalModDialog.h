@@ -1,10 +1,7 @@
-// SPDX-FileCopyrightText: 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
-//
 // SPDX-License-Identifier: GPL-3.0-only
-
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,14 +14,26 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
-#include "FileLink.h"
+#pragma once
 
-int main(int argc, char* argv[])
-{
-    FileLinkApp ldh(argc, argv);
+#include <QAbstractListModel>
+#include <QDialog>
 
-    return ldh.exec();
+namespace Ui {
+class OptionalModDialog;
 }
+
+class OptionalModDialog : public QDialog {
+    Q_OBJECT
+
+   public:
+    OptionalModDialog(QWidget* parent, const QStringList& mods);
+    ~OptionalModDialog() override;
+
+    QStringList getResult();
+
+   private:
+    Ui::OptionalModDialog* ui;
+};

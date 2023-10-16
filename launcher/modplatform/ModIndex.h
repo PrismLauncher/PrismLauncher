@@ -137,6 +137,7 @@ struct IndexedPack {
     QString logoName;
     QString logoUrl;
     QString websiteUrl;
+    QString side;
 
     bool versionsLoaded = false;
     QVector<IndexedVersion> versions;
