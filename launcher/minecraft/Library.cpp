@@ -172,12 +172,15 @@ QList<NetAction::Ptr> Library::getDownloads(const RuntimeContext& runtimeContext
             }
 
             if (m_repositoryURL.isEmpty()) {
+#ifndef LAUNCHER_TEST
                 QString librariesOverride = APPLICATION->settings()->get("MinecraftLibrariesURLOverride").toString();
-                if (librariesOverride.isEmpty()) {
-                    return BuildConfig.LIBRARY_BASE + raw_storage;
-                } else {
+                if (!librariesOverride.isEmpty())
                     return librariesOverride + raw_storage;
-                }
+                else
+#endif
+                    return BuildConfig.LIBRARY_BASE + raw_storage;
+
+
             }
 
             if (m_repositoryURL.endsWith('/')) {
