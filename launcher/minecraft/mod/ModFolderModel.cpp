@@ -64,15 +64,16 @@
 ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Side", "Loaders" });
-    m_column_names_translated = QStringList(
-        { tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Side"), tr("Loaders") });
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME,     SortType::NAME, SortType::VERSION,
-                           SortType::DATE,    SortType::PROVIDER, SortType::SIDE, SortType::LOADERS };
+    m_column_names =
+        QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Side", "Loaders", "Miecraft Versions" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"),
+                                              tr("Side"), tr("Loaders"), tr("Miecraft Versions") });
+    m_column_sort_keys = { SortType::ENABLED,  SortType::NAME, SortType::NAME,    SortType::VERSION,    SortType::DATE,
+                           SortType::PROVIDER, SortType::SIDE, SortType::LOADERS, SortType::MC_VERSIONS };
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive,      QHeaderView::Stretch,
                               QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents,
-                              QHeaderView::ResizeToContents, QHeaderView::ResizeToContents };
-    m_columnsHideable = { false, true, false, true, true, true, true, true };
+                              QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents };
+    m_columnsHideable = { false, true, false, true, true, true, true, true, true };
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
@@ -122,7 +123,10 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                             loaders << getModLoaderAsString(loader);
                         }
                     }
-                    return loaders.join(",");
+                    return loaders.join(", ");
+                }
+                case McVersionsColumn: {
+                    return at(row)->mcVersions().join(", ");
                 }
                 default:
                     return QVariant();
@@ -175,6 +179,7 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case ImageColumn:
                 case SideColumn:
                 case LoadersColumn:
+                case McVersionsColumn:
                     return columnNames().at(section);
                 default:
                     return QVariant();
@@ -196,6 +201,8 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                     return tr("On what environment the mod is running.");
                 case LoadersColumn:
                     return tr("The mod loader.");
+                case McVersionsColumn:
+                    return tr("The supported minecraft versions.");
                 default:
                     return QVariant();
             }

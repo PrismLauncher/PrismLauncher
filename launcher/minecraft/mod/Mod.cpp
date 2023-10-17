@@ -124,6 +124,14 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
                 return { -1, type == SortType::LOADERS };
             break;
         }
+        case SortType::MC_VERSIONS: {
+            auto thisVersion = mcVersions().join(",");
+            auto otherVersion = cast_other->mcVersions().join(",");
+            auto compare_result = QString::compare(thisVersion, otherVersion, Qt::CaseInsensitive);
+            if (compare_result != 0)
+                return { compare_result, type == SortType::MC_VERSIONS };
+            break;
+        }
     }
     return { 0, false };
 }
@@ -258,6 +266,13 @@ auto Mod::loaders() const -> ModPlatform::ModLoaderTypes
 {
     if (metadata())
         return metadata()->loaders;
+    return {};
+}
+
+auto Mod::mcVersions() const -> QStringList
+{
+    if (metadata())
+        return metadata()->mcVersions;
     return {};
 }
 

@@ -183,7 +183,7 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
 QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 auto getModLoaderAsString(ModLoaderType type) -> const QString;
-auto getModLoaderFromString(QString type) -> const ModLoaderType;
+auto getModLoaderFromString(QString type) -> ModLoaderType;
 
 constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
 {

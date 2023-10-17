@@ -15,7 +15,7 @@ enum class ResourceType {
     LITEMOD,     //!< The resource is a litemod
 };
 
-enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER, SIDE, LOADERS };
+enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER, SIDE, LOADERS, MC_VERSIONS };
 
 enum class EnableAction { ENABLE, DISABLE, TOGGLE };
 

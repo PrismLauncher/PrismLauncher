@@ -138,7 +138,7 @@ auto getModLoaderAsString(ModLoaderType type) -> const QString
     return "";
 }
 
-auto getModLoaderFromString(QString type) -> const ModLoaderType
+auto getModLoaderFromString(QString type) -> ModLoaderType
 {
     if (type == "neoforge")
         return NeoForge;

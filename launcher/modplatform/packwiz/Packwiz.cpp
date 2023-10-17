@@ -115,6 +115,8 @@ auto V1::createModFormat([[maybe_unused]] QDir& index_dir, ModPlatform::IndexedP
     mod.project_id = mod_pack.addonId;
     mod.side = stringToSide(mod_version.side.isEmpty() ? mod_pack.side : mod_version.side);
     mod.loaders = mod_version.loaders;
+    mod.mcVersions = mod_version.mcVersion;
+    mod.mcVersions.sort();
 
     return mod;
 }
@@ -189,6 +191,10 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
             loaders.push_back(getModLoaderAsString(loader).toStdString());
         }
     }
+    toml::array mcVersions;
+    for (auto version : mod.mcVersions) {
+        mcVersions.push_back(version.toStdString());
+    }
 
     if (!index_file.open(QIODevice::ReadWrite)) {
         qCritical() << QString("Could not open file %1!").arg(normalized_fname);
@@ -202,6 +208,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
                                 { "filename", mod.filename.toStdString() },
                                 { "side", sideToString(mod.side).toStdString() },
                                 { "loaders", loaders },
+                                { "mcVersions", mcVersions },
                                 { "download",
                                   toml::table{
                                       { "mode", mod.mode.toStdString() },
@@ -292,6 +299,17 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
                     mod.loaders |= ModPlatform::getModLoaderFromString(QString::fromStdString(loader.as_string()->value_or("")));
                 }
             }
+        }
+        if (auto versions = table["mcVersions"]; versions && versions.is_array()) {
+            for (auto&& version : *versions.as_array()) {
+                if (version.is_string()) {
+                    auto ver = QString::fromStdString(version.as_string()->value_or(""));
+                    if (!ver.isEmpty()) {
+                        mod.mcVersions << ver;
+                    }
+                }
+            }
+            mod.mcVersions.sort();
         }
     }
 

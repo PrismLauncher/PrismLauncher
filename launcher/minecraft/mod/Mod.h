@@ -73,6 +73,7 @@ class Mod : public Resource {
     auto metaurl() const -> QString;
     auto side() const -> Metadata::ModSide;
     auto loaders() const -> ModPlatform::ModLoaderTypes;
+    auto mcVersions() const -> QStringList;
 
     /** Get the intneral path to the mod's icon file*/
     QString iconPath() const { return m_local_details.icon_file; }
