@@ -568,7 +568,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     m_mod_id_resolver.reset();
     connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
         m_files_job.reset();
-        validateZIPResouces();
+        validateZIPResources();
     });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
@@ -617,7 +617,7 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     setAbortable(true);
 }
 
-void FlameCreationTask::validateZIPResouces()
+void FlameCreationTask::validateZIPResources()
 {
     qDebug() << "Validating whether resources stored as .zip are in the right place";
     for (auto [fileName, targetFolder] : m_ZIP_resources) {
@@ -670,8 +670,8 @@ void FlameCreationTask::validateZIPResouces()
                 validatePath(fileName, targetFolder, "datapacks");
                 break;
             case PackedResourceType::ShaderPack:
-                // in theroy flame API can't do this but who knows, that *may* change ?
-                // better to handle it if it *does* occure in the future
+                // in theory flame API can't do this but who knows, that *may* change ?
+                // better to handle it if it *does* occur in the future
                 validatePath(fileName, targetFolder, "shaderpacks");
                 break;
             case PackedResourceType::WorldSave:
