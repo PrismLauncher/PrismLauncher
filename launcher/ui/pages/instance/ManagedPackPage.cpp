@@ -142,12 +142,7 @@ void ManagedPackPage::openedImpl()
 
 QString ManagedPackPage::displayName() const
 {
-    auto type = m_inst->getManagedPackType();
-    if (type.isEmpty())
-        return "Pack Manager";
-    if (type == "flame")
-        type = "CurseForge";
-    return type.replace(0, 1, type[0].toUpper());
+    return "Modpack";
 }
 
 QIcon ManagedPackPage::icon() const
