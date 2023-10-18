@@ -100,11 +100,8 @@ void LogView::repopulate()
     rowsInserted(QModelIndex(), 0, m_model->rowCount() - 1);
 }
 
-void LogView::rowsAboutToBeInserted(const QModelIndex& parent, int first, int last)
+void LogView::rowsAboutToBeInserted([[maybe_unused]] const QModelIndex& parent, [[maybe_unused]] int first, [[maybe_unused]] int last)
 {
-    Q_UNUSED(parent)
-    Q_UNUSED(first)
-    Q_UNUSED(last)
     QScrollBar* bar = verticalScrollBar();
     int max_bar = bar->maximum();
     int val_bar = bar->value();
@@ -144,12 +141,9 @@ void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
     }
 }
 
-void LogView::rowsRemoved(const QModelIndex& parent, int first, int last)
+void LogView::rowsRemoved([[maybe_unused]] const QModelIndex& parent, [[maybe_unused]] int first, [[maybe_unused]] int last)
 {
     // TODO: some day... maybe
-    Q_UNUSED(parent)
-    Q_UNUSED(first)
-    Q_UNUSED(last)
 }
 
 void LogView::scrollToBottom()

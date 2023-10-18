@@ -1398,9 +1398,8 @@ void Application::controllerSucceeded()
     }
 }
 
-void Application::controllerFailed(const QString& error)
+void Application::controllerFailed([[maybe_unused]] const QString& error)
 {
-    Q_UNUSED(error);
     auto controller = qobject_cast<LaunchController*>(QObject::sender());
     if (!controller)
         return;

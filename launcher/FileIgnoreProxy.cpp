@@ -244,10 +244,8 @@ void FileIgnoreProxy::setBlockedPaths(QStringList paths)
     endResetModel();
 }
 
-bool FileIgnoreProxy::filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const
+bool FileIgnoreProxy::filterAcceptsColumn(int source_column, [[maybe_unused]] const QModelIndex& source_parent) const
 {
-    Q_UNUSED(source_parent)
-
     // adjust the columns you want to filter out here
     // return false for those that will be hidden
     if (source_column == 2 || source_column == 3)

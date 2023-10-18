@@ -30,10 +30,8 @@
 
 enum FormatProperties { ImageData = QTextFormat::UserProperty + 1 };
 
-QSizeF VariableSizedImageObject::intrinsicSize(QTextDocument* doc, int posInDocument, const QTextFormat& format)
+QSizeF VariableSizedImageObject::intrinsicSize(QTextDocument* doc, [[maybe_unused]] int posInDocument, const QTextFormat& format)
 {
-    Q_UNUSED(posInDocument);
-
     auto image = qvariant_cast<QImage>(format.property(ImageData));
     auto size = image.size();
 

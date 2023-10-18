@@ -74,9 +74,8 @@ void MinecraftPage::updateCheckboxStuff()
     ui->windowHeightSpinBox->setEnabled(!ui->maximizedCheckBox->isChecked());
 }
 
-void MinecraftPage::on_maximizedCheckBox_clicked(bool checked)
+void MinecraftPage::on_maximizedCheckBox_clicked([[maybe_unused]] bool checked)
 {
-    Q_UNUSED(checked);
     updateCheckboxStuff();
 }
 
