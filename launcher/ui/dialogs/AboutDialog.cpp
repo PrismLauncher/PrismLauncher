@@ -85,6 +85,7 @@ QString getCreditsHtml()
     stream << QString("<p>TayouVR %1</p>\n").arg(getGitHub("TayouVR"));
     stream << QString("<p>TheKodeToad %1</p>\n").arg(getGitHub("TheKodeToad"));
     stream << QString("<p>getchoo %1</p>\n").arg(getGitHub("getchoo"));
+    stream << QString("<p>Alexandru Tripon (Trial97) %1</p>\n").arg(getGitHub("Trial97"));
     stream << "<br />\n";
 
     // TODO: possibly retrieve from git history at build time?
