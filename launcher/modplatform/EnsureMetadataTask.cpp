@@ -149,6 +149,7 @@ void EnsureMetadataTask::executeTask()
             if (m_current_task)
                 m_current_task.reset();
         });
+        connect(project_task.get(), &Task::failed, this, &EnsureMetadataTask::emitFailed);
 
         m_current_task = project_task;
         project_task->start();
@@ -159,6 +160,7 @@ void EnsureMetadataTask::executeTask()
         if (m_current_task)
             m_current_task.reset();
     });
+    connect(version_task.get(), &Task::failed, this, &EnsureMetadataTask::emitFailed);
 
     if (m_mods.size() > 1)
         setStatus(tr("Requesting metadata information from %1...").arg(ProviderCaps.readableName(m_provider)));

@@ -120,10 +120,10 @@ void ConcurrentTask::executeNextSubTask()
     }
     if (m_queue.isEmpty()) {
         if (m_doing.isEmpty()) {
-            // if (m_failed.isEmpty())
-            emitSucceeded();
-            // else
-            // emitFailed(tr("One or more subtasks failed"));
+            if (m_failed.isEmpty())
+                emitSucceeded();
+            else
+                emitFailed(tr("One or more subtasks failed"));
         }
         return;
     }
@@ -138,6 +138,7 @@ void ConcurrentTask::startSubTask(Task::Ptr next)
 {
     connect(next.get(), &Task::succeeded, this, [this, next]() { subTaskSucceeded(next); });
     connect(next.get(), &Task::failed, this, [this, next](QString msg) { subTaskFailed(next, msg); });
+    // this should never happen but if it does, it's better to fail the task than get stuck
     connect(next.get(), &Task::aborted, this, [this, next] { subTaskFailed(next, "Aborted"); });
 
     connect(next.get(), &Task::status, this, [this, next](QString msg) { subTaskStatus(next, msg); });
