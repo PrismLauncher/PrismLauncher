@@ -347,6 +347,11 @@ add_subdirectory(program_info)
 ####################################### Install layout #######################################
 
 set(Launcher_ENABLE_UPDATER NO)
+set(Launcher_BUILD_UPDATER NO)
+
+if (NOT APPLE AND (NOT Launcher_UPDATER_GITHUB_REPO STREQUAL "" AND NOT Launcher_BUILD_ARTIFACT STREQUAL ""))
+	set(Launcher_BUILD_UPDATER YES)
+endif()
 
 if(NOT (UNIX AND APPLE))
     # Install "portable.txt" if selected component is "portable"
