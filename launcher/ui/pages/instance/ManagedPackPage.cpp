@@ -144,7 +144,7 @@ QString ManagedPackPage::displayName() const
 {
     auto type = m_inst->getManagedPackType();
     if (type.isEmpty())
-        return "PrismPack";
+        return "Generic";
     if (type == "flame")
         type = "CurseForge";
     return type.replace(0, 1, type[0].toUpper());
@@ -357,6 +357,8 @@ void ModrinthManagedPackPage::update()
 void ModrinthManagedPackPage::updateFromFile()
 {
     auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "Modrinth pack (*.mrpack *.zip)");
+    if (output.isEmpty())
+        return;
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", m_inst->getManagedPackID());
     extra_info.insert("pack_version_id", QString());
@@ -520,6 +522,8 @@ void FlameManagedPackPage::update()
 void FlameManagedPackPage::updateFromFile()
 {
     auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "CurseForge pack (*.zip)");
+    if (output.isEmpty())
+        return;
 
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", m_inst->getManagedPackID());
@@ -550,8 +554,6 @@ GenericManagedPackPage::GenericManagedPackPage(BaseInstance* inst, InstanceWindo
 {
     connect(ui->updateFromFileButton, &QPushButton::clicked, this, &GenericManagedPackPage::updateFromFile);
 
-    ui->changelogTextBrowser->setText(m_inst->notes());
-    ui->packName->setText(m_inst->name());
     ui->packVersion->hide();
     ui->packVersionLabel->hide();
     ui->packOrigin->hide();
@@ -562,9 +564,18 @@ GenericManagedPackPage::GenericManagedPackPage(BaseInstance* inst, InstanceWindo
     ui->updateFromFileButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 }
 
+void GenericManagedPackPage::parseManagedPack()
+{
+    ui->packName->setText(m_inst->name());
+    ui->changelogTextBrowser->setText(m_inst->notes());
+}
+
 void GenericManagedPackPage::updateFromFile()
 {
-    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "Prism pack (*.mrpack *.zip)");
+    auto output =
+        QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "Modrinth/CurseForge pack (*.mrpack *.zip)");
+    if (output.isEmpty())
+        return;
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", m_inst->getManagedPackID());
     extra_info.insert("pack_version_id", QString());

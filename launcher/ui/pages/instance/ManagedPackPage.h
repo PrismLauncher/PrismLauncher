@@ -105,6 +105,8 @@ class GenericManagedPackPage final : public ManagedPackPage {
     ~GenericManagedPackPage() override = default;
 
     [[nodiscard]] bool shouldDisplay() const override;
+    void parseManagedPack() override;
+   public slots:
     void updateFromFile() override;
 };
 
