@@ -43,6 +43,8 @@ class ManagedPackPage : public QWidget, public BasePage {
     [[nodiscard]] QString id() const override { return "managed_pack"; }
     [[nodiscard]] bool shouldDisplay() const override;
 
+    QString providerName() const;
+
     void openedImpl() override;
 
     bool apply() override { return true; }

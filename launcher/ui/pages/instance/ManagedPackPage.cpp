@@ -135,14 +135,24 @@ void ManagedPackPage::openedImpl()
     ui->packName->setText(m_inst->getManagedPackName());
     ui->packVersion->setText(m_inst->getManagedPackVersionName());
     ui->packOrigin->setText(tr("Website: <a href=%1>%2</a>    |    Pack ID: %3    |    Version ID: %4")
-                                .arg(url(), displayName(), m_inst->getManagedPackID(), m_inst->getManagedPackVersionID()));
+                                .arg(url(), providerName(), m_inst->getManagedPackID(), m_inst->getManagedPackVersionID()));
 
     parseManagedPack();
 }
 
+QString ManagedPackPage::providerName() const
+{
+    auto type = m_inst->getManagedPackType();
+    if (type.isEmpty())
+        return {};
+    if (type == "flame")
+        type = "CurseForge";
+    return type.replace(0, 1, type[0].toUpper());
+}
+
 QString ManagedPackPage::displayName() const
 {
-    return "Modpack";
+    return tr("Modpack");
 }
 
 QIcon ManagedPackPage::icon() const
