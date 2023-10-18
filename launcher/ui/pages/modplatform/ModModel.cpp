@@ -25,15 +25,18 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
     Q_ASSERT(m_filter);
 
     std::optional<std::list<Version>> versions{};
+    auto loaders = profile->getSupportedModLoaders();
 
     {  // Version filter
         if (!m_filter->versions.empty())
             versions = m_filter->versions;
+        if (m_filter->loaders)
+            loaders = m_filter->loaders;
     }
 
     auto sort = getCurrentSortingMethodByIndex();
 
-    return { ModPlatform::ResourceType::MOD, m_next_search_offset, m_search_term, sort, profile->getSupportedModLoaders(), versions };
+    return { ModPlatform::ResourceType::MOD, m_next_search_offset, m_search_term, sort, loaders, versions };
 }
 
 ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& entry)
@@ -45,10 +48,13 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& en
     Q_ASSERT(m_filter);
 
     std::optional<std::list<Version>> versions{};
+    auto loaders = profile->getSupportedModLoaders();
     if (!m_filter->versions.empty())
         versions = m_filter->versions;
+    if (m_filter->loaders)
+        loaders = m_filter->loaders;
 
-    return { pack, versions, profile->getSupportedModLoaders() };
+    return { pack, versions, loaders };
 }
 
 ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(QModelIndex& entry)

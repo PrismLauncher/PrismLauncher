@@ -6,6 +6,7 @@
 
 #include "Json.h"
 
+#include "minecraft/PackProfile.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 

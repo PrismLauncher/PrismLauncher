@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>127</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,35 +16,143 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
+  <property name="currentIndex">
+   <number>0</number>
+  </property>
   <widget class="QWidget" name="VersionPage">
    <attribute name="title">
     <string>Minecraft versions</string>
    </attribute>
    <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0">
+     <widget class="QComboBox" name="versionsCb">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maxVisibleItems">
+       <number>5</number>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QCheckBox" name="snapshotsCb">
+      <property name="text">
+       <string>Include Snapshots</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="LoadersPage">
+   <attribute name="title">
+    <string>Loaders</string>
+   </attribute>
+   <layout class="QGridLayout" name="gridLayout_2">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetMinimumSize</enum>
+    </property>
+    <item row="3" column="3">
+     <widget class="QCheckBox" name="liteLoaderCb">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>LiteLoader</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QCheckBox" name="cauldronCb">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Cauldron</string>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="0">
-     <layout class="QFormLayout" name="formLayout">
-      <item row="2" column="0">
-       <widget class="QRadioButton" name="allVersionsButton">
-        <property name="text">
-         <string notr="true">allVersions</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QRadioButton" name="strictVersionButton">
-        <property name="text">
-         <string notr="true">strictVersion</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="majorVersionButton">
-        <property name="text">
-         <string notr="true">majorVersion</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QCheckBox" name="neoForgeCb">
+      <property name="text">
+       <string>NeoForge</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QCheckBox" name="forgeCb">
+      <property name="text">
+       <string>Forge</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
+     <widget class="QCheckBox" name="quiltCb">
+      <property name="text">
+       <string>Quilt</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QCheckBox" name="fabricCb">
+      <property name="text">
+       <string>Fabric</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="ModPage">
+   <attribute name="title">
+    <string>Others</string>
+   </attribute>
+   <layout class="QGridLayout" name="gridLayout1">
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="envBox">
+      <property name="title">
+       <string>Environments</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
+       <item>
+        <widget class="QCheckBox" name="clientEnv">
+         <property name="text">
+          <string>Client</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="serverEnv">
+         <property name="text">
+          <string>Server</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string>Instaled status</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QCheckBox" name="hide_installed">
+         <property name="text">
+          <string>Hide already installed</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>

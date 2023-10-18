@@ -94,10 +94,9 @@ auto ProviderCapabilities::hash(ResourceProvider p, QIODevice* device, QString t
 {
     QCryptographicHash::Algorithm algo = QCryptographicHash::Sha1;
     switch (p) {
-        case ResourceProvider::MODRINTH: {
+        case ResourceProvider::MODRINTH:
             algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Sha512;
             break;
-        }
         case ResourceProvider::FLAME:
             algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Md5;
             break;

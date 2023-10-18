@@ -31,8 +31,7 @@ class ModPage : public ResourcePage {
         auto page = new T(dialog, instance);
         auto model = static_cast<ModModel*>(page->getModel());
 
-        auto filter_widget =
-            ModFilterWidget::create(static_cast<MinecraftInstance&>(instance).getPackProfile()->getComponentVersion("net.minecraft"), page);
+        auto filter_widget = ModFilterWidget::create(&static_cast<MinecraftInstance&>(instance), page);
         page->setFilterWidget(filter_widget);
         model->setFilter(page->getFilter());
 

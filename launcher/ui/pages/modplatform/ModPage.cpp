@@ -71,7 +71,6 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
 
     m_ui->gridLayout_3->addWidget(m_filter_widget.get(), 0, 0, 1, m_ui->gridLayout_3->columnCount());
 
-    m_filter_widget->setInstance(&static_cast<MinecraftInstance&>(m_base_instance));
     m_filter = m_filter_widget->getFilter();
 
     connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this,
@@ -89,13 +88,14 @@ void ModPage::filterMods()
 
 void ModPage::triggerSearch()
 {
+    auto changed = m_filter_widget->changed();
     m_filter = m_filter_widget->getFilter();
     m_ui->packView->clearSelection();
     m_ui->packDescription->clear();
     m_ui->versionSelectionBox->clear();
     updateSelectionButton();
 
-    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), m_filter_widget->changed());
+    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), changed);
     m_fetch_progress.watch(m_model->activeSearchJob().get());
 }
 
@@ -116,6 +116,9 @@ void ModPage::updateVersionList()
     auto packProfile = (dynamic_cast<MinecraftInstance&>(m_base_instance)).getPackProfile();
 
     QString mcVersion = packProfile->getComponentVersion("net.minecraft");
+    auto loaders = packProfile->getSupportedModLoaders();
+    if (m_filter->loaders)
+        loaders = m_filter->loaders;
 
     auto current_pack = getCurrentPack();
     if (!current_pack)
@@ -124,7 +127,7 @@ void ModPage::updateVersionList()
         auto version = current_pack->versions[i];
         bool valid = false;
         for (auto& mcVer : m_filter->versions) {
-            if (validateVersion(version, mcVer.toString(), packProfile->getSupportedModLoaders())) {
+            if (validateVersion(version, mcVer.toString(), loaders)) {
                 valid = true;
                 break;
             }
