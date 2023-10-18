@@ -3,7 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2023 seth <getchoo at tuta dot io>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -254,12 +254,12 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("InstanceAccountId");
     }
 
-    bool overrideModLoaderSettings = ui->modLoaderSettingsGroupBox->isChecked();
-    m_settings->set("OverrideModLoaderSettings", overrideModLoaderSettings);
-    if (overrideModLoaderSettings) {
-        m_settings->set("DisableQuiltBeacon", ui->disableQuiltBeaconCheckBox->isChecked());
+    bool overrideLegacySettings = ui->legacySettingsGroupBox->isChecked();
+    m_settings->set("OverrideLegacySettings", overrideLegacySettings);
+    if (overrideLegacySettings) {
+        m_settings->set("OnlineFixes", ui->onlineFixes->isChecked());
     } else {
-        m_settings->reset("DisableQuiltBeacon");
+        m_settings->reset("OnlineFixes");
     }
 
     // FIXME: This should probably be called by a signal instead
@@ -366,9 +366,8 @@ void InstanceSettingsPage::loadSettings()
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
 
-    // Mod loader specific settings
-    ui->modLoaderSettingsGroupBox->setChecked(m_settings->get("OverrideModLoaderSettings").toBool());
-    ui->disableQuiltBeaconCheckBox->setChecked(m_settings->get("DisableQuiltBeacon").toBool());
+    ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
+    ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
@@ -491,6 +490,7 @@ void InstanceSettingsPage::updateThresholds()
 {
     auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
     unsigned int maxMem = ui->maxMemSpinBox->value();
+    unsigned int minMem = ui->minMemSpinBox->value();
 
     QString iconName;
 
@@ -500,6 +500,9 @@ void InstanceSettingsPage::updateThresholds()
     } else if (maxMem > (sysMiB * 0.9)) {
         iconName = "status-yellow";
         ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+    } else if (maxMem < minMem) {
+        iconName = "status-yellow";
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
     } else {
         iconName = "status-good";
         ui->labelMaxMemIcon->setToolTip("");

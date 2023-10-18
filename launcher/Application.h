@@ -159,6 +159,9 @@ class Application : public QApplication {
     /// this is the root of the 'installation'. Used for automatic updates
     const QString& root() { return m_rootPath; }
 
+    /// the data path the application is using
+    const QString& dataRoot() { return m_dataPath; }
+
     bool isPortable() { return m_portable; }
 
     const Capabilities capabilities() { return m_capabilities; }
@@ -179,6 +182,9 @@ class Application : public QApplication {
 
     int suitableMaxMem();
 
+    bool updaterEnabled();
+    QString updaterBinaryName();
+
     QUrl normalizeImportUrl(QString const& url);
 
    signals:
@@ -195,7 +201,6 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
-                BaseProfilerFactory* profiler = nullptr,
                 MinecraftServerTargetPtr serverToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);
@@ -245,6 +250,7 @@ class Application : public QApplication {
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 
     QString m_rootPath;
+    QString m_dataPath;
     Status m_status = Application::StartingUp;
     Capabilities m_capabilities;
     bool m_portable = false;

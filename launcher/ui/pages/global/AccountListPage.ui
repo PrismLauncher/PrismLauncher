@@ -53,7 +53,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAddMicrosoft"/>
-   <addaction name="actionAddMojang"/>
    <addaction name="actionAddOffline"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionRemove"/>
@@ -63,11 +62,6 @@
    <addaction name="actionUploadSkin"/>
    <addaction name="actionDeleteSkin"/>
   </widget>
-  <action name="actionAddMojang">
-   <property name="text">
-    <string>Add &amp;Mojang</string>
-   </property>
-  </action>
   <action name="actionRemove">
    <property name="text">
     <string>Remo&amp;ve</string>

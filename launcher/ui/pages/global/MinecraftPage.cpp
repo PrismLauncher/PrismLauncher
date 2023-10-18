@@ -2,7 +2,6 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
- *  Copyright (C) 2023 seth <getchoo at tuta dot io>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -115,13 +114,14 @@ void MinecraftPage::applySettings()
     s->set("ShowGameTime", ui->showGameTime->isChecked());
     s->set("ShowGlobalGameTime", ui->showGlobalGameTime->isChecked());
     s->set("RecordGameTime", ui->recordGameTime->isChecked());
+    s->set("ShowGameTimeWithoutDays", ui->showGameTimeWithoutDays->isChecked());
 
     // Miscellaneous
     s->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
     s->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
 
-    // Mod loader settings
-    s->set("DisableQuiltBeacon", ui->disableQuiltBeaconCheckBox->isChecked());
+    // Legacy settings
+    s->set("OnlineFixes", ui->onlineFixes->isChecked());
 }
 
 void MinecraftPage::loadSettings()
@@ -169,11 +169,12 @@ void MinecraftPage::loadSettings()
     ui->showGameTime->setChecked(s->get("ShowGameTime").toBool());
     ui->showGlobalGameTime->setChecked(s->get("ShowGlobalGameTime").toBool());
     ui->recordGameTime->setChecked(s->get("RecordGameTime").toBool());
+    ui->showGameTimeWithoutDays->setChecked(s->get("ShowGameTimeWithoutDays").toBool());
 
     ui->closeAfterLaunchCheck->setChecked(s->get("CloseAfterLaunch").toBool());
     ui->quitAfterGameStopCheck->setChecked(s->get("QuitAfterGameStop").toBool());
 
-    ui->disableQuiltBeaconCheckBox->setChecked(s->get("DisableQuiltBeacon").toBool());
+    ui->onlineFixes->setChecked(s->get("OnlineFixes").toBool());
 }
 
 void MinecraftPage::retranslate()

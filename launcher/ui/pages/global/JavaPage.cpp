@@ -185,6 +185,7 @@ void JavaPage::updateThresholds()
 {
     auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
     unsigned int maxMem = ui->maxMemSpinBox->value();
+    unsigned int minMem = ui->minMemSpinBox->value();
 
     QString iconName;
 
@@ -194,6 +195,9 @@ void JavaPage::updateThresholds()
     } else if (maxMem > (sysMiB * 0.9)) {
         iconName = "status-yellow";
         ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+    } else if (maxMem < minMem) {
+        iconName = "status-yellow";
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
     } else {
         iconName = "status-good";
         ui->labelMaxMemIcon->setToolTip("");
