@@ -4,6 +4,7 @@
 
 #include "ManagedPackPage.h"
 #include <QDesktopServices>
+#include <QSizePolicy>
 #include <QUrl>
 #include <QUrlQuery>
 #include "ui_ManagedPackPage.h"
@@ -143,7 +144,7 @@ QString ManagedPackPage::displayName() const
 {
     auto type = m_inst->getManagedPackType();
     if (type.isEmpty())
-        return {};
+        return "PrismPack";
     if (type == "flame")
         type = "CurseForge";
     return type.replace(0, 1, type[0].toUpper());
@@ -151,7 +152,8 @@ QString ManagedPackPage::displayName() const
 
 QIcon ManagedPackPage::icon() const
 {
-    return APPLICATION->getThemedIcon(m_inst->getManagedPackType());
+    auto type = m_inst->getManagedPackType();
+    return APPLICATION->getThemedIcon(type.isEmpty() ? "prismlauncher" : type);
 }
 
 QString ManagedPackPage::helpPage() const
@@ -471,8 +473,7 @@ void FlameManagedPackPage::parseManagedPack()
 
 QString FlameManagedPackPage::url() const
 {
-    // FIXME: We should display the websiteUrl field, but this requires doing the API request first :(
-    return {};
+    return "https://www.curseforge.com/projects/" + m_inst->getManagedPackID();
 }
 
 void FlameManagedPackPage::suggestVersion()
@@ -520,6 +521,50 @@ void FlameManagedPackPage::updateFromFile()
 {
     auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "CurseForge pack (*.zip)");
 
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", m_inst->getManagedPackID());
+    extra_info.insert("pack_version_id", QString());
+    extra_info.insert("original_instance_id", m_inst->id());
+
+    auto extracted = new InstanceImportTask(output, this, std::move(extra_info));
+
+    extracted->setName(m_inst->name());
+    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
+    extracted->setIcon(m_inst->iconKey());
+    extracted->setConfirmUpdate(false);
+
+    auto did_succeed = runUpdateTask(extracted);
+
+    if (m_instance_window && did_succeed)
+        m_instance_window->close();
+}
+
+// Generic
+bool GenericManagedPackPage::shouldDisplay() const
+{
+    return m_inst->getManagedPackType().isEmpty();
+};
+
+GenericManagedPackPage::GenericManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
+    : ManagedPackPage(inst, instance_window, parent)
+{
+    connect(ui->updateFromFileButton, &QPushButton::clicked, this, &GenericManagedPackPage::updateFromFile);
+
+    ui->changelogTextBrowser->setText(m_inst->notes());
+    ui->packName->setText(m_inst->name());
+    ui->packVersion->hide();
+    ui->packVersionLabel->hide();
+    ui->packOrigin->hide();
+    ui->packOriginLabel->hide();
+    ui->versionsComboBox->hide();
+    ui->updateButton->hide();
+    ui->updateToVersionLabel->hide();
+    ui->updateFromFileButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+}
+
+void GenericManagedPackPage::updateFromFile()
+{
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "Prism pack (*.mrpack *.zip)");
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", m_inst->getManagedPackID());
     extra_info.insert("pack_version_id", QString());
