@@ -144,7 +144,7 @@ QString ManagedPackPage::displayName() const
 {
     auto type = m_inst->getManagedPackType();
     if (type.isEmpty())
-        return "Generic";
+        return "Pack Manager";
     if (type == "flame")
         type = "CurseForge";
     return type.replace(0, 1, type[0].toUpper());
@@ -153,7 +153,7 @@ QString ManagedPackPage::displayName() const
 QIcon ManagedPackPage::icon() const
 {
     auto type = m_inst->getManagedPackType();
-    return APPLICATION->getThemedIcon(type.isEmpty() ? "prismlauncher" : type);
+    return APPLICATION->getThemedIcon(type.isEmpty() ? "checkupdate" : type);
 }
 
 QString ManagedPackPage::helpPage() const
