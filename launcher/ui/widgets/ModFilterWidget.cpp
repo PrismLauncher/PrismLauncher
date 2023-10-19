@@ -105,8 +105,7 @@ void ModFilterWidget::prepareBasicFilter()
     m_filter->loaders = loaders;
     auto def = m_instance->getPackProfile()->getComponentVersion("net.minecraft");
     m_filter->versions.push_front(Version{ def });
-    m_versions_proxy->setCurrentVersion(def);
-    ui->versionsCb->setCurrentIndex(m_versions_proxy->getVersion(def).row());
+    ui->versionsCb->setCheckedItems({ def });
 }
 
 void ModFilterWidget::onIncludeSnapshotsChanged()
@@ -119,9 +118,10 @@ void ModFilterWidget::onIncludeSnapshotsChanged()
 
 void ModFilterWidget::onVersionFilterChanged()
 {
-    auto version = ui->versionsCb->currentData(BaseVersionList::VersionIdRole).toString();
+    auto versions = ui->versionsCb->checkedItems();
     m_filter->versions.clear();
-    m_filter->versions.push_front(version);
+    for (auto version : versions)
+        m_filter->versions.push_back(version);
     m_filter_changed = true;
     emit filterChanged();
 }

@@ -1035,6 +1035,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/InstallLoaderDialog.h
 
     # GUI - widgets
+    ui/widgets/CheckComboBox.cpp
+    ui/widgets/CheckComboBox.h
     ui/widgets/Common.cpp
     ui/widgets/Common.h
     ui/widgets/CustomCommands.cpp
