@@ -5,7 +5,7 @@
 
 #include <QPushButton>
 
-ReviewMessageBox::ReviewMessageBox(QWidget* parent, QString const& title, QString const& icon)
+ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString const& title, [[maybe_unused]] QString const& icon)
     : QDialog(parent), ui(new Ui::ReviewMessageBox)
 {
     ui->setupUi(this);
@@ -76,6 +76,10 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
 
         itemTop->insertChildren(childIndx++, { requiredByItem });
     }
+
+    auto versionTypeItem = new QTreeWidgetItem(itemTop);
+    versionTypeItem->setText(0, tr("Version Type: %1").arg(info.version_type));
+    itemTop->insertChildren(childIndx++, { versionTypeItem });
 
     ui->modTreeWidget->addTopLevelItem(itemTop);
 }

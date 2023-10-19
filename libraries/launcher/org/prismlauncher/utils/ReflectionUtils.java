@@ -69,61 +69,6 @@ public final class ReflectionUtils {
     private static final ClassLoader LOADER = ClassLoader.getSystemClassLoader();
 
     /**
-     * Construct a Java applet by its class name.
-     *
-     * @param clazz The class name
-     * @return The applet instance
-     * @throws Throwable
-     */
-    public static Applet createAppletClass(String clazz) throws Throwable {
-        Class<?> appletClass = LOADER.loadClass(clazz);
-
-        MethodHandle appletConstructor = LOOKUP.findConstructor(appletClass, MethodType.methodType(void.class));
-        return (Applet) appletConstructor.invoke();
-    }
-
-    /**
-     * Best guess of the game directory field within net.minecraft.client.Minecraft.
-     * Designed for legacy versions - newer versions do not use a static field.
-     *
-     * @param clazz The class
-     * @return The first field matching criteria
-     */
-    public static Field findMinecraftGameDirField(Class<?> clazz) {
-        Log.debug("Resolving minecraft game directory field");
-
-        // search for private static File
-        for (Field field : clazz.getDeclaredFields()) {
-            if (field.getType() != File.class) {
-                continue;
-            }
-
-            int fieldModifiers = field.getModifiers();
-
-            if (!Modifier.isStatic(fieldModifiers)) {
-                Log.debug("Rejecting field " + field.getName() + " because it is not static");
-                continue;
-            }
-
-            if (!Modifier.isPrivate(fieldModifiers)) {
-                Log.debug("Rejecting field " + field.getName() + " because it is not private");
-                continue;
-            }
-
-            if (Modifier.isFinal(fieldModifiers)) {
-                Log.debug("Rejecting field " + field.getName() + " because it is final");
-                continue;
-            }
-
-            Log.debug("Identified field " + field.getName() + " to match conditions for game directory field");
-
-            return field;
-        }
-
-        return null;
-    }
-
-    /**
      * Gets the main method within a class.
      *
      * @param clazz The class

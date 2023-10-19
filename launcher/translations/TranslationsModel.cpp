@@ -206,7 +206,7 @@ void TranslationsModel::indexReceived()
         reloadLocalFiles();
 
         auto language = d->m_system_locale;
-        if (!findLanguage(language)) {
+        if (!findLanguageAsOptional(language).has_value()) {
             language = d->m_system_language;
         }
         selectLanguage(language);
@@ -228,12 +228,11 @@ void readIndex(const QString& path, QMap<QString, Language>& languages)
     QByteArray data;
     try {
         data = FS::read(path);
-    } catch (const Exception& e) {
+    } catch ([[maybe_unused]] const Exception& e) {
         qCritical() << "Translations Download Failed: index file not readable";
         return;
     }
 
-    int index = 1;
     try {
         auto toplevel_doc = Json::requireDocument(data);
         auto doc = Json::requireObject(toplevel_doc);
@@ -259,9 +258,8 @@ void readIndex(const QString& path, QMap<QString, Language>& languages)
             lang.file_size = Json::requireInteger(langObj, "size");
 
             languages.insert(lang.key, lang);
-            index++;
         }
-    } catch (Json::JsonException& e) {
+    } catch ([[maybe_unused]] Json::JsonException& e) {
         qCritical() << "Translations Download Failed: index file could not be parsed as json";
     }
 }
@@ -409,24 +407,27 @@ QVariant TranslationsModel::headerData(int section, Qt::Orientation orientation,
     return QAbstractListModel::headerData(section, orientation, role);
 }
 
-int TranslationsModel::rowCount(const QModelIndex& parent) const
+int TranslationsModel::rowCount([[maybe_unused]] const QModelIndex& parent) const
 {
     return d->m_languages.size();
 }
 
-int TranslationsModel::columnCount(const QModelIndex& parent) const
+int TranslationsModel::columnCount([[maybe_unused]] const QModelIndex& parent) const
 {
     return 2;
 }
 
-Language* TranslationsModel::findLanguage(const QString& key)
+QVector<Language>::Iterator TranslationsModel::findLanguage(const QString& key)
 {
-    auto found = std::find_if(d->m_languages.begin(), d->m_languages.end(), [&](Language& lang) { return lang.key == key; });
-    if (found == d->m_languages.end()) {
-        return nullptr;
-    } else {
-        return found;
-    }
+    return std::find_if(d->m_languages.begin(), d->m_languages.end(), [&](Language& lang) { return lang.key == key; });
+}
+
+std::optional<Language> TranslationsModel::findLanguageAsOptional(const QString& key)
+{
+    auto found = findLanguage(key);
+    if (found != d->m_languages.end())
+        return *found;
+    return {};
 }
 
 void TranslationsModel::setUseSystemLocale(bool useSystemLocale)
@@ -438,13 +439,13 @@ void TranslationsModel::setUseSystemLocale(bool useSystemLocale)
 bool TranslationsModel::selectLanguage(QString key)
 {
     QString& langCode = key;
-    auto langPtr = findLanguage(key);
+    auto langPtr = findLanguageAsOptional(key);
 
     if (langCode.isEmpty()) {
         d->no_language_set = true;
     }
 
-    if (!langPtr) {
+    if (!langPtr.has_value()) {
         qWarning() << "Selected invalid language" << key << ", defaulting to" << defaultLangCode;
         langCode = defaultLangCode;
     } else {
@@ -529,9 +530,8 @@ bool TranslationsModel::selectLanguage(QString key)
 QModelIndex TranslationsModel::selectedIndex()
 {
     auto found = findLanguage(d->m_selectedLanguage);
-    if (found) {
-        // QVector iterator freely converts to pointer to contained type
-        return index(found - d->m_languages.begin(), 0, QModelIndex());
+    if (found != d->m_languages.end()) {
+        return index(std::distance(d->m_languages.begin(), found), 0, QModelIndex());
     }
     return QModelIndex();
 }
@@ -564,8 +564,8 @@ void TranslationsModel::updateLanguage(QString key)
         qWarning() << "Cannot update builtin language" << key;
         return;
     }
-    auto found = findLanguage(key);
-    if (!found) {
+    auto found = findLanguageAsOptional(key);
+    if (!found.has_value()) {
         qWarning() << "Cannot update invalid language" << key;
         return;
     }
@@ -580,8 +580,8 @@ void TranslationsModel::downloadTranslation(QString key)
         d->m_nextDownload = key;
         return;
     }
-    auto lang = findLanguage(key);
-    if (!lang) {
+    auto lang = findLanguageAsOptional(key);
+    if (!lang.has_value()) {
         qWarning() << "Will not download an unknown translation" << key;
         return;
     }

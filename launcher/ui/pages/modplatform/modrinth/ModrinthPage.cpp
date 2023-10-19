@@ -46,11 +46,14 @@
 
 #include "ui/widgets/ProjectItem.h"
 
+#include "net/ApiDownload.h"
+
 #include <QComboBox>
 #include <QKeyEvent>
 #include <QPushButton>
 
-ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::ModrinthPage), dialog(dialog)
+ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
+    : QWidget(parent), ui(new Ui::ModrinthPage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
 
@@ -61,6 +64,17 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
+
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &ModrinthPage::triggerSearch);
+
+    m_fetch_progress.hideIfInactive(true);
+    m_fetch_progress.setFixedHeight(24);
+    m_fetch_progress.progressFormat("");
+
+    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
 
     ui->sortByBox->addItem(tr("Sort by Relevance"));
     ui->sortByBox->addItem(tr("Sort by Total Downloads"));
@@ -100,12 +114,17 @@ bool ModrinthPage::eventFilter(QObject* watched, QEvent* event)
             this->triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     }
     return QObject::eventFilter(watched, event);
 }
 
-void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
@@ -127,7 +146,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
 
         QString id = current.id;
 
-        netJob->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+        netJob->addNetAction(Net::ApiDownload::makeByteArray(QString("%1/project/%2").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
@@ -176,7 +195,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         QString id = current.id;
 
         netJob->addNetAction(
-            Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
+            Net::ApiDownload::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, id, curr] {
             if (id != current.id) {
@@ -198,12 +217,13 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
                 qDebug() << *response;
                 qWarning() << "Error while reading modrinth modpack version: " << e.cause();
             }
-
             for (auto version : current.versions) {
+                auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
                 if (!version.name.contains(version.version))
-                    ui->versionSelectionBox->addItem(QString("%1 — %2").arg(version.name, version.version), QVariant(version.id));
+                    ui->versionSelectionBox->addItem(QString("%1 — %2%3").arg(version.name, version.version, release_type),
+                                                     QVariant(version.id));
                 else
-                    ui->versionSelectionBox->addItem(version.name, QVariant(version.id));
+                    ui->versionSelectionBox->addItem(QString("%1%2").arg(version.name, release_type), QVariant(version.id));
             }
 
             QVariant current_updated;
@@ -307,11 +327,12 @@ void ModrinthPage::suggestCurrent()
 void ModrinthPage::triggerSearch()
 {
     m_model->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+    m_fetch_progress.watch(m_model->activeSearchJob().get());
 }
 
-void ModrinthPage::onVersionSelectionChanged(QString data)
+void ModrinthPage::onVersionSelectionChanged(QString version)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }

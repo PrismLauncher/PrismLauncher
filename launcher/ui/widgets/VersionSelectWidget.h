@@ -51,7 +51,6 @@ class VersionSelectWidget : public QWidget {
     Q_OBJECT
    public:
     explicit VersionSelectWidget(QWidget* parent);
-    explicit VersionSelectWidget(bool focusSearch = false, QWidget* parent = 0);
     ~VersionSelectWidget();
 
     //! loads the list if needed.
@@ -64,22 +63,26 @@ class VersionSelectWidget : public QWidget {
     BaseVersion::Ptr selectedVersion() const;
     void selectRecommended();
     void selectCurrent();
+    void selectSearch();
+    VersionListView* view();
 
     void setCurrentVersion(const QString& version);
     void setFuzzyFilter(BaseVersionList::ModelRoles role, QString filter);
     void setExactFilter(BaseVersionList::ModelRoles role, QString filter);
+    void setExactIfPresentFilter(BaseVersionList::ModelRoles role, QString filter);
     void setFilter(BaseVersionList::ModelRoles role, Filter* filter);
     void setEmptyString(QString emptyString);
     void setEmptyErrorString(QString emptyErrorString);
     void setEmptyMode(VersionListView::EmptyMode mode);
     void setResizeOn(int column);
+
     bool eventFilter(QObject* watched, QEvent* event) override;
 
    signals:
     void selectedVersionChanged(BaseVersion::Ptr version);
 
    protected:
-    virtual void closeEvent(QCloseEvent*);
+    virtual void closeEvent(QCloseEvent*) override;
 
    private slots:
     void onTaskSucceeded();
@@ -97,7 +100,6 @@ class VersionSelectWidget : public QWidget {
     int resizeOnColumn = 0;
     Task* loadTask;
     bool preselectedAlready = false;
-    bool focusSearch;
 
     QVBoxLayout* verticalLayout = nullptr;
     VersionListView* listView = nullptr;

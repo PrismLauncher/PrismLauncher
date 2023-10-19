@@ -61,6 +61,8 @@
 #include "meta/VersionList.h"
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
+#include "net/ApiDownload.h"
+#include "ui/pages/modplatform/OptionalModDialog.h"
 
 static const FlameAPI api;
 
@@ -283,7 +285,7 @@ QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, 
             // filter by minecraft version, if the loader depends on a certain version.
             // not all mod loaders depend on a given Minecraft version, so we won't do this
             // filtering for those loaders.
-            if (loaderType == "forge") {
+            if (loaderType == "forge" || loaderType == "neoforge") {
                 auto iter = std::find_if(reqs.begin(), reqs.end(), [mcVersion](const Meta::Require& req) {
                     return req.uid == "net.minecraft" && req.equalsVersion == mcVersion;
                 });
@@ -349,15 +351,19 @@ bool FlameCreationTask::createInstance()
 
     for (auto& loader : m_pack.minecraft.modLoaders) {
         auto id = loader.id;
-        if (id.startsWith("forge-")) {
+        if (id.startsWith("neoforge-")) {
+            id.remove("neoforge-");
+            loaderType = "neoforge";
+            loaderUid = "net.neoforged";
+        } else if (id.startsWith("forge-")) {
             id.remove("forge-");
             loaderType = "forge";
             loaderUid = "net.minecraftforge";
-        } else if (loaderType == "fabric") {
+        } else if (id.startsWith("fabric-")) {
             id.remove("fabric-");
             loaderType = "fabric";
             loaderUid = "net.fabricmc.fabric-loader";
-        } else if (loaderType == "quilt") {
+        } else if (id.startsWith("quilt-")) {
             id.remove("quilt-");
             loaderType = "quilt";
             loaderUid = "org.quiltmc.quilt-loader";
@@ -504,13 +510,33 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
 void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
 {
     m_files_job.reset(new NetJob(tr("Mod Download Flame"), APPLICATION->network()));
-    for (const auto& result : m_mod_id_resolver->getResults().files) {
-        QString filename = result.fileName;
+    auto results = m_mod_id_resolver->getResults().files;
+
+    QStringList optionalFiles;
+    for (auto& result : results) {
         if (!result.required) {
-            filename += ".disabled";
+            optionalFiles << FS::PathCombine(result.targetFolder, result.fileName);
+        }
+    }
+
+    QStringList selectedOptionalMods;
+    if (!optionalFiles.empty()) {
+        OptionalModDialog optionalModDialog(m_parent, optionalFiles);
+        if (optionalModDialog.exec() == QDialog::Rejected) {
+            emitAborted();
+            loop.quit();
+            return;
         }
 
-        auto relpath = FS::PathCombine("minecraft", result.targetFolder, filename);
+        selectedOptionalMods = optionalModDialog.getResult();
+    }
+    for (const auto& result : results) {
+        auto relpath = FS::PathCombine(result.targetFolder, result.fileName);
+        if (!result.required && !selectedOptionalMods.contains(relpath)) {
+            relpath += ".disabled";
+        }
+
+        relpath = FS::PathCombine("minecraft", relpath);
         auto path = FS::PathCombine(m_stagingPath, relpath);
 
         switch (result.type) {
@@ -523,7 +549,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
             case Flame::File::Type::Mod: {
                 if (!result.url.isEmpty()) {
                     qDebug() << "Will download" << result.url << "to" << path;
-                    auto dl = Net::Download::makeFile(result.url, path);
+                    auto dl = Net::ApiDownload::makeFile(result.url, path);
                     m_files_job->addNetAction(dl);
                 }
                 break;
@@ -542,7 +568,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     m_mod_id_resolver.reset();
     connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
         m_files_job.reset();
-        validateZIPResouces();
+        validateZIPResources();
     });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
@@ -591,7 +617,7 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     setAbortable(true);
 }
 
-void FlameCreationTask::validateZIPResouces()
+void FlameCreationTask::validateZIPResources()
 {
     qDebug() << "Validating whether resources stored as .zip are in the right place";
     for (auto [fileName, targetFolder] : m_ZIP_resources) {
@@ -644,8 +670,8 @@ void FlameCreationTask::validateZIPResouces()
                 validatePath(fileName, targetFolder, "datapacks");
                 break;
             case PackedResourceType::ShaderPack:
-                // in theroy flame API can't do this but who knows, that *may* change ?
-                // better to handle it if it *does* occure in the future
+                // in theory flame API can't do this but who knows, that *may* change ?
+                // better to handle it if it *does* occur in the future
                 validatePath(fileName, targetFolder, "shaderpacks");
                 break;
             case PackedResourceType::WorldSave:

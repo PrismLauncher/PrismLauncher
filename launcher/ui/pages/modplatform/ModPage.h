@@ -55,7 +55,7 @@ class ModPage : public ResourcePage {
 
     virtual auto validateVersion(ModPlatform::IndexedVersion& ver,
                                  QString mineVer,
-                                 std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const -> bool = 0;
+                                 std::optional<ModPlatform::ModLoaderTypes> loaders = {}) const -> bool = 0;
 
     [[nodiscard]] bool supportsFiltering() const override { return true; };
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }

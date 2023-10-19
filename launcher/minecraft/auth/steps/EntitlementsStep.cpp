@@ -36,7 +36,9 @@ void EntitlementsStep::rehydrate()
     // NOOP, for now. We only save bools and there's nothing to check.
 }
 
-void EntitlementsStep::onRequestDone(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers)
+void EntitlementsStep::onRequestDone([[maybe_unused]] QNetworkReply::NetworkError error,
+                                     QByteArray data,
+                                     [[maybe_unused]] QList<QNetworkReply::RawHeaderPair> headers)
 {
     auto requestor = qobject_cast<AuthRequest*>(QObject::sender());
     requestor->deleteLater();

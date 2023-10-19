@@ -62,6 +62,16 @@ class FileSystemException : public ::Exception {
 void write(const QString& filename, const QByteArray& data);
 
 /**
+ * append data to a file safely
+ */
+void appendSafe(const QString& filename, const QByteArray& data);
+
+/**
+ * append data to a file
+ */
+void append(const QString& filename, const QByteArray& data);
+
+/**
  * read data from a file safely\
  */
 QByteArray read(const QString& filename);
@@ -109,11 +119,16 @@ class copy : public QObject {
         m_whitelist = whitelist;
         return *this;
     }
+    copy& overwrite(const bool overwrite)
+    {
+        m_overwrite = overwrite;
+        return *this;
+    }
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    int totalCopied() { return m_copied; }
-    int totalFailed() { return m_failedPaths.length(); }
+    qsizetype totalCopied() { return m_copied; }
+    qsizetype totalFailed() { return m_failedPaths.length(); }
     QStringList failed() { return m_failedPaths; }
 
    signals:
@@ -128,9 +143,10 @@ class copy : public QObject {
     bool m_followSymlinks = true;
     const IPathMatcher* m_matcher = nullptr;
     bool m_whitelist = false;
+    bool m_overwrite = false;
     QDir m_src;
     QDir m_dst;
-    int m_copied;
+    qsizetype m_copied;
     QStringList m_failedPaths;
 };
 
@@ -474,8 +490,8 @@ class clone : public QObject {
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    int totalCloned() { return m_cloned; }
-    int totalFailed() { return m_failedClones.length(); }
+    qsizetype totalCloned() { return m_cloned; }
+    qsizetype totalFailed() { return m_failedClones.length(); }
 
     QList<QPair<QString, QString>> failed() { return m_failedClones; }
 
@@ -491,7 +507,7 @@ class clone : public QObject {
     bool m_whitelist = false;
     QDir m_src;
     QDir m_dst;
-    int m_cloned;
+    qsizetype m_cloned;
     QList<QPair<QString, QString>> m_failedClones;
 };
 

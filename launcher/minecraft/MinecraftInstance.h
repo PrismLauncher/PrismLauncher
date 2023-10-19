@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -70,6 +70,8 @@ class MinecraftInstance : public BaseInstance {
 
     bool canExport() const override { return true; }
 
+    void populateLaunchMenu(QMenu* menu) override;
+
     ////// Directories and files //////
     QString jarModsDir() const;
     QString resourcePacksDir() const;
@@ -127,6 +129,7 @@ class MinecraftInstance : public BaseInstance {
     /// get arguments passed to java
     QStringList javaArguments();
     QString getLauncher();
+    bool shouldApplyOnlineFixes();
 
     /// get variables for launch command variable substitution/environment
     QMap<QString, QString> getVariables() override;

@@ -51,8 +51,13 @@
 
 #include "Application.h"
 
+#include "Json.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
+#include "minecraft/mod/tasks/LocalModUpdateTask.h"
 #include "minecraft/mod/tasks/ModFolderLoadTask.h"
+#include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
 
 ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
@@ -62,6 +67,7 @@ ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool 
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::VERSION, SortType::DATE, SortType::PROVIDER };
     m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive,      QHeaderView::Stretch,
                               QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents };
+    m_columnsHideable = { false, true, false, true, true, true };
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
@@ -137,7 +143,7 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
     }
 }
 
-QVariant ModFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
         case Qt::DisplayRole:
@@ -227,6 +233,25 @@ bool ModFolderModel::deleteMods(const QModelIndexList& indexes)
     return true;
 }
 
+bool ModFolderModel::deleteModsMetadata(const QModelIndexList& indexes)
+{
+    if (indexes.isEmpty())
+        return true;
+
+    for (auto i : indexes) {
+        if (i.column() != 0) {
+            continue;
+        }
+        auto m = at(i.row());
+        auto index_dir = indexDir();
+        m->destroyMetadata(index_dir);
+    }
+
+    update();
+
+    return true;
+}
+
 bool ModFolderModel::isValid()
 {
     return m_dir.exists() && m_dir.isReadable();
@@ -307,4 +332,48 @@ void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)
         resource->finishResolvingWithDetails(std::move(result->details));
 
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
+}
+
+static const FlameAPI flameAPI;
+bool ModFolderModel::installMod(QString file_path, ModPlatform::IndexedVersion& vers)
+{
+    if (vers.addonId.isValid()) {
+        ModPlatform::IndexedPack pack{
+            vers.addonId,
+            ModPlatform::ResourceProvider::FLAME,
+        };
+
+        QEventLoop loop;
+
+        auto response = std::make_shared<QByteArray>();
+        auto job = flameAPI.getProject(vers.addonId.toString(), response);
+
+        QObject::connect(job.get(), &Task::failed, [&loop] { loop.quit(); });
+        QObject::connect(job.get(), &Task::aborted, &loop, &QEventLoop::quit);
+        QObject::connect(job.get(), &Task::succeeded, [response, this, &vers, &loop, &pack] {
+            QJsonParseError parse_error{};
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                qDebug() << *response;
+                return;
+            }
+            try {
+                auto obj = Json::requireObject(Json::requireObject(doc), "data");
+                FlameMod::loadIndexedPack(pack, obj);
+            } catch (const JSONValidationError& e) {
+                qDebug() << doc;
+                qWarning() << "Error while reading mod info: " << e.cause();
+            }
+            LocalModUpdateTask update_metadata(indexDir(), pack, vers);
+            QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);
+            update_metadata.start();
+        });
+
+        job->start();
+
+        loop.exec();
+    }
+    return ResourceFolderModel::installResource(file_path);
 }

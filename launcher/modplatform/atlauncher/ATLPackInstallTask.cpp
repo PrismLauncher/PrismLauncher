@@ -37,6 +37,7 @@
 #include "ATLPackInstallTask.h"
 
 #include <QtConcurrent>
+#include <algorithm>
 
 #include <quazip/quazip.h>
 
@@ -50,11 +51,15 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/PackProfile.h"
+#include "modplatform/atlauncher/ATLPackManifest.h"
 #include "net/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
 
+#include "net/ApiDownload.h"
+
 #include "Application.h"
 #include "BuildConfig.h"
+#include "ui/dialogs/BlockedModsDialog.h"
 
 namespace ATLauncher {
 
@@ -83,7 +88,7 @@ void PackInstallTask::executeTask()
     NetJob::Ptr netJob{ new NetJob("ATLauncher::VersionFetch", APPLICATION->network()) };
     auto searchUrl =
         QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "packs/%1/versions/%2/Configs.json").arg(m_pack_safe_name).arg(m_version_name);
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &PackInstallTask::onDownloadSucceeded);
     QObject::connect(netJob.get(), &NetJob::failed, this, &PackInstallTask::onDownloadFailed);
@@ -631,7 +636,7 @@ void PackInstallTask::installConfigs()
     auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", path);
     entry->setStale(true);
 
-    auto dl = Net::Download::makeCached(url, entry);
+    auto dl = Net::ApiDownload::makeCached(url, entry);
     if (!m_version.configs.sha1.isEmpty()) {
         auto rawSha1 = QByteArray::fromHex(m_version.configs.sha1.toLatin1());
         dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
@@ -715,6 +720,8 @@ void PackInstallTask::downloadMods()
 
     jarmods.clear();
     jobPtr.reset(new NetJob(tr("Mod download"), APPLICATION->network()));
+
+    QList<VersionMod> blocked_mods;
     for (const auto& mod : m_version.mods) {
         // skip non-client mods
         if (!mod.client)
@@ -729,9 +736,10 @@ void PackInstallTask::downloadMods()
             case DownloadType::Server:
                 url = BuildConfig.ATL_DOWNLOAD_SERVER_URL + mod.url;
                 break;
-            case DownloadType::Browser:
-                emitFailed(tr("Unsupported download type: %1").arg(mod.download_raw));
-                return;
+            case DownloadType::Browser: {
+                blocked_mods.append(mod);
+                continue;
+            }
             case DownloadType::Direct:
                 url = mod.url;
                 break;
@@ -748,7 +756,7 @@ void PackInstallTask::downloadMods()
             entry->setStale(true);
             modsToExtract.insert(entry->getFullPath(), mod);
 
-            auto dl = Net::Download::makeCached(url, entry);
+            auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
@@ -759,7 +767,7 @@ void PackInstallTask::downloadMods()
             entry->setStale(true);
             modsToDecomp.insert(entry->getFullPath(), mod);
 
-            auto dl = Net::Download::makeCached(url, entry);
+            auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
@@ -773,7 +781,7 @@ void PackInstallTask::downloadMods()
             auto entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", cacheName);
             entry->setStale(true);
 
-            auto dl = Net::Download::makeCached(url, entry);
+            auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
                 auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
                 dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
@@ -803,24 +811,86 @@ void PackInstallTask::downloadMods()
             modsToCopy[entry->getFullPath()] = path;
         }
     }
+    if (!blocked_mods.isEmpty()) {
+        QList<BlockedMod> mods;
+
+        for (auto mod : blocked_mods) {
+            BlockedMod blocked_mod;
+            blocked_mod.name = mod.file;
+            blocked_mod.websiteUrl = mod.url;
+            blocked_mod.hash = mod.md5;
+            blocked_mod.matched = false;
+            blocked_mod.localPath = "";
+
+            mods.append(blocked_mod);
+        }
+
+        qWarning() << "Blocked mods found, displaying mod list";
+
+        BlockedModsDialog message_dialog(nullptr, tr("Blocked mods found"),
+                                         tr("The following files are not available for download in third party launchers.<br/>"
+                                            "You will need to manually download them and add them to the instance."),
+                                         mods, "md5");
+
+        message_dialog.setModal(true);
+
+        if (message_dialog.exec()) {
+            qDebug() << "Post dialog blocked mods list: " << mods;
+            for (auto blocked : mods) {
+                if (!blocked.matched) {
+                    qDebug() << blocked.name << "was not matched to a local file, skipping copy";
+                    continue;
+                }
+                auto modIter = std::find_if(blocked_mods.begin(), blocked_mods.end(),
+                                            [blocked](const VersionMod& mod) { return mod.url == blocked.websiteUrl; });
+                if (modIter == blocked_mods.end())
+                    continue;
+                auto mod = *modIter;
+                if (mod.type == ModType::Extract || mod.type == ModType::TexturePackExtract || mod.type == ModType::ResourcePackExtract) {
+                    modsToExtract.insert(blocked.localPath, mod);
+                } else if (mod.type == ModType::Decomp) {
+                    modsToDecomp.insert(blocked.localPath, mod);
+                } else {
+                    auto relpath = getDirForModType(mod.type, mod.type_raw);
+                    if (relpath == Q_NULLPTR)
+                        continue;
+
+                    auto path = FS::PathCombine(m_stagingPath, "minecraft", relpath, mod.file);
+
+                    if (mod.type == ModType::Forge) {
+                        auto ver = getComponentVersion("net.minecraftforge", mod.version);
+                        if (ver) {
+                            componentsToInstall.insert("net.minecraftforge", ver);
+                            continue;
+                        }
+
+                        qDebug() << "Jarmod: " + path;
+                        jarmods.push_back(path);
+                    }
+
+                    if (mod.type == ModType::Jar) {
+                        qDebug() << "Jarmod: " + path;
+                        jarmods.push_back(path);
+                    }
+
+                    modsToCopy[blocked.localPath] = path;
+                }
+            }
+        } else {
+            emitFailed(tr("Unknown download type: %1").arg("browser"));
+            return;
+        }
+    }
 
     connect(jobPtr.get(), &NetJob::succeeded, this, &PackInstallTask::onModsDownloaded);
-    connect(jobPtr.get(), &NetJob::failed, [&](QString reason) {
-        abortable = false;
-        jobPtr.reset();
-        emitFailed(reason);
-    });
-    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
+    connect(jobPtr.get(), &NetJob::progress, [this](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         abortable = true;
         setProgress(current, total);
     });
     connect(jobPtr.get(), &NetJob::stepProgress, this, &PackInstallTask::propagateStepProgress);
-    connect(jobPtr.get(), &NetJob::aborted, [&] {
-        abortable = false;
-        jobPtr.reset();
-        emitAborted();
-    });
+    connect(jobPtr.get(), &NetJob::aborted, &PackInstallTask::emitAborted);
+    connect(jobPtr.get(), &NetJob::failed, &PackInstallTask::emitFailed);
 
     jobPtr->start();
 }
@@ -841,7 +911,7 @@ void PackInstallTask::onModsDownloaded()
             QtConcurrent::run(QThreadPool::globalInstance(), this, &PackInstallTask::extractMods, modsToExtract, modsToDecomp, modsToCopy);
 #endif
         connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onModsExtracted);
-        connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, [&]() { emitAborted(); });
+        connect(&m_modExtractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::emitAborted);
         m_modExtractFutureWatcher.setFuture(m_modExtractFuture);
     } else {
         install();
@@ -1003,15 +1073,30 @@ static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString&
     if (!vlist)
         return {};
 
-    if (!vlist->isLoaded())
-        vlist->load(Net::Mode::Online);
+    if (!vlist->isLoaded()) {
+        QEventLoop loadVersionLoop;
+        auto task = vlist->getLoadTask();
+        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+        if (!task->isRunning())
+            task->start();
+
+        loadVersionLoop.exec();
+    }
 
     auto ver = vlist->getVersion(version);
     if (!ver)
         return {};
 
-    if (!ver->isLoaded())
+    if (!ver->isLoaded()) {
+        QEventLoop loadVersionLoop;
         ver->load(Net::Mode::Online);
+        auto task = ver->getCurrentTask();
+        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+        if (!task->isRunning())
+            task->start();
+
+        loadVersionLoop.exec();
+    }
 
     return ver;
 }

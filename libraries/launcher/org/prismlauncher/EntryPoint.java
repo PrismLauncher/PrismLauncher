@@ -57,7 +57,7 @@ package org.prismlauncher;
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
-import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
+import org.prismlauncher.legacy.LegacyProxy;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.logging.Log;
 
@@ -110,6 +110,8 @@ public final class EntryPoint {
         String launcherType = params.getString("launcher");
 
         try {
+            LegacyProxy.applyOnlineFixes(params);
+
             Launcher launcher;
 
             switch (launcherType) {
@@ -118,7 +120,7 @@ public final class EntryPoint {
                     break;
 
                 case "legacy":
-                    launcher = new LegacyLauncher(params);
+                    launcher = LegacyProxy.createLauncher(params);
                     break;
 
                 default:

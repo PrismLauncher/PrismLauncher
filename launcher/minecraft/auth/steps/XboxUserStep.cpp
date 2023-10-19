@@ -38,7 +38,7 @@ void XboxUserStep::perform()
     QNetworkRequest request = QNetworkRequest(QUrl("https://user.auth.xboxlive.com/user/authenticate"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     request.setRawHeader("Accept", "application/json");
-    // set contract-verison header (prevent err 400 bad-request?)
+    // set contract-version header (prevent err 400 bad-request?)
     // https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/reference/live/rest/additional/httpstandardheaders
     request.setRawHeader("x-xbl-contract-version", "1");
 
