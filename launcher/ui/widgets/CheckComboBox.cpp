@@ -39,17 +39,17 @@ class CheckComboModel : public QIdentityProxyModel {
     virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const
     {
         if (role == Qt::CheckStateRole) {
-            auto txt = QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole).toString();
+            auto txt = QIdentityProxyModel::data(index, Qt::DisplayRole).toString();
             return checked.contains(txt) ? Qt::Checked : Qt::Unchecked;
         }
         if (role == Qt::DisplayRole)
-            return QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole);
+            return QIdentityProxyModel::data(index, Qt::DisplayRole);
         return {};
     }
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole)
     {
         if (role == Qt::CheckStateRole) {
-            auto txt = QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole).toString();
+            auto txt = QIdentityProxyModel::data(index, Qt::DisplayRole).toString();
             if (checked.contains(txt)) {
                 checked.removeOne(txt);
             } else {
@@ -72,11 +72,10 @@ class CheckComboModel : public QIdentityProxyModel {
 
 CheckComboBox::CheckComboBox(QWidget* parent) : QComboBox(parent), m_separator(",")
 {
-    // read-only contents
-    // QLineEdit* lineEdit = new QLineEdit(this);
-    // lineEdit->setReadOnly(false);
-    // setLineEdit(lineEdit);
-    // lineEdit->disconnect(this);
+    QLineEdit* lineEdit = new QLineEdit(this);
+    lineEdit->setReadOnly(false);
+    setLineEdit(lineEdit);
+    lineEdit->disconnect(this);
     setInsertPolicy(QComboBox::NoInsert);
 
     view()->installEventFilter(this);
@@ -150,7 +149,6 @@ bool CheckComboBox::eventFilter(QObject* receiver, QEvent* event)
                 showPopup();
                 return true;
             } else if (keyEvent->key() == Qt::Key_Enter || keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Escape) {
-                // it is important to call QComboBox implementation
                 QComboBox::hidePopup();
                 return (keyEvent->key() != Qt::Key_Escape);
             }

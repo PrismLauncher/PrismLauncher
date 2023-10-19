@@ -14,6 +14,20 @@ unique_qobject_ptr<ModFilterWidget> ModFilterWidget::create(MinecraftInstance* i
     return unique_qobject_ptr<ModFilterWidget>(new ModFilterWidget(instance, parent));
 }
 
+class VersionBasicModel : public QIdentityProxyModel {
+    Q_OBJECT
+
+   public:
+    explicit VersionBasicModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
+
+    virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
+    {
+        if (role == Qt::DisplayRole)
+            return QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole);
+        return {};
+    }
+};
+
 ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, QWidget* parent)
     : QTabWidget(parent), ui(new Ui::ModFilterWidget), m_instance(instance), m_filter(new Filter())
 {
@@ -21,7 +35,10 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, QWidget* parent)
 
     m_versions_proxy = new VersionProxyModel(this);
 
-    ui->versionsCb->setModel(m_versions_proxy);
+    auto proxy = new VersionBasicModel(this);
+    proxy->setSourceModel(m_versions_proxy);
+    ui->versionsCb->setModel(proxy);
+    ui->versionsCb->setSeparator("| ");
 
     m_versions_proxy->setFilter(BaseVersionList::TypeRole, new RegexpFilter("(release)", false));
 
@@ -178,3 +195,5 @@ void ModFilterWidget::onHideInstalledFilterChanged()
     else
         emit filterUnchanged();
 }
+
+#include "ModFilterWidget.moc"
