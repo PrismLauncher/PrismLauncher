@@ -63,7 +63,7 @@ import java.util.List;
 
 public final class StandardLauncher extends AbstractLauncher {
     private final boolean quickPlaySupported;
-  
+
     public StandardLauncher(Parameters params) {
         super(params);
 
