@@ -35,7 +35,6 @@
  */
 #include "ConcurrentTask.h"
 
-#include <QCoreApplication>
 #include <QDebug>
 #include "tasks/Task.h"
 
@@ -69,7 +68,7 @@ void ConcurrentTask::addTask(Task::Ptr task)
 
 void ConcurrentTask::executeTask()
 {
-    for (auto i = 0; i <= m_total_max_size; i++)
+    for (auto i = 0; i < m_total_max_size; i++)
         executeNextSubTask();
 }
 
@@ -133,8 +132,6 @@ void ConcurrentTask::executeNextSubTask()
     }
 
     startSubTask(m_queue.dequeue());
-
-    QCoreApplication::processEvents();
 }
 
 void ConcurrentTask::startSubTask(Task::Ptr next)
