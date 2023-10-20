@@ -127,21 +127,15 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
             if (column == ImageColumn) {
-                QSize size(32, 32);
-                auto icon = at(row)->icon(size, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
-                if (icon.isNull()) {
-                    QPixmap transparent_image(size);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-                    transparent_image.fill(QColorConstants::Transparent);
-#else
-                    transparent_image.fill(QColor(0, 0, 0, 0));
-#endif
-                    return transparent_image;
-                }
-                return icon;
+                return at(row)->icon({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }
             return {};
         }
+        case Qt::SizeHintRole:
+            if (column == ImageColumn) {
+                return QSize(32, 32);
+            }
+            return {};
         case Qt::CheckStateRole:
             switch (column) {
                 case ActiveColumn:

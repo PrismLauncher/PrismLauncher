@@ -117,6 +117,11 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
             }
             return m_resources[row]->internal_id();
         }
+        case Qt::SizeHintRole:
+            if (column == ImageColumn) {
+                return QSize(32, 32);
+            }
+            return {};
         case Qt::CheckStateRole:
             switch (column) {
                 case ActiveColumn:
