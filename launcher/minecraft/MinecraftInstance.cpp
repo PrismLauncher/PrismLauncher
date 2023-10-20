@@ -187,7 +187,7 @@ void MinecraftInstance::loadSpecificSettings()
         // Legacy-related options
         auto legacySettings = m_settings->registerSetting("OverrideLegacySettings", false);
         m_settings->registerOverride(global_settings->getSetting("OnlineFixes"), legacySettings);
-      
+
         m_settings->registerSetting("UseEnv", false);
         m_settings->registerSetting("OverrideEnv", false);
         m_settings->registerSetting("Env", QVariant(QMap<QString, QVariant>()));
