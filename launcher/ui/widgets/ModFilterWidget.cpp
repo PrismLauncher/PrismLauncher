@@ -289,10 +289,10 @@ void ModFilterWidget::setCategories(QList<ModPlatform::Category> categories)
     }
 }
 
-void ModFilterWidget::onCategoryClicked(QListWidgetItem* item)
+void ModFilterWidget::onCategoryClicked(QListWidgetItem* itm)
 {
-    if (item)
-        item->setCheckState(item->checkState() == Qt::Checked ? Qt::Unchecked : Qt::Checked);
+    if (itm)
+        itm->setCheckState(itm->checkState() == Qt::Checked ? Qt::Unchecked : Qt::Checked);
     m_filter->categoryIds.clear();
     for (auto i = 0; i < ui->categoriesList->count(); i++) {
         auto item = ui->categoriesList->item(i);
