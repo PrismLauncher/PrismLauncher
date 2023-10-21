@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="currentIndex">
-   <number>0</number>
+   <number>2</number>
   </property>
   <widget class="QWidget" name="VersionPage">
    <attribute name="title">
@@ -57,23 +57,10 @@
     <property name="sizeConstraint">
      <enum>QLayout::SetMinimumSize</enum>
     </property>
-    <item row="3" column="3">
-     <widget class="QCheckBox" name="liteLoaderCb">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
+    <item row="0" column="2">
+     <widget class="QCheckBox" name="fabricCb">
       <property name="text">
-       <string>LiteLoader</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QCheckBox" name="cauldronCb">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Cauldron</string>
+       <string>Fabric</string>
       </property>
      </widget>
     </item>
@@ -91,6 +78,16 @@
       </property>
      </widget>
     </item>
+    <item row="0" column="4">
+     <widget class="QCheckBox" name="cauldronCb">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string>Cauldron</string>
+      </property>
+     </widget>
+    </item>
     <item row="0" column="3">
      <widget class="QCheckBox" name="quiltCb">
       <property name="text">
@@ -98,10 +95,48 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
-     <widget class="QCheckBox" name="fabricCb">
+    <item row="0" column="5">
+     <widget class="QCheckBox" name="liteLoaderCb">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="text">
-       <string>Fabric</string>
+       <string>LiteLoader</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="ReleasePage">
+   <attribute name="title">
+    <string>Release type</string>
+   </attribute>
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <item>
+     <widget class="QCheckBox" name="releaseCb">
+      <property name="text">
+       <string>Release</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="betaCb">
+      <property name="text">
+       <string>Beta</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="alphaCb">
+      <property name="text">
+       <string>Alpha</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="unknownCb">
+      <property name="text">
+       <string>Unknown</string>
       </property>
      </widget>
     </item>
