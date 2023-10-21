@@ -71,6 +71,7 @@ class ModFolderModel : public ResourceFolderModel {
         SideColumn,
         LoadersColumn,
         McVersionsColumn,
+        ReleaseTypeColumn,
         NUM_COLUMNS
     };
     enum ModStatusAction { Disable, Enable, Toggle };

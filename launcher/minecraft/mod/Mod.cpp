@@ -47,6 +47,7 @@
 #include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
+#include "modplatform/ModIndex.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
@@ -130,6 +131,13 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
             auto compare_result = QString::compare(thisVersion, otherVersion, Qt::CaseInsensitive);
             if (compare_result != 0)
                 return { compare_result, type == SortType::MC_VERSIONS };
+            break;
+        }
+        case SortType::RELEASE_TYPE: {
+            if (releaseType() > cast_other->releaseType())
+                return { 1, type == SortType::RELEASE_TYPE };
+            else if (releaseType() < cast_other->releaseType())
+                return { -1, type == SortType::RELEASE_TYPE };
             break;
         }
     }
@@ -260,6 +268,13 @@ auto Mod::side() const -> Metadata::ModSide
     if (metadata())
         return metadata()->side;
     return Metadata::ModSide::UniversalSide;
+}
+
+auto Mod::releaseType() const -> ModPlatform::IndexedVersionType
+{
+    if (metadata())
+        return metadata()->releaseType;
+    return ModPlatform::IndexedVersionType::VersionType::Unknown;
 }
 
 auto Mod::loaders() const -> ModPlatform::ModLoaderTypes

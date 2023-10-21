@@ -117,6 +117,7 @@ auto V1::createModFormat([[maybe_unused]] QDir& index_dir, ModPlatform::IndexedP
     mod.loaders = mod_version.loaders;
     mod.mcVersions = mod_version.mcVersion;
     mod.mcVersions.sort();
+    mod.releaseType = mod_version.version_type;
 
     return mod;
 }
@@ -209,6 +210,7 @@ void V1::updateModIndex(QDir& index_dir, Mod& mod)
                                 { "side", sideToString(mod.side).toStdString() },
                                 { "loaders", loaders },
                                 { "mcVersions", mcVersions },
+                                { "releaseType", mod.releaseType.toString().toStdString() },
                                 { "download",
                                   toml::table{
                                       { "mode", mod.mode.toStdString() },
@@ -293,6 +295,7 @@ auto V1::getIndexForMod(QDir& index_dir, QString slug) -> Mod
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
         mod.side = stringToSide(stringEntry(table, "side"));
+        mod.releaseType = ModPlatform::IndexedVersionType(stringEntry(table, "releaseType"));
         if (auto loaders = table["loaders"]; loaders && loaders.is_array()) {
             for (auto&& loader : *loaders.as_array()) {
                 if (loader.is_string()) {

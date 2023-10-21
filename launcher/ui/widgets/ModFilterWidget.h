@@ -52,7 +52,7 @@ class ModFilterWidget : public QTabWidget {
     void prepareBasicFilter();
 
    private slots:
-    void onVersionFilterChanged();
+    void onVersionFilterChanged(int);
     void onVersionFilterTextChanged(QString version);
     void onReleaseFilterChanged();
     void onLoadersFilterChanged();

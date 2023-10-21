@@ -148,7 +148,7 @@ void ModFilterWidget::onIncludeSnapshotsChanged()
     m_versions_proxy->setFilter(BaseVersionList::TypeRole, new RegexpFilter(filter, false));
 }
 
-void ModFilterWidget::onVersionFilterChanged()
+void ModFilterWidget::onVersionFilterChanged(int)
 {
     auto versions = ui->versionsCb->checkedItems();
     m_filter->versions.clear();
