@@ -73,6 +73,7 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
 
     m_filter = m_filter_widget->getFilter();
 
+    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, &ResourcePage::updateVersionList);
     connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this,
             [&] { m_ui->searchButton->setStyleSheet("text-decoration: underline"); });
     connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this,
@@ -109,43 +110,6 @@ QMap<QString, QString> ModPage::urlHandlers() const
 }
 
 /******** Make changes to the UI ********/
-
-void ModPage::updateVersionList()
-{
-    m_ui->versionSelectionBox->clear();
-    auto packProfile = (dynamic_cast<MinecraftInstance&>(m_base_instance)).getPackProfile();
-
-    QString mcVersion = packProfile->getComponentVersion("net.minecraft");
-    auto loaders = packProfile->getSupportedModLoaders();
-    if (m_filter->loaders)
-        loaders = m_filter->loaders;
-
-    auto current_pack = getCurrentPack();
-    if (!current_pack)
-        return;
-    for (int i = 0; i < current_pack->versions.size(); i++) {
-        auto version = current_pack->versions[i];
-        bool valid = false;
-        for (auto& mcVer : m_filter->versions) {
-            if (validateVersion(version, mcVer.toString(), loaders)) {
-                valid = true;
-                break;
-            }
-        }
-
-        // Only add the version if it's valid or using the 'Any' filter, but never if the version is opted out
-        if ((valid || m_filter->versions.empty()) && !optedOut(version)) {
-            auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
-            m_ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(i));
-        }
-    }
-    if (m_ui->versionSelectionBox->count() == 0) {
-        m_ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1));
-        m_ui->resourceSelectionButton->setText(tr("Cannot select invalid version :("));
-    }
-
-    updateSelectionButton();
-}
 
 void ModPage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                 ModPlatform::IndexedVersion& version,

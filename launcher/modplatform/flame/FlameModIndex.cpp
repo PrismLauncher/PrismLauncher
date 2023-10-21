@@ -79,10 +79,6 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
-    QString mcVersion = profile->getComponentVersion("net.minecraft");
-    auto loaders = profile->getSupportedModLoaders();
-
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
@@ -90,8 +86,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         if (!file.addonId.isValid())
             file.addonId = pack.addonId;
 
-        if (file.fileId.isValid() &&
-            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
 

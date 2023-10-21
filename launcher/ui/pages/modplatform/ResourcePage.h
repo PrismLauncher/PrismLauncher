@@ -96,13 +96,6 @@ class ResourcePage : public QWidget, public BasePage {
     virtual QMap<QString, QString> urlHandlers() const = 0;
     virtual void openUrl(const QUrl&);
 
-    /** Whether the version is opted out or not. Currently only makes sense in CF. */
-    virtual bool optedOut(ModPlatform::IndexedVersion& ver) const
-    {
-        Q_UNUSED(ver);
-        return false;
-    };
-
    public:
     BaseInstance& m_base_instance;
 

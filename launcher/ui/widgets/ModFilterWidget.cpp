@@ -9,9 +9,9 @@
 #include "Application.h"
 #include "minecraft/PackProfile.h"
 
-unique_qobject_ptr<ModFilterWidget> ModFilterWidget::create(MinecraftInstance* instance, QWidget* parent)
+unique_qobject_ptr<ModFilterWidget> ModFilterWidget::create(MinecraftInstance* instance, bool extendedSupport, QWidget* parent)
 {
-    return unique_qobject_ptr<ModFilterWidget>(new ModFilterWidget(instance, parent));
+    return unique_qobject_ptr<ModFilterWidget>(new ModFilterWidget(instance, extendedSupport, parent));
 }
 
 class VersionBasicModel : public QIdentityProxyModel {
@@ -28,23 +28,33 @@ class VersionBasicModel : public QIdentityProxyModel {
     }
 };
 
-ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, QWidget* parent)
+ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extendedSupport, QWidget* parent)
     : QTabWidget(parent), ui(new Ui::ModFilterWidget), m_instance(instance), m_filter(new Filter())
 {
     ui->setupUi(this);
 
     m_versions_proxy = new VersionProxyModel(this);
+    m_versions_proxy->setFilter(BaseVersionList::TypeRole, new RegexpFilter("(release)", false));
 
     auto proxy = new VersionBasicModel(this);
     proxy->setSourceModel(m_versions_proxy);
-    ui->versionsCb->setModel(proxy);
-    ui->versionsCb->setSeparator("| ");
 
-    m_versions_proxy->setFilter(BaseVersionList::TypeRole, new RegexpFilter("(release)", false));
+    if (!extendedSupport) {
+        ui->versionsSimpleCb->setModel(proxy);
+        ui->versionsCb->hide();
+        ui->snapshotsCb->hide();
+        ui->envBox->hide();
+    } else {
+        ui->versionsCb->setSourceModel(proxy);
+        ui->versionsCb->setSeparator("| ");
+        ui->versionsSimpleCb->hide();
+    }
 
     ui->versionsCb->setStyleSheet("combobox-popup: 0;");
+    ui->versionsSimpleCb->setStyleSheet("combobox-popup: 0;");
     connect(ui->snapshotsCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onIncludeSnapshotsChanged);
     connect(ui->versionsCb, &QComboBox::currentIndexChanged, this, &ModFilterWidget::onVersionFilterChanged);
+    connect(ui->versionsSimpleCb, &QComboBox::currentTextChanged, this, &ModFilterWidget::onVersionFilterTextChanged);
 
     connect(ui->neoForgeCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
     connect(ui->forgeCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
@@ -60,6 +70,11 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, QWidget* parent)
     connect(ui->clientEnv, &QCheckBox::stateChanged, this, &ModFilterWidget::onSideFilterChanged);
 
     connect(ui->hide_installed, &QCheckBox::stateChanged, this, &ModFilterWidget::onHideInstalledFilterChanged);
+
+    connect(ui->releaseCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
+    connect(ui->betaCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
+    connect(ui->alphaCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
+    connect(ui->unknownCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
 
     setHidden(true);
     loadVersionList();
@@ -194,6 +209,33 @@ void ModFilterWidget::onHideInstalledFilterChanged()
         emit filterChanged();
     else
         emit filterUnchanged();
+}
+
+void ModFilterWidget::onReleaseFilterChanged()
+{
+    std::list<ModPlatform::IndexedVersionType> releases;
+    if (ui->releaseCb->isChecked())
+        releases.push_back(ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::VersionType::Release));
+    if (ui->betaCb->isChecked())
+        releases.push_back(ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::VersionType::Beta));
+    if (ui->alphaCb->isChecked())
+        releases.push_back(ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::VersionType::Alpha));
+    if (ui->unknownCb->isChecked())
+        releases.push_back(ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::VersionType::Unknown));
+    m_filter_changed = releases != m_filter->releases;
+    m_filter->releases = releases;
+    if (m_filter_changed)
+        emit filterChanged();
+    else
+        emit filterUnchanged();
+}
+
+void ModFilterWidget::onVersionFilterTextChanged(QString version)
+{
+    m_filter->versions.clear();
+    m_filter->versions.push_front(version);
+    m_filter_changed = true;
+    emit filterChanged();
 }
 
 #include "ModFilterWidget.moc"

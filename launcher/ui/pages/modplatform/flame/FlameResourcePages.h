@@ -94,12 +94,8 @@ class FlameModPage : public ModPage {
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
-    bool validateVersion(ModPlatform::IndexedVersion& ver,
-                         QString mineVer,
-                         std::optional<ModPlatform::ModLoaderTypes> loaders = {}) const override;
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
-
     void openUrl(const QUrl& url) override;
+    unique_qobject_ptr<ModFilterWidget> createFilterWidget() override;
 };
 
 class FlameResourcePackPage : public ResourcePackResourcePage {
@@ -123,8 +119,6 @@ class FlameResourcePackPage : public ResourcePackResourcePage {
     [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
-
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     void openUrl(const QUrl& url) override;
 };
@@ -151,8 +145,6 @@ class FlameTexturePackPage : public TexturePackResourcePage {
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
 
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
-
     void openUrl(const QUrl& url) override;
 };
 
@@ -177,8 +169,6 @@ class FlameShaderPackPage : public ShaderPackResourcePage {
     [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
-
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     void openUrl(const QUrl& url) override;
 };

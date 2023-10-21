@@ -84,7 +84,7 @@ CheckComboBox::CheckComboBox(QWidget* parent) : QComboBox(parent), m_separator("
     this->installEventFilter(this);
 }
 
-void CheckComboBox::setModel(QAbstractItemModel* new_model)
+void CheckComboBox::setSourceModel(QAbstractItemModel* new_model)
 {
     auto proxy = new CheckComboModel(this);
     proxy->setSourceModel(new_model);

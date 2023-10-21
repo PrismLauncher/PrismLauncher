@@ -44,11 +44,6 @@
 
 namespace ResourceDownload {
 
-static bool isOptedOut(ModPlatform::IndexedVersion const& ver)
-{
-    return ver.downloadUrl.isEmpty();
-}
-
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
     m_model = new FlameModModel(instance);
@@ -64,19 +59,6 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : 
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameModPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
-}
-
-auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver,
-                                   QString mineVer,
-                                   std::optional<ModPlatform::ModLoaderTypes> loaders) const -> bool
-{
-    return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty() &&
-           (!loaders.has_value() || !ver.loaders || loaders.value() & ver.loaders);
-}
-
-bool FlameModPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
 }
 
 void FlameModPage::openUrl(const QUrl& url)
@@ -113,11 +95,6 @@ FlameResourcePackPage::FlameResourcePackPage(ResourcePackDownloadDialog* dialog,
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-bool FlameResourcePackPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
-}
-
 void FlameResourcePackPage::openUrl(const QUrl& url)
 {
     if (url.scheme().isEmpty()) {
@@ -150,11 +127,6 @@ FlameTexturePackPage::FlameTexturePackPage(TexturePackDownloadDialog* dialog, Ba
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameTexturePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
-}
-
-bool FlameTexturePackPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
 }
 
 void FlameTexturePackPage::openUrl(const QUrl& url)
@@ -191,11 +163,6 @@ FlameShaderPackPage::FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseI
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-bool FlameShaderPackPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
-}
-
 void FlameShaderPackPage::openUrl(const QUrl& url)
 {
     if (url.scheme().isEmpty()) {
@@ -230,6 +197,11 @@ auto FlameTexturePackPage::shouldDisplay() const -> bool
 auto FlameShaderPackPage::shouldDisplay() const -> bool
 {
     return true;
+}
+
+unique_qobject_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
+{
+    return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_base_instance), false, this);
 }
 
 }  // namespace ResourceDownload

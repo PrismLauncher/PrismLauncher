@@ -56,6 +56,18 @@ class ModrinthAPI : public NetworkResourceAPI {
         return l.join(',');
     }
 
+    static auto getSideFilters(QString side) -> const QString
+    {
+        if (side.isEmpty() || side == "both") {
+            return {};
+        }
+        if (side == "client")
+            return QString("\"client_side:required\",\"client_side:optional\"");
+        if (side == "server")
+            return QString("\"server_side:required\",\"server_side:optional\"");
+        return {};
+    }
+
    private:
     [[nodiscard]] static QString resourceTypeParameter(ModPlatform::ResourceType type)
     {
@@ -73,6 +85,7 @@ class ModrinthAPI : public NetworkResourceAPI {
 
         return "";
     }
+
     [[nodiscard]] QString createFacets(SearchArgs const& args) const
     {
         QStringList facets_list;
@@ -81,6 +94,11 @@ class ModrinthAPI : public NetworkResourceAPI {
             facets_list.append(QString("[%1]").arg(getModLoaderFilters(args.loaders.value())));
         if (args.versions.has_value())
             facets_list.append(QString("[%1]").arg(getGameVersionsArray(args.versions.value())));
+        if (args.side.has_value()) {
+            auto side = getSideFilters(args.side.value());
+            if (!side.isEmpty())
+                facets_list.append(QString("[%1]").arg(side));
+        }
         facets_list.append(QString("[\"project_type:%1\"]").arg(resourceTypeParameter(args.type)));
 
         return QString("[%1]").arg(facets_list.join(','));

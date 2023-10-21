@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>460</width>
     <height>127</height>
    </rect>
   </property>
@@ -17,13 +17,20 @@
    </sizepolicy>
   </property>
   <property name="currentIndex">
-   <number>2</number>
+   <number>0</number>
   </property>
   <widget class="QWidget" name="VersionPage">
    <attribute name="title">
     <string>Minecraft versions</string>
    </attribute>
    <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="1">
+     <widget class="QCheckBox" name="snapshotsCb">
+      <property name="text">
+       <string>Include Snapshots</string>
+      </property>
+     </widget>
+    </item>
     <item row="1" column="0">
      <widget class="CheckComboBox" name="versionsCb">
       <property name="sizePolicy">
@@ -40,12 +47,8 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QCheckBox" name="snapshotsCb">
-      <property name="text">
-       <string>Include Snapshots</string>
-      </property>
-     </widget>
+    <item row="2" column="0">
+     <widget class="QComboBox" name="versionsSimpleCb"/>
     </item>
    </layout>
   </widget>

@@ -28,7 +28,7 @@ class CheckComboBox : public QComboBox {
     explicit CheckComboBox(QWidget* parent = nullptr);
     virtual ~CheckComboBox() = default;
 
-    virtual void hidePopup() override;
+    void hidePopup() override;
 
     QString defaultText() const;
     void setDefaultText(const QString& text);
@@ -41,7 +41,7 @@ class CheckComboBox : public QComboBox {
 
     QStringList checkedItems() const;
 
-    virtual void setModel(QAbstractItemModel* model) override;
+    void setSourceModel(QAbstractItemModel* model);
 
    public slots:
     void setCheckedItems(const QStringList& items);

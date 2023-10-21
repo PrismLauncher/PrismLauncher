@@ -73,6 +73,7 @@ class ResourceAPI {
         std::optional<SortingMethod> sorting;
         std::optional<ModPlatform::ModLoaderTypes> loaders;
         std::optional<std::list<Version> > versions;
+        std::optional<QString> side;
     };
     struct SearchCallbacks {
         std::function<void(QJsonDocument&)> on_succeed;

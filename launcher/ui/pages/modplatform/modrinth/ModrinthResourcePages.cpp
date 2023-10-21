@@ -63,13 +63,6 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instan
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver,
-                                      QString mineVer,
-                                      std::optional<ModPlatform::ModLoaderTypes> loaders) const -> bool
-{
-    return ver.mcVersion.contains(mineVer) && (!loaders.has_value() || !ver.loaders || loaders.value() & ver.loaders);
-}
-
 ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePackResourcePage(dialog, instance)
 {
@@ -144,4 +137,8 @@ auto ModrinthShaderPackPage::shouldDisplay() const -> bool
     return true;
 }
 
+unique_qobject_ptr<ModFilterWidget> ModrinthModPage::createFilterWidget()
+{
+    return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_base_instance), true, this);
+}
 }  // namespace ResourceDownload
