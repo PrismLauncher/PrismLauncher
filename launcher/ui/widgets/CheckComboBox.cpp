@@ -17,17 +17,15 @@
  */
 
 #include "CheckComboBox.h"
-#include <qboxlayout.h>
-#include <qcontainerfwd.h>
-#include <qlistview.h>
 
 #include <QAbstractItemView>
+#include <QBoxLayout>
 #include <QEvent>
 #include <QIdentityProxyModel>
 #include <QKeyEvent>
 #include <QLineEdit>
+#include <QListView>
 #include <QStringList>
-#include "BaseVersionList.h"
 
 class CheckComboModel : public QIdentityProxyModel {
     Q_OBJECT

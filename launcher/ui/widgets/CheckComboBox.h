@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <qlineedit.h>
 #include <QComboBox>
+#include <QLineEdit>
 
 class CheckComboBox : public QComboBox {
     Q_OBJECT
