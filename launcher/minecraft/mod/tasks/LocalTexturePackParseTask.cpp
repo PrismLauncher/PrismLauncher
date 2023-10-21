@@ -189,8 +189,6 @@ bool processPackPNG(const TexturePack& pack)
             return false;
         }
         case ResourceType::ZIPFILE: {
-            Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
-
             QuaZip zip(pack.fileinfo().filePath());
             if (!zip.open(QuaZip::mdUnzip))
                 return false;  // can't open zip file

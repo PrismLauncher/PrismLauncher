@@ -235,8 +235,6 @@ bool processPackPNG(const ResourcePack& pack)
             return false;  // not processed correctly; https://github.com/PrismLauncher/PrismLauncher/issues/1740
         }
         case ResourceType::ZIPFILE: {
-            Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
-
             QuaZip zip(pack.fileinfo().filePath());
             if (!zip.open(QuaZip::mdUnzip))
                 return false;  // can't open zip file
