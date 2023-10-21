@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QButtonGroup>
+#include <QList>
+#include <QListWidgetItem>
 #include <QTabWidget>
 
 #include "Version.h"
@@ -26,11 +28,12 @@ class ModFilterWidget : public QTabWidget {
         ModPlatform::ModLoaderTypes loaders;
         QString side;
         bool hideInstalled;
+        QStringList categoryIds;
 
         bool operator==(const Filter& other) const
         {
             return hideInstalled == other.hideInstalled && side == other.side && loaders == other.loaders && versions == other.versions &&
-                   releases == other.releases;
+                   releases == other.releases && categoryIds == other.categoryIds;
         }
         bool operator!=(const Filter& other) const { return !(*this == other); }
     };
@@ -44,6 +47,9 @@ class ModFilterWidget : public QTabWidget {
    signals:
     void filterChanged();
     void filterUnchanged();
+
+   public slots:
+    void setCategories(QList<ModPlatform::Category>);
 
    private:
     ModFilterWidget(MinecraftInstance* instance, bool extendedSupport, QWidget* parent = nullptr);
@@ -59,6 +65,7 @@ class ModFilterWidget : public QTabWidget {
     void onSideFilterChanged();
     void onHideInstalledFilterChanged();
     void onIncludeSnapshotsChanged();
+    void onCategoryClicked(QListWidgetItem* item);
 
    private:
     Ui::ModFilterWidget* ui;
@@ -69,4 +76,6 @@ class ModFilterWidget : public QTabWidget {
 
     Meta::VersionList::Ptr m_version_list;
     VersionProxyModel* m_versions_proxy = nullptr;
+
+    QList<ModPlatform::Category> m_categories;
 };

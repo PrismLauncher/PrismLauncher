@@ -61,6 +61,8 @@ class ModPage : public ResourcePage {
    protected:
     ModPage(ModDownloadDialog* dialog, BaseInstance& instance);
 
+    virtual void prepareProviderCategories(){};
+
    protected slots:
     virtual void filterMods();
     void triggerSearch() override;

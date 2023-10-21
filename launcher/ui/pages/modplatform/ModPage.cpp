@@ -78,6 +78,7 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
             [&] { m_ui->searchButton->setStyleSheet("text-decoration: underline"); });
     connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this,
             [&] { m_ui->searchButton->setStyleSheet("text-decoration: none"); });
+    prepareProviderCategories();
 }
 
 /******** Callbacks to events in the UI (set up in the derived classes) ********/

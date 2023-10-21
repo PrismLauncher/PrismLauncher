@@ -25,6 +25,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
     Q_ASSERT(m_filter);
 
     std::optional<std::list<Version>> versions{};
+    std::optional<QStringList> categories{};
     auto loaders = profile->getSupportedModLoaders();
 
     // Version filter
@@ -32,11 +33,13 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
         versions = m_filter->versions;
     if (m_filter->loaders)
         loaders = m_filter->loaders;
+    if (!m_filter->categoryIds.empty())
+        categories = m_filter->categoryIds;
     auto side = m_filter->side;
 
     auto sort = getCurrentSortingMethodByIndex();
 
-    return { ModPlatform::ResourceType::MOD, m_next_search_offset, m_search_term, sort, loaders, versions, side };
+    return { ModPlatform::ResourceType::MOD, m_next_search_offset, m_search_term, sort, loaders, versions, side, categories };
 }
 
 ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& entry)

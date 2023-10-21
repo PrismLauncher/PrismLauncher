@@ -37,6 +37,10 @@
  */
 
 #include "FlameResourcePages.h"
+#include <QList>
+#include <memory>
+#include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui_ResourcePage.h"
 
 #include "FlameResourceModels.h"
@@ -204,4 +208,14 @@ unique_qobject_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
     return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_base_instance), false, this);
 }
 
+void FlameModPage::prepareProviderCategories()
+{
+    auto response = std::make_shared<QByteArray>();
+    auto task = FlameAPI::getModCategories(response);
+    QObject::connect(task.get(), &Task::succeeded, [this, response]() {
+        auto categories = FlameAPI::loadModCategories(response);
+        m_filter_widget->setCategories(categories);
+    });
+    task->start();
+};
 }  // namespace ResourceDownload

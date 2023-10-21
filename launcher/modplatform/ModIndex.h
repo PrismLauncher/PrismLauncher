@@ -191,6 +191,11 @@ constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
     return x && !(x & (x - 1));
 }
 
+struct Category {
+    QString name;
+    QString id;
+};
+
 }  // namespace ModPlatform
 
 Q_DECLARE_METATYPE(ModPlatform::IndexedPack)

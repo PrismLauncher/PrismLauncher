@@ -94,6 +94,9 @@ class ModrinthModPage : public ModPage {
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
     unique_qobject_ptr<ModFilterWidget> createFilterWidget() override;
+
+   protected:
+    virtual void prepareProviderCategories() override;
 };
 
 class ModrinthResourcePackPage : public ResourcePackResourcePage {

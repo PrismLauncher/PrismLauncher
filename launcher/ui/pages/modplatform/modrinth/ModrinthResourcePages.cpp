@@ -141,4 +141,15 @@ unique_qobject_ptr<ModFilterWidget> ModrinthModPage::createFilterWidget()
 {
     return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_base_instance), true, this);
 }
+
+void ModrinthModPage::prepareProviderCategories()
+{
+    auto response = std::make_shared<QByteArray>();
+    auto task = ModrinthAPI::getModCategories(response);
+    QObject::connect(task.get(), &Task::succeeded, [this, response]() {
+        auto categories = ModrinthAPI::loadModCategories(response);
+        m_filter_widget->setCategories(categories);
+    });
+    task->start();
+};
 }  // namespace ResourceDownload

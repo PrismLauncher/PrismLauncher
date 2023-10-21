@@ -30,6 +30,9 @@ class ModrinthAPI : public NetworkResourceAPI {
 
     Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
 
+    static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
+    static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
+
    public:
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
@@ -52,6 +55,15 @@ class ModrinthAPI : public NetworkResourceAPI {
         QStringList l;
         for (auto loader : getModLoaderStrings(types)) {
             l << QString("\"categories:%1\"").arg(loader);
+        }
+        return l.join(',');
+    }
+
+    static auto getCategoriesFilters(QStringList categories) -> const QString
+    {
+        QStringList l;
+        for (auto cat : categories) {
+            l << QString("\"categories:%1\"").arg(cat);
         }
         return l.join(',');
     }
@@ -99,6 +111,9 @@ class ModrinthAPI : public NetworkResourceAPI {
             if (!side.isEmpty())
                 facets_list.append(QString("[%1]").arg(side));
         }
+        if (args.categoryIds.has_value() && !args.categoryIds->empty())
+            facets_list.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
+
         facets_list.append(QString("[\"project_type:%1\"]").arg(resourceTypeParameter(args.type)));
 
         return QString("[%1]").arg(facets_list.join(','));

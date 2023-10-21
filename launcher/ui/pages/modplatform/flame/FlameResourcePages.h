@@ -96,6 +96,9 @@ class FlameModPage : public ModPage {
 
     void openUrl(const QUrl& url) override;
     unique_qobject_ptr<ModFilterWidget> createFilterWidget() override;
+
+   protected:
+    virtual void prepareProviderCategories() override;
 };
 
 class FlameResourcePackPage : public ResourcePackResourcePage {

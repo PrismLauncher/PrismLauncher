@@ -1,6 +1,8 @@
 #include "ModFilterWidget.h"
-#include <qcheckbox.h>
-#include <qcombobox.h>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QListWidget>
+#include <algorithm>
 #include "BaseVersionList.h"
 #include "meta/Index.h"
 #include "modplatform/ModIndex.h"
@@ -75,6 +77,8 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extendedSuppo
     connect(ui->betaCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
     connect(ui->alphaCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
     connect(ui->unknownCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onReleaseFilterChanged);
+
+    connect(ui->categoriesList, &QListWidget::itemClicked, this, &ModFilterWidget::onCategoryClicked);
 
     setHidden(true);
     loadVersionList();
@@ -237,5 +241,34 @@ void ModFilterWidget::onVersionFilterTextChanged(QString version)
     m_filter_changed = true;
     emit filterChanged();
 }
+
+void ModFilterWidget::setCategories(QList<ModPlatform::Category> categories)
+{
+    ui->categoriesList->clear();
+    m_categories = categories;
+    for (auto cat : categories) {
+        auto item = new QListWidgetItem(cat.name, ui->categoriesList);
+        item->setFlags(item->flags() & (~Qt::ItemIsUserCheckable));
+        item->setCheckState(Qt::Unchecked);
+        ui->categoriesList->addItem(item);
+    }
+}
+
+void ModFilterWidget::onCategoryClicked(QListWidgetItem* item)
+{
+    if (item)
+        item->setCheckState(item->checkState() == Qt::Checked ? Qt::Unchecked : Qt::Checked);
+    m_filter->categoryIds.clear();
+    for (auto i = 0; i < ui->categoriesList->count(); i++) {
+        auto item = ui->categoriesList->item(i);
+        if (item->checkState() == Qt::Checked) {
+            auto c = std::find_if(m_categories.cbegin(), m_categories.cend(), [item](auto v) { return v.name == item->text(); });
+            if (c != m_categories.cend())
+                m_filter->categoryIds << c->id;
+        }
+    }
+    m_filter_changed = true;
+    emit filterChanged();
+};
 
 #include "ModFilterWidget.moc"
