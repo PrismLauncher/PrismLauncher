@@ -45,6 +45,14 @@ static ModPlatform::ModLoaderTypes mcLoaders(BaseInstance* inst)
     return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value();
 }
 
+static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDependency> sel,
+                              Version mcVersion,
+                              ModPlatform::ModLoaderTypes loaders)
+{
+    return (sel->pack->versions.isEmpty() || sel->version.mcVersion.contains(mcVersion.toString())) &&
+           (!loaders || !sel->version.loaders || sel->version.loaders & loaders);
+}
+
 GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
                                                BaseInstance* instance,
                                                ModFolderModel* folder,
@@ -67,9 +75,10 @@ GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
 void GetModDependenciesTask::prepare()
 {
     for (auto sel : m_selected) {
-        for (auto dep : getDependenciesForVersion(sel->version, sel->pack->provider)) {
-            addTask(prepareDependencyTask(dep, sel->pack->provider, 20));
-        }
+        if (checkDependencies(sel, m_version, m_loaderType))
+            for (auto dep : getDependenciesForVersion(sel->version, sel->pack->provider)) {
+                addTask(prepareDependencyTask(dep, sel->pack->provider, 20));
+            }
     }
 }
 

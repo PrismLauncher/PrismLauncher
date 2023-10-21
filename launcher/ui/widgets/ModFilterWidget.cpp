@@ -53,7 +53,7 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extendedSuppo
     ui->versionsCb->setStyleSheet("combobox-popup: 0;");
     ui->versionsSimpleCb->setStyleSheet("combobox-popup: 0;");
     connect(ui->snapshotsCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onIncludeSnapshotsChanged);
-    connect(ui->versionsCb, &QComboBox::currentIndexChanged, this, &ModFilterWidget::onVersionFilterChanged);
+    connect(ui->versionsCb, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModFilterWidget::onVersionFilterChanged);
     connect(ui->versionsSimpleCb, &QComboBox::currentTextChanged, this, &ModFilterWidget::onVersionFilterTextChanged);
 
     connect(ui->neoForgeCb, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
