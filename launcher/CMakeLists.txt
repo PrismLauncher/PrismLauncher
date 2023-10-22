@@ -139,6 +139,7 @@ set(NET_SOURCES
     net/HeaderProxy.h
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
+    net/StaticHeaderProxy.h
     net/ApiDownload.h
     net/ApiDownload.cpp
     net/ApiUpload.cpp
@@ -181,6 +182,11 @@ set(MAC_UPDATE_SOURCES
     updater/MacSparkleUpdater.mm
 )
 
+set(PRISM_UPDATE_SOURCES
+    updater/PrismExternalUpdater.h
+    updater/PrismExternalUpdater.cpp
+)
+
 # Backend for the news bar... there's usually no news.
 set(NEWS_SOURCES
     # News System
@@ -216,13 +222,9 @@ set(MINECRAFT_SOURCES
     minecraft/auth/MinecraftAccount.h
     minecraft/auth/Parsers.cpp
     minecraft/auth/Parsers.h
-    minecraft/auth/Yggdrasil.cpp
-    minecraft/auth/Yggdrasil.h
 
     minecraft/auth/flows/AuthFlow.cpp
     minecraft/auth/flows/AuthFlow.h
-    minecraft/auth/flows/Mojang.cpp
-    minecraft/auth/flows/Mojang.h
     minecraft/auth/flows/MSA.cpp
     minecraft/auth/flows/MSA.h
     minecraft/auth/flows/Offline.cpp
@@ -236,12 +238,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/steps/GetSkinStep.h
     minecraft/auth/steps/LauncherLoginStep.cpp
     minecraft/auth/steps/LauncherLoginStep.h
-    minecraft/auth/steps/MigrationEligibilityStep.cpp
-    minecraft/auth/steps/MigrationEligibilityStep.h
     minecraft/auth/steps/MinecraftProfileStep.cpp
     minecraft/auth/steps/MinecraftProfileStep.h
-    minecraft/auth/steps/MinecraftProfileStepMojang.cpp
-    minecraft/auth/steps/MinecraftProfileStepMojang.h
     minecraft/auth/steps/MSAStep.cpp
     minecraft/auth/steps/MSAStep.h
     minecraft/auth/steps/XboxAuthorizationStep.cpp
@@ -250,8 +248,6 @@ set(MINECRAFT_SOURCES
     minecraft/auth/steps/XboxProfileStep.h
     minecraft/auth/steps/XboxUserStep.cpp
     minecraft/auth/steps/XboxUserStep.h
-    minecraft/auth/steps/YggdrasilStep.cpp
-    minecraft/auth/steps/YggdrasilStep.h
 
     minecraft/gameoptions/GameOptions.h
     minecraft/gameoptions/GameOptions.cpp
@@ -589,6 +585,63 @@ set(LINKEXE_SOURCES
     DesktopServices.cpp
 )
 
+set(PRISMUPDATER_SOURCES
+    updater/prismupdater/PrismUpdater.h
+    updater/prismupdater/PrismUpdater.cpp
+    updater/prismupdater/UpdaterDialogs.h
+    updater/prismupdater/UpdaterDialogs.cpp
+    updater/prismupdater/GitHubRelease.h
+    updater/prismupdater/GitHubRelease.cpp
+   
+    Json.h
+    Json.cpp
+    FileSystem.h
+    FileSystem.cpp
+    StringUtils.h
+    StringUtils.cpp
+    DesktopServices.h
+    DesktopServices.cpp
+    Version.h
+    Version.cpp
+    Markdown.h
+    Markdown.cpp
+
+    # Zip
+    MMCZip.h
+    MMCZip.cpp
+    
+    # Time
+    MMCTime.h
+    MMCTime.cpp
+
+    net/ByteArraySink.h
+    net/ChecksumValidator.h
+    net/Download.cpp
+    net/Download.h
+    net/FileSink.cpp
+    net/FileSink.h
+    net/HttpMetaCache.cpp
+    net/HttpMetaCache.h
+    net/Logging.h
+    net/Logging.cpp
+    net/NetAction.h
+    net/NetRequest.cpp
+    net/NetRequest.h
+    net/NetJob.cpp
+    net/NetJob.h
+    net/NetUtils.h
+    net/Sink.h
+    net/Validator.h
+    net/HeaderProxy.h
+    net/RawHeaderProxy.h
+
+    ui/dialogs/ProgressDialog.cpp
+    ui/dialogs/ProgressDialog.h
+    ui/widgets/SubTaskProgressBar.h
+    ui/widgets/SubTaskProgressBar.cpp
+
+)
+
 ######## Logging categories ########
 
 ecm_qt_declare_logging_category(CORE_SOURCES
@@ -685,6 +738,8 @@ set(LOGIC_SOURCES
 
 if(APPLE AND Launcher_ENABLE_UPDATER)
     set (LOGIC_SOURCES ${LOGIC_SOURCES} ${MAC_UPDATE_SOURCES})
+else()
+    set (LOGIC_SOURCES ${LOGIC_SOURCES} ${PRISM_UPDATE_SOURCES})
 endif()
 
 SET(LAUNCHER_SOURCES
@@ -916,6 +971,9 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ImportPage.cpp
     ui/pages/modplatform/ImportPage.h
 
+    ui/pages/modplatform/OptionalModDialog.cpp
+    ui/pages/modplatform/OptionalModDialog.h
+
     ui/pages/modplatform/modrinth/ModrinthResourceModels.cpp
     ui/pages/modplatform/modrinth/ModrinthResourceModels.h
     ui/pages/modplatform/modrinth/ModrinthResourcePages.cpp
@@ -944,8 +1002,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/IconPickerDialog.h
     ui/dialogs/ImportResourceDialog.cpp
     ui/dialogs/ImportResourceDialog.h
-    ui/dialogs/LoginDialog.cpp
-    ui/dialogs/LoginDialog.h
     ui/dialogs/MSALoginDialog.cpp
     ui/dialogs/MSALoginDialog.h
     ui/dialogs/OfflineLoginDialog.cpp
@@ -1042,6 +1098,15 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/VisualGroup.h
 )
 
+if (NOT Apple)
+set(LAUNCHER_SOURCES
+    ${LAUNCHER_SOURCES}
+
+    ui/dialogs/UpdateAvailableDialog.h
+    ui/dialogs/UpdateAvailableDialog.cpp
+)
+endif()
+
 if(WIN32)
     set(LAUNCHER_SOURCES
         WindowsConsole.cpp
@@ -1080,6 +1145,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/legacy_ftb/Page.ui
     ui/pages/modplatform/import_ftb/ImportFTBPage.ui
     ui/pages/modplatform/ImportPage.ui
+    ui/pages/modplatform/OptionalModDialog.ui
     ui/pages/modplatform/modrinth/ModrinthPage.ui
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/InstanceCardWidget.ui
@@ -1104,13 +1170,20 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/MSALoginDialog.ui
     ui/dialogs/OfflineLoginDialog.ui
     ui/dialogs/AboutDialog.ui
-    ui/dialogs/LoginDialog.ui
     ui/dialogs/EditAccountDialog.ui
     ui/dialogs/ReviewMessageBox.ui
     ui/dialogs/ScrollMessageBox.ui
     ui/dialogs/BlockedModsDialog.ui
     ui/dialogs/ChooseProviderDialog.ui
 )
+
+qt_wrap_ui(PRISM_UPDATE_UI
+    ui/dialogs/UpdateAvailableDialog.ui
+)
+
+if (NOT Apple)
+    set (LAUNCHER_UI ${LAUNCHER_UI} ${PRISM_UPDATE_UI})
+endif()
 
 qt_add_resources(LAUNCHER_RESOURCES
     resources/backgrounds/backgrounds.qrc
@@ -1128,6 +1201,12 @@ qt_add_resources(LAUNCHER_RESOURCES
     ../${Launcher_Branding_LogoQRC}
 )
 
+qt_wrap_ui(PRISMUPDATER_UI
+    updater/prismupdater/SelectReleaseDialog.ui
+    ui/widgets/SubTaskProgressBar.ui
+    ui/dialogs/ProgressDialog.ui
+)
+
 ######## Windows resource files ########
 if(WIN32)
     set(LAUNCHER_RCS ${CMAKE_CURRENT_BINARY_DIR}/../${Launcher_Branding_WindowsRC})
@@ -1137,12 +1216,16 @@ include(CompilerWarnings)
 
 # Add executable
 add_library(Launcher_logic STATIC ${LOGIC_SOURCES} ${LAUNCHER_SOURCES} ${LAUNCHER_UI} ${LAUNCHER_RESOURCES})
+if(BUILD_TESTING)
+target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_TEST)
+endif()
 set_project_warnings(Launcher_logic
     "${Launcher_MSVC_WARNINGS}"
     "${Launcher_CLANG_WARNINGS}"
     "${Launcher_GCC_WARNINGS}")
 target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_link_libraries(Launcher_logic
     systeminfo
     Launcher_murmur2
@@ -1224,7 +1307,45 @@ install(TARGETS ${Launcher_Name}
     FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
 
-if(WIN32)
+if(Launcher_BUILD_UPDATER)
+    # Updater
+    add_library(prism_updater_logic STATIC ${PRISMUPDATER_SOURCES} ${TASKS_SOURCES} ${PRISMUPDATER_UI})
+    target_include_directories(prism_updater_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(prism_updater_logic
+        QuaZip::QuaZip
+        ${ZLIB_LIBRARIES}
+        systeminfo
+        BuildConfig
+        ghcFilesystem::ghc_filesystem
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Network
+        ${Launcher_QT_LIBS}
+        cmark::cmark
+        Katabasis
+    )
+
+    add_executable("${Launcher_Name}_updater" WIN32 updater/prismupdater/updater_main.cpp)
+    target_sources("${Launcher_Name}_updater" PRIVATE updater/prismupdater/updater.exe.manifest)
+    target_link_libraries("${Launcher_Name}_updater" prism_updater_logic)
+    
+    if(DEFINED Launcher_APP_BINARY_NAME)
+        set_target_properties("${Launcher_Name}_updater" PROPERTIES OUTPUT_NAME "${Launcher_APP_BINARY_NAME}_updater")
+    endif()
+    if(DEFINED Launcher_BINARY_RPATH)
+        SET_TARGET_PROPERTIES("${Launcher_Name}_updater" PROPERTIES INSTALL_RPATH "${Launcher_BINARY_RPATH}")
+    endif()
+
+    install(TARGETS "${Launcher_Name}_updater"
+        BUNDLE DESTINATION "." COMPONENT Runtime
+        LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
+        RUNTIME DESTINATION ${BINARY_DEST_DIR} COMPONENT Runtime
+        FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
+    )
+endif()
+
+if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
+    # File link
     add_library(filelink_logic STATIC ${LINKEXE_SOURCES})
     set_project_warnings(filelink_logic
     "${Launcher_MSVC_WARNINGS}"
@@ -1243,7 +1364,7 @@ if(WIN32)
         ${Launcher_QT_LIBS}
     )
 
-    add_executable("${Launcher_Name}_filelink" WIN32 filelink/main.cpp)
+    add_executable("${Launcher_Name}_filelink" WIN32 filelink/filelink_main.cpp)
 
     target_sources("${Launcher_Name}_filelink" PRIVATE filelink/filelink.exe.manifest)
 

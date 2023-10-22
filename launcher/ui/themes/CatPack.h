@@ -52,9 +52,9 @@ class BasicCatPack : public CatPack {
    public:
     BasicCatPack(QString id, QString name) : m_id(id), m_name(name) {}
     BasicCatPack(QString id) : BasicCatPack(id, id) {}
-    virtual QString id() { return m_id; }
-    virtual QString name() { return m_name; }
-    virtual QString path();
+    virtual QString id() override { return m_id; }
+    virtual QString name() override { return m_name; }
+    virtual QString path() override;
 
    protected:
     QString m_id;
@@ -83,7 +83,8 @@ class JsonCatPack : public BasicCatPack {
         PartialDate endTime;
     };
     JsonCatPack(QFileInfo& manifestInfo);
-    virtual QString path();
+    virtual QString path() override;
+    QString path(QDate now);
 
    private:
     QString m_defaultPath;

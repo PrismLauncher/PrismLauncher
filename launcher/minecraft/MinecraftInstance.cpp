@@ -184,6 +184,10 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("CloseAfterLaunch"), miscellaneousOverride);
         m_settings->registerOverride(global_settings->getSetting("QuitAfterGameStop"), miscellaneousOverride);
 
+        // Legacy-related options
+        auto legacySettings = m_settings->registerSetting("OverrideLegacySettings", false);
+        m_settings->registerOverride(global_settings->getSetting("OnlineFixes"), legacySettings);
+
         m_settings->set("InstanceType", "OneSix");
     }
 
@@ -311,7 +315,7 @@ QString MinecraftInstance::getLocalLibraryPath() const
 bool MinecraftInstance::supportsDemo() const
 {
     Version instance_ver{ getPackProfile()->getComponentVersion("net.minecraft") };
-    // Demo mode was introduced in 1.3.1: https://minecraft.fandom.com/wiki/Demo_mode#History
+    // Demo mode was introduced in 1.3.1: https://minecraft.wiki/w/Demo_mode#History
     // FIXME: Due to Version constraints atm, this can't handle well non-release versions
     return instance_ver >= Version("1.3.1");
 }
@@ -513,18 +517,26 @@ QStringList MinecraftInstance::javaArguments()
 
     args << "-Duser.language=en";
 
+    if (javaVersion.isModular() && shouldApplyOnlineFixes())
+        // allow reflective access to java.net - required by the skin fix
+        args << "--add-opens"
+             << "java.base/java.net=ALL-UNNAMED";
+
     return args;
 }
 
 QString MinecraftInstance::getLauncher()
 {
-    auto profile = m_components->getProfile();
-
     // use legacy launcher if the traits are set
-    if (profile->getTraits().contains("legacyLaunch") || profile->getTraits().contains("alphaLaunch"))
+    if (traits().contains("legacyLaunch") || traits().contains("alphaLaunch"))
         return "legacy";
 
     return "standard";
+}
+
+bool MinecraftInstance::shouldApplyOnlineFixes()
+{
+    return traits().contains("legacyServices") && settings()->get("OnlineFixes").toBool();
 }
 
 QMap<QString, QString> MinecraftInstance::getVariables()
@@ -716,6 +728,9 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "traits " + trait + "\n";
     }
 
+    if (shouldApplyOnlineFixes())
+        launchScript += "onlineFixes true\n";
+
     launchScript += "launcher " + getLauncher() + "\n";
 
     // qDebug() << "Generated launch script:" << launchScript;
@@ -855,9 +870,6 @@ QMap<QString, QString> MinecraftInstance::createCensorFilterFromSession(AuthSess
     }
     if (sessionRef.access_token != "0") {
         addToFilter(sessionRef.access_token, tr("<ACCESS TOKEN>"));
-    }
-    if (sessionRef.client_token.size()) {
-        addToFilter(sessionRef.client_token, tr("<CLIENT TOKEN>"));
     }
     addToFilter(sessionRef.uuid, tr("<PROFILE ID>"));
 

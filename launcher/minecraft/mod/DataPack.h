@@ -63,7 +63,7 @@ class DataPack : public Resource {
     mutable QMutex m_data_lock;
 
     /* The 'version' of a data pack, as defined in the pack.mcmeta file.
-     * See https://minecraft.fandom.com/wiki/Data_pack#pack.mcmeta
+     * See https://minecraft.wiki/w/Data_pack#pack.mcmeta
      */
     int m_pack_format = 0;
 

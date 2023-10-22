@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <iterator>
 #include <memory>
+#include "Application.h"
 #include "Json.h"
 #include "MMCZip.h"
 #include "minecraft/PackProfile.h"
@@ -102,7 +103,8 @@ void FlamePackExportTask::collectHashes()
     setStatus(tr("Finding file hashes..."));
     setProgress(1, 5);
     auto allMods = mcInstance->loaderModList()->allMods();
-    ConcurrentTask::Ptr hashingTask(new ConcurrentTask(this, "MakeHashesTask", 10));
+    ConcurrentTask::Ptr hashingTask(
+        new ConcurrentTask(this, "MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
     task.reset(hashingTask);
     for (const QFileInfo& file : files) {
         const QString relative = gameRoot.relativeFilePath(file.absoluteFilePath());

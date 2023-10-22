@@ -77,6 +77,10 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
         itemTop->insertChildren(childIndx++, { requiredByItem });
     }
 
+    auto versionTypeItem = new QTreeWidgetItem(itemTop);
+    versionTypeItem->setText(0, tr("Version Type: %1").arg(info.version_type));
+    itemTop->insertChildren(childIndx++, { versionTypeItem });
+
     ui->modTreeWidget->addTopLevelItem(itemTop);
 }
 

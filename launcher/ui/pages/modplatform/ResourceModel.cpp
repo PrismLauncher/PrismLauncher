@@ -31,6 +31,9 @@ QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 ResourceModel::ResourceModel(ResourceAPI* api) : QAbstractListModel(), m_api(api)
 {
     s_running_models.insert(this, true);
+#ifndef LAUNCHER_TEST
+    m_current_info_job.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+#endif
 }
 
 ResourceModel::~ResourceModel()
