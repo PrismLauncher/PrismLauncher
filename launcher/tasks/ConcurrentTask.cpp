@@ -46,13 +46,9 @@ ConcurrentTask::ConcurrentTask(QObject* parent, QString task_name, int max_concu
 
 ConcurrentTask::~ConcurrentTask()
 {
-    for (auto task : m_queue) {
+    for (auto task : m_doing) {
         if (task)
-            task->deleteLater();
-    }
-    for (auto task : m_done) {
-        if (task)
-            task->deleteLater();
+            task->disconnect(this);
     }
 }
 
@@ -118,6 +114,9 @@ void ConcurrentTask::executeNextSubTask()
     if (!isRunning()) {
         return;
     }
+    if (m_doing.count() >= m_total_max_size) {
+        return;
+    }
     if (m_queue.isEmpty()) {
         if (m_doing.isEmpty()) {
             if (m_failed.isEmpty())
@@ -125,9 +124,6 @@ void ConcurrentTask::executeNextSubTask()
             else
                 emitFailed(tr("One or more subtasks failed"));
         }
-        return;
-    }
-    if (m_doing.count() >= m_total_max_size) {
         return;
     }
 
