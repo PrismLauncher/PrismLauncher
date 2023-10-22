@@ -232,6 +232,7 @@ bool processPackPNG(const ResourcePack& pack)
             } else {
                 return png_invalid();  // pack.png does not exists or is not a valid file.
             }
+            return false;  // not processed correctly; https://github.com/PrismLauncher/PrismLauncher/issues/1740
         }
         case ResourceType::ZIPFILE: {
             Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
@@ -259,6 +260,7 @@ bool processPackPNG(const ResourcePack& pack)
             } else {
                 return png_invalid();  // could not set pack.mcmeta as current file.
             }
+            return false;  // not processed correctly; https://github.com/PrismLauncher/PrismLauncher/issues/1740
         }
         default:
             qWarning() << "Invalid type for resource pack parse task!";
