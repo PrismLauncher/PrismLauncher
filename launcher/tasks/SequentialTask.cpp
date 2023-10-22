@@ -43,7 +43,7 @@ SequentialTask::SequentialTask(QObject* parent, QString task_name) : ConcurrentT
 void SequentialTask::subTaskFailed(Task::Ptr task, const QString& msg)
 {
     emitFailed(msg);
-    qWarning() << m_failed.constBegin()->get()->failReason();
+    qWarning() << msg;
     ConcurrentTask::subTaskFailed(task, msg);
 }
 
