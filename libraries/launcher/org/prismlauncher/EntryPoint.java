@@ -142,11 +142,18 @@ public final class EntryPoint {
     }
 
     private static void setProperties(Parameters params) {
+        String launcherBrand = params.getString("launcherBrand", null);
+        String launcherVersion = params.getString("launcherVersion", null);
         String name = params.getString("instanceName", null);
         String iconId = params.getString("instanceIconKey", null);
         String iconPath = params.getString("instanceIconPath", null);
         String windowTitle = params.getString("windowTitle", null);
         String windowDimensions = params.getString("windowParams", null);
+
+        if (launcherBrand != null)
+            System.setProperty("minecraft.launcher.brand", launcherBrand);
+        if (launcherVersion != null)
+            System.setProperty("minecraft.launcher.version", launcherVersion);
 
         // set useful properties for mods
         if (name != null)

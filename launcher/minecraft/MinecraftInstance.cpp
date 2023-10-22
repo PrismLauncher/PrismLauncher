@@ -718,6 +718,12 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         launchScript += "windowParams " + windowParams + "\n";
     }
 
+    // launcher info
+    {
+        launchScript += "launcherBrand " + BuildConfig.LAUNCHER_NAME + "\n";
+        launchScript += "launcherVersion " + BuildConfig.printableVersionString() + "\n";
+    }
+
     // instance info
     {
         launchScript += "instanceName " + name() + "\n";
