@@ -88,6 +88,11 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
 
+        ui->actionUpdateDepsItem->setToolTip(
+            tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
+        ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionUpdateDepsItem);
+        connect(ui->actionUpdateDepsItem, &QAction::triggered, this, [this] { updateMods(true); });
+
         ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
@@ -100,6 +105,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
         connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
             ui->actionUpdateItem->setEnabled(check_allow_update());
+            ui->actionUpdateDepsItem->setEnabled(check_allow_update());
 
             auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
             auto mods_list = m_model->selectedMods(selection);
@@ -120,14 +126,15 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
             ui->actionRemoveItemMetadata->setEnabled(selected != 0);
         });
 
-        connect(mods.get(), &ModFolderModel::rowsInserted, this,
-                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
+        auto updateButtons = [this, check_allow_update] {
+            ui->actionUpdateItem->setEnabled(check_allow_update());
+            ui->actionUpdateDepsItem->setEnabled(check_allow_update());
+        };
+        connect(mods.get(), &ModFolderModel::rowsInserted, this, updateButtons);
 
-        connect(mods.get(), &ModFolderModel::rowsRemoved, this,
-                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
+        connect(mods.get(), &ModFolderModel::rowsRemoved, this, updateButtons);
 
-        connect(mods.get(), &ModFolderModel::updateFinished, this,
-                [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); });
+        connect(mods.get(), &ModFolderModel::updateFinished, this, updateButtons);
     }
 }
 
@@ -204,7 +211,7 @@ void ModFolderPage::installMods()
     }
 }
 
-void ModFolderPage::updateMods()
+void ModFolderPage::updateMods(bool includeDeps)
 {
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
@@ -221,7 +228,7 @@ void ModFolderPage::updateMods()
     if (use_all)
         mods_list = m_model->allMods();
 
-    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list);
+    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps);
     update_dialog.checkCandidates();
 
     if (update_dialog.aborted()) {

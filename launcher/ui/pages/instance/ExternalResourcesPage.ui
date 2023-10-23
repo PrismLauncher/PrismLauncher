@@ -157,6 +157,17 @@
     <string>Try to check or update all selected resources (all resources if none are selected)</string>
    </property>
   </action>
+    <action name="actionUpdateDepsItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>&amp;Verify Dependencies</string>
+   </property>
+   <property name="toolTip">
+    <string>Try to update and check for missing dependencies all selected resources (all resources if none are selected)</string>
+   </property>
+  </action>
   <action name="actionVisitItemPage">
    <property name="enabled">
     <bool>false</bool>
