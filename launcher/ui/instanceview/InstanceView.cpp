@@ -39,6 +39,7 @@
 #include <QApplication>
 #include <QCache>
 #include <QDrag>
+#include <QFont>
 #include <QListView>
 #include <QMimeData>
 #include <QMouseEvent>
@@ -477,6 +478,38 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
     QStyleOptionViewItem option = viewOptions();
 #endif
     option.widget = this;
+
+    if (model()->rowCount() == 0) {
+        painter.save();
+        const QString line1 = tr("Welcome!");
+        const QString line2 = tr("Click \"Add Instance\" to get started.");
+        auto rect = this->viewport()->rect();
+        auto font = option.font;
+        font.setPointSize(37);
+        painter.setFont(font);
+        auto fm = painter.fontMetrics();
+
+        if (rect.height() <= (fm.height() * 5) || rect.width() <= fm.horizontalAdvance(line2)) {
+            auto s = rect.height() / (5. * fm.height());
+            auto sx = rect.width() * 1. / fm.horizontalAdvance(line2);
+            if (s >= sx)
+                s = sx;
+            auto ps = font.pointSize() * s;
+            if (ps <= 0)
+                ps = 1;
+            font.setPointSize(ps);
+            painter.setFont(font);
+            fm = painter.fontMetrics();
+        }
+
+        // text
+        rect.setTop(rect.top() + fm.height() * 1.5);
+        painter.drawText(rect, Qt::AlignHCenter, line1);
+        rect.setTop(rect.top() + fm.height());
+        painter.drawText(rect, Qt::AlignHCenter, line2);
+        painter.restore();
+        return;
+    }
 
     int wpWidth = viewport()->width();
     option.rect.setWidth(wpWidth);
