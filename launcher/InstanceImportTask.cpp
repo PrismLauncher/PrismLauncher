@@ -334,13 +334,15 @@ void InstanceImportTask::processMultiMC()
         m_instIcon = instance.iconKey();
 
         auto importIconPath = IconUtils::findBestIconIn(instance.instanceRoot(), m_instIcon);
+        if (importIconPath.isNull() || !QFile::exists(importIconPath))
+            importIconPath = IconUtils::findBestIconIn(instance.instanceRoot(), "icon.png");
         if (!importIconPath.isNull() && QFile::exists(importIconPath)) {
             // import icon
             auto iconList = APPLICATION->icons();
             if (iconList->iconFileExists(m_instIcon)) {
                 iconList->deleteIcon(m_instIcon);
             }
-            iconList->installIcons({ importIconPath });
+            iconList->installIcon(importIconPath, m_instIcon);
         }
     }
     emitSucceeded();
