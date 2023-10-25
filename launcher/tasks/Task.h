@@ -77,7 +77,7 @@ struct TaskStepProgress {
 
 Q_DECLARE_METATYPE(TaskStepProgress)
 
-typedef QList<std::shared_ptr<TaskStepProgress>> TaskStepProgressList;
+using TaskStepProgressList = QList<std::shared_ptr<TaskStepProgress>>;
 
 class Task : public QObject, public QRunnable {
     Q_OBJECT
