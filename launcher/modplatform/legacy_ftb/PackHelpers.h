@@ -31,7 +31,7 @@ struct Modpack {
     QString packCode;
 };
 
-typedef QList<Modpack> ModpackList;
+using ModpackList = QList<Modpack>;
 
 }  // namespace LegacyFTB
 

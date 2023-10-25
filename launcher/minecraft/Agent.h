@@ -6,7 +6,7 @@
 
 class Agent;
 
-typedef std::shared_ptr<Agent> AgentPtr;
+using AgentPtr = std::shared_ptr<Agent>;
 
 class Agent {
    public:

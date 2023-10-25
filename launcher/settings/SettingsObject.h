@@ -26,8 +26,8 @@
 class Setting;
 class SettingsObject;
 
-typedef std::shared_ptr<SettingsObject> SettingsObjectPtr;
-typedef std::weak_ptr<SettingsObject> SettingsObjectWeakPtr;
+using SettingsObjectPtr = std::shared_ptr<SettingsObject>;
+using SettingsObjectWeakPtr = std::weak_ptr<SettingsObject>;
 
 /*!
  * \brief The SettingsObject handles communicating settings between the application and a
