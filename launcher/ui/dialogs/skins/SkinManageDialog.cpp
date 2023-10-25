@@ -229,8 +229,10 @@ void SkinManageDialog::on_steveBtn_toggled(bool checked)
 void SkinManageDialog::accept()
 {
     auto skin = m_list.skin(m_selected_skin);
-    if (!skin)
+    if (!skin) {
         reject();
+        return;
+    }
     auto path = skin->getPath();
 
     ProgressDialog prog(this);
@@ -315,7 +317,7 @@ void SkinManageDialog::on_action_Delete_Skin_triggered(bool checked)
         return;
 
     if (m_list.getSkinIndex(m_selected_skin) == m_list.getSelectedAccountSkin()) {
-        CustomMessageBox::selectable(this, tr("Delete error"), tr("Can not delete skin that is in use."), QMessageBox::Warning);
+        CustomMessageBox::selectable(this, tr("Delete error"), tr("Can not delete skin that is in use."), QMessageBox::Warning)->exec();
         return;
     }
 

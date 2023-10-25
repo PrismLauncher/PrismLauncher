@@ -359,7 +359,7 @@ bool SkinList::setData(const QModelIndex& idx, const QVariant& value, int role)
     int row = idx.row();
     if (row < 0 || row >= m_skin_list.size())
         return false;
-    auto skin = m_skin_list[row];
+    auto& skin = m_skin_list[row];
     auto newName = value.toString();
     if (skin.name() != newName) {
         skin.rename(newName);
