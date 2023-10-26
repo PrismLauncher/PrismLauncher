@@ -17,6 +17,7 @@
  */
 
 #include <QTabBar>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 #include "EnvironmentVariablesPage.h"
@@ -24,10 +25,16 @@
 EnvironmentVariablesPage::EnvironmentVariablesPage(QWidget* parent) : QWidget(parent)
 {
     auto verticalLayout = new QVBoxLayout(this);
+    verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
     verticalLayout->setContentsMargins(0, 0, 0, 0);
+
+    auto tabWidget = new QTabWidget(this);
+    tabWidget->setObjectName(QStringLiteral("tabWidget"));
     variables = new EnvironmentVariables(this);
     variables->setContentsMargins(6, 6, 6, 6);
-    verticalLayout->addWidget(variables);
+    tabWidget->addTab(variables, "Foo");
+    tabWidget->tabBar()->hide();
+    verticalLayout->addWidget(tabWidget);
 
     variables->initialize(false, false, APPLICATION->settings()->get("Env").toMap());
 }
