@@ -460,7 +460,7 @@ void SkinManageDialog::on_userBtn_clicked()
     dlg.execWithTask(job.get());
 
     SkinModel s(path);
-    s.setModel(mcProfile.skin.variant == "slim" ? SkinModel::SLIM : SkinModel::CLASSIC);
+    s.setModel(mcProfile.skin.variant == "SLIM" ? SkinModel::SLIM : SkinModel::CLASSIC);
     s.setURL(mcProfile.skin.url);
     if (m_capes.contains(mcProfile.currentCape)) {
         s.setCapeId(mcProfile.currentCape);

@@ -106,7 +106,7 @@ bool SkinList::update()
             auto path = m_dir.absoluteFilePath(name);
             if (skinTexture.loadFromData(skin.data, "PNG") && skinTexture.save(path)) {
                 SkinModel s(path);
-                s.setModel(skin.variant == "slim" ? SkinModel::SLIM : SkinModel::CLASSIC);
+                s.setModel(skin.variant == "SLIM" ? SkinModel::SLIM : SkinModel::CLASSIC);
                 s.setCapeId(m_acct->accountData()->minecraftProfile.currentCape);
                 s.setURL(skin.url);
                 newSkins << s;
@@ -114,7 +114,7 @@ bool SkinList::update()
             }
         } else {
             nskin->setCapeId(m_acct->accountData()->minecraftProfile.currentCape);
-            nskin->setModel(skin.variant == "slim" ? SkinModel::SLIM : SkinModel::CLASSIC);
+            nskin->setModel(skin.variant == "SLIM" ? SkinModel::SLIM : SkinModel::CLASSIC);
         }
     }
 
