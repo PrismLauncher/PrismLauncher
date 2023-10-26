@@ -203,9 +203,12 @@ void InstanceSettingsPage::applySettings()
     }
 
     // Environment Variables
-    m_settings->set("UseEnv", ui->environmentVariables->checked());
-    m_settings->set("OverrideEnv", ui->environmentVariables->override());
-    m_settings->set("Env", ui->environmentVariables->value());
+    auto env = ui->environmentVariables->override();
+    m_settings->set("OverrideEnv", env);
+    if (env)
+        m_settings->set("Env", ui->environmentVariables->value());
+    else
+        m_settings->reset("Env");
 
     // Workarounds
     bool workarounds = ui->nativeWorkaroundsGroupBox->isChecked();
@@ -327,8 +330,7 @@ void InstanceSettingsPage::loadSettings()
                                    m_settings->get("WrapperCommand").toString(), m_settings->get("PostExitCommand").toString());
 
     // Environment variables
-    ui->environmentVariables->initialize(true, m_settings->get("UseEnv").toBool(), m_settings->get("OverrideEnv").toBool(),
-                                         m_settings->get("Env").toMap());
+    ui->environmentVariables->initialize(true, m_settings->get("OverrideEnv").toBool(), m_settings->get("Env").toMap());
 
     // Workarounds
     ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());

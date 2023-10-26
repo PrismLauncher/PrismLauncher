@@ -188,9 +188,8 @@ void MinecraftInstance::loadSpecificSettings()
         auto legacySettings = m_settings->registerSetting("OverrideLegacySettings", false);
         m_settings->registerOverride(global_settings->getSetting("OnlineFixes"), legacySettings);
 
-        m_settings->registerSetting("UseEnv", false);
-        m_settings->registerSetting("OverrideEnv", false);
-        m_settings->registerSetting("Env", QVariant(QMap<QString, QVariant>()));
+        auto envSetting = m_settings->registerSetting("OverrideEnv", false);
+        m_settings->registerOverride(global_settings->getSetting("Env"), envSetting);
 
         m_settings->set("InstanceType", "OneSix");
     }
@@ -612,12 +611,11 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
             env.insert(iter.key(), iter.value().toString());
     };
 
-    bool useEnv = settings()->get("UseEnv").toBool();
-    bool overrideEnv = useEnv && settings()->get("OverrideEnv").toBool();
+    bool overrideEnv = settings()->get("OverrideEnv").toBool();
 
     if (!overrideEnv)
         insertEnv(APPLICATION->settings()->get("Env").toMap());
-    if (useEnv)
+    else
         insertEnv(settings()->get("Env").toMap());
 
     return env;

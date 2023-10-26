@@ -50,25 +50,6 @@ EnvironmentVariables::EnvironmentVariables(QWidget* parent) : QWidget(parent), u
     });
 
     connect(ui->clear, &QPushButton::clicked, this, [this] { ui->list->clear(); });
-
-    connect(ui->globalOverride, &QCheckBox::clicked, this, [this](bool state) {
-        if (!state)
-            return;
-
-        auto global = APPLICATION->settings()->get("Env").toMap();
-        if (global.isEmpty())
-            return;
-
-        auto response = CustomMessageBox::selectable(
-                            this, tr("Reset"),
-                            tr("You have chosen to ignore global settings.\n\nWould you like to clear the current variables and copy "
-                               "the global variables over?"),
-                            QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                            ->exec();
-
-        if (response == QMessageBox::Yes)
-            initialize(true, checked(), override(), global);
-    });
 }
 
 EnvironmentVariables::~EnvironmentVariables()
@@ -76,13 +57,11 @@ EnvironmentVariables::~EnvironmentVariables()
     delete ui;
 }
 
-void EnvironmentVariables::initialize(bool instance, bool checked, bool override, const QMap<QString, QVariant>& value)
+void EnvironmentVariables::initialize(bool instance, bool override, const QMap<QString, QVariant>& value)
 {
     // update widgets to settings
     ui->groupBox->setCheckable(instance);
-    ui->groupBox->setChecked(checked);
-    ui->globalOverride->setVisible(instance);
-    ui->globalOverride->setChecked(override);
+    ui->groupBox->setChecked(override);
 
     // populate
     ui->list->clear();
@@ -113,18 +92,11 @@ void EnvironmentVariables::retranslate()
     ui->retranslateUi(this);
 }
 
-bool EnvironmentVariables::checked() const
-{
-    if (!ui->groupBox->isCheckable())
-        return true;
-    return ui->groupBox->isChecked();
-}
-
 bool EnvironmentVariables::override() const
 {
-    if (!ui->globalOverride->isVisible())
+    if (!ui->groupBox->isCheckable())
         return false;
-    return ui->globalOverride->isChecked();
+    return ui->groupBox->isChecked();
 }
 
 QMap<QString, QVariant> EnvironmentVariables::value() const

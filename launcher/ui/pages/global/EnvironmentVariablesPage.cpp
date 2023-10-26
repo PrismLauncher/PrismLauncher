@@ -29,7 +29,7 @@ EnvironmentVariablesPage::EnvironmentVariablesPage(QWidget* parent) : QWidget(pa
     variables->setContentsMargins(6, 6, 6, 6);
     verticalLayout->addWidget(variables);
 
-    variables->initialize(false, true, false, APPLICATION->settings()->get("Env").toMap());
+    variables->initialize(false, false, APPLICATION->settings()->get("Env").toMap());
 }
 
 QString EnvironmentVariablesPage::displayName() const

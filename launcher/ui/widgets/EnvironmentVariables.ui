@@ -36,13 +36,6 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="QCheckBox" name="globalOverride">
-        <property name="text">
-         <string>&amp;Ignore global settings</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QTreeWidget" name="list">
         <property name="alternatingRowColors">
          <bool>true</bool>
