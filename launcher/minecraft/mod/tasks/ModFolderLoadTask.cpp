@@ -62,9 +62,15 @@ void ModFolderLoadTask::executeTask()
 
     // Read JAR files that don't have metadata
     m_mods_dir.refresh();
+    QStringList names;
     for (auto entry : m_mods_dir.entryInfoList()) {
         Mod* mod(new Mod(entry));
 
+        if (names.contains(mod->name())) {
+            mod->destroy(m_index_dir, true);
+            continue;
+        }
+        names << mod->name();
         if (mod->enabled()) {
             if (m_result->mods.contains(mod->internal_id())) {
                 m_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
