@@ -371,13 +371,13 @@ void InstanceList::undoTrashInstance()
 
     auto top = m_trashHistory.pop();
 
-    while (QDir(top.polyPath).exists()) {
+    while (QDir(top.rootPath).exists()) {
         top.id += "1";
-        top.polyPath += "1";
+        top.rootPath += "1";
     }
 
-    qDebug() << "Moving" << top.trashPath << "back to" << top.polyPath;
-    QFile(top.trashPath).rename(top.polyPath);
+    qDebug() << "Moving" << top.trashPath << "back to" << top.rootPath;
+    QFile(top.trashPath).rename(top.rootPath);
 
     m_instanceGroupIndex[top.id] = top.groupName;
     increaseGroupCount(top.groupName);
@@ -634,8 +634,8 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
 
     QString inst_type = instanceSettings->get("InstanceType").toString();
 
-    // NOTE: Some PolyMC versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a OneSix
-    // instance
+    // NOTE: Some PrismLauncher versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a
+    // OneSix instance
     if (inst_type == "OneSix" || inst_type.isEmpty()) {
         inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
     } else {
