@@ -188,6 +188,9 @@ void MinecraftInstance::loadSpecificSettings()
         auto legacySettings = m_settings->registerSetting("OverrideLegacySettings", false);
         m_settings->registerOverride(global_settings->getSetting("OnlineFixes"), legacySettings);
 
+        auto envSetting = m_settings->registerSetting("OverrideEnv", false);
+        m_settings->registerOverride(global_settings->getSetting("Env"), envSetting);
+
         m_settings->set("InstanceType", "OneSix");
     }
 
@@ -597,6 +600,23 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
         env.insert("__GLX_VENDOR_LIBRARY_NAME", "nvidia");
     }
 #endif
+
+    // custom env
+
+    auto insertEnv = [&env](QMap<QString, QVariant> envMap) {
+        if (envMap.isEmpty())
+            return;
+
+        for (auto iter = envMap.begin(); iter != envMap.end(); iter++)
+            env.insert(iter.key(), iter.value().toString());
+    };
+
+    bool overrideEnv = settings()->get("OverrideEnv").toBool();
+
+    if (!overrideEnv)
+        insertEnv(APPLICATION->settings()->get("Env").toMap());
+    else
+        insertEnv(settings()->get("Env").toMap());
 
     return env;
 }
