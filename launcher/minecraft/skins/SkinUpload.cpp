@@ -49,7 +49,7 @@ SkinUpload::SkinUpload(QString token, QString path, QString variant) : NetReques
 
 QNetworkReply* SkinUpload::getReply(QNetworkRequest& request)
 {
-    QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType, this);
 
     QHttpPart skin;
     skin.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/png"));

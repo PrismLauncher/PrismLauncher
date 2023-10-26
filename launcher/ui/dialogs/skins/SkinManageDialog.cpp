@@ -74,7 +74,7 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
     contentsWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     contentsWidget->installEventFilter(this);
-    contentsWidget->setItemDelegate(new ListViewDelegate());
+    contentsWidget->setItemDelegate(new ListViewDelegate(this));
 
     contentsWidget->setAcceptDrops(true);
     contentsWidget->setDropIndicatorShown(true);
