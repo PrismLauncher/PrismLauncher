@@ -193,12 +193,20 @@ QString JavaSettingsWidget::javaPath() const
 
 int JavaSettingsWidget::maxHeapSize() const
 {
-    return m_maxMemSpinBox->value();
+    auto min = m_minMemSpinBox->value();
+    auto max = m_maxMemSpinBox->value();
+    if (max < min)
+        max = min;
+    return max;
 }
 
 int JavaSettingsWidget::minHeapSize() const
 {
-    return m_minMemSpinBox->value();
+    auto min = m_minMemSpinBox->value();
+    auto max = m_maxMemSpinBox->value();
+    if (min > max)
+        min = max;
+    return min;
 }
 
 bool JavaSettingsWidget::permGenEnabled() const
@@ -221,17 +229,9 @@ void JavaSettingsWidget::memoryValueChanged(int)
     if (obj == m_minMemSpinBox && min != observedMinMemory) {
         observedMinMemory = min;
         actuallyChanged = true;
-        if (min > max) {
-            observedMaxMemory = min;
-            m_maxMemSpinBox->setValue(min);
-        }
     } else if (obj == m_maxMemSpinBox && max != observedMaxMemory) {
         observedMaxMemory = max;
         actuallyChanged = true;
-        if (min > max) {
-            observedMinMemory = max;
-            m_minMemSpinBox->setValue(max);
-        }
     } else if (obj == m_permGenSpinBox && permgen != observedPermGenMemory) {
         observedPermGenMemory = permgen;
         actuallyChanged = true;
@@ -372,8 +372,8 @@ void JavaSettingsWidget::checkJavaPath(const QString& path)
     setJavaStatus(JavaStatus::Pending);
     m_checker.reset(new JavaChecker());
     m_checker->m_path = path;
-    m_checker->m_minMem = m_minMemSpinBox->value();
-    m_checker->m_maxMem = m_maxMemSpinBox->value();
+    m_checker->m_minMem = minHeapSize();
+    m_checker->m_maxMem = maxHeapSize();
     if (m_permGenSpinBox->isVisible()) {
         m_checker->m_permGen = m_permGenSpinBox->value();
     }
@@ -426,6 +426,9 @@ void JavaSettingsWidget::updateThresholds()
     } else if (observedMaxMemory > (m_availableMemory * 0.9)) {
         iconName = "status-yellow";
         m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+    } else if (observedMaxMemory < observedMinMemory) {
+        iconName = "status-yellow";
+        m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
     } else {
         iconName = "status-good";
         m_labelMaxMemIcon->setToolTip("");

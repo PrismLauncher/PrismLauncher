@@ -35,13 +35,10 @@
    </item>
    <item>
     <widget class="QTabWidget" name="settingsTabs">
-     <property name="tabShape">
-      <enum>QTabWidget::Rounded</enum>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="minecraftTab">
+     <widget class="QWidget" name="minecraftPage">
       <attribute name="title">
        <string notr="true">Java</string>
       </attribute>
@@ -261,7 +258,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="javaTab">
+     <widget class="QWidget" name="javaPage">
       <attribute name="title">
        <string>Game windows</string>
       </attribute>
@@ -421,13 +418,23 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="customCommandsPage">
       <attribute name="title">
        <string>Custom commands</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="CustomCommands" name="customCommands" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="environmentVariablesPage">
+      <attribute name="title">
+       <string>Environment variables</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_16">
+       <item>
+        <widget class="EnvironmentVariables" name="environmentVariables" native="true"/>
        </item>
       </layout>
      </widget>
@@ -450,18 +457,52 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="useNativeOpenALCheck">
+            <property name="text">
+             <string>Use system installation of OpenAL</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelGLFWPath">
+            <property name="text">
+             <string>&amp;GLFW library path</string>
+            </property>
+            <property name="buddy">
+             <cstring>lineEditGLFWPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
            <widget class="QCheckBox" name="useNativeGLFWCheck">
             <property name="text">
              <string>Use system installation of GLFW</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QCheckBox" name="useNativeOpenALCheck">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditGLFWPath">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelOpenALPath">
             <property name="text">
-             <string>Use system installation of OpenAL</string>
+             <string>&amp;OpenAL library path</string>
+            </property>
+            <property name="buddy">
+             <cstring>lineEditOpenALPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="lineEditOpenALPath">
+            <property name="enabled">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -557,9 +598,9 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
-        <widget class="QGroupBox" name="modLoaderSettingsGroupBox">
+        <widget class="QGroupBox" name="legacySettingsGroupBox">
          <property name="title">
-          <string>Mod loader settings</string>
+          <string>Legacy settings</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -567,11 +608,14 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="VerticalLayout_16">
+         <layout class="QVBoxLayout" name="verticalLayout_17">
           <item>
-           <widget class="QCheckBox" name="disableQuiltBeaconCheckBox">
+           <widget class="QCheckBox" name="onlineFixes">
             <property name="toolTip">
-             <string>Disable Quilt loader's beacon for counting monthly active users</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;This currently allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable online fixes (experimental)</string>
             </property>
             <property name="text">
              <string>Disable Quilt Loader Beacon</string>
@@ -707,6 +751,12 @@
    <class>CustomCommands</class>
    <extends>QWidget</extends>
    <header>ui/widgets/CustomCommands.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>EnvironmentVariables</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/EnvironmentVariables.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

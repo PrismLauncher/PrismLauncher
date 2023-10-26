@@ -44,7 +44,8 @@ void TexturePack::setImage(QImage new_image) const
         PixmapCache::remove(m_pack_image_cache_key.key);
 
     // scale the image to avoid flooding the pixmapcache
-    auto pixmap = QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding));
+    auto pixmap =
+        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
 
     m_pack_image_cache_key.key = PixmapCache::insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;
@@ -56,7 +57,7 @@ QPixmap TexturePack::image(QSize size, Qt::AspectRatioMode mode) const
     if (PixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull())
             return cached_image;
-        return cached_image.scaled(size, mode);
+        return cached_image.scaled(size, mode, Qt::SmoothTransformation);
     }
 
     // No valid image we can get

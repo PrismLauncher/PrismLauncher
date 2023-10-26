@@ -3,7 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2023 seth <getchoo at tuta dot io>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@
 #include "ui/widgets/CustomCommands.h"
 
 #include "Application.h"
+#include "BuildConfig.h"
 #include "JavaCommon.h"
 #include "minecraft/auth/AccountList.h"
 
@@ -67,6 +68,10 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance* inst, QWidget* parent)
     connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
     connect(ui->instanceAccountSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             &InstanceSettingsPage::changeInstanceAccount);
+
+    connect(ui->useNativeGLFWCheck, &QAbstractButton::toggled, this, &InstanceSettingsPage::onUseNativeGLFWChanged);
+    connect(ui->useNativeOpenALCheck, &QAbstractButton::toggled, this, &InstanceSettingsPage::onUseNativeOpenALChanged);
+
     loadSettings();
 
     updateThresholds();
@@ -85,6 +90,9 @@ void InstanceSettingsPage::globalSettingsButtonClicked(bool)
             return;
         case 2:
             APPLICATION->ShowGlobalSettings(this, "custom-commands");
+            return;
+        case 3:
+            APPLICATION->ShowGlobalSettings(this, "environment-variables");
             return;
         default:
             APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
@@ -195,15 +203,27 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("PostExitCommand");
     }
 
+    // Environment Variables
+    auto env = ui->environmentVariables->override();
+    m_settings->set("OverrideEnv", env);
+    if (env)
+        m_settings->set("Env", ui->environmentVariables->value());
+    else
+        m_settings->reset("Env");
+
     // Workarounds
     bool workarounds = ui->nativeWorkaroundsGroupBox->isChecked();
     m_settings->set("OverrideNativeWorkarounds", workarounds);
     if (workarounds) {
-        m_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
         m_settings->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
+        m_settings->set("CustomGLFWPath", ui->lineEditGLFWPath->text());
+        m_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
+        m_settings->set("CustomOpenALPath", ui->lineEditOpenALPath->text());
     } else {
-        m_settings->reset("UseNativeOpenAL");
         m_settings->reset("UseNativeGLFW");
+        m_settings->reset("CustomGLFWPath");
+        m_settings->reset("UseNativeOpenAL");
+        m_settings->reset("CustomOpenALPath");
     }
 
     // Performance
@@ -246,12 +266,12 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("InstanceAccountId");
     }
 
-    bool overrideModLoaderSettings = ui->modLoaderSettingsGroupBox->isChecked();
-    m_settings->set("OverrideModLoaderSettings", overrideModLoaderSettings);
-    if (overrideModLoaderSettings) {
-        m_settings->set("DisableQuiltBeacon", ui->disableQuiltBeaconCheckBox->isChecked());
+    bool overrideLegacySettings = ui->legacySettingsGroupBox->isChecked();
+    m_settings->set("OverrideLegacySettings", overrideLegacySettings);
+    if (overrideLegacySettings) {
+        m_settings->set("OnlineFixes", ui->onlineFixes->isChecked());
     } else {
-        m_settings->reset("DisableQuiltBeacon");
+        m_settings->reset("OnlineFixes");
     }
 
     // FIXME: This should probably be called by a signal instead
@@ -310,10 +330,25 @@ void InstanceSettingsPage::loadSettings()
     ui->customCommands->initialize(true, m_settings->get("OverrideCommands").toBool(), m_settings->get("PreLaunchCommand").toString(),
                                    m_settings->get("WrapperCommand").toString(), m_settings->get("PostExitCommand").toString());
 
+    // Environment variables
+    ui->environmentVariables->initialize(true, m_settings->get("OverrideEnv").toBool(), m_settings->get("Env").toMap());
+
     // Workarounds
     ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());
     ui->useNativeGLFWCheck->setChecked(m_settings->get("UseNativeGLFW").toBool());
+    ui->lineEditGLFWPath->setText(m_settings->get("CustomGLFWPath").toString());
+#ifdef Q_OS_LINUX
+    ui->lineEditGLFWPath->setPlaceholderText(APPLICATION->m_detectedGLFWPath);
+#else
+    ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.GLFW_LIBRARY_NAME));
+#endif
     ui->useNativeOpenALCheck->setChecked(m_settings->get("UseNativeOpenAL").toBool());
+    ui->lineEditOpenALPath->setText(m_settings->get("CustomOpenALPath").toString());
+#ifdef Q_OS_LINUX
+    ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
+#else
+    ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
+#endif
 
     // Performance
     ui->perfomanceGroupBox->setChecked(m_settings->get("OverridePerformance").toBool());
@@ -346,9 +381,8 @@ void InstanceSettingsPage::loadSettings()
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
 
-    // Mod loader specific settings
-    ui->modLoaderSettingsGroupBox->setChecked(m_settings->get("OverrideModLoaderSettings").toBool());
-    ui->disableQuiltBeaconCheckBox->setChecked(m_settings->get("DisableQuiltBeacon").toBool());
+    ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
+    ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
 }
 
 void InstanceSettingsPage::on_javaDownloadBtn_clicked()
@@ -414,6 +448,16 @@ void InstanceSettingsPage::on_javaTestBtn_clicked()
     checker->run();
 }
 
+void InstanceSettingsPage::onUseNativeGLFWChanged(bool checked)
+{
+    ui->lineEditGLFWPath->setEnabled(checked);
+}
+
+void InstanceSettingsPage::onUseNativeOpenALChanged(bool checked)
+{
+    ui->lineEditOpenALPath->setEnabled(checked);
+}
+
 void InstanceSettingsPage::updateAccountsMenu()
 {
     ui->instanceAccountSelector->clear();
@@ -460,12 +504,14 @@ void InstanceSettingsPage::retranslate()
 {
     ui->retranslateUi(this);
     ui->customCommands->retranslate();  // TODO: why is this seperate from the others?
+    ui->environmentVariables->retranslate();
 }
 
 void InstanceSettingsPage::updateThresholds()
 {
     auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
     unsigned int maxMem = ui->maxMemSpinBox->value();
+    unsigned int minMem = ui->minMemSpinBox->value();
 
     QString iconName;
 
@@ -475,6 +521,9 @@ void InstanceSettingsPage::updateThresholds()
     } else if (maxMem > (sysMiB * 0.9)) {
         iconName = "status-yellow";
         ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+    } else if (maxMem < minMem) {
+        iconName = "status-yellow";
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
     } else {
         iconName = "status-good";
         ui->labelMaxMemIcon->setToolTip("");

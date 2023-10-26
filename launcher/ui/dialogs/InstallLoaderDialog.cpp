@@ -129,7 +129,9 @@ InstallLoaderDialog::InstallLoaderDialog(std::shared_ptr<PackProfile> profile, c
 
 QList<BasePage*> InstallLoaderDialog::getPages()
 {
-    return { // Forge
+    return { // NeoForge
+             new InstallLoaderPage("net.neoforged", "neoforged", tr("NeoForge"), {}, profile),
+             // Forge
              new InstallLoaderPage("net.minecraftforge", "forge", tr("Forge"), {}, profile),
              // Fabric
              new InstallLoaderPage("net.fabricmc.fabric-loader", "fabricmc", tr("Fabric"), Version("1.14"), profile),

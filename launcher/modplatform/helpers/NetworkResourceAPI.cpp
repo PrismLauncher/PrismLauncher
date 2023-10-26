@@ -72,7 +72,8 @@ Task::Ptr NetworkResourceAPI::getProjectInfo(ProjectInfoArgs&& args, ProjectInfo
 
         callbacks.on_succeed(doc, args.pack);
     });
-
+    QObject::connect(job.get(), &NetJob::failed, [callbacks](QString reason) { callbacks.on_fail(reason); });
+    QObject::connect(job.get(), &NetJob::aborted, [callbacks] { callbacks.on_abort(); });
     return job;
 }
 
@@ -131,7 +132,7 @@ Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, 
     auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
     auto response = std::make_shared<QByteArray>();
 
-    netJob->addNetAction(Net::Download::makeByteArray(versions_url, response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [=] {
         QJsonParseError parse_error{};

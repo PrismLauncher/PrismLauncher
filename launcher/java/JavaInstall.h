@@ -24,11 +24,11 @@
 struct JavaInstall : public BaseVersion {
     JavaInstall() {}
     JavaInstall(QString id, QString arch, QString path) : id(id), arch(arch), path(path) {}
-    virtual QString descriptor() { return id.toString(); }
+    virtual QString descriptor() override { return id.toString(); }
 
-    virtual QString name() { return id.toString(); }
+    virtual QString name() override { return id.toString(); }
 
-    virtual QString typeString() const { return arch; }
+    virtual QString typeString() const override { return arch; }
 
     virtual bool operator<(BaseVersion& a) override;
     virtual bool operator>(BaseVersion& a) override;
@@ -42,4 +42,4 @@ struct JavaInstall : public BaseVersion {
     bool recommended = false;
 };
 
-typedef std::shared_ptr<JavaInstall> JavaInstallPtr;
+using JavaInstallPtr = std::shared_ptr<JavaInstall>;

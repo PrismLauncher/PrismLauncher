@@ -168,6 +168,17 @@
     <string>Go to mods home page</string>
    </property>
   </action>
+  <action name="actionRemoveItemMetadata">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Remove metadata</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove mod's metadata</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
