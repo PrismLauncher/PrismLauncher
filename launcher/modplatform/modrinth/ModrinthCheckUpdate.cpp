@@ -72,7 +72,7 @@ void ModrinthCheckUpdate::executeTask()
     auto response = std::make_shared<QByteArray>();
     auto job = api.latestVersions(hashes, best_hash_type, m_game_versions, m_loaders, response);
 
-    connect(job.get(), &Task::succeeded, this, [this, response, &mappings, best_hash_type, job] {
+    connect(job.get(), &Task::succeeded, this, [this, response, mappings, best_hash_type, job] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
