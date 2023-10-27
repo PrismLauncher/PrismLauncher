@@ -40,7 +40,6 @@ JavaSettingsWidget::JavaSettingsWidget(QWidget* parent) : QWidget(parent)
     connect(m_javaPathTextBox, &QLineEdit::textEdited, this, &JavaSettingsWidget::javaPathEdited);
     connect(m_javaStatusBtn, &QToolButton::clicked, this, &JavaSettingsWidget::on_javaStatusBtn_clicked);
     connect(m_javaDownloadBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_javaDownloadBtn_clicked);
-
 }
 
 void JavaSettingsWidget::setupUi()
@@ -274,7 +273,6 @@ void JavaSettingsWidget::on_javaBrowseBtn_clicked()
 void JavaSettingsWidget::on_javaDownloadBtn_clicked()
 {
     JavaDownloader::showPrompts(this);
-
 }
 void JavaSettingsWidget::on_javaStatusBtn_clicked()
 {
