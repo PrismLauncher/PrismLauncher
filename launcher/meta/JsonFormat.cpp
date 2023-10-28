@@ -48,17 +48,15 @@ static std::shared_ptr<Index> parseIndexInternal(const QJsonObject& obj)
 }
 
 // Property
-static std::shared_ptr<Property> parsePropertyInternal(const QJsonObject& obj){
-
+static std::shared_ptr<Property> parsePropertyInternal(const QJsonObject& obj)
+{
     const QVector<QJsonObject> objects = requireIsArrayOf<QJsonObject>(obj, "properties");
     QVector<QPair<QString, QString>> properties;
     properties.reserve(objects.size());
 
-    for (const auto& object : objects)
-    {
+    for (const auto& object : objects) {
         auto type = requireString(object, "type");
-        if (type == "override")
-        {
+        if (type == "override") {
             auto field1 = requireString(object, "target");
             auto field2 = requireString(object, "value");
             if (!field1.endsWith("Override") || !field2.startsWith("https"))

@@ -179,8 +179,6 @@ QList<NetAction::Ptr> Library::getDownloads(const RuntimeContext& runtimeContext
                 else
 #endif
                     return BuildConfig.LIBRARY_BASE + raw_storage;
-
-
             }
 
             if (m_repositoryURL.endsWith('/')) {

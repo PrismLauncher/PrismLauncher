@@ -49,10 +49,10 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
+#include "meta/Index.h"
 #include "net/PasteUpload.h"
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
-#include "meta/Index.h"
 
 APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
 {

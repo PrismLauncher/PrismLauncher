@@ -36,17 +36,16 @@ void Property::merge(const std::shared_ptr<Property>& other)
     m_properties = other->m_properties;
 }
 
-void Property::applyProperties() {
-    if (!isLoaded())
-    {
+void Property::applyProperties()
+{
+    if (!isLoaded()) {
         load(Net::Mode::Online);
     }
 
     auto s = APPLICATION->settings();
-    for (auto& property : m_properties)
-    {
+    for (auto& property : m_properties) {
         if (s->contains(property.first))
-            s->set(property.first,property.second);
+            s->set(property.first, property.second);
     }
 }
 }  // namespace Meta
