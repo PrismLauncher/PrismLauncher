@@ -59,6 +59,8 @@ class APIPage : public QWidget, public BasePage {
     QString helpPage() const override { return "APIs"; }
     virtual bool apply() override;
     void retranslate() override;
+   public slots:
+    void on_applyPropertiesBtn_clicked();
 
    private:
     int baseURLPasteType;

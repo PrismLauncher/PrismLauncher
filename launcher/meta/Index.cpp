@@ -126,4 +126,12 @@ void Index::connectVersionList(const int row, const VersionList::Ptr& list)
     connect(list.get(), &VersionList::nameChanged, this,
             [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << Qt::DisplayRole); });
 }
+
+shared_qobject_ptr<Meta::Property> Index::property()
+{
+    if (!m_property) {
+        m_property.reset(new Meta::Property());
+    }
+    return m_property;
+}
 }  // namespace Meta

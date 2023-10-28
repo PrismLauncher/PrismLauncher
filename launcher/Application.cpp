@@ -688,7 +688,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
             if (!resourceUrl.isValid() || (resourceUrl.scheme() != "http" && resourceUrl.scheme() != "https"))
                 m_settings->reset("MinecraftResourceURLOverride");
-            if (!librariesUrl.isValid() || (librariesUrl.scheme() != "http" && resourceUrl.scheme() != "https"))
+            if (!librariesUrl.isValid() || (librariesUrl.scheme() != "http" && librariesUrl.scheme() != "https"))
                 m_settings->reset("MinecraftLibrariesURLOverride");
         }
 

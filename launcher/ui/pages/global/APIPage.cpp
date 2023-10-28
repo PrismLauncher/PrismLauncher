@@ -52,6 +52,7 @@
 #include "net/PasteUpload.h"
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
+#include "meta/Index.h"
 
 APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
 {
@@ -217,4 +218,10 @@ bool APIPage::apply()
 void APIPage::retranslate()
 {
     ui->retranslateUi(this);
+}
+
+void APIPage::on_applyPropertiesBtn_clicked()
+{
+    APPLICATION->metadataIndex()->property()->applyProperties();
+    loadSettings();
 }
