@@ -16,10 +16,7 @@ class ConcurrentTask;
 class ModUpdateDialog final : public ReviewMessageBox {
     Q_OBJECT
    public:
-    explicit ModUpdateDialog(QWidget* parent,
-                             BaseInstance* instance,
-                             const std::shared_ptr<ModFolderModel> mod_model,
-                             QList<Mod*>& search_for);
+    explicit ModUpdateDialog(QWidget* parent, BaseInstance* instance, std::shared_ptr<ModFolderModel> mod_model, QList<Mod*>& search_for);
 
     void checkCandidates();
 

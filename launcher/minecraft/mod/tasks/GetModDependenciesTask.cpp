@@ -238,7 +238,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     return tasks;
 }
 
-void GetModDependenciesTask::removePack(const QVariant addonId)
+void GetModDependenciesTask::removePack(const QVariant& addonId)
 {
     auto pred = [addonId](const std::shared_ptr<PackDependency>& v) { return v->pack->addonId == addonId; };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)
