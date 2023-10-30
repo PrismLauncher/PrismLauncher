@@ -36,12 +36,14 @@
 
 #include "LaunchController.h"
 #include "Application.h"
+#include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AccountList.h"
 
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/EditAccountDialog.h"
+#include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/ProfileSelectDialog.h"
 #include "ui/dialogs/ProfileSetupDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -154,6 +156,12 @@ void LaunchController::login()
                 return;
             }
         }
+        if (!m_accountToUse->isOffline() && m_accountToUse->accountState() == AccountState::Offline && tries == 0) {
+            // Force account refresh on the account used to launch the instance updating the AccountState
+            //  only on first try and if it is not meant to be offline
+            auto accounts = APPLICATION->accounts();
+            accounts->requestRefresh(m_accountToUse->internalId());
+        }
         tries++;
         m_session = std::make_shared<AuthSession>();
         m_session->wants_online = m_online;
@@ -249,17 +257,30 @@ void LaunchController::login()
                 progDialog.execWithTask(task.get());
                 continue;
             }
-            // FIXME: this is missing - the meaning is that the account is queued for refresh and we should wait for that
-            /*
-            case AccountState::Queued: {
-                return;
-            }
-            */
             case AccountState::Expired: {
-                auto errorString = tr("The account has expired and needs to be logged into manually again.");
-                QMessageBox::warning(m_parentWidget, tr("Account refresh failed"), errorString, QMessageBox::StandardButton::Ok,
-                                     QMessageBox::StandardButton::Ok);
-                emitFailed(errorString);
+                auto errorString = tr("The account has expired and needs to be logged into manually. Press OK to log in again.");
+                auto button = QMessageBox::warning(m_parentWidget, tr("Account refresh failed"), errorString,
+                                                   QMessageBox::StandardButton::Ok | QMessageBox::StandardButton::Cancel,
+                                                   QMessageBox::StandardButton::Ok);
+                if (button == QMessageBox::StandardButton::Ok) {
+                    auto accounts = APPLICATION->accounts();
+                    bool isDefault = accounts->defaultAccount() == m_accountToUse;
+                    accounts->removeAccount(accounts->index(accounts->findAccountByProfileId(m_accountToUse->profileId())));
+                    if (m_accountToUse->isMSA()) {
+                        auto newAccount = MSALoginDialog::newAccount(
+                            m_parentWidget, tr("Please enter your Mojang account email and password to add your account."));
+                        accounts->addAccount(newAccount);
+                        if (isDefault) {
+                            accounts->setDefaultAccount(newAccount);
+                        }
+                        m_accountToUse = nullptr;
+                        decideAccount();
+                        continue;
+                    }
+                    emitFailed(tr("Account expired and re-login attempt failed"));
+                } else {
+                    emitFailed(errorString);
+                }
                 return;
             }
             case AccountState::Disabled: {
