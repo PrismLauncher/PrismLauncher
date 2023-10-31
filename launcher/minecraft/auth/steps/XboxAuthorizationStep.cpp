@@ -136,7 +136,7 @@ bool XboxAuthorizationStep::processSTSError(QNetworkReply::NetworkError error, Q
                 return true;
             }
             case 2148916237:
-                emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("This Microsoft account has reached the its limit for playtime. This "
+                emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("This Microsoft account has reached its limit for playtime. This "
                                                                       "Microsoft account has been blocked from logging in."));
                 return true;
             case 2148916227: {
