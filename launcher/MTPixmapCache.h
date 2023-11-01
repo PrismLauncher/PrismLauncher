@@ -113,7 +113,13 @@ class PixmapCache final : public QObject {
         if (m_consecutive_fast_evicitons >= m_consecutive_fast_evicitons_threshold) {
             // double the cache size
             auto newSize = _cacheLimit() * 2;
-            qDebug() << m_consecutive_fast_evicitons << "pixmap cache misses by eviction happened too fast, doubling cache size to"
+            if (newSize <= 0) {  // double it until you overflow :D
+                qDebug() << m_consecutive_fast_evicitons
+                         << tr("pixmap cache misses by eviction happened too fast, doing nothing as the cache size reached it's limit");
+                m_consecutive_fast_evicitons = 0;
+                return true;
+            }
+            qDebug() << m_consecutive_fast_evicitons << tr("pixmap cache misses by eviction happened too fast, doubling cache size to")
                      << newSize;
             _setCacheLimit(newSize);
             m_consecutive_fast_evicitons = 0;
