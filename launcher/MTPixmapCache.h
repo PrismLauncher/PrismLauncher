@@ -5,6 +5,7 @@
 #include <QPixmapCache>
 #include <QThread>
 #include <QTime>
+#include <limits>
 
 #define GET_TYPE()                                                          \
     Qt::ConnectionType type;                                                \
@@ -112,16 +113,16 @@ class PixmapCache final : public QObject {
         m_last_cache_miss_by_eviciton = now;
         if (m_consecutive_fast_evicitons >= m_consecutive_fast_evicitons_threshold) {
             // double the cache size
-            auto newSize = _cacheLimit() * 2;
-            if (newSize <= 0) {  // double it until you overflow :D
+            auto newSize = _cacheLimit() * 2.L;
+            if (newSize >= std::numeric_limits<int>::max()) {  // double it until you overflow :D
+                newSize = std::numeric_limits<int>::max();
                 qDebug() << m_consecutive_fast_evicitons
                          << tr("pixmap cache misses by eviction happened too fast, doing nothing as the cache size reached it's limit");
-                m_consecutive_fast_evicitons = 0;
-                return true;
+            } else {
+                qDebug() << m_consecutive_fast_evicitons << tr("pixmap cache misses by eviction happened too fast, doubling cache size to")
+                         << static_cast<int>(newSize);
             }
-            qDebug() << m_consecutive_fast_evicitons << tr("pixmap cache misses by eviction happened too fast, doubling cache size to")
-                     << newSize;
-            _setCacheLimit(newSize);
+            _setCacheLimit(static_cast<int>(newSize));
             m_consecutive_fast_evicitons = 0;
             return true;
         }
