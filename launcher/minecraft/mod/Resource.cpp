@@ -89,6 +89,13 @@ std::pair<int, bool> Resource::compare(const Resource& other, SortType type) con
             if (dateTimeChanged() < other.dateTimeChanged())
                 return { -1, type == SortType::DATE };
             break;
+        case SortType::SIZE: {
+            if (fileinfo().size() > other.fileinfo().size())
+                return { 1, type == SortType::SIZE };
+            if (fileinfo().size() < other.fileinfo().size())
+                return { -1, type == SortType::SIZE };
+            break;
+        }
     }
 
     return { 0, false };

@@ -45,6 +45,7 @@
 #include "MetadataHandler.h"
 #include "Version.h"
 #include "minecraft/mod/ModDetails.h"
+#include "minecraft/mod/Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -87,7 +88,8 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
         default:
         case SortType::ENABLED:
         case SortType::NAME:
-        case SortType::DATE: {
+        case SortType::DATE:
+        case SortType::SIZE: {
             auto res = Resource::compare(other, type);
             if (res.first != 0)
                 return res;

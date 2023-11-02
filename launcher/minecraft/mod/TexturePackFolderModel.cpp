@@ -37,6 +37,7 @@
 
 #include "Application.h"
 
+#include "StringUtils.h"
 #include "TexturePackFolderModel.h"
 
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
@@ -44,12 +45,12 @@
 
 TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance* instance) : ResourceFolderModel(QDir(dir), instance)
 {
-    m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified" });
-    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified") });
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::DATE };
-    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch,
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified", "Size" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified"), tr("Size") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::DATE, SortType::SIZE };
+    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::ResizeToContents,
                               QHeaderView::ResizeToContents };
-    m_columnsHideable = { false, true, false, true };
+    m_columnsHideable = { false, true, false, true, true };
 }
 
 Task* TexturePackFolderModel::createUpdateTask()
@@ -77,6 +78,8 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
                     return m_resources[row]->name();
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
+                case SizeColumn:
+                    return StringUtils::humanReadableFileSize(m_resources[row]->fileinfo().size(), true);
                 default:
                     return {};
             }
@@ -123,6 +126,7 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
                 case NameColumn:
                 case DateColumn:
                 case ImageColumn:
+                case SizeColumn:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -138,6 +142,8 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
                 case DateColumn:
                     //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
                     return tr("The date and time this resource was last changed (or added).");
+                case SizeColumn:
+                    return tr("The size of the resource.");
                 default:
                     return {};
             }
