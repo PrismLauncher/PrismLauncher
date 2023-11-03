@@ -180,7 +180,7 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case ProviderColumn:
                     return tr("Where the mod was downloaded from.");
                 case SizeColumn:
-                    return tr("The size of the resource.");
+                    return tr("The size of the mod.");
                 default:
                     return QVariant();
             }

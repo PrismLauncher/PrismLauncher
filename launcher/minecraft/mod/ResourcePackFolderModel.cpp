@@ -161,7 +161,7 @@ QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::O
                 case DateColumn:
                     return tr("The date and time this resource pack was last changed (or added).");
                 case SizeColumn:
-                    return tr("The size of the resource.");
+                    return tr("The size of the resource pack.");
                 default:
                     return {};
             }
