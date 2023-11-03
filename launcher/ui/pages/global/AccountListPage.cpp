@@ -167,7 +167,7 @@ void AccountListPage::on_actionAddOffline_triggered()
 
 void AccountListPage::on_actionRemove_triggered()
 {
-    auto response = CustomMessageBox::selectable(this, tr("Remove account?"), tr("Do you realy want to delete this account?"),
+    auto response = CustomMessageBox::selectable(this, tr("Remove account?"), tr("Do you really want to delete this account?"),
                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                         ->exec();
     if (response != QMessageBox::Yes) {
