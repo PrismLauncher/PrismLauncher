@@ -259,9 +259,9 @@ void GetModDependenciesTask::removePack(const QVariant addonId)
 #endif
 }
 
-QHash<QString, QStringList> GetModDependenciesTask::getRequiredBy()
+auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtraInfo>
 {
-    QHash<QString, QStringList> rby;
+    QHash<QString, PackDependencyExtraInfo> rby;
     auto fullList = m_selected + m_pack_dependencies;
     for (auto& mod : fullList) {
         auto addonId = mod->pack->addonId;
@@ -283,7 +283,7 @@ QHash<QString, QStringList> GetModDependenciesTask::getRequiredBy()
                 req.append(smod->pack->name);
             }
         }
-        rby[addonId.toString()] = req;
+        rby[addonId.toString()] = { maybeInstalled(mod), req };
     }
     return rby;
 }
@@ -335,7 +335,7 @@ bool GetModDependenciesTask::isLocalyInstalled(std::shared_ptr<PackDependency> p
            }) != m_pack_dependencies.end();  // check loaded dependencies
 }
 
-bool GetModDependenciesTask::isLaxInstalled(std::shared_ptr<PackDependency> pDep)
+bool GetModDependenciesTask::maybeInstalled(std::shared_ptr<PackDependency> pDep)
 {
     return std::find_if(m_mods_file_names.begin(), m_mods_file_names.end(), [pDep](QString i) {
                return !i.isEmpty() && laxCompare(i, pDep->version.fileName, true);
