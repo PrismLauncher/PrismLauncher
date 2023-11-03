@@ -68,8 +68,8 @@
 #include <FileSystem.h>
 #include "RWStorage.h"
 
-typedef RWStorage<QString, QIcon> SharedIconCache;
-typedef std::shared_ptr<SharedIconCache> SharedIconCachePtr;
+using SharedIconCache = RWStorage<QString, QIcon>;
+using SharedIconCachePtr = std::shared_ptr<SharedIconCache>;
 
 class ThumbnailingResult : public QObject {
     Q_OBJECT

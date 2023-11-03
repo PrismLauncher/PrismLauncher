@@ -172,7 +172,7 @@ class ExportToZipTask : public Task {
     void setExcludeFiles(QStringList excludeFiles) { m_exclude_files = excludeFiles; }
     void addExtraFile(QString fileName, QByteArray data) { m_extra_files.insert(fileName, data); }
 
-    typedef std::optional<QString> ZipResult;
+    using ZipResult = std::optional<QString>;
 
    protected:
     virtual void executeTask() override;
