@@ -129,9 +129,9 @@ void Index::connectVersionList(const int row, const VersionList::Ptr& list)
 
 shared_qobject_ptr<Meta::Property> Index::property()
 {
-    if (!m_property) {
-        m_property.reset(new Meta::Property());
+    if (!m_properties) {
+        m_properties.reset(new Meta::Property());
     }
-    return m_property;
+    return m_properties;
 }
 }  // namespace Meta
