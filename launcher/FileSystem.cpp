@@ -652,8 +652,7 @@ bool move(const QString& source, const QString& dest)
 
     if (err) {
         qWarning() << "Failed to move file:" << QString::fromStdString(err.message());
-        qDebug() << "Source file:" << source;
-        qDebug() << "Destination file:" << dest;
+        qDebug() << "Source file:" << source << ";Destination file:" << dest;
     }
 
     return err.value() == 0;
