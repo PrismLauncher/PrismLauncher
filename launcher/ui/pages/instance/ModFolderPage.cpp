@@ -215,7 +215,7 @@ void ModFolderPage::updateMods()
         return;
     }
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
-        QMessageBox::critical(this, tr("Error"), tr("The mod update is disabled when the metadata is disabled!"));
+        QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
