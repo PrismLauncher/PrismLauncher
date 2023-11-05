@@ -186,6 +186,16 @@
             </property>
            </widget>
           </item>
+           <item>
+           <widget class="QCheckBox" name="dependenciesDisableBtn">
+            <property name="toolTip">
+             <string>Disable mod dependencies checking.</string>
+            </property>
+            <property name="text">
+             <string>Disable mod dependencies checking</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
