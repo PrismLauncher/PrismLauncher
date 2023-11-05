@@ -18,16 +18,16 @@
 </a>
 
 - All downloads and instructions for Prism Launcher can be found on our [Website](https://prismlauncher.org/download).
-- Last build status can be found in the [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) (this also includes the pull requests status).
+- Last build status can be found in the [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) tab (this also includes the pull requests status).
 
 ### Development Builds
 
 Please understand that these builds are not intended for most users. There may be bugs, and other instabilities. You have been warned.
 
-There are development builds available on:
+There are development builds available through:
 
-- [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) includes builds from pull requests opened by contribuitors.
-- [nightly.link](https://nightly.link/PrismLauncher/PrismLauncher/workflows/trigger_builds/develop) this will allways point only to the latest develop.
+- [GitHub Actions](https://github.com/PrismLauncher/PrismLauncher/actions) (includes builds from pull requests opened by contribuitors)
+- [nightly.link](https://nightly.link/PrismLauncher/PrismLauncher/workflows/trigger_builds/develop) (this will always point only to the latest version of develop)
 
 These have debug information in the binaries, so their file sizes are relatively larger.
 
