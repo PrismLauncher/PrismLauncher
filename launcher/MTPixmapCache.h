@@ -113,7 +113,7 @@ class PixmapCache final : public QObject {
         m_last_cache_miss_by_eviciton = now;
         if (m_consecutive_fast_evicitons >= m_consecutive_fast_evicitons_threshold) {
             // double the cache size
-            auto newSize = _cacheLimit() * 2.L;
+            auto newSize = _cacheLimit() * 2ll;
             if (newSize >= std::numeric_limits<int>::max()) {  // double it until you overflow :D
                 newSize = std::numeric_limits<int>::max();
                 qDebug() << m_consecutive_fast_evicitons
