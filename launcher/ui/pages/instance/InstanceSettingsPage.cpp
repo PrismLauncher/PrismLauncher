@@ -90,6 +90,9 @@ void InstanceSettingsPage::globalSettingsButtonClicked(bool)
         case 2:
             APPLICATION->ShowGlobalSettings(this, "custom-commands");
             return;
+        case 3:
+            APPLICATION->ShowGlobalSettings(this, "environment-variables");
+            return;
         default:
             APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
             return;
@@ -198,6 +201,14 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("WrapperCommand");
         m_settings->reset("PostExitCommand");
     }
+
+    // Environment Variables
+    auto env = ui->environmentVariables->override();
+    m_settings->set("OverrideEnv", env);
+    if (env)
+        m_settings->set("Env", ui->environmentVariables->value());
+    else
+        m_settings->reset("Env");
 
     // Workarounds
     bool workarounds = ui->nativeWorkaroundsGroupBox->isChecked();
@@ -317,6 +328,9 @@ void InstanceSettingsPage::loadSettings()
     // Custom commands
     ui->customCommands->initialize(true, m_settings->get("OverrideCommands").toBool(), m_settings->get("PreLaunchCommand").toString(),
                                    m_settings->get("WrapperCommand").toString(), m_settings->get("PostExitCommand").toString());
+
+    // Environment variables
+    ui->environmentVariables->initialize(true, m_settings->get("OverrideEnv").toBool(), m_settings->get("Env").toMap());
 
     // Workarounds
     ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());
@@ -484,6 +498,7 @@ void InstanceSettingsPage::retranslate()
 {
     ui->retranslateUi(this);
     ui->customCommands->retranslate();  // TODO: why is this seperate from the others?
+    ui->environmentVariables->retranslate();
 }
 
 void InstanceSettingsPage::updateThresholds()

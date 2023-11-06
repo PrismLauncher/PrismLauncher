@@ -290,7 +290,7 @@ void InstanceList::deleteGroup(const GroupId& name)
             qDebug() << "Remove" << instID << "from group" << name;
             removed = true;
             auto idx = getInstIndex(instance.get());
-            if (idx > 0)
+            if (idx >= 0)
                 emit dataChanged(index(idx), index(idx), { GroupRole });
         }
     }
@@ -315,7 +315,7 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
             qDebug() << "Set" << instID << "group to" << dst;
             modified = true;
             auto idx = getInstIndex(instance.get());
-            if (idx > 0)
+            if (idx >= 0)
                 emit dataChanged(index(idx), index(idx), { GroupRole });
         }
     }
@@ -947,9 +947,12 @@ QString InstanceList::getStagedInstancePath()
 
 bool InstanceList::commitStagedInstance(const QString& path,
                                         InstanceName const& instanceName,
-                                        const QString& groupName,
+                                        QString groupName,
                                         InstanceTask const& commiting)
 {
+    if (groupName.isEmpty() && !groupName.isNull())
+        groupName = QString();
+
     QDir dir;
     QString instID;
     InstancePtr inst;
