@@ -575,15 +575,20 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
 
 #ifdef Q_OS_LINUX
     if (settings()->get("EnableMangoHud").toBool() && APPLICATION->capabilities() & Application::SupportsMangoHud) {
-        auto preloadList = env.value("LD_PRELOAD").split(QLatin1String(":"));
-        auto libPaths = env.value("LD_LIBRARY_PATH").split(QLatin1String(":"));
+        QStringList preloadList;
+        if (auto value = env.value("LD_PRELOAD"); !value.isEmpty())
+            preloadList = value.split(QLatin1String(":"));
+        QStringList libPaths;
+        if (auto value = env.value("LD_LIBRARY_PATH"); !value.isEmpty())
+            libPaths = value.split(QLatin1String(":"));
 
         auto mangoHudLibString = MangoHud::getLibraryString();
         if (!mangoHudLibString.isEmpty()) {
             QFileInfo mangoHudLib(mangoHudLibString);
 
             // dlsym variant is only needed for OpenGL and not included in the vulkan layer
-            preloadList << "libMangoHud_dlsym.so" << mangoHudLib.fileName();
+            preloadList << "libMangoHud_dlsym.so"
+                        << "libMangoHud_opengl.so" << mangoHudLib.fileName();
             libPaths << mangoHudLib.absolutePath();
         }
 
