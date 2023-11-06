@@ -104,6 +104,11 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
             }
             return {};
         }
+        case Qt::SizeHintRole:
+            if (column == ImageColumn) {
+                return QSize(32, 32);
+            }
+            return {};
         case Qt::CheckStateRole:
             if (column == ActiveColumn) {
                 return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
