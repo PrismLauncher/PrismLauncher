@@ -101,7 +101,7 @@ class PixmapCache final : public QObject {
      */
     bool _markCacheMissByEviciton()
     {
-        static constexpr int maxInt = std::numeric_limits<int>::max();
+        static constexpr uint maxInt = static_cast<uint>(std::numeric_limits<int>::max());
         static constexpr uint step = 10240;
         static constexpr int oneSecond = 1000;
 
@@ -123,8 +123,8 @@ class PixmapCache final : public QObject {
                 qDebug() << m_consecutive_fast_evicitons
                          << tr("pixmap cache misses by eviction happened too fast, doing nothing as the cache size reached it's limit");
             } else {
-                qDebug() << m_consecutive_fast_evicitons << tr("pixmap cache misses by eviction happened too fast, doubling cache size to")
-                         << static_cast<int>(newSize);
+                qDebug() << m_consecutive_fast_evicitons
+                         << tr("pixmap cache misses by eviction happened too fast, increasing cache size to") << static_cast<int>(newSize);
             }
             _setCacheLimit(static_cast<int>(newSize));
             m_consecutive_fast_evicitons = 0;
