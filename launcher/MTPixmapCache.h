@@ -102,7 +102,7 @@ class PixmapCache final : public QObject {
     bool _markCacheMissByEviciton()
     {
         static constexpr int maxInt = std::numeric_limits<int>::max();
-        static constexpr uint oneMB = 1000;
+        static constexpr uint step = 10240;
         static constexpr int oneSecond = 1000;
 
         auto now = QTime::currentTime();
@@ -117,7 +117,7 @@ class PixmapCache final : public QObject {
         m_last_cache_miss_by_eviciton = now;
         if (m_consecutive_fast_evicitons >= m_consecutive_fast_evicitons_threshold) {
             // increase the cache size
-            uint newSize = _cacheLimit() + oneMB;
+            uint newSize = _cacheLimit() + step;
             if (newSize >= maxInt) {  // increase it until you overflow :D
                 newSize = maxInt;
                 qDebug() << m_consecutive_fast_evicitons
