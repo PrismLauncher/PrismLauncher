@@ -188,7 +188,7 @@ void ModUpdateDialog::checkCandidates()
         }
     }
 
-    if (m_include_deps) {  // dependencies
+    if (m_include_deps && !APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
         auto depTask = makeShared<GetModDependenciesTask>(this, m_instance, m_mod_model.get(), selectedVers);
 
         connect(depTask.get(), &Task::failed, this,
