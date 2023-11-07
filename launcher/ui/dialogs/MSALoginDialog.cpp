@@ -109,8 +109,8 @@ void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& 
         urlString += QString("?otc=%1").arg(code);
         DesktopServices::openUrl(urlString);
         ui->label->setText(
-            tr("<p>Please login in the opened browser. If no browser was opened please follow the following instructions:</p>"
-               "<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>")
+            tr("<p>Please login in the opened browser. If no browser was opened please open up %1 in "
+               "a browser and put in the code <b>%2</b> to proceed with login.</p>")
                 .arg(linkString, code));
     } else {
         ui->label->setText(
