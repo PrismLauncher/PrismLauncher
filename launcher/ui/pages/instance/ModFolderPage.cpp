@@ -84,25 +84,27 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
         connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::installMods);
 
-        auto updateMenu = ui->actionUpdateItem->menu();
-        if (updateMenu) {
-            updateMenu->clear();
-        } else {
-            updateMenu = new QMenu(this);
-        }
+        if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+            auto updateMenu = ui->actionUpdateItem->menu();
+            if (updateMenu) {
+                updateMenu->clear();
+            } else {
+                updateMenu = new QMenu(this);
+            }
 
-        {
-            auto update = updateMenu->addAction(tr("Check for Updates"));
-            update->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-            connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
+            {
+                auto update = updateMenu->addAction(tr("Check for Updates"));
+                update->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+                connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
+            }
+            {
+                auto updateWithDeps = updateMenu->addAction(tr("Verify Dependencies"));
+                updateWithDeps->setToolTip(
+                    tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
+                connect(updateWithDeps, &QAction::triggered, this, [this] { updateMods(true); });
+            }
+            ui->actionUpdateItem->setMenu(updateMenu);
         }
-        {
-            auto updateWithDeps = updateMenu->addAction(tr("Verify Dependencies"));
-            updateWithDeps->setToolTip(
-                tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
-            connect(updateWithDeps, &QAction::triggered, this, [this] { updateMods(true); });
-        }
-        ui->actionUpdateItem->setMenu(updateMenu);
 
         ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
