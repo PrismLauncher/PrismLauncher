@@ -84,52 +84,77 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
         connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::installMods);
 
-        ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-        ui->actionsToolbar->insertActionAfter(ui->actionAddItem, ui->actionUpdateItem);
-        connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
+        auto updateMenu = ui->actionUpdateItem->menu();
+        if (updateMenu) {
+            updateMenu->clear();
+        } else {
+            updateMenu = new QMenu(this);
+        }
 
-        ui->actionUpdateDepsItem->setToolTip(
-            tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
-        ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionUpdateDepsItem);
-        connect(ui->actionUpdateDepsItem, &QAction::triggered, this, [this] { updateMods(true); });
+        {
+            auto update = updateMenu->addAction(tr("Check for Updates"));
+            update->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+            connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
+        }
+        {
+            auto updateWithDeps = updateMenu->addAction(tr("Verify Dependencies"));
+            updateWithDeps->setToolTip(
+                tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
+            connect(updateWithDeps, &QAction::triggered, this, [this] { updateMods(true); });
+        }
+        ui->actionUpdateItem->setMenu(updateMenu);
+
+        ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+        connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
+        ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
 
         ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
 
-        ui->actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
-        ui->actionsToolbar->insertActionAfter(ui->actionRemoveItem, ui->actionRemoveItemMetadata);
-        connect(ui->actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
+        auto removeMenu = ui->actionRemoveItem->menu();
+        if (removeMenu) {
+            removeMenu->clear();
+        } else {
+            removeMenu = new QMenu(this);
+        }
+        {
+            auto remove = removeMenu->addAction("Remove");
+            remove->setToolTip(tr("Remove selected item"));
+            connect(remove, &QAction::triggered, this, &ModFolderPage::removeItem);
+        }
+        auto actionRemoveItemMetadata = removeMenu->addAction(tr("Remove metadata"));
+        actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
+        connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
+
+        ui->actionRemoveItem->setMenu(removeMenu);
 
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
-        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
-            ui->actionUpdateItem->setEnabled(check_allow_update());
-            ui->actionUpdateDepsItem->setEnabled(check_allow_update());
+        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+                [this, check_allow_update, actionRemoveItemMetadata] {
+                    ui->actionUpdateItem->setEnabled(check_allow_update());
 
-            auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-            auto mods_list = m_model->selectedMods(selection);
-            auto selected = std::count_if(mods_list.cbegin(), mods_list.cend(),
-                                          [](Mod* v) { return v->metadata() != nullptr || v->homeurl().size() != 0; });
-            if (selected <= 1) {
-                ui->actionVisitItemPage->setText(tr("Visit mod's page"));
-                ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
+                    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+                    auto mods_list = m_model->selectedMods(selection);
+                    auto selected = std::count_if(mods_list.cbegin(), mods_list.cend(),
+                                                  [](Mod* v) { return v->metadata() != nullptr || v->homeurl().size() != 0; });
+                    if (selected <= 1) {
+                        ui->actionVisitItemPage->setText(tr("Visit mod's page"));
+                        ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
 
-                ui->actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
-            } else {
-                ui->actionVisitItemPage->setText(tr("Visit mods' pages"));
-                ui->actionVisitItemPage->setToolTip(tr("Go to the pages of the selected mods"));
+                        actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
+                    } else {
+                        ui->actionVisitItemPage->setText(tr("Visit mods' pages"));
+                        ui->actionVisitItemPage->setToolTip(tr("Go to the pages of the selected mods"));
 
-                ui->actionRemoveItemMetadata->setToolTip(tr("Remove mods' metadata"));
-            }
-            ui->actionVisitItemPage->setEnabled(selected != 0);
-            ui->actionRemoveItemMetadata->setEnabled(selected != 0);
-        });
+                        actionRemoveItemMetadata->setToolTip(tr("Remove mods' metadata"));
+                    }
+                    ui->actionVisitItemPage->setEnabled(selected != 0);
+                    actionRemoveItemMetadata->setEnabled(selected != 0);
+                });
 
-        auto updateButtons = [this, check_allow_update] {
-            ui->actionUpdateItem->setEnabled(check_allow_update());
-            ui->actionUpdateDepsItem->setEnabled(check_allow_update());
-        };
+        auto updateButtons = [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); };
         connect(mods.get(), &ModFolderModel::rowsInserted, this, updateButtons);
 
         connect(mods.get(), &ModFolderModel::rowsRemoved, this, updateButtons);
