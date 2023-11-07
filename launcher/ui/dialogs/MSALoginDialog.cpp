@@ -105,8 +105,17 @@ void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& 
 
     QString urlString = uri.toString();
     QString linkString = QString("<a href=\"%1\">%2</a>").arg(urlString, urlString);
-    ui->label->setText(
-        tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
+    if (urlString == "https://www.microsoft.com/link" && !code.isEmpty()) {
+        urlString += QString("?otc=%1").arg(code);
+        DesktopServices::openUrl(urlString);
+        ui->label->setText(
+            tr("<p>Please login in the opened browser. If no browser was opened please follow the following instructions:</p>"
+               "<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>")
+                .arg(linkString, code));
+    } else {
+        ui->label->setText(
+            tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
+    }
     ui->actionButton->setVisible(true);
     connect(ui->actionButton, &QPushButton::clicked, [=]() {
         DesktopServices::openUrl(uri);
