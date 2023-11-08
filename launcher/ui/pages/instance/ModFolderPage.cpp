@@ -84,27 +84,32 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
         connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::installMods);
 
-        if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
-            auto updateMenu = ui->actionUpdateItem->menu();
-            if (updateMenu) {
-                updateMenu->clear();
-            } else {
-                updateMenu = new QMenu(this);
-            }
-
-            {
-                auto update = updateMenu->addAction(tr("Check for Updates"));
-                update->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-                connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
-            }
-            {
-                auto updateWithDeps = updateMenu->addAction(tr("Verify Dependencies"));
-                updateWithDeps->setToolTip(
-                    tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
-                connect(updateWithDeps, &QAction::triggered, this, [this] { updateMods(true); });
-            }
-            ui->actionUpdateItem->setMenu(updateMenu);
+        // update menu
+        auto updateMenu = ui->actionUpdateItem->menu();
+        if (updateMenu) {
+            updateMenu->clear();
+        } else {
+            updateMenu = new QMenu(this);
         }
+
+        {
+            auto update = updateMenu->addAction(tr("Check for Updates"));
+            update->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+            connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
+        }
+        if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+
+            auto updateWithDeps = updateMenu->addAction(tr("Verify Dependencies"));
+            updateWithDeps->setToolTip(
+                tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
+            connect(updateWithDeps, &QAction::triggered, this, [this] { updateMods(true); });
+        }
+        auto actionRemoveItemMetadata = updateMenu->addAction(tr("Reset update metadata"));
+        actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
+        connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
+        actionRemoveItemMetadata->setEnabled(false);
+
+        ui->actionUpdateItem->setMenu(updateMenu);
 
         ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
         connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
@@ -113,23 +118,6 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
-
-        auto removeMenu = ui->actionRemoveItem->menu();
-        if (removeMenu) {
-            removeMenu->clear();
-        } else {
-            removeMenu = new QMenu(this);
-        }
-        {
-            auto remove = removeMenu->addAction("Remove");
-            remove->setToolTip(tr("Remove selected item"));
-            connect(remove, &QAction::triggered, this, &ModFolderPage::removeItem);
-        }
-        auto actionRemoveItemMetadata = removeMenu->addAction(tr("Reset update metadata"));
-        actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
-        connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
-
-        ui->actionRemoveItem->setMenu(removeMenu);
 
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
