@@ -94,15 +94,22 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     resetBaseURLNote();
     connect(ui->pasteTypeComboBox, currentIndexChangedSignal, this, &APIPage::updateBaseURLNote);
     connect(ui->baseURLEntry, &QLineEdit::textEdited, this, &APIPage::resetBaseURLNote);
-    connect(APPLICATION->metadataIndex()->property().get(), &Meta::Property::succeedApplyProperties, [&](const QHash<QString, QString> succeed) {
-        QString context;
-        if (!succeed.isEmpty()) {
-            for (auto& item : succeed.keys())
-                context.append(item).append(": ").append(succeed[item]).append("\n");
-        } else context = tr("Nothing at all!");
-        QMessageBox::information(nullptr, tr("OK"), tr("The following meta server properties were successfully obtained: %1").arg(context));
-        loadSettings();
-    });
+    connect(APPLICATION->metadataIndex()->property().get(), &Meta::Property::succeededApplyProperties,
+            [&](const QHash<QString, QString> succeed) {
+                QString context;
+                if (!succeed.isEmpty()) {
+                    for (auto& item : succeed.keys())
+                        context.append("\n").append(item).append(": ").append(succeed[item]);
+
+                    QMessageBox::information(nullptr, tr("OK"),
+                                             tr("The following meta server properties were successfully obtained: %1").arg(context));
+                    loadSettings();
+                } else {
+                    QMessageBox::warning(nullptr, tr("DONE"),
+                                         tr("No properties is applied or unable to download the properties file from the %1")
+                                             .arg(APPLICATION->metadataIndex()->property()->url().toString()));
+                }
+            });
 }
 
 APIPage::~APIPage()

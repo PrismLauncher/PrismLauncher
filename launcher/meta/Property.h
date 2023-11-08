@@ -36,8 +36,8 @@ class Property : public QObject, public BaseEntity {
     // Properties
     void applyProperties();
 
-  signals:
-    void succeedApplyProperties(QHash<QString, QString> succeed);
+   signals:
+    void succeededApplyProperties(QHash<QString, QString> succeed);
 
    public:  // for usage by parsers only
     void configurate(const std::shared_ptr<Property>& other);

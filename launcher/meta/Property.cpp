@@ -34,13 +34,16 @@ void Property::parse(const QJsonObject& obj)
 void Property::configurate(const std::shared_ptr<Property>& other)
 {
     m_properties = other->m_properties;
-    apply();
 }
 
 void Property::applyProperties()
 {
     if (!isLoaded()) {
         load(Net::Mode::Online);
+        NetJob* task = dynamic_cast<NetJob*>(getCurrentTask().get());
+        QObject::connect(task, &NetJob::succeeded, [&]() {
+            apply();
+        });
     } else {
         apply();
     }
@@ -55,6 +58,6 @@ inline void Property::apply()
             s->set(propertyKey, m_properties[propertyKey]);
             succeed[propertyKey] = m_properties[propertyKey];
         }
-    emit succeedApplyProperties(succeed);
+    emit succeededApplyProperties(succeed);
 }
 }  // namespace Meta
