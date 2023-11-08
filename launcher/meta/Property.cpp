@@ -21,7 +21,7 @@
 namespace Meta {
 Property::Property(QObject* parent) : QObject(parent) {}
 
-Property::Property(const QVector<QPair<QString, QString>>& properties, QObject* parent) : QObject(parent)
+Property::Property(const QHash<QString, QString>& properties, QObject* parent) : QObject(parent)
 {
     m_properties = properties;
 }
@@ -31,21 +31,30 @@ void Property::parse(const QJsonObject& obj)
     parseProperty(obj, this);
 }
 
-void Property::merge(const std::shared_ptr<Property>& other)
+void Property::configurate(const std::shared_ptr<Property>& other)
 {
     m_properties = other->m_properties;
+    apply();
 }
 
 void Property::applyProperties()
 {
     if (!isLoaded()) {
         load(Net::Mode::Online);
+    } else {
+        apply();
     }
+}
 
+inline void Property::apply()
+{
     auto s = APPLICATION->settings();
-    for (auto& property : m_properties) {
-        if (s->contains(property.first))
-            s->set(property.first, property.second);
-    }
+    QHash<QString, QString> succeed;
+    for (auto& propertyKey : m_properties.keys())
+        if (s->contains(propertyKey)) {
+            s->set(propertyKey, m_properties[propertyKey]);
+            succeed[propertyKey] = m_properties[propertyKey];
+        }
+    emit succeedApplyProperties(succeed);
 }
 }  // namespace Meta

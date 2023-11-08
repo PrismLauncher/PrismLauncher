@@ -50,8 +50,8 @@ static std::shared_ptr<Index> parseIndexInternal(const QJsonObject& obj)
 // Property
 static std::shared_ptr<Property> parsePropertyInternal(const QJsonObject& obj)
 {
-    const QVector<QJsonObject> objects = requireIsArrayOf<QJsonObject>(obj, "properties");
-    QVector<QPair<QString, QString>> properties;
+    const auto objects = requireIsArrayOf<QJsonObject>(obj, "properties");
+    QHash<QString, QString> properties;
     properties.reserve(objects.size());
 
     for (const auto& object : objects) {
@@ -59,14 +59,10 @@ static std::shared_ptr<Property> parsePropertyInternal(const QJsonObject& obj)
         if (type == "override") {
             auto field1 = requireString(object, "target");
             auto field2 = requireString(object, "value");
-            if (!field1.endsWith("Override") || !field2.startsWith("https"))
+            if (!field2.startsWith("https"))
                 continue;
-
-            QPair<QString, QString> aProperty;
-            aProperty.first = field1;
-            aProperty.second = field2;
-
-            properties.append(aProperty);
+            if (field1 == "MinecraftLibrariesURLOverride" || field1 == "MinecraftResourceURLOverride")
+                properties[field1] = field2;
         }
     }
     return std::make_shared<Property>(properties);
@@ -161,7 +157,7 @@ void parseProperty(const QJsonObject& obj, Property* ptr)
     const MetadataVersion version = parseFormatVersion(obj);
     switch (version) {
         case MetadataVersion::InitialRelease:
-            ptr->merge(parsePropertyInternal(obj));
+            ptr->configurate(parsePropertyInternal(obj));
             break;
         case MetadataVersion::Invalid:
             throw ParseException(QObject::tr("Unknown format version!"));

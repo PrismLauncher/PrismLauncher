@@ -166,7 +166,7 @@
           <item>
            <widget class="QPushButton" name="applyPropertiesBtn">
             <property name="text">
-             <string>Apply Meta Server Properties</string>
+             <string>Download and Apply Properties in the Meta Server</string>
             </property>
            </widget>
           </item>

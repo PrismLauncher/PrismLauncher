@@ -29,18 +29,24 @@ class Property : public QObject, public BaseEntity {
     Q_OBJECT
    public:
     explicit Property(QObject* parent = nullptr);
-    explicit Property(const QVector<QPair<QString, QString>>& properties, QObject* parent = nullptr);
+    explicit Property(const QHash<QString, QString>& properties, QObject* parent = nullptr);
 
     QString localFilename() const override { return "property.json"; }
 
     // Properties
     void applyProperties();
 
+  signals:
+    void succeedApplyProperties(QHash<QString, QString> succeed);
+
    public:  // for usage by parsers only
-    void merge(const std::shared_ptr<Property>& other);
+    void configurate(const std::shared_ptr<Property>& other);
     void parse(const QJsonObject& obj) override;
 
    private:
-    QVector<QPair<QString, QString>> m_properties;
+    inline void apply();
+
+   private:
+    QHash<QString, QString> m_properties;
 };
 }  // namespace Meta
