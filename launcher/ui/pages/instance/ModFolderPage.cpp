@@ -125,7 +125,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
             remove->setToolTip(tr("Remove selected item"));
             connect(remove, &QAction::triggered, this, &ModFolderPage::removeItem);
         }
-        auto actionRemoveItemMetadata = removeMenu->addAction(tr("Remove metadata"));
+        auto actionRemoveItemMetadata = removeMenu->addAction(tr("Reset update metadata"));
         actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
         connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
 
@@ -145,12 +145,9 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
                         ui->actionVisitItemPage->setText(tr("Visit mod's page"));
                         ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
 
-                        actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
                     } else {
                         ui->actionVisitItemPage->setText(tr("Visit mods' pages"));
                         ui->actionVisitItemPage->setToolTip(tr("Go to the pages of the selected mods"));
-
-                        actionRemoveItemMetadata->setToolTip(tr("Remove mods' metadata"));
                     }
                     ui->actionVisitItemPage->setEnabled(selected != 0);
                     actionRemoveItemMetadata->setEnabled(selected != 0);
