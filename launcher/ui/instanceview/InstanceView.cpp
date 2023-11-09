@@ -465,7 +465,7 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
             widWidth = m_catPixmap.width();
         if (m_catPixmap.height() < widHeight)
             widHeight = m_catPixmap.height();
-        auto pixmap = m_catPixmap.scaled(widWidth, widHeight, Qt::KeepAspectRatio);
+        auto pixmap = m_catPixmap.scaled(widWidth, widHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         QRect rectOfPixmap = pixmap.rect();
         rectOfPixmap.moveBottomRight(this->viewport()->rect().bottomRight());
         painter.drawPixmap(rectOfPixmap.topLeft(), pixmap);
