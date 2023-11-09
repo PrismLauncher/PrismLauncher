@@ -39,6 +39,8 @@ ThemeCustomizationWidget::ThemeCustomizationWidget(QWidget* parent) : QWidget(pa
             [] { DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path()); });
     connect(ui->catPackFolder, &QPushButton::clicked, this,
             [] { DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path()); });
+
+    connect(ui->refreshButton, &QPushButton::clicked, this, &ThemeCustomizationWidget::refresh);
 }
 
 ThemeCustomizationWidget::~ThemeCustomizationWidget()
@@ -169,3 +171,22 @@ void ThemeCustomizationWidget::retranslate()
 {
     ui->retranslateUi(this);
 }
+
+void ThemeCustomizationWidget::refresh()
+{
+    applySettings();
+    disconnect(ui->iconsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThemeCustomizationWidget::applyIconTheme);
+    disconnect(ui->widgetStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+               &ThemeCustomizationWidget::applyWidgetTheme);
+    disconnect(ui->backgroundCatComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+               &ThemeCustomizationWidget::applyCatTheme);
+    APPLICATION->themeManager()->refresh();
+    ui->iconsComboBox->clear();
+    ui->widgetStyleComboBox->clear();
+    ui->backgroundCatComboBox->clear();
+    loadSettings();
+    connect(ui->iconsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThemeCustomizationWidget::applyIconTheme);
+    connect(ui->widgetStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &ThemeCustomizationWidget::applyWidgetTheme);
+    connect(ui->backgroundCatComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThemeCustomizationWidget::applyCatTheme);
+};

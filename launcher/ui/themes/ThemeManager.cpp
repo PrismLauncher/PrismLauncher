@@ -313,3 +313,13 @@ void ThemeManager::initializeCatPacks()
         }
     }
 }
+
+void ThemeManager::refresh()
+{
+    m_themes.clear();
+    m_icons.clear();
+    m_catPacks.clear();
+
+    initializeThemes();
+    initializeCatPacks();
+};
