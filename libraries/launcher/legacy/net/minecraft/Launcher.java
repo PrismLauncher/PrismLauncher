@@ -92,12 +92,11 @@ public final class Launcher extends Applet implements AppletStub {
 
         try {
             if (documentBase == null) {
-                if (applet.getClass().getPackage().getName().startsWith("com.mojang.")) {
+                if (applet.getClass().getPackage().getName().startsWith("com.mojang"))
                     // Special case only for Classic versions
                     documentBase = new URL("http://www.minecraft.net:80/game/");
-                } else {
+                else
                     documentBase = new URL("http://www.minecraft.net/game/");
-                }
             }
         } catch (MalformedURLException e) {
             throw new AssertionError(e);

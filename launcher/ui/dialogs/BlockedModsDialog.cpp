@@ -41,8 +41,8 @@
 #include <QPushButton>
 #include <QStandardPaths>
 
-BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
-    : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods)
+BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods, QString hash_type)
+    : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods), m_hash_type(hash_type)
 {
     m_hashing_task = shared_qobject_ptr<ConcurrentTask>(
         new ConcurrentTask(this, "MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
@@ -255,7 +255,7 @@ void BlockedModsDialog::addHashTask(QString path)
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::buildHashTask(QString path)
 {
-    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::ResourceProvider::FLAME, "sha1");
+    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::ResourceProvider::FLAME, m_hash_type);
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
 
@@ -335,6 +335,13 @@ bool BlockedModsDialog::checkValidPath(QString path)
 
     for (auto& mod : m_mods) {
         if (compare(filename, mod.name)) {
+            // if the mod is not yet matched and doesn't have a hash then
+            // just match it with the file that has the exact same name
+            if (!mod.matched && mod.hash.isEmpty()) {
+                mod.matched = true;
+                mod.localPath = path;
+                return false;
+            }
             qDebug() << "[Blocked Mods Dialog] Name match found:" << mod.name << "| From path:" << path;
             return true;
         }

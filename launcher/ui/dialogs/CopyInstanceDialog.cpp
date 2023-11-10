@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,22 +62,14 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget* parent)
     ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
     ui->instNameTextBox->setText(original->name());
     ui->instNameTextBox->setFocus();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    auto groupList = APPLICATION->instances()->getGroups();
-    QSet<QString> groups(groupList.begin(), groupList.end());
-    groupList = QStringList(groups.values());
-#else
-    auto groups = APPLICATION->instances()->getGroups().toSet();
-    auto groupList = QStringList(groups.toList());
-#endif
-    groupList.sort(Qt::CaseInsensitive);
-    groupList.removeOne("");
-    groupList.push_front("");
-    ui->groupBox->addItems(groupList);
-    int index = groupList.indexOf(APPLICATION->instances()->getInstanceGroup(m_original->id()));
-    if (index == -1) {
+
+    QStringList groups = APPLICATION->instances()->getGroups();
+    groups.prepend("");
+    ui->groupBox->addItems(groups);
+    int index = groups.indexOf(APPLICATION->instances()->getInstanceGroup(m_original->id()));
+    if (index == -1)
         index = 0;
-    }
+
     ui->groupBox->setCurrentIndex(index);
     ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
     ui->copySavesCheckbox->setChecked(m_selectedOptions.isCopySavesEnabled());

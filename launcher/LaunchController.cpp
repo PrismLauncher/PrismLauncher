@@ -89,7 +89,7 @@ void LaunchController::decideAccount()
         // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
                                                   tr("In order to play Minecraft, you must have at least one Microsoft "
-                                                     "account which owns Minecraft logged in."
+                                                     "account which owns Minecraft logged in. "
                                                      "Would you like to open the account manager to add an account now?"),
                                                   QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
                          ->exec();
@@ -106,7 +106,7 @@ void LaunchController::decideAccount()
     // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
     auto instanceAccountId = m_instance->settings()->get("InstanceAccountId").toString();
     auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId);
-    if (instanceAccountIndex == -1) {
+    if (instanceAccountIndex == -1 || instanceAccountId.isEmpty()) {
         m_accountToUse = accounts->defaultAccount();
     } else {
         m_accountToUse = accounts->at(instanceAccountIndex);

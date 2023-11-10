@@ -22,8 +22,8 @@ struct JavaCheckResult {
     enum class Validity { Errored, ReturnedInvalidData, Valid } validity = Validity::Errored;
 };
 
-typedef shared_qobject_ptr<QProcess> QProcessPtr;
-typedef shared_qobject_ptr<JavaChecker> JavaCheckerPtr;
+using QProcessPtr = shared_qobject_ptr<QProcess>;
+using JavaCheckerPtr = shared_qobject_ptr<JavaChecker>;
 class JavaChecker : public QObject {
     Q_OBJECT
    public:

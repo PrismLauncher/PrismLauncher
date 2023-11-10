@@ -42,21 +42,16 @@
 
 #include <QDebug>
 
-#include "net/NetJob.h"
-
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/SkinUploadDialog.h"
 
-#include "minecraft/auth/AccountTask.h"
 #include "minecraft/services/SkinDelete.h"
 #include "tasks/Task.h"
 
 #include "Application.h"
-
-#include "BuildConfig.h"
 
 AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
@@ -172,6 +167,12 @@ void AccountListPage::on_actionAddOffline_triggered()
 
 void AccountListPage::on_actionRemove_triggered()
 {
+    auto response = CustomMessageBox::selectable(this, tr("Remove account?"), tr("Do you really want to delete this account?"),
+                                                 QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+    if (response != QMessageBox::Yes) {
+        return;
+    }
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.size() > 0) {
         QModelIndex selected = selection.first();

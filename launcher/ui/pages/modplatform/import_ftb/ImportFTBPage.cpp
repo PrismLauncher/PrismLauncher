@@ -90,7 +90,7 @@ void ImportFTBPage::suggestCurrent()
     }
 
     dialog->setSuggestedPack(selected.name, new PackInstallTask(selected));
-    QString editedLogoName = QString("ftb_%1").arg(selected.id);
+    QString editedLogoName = QString("ftb_%1_%2.jpg").arg(selected.name, QString::number(selected.id));
     dialog->setSuggestedIconFromFile(FS::PathCombine(selected.path, "folder.jpg"), editedLogoName);
 }
 

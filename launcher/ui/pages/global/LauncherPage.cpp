@@ -223,6 +223,7 @@ void LauncherPage::applySettings()
 
     // Mods
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
+    s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -278,6 +279,7 @@ void LauncherPage::loadSettings()
     // Mods
     ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
+    ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
 }
 
 void LauncherPage::refreshFontPreview()
