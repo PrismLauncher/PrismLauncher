@@ -746,7 +746,7 @@ void LocalModParseTask::executeTask()
     m_result->details = mod.details();
 
     if (m_aborted)
-        emit finished();
+        emitAborted();
     else
         emitSucceeded();
 }
