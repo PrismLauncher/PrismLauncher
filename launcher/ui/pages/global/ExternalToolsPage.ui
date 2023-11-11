@@ -36,7 +36,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <widget class="QLabel" name="jprofilerLink">
-          <property name="title">
+          <property name="text">
            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;J&amp;Profiler&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
@@ -68,7 +68,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <widget class="QLabel" name="jvisualvmLink">
-          <property name="title">
+          <property name="text">
            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://visualvm.github.io/&quot;&gt;J&amp;VisualVM&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
@@ -100,7 +100,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_4">
          <widget class="QLabel" name="mceditLink">
-          <property name="title">
+          <property name="text">
            <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://www.mcedit.net/&quot;&gt;&amp;MCEdit&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
