@@ -36,7 +36,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string notr="true">J&amp;Profiler</string>
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;J&amp;Profiler&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
@@ -60,20 +60,13 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="jprofilerLink">
-            <property name="text">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;https://www.ej-technologies.com/products/jprofiler/overview.html&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string notr="true">J&amp;VisualVM</string>
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://visualvm.github.io/&quot;&gt;J&amp;VisualVM&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <item>
@@ -97,20 +90,13 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="jvisualvmLink">
-            <property name="text">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://visualvm.github.io/&quot;&gt;https://visualvm.github.io/&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string notr="true">&amp;MCEdit</string>
+          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://www.mcedit.net/&quot;&gt;&amp;MCEdit&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_12">
           <item>
@@ -135,13 +121,6 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="mceditLink">
-            <property name="text">
-             <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;https://www.mcedit.net/&quot;&gt;https://www.mcedit.net/&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
         </widget>
        </item>
        <item>
