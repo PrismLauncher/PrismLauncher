@@ -18,8 +18,10 @@
  */
 #pragma once
 
+#include <QDebug>
 #include <QDir>
 #include <QString>
+#include <memory>
 
 #include "IconTheme.h"
 #include "ui/themes/CatPack.h"

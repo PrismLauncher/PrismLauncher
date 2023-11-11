@@ -160,8 +160,7 @@ static bool writeThemeJson(const QString& path,
 /// @param baseTheme Base Theme
 /// @param fileInfo FileInfo object for file to load
 /// @param isManifest whether to load a theme manifest or a qss file
-CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, QDir themeDir, bool isManifest)
-    : m_themeDirectory(fileInfo.dir())
+CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, QDir themeDir, bool isManifest) : m_themeDirectory(fileInfo.dir())
 {
     if (isManifest) {
         m_id = fileInfo.dir().dirName();
@@ -239,7 +238,7 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, QDir themeDir, 
 void CustomTheme::apply(bool initial)
 {
     auto qqc_conf_path = themeDirectory().absoluteFilePath("qtquickcontrols2.conf");
-    QFileInfo qqc_conf_file { qqc_conf_path };
+    QFileInfo qqc_conf_file{ qqc_conf_path };
 
     auto old_qqc_conf_path = qgetenv("QT_QUICK_CONTROLS_CONF");
 

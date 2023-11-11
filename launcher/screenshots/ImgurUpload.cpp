@@ -82,13 +82,13 @@ QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
     multipart->append(namePart);
 
     return m_network->post(request, multipart);
-};
+}
 
 auto ImgurUpload::Sink::init(QNetworkRequest& request) -> Task::State
 {
     m_output.clear();
     return Task::State::Running;
-};
+}
 
 auto ImgurUpload::Sink::write(QByteArray& data) -> Task::State
 {

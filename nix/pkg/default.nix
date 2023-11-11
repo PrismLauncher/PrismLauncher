@@ -9,6 +9,7 @@
   jdk17,
   zlib,
   qtbase,
+  qtquickcontrols2 ? null,
   quazip,
   extra-cmake-modules,
   tomlplusplus,
@@ -37,6 +38,7 @@ assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is on
         tomlplusplus
         cmark
       ]
+      ++ lib.optional (lib.versionOlder qtbase.version "6") qtquickcontrols2
       ++ lib.optional gamemodeSupport gamemode
       ++ lib.optionals stdenv.isDarwin [Cocoa];
 
