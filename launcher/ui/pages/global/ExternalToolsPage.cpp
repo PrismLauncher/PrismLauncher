@@ -54,9 +54,9 @@ ExternalToolsPage::ExternalToolsPage(QWidget* parent) : QWidget(parent), ui(new 
 
     ui->jsonEditorTextBox->setClearButtonEnabled(true);
 
-    ui->mceditLink->setOpenExternalLinks(true);
-    ui->jvisualvmLink->setOpenExternalLinks(true);
-    ui->jprofilerLink->setOpenExternalLinks(true);
+    ui->groupBox_4->setOpenExternalLinks(true);
+    ui->groupBox_3->setOpenExternalLinks(true);
+    ui->groupBox_2->setOpenExternalLinks(true);
     loadSettings();
 }
 
