@@ -60,10 +60,10 @@ jobs:
             vcvars_arch: "amd64"
             qt_ver: 6
             qt_host: windows
-            qt_arch: ''
-            qt_version: '6.6.0'
-            qt_modules: 'qt5compat qtimageformats'
-            qt_tools: ''
+            qt_arch: ""
+            qt_version: "6.6.0"
+            qt_modules: "qt5compat qtimageformats"
+            qt_tools: ""
 
           - os: windows-2022
             name: "Windows-MSVC-arm64"
@@ -72,20 +72,20 @@ jobs:
             vcvars_arch: "amd64_arm64"
             qt_ver: 6
             qt_host: windows
-            qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.6.0'
-            qt_modules: 'qt5compat qtimageformats'
-            qt_tools: ''
+            qt_arch: "win64_msvc2019_arm64"
+            qt_version: "6.6.0"
+            qt_modules: "qt5compat qtimageformats"
+            qt_tools: ""
 
           - os: macos-12
             name: macOS
             macosx_deployment_target: 11.0
             qt_ver: 6
             qt_host: mac
-            qt_arch: ''
-            qt_version: '6.6.0'
-            qt_modules: 'qt5compat qtimageformats'
-            qt_tools: ''
+            qt_arch: ""
+            qt_version: "6.6.0"
+            qt_modules: "qt5compat qtimageformats"
+            qt_tools: ""
 
           - os: macos-12
             name: macOS-Legacy
@@ -250,7 +250,7 @@ jobs:
           wget "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-x86_64.AppImage"
 
           ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
-          sudo apt install libopengl0
+          sudo apt install libopengl0 libfuse2
 
       - name: Add QT_HOST_PATH var (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
