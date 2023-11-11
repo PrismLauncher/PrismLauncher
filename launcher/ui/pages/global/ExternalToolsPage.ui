@@ -35,9 +35,11 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QGroupBox" name="groupBox_2">
-         <property name="title">
-          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;J&amp;Profiler&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
+         <widget class="QLabel" name="jprofilerLink">
+          <property name="title">
+           <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://www.ej-technologies.com/products/jprofiler/overview.html&quot;&gt;J&amp;Profiler&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -65,9 +67,11 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_3">
-         <property name="title">
-          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://visualvm.github.io/&quot;&gt;J&amp;VisualVM&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
+         <widget class="QLabel" name="jvisualvmLink">
+          <property name="title">
+           <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://visualvm.github.io/&quot;&gt;J&amp;VisualVM&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -95,9 +99,11 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://www.mcedit.net/&quot;&gt;&amp;MCEdit&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
+         <widget class="QLabel" name="mceditLink">
+          <property name="title">
+           <string notr="true">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;a href=&quot;https://www.mcedit.net/&quot;&gt;&amp;MCEdit&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
          <layout class="QVBoxLayout" name="verticalLayout_12">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_6">
