@@ -35,13 +35,14 @@ auto getRealIndexName(const QDir& index_dir, QString normalized_index_name, bool
 
 class V1 {
    public:
+    enum class Side { ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
+
     // can also represent other resources beside loader mods - but this is what packwiz calls it
     struct Mod {
         QString slug{};
         QString name{};
         QString filename{};
-        // FIXME: make side an enum
-        QString side{ "both" };
+        Side side{ Side::UniversalSide };
 
         // [download]
         QString mode{};
@@ -94,6 +95,9 @@ class V1 {
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
     static auto getIndexForMod(const QDir& index_dir, QVariant& mod_id) -> Mod;
+
+    static auto sideToString(Side side) -> QString;
+    static auto stringToSide(QString side) -> Side;
 };
 
 }  // namespace Packwiz

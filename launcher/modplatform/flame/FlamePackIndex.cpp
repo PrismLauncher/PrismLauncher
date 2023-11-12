@@ -1,4 +1,6 @@
 #include "FlamePackIndex.h"
+#include <QFileInfo>
+#include <QUrl>
 
 #include "Json.h"
 
@@ -9,8 +11,8 @@ void Flame::loadIndexedPack(Flame::IndexedPack& pack, QJsonObject& obj)
     pack.description = Json::ensureString(obj, "summary", "");
 
     auto logo = Json::requireObject(obj, "logo");
-    pack.logoName = Json::requireString(logo, "title");
     pack.logoUrl = Json::requireString(logo, "thumbnailUrl");
+    pack.logoName = Json::requireString(obj, "slug") + "." + QFileInfo(QUrl(pack.logoUrl).fileName()).suffix();
 
     auto authors = Json::requireArray(obj, "authors");
     for (auto authorIter : authors) {
@@ -89,6 +91,22 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
         // pick the latest version supported
         file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(version, "displayName");
+
+        ModPlatform::IndexedVersionType::VersionType ver_type;
+        switch (Json::requireInteger(version, "releaseType")) {
+            case 1:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Release;
+                break;
+            case 2:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Beta;
+                break;
+            case 3:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Alpha;
+                break;
+            default:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Unknown;
+        }
+        file.version_type = ModPlatform::IndexedVersionType(ver_type);
         file.downloadUrl = Json::ensureString(version, "downloadUrl");
 
         // only add if we have a download URL (third party distribution is enabled)

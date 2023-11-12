@@ -75,7 +75,6 @@ function(
     set(CLANG_WARNINGS
         -Wall
         -Wextra # reasonable and standard
-        -Wextra-semi # Warn about semicolon after in-class function definition.
         -Wshadow # warn the user if a variable declaration shadows one from a parent context
         -Wnon-virtual-dtor # warn the user if a class with virtual functions has a non-virtual destructor. This helps
         # catch hard to track down memory errors
@@ -90,6 +89,10 @@ function(
         -Wdouble-promotion # warn if float is implicit promoted to double
         -Wformat=2 # warn on security issues around functions that format output (ie printf)
         -Wimplicit-fallthrough # warn on statements that fallthrough without an explicit annotation
+        # -Wgnu-zero-variadic-macro-arguments (part of -pedantic) is triggered by every qCDebug() call and therefore results
+        # in a lot of noise. This warning is only notifying us that clang is emulating the GCC behaviour
+        # instead of the exact standard wording so we can safely ignore it
+        -Wno-gnu-zero-variadic-macro-arguments
     )
   endif()
 

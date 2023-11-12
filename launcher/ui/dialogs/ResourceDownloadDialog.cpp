@@ -127,35 +127,12 @@ void ResourceDownloadDialog::connectButtons()
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
-QStringList getRequiredBy(QList<ResourceDownloadDialog::DownloadTaskPtr> tasks, ResourceDownloadDialog::DownloadTaskPtr pack)
-{
-    auto addonId = pack->getPack()->addonId;
-    auto provider = pack->getPack()->provider;
-    auto version = pack->getVersionID();
-    auto req = QStringList();
-    for (auto& task : tasks) {
-        if (provider != task->getPack()->provider)
-            continue;
-        auto deps = task->getVersion().dependencies;
-        if (auto dep = std::find_if(deps.begin(), deps.end(),
-                                    [addonId, provider, version](const ModPlatform::Dependency& d) {
-                                        return d.type == ModPlatform::DependencyType::REQUIRED &&
-                                               (provider == ModPlatform::ResourceProvider::MODRINTH && d.addonId.toString().isEmpty()
-                                                    ? version == d.version
-                                                    : d.addonId == addonId);
-                                    });
-            dep != deps.end()) {
-            req.append(task->getName());
-        }
-    }
-    return req;
-}
-
 void ResourceDownloadDialog::confirm()
 {
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
     confirm_dialog->retranslateUi(resourcesString());
 
+    QHash<QString, QStringList> getRequiredBy;
     if (auto task = getModDependenciesTask(); task) {
         connect(task.get(), &Task::failed, this,
                 [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
@@ -180,6 +157,7 @@ void ResourceDownloadDialog::confirm()
         } else {
             for (auto dep : task->getDependecies())
                 addResource(dep->pack, dep->version);
+            getRequiredBy = task->getRequiredBy();
         }
     }
 
@@ -189,7 +167,8 @@ void ResourceDownloadDialog::confirm()
     });
     for (auto& task : selected) {
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ProviderCaps.name(task->getProvider()), getRequiredBy(selected, task) });
+                                         ProviderCaps.name(task->getProvider()), getRequiredBy.value(task->getPack()->addonId.toString()),
+                                         task->getVersion().version_type.toString() });
     }
 
     if (confirm_dialog->exec()) {
@@ -291,13 +270,15 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
 GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
 {
-    if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
-        QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
-        for (auto& selected : getTasks()) {
-            selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
-        }
+    if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+        if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
+            QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
+            for (auto& selected : getTasks()) {
+                selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
+            }
 
-        return makeShared<GetModDependenciesTask>(this, m_instance, model, selectedVers);
+            return makeShared<GetModDependenciesTask>(this, m_instance, model, selectedVers);
+        }
     }
     return nullptr;
 }
@@ -370,6 +351,8 @@ QList<BasePage*> ShaderPackDownloadDialog::getPages()
 {
     QList<BasePage*> pages;
     pages.append(ModrinthShaderPackPage::create(this, *m_instance));
+    if (APPLICATION->capabilities() & Application::SupportsFlame)
+        pages.append(FlameShaderPackPage::create(this, *m_instance));
     return pages;
 }
 

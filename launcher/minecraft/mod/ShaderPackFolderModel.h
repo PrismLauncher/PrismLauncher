@@ -1,6 +1,8 @@
 #pragma once
 
 #include "ResourceFolderModel.h"
+#include "minecraft/mod/ShaderPack.h"
+#include "minecraft/mod/tasks/LocalShaderPackParseTask.h"
 
 class ShaderPackFolderModel : public ResourceFolderModel {
     Q_OBJECT
@@ -11,4 +13,11 @@ class ShaderPackFolderModel : public ResourceFolderModel {
     {}
 
     virtual QString id() const override { return "shaderpacks"; }
+
+    [[nodiscard]] Resource* createResource(const QFileInfo& info) override { return new ShaderPack(info); }
+
+    [[nodiscard]] Task* createParseTask(Resource& resource) override
+    {
+        return new LocalShaderPackParseTask(m_next_resolution_ticket, static_cast<ShaderPack&>(resource));
+    }
 };

@@ -38,6 +38,10 @@ ResourceFolderModel::ResourceFolderModel(const QDir& dir, BaseInstance* instance
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &ResourceFolderModel::directoryChanged);
     connect(&m_helper_thread_task, &ConcurrentTask::finished, this, [this] { m_helper_thread_task.clear(); });
+#ifndef LAUNCHER_TEST
+    // in tests the application macro doesn't work
+    m_helper_thread_task.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+#endif
 }
 
 ResourceFolderModel::~ResourceFolderModel()
@@ -225,13 +229,29 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
         return true;
 
     for (auto i : indexes) {
-        if (i.column() != 0) {
+        if (i.column() != 0)
             continue;
-        }
 
         auto& resource = m_resources.at(i.row());
-
         resource->destroy(indexDir());
+    }
+
+    update();
+
+    return true;
+}
+
+bool ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
+{
+    if (indexes.isEmpty())
+        return true;
+
+    for (auto i : indexes) {
+        if (i.column() != 0)
+            continue;
+
+        auto& resource = m_resources.at(i.row());
+        resource->destroyMetadata(indexDir());
     }
 
     update();

@@ -178,16 +178,21 @@ auto Resource::destroy(const QDir& index_dir, bool preserve_metadata, bool attem
 
     if (!preserve_metadata) {
         qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
-
-        if (metadata()) {
-            Metadata::remove(index_dir, metadata()->slug);
-        } else {
-            auto n = name();
-            Metadata::remove(index_dir, n);
-        }
+        destroyMetadata(index_dir);
     }
 
     return (attempt_trash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
+}
+
+auto Resource::destroyMetadata(const QDir& index_dir) -> bool
+{
+    if (metadata()) {
+        Metadata::remove(index_dir, metadata()->slug);
+    } else {
+        auto n = name();
+        Metadata::remove(index_dir, n);
+    }
+    m_metadata = nullptr;
 }
 
 bool Resource::isSymLinkUnder(const QString& instPath) const

@@ -69,6 +69,7 @@ class ResourceFolderModel : public QAbstractListModel {
      */
     virtual bool uninstallResource(QString file_name, bool preserve_metadata = false);
     virtual bool deleteResources(const QModelIndexList&);
+    virtual bool deleteMetadata(const QModelIndexList&);
 
     /** Applies the given 'action' to the resources in 'indexes'.
      *
@@ -339,7 +340,8 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
 
         // When you have a Qt build with assertions turned on, proceeding here will abort the application
         if (added_set.size() > 0) {
-            beginInsertRows(QModelIndex(), m_resources.size(), m_resources.size() + added_set.size() - 1);
+            beginInsertRows(QModelIndex(), static_cast<int>(m_resources.size()),
+                            static_cast<int>(m_resources.size() + added_set.size() - 1));
 
             for (auto& added : added_set) {
                 auto res = new_resources[added];

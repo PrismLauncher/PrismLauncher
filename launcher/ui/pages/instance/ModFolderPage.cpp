@@ -92,6 +92,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
 
+        ui->actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
+        ui->actionsToolbar->insertActionAfter(ui->actionRemoveItem, ui->actionRemoveItemMetadata);
+        connect(ui->actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
+
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
         connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this, check_allow_update] {
@@ -104,11 +108,16 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
             if (selected <= 1) {
                 ui->actionVisitItemPage->setText(tr("Visit mod's page"));
                 ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
+
+                ui->actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
             } else {
                 ui->actionVisitItemPage->setText(tr("Visit mods' pages"));
                 ui->actionVisitItemPage->setToolTip(tr("Go to the pages of the selected mods"));
+
+                ui->actionRemoveItemMetadata->setToolTip(tr("Remove mods' metadata"));
             }
             ui->actionVisitItemPage->setEnabled(selected != 0);
+            ui->actionRemoveItemMetadata->setEnabled(selected != 0);
         });
 
         connect(mods.get(), &ModFolderModel::rowsInserted, this,
@@ -166,7 +175,7 @@ void ModFolderPage::installMods()
 
     ResourceDownload::ModDownloadDialog mdownload(this, m_model, m_instance);
     if (mdownload.exec()) {
-        ConcurrentTask* tasks = new ConcurrentTask(this);
+        auto tasks = new ConcurrentTask(this, "Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -197,6 +206,18 @@ void ModFolderPage::installMods()
 
 void ModFolderPage::updateMods()
 {
+    if (m_instance->typeName() != "Minecraft")
+        return;  // this is a null instance or a legacy instance
+
+    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    if (!profile->getModLoaders().has_value()) {
+        QMessageBox::critical(this, tr("Error"), tr("Please install a mod loader first!"));
+        return;
+    }
+    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+        QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
+        return;
+    }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
     auto mods_list = m_model->selectedMods(selection);
@@ -225,7 +246,7 @@ void ModFolderPage::updateMods()
     }
 
     if (update_dialog.exec()) {
-        ConcurrentTask* tasks = new ConcurrentTask(this);
+        auto tasks = new ConcurrentTask(this, "Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -296,4 +317,25 @@ void ModFolderPage::visitModPages()
         if (!url.isEmpty())
             DesktopServices::openUrl(url);
     }
+}
+
+void ModFolderPage::deleteModMetadata()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selectionCount = m_model->selectedMods(selection).length();
+    if (selectionCount == 0)
+        return;
+    if (selectionCount > 1) {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
+                                                     tr("You are about to remove the metadata for %1 mods.\n"
+                                                        "Are you sure?")
+                                                         .arg(selectionCount),
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+
+    m_model->deleteMetadata(selection);
 }

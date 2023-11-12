@@ -27,6 +27,7 @@ class Mod;
 
 namespace Metadata {
 using ModStruct = Packwiz::V1::Mod;
+using ModSide = Packwiz::V1::Side;
 
 inline auto create(const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> ModStruct
 {

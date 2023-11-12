@@ -127,7 +127,7 @@ void ResourceFolderLoadTask::getFromMetadata()
         auto metadata = Metadata::get(m_index_dir, entry);
 
         if (!metadata.isValid())
-            return;
+            continue;
 
         auto* resource = m_create_func(QFileInfo(m_resource_dir.filePath(metadata.filename)));
         resource->setMetadata(metadata);

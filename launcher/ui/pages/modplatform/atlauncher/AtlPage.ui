@@ -11,44 +11,7 @@
    </rect>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_3">
-     <item row="1" column="0">
-      <widget class="QTreeView" name="packView">
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>96</width>
-         <height>48</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QTextBrowser" name="packDescription">
-       <property name="openExternalLinks">
-        <bool>true</bool>
-       </property>
-       <property name="openLinks">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0" colspan="2">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Warning: This is still a work in progress. If you run into issues with the imported modpack, it may be a bug.</string>
-       </property>
-       <property name="wordWrap">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="2" column="0" colspan="2">
+   <item row="3" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0" rowminimumheight="0" columnminimumwidth="0,0,0">
      <item row="0" column="2">
       <widget class="QComboBox" name="versionSelectionBox"/>
@@ -68,12 +31,64 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="0">
+   <item row="2" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="1" column="1">
+      <widget class="QTextBrowser" name="packDescription">
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+       <property name="openLinks">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QTreeView" name="packView">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>96</width>
+         <height>48</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
     <widget class="QLineEdit" name="searchEdit">
      <property name="placeholderText">
       <string>Search and filter...</string>
      </property>
      <property name="clearButtonEnabled">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>Search</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QLabel" name="label_2">
+     <property name="font">
+      <font>
+       <italic>true</italic>
+      </font>
+     </property>
+     <property name="text">
+      <string>Warning: This is still a work in progress. If you run into issues with the imported modpack, it may be a bug.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
       <bool>true</bool>
      </property>
     </widget>

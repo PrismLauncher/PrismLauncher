@@ -85,6 +85,7 @@ QString getCreditsHtml()
     stream << QString("<p>TayouVR %1</p>\n").arg(getGitHub("TayouVR"));
     stream << QString("<p>TheKodeToad %1</p>\n").arg(getGitHub("TheKodeToad"));
     stream << QString("<p>getchoo %1</p>\n").arg(getGitHub("getchoo"));
+    stream << QString("<p>Alexandru Tripon (Trial97) %1</p>\n").arg(getGitHub("Trial97"));
     stream << "<br />\n";
 
     // TODO: possibly retrieve from git history at build time?
@@ -100,7 +101,7 @@ QString getCreditsHtml()
     stream << "<h3>" << QObject::tr("With thanks to", "About Credits") << "</h3>\n";
     stream << QString("<p>Boba %1</p>\n").arg(getWebsite("https://bobaonline.neocities.org/"));
     stream << QString("<p>Davi Rafael %1</p>\n").arg(getWebsite("https://auti.one/"));
-    stream << QString("<p>Fulmine %1</p>\n").arg(getWebsite("https://www.fulmine.xyz/"));
+    stream << QString("<p>Fulmine %1</p>\n").arg(getWebsite("https://fulmine.xyz/"));
     stream << QString("<p>ely %1</p>\n").arg(getGitHub("elyrodso"));
     stream << QString("<p>gon sawa %1</p>\n").arg(getGitHub("gonsawa"));
     stream << QString("<p>Pankakes</p>\n");
