@@ -34,6 +34,7 @@
  */
 
 #include <QDir>
+#include <QFileInfo>
 #include <QString>
 #include <QStringList>
 
@@ -440,18 +441,26 @@ QStringList getMinecraftJavaBundle()
 {
     QString partialPath;
     QString executable = "java";
+    QStringList processpaths;
 #if defined(Q_OS_OSX)
     partialPath = FS::PathCombine(QDir::homePath(), "Library/Application Support");
 #elif defined(Q_OS_WIN32)
     partialPath = QProcessEnvironment::systemEnvironment().value("LOCALAPPDATA", "");
     executable += "w.exe";
+
+    // add the microsoft store version of the launcher to the search. the current path is:
+    // C:\Users\USERNAME\AppData\Local\Packages\Microsoft.4297127D64EC6_8wekyb3d8bbwe\LocalCache\Local\runtime
+    auto minecraftMSStorePath =
+        FS::PathCombine(QFileInfo(partialPath).absolutePath(), "Local", "Packages", "Microsoft.4297127D64EC6_8wekyb3d8bbwe");
+    minecraftMSStorePath = FS::PathCombine(minecraftMSStorePath, "LocalCache", "Local", "runtime");
+    processpaths << minecraftMSStorePath;
 #else
     partialPath = QDir::homePath();
 #endif
-    auto minecraftPath = FS::PathCombine(partialPath, ".minecraft", "runtime");
-    QStringList javas;
-    QStringList processpaths{ minecraftPath };
+    auto minecraftDataPath = FS::PathCombine(partialPath, ".minecraft", "runtime");
+    processpaths << minecraftDataPath;
 
+    QStringList javas;
     while (!processpaths.isEmpty()) {
         auto dirPath = processpaths.takeFirst();
         QDir dir(dirPath);
