@@ -57,6 +57,7 @@ struct File {
     QCryptographicHash::Algorithm hashAlgorithm;
     QByteArray hash;
     QQueue<QUrl> downloads;
+    bool required = true;
 };
 
 struct DonationData {

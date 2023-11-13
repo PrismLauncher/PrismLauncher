@@ -1018,8 +1018,7 @@ std::optional<ModPlatform::ModLoaderTypes> PackProfile::getSupportedModLoaders()
     // TODO: remove this or add version condition once Quilt drops official Fabric support
     if (loaders & ModPlatform::Quilt)
         loaders |= ModPlatform::Fabric;
-    // TODO: remove this or add version condition once NeoForge drops official Forge support
-    if (loaders & ModPlatform::NeoForge)
+    if (getComponentVersion("net.minecraft") == "1.20.1" && (loaders & ModPlatform::NeoForge))
         loaders |= ModPlatform::Forge;
     return loaders;
 }

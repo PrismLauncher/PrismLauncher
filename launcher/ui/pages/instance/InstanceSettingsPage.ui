@@ -35,13 +35,10 @@
    </item>
    <item>
     <widget class="QTabWidget" name="settingsTabs">
-     <property name="tabShape">
-      <enum>QTabWidget::Rounded</enum>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="minecraftTab">
+     <widget class="QWidget" name="minecraftPage">
       <attribute name="title">
        <string notr="true">Java</string>
       </attribute>
@@ -254,7 +251,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="javaTab">
+     <widget class="QWidget" name="javaPage">
       <attribute name="title">
        <string>Game windows</string>
       </attribute>
@@ -414,13 +411,23 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="customCommandsPage">
       <attribute name="title">
        <string>Custom commands</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="CustomCommands" name="customCommands" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="environmentVariablesPage">
+      <attribute name="title">
+       <string>Environment variables</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_16">
+       <item>
+        <widget class="EnvironmentVariables" name="environmentVariables" native="true"/>
        </item>
       </layout>
      </widget>
@@ -584,6 +591,31 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
+        <widget class="QGroupBox" name="legacySettingsGroupBox">
+         <property name="title">
+          <string>Legacy settings</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_17">
+          <item>
+           <widget class="QCheckBox" name="onlineFixes">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;This currently allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable online fixes (experimental)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="gameTimeGroupBox">
          <property name="enabled">
           <bool>true</bool>
@@ -709,6 +741,12 @@
    <class>CustomCommands</class>
    <extends>QWidget</extends>
    <header>ui/widgets/CustomCommands.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>EnvironmentVariables</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/EnvironmentVariables.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

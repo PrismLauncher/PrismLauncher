@@ -54,7 +54,7 @@ class Task;
 class AccountTask;
 class MinecraftAccount;
 
-typedef shared_qobject_ptr<MinecraftAccount> MinecraftAccountPtr;
+using MinecraftAccountPtr = shared_qobject_ptr<MinecraftAccount>;
 Q_DECLARE_METATYPE(MinecraftAccountPtr)
 
 /**

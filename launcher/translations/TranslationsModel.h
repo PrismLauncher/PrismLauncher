@@ -17,6 +17,7 @@
 
 #include <QAbstractListModel>
 #include <memory>
+#include <optional>
 
 struct Language;
 
@@ -40,7 +41,8 @@ class TranslationsModel : public QAbstractListModel {
     void setUseSystemLocale(bool useSystemLocale);
 
    private:
-    Language* findLanguage(const QString& key);
+    QVector<Language>::Iterator findLanguage(const QString& key);
+    std::optional<Language> findLanguageAsOptional(const QString& key);
     void reloadLocalFiles();
     void downloadTranslation(QString key);
     void downloadNext();
