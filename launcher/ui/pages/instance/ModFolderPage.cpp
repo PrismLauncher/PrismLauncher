@@ -92,18 +92,19 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
             updateMenu = new QMenu(this);
         }
 
-        {
-            auto update = updateMenu->addAction(tr("Check for Updates"));
-            update->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-            connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
-        }
-        if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+        auto update = updateMenu->addAction(tr("Check for Updates"));
+        update->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+        connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
 
-            auto updateWithDeps = updateMenu->addAction(tr("Verify Dependencies"));
-            updateWithDeps->setToolTip(
-                tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
-            connect(updateWithDeps, &QAction::triggered, this, [this] { updateMods(true); });
-        }
+        auto updateWithDeps = updateMenu->addAction(tr("Verify Dependencies"));
+        updateWithDeps->setToolTip(
+            tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
+        connect(updateWithDeps, &QAction::triggered, this, [this] { updateMods(true); });
+
+        auto depsDisabled = APPLICATION->settings()->getSetting("ModDependenciesDisabled");
+        updateWithDeps->setVisible(!depsDisabled->get().toBool());
+        connect(depsDisabled.get(), &Setting::SettingChanged, this,
+                [](const Setting& setting, QVariant value) { updateWithDeps->setVisible(!value.toBool()); });
         auto actionRemoveItemMetadata = updateMenu->addAction(tr("Reset update metadata"));
         actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
         connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
