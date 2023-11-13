@@ -104,7 +104,8 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         auto depsDisabled = APPLICATION->settings()->getSetting("ModDependenciesDisabled");
         updateWithDeps->setVisible(!depsDisabled->get().toBool());
         connect(depsDisabled.get(), &Setting::SettingChanged, this,
-                [](const Setting& setting, QVariant value) { updateWithDeps->setVisible(!value.toBool()); });
+                [updateWithDeps](const Setting& setting, QVariant value) { updateWithDeps->setVisible(!value.toBool()); });
+
         auto actionRemoveItemMetadata = updateMenu->addAction(tr("Reset update metadata"));
         actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
         connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
