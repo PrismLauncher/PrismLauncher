@@ -37,6 +37,7 @@
  */
 
 #include "ModFolderPage.h"
+#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui_ExternalResourcesPage.h"
 
 #include <QAbstractItemModel>
@@ -111,6 +112,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
         actionRemoveItemMetadata->setEnabled(false);
 
+        auto actionExportMetadata = updateMenu->addAction(tr("Export metadata"));
+        actionExportMetadata->setToolTip(tr("Export mod's metadata to text"));
+        connect(actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
+
         ui->actionUpdateItem->setMenu(updateMenu);
 
         ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
@@ -124,7 +129,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
         connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-                [this, check_allow_update, actionRemoveItemMetadata] {
+                [this, check_allow_update, actionRemoveItemMetadata, actionExportMetadata] {
                     ui->actionUpdateItem->setEnabled(check_allow_update());
 
                     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
@@ -359,4 +364,15 @@ void ModFolderPage::deleteModMetadata()
     }
 
     m_model->deleteModsMetadata(selection);
+}
+
+void ModFolderPage::exportModMetadata()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selectedMods = m_model->selectedMods(selection);
+    if (selectedMods.length() == 0)
+        selectedMods = m_model->allMods();
+
+    ExportToModListDialog dlg(m_instance->name(), selectedMods, this);
+    dlg.exec();
 }

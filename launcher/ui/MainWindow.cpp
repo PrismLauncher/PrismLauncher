@@ -96,7 +96,6 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
-#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -208,7 +207,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
         exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
-        exportInstanceMenu->addAction(ui->actionExportInstanceToModList);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
 
@@ -1386,14 +1384,6 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
 {
     if (m_selectedInstance) {
         ExportPackDialog dlg(m_selectedInstance, this);
-        dlg.exec();
-    }
-}
-
-void MainWindow::on_actionExportInstanceToModList_triggered()
-{
-    if (m_selectedInstance) {
-        ExportToModListDialog dlg(m_selectedInstance, this);
         dlg.exec();
     }
 }
