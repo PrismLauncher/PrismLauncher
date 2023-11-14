@@ -231,6 +231,7 @@ void AccountListPage::updateButtonStates()
         ui->actionNoDefault->setEnabled(true);
         ui->actionNoDefault->setChecked(false);
     }
+    ui->listView->resizeColumnToContents(3);
 }
 
 void AccountListPage::on_actionUploadSkin_triggered()
