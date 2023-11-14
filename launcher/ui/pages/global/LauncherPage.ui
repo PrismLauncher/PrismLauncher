@@ -189,10 +189,10 @@
            <item>
            <widget class="QCheckBox" name="dependenciesDisableBtn">
             <property name="toolTip">
-             <string>Disable automatically checking and installation of mod dependencies.</string>
+             <string>Disable the automatic detection, installation, and updating of mod dependencies.</string>
             </property>
             <property name="text">
-             <string>Do not install mod dependencies</string>
+             <string>Disable automatic mod dependency management</string>
             </property>
            </widget>
           </item>
