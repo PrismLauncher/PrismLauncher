@@ -49,14 +49,15 @@ ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWi
     connect(ui->authorsCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->versionCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->urlCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
+    connect(ui->filenameCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->authorsButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Authors); });
     connect(ui->versionButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Version); });
     connect(ui->urlButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Url); });
+    connect(ui->filenameButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::FileName); });
     connect(ui->templateText, &QTextEdit::textChanged, this, [this] {
         if (ui->templateText->toPlainText() != exampleLines[m_format])
             ui->formatComboBox->setCurrentIndex(5);
-        else
-            triggerImp();
+        triggerImp();
     });
     connect(ui->copyButton, &QPushButton::clicked, this, [this](bool) {
         this->ui->finalText->selectAll();
@@ -127,6 +128,8 @@ void ExportToModListDialog::triggerImp()
         opt |= ExportToModList::Version;
     if (ui->urlCheckBox->isChecked())
         opt |= ExportToModList::Url;
+    if (ui->filenameCheckBox->isChecked())
+        opt |= ExportToModList::FileName;
     auto txt = ExportToModList::exportToModList(m_mods, m_format, static_cast<ExportToModList::OptionalData>(opt));
     ui->finalText->setPlainText(txt);
     switch (m_format) {
@@ -199,6 +202,9 @@ void ExportToModListDialog::addExtra(ExportToModList::OptionalData option)
         case ExportToModList::Version:
             ui->templateText->insertPlainText("{version}");
             break;
+        case ExportToModList::FileName:
+            ui->templateText->insertPlainText("{filename}");
+            break;
     }
 }
 void ExportToModListDialog::enableCustom(bool enabled)
@@ -211,4 +217,7 @@ void ExportToModListDialog::enableCustom(bool enabled)
 
     ui->urlCheckBox->setHidden(enabled);
     ui->urlButton->setHidden(!enabled);
+
+    ui->filenameCheckBox->setHidden(enabled);
+    ui->filenameButton->setHidden(!enabled);
 }
