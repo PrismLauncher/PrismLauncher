@@ -88,7 +88,7 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
                 case SizeColumn:
-                    return StringUtils::humanReadableFileSize(m_resources[row]->fileinfo().size(), true);
+                    return StringUtils::humanReadableFileSize(m_resources[row]->size(), true);
 
                 default:
                     return {};

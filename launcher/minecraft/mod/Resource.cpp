@@ -1,5 +1,6 @@
 #include "Resource.h"
 
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QRegularExpression>
 
@@ -18,6 +19,20 @@ void Resource::setFile(QFileInfo file_info)
     parseFile();
 }
 
+qint64 calculateFileSize(const QFileInfo& file)
+{
+    if (file.isDir()) {
+        QDirIterator it(file.absoluteFilePath(), QDir::Files);
+        qint64 total = 0;
+        while (it.hasNext()) {
+            it.next();
+            total += it.fileInfo().size();
+        }
+        return total;
+    }
+    return file.size();
+}
+
 void Resource::parseFile()
 {
     QString file_name{ m_file_info.fileName() };
@@ -26,6 +41,7 @@ void Resource::parseFile()
 
     m_internal_id = file_name;
 
+    m_size = calculateFileSize(m_file_info);
     if (m_file_info.isDir()) {
         m_type = ResourceType::FOLDER;
         m_name = file_name;
@@ -90,9 +106,9 @@ std::pair<int, bool> Resource::compare(const Resource& other, SortType type) con
                 return { -1, type == SortType::DATE };
             break;
         case SortType::SIZE: {
-            if (fileinfo().size() > other.fileinfo().size())
+            if (size() > other.size())
                 return { 1, type == SortType::SIZE };
-            if (fileinfo().size() < other.fileinfo().size())
+            if (size() < other.size())
                 return { -1, type == SortType::SIZE };
             break;
         }
