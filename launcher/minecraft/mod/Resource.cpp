@@ -22,7 +22,7 @@ void Resource::setFile(QFileInfo file_info)
 qint64 calculateFileSize(const QFileInfo& file)
 {
     if (file.isDir()) {
-        QDirIterator it(file.absoluteFilePath(), QDir::Files);
+        QDirIterator it(file.absoluteFilePath(), QDir::Files, QDirIterator::Subdirectories);
         qint64 total = 0;
         while (it.hasNext()) {
             it.next();
