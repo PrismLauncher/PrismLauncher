@@ -252,9 +252,9 @@ void ExternalResourcesPage::removeItem()
 void ExternalResourcesPage::removeItems(const QItemSelection& selection)
 {
     if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response = CustomMessageBox::selectable(this, "Confirm Delete",
-                                                     "If you remove this resource while the game is running it may crash your game.\n"
-                                                     "Are you sure you want to do this?",
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Delete"),
+                                                     tr("If you remove this resource while the game is running it may crash your game.\n"
+                                                        "Are you sure you want to do this?"),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
@@ -273,9 +273,9 @@ void ExternalResourcesPage::enableItem()
 void ExternalResourcesPage::disableItem()
 {
     if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response = CustomMessageBox::selectable(this, "Confirm disable",
-                                                     "If you disable this resource while the game is running it may crash your game.\n"
-                                                     "Are you sure you want to do this?",
+        auto response = CustomMessageBox::selectable(this, tr("Confirm disable"),
+                                                     tr("If you disable this resource while the game is running it may crash your game.\n"
+                                                        "Are you sure you want to do this?"),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
