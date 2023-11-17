@@ -38,9 +38,9 @@
 #include "ModFolderModel.h"
 
 #include <FileSystem.h>
-#include <qheaderview.h>
 #include <QDebug>
 #include <QFileSystemWatcher>
+#include <QHeaderView>
 #include <QIcon>
 #include <QMimeData>
 #include <QString>
@@ -71,10 +71,9 @@ ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool 
                                               tr("Side"), tr("Loaders"), tr("Miecraft Versions"), tr("Release Type") });
     m_column_sort_keys = { SortType::ENABLED,  SortType::NAME, SortType::NAME,    SortType::VERSION,     SortType::DATE,
                            SortType::PROVIDER, SortType::SIDE, SortType::LOADERS, SortType::MC_VERSIONS, SortType::RELEASE_TYPE };
-    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive,      QHeaderView::Stretch,
-                              QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents,
-                              QHeaderView::ResizeToContents, QHeaderView::ResizeToContents, QHeaderView::ResizeToContents,
-                              QHeaderView::ResizeToContents };
+    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
+                              QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
+                              QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true };
 }
 
@@ -159,6 +158,11 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             }
             return {};
         }
+        case Qt::SizeHintRole:
+            if (column == ImageColumn) {
+                return QSize(32, 32);
+            }
+            return {};
         case Qt::CheckStateRole:
             switch (column) {
                 case ActiveColumn:

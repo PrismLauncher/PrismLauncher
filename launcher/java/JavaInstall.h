@@ -42,4 +42,4 @@ struct JavaInstall : public BaseVersion {
     bool recommended = false;
 };
 
-typedef std::shared_ptr<JavaInstall> JavaInstallPtr;
+using JavaInstallPtr = std::shared_ptr<JavaInstall>;

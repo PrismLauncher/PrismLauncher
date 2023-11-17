@@ -51,4 +51,4 @@ class NewsEntry : public QObject {
     QString link;
 };
 
-typedef std::shared_ptr<NewsEntry> NewsEntryPtr;
+using NewsEntryPtr = std::shared_ptr<NewsEntry>;
