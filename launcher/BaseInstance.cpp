@@ -65,7 +65,7 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("lastLaunchTime", 0);
     m_settings->registerSetting("totalTimePlayed", 0);
     if (m_settings->get("totalTimePlayed").toLongLong() < 0)
-        m_settings->set("totalTimePlayed", 0);
+        m_settings->reset("totalTimePlayed");
     m_settings->registerSetting("lastTimePlayed", 0);
 
     m_settings->registerSetting("linkedInstances", "[]");
