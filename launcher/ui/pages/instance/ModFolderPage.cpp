@@ -220,7 +220,7 @@ void ModFolderPage::updateMods()
     }
     if (m_instance != nullptr && m_instance->isRunning()) {
         auto response = CustomMessageBox::selectable(this, tr("Confirm Update"),
-                                                     tr("If you update mods while the game is running may cause mod duplication.\n"
+                                                     tr("If you update mods while the game is running may cause mod duplication and game crashes.\n"
                                                         "The old files may not be deleted as they are in use.\n"
                                                         "Are you sure you want to do this?"),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
