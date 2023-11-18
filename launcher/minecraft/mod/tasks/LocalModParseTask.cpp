@@ -688,6 +688,7 @@ bool loadIconFile(const Mod& mod)
                     return png_invalid();  // icon invalid
                 }
             }
+            return false;
         }
         case ResourceType::ZIPFILE: {
             QuaZip zip(mod.fileinfo().filePath());
@@ -714,6 +715,7 @@ bool loadIconFile(const Mod& mod)
             } else {
                 return png_invalid();  // could not set icon as current file.
             }
+            return false;
         }
         case ResourceType::LITEMOD: {
             return false;  // can lightmods even have icons?

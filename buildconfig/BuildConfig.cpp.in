@@ -33,6 +33,7 @@
  *      limitations under the License.
  */
 
+#include <qstringliteral.h>
 #include "BuildConfig.h"
 #include <QObject>
 
@@ -59,14 +60,24 @@ Config::Config()
     VERSION_MINOR = @Launcher_VERSION_MINOR@;
 
     BUILD_PLATFORM = "@Launcher_BUILD_PLATFORM@";
+    BUILD_ARTIFACT = "@Launcher_BUILD_ARTIFACT@";
     BUILD_DATE = "@Launcher_BUILD_TIMESTAMP@";
-    UPDATER_BASE = "@Launcher_UPDATER_BASE@";
+    UPDATER_GITHUB_REPO = "@Launcher_UPDATER_GITHUB_REPO@";
+
+    COMPILER_NAME = "@Launcher_COMPILER_NAME@";
+    COMPILER_VERSION = "@Launcher_COMPILER_VERSION@";
+
+    COMPILER_TARGET_SYSTEM = "@Launcher_COMPILER_TARGET_SYSTEM@";
+    COMPILER_TARGET_SYSTEM_VERSION = "@Launcher_COMPILER_TARGET_SYSTEM_VERSION@";
+    COMPILER_TARGET_SYSTEM_PROCESSOR = "@Launcher_COMPILER_TARGET_PROCESSOR@";
 
     MAC_SPARKLE_PUB_KEY = "@MACOSX_SPARKLE_UPDATE_PUBLIC_KEY@";
     MAC_SPARKLE_APPCAST_URL = "@MACOSX_SPARKLE_UPDATE_FEED_URL@";
 
     if (!MAC_SPARKLE_PUB_KEY.isEmpty() && !MAC_SPARKLE_APPCAST_URL.isEmpty())
     {
+        UPDATER_ENABLED = true;
+    } else if(!UPDATER_GITHUB_REPO.isEmpty() && !BUILD_ARTIFACT.isEmpty()) {
         UPDATER_ENABLED = true;
     }
 
@@ -88,10 +99,7 @@ Config::Config()
     if (GIT_REFSPEC.startsWith("refs/heads/"))
     {
         VERSION_CHANNEL = GIT_REFSPEC;
-        VERSION_CHANNEL.remove("refs/heads/");
-        if(!UPDATER_BASE.isEmpty() && !BUILD_PLATFORM.isEmpty()) {
-            UPDATER_ENABLED = true;
-        }
+        VERSION_CHANNEL.remove("refs/heads/"); 
     }
     else if (!GIT_COMMIT.isEmpty())
     {
@@ -136,3 +144,16 @@ QString Config::printableVersionString() const
     }
     return vstr;
 }
+
+QString Config::compilerID() const
+{
+    if (COMPILER_VERSION.isEmpty())
+        return COMPILER_NAME;
+    return QStringLiteral("%1 - %2").arg(COMPILER_NAME).arg(COMPILER_VERSION);
+}
+
+QString Config::systemID() const
+{
+    return QStringLiteral("%1 %2 %3").arg(COMPILER_TARGET_SYSTEM, COMPILER_TARGET_SYSTEM_VERSION, COMPILER_TARGET_SYSTEM_PROCESSOR);
+}
+

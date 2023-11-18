@@ -129,6 +129,7 @@ class MinecraftInstance : public BaseInstance {
     /// get arguments passed to java
     QStringList javaArguments();
     QString getLauncher();
+    bool shouldApplyOnlineFixes();
 
     /// get variables for launch command variable substitution/environment
     QMap<QString, QString> getVariables() override;
@@ -173,4 +174,4 @@ class MinecraftInstance : public BaseInstance {
     mutable std::shared_ptr<GameOptions> m_game_options;
 };
 
-typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;
+using MinecraftInstancePtr = std::shared_ptr<MinecraftInstance>;

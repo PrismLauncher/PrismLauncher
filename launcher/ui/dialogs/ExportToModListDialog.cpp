@@ -214,10 +214,11 @@ void ExportToModListDialog::addExtra(ExportToModList::OptionalData option)
 void ExportToModListDialog::enableCustom(bool enabled)
 {
     ui->authorsCheckBox->setHidden(enabled);
-    ui->versionCheckBox->setHidden(enabled);
-    ui->urlCheckBox->setHidden(enabled);
-
     ui->authorsButton->setHidden(!enabled);
+
+    ui->versionCheckBox->setHidden(enabled);
     ui->versionButton->setHidden(!enabled);
+
+    ui->urlCheckBox->setHidden(enabled);
     ui->urlButton->setHidden(!enabled);
 }

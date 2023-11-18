@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -237,8 +238,11 @@ GroupId InstanceList::getInstanceGroup(const InstanceId& id) const
     return GroupId();
 }
 
-void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
+void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)
 {
+    if (name.isEmpty() && !name.isNull())
+        name = QString();
+
     auto inst = getInstanceById(id);
     if (!inst) {
         qDebug() << "Attempt to set a null instance's group";
@@ -249,6 +253,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
     auto iter = m_instanceGroupIndex.find(inst->id());
     if (iter != m_instanceGroupIndex.end()) {
         if (*iter != name) {
+            decreaseGroupCount(*iter);
             *iter = name;
             changed = true;
         }
@@ -258,7 +263,7 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
     }
 
     if (changed) {
-        m_groupNameCache.insert(name);
+        increaseGroupCount(name);
         auto idx = getInstIndex(inst.get());
         emit dataChanged(index(idx), index(idx), { GroupRole });
         saveGroupList();
@@ -267,29 +272,55 @@ void InstanceList::setInstanceGroup(const InstanceId& id, const GroupId& name)
 
 QStringList InstanceList::getGroups()
 {
-    return m_groupNameCache.values();
+    return m_groupNameCache.keys();
 }
 
-void InstanceList::deleteGroup(const QString& name)
+void InstanceList::deleteGroup(const GroupId& name)
 {
+    m_groupNameCache.remove(name);
+    m_collapsedGroups.remove(name);
+
     bool removed = false;
     qDebug() << "Delete group" << name;
     for (auto& instance : m_instances) {
-        const auto& instID = instance->id();
-        auto instGroupName = getInstanceGroup(instID);
+        const QString& instID = instance->id();
+        const QString instGroupName = getInstanceGroup(instID);
         if (instGroupName == name) {
             m_instanceGroupIndex.remove(instID);
             qDebug() << "Remove" << instID << "from group" << name;
             removed = true;
             auto idx = getInstIndex(instance.get());
-            if (idx > 0) {
+            if (idx >= 0)
                 emit dataChanged(index(idx), index(idx), { GroupRole });
-            }
         }
     }
-    if (removed) {
+    if (removed)
         saveGroupList();
+}
+
+void InstanceList::renameGroup(const QString& src, const QString& dst)
+{
+    m_groupNameCache.remove(src);
+    if (m_collapsedGroups.remove(src))
+        m_collapsedGroups.insert(dst);
+
+    bool modified = false;
+    qDebug() << "Rename group" << src << "to" << dst;
+    for (auto& instance : m_instances) {
+        const QString& instID = instance->id();
+        const QString instGroupName = getInstanceGroup(instID);
+        if (instGroupName == src) {
+            m_instanceGroupIndex[instID] = dst;
+            increaseGroupCount(dst);
+            qDebug() << "Set" << instID << "group to" << dst;
+            modified = true;
+            auto idx = getInstIndex(instance.get());
+            if (idx >= 0)
+                emit dataChanged(index(idx), index(idx), { GroupRole });
+        }
     }
+    if (modified)
+        saveGroupList();
 }
 
 bool InstanceList::isGroupCollapsed(const QString& group)
@@ -305,12 +336,13 @@ bool InstanceList::trashInstance(const InstanceId& id)
         return false;
     }
 
-    auto cachedGroupId = m_instanceGroupIndex[id];
+    QString cachedGroupId = m_instanceGroupIndex[id];
 
     qDebug() << "Will trash instance" << id;
     QString trashedLoc;
 
     if (m_instanceGroupIndex.remove(id)) {
+        decreaseGroupCount(cachedGroupId);
         saveGroupList();
     }
 
@@ -348,7 +380,7 @@ void InstanceList::undoTrashInstance()
     QFile(top.trashPath).rename(top.polyPath);
 
     m_instanceGroupIndex[top.id] = top.groupName;
-    m_groupNameCache.insert(top.groupName);
+    increaseGroupCount(top.groupName);
 
     saveGroupList();
     emit instancesChanged();
@@ -362,7 +394,10 @@ void InstanceList::deleteInstance(const InstanceId& id)
         return;
     }
 
+    QString cachedGroupId = m_instanceGroupIndex[id];
+
     if (m_instanceGroupIndex.remove(id)) {
+        decreaseGroupCount(cachedGroupId);
         saveGroupList();
     }
 
@@ -610,6 +645,25 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
     return inst;
 }
 
+void InstanceList::increaseGroupCount(const QString& group)
+{
+    if (group.isEmpty())
+        return;
+
+    ++m_groupNameCache[group];
+}
+
+void InstanceList::decreaseGroupCount(const QString& group)
+{
+    if (group.isEmpty())
+        return;
+
+    if (--m_groupNameCache[group] < 1) {
+        m_groupNameCache.remove(group);
+        m_collapsedGroups.remove(group);
+    }
+}
+
 void InstanceList::saveGroupList()
 {
     qDebug() << "Will save group list now.";
@@ -621,7 +675,7 @@ void InstanceList::saveGroupList()
     QString groupFileName = m_instDir + "/instgroups.json";
     QMap<QString, QSet<QString>> reverseGroupMap;
     for (auto iter = m_instanceGroupIndex.begin(); iter != m_instanceGroupIndex.end(); iter++) {
-        QString id = iter.key();
+        const QString& id = iter.key();
         QString group = iter.value();
         if (group.isEmpty())
             continue;
@@ -711,17 +765,22 @@ void InstanceList::loadGroupList()
         return;
     }
 
-    QSet<QString> groupSet;
     m_instanceGroupIndex.clear();
+    m_groupNameCache.clear();
 
     // Iterate through all the groups.
     QJsonObject groupMapping = rootObj.value("groups").toObject();
     for (QJsonObject::iterator iter = groupMapping.begin(); iter != groupMapping.end(); iter++) {
         QString groupName = iter.key();
 
+        if (iter.key().isEmpty()) {
+            qWarning() << "Redundant empty group found";
+            continue;
+        }
+
         // If not an object, complain and skip to the next one.
         if (!iter.value().isObject()) {
-            qWarning() << QString("Group '%1' in the group list should be an object.").arg(groupName).toUtf8();
+            qWarning() << QString("Group '%1' in the group list should be an object").arg(groupName).toUtf8();
             continue;
         }
 
@@ -733,23 +792,19 @@ void InstanceList::loadGroupList()
             continue;
         }
 
-        // keep a list/set of groups for choosing
-        groupSet.insert(groupName);
-
         auto hidden = groupObj.value("hidden").toBool(false);
-        if (hidden) {
+        if (hidden)
             m_collapsedGroups.insert(groupName);
-        }
 
         // Iterate through the list of instances in the group.
         QJsonArray instancesArray = groupObj.value("instances").toArray();
 
-        for (QJsonArray::iterator iter2 = instancesArray.begin(); iter2 != instancesArray.end(); iter2++) {
-            m_instanceGroupIndex[(*iter2).toString()] = groupName;
+        for (auto value : instancesArray) {
+            m_instanceGroupIndex[value.toString()] = groupName;
+            increaseGroupCount(groupName);
         }
     }
     m_groupsLoaded = true;
-    m_groupNameCache.unite(groupSet);
     qDebug() << "Group list loaded.";
 }
 
@@ -892,9 +947,12 @@ QString InstanceList::getStagedInstancePath()
 
 bool InstanceList::commitStagedInstance(const QString& path,
                                         InstanceName const& instanceName,
-                                        const QString& groupName,
+                                        QString groupName,
                                         InstanceTask const& commiting)
 {
+    if (groupName.isEmpty() && !groupName.isNull())
+        groupName = QString();
+
     QDir dir;
     QString instID;
     InstancePtr inst;
@@ -925,7 +983,7 @@ bool InstanceList::commitStagedInstance(const QString& path,
             }
 
             m_instanceGroupIndex[instID] = groupName;
-            m_groupNameCache.insert(groupName);
+            increaseGroupCount(groupName);
         }
 
         instanceSet.insert(instID);

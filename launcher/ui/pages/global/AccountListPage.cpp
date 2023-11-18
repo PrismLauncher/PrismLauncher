@@ -42,30 +42,23 @@
 
 #include <QDebug>
 
-#include "net/NetJob.h"
-
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/LoginDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/OfflineLoginDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/SkinUploadDialog.h"
 
-#include "minecraft/auth/AccountTask.h"
 #include "minecraft/services/SkinDelete.h"
 #include "tasks/Task.h"
 
 #include "Application.h"
-
-#include "BuildConfig.h"
 
 AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::AccountListPage)
 {
     ui->setupUi(this);
     ui->listView->setEmptyString(
         tr("Welcome!\n"
-           "If you're new here, you can select the \"Add Microsoft\" or \"Add Mojang\" buttons to link your Microsoft and/or Mojang "
-           "accounts."));
+           "If you're new here, you can select the \"Add Microsoft\" button to link your Microsoft account."));
     ui->listView->setEmptyMode(VersionListView::String);
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -74,7 +67,6 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     ui->listView->setModel(m_accounts.get());
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::ProfileNameColumn, QHeaderView::Stretch);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::NameColumn, QHeaderView::Stretch);
-    ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::MigrationColumn, QHeaderView::ResizeToContents);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::TypeColumn, QHeaderView::ResizeToContents);
     ui->listView->header()->setSectionResizeMode(AccountList::VListColumns::StatusColumn, QHeaderView::ResizeToContents);
     ui->listView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -86,6 +78,8 @@ AccountListPage::AccountListPage(QWidget* parent) : QMainWindow(parent), ui(new 
     connect(selectionModel, &QItemSelectionModel::selectionChanged,
             [this]([[maybe_unused]] const QItemSelection& sel, [[maybe_unused]] const QItemSelection& dsel) { updateButtonStates(); });
     connect(ui->listView, &VersionListView::customContextMenuRequested, this, &AccountListPage::ShowContextMenu);
+    connect(ui->listView, &VersionListView::activated, this,
+            [this](const QModelIndex& index) { m_accounts->setDefaultAccount(m_accounts->at(index.row())); });
 
     connect(m_accounts.get(), &AccountList::listChanged, this, &AccountListPage::listChanged);
     connect(m_accounts.get(), &AccountList::listActivityChanged, this, &AccountListPage::listChanged);
@@ -137,19 +131,6 @@ void AccountListPage::listChanged()
     updateButtonStates();
 }
 
-void AccountListPage::on_actionAddMojang_triggered()
-{
-    MinecraftAccountPtr account =
-        LoginDialog::newAccount(this, tr("Please enter your Mojang account email and password to add your account."));
-
-    if (account) {
-        m_accounts->addAccount(account);
-        if (m_accounts->count() == 1) {
-            m_accounts->setDefaultAccount(account);
-        }
-    }
-}
-
 void AccountListPage::on_actionAddMicrosoft_triggered()
 {
     MinecraftAccountPtr account =
@@ -167,7 +148,7 @@ void AccountListPage::on_actionAddOffline_triggered()
 {
     if (!m_accounts->anyAccountIsValid()) {
         QMessageBox::warning(this, tr("Error"),
-                             tr("You must add a Microsoft or Mojang account that owns Minecraft before you can add an offline account."
+                             tr("You must add a Microsoft account that owns Minecraft before you can add an offline account."
                                 "<br><br>"
                                 "If you have lost your account you can contact Microsoft for support."));
         return;
@@ -186,6 +167,12 @@ void AccountListPage::on_actionAddOffline_triggered()
 
 void AccountListPage::on_actionRemove_triggered()
 {
+    auto response = CustomMessageBox::selectable(this, tr("Remove account?"), tr("Do you really want to delete this account?"),
+                                                 QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+    if (response != QMessageBox::Yes) {
+        return;
+    }
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.size() > 0) {
         QModelIndex selected = selection.first();
@@ -244,6 +231,7 @@ void AccountListPage::updateButtonStates()
         ui->actionNoDefault->setEnabled(true);
         ui->actionNoDefault->setChecked(false);
     }
+    ui->listView->resizeColumnToContents(3);
 }
 
 void AccountListPage::on_actionUploadSkin_triggered()

@@ -165,9 +165,13 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
         QString path = FS::PathCombine("themes", m_id);
         QString pathResources = FS::PathCombine("themes", m_id, "resources");
 
-        if (!FS::ensureFolderPathExists(path) || !FS::ensureFolderPathExists(pathResources)) {
-            themeWarningLog() << "couldn't create folder for theme!";
+        if (!FS::ensureFolderPathExists(path)) {
+            themeWarningLog() << "Theme directory for" << m_id << "could not be created. This theme might be invalid";
             return;
+        }
+
+        if (!FS::ensureFolderPathExists(pathResources)) {
+            themeWarningLog() << "Resources directory for" << m_id << "could not be created";
         }
 
         auto themeFilePath = FS::PathCombine(path, themeFile);
@@ -230,7 +234,11 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
 
 QStringList CustomTheme::searchPaths()
 {
-    return { FS::PathCombine("themes", m_id, "resources") };
+    QString pathResources = FS::PathCombine("themes", m_id, "resources");
+    if (QFileInfo::exists(pathResources))
+        return { pathResources };
+
+    return {};
 }
 
 QString CustomTheme::id()

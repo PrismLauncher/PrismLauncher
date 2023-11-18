@@ -38,7 +38,7 @@
 #include "VersionFile.h"
 
 namespace ProfileUtils {
-typedef QStringList PatchOrder;
+using PatchOrder = QStringList;
 
 /// Read and parse a OneSix format order file
 bool readOverrideOrders(QString path, PatchOrder& order);

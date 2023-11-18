@@ -186,6 +186,53 @@
             </property>
            </widget>
           </item>
+           <item>
+           <widget class="QCheckBox" name="dependenciesDisableBtn">
+            <property name="toolTip">
+             <string>Disable the automatic detection, installation, and updating of mod dependencies.</string>
+            </property>
+            <property name="text">
+             <string>Disable automatic mod dependency management</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="miscellaneousGroupBox">
+         <property name="title">
+          <string>Miscellaneous</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="numberOfConcurrentTasksLabel">
+            <property name="text">
+             <string>Number of concurrent tasks</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="numberOfConcurrentTasksSpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="numberOfConcurrentDownloadsLabel">
+            <property name="text">
+             <string>Number of concurrent downloads</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="numberOfConcurrentDownloadsSpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

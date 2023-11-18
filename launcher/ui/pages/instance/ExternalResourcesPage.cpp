@@ -42,6 +42,7 @@
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "ui/GuiUtil.h"
 
+#include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
 #include <algorithm>
@@ -95,7 +96,8 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
 
     connect(viewHeader, &QHeaderView::customContextMenuRequested, this, &ExternalResourcesPage::ShowHeaderContextMenu);
 
-    m_model->loadHiddenColumns(ui->treeView);
+    m_model->loadColumns(ui->treeView);
+    connect(ui->treeView->header(), &QHeaderView::sectionResized, this, [this] { m_model->saveColumns(ui->treeView); });
 }
 
 ExternalResourcesPage::~ExternalResourcesPage()
@@ -152,6 +154,7 @@ void ExternalResourcesPage::retranslate()
 void ExternalResourcesPage::itemActivated(const QModelIndex&)
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setResourceEnabled(selection.indexes(), EnableAction::TOGGLE);
 }
 
 void ExternalResourcesPage::filterTextChanged(const QString& newContents)

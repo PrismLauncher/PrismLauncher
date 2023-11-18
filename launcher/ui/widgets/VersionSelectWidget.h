@@ -82,7 +82,7 @@ class VersionSelectWidget : public QWidget {
     void selectedVersionChanged(BaseVersion::Ptr version);
 
    protected:
-    virtual void closeEvent(QCloseEvent*);
+    virtual void closeEvent(QCloseEvent*) override;
 
    private slots:
     void onTaskSucceeded();

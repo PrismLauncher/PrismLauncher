@@ -51,6 +51,9 @@ class ConcurrentTask : public Task {
     explicit ConcurrentTask(QObject* parent = nullptr, QString task_name = "", int max_concurrent = 6);
     ~ConcurrentTask() override;
 
+    // safe to call before starting the task
+    void setMaxConcurrent(int max_concurrent) { m_total_max_size = max_concurrent; }
+
     bool canAbort() const override { return true; }
 
     inline auto isMultiStep() const -> bool override { return totalSize() > 1; }

@@ -56,6 +56,7 @@ class Version {
     bool operator!=(const Version& other) const;
 
     QString toString() const { return m_string; }
+    bool isEmpty() const { return m_string.isEmpty(); }
 
     friend QDebug operator<<(QDebug debug, const Version& v);
 
@@ -103,14 +104,8 @@ class Version {
 
         QString m_fullString;
 
-        [[nodiscard]] inline bool isAppendix() const
-        {
-            return m_stringPart.startsWith('+');
-        }
-        [[nodiscard]] inline bool isPreRelease() const
-        {
-            return m_stringPart.startsWith('-') && m_stringPart.length() > 1;
-        }
+        [[nodiscard]] inline bool isAppendix() const { return m_stringPart.startsWith('+'); }
+        [[nodiscard]] inline bool isPreRelease() const { return m_stringPart.startsWith('-') && m_stringPart.length() > 1; }
 
         inline bool operator==(const Section& other) const
         {
@@ -156,14 +151,8 @@ class Version {
             return m_fullString < other.m_fullString;
         }
 
-        inline bool operator!=(const Section& other) const
-        {
-            return !(*this == other);
-        }
-        inline bool operator>(const Section& other) const
-        {
-            return !(*this < other || *this == other);
-        }
+        inline bool operator!=(const Section& other) const { return !(*this == other); }
+        inline bool operator>(const Section& other) const { return !(*this < other || *this == other); }
     };
 
    private:
