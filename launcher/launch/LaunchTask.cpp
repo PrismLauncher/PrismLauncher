@@ -307,7 +307,7 @@ QString expandVariables(const QString& input, QProcessEnvironment dict)
     return result;
 }
 
-QString LaunchTask::substituteVariables(QString& cmd) const
+QString LaunchTask::substituteVariables(QString& cmd, bool isLaunch) const
 {
-    return expandVariables(cmd, m_instance->createEnvironment());
+    return expandVariables(cmd, isLaunch ? m_instance->createLaunchEnvironment() : m_instance->createEnvironment());
 }

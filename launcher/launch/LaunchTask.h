@@ -87,7 +87,7 @@ class LaunchTask : public Task {
     shared_qobject_ptr<LogModel> getLogModel();
 
    public:
-    QString substituteVariables(QString& cmd) const;
+    QString substituteVariables(QString& cmd, bool isLaunch = false) const;
     QString censorPrivateInfo(QString in);
 
    protected: /* methods */
