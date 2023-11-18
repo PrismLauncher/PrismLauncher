@@ -26,7 +26,7 @@ class BasePageProvider {
 };
 
 class GenericPageProvider : public BasePageProvider {
-    typedef std::function<BasePage*()> PageCreator;
+    using PageCreator = std::function<BasePage*()>;
 
    public:
     explicit GenericPageProvider(const QString& dialogTitle) : m_dialogTitle(dialogTitle) {}

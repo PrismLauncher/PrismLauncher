@@ -70,6 +70,9 @@
    </layout>
   </widget>
   <widget class="WideBar" name="actionsToolbar">
+   <property name="useDefaultAction" stdset="0">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>Actions</string>
    </property>
@@ -146,17 +149,6 @@
     <string>Download a new resource</string>
    </property>
   </action>
-  <action name="actionUpdateItem">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Check for &amp;Updates</string>
-   </property>
-   <property name="toolTip">
-    <string>Try to check or update all selected resources (all resources if none are selected)</string>
-   </property>
-  </action>
   <action name="actionVisitItemPage">
    <property name="enabled">
     <bool>false</bool>
@@ -168,15 +160,15 @@
     <string>Go to mods home page</string>
    </property>
   </action>
-  <action name="actionRemoveItemMetadata">
+  <action name="actionUpdateItem">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
-    <string>Remove metadata</string>
+    <string>Check for &amp;Updates</string>
    </property>
    <property name="toolTip">
-    <string>Remove mod's metadata</string>
+    <string>Try to check or update all selected resources (all resources if none are selected)</string>
    </property>
   </action>
  </widget>

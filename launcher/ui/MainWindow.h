@@ -148,7 +148,8 @@ class MainWindow : public QMainWindow {
 
     void on_actionDeleteInstance_triggered();
 
-    void deleteGroup();
+    void deleteGroup(QString group);
+    void renameGroup(QString group);
     void undoTrashInstance();
 
     inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
