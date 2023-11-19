@@ -200,9 +200,8 @@ void ImportPage::setExtraInfo(const QMap<QString, QString>& extra_info)
 
 void ImportPage::on_modpackBtn_clicked()
 {
-	const QMimeType zip = QMimeDatabase().mimeTypeForName("application/zip");
-    const QString filter =
-        tr("Supported files") + QString(" (%1 *.mrpack)").arg(zip.globPatterns().join(" "));
+    const QMimeType zip = QMimeDatabase().mimeTypeForName("application/zip");
+    auto filter = tr("Supported files") + QString(" (%1 *.mrpack)").arg(zip.globPatterns().join(" "));
     filter += ";;" + zip.filterString();
     //: Option for filtering for *.mrpack files when importing
     filter += ";;" + tr("Modrinth pack") + " (*.mrpack)";
