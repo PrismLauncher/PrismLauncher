@@ -110,7 +110,7 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                     return provider.value();
                 }
                 case SizeColumn:
-                    return StringUtils::humanReadableFileSize(m_resources[row]->size(), true);
+                    return m_resources[row]->sizeStr();
                 default:
                     return QVariant();
             }

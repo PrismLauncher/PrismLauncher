@@ -45,7 +45,7 @@ class Resource : public QObject {
     [[nodiscard]] auto internal_id() const -> QString { return m_internal_id; }
     [[nodiscard]] auto type() const -> ResourceType { return m_type; }
     [[nodiscard]] bool enabled() const { return m_enabled; }
-    [[nodiscard]] qint64 size() const { return m_size; }
+    [[nodiscard]] QString sizeStr() const { return m_size_str; }
 
     [[nodiscard]] virtual auto name() const -> QString { return m_name; }
     [[nodiscard]] virtual bool valid() const { return m_type != ResourceType::UNKNOWN; }
@@ -118,5 +118,5 @@ class Resource : public QObject {
     bool m_is_resolving = false;
     bool m_is_resolved = false;
     int m_resolution_ticket = 0;
-    qint64 m_size = 0;
+    QString m_size_str;
 };

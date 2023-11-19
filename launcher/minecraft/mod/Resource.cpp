@@ -5,6 +5,7 @@
 #include <QRegularExpression>
 
 #include "FileSystem.h"
+#include "StringUtils.h"
 
 Resource::Resource(QObject* parent) : QObject(parent) {}
 
@@ -19,18 +20,18 @@ void Resource::setFile(QFileInfo file_info)
     parseFile();
 }
 
-qint64 calculateFileSize(const QFileInfo& file)
+QString calculateFileSize(const QFileInfo& file)
 {
     if (file.isDir()) {
-        QDirIterator it(file.absoluteFilePath(), QDir::Files, QDirIterator::Subdirectories);
-        qint64 total = 0;
-        while (it.hasNext()) {
-            it.next();
-            total += it.fileInfo().size();
-        }
-        return total;
+        auto dir = QDir(file.absoluteFilePath());
+        dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
+        auto count = dir.count();
+        auto str = QObject::tr("item");
+        if (count != 1)
+            str = QObject::tr("items");
+        return QString("%1 %2").arg(QString::number(count), str);
     }
-    return file.size();
+    return StringUtils::humanReadableFileSize(file.size(), true);
 }
 
 void Resource::parseFile()
@@ -41,7 +42,7 @@ void Resource::parseFile()
 
     m_internal_id = file_name;
 
-    m_size = calculateFileSize(m_file_info);
+    m_size_str = calculateFileSize(m_file_info);
     if (m_file_info.isDir()) {
         m_type = ResourceType::FOLDER;
         m_name = file_name;
@@ -106,9 +107,9 @@ std::pair<int, bool> Resource::compare(const Resource& other, SortType type) con
                 return { -1, type == SortType::DATE };
             break;
         case SortType::SIZE: {
-            if (size() > other.size())
+            if (fileinfo().size() > other.fileinfo().size())
                 return { 1, type == SortType::SIZE };
-            if (size() < other.size())
+            if (fileinfo().size() < other.fileinfo().size())
                 return { -1, type == SortType::SIZE };
             break;
         }

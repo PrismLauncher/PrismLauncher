@@ -417,7 +417,7 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
                 case SizeColumn:
-                    return StringUtils::humanReadableFileSize(m_resources[row]->size(), true);
+                    return m_resources[row]->sizeStr();
                 default:
                     return {};
             }
