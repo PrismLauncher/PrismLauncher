@@ -56,7 +56,9 @@ const QVector<PasteUpload::RegReplace> PasteUpload::AnonimizeRules = {
     RegReplace(QRegularExpression("eyJhbGciOiJIUzI1NiJ9\\.eyJ4dWlkIjoi[^\\.]+\\.[A-Za-z0-9]+", QRegularExpression::CaseInsensitiveOption),
                "<SESSION_TOKEN>"),  // SESSION_TOKEN
     RegReplace(QRegularExpression("new refresh token: \"[^\"]+\"", QRegularExpression::CaseInsensitiveOption),
-               "new refresh token: \"<TOKEN>\""),  // katabasis token
+               "new refresh token: \"<TOKEN>\""),  // refresh token
+    RegReplace(QRegularExpression("\"device_code\" :  \"[^\"]+\"", QRegularExpression::CaseInsensitiveOption),
+               "\"device_code\" :  \"<DEVICE_CODE>\""),  // device code
     RegReplace(QRegularExpression("(?!127\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})(?!0\\.0\\.0\\.0)(?!1\\.[01]\\.[01]\\.1)(?!8\\.8\\.[84]\\."
                                   "[84])(?<!version: )(?<!version )(?<!([0-9]|-|\\w))([0-9]{1,3}\\.){3}[0-9]{1,3}(?![0-9])",
                                   QRegularExpression::CaseInsensitiveOption),
