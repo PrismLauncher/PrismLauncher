@@ -594,7 +594,7 @@ jobs:
   flatpak:
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:kde-5.15-22.08
+      image: bilelmoussaoui/flatpak-github-actions:kde-5.15-23.08
       options: --privileged
     steps:
       - name: Checkout
