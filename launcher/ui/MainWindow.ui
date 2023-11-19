@@ -209,6 +209,7 @@
     </property>
     <addaction name="actionClearMetadata"/>
     <addaction name="actionReportBug"/>
+    <addaction name="actionUploadLog"/>
     <addaction name="actionAddToPATH"/>
     <addaction name="separator"/>
     <addaction name="actionMATRIX"/>
@@ -655,6 +656,18 @@
     <string>Clear cached metadata</string>
    </property>
   </action>
+  <action name="actionUploadLog">
+   <property name="icon">
+    <iconset theme="log">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Upload logs</string>
+   </property>
+   <property name="toolTip">
+    <string>Upload launcher logs to the selected log provider</string>
+   </property>
+  </action>
   <action name="actionAddToPATH">
    <property name="icon">
     <iconset theme="custom-commands">
@@ -738,7 +751,8 @@
   </action>
   <action name="actionViewCatPackFolder">
    <property name="icon">
-    <iconset theme="viewfolder"/>
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>View Cat Packs Folder</string>
