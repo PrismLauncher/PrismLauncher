@@ -44,7 +44,7 @@ class ExtentionPointRegistry {
     bool isKnown(const QString& kind) const;
     void withFactory(const QString& kind, std::function<void(Factory&)> action);
     void registerExtensionpoint(QString name, Factory factory);
-    template<class T>
+    template <class T>
     void registerExtensionpoint(QString name);
 
    private:

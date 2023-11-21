@@ -48,5 +48,5 @@ void CatPackContribution::onPluginDisable()
         return;
 
     APPLICATION->themeManager()->removeCatPack(m_id);
-    m_id = ""; // reset to empty
+    m_id = "";  // reset to empty
 }

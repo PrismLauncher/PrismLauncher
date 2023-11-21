@@ -42,8 +42,8 @@ PluginPage::PluginPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Plugin
 
     assert(ui->treeView->header()->count() > 0);
 
-    ui->treeView->setResizeModes({ QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,
-                                   QHeaderView::Interactive, QHeaderView::Interactive });
+    ui->treeView->setResizeModes(
+        { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive, QHeaderView::Interactive });
 
     ui->treeView->installEventFilter(this);
     ui->treeView->sortByColumn(1, Qt::AscendingOrder);
@@ -84,10 +84,12 @@ PluginPage::~PluginPage()
 
 void PluginPage::saveColumns()
 {
+    // TODO: implement this
 }
 
 void PluginPage::loadColumns()
 {
+    // TODO: implement this
 }
 
 void PluginPage::ShowContextMenu(const QPoint& pos)
@@ -124,9 +126,9 @@ void PluginPage::itemActivated(const QModelIndex&)
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     if (m_model->setEnabled(selection.indexes(), Plugin::EnableAction::TOGGLE)) {
         auto response = CustomMessageBox::selectable(this, "Need Launcher restart",
-                            "Some settings / disable of plugins only gets effective on the next restart.",
-                            QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
-            ->exec();
+                                                     "Some settings / disable of plugins only gets effective on the next restart.",
+                                                     QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
+                            ->exec();
     }
 }
 
@@ -147,9 +149,9 @@ void PluginPage::disableItem()
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
     if (m_model->setEnabled(selection.indexes(), Plugin::EnableAction::DISABLE)) {
         auto response = CustomMessageBox::selectable(this, "Need Launcher restart",
-                            "Some settings / disable of plugins only gets effective on the next restart.",
-                            QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
-            ->exec();
+                                                     "Some settings / disable of plugins only gets effective on the next restart.",
+                                                     QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
+                            ->exec();
     }
 }
 
@@ -191,8 +193,9 @@ bool PluginPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]]
     }
 
     if (!plugin.issueTracker().isEmpty()) {
-        ui->frame->setIssueTracker(tr("Report issues to: ")
-            + "<a href=\"" + plugin.issueTracker() + "\">" + plugin.issueTracker() + "</a>");
+        auto issueTracker = tr("Report issues to: ");
+        issueTracker += "<a href=\"" + plugin.issueTracker() + "\">" + plugin.issueTracker() + "</a>";
+        ui->frame->setIssueTracker(issueTracker);
     }
 
     return true;

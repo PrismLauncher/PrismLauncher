@@ -49,12 +49,8 @@ class PluginList : public QAbstractListModel {
     [[nodiscard]] qsizetype size() const { return m_plugins.size(); }
     [[nodiscard]] PluginPtr at(int i) const { return m_plugins.at(i); }
 
-    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override {
-        return parent.isValid() ? 0 : static_cast<int>(size());
-    }
-    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override {
-        return parent.isValid() ? 0 : NUM_COLUMNS;
-    }
+    [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
+    [[nodiscard]] int columnCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : NUM_COLUMNS; }
 
     [[nodiscard]] bool validateIndex(const QModelIndex& index) const;
 
@@ -69,14 +65,12 @@ class PluginList : public QAbstractListModel {
        public:
         explicit ProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
 
-       // protected:
-       //  [[nodiscard]] bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
-       //  [[nodiscard]] bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override;
+        // protected:
+        //  [[nodiscard]] bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
+        //  [[nodiscard]] bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override;
     };
 
-    QSortFilterProxyModel* createFilterProxyModel(QObject* parent) {
-        return new ProxyModel(parent);
-    }
+    QSortFilterProxyModel* createFilterProxyModel(QObject* parent) { return new ProxyModel(parent); }
 
    signals:
     void pluginsReloaded();

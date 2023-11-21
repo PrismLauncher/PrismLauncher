@@ -266,7 +266,8 @@ QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
     return id;
 }
 
-void ThemeManager::removeCatPack(const QString& id) {
+void ThemeManager::removeCatPack(const QString& id)
+{
     m_catPacks.erase(id);
     if (APPLICATION->settings()->get("BackgroundCat").toString() == id) {
         // set the selected cat to a first of the remaining ones...

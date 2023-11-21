@@ -49,18 +49,20 @@ void ExtentionPointRegistry::registerExtensionpoint(QString name, ExtentionPoint
     m_factories.insert(name, factory);
 }
 
-template<class T>
-void ExtentionPointRegistry::registerExtensionpoint(QString name) {
+template <class T>
+void ExtentionPointRegistry::registerExtensionpoint(QString name)
+{
     static_assert(std::is_base_of<PluginContribution, T>::value, "T must derive from PluginContribution");
 
-    this->registerExtensionpoint(name, [] () { return new T(); });
+    this->registerExtensionpoint(name, [] { return new T(); });
 }
 
 #include "extension_points/CatPackExtension.h"
 
-void registerExtensionPoints() {
+void registerExtensionPoints()
+{
     ExtentionPointRegistry& registry = ExtentionPointRegistry::instance();
-    #define REGISTER(name, clazz) registry.registerExtensionpoint<clazz>(#name);
+#define REGISTER(name, clazz) registry.registerExtensionpoint<clazz>(#name);
 
     REGISTER(cat_packs, CatPackContribution);
 }

@@ -44,14 +44,16 @@ PluginList::~PluginList()
     //     QCoreApplication::processEvents();
 }
 
-void PluginList::enablePlugins() {
+void PluginList::enablePlugins()
+{
     for (auto& plugin : m_plugins) {
         if (plugin->enabled())
             plugin->onEnable();
     }
 }
 
-static QMap<QString, PluginLocator> getIdMapping(const QList<PluginPtr>& list) {
+static QMap<QString, PluginLocator> getIdMapping(const QList<PluginPtr>& list)
+{
     QMap<QString, PluginLocator> out;
     int i = 0;
     for (auto& item : list) {
@@ -107,7 +109,8 @@ bool PluginList::validateIndex(const QModelIndex& index) const
     return true;
 }
 
-bool PluginList::setEnabled(const QModelIndexList& indexes, Plugin::EnableAction action) {
+bool PluginList::setEnabled(const QModelIndexList& indexes, Plugin::EnableAction action)
+{
     if (indexes.isEmpty())
         return false;
 
@@ -134,7 +137,8 @@ bool PluginList::setEnabled(const QModelIndexList& indexes, Plugin::EnableAction
     return needsRestart;
 }
 
-QVariant PluginList::data(const QModelIndex& index, int role) const {
+QVariant PluginList::data(const QModelIndex& index, int role) const
+{
     if (!validateIndex(index))
         return {};
 
@@ -164,8 +168,7 @@ QVariant PluginList::data(const QModelIndex& index, int role) const {
         case Qt::DecorationRole: {
             if (column == ActiveColumn && m_plugins[row]->needsRestart()) {
                 return APPLICATION->getThemedIcon("status-yellow");
-            }
-            else if (column == ImageColumn) {
+            } else if (column == ImageColumn) {
                 return at(row)->icon({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }
             return {};
@@ -238,7 +241,8 @@ QList<PluginId> PluginList::discoverPlugins()
     qDebug() << "Discovering plugins in" << m_pluginsDir;
 
     QList<QString> out;
-    QDirIterator iter(m_pluginsDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
+    QDirIterator iter(m_pluginsDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden,
+                      QDirIterator::FollowSymlinks);
 
     while (iter.hasNext()) {
         QString subDir = iter.next();
@@ -260,18 +264,19 @@ QList<PluginId> PluginList::discoverPlugins()
         qDebug() << "Found plugin ID" << id;
     }
 
-    #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-        pluginSet = QSet<QString>(out.begin(), out.end());
-    #else
-        pluginSet = out.toSet();
-    #endif
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    pluginSet = QSet<QString>(out.begin(), out.end());
+#else
+    pluginSet = out.toSet();
+#endif
 
     m_pluginsProbed = true;
 
     return out;
 }
 
-PluginPtr PluginList::loadPlugin(const PluginId& id) {
+PluginPtr PluginList::loadPlugin(const PluginId& id)
+{
     auto pluginRoot = FS::PathCombine(m_pluginsDir, id);
     PluginPtr plugin;
     plugin.reset(new Plugin(pluginRoot));

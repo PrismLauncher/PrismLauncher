@@ -16,15 +16,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
 
+#include "FileSystem.h"
 #include "MTPixmapCache.h"
 #include "Plugin.h"
 #include "PluginContribution.h"
 #include "api/PluginInterface.h"
-#include "FileSystem.h"
 
 Q_LOGGING_CATEGORY(pluginLogC, "launcher.plugins")
 
@@ -302,12 +302,18 @@ void Plugin::loadV1(const QJsonObject& root)
         }
 
         QJsonArray entries = contributions[key].toArray();
-        registry.withFactory(key, [this, &entries, &skipped, &failed] (ExtentionPointRegistry::Factory& factory) {
+        registry.withFactory(key, [this, &entries, &skipped, &failed](ExtentionPointRegistry::Factory& factory) {
             for (auto entry : entries) {
                 PluginContributionPtr contribution;
                 contribution.reset(factory());
-                if (!contribution) { skipped++; continue; }
-                if (!contribution->loadConfig(*this, entry)) { failed++; continue; }
+                if (!contribution) {
+                    skipped++;
+                    continue;
+                }
+                if (!contribution->loadConfig(*this, entry)) {
+                    failed++;
+                    continue;
+                }
                 m_contributions.append(contribution);
             }
         });
@@ -320,25 +326,26 @@ void Plugin::loadV1(const QJsonObject& root)
         qCritical(pluginLogC) << "Failed" << failed << "contributions for plugin" << id();
 }
 
-QString Plugin::getNativePluginPath() {
-    #if defined(Q_OS_WIN)
-        #if defined(Q_PROCESSOR_X86_64)
-            if (!m_native_plugin_paths.win64.isEmpty()) {
-                return m_native_plugin_paths.win64;
-            }
-        #endif
-        return m_native_plugin_paths.win32;
-    #elif defined(Q_OS_LINUX)
-        #if defined(Q_PROCESSOR_X86_64)
-            if (!m_native_plugin_paths.lin64.isEmpty()) {
-                return m_native_plugin_paths.lin64;
-            }
-        #endif
-        return m_native_plugin_paths.lin32;
-    #elif defined(Q_OS_MACOS)
-        return m_native_plugin_paths.osx;
-    #else
-        qWarning() << "Native plugins not supported! unknown OS";
-        return "";
-    #endif
+QString Plugin::getNativePluginPath()
+{
+#if defined(Q_OS_WIN)
+#if defined(Q_PROCESSOR_X86_64)
+    if (!m_native_plugin_paths.win64.isEmpty()) {
+        return m_native_plugin_paths.win64;
+    }
+#endif
+    return m_native_plugin_paths.win32;
+#elif defined(Q_OS_LINUX)
+#if defined(Q_PROCESSOR_X86_64)
+    if (!m_native_plugin_paths.lin64.isEmpty()) {
+        return m_native_plugin_paths.lin64;
+    }
+#endif
+    return m_native_plugin_paths.lin32;
+#elif defined(Q_OS_MACOS)
+    return m_native_plugin_paths.osx;
+#else
+    qWarning() << "Native plugins not supported! unknown OS";
+    return "";
+#endif
 }

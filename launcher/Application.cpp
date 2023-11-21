@@ -120,8 +120,8 @@
 #include "meta/Index.h"
 #include "translations/TranslationsModel.h"
 
-#include "plugin/PluginList.h"
 #include "plugin/PluginContribution.h"
+#include "plugin/PluginList.h"
 
 #include <DesktopServices.h>
 #include <FileSystem.h>
