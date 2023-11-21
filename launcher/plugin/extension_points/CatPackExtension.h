@@ -32,5 +32,3 @@ class CatPackContribution : public PluginContribution {
     QFileInfo m_manifest;
     QString m_id;
 };
-
-REGISTER_EXTENSIONPOINT(cat_packs, CatPackContribution);

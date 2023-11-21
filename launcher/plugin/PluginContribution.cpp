@@ -46,3 +46,18 @@ void ExtentionPointRegistry::registerExtensionpoint(QString name, ExtentionPoint
     // TODO: check for duplicates
     m_factories.insert(name, factory);
 }
+
+template<typename T>
+void ExtentionPointRegistry::registerExtensionpoint(QString name) {
+    this->registerExtensionpoint(name, [] () { return new T(); });
+}
+
+#include "extension_points/CatPackExtension.h"
+
+__attribute__((constructor))
+static void __registerExtensionPoints() {
+    ExtentionPointRegistry& registry = ExtentionPointRegistry::instance();
+    #define REGISTER(name, clazz) registry.registerExtensionpoint<clazz>(#name);
+
+    REGISTER(cat_packs, CatPackContribution);
+}

@@ -643,7 +643,6 @@ set(PRISMUPDATER_SOURCES
 )
 
 set(PLUGIN_SOURCES
-    plugin/extension_points.h
     plugin/extension_points/CatPackExtension.h
     plugin/extension_points/CatPackExtension.cpp
 

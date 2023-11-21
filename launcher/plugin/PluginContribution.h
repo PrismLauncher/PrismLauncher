@@ -29,6 +29,7 @@
 enum class ExtensionPointKind {
     UNKNOWN,
     CAT_PACK,
+    MOD_PLATFORM,
 };
 
 class Plugin;
@@ -43,15 +44,15 @@ class ExtentionPointRegistry {
     bool isKnown(const QString& kind) const;
     void withFactory(const QString& kind, std::function<void(Factory&)> action);
     void registerExtensionpoint(QString name, Factory factory);
+    template<typename T>
+    void registerExtensionpoint(QString name);
 
    private:
     QMap<QString, Factory> m_factories;
 };
 
-#define REGISTER_EXTENSIONPOINT(name, clazz) \
-    __attribute__((constructor)) static void __registerExtensionPoint_##name () { \
-        ExtentionPointRegistry::instance().registerExtensionpoint(#name, [] () { return new clazz(); }); \
-    }
+__attribute__((constructor))
+static void __registerExtensionPoints();
 
 class PluginContribution {
    public:
@@ -70,5 +71,3 @@ class PluginContribution {
    private:
     ExtensionPointKind m_kind;
 };
-
-#include "extension_points.h"
