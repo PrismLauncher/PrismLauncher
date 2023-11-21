@@ -50,7 +50,7 @@ class Plugin : public PluginInstance {
 
     [[nodiscard]] auto name() const -> QString { return m_name; }
     [[nodiscard]] auto description() const -> QString { return m_desc; }
-    [[nodiscard]] auto metaurl() const -> QString { return m_metaurl; }
+    [[nodiscard]] auto homepage() const -> QString { return m_homepage; }
     [[nodiscard]] auto issueTracker() const -> QString { return m_issueTracker; }
     [[nodiscard]] auto authors() const -> QStringList { return m_authors; }
     [[nodiscard]] auto license() const -> QString { return m_license; }
@@ -73,7 +73,7 @@ class Plugin : public PluginInstance {
     void loadV1(const QJsonObject& root);
     QString getNativePluginPath();
 
-    QString m_name, m_desc, m_metaurl, m_icon_file, m_issueTracker, m_license;
+    QString m_name, m_desc, m_homepage, m_icon_file, m_issueTracker, m_license;
     QStringList m_authors;
     struct {
         QString osx;

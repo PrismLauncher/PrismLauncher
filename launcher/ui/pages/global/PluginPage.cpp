@@ -177,7 +177,7 @@ bool PluginPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]]
     Plugin const& plugin = *m_model->at(row);
 
     QString name = plugin.name().isEmpty() ? plugin.id() : plugin.name();
-    QString link = plugin.metaurl();
+    QString link = plugin.homepage();
     QString text = link.isEmpty() ? name : ("<a href=\"" + link + "\">" + name + "</a>");
     if (!plugin.authors().isEmpty())
         text += " by " + plugin.authors().join(", ");

@@ -267,7 +267,7 @@ void Plugin::loadV1(const QJsonObject& root)
 {
     m_name = root.value("displayName").toString();
     m_desc = root.value("description").toString();
-    m_metaurl = root.value("homepage").toString();
+    m_homepage = root.value("homepage").toString();
     m_icon_file = root.value("icon").toString();
     m_issueTracker = root.value("issues").toString();
     m_license = root.value("license").toString();
