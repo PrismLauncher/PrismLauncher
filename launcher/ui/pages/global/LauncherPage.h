@@ -75,6 +75,7 @@ class LauncherPage : public QWidget, public BasePage {
     void on_iconsDirBrowseBtn_clicked();
     void on_downloadsDirBrowseBtn_clicked();
     void on_metadataDisableBtn_clicked();
+    void on_pluginsDirBrowseBtn_clicked();
 
     /*!
      * Updates the font preview

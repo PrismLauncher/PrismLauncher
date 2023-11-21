@@ -642,6 +642,24 @@ set(PRISMUPDATER_SOURCES
 
 )
 
+set(PLUGIN_SOURCES
+    plugin/extension_points.h
+    plugin/extension_points/CatPackExtension.h
+    plugin/extension_points/CatPackExtension.cpp
+
+    plugin/Plugin.h
+    plugin/Plugin.cpp
+
+    plugin/PluginContribution.h
+    plugin/PluginContribution.cpp
+
+    plugin/api/PluginInterface.h
+    plugin/api/PluginInstance.h
+
+    plugin/PluginList.h
+    plugin/PluginList.cpp
+)
+
 ######## Logging categories ########
 
 ecm_qt_declare_logging_category(CORE_SOURCES
@@ -700,6 +718,14 @@ ecm_qt_export_logging_category(
     EXPORT "${Launcher_Name}"
 )
 
+ecm_qt_export_logging_category(
+    IDENTIFIER pluginLogC
+    CATEGORY_NAME "launcher.plugins"
+    DEFAULT_SEVERITY Debug
+    DESCRIPTION "plugins & plugin loading"
+    EXPORT "${Launcher_Name}"
+)
+
 
 
 if(KDE_INSTALL_LOGGINGCATEGORIESDIR)  # only install if there is a standard path for this
@@ -734,6 +760,7 @@ set(LOGIC_SOURCES
     ${PACKWIZ_SOURCES}
     ${TECHNIC_SOURCES}
     ${ATLAUNCHER_SOURCES}
+    ${PLUGIN_SOURCES}
 )
 
 if(APPLE AND Launcher_ENABLE_UPDATER)
@@ -905,6 +932,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/global/ProxyPage.h
     ui/pages/global/APIPage.cpp
     ui/pages/global/APIPage.h
+    ui/pages/global/PluginPage.cpp
+    ui/pages/global/PluginPage.h
 
     # GUI - platform pages
     ui/pages/modplatform/CustomPage.cpp
@@ -1127,6 +1156,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
     ui/pages/global/APIPage.ui
+    ui/pages/global/PluginPage.ui
     ui/pages/global/ProxyPage.ui
     ui/pages/global/MinecraftPage.ui
     ui/pages/global/ExternalToolsPage.ui

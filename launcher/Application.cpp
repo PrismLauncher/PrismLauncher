@@ -64,6 +64,7 @@
 #include "ui/pages/global/LanguagePage.h"
 #include "ui/pages/global/LauncherPage.h"
 #include "ui/pages/global/MinecraftPage.h"
+#include "ui/pages/global/PluginPage.h"
 #include "ui/pages/global/ProxyPage.h"
 
 #include "ui/setupwizard/JavaWizardPage.h"
@@ -118,6 +119,8 @@
 
 #include "meta/Index.h"
 #include "translations/TranslationsModel.h"
+
+#include "plugin/PluginList.h"
 
 #include <DesktopServices.h>
 #include <FileSystem.h>
@@ -587,6 +590,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("IconsDir", "icons");
         m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
         m_settings->registerSetting("DownloadsDirWatchRecursive", false);
+        m_settings->registerSetting("PluginsDir", "plugins");
 
         // Editors
         m_settings->registerSetting("JsonEditor", QString());
@@ -767,6 +771,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<ExternalToolsPage>();
             m_globalSettingsProvider->addPage<AccountListPage>();
             m_globalSettingsProvider->addPage<APIPage>();
+            m_globalSettingsProvider->addPage<PluginPage>();
         }
 
         PixmapCache::setInstance(new PixmapCache(this));
@@ -1031,6 +1036,20 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox->adjustSize();
             msgBox->open();
         }
+    }
+
+    // load plugins
+    {
+        auto PluginsDirSetting = m_settings->getSetting("PluginsDir");
+        QString pluginsDir = PluginsDirSetting->get().toString();
+        qDebug() << "Plugins path               : " << pluginsDir;
+        m_plugins.reset(new PluginList(m_settings, pluginsDir, this));
+        qDebug() << "Loading Plugins...";
+        m_plugins->loadList();
+        qDebug() << "<> Plugins loaded.";
+        qDebug() << "Enable Plugins...";
+        m_plugins->enablePlugins();
+        qDebug() << "<> Plugins enabled.";
     }
 
     if (createSetupWizard()) {
