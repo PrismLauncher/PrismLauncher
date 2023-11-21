@@ -82,6 +82,7 @@
 
 #include <iostream>
 #include <mutex>
+#include <string_view>
 
 #include <QAccessible>
 #include <QCommandLineParser>
@@ -130,6 +131,10 @@
 #include <dlfcn.h>
 #include "MangoHud.h"
 #include "gamemode_client.h"
+#endif
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#include <mntent.h>
 #endif
 
 #if defined(Q_OS_MAC)
@@ -987,6 +992,36 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             FS::deletePath(update_success_marker.absoluteFilePath());
         }
     }
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+
+    // notify user if /tmp is mounted with `noexec` (#1693)
+    {
+        FILE* description = setmntent(MOUNTED, "r");
+        mntent* info = nullptr;
+
+        while ((info = getmntent(description)) != nullptr) {
+            std::string_view directory = info->mnt_dir;
+            std::string_view options = info->mnt_opts;
+
+            if (directory == "/tmp" && options.rfind("noexec") != std::string_view::npos) {
+                auto infoMsg =
+                    tr("Your /tmp directory is currently mounted with the 'noexec' flag enabled.\n"
+                       "Some versions of Minecraft may not launch.\n");
+                auto msgBox = new QMessageBox(QMessageBox::Information, tr("Incompatible system configuration"), infoMsg, QMessageBox::Ok);
+                msgBox->setDefaultButton(QMessageBox::Ok);
+                msgBox->setAttribute(Qt::WA_DeleteOnClose);
+                msgBox->setMinimumWidth(460);
+                msgBox->adjustSize();
+                msgBox->open();
+                break;
+            }
+        }
+
+        endmntent(description);
+    }
+
+#endif
 
     if (createSetupWizard()) {
         return;
