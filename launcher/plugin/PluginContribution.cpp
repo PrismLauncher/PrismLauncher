@@ -58,8 +58,7 @@ void ExtentionPointRegistry::registerExtensionpoint(QString name) {
 
 #include "extension_points/CatPackExtension.h"
 
-__attribute__((constructor))
-static void __registerExtensionPoints() {
+void registerExtensionPoints() {
     ExtentionPointRegistry& registry = ExtentionPointRegistry::instance();
     #define REGISTER(name, clazz) registry.registerExtensionpoint<clazz>(#name);
 

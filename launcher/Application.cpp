@@ -121,6 +121,7 @@
 #include "translations/TranslationsModel.h"
 
 #include "plugin/PluginList.h"
+#include "plugin/PluginContribution.h"
 
 #include <DesktopServices.h>
 #include <FileSystem.h>
@@ -212,6 +213,8 @@ std::tuple<QDateTime, QString, QString, QString, QString> read_lock_File(const Q
 
 Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 {
+    registerExtensionPoints();
+
 #if defined Q_OS_WIN32
     // attach the parent console if stdout not already captured
     if (AttachWindowsConsole()) {

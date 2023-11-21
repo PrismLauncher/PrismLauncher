@@ -51,8 +51,7 @@ class ExtentionPointRegistry {
     QMap<QString, Factory> m_factories;
 };
 
-__attribute__((constructor))
-static void __registerExtensionPoints();
+void registerExtensionPoints();
 
 class PluginContribution {
    public:
