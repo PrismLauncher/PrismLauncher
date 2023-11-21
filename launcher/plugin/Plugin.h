@@ -25,6 +25,8 @@
 #include <QPixmapCache>
 #include <QPluginLoader>
 
+#include <memory>
+
 #include "api/PluginInstance.h"
 
 Q_DECLARE_LOGGING_CATEGORY(pluginLogC)
