@@ -270,7 +270,7 @@ void ThemeManager::removeCatPack(const QString& id) {
     m_catPacks.erase(id);
     if (APPLICATION->settings()->get("BackgroundCat").toString() == id) {
         // set the selected cat to a random one of the remaining ones...
-        auto idx = (size_t) QRandomGenerator::global()->bounded((quint64) m_catPacks.size());
+        auto idx = (quint32) QRandomGenerator::global()->bounded((quint32) m_catPacks.size());
         auto item = m_catPacks.begin();
         std::advance( item, idx );
         APPLICATION->settings()->set("BackgroundCat", item->first);
