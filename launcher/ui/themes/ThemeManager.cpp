@@ -269,11 +269,11 @@ QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
 void ThemeManager::removeCatPack(const QString& id) {
     m_catPacks.erase(id);
     if (APPLICATION->settings()->get("BackgroundCat").toString() == id) {
-        // set the selected cat to a random one of the remaining ones...
-        auto idx = (quint32) QRandomGenerator::global()->bounded((quint32) m_catPacks.size());
+        // set the selected cat to a first of the remaining ones...
         auto item = m_catPacks.begin();
-        std::advance( item, idx );
-        APPLICATION->settings()->set("BackgroundCat", item->first);
+        if (item != m_catPacks.end()) {
+            APPLICATION->settings()->set("BackgroundCat", item->first);
+        }
     }
 }
 
