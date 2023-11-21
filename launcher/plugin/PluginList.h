@@ -42,7 +42,7 @@ class PluginList : public QAbstractListModel {
     enum PluginListError { NoError = 0, UnknownError };
 
     void enablePlugins();
-    [[nodiscard]] PluginListError loadList();
+    PluginListError loadList();
 
     [[nodiscard]] QDir dir() const { return QDir(m_pluginsDir); }
 
