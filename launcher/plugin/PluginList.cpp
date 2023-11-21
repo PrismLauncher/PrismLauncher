@@ -127,6 +127,10 @@ bool PluginList::setEnabled(const QModelIndexList& indexes, Plugin::EnableAction
 
         emit dataChanged(index(row, 0), index(row, columnCount(QModelIndex()) - 1));
     }
+
+    // reload everything that needs it...
+    emit pluginsReloaded();
+
     return needsRestart;
 }
 

@@ -78,6 +78,9 @@ class PluginList : public QAbstractListModel {
         return new ProxyModel(parent);
     }
 
+   signals:
+    void pluginsReloaded();
+
    private:
     void add(const QList<PluginPtr>& list);
     QList<PluginId> discoverPlugins();

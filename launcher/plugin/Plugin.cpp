@@ -249,18 +249,18 @@ void Plugin::onDisable()
 {
     // TODO: make plugins disable- / unload-able
 
-    // for (auto& contribution : m_contributions) {
-    //     contribution->onPluginDisable();
-    // }
+    for (auto& contribution : m_contributions) {
+        contribution->onPluginDisable();
+    }
 
-    // if (m_interface) {
-    //     m_interface->onDisable();
-    //     delete m_interface;
-    //     m_loader->unload();
-    //     delete m_loader;
-    //     m_interface = nullptr;
-    //     m_loader = nullptr;
-    // }
+    if (m_interface) {
+        m_interface->onDisable(*this);
+        delete m_interface;
+        m_loader->unload();
+        delete m_loader;
+        m_interface = nullptr;
+        m_loader = nullptr;
+    }
 }
 
 void Plugin::loadV1(const QJsonObject& root)
