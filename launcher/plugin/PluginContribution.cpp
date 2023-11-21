@@ -18,6 +18,8 @@
  */
 #include "PluginContribution.h"
 
+#include <type_traits>
+
 static ExtentionPointRegistry* self = nullptr;
 
 ExtentionPointRegistry& ExtentionPointRegistry::instance() noexcept
@@ -47,8 +49,10 @@ void ExtentionPointRegistry::registerExtensionpoint(QString name, ExtentionPoint
     m_factories.insert(name, factory);
 }
 
-template<typename T>
+template<class T>
 void ExtentionPointRegistry::registerExtensionpoint(QString name) {
+    static_assert(std::is_base_of<PluginContribution, T>::value, "T must derive from PluginContribution");
+
     this->registerExtensionpoint(name, [] () { return new T(); });
 }
 
