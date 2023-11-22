@@ -55,6 +55,7 @@ ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, BaseInstanc
     m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive,
                               QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true };
+    m_columnsHiddenByDefault = { false, false, false, false, false };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
