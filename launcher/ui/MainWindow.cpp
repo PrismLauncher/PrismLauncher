@@ -1209,17 +1209,27 @@ void MainWindow::on_actionViewCentralModsFolder_triggered()
 
 void MainWindow::on_actionViewIconThemeFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path());
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path(), true);
 }
 
 void MainWindow::on_actionViewWidgetThemeFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path());
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path(), true);
 }
 
 void MainWindow::on_actionViewCatPackFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path());
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path(), true);
+}
+
+void MainWindow::on_actionViewIconsFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->icons()->getDirectory(), true);
+}
+
+void MainWindow::on_actionViewLogsFolder_triggered()
+{
+    DesktopServices::openDirectory("logs", true);
 }
 
 void MainWindow::refreshInstances()
