@@ -123,26 +123,35 @@ namespace fs = ghc::filesystem;
 
 #if defined(__MINGW32__)
 
-typedef struct _DUPLICATE_EXTENTS_DATA {
+struct _DUPLICATE_EXTENTS_DATA {
     HANDLE FileHandle;
     LARGE_INTEGER SourceFileOffset;
     LARGE_INTEGER TargetFileOffset;
     LARGE_INTEGER ByteCount;
-} DUPLICATE_EXTENTS_DATA, *PDUPLICATE_EXTENTS_DATA;
+};
 
-typedef struct _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER {
+using DUPLICATE_EXTENTS_DATA = _DUPLICATE_EXTENTS_DATA;
+using PDUPLICATE_EXTENTS_DATA = _DUPLICATE_EXTENTS_DATA*;
+
+struct _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER {
     WORD ChecksumAlgorithm;  // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
     WORD Reserved;           // Must be 0
     DWORD Flags;             // FSCTL_INTEGRITY_FLAG_xxx
     DWORD ChecksumChunkSizeInBytes;
     DWORD ClusterSizeInBytes;
-} FSCTL_GET_INTEGRITY_INFORMATION_BUFFER, *PFSCTL_GET_INTEGRITY_INFORMATION_BUFFER;
+};
 
-typedef struct _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER {
+using FSCTL_GET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER;
+using PFSCTL_GET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER*;
+
+struct _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER {
     WORD ChecksumAlgorithm;  // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
     WORD Reserved;           // Must be 0
     DWORD Flags;             // FSCTL_INTEGRITY_FLAG_xxx
-} FSCTL_SET_INTEGRITY_INFORMATION_BUFFER, *PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER;
+};
+
+using FSCTL_SET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER;
+using PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER*;
 
 #endif
 
@@ -634,6 +643,19 @@ void ExternalLinkFileProcess::runLinkFile()
     qDebug() << "Process exited";
 }
 
+bool moveByCopy(const QString& source, const QString& dest)
+{
+    if (!copy(source, dest)()) {  // copy
+        qDebug() << "Copy of" << source << "to" << dest << "failed!";
+        return false;
+    }
+    if (!deletePath(source)) {  // remove original
+        qDebug() << "Deletion of" << source << "failed!";
+        return false;
+    };
+    return true;
+}
+
 bool move(const QString& source, const QString& dest)
 {
     std::error_code err;
@@ -641,13 +663,14 @@ bool move(const QString& source, const QString& dest)
     ensureFilePathExists(dest);
     fs::rename(StringUtils::toStdString(source), StringUtils::toStdString(dest), err);
 
-    if (err) {
-        qWarning() << "Failed to move file:" << QString::fromStdString(err.message());
-        qDebug() << "Source file:" << source;
-        qDebug() << "Destination file:" << dest;
+    if (err.value() != 0) {
+        if (moveByCopy(source, dest))
+            return true;
+        qDebug() << "Move of" << source << "to" << dest << "failed!";
+        qWarning() << "Failed to move file:" << QString::fromStdString(err.message()) << QString::number(err.value());
+        return false;
     }
-
-    return err.value() == 0;
+    return true;
 }
 
 bool deletePath(QString path)
@@ -933,6 +956,8 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     stream << "[Desktop Entry]"
            << "\n";
     stream << "Type=Application"
+           << "\n";
+    stream << "Categories=Game;ActionGame;AdventureGame;Simulation"
            << "\n";
     stream << "Exec=\"" << target.toLocal8Bit() << "\"" << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";

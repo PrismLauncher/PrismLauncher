@@ -430,7 +430,7 @@ bool PackProfile::remove(const int index)
     return true;
 }
 
-bool PackProfile::remove(const QString id)
+bool PackProfile::remove(const QString& id)
 {
     int i = 0;
     for (auto patch : d->components) {

@@ -290,7 +290,7 @@ void InstanceList::deleteGroup(const GroupId& name)
             qDebug() << "Remove" << instID << "from group" << name;
             removed = true;
             auto idx = getInstIndex(instance.get());
-            if (idx > 0)
+            if (idx >= 0)
                 emit dataChanged(index(idx), index(idx), { GroupRole });
         }
     }
@@ -315,7 +315,7 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
             qDebug() << "Set" << instID << "group to" << dst;
             modified = true;
             auto idx = getInstIndex(instance.get());
-            if (idx > 0)
+            if (idx >= 0)
                 emit dataChanged(index(idx), index(idx), { GroupRole });
         }
     }
@@ -823,6 +823,9 @@ void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting,
         }
         m_instDir = newInstDir;
         m_groupsLoaded = false;
+        beginRemoveRows(QModelIndex(), 0, count());
+        m_instances.erase(m_instances.begin(), m_instances.end());
+        endRemoveRows();
         emit instancesChanged();
     }
 }
@@ -947,10 +950,12 @@ QString InstanceList::getStagedInstancePath()
 
 bool InstanceList::commitStagedInstance(const QString& path,
                                         InstanceName const& instanceName,
-                                        const QString& groupName,
+                                        QString groupName,
                                         InstanceTask const& commiting)
 {
-    QDir dir;
+    if (groupName.isEmpty() && !groupName.isNull())
+        groupName = QString();
+
     QString instID;
     InstancePtr inst;
 
@@ -974,7 +979,7 @@ bool InstanceList::commitStagedInstance(const QString& path,
                 return false;
             }
         } else {
-            if (!dir.rename(path, destination)) {
+            if (!FS::move(path, destination)) {
                 qWarning() << "Failed to move" << path << "to" << destination;
                 return false;
             }

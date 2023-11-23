@@ -1,6 +1,6 @@
 id: org.prismlauncher.PrismLauncher
 runtime: org.kde.Platform
-runtime-version: "5.15-22.08"
+runtime-version: "5.15-23.08"
 sdk: org.kde.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk17
@@ -113,6 +113,9 @@ modules:
           version-query: .tag_name
           url-query: .tarball_url
           timestamp-query: .published_at
+      # from https://github.com/flathub/net.gaijin.WarThunder/blob/7ea6f7a9f84b9c77150c003a7059dc03f8dcbc7f/gamemode.patch
+      - type: patch
+        path: patches/gamemode.patch
     cleanup:
       - /include
       - /lib/pkgconfig

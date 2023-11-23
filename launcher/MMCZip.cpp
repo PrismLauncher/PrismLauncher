@@ -42,6 +42,7 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFileInfo>
 #include <QUrl>
 
 #if defined(LAUNCHER_APPLICATION)
@@ -50,7 +51,7 @@
 
 namespace MMCZip {
 // ours
-bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction filter)
+bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction& filter)
 {
     QuaZip modZip(from.filePath());
     modZip.open(QuaZip::mdUnzip);
@@ -327,9 +328,20 @@ std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, con
         }
 
         extracted.append(target_file_path);
-        QFile::setPermissions(target_file_path,
-                              QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser);
+        auto fileInfo = QFileInfo(target_file_path);
+        if (fileInfo.isFile()) {
+            auto permissions = fileInfo.permissions();
+            auto maxPermisions = QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser |
+                                 QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther;
+            auto minPermisions = QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
 
+            auto newPermisions = (permissions & maxPermisions) | minPermisions;
+            if (newPermisions != permissions) {
+                if (!QFile::setPermissions(target_file_path, permissions)) {
+                    qWarning() << (QObject::tr("Could not fix permissions for %1").arg(target_file_path));
+                }
+            }
+        }
         qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
     } while (zip->goToNextFile());
 
@@ -582,8 +594,20 @@ auto ExtractZipTask::extractZip() -> ZipResult
         }
 
         extracted.append(target_file_path);
-        QFile::setPermissions(target_file_path,
-                              QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser);
+        auto fileInfo = QFileInfo(target_file_path);
+        if (fileInfo.isFile()) {
+            auto permissions = fileInfo.permissions();
+            auto maxPermisions = QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser |
+                                 QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther;
+            auto minPermisions = QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
+
+            auto newPermisions = (permissions & maxPermisions) | minPermisions;
+            if (newPermisions != permissions) {
+                if (!QFile::setPermissions(target_file_path, permissions)) {
+                    logWarning(tr("Could not fix permissions for %1").arg(target_file_path));
+                }
+            }
+        }
 
         qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
     } while (m_input->goToNextFile());

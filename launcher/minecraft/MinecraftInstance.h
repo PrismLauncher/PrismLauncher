@@ -174,4 +174,4 @@ class MinecraftInstance : public BaseInstance {
     mutable std::shared_ptr<GameOptions> m_game_options;
 };
 
-typedef std::shared_ptr<MinecraftInstance> MinecraftInstancePtr;
+using MinecraftInstancePtr = std::shared_ptr<MinecraftInstance>;
