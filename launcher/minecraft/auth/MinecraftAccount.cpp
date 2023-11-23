@@ -52,6 +52,7 @@
 
 #include "flows/MSA.h"
 #include "flows/Offline.h"
+#include "minecraft/auth/AccountData.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
 {
@@ -185,7 +186,7 @@ void MinecraftAccount::authFailed(QString reason)
             // NOTE: this doesn't do much. There was an error of some sort.
         } break;
         case AccountTaskState::STATE_FAILED_HARD: {
-            if (isMSA()) {
+            if (accountType() == AccountType::MSA) {
                 data.msaToken.token = QString();
                 data.msaToken.refresh_token = QString();
                 data.msaToken.validity = Katabasis::Validity::None;

@@ -36,6 +36,7 @@
 
 #include "LaunchController.h"
 #include "Application.h"
+#include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AccountList.h"
 
 #include "ui/InstanceWindow.h"
@@ -212,7 +213,7 @@ void LaunchController::login()
         m_accountToUse->fillSession(m_session);
 
         // Launch immediately in true offline mode
-        if (m_accountToUse->isOffline()) {
+        if (m_accountToUse->accountType() == AccountType::Offline) {
             launchInstance();
             return;
         }

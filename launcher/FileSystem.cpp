@@ -943,6 +943,8 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
            << "\n";
     stream << "Type=Application"
            << "\n";
+    stream << "Categories=Game;ActionGame;AdventureGame;Simulation"
+           << "\n";
     stream << "Exec=\"" << target.toLocal8Bit() << "\"" << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";
     if (!icon.isEmpty()) {

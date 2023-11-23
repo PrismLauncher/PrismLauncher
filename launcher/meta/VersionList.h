@@ -79,7 +79,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
 
     Version::Ptr m_recommended;
 
-    void setupAddedVersion(const int row, const Version::Ptr& version);
+    void setupAddedVersion(int row, const Version::Ptr& version);
 };
 }  // namespace Meta
 Q_DECLARE_METATYPE(Meta::VersionList::Ptr)

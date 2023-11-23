@@ -48,14 +48,14 @@ void ModListView::setModel(QAbstractItemModel* model)
         return;
     }
     if (!string.size()) {
-        head->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+        head->setSectionResizeMode(0, QHeaderView::Interactive);
         head->setSectionResizeMode(1, QHeaderView::Stretch);
         for (int i = 2; i < head->count(); i++)
-            head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+            head->setSectionResizeMode(i, QHeaderView::Interactive);
     } else {
         head->setSectionResizeMode(0, QHeaderView::Stretch);
         for (int i = 1; i < head->count(); i++)
-            head->setSectionResizeMode(i, QHeaderView::ResizeToContents);
+            head->setSectionResizeMode(i, QHeaderView::Interactive);
     }
 }
 
