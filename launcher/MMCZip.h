@@ -60,7 +60,7 @@ using FilterFunction = std::function<bool(const QString&)>;
 /**
  * Merge two zip files, using a filter function
  */
-bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction filter = nullptr);
+bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction& filter = nullptr);
 
 /**
  * Compress directory, by providing a list of files to compress
@@ -172,7 +172,7 @@ class ExportToZipTask : public Task {
     void setExcludeFiles(QStringList excludeFiles) { m_exclude_files = excludeFiles; }
     void addExtraFile(QString fileName, QByteArray data) { m_extra_files.insert(fileName, data); }
 
-    typedef std::optional<QString> ZipResult;
+    using ZipResult = std::optional<QString>;
 
    protected:
     virtual void executeTask() override;
