@@ -118,9 +118,7 @@ class MinecraftAccount : public QObject, public Usable {
 
     bool isActive() const;
 
-    bool isMSA() const { return data.type == AccountType::MSA; }
-
-    bool isOffline() const { return data.type == AccountType::Offline; }
+    [[nodiscard]] AccountType accountType() const noexcept { return data.type; }
 
     bool ownsMinecraft() const { return data.minecraftEntitlement.ownsMinecraft; }
 
