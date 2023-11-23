@@ -78,7 +78,7 @@ class ResourcePage : public QWidget, public BasePage {
     void addResourceToDialog(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
     void removeResourceFromDialog(const QString& pack_name);
     virtual void removeResourceFromPage(const QString& name);
-    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, const std::shared_ptr<ResourceFolderModel>);
+    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>);
 
     QList<DownloadTaskPtr> selectedPacks() { return m_model->selectedPacks(); }
     bool hasSelectedPacks() { return !(m_model->selectedPacks().isEmpty()); }
