@@ -186,10 +186,9 @@ bool processPackPNG(const TexturePack& pack)
             } else {
                 return png_invalid();  // pack.png does not exists or is not a valid file.
             }
+            return false;
         }
         case ResourceType::ZIPFILE: {
-            Q_ASSERT(pack.type() == ResourceType::ZIPFILE);
-
             QuaZip zip(pack.fileinfo().filePath());
             if (!zip.open(QuaZip::mdUnzip))
                 return false;  // can't open zip file
@@ -215,6 +214,7 @@ bool processPackPNG(const TexturePack& pack)
                 zip.close();
                 return png_invalid();  // could not set pack.mcmeta as current file.
             }
+            return false;
         }
         default:
             qWarning() << "Invalid type for resource pack parse task!";

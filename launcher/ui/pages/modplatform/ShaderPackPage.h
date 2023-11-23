@@ -38,9 +38,7 @@ class ShaderPackResourcePage : public ResourcePage {
 
     [[nodiscard]] bool supportsFiltering() const override { return false; };
 
-    void addResourceToPage(ModPlatform::IndexedPack::Ptr,
-                           ModPlatform::IndexedVersion&,
-                           const std::shared_ptr<ResourceFolderModel>) override;
+    void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>) override;
 
     [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
 

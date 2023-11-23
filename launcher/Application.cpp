@@ -58,6 +58,7 @@
 #include "ui/pages/global/APIPage.h"
 #include "ui/pages/global/AccountListPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
+#include "ui/pages/global/EnvironmentVariablesPage.h"
 #include "ui/pages/global/ExternalToolsPage.h"
 #include "ui/pages/global/JavaPage.h"
 #include "ui/pages/global/LanguagePage.h"
@@ -643,6 +644,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
+        m_settings->registerSetting("ModDependenciesDisabled", false);
 
         // Minecraft offline player name
         m_settings->registerSetting("LastOfflinePlayerName", "");
@@ -719,6 +721,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);
 
+        m_settings->registerSetting("Env", QVariant(QMap<QString, QVariant>()));
+
         // Custom Microsoft Authentication Client ID
         m_settings->registerSetting("MSAClientIDOverride", "");
 
@@ -744,6 +748,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             m_globalSettingsProvider->addPage<JavaPage>();
             m_globalSettingsProvider->addPage<LanguagePage>();
             m_globalSettingsProvider->addPage<CustomCommandsPage>();
+            m_globalSettingsProvider->addPage<EnvironmentVariablesPage>();
             m_globalSettingsProvider->addPage<ProxyPage>();
             m_globalSettingsProvider->addPage<ExternalToolsPage>();
             m_globalSettingsProvider->addPage<AccountListPage>();

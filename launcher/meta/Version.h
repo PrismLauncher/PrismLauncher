@@ -64,7 +64,7 @@ class Version : public QObject, public BaseVersion, public BaseEntity {
 
    public:  // for usage by format parsers only
     void setType(const QString& type);
-    void setTime(const qint64 time);
+    void setTime(qint64 time);
     void setRequires(const Meta::RequireSet& reqs, const Meta::RequireSet& conflicts);
     void setVolatile(bool volatile_);
     void setRecommended(bool recommended);
