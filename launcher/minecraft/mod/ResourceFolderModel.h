@@ -117,8 +117,8 @@ class ResourceFolderModel : public QAbstractListModel {
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     void setupHeaderAction(QAction* act, int column);
-    void saveHiddenColumn(int column, bool hidden);
-    void loadHiddenColumns(QTreeView* tree);
+    void saveColumns(QTreeView* tree);
+    void loadColumns(QTreeView* tree);
     QMenu* createHeaderContextMenu(QTreeView* tree);
 
     /** This creates a proxy model to filter / sort the model for a UI.
@@ -201,8 +201,7 @@ class ResourceFolderModel : public QAbstractListModel {
     QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
     QStringList m_column_names = { "Enable", "Name", "Last Modified" };
     QStringList m_column_names_translated = { tr("Enable"), tr("Name"), tr("Last Modified") };
-    QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Stretch,
-                                                             QHeaderView::ResizeToContents };
+    QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive };
     QList<bool> m_columnsHideable = { false, false, true };
 
     QDir m_dir;
