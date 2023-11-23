@@ -171,9 +171,9 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, [[maybe_unuse
 void ModFolderPage::removeItems(const QItemSelection& selection)
 {
     if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response = CustomMessageBox::selectable(this, "Confirm Delete",
-                                                     "If you remove mods while the game is running it may crash your game.\n"
-                                                     "Are you sure you want to do this?",
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Delete"),
+                                                     tr("If you remove mods while the game is running it may crash your game.\n"
+                                                        "Are you sure you want to do this?"),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
@@ -238,6 +238,18 @@ void ModFolderPage::updateMods(bool includeDeps)
     if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
         QMessageBox::critical(this, tr("Error"), tr("Mod updates are unavailable when metadata is disabled!"));
         return;
+    }
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response =
+            CustomMessageBox::selectable(this, tr("Confirm Update"),
+                                         tr("If you update mods while the game is running may cause mod duplication and game crashes.\n"
+                                            "The old files may not be deleted as they are in use.\n"
+                                            "Are you sure you want to do this?"),
+                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 

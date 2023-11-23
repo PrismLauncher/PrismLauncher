@@ -1,4 +1,5 @@
 Checks:
   - modernize-use-using
+  - readability-avoid-const-params-in-decls
 
 SystemHeaders: false
