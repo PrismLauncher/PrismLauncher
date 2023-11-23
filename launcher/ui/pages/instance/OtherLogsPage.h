@@ -65,7 +65,7 @@ class OtherLogsPage : public QWidget, public BasePage {
 
    private slots:
     void populateSelectLogBox();
-    void on_selectLogBox_currentIndexChanged(const int index);
+    void on_selectLogBox_currentIndexChanged(int index);
     void on_btnReload_clicked();
     void on_btnPaste_clicked();
     void on_btnCopy_clicked();
@@ -78,7 +78,7 @@ class OtherLogsPage : public QWidget, public BasePage {
     void findPreviousActivated();
 
    private:
-    void setControlsEnabled(const bool enabled);
+    void setControlsEnabled(bool enabled);
 
    private:
     Ui::OtherLogsPage* ui;

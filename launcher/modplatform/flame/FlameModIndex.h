@@ -19,5 +19,5 @@ void loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                              const shared_qobject_ptr<QNetworkAccessManager>& network,
                              const BaseInstance* inst);
 auto loadIndexedPackVersion(QJsonObject& obj, bool load_changelog = false) -> ModPlatform::IndexedVersion;
-auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion;
+auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr, const BaseInstance* inst) -> ModPlatform::IndexedVersion;
 }  // namespace FlameMod

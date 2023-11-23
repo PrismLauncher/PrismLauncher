@@ -166,14 +166,17 @@ VersionPage::VersionPage(MinecraftInstance* inst, QWidget* parent) : QMainWindow
     ui->packageView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->packageView->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(ui->packageView->selectionModel(), &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
     auto smodel = ui->packageView->selectionModel();
+    connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::versionCurrent);
     connect(smodel, &QItemSelectionModel::currentChanged, this, &VersionPage::packageCurrent);
-
     connect(m_profile.get(), &PackProfile::minecraftChanged, this, &VersionPage::updateVersionControls);
     updateVersionControls();
     preselect(0);
     connect(ui->packageView, &ModListView::customContextMenuRequested, this, &VersionPage::showContextMenu);
+    connect(ui->packageView, &QAbstractItemView::activated, this, [this](const QModelIndex& index) {
+        auto component = m_profile->getComponent(index.row());
+        component->setEnabled(!component->isEnabled());
+    });
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &VersionPage::onFilterTextChanged);
 }
 
@@ -408,7 +411,7 @@ void VersionPage::on_actionDownload_All_triggered()
     if (!APPLICATION->accounts()->anyAccountIsValid()) {
         CustomMessageBox::selectable(this, tr("Error"),
                                      tr("Cannot download Minecraft or update instances unless you have at least "
-                                        "one account added.\nPlease add your Microsoft or Mojang account."),
+                                        "one account added.\nPlease add a Microsoft account."),
                                      QMessageBox::Warning)
             ->show();
         return;

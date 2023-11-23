@@ -7,11 +7,8 @@
     <x>0</x>
     <y>0</y>
     <width>650</width>
-    <height>413</height>
+    <height>510</height>
    </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Export Pack</string>
   </property>
   <property name="sizeGripEnabled">
    <bool>true</bool>
@@ -20,13 +17,16 @@
    <item>
     <widget class="QGroupBox" name="information">
      <property name="title">
-      <string>Information</string>
+      <string>&amp;Description</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="3" column="0">
        <widget class="QLabel" name="summaryLabel">
         <property name="text">
-         <string>Summary</string>
+         <string>&amp;Summary</string>
+        </property>
+        <property name="buddy">
+         <cstring>summary</cstring>
         </property>
        </widget>
       </item>
@@ -36,14 +36,20 @@
       <item row="0" column="0">
        <widget class="QLabel" name="nameLabel">
         <property name="text">
-         <string>Name</string>
+         <string>&amp;Name</string>
+        </property>
+        <property name="buddy">
+         <cstring>name</cstring>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="versionLabel">
         <property name="text">
-         <string>Version</string>
+         <string>&amp;Version</string>
+        </property>
+        <property name="buddy">
+         <cstring>version</cstring>
         </property>
        </widget>
       </item>
@@ -57,31 +63,52 @@
         </property>
        </widget>
       </item>
-     
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="filesLabel">
-     <property name="text">
-      <string>Files</string>
+    <widget class="QGroupBox" name="options">
+     <property name="title">
+      <string>&amp;Options</string>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTreeView" name="treeView">
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::ExtendedSelection</enum>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
-     </property>
-     <attribute name="headerStretchLastSection">
-      <bool>false</bool>
-     </attribute>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QLabel" name="filesLabel">
+        <property name="text">
+         <string>&amp;Files</string>
+        </property>
+        <property name="buddy">
+         <cstring>files</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTreeView" name="files">
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::ExtendedSelection</enum>
+        </property>
+        <property name="sortingEnabled">
+         <bool>true</bool>
+        </property>
+        <attribute name="headerStretchLastSection">
+         <bool>false</bool>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="optionalFiles">
+        <property name="text">
+         <string>&amp;Mark disabled files as optional</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -97,7 +124,8 @@
   <tabstop>name</tabstop>
   <tabstop>version</tabstop>
   <tabstop>summary</tabstop>
-  <tabstop>treeView</tabstop>
+  <tabstop>files</tabstop>
+  <tabstop>optionalFiles</tabstop>
  </tabstops>
  <resources/>
  <connections>

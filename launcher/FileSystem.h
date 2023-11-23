@@ -62,6 +62,16 @@ class FileSystemException : public ::Exception {
 void write(const QString& filename, const QByteArray& data);
 
 /**
+ * append data to a file safely
+ */
+void appendSafe(const QString& filename, const QByteArray& data);
+
+/**
+ * append data to a file
+ */
+void append(const QString& filename, const QByteArray& data);
+
+/**
  * read data from a file safely\
  */
 QByteArray read(const QString& filename);
@@ -109,6 +119,11 @@ class copy : public QObject {
         m_whitelist = whitelist;
         return *this;
     }
+    copy& overwrite(const bool overwrite)
+    {
+        m_overwrite = overwrite;
+        return *this;
+    }
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
@@ -128,6 +143,7 @@ class copy : public QObject {
     bool m_followSymlinks = true;
     const IPathMatcher* m_matcher = nullptr;
     bool m_whitelist = false;
+    bool m_overwrite = false;
     QDir m_src;
     QDir m_dst;
     qsizetype m_copied;

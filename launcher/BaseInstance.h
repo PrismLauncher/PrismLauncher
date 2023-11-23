@@ -64,7 +64,7 @@ class LaunchTask;
 class BaseInstance;
 
 // pointer for lazy people
-typedef std::shared_ptr<BaseInstance> InstancePtr;
+using InstancePtr = std::shared_ptr<BaseInstance>;
 
 /*!
  * \brief Base class for instances.
