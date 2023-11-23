@@ -76,7 +76,7 @@ void LanguageSelectionWidget::languageRowChanged(const QModelIndex& current, con
     translations->updateLanguage(key);
 }
 
-void LanguageSelectionWidget::languageSettingChanged(const Setting&, const QVariant)
+void LanguageSelectionWidget::languageSettingChanged(const Setting&, const QVariant&)
 {
     auto translations = APPLICATION->translations();
     auto index = translations->selectedIndex();

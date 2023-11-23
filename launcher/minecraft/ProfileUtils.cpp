@@ -140,7 +140,7 @@ VersionFilePtr parseJsonFile(const QFileInfo& fileInfo, const bool requireOrder)
     return guardedParseJson(doc, fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), requireOrder);
 }
 
-bool saveJsonFile(const QJsonDocument doc, const QString& filename)
+bool saveJsonFile(const QJsonDocument& doc, const QString& filename)
 {
     auto data = doc.toJson();
     QSaveFile jsonFile(filename);

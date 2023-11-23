@@ -46,7 +46,7 @@ ResourceFolderModel::~ResourceFolderModel()
         QCoreApplication::processEvents();
 }
 
-bool ResourceFolderModel::startWatching(const QStringList paths)
+bool ResourceFolderModel::startWatching(const QStringList& paths)
 {
     if (m_is_watching)
         return false;
@@ -65,7 +65,7 @@ bool ResourceFolderModel::startWatching(const QStringList paths)
     return m_is_watching;
 }
 
-bool ResourceFolderModel::stopWatching(const QStringList paths)
+bool ResourceFolderModel::stopWatching(const QStringList& paths)
 {
     if (!m_is_watching)
         return false;
