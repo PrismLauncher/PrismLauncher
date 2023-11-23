@@ -50,7 +50,8 @@
 
 static FlameAPI api;
 
-FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog)
+FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
+    : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
     connect(ui->searchButton, &QPushButton::clicked, this, &FlamePage::triggerSearch);
@@ -60,6 +61,17 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
+
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &FlamePage::triggerSearch);
+
+    m_fetch_progress.hideIfInactive(true);
+    m_fetch_progress.setFixedHeight(24);
+    m_fetch_progress.progressFormat("");
+
+    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
 
     // index is used to set the sorting with the curseforge api
     ui->sortByBox->addItem(tr("Sort by Featured"));
@@ -90,6 +102,11 @@ bool FlamePage::eventFilter(QObject* watched, QEvent* event)
             triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     }
     return QWidget::eventFilter(watched, event);
@@ -114,6 +131,7 @@ void FlamePage::openedImpl()
 void FlamePage::triggerSearch()
 {
     listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+    m_fetch_progress.watch(listModel->activeSearchJob().get());
 }
 
 void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
@@ -158,7 +176,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             }
 
             for (auto version : current.versions) {
-                ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+                auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
+                ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(version.downloadUrl));
             }
 
             QVariant current_updated;
@@ -209,8 +228,7 @@ void FlamePage::suggestCurrent()
     extra_info.insert("pack_version_id", QString::number(version.fileId));
 
     dialog->setSuggestedPack(current.name, new InstanceImportTask(version.downloadUrl, this, std::move(extra_info)));
-    QString editedLogoName;
-    editedLogoName = "curseforge_" + current.logoName;
+    QString editedLogoName = "curseforge_" + current.logoName;
     listModel->getLogo(current.logoName, current.logoUrl,
                        [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }

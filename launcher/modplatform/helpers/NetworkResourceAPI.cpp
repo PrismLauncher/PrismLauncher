@@ -72,7 +72,8 @@ Task::Ptr NetworkResourceAPI::getProjectInfo(ProjectInfoArgs&& args, ProjectInfo
 
         callbacks.on_succeed(doc, args.pack);
     });
-
+    QObject::connect(job.get(), &NetJob::failed, [callbacks](QString reason) { callbacks.on_fail(reason); });
+    QObject::connect(job.get(), &NetJob::aborted, [callbacks] { callbacks.on_abort(); });
     return job;
 }
 

@@ -111,14 +111,12 @@ Task::Ptr ModrinthAPI::getProjects(QStringList addonIds, std::shared_ptr<QByteAr
     return netJob;
 }
 
-// https://docs.modrinth.com/api-spec/#tag/projects/operation/searchProjects
-static QList<ResourceAPI::SortingMethod> s_sorts = { { 1, "relevance", QObject::tr("Sort by Relevance") },
-                                                     { 2, "downloads", QObject::tr("Sort by Downloads") },
-                                                     { 3, "follows", QObject::tr("Sort by Follows") },
-                                                     { 4, "newest", QObject::tr("Sort by Last Updated") },
-                                                     { 5, "updated", QObject::tr("Sort by Newest") } };
-
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 {
-    return s_sorts;
+    // https://docs.modrinth.com/api-spec/#tag/projects/operation/searchProjects
+    return { { 1, "relevance", QObject::tr("Sort by Relevance") },
+             { 2, "downloads", QObject::tr("Sort by Downloads") },
+             { 3, "follows", QObject::tr("Sort by Follows") },
+             { 4, "newest", QObject::tr("Sort by Newest") },
+             { 5, "updated", QObject::tr("Sort by Last Updated") } };
 }

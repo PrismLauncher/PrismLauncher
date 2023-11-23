@@ -25,6 +25,7 @@
 #include "Json.h"
 #include "MMCZip.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
@@ -33,12 +34,14 @@ const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "z
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
                                                const QString& summary,
+                                               bool optionalFiles,
                                                InstancePtr instance,
                                                const QString& output,
                                                MMCZip::FilterFunction filter)
     : name(name)
     , version(version)
     , summary(summary)
+    , optionalFiles(optionalFiles)
     , instance(instance)
     , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
     , gameRoot(instance->gameRoot())
@@ -127,7 +130,8 @@ void ModrinthPackExportTask::collectHashes()
                     QCryptographicHash sha1(QCryptographicHash::Algorithm::Sha1);
                     sha1.addData(data);
 
-                    ResolvedFile resolvedFile{ sha1.result().toHex(), sha512.result().toHex(), url.toEncoded(), openFile.size() };
+                    ResolvedFile resolvedFile{ sha1.result().toHex(), sha512.result().toHex(), url.toEncoded(), openFile.size(),
+                                               mod->metadata()->side };
                     resolvedFiles[relative] = resolvedFile;
 
                     // nice! we've managed to resolve based on local metadata!
@@ -270,20 +274,33 @@ QByteArray ModrinthPackExportTask::generateIndex()
         QString path = iterator.key();
         const ResolvedFile& value = iterator.value();
 
+        QJsonObject env;
+
         // detect disabled mod
         const QFileInfo pathInfo(path);
-        if (pathInfo.suffix() == "disabled") {
+        if (optionalFiles && pathInfo.suffix() == "disabled") {
             // rename it
             path = pathInfo.dir().filePath(pathInfo.completeBaseName());
-            // ...and make it optional
-            QJsonObject env;
             env["client"] = "optional";
             env["server"] = "optional";
-            fileOut["env"] = env;
+        } else {
+            env["client"] = "required";
+            env["server"] = "required";
         }
+        switch (iterator->side) {
+            case Metadata::ModSide::ClientSide:
+                env["server"] = "unsupported";
+                break;
+            case Metadata::ModSide::ServerSide:
+                env["client"] = "unsupported";
+                break;
+            case Metadata::ModSide::UniversalSide:
+                break;
+        }
+        fileOut["env"] = env;
 
         fileOut["path"] = path;
-        fileOut["downloads"] = QJsonArray{ iterator.value().url };
+        fileOut["downloads"] = QJsonArray{ iterator->url };
 
         QJsonObject hashes;
         hashes["sha1"] = value.sha1;

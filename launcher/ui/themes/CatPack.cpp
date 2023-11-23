@@ -99,18 +99,22 @@ QDate ensureDay(int year, int month, int day)
 
 QString JsonCatPack::path()
 {
-    const QDate now = QDate::currentDate();
+    return path(QDate::currentDate());
+}
+
+QString JsonCatPack::path(QDate now)
+{
     for (auto var : m_variants) {
         QDate startDate = ensureDay(now.year(), var.startTime.month, var.startTime.day);
         QDate endDate = ensureDay(now.year(), var.endTime.month, var.endTime.day);
         if (startDate > endDate) {  // it's spans over multiple years
-            if (endDate <= now)     // end date is in the past so jump one year into the future for endDate
+            if (endDate < now)      // end date is in the past so jump one year into the future for endDate
                 endDate = endDate.addYears(1);
             else  // end date is in the future so jump one year into the past for startDate
                 startDate = startDate.addYears(-1);
         }
 
-        if (startDate >= now && now >= endDate)
+        if (startDate <= now && now <= endDate)
             return var.path;
     }
     return m_defaultPath;

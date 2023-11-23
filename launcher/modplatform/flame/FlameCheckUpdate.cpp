@@ -10,6 +10,7 @@
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
 
 #include "net/ApiDownload.h"
 
@@ -154,18 +155,17 @@ void FlameCheckUpdate::executeTask()
             continue;
         }
 
+        // Fake pack with the necessary info to pass to the download task :)
+        auto pack = std::make_shared<ModPlatform::IndexedPack>();
+        pack->name = mod->name();
+        pack->slug = mod->metadata()->slug;
+        pack->addonId = mod->metadata()->project_id;
+        pack->websiteUrl = mod->homeurl();
+        for (auto& author : mod->authors())
+            pack->authors.append({ author });
+        pack->description = mod->description();
+        pack->provider = ModPlatform::ResourceProvider::FLAME;
         if (!latest_ver.hash.isEmpty() && (mod->metadata()->hash != latest_ver.hash || mod->status() == ModStatus::NotInstalled)) {
-            // Fake pack with the necessary info to pass to the download task :)
-            auto pack = std::make_shared<ModPlatform::IndexedPack>();
-            pack->name = mod->name();
-            pack->slug = mod->metadata()->slug;
-            pack->addonId = mod->metadata()->project_id;
-            pack->websiteUrl = mod->homeurl();
-            for (auto& author : mod->authors())
-                pack->authors.append({ author });
-            pack->description = mod->description();
-            pack->provider = ModPlatform::ResourceProvider::FLAME;
-
             auto old_version = mod->version();
             if (old_version.isEmpty() && mod->status() != ModStatus::NotInstalled) {
                 auto current_ver = getFileInfo(latest_ver.addonId.toInt(), mod->metadata()->file_id.toInt());
@@ -173,10 +173,11 @@ void FlameCheckUpdate::executeTask()
             }
 
             auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver, m_mods_folder);
-            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver.version,
+            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver.version, latest_ver.version_type,
                                      api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
                                      ModPlatform::ResourceProvider::FLAME, download_task);
         }
+        m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latest_ver));
     }
 
     emitSucceeded();

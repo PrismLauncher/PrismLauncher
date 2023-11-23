@@ -16,14 +16,16 @@ class ConcurrentTask;
 class ModUpdateDialog final : public ReviewMessageBox {
     Q_OBJECT
    public:
+    explicit ModUpdateDialog(QWidget* parent, BaseInstance* instance, std::shared_ptr<ModFolderModel> mod_model, QList<Mod*>& search_for);
     explicit ModUpdateDialog(QWidget* parent,
                              BaseInstance* instance,
-                             const std::shared_ptr<ModFolderModel> mod_model,
-                             QList<Mod*>& search_for);
+                             std::shared_ptr<ModFolderModel> mod_model,
+                             QList<Mod*>& search_for,
+                             bool includeDeps);
 
     void checkCandidates();
 
-    void appendMod(const CheckUpdateTask::UpdatableMod& info);
+    void appendMod(const CheckUpdateTask::UpdatableMod& info, QStringList requiredBy = {});
 
     const QList<ResourceDownloadTask::Ptr> getTasks();
     auto indexDir() const -> QDir { return m_mod_model->indexDir(); }
@@ -61,4 +63,5 @@ class ModUpdateDialog final : public ReviewMessageBox {
 
     bool m_no_updates = false;
     bool m_aborted = false;
+    bool m_include_deps = false;
 };

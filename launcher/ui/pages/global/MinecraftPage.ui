@@ -138,7 +138,7 @@
             </property>
            </widget>
           </item>
-           <item>
+          <item>
            <widget class="QCheckBox" name="showGameTimeWithoutDays">
             <property name="text">
              <string>Show time spent playing in hours</string>
@@ -197,6 +197,25 @@
        <string>Tweaks</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_12">
+       <item>
+        <widget class="QGroupBox" name="legacySettingsGroupBox">
+         <property name="title">
+          <string>Legacy settings</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QCheckBox" name="onlineFixes">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;This currently allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable online fixes (experimental)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <widget class="QGroupBox" name="nativeLibWorkaroundGroupBox">
          <property name="title">
