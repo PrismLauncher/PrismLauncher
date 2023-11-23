@@ -28,7 +28,7 @@ class VersionProxyModel : public QAbstractProxyModel {
 
     const FilterMap& filters() const;
     const QString& search() const;
-    void setFilter(const BaseVersionList::ModelRoles column, Filter* filter);
+    void setFilter(BaseVersionList::ModelRoles column, Filter* filter);
     void setSearch(const QString& search);
     void clearFilters();
     QModelIndex getRecommended() const;
