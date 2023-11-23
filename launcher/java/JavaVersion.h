@@ -25,6 +25,8 @@ class JavaVersion {
 
     bool requiresPermGen() const;
 
+    bool isModular();
+
     QString toString() const;
 
     int major() { return m_major; }

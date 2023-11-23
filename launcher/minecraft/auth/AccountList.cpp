@@ -304,9 +304,15 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                 case NameColumn:
                     return account->accountDisplayString();
                 case TypeColumn: {
-                    auto typeStr = account->typeString();
-                    typeStr[0] = typeStr[0].toUpper();
-                    return typeStr;
+                    switch (account->accountType()) {
+                        case AccountType::MSA: {
+                            return tr("MSA", "Account type");
+                        }
+                        case AccountType::Offline: {
+                            return tr("Offline", "Account type");
+                        }
+                    }
+                    return tr("Unknown", "Account type");
                 }
                 case StatusColumn:
                     return getAccountStatus(account->accountState());

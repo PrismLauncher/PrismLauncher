@@ -38,7 +38,7 @@
 #include <QAbstractListModel>
 #include <QDialog>
 
-#include "modplatform/atlauncher/ATLPackIndex.h"
+#include "modplatform/atlauncher/ATLPackManifest.h"
 #include "net/NetJob.h"
 
 namespace Ui {

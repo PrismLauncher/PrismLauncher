@@ -36,34 +36,39 @@
 #pragma once
 
 #include "Screenshot.h"
-#include "net/NetAction.h"
+#include "net/NetRequest.h"
 
-typedef shared_qobject_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
-class ImgurAlbumCreation : public NetAction {
+class ImgurAlbumCreation : public Net::NetRequest {
    public:
-    explicit ImgurAlbumCreation(QList<ScreenShot::Ptr> screenshots);
-    static ImgurAlbumCreationPtr make(QList<ScreenShot::Ptr> screenshots)
-    {
-        return ImgurAlbumCreationPtr(new ImgurAlbumCreation(screenshots));
-    }
+    virtual ~ImgurAlbumCreation() = default;
 
-    QString deleteHash() const { return m_deleteHash; }
-    QString id() const { return m_id; }
+    struct Result {
+        QString deleteHash;
+        QString id;
+    };
 
-    void init() override{};
+    class Sink : public Net::Sink {
+       public:
+        Sink(std::shared_ptr<Result> res) : m_result(res){};
+        virtual ~Sink() = default;
 
-   protected slots:
-    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
-    void downloadError(QNetworkReply::NetworkError error) override;
-    void downloadFinished() override;
-    void downloadReadyRead() override {}
+       public:
+        auto init(QNetworkRequest& request) -> Task::State override;
+        auto write(QByteArray& data) -> Task::State override;
+        auto abort() -> Task::State override;
+        auto finalize(QNetworkReply& reply) -> Task::State override;
+        auto hasLocalData() -> bool override { return false; }
 
-   public slots:
-    void executeTask() override;
+       private:
+        std::shared_ptr<Result> m_result;
+        QByteArray m_output;
+    };
+
+    static NetRequest::Ptr make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots);
+    QNetworkReply* getReply(QNetworkRequest& request) override;
+
+    void init() override;
 
    private:
     QList<ScreenShot::Ptr> m_screenshots;
-
-    QString m_deleteHash;
-    QString m_id;
 };

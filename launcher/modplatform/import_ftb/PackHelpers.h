@@ -45,7 +45,7 @@ struct Modpack {
     QIcon icon;
 };
 
-typedef QList<Modpack> ModpackList;
+using ModpackList = QList<Modpack>;
 
 Modpack parseDirectory(QString path);
 

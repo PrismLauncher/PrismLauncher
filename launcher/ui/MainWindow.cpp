@@ -219,7 +219,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->actionDISCORD->setVisible(!BuildConfig.DISCORD_URL.isEmpty());
         ui->actionREDDIT->setVisible(!BuildConfig.SUBREDDIT_URL.isEmpty());
 
-        ui->actionCheckUpdate->setVisible(BuildConfig.UPDATER_ENABLED);
+        ui->actionCheckUpdate->setVisible(APPLICATION->updaterEnabled());
 
 #ifndef Q_OS_MAC
         ui->actionAddToPATH->setVisible(false);
@@ -377,7 +377,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         updateNewsLabel();
     }
 
-    if (BuildConfig.UPDATER_ENABLED) {
+    if (APPLICATION->updaterEnabled()) {
         bool updatesAllowed = APPLICATION->updatesAreAllowed();
         updatesAllowedChanged(updatesAllowed);
 
@@ -514,10 +514,10 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
     } else {
         auto group = view->groupNameAt(pos);
 
-        QAction* actionVoid = new QAction(BuildConfig.LAUNCHER_DISPLAYNAME, this);
+        QAction* actionVoid = new QAction(group.isNull() ? BuildConfig.LAUNCHER_DISPLAYNAME : group, this);
         actionVoid->setEnabled(false);
 
-        QAction* actionCreateInstance = new QAction(tr("Create instance"), this);
+        QAction* actionCreateInstance = new QAction(tr("&Create instance"), this);
         actionCreateInstance->setToolTip(ui->actionAddInstance->toolTip());
         if (!group.isNull()) {
             QVariantMap instance_action_data;
@@ -531,12 +531,13 @@ void MainWindow::showInstanceContextMenu(const QPoint& pos)
         actions.prepend(actionVoid);
         actions.append(actionCreateInstance);
         if (!group.isNull()) {
-            QAction* actionDeleteGroup = new QAction(tr("Delete group '%1'").arg(group), this);
-            QVariantMap delete_group_action_data;
-            delete_group_action_data["group"] = group;
-            actionDeleteGroup->setData(delete_group_action_data);
-            connect(actionDeleteGroup, SIGNAL(triggered(bool)), SLOT(deleteGroup()));
+            QAction* actionDeleteGroup = new QAction(tr("&Delete group"), this);
+            connect(actionDeleteGroup, &QAction::triggered, this, [this, group] { deleteGroup(group); });
             actions.append(actionDeleteGroup);
+
+            QAction* actionRenameGroup = new QAction(tr("&Rename group"), this);
+            connect(actionRenameGroup, &QAction::triggered, this, [this, group] { renameGroup(group); });
+            actions.append(actionRenameGroup);
         }
     }
     QMenu myMenu;
@@ -676,7 +677,7 @@ void MainWindow::repopulateAccountsMenu()
 
 void MainWindow::updatesAllowedChanged(bool allowed)
 {
-    if (!BuildConfig.UPDATER_ENABLED) {
+    if (!APPLICATION->updaterEnabled()) {
         return;
     }
     ui->actionCheckUpdate->setEnabled(allowed);
@@ -1128,40 +1129,49 @@ void MainWindow::on_actionChangeInstGroup_triggered()
     if (!m_selectedInstance)
         return;
 
-    bool ok = false;
     InstanceId instId = m_selectedInstance->id();
-    QString name(APPLICATION->instances()->getInstanceGroup(instId));
-    auto groups = APPLICATION->instances()->getGroups();
-    groups.insert(0, "");
-    groups.sort(Qt::CaseInsensitive);
-    int foo = groups.indexOf(name);
+    QString src(APPLICATION->instances()->getInstanceGroup(instId));
 
-    name = QInputDialog::getItem(this, tr("Group name"), tr("Enter a new group name."), groups, foo, true, &ok);
-    name = name.simplified();
+    QStringList groups = APPLICATION->instances()->getGroups();
+    groups.prepend("");
+    int index = groups.indexOf(src);
+    bool ok = false;
+    QString dst = QInputDialog::getItem(this, tr("Group name"), tr("Enter a new group name."), groups, index, true, &ok);
+    dst = dst.simplified();
+
     if (ok) {
-        APPLICATION->instances()->setInstanceGroup(instId, name);
+        APPLICATION->instances()->setInstanceGroup(instId, dst);
     }
 }
 
-void MainWindow::deleteGroup()
+void MainWindow::deleteGroup(QString group)
 {
-    QObject* obj = sender();
-    if (!obj)
+    Q_ASSERT(!group.isEmpty());
+
+    const int reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group '%1'?").arg(group),
+                                            QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+        APPLICATION->instances()->deleteGroup(group);
+}
+
+void MainWindow::renameGroup(QString group)
+{
+    Q_ASSERT(!group.isEmpty());
+
+    QString name = QInputDialog::getText(this, tr("Rename group"), tr("Enter a new group name."), QLineEdit::Normal, group);
+    name = name.simplified();
+    if (name.isNull() || name == group)
         return;
-    QAction* action = qobject_cast<QAction*>(obj);
-    if (!action)
+
+    const bool empty = name.isEmpty();
+    const bool duplicate = APPLICATION->instances()->getGroups().contains(name, Qt::CaseInsensitive) && group.toLower() != name.toLower();
+
+    if (empty || duplicate) {
+        QMessageBox::warning(this, tr("Cannot rename group"), empty ? tr("Cannot set empty name.") : tr("Group already exists. :/"));
         return;
-    auto map = action->data().toMap();
-    if (!map.contains("group"))
-        return;
-    QString groupName = map["group"].toString();
-    if (!groupName.isEmpty()) {
-        auto reply = QMessageBox::question(this, tr("Delete group"), tr("Are you sure you want to delete the group %1?").arg(groupName),
-                                           QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes) {
-            APPLICATION->instances()->deleteGroup(groupName);
-        }
     }
+
+    APPLICATION->instances()->renameGroup(group, name);
 }
 
 void MainWindow::undoTrashInstance()
@@ -1188,17 +1198,27 @@ void MainWindow::on_actionViewCentralModsFolder_triggered()
 
 void MainWindow::on_actionViewIconThemeFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path());
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path(), true);
 }
 
 void MainWindow::on_actionViewWidgetThemeFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path());
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path(), true);
 }
 
 void MainWindow::on_actionViewCatPackFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path());
+    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path(), true);
+}
+
+void MainWindow::on_actionViewIconsFolder_triggered()
+{
+    DesktopServices::openDirectory(APPLICATION->icons()->getDirectory(), true);
+}
+
+void MainWindow::on_actionViewLogsFolder_triggered()
+{
+    DesktopServices::openDirectory("logs", true);
 }
 
 void MainWindow::refreshInstances()
@@ -1208,7 +1228,7 @@ void MainWindow::refreshInstances()
 
 void MainWindow::checkForUpdates()
 {
-    if (BuildConfig.UPDATER_ENABLED) {
+    if (APPLICATION->updaterEnabled()) {
         APPLICATION->triggerUpdateCheck();
     } else {
         qWarning() << "Updater not set up. Cannot check for updates.";

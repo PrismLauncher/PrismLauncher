@@ -13,8 +13,8 @@
 
 namespace LegacyFTB {
 
-typedef QMap<QString, QIcon> FTBLogoMap;
-typedef std::function<void(QString)> LogoCallback;
+using FTBLogoMap = QMap<QString, QIcon>;
+using LogoCallback = std::function<void(QString)>;
 
 class FilterModel : public QSortFilterProxyModel {
     Q_OBJECT

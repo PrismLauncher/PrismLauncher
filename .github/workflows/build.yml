@@ -37,56 +37,43 @@ jobs:
       fail-fast: false
       matrix:
         include:
-
           - os: ubuntu-20.04
             qt_ver: 5
 
           - os: ubuntu-20.04
             qt_ver: 6
             qt_host: linux
-            qt_arch: ''
-            qt_version: '6.2.4'
-            qt_modules: 'qt5compat qtimageformats'
-            qt_tools: ''
+            qt_arch: ""
+            qt_version: "6.2.4"
+            qt_modules: "qt5compat qtimageformats"
+            qt_tools: ""
 
           - os: windows-2022
             name: "Windows-MinGW-w64"
             msystem: clang64
-            vcvars_arch: 'amd64_x86'
-
-          - os: windows-2022
-            name: "Windows-MSVC-Legacy"
-            msystem: ''
-            architecture: 'win32'
-            vcvars_arch: 'amd64_x86'
-            qt_ver: 5
-            qt_host: windows
-            qt_arch: 'win32_msvc2019'
-            qt_version: '5.15.2'
-            qt_modules: ''
-            qt_tools: 'tools_openssl_x86'
+            vcvars_arch: "amd64_x86"
 
           - os: windows-2022
             name: "Windows-MSVC"
-            msystem: ''
-            architecture: 'x64'
-            vcvars_arch: 'amd64'
+            msystem: ""
+            architecture: "x64"
+            vcvars_arch: "amd64"
             qt_ver: 6
             qt_host: windows
             qt_arch: ''
-            qt_version: '6.5.2'
+            qt_version: '6.6.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
           - os: windows-2022
             name: "Windows-MSVC-arm64"
-            msystem: ''
-            architecture: 'arm64'
-            vcvars_arch: 'amd64_arm64'
+            msystem: ""
+            architecture: "arm64"
+            vcvars_arch: "amd64_arm64"
             qt_ver: 6
             qt_host: windows
             qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.5.2'
+            qt_version: '6.6.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -96,7 +83,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ''
-            qt_version: '6.5.2'
+            qt_version: '6.6.0'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
 
@@ -105,9 +92,9 @@ jobs:
             macosx_deployment_target: 10.13
             qt_ver: 5
             qt_host: mac
-            qt_version: '5.15.2'
-            qt_modules: ''
-            qt_tools: ''
+            qt_version: "5.15.2"
+            qt_modules: ""
+            qt_tools: ""
 
     runs-on: ${{ matrix.os }}
 
@@ -127,9 +114,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: 'true'
+          submodules: "true"
 
-      - name: 'Setup MSYS2'
+      - name: "Setup MSYS2"
         if: runner.os == 'Windows' && matrix.msystem != ''
         uses: msys2/setup-msys2@v2
         with:
@@ -169,7 +156,7 @@ jobs:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
           restore-keys: |
-              ${{ matrix.os }}-mingw-w64-ccache
+            ${{ matrix.os }}-mingw-w64-ccache
 
       - name: Setup ccache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
@@ -214,35 +201,35 @@ jobs:
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         uses: jurplel/install-qt-action@v3
         with:
-           aqtversion: '==3.1.*'
-           py7zrversion: '>=0.20.2'
-           version: ${{ matrix.qt_version }}
-           host: 'windows'
-           target: 'desktop'
-           arch: ''
-           modules: ${{ matrix.qt_modules }}
-           tools: ${{ matrix.qt_tools }}
-           cache: ${{ inputs.is_qt_cached }}
-           cache-key-prefix: host-qt-arm64-windows
-           dir: ${{ github.workspace }}\HostQt
-           set-env: false
+          aqtversion: "==3.1.*"
+          py7zrversion: ">=0.20.2"
+          version: ${{ matrix.qt_version }}
+          host: "windows"
+          target: "desktop"
+          arch: ""
+          modules: ${{ matrix.qt_modules }}
+          tools: ${{ matrix.qt_tools }}
+          cache: ${{ inputs.is_qt_cached }}
+          cache-key-prefix: host-qt-arm64-windows
+          dir: ${{ github.workspace }}\HostQt
+          set-env: false
 
       - name: Install Qt (macOS, Linux, Qt 6 & Windows MSVC)
         if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
-           aqtversion: '==3.1.*'
-           py7zrversion: '>=0.20.2'
-           version: ${{ matrix.qt_version }}
-           host: ${{ matrix.qt_host }}
-           target: 'desktop'
-           arch: ${{ matrix.qt_arch }}
-           modules: ${{ matrix.qt_modules }}
-           tools: ${{ matrix.qt_tools }}
-           cache: ${{ inputs.is_qt_cached }}
+          aqtversion: "==3.1.*"
+          py7zrversion: ">=0.20.2"
+          version: ${{ matrix.qt_version }}
+          host: ${{ matrix.qt_host }}
+          target: "desktop"
+          arch: ${{ matrix.qt_arch }}
+          modules: ${{ matrix.qt_modules }}
+          tools: ${{ matrix.qt_tools }}
+          cache: ${{ inputs.is_qt_cached }}
 
       - name: Install MSVC (Windows MSVC)
-        if: runner.os == 'Windows'  # We want this for MinGW builds as well, as we need SignTool
+        if: runner.os == 'Windows' # We want this for MinGW builds as well, as we need SignTool
         uses: ilammy/msvc-dev-cmd@v1
         with:
           vsversion: 2022
@@ -283,12 +270,12 @@ jobs:
         if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=6 -DCMAKE_OBJDUMP=/mingw64/bin/objdump.exe -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=6 -DCMAKE_OBJDUMP=/mingw64/bin/objdump.exe -DLauncher_BUILD_ARTIFACT=${{ matrix.name }}-Qt${{ matrix.qt_ver }} -G Ninja
 
       - name: Configure CMake (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" -A${{ matrix.architecture}} -DLauncher_FORCE_BUNDLED_LIBS=ON
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" -A${{ matrix.architecture}} -DLauncher_FORCE_BUNDLED_LIBS=ON  -DLauncher_BUILD_ARTIFACT=${{ matrix.name }}-Qt${{ matrix.qt_ver }}
           # https://github.com/ccache/ccache/wiki/MS-Visual-Studio (I coudn't figure out the compiler prefix)
           if ("${{ env.CCACHE_VAR }}")
           {
@@ -303,7 +290,7 @@ jobs:
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DLauncher_BUILD_ARTIFACT=Linux-Qt${{ matrix.qt_ver }} -G Ninja
 
       ##
       # BUILD
@@ -343,7 +330,7 @@ jobs:
       - name: Test (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != 'arm64'
         run: |
-          ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }} 
+          ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }}
 
       ##
       # PACKAGE BUILDS
@@ -385,7 +372,7 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }}
           touch ${{ env.INSTALL_DIR }}/manifest.txt
-          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt 
+          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
@@ -402,10 +389,9 @@ jobs:
 
           Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
-
       - name: Fetch codesign certificate (Windows)
         if: runner.os == 'Windows'
-        shell: bash  # yes, we are not using MSYS2 or PowerShell here
+        shell: bash # yes, we are not using MSYS2 or PowerShell here
         run: |
           echo '${{ secrets.WINDOWS_CODESIGN_CERT }}' | base64 --decode > codesign.pfx
 
@@ -415,7 +401,7 @@ jobs:
           if (Get-Content ./codesign.pfx){
             cd ${{ env.INSTALL_DIR }}
             # We ship the exact same executable for portable and non-portable editions, so signing just once is fine
-            SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com prismlauncher.exe prismlauncher_filelink.exe
+            SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com prismlauncher.exe prismlauncher_updater.exe prismlauncher_filelink.exe 
           } else {
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
@@ -507,15 +493,7 @@ jobs:
           export LD_LIBRARY_PATH
 
           chmod +x AppImageUpdate-x86_64.AppImage
-          ./AppImageUpdate-x86_64.AppImage --appimage-extract
-
-          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
-          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
-
-          cp -r squashfs-root/usr/bin/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
-          cp -r squashfs-root/usr/lib/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib
-          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/optional
-          cp -r squashfs-root/usr/optional/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins
+          cp AppImageUpdate-x86_64.AppImage ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
 
           export UPDATE_INFORMATION="gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-Linux-x86_64.AppImage.zsync" 
 
@@ -523,7 +501,7 @@ jobs:
             export SIGN=1
             export SIGN_KEY=${{ secrets.GPG_PRIVATE_KEY_ID }}
             mkdir -p ~/.gnupg/
-            printf "$GPG_PRIVATE_KEY" | base64 --decode > ~/.gnupg/private.key
+            echo "$GPG_PRIVATE_KEY" > ~/.gnupg/private.key
             gpg --import ~/.gnupg/private.key
           else
             echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $GITHUB_STEP_SUMMARY
@@ -569,14 +547,14 @@ jobs:
         if: runner.os == 'Linux' && matrix.qt_ver != 6
         uses: actions/upload-artifact@v3
         with:
-          name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
+          name: PrismLauncher-${{ runner.os }}-Qt5-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher.tar.gz
 
       - name: Upload binary tarball (Linux, portable, Qt 5)
         if: runner.os == 'Linux' && matrix.qt_ver != 6
         uses: actions/upload-artifact@v3
         with:
-          name: PrismLauncher-${{ runner.os }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
+          name: PrismLauncher-${{ runner.os }}-Qt5-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher-portable.tar.gz
 
       - name: Upload binary tarball (Linux, Qt 6)
@@ -599,7 +577,7 @@ jobs:
         with:
           name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
           path: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
-      
+
       - name: Upload AppImage Zsync (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
         uses: actions/upload-artifact@v3
@@ -616,17 +594,17 @@ jobs:
   flatpak:
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:kde-5.15-22.08
+      image: bilelmoussaoui/flatpak-github-actions:kde-5.15-23.08
       options: --privileged
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         if: inputs.build_type == 'Debug'
         with:
-          submodules: 'true'
+          submodules: "true"
       - name: Build Flatpak (Linux)
         if: inputs.build_type == 'Debug'
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: "Prism Launcher.flatpak"
-          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
+          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml

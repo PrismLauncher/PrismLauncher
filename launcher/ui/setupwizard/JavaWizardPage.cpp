@@ -64,8 +64,7 @@ bool JavaWizardPage::validatePage()
         }
         case JavaSettingsWidget::ValidationStatus::AllOK: {
             settings->set("JavaPath", m_java_widget->javaPath());
-            return true;
-        }
+        } /* fallthrough */
         case JavaSettingsWidget::ValidationStatus::JavaBad: {
             // Memory
             auto s = APPLICATION->settings();

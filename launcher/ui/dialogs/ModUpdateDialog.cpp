@@ -39,7 +39,8 @@ static std::optional<ModPlatform::ModLoaderTypes> mcLoaders(BaseInstance* inst)
 ModUpdateDialog::ModUpdateDialog(QWidget* parent,
                                  BaseInstance* instance,
                                  const std::shared_ptr<ModFolderModel> mods,
-                                 QList<Mod*>& search_for)
+                                 QList<Mod*>& search_for,
+                                 bool includeDeps)
     : ReviewMessageBox(parent, tr("Confirm mods to update"), "")
     , m_parent(parent)
     , m_mod_model(mods)
@@ -47,6 +48,7 @@ ModUpdateDialog::ModUpdateDialog(QWidget* parent,
     , m_second_try_metadata(
           new ConcurrentTask(nullptr, "Second Metadata Search", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
     , m_instance(instance)
+    , m_include_deps(includeDeps)
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
@@ -186,7 +188,7 @@ void ModUpdateDialog::checkCandidates()
         }
     }
 
-    {  // dependencies
+    if (m_include_deps && !APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
         auto depTask = makeShared<GetModDependenciesTask>(this, m_instance, m_mod_model.get(), selectedVers);
 
         connect(depTask.get(), &Task::failed, this,

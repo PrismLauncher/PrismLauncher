@@ -42,11 +42,15 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QUrl>
+
+#if defined(LAUNCHER_APPLICATION)
 #include <QtConcurrentRun>
+#endif
 
 namespace MMCZip {
 // ours
-bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction filter)
+bool mergeZipFiles(QuaZip* into, QFileInfo from, QSet<QString>& contained, const FilterFunction& filter)
 {
     QuaZip modZip(from.filePath());
     modZip.open(QuaZip::mdUnzip);
@@ -132,6 +136,7 @@ bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, 
     return result;
 }
 
+#if defined(LAUNCHER_APPLICATION)
 // ours
 bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
 {
@@ -217,6 +222,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
     }
     return true;
 }
+#endif
 
 // ours
 QString findFolderOfFileInZip(QuaZip* zip, const QString& what, const QStringList& ignore_paths, const QString& root)
@@ -422,6 +428,7 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
     return true;
 }
 
+#if defined(LAUNCHER_APPLICATION)
 void ExportToZipTask::executeTask()
 {
     setStatus("Adding files...");
@@ -500,5 +507,6 @@ bool ExportToZipTask::abort()
     }
     return false;
 }
+#endif
 
 }  // namespace MMCZip

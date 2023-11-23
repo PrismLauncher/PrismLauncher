@@ -123,26 +123,35 @@ namespace fs = ghc::filesystem;
 
 #if defined(__MINGW32__)
 
-typedef struct _DUPLICATE_EXTENTS_DATA {
+struct _DUPLICATE_EXTENTS_DATA {
     HANDLE FileHandle;
     LARGE_INTEGER SourceFileOffset;
     LARGE_INTEGER TargetFileOffset;
     LARGE_INTEGER ByteCount;
-} DUPLICATE_EXTENTS_DATA, *PDUPLICATE_EXTENTS_DATA;
+};
 
-typedef struct _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER {
+using DUPLICATE_EXTENTS_DATA = _DUPLICATE_EXTENTS_DATA;
+using PDUPLICATE_EXTENTS_DATA = _DUPLICATE_EXTENTS_DATA*;
+
+struct _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER {
     WORD ChecksumAlgorithm;  // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
     WORD Reserved;           // Must be 0
     DWORD Flags;             // FSCTL_INTEGRITY_FLAG_xxx
     DWORD ChecksumChunkSizeInBytes;
     DWORD ClusterSizeInBytes;
-} FSCTL_GET_INTEGRITY_INFORMATION_BUFFER, *PFSCTL_GET_INTEGRITY_INFORMATION_BUFFER;
+};
 
-typedef struct _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER {
+using FSCTL_GET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER;
+using PFSCTL_GET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_GET_INTEGRITY_INFORMATION_BUFFER*;
+
+struct _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER {
     WORD ChecksumAlgorithm;  // Checksum algorithm. e.g. CHECKSUM_TYPE_UNCHANGED, CHECKSUM_TYPE_NONE, CHECKSUM_TYPE_CRC32
     WORD Reserved;           // Must be 0
     DWORD Flags;             // FSCTL_INTEGRITY_FLAG_xxx
-} FSCTL_SET_INTEGRITY_INFORMATION_BUFFER, *PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER;
+};
+
+using FSCTL_SET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER;
+using PFSCTL_SET_INTEGRITY_INFORMATION_BUFFER = _FSCTL_SET_INTEGRITY_INFORMATION_BUFFER*;
 
 #endif
 
@@ -194,6 +203,40 @@ void write(const QString& filename, const QByteArray& data)
     }
 }
 
+void appendSafe(const QString& filename, const QByteArray& data)
+{
+    ensureExists(QFileInfo(filename).dir());
+    QByteArray buffer;
+    try {
+        buffer = read(filename);
+    } catch (FileSystemException&) {
+        buffer = QByteArray();
+    }
+    buffer.append(data);
+    QSaveFile file(filename);
+    if (!file.open(QSaveFile::WriteOnly)) {
+        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+    }
+    if (buffer.size() != file.write(buffer)) {
+        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+    }
+    if (!file.commit()) {
+        throw FileSystemException("Error while committing data to " + filename + ": " + file.errorString());
+    }
+}
+
+void append(const QString& filename, const QByteArray& data)
+{
+    ensureExists(QFileInfo(filename).dir());
+    QFile file(filename);
+    if (!file.open(QFile::Append)) {
+        throw FileSystemException("Couldn't open " + filename + " for writing: " + file.errorString());
+    }
+    if (data.size() != file.write(data)) {
+        throw FileSystemException("Error writing data to " + filename + ": " + file.errorString());
+    }
+}
+
 QByteArray read(const QString& filename)
 {
     QFile file(filename);
@@ -238,6 +281,28 @@ bool ensureFolderPathExists(QString foldernamepath)
     return success;
 }
 
+bool copyFileAttributes(QString src, QString dst)
+{
+#ifdef Q_OS_WIN32
+    auto attrs = GetFileAttributesW(src.toStdWString().c_str());
+    if (attrs == INVALID_FILE_ATTRIBUTES)
+        return false;
+    return SetFileAttributesW(dst.toStdWString().c_str(), attrs);
+#endif
+    return true;
+}
+
+// needs folders to exists
+void copyFolderAttributes(QString src, QString dst, QString relative)
+{
+    auto path = PathCombine(src, relative);
+    QDir dsrc(src);
+    while ((path = QFileInfo(path).path()).length() >= src.length()) {
+        auto dst_path = PathCombine(dst, dsrc.relativeFilePath(path));
+        copyFileAttributes(path, dst_path);
+    }
+}
+
 /**
  * @brief Copies a directory and it's contents from src to dest
  * @param offset subdirectory form src to copy to dest
@@ -265,6 +330,9 @@ bool copy::operator()(const QString& offset, bool dryRun)
     if (!m_followSymlinks)
         opt |= copy_opts::copy_symlinks;
 
+    if (m_overwrite)
+        opt |= copy_opts::overwrite_existing;
+
     // Function that'll do the actual copying
     auto copy_file = [&](QString src_path, QString relative_dst_path) {
         if (m_matcher && (m_matcher->matches(relative_dst_path) != m_whitelist))
@@ -273,6 +341,9 @@ bool copy::operator()(const QString& offset, bool dryRun)
         auto dst_path = PathCombine(dst, relative_dst_path);
         if (!dryRun) {
             ensureFilePathExists(dst_path);
+#ifdef Q_OS_WIN32
+            copyFolderAttributes(src, dst, relative_dst_path);
+#endif
             fs::copy(StringUtils::toStdString(src_path), StringUtils::toStdString(dst_path), opt, err);
         }
         if (err) {
@@ -871,6 +942,8 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     stream << "[Desktop Entry]"
            << "\n";
     stream << "Type=Application"
+           << "\n";
+    stream << "Categories=Game;ActionGame;AdventureGame;Simulation"
            << "\n";
     stream << "Exec=\"" << target.toLocal8Bit() << "\"" << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";

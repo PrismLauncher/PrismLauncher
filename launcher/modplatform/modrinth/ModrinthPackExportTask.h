@@ -44,6 +44,7 @@ class ModrinthPackExportTask : public Task {
     struct ResolvedFile {
         QString sha1, sha512, url;
         qint64 size;
+        Metadata::ModSide side;
     };
 
     static const QStringList PREFIXES;
@@ -67,7 +68,7 @@ class ModrinthPackExportTask : public Task {
     void collectFiles();
     void collectHashes();
     void makeApiRequest();
-    void parseApiResponse(const std::shared_ptr<QByteArray> response);
+    void parseApiResponse(std::shared_ptr<QByteArray> response);
     void buildZip();
 
     QByteArray generateIndex();
