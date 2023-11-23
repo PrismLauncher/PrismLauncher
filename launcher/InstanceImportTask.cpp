@@ -50,6 +50,7 @@
 #include "modplatform/technic/TechnicPackProcessor.h"
 
 #include "settings/INISettingsObject.h"
+#include "tasks/Task.h"
 
 #include "net/ApiDownload.h"
 
@@ -58,7 +59,7 @@
 
 #include <quazip/quazipdir.h>
 
-InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
+InstanceImportTask::InstanceImportTask(const QUrl& sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
     : m_sourceUrl(sourceUrl), m_extra_info(extra_info), m_parent(parent)
 {}
 
@@ -90,23 +91,25 @@ void InstanceImportTask::executeTask()
         setStatus(tr("Downloading modpack:\n%1").arg(m_sourceUrl.toString()));
         m_downloadRequired = true;
 
-        const QString path(m_sourceUrl.host() + '/' + m_sourceUrl.path());
-
-        auto entry = APPLICATION->metacache()->resolveEntry("general", path);
-        entry->setStale(true);
-        m_archivePath = entry->getFullPath();
-
-        m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
-        m_filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
-
-        connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
-        connect(m_filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
-        connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &InstanceImportTask::propagateStepProgress);
-        connect(m_filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::downloadFailed);
-        connect(m_filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::downloadAborted);
-
-        m_filesNetJob->start();
+        downloadFromUrl();
     }
+}
+
+void InstanceImportTask::downloadFromUrl()
+{
+    const QString path = m_sourceUrl.host() + '/' + m_sourceUrl.path();
+    auto entry = APPLICATION->metacache()->resolveEntry("general", path);
+    entry->setStale(true);
+    m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
+    m_filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
+    m_archivePath = entry->getFullPath();
+
+    connect(m_filesNetJob.get(), &NetJob::succeeded, this, &InstanceImportTask::downloadSucceeded);
+    connect(m_filesNetJob.get(), &NetJob::progress, this, &InstanceImportTask::downloadProgressChanged);
+    connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &InstanceImportTask::propagateStepProgress);
+    connect(m_filesNetJob.get(), &NetJob::failed, this, &InstanceImportTask::downloadFailed);
+    connect(m_filesNetJob.get(), &NetJob::aborted, this, &InstanceImportTask::downloadAborted);
+    m_filesNetJob->start();
 }
 
 void InstanceImportTask::downloadSucceeded()

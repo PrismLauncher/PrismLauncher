@@ -11,7 +11,7 @@
 #include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
 
 // Values taken from:
-// https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
+// https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
 static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
     { 1, { Version("1.6.1"), Version("1.8.9") } },    { 2, { Version("1.9"), Version("1.10.2") } },
     { 3, { Version("1.11"), Version("1.12.2") } },    { 4, { Version("1.13"), Version("1.14.4") } },
@@ -50,7 +50,8 @@ void ResourcePack::setImage(QImage new_image) const
         PixmapCache::instance().remove(m_pack_image_cache_key.key);
 
     // scale the image to avoid flooding the pixmapcache
-    auto pixmap = QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding));
+    auto pixmap =
+        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
 
     m_pack_image_cache_key.key = PixmapCache::instance().insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;
@@ -68,7 +69,7 @@ QPixmap ResourcePack::image(QSize size, Qt::AspectRatioMode mode) const
     if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull())
             return cached_image;
-        return cached_image.scaled(size, mode);
+        return cached_image.scaled(size, mode, Qt::SmoothTransformation);
     }
 
     // No valid image we can get

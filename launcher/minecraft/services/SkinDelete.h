@@ -4,7 +4,7 @@
 #include <QtNetwork/QtNetwork>
 #include "tasks/Task.h"
 
-typedef shared_qobject_ptr<class SkinDelete> SkinDeletePtr;
+using SkinDeletePtr = shared_qobject_ptr<class SkinDelete>;
 
 class SkinDelete : public Task {
     Q_OBJECT

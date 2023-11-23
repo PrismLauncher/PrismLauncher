@@ -45,10 +45,12 @@ QString JavaVersion::toString() const
 
 bool JavaVersion::requiresPermGen()
 {
-    if (m_parseable) {
-        return m_major < 8;
-    }
-    return true;
+    return !m_parseable || m_major < 8;
+}
+
+bool JavaVersion::isModular()
+{
+    return m_parseable && m_major >= 9;
 }
 
 bool JavaVersion::operator<(const JavaVersion& rhs)

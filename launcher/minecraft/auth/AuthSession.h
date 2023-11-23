@@ -24,10 +24,6 @@ struct AuthSession {
         GoneOrMigrated
     } status = Undetermined;
 
-    // client token
-    QString client_token;
-    // account user name
-    QString username;
     // combined session ID
     QString session;
     // volatile auth token
@@ -47,4 +43,4 @@ struct AuthSession {
     bool demo = false;
 };
 
-typedef std::shared_ptr<AuthSession> AuthSessionPtr;
+using AuthSessionPtr = std::shared_ptr<AuthSession>;

@@ -1,16 +1,36 @@
-/* Copyright 2013-2021 MultiMC Contributors
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
  */
 
 #pragma once
@@ -86,9 +106,10 @@ class InstanceList : public QAbstractListModel {
     bool isGroupCollapsed(const QString& groupName);
 
     GroupId getInstanceGroup(const InstanceId& id) const;
-    void setInstanceGroup(const InstanceId& id, const GroupId& name);
+    void setInstanceGroup(const InstanceId& id, GroupId name);
 
     void deleteGroup(const GroupId& name);
+    void renameGroup(const GroupId& src, const GroupId& dst);
     bool trashInstance(const InstanceId& id);
     bool trashedSomething();
     void undoTrashInstance();
@@ -109,7 +130,7 @@ class InstanceList : public QAbstractListModel {
      * should_override is used when another similar instance already exists, and we want to override it
      * - for instance, when updating it.
      */
-    bool commitStagedInstance(const QString& keyPath, const InstanceName& instanceName, const QString& groupName, const InstanceTask&);
+    bool commitStagedInstance(const QString& keyPath, const InstanceName& instanceName, QString groupName, const InstanceTask&);
 
     /**
      * Destroy a previously created staging area given by @keyPath - used when creation fails.
@@ -158,12 +179,16 @@ class InstanceList : public QAbstractListModel {
     QList<InstanceId> discoverInstances();
     InstancePtr loadInstance(const InstanceId& id);
 
+    void increaseGroupCount(const QString& group);
+    void decreaseGroupCount(const QString& group);
+
    private:
     int m_watchLevel = 0;
     int totalPlayTime = 0;
     bool m_dirty = false;
     QList<InstancePtr> m_instances;
-    QSet<QString> m_groupNameCache;
+    // id -> refs
+    QMap<QString, int> m_groupNameCache;
 
     SettingsObjectPtr m_globalSettings;
     QString m_instDir;

@@ -142,6 +142,8 @@ class Application : public QApplication {
 
     void updateCapabilities();
 
+    void detectLibraries();
+
     /*!
      * Finds and returns the full path to a jar file.
      * Returns a null-string if it could not be found.
@@ -156,6 +158,9 @@ class Application : public QApplication {
 
     /// this is the root of the 'installation'. Used for automatic updates
     const QString& root() { return m_rootPath; }
+
+    /// the data path the application is using
+    const QString& dataRoot() { return m_dataPath; }
 
     bool isPortable() { return m_portable; }
 
@@ -177,6 +182,11 @@ class Application : public QApplication {
 
     int suitableMaxMem();
 
+    bool updaterEnabled();
+    QString updaterBinaryName();
+
+    QUrl normalizeImportUrl(QString const& url);
+
    signals:
     void updateAllowedChanged(bool status);
     void globalSettingsAboutToOpen();
@@ -191,7 +201,6 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
-                BaseProfilerFactory* profiler = nullptr,
                 MinecraftServerTargetPtr serverToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);
@@ -241,6 +250,7 @@ class Application : public QApplication {
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 
     QString m_rootPath;
+    QString m_dataPath;
     Status m_status = Application::StartingUp;
     Capabilities m_capabilities;
     bool m_portable = false;
@@ -275,11 +285,13 @@ class Application : public QApplication {
     SetupWizard* m_setupWizard = nullptr;
 
    public:
+    QString m_detectedGLFWPath;
+    QString m_detectedOpenALPath;
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
-    QList<QUrl> m_zipsToImport;
+    QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };
