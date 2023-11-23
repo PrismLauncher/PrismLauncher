@@ -42,7 +42,6 @@
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/ProfileSelectDialog.h"
 #include "ui/dialogs/ProfileSetupDialog.h"
@@ -145,7 +144,7 @@ void LaunchController::login()
     bool tryagain = true;
     unsigned int tries = 0;
 
-    if (!m_accountToUse->isOffline() && m_accountToUse->accountState() == AccountState::Offline) {
+    if (m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) {
         // Force account refresh on the account used to launch the instance updating the AccountState
         //  only on first try and if it is not meant to be offline
         auto accounts = APPLICATION->accounts();
@@ -293,7 +292,7 @@ bool LaunchController::reauthenticateCurrentAccount()
         auto accounts = APPLICATION->accounts();
         bool isDefault = accounts->defaultAccount() == m_accountToUse;
         accounts->removeAccount(accounts->index(accounts->findAccountByProfileId(m_accountToUse->profileId())));
-        if (m_accountToUse->isMSA()) {
+        if (m_accountToUse->accountType() == AccountType::MSA) {
             auto newAccount =
                 MSALoginDialog::newAccount(m_parentWidget, tr("Please enter your Mojang account email and password to add your account."));
             accounts->addAccount(newAccount);
