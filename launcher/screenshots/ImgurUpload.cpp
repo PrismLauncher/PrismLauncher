@@ -35,8 +35,8 @@
  */
 
 #include "ImgurUpload.h"
-#include "Application.h"
 #include "BuildConfig.h"
+#include "net/StaticHeaderProxy.h"
 
 #include <QDebug>
 #include <QFile>
@@ -47,104 +47,84 @@
 #include <QNetworkRequest>
 #include <QUrl>
 
-ImgurUpload::ImgurUpload(ScreenShot::Ptr shot) : NetAction(), m_shot(shot)
+void ImgurUpload::init()
 {
-    m_url = BuildConfig.IMGUR_BASE_URL + "upload.json";
-    m_state = State::Inactive;
+    qDebug() << "Setting up imgur upload";
+    auto api_headers = new Net::StaticHeaderProxy(
+        QList<Net::HeaderPair>{ { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toStdString().c_str() },
+                                { "Accept", "application/json" } });
+    addHeaderProxy(api_headers);
 }
 
-void ImgurUpload::executeTask()
+QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
 {
-    finished = false;
-    m_state = Task::State::Running;
-    QNetworkRequest request(m_url);
-    request.setHeader(QNetworkRequest::UserAgentHeader, APPLICATION->getUserAgentUncached().toUtf8());
-    request.setRawHeader("Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toStdString().c_str());
-    request.setRawHeader("Accept", "application/json");
+    auto file = new QFile(m_fileInfo.absoluteFilePath());
 
-    QFile f(m_shot->m_file.absoluteFilePath());
-    if (!f.open(QFile::ReadOnly)) {
+    if (!file->open(QFile::ReadOnly)) {
         emitFailed();
-        return;
+        return nullptr;
     }
 
     QHttpMultiPart* multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    file->setParent(multipart);
     QHttpPart filePart;
-    filePart.setBody(f.readAll().toBase64());
+    filePart.setBodyDevice(file);
     filePart.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"image\"");
     multipart->append(filePart);
     QHttpPart typePart;
     typePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"type\"");
-    typePart.setBody("base64");
+    typePart.setBody("file");
     multipart->append(typePart);
     QHttpPart namePart;
     namePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"name\"");
-    namePart.setBody(m_shot->m_file.baseName().toUtf8());
+    namePart.setBody(m_fileInfo.baseName().toUtf8());
     multipart->append(namePart);
 
-    QNetworkReply* rep = m_network->post(request, multipart);
+    return m_network->post(request, multipart);
+};
 
-    m_reply.reset(rep);
-    connect(rep, &QNetworkReply::uploadProgress, this, &ImgurUpload::downloadProgress);
-    connect(rep, &QNetworkReply::finished, this, &ImgurUpload::downloadFinished);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
-    connect(rep, &QNetworkReply::errorOccurred, this, &ImgurUpload::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &ImgurUpload::downloadError);
-#endif
-    connect(rep, &QNetworkReply::sslErrors, this, &ImgurUpload::sslErrors);
+auto ImgurUpload::Sink::init(QNetworkRequest& request) -> Task::State
+{
+    m_output.clear();
+    return Task::State::Running;
+};
+
+auto ImgurUpload::Sink::write(QByteArray& data) -> Task::State
+{
+    m_output.append(data);
+    return Task::State::Running;
 }
 
-void ImgurUpload::downloadError([[maybe_unused]] QNetworkReply::NetworkError error)
+auto ImgurUpload::Sink::abort() -> Task::State
 {
-    qCritical() << "ImgurUpload failed with error" << m_reply->errorString() << "Server reply:\n" << m_reply->readAll();
-    if (finished) {
-        qCritical() << "Double finished ImgurUpload!";
-        return;
-    }
-    m_state = Task::State::Failed;
-    finished = true;
-    m_reply.reset();
-    emitFailed();
+    m_output.clear();
+    return Task::State::Failed;
 }
 
-void ImgurUpload::downloadFinished()
+auto ImgurUpload::Sink::finalize(QNetworkReply&) -> Task::State
 {
-    if (finished) {
-        qCritical() << "Double finished ImgurUpload!";
-        return;
-    }
-    QByteArray data = m_reply->readAll();
-    m_reply.reset();
     QJsonParseError jsonError;
-    QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
+    QJsonDocument doc = QJsonDocument::fromJson(m_output, &jsonError);
     if (jsonError.error != QJsonParseError::NoError) {
         qDebug() << "imgur server did not reply with JSON" << jsonError.errorString();
-        finished = true;
-        m_reply.reset();
-        emitFailed();
-        return;
+        return Task::State::Failed;
     }
     auto object = doc.object();
     if (!object.value("success").toBool()) {
         qDebug() << "Screenshot upload not successful:" << doc.toJson();
-        finished = true;
-        m_reply.reset();
-        emitFailed();
-        return;
+        return Task::State::Failed;
     }
     m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
     m_shot->m_url = object.value("data").toObject().value("link").toString();
     m_shot->m_imgurDeleteHash = object.value("data").toObject().value("deletehash").toString();
-    m_state = Task::State::Succeeded;
-    finished = true;
-    emit succeeded();
-    return;
+    return Task::State::Succeeded;
 }
 
-void ImgurUpload::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+Net::NetRequest::Ptr ImgurUpload::make(ScreenShot::Ptr m_shot)
 {
-    setProgress(bytesReceived, bytesTotal);
-    emit progress(bytesReceived, bytesTotal);
+    auto up = makeShared<ImgurUpload>(m_shot->m_file);
+    up->m_url = std::move(BuildConfig.IMGUR_BASE_URL + "upload.json");
+    up->m_sink.reset(new Sink(m_shot));
+    return up;
 }

@@ -9,7 +9,7 @@
 class OneSixVersionFormat {
    public:
     // version files / profile patches
-    static VersionFilePtr versionFileFromJson(const QJsonDocument& doc, const QString& filename, const bool requireOrder);
+    static VersionFilePtr versionFileFromJson(const QJsonDocument& doc, const QString& filename, bool requireOrder);
     static QJsonDocument versionFileToJson(const VersionFilePtr& patch);
 
     // libraries

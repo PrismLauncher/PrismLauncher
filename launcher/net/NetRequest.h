@@ -87,7 +87,7 @@ class NetRequest : public NetAction {
     std::unique_ptr<Sink> m_sink;
     Options m_options;
 
-    typedef const QLoggingCategory& (*logCatFunc)();
+    using logCatFunc = const QLoggingCategory& (*)();
     logCatFunc logCat = taskUploadLogC;
 
     std::chrono::steady_clock m_clock;

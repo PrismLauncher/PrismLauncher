@@ -139,6 +139,7 @@ set(NET_SOURCES
     net/HeaderProxy.h
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
+    net/StaticHeaderProxy.h
     net/ApiDownload.h
     net/ApiDownload.cpp
     net/ApiUpload.cpp
@@ -888,6 +889,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/global/AccountListPage.h
     ui/pages/global/CustomCommandsPage.cpp
     ui/pages/global/CustomCommandsPage.h
+    ui/pages/global/EnvironmentVariablesPage.cpp
+    ui/pages/global/EnvironmentVariablesPage.h
     ui/pages/global/ExternalToolsPage.cpp
     ui/pages/global/ExternalToolsPage.h
     ui/pages/global/JavaPage.cpp
@@ -1039,6 +1042,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/Common.h
     ui/widgets/CustomCommands.cpp
     ui/widgets/CustomCommands.h
+    ui/widgets/EnvironmentVariables.cpp
+    ui/widgets/EnvironmentVariables.h
     ui/widgets/DropLabel.cpp
     ui/widgets/DropLabel.h
     ui/widgets/FocusLineEdit.cpp
@@ -1149,6 +1154,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
+    ui/widgets/EnvironmentVariables.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
     ui/widgets/SubTaskProgressBar.ui
@@ -1306,7 +1312,7 @@ install(TARGETS ${Launcher_Name}
     FRAMEWORK DESTINATION ${FRAMEWORK_DEST_DIR} COMPONENT Runtime
 )
 
-if(NOT APPLE OR (DEFINED Launcher_BUILD_UPDATER AND Launcher_BUILD_UPDATER))
+if(Launcher_BUILD_UPDATER)
     # Updater
     add_library(prism_updater_logic STATIC ${PRISMUPDATER_SOURCES} ${TASKS_SOURCES} ${PRISMUPDATER_UI})
     target_include_directories(prism_updater_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

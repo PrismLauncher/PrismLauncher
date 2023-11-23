@@ -43,7 +43,7 @@
 #include "FileIgnoreProxy.h"
 
 class BaseInstance;
-typedef std::shared_ptr<BaseInstance> InstancePtr;
+using InstancePtr = std::shared_ptr<BaseInstance>;
 
 namespace Ui {
 class ExportInstanceDialog;

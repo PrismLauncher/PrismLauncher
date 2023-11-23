@@ -52,7 +52,7 @@
 class Library;
 class MinecraftInstance;
 
-typedef std::shared_ptr<Library> LibraryPtr;
+using LibraryPtr = std::shared_ptr<Library>;
 
 class Library {
     friend class OneSixVersionFormat;
