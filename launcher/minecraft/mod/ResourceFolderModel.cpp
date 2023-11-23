@@ -461,9 +461,9 @@ bool ResourceFolderModel::setData(const QModelIndex& index, [[maybe_unused]] con
     if (role == Qt::CheckStateRole) {
         if (m_instance != nullptr && m_instance->isRunning()) {
             auto response =
-                CustomMessageBox::selectable(nullptr, "Confirm toggle",
-                                             "If you enable/disable this resource while the game is running it may crash your game.\n"
-                                             "Are you sure you want to do this?",
+                CustomMessageBox::selectable(nullptr, tr("Confirm toggle"),
+                                             tr("If you enable/disable this resource while the game is running it may crash your game.\n"
+                                                "Are you sure you want to do this?"),
                                              QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                     ->exec();
 
