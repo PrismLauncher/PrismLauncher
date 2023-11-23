@@ -4,6 +4,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QFileInfo>
+#include <QHeaderView>
 #include <QIcon>
 #include <QMenu>
 #include <QMimeData>
@@ -516,36 +517,22 @@ void ResourceFolderModel::setupHeaderAction(QAction* act, int column)
     act->setText(columnNames().at(column));
 }
 
-void ResourceFolderModel::saveHiddenColumn(int column, bool hidden)
+void ResourceFolderModel::saveColumns(QTreeView* tree)
 {
-    auto const setting_name = QString("UI/%1_Page/HiddenColumns").arg(id());
+    auto const setting_name = QString("UI/%1_Page/Columns").arg(id());
     auto setting = (m_instance->settings()->contains(setting_name)) ? m_instance->settings()->getSetting(setting_name)
                                                                     : m_instance->settings()->registerSetting(setting_name);
 
-    auto hiddenColumns = setting->get().toStringList();
-    auto name = columnNames(false).at(column);
-    auto index = hiddenColumns.indexOf(name);
-    if (index >= 0 && !hidden) {
-        hiddenColumns.removeAt(index);
-    } else if (index < 0 && hidden) {
-        hiddenColumns.append(name);
-    }
-    setting->set(hiddenColumns);
+    setting->set(tree->header()->saveState());
 }
 
-void ResourceFolderModel::loadHiddenColumns(QTreeView* tree)
+void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
-    auto const setting_name = QString("UI/%1_Page/HiddenColumns").arg(id());
+    auto const setting_name = QString("UI/%1_Page/Columns").arg(id());
     auto setting = (m_instance->settings()->contains(setting_name)) ? m_instance->settings()->getSetting(setting_name)
                                                                     : m_instance->settings()->registerSetting(setting_name);
 
-    auto hiddenColumns = setting->get().toStringList();
-    auto col_names = columnNames(false);
-    for (auto col_name : hiddenColumns) {
-        auto index = col_names.indexOf(col_name);
-        if (index >= 0)
-            tree->setColumnHidden(index, true);
-    }
+    tree->header()->restoreState(setting->get().toByteArray());
 }
 
 QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
@@ -570,7 +557,7 @@ QMenu* ResourceFolderModel::createHeaderContextMenu(QTreeView* tree)
                 if (m_column_resize_modes.at(c) == QHeaderView::ResizeToContents)
                     tree->resizeColumnToContents(c);
             }
-            saveHiddenColumn(col, !toggled);
+            saveColumns(tree);
         });
 
         menu->addAction(act);

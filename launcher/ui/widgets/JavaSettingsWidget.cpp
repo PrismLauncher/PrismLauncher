@@ -80,7 +80,7 @@ void JavaSettingsWidget::setupUi()
     m_minMemSpinBox = new QSpinBox(m_memoryGroupBox);
     m_minMemSpinBox->setObjectName(QStringLiteral("minMemSpinBox"));
     m_minMemSpinBox->setSuffix(QStringLiteral(" MiB"));
-    m_minMemSpinBox->setMinimum(128);
+    m_minMemSpinBox->setMinimum(8);
     m_minMemSpinBox->setMaximum(1048576);
     m_minMemSpinBox->setSingleStep(128);
     m_labelMinMem->setBuddy(m_minMemSpinBox);
@@ -93,7 +93,7 @@ void JavaSettingsWidget::setupUi()
     m_maxMemSpinBox = new QSpinBox(m_memoryGroupBox);
     m_maxMemSpinBox->setObjectName(QStringLiteral("maxMemSpinBox"));
     m_maxMemSpinBox->setSuffix(QStringLiteral(" MiB"));
-    m_maxMemSpinBox->setMinimum(128);
+    m_maxMemSpinBox->setMinimum(8);
     m_maxMemSpinBox->setMaximum(1048576);
     m_maxMemSpinBox->setSingleStep(128);
     m_labelMaxMem->setBuddy(m_maxMemSpinBox);
@@ -112,7 +112,7 @@ void JavaSettingsWidget::setupUi()
     m_permGenSpinBox = new QSpinBox(m_memoryGroupBox);
     m_permGenSpinBox->setObjectName(QStringLiteral("permGenSpinBox"));
     m_permGenSpinBox->setSuffix(QStringLiteral(" MiB"));
-    m_permGenSpinBox->setMinimum(64);
+    m_permGenSpinBox->setMinimum(4);
     m_permGenSpinBox->setMaximum(1048576);
     m_permGenSpinBox->setSingleStep(8);
     m_gridLayout_2->addWidget(m_permGenSpinBox, 2, 1, 1, 1);

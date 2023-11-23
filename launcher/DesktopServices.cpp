@@ -108,12 +108,9 @@ bool openDirectory(const QString& path, [[maybe_unused]] bool ensureExists)
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
     if (!isSandbox()) {
         return IndirectOpen(f);
-    } else {
-        return f();
     }
-#else
-    return f();
 #endif
+    return f();
 }
 
 bool openFile(const QString& path)
