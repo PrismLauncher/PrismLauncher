@@ -55,6 +55,6 @@ class Index : public QAbstractListModel, public BaseEntity {
     QVector<VersionList::Ptr> m_lists;
     QHash<QString, VersionList::Ptr> m_uids;
 
-    void connectVersionList(const int row, const VersionList::Ptr& list);
+    void connectVersionList(int row, const VersionList::Ptr& list);
 };
 }  // namespace Meta
