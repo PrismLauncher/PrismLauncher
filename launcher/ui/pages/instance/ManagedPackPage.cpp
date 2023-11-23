@@ -489,6 +489,7 @@ void FlameManagedPackPage::parseManagedPack()
 
 QString FlameManagedPackPage::url() const
 {
+    // FIXME: We should display the websiteUrl field, but this requires doing the API request first :(
     return "https://www.curseforge.com/projects/" + m_inst->getManagedPackID();
 }
 
