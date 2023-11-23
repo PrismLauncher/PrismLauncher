@@ -68,6 +68,8 @@ function(
         /w14906 # string literal cast to 'LPWSTR'
         /w14928 # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
         /permissive- # standards conformance mode for MSVC compiler.
+
+        /we4062 # forbid omitting a possible value of an enum in a switch statement
     )
   endif()
 
@@ -93,6 +95,8 @@ function(
         # in a lot of noise. This warning is only notifying us that clang is emulating the GCC behaviour
         # instead of the exact standard wording so we can safely ignore it
         -Wno-gnu-zero-variadic-macro-arguments
+
+        -Werror=switch # forbid omitting a possible value of an enum in a switch statement
     )
   endif()
 
@@ -104,6 +108,8 @@ function(
         -Wduplicated-branches # warn if if / else branches have duplicated code
         -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
         -Wuseless-cast # warn if you perform a cast to the same type
+
+        -Werror=switch # forbid omitting a possible value of an enum in a switch statement
     )
   endif()
 
@@ -128,6 +134,8 @@ function(
     -Woverloaded-virtual
     -Wuseless-cast
     -Wextra-semi
+
+    -Werror=switch # forbid omitting a possible value of an enum in a switch statement
   )
 
   target_compile_options(

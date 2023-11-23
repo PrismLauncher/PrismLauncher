@@ -39,14 +39,14 @@ class ResourceFolderModel : public QAbstractListModel {
      *  Returns whether starting to watch all the paths was successful.
      *  If one or more fails, it returns false.
      */
-    bool startWatching(const QStringList paths);
+    bool startWatching(const QStringList& paths);
 
     /** Stops watching the paths for changes.
      *
      *  Returns whether stopping to watch all the paths was successful.
      *  If one or more fails, it returns false.
      */
-    bool stopWatching(const QStringList paths);
+    bool stopWatching(const QStringList& paths);
 
     /* Helper methods for subclasses, using a predetermined list of paths. */
     virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); }
