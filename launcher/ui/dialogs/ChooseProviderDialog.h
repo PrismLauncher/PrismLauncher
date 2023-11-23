@@ -13,7 +13,6 @@ enum class ResourceProvider;
 
 class Mod;
 class NetJob;
-class ModUpdateDialog;
 
 class ChooseProviderDialog : public QDialog {
     Q_OBJECT
