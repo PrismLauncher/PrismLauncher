@@ -270,13 +270,15 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
 GetModDependenciesTask::Ptr ModDownloadDialog::getModDependenciesTask()
 {
-    if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
-        QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
-        for (auto& selected : getTasks()) {
-            selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
-        }
+    if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+        if (auto model = dynamic_cast<ModFolderModel*>(getBaseModel().get()); model) {
+            QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> selectedVers;
+            for (auto& selected : getTasks()) {
+                selectedVers.append(std::make_shared<GetModDependenciesTask::PackDependency>(selected->getPack(), selected->getVersion()));
+            }
 
-        return makeShared<GetModDependenciesTask>(this, m_instance, model, selectedVers);
+            return makeShared<GetModDependenciesTask>(this, m_instance, model, selectedVers);
+        }
     }
     return nullptr;
 }

@@ -68,8 +68,8 @@
 #include <FileSystem.h>
 #include "RWStorage.h"
 
-typedef RWStorage<QString, QIcon> SharedIconCache;
-typedef std::shared_ptr<SharedIconCache> SharedIconCachePtr;
+using SharedIconCache = RWStorage<QString, QIcon>;
+using SharedIconCachePtr = std::shared_ptr<SharedIconCache>;
 
 class ThumbnailingResult : public QObject {
     Q_OBJECT
@@ -383,20 +383,31 @@ void ScreenshotsPage::on_actionUpload_triggered()
 
     QList<ScreenShot::Ptr> uploaded;
     auto job = NetJob::Ptr(new NetJob("Screenshot Upload", APPLICATION->network()));
+
+    ProgressDialog dialog(this);
+    dialog.setSkipButton(true, tr("Abort"));
+
     if (selection.size() < 2) {
         auto item = selection.at(0);
         auto info = m_model->fileInfo(item);
         auto screenshot = std::make_shared<ScreenShot>(info);
         job->addNetAction(ImgurUpload::make(screenshot));
 
-        m_uploadActive = true;
-        ProgressDialog dialog(this);
+        connect(job.get(), &Task::failed, [this](QString reason) {
+            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
+        });
+        connect(job.get(), &Task::aborted, [this] {
+            CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
+                                         QMessageBox::Information)
+                ->show();
+        });
 
-        if (dialog.execWithTask(job.get()) != QDialog::Accepted) {
-            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), tr("Unknown error"), QMessageBox::Warning)->exec();
-        } else {
+        m_uploadActive = true;
+
+        if (dialog.execWithTask(job.get()) == QDialog::Accepted) {
             auto link = screenshot->m_url;
             QClipboard* clipboard = QApplication::clipboard();
+            qDebug() << "ImgurUpload link" << link;
             clipboard->setText(link);
             CustomMessageBox::selectable(
                 this, tr("Upload finished"),
@@ -417,22 +428,36 @@ void ScreenshotsPage::on_actionUpload_triggered()
     }
     SequentialTask task;
     auto albumTask = NetJob::Ptr(new NetJob("Imgur Album Creation", APPLICATION->network()));
-    auto imgurAlbum = ImgurAlbumCreation::make(uploaded);
+    auto imgurResult = std::make_shared<ImgurAlbumCreation::Result>();
+    auto imgurAlbum = ImgurAlbumCreation::make(imgurResult, uploaded);
     albumTask->addNetAction(imgurAlbum);
     task.addTask(job);
     task.addTask(albumTask);
-    m_uploadActive = true;
-    ProgressDialog prog(this);
-    if (prog.execWithTask(&task) != QDialog::Accepted) {
-        CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), tr("Unknown error"), QMessageBox::Warning)->exec();
-    } else {
-        auto link = QString("https://imgur.com/a/%1").arg(imgurAlbum->id());
-        QClipboard* clipboard = QApplication::clipboard();
-        clipboard->setText(link);
-        CustomMessageBox::selectable(this, tr("Upload finished"),
-                                     tr("The <a href=\"%1\">link  to the uploaded album</a> has been placed in your clipboard.").arg(link),
+
+    connect(&task, &Task::failed, [this](QString reason) {
+        CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
+    });
+    connect(&task, &Task::aborted, [this] {
+        CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
                                      QMessageBox::Information)
-            ->exec();
+            ->show();
+    });
+
+    m_uploadActive = true;
+    if (dialog.execWithTask(&task) == QDialog::Accepted) {
+        if (imgurResult->id.isEmpty()) {
+            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), tr("Unknown error"), QMessageBox::Warning)->exec();
+        } else {
+            auto link = QString("https://imgur.com/a/%1").arg(imgurResult->id);
+            qDebug() << "ImgurUpload link" << link;
+            QClipboard* clipboard = QApplication::clipboard();
+            clipboard->setText(link);
+            CustomMessageBox::selectable(
+                this, tr("Upload finished"),
+                tr("The <a href=\"%1\">link  to the uploaded album</a> has been placed in your clipboard.").arg(link),
+                QMessageBox::Information)
+                ->exec();
+        }
     }
     m_uploadActive = false;
 }

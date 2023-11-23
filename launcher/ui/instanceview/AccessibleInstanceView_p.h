@@ -59,7 +59,7 @@ class AccessibleInstanceView : public QAccessibleTableInterface, public QAccessi
 
    protected:
     // maybe vector
-    typedef QHash<int, QAccessible::Id> ChildCache;
+    using ChildCache = QHash<int, QAccessible::Id>;
     mutable ChildCache childToId;
 
     virtual ~AccessibleInstanceView();
