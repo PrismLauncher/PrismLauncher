@@ -26,4 +26,4 @@ struct MinecraftServerTarget {
     static MinecraftServerTarget parse(const QString& fullAddress);
 };
 
-typedef std::shared_ptr<MinecraftServerTarget> MinecraftServerTargetPtr;
+using MinecraftServerTargetPtr = std::shared_ptr<MinecraftServerTarget>;

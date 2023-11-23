@@ -56,6 +56,7 @@ class Version {
     bool operator!=(const Version& other) const;
 
     QString toString() const { return m_string; }
+    bool isEmpty() const { return m_string.isEmpty(); }
 
     friend QDebug operator<<(QDebug debug, const Version& v);
 

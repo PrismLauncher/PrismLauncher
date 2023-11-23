@@ -43,4 +43,4 @@ struct AuthSession {
     bool demo = false;
 };
 
-typedef std::shared_ptr<AuthSession> AuthSessionPtr;
+using AuthSessionPtr = std::shared_ptr<AuthSession>;
