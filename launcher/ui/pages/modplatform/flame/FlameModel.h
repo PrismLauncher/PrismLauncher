@@ -38,7 +38,7 @@ class ListModel : public QAbstractListModel {
     void fetchMore(const QModelIndex& parent) override;
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
-    void searchWithTerm(const QString& term, const int sort);
+    void searchWithTerm(const QString& term, int sort);
 
     [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
     [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
