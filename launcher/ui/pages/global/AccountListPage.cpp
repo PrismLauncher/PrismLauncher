@@ -212,7 +212,7 @@ void AccountListPage::updateButtonStates()
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
-        accountIsOnline = !account->isOffline();
+        accountIsOnline = account->accountType() != AccountType::Offline;
     }
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
