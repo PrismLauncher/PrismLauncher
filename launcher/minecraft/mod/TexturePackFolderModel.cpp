@@ -47,8 +47,7 @@ TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance*
     m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified" });
     m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified") });
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::DATE };
-    m_column_resize_modes = { QHeaderView::ResizeToContents, QHeaderView::Interactive, QHeaderView::Stretch,
-                              QHeaderView::ResizeToContents };
+    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true };
 }
 
