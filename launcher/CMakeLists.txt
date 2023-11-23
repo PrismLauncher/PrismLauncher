@@ -889,6 +889,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/global/AccountListPage.h
     ui/pages/global/CustomCommandsPage.cpp
     ui/pages/global/CustomCommandsPage.h
+    ui/pages/global/EnvironmentVariablesPage.cpp
+    ui/pages/global/EnvironmentVariablesPage.h
     ui/pages/global/ExternalToolsPage.cpp
     ui/pages/global/ExternalToolsPage.h
     ui/pages/global/JavaPage.cpp
@@ -1040,6 +1042,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/Common.h
     ui/widgets/CustomCommands.cpp
     ui/widgets/CustomCommands.h
+    ui/widgets/EnvironmentVariables.cpp
+    ui/widgets/EnvironmentVariables.h
     ui/widgets/DropLabel.cpp
     ui/widgets/DropLabel.h
     ui/widgets/FocusLineEdit.cpp
@@ -1150,6 +1154,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/modplatform/technic/TechnicPage.ui
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
+    ui/widgets/EnvironmentVariables.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
     ui/widgets/SubTaskProgressBar.ui
