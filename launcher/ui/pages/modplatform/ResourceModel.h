@@ -88,7 +88,7 @@ class ResourceModel : public QAbstractListModel {
 
     void addPack(ModPlatform::IndexedPack::Ptr pack,
                  ModPlatform::IndexedVersion& version,
-                 const std::shared_ptr<ResourceFolderModel> packs,
+                 std::shared_ptr<ResourceFolderModel> packs,
                  bool is_indexed = false,
                  QString custom_target_folder = {});
     void removePack(const QString& rem);
@@ -149,6 +149,7 @@ class ResourceModel : public QAbstractListModel {
    private:
     /* Default search request callbacks */
     void searchRequestSucceeded(QJsonDocument&);
+    void searchRequestForOneSucceeded(QJsonDocument&);
     void searchRequestFailed(QString reason, int network_error_code);
     void searchRequestAborted();
 

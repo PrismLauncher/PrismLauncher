@@ -117,6 +117,8 @@ class MainWindow : public QMainWindow {
     void on_actionViewIconThemeFolder_triggered();
     void on_actionViewWidgetThemeFolder_triggered();
     void on_actionViewCatPackFolder_triggered();
+    void on_actionViewIconsFolder_triggered();
+    void on_actionViewLogsFolder_triggered();
 
     void on_actionViewSelectedInstFolder_triggered();
 
@@ -144,21 +146,15 @@ class MainWindow : public QMainWindow {
 
     void on_actionLaunchInstance_triggered();
 
-    void on_actionLaunchInstanceOffline_triggered();
-
-    void on_actionLaunchInstanceDemo_triggered();
-
     void on_actionKillInstance_triggered();
 
     void on_actionDeleteInstance_triggered();
 
-    void deleteGroup();
+    void deleteGroup(QString group);
+    void renameGroup(QString group);
     void undoTrashInstance();
 
-    inline void on_actionExportInstance_triggered()
-    {
-        on_actionExportInstanceZip_triggered();
-    }
+    inline void on_actionExportInstance_triggered() { on_actionExportInstanceZip_triggered(); }
     void on_actionExportInstanceZip_triggered();
     void on_actionExportInstanceMrPack_triggered();
     void on_actionExportInstanceFlamePack_triggered();
@@ -181,7 +177,7 @@ class MainWindow : public QMainWindow {
 
     void updateMainToolBar();
 
-    void updateToolsMenu();
+    void updateLaunchButton();
 
     void updateThemeMenu();
 
@@ -215,12 +211,12 @@ class MainWindow : public QMainWindow {
     void keyReleaseEvent(QKeyEvent* event) override;
 #endif
 
-    void refreshCurrentInstance(bool running);
+    void refreshCurrentInstance();
 
    private:
     void retranslateUi();
 
-    void addInstance(QString url = QString());
+    void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
     void activateInstance(InstancePtr instance);
     void setCatBackground(bool enabled);
     void updateInstanceToolIcon(QString new_icon);

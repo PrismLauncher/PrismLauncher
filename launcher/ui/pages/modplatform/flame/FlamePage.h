@@ -39,8 +39,9 @@
 
 #include <Application.h>
 #include <modplatform/flame/FlamePackIndex.h>
-#include "tasks/Task.h"
+#include <QTimer>
 #include "ui/pages/BasePage.h"
+#include "ui/widgets/ProgressWidget.h"
 
 namespace Ui {
 class FlamePage;
@@ -86,4 +87,9 @@ class FlamePage : public QWidget, public BasePage {
     Flame::IndexedPack current;
 
     int m_selected_version_index = -1;
+
+    ProgressWidget m_fetch_progress;
+
+    // Used to do instant searching with a delay to cache quick changes
+    QTimer m_search_timer;
 };

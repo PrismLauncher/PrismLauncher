@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -100,6 +101,8 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("ManagedPackName", "");
     m_settings->registerSetting("ManagedPackVersionID", "");
     m_settings->registerSetting("ManagedPackVersionName", "");
+
+    m_settings->registerSetting("Profiler", "");
 }
 
 QString BaseInstance::getPreLaunchCommand()
@@ -385,7 +388,7 @@ QString BaseInstance::name() const
 
 QString BaseInstance::windowTitle() const
 {
-    return BuildConfig.LAUNCHER_DISPLAYNAME + ": " + name().replace(QRegularExpression("\\s+"), " ");
+    return BuildConfig.LAUNCHER_DISPLAYNAME + ": " + name();
 }
 
 // FIXME: why is this here? move it to MinecraftInstance!!!

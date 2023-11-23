@@ -2,14 +2,14 @@
 
 #include "Component.h"
 #include "ComponentUpdateTask_p.h"
-#include "OneSixVersionFormat.h"
 #include "PackProfile.h"
 #include "PackProfile_p.h"
 #include "Version.h"
 #include "cassert"
 #include "meta/Index.h"
 #include "meta/Version.h"
-#include "meta/VersionList.h"
+#include "minecraft/OneSixVersionFormat.h"
+#include "minecraft/ProfileUtils.h"
 #include "net/Mode.h"
 
 #include "Application.h"

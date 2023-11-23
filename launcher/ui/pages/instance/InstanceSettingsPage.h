@@ -71,6 +71,9 @@ class InstanceSettingsPage : public QWidget, public BasePage {
     void on_javaBrowseBtn_clicked();
     void on_maxMemSpinBox_valueChanged(int i);
 
+    void onUseNativeGLFWChanged(bool checked);
+    void onUseNativeOpenALChanged(bool checked);
+
     void applySettings();
     void loadSettings();
 

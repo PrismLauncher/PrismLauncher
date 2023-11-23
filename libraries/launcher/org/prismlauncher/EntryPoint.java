@@ -57,7 +57,7 @@ package org.prismlauncher;
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
-import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
+import org.prismlauncher.legacy.LegacyProxy;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.logging.Log;
 
@@ -105,21 +105,26 @@ public final class EntryPoint {
             return ExitCode.ABORT;
         }
 
-        try {
-            Launcher launcher;
-            String type = params.getString("launcher");
+        setProperties(params);
 
-            switch (type) {
+        String launcherType = params.getString("launcher");
+
+        try {
+            LegacyProxy.applyOnlineFixes(params);
+
+            Launcher launcher;
+
+            switch (launcherType) {
                 case "standard":
                     launcher = new StandardLauncher(params);
                     break;
 
                 case "legacy":
-                    launcher = new LegacyLauncher(params);
+                    launcher = LegacyProxy.createLauncher(params);
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid launcher type: " + type);
+                    throw new IllegalArgumentException("Invalid launcher type: " + launcherType);
             }
 
             launcher.launch();
@@ -134,6 +139,39 @@ public final class EntryPoint {
 
             return ExitCode.ERROR;
         }
+    }
+
+    private static void setProperties(Parameters params) {
+        String launcherBrand = params.getString("launcherBrand", null);
+        String launcherVersion = params.getString("launcherVersion", null);
+        String name = params.getString("instanceName", null);
+        String iconId = params.getString("instanceIconKey", null);
+        String iconPath = params.getString("instanceIconPath", null);
+        String windowTitle = params.getString("windowTitle", null);
+        String windowDimensions = params.getString("windowParams", null);
+
+        if (launcherBrand != null)
+            System.setProperty("minecraft.launcher.brand", launcherBrand);
+        if (launcherVersion != null)
+            System.setProperty("minecraft.launcher.version", launcherVersion);
+
+        // set useful properties for mods
+        if (name != null)
+            System.setProperty("org.prismlauncher.instance.name", name);
+        if (iconId != null)
+            System.setProperty("org.prismlauncher.instance.icon.id", iconId);
+        if (iconPath != null)
+            System.setProperty("org.prismlauncher.instance.icon.path", iconPath);
+        if (windowTitle != null)
+            System.setProperty("org.prismlauncher.window.title", windowTitle);
+        if (windowDimensions != null)
+            System.setProperty("org.prismlauncher.window.dimensions", windowDimensions);
+
+        // set multimc properties for compatibility
+        if (name != null)
+            System.setProperty("multimc.instance.title", name);
+        if (iconId != null)
+            System.setProperty("multimc.instance.icon", iconId);
     }
 
     private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {

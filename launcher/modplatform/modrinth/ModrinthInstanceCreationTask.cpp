@@ -9,6 +9,7 @@
 
 #include "modplatform/helpers/OverrideUtils.h"
 
+#include "modplatform/modrinth/ModrinthPackManifest.h"
 #include "net/ChecksumValidator.h"
 
 #include "net/ApiDownload.h"
@@ -16,8 +17,10 @@
 #include "settings/INISettingsObject.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/pages/modplatform/OptionalModDialog.h"
 
 #include <QAbstractButton>
+#include <vector>
 
 bool ModrinthCreationTask::abort()
 {
@@ -211,6 +214,8 @@ bool ModrinthCreationTask::createInstance()
         components->setComponentVersion("org.quiltmc.quilt-loader", m_quilt_version);
     if (!m_forge_version.isEmpty())
         components->setComponentVersion("net.minecraftforge", m_forge_version);
+    if (!m_neoForge_version.isEmpty())
+        components->setComponentVersion("net.neoforged", m_neoForge_version);
 
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
@@ -317,10 +322,10 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
             }
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
-            bool had_optional = false;
+            std::vector<Modrinth::File> optionalFiles;
             for (const auto& modInfo : jsonFiles) {
                 Modrinth::File file;
-                file.path = Json::requireString(modInfo, "path");
+                file.path = Json::requireString(modInfo, "path").replace("\\", "/");
 
                 auto env = Json::ensureObject(modInfo, "env");
                 // 'env' field is optional
@@ -329,18 +334,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                     if (support == "unsupported") {
                         continue;
                     } else if (support == "optional") {
-                        // TODO: Make a review dialog for choosing which ones the user wants!
-                        if (!had_optional && show_optional_dialog) {
-                            had_optional = true;
-                            auto info = CustomMessageBox::selectable(
-                                m_parent, tr("Optional mod detected!"),
-                                tr("One or more mods from this modpack are optional. They will be downloaded, but disabled by default!"),
-                                QMessageBox::Information);
-                            info->exec();
-                        }
-
-                        if (file.path.endsWith(".jar"))
-                            file.path += ".disabled";
+                        file.required = false;
                     }
                 }
 
@@ -383,9 +377,29 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                     }
                 }
 
-                files.push_back(file);
+                (file.required ? files : optionalFiles).push_back(file);
             }
 
+            if (!optionalFiles.empty()) {
+                QStringList oFiles;
+                for (auto file : optionalFiles)
+                    oFiles.push_back(file.path);
+                OptionalModDialog optionalModDialog(m_parent, oFiles);
+                if (optionalModDialog.exec() == QDialog::Rejected) {
+                    emitAborted();
+                    return false;
+                }
+
+                auto selectedMods = optionalModDialog.getResult();
+                for (auto file : optionalFiles) {
+                    if (selectedMods.contains(file.path)) {
+                        file.required = true;
+                    } else {
+                        file.path += ".disabled";
+                    }
+                    files.push_back(file);
+                }
+            }
             if (set_internal_data) {
                 auto dependencies = Json::requireObject(obj, "dependencies", "modrinth.index.json");
                 for (auto it = dependencies.begin(), end = dependencies.end(); it != end; ++it) {
@@ -398,6 +412,8 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                         m_quilt_version = Json::requireString(*it, "Quilt Loader version");
                     } else if (name == "forge") {
                         m_forge_version = Json::requireString(*it, "Forge version");
+                    } else if (name == "neoforge") {
+                        m_neoForge_version = Json::requireString(*it, "NeoForge version");
                     } else {
                         throw JSONValidationError("Unknown dependency type: " + name);
                     }

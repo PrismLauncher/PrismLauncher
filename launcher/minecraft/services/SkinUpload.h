@@ -5,7 +5,7 @@
 #include <memory>
 #include "tasks/Task.h"
 
-typedef shared_qobject_ptr<class SkinUpload> SkinUploadPtr;
+using SkinUploadPtr = shared_qobject_ptr<class SkinUpload>;
 
 class SkinUpload : public Task {
     Q_OBJECT

@@ -61,9 +61,10 @@ class ModFolderPage : public ExternalResourcesPage {
 
    private slots:
     void removeItems(const QItemSelection& selection) override;
+    void deleteModMetadata();
 
     void installMods();
-    void updateMods();
+    void updateMods(bool includeDeps = false);
     void visitModPages();
 
    protected:
