@@ -75,7 +75,7 @@ class AccountList : public QAbstractListModel {
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-    void addAccount(const MinecraftAccountPtr account);
+    void addAccount(MinecraftAccountPtr account);
     void removeAccount(QModelIndex index);
     int findAccountByProfileId(const QString& profileId) const;
     MinecraftAccountPtr getAccountByProfileName(const QString& profileName) const;
