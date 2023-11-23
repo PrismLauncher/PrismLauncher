@@ -35,6 +35,7 @@
  */
 
 #include "AccountListPage.h"
+#include "minecraft/auth/AccountData.h"
 #include "ui_AccountListPage.h"
 
 #include <QItemSelectionModel>
@@ -216,7 +217,7 @@ void AccountListPage::updateButtonStates()
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
-        accountIsOnline = !account->isOffline();
+        accountIsOnline = account->accountType() != AccountType::Offline;
     }
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
@@ -231,6 +232,7 @@ void AccountListPage::updateButtonStates()
         ui->actionNoDefault->setEnabled(true);
         ui->actionNoDefault->setChecked(false);
     }
+    ui->listView->resizeColumnToContents(3);
 }
 
 void AccountListPage::on_actionUploadSkin_triggered()
