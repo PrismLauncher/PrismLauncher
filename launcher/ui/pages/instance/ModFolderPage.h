@@ -64,7 +64,7 @@ class ModFolderPage : public ExternalResourcesPage {
     void deleteModMetadata();
 
     void installMods();
-    void updateMods();
+    void updateMods(bool includeDeps = false);
     void visitModPages();
 
    protected:
