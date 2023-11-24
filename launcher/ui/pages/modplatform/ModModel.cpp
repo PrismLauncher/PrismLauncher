@@ -79,4 +79,14 @@ bool ModModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
     });
 }
 
+QVariant ModModel:: getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) const
+{
+    auto allMods = static_cast<MinecraftInstance&>(m_base_instance).loaderModList()->allMods();
+    for (auto mod : allMods) {
+        if (auto meta = mod->metadata(); meta && meta->provider == pack->provider && meta->project_id == pack->addonId) {
+            return meta->version();
+        }
+    }
+    return {};
+}
 }  // namespace ResourceDownload

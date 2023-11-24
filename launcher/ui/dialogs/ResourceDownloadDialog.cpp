@@ -356,4 +356,19 @@ QList<BasePage*> ShaderPackDownloadDialog::getPages()
     return pages;
 }
 
+void ModDownloadDialog::setModMetadata(std::shared_ptr<Metadata::ModStruct> meta)
+{
+    switch (meta->provider) {
+        case ModPlatform::ResourceProvider::MODRINTH:
+            selectPage(Modrinth::id());
+            break;
+        case ModPlatform::ResourceProvider::FLAME:
+            selectPage(Flame::id());
+            break;
+    }
+    m_container->hidePageList();
+    m_buttons.hide();
+    auto page = selectedPage();
+    page->openProject(meta->project_id);
+}
 }  // namespace ResourceDownload

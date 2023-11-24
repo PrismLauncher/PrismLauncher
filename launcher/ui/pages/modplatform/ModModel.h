@@ -35,6 +35,7 @@ class ModModel : public ResourceModel {
     virtual ModPlatform::IndexedVersion loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) = 0;
 
     void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = filter; }
+    virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const override;
 
    public slots:
     ResourceAPI::SearchArgs createSearchArguments() override;
