@@ -534,7 +534,7 @@ QStringList MinecraftInstance::javaArguments()
 QString MinecraftInstance::getLauncher()
 {
     // use legacy launcher if the traits are set
-    if (traits().contains("legacyLaunch") || traits().contains("alphaLaunch"))
+    if (isLegacy())
         return "legacy";
 
     return "standard";
@@ -744,7 +744,7 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
         QString windowParams;
         if (settings()->get("LaunchMaximized").toBool()) {
             // FIXME doesn't support maximisation
-            if (getLauncher() == "standard") {
+            if (!isLegacy()) {
                 auto screen = QGuiApplication::primaryScreen();
                 auto screenGeometry = screen->availableSize();
 
