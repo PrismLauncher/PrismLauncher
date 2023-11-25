@@ -195,6 +195,8 @@ void Plugin::enable(EnableAction action)
 
         onDisable();
 
+        m_needsRestart = false;
+
         for (auto& contribution : m_contributions) {
             if (contribution->requiresRestart()) {
                 m_needsRestart = true;
@@ -263,11 +265,15 @@ void Plugin::onDisable()
 
     if (m_interface) {
         m_interface->onDisable(*this);
-        delete m_interface;
-        m_loader->unload();
-        delete m_loader;
-        m_interface = nullptr;
-        m_loader = nullptr;
+        if (!m_interface->requiresRestart()) {
+            // only completly unload native code when
+            // the plugin does NOT require a restart
+            delete m_interface;
+            m_loader->unload();
+            delete m_loader;
+            m_interface = nullptr;
+            m_loader = nullptr;
+        }
     }
 }
 
