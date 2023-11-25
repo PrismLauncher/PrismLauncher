@@ -752,7 +752,12 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
                 for (auto w : QApplication::topLevelWidgets()) {
                     auto mainWindow = qobject_cast<QMainWindow*>(w);
                     if (mainWindow) {
-                        screenGeometry = screenGeometry.shrunkBy(mainWindow->windowHandle()->frameMargins());
+                        auto m = mainWindow->windowHandle()->frameMargins();
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+                        screenGeometry = screenGeometry.shrunkBy(m);
+#else
+                        screenGeometry = { screenGeometry.width() - m.left() - m.right(), screenGeometry.height() - m.top() - m.bottom() };
+#endif
                         break;
                     }
                 }
