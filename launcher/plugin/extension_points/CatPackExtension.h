@@ -27,6 +27,7 @@ class CatPackContribution : public PluginContribution {
     bool loadConfig(const Plugin& plugin, const QJsonValue& json) override;
     void onPluginEnable() override;
     void onPluginDisable() override;
+    bool requiresRestart() override { return false; }
 
    private:
     QFileInfo m_manifest;

@@ -30,6 +30,8 @@ class PluginInterface {
 
     virtual void onEnable(const PluginInstance& plugin) = 0;
     virtual void onDisable(const PluginInstance& plugin) = 0;
+
+    virtual bool requiresRestart() { return true; }
 };
 
 QT_BEGIN_NAMESPACE

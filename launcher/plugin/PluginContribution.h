@@ -64,6 +64,8 @@ class PluginContribution {
     virtual void onPluginEnable() = 0;
     virtual void onPluginDisable() = 0;
 
+    virtual bool requiresRestart() { return true; }
+
    protected:
     explicit PluginContribution(ExtensionPointKind kind) : m_kind(kind) {}
 

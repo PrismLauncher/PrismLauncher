@@ -195,8 +195,16 @@ void Plugin::enable(EnableAction action)
 
         onDisable();
 
-        // TODO: m_needsRestart should be dynamically decided by the plugin itself
-        m_needsRestart = true;
+        for (auto& contribution : m_contributions) {
+            if (contribution->requiresRestart()) {
+                m_needsRestart = true;
+                break;
+            }
+        }
+
+        if (!m_needsRestart && m_interface) {
+            m_needsRestart = m_interface->requiresRestart();
+        }
     }
 
     m_enabled = enable;
