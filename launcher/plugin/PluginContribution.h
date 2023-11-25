@@ -57,7 +57,7 @@ class PluginContribution {
    public:
     virtual ~PluginContribution() {}
 
-    ExtensionPointKind kind() const;
+    [[nodiscard]] ExtensionPointKind kind() const { return this->m_kind; }
 
     virtual bool loadConfig(const Plugin& plugin, const QJsonValue& json) = 0;
 
