@@ -79,7 +79,7 @@ bool ModModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
     });
 }
 
-QVariant ModModel:: getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) const
+QVariant ModModel::getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) const
 {
     auto allMods = static_cast<MinecraftInstance&>(m_base_instance).loaderModList()->allMods();
     for (auto mod : allMods) {
