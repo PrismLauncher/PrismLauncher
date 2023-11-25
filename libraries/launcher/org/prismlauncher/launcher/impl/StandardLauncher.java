@@ -57,13 +57,6 @@ package org.prismlauncher.launcher.impl;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.ReflectionUtils;
 
-import java.awt.Dimension;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.lang.invoke.MethodHandle;
 
 public final class StandardLauncher extends AbstractLauncher {
@@ -74,25 +67,10 @@ public final class StandardLauncher extends AbstractLauncher {
     @Override
     public void launch() throws Throwable {
         // window size, title and state
-        // FIXME doesn't support maximisation
-        if (!maximize) {
-            gameArgs.add("--width");
-            gameArgs.add(Integer.toString(width));
-            gameArgs.add("--height");
-            gameArgs.add(Integer.toString(height));
-        } else {
-            try {
-                // Dimension rct = Toolkit.getDefaultToolkit().getScreenSize();
-                Rectangle rct = getDefaultDeviceBounds();
-
-                gameArgs.add("--width");
-                gameArgs.add(Integer.toString(rct.width));
-                gameArgs.add("--height");
-                gameArgs.add(Integer.toString(rct.height));
-            } catch (Exception e) {
-                //  If for some reason the get fails just continue without seting the dimensions
-            }
-        }
+        gameArgs.add("--width");
+        gameArgs.add(Integer.toString(width));
+        gameArgs.add("--height");
+        gameArgs.add(Integer.toString(height));
 
         if (serverAddress != null) {
             gameArgs.add("--server");
@@ -104,19 +82,5 @@ public final class StandardLauncher extends AbstractLauncher {
         // find and invoke the main method
         MethodHandle method = ReflectionUtils.findMainMethod(mainClassName);
         method.invokeExact(gameArgs.toArray(new String[0]));
-    }
-
-    private static Rectangle getDefaultDeviceBounds() {
-        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        GraphicsConfiguration gc = gd.getDefaultConfiguration();
-
-        Rectangle bounds = gc.getBounds();
-        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
-        bounds.x += insets.left;
-        bounds.y += insets.top;
-        bounds.width -= (insets.left + insets.right);
-        bounds.height -= (insets.top + insets.bottom);
-
-        return bounds;
     }
 }

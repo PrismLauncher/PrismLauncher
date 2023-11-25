@@ -90,6 +90,9 @@
 #include "tools/BaseProfiler.h"
 
 #include <QActionGroup>
+#include <QMainWindow>
+#include <QScreen>
+#include <QWindow>
 
 #ifdef Q_OS_LINUX
 #include "MangoHud.h"
@@ -739,11 +742,29 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
     // window size, title and state, legacy
     {
         QString windowParams;
-        if (settings()->get("LaunchMaximized").toBool())
-            windowParams = "maximized";
-        else
+        if (settings()->get("LaunchMaximized").toBool()) {
+            // FIXME doesn't support maximisation
+            if (getLauncher() == "standard") {
+                auto screen = QGuiApplication::primaryScreen();
+                auto screenGeometry = screen->availableSize();
+
+                // small hack to get the widow decorations
+                for (auto w : QApplication::topLevelWidgets()) {
+                    auto mainWindow = qobject_cast<QMainWindow*>(w);
+                    if (mainWindow) {
+                        screenGeometry = screenGeometry.shrunkBy(mainWindow->windowHandle()->frameMargins());
+                        break;
+                    }
+                }
+
+                windowParams = QString("%1x%2").arg(screenGeometry.width()).arg(screenGeometry.height());
+            } else {
+                windowParams = "maximized";
+            }
+        } else {
             windowParams =
                 QString("%1x%2").arg(settings()->get("MinecraftWinWidth").toInt()).arg(settings()->get("MinecraftWinHeight").toInt());
+        }
         launchScript += "windowTitle " + windowTitle() + "\n";
         launchScript += "windowParams " + windowParams + "\n";
     }
