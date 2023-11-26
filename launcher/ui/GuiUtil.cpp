@@ -122,8 +122,11 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
     return {};
 }
 
-void GuiUtil::setClipboardText(const QString& text)
+void GuiUtil::setClipboardText(QString text)
 {
+    for (auto rule : PasteUpload::AnonimizeRules) {
+        text.replace(rule.reg, rule.with);
+    }
     QApplication::clipboard()->setText(text);
 }
 
