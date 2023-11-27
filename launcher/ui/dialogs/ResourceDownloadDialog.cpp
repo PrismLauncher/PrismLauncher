@@ -366,6 +366,7 @@ void ModDownloadDialog::setModMetadata(std::shared_ptr<Metadata::ModStruct> meta
             selectPage(Flame::id());
             break;
     }
+    setWindowTitle(tr("Change %1 version").arg(meta->name));
     m_container->hidePageList();
     m_buttons.hide();
     auto page = selectedPage();

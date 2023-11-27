@@ -133,7 +133,7 @@ void ModPage::updateVersionList()
         }
         QString flag;
         if (installedIndex == -1 && installedVersion.isValid() && installedVersion == version.fileId) {
-            flag = tr("[installed]");
+            flag = QString(" [%1]").arg(tr("installed", "Mod version select box"));
             installedIndex = i;
         }
         // Only add the version if it's valid or using the 'Any' filter, but never if the version is opted out

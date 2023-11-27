@@ -122,10 +122,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
 
-        auto changeVersion = new QAction(tr("Reinstall"));
-        changeVersion->setToolTip(tr("Reinstall mod"));
+        auto changeVersion = new QAction(tr("Change Version"));
+        changeVersion->setToolTip(tr("Change mod version"));
         changeVersion->setEnabled(false);
-        ui->actionsToolbar->insertActionAfter(ui->actionVisitItemPage, changeVersion);
+        ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, changeVersion);
         connect(changeVersion, &QAction::triggered, this, &ModFolderPage::changeModVersion);
 
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
