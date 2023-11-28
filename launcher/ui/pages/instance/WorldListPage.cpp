@@ -57,6 +57,7 @@
 #include "ui/GuiUtil.h"
 
 #include "Application.h"
+#include "DataPackPage.h"
 
 class WorldListProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
@@ -82,7 +83,7 @@ class WorldListProxyModel : public QSortFilterProxyModel {
     }
 };
 
-WorldListPage::WorldListPage(BaseInstance* inst, std::shared_ptr<WorldList> worlds, QWidget* parent)
+WorldListPage::WorldListPage(MinecraftInstance* inst, std::shared_ptr<WorldList> worlds, QWidget* parent)
     : QMainWindow(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds)
 {
     ui->setupUi(this);
@@ -210,7 +211,7 @@ void WorldListPage::on_actionView_Folder_triggered()
     DesktopServices::openDirectory(m_worlds->dir().absolutePath(), true);
 }
 
-void WorldListPage::on_actionDatapacks_triggered()
+void WorldListPage::on_actionData_Packs_triggered()
 {
     QModelIndex index = getSelectedWorld();
 
@@ -218,12 +219,33 @@ void WorldListPage::on_actionDatapacks_triggered()
         return;
     }
 
-    if (!worldSafetyNagQuestion(tr("Open World Datapacks Folder")))
+    if (!worldSafetyNagQuestion(tr("Manage Data Packs")))
         return;
 
-    auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
+    const QString fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
+    const QString folder = FS::PathCombine(fullPath, "datapacks");
 
-    DesktopServices::openDirectory(FS::PathCombine(fullPath, "datapacks"), true);
+    auto dialog = new QDialog(window());
+    dialog->setWindowTitle(tr("Data packs for %1").arg(m_worlds->data(index, WorldList::NameRole).toString()));
+    dialog->setWindowModality(Qt::WindowModal);
+
+    dialog->resize(static_cast<int>(std::max(0.5 * window()->width(), 400.0)),
+                   static_cast<int>(std::max(0.75 * window()->height(), 400.0)));
+    dialog->restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("DataPackDownloadGeometry").toByteArray()));
+
+    auto layout = new QHBoxLayout(dialog);
+    auto page = new DataPackPage(m_inst, std::make_shared<DataPackFolderModel>(folder, m_inst));
+    page->setParent(dialog);  // HACK: many pages extend QMainWindow; setting the parent manually prevents them from creating a window.
+    layout->addWidget(page);
+    dialog->setLayout(layout);
+
+    connect(dialog, &QDialog::finished, this, [dialog, page] {
+        APPLICATION->settings()->set("DataPackDownloadGeometry", dialog->saveGeometry().toBase64());
+        page->closed();
+    });
+
+    dialog->show();
+    page->opened();
 }
 
 void WorldListPage::on_actionReset_Icon_triggered()
@@ -336,7 +358,7 @@ void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[
     ui->actionRemove->setEnabled(enable);
     ui->actionCopy->setEnabled(enable);
     ui->actionRename->setEnabled(enable);
-    ui->actionDatapacks->setEnabled(enable);
+    ui->actionData_Packs->setEnabled(enable);
     bool hasIcon = !index.data(WorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
 }

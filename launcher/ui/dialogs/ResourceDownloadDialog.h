@@ -25,6 +25,7 @@
 #include <QLayout>
 
 #include "QObjectPtr.h"
+#include "minecraft/mod/DataPackFolderModel.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "ui/pages/BasePageProvider.h"
@@ -159,6 +160,23 @@ class ShaderPackDownloadDialog final : public ResourceDownloadDialog {
     //: String that gets appended to the shader pack download dialog title ("Download " + resourcesString())
     [[nodiscard]] QString resourcesString() const override { return tr("shader packs"); }
     [[nodiscard]] QString geometrySaveKey() const override { return "ShaderDownloadGeometry"; }
+
+    QList<BasePage*> getPages() override;
+
+   private:
+    BaseInstance* m_instance;
+};
+
+class DataPackDownloadDialog final : public ResourceDownloadDialog {
+    Q_OBJECT
+
+   public:
+    explicit DataPackDownloadDialog(QWidget* parent, const std::shared_ptr<DataPackFolderModel>& data_packs, BaseInstance* instance);
+    ~DataPackDownloadDialog() override = default;
+
+    //: String that gets appended to the data pack download dialog title ("Download " + resourcesString())
+    [[nodiscard]] QString resourcesString() const override { return tr("data packs"); }
+    [[nodiscard]] QString geometrySaveKey() const override { return "DataPackDownloadGeometry"; }
 
     QList<BasePage*> getPages() override;
 

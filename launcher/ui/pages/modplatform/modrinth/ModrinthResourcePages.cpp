@@ -124,6 +124,24 @@ ModrinthShaderPackPage::ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog,
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
+ModrinthDataPackPage::ModrinthDataPackPage(DataPackDownloadDialog* dialog, BaseInstance& instance)
+    : DataPackResourcePage(dialog, instance)
+{
+    m_model = new ModrinthDataPackModel(instance);
+    m_ui->packView->setModel(m_model);
+
+    addSortings();
+
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
+    // so it's best not to connect them in the parent's constructor...
+    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthDataPackPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthDataPackPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthDataPackPage::onResourceSelected);
+
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
+}
+
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
@@ -140,6 +158,10 @@ auto ModrinthTexturePackPage::shouldDisplay() const -> bool
     return true;
 }
 auto ModrinthShaderPackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto ModrinthDataPackPage::shouldDisplay() const -> bool
 {
     return true;
 }

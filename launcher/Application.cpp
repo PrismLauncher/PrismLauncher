@@ -683,6 +683,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("RPDownloadGeometry", "");
         m_settings->registerSetting("TPDownloadGeometry", "");
         m_settings->registerSetting("ShaderDownloadGeometry", "");
+        m_settings->registerSetting("DataPackDownloadGeometry", "");
+
+        // data pack window
+        // in future, more pages may be added - so this name is chosen to avoid needing migration
+        m_settings->registerSetting("WorldManagementGeometry", "");
 
         // HACK: This code feels so stupid is there a less stupid way of doing this?
         {

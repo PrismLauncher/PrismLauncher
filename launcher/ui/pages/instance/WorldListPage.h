@@ -53,7 +53,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit WorldListPage(BaseInstance* inst, std::shared_ptr<WorldList> worlds, QWidget* parent = 0);
+    explicit WorldListPage(MinecraftInstance* inst, std::shared_ptr<WorldList> worlds, QWidget* parent = 0);
     virtual ~WorldListPage();
 
     virtual QString displayName() const override { return tr("Worlds"); }
@@ -72,7 +72,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     QMenu* createPopupMenu() override;
 
    protected:
-    BaseInstance* m_inst;
+    MinecraftInstance* m_inst;
 
    private:
     QModelIndex getSelectedWorld();
@@ -97,7 +97,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     void on_actionRename_triggered();
     void on_actionRefresh_triggered();
     void on_actionView_Folder_triggered();
-    void on_actionDatapacks_triggered();
+    void on_actionData_Packs_triggered();
     void on_actionReset_Icon_triggered();
     void worldChanged(const QModelIndex& current, const QModelIndex& previous);
     void mceditState(LoggedProcess::State state);

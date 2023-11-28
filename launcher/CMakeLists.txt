@@ -333,6 +333,8 @@ set(MINECRAFT_SOURCES
     minecraft/mod/ResourceFolderModel.cpp
     minecraft/mod/DataPack.h
     minecraft/mod/DataPack.cpp
+    minecraft/mod/DataPackFolderModel.h
+    minecraft/mod/DataPackFolderModel.cpp
     minecraft/mod/ResourcePack.h
     minecraft/mod/ResourcePack.cpp
     minecraft/mod/ResourcePackFolderModel.h
@@ -861,6 +863,8 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/VersionPage.h
     ui/pages/instance/ManagedPackPage.cpp
     ui/pages/instance/ManagedPackPage.h
+    ui/pages/instance/DataPackPage.h
+    ui/pages/instance/DataPackPage.cpp
     ui/pages/instance/TexturePackPage.h
     ui/pages/instance/TexturePackPage.cpp
     ui/pages/instance/ResourcePackPage.h
@@ -929,6 +933,9 @@ SET(LAUNCHER_SOURCES
 
     ui/pages/modplatform/ShaderPackPage.cpp
     ui/pages/modplatform/ShaderPackModel.cpp
+
+    ui/pages/modplatform/DataPackPage.cpp
+    ui/pages/modplatform/DataPackModel.cpp
 
     ui/pages/modplatform/atlauncher/AtlFilterModel.cpp
     ui/pages/modplatform/atlauncher/AtlFilterModel.h

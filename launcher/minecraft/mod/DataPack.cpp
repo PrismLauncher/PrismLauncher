@@ -25,7 +25,9 @@
 #include <QMap>
 #include <QRegularExpression>
 
+#include "MTPixmapCache.h"
 #include "Version.h"
+#include "minecraft/mod/tasks/LocalDataPackParseTask.h"
 
 // Values taken from:
 // https://minecraft.wiki/w/Tutorials/Creating_a_data_pack#%22pack_format%22
@@ -54,6 +56,51 @@ void DataPack::setDescription(QString new_description)
     QMutexLocker locker(&m_data_lock);
 
     m_description = new_description;
+}
+
+void DataPack::setImage(QImage new_image) const
+{
+    QMutexLocker locker(&m_data_lock);
+
+    Q_ASSERT(!new_image.isNull());
+
+    if (m_pack_image_cache_key.key.isValid())
+        PixmapCache::instance().remove(m_pack_image_cache_key.key);
+
+    // scale the image to avoid flooding the pixmapcache
+    auto pixmap =
+        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+
+    m_pack_image_cache_key.key = PixmapCache::instance().insert(pixmap);
+    m_pack_image_cache_key.was_ever_used = true;
+
+    // This can happen if the pixmap is too big to fit in the cache :c
+    if (!m_pack_image_cache_key.key.isValid()) {
+        qWarning() << "Could not insert a image cache entry! Ignoring it.";
+        m_pack_image_cache_key.was_ever_used = false;
+    }
+}
+
+QPixmap DataPack::image(QSize size, Qt::AspectRatioMode mode) const
+{
+    QPixmap cached_image;
+    if (PixmapCache::instance().find(m_pack_image_cache_key.key, &cached_image)) {
+        if (size.isNull())
+            return cached_image;
+        return cached_image.scaled(size, mode, Qt::SmoothTransformation);
+    }
+
+    // No valid image we can get
+    if (!m_pack_image_cache_key.was_ever_used) {
+        return {};
+    } else {
+        qDebug() << "Resource Pack" << name() << "Had it's image evicted from the cache. reloading...";
+        PixmapCache::markCacheMissByEviciton();
+    }
+
+    // Imaged got evicted from the cache. Re-process it and retry.
+    DataPackUtils::processPackPNG(*this);
+    return image(size);
 }
 
 std::pair<Version, Version> DataPack::compatibleVersions() const

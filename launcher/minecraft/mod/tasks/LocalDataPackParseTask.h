@@ -38,6 +38,10 @@ bool processZIP(DataPack& pack, ProcessingLevel level = ProcessingLevel::Full);
 bool processFolder(DataPack& pack, ProcessingLevel level = ProcessingLevel::Full);
 
 bool processMCMeta(DataPack& pack, QByteArray&& raw_data);
+bool processPackPNG(const DataPack& pack, QByteArray&& raw_data);
+
+/// processes ONLY the pack.png (rest of the pack may be invalid)
+bool processPackPNG(const DataPack& pack);
 
 /** Checks whether a file is valid as a data pack or not. */
 bool validate(QFileInfo file);

@@ -212,6 +212,12 @@ void InfoFrame::updateWithResourcePack(ResourcePack& resource_pack)
     setImage(resource_pack.image({ 64, 64 }));
 }
 
+void InfoFrame::updateWithDataPack(DataPack& data_pack) {
+    setName(renderColorCodes(data_pack.name()));
+    setDescription(renderColorCodes(data_pack.description()));
+    setImage(data_pack.image({ 64, 64 }));
+}
+
 void InfoFrame::updateWithTexturePack(TexturePack& texture_pack)
 {
     setName(renderColorCodes(texture_pack.name()));

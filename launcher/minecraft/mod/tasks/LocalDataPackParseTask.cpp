@@ -81,6 +81,29 @@ bool processFolder(DataPack& pack, ProcessingLevel level)
         return true;  // only need basic info already checked
     }
 
+    auto png_invalid = [&pack]() {
+        qWarning() << "Data pack at" << pack.fileinfo().filePath() << "does not have a valid pack.png";
+        return true;  // the png is optional
+    };
+
+    QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
+    if (image_file_info.exists() && image_file_info.isFile()) {
+        QFile pack_png_file(image_file_info.filePath());
+        if (!pack_png_file.open(QIODevice::ReadOnly))
+            return png_invalid();  // can't open pack.png file
+
+        auto data = pack_png_file.readAll();
+
+        bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
+
+        pack_png_file.close();
+        if (!pack_png_result) {
+            return png_invalid();  // pack.png invalid
+        }
+    } else {
+        return png_invalid();  // pack.png does not exists or is not a valid file.
+    }
+
     return true;  // all tests passed
 }
 
@@ -128,6 +151,32 @@ bool processZIP(DataPack& pack, ProcessingLevel level)
         return true;  // only need basic info already checked
     }
 
+    auto png_invalid = [&pack]() {
+        qWarning() << "Data pack at" << pack.fileinfo().filePath() << "does not have a valid pack.png";
+        return true;  // the png is optional
+    };
+
+    if (zip.setCurrentFile("pack.png")) {
+        if (!file.open(QIODevice::ReadOnly)) {
+            qCritical() << "Failed to open file in zip.";
+            zip.close();
+            return png_invalid();
+        }
+
+        auto data = file.readAll();
+
+        bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
+
+        file.close();
+        zip.close();
+        if (!pack_png_result) {
+            return png_invalid();  // pack.png invalid
+        }
+    } else {
+        zip.close();
+        return png_invalid();  // could not set pack.mcmeta as current file.
+    }
+
     zip.close();
 
     return true;
@@ -147,6 +196,78 @@ bool processMCMeta(DataPack& pack, QByteArray&& raw_data)
         return false;
     }
     return true;
+}
+
+bool processPackPNG(const DataPack& pack, QByteArray&& raw_data)
+{
+    auto img = QImage::fromData(raw_data);
+    if (!img.isNull()) {
+        pack.setImage(img);
+    } else {
+        qWarning() << "Failed to parse pack.png.";
+        return false;
+    }
+    return true;
+}
+
+bool processPackPNG(const DataPack& pack)
+{
+    auto png_invalid = [&pack]() {
+        qWarning() << "Data pack at" << pack.fileinfo().filePath() << "does not have a valid pack.png";
+        return false;
+    };
+
+    switch (pack.type()) {
+        case ResourceType::FOLDER: {
+            QFileInfo image_file_info(FS::PathCombine(pack.fileinfo().filePath(), "pack.png"));
+            if (image_file_info.exists() && image_file_info.isFile()) {
+                QFile pack_png_file(image_file_info.filePath());
+                if (!pack_png_file.open(QIODevice::ReadOnly))
+                    return png_invalid();  // can't open pack.png file
+
+                auto data = pack_png_file.readAll();
+
+                bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
+
+                pack_png_file.close();
+                if (!pack_png_result) {
+                    return png_invalid();  // pack.png invalid
+                }
+            } else {
+                return png_invalid();  // pack.png does not exists or is not a valid file.
+            }
+            return false;  // not processed correctly; https://github.com/PrismLauncher/PrismLauncher/issues/1740
+        }
+        case ResourceType::ZIPFILE: {
+            QuaZip zip(pack.fileinfo().filePath());
+            if (!zip.open(QuaZip::mdUnzip))
+                return false;  // can't open zip file
+
+            QuaZipFile file(&zip);
+            if (zip.setCurrentFile("pack.png")) {
+                if (!file.open(QIODevice::ReadOnly)) {
+                    qCritical() << "Failed to open file in zip.";
+                    zip.close();
+                    return png_invalid();
+                }
+
+                auto data = file.readAll();
+
+                bool pack_png_result = DataPackUtils::processPackPNG(pack, std::move(data));
+
+                file.close();
+                if (!pack_png_result) {
+                    return png_invalid();  // pack.png invalid
+                }
+            } else {
+                return png_invalid();  // could not set pack.mcmeta as current file.
+            }
+            return false;  // not processed correctly; https://github.com/PrismLauncher/PrismLauncher/issues/1740
+        }
+        default:
+            qWarning() << "Invalid type for data pack parse task!";
+            return false;
+    }
 }
 
 bool validate(QFileInfo file)
