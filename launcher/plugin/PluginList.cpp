@@ -150,10 +150,8 @@ QVariant PluginList::data(const QModelIndex& index, int role) const
             switch (column) {
                 case NameColumn:
                     return m_plugins[row]->name();
-                case VersionColumn: {
-                    // TODO
-                    return {};
-                }
+                case VersionColumn:
+                    return m_plugins[row]->version();
                 // case DateColumn:
                 //     return m_plugins[row]->dateTimeChanged();
                 default:

@@ -288,6 +288,7 @@ void Plugin::onDisable()
 void Plugin::loadV1(const QJsonObject& root)
 {
     m_name = root.value("displayName").toString();
+    m_version = root.value("version").toString();
     m_desc = root.value("description").toString();
     m_homepage = root.value("homepage").toString();
     m_icon_file = root.value("icon").toString();
