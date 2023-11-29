@@ -67,6 +67,8 @@ class Plugin : public PluginInstance {
     enum class EnableAction { ENABLE, DISABLE, TOGGLE };
     void enable(EnableAction action);
 
+    bool destroy();
+
     void onEnable();
     void onDisable();
 

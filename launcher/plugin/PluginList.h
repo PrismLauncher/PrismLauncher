@@ -61,6 +61,8 @@ class PluginList : public QAbstractListModel {
 
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
+    bool deletePlugins(const QModelIndexList& indexes);
+
     class ProxyModel : public QSortFilterProxyModel {
        public:
         explicit ProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}

@@ -225,6 +225,29 @@ QVariant PluginList::headerData(int section, [[maybe_unused]] Qt::Orientation or
     return QVariant();
 }
 
+bool PluginList::deletePlugins(const QModelIndexList& indexes)
+{
+    if (indexes.isEmpty())
+        return true;
+
+    for (auto i : indexes) {
+        if (i.column() != 0) {
+            continue;
+        }
+        auto pl = at(i.row());
+        pl->destroy();
+
+        auto removed_index = i.row();
+        beginRemoveRows(QModelIndex(), removed_index, removed_index);
+        m_plugins.erase(m_plugins.begin() + removed_index);
+        endRemoveRows();
+    }
+
+    emit pluginsReloaded();
+
+    return true;
+}
+
 // TODO: PluginList::ProxyModel
 
 void PluginList::add(const QList<PluginPtr>& t)

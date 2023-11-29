@@ -56,6 +56,8 @@ class PluginPage : public QMainWindow, public BasePage {
     void itemActivated(const QModelIndex& index);
     void filterTextChanged(const QString& newContents);
 
+    void removeItem();
+
     virtual void enableItem();
     virtual void disableItem();
 

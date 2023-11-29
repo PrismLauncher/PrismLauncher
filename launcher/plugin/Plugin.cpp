@@ -212,6 +212,12 @@ void Plugin::enable(EnableAction action)
     m_enabled = enable;
 }
 
+bool Plugin::destroy()
+{
+    enable(EnableAction::DISABLE);
+    return FS::trash(m_file_info.filePath()) || FS::deletePath(m_file_info.filePath());
+}
+
 void Plugin::onEnable()
 {
     // TODO: make enable better; i.e. settings window needs to be reloaded etc.

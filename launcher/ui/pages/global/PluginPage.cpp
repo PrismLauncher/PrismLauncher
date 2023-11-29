@@ -50,14 +50,13 @@ PluginPage::PluginPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::Plugin
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 
     // connect(ui->actionAddItem, &QAction::triggered, this, &PluginPage::addItem);
-    // connect(ui->actionRemoveItem, &QAction::triggered, this, &PluginPage::removeItem);
+    connect(ui->actionRemoveItem, &QAction::triggered, this, &PluginPage::removeItem);
     connect(ui->actionEnableItem, &QAction::triggered, this, &PluginPage::enableItem);
     connect(ui->actionDisableItem, &QAction::triggered, this, &PluginPage::disableItem);
     // connect(ui->actionViewConfigs, &QAction::triggered, this, &PluginPage::viewConfigs);
     connect(ui->actionViewFolder, &QAction::triggered, this, &PluginPage::viewFolder);
 
     ui->actionAddItem->setVisible(false);
-    ui->actionRemoveItem->setVisible(false);
     ui->actionViewConfigs->setVisible(false);
 
     connect(ui->treeView, &ModListView::customContextMenuRequested, this, &PluginPage::ShowContextMenu);
@@ -136,6 +135,35 @@ void PluginPage::filterTextChanged(const QString& newContents)
 {
     m_viewFilter = newContents;
     m_filterModel->setFilterRegularExpression(m_viewFilter);
+}
+
+void PluginPage::removeItem()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+
+    int count = 0;
+    for (auto& i : selection.indexes()) {
+        if (i.column() == 0) {
+            count++;
+        }
+    }
+
+    if (count < 1) {
+        return;
+    }
+
+    QString text = tr("You are about to remove %1 items.\n"
+                      "This may be permanent and they will be gone from the folder.\n\n"
+                      "Are you sure?")
+                       .arg(count);
+    auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"), text, QMessageBox::Warning,
+                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+
+    if (response != QMessageBox::Yes)
+        return;
+
+    m_model->deletePlugins(selection.indexes());
 }
 
 void PluginPage::enableItem()
