@@ -307,7 +307,8 @@ void Plugin::loadV1(const QJsonObject& root)
             m_native_plugin_paths.lin32 = nativesJson.value("linux32").toString();
             m_native_plugin_paths.lin64 = nativesJson.value("linux64").toString();
         } else {
-            qWarning(pluginLogC) << "Plugin" << m_name << "specifies natives, but not for the correct qt version of QT " << QT_VERSION_MAJOR;
+            qWarning(pluginLogC) << "Plugin" << m_name << "specifies natives, but not for the correct qt version of QT "
+                                 << QT_VERSION_MAJOR;
         }
 #else
         qWarning(pluginLogC) << "PrismLauncher was compiled without native plugin support, due to unknown QT version used!";
