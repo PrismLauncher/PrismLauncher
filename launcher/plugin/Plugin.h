@@ -83,7 +83,7 @@ class Plugin : public PluginInstance {
 
     bool m_enabled = true, m_needsRestart = false;
     QList<PluginContributionPtr> m_contributions;
-    QPluginLoader* m_loader;
+    QPluginLoader* m_loader = nullptr;
     PluginInterface* m_interface = nullptr;
     mutable QMutex m_data_lock;
     struct {
