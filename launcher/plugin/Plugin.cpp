@@ -277,6 +277,14 @@ void Plugin::onDisable()
     }
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#define NATIVES_KEY "qt6"
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#define NATIVES_KEY "qt5"
+#else
+#warning "No native plugin support: unkown QT version used!"
+#endif
+
 void Plugin::loadV1(const QJsonObject& root)
 {
     m_name = root.value("displayName").toString();
@@ -287,12 +295,22 @@ void Plugin::loadV1(const QJsonObject& root)
     m_license = root.value("license").toString();
 
     if (root.value("natives").isObject()) {
+#ifdef NATIVES_KEY
         auto nativesJson = root.value("natives").toObject();
-        m_native_plugin_paths.osx = nativesJson.value("osx").toString();
-        m_native_plugin_paths.win32 = nativesJson.value("win32").toString();
-        m_native_plugin_paths.win64 = nativesJson.value("win64").toString();
-        m_native_plugin_paths.lin32 = nativesJson.value("linux32").toString();
-        m_native_plugin_paths.lin64 = nativesJson.value("linux64").toString();
+        if (nativesJson.value(NATIVES_KEY).isObject()) {
+            nativesJson = nativesJson.value(NATIVES_KEY).toObject();
+
+            m_native_plugin_paths.osx = nativesJson.value("osx").toString();
+            m_native_plugin_paths.win32 = nativesJson.value("win32").toString();
+            m_native_plugin_paths.win64 = nativesJson.value("win64").toString();
+            m_native_plugin_paths.lin32 = nativesJson.value("linux32").toString();
+            m_native_plugin_paths.lin64 = nativesJson.value("linux64").toString();
+        } else {
+            qWarning(pluginLogC) << "Plugin" << m_name << "specifies natives, but not for the correct qt version of QT " << QT_VERSION_MAJOR;
+        }
+#else
+        qWarning(pluginLogC) << "PrismLauncher was compiled without native plugin support, due to unknown QT version used!";
+#endif
     }
 
     if (root.value("authors").isArray()) {
