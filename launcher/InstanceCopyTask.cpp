@@ -142,9 +142,8 @@ void InstanceCopyTask::copyFinished()
     if (!m_keepPlaytime) {
         inst->resetTimePlayed();
     }
-    if (m_useLinks)
-        inst->addLinkedInstanceId(m_origInstance->id());
     if (m_useLinks) {
+        inst->addLinkedInstanceId(m_origInstance->id());
         auto allowed_symlinks_file = QFileInfo(FS::PathCombine(inst->gameRoot(), "allowed_symlinks.txt"));
 
         QByteArray allowed_symlinks;
