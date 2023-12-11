@@ -34,6 +34,7 @@
  */
 
 #include "FlamePage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_FlamePage.h"
 
 #include <QKeyEvent>
@@ -193,6 +194,8 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
     } else {
         for (auto version : current.versions) {
