@@ -102,14 +102,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source,
 
     auto full_entry_path = entry->getFullPath();
     auto source_url = source;
-    connect(job, &NetJob::succeeded, this, [this, doc, full_entry_path, source_url, posInDocument] {
-        qDebug() << "Loaded resource at" << full_entry_path;
-
-        // If we flushed, don't proceed.
-        if (!m_fetching_images.contains(source_url))
-            return;
-
-        QImage image(full_entry_path);
+    auto loadImage = [this, doc, full_entry_path, source_url, posInDocument](const QImage& image) {
         doc->addResource(QTextDocument::ImageResource, source_url, image);
 
         parseImage(doc, image, posInDocument);
@@ -121,6 +114,23 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source,
         doc->setPageSize(size);
 
         m_fetching_images.remove(source_url);
+    };
+    connect(job, &NetJob::succeeded, this, [this, full_entry_path, source_url, loadImage] {
+        qDebug() << "Loaded resource at:" << full_entry_path;
+        // If we flushed, don't proceed.
+        if (!m_fetching_images.contains(source_url))
+            return;
+
+        QImage image(full_entry_path);
+        loadImage(image);
+    });
+    connect(job, &NetJob::failed, this, [this, full_entry_path, source_url, loadImage](QString reason) {
+        qWarning() << "Failed resource at:" << full_entry_path << " because:" << reason;
+        // If we flushed, don't proceed.
+        if (!m_fetching_images.contains(source_url))
+            return;
+
+        loadImage(QImage());
     });
     connect(job, &NetJob::finished, job, &NetJob::deleteLater);
 

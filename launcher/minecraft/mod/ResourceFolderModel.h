@@ -306,7 +306,6 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             auto removed_it = m_resources.begin() + removed_index;
 
             Q_ASSERT(removed_it != m_resources.end());
-            Q_ASSERT(removed_set.contains(removed_it->get()->internal_id()));
 
             if ((*removed_it)->isResolving()) {
                 auto ticket = (*removed_it)->resolutionTicket();
