@@ -56,6 +56,3 @@ flatbuild
 
 # Snap
 *.snap
-
-# maid build
-.maid
