@@ -1,0 +1,13 @@
+[project]
+name = "Prism"
+version = "8.0"
+
+[tasks]
+run = { script = "./build/prismlauncher.app/Contents/MacOS/prismlauncher" }
+clean = { script = ["rm -rf build", "mkdir build"] }
+build = { script = ["maid init -q", "bash -c 'cd build && ninja'"] }
+
+[tasks.init]
+depends = ["clean"]
+path = "build"
+script = "cmake -G Ninja -DCMAKE_INSTALL_PREFIX=install -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH='/opt/homebrew/opt/qt' -DQt6_DIR='/opt/homebrew/opt/qt' -DLauncher_BUILD_PLATFORM=macOS -DENABLE_LTO=ON .."
