@@ -176,6 +176,7 @@
     <addaction name="actionChangeTheme"/>
     <addaction name="separator"/>
     <addaction name="actionCAT"/>
+    <addaction name="actionToggleStatusBar"/>
     <addaction name="actionLockToolbars"/>
     <addaction name="separator"/>
    </widget>
@@ -255,6 +256,14 @@
    </property>
    <property name="toolTip">
     <string>It's a fluffy kitty :3</string>
+   </property>
+  </action>
+  <action name="actionToggleStatusBar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Status Bar</string>
    </property>
   </action>
   <action name="actionLockToolbars">

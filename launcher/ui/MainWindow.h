@@ -204,6 +204,8 @@ class MainWindow : public QMainWindow {
 
     void globalSettingsClosed();
 
+    void setStatusBarVisibility(bool);
+
     void lockToolbars(bool);
 
 #ifndef Q_OS_MAC
