@@ -129,7 +129,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
         connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-                [this, check_allow_update, actionRemoveItemMetadata, actionExportMetadata] {
+                [this, check_allow_update, actionRemoveItemMetadata] {
                     ui->actionUpdateItem->setEnabled(check_allow_update());
 
                     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
@@ -385,6 +385,7 @@ void ModFolderPage::exportModMetadata()
     if (selectedMods.length() == 0)
         selectedMods = m_model->allMods();
 
+    std::sort(selectedMods.begin(), selectedMods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
     ExportToModListDialog dlg(m_instance->name(), selectedMods, this);
     dlg.exec();
 }
