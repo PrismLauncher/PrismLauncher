@@ -155,7 +155,7 @@ void NetJob::emitFailed(QString reason)
 
     if (response == QMessageBox::Yes) {
         m_try = 0;
-        startNext();
+        executeNextSubTask();
         return;
     }
 #endif
