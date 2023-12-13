@@ -1511,6 +1511,17 @@ InstanceWindow* Application::showInstanceWindow(InstancePtr instance, QString pa
     auto& window = extras.window;
 
     if (window) {
+// If the window is minimized on macOS or Windows, activate and bring it up
+#ifdef Q_OS_MACOS
+        if (window->isMinimized()) {
+            window->setWindowState(window->windowState() & ~Qt::WindowMinimized);
+        }
+#elif defined(Q_OS_WIN)
+        if (window->isMinimized()) {
+            window->showNormal();
+        }
+#endif
+
         window->raise();
         window->activateWindow();
     } else {
@@ -1518,6 +1529,7 @@ InstanceWindow* Application::showInstanceWindow(InstancePtr instance, QString pa
         m_openWindows++;
         connect(window, &InstanceWindow::isClosing, this, &Application::on_windowClose);
     }
+
     if (!page.isEmpty()) {
         window->selectPage(page);
     }
