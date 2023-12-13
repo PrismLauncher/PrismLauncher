@@ -177,6 +177,7 @@ void ModFilterWidget::prepareBasicFilter()
     auto def = m_instance->getPackProfile()->getComponentVersion("net.minecraft");
     m_filter->versions.push_front(Version{ def });
     ui->versionsCb->setCheckedItems({ def });
+    ui->versionsSimpleCb->setCurrentIndex(ui->versionsSimpleCb->findText(def));
 }
 
 void ModFilterWidget::onIncludeSnapshotsChanged()
