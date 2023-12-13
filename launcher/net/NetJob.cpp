@@ -58,21 +58,18 @@ auto NetJob::addNetAction(NetAction::Ptr action) -> bool
     return true;
 }
 
-void NetJob::startNext()
+void NetJob::executeNextSubTask()
 {
-    if (m_queue.isEmpty() && m_doing.isEmpty()) {
-        // We're finished, check for failures and retry if we can (up to 3 times)
-        if (!m_failed.isEmpty() && m_try < 3) {
-            m_try += 1;
-            while (!m_failed.isEmpty()) {
-                auto task = m_failed.take(*m_failed.keyBegin());
-                m_done.remove(task.get());
-                m_queue.enqueue(task);
-            }
+    // We're finished, check for failures and retry if we can (up to 3 times)
+    if (isRunning() && m_queue.isEmpty() && m_doing.isEmpty() && !m_failed.isEmpty() && m_try < 3) {
+        m_try += 1;
+        while (!m_failed.isEmpty()) {
+            auto task = m_failed.take(*m_failed.keyBegin());
+            m_done.remove(task.get());
+            m_queue.enqueue(task);
         }
     }
-
-    ConcurrentTask::startNext();
+    ConcurrentTask::executeNextSubTask();
 }
 
 auto NetJob::size() const -> int

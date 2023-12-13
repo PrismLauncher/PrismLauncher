@@ -119,7 +119,6 @@ void Flame::FileResolvingTask::netJobFinished()
     connect(m_checkJob.get(), &NetJob::failed, this, [this, step_progress](QString reason) {
         step_progress->state = TaskStepState::Failed;
         stepProgress(*step_progress);
-        emitFailed(reason);
     });
     connect(m_checkJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propagateStepProgress);
     connect(m_checkJob.get(), &NetJob::progress, this, [this, step_progress](qint64 current, qint64 total) {
