@@ -226,6 +226,9 @@ bool ModrinthCreationTask::createInstance()
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managed_id.isEmpty())
         instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
+    else
+        instance.setManagedPack("modrinth", "", name(), "", "");
+
     instance.setName(name());
     instance.saveNow();
 
@@ -289,7 +292,7 @@ bool ModrinthCreationTask::createInstance()
         // Only change the name if it didn't use a custom name, so that the previous custom name
         // is preserved, but if we're using the original one, we update the version string.
         // NOTE: This needs to come before the copyManagedPack call!
-        if (inst->name().contains(inst->getManagedPackVersionName())) {
+        if (inst->name().contains(inst->getManagedPackVersionName()) && inst->name() != instance.name()) {
             if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
                 inst->setName(instance.name());
         }

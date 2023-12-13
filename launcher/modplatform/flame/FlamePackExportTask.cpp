@@ -323,6 +323,7 @@ void FlamePackExportTask::getProjectsInfo()
         }
         buildZip();
     });
+    connect(projTask.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
     task.reset(projTask);
     task->start();
 }
