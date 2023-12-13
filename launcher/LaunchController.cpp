@@ -42,7 +42,6 @@
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/ProfileSelectDialog.h"
 #include "ui/dialogs/ProfileSetupDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -257,8 +256,10 @@ void LaunchController::login()
                 continue;
             }
             case AccountState::Expired: {
-                if (reauthenticateCurrentAccount())
-                    continue;
+                auto errorString = tr("The account has expired and needs to be logged into manually again.");
+                QMessageBox::warning(m_parentWidget, tr("Account refresh failed"), errorString, QMessageBox::StandardButton::Ok,
+                                     QMessageBox::StandardButton::Ok);
+                emitFailed(errorString);
                 return;
             }
             case AccountState::Disabled: {
@@ -280,34 +281,6 @@ void LaunchController::login()
         }
     }
     emitFailed(tr("Failed to launch."));
-}
-
-bool LaunchController::reauthenticateCurrentAccount()
-{
-    auto button =
-        QMessageBox::warning(m_parentWidget, tr("Account refresh failed"),
-                             tr("The account has expired and needs to be reauthenticated. Do you want to reauthenticate this account?"),
-                             QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No, QMessageBox::StandardButton::Yes);
-    if (button == QMessageBox::StandardButton::Yes) {
-        auto accounts = APPLICATION->accounts();
-        bool isDefault = accounts->defaultAccount() == m_accountToUse;
-        accounts->removeAccount(accounts->index(accounts->findAccountByProfileId(m_accountToUse->profileId())));
-        if (m_accountToUse->accountType() == AccountType::MSA) {
-            auto newAccount =
-                MSALoginDialog::newAccount(m_parentWidget, tr("Please enter your Mojang account email and password to add your account."));
-            accounts->addAccount(newAccount);
-            if (isDefault) {
-                accounts->setDefaultAccount(newAccount);
-            }
-            m_accountToUse = nullptr;
-            decideAccount();
-            return true;
-        }
-        emitFailed(tr("Account expired and re-login attempt failed"));
-    } else {
-        emitFailed(tr("The account has expired and needs to be reauthenticated"));
-    }
-    return false;
 }
 
 void LaunchController::launchInstance()

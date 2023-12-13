@@ -74,7 +74,6 @@ class LaunchController : public Task {
     void login();
     void launchInstance();
     void decideAccount();
-    bool reauthenticateCurrentAccount();
 
    private slots:
     void readyForLaunch();
