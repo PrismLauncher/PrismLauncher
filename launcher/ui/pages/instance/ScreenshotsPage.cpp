@@ -325,7 +325,7 @@ void ScreenshotsPage::onItemActivated(QModelIndex index)
         return;
     auto info = m_model->fileInfo(index);
     QString fileName = info.absoluteFilePath();
-    DesktopServices::openFile(info.absoluteFilePath());
+    DesktopServices::openPath(info.absoluteFilePath());
 }
 
 void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection& selected)
@@ -352,7 +352,7 @@ void ScreenshotsPage::onCurrentSelectionChanged(const QItemSelection& selected)
 
 void ScreenshotsPage::on_actionView_Folder_triggered()
 {
-    DesktopServices::openDirectory(m_folder, true);
+    DesktopServices::openPath(m_folder, true);
 }
 
 void ScreenshotsPage::on_actionUpload_triggered()

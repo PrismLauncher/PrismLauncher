@@ -37,6 +37,7 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QProcess>
+#include "FileSystem.h"
 
 /**
  * This shouldn't exist, but until QTBUG-9328 and other unreported bugs are fixed, it needs to be a thing.
@@ -96,81 +97,30 @@ bool IndirectOpen(T callable, qint64* pid_forked = nullptr)
 #endif
 
 namespace DesktopServices {
-bool openDirectory(const QString& path, [[maybe_unused]] bool ensureExists)
+bool openPath(const QFileInfo& path, [[maybe_unused]] bool ensureExists)
 {
-    qDebug() << "Opening directory" << path;
-    QDir parentPath;
-    QDir dir(path);
-    if (ensureExists && !dir.exists()) {
-        parentPath.mkpath(dir.absolutePath());
+    qDebug() << "Opening path" << path;
+    if (ensureExists) {
+        FS::ensureFolderPathExists(path);
     }
-    auto f = [&]() { return QDesktopServices::openUrl(QUrl::fromLocalFile(dir.absolutePath())); };
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    if (!isSandbox()) {
-        return IndirectOpen(f);
-    }
-#endif
-    return f();
+    return openUrl(QUrl::fromLocalFile(QFileInfo(path).absolutePath()));
 }
 
-bool openFile(const QString& path)
+bool openPath(const QString& path, [[maybe_unused]] bool ensureExists)
 {
-    qDebug() << "Opening file" << path;
-    auto f = [&]() { return QDesktopServices::openUrl(QUrl::fromLocalFile(path)); };
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    if (!isSandbox()) {
-        return IndirectOpen(f);
-    } else {
-        return f();
-    }
-#else
-    return f();
-#endif
-}
-
-bool openFile(const QString& application, const QString& path, const QString& workingDirectory, qint64* pid)
-{
-    qDebug() << "Opening file" << path << "using" << application;
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    // FIXME: the pid here is fake. So if something depends on it, it will likely misbehave
-    if (!isSandbox()) {
-        return IndirectOpen([&]() { return QProcess::startDetached(application, QStringList() << path, workingDirectory); }, pid);
-    } else {
-        return QProcess::startDetached(application, QStringList() << path, workingDirectory, pid);
-    }
-#else
-    return QProcess::startDetached(application, QStringList() << path, workingDirectory, pid);
-#endif
+    return openPath(QFileInfo(path), ensureExists);
 }
 
 bool run(const QString& application, const QStringList& args, const QString& workingDirectory, qint64* pid)
 {
     qDebug() << "Running" << application << "with args" << args.join(' ');
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    if (!isSandbox()) {
-        // FIXME: the pid here is fake. So if something depends on it, it will likely misbehave
-        return IndirectOpen([&]() { return QProcess::startDetached(application, args, workingDirectory); }, pid);
-    } else {
-        return QProcess::startDetached(application, args, workingDirectory, pid);
-    }
-#else
     return QProcess::startDetached(application, args, workingDirectory, pid);
-#endif
 }
 
 bool openUrl(const QUrl& url)
 {
     qDebug() << "Opening URL" << url.toString();
-    auto f = [&]() { return QDesktopServices::openUrl(url); };
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-    if (!isSandbox()) {
-        return IndirectOpen(f);
-    } else {
-        return f();
-    }
-#else
-    return f();
-#endif
+    return QDesktopServices::openUrl(url);
 }
 
 bool isFlatpak()
