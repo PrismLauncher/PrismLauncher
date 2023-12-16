@@ -183,7 +183,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     ResourceAPI::DependencySearchArgs args = { dep, m_version, m_loaderType };
     ResourceAPI::DependencySearchCallbacks callbacks;
     callbacks.on_fail = [](QString reason, int) {
-        qCritical() << tr("A network error occurred. Could not load project dependenies:%1").arg(reason);
+        qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
     };
     callbacks.on_succeed = [dep, provider, pDep, level, this](auto& doc, [[maybe_unused]] auto& pack) {
         try {
