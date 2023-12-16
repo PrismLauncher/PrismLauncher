@@ -238,7 +238,7 @@ void ResourceModel::loadEntry(QModelIndex& entry)
             callbacks.on_abort = [this] {
                 if (!s_running_models.constFind(this).value())
                     return;
-                qCritical() << tr("The request was abborted for an unknown reason");
+                qCritical() << tr("The request was aborted for an unknown reason");
             };
 
         if (auto job = m_api->getProjectInfo(std::move(args), std::move(callbacks)); job)
