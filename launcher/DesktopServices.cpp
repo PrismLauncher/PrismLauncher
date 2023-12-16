@@ -97,7 +97,7 @@ bool IndirectOpen(T callable, qint64* pid_forked = nullptr)
 #endif
 
 namespace DesktopServices {
-bool openPath(const QFileInfo& path, [[maybe_unused]] bool ensureExists)
+bool openPath(const QFileInfo& path, bool ensureExists)
 {
     qDebug() << "Opening path" << path;
     if (ensureExists) {
@@ -106,7 +106,7 @@ bool openPath(const QFileInfo& path, [[maybe_unused]] bool ensureExists)
     return openUrl(QUrl::fromLocalFile(QFileInfo(path).absolutePath()));
 }
 
-bool openPath(const QString& path, [[maybe_unused]] bool ensureExists)
+bool openPath(const QString& path, bool ensureExists)
 {
     return openPath(QFileInfo(path), ensureExists);
 }
