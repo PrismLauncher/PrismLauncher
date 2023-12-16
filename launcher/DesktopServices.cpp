@@ -39,63 +39,6 @@
 #include <QProcess>
 #include "FileSystem.h"
 
-/**
- * This shouldn't exist, but until QTBUG-9328 and other unreported bugs are fixed, it needs to be a thing.
- */
-#if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
-
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-template <typename T>
-bool IndirectOpen(T callable, qint64* pid_forked = nullptr)
-{
-    auto pid = fork();
-    if (pid_forked) {
-        if (pid > 0)
-            *pid_forked = pid;
-        else
-            *pid_forked = 0;
-    }
-    if (pid == -1) {
-        qWarning() << "IndirectOpen failed to fork: " << errno;
-        return false;
-    }
-    // child - do the stuff
-    if (pid == 0) {
-        // unset all this garbage so it doesn't get passed to the child process
-        qunsetenv("LD_PRELOAD");
-        qunsetenv("LD_LIBRARY_PATH");
-        qunsetenv("LD_DEBUG");
-        qunsetenv("QT_PLUGIN_PATH");
-        qunsetenv("QT_FONTPATH");
-
-        // open the URL
-        auto status = callable();
-
-        // detach from the parent process group.
-        setsid();
-
-        // die. now. do not clean up anything, it would just hang forever.
-        _exit(status ? 0 : 1);
-    } else {
-        // parent - assume it worked.
-        int status;
-        while (waitpid(pid, &status, 0)) {
-            if (WIFEXITED(status)) {
-                return WEXITSTATUS(status) == 0;
-            }
-            if (WIFSIGNALED(status)) {
-                return false;
-            }
-        }
-        return true;
-    }
-}
-#endif
-
 namespace DesktopServices {
 bool openPath(const QFileInfo& path, bool ensureExists)
 {
@@ -139,11 +82,6 @@ bool isSnap()
 #else
     return false;
 #endif
-}
-
-bool isSandbox()
-{
-    return isSnap() || isFlatpak();
 }
 
 }  // namespace DesktopServices
