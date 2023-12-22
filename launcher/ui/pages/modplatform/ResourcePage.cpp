@@ -404,9 +404,9 @@ void ResourcePage::openUrl(const QUrl& url)
             auto jump = [url, slug, model, view] {
                 for (int row = 0; row < model->rowCount({}); row++) {
                     const QModelIndex index = model->index(row);
-                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
-                    if (pack.slug == slug) {
+                    if (pack->slug == slug) {
                         view->setCurrentIndex(index);
                         return;
                     }
