@@ -667,6 +667,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // The cat
         m_settings->registerSetting("TheCat", false);
+        m_settings->registerSetting("CatOpacity", 100);
 
         m_settings->registerSetting("StatusBarVisible", true);
 
