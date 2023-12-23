@@ -77,7 +77,7 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
         case UserDataTypes::TITLE:
             return pack->name;
         case UserDataTypes::DESCRIPTION:
-            return pack->description.simplified();
+            return pack->description;
         case UserDataTypes::SELECTED:
             return pack->isAnyVersionSelected();
         case UserDataTypes::INSTALLED:
