@@ -105,7 +105,7 @@ auto ModpackListModel::data(const QModelIndex& index, int role) const -> QVarian
         case UserDataTypes::TITLE:
             return pack.name;
         case UserDataTypes::DESCRIPTION:
-            return pack.description.simplified();
+            return pack.description;
         case UserDataTypes::SELECTED:
             return false;
         case UserDataTypes::INSTALLED:
