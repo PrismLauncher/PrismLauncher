@@ -268,7 +268,8 @@ void ModrinthPage::updateUI()
 
     if (current.extraInfoLoaded) {
         if (current.extra.status == "archived") {
-            text += "<br><br>" + tr("<b>This project has been archived. It will not receive any further updates unless the author decides to unarchive the project.</b>");
+            text += "<br><br>" + tr("<b>This project has been archived. It will not receive any further updates unless the author decides "
+                                    "to unarchive the project.</b>");
         }
 
         if (!current.extra.donate.isEmpty()) {
