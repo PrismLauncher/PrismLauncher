@@ -46,6 +46,8 @@ import java.net.URLStreamHandlerFactory;
 
 /**
  * Fixes skins by redirecting to other URLs.
+ * Thanks to MineOnline for the implementation from which this was inspired!
+ * See https://github.com/ahnewark/MineOnline/tree/main/src/main/java/gg/codie/mineonline/protocol.
  *
  * @see {@link Handler}
  * @see {@link UrlUtils}
