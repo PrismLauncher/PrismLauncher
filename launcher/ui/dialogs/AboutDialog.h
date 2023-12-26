@@ -15,7 +15,6 @@
 
 #pragma once
 
-#include <net/NetJob.h>
 #include <QDialog>
 
 namespace Ui {
@@ -31,7 +30,4 @@ class AboutDialog : public QDialog {
 
    private:
     Ui::AboutDialog* ui;
-
-    NetJob::Ptr netJob;
-    QByteArray dataSink;
 };

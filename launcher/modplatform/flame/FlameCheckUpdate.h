@@ -22,6 +22,9 @@ class FlameCheckUpdate : public CheckUpdateTask {
     void executeTask() override;
 
    private:
+    ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info);
+    ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId);
+
     NetJob* m_net_job = nullptr;
 
     bool m_was_aborted = false;

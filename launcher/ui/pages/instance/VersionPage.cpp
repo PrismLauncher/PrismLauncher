@@ -295,13 +295,6 @@ void VersionPage::on_actionRemove_triggered()
     m_container->refreshContainer();
 }
 
-void VersionPage::on_actionInstall_mods_triggered()
-{
-    if (m_container) {
-        m_container->selectPage("mods");
-    }
-}
-
 void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 {
     auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"),
