@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  Prism Launcher - Minecraft Launcher
+ *  PolyMC - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -16,15 +16,16 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "InstanceDelegate.h"
-#include "InstanceList.h"
+#pragma once
 
-InstanceDelegate::InstanceDelegate(QObject* parent, int iconSize) : QStyledItemDelegate(parent), m_iconSize(iconSize) {}
+#include "InstanceTableProxyModel.h"
 
-void InstanceDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
-{
-    QStyledItemDelegate::initStyleOption(option, index);
-    if (index.column() == InstanceList::NameColumn) {
-        option->decorationSize = QSize(m_iconSize, m_iconSize);
-    }
-}
+class InstanceGridProxyModel : public InstanceTableProxyModel {
+    Q_OBJECT
+
+   public:
+    InstanceGridProxyModel(QObject* parent = 0);
+
+   protected:
+    QVariant data(const QModelIndex& index, int role) const override;
+};

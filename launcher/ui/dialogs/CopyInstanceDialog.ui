@@ -90,7 +90,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="labelVersion_3">
        <property name="text">
-        <string>&amp;Group</string>
+        <string>&amp;Category</string>
        </property>
        <property name="buddy">
         <cstring>groupBox</cstring>

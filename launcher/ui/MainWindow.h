@@ -53,13 +53,12 @@
 class LaunchController;
 class NewsChecker;
 class QToolButton;
-class InstanceProxyModel;
 class LabeledToolButton;
 class QLabel;
+class QLineEdit;
+class InstancesView;
 class MinecraftLauncher;
 class BaseProfilerFactory;
-class InstanceView;
-class KonamiCode;
 class InstanceTask;
 class LabeledToolButton;
 
@@ -173,7 +172,7 @@ class MainWindow : public QMainWindow {
      */
     void iconUpdated(QString);
 
-    void showInstanceContextMenu(const QPoint&);
+    void showInstanceContextMenu(const QPoint& pos, InstancePtr inst);
 
     void updateMainToolBar();
 
@@ -181,13 +180,11 @@ class MainWindow : public QMainWindow {
 
     void updateThemeMenu();
 
-    void instanceActivated(QModelIndex);
+    void instanceActivated(InstancePtr inst);
 
-    void instanceChanged(const QModelIndex& current, const QModelIndex& previous);
+    void instanceChanged(InstancePtr current, InstancePtr previous);
 
     void instanceSelectRequest(QString id);
-
-    void instanceDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
     void selectionBad();
 
@@ -200,8 +197,6 @@ class MainWindow : public QMainWindow {
     void repopulateAccountsMenu();
 
     void updateNewsLabel();
-
-    void konamiTriggered();
 
     void globalSettingsClosed();
 
@@ -220,10 +215,8 @@ class MainWindow : public QMainWindow {
 
     void addInstance(const QString& url = QString(), const QMap<QString, QString>& extra_info = {});
     void activateInstance(InstancePtr instance);
-    void setCatBackground(bool enabled);
     void updateInstanceToolIcon(QString new_icon);
     void setSelectedInstanceById(const QString& id);
-    void updateStatusCenter();
     void setInstanceActionsEnabled(bool enabled);
 
     void runModalTask(Task* task);
@@ -233,15 +226,14 @@ class MainWindow : public QMainWindow {
    private:
     Ui::MainWindow* ui;
     // these are managed by Qt's memory management model!
-    InstanceView* view = nullptr;
-    InstanceProxyModel* proxymodel = nullptr;
+    InstancesView* view = nullptr;
+    QLineEdit* filterView = nullptr;
     QToolButton* newsLabel = nullptr;
-    QLabel* m_statusLeft = nullptr;
-    QLabel* m_statusCenter = nullptr;
+    QMenu* accountMenu = nullptr;
+    QToolButton* accountMenuButton = nullptr;
     LabeledToolButton* changeIconButton = nullptr;
     LabeledToolButton* renameButton = nullptr;
     QToolButton* helpMenuButton = nullptr;
-    KonamiCode* secretEventFilter = nullptr;
 
     std::shared_ptr<Setting> instanceToolbarSetting = nullptr;
 

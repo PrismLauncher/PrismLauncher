@@ -145,7 +145,7 @@ class MinecraftInstance : public BaseInstance {
 
     QString getLogFileRoot() override;
 
-    QString getStatusbarDescription() override;
+    QString getMainVersion() override;
 
     // FIXME: remove
     virtual QStringList getClassPath();

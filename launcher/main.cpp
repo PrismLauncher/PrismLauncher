@@ -73,6 +73,7 @@ int main(int argc, char* argv[])
             Q_INIT_RESOURCE(backgrounds);
             Q_INIT_RESOURCE(documents);
             Q_INIT_RESOURCE(prismlauncher);
+            Q_INIT_RESOURCE(resources);
 
             Q_INIT_RESOURCE(pe_dark);
             Q_INIT_RESOURCE(pe_light);

@@ -25,7 +25,7 @@ class IconPickerDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit IconPickerDialog(QWidget* parent = 0);
+    explicit IconPickerDialog(QWidget* parent = 0, int iconSize = 48);
     ~IconPickerDialog();
     int execWithSelection(QString selection);
     QString selectedIconKey;
@@ -35,6 +35,7 @@ class IconPickerDialog : public QDialog {
 
    private:
     Ui::IconPickerDialog* ui;
+    int m_iconSize;
     QPushButton* buttonRemove;
 
    private slots:

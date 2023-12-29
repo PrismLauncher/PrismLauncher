@@ -50,9 +50,9 @@
 #include "settings/INIFile.h"
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
+#include "ui/instanceview/InstancesView.h"
 
 #include "ui/dialogs/ProgressDialog.h"
-#include "ui/instanceview/AccessibleInstanceView.h"
 
 #include "ui/pages/BasePageProvider.h"
 #include "ui/pages/global/APIPage.h"
@@ -667,6 +667,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // The cat
         m_settings->registerSetting("TheCat", false);
+        m_settings->registerSetting("InstanceDisplayMode", InstancesView::TableMode);
 
         m_settings->registerSetting("StatusBarVisible", true);
 
@@ -678,6 +679,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Window state and geometry
         m_settings->registerSetting("MainWindowState", "");
         m_settings->registerSetting("MainWindowGeometry", "");
+
+        m_settings->registerSetting("InstanceViewTableHeaderState", "");
 
         m_settings->registerSetting("ConsoleWindowState", "");
         m_settings->registerSetting("ConsoleWindowGeometry", "");
@@ -770,10 +773,6 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         qDebug() << "<> Settings loaded.";
     }
-
-#ifndef QT_NO_ACCESSIBILITY
-    QAccessible::installFactory(groupViewAccessibleFactory);
-#endif /* !QT_NO_ACCESSIBILITY */
 
     // initialize network access and proxy setup
     {

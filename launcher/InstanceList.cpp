@@ -34,7 +34,6 @@
  *      limitations under the License.
  */
 
-#include <QDebug>
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
@@ -49,13 +48,13 @@
 #include <QThread>
 #include <QTimer>
 #include <QUuid>
-#include <QXmlStreamReader>
 
 #include "BaseInstance.h"
 #include "ExponentialSeries.h"
 #include "FileSystem.h"
 #include "InstanceList.h"
 #include "InstanceTask.h"
+#include "MMCTime.h"
 #include "NullInstance.h"
 #include "WatchLock.h"
 #include "minecraft/MinecraftInstance.h"
@@ -68,7 +67,7 @@
 const static int GROUP_FILE_FORMAT_VERSION = 1;
 
 InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, QObject* parent)
-    : QAbstractListModel(parent), m_globalSettings(settings)
+    : QAbstractTableModel(parent), m_globalSettings(settings)
 {
     resumeWatch();
     // Create aand normalize path
@@ -123,14 +122,14 @@ bool InstanceList::dropMimeData(const QMimeData* data,
 
 QStringList InstanceList::mimeTypes() const
 {
-    auto types = QAbstractListModel::mimeTypes();
+    auto types = QAbstractTableModel::mimeTypes();
     types.push_back("application/x-instanceid");
     return types;
 }
 
 QMimeData* InstanceList::mimeData(const QModelIndexList& indexes) const
 {
-    auto mimeData = QAbstractListModel::mimeData(indexes);
+    auto mimeData = QAbstractTableModel::mimeData(indexes);
     if (indexes.size() == 1) {
         auto instanceId = data(indexes[0], InstanceIDRole).toString();
         mimeData->setData("application/x-instanceid", instanceId.toUtf8());
@@ -154,12 +153,43 @@ int InstanceList::rowCount(const QModelIndex& parent) const
     return m_instances.count();
 }
 
-QModelIndex InstanceList::index(int row, int column, const QModelIndex& parent) const
+int InstanceList::columnCount(const QModelIndex& parent) const
 {
-    Q_UNUSED(parent);
-    if (row < 0 || row >= m_instances.size())
-        return QModelIndex();
-    return createIndex(row, column, (void*)m_instances.at(row).get());
+    return ColumnCount;
+}
+
+QHash<int, QByteArray> InstanceList::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[SortRole] = "sort";
+    roles[IconRole] = "icon";
+    roles[NameRole] = "name";
+    roles[CategoryRole] = "category";
+    roles[InstanceIDRole] = "instanceId";
+    return roles;
+}
+
+QVariant InstanceList::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole) {
+        return QVariant();
+    }
+
+    switch (section) {
+        case StatusColumn:
+            return tr("Status");
+        case NameColumn:
+            return tr("Name");
+        case CategoryColumn:
+            return tr("Category");
+        case GameVersionColumn:
+            return tr("Game Version");
+        case PlayTimeColumn:
+            return tr("Play time");
+        case LastPlayedColumn:
+            return tr("Last played");
+    }
+    return QVariant();
 }
 
 QVariant InstanceList::data(const QModelIndex& index, int role) const
@@ -167,34 +197,107 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
     if (!index.isValid()) {
         return QVariant();
     }
-    BaseInstance* pdata = static_cast<BaseInstance*>(index.internalPointer());
+    const InstancePtr inst = m_instances[index.row()];
+
+    QString instanceGroup = getInstanceGroup(inst->id());
+
     switch (role) {
-        case InstancePointerRole: {
-            QVariant v = QVariant::fromValue((void*)pdata);
-            return v;
-        }
-        case InstanceIDRole: {
-            return pdata->id();
-        }
-        case Qt::EditRole:
-        case Qt::DisplayRole: {
-            return pdata->name();
-        }
-        case Qt::AccessibleTextRole: {
-            return tr("%1 Instance").arg(pdata->name());
-        }
-        case Qt::ToolTipRole: {
-            return pdata->instanceRoot();
-        }
         case Qt::DecorationRole: {
-            return pdata->iconKey();
-        }
-        // HACK: see InstanceView.h in gui!
-        case GroupRole: {
-            return getInstanceGroup(pdata->id());
-        }
-        default:
+            switch (index.column()) {
+                case StatusColumn: {
+                    if (inst->isRunning())
+                        return "status-running";
+                    else if (inst->hasCrashed() || inst->hasVersionBroken())
+                        return "status-bad";
+                    return QVariant();
+                }
+                case NameColumn:
+                    return inst->iconKey();
+            }
             break;
+        }
+
+        case Qt::DisplayRole: {
+            switch (index.column()) {
+                case NameColumn:
+                    return inst->name();
+                case CategoryColumn:
+                    return instanceGroup;
+                case GameVersionColumn:
+                    return inst->getMainVersion();
+                case PlayTimeColumn:
+                    return Time::prettifyDuration(inst->totalTimePlayed());
+                case LastPlayedColumn:
+                    return QDateTime::fromMSecsSinceEpoch(inst->lastLaunch());  // FIXME: Qt does not retranslate this?
+            }
+            break;
+        }
+
+        case Qt::ToolTipRole: {
+            switch (index.column()) {
+                case StatusColumn: {
+                    if (inst->isRunning())
+                        return tr("Running");
+                    else if (inst->hasCrashed())
+                        return tr("Crashed");
+                    else if (inst->hasVersionBroken())
+                        return tr("Broken");
+                    return tr("Inactive");
+                }
+                case NameColumn:
+                    return inst->instanceRoot();
+                case GameVersionColumn:
+                    return inst->getMainVersion();
+                case PlayTimeColumn:
+                    return tr("Total played for %1").arg(Time::prettifyDuration(inst->totalTimePlayed()));
+                case LastPlayedColumn:
+                    return tr("Last played for %1").arg(Time::prettifyDuration(inst->lastTimePlayed()));
+            }
+            break;
+        }
+
+        case Qt::EditRole: {
+            switch (index.column()) {
+                case NameColumn:
+                case CategoryColumn:
+                    return data(index, Qt::DisplayRole);
+            }
+            break;
+        }
+
+        case Qt::AccessibleTextRole: {
+            if (index.column() == NameColumn)
+                return tr("%1 Instance").arg(inst->name());
+            break;
+        }
+
+        case SortRole: {
+            switch (index.column()) {
+                case PlayTimeColumn:
+                    return QVariant(inst->totalTimePlayed());
+                case LastPlayedColumn:
+                    return QVariant(inst->lastLaunch());
+                default:
+                    return data(index, Qt::DisplayRole);
+            }
+            break;
+        }
+
+        case IconRole: {
+            return inst->iconKey();
+        }
+
+        case NameRole: {
+            return inst->name();
+        }
+
+        case InstanceIDRole: {
+            return inst->id();
+        }
+
+        case CategoryRole: {
+            return instanceGroup;
+        }
     }
     return QVariant();
 }
@@ -207,20 +310,29 @@ bool InstanceList::setData(const QModelIndex& index, const QVariant& value, int 
     if (role != Qt::EditRole) {
         return false;
     }
-    BaseInstance* pdata = static_cast<BaseInstance*>(index.internalPointer());
-    auto newName = value.toString();
-    if (pdata->name() == newName) {
+    InstancePtr inst = m_instances.at(index.row());
+    auto newValue = value.toString();
+
+    if (index.column() == NameColumn) {
+        setInstanceName(inst, newValue);
         return true;
     }
-    pdata->setName(newName);
-    return true;
+    if (index.column() == CategoryColumn) {
+        setInstanceGroup(inst, newValue);
+        return true;
+    }
+    return false;
 }
 
 Qt::ItemFlags InstanceList::flags(const QModelIndex& index) const
 {
-    Qt::ItemFlags f;
+    Qt::ItemFlags f = QAbstractTableModel::flags(index) | Qt::ItemIsEnabled;
     if (index.isValid()) {
-        f |= (Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable);
+        f |= Qt::ItemIsSelectable;
+
+        if (index.column() == NameColumn || index.column() == CategoryColumn) {
+            f |= Qt::ItemIsEditable;  // NOTE: instance view forces focus on NameColumn
+        }
     }
     return f;
 }
@@ -240,15 +352,18 @@ GroupId InstanceList::getInstanceGroup(const InstanceId& id) const
 
 void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)
 {
-    if (name.isEmpty() && !name.isNull())
-        name = QString();
-
     auto inst = getInstanceById(id);
     if (!inst) {
         qDebug() << "Attempt to set a null instance's group";
         return;
     }
+    setInstanceGroup(inst, name);
+}
 
+void InstanceList::setInstanceGroup(const InstancePtr inst, GroupId name)
+{
+    if (name.isEmpty() && !name.isNull())
+        name = QString();
     bool changed = false;
     auto iter = m_instanceGroupIndex.find(inst->id());
     if (iter != m_instanceGroupIndex.end()) {
@@ -259,14 +374,31 @@ void InstanceList::setInstanceGroup(const InstanceId& id, GroupId name)
         }
     } else {
         changed = true;
-        m_instanceGroupIndex[id] = name;
+        m_instanceGroupIndex[inst->id()] = name;
     }
 
     if (changed) {
         increaseGroupCount(name);
         auto idx = getInstIndex(inst.get());
-        emit dataChanged(index(idx), index(idx), { GroupRole });
+        emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { CategoryRole });
         saveGroupList();
+    }
+}
+
+void InstanceList::setInstanceName(const InstanceId& id, const QString name)
+{
+    auto inst = getInstanceById(id);
+    if (!inst) {
+        qDebug() << "Attempt to set a null instance's name";
+        return;
+    }
+    setInstanceName(inst, name);
+}
+
+void InstanceList::setInstanceName(const InstancePtr inst, const QString name)
+{
+    if (inst->name() != name) {
+        inst->setName(name);
     }
 }
 
@@ -278,7 +410,6 @@ QStringList InstanceList::getGroups()
 void InstanceList::deleteGroup(const GroupId& name)
 {
     m_groupNameCache.remove(name);
-    m_collapsedGroups.remove(name);
 
     bool removed = false;
     qDebug() << "Delete group" << name;
@@ -290,8 +421,9 @@ void InstanceList::deleteGroup(const GroupId& name)
             qDebug() << "Remove" << instID << "from group" << name;
             removed = true;
             auto idx = getInstIndex(instance.get());
-            if (idx >= 0)
-                emit dataChanged(index(idx), index(idx), { GroupRole });
+            if (idx >= 0) {
+                emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { CategoryRole });
+            }
         }
     }
     if (removed)
@@ -301,8 +433,6 @@ void InstanceList::deleteGroup(const GroupId& name)
 void InstanceList::renameGroup(const QString& src, const QString& dst)
 {
     m_groupNameCache.remove(src);
-    if (m_collapsedGroups.remove(src))
-        m_collapsedGroups.insert(dst);
 
     bool modified = false;
     qDebug() << "Rename group" << src << "to" << dst;
@@ -316,16 +446,11 @@ void InstanceList::renameGroup(const QString& src, const QString& dst)
             modified = true;
             auto idx = getInstIndex(instance.get());
             if (idx >= 0)
-                emit dataChanged(index(idx), index(idx), { GroupRole });
+                emit dataChanged(index(idx, NameColumn), index(idx, NameColumn), { CategoryRole });
         }
     }
     if (modified)
         saveGroupList();
-}
-
-bool InstanceList::isGroupCollapsed(const QString& group)
-{
-    return m_collapsedGroups.contains(group);
 }
 
 bool InstanceList::trashInstance(const InstanceId& id)
@@ -457,7 +582,7 @@ QList<InstanceId> InstanceList::discoverInstances()
     return out;
 }
 
-InstanceList::InstListError InstanceList::loadList()
+void InstanceList::loadList()
 {
     auto existingIds = getIdMapping(m_instances);
 
@@ -517,7 +642,6 @@ InstanceList::InstListError InstanceList::loadList()
     }
     m_dirty = false;
     updateTotalPlayTime();
-    return NoError;
 }
 
 void InstanceList::updateTotalPlayTime()
@@ -597,7 +721,7 @@ InstancePtr InstanceList::getInstanceByManagedName(const QString& managed_name) 
 
 QModelIndex InstanceList::getInstanceIndexById(const QString& id) const
 {
-    return index(getInstIndex(getInstanceById(id).get()));
+    return index(getInstIndex(getInstanceById(id).get()), NameColumn);
 }
 
 int InstanceList::getInstIndex(BaseInstance* inst) const
@@ -615,7 +739,7 @@ void InstanceList::propertiesChanged(BaseInstance* inst)
 {
     int i = getInstIndex(inst);
     if (i != -1) {
-        emit dataChanged(index(i), index(i));
+        emit dataChanged(index(i, NameColumn), index(i, ColumnCount - 1));
         updateTotalPlayTime();
     }
 }
@@ -660,7 +784,6 @@ void InstanceList::decreaseGroupCount(const QString& group)
 
     if (--m_groupNameCache[group] < 1) {
         m_groupNameCache.remove(group);
-        m_collapsedGroups.remove(group);
     }
 }
 
@@ -701,7 +824,7 @@ void InstanceList::saveGroupList()
         auto name = iter.key();
         QJsonObject groupObj;
         QJsonArray instanceArr;
-        groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
+        groupObj.insert("hidden", false);  // preserve compatiblity with older versions
         for (auto item : list) {
             instanceArr.append(QJsonValue(item));
         }
@@ -792,10 +915,6 @@ void InstanceList::loadGroupList()
             continue;
         }
 
-        auto hidden = groupObj.value("hidden").toBool(false);
-        if (hidden)
-            m_collapsedGroups.insert(groupName);
-
         // Iterate through the list of instances in the group.
         QJsonArray instancesArray = groupObj.value("instances").toArray();
 
@@ -828,17 +947,6 @@ void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting,
         endRemoveRows();
         emit instancesChanged();
     }
-}
-
-void InstanceList::on_GroupStateChanged(const QString& group, bool collapsed)
-{
-    qDebug() << "Group" << group << (collapsed ? "collapsed" : "expanded");
-    if (collapsed) {
-        m_collapsedGroups.insert(group);
-    } else {
-        m_collapsedGroups.remove(group);
-    }
-    saveGroupList();
 }
 
 class InstanceStaging : public Task {
@@ -951,7 +1059,7 @@ QString InstanceList::getStagedInstancePath()
 bool InstanceList::commitStagedInstance(const QString& path,
                                         InstanceName const& instanceName,
                                         QString groupName,
-                                        InstanceTask const& commiting)
+                                        const InstanceTask& commiting)
 {
     if (groupName.isEmpty() && !groupName.isNull())
         groupName = QString();

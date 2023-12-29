@@ -85,7 +85,7 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     }
     ui->groupBox->addItems(groups);
     ui->groupBox->setCurrentIndex(index);
-    ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
+    ui->groupBox->lineEdit()->setPlaceholderText(tr("No category"));
 
     // NOTE: m_buttons must be initialized before PageContainer, because it indirectly accesses m_buttons through setSuggestedPack! Do not
     // move this below.

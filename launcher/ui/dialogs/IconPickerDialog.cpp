@@ -28,7 +28,7 @@
 #include "icons/IconList.h"
 #include "icons/IconUtils.h"
 
-IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui::IconPickerDialog)
+IconPickerDialog::IconPickerDialog(QWidget* parent, int iconSize) : QDialog(parent), ui(new Ui::IconPickerDialog), m_iconSize(iconSize)
 {
     ui->setupUi(this);
     setWindowModality(Qt::WindowModal);
@@ -40,14 +40,17 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
     contentsWidget->setMovement(QListView::Static);
     contentsWidget->setResizeMode(QListView::Adjust);
     contentsWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    contentsWidget->setSpacing(5);
-    contentsWidget->setWordWrap(false);
+    contentsWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    contentsWidget->setWordWrap(true);
     contentsWidget->setWrapping(true);
     contentsWidget->setUniformItemSizes(true);
     contentsWidget->setTextElideMode(Qt::ElideRight);
     contentsWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    contentsWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    contentsWidget->setFrameStyle(QFrame::NoFrame);
+    contentsWidget->setGridSize(QSize(m_iconSize * 2, m_iconSize * 2));
+    contentsWidget->setItemDelegate(new InstanceDelegate(this, m_iconSize));
     contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    contentsWidget->setItemDelegate(new ListViewDelegate());
 
     // contentsWidget->setAcceptDrops(true);
     contentsWidget->setDropIndicatorShown(true);

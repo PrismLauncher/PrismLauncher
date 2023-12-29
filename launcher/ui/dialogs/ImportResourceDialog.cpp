@@ -9,6 +9,7 @@
 
 #include <InstanceList.h>
 #include "ui/instanceview/InstanceDelegate.h"
+#include "ui/instanceview/InstanceGridProxyModel.h"
 #include "ui/instanceview/InstanceProxyModel.h"
 
 ImportResourceDialog::ImportResourceDialog(QString file_path, PackedResourceType type, QWidget* parent)
@@ -31,9 +32,9 @@ ImportResourceDialog::ImportResourceDialog(QString file_path, PackedResourceType
     contentsWidget->setUniformItemSizes(false);
     contentsWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     contentsWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    contentsWidget->setItemDelegate(new ListViewDelegate());
+    contentsWidget->setItemDelegate(new InstanceDelegate());
 
-    proxyModel = new InstanceProxyModel(this);
+    proxyModel = new InstanceGridProxyModel(this);
     proxyModel->setSourceModel(APPLICATION->instances().get());
     proxyModel->sort(0);
     contentsWidget->setModel(proxyModel);

@@ -4,7 +4,7 @@
 #include <QItemSelection>
 
 #include "minecraft/mod/tasks/LocalResourceParse.h"
-#include "ui/instanceview/InstanceProxyModel.h"
+#include "ui/instanceview/InstanceGridProxyModel.h"
 
 namespace Ui {
 class ImportResourceDialog;
@@ -22,7 +22,7 @@ class ImportResourceDialog : public QDialog {
     Ui::ImportResourceDialog* ui;
     PackedResourceType m_resource_type;
     QString m_file_path;
-    InstanceProxyModel* proxyModel;
+    InstanceGridProxyModel* proxyModel;
 
    private slots:
     void selectionChanged(QItemSelection, QItemSelection);

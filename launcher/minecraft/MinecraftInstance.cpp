@@ -41,6 +41,7 @@
 #include "minecraft/launch/CreateGameFolders.h"
 #include "minecraft/launch/ExtractNatives.h"
 #include "minecraft/launch/PrintInstanceInfo.h"
+#include "modplatform/ResourceAPI.h"
 #include "settings/Setting.h"
 #include "settings/SettingsObject.h"
 
@@ -976,13 +977,8 @@ QString MinecraftInstance::getLogFileRoot()
     return gameRoot();
 }
 
-QString MinecraftInstance::getStatusbarDescription()
+QString MinecraftInstance::getMainVersion()
 {
-    QStringList traits;
-    if (hasVersionBroken()) {
-        traits.append(tr("broken"));
-    }
-
     QString mcVersion = m_components->getComponentVersion("net.minecraft");
     if (mcVersion.isEmpty()) {
         // Load component info if needed
@@ -1007,10 +1003,11 @@ QString MinecraftInstance::getStatusbarDescription()
                     .arg(Time::prettifyDuration(totalTimePlayed(), APPLICATION->settings()->get("ShowGameTimeWithoutDays").toBool())));
         }
     }
-    if (hasCrashed()) {
-        description.append(tr(", has crashed."));
+    if (getPackProfile()->getModLoaders()) {
+        return tr("%1 (Modded)").arg(mcVersion);
     }
-    return description;
+
+    return mcVersion;
 }
 
 Task::Ptr MinecraftInstance::createUpdateTask(Net::Mode mode)

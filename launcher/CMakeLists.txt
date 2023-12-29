@@ -759,10 +759,6 @@ SET(LAUNCHER_SOURCES
     Markdown.h
     Markdown.cpp
 
-    # Super secret!
-    KonamiCode.h
-    KonamiCode.cpp
-
     # Bundled resources
     resources/backgrounds/backgrounds.qrc
     resources/multimc/multimc.qrc
@@ -784,6 +780,11 @@ SET(LAUNCHER_SOURCES
     icons/MMCIcon.cpp
     icons/IconList.h
     icons/IconList.cpp
+    icons/IconImageProvider.h
+    icons/IconImageProvider.cpp
+
+    # GUI
+    ui/resources.qrc
 
     # GUI - windows
     ui/GuiUtil.h
@@ -1089,17 +1090,14 @@ SET(LAUNCHER_SOURCES
     ui/widgets/ThemeCustomizationWidget.cpp
 
     # GUI - instance group view
-    ui/instanceview/InstanceProxyModel.cpp
-    ui/instanceview/InstanceProxyModel.h
-    ui/instanceview/AccessibleInstanceView.cpp
-    ui/instanceview/AccessibleInstanceView.h
-    ui/instanceview/AccessibleInstanceView_p.h
-    ui/instanceview/InstanceView.cpp
-    ui/instanceview/InstanceView.h
-    ui/instanceview/InstanceDelegate.cpp
+    ui/instanceview/InstanceTableProxyModel.cpp
+    ui/instanceview/InstanceTableProxyModel.h
+    ui/instanceview/InstanceGridProxyModel.cpp
+    ui/instanceview/InstanceGridProxyModel.h
     ui/instanceview/InstanceDelegate.h
-    ui/instanceview/VisualGroup.cpp
-    ui/instanceview/VisualGroup.h
+    ui/instanceview/InstanceDelegate.cpp
+    ui/instanceview/InstancesView.h
+    ui/instanceview/InstancesView.cpp
 )
 
 if (NOT Apple)
@@ -1256,6 +1254,7 @@ target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::QuickWidgets
     Qt${QT_VERSION_MAJOR}::Widgets
     ${Launcher_QT_LIBS}
 )

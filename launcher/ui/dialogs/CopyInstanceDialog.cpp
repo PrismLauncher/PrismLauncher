@@ -71,7 +71,7 @@ CopyInstanceDialog::CopyInstanceDialog(InstancePtr original, QWidget* parent)
         index = 0;
 
     ui->groupBox->setCurrentIndex(index);
-    ui->groupBox->lineEdit()->setPlaceholderText(tr("No group"));
+    ui->groupBox->lineEdit()->setPlaceholderText(tr("No category"));
     ui->copySavesCheckbox->setChecked(m_selectedOptions.isCopySavesEnabled());
     ui->keepPlaytimeCheckbox->setChecked(m_selectedOptions.isKeepPlaytimeEnabled());
     ui->copyGameOptionsCheckbox->setChecked(m_selectedOptions.isCopyGameOptionsEnabled());

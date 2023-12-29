@@ -11,7 +11,7 @@
    </rect>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
      <number>0</number>
     </property>
@@ -131,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -179,6 +179,8 @@
     <addaction name="actionToggleStatusBar"/>
     <addaction name="actionLockToolbars"/>
     <addaction name="separator"/>
+    <addaction name="actionTableMode"/>
+    <addaction name="actionGridMode"/>
    </widget>
    <widget class="QMenu" name="foldersMenu">
     <property name="title">
@@ -231,6 +233,36 @@
    <addaction name="accountsMenu"/>
    <addaction name="helpMenu"/>
   </widget>
+  <action name="actionTableMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="view-list-symbolic">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Table View</string>
+   </property>
+   <property name="toolTip">
+    <string>Display instances in a table</string>
+   </property>
+  </action>
+  <action name="actionGridMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="view-grid-symbolic">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Grid View</string>
+   </property>
+   <property name="toolTip">
+    <string>Display instances in a grid</string>
+   </property>
+  </action>
   <action name="actionMoreNews">
    <property name="icon">
     <iconset theme="news">
@@ -378,10 +410,10 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>&amp;Change Group...</string>
+    <string>&amp;Change category...</string>
    </property>
    <property name="toolTip">
-    <string>Change the selected instance's group.</string>
+    <string>Change the selected instance's category.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+G</string>

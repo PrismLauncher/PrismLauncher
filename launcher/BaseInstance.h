@@ -106,8 +106,8 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
 
     void setRunning(bool running);
     bool isRunning() const;
-    int64_t totalTimePlayed() const;
-    int64_t lastTimePlayed() const;
+    quint64 totalTimePlayed() const;
+    quint64 lastTimePlayed() const;
     void resetTimePlayed();
 
     /// get the type of this instance
@@ -159,9 +159,9 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
      * Gets the time that the instance was last launched.
      * Stored in milliseconds since epoch.
      */
-    qint64 lastLaunch() const;
+    quint64 lastLaunch() const;
     /// Sets the last launched time to 'val' milliseconds since epoch
-    void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch());
+    void setLastLaunch(quint64 val = QDateTime::currentMSecsSinceEpoch());
 
     /*!
      * \brief Gets this instance's settings object.
@@ -204,7 +204,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
      */
     virtual QString getLogFileRoot() = 0;
 
-    virtual QString getStatusbarDescription() = 0;
+    virtual QString getMainVersion() = 0;
 
     /// FIXME: this really should be elsewhere...
     virtual QString instanceConfigFolder() const = 0;
@@ -222,15 +222,6 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     {
         if (m_hasBrokenVersion != value) {
             m_hasBrokenVersion = value;
-            emit propertiesChanged(this);
-        }
-    }
-
-    bool hasUpdateAvailable() const { return m_hasUpdate; }
-    void setUpdateAvailable(bool value)
-    {
-        if (m_hasUpdate != value) {
-            m_hasUpdate = value;
             emit propertiesChanged(this);
         }
     }
@@ -305,7 +296,6 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
    private: /* data */
     Status m_status = Status::Present;
     bool m_crashed = false;
-    bool m_hasUpdate = false;
     bool m_hasBrokenVersion = false;
 
     SettingsObjectWeakPtr m_global_settings;

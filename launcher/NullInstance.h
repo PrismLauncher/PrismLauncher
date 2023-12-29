@@ -49,11 +49,11 @@ class NullInstance : public BaseInstance {
     virtual ~NullInstance(){};
     void saveNow() override {}
     void loadSpecificSettings() override { setSpecificSettingsLoaded(true); }
-    QString getStatusbarDescription() override { return tr("Unknown instance type"); };
+    QString getMainVersion() override { return tr("Unknown"); };
     QSet<QString> traits() const override { return {}; };
     QString instanceConfigFolder() const override { return instanceRoot(); };
     shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr, MinecraftServerTargetPtr) override { return nullptr; }
-    shared_qobject_ptr<Task> createUpdateTask([[maybe_unused]] Net::Mode mode) override { return nullptr; }
+    shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) override { return nullptr; }
     QProcessEnvironment createEnvironment() override { return QProcessEnvironment(); }
     QProcessEnvironment createLaunchEnvironment() override { return QProcessEnvironment(); }
     QMap<QString, QString> getVariables() override { return QMap<QString, QString>(); }

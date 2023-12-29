@@ -35,7 +35,7 @@
 
 #pragma once
 
-#include <QAbstractListModel>
+#include <QAbstractTableModel>
 #include <QList>
 #include <QObject>
 #include <QPair>
@@ -52,10 +52,6 @@ using InstanceId = QString;
 using GroupId = QString;
 using InstanceLocator = std::pair<InstancePtr, int>;
 
-enum class InstCreateError { NoCreateError = 0, NoSuchVersion, UnknownCreateError, InstExists, CantCreateDir };
-
-enum class GroupsState { NotLoaded, Steady, Dirty };
-
 struct TrashHistoryItem {
     QString id;
     QString polyPath;
@@ -63,7 +59,7 @@ struct TrashHistoryItem {
     QString groupName;
 };
 
-class InstanceList : public QAbstractListModel {
+class InstanceList : public QAbstractTableModel {
     Q_OBJECT
 
    public:
@@ -71,30 +67,35 @@ class InstanceList : public QAbstractListModel {
     virtual ~InstanceList();
 
    public:
-    QModelIndex index(int row, int column = 0, const QModelIndex& parent = QModelIndex()) const override;
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-    enum AdditionalRoles {
-        GroupRole = Qt::UserRole,
-        InstancePointerRole = 0x34B1CB48,  ///< Return pointer to real instance
-        InstanceIDRole = 0x34B1CB49        ///< Return id if the instance
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+
+    enum Column {
+        StatusColumn,
+        NameColumn,
+        CategoryColumn,
+        GameVersionColumn,
+        PlayTimeColumn,
+        LastPlayedColumn,
+
+        ColumnCount
     };
-    /*!
-     * \brief Error codes returned by functions in the InstanceList class.
-     * NoError Indicates that no error occurred.
-     * UnknownError indicates that an unspecified error occurred.
-     */
-    enum InstListError { NoError = 0, UnknownError };
+
+    enum AdditionalRoles { SortRole = Qt::UserRole + 1, IconRole, NameRole, CategoryRole, InstanceIDRole };
+
+    QHash<int, QByteArray> roleNames() const override;
 
     InstancePtr at(int i) const { return m_instances.at(i); }
 
     int count() const { return m_instances.count(); }
 
-    InstListError loadList();
+    void loadList();
     void saveNow();
 
     /* O(n) */
@@ -103,10 +104,13 @@ class InstanceList : public QAbstractListModel {
     InstancePtr getInstanceByManagedName(const QString& managed_name) const;
     QModelIndex getInstanceIndexById(const QString& id) const;
     QStringList getGroups();
-    bool isGroupCollapsed(const QString& groupName);
 
     GroupId getInstanceGroup(const InstanceId& id) const;
     void setInstanceGroup(const InstanceId& id, GroupId name);
+    void setInstanceGroup(const InstancePtr inst, GroupId name);
+
+    void setInstanceName(const InstanceId& id, const QString name);
+    void setInstanceName(const InstancePtr inst, const QString name);
 
     void deleteGroup(const GroupId& name);
     void renameGroup(const GroupId& src, const GroupId& dst);
@@ -161,7 +165,6 @@ class InstanceList : public QAbstractListModel {
 
    public slots:
     void on_InstFolderChanged(const Setting& setting, QVariant value);
-    void on_GroupStateChanged(const QString& group, bool collapsed);
 
    private slots:
     void propertiesChanged(BaseInstance* inst);
@@ -193,8 +196,6 @@ class InstanceList : public QAbstractListModel {
     SettingsObjectPtr m_globalSettings;
     QString m_instDir;
     QFileSystemWatcher* m_watcher;
-    // FIXME: this is so inefficient that looking at it is almost painful.
-    QSet<QString> m_collapsedGroups;
     QMap<InstanceId, GroupId> m_instanceGroupIndex;
     QSet<InstanceId> instanceSet;
     bool m_groupsLoaded = false;
