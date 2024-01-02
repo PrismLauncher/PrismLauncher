@@ -601,6 +601,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("AutoCloseConsole", false);
         m_settings->registerSetting("ShowConsoleOnError", true);
         m_settings->registerSetting("LogPrePostOutput", true);
+        m_settings->registerSetting("LineWrap", true);
 
         // Window Size
         m_settings->registerSetting({ "LaunchMaximized", "MCWindowMaximize" }, false);

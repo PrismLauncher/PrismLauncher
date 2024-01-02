@@ -140,12 +140,12 @@ void LogModel::setOverflowMessage(const QString& overflowMessage)
 
 void LogModel::setLineWrap(bool state)
 {
-    if (m_lineWrap != state) {
-        m_lineWrap = state;
+    if (APPLICATION->settings()->get("LineWrap") != state) {
+        APPLICATION->settings()->set("LineWrap",state);
     }
 }
 
-bool LogModel::wrapLines() const
+bool LogModel::wrapLines()
 {
-    return m_lineWrap;
+    return APPLICATION->settings()->get("LineWrap");
 }
