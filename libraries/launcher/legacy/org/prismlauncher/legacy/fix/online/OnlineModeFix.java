@@ -41,6 +41,8 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.prismlauncher.legacy.utils.url.UrlUtils;
+
 public final class OnlineModeFix {
     public static URLConnection openConnection(URL address, Proxy proxy) throws IOException {
         // we start with "http://www.minecraft.net/game/joinserver.jsp?user=..."
@@ -59,6 +61,6 @@ public final class OnlineModeFix {
             throw new AssertionError("url should be valid", e);
         }
 
-        return url.openConnection();
+        return UrlUtils.openConnection(url, proxy);
     }
 }
