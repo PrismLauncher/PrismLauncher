@@ -267,6 +267,11 @@ void ModrinthPage::updateUI()
     text += "<br>" + tr(" by ") + QString("<a href=%1>%2</a>").arg(std::get<1>(current.author).toString(), std::get<0>(current.author));
 
     if (current.extraInfoLoaded) {
+        if (current.extra.status == "archived") {
+            text += "<br><br>" + tr("<b>This project has been archived. It will not receive any further updates unless the author decides "
+                                    "to unarchive the project.</b>");
+        }
+
         if (!current.extra.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
             auto donateToStr = [](Modrinth::DonationData& donate) -> QString {

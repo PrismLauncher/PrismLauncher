@@ -200,6 +200,11 @@ void ResourcePage::updateUi()
     }
 
     if (current_pack->extraDataLoaded) {
+        if (current_pack->extraData.status == "archived") {
+            text += "<br><br>" + tr("<b>This project has been archived. It will not receive any further updates unless the author decides "
+                                    "to unarchive the project.</b>");
+        }
+
         if (!current_pack->extraData.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
             auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
