@@ -12,15 +12,15 @@ class QFileInfo;
 namespace DesktopServices {
 /**
  * Open a path in whatever application is applicable.
- * @param ensurePathExists Make sure the path exists
+ * @param ensureFolderPathExists Make sure the path exists
  */
-bool openPath(const QFileInfo& path, bool ensurePathExists = false);
+bool openPath(const QFileInfo& path, bool ensureFolderPathExists = false);
 
 /**
  * Open a path in whatever application is applicable.
- * @param ensurePathExists Make sure the path exists
+ * @param ensureFolderPathExists Make sure the path exists
  */
-bool openPath(const QString& path, bool ensurePathExists = false);
+bool openPath(const QString& path, bool ensureFolderPathExists = false);
 
 /**
  * Run an application

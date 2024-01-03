@@ -40,18 +40,18 @@
 #include "FileSystem.h"
 
 namespace DesktopServices {
-bool openPath(const QFileInfo& path, bool ensureExists)
+bool openPath(const QFileInfo& path, bool ensureFolderPathExists)
 {
     qDebug() << "Opening path" << path;
-    if (ensureExists) {
+    if (ensureFolderPathExists) {
         FS::ensureFolderPathExists(path);
     }
     return openUrl(QUrl::fromLocalFile(QFileInfo(path).absolutePath()));
 }
 
-bool openPath(const QString& path, bool ensureExists)
+bool openPath(const QString& path, bool ensureFolderPathExists)
 {
-    return openPath(QFileInfo(path), ensureExists);
+    return openPath(QFileInfo(path), ensureFolderPathExists);
 }
 
 bool run(const QString& application, const QStringList& args, const QString& workingDirectory, qint64* pid)
