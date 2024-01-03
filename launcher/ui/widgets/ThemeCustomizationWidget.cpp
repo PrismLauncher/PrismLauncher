@@ -27,6 +27,7 @@ ThemeCustomizationWidget::ThemeCustomizationWidget(QWidget* parent) : QWidget(pa
 {
     ui->setupUi(this);
     loadSettings();
+    ThemeCustomizationWidget::refresh();
 
     connect(ui->iconsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThemeCustomizationWidget::applyIconTheme);
     connect(ui->widgetStyleComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
