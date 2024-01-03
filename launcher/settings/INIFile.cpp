@@ -54,6 +54,7 @@ bool INIFile::saveFile(QString fileName)
         insert("ConfigVersion", "1.2");
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
     _settings_obj.setFallbacksEnabled(false);
+    _settings_obj.clear();
 
     for (Iterator iter = begin(); iter != end(); iter++)
         _settings_obj.setValue(iter.key(), iter.value());

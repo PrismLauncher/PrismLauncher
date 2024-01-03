@@ -35,7 +35,6 @@
  */
 #include "ConcurrentTask.h"
 
-#include <QCoreApplication>
 #include <QDebug>
 #include "tasks/Task.h"
 
@@ -47,9 +46,9 @@ ConcurrentTask::ConcurrentTask(QObject* parent, QString task_name, int max_concu
 
 ConcurrentTask::~ConcurrentTask()
 {
-    for (auto task : m_queue) {
+    for (auto task : m_doing) {
         if (task)
-            task->deleteLater();
+            task->disconnect(this);
     }
 }
 
@@ -65,15 +64,13 @@ void ConcurrentTask::addTask(Task::Ptr task)
 
 void ConcurrentTask::executeTask()
 {
-    // Start one task, startNext handles starting the up to the m_total_max_size
-    // while tracking the number currently being done
-    QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
+    for (auto i = 0; i < m_total_max_size; i++)
+        QMetaObject::invokeMethod(this, &ConcurrentTask::executeNextSubTask, Qt::QueuedConnection);
 }
 
 bool ConcurrentTask::abort()
 {
     m_queue.clear();
-    m_aborted = true;
 
     if (m_doing.isEmpty()) {
         // Don't call emitAborted() here, we want to bypass the 'is the task running' check
@@ -108,29 +105,36 @@ void ConcurrentTask::clear()
     m_failed.clear();
     m_queue.clear();
 
-    m_aborted = false;
-
     m_progress = 0;
     m_stepProgress = 0;
 }
 
-void ConcurrentTask::startNext()
+void ConcurrentTask::executeNextSubTask()
 {
-    if (m_aborted || m_doing.count() > m_total_max_size)
+    if (!isRunning()) {
         return;
-
-    if (m_queue.isEmpty() && m_doing.isEmpty() && !wasSuccessful()) {
-        emitSucceeded();
+    }
+    if (m_doing.count() >= m_total_max_size) {
+        return;
+    }
+    if (m_queue.isEmpty()) {
+        if (m_doing.isEmpty()) {
+            if (m_failed.isEmpty())
+                emitSucceeded();
+            else
+                emitFailed(tr("One or more subtasks failed"));
+        }
         return;
     }
 
-    if (m_queue.isEmpty())
-        return;
+    startSubTask(m_queue.dequeue());
+}
 
-    Task::Ptr next = m_queue.dequeue();
-
+void ConcurrentTask::startSubTask(Task::Ptr next)
+{
     connect(next.get(), &Task::succeeded, this, [this, next]() { subTaskSucceeded(next); });
     connect(next.get(), &Task::failed, this, [this, next](QString msg) { subTaskFailed(next, msg); });
+    // this should never happen but if it does, it's better to fail the task than get stuck
     connect(next.get(), &Task::aborted, this, [this, next] { subTaskFailed(next, "Aborted"); });
 
     connect(next.get(), &Task::status, this, [this, next](QString msg) { subTaskStatus(next, msg); });
@@ -140,55 +144,42 @@ void ConcurrentTask::startNext()
     connect(next.get(), &Task::progress, this, [this, next](qint64 current, qint64 total) { subTaskProgress(next, current, total); });
 
     m_doing.insert(next.get(), next);
-    qsizetype num_starts = qMin(m_queue.size(), m_total_max_size - m_doing.size());
+
     auto task_progress = std::make_shared<TaskStepProgress>(next->getUid());
     m_task_progress.insert(next->getUid(), task_progress);
 
     updateState();
     updateStepProgress(*task_progress.get(), Operation::ADDED);
 
-    QCoreApplication::processEvents();
-
     QMetaObject::invokeMethod(next.get(), &Task::start, Qt::QueuedConnection);
+}
 
-    // Allow going up the number of concurrent tasks in case of tasks being added in the middle of a running task.
-    for (int i = 0; i < num_starts; i++)
-        QMetaObject::invokeMethod(this, &ConcurrentTask::startNext, Qt::QueuedConnection);
+void ConcurrentTask::subTaskFinished(Task::Ptr task, TaskStepState state)
+{
+    m_done.insert(task.get(), task);
+    (state == TaskStepState::Succeeded ? m_succeeded : m_failed).insert(task.get(), task);
+
+    m_doing.remove(task.get());
+
+    auto task_progress = m_task_progress.value(task->getUid());
+    task_progress->state = state;
+
+    disconnect(task.get(), 0, this, 0);
+
+    emit stepProgress(*task_progress);
+    updateState();
+    updateStepProgress(*task_progress, Operation::REMOVED);
+    QMetaObject::invokeMethod(this, &ConcurrentTask::executeNextSubTask, Qt::QueuedConnection);
 }
 
 void ConcurrentTask::subTaskSucceeded(Task::Ptr task)
 {
-    m_done.insert(task.get(), task);
-    m_succeeded.insert(task.get(), task);
-
-    m_doing.remove(task.get());
-    auto task_progress = m_task_progress.value(task->getUid());
-    task_progress->state = TaskStepState::Succeeded;
-
-    disconnect(task.get(), 0, this, 0);
-
-    emit stepProgress(*task_progress);
-    updateState();
-    updateStepProgress(*task_progress, Operation::REMOVED);
-    startNext();
+    subTaskFinished(task, TaskStepState::Succeeded);
 }
 
 void ConcurrentTask::subTaskFailed(Task::Ptr task, [[maybe_unused]] const QString& msg)
 {
-    m_done.insert(task.get(), task);
-    m_failed.insert(task.get(), task);
-
-    m_doing.remove(task.get());
-
-    auto task_progress = m_task_progress.value(task->getUid());
-    task_progress->state = TaskStepState::Failed;
-
-    disconnect(task.get(), 0, this, 0);
-
-    emit stepProgress(*task_progress);
-    updateState();
-    updateStepProgress(*task_progress, Operation::REMOVED);
-    startNext();
+    subTaskFinished(task, TaskStepState::Failed);
 }
 
 void ConcurrentTask::subTaskStatus(Task::Ptr task, const QString& msg)

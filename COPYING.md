@@ -1,7 +1,7 @@
 ## Prism Launcher
 
      Prism Launcher - Minecraft Launcher
-     Copyright (C) 2022-2023 Prism Launcher Contributors
+     Copyright (C) 2022-2024 Prism Launcher Contributors
 
      This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -436,7 +436,7 @@
         Copyright (C) 2007 Johann Ollivier Lapeyre <johann@oxygen-icons.org>
         Copyright (C) 2007 Kenneth Wimer <kwwii@bootsplash.org>
         Copyright (C) 2007 Riccardo Iaconelli <riccardo@oxygen-icons.org>
-    
+
     and others
 
     This library is free software; you can redistribute it and/or
