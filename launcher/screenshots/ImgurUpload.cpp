@@ -58,14 +58,14 @@ void ImgurUpload::init()
 
 QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
 {
-    auto file = new QFile(m_fileInfo.absoluteFilePath());
+    auto file = new QFile(m_fileInfo.absoluteFilePath(), this);
 
     if (!file->open(QFile::ReadOnly)) {
         emitFailed();
         return nullptr;
     }
 
-    QHttpMultiPart* multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QHttpMultiPart* multipart = new QHttpMultiPart(QHttpMultiPart::FormDataType, this);
     file->setParent(multipart);
     QHttpPart filePart;
     filePart.setBodyDevice(file);
