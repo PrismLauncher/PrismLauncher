@@ -321,6 +321,12 @@ bool CoreModFolderPage::shouldDisplay() const
 
         auto version = inst->getPackProfile();
 
+        ProgressDialog loadDialog(parentWidget());
+        auto update = inst->createUpdateTask(Net::Mode::Offline);
+        if (update) {
+            loadDialog.setSkipButton(true, tr("Abort"));
+            loadDialog.execWithTask(update.get());
+        }
         if (!version)
             return true;
         if (!version->getComponent("net.minecraftforge"))
