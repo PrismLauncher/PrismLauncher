@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
+  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5">
+
+<Identity
+  Name="org.prismlauncher.PrismLauncher"
+  Version="PRISM_VERSION_REPLACEME"
+  Publisher="CN=Sefa Eyeoglu, O=Sefa Eyeoglu, S=Nordrhein-Westfalen, C=DE"
+  ProcessorArchitecture="PRISM_ARCH_REPLACEME" />
+
+  <Properties>
+    <DisplayName>Prism Launcher</DisplayName>
+    <PublisherDisplayName>Prism Launcher</PublisherDisplayName>
+    <Description>A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once</Description>
+    <Logo>prismlauncher_150x150.png</Logo>
+  </Properties>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.22621.0" />
+    <PackageDependency
+      Name="Microsoft.VCLibs.140.00.UWPDesktop"
+      Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
+      MinVersion="14.0.30035.0" />
+  </Dependencies>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust"/>
+    <rescap:Capability Name="unvirtualizedResources"/>
+  </Capabilities>
+
+  <Applications>
+    <Application
+      Id="PrismLauncher"
+      Executable="prismlauncher.exe"
+      EntryPoint="windows.fullTrustApplication"
+    >
+
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation
+            Name="prismlauncher_fileassociations"
+            desktop2:AllowSilentDefaultTakeOver="true"
+            desktop5:ThumbnailTypeOverlay="prismlauncher_44x44.png">
+              <uap:DisplayName>Prism Launcher</uap:DisplayName>
+              <uap:InfoTip>Import into Prism Launcher</uap:InfoTip>
+              <uap:SupportedFileTypes>
+                <uap:FileType>.zip</uap:FileType>
+                <uap:FileType>.mrpack</uap:FileType>
+              </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
+
+      <uap:VisualElements
+        DisplayName="Prism Launcher"
+        Description="A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once"
+        Square150x150Logo="prismlauncher_150x150.png"
+        Square44x44Logo="prismlauncher_44x44.png"
+        BackgroundColor="transparent"
+      />
+    </Application>
+  </Applications>
+</Package>
