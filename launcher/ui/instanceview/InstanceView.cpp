@@ -458,6 +458,7 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
     QPainter painter(this->viewport());
 
     if (m_catVisible) {
+        painter.setOpacity(APPLICATION->settings()->get("CatOpacity").toFloat() / 100);
         int widWidth = this->viewport()->width();
         int widHeight = this->viewport()->height();
         if (m_catPixmap.width() < widWidth)
@@ -468,6 +469,7 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
         QRect rectOfPixmap = pixmap.rect();
         rectOfPixmap.moveBottomRight(this->viewport()->rect().bottomRight());
         painter.drawPixmap(rectOfPixmap.topLeft(), pixmap);
+        painter.setOpacity(1.0);
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)

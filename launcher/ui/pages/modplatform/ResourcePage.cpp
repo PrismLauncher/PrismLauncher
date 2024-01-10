@@ -200,6 +200,11 @@ void ResourcePage::updateUi()
     }
 
     if (current_pack->extraDataLoaded) {
+        if (current_pack->extraData.status == "archived") {
+            text += "<br><br>" + tr("<b>This project has been archived. It will not receive any further updates unless the author decides "
+                                    "to unarchive the project.</b>");
+        }
+
         if (!current_pack->extraData.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
             auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
@@ -404,9 +409,9 @@ void ResourcePage::openUrl(const QUrl& url)
             auto jump = [url, slug, model, view] {
                 for (int row = 0; row < model->rowCount({}); row++) {
                     const QModelIndex index = model->index(row);
-                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
-                    if (pack.slug == slug) {
+                    if (pack->slug == slug) {
                         view->setCurrentIndex(index);
                         return;
                     }

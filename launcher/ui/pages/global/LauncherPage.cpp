@@ -221,6 +221,9 @@ void LauncherPage::applySettings()
             break;
     }
 
+    // Cat
+    s->set("CatOpacity", ui->catOpacitySpinBox->value());
+
     // Mods
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
     s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
@@ -275,6 +278,9 @@ void LauncherPage::loadSettings()
     } else {
         ui->sortByNameBtn->setChecked(true);
     }
+
+    // Cat
+    ui->catOpacitySpinBox->setValue(s->get("CatOpacity").toInt());
 
     // Mods
     ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());

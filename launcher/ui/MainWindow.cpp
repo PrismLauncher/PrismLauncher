@@ -186,6 +186,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         ui->instanceToolBar->addContextMenuAction(ui->newsToolBar->toggleViewAction());
         ui->instanceToolBar->addContextMenuAction(ui->instanceToolBar->toggleViewAction());
+        ui->instanceToolBar->addContextMenuAction(ui->actionToggleStatusBar);
         ui->instanceToolBar->addContextMenuAction(ui->actionLockToolbars);
     }
 
@@ -317,6 +318,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(ui->actionCAT, &QAction::toggled, this, &MainWindow::onCatToggled);
         connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::onCatChanged);
         setCatBackground(cat_enable);
+    }
+
+    // Togglable status bar
+    {
+        bool statusBarVisible = APPLICATION->settings()->get("StatusBarVisible").toBool();
+        ui->actionToggleStatusBar->setChecked(statusBarVisible);
+        connect(ui->actionToggleStatusBar, &QAction::toggled, this, &MainWindow::setStatusBarVisibility);
+        setStatusBarVisibility(statusBarVisible);
     }
 
     // Lock toolbars
@@ -451,9 +460,15 @@ QMenu* MainWindow::createPopupMenu()
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
     filteredMenu->removeAction(ui->mainToolBar->toggleViewAction());
 
+    filteredMenu->addAction(ui->actionToggleStatusBar);
     filteredMenu->addAction(ui->actionLockToolbars);
 
     return filteredMenu;
+}
+void MainWindow::setStatusBarVisibility(bool state)
+{
+    statusBar()->setVisible(state);
+    APPLICATION->settings()->set("StatusBarVisible", state);
 }
 void MainWindow::lockToolbars(bool state)
 {

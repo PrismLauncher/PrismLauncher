@@ -149,6 +149,7 @@ void EnsureMetadataTask::executeTask()
             if (m_current_task)
                 m_current_task.reset();
         });
+        connect(project_task.get(), &Task::failed, this, &EnsureMetadataTask::emitFailed);
 
         m_current_task = project_task;
         project_task->start();
