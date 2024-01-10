@@ -35,13 +35,13 @@
 
 package org.prismlauncher.legacy.fix.online;
 
+import org.prismlauncher.legacy.utils.url.UrlUtils;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.prismlauncher.legacy.utils.url.UrlUtils;
 
 public final class OnlineModeFix {
     public static URLConnection openConnection(URL address, Proxy proxy) throws IOException {
