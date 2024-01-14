@@ -1437,7 +1437,7 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 {
     if (m_selectedInstance) {
         QString str = m_selectedInstance->instanceRoot();
-        DesktopServices::openPath(QDir(str).absolutePath());
+        DesktopServices::openPath(QFileInfo(str));
     }
 }
 
