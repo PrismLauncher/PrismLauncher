@@ -39,9 +39,6 @@ on:
       APPLE_NOTARIZE_PASSWORD:
         description: Password used for notarizing macOS builds
         required: false
-      CACHIX_AUTH_TOKEN:
-        description: Private token for authenticating against Cachix cache
-        required: false
       GPG_PRIVATE_KEY:
         description: Private key for AppImage signing
         required: false
