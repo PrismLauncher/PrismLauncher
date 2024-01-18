@@ -16,7 +16,12 @@ jobs:
       SPARKLE_ED25519_KEY: ${{ secrets.SPARKLE_ED25519_KEY }}
       WINDOWS_CODESIGN_CERT: ${{ secrets.WINDOWS_CODESIGN_CERT }}
       WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
-      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      APPLE_CODESIGN_CERT: ${{ secrets.APPLE_CODESIGN_CERT }}
+      APPLE_CODESIGN_PASSWORD: ${{ secrets.APPLE_CODESIGN_PASSWORD }}
+      APPLE_CODESIGN_ID: ${{ secrets.APPLE_CODESIGN_ID }}
+      APPLE_NOTARIZE_APPLE_ID: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
+      APPLE_NOTARIZE_TEAM_ID: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
+      APPLE_NOTARIZE_PASSWORD: ${{ secrets.APPLE_NOTARIZE_PASSWORD }}
       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
       GPG_PRIVATE_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY_ID }}
 
@@ -46,8 +51,8 @@ jobs:
           mv PrismLauncher-Linux-Qt5*/PrismLauncher.tar.gz PrismLauncher-Linux-Qt5-${{ env.VERSION }}.tar.gz       
           mv PrismLauncher-*.AppImage/PrismLauncher-*.AppImage PrismLauncher-Linux-x86_64.AppImage
           mv PrismLauncher-*.AppImage.zsync/PrismLauncher-*.AppImage.zsync PrismLauncher-Linux-x86_64.AppImage.zsync
-          mv PrismLauncher-macOS-Legacy*/PrismLauncher.tar.gz PrismLauncher-macOS-Legacy-${{ env.VERSION }}.tar.gz
-          mv PrismLauncher-macOS*/PrismLauncher.tar.gz PrismLauncher-macOS-${{ env.VERSION }}.tar.gz
+          mv PrismLauncher-macOS-Legacy*/PrismLauncher.zip PrismLauncher-macOS-Legacy-${{ env.VERSION }}.zip
+          mv PrismLauncher-macOS*/PrismLauncher.zip PrismLauncher-macOS-${{ env.VERSION }}.zip
 
           tar --exclude='.git' -czf PrismLauncher-${{ env.VERSION }}.tar.gz PrismLauncher-${{ env.VERSION }}
 
@@ -102,6 +107,6 @@ jobs:
             PrismLauncher-Windows-MSVC-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Portable-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MSVC-Setup-${{ env.VERSION }}.exe
-            PrismLauncher-macOS-${{ env.VERSION }}.tar.gz
-            PrismLauncher-macOS-Legacy-${{ env.VERSION }}.tar.gz
+            PrismLauncher-macOS-${{ env.VERSION }}.zip
+            PrismLauncher-macOS-Legacy-${{ env.VERSION }}.zip
             PrismLauncher-${{ env.VERSION }}.tar.gz

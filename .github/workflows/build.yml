@@ -21,8 +21,23 @@ on:
       WINDOWS_CODESIGN_PASSWORD:
         description: Password for signing Windows builds
         required: false
-      CACHIX_AUTH_TOKEN:
-        description: Private token for authenticating against Cachix cache
+      APPLE_CODESIGN_CERT:
+        description: Certificate for signing macOS builds
+        required: false
+      APPLE_CODESIGN_PASSWORD:
+        description: Password for signing macOS builds
+        required: false
+      APPLE_CODESIGN_ID:
+        description: Certificate ID for signing macOS builds
+        required: false
+      APPLE_NOTARIZE_APPLE_ID:
+        description: Apple ID used for notarizing macOS builds
+        required: false
+      APPLE_NOTARIZE_TEAM_ID:
+        description: Team ID used for notarizing macOS builds
+        required: false
+      APPLE_NOTARIZE_PASSWORD:
+        description: Password used for notarizing macOS builds
         required: false
       GPG_PRIVATE_KEY:
         description: Private key for AppImage signing
@@ -336,6 +351,20 @@ jobs:
       # PACKAGE BUILDS
       ##
 
+      - name: Fetch codesign certificate (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          echo '${{ secrets.APPLE_CODESIGN_CERT }}' | base64 --decode > codesign.p12
+          if [ -n '${{ secrets.APPLE_CODESIGN_ID }}' ]; then
+            security create-keychain -p '${{ secrets.APPLE_CODESIGN_PASSWORD }}' build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p '${{ secrets.APPLE_CODESIGN_PASSWORD }}' build.keychain
+            security import codesign.p12 -k build.keychain -P '${{ secrets.APPLE_CODESIGN_PASSWORD }}' -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '${{ secrets.APPLE_CODESIGN_PASSWORD }}' build.keychain
+          else
+            echo ":warning: Using ad-hoc code signing for macOS, as certificate was not present." >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Package (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -343,9 +372,34 @@ jobs:
 
           cd ${{ env.INSTALL_DIR }}
           chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
-          sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
+
+          if [ -n '${{ secrets.APPLE_CODESIGN_ID }}' ]; then
+            APPLE_CODESIGN_ID='${{ secrets.APPLE_CODESIGN_ID }}'
+          else
+            APPLE_CODESIGN_ID='-'
+          fi
+
+          sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
           mv "PrismLauncher.app" "Prism Launcher.app"
-          tar -czf ../PrismLauncher.tar.gz *
+
+      - name: Notarize (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          cd ${{ env.INSTALL_DIR }}
+
+          if [ -n '${{ secrets.APPLE_NOTARIZE_PASSWORD }}' ]; then
+            ditto -c -k --sequesterRsrc --keepParent "Prism Launcher.app" ../PrismLauncher.zip
+            xcrun notarytool submit ../PrismLauncher.zip \
+              --wait --progress \
+              --apple-id '${{ secrets.APPLE_NOTARIZE_APPLE_ID }}' \
+              --team-id '${{ secrets.APPLE_NOTARIZE_TEAM_ID }}' \
+              --password '${{ secrets.APPLE_NOTARIZE_PASSWORD }}'
+
+            xcrun stapler staple "Prism Launcher.app"
+          else
+            echo ":warning: Skipping notarization as credentials are not present." >> $GITHUB_STEP_SUMMARY
+          fi
+          ditto -c -k --sequesterRsrc --keepParent "Prism Launcher.app" ../PrismLauncher.zip
 
       - name: Make Sparkle signature (macOS)
         if: matrix.name == 'macOS'
@@ -520,7 +574,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: PrismLauncher-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PrismLauncher.tar.gz
+          path: PrismLauncher.zip
 
       - name: Upload binary zip (Windows)
         if: runner.os == 'Windows'
