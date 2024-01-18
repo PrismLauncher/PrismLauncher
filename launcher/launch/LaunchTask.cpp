@@ -226,20 +226,14 @@ void LaunchTask::onLogLine(QString line, MessageLevel::Enum level)
 {
     // if the launcher part set a log level, use it
     auto innerLevel = MessageLevel::fromLine(line);
-    if (innerLevel != MessageLevel::Unknown) {
+    if (innerLevel != MessageLevel::Unknown)
         level = innerLevel;
-    }
-
-    // If the level is still undetermined, guess level
-    if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown) {
-        level = m_instance->guessLevel(line, level);
-    }
 
     // censor private user info
     line = censorPrivateInfo(line);
 
-    auto& model = *getLogModel();
-    model.append(level, line);
+    auto model = getLogModel();
+    model->append(level, line);
 }
 
 void LaunchTask::emitSucceeded()

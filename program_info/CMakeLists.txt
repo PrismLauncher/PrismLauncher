@@ -36,6 +36,8 @@ set(Launcher_Branding_LogoQRC "program_info/prismlauncher.qrc" PARENT_SCOPE)
 
 set(Launcher_Portable_File "program_info/portable.txt" PARENT_SCOPE)
 
+set(Launcher_QtConf_MacOS "program_info/macos.qt.conf" PARENT_SCOPE)
+
 configure_file(org.prismlauncher.PrismLauncher.desktop.in org.prismlauncher.PrismLauncher.desktop)
 configure_file(org.prismlauncher.PrismLauncher.metainfo.xml.in org.prismlauncher.PrismLauncher.metainfo.xml)
 configure_file(prismlauncher.rc.in prismlauncher.rc @ONLY)

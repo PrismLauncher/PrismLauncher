@@ -47,8 +47,8 @@
 
 #include <BaseInstance.h>
 
+#include "minecraft/auth/MinecraftAccount.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
-#include "ui/themes/CatPack.h"
 
 class LaunchController;
 class LocalPeer;
