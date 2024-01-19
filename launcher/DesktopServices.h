@@ -3,30 +3,29 @@
 #include <QString>
 #include <QUrl>
 
+class QFileInfo;
+
 /**
  * This wraps around QDesktopServices and adds workarounds where needed
  * Use this instead of QDesktopServices!
  */
 namespace DesktopServices {
 /**
- * Open a file in whatever application is applicable
+ * Open a path in whatever application is applicable.
+ * @param ensureFolderPathExists Make sure the path exists
  */
-bool openFile(const QString& path);
+bool openPath(const QFileInfo& path, bool ensureFolderPathExists = false);
 
 /**
- * Open a file in the specified application
+ * Open a path in whatever application is applicable.
+ * @param ensureFolderPathExists Make sure the path exists
  */
-bool openFile(const QString& application, const QString& path, const QString& workingDirectory = QString(), qint64* pid = 0);
+bool openPath(const QString& path, bool ensureFolderPathExists = false);
 
 /**
  * Run an application
  */
 bool run(const QString& application, const QStringList& args, const QString& workingDirectory = QString(), qint64* pid = 0);
-
-/**
- * Open a directory
- */
-bool openDirectory(const QString& path, bool ensureExists = false);
 
 /**
  * Open the URL, most likely in a browser. Maybe.
@@ -42,9 +41,4 @@ bool isFlatpak();
  * Determine whether the launcher is running in a Snap environment
  */
 bool isSnap();
-
-/**
- * Determine whether the launcher is running in a sandboxed (Flatpak or Snap) environment
- */
-bool isSandbox();
 }  // namespace DesktopServices
