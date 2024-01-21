@@ -132,7 +132,7 @@ QString JsonCatPack::path(QDate now)
     auto files = QDir(m_default_path).entryInfoList(supportedImageFormats, QDir::Files, QDir::Name);
     if (files.length() == 0)
         return "";
-    auto idx = now.dayOfYear() % files.length();
+    auto idx = (now.dayOfYear() - 1) % files.length();
     auto isRandom = dInfo.fileName().compare("random", Qt::CaseInsensitive) == 0;
     if (isRandom)
         idx = QRandomGenerator::global()->bounded(0, files.length());
