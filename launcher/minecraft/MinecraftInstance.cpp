@@ -292,10 +292,10 @@ QString MinecraftInstance::gameRoot() const
     QFileInfo mcDir(FS::PathCombine(instanceRoot(), "minecraft"));
     QFileInfo dotMCDir(FS::PathCombine(instanceRoot(), ".minecraft"));
 
-    if (mcDir.exists() && !dotMCDir.exists())
-        return mcDir.filePath();
-    else
+    if (dotMCDir.exists() && !mcDir.exists())
         return dotMCDir.filePath();
+    else
+        return mcDir.filePath();
 }
 
 QString MinecraftInstance::binRoot() const
