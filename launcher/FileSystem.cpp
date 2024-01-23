@@ -272,13 +272,17 @@ bool ensureFilePathExists(QString filenamepath)
     return success;
 }
 
-bool ensureFolderPathExists(QString foldernamepath)
+bool ensureFolderPathExists(const QFileInfo folderPath)
 {
-    QFileInfo a(foldernamepath);
     QDir dir;
-    QString ensuredPath = a.filePath();
+    QString ensuredPath = folderPath.filePath();
     bool success = dir.mkpath(ensuredPath);
     return success;
+}
+
+bool ensureFolderPathExists(const QString folderPathName)
+{
+    return ensureFolderPathExists(QFileInfo(folderPathName));
 }
 
 bool copyFileAttributes(QString src, QString dst)
@@ -942,6 +946,8 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
     stream << "[Desktop Entry]"
            << "\n";
     stream << "Type=Application"
+           << "\n";
+    stream << "Categories=Game;ActionGame;AdventureGame;Simulation"
            << "\n";
     stream << "Exec=\"" << target.toLocal8Bit() << "\"" << argstring.toLocal8Bit() << "\n";
     stream << "Name=" << name.toLocal8Bit() << "\n";

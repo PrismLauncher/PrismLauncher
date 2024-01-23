@@ -39,7 +39,8 @@ static std::optional<ModPlatform::ModLoaderTypes> mcLoaders(BaseInstance* inst)
 ModUpdateDialog::ModUpdateDialog(QWidget* parent,
                                  BaseInstance* instance,
                                  const std::shared_ptr<ModFolderModel> mods,
-                                 QList<Mod*>& search_for)
+                                 QList<Mod*>& search_for,
+                                 bool includeDeps)
     : ReviewMessageBox(parent, tr("Confirm mods to update"), "")
     , m_parent(parent)
     , m_mod_model(mods)
@@ -47,6 +48,7 @@ ModUpdateDialog::ModUpdateDialog(QWidget* parent,
     , m_second_try_metadata(
           new ConcurrentTask(nullptr, "Second Metadata Search", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
     , m_instance(instance)
+    , m_include_deps(includeDeps)
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
@@ -186,7 +188,7 @@ void ModUpdateDialog::checkCandidates()
         }
     }
 
-    if (!APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
+    if (m_include_deps && !APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
         auto depTask = makeShared<GetModDependenciesTask>(this, m_instance, m_mod_model.get(), selectedVers);
 
         connect(depTask.get(), &Task::failed, this,
@@ -326,6 +328,8 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         connect(modrinth_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });
+        connect(modrinth_task.get(), &EnsureMetadataTask::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (modrinth_task->getHashingTask())
             seq.addTask(modrinth_task->getHashingTask());
@@ -339,6 +343,8 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         connect(flame_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::FLAME);
         });
+        connect(flame_task.get(), &EnsureMetadataTask::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (flame_task->getHashingTask())
             seq.addTask(flame_task->getHashingTask());
@@ -392,6 +398,8 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
         auto task = makeShared<EnsureMetadataTask>(mod, index_dir, next(first_choice));
         connect(task.get(), &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
         connect(task.get(), &EnsureMetadataTask::metadataFailed, [this](Mod* candidate) { onMetadataFailed(candidate, false); });
+        connect(task.get(), &EnsureMetadataTask::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         m_second_try_metadata->addTask(task);
     } else {
@@ -435,6 +443,9 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStri
                 reqItem->insertChildren(i++, { reqItem });
             }
         }
+
+        ui->toggleDepsButton->show();
+        m_deps << item_top;
     }
 
     auto changelog_item = new QTreeWidgetItem(item_top);

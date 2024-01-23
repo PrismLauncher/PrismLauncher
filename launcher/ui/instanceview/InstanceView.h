@@ -65,7 +65,7 @@ class InstanceView : public QAbstractItemView {
     /// get the model index at the specified visual point
     virtual QModelIndex indexAt(const QPoint& point) const override;
     QString groupNameAt(const QPoint& point);
-    void setSelection(const QRect& rect, const QItemSelectionModel::SelectionFlags commands) override;
+    void setSelection(const QRect& rect, QItemSelectionModel::SelectionFlags commands) override;
 
     virtual int horizontalOffset() const override;
     virtual int verticalOffset() const override;

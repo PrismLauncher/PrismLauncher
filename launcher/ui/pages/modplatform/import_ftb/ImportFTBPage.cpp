@@ -20,6 +20,7 @@
 #include "ui/widgets/ProjectItem.h"
 #include "ui_ImportFTBPage.h"
 
+#include <QFileDialog>
 #include <QWidget>
 #include "FileSystem.h"
 #include "ListModel.h"
@@ -55,6 +56,13 @@ ImportFTBPage::ImportFTBPage(NewInstanceDialog* dialog, QWidget* parent) : QWidg
     connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &ImportFTBPage::onSortingSelectionChanged);
 
     connect(ui->searchEdit, &QLineEdit::textChanged, this, &ImportFTBPage::triggerSearch);
+
+    connect(ui->browseButton, &QPushButton::clicked, this, [this] {
+        auto path = listModel->getPath();
+        QString dir = QFileDialog::getExistingDirectory(this, tr("Select FTBApp instances directory"), path, QFileDialog::ShowDirsOnly);
+        if (!dir.isEmpty())
+            listModel->setPath(dir);
+    });
 
     ui->modpackList->setItemDelegate(new ProjectItemDelegate(this));
     ui->modpackList->selectionModel()->reset();

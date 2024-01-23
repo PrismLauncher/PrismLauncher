@@ -186,6 +186,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         ui->instanceToolBar->addContextMenuAction(ui->newsToolBar->toggleViewAction());
         ui->instanceToolBar->addContextMenuAction(ui->instanceToolBar->toggleViewAction());
+        ui->instanceToolBar->addContextMenuAction(ui->actionToggleStatusBar);
         ui->instanceToolBar->addContextMenuAction(ui->actionLockToolbars);
     }
 
@@ -317,6 +318,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         connect(ui->actionCAT, &QAction::toggled, this, &MainWindow::onCatToggled);
         connect(APPLICATION, &Application::currentCatChanged, this, &MainWindow::onCatChanged);
         setCatBackground(cat_enable);
+    }
+
+    // Togglable status bar
+    {
+        bool statusBarVisible = APPLICATION->settings()->get("StatusBarVisible").toBool();
+        ui->actionToggleStatusBar->setChecked(statusBarVisible);
+        connect(ui->actionToggleStatusBar, &QAction::toggled, this, &MainWindow::setStatusBarVisibility);
+        setStatusBarVisibility(statusBarVisible);
     }
 
     // Lock toolbars
@@ -451,9 +460,15 @@ QMenu* MainWindow::createPopupMenu()
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
     filteredMenu->removeAction(ui->mainToolBar->toggleViewAction());
 
+    filteredMenu->addAction(ui->actionToggleStatusBar);
     filteredMenu->addAction(ui->actionLockToolbars);
 
     return filteredMenu;
+}
+void MainWindow::setStatusBarVisibility(bool state)
+{
+    statusBar()->setVisible(state);
+    APPLICATION->settings()->set("StatusBarVisible", state);
 }
 void MainWindow::lockToolbars(bool state)
 {
@@ -1182,33 +1197,43 @@ void MainWindow::undoTrashInstance()
 
 void MainWindow::on_actionViewLauncherRootFolder_triggered()
 {
-    DesktopServices::openDirectory(".");
+    DesktopServices::openPath(".");
 }
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
     QString str = APPLICATION->settings()->get("InstanceDir").toString();
-    DesktopServices::openDirectory(str);
+    DesktopServices::openPath(str);
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->settings()->get("CentralModsDir").toString(), true);
+    DesktopServices::openPath(APPLICATION->settings()->get("CentralModsDir").toString(), true);
 }
 
 void MainWindow::on_actionViewIconThemeFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path());
+    DesktopServices::openPath(APPLICATION->themeManager()->getIconThemesFolder().path(), true);
 }
 
 void MainWindow::on_actionViewWidgetThemeFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path());
+    DesktopServices::openPath(APPLICATION->themeManager()->getApplicationThemesFolder().path(), true);
 }
 
 void MainWindow::on_actionViewCatPackFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path());
+    DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path(), true);
+}
+
+void MainWindow::on_actionViewIconsFolder_triggered()
+{
+    DesktopServices::openPath(APPLICATION->icons()->getDirectory(), true);
+}
+
+void MainWindow::on_actionViewLogsFolder_triggered()
+{
+    DesktopServices::openPath("logs", true);
 }
 
 void MainWindow::refreshInstances()
@@ -1427,7 +1452,7 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 {
     if (m_selectedInstance) {
         QString str = m_selectedInstance->instanceRoot();
-        DesktopServices::openDirectory(QDir(str).absolutePath());
+        DesktopServices::openPath(QFileInfo(str));
     }
 }
 

@@ -155,7 +155,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -177,7 +177,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -199,7 +199,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>64</number>
+             <number>4</number>
             </property>
             <property name="maximum">
              <number>999999999</number>
@@ -605,7 +605,7 @@
           <item>
            <widget class="QCheckBox" name="onlineFixes">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;This currently allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;Current fixes include: skin and online mode support.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Enable online fixes (experimental)</string>

@@ -346,7 +346,7 @@ void InstanceSettingsPage::loadSettings()
 #ifdef Q_OS_LINUX
     ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
 #else
-    ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
+    ui->lineEditOpenALPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
 #endif
 
     // Performance

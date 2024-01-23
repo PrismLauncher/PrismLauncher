@@ -565,6 +565,22 @@ QProcessEnvironment MinecraftInstance::createEnvironment()
     for (auto it = variables.begin(); it != variables.end(); ++it) {
         env.insert(it.key(), it.value());
     }
+    // custom env
+
+    auto insertEnv = [&env](QMap<QString, QVariant> envMap) {
+        if (envMap.isEmpty())
+            return;
+
+        for (auto iter = envMap.begin(); iter != envMap.end(); iter++)
+            env.insert(iter.key(), iter.value().toString());
+    };
+
+    bool overrideEnv = settings()->get("OverrideEnv").toBool();
+
+    if (!overrideEnv)
+        insertEnv(APPLICATION->settings()->get("Env").toMap());
+    else
+        insertEnv(settings()->get("Env").toMap());
     return env;
 }
 
@@ -585,11 +601,17 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
         auto mangoHudLibString = MangoHud::getLibraryString();
         if (!mangoHudLibString.isEmpty()) {
             QFileInfo mangoHudLib(mangoHudLibString);
+            QString libPath = mangoHudLib.absolutePath();
+            auto appendLib = [libPath, &preloadList](QString fileName) {
+                if (QFileInfo(FS::PathCombine(libPath, fileName)).exists())
+                    preloadList << fileName;
+            };
 
             // dlsym variant is only needed for OpenGL and not included in the vulkan layer
-            preloadList << "libMangoHud_dlsym.so"
-                        << "libMangoHud_opengl.so" << mangoHudLib.fileName();
-            libPaths << mangoHudLib.absolutePath();
+            appendLib("libMangoHud_dlsym.so");
+            appendLib("libMangoHud_opengl.so");
+            appendLib(mangoHudLib.fileName());
+            libPaths << libPath;
         }
 
         env.insert("LD_PRELOAD", preloadList.join(QLatin1String(":")));
@@ -606,24 +628,6 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
         env.insert("__GLX_VENDOR_LIBRARY_NAME", "nvidia");
     }
 #endif
-
-    // custom env
-
-    auto insertEnv = [&env](QMap<QString, QVariant> envMap) {
-        if (envMap.isEmpty())
-            return;
-
-        for (auto iter = envMap.begin(); iter != envMap.end(); iter++)
-            env.insert(iter.key(), iter.value().toString());
-    };
-
-    bool overrideEnv = settings()->get("OverrideEnv").toBool();
-
-    if (!overrideEnv)
-        insertEnv(APPLICATION->settings()->get("Env").toMap());
-    else
-        insertEnv(settings()->get("Env").toMap());
-
     return env;
 }
 
