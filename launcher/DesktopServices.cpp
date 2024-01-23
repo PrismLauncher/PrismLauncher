@@ -46,7 +46,7 @@ bool openPath(const QFileInfo& path, bool ensureFolderPathExists)
     if (ensureFolderPathExists) {
         FS::ensureFolderPathExists(path);
     }
-    return openUrl(QUrl::fromLocalFile(QFileInfo(path).absolutePath()));
+    return openUrl(QUrl::fromLocalFile(QFileInfo(path).absoluteFilePath()));
 }
 
 bool openPath(const QString& path, bool ensureFolderPathExists)
