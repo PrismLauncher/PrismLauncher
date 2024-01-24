@@ -15,7 +15,6 @@ to temporarily enable it when using `nix` commands.
 Example (NixOS):
 
 ```nix
-{...}:
 {
   nix.settings = {
     trusted-substituters = [
@@ -118,7 +117,6 @@ If you want to avoid rebuilds you may add the garnix cache to your substitutors.
 Example (NixOS):
 
 ```nix
-{...}:
 {
   nix.settings = {
     trusted-substituters = [
@@ -140,7 +138,7 @@ Example:
 
 ```nix
 {pkgs, ...}: {
-  nixpkgs.overlays = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz")).overlays.default];
+  nixpkgs.overlays = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz" + "/overlays.nix"))];
 
   environment.systemPackages = [pkgs.prismlauncher];
 }
@@ -154,8 +152,8 @@ This way the installed package is fully reproducible.
 Example:
 
 ```nix
-{pkgs, ...}: {
-  environment.systemPackages = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz")).packages.${pkgs.system}.prismlauncher];
+{
+  environment.systemPackages = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz") {}).prismlauncher];
 }
 ```
 
