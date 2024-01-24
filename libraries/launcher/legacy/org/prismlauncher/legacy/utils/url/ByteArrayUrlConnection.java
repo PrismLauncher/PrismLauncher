@@ -33,36 +33,36 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.legacy.fix.online;
+package org.prismlauncher.legacy.utils.url;
 
-import org.prismlauncher.legacy.utils.url.UrlUtils;
-
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.Proxy;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 
-final class Handler extends URLStreamHandler {
-    @Override
-    protected URLConnection openConnection(URL address) throws IOException {
-        return openConnection(address, null);
+public final class ByteArrayUrlConnection extends HttpURLConnection {
+    private final InputStream in;
+
+    public ByteArrayUrlConnection(byte[] data) {
+        super(null);
+        this.in = new ByteArrayInputStream(data);
     }
 
     @Override
-    protected URLConnection openConnection(URL address, Proxy proxy) throws IOException {
-        URLConnection result;
+    public void connect() throws IOException {
+        responseCode = 200;
+    }
 
-        // try various fixes...
-        result = SkinFix.openConnection(address, proxy);
-        if (result != null)
-            return result;
+    @Override
+    public void disconnect() {}
 
-        result = OnlineModeFix.openConnection(address, proxy);
-        if (result != null)
-            return result;
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return in;
+    }
 
-        // ...then give up and make the request directly
-        return UrlUtils.openConnection(address, proxy);
+    @Override
+    public boolean usingProxy() {
+        return false;
     }
 }

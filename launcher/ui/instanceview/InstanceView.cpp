@@ -278,12 +278,14 @@ void InstanceView::mousePressEvent(QMouseEvent* event)
     m_pressedAlreadySelected = selectionModel()->isSelected(m_pressedIndex);
     m_pressedPosition = geometryPos;
 
-    VisualGroup::HitResults hitResult;
-    m_pressedCategory = categoryAt(geometryPos, hitResult);
-    if (m_pressedCategory && hitResult & VisualGroup::CheckboxHit) {
-        setState(m_pressedCategory->collapsed ? ExpandingState : CollapsingState);
-        event->accept();
-        return;
+    if (event->button() == Qt::LeftButton) {
+        VisualGroup::HitResults hitResult;
+        m_pressedCategory = categoryAt(geometryPos, hitResult);
+        if (m_pressedCategory && hitResult & VisualGroup::CheckboxHit) {
+            setState(m_pressedCategory->collapsed ? ExpandingState : CollapsingState);
+            event->accept();
+            return;
+        }
     }
 
     if (index.isValid() && (index.flags() & Qt::ItemIsEnabled)) {
@@ -366,10 +368,7 @@ void InstanceView::mouseReleaseEvent(QMouseEvent* event)
 
     VisualGroup::HitResults hitResult;
 
-    bool click =
-        (index == m_pressedIndex && index.isValid()) || (m_pressedCategory && m_pressedCategory == categoryAt(geometryPos, hitResult));
-
-    if (click && m_pressedCategory) {
+    if (event->button() == Qt::LeftButton && m_pressedCategory != nullptr && m_pressedCategory == categoryAt(geometryPos, hitResult)) {
         if (state() == ExpandingState) {
             m_pressedCategory->collapsed = false;
             emit groupStateChanged(m_pressedCategory->text, false);
@@ -397,7 +396,7 @@ void InstanceView::mouseReleaseEvent(QMouseEvent* event)
 
     setState(NoState);
 
-    if (click) {
+    if (index == m_pressedIndex && index.isValid()) {
         if (event->button() == Qt::LeftButton) {
             emit clicked(index);
         }
@@ -459,6 +458,7 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
     QPainter painter(this->viewport());
 
     if (m_catVisible) {
+        painter.setOpacity(APPLICATION->settings()->get("CatOpacity").toFloat() / 100);
         int widWidth = this->viewport()->width();
         int widHeight = this->viewport()->height();
         if (m_catPixmap.width() < widWidth)
@@ -469,6 +469,7 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
         QRect rectOfPixmap = pixmap.rect();
         rectOfPixmap.moveBottomRight(this->viewport()->rect().bottomRight());
         painter.drawPixmap(rectOfPixmap.topLeft(), pixmap);
+        painter.setOpacity(1.0);
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)

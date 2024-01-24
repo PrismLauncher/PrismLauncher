@@ -176,6 +176,7 @@
     <addaction name="actionChangeTheme"/>
     <addaction name="separator"/>
     <addaction name="actionCAT"/>
+    <addaction name="actionToggleStatusBar"/>
     <addaction name="actionLockToolbars"/>
     <addaction name="separator"/>
    </widget>
@@ -194,6 +195,9 @@
     <addaction name="actionViewIconThemeFolder"/>
     <addaction name="actionViewWidgetThemeFolder"/>
     <addaction name="actionViewCatPackFolder"/>
+    <addaction name="actionViewIconsFolder"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewLogsFolder"/>
    </widget>
    <widget class="QMenu" name="accountsMenu">
     <property name="title">
@@ -252,6 +256,14 @@
    </property>
    <property name="toolTip">
     <string>It's a fluffy kitty :3</string>
+   </property>
+  </action>
+  <action name="actionToggleStatusBar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Status Bar</string>
    </property>
   </action>
   <action name="actionLockToolbars">
@@ -545,10 +557,10 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>View &amp;Instance Folder</string>
+    <string>&amp;Instances</string>
    </property>
    <property name="toolTip">
-    <string>Open the instance folder in a file browser.</string>
+    <string>Open the instances folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewLauncherRootFolder">
@@ -557,7 +569,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>View Launcher &amp;Root Folder</string>
+    <string>Launcher &amp;Root</string>
    </property>
    <property name="toolTip">
     <string>Open the launcher's root folder in a file browser.</string>
@@ -569,10 +581,34 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>View &amp;Central Mods Folder</string>
+    <string>&amp;Central Mods</string>
    </property>
    <property name="toolTip">
     <string>Open the central mods folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewIconsFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Instance Icons</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the instance icons folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewLogsFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Logs</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the logs folder in a file browser.</string>
    </property>
   </action>
   <action name="actionChangeTheme">
@@ -718,10 +754,10 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>View &amp;Widget Themes Folder</string>
+    <string>&amp;Widget Themes</string>
    </property>
    <property name="toolTip">
-    <string>View Widget Theme Folder</string>
+    <string>Open the widget themes folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewIconThemeFolder">
@@ -730,18 +766,22 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>View I&amp;con Theme Folder</string>
+    <string>I&amp;con Theme</string>
    </property>
    <property name="toolTip">
-    <string>View Icon Theme Folder</string>
+    <string>Open the icon theme folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewCatPackFolder">
    <property name="icon">
-    <iconset theme="viewfolder"/>
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>View Cat Packs Folder</string>
+    <string>Cat Packs</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the cat packs folder in a file browser.</string>
    </property>
   </action>
  </widget>

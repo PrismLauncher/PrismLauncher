@@ -84,7 +84,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -106,7 +106,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -128,7 +128,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>64</number>
+             <number>4</number>
             </property>
             <property name="maximum">
              <number>999999999</number>
