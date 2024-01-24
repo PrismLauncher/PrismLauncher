@@ -130,21 +130,34 @@ Example (NixOS):
 }
 ```
 
-### Using the overlay (`fetchTarball`)
+### Using the overlay (stable Nix)
 
-We use flake-compat to allow using this Flake on a system that doesn't use flakes.
+We offer standard Nix expressions and a channel to allow using this flake on a system that doesn't use flakes.
+
+To add the channel:
+
+```shell
+nix-channel --add https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz prismlauncher
+
+nix-channel --update prismlauncher
+```
 
 Example:
 
 ```nix
-{pkgs, ...}: {
-  nixpkgs.overlays = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz" + "/overlays.nix"))];
+{pkgs, ...}: let
+  # with channels
+  prismOverlay = import <prismlauncher/overlay.nix>;
+  # with fetchTarball
+  prismOverlay = import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz" + "/overlay.nix");
+in {
+  nixpkgs.overlays = [prismOverlay];
 
   environment.systemPackages = [pkgs.prismlauncher];
 }
 ```
 
-### Installing the package directly (`fetchTarball`)
+### Installing the package directly (stable Nix)
 
 Alternatively, if you don't want to use an overlay, you can install Prism Launcher directly by installing the `prismlauncher` package.
 This way the installed package is fully reproducible.
@@ -152,8 +165,11 @@ This way the installed package is fully reproducible.
 Example:
 
 ```nix
-{
-  environment.systemPackages = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz") {}).prismlauncher];
+let
+  prismlauncher = import <prismlauncher> {};
+  prismlauncher = import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz") {};
+in {
+  environment.systemPackages = [prismlauncher.prismlauncher];
 }
 ```
 
@@ -164,10 +180,6 @@ You can add this repository as a channel and install its packages that way.
 Example:
 
 ```shell
-nix-channel --add https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz prismlauncher
-
-nix-channel --update prismlauncher
-
 nix-env -iA prismlauncher.prismlauncher
 ```
 
