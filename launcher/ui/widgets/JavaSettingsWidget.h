@@ -51,7 +51,7 @@ class JavaSettingsWidget : public QWidget {
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
     void on_javaDownloadBtn_clicked();
-    void checkFinished(JavaCheckResult result);
+    void checkFinished(JavaChecker::Result result);
 
    protected: /* methods */
     void checkJavaPathOnEdit(const QString& path);
@@ -89,5 +89,5 @@ class JavaSettingsWidget : public QWidget {
     QString queuedCheck;
     uint64_t m_availableMemory = 0ull;
     shared_qobject_ptr<JavaChecker> m_checker;
-    JavaCheckResult m_result;
+    JavaChecker::Result m_result;
 };

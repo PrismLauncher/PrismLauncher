@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QString>
+#include "sys.h"
 #ifdef Q_OS_MACOS
 #include <sys/sysctl.h>
 #endif
@@ -7,9 +8,6 @@
 #include <QMap>
 #include <QProcess>
 #include <QStandardPaths>
-#include "Application.h"
-#include "Commandline.h"
-#include "java/JavaUtils.h"
 
 #ifdef Q_OS_MACOS
 bool rosettaDetect()
@@ -58,5 +56,19 @@ QString useQTForArch()
     }
 #endif
     return qtArch;
+}
+
+int suitableMaxMem()
+{
+    float totalRAM = (float)Sys::getSystemRam() / (float)Sys::mebibyte;
+    int maxMemoryAlloc;
+
+    // If totalRAM < 6GB, use (totalRAM / 1.5), else 4GB
+    if (totalRAM < (4096 * 1.5))
+        maxMemoryAlloc = (int)(totalRAM / 1.5);
+    else
+        maxMemoryAlloc = 4096;
+
+    return maxMemoryAlloc;
 }
 }  // namespace SysInfo

@@ -180,8 +180,6 @@ class Application : public QApplication {
 
     void ShowGlobalSettings(class QWidget* parent, QString open_page = QString());
 
-    int suitableMaxMem();
-
     bool updaterEnabled();
     QString updaterBinaryName();
 

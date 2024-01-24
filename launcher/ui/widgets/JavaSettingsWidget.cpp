@@ -14,7 +14,9 @@
 #include "FileSystem.h"
 #include "JavaCommon.h"
 #include "JavaDownloader.h"
+#include "java/JavaChecker.h"
 #include "java/JavaInstall.h"
+#include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
@@ -368,30 +370,25 @@ void JavaSettingsWidget::checkJavaPath(const QString& path)
         return;
     }
     setJavaStatus(JavaStatus::Pending);
-    m_checker.reset(new JavaChecker());
-    m_checker->m_path = path;
-    m_checker->m_minMem = minHeapSize();
-    m_checker->m_maxMem = maxHeapSize();
-    if (m_permGenSpinBox->isVisible()) {
-        m_checker->m_permGen = m_permGenSpinBox->value();
-    }
+    m_checker.reset(
+        new JavaChecker(path, "", minHeapSize(), maxHeapSize(), m_permGenSpinBox->isVisible() ? m_permGenSpinBox->value() : 0, 0, this));
     connect(m_checker.get(), &JavaChecker::checkFinished, this, &JavaSettingsWidget::checkFinished);
-    m_checker->performCheck();
+    m_checker->start();
 }
 
-void JavaSettingsWidget::checkFinished(JavaCheckResult result)
+void JavaSettingsWidget::checkFinished(JavaChecker::Result result)
 {
     m_result = result;
     switch (result.validity) {
-        case JavaCheckResult::Validity::Valid: {
+        case JavaChecker::Result::Validity::Valid: {
             setJavaStatus(JavaStatus::Good);
             break;
         }
-        case JavaCheckResult::Validity::ReturnedInvalidData: {
+        case JavaChecker::Result::Validity::ReturnedInvalidData: {
             setJavaStatus(JavaStatus::ReturnedInvalidData);
             break;
         }
-        case JavaCheckResult::Validity::Errored: {
+        case JavaChecker::Result::Validity::Errored: {
             setJavaStatus(JavaStatus::DoesNotStart);
             break;
         }
