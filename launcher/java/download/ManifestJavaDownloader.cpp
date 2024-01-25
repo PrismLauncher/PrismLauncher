@@ -31,7 +31,8 @@ struct File {
 };
 
 ManifestJavaDownloader::ManifestJavaDownloader(QUrl url, QString final_path, QString checksumType, QString checksumHash)
-    : m_url(url), m_final_path(final_path), m_checksum_type(checksumType), m_checksum_hash(checksumHash){};
+    : m_url(url), m_final_path(final_path), m_checksum_type(checksumType), m_checksum_hash(checksumHash)
+{}
 
 void ManifestJavaDownloader::executeTask()
 {
