@@ -18,24 +18,24 @@
 
 #pragma once
 
+#include <QUrl>
 #include "tasks/Task.h"
 
-class BasicJavaDownloader : public Task {
+class ManifestJavaDownloader : public Task {
     Q_OBJECT
    public:
-    BasicJavaDownloader(QString final_path, bool m_is_legacy = false, QObject* parent = nullptr);
-    virtual ~BasicJavaDownloader() = default;
+    ManifestJavaDownloader(QUrl url, QString final_path);
+    virtual ~ManifestJavaDownloader() = default;
 
     [[nodiscard]] bool canAbort() const override { return true; }
+    void executeTask() override;
 
-    virtual QString name() const = 0;
-    virtual bool isSupported() const = 0;
+   private slots:
+    void downloadJava(const QJsonDocument& doc);
 
    protected:
-    QString m_os_name;
-    QString m_os_arch;
+    QUrl m_url;
     QString m_final_path;
-    bool m_is_legacy;
 
     Task::Ptr m_current_task;
 };

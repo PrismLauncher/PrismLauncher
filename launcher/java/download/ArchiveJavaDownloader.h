@@ -15,15 +15,27 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "java/providers/BasicJavaDownloader.h"
 
-#include "SysInfo.h"
+#pragma once
+
+#include <QUrl>
 #include "tasks/Task.h"
 
-BasicJavaDownloader::BasicJavaDownloader(QString final_path, bool m_is_legacy, QObject* parent)
-    : Task(parent)
-    , m_os_name(SysInfo::currentSystem())
-    , m_os_arch(SysInfo::useQTForArch())
-    , m_final_path(final_path)
-    , m_is_legacy(m_is_legacy)
-{}
+class ArchiveJavaDownloader : public Task {
+    Q_OBJECT
+   public:
+    ArchiveJavaDownloader(QUrl url, QString final_path);
+    virtual ~ArchiveJavaDownloader() = default;
+
+    [[nodiscard]] bool canAbort() const override { return true; }
+    void executeTask() override;
+
+   private slots:
+    void extractJava(QString input);
+
+   protected:
+    QUrl m_url;
+    QString m_final_path;
+
+    Task::Ptr m_current_task;
+};

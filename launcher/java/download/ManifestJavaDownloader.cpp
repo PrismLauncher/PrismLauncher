@@ -15,7 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "java/providers/MojanglJavaDownloader.h"
+#include "java/download/ManifestJavaDownloader.h"
 
 #include "Application.h"
 #include "FileSystem.h"
@@ -30,89 +30,18 @@ struct File {
     bool isExec;
 };
 
-void MojangJavaDownloader::executeTask()
+ManifestJavaDownloader::ManifestJavaDownloader(QUrl url, QString final_path) : m_url(url), m_final_path(final_path){};
+void ManifestJavaDownloader::executeTask()
 {
-    downloadJavaList();
-};
-
-void MojangJavaDownloader::downloadJavaList()
-{
-    auto netJob = makeShared<NetJob>(QString("JRE::QueryVersions"), APPLICATION->network());
-    auto response = std::make_shared<QByteArray>();
-    setStatus(tr("Querying mojang meta"));
-    netJob->addNetAction(Net::Download::makeByteArray(
-        QUrl("https://piston-meta.mojang.com/v1/products/java-runtime/2ec0cc96c44e5a76b9c8b7c39df7210883d12871/all.json"), response));
-
-    connect(netJob.get(), &NetJob::finished, [netJob, this] {
-        // delete so that it's not called on a deleted job
-        // FIXME: is this needed? qt should handle this
-        disconnect(this, &Task::aborted, netJob.get(), &NetJob::abort);
-    });
-    connect(this, &Task::aborted, netJob.get(), &NetJob::abort);
-
-    connect(netJob.get(), &NetJob::progress, this, &MojangJavaDownloader::progress);
-    connect(netJob.get(), &NetJob::failed, this, &MojangJavaDownloader::emitFailed);
-    connect(netJob.get(), &NetJob::succeeded, [response, this, netJob] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response at " << parse_error.offset << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            emitFailed(parse_error.errorString());
-            return;
-        }
-        auto versionArray = Json::ensureArray(Json::ensureObject(doc.object(), getOS()), m_is_legacy ? "jre-legacy" : "java-runtime-gamma");
-        if (!versionArray.empty()) {
-            parseManifest(versionArray);
-
-        } else {
-            // mojang does not have a JRE for us, so fail
-            emitFailed("No suitable JRE found");
-        }
-    });
-
-    netJob->start();
-};
-
-QString MojangJavaDownloader::getOS() const
-{
-    if (m_os_name == "windows") {
-        if (m_os_arch == "x86_64") {
-            return "windows-x64";
-        }
-        if (m_os_arch == "i386") {
-            return "windows-x86";
-        }
-        // Unknown, maybe arm, appending arch for downloader
-        return "windows-" + m_os_arch;
-    }
-    if (m_os_name == "osx") {
-        if (m_os_arch == "arm64") {
-            return "mac-os-arm64";
-        }
-        return "mac-os";
-    }
-    if (m_os_name == "linux") {
-        if (m_os_arch == "x86_64") {
-            return "linux";
-        }
-        // will work for i386, and arm(64)
-        return "linux-" + m_os_arch;
-    }
-    return {};
-}
-void MojangJavaDownloader::parseManifest(const QJsonArray& versionArray)
-{
-    setStatus(tr("Downloading Java from Mojang"));
-    auto url = Json::ensureString(Json::ensureObject(Json::ensureObject(versionArray[0]), "manifest"), "url");
+    setStatus(tr("Downloading Java"));
     auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
     auto files = std::make_shared<QByteArray>();
 
-    download->addNetAction(Net::Download::makeByteArray(QUrl(url), files));
+    download->addNetAction(Net::Download::makeByteArray(m_url, files));
 
     connect(download.get(), &NetJob::finished, [download, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
-    connect(download.get(), &NetJob::progress, this, &MojangJavaDownloader::progress);
-    connect(download.get(), &NetJob::failed, this, &MojangJavaDownloader::emitFailed);
+    connect(download.get(), &NetJob::progress, this, &ManifestJavaDownloader::progress);
+    connect(download.get(), &NetJob::failed, this, &ManifestJavaDownloader::emitFailed);
     connect(this, &Task::aborted, download.get(), &NetJob::abort);
 
     connect(download.get(), &NetJob::succeeded, [files, this] {
@@ -129,7 +58,7 @@ void MojangJavaDownloader::parseManifest(const QJsonArray& versionArray)
     download->start();
 };
 
-void MojangJavaDownloader::downloadJava(const QJsonDocument& doc)
+void ManifestJavaDownloader::downloadJava(const QJsonDocument& doc)
 {
     // valid json doc, begin making jre spot
     FS::ensureFolderPathExists(m_final_path);
@@ -176,8 +105,8 @@ void MojangJavaDownloader::downloadJava(const QJsonDocument& doc)
         disconnect(this, &Task::aborted, elementDownload, &NetJob::abort);
         elementDownload->deleteLater();
     });
-    connect(elementDownload, &NetJob::progress, this, &MojangJavaDownloader::progress);
-    connect(elementDownload, &NetJob::failed, this, &MojangJavaDownloader::emitFailed);
+    connect(elementDownload, &NetJob::progress, this, &ManifestJavaDownloader::progress);
+    connect(elementDownload, &NetJob::failed, this, &ManifestJavaDownloader::emitFailed);
 
     connect(this, &Task::aborted, elementDownload, &NetJob::abort);
     connect(elementDownload, &NetJob::succeeded, [this] { emitSucceeded(); });

@@ -433,6 +433,10 @@ set(JAVA_SOURCES
 
     java/JavaRuntime.h
     java/JavaRuntime.cpp
+    java/download/ArchiveJavaDownloader.cpp
+    java/download/ArchiveJavaDownloader.h
+    java/download/ManifestJavaDownloader.cpp
+    java/download/ManifestJavaDownloader.h
 )
 
 set(TRANSLATIONS_SOURCES
