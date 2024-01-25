@@ -30,14 +30,24 @@ struct File {
     bool isExec;
 };
 
-ManifestJavaDownloader::ManifestJavaDownloader(QUrl url, QString final_path) : m_url(url), m_final_path(final_path){};
+ManifestJavaDownloader::ManifestJavaDownloader(QUrl url, QString final_path, QString checksumType, QString checksumHash)
+    : m_url(url), m_final_path(final_path), m_checksum_type(checksumType), m_checksum_hash(checksumHash){};
+
 void ManifestJavaDownloader::executeTask()
 {
     setStatus(tr("Downloading Java"));
     auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
     auto files = std::make_shared<QByteArray>();
 
-    download->addNetAction(Net::Download::makeByteArray(m_url, files));
+    auto action = Net::Download::makeByteArray(m_url, files);
+    if (!m_checksum_hash.isEmpty() && !m_checksum_type.isEmpty()) {
+        auto hashType = QCryptographicHash::Algorithm::Sha1;
+        if (m_checksum_type == "sha256") {
+            hashType = QCryptographicHash::Algorithm::Sha256;
+        }
+        action->addValidator(new Net::ChecksumValidator(hashType, m_checksum_hash.toLatin1()));
+    }
+    download->addNetAction(action);
 
     connect(download.get(), &NetJob::finished, [download, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
     connect(download.get(), &NetJob::progress, this, &ManifestJavaDownloader::progress);
@@ -56,7 +66,7 @@ void ManifestJavaDownloader::executeTask()
         downloadJava(doc);
     });
     download->start();
-};
+}
 
 void ManifestJavaDownloader::downloadJava(const QJsonDocument& doc)
 {
@@ -111,4 +121,4 @@ void ManifestJavaDownloader::downloadJava(const QJsonDocument& doc)
     connect(this, &Task::aborted, elementDownload, &NetJob::abort);
     connect(elementDownload, &NetJob::succeeded, [this] { emitSucceeded(); });
     elementDownload->start();
-};
+}

@@ -24,7 +24,7 @@
 class ManifestJavaDownloader : public Task {
     Q_OBJECT
    public:
-    ManifestJavaDownloader(QUrl url, QString final_path);
+    ManifestJavaDownloader(QUrl url, QString final_path, QString checksumType = "", QString checksumHash = "");
     virtual ~ManifestJavaDownloader() = default;
 
     [[nodiscard]] bool canAbort() const override { return true; }
@@ -36,6 +36,8 @@ class ManifestJavaDownloader : public Task {
    protected:
     QUrl m_url;
     QString m_final_path;
+    QString m_checksum_type;
+    QString m_checksum_hash;
 
     Task::Ptr m_current_task;
 };

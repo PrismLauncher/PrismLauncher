@@ -24,7 +24,7 @@
 class ArchiveJavaDownloader : public Task {
     Q_OBJECT
    public:
-    ArchiveJavaDownloader(QUrl url, QString final_path);
+    ArchiveJavaDownloader(QUrl url, QString final_path, QString checksumType = "", QString checksumHash = "");
     virtual ~ArchiveJavaDownloader() = default;
 
     [[nodiscard]] bool canAbort() const override { return true; }
@@ -36,6 +36,8 @@ class ArchiveJavaDownloader : public Task {
    protected:
     QUrl m_url;
     QString m_final_path;
+    QString m_checksum_type;
+    QString m_checksum_hash;
 
     Task::Ptr m_current_task;
 };

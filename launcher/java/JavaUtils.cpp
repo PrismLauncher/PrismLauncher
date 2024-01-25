@@ -393,6 +393,7 @@ QList<QString> JavaUtils::FindJavaPaths()
             scanJavaDir(snap + dirPath);
         }
     };
+    scanJavaDir(FS::PathCombine(APPLICATION->dataRoot(), "java"));
     // oracle RPMs
     scanJavaDirs("/usr/java");
     // general locations used by distro packaging

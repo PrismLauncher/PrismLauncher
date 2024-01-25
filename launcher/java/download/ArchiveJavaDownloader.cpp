@@ -21,8 +21,12 @@
 #include "MMCZip.h"
 
 #include "Application.h"
+#include "net/ChecksumValidator.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
+
+ArchiveJavaDownloader::ArchiveJavaDownloader(QUrl url, QString final_path, QString checksumType, QString checksumHash)
+    : m_url(url), m_final_path(final_path), m_checksum_type(checksumType), m_checksum_hash(checksumHash){};
 
 void ArchiveJavaDownloader::executeTask()
 {
@@ -32,7 +36,15 @@ void ArchiveJavaDownloader::executeTask()
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("java", m_url.toLocalFile());
 
     auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
-    download->addNetAction(Net::Download::makeCached(m_url, entry));
+    auto action = Net::Download::makeCached(m_url, entry);
+    if (!m_checksum_hash.isEmpty() && !m_checksum_type.isEmpty()) {
+        auto hashType = QCryptographicHash::Algorithm::Sha1;
+        if (m_checksum_type == "sha256") {
+            hashType = QCryptographicHash::Algorithm::Sha256;
+        }
+        action->addValidator(new Net::ChecksumValidator(hashType, m_checksum_hash.toLatin1()));
+    }
+    download->addNetAction(action);
     auto fullPath = entry->getFullPath();
 
     connect(download.get(), &NetJob::finished, [download, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
@@ -45,7 +57,7 @@ void ArchiveJavaDownloader::executeTask()
         extractJava(fullPath);
     });
     download->start();
-};
+}
 
 void ArchiveJavaDownloader::extractJava(QString input)
 {
@@ -85,4 +97,4 @@ void ArchiveJavaDownloader::extractJava(QString input)
         stepProgress(*progressStep);
     });
     zipTask->start();
-};
+}
