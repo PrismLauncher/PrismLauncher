@@ -16,6 +16,7 @@ class JavaVersion {
    public:
     JavaVersion() {}
     JavaVersion(const QString& rhs);
+    JavaVersion(int major, int minor, int security, int build = 0, QString name = "");
 
     JavaVersion& operator=(const QString& rhs);
 
@@ -32,12 +33,15 @@ class JavaVersion {
     int major() { return m_major; }
     int minor() { return m_minor; }
     int security() { return m_security; }
+    QString build() { return m_prerelease; }
+    QString name() { return m_name; }
 
    private:
     QString m_string;
     int m_major = 0;
     int m_minor = 0;
     int m_security = 0;
+    QString m_name = "";
     bool m_parseable = false;
     QString m_prerelease;
 };

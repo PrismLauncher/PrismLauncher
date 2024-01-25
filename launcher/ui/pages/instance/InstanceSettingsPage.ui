@@ -796,8 +796,6 @@
   <tabstop>enableFeralGamemodeCheck</tabstop>
   <tabstop>enableMangoHud</tabstop>
   <tabstop>useDiscreteGpuCheck</tabstop>
-  <tabstop>modLoaderSettingsGroupBox</tabstop>
-  <tabstop>disableQuiltBeaconCheckBox</tabstop>
   <tabstop>gameTimeGroupBox</tabstop>
   <tabstop>serverJoinGroupBox</tabstop>
   <tabstop>serverJoinAddress</tabstop>

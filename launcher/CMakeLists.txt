@@ -430,6 +430,9 @@ set(JAVA_SOURCES
     java/JavaUtils.cpp
     java/JavaVersion.h
     java/JavaVersion.cpp
+
+    java/JavaRuntime.h
+    java/JavaRuntime.cpp
 )
 
 set(TRANSLATIONS_SOURCES

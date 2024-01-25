@@ -36,6 +36,8 @@
 #include "OneSixVersionFormat.h"
 #include <Json.h>
 #include <minecraft/MojangVersionFormat.h>
+#include <QList>
+#include "java/JavaRuntime.h"
 #include "minecraft/Agent.h"
 #include "minecraft/ParseUtils.h"
 
@@ -253,6 +255,18 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
     }
     if (root.contains("volatile")) {
         out->m_volatile = requireBoolean(root, "volatile");
+    }
+
+    if (root.contains("runtimes")) {
+        auto runtimes = requireObject(root, "runtimes");
+        out->runtimes = {};
+        for (auto key : runtimes.keys()) {
+            QList<JavaRuntime::MetaPtr> list;
+            for (auto runtime : ensureArray(runtimes, key)) {
+                list.append(JavaRuntime::parseJavaMeta(ensureObject(runtime)));
+            }
+            out->runtimes[key] = list;
+        }
     }
 
     /* removed features that shouldn't be used */

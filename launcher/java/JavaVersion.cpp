@@ -109,3 +109,23 @@ bool JavaVersion::operator>(const JavaVersion& rhs)
 {
     return (!operator<(rhs)) && (!operator==(rhs));
 }
+
+JavaVersion::JavaVersion(int major, int minor, int security, int build, QString name)
+    : m_major(major), m_minor(minor), m_security(security), m_name(name), m_parseable(true)
+{
+    if (build != 0) {
+        m_prerelease = QString::number(build);
+        m_string = m_prerelease;
+    }
+    if (m_security != 0)
+        m_string = QString::number(m_security) + "." + m_string;
+    else if (!m_string.isEmpty()) {
+        m_string = "0." + m_string;
+    }
+    if (m_minor != 0)
+        m_string = QString::number(m_minor) + "." + m_string;
+    else if (!m_string.isEmpty()) {
+        m_string = "0." + m_string;
+    }
+    m_string = QString::number(m_major) + "." + m_string;
+}
