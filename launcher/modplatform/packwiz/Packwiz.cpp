@@ -91,8 +91,9 @@ auto intEntry(toml::table table, QString entry_name) -> int
     return node.value_or(0);
 }
 
-auto V1::createModFormat([[maybe_unused]] const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version)
-    -> Mod
+auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
+                         ModPlatform::IndexedPack& mod_pack,
+                         ModPlatform::IndexedVersion& mod_version) -> Mod
 {
     Mod mod;
 
@@ -111,6 +112,7 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir, ModPlatform::In
     mod.hash = mod_version.hash;
 
     mod.provider = mod_pack.provider;
+    mod.version_number = mod_version.version_number;
     mod.file_id = mod_version.fileId;
     mod.project_id = mod_pack.addonId;
     mod.side = stringToSide(mod_pack.side);
@@ -199,7 +201,8 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                                       { "hash-format", mod.hash_format.toStdString() },
                                       { "hash", mod.hash.toStdString() },
                                   } },
-                                { "update", toml::table{ { ProviderCaps.name(mod.provider), update } } } };
+                                { "update", toml::table{ { ProviderCaps.name(mod.provider), update },
+                                                         { "x-prismlauncher-version-number", mod.version_number.toStdString() } } } };
         std::stringstream ss;
         ss << tbl;
         in_stream << QString::fromStdString(ss.str());

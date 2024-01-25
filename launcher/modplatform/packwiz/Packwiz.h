@@ -52,6 +52,7 @@ class V1 {
 
         // [update]
         ModPlatform::ResourceProvider provider{};
+        QString version_number{};
         QVariant file_id{};
         QVariant project_id{};
 
