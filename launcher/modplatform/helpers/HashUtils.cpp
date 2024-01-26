@@ -10,8 +10,6 @@
 
 namespace Hashing {
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider)
 {
     switch (provider) {
@@ -62,8 +60,8 @@ void ModrinthHasher::executeTask()
         return;
     }
 
-    auto hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
-    m_hash = ProviderCaps.hash(ModPlatform::ResourceProvider::MODRINTH, &file, hash_type);
+    auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    m_hash = ModPlatform::ProviderCapabilities::hash(ModPlatform::ResourceProvider::MODRINTH, &file, hash_type);
 
     file.close();
 
@@ -96,7 +94,7 @@ void FlameHasher::executeTask()
 BlockedModHasher::BlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider) : Hasher(file_path), provider(provider)
 {
     setObjectName(QString("BlockedModHasher: %1").arg(file_path));
-    hash_type = ProviderCaps.hashType(provider).first();
+    hash_type = ModPlatform::ProviderCapabilities::hashType(provider).first();
 }
 
 void BlockedModHasher::executeTask()
@@ -113,7 +111,7 @@ void BlockedModHasher::executeTask()
         return;
     }
 
-    m_hash = ProviderCaps.hash(provider, &file, hash_type);
+    m_hash = ModPlatform::ProviderCapabilities::hash(provider, &file, hash_type);
 
     file.close();
 
@@ -127,12 +125,12 @@ void BlockedModHasher::executeTask()
 
 QStringList BlockedModHasher::getHashTypes()
 {
-    return ProviderCaps.hashType(provider);
+    return ModPlatform::ProviderCapabilities::hashType(provider);
 }
 
 bool BlockedModHasher::useHashType(QString type)
 {
-    auto types = ProviderCaps.hashType(provider);
+    auto types = ModPlatform::ProviderCapabilities::hashType(provider);
     if (types.contains(type)) {
         hash_type = type;
         return true;

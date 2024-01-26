@@ -24,8 +24,6 @@
 
 #include <optional>
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 static std::list<Version> mcVersions(BaseInstance* inst)
 {
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
@@ -423,7 +421,7 @@ void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, Q
     item_top->setExpanded(true);
 
     auto provider_item = new QTreeWidgetItem(item_top);
-    provider_item->setText(0, tr("Provider: %1").arg(ProviderCaps.readableName(info.provider)));
+    provider_item->setText(0, tr("Provider: %1").arg(ModPlatform::ProviderCapabilities::readableName(info.provider)));
 
     auto old_version_item = new QTreeWidgetItem(item_top);
     old_version_item->setText(0, tr("Old version: %1").arg(info.old_version));

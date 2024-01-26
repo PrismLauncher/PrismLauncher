@@ -40,8 +40,7 @@ enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
 
 enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 
-class ProviderCapabilities {
-   public:
+namespace ProviderCapabilities {
     auto name(ResourceProvider) -> const char*;
     auto readableName(ResourceProvider) -> QString;
     auto hashType(ResourceProvider) -> QStringList;

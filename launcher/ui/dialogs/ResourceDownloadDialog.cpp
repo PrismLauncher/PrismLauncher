@@ -125,8 +125,6 @@ void ResourceDownloadDialog::connectButtons()
     connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
 }
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 void ResourceDownloadDialog::confirm()
 {
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
@@ -167,7 +165,7 @@ void ResourceDownloadDialog::confirm()
     });
     for (auto& task : selected) {
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ProviderCaps.name(task->getProvider()), getRequiredBy.value(task->getPack()->addonId.toString()),
+                                         ModPlatform::ProviderCapabilities::name(task->getProvider()), getRequiredBy.value(task->getPack()->addonId.toString()),
                                          task->getVersion().version_type.toString() });
     }
 

@@ -66,8 +66,6 @@ static inline auto indexFileName(QString const& mod_slug) -> QString
     return QString("%1.pw.toml").arg(mod_slug);
 }
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 // Helper functions for extracting data from the TOML file
 auto stringEntry(toml::table table, QString entry_name) -> QString
 {
@@ -201,7 +199,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                                       { "hash-format", mod.hash_format.toStdString() },
                                       { "hash", mod.hash.toStdString() },
                                   } },
-                                { "update", toml::table{ { ProviderCaps.name(mod.provider), update },
+                                { "update", toml::table{ { ModPlatform::ProviderCapabilities::name(mod.provider), update },
                                                          { "x-prismlauncher-version-number", mod.version_number.toStdString() } } } };
         std::stringstream ss;
         ss << tbl;
@@ -306,11 +304,11 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
         mod.version_number = stringEntry(*update_table, "x-prismlauncher-version-number");
 
         toml::table* mod_provider_table = nullptr;
-        if ((mod_provider_table = (*update_table)[ProviderCaps.name(Provider::FLAME)].as_table())) {
+        if ((mod_provider_table = (*update_table)[ModPlatform::ProviderCapabilities::name(Provider::FLAME)].as_table())) {
             mod.provider = Provider::FLAME;
             mod.file_id = intEntry(*mod_provider_table, "file-id");
             mod.project_id = intEntry(*mod_provider_table, "project-id");
-        } else if ((mod_provider_table = (*update_table)[ProviderCaps.name(Provider::MODRINTH)].as_table())) {
+        } else if ((mod_provider_table = (*update_table)[ModPlatform::ProviderCapabilities::name(Provider::MODRINTH)].as_table())) {
             mod.provider = Provider::MODRINTH;
             mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
             mod.version() = stringEntry(*mod_provider_table, "version");

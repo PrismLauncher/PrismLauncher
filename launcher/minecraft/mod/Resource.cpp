@@ -5,8 +5,6 @@
 
 #include "FileSystem.h"
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 Resource::Resource(QObject* parent) : QObject(parent) {}
 
 Resource::Resource(QFileInfo file_info) : QObject()
@@ -74,7 +72,7 @@ static void removeThePrefix(QString& string)
 auto Resource::provider() const -> QString
 {
     if (metadata())
-        return ProviderCaps.readableName(metadata()->provider);
+        return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
 
     return tr("Unknown");
 }

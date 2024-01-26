@@ -13,7 +13,6 @@
 #include "minecraft/mod/ModFolderModel.h"
 
 static ModrinthAPI api;
-static ModPlatform::ProviderCapabilities ProviderCaps;
 
 bool ModrinthCheckUpdate::abort()
 {
@@ -36,7 +35,7 @@ void ModrinthCheckUpdate::executeTask()
 
     // Create all hashes
     QStringList hashes;
-    auto best_hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    auto best_hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
     ConcurrentTask hashing_task(this, "MakeModrinthHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
     for (auto* resource : m_resources) {
