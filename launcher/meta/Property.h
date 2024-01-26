@@ -34,10 +34,11 @@ class Property : public QObject, public BaseEntity {
     QString localFilename() const override { return "property.json"; }
 
     // Properties
-    void applyProperties();
+    void downloadAndApplyProperties();
 
    signals:
     void succeededApplyProperties(QHash<QString, QString> succeed);
+    void failedApplyProperties(QString reasons);
 
    public:  // for usage by parsers only
     void configurate(const std::shared_ptr<Property>& other);

@@ -97,19 +97,23 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     connect(APPLICATION->metadataIndex()->property().get(), &Meta::Property::succeededApplyProperties,
             [&](const QHash<QString, QString> succeed) {
                 QString context;
-                if (!succeed.isEmpty()) {
-                    for (auto& item : succeed.keys())
-                        context.append("\n").append(item).append(": ").append(succeed[item]);
+                for (auto& item : succeed.keys())
+                    context.append("\n").append(item).append(": ").append(succeed[item]);
 
-                    QMessageBox::information(nullptr, tr("OK"),
-                                             tr("The following meta server properties were successfully obtained: %1").arg(context));
-                    loadSettings();
-                } else {
-                    QMessageBox::warning(nullptr, tr("DONE"),
-                                         tr("No properties is applied or unable to download the properties file from the %1")
-                                             .arg(APPLICATION->metadataIndex()->property()->url().toString()));
-                }
+                QMessageBox::information(nullptr, tr("OK"),
+                                         tr("The following meta server properties were successfully obtained: %1").arg(context));
+                loadSettings();
+                ui->applyPropertiesBtn->setEnabled(true);
+                ui->applyPropertiesBtn->setText(tr("Download and Apply Properties in the Meta Server"));
             });
+    connect(APPLICATION->metadataIndex()->property().get(), &Meta::Property::failedApplyProperties, [&](const QString reasons) {
+        QMessageBox::warning(nullptr, tr("FAILED"),
+                             tr("Unable to download the properties file from the \n%1\bReasons:%2")
+                                 .arg(APPLICATION->metadataIndex()->property()->url().toString())
+                                 .arg(reasons));
+        ui->applyPropertiesBtn->setEnabled(true);
+        ui->applyPropertiesBtn->setText(tr("Download and Apply Properties in the Meta Server"));
+    });
 }
 
 APIPage::~APIPage()
@@ -219,5 +223,9 @@ void APIPage::retranslate()
 
 void APIPage::on_applyPropertiesBtn_clicked()
 {
-    APPLICATION->metadataIndex()->property()->applyProperties();
+    if (ui->applyPropertiesBtn->isEnabled()) {
+        ui->applyPropertiesBtn->setText(tr("Downloading and Applying..."));
+        ui->applyPropertiesBtn->setEnabled(false);
+        APPLICATION->metadataIndex()->property()->downloadAndApplyProperties();
+    }
 }
