@@ -66,6 +66,7 @@
 
 #include "Version.h"
 #include "tasks/ConcurrentTask.h"
+#include "tasks/Task.h"
 #include "ui/dialogs/ProgressDialog.h"
 
 ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
@@ -320,21 +321,23 @@ bool CoreModFolderPage::shouldDisplay() const
             return true;
 
         auto version = inst->getPackProfile();
-
-        ProgressDialog loadDialog(parentWidget());
-        auto update = inst->createUpdateTask(Net::Mode::Offline);
-        if (update) {
-            loadDialog.setSkipButton(true, tr("Abort"));
-            loadDialog.execWithTask(update.get());
+        if (!version || !version->getComponent("net.minecraftforge") || !version->getComponent("net.minecraft"))
+            return false;
+        auto minecraftCmp = version->getComponent("net.minecraft");
+        if (!minecraftCmp->m_loaded) {
+            version->reload(Net::Mode::Offline);
+            auto update = version->getCurrentTask();
+            if (update) {
+                connect(update.get(), &Task::finished, this, [this] {
+                    if (m_container) {
+                        m_container->refreshContainer();
+                    }
+                });
+                update->start();
+            }
+            return false;
         }
-        if (!version)
-            return true;
-        if (!version->getComponent("net.minecraftforge"))
-            return false;
-        if (!version->getComponent("net.minecraft"))
-            return false;
-        if (version->getComponent("net.minecraft")->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate)
-            return true;
+        return minecraftCmp->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate;
     }
     return false;
 }
