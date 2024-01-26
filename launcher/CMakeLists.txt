@@ -1031,8 +1031,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/BlockedModsDialog.h
     ui/dialogs/ChooseProviderDialog.h
     ui/dialogs/ChooseProviderDialog.cpp
-    ui/dialogs/ModUpdateDialog.cpp
-    ui/dialogs/ModUpdateDialog.h
+        ui/dialogs/ResourceUpdateDialog.cpp
+        ui/dialogs/ResourceUpdateDialog.h
     ui/dialogs/InstallLoaderDialog.cpp
     ui/dialogs/InstallLoaderDialog.h
 

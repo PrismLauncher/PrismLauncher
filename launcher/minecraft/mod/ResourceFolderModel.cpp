@@ -242,10 +242,10 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
     return true;
 }
 
-bool ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
+void ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
 {
     if (indexes.isEmpty())
-        return true;
+        return;
 
     for (auto i : indexes) {
         if (i.column() != 0)
@@ -256,8 +256,6 @@ bool ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
     }
 
     update();
-
-    return true;
 }
 
 bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAction action)

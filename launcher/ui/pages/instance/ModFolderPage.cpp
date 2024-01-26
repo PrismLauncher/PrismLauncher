@@ -51,8 +51,8 @@
 
 #include "ui/GuiUtil.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/ModUpdateDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
+#include "ui/dialogs/ResourceUpdateDialog.h"
 
 #include "DesktopServices.h"
 
@@ -161,9 +161,8 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, [[maybe_unuse
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    Mod const* m = m_model->at(row);
-    if (m)
-        ui->frame->updateWithMod(*m);
+    const Mod& mod = m_model->at(row);
+    ui->frame->updateWithMod(mod);
 
     return true;
 }
@@ -253,12 +252,12 @@ void ModFolderPage::updateMods(bool includeDeps)
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
-    auto mods_list = m_model->selectedMods(selection);
+    auto mods_list = m_model->selectedResources(selection);
     bool use_all = mods_list.empty();
     if (use_all)
-        mods_list = m_model->allMods();
+        mods_list = m_model->allResources();
 
-    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps);
+    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps);
     update_dialog.checkCandidates();
 
     if (update_dialog.aborted()) {

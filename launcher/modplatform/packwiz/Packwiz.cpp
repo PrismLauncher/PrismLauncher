@@ -297,18 +297,20 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
     {  // [update] info
         using Provider = ModPlatform::ResourceProvider;
 
-        auto update_table = table["update"];
-        if (!update_table || !update_table.is_table()) {
+        auto update_table = table["update"].as_table();
+        if (!update_table) {
             qCritical() << QString("No [update] section found on mod metadata!");
             return {};
         }
 
+        mod.version_number = stringEntry(*update_table, "x-prismlauncher-version-number");
+
         toml::table* mod_provider_table = nullptr;
-        if ((mod_provider_table = update_table[ProviderCaps.name(Provider::FLAME)].as_table())) {
+        if ((mod_provider_table = (*update_table)[ProviderCaps.name(Provider::FLAME)].as_table())) {
             mod.provider = Provider::FLAME;
             mod.file_id = intEntry(*mod_provider_table, "file-id");
             mod.project_id = intEntry(*mod_provider_table, "project-id");
-        } else if ((mod_provider_table = update_table[ProviderCaps.name(Provider::MODRINTH)].as_table())) {
+        } else if ((mod_provider_table = (*update_table)[ProviderCaps.name(Provider::MODRINTH)].as_table())) {
             mod.provider = Provider::MODRINTH;
             mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
             mod.version() = stringEntry(*mod_provider_table, "version");

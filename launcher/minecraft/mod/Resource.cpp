@@ -184,7 +184,7 @@ auto Resource::destroy(const QDir& index_dir, bool preserve_metadata, bool attem
     return (attempt_trash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
 }
 
-auto Resource::destroyMetadata(const QDir& index_dir) -> bool
+auto Resource::destroyMetadata(const QDir& index_dir) -> void
 {
     if (metadata()) {
         Metadata::remove(index_dir, metadata()->slug);

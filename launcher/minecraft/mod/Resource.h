@@ -101,7 +101,7 @@ class Resource : public QObject {
     // Delete all files of this resource.
     auto destroy(const QDir& index_dir, bool preserve_metadata = false, bool attempt_trash = true) -> bool;
     // Delete the metadata only.
-    auto destroyMetadata(const QDir& index_dir) -> bool;
+    auto destroyMetadata(const QDir& index_dir) -> void;
 
     [[nodiscard]] auto isSymLink() const -> bool { return m_file_info.isSymLink(); }
 

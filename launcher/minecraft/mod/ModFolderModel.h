@@ -76,9 +76,6 @@ class ModFolderModel : public ResourceFolderModel {
 
     bool isValid();
 
-    auto selectedMods(QModelIndexList& indexes) -> QList<Mod*>;
-    auto allMods() -> QList<Mod*>;
-
     RESOURCE_HELPERS(Mod)
 
    private slots:

@@ -19,6 +19,58 @@
 
 class QSortFilterProxyModel;
 
+/* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
+#define RESOURCE_HELPERS(T)                                                                       \
+    [[nodiscard]] T& operator[](int index)                                                        \
+    {                                                                                             \
+        return *static_cast<T*>(m_resources[index].get());                                        \
+    }                                                                                             \
+    [[nodiscard]] T& at(int index)                                                                \
+    {                                                                                             \
+        return *static_cast<T*>(m_resources[index].get());                                        \
+    }                                                                                             \
+    [[nodiscard]] const T& at(int index) const                                                    \
+    {                                                                                             \
+        return *static_cast<const T*>(m_resources.at(index).get());                               \
+    }                                                                                             \
+    [[nodiscard]] T& first()                                                                      \
+    {                                                                                             \
+        return *static_cast<T*>(m_resources.first().get());                                       \
+    }                                                                                             \
+    [[nodiscard]] T& last()                                                                       \
+    {                                                                                             \
+        return *static_cast<T*>(m_resources.last().get());                                        \
+    }                                                                                             \
+    [[nodiscard]] T* find(QString id)                                                             \
+    {                                                                                             \
+        auto iter = std::find_if(m_resources.constBegin(), m_resources.constEnd(),                \
+                                 [&](Resource::Ptr const& r) { return r->internal_id() == id; }); \
+        if (iter == m_resources.constEnd())                                                       \
+            return nullptr;                                                                       \
+        return static_cast<T*>((*iter).get());                                                    \
+    }                                                                                             \
+    QList<T*> selected##T##s(const QModelIndexList& indexes)                                \
+    {                                                                                             \
+        QList<T*> result;                                                                         \
+        for (const QModelIndex& index : indexes) {                                                \
+            if (index.column() != 0)                                                              \
+                continue;                                                                         \
+                                                                                                  \
+            result.append(&at(index.row()));                                                      \
+        }                                                                                         \
+        return result;                                                                            \
+    }                                                                                             \
+    QList<T*> all##T##s()                                                                   \
+    {                                                                                             \
+        QList<T*> result;                                                                         \
+        result.reserve(m_resources.size());                                                       \
+                                                                                                  \
+        for (const Resource::Ptr& resource : m_resources)                                         \
+            result.append(static_cast<T*>(resource.get()));                                       \
+                                                                                                  \
+        return result;                                                                            \
+    }
+
 /** A basic model for external resources.
  *
  *  This model manages a list of resources. As such, external users of such resources do not own them,
@@ -69,7 +121,7 @@ class ResourceFolderModel : public QAbstractListModel {
      */
     virtual bool uninstallResource(QString file_name, bool preserve_metadata = false);
     virtual bool deleteResources(const QModelIndexList&);
-    virtual bool deleteMetadata(const QModelIndexList&);
+    virtual void deleteMetadata(const QModelIndexList&);
 
     /** Applies the given 'action' to the resources in 'indexes'.
      *
@@ -85,9 +137,7 @@ class ResourceFolderModel : public QAbstractListModel {
 
     [[nodiscard]] qsizetype size() const { return m_resources.size(); }
     [[nodiscard]] bool empty() const { return size() == 0; }
-    [[nodiscard]] Resource& at(int index) { return *m_resources.at(index); }
-    [[nodiscard]] Resource const& at(int index) const { return *m_resources.at(index); }
-    [[nodiscard]] QList<Resource::Ptr> const& all() const { return m_resources; }
+    RESOURCE_HELPERS(Resource)
 
     [[nodiscard]] QDir const& dir() const { return m_dir; }
 
@@ -231,37 +281,6 @@ class ResourceFolderModel : public QAbstractListModel {
     QMap<int, Task::Ptr> m_active_parse_tasks;
     std::atomic<int> m_next_resolution_ticket = 0;
 };
-
-/* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
-#define RESOURCE_HELPERS(T)                                                                       \
-    [[nodiscard]] T* operator[](int index)                                                        \
-    {                                                                                             \
-        return static_cast<T*>(m_resources[index].get());                                         \
-    }                                                                                             \
-    [[nodiscard]] T* at(int index)                                                                \
-    {                                                                                             \
-        return static_cast<T*>(m_resources[index].get());                                         \
-    }                                                                                             \
-    [[nodiscard]] const T* at(int index) const                                                    \
-    {                                                                                             \
-        return static_cast<const T*>(m_resources.at(index).get());                                \
-    }                                                                                             \
-    [[nodiscard]] T* first()                                                                      \
-    {                                                                                             \
-        return static_cast<T*>(m_resources.first().get());                                        \
-    }                                                                                             \
-    [[nodiscard]] T* last()                                                                       \
-    {                                                                                             \
-        return static_cast<T*>(m_resources.last().get());                                         \
-    }                                                                                             \
-    [[nodiscard]] T* find(QString id)                                                             \
-    {                                                                                             \
-        auto iter = std::find_if(m_resources.constBegin(), m_resources.constEnd(),                \
-                                 [&](Resource::Ptr const& r) { return r->internal_id() == id; }); \
-        if (iter == m_resources.constEnd())                                                       \
-            return nullptr;                                                                       \
-        return static_cast<T*>((*iter).get());                                                    \
-    }
 
 /* Template definition to avoid some code duplication */
 template <typename T>

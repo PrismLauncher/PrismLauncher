@@ -89,35 +89,35 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                         default:
                             break;
                     }
-                    return at(row)->version();
+                    return at(row).version();
                 }
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
                 case ProviderColumn:
-                    return at(row)->provider();
+                    return at(row).provider();
                 default:
                     return QVariant();
             }
 
         case Qt::ToolTipRole:
             if (column == NAME_COLUMN) {
-                if (at(row)->isSymLinkUnder(instDirPath())) {
+                if (at(row).isSymLinkUnder(instDirPath())) {
                     return m_resources[row]->internal_id() +
                            tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
                               "\nCanonical Path: %1")
-                               .arg(at(row)->fileinfo().canonicalFilePath());
+                               .arg(at(row).fileinfo().canonicalFilePath());
                 }
-                if (at(row)->isMoreThanOneHardLink()) {
+                if (at(row).isMoreThanOneHardLink()) {
                     return m_resources[row]->internal_id() +
                            tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
                 }
             }
             return m_resources[row]->internal_id();
         case Qt::DecorationRole: {
-            if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
+            if (column == NAME_COLUMN && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
             if (column == ImageColumn) {
-                return at(row)->icon({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+                return at(row).icon({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }
             return {};
         }
@@ -129,7 +129,7 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             switch (column) {
                 case ActiveColumn:
-                    return at(row)->enabled() ? Qt::Checked : Qt::Unchecked;
+                    return at(row).enabled() ? Qt::Checked : Qt::Unchecked;
                 default:
                     return QVariant();
             }
@@ -188,29 +188,6 @@ Task* ModFolderModel::createParseTask(Resource& resource)
 bool ModFolderModel::isValid()
 {
     return m_dir.exists() && m_dir.isReadable();
-}
-
-auto ModFolderModel::selectedMods(QModelIndexList& indexes) -> QList<Mod*>
-{
-    QList<Mod*> selected_resources;
-    for (auto i : indexes) {
-        if (i.column() != 0)
-            continue;
-
-        selected_resources.push_back(at(i.row()));
-    }
-    return selected_resources;
-}
-
-auto ModFolderModel::allMods() -> QList<Mod*>
-{
-    QList<Mod*> mods;
-
-    for (auto& res : qAsConst(m_resources)) {
-        mods.append(static_cast<Mod*>(res.get()));
-    }
-
-    return mods;
 }
 
 void ModFolderModel::onParseSucceeded(int ticket, QString mod_id)

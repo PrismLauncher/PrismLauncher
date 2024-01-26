@@ -8,11 +8,11 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
 
    public:
-    ModrinthCheckUpdate(QList<Mod*>& mods,
+    ModrinthCheckUpdate(QList<Resource*>& resources,
                         std::list<Version>& mcVersions,
                         std::optional<ModPlatform::ModLoaderTypes> loaders,
-                        std::shared_ptr<ModFolderModel> mods_folder)
-        : CheckUpdateTask(mods, mcVersions, loaders, mods_folder)
+                        std::shared_ptr<ResourceFolderModel> resource_model)
+        : CheckUpdateTask(resources, mcVersions, loaders, resource_model)
     {}
 
    public slots:
