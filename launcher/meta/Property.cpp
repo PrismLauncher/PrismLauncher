@@ -41,9 +41,7 @@ void Property::applyProperties()
     if (!isLoaded()) {
         load(Net::Mode::Online);
         NetJob* task = dynamic_cast<NetJob*>(getCurrentTask().get());
-        QObject::connect(task, &NetJob::succeeded, [&]() {
-            apply();
-        });
+        QObject::connect(task, &NetJob::succeeded, [&]() { apply(); });
     } else {
         apply();
     }
