@@ -62,7 +62,7 @@ MetaPtr parseJavaMeta(const QJsonObject& in)
     }
 
     if (in.contains("version")) {
-        auto obj = Json::requireObject(in, "checksum");
+        auto obj = Json::requireObject(in, "version");
         auto name = Json::ensureString(obj, "name", "");
         auto major = Json::ensureInteger(obj, "major", 0);
         auto minor = Json::ensureInteger(obj, "minor", 0);

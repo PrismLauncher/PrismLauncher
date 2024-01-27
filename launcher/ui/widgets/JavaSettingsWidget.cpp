@@ -13,13 +13,13 @@
 
 #include "FileSystem.h"
 #include "JavaCommon.h"
-#include "JavaDownloader.h"
 #include "java/JavaChecker.h"
 #include "java/JavaInstall.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/java/JavaDownload.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
 #include "Application.h"
@@ -274,7 +274,8 @@ void JavaSettingsWidget::on_javaBrowseBtn_clicked()
 }
 void JavaSettingsWidget::on_javaDownloadBtn_clicked()
 {
-    JavaDownloader::showPrompts(this);
+    auto jdialog = new JavaDownload(this);
+    jdialog->exec();
 }
 void JavaSettingsWidget::on_javaStatusBtn_clicked()
 {

@@ -110,6 +110,7 @@ QHash<int, QByteArray> BaseVersionList::roleNames() const
     roles.insert(TypeRole, "type");
     roles.insert(BranchRole, "branch");
     roles.insert(PathRole, "path");
+    roles.insert(AliasRole, "alias");
     roles.insert(ArchitectureRole, "architecture");
     return roles;
 }

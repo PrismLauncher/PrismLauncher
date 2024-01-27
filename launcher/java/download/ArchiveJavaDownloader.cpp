@@ -43,7 +43,7 @@ void ArchiveJavaDownloader::executeTask()
         if (m_checksum_type == "sha256") {
             hashType = QCryptographicHash::Algorithm::Sha256;
         }
-        action->addValidator(new Net::ChecksumValidator(hashType, m_checksum_hash.toLatin1()));
+        action->addValidator(new Net::ChecksumValidator(hashType, QByteArray::fromHex(m_checksum_hash.toUtf8())));
     }
     download->addNetAction(action);
     auto fullPath = entry->getFullPath();

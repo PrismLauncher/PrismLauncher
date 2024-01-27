@@ -48,6 +48,7 @@ class BaseVersionList : public QAbstractListModel {
         TypeRole,
         BranchRole,
         PathRole,
+        AliasRole,
         ArchitectureRole,
         SortRole
     };

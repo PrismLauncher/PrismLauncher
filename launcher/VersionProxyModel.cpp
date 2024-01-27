@@ -118,6 +118,8 @@ QVariant VersionProxyModel::headerData(int section, Qt::Orientation orientation,
                 return tr("Architecture");
             case Path:
                 return tr("Path");
+            case Alias:
+                return tr("Alias");
             case Time:
                 return tr("Released");
         }
@@ -135,6 +137,8 @@ QVariant VersionProxyModel::headerData(int section, Qt::Orientation orientation,
                 return tr("CPU Architecture");
             case Path:
                 return tr("Filesystem path to this version");
+            case Alias:
+                return tr("The alternative name of the java version");
             case Time:
                 return tr("Release date of this version");
         }
@@ -169,6 +173,8 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
                     return sourceModel()->data(parentIndex, BaseVersionList::ArchitectureRole);
                 case Path:
                     return sourceModel()->data(parentIndex, BaseVersionList::PathRole);
+                case Alias:
+                    return sourceModel()->data(parentIndex, BaseVersionList::AliasRole);
                 case Time:
                     return sourceModel()->data(parentIndex, Meta::VersionList::TimeRole).toDate();
                 default:
@@ -313,6 +319,9 @@ void VersionProxyModel::setSourceModel(QAbstractItemModel* replacingRaw)
     }
     if (roles.contains(BaseVersionList::PathRole)) {
         m_columns.push_back(Path);
+    }
+    if (roles.contains(BaseVersionList::AliasRole)) {
+        m_columns.push_back(Alias);
     }
     if (roles.contains(Meta::VersionList::TimeRole)) {
         m_columns.push_back(Time);

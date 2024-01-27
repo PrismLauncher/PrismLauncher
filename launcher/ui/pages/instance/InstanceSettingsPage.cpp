@@ -36,6 +36,7 @@
  */
 
 #include "InstanceSettingsPage.h"
+#include "ui/java/JavaDownload.h"
 #include "ui_InstanceSettingsPage.h"
 
 #include <QDialog>
@@ -53,7 +54,6 @@
 #include "minecraft/auth/AccountList.h"
 
 #include "FileSystem.h"
-#include "JavaDownloader.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 
@@ -387,7 +387,8 @@ void InstanceSettingsPage::loadSettings()
 
 void InstanceSettingsPage::on_javaDownloadBtn_clicked()
 {
-    JavaDownloader::showPrompts(this);
+    auto jdialog = new JavaDownload(this);
+    jdialog->exec();
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

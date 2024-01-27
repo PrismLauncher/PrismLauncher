@@ -437,6 +437,11 @@ set(JAVA_SOURCES
     java/download/ArchiveJavaDownloader.h
     java/download/ManifestJavaDownloader.cpp
     java/download/ManifestJavaDownloader.h
+
+    ui/java/JavaDownload.h
+    ui/java/JavaDownload.cpp
+    ui/java/ListModel.h
+    ui/java/ListModel.cpp
 )
 
 set(TRANSLATIONS_SOURCES
@@ -1107,8 +1112,6 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/InstanceDelegate.h
     ui/instanceview/VisualGroup.cpp
     ui/instanceview/VisualGroup.h
-    JavaDownloader.cpp
-    JavaDownloader.h
 )
 
 if (NOT Apple)
@@ -1189,6 +1192,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ScrollMessageBox.ui
     ui/dialogs/BlockedModsDialog.ui
     ui/dialogs/ChooseProviderDialog.ui
+    ui/java/JavaDownload.ui
 )
 
 qt_wrap_ui(PRISM_UPDATE_UI

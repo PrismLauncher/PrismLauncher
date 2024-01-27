@@ -36,6 +36,7 @@
 
 #include "JavaPage.h"
 #include "JavaCommon.h"
+#include "ui/java/JavaDownload.h"
 #include "ui_JavaPage.h"
 
 #include <QDir>
@@ -51,7 +52,6 @@
 #include <FileSystem.h>
 #include <sys.h>
 #include "Application.h"
-#include "JavaDownloader.h"
 #include "settings/SettingsObject.h"
 
 JavaPage::JavaPage(QWidget* parent) : QWidget(parent), ui(new Ui::JavaPage)
@@ -169,7 +169,8 @@ void JavaPage::on_javaTestBtn_clicked()
 
 void JavaPage::on_javaDownloadBtn_clicked()
 {
-    JavaDownloader::showPrompts(this);
+    auto jdialog = new JavaDownload(this);
+    jdialog->exec();
 }
 
 void JavaPage::on_maxMemSpinBox_valueChanged([[maybe_unused]] int i)
