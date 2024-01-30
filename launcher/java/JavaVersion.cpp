@@ -43,12 +43,12 @@ QString JavaVersion::toString() const
     return m_string;
 }
 
-bool JavaVersion::requiresPermGen()
+bool JavaVersion::requiresPermGen() const
 {
     return !m_parseable || m_major < 8;
 }
 
-bool JavaVersion::isModular()
+bool JavaVersion::isModular() const
 {
     return m_parseable && m_major >= 9;
 }

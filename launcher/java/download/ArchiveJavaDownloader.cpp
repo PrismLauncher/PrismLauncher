@@ -49,7 +49,6 @@ void ArchiveJavaDownloader::executeTask()
     auto fullPath = entry->getFullPath();
 
     connect(download.get(), &NetJob::finished, [download, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
-    // connect(download.get(), &NetJob::aborted, [path] { APPLICATION->instances()->destroyStagingPath(path); });
     connect(download.get(), &NetJob::progress, this, &ArchiveJavaDownloader::progress);
     connect(download.get(), &NetJob::failed, this, &ArchiveJavaDownloader::emitFailed);
     connect(this, &Task::aborted, download.get(), &NetJob::abort);

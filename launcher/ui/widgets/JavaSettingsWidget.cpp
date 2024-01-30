@@ -377,7 +377,7 @@ void JavaSettingsWidget::checkJavaPath(const QString& path)
     m_checker->start();
 }
 
-void JavaSettingsWidget::checkFinished(JavaChecker::Result result)
+void JavaSettingsWidget::checkFinished(const JavaChecker::Result& result)
 {
     m_result = result;
     switch (result.validity) {

@@ -29,7 +29,7 @@ class JavaChecker : public Task {
     explicit JavaChecker(QString path, QString args, int minMem = 0, int maxMem = 0, int permGen = 0, int id = 0, QObject* parent = 0);
 
    signals:
-    void checkFinished(Result result);
+    void checkFinished(const Result& result);
 
    protected:
     virtual void executeTask() override;

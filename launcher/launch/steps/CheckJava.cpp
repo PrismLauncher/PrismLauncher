@@ -106,7 +106,7 @@ void CheckJava::executeTask()
     emitSucceeded();
 }
 
-void CheckJava::checkJavaFinished(JavaChecker::Result result)
+void CheckJava::checkJavaFinished(const JavaChecker::Result& result)
 {
     switch (result.validity) {
         case JavaChecker::Result::Validity::Errored: {

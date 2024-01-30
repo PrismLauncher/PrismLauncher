@@ -51,7 +51,7 @@ class JavaSettingsWidget : public QWidget {
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
     void on_javaDownloadBtn_clicked();
-    void checkFinished(JavaChecker::Result result);
+    void checkFinished(const JavaChecker::Result& result);
 
    protected: /* methods */
     void checkJavaPathOnEdit(const QString& path);

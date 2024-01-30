@@ -170,7 +170,7 @@ void JavaListLoadTask::executeTask()
     int id = 0;
     for (QString candidate : candidate_paths) {
         auto checker = new JavaChecker(candidate, "", 0, 0, 0, id, this);
-        connect(checker, &JavaChecker::checkFinished, [this](JavaChecker::Result result) { m_results << result; });
+        connect(checker, &JavaChecker::checkFinished, [this](const JavaChecker::Result& result) { m_results << result; });
         job->addTask(Task::Ptr(checker));
         id++;
     }
@@ -181,7 +181,7 @@ void JavaListLoadTask::executeTask()
 void JavaListLoadTask::javaCheckerFinished()
 {
     QList<JavaInstallPtr> candidates;
-    std::sort(m_results.begin(), m_results.end(), [](JavaChecker::Result a, JavaChecker::Result b) { return a.id < b.id; });
+    std::sort(m_results.begin(), m_results.end(), [](const JavaChecker::Result& a, const JavaChecker::Result& b) { return a.id < b.id; });
 
     qDebug() << "Found the following valid Java installations:";
     for (auto result : m_results) {

@@ -24,9 +24,9 @@ class JavaVersion {
     bool operator==(const JavaVersion& rhs);
     bool operator>(const JavaVersion& rhs);
 
-    bool requiresPermGen();
+    bool requiresPermGen() const;
 
-    bool isModular();
+    bool isModular() const;
 
     QString toString() const;
 
