@@ -23,14 +23,28 @@
 
 #include <memory>
 
+#include "BaseVersion.h"
 #include "java/JavaVersion.h"
 
 namespace JavaRuntime {
 
 enum class DownloadType { Manifest, Archive };
 
-struct Meta {
-    QString name;
+class Meta : public BaseVersion {
+   public:
+    virtual QString descriptor() override { return version.toString(); }
+
+    virtual QString name() override { return m_name; }
+
+    virtual QString typeString() const override { return vendor; }
+
+    virtual bool operator<(BaseVersion& a) override;
+    virtual bool operator>(BaseVersion& a) override;
+    bool operator<(const Meta& rhs);
+    bool operator==(const Meta& rhs);
+    bool operator>(const Meta& rhs);
+
+    QString m_name;
     QString vendor;
     QString url;
     QDateTime releaseTime;

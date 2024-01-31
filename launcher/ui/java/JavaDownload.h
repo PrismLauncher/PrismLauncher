@@ -20,7 +20,6 @@
 
 #include <QDialog>
 #include "BaseVersion.h"
-#include "ui/java/ListModel.h"
 
 namespace Ui {
 class JavaDownload;
@@ -40,9 +39,7 @@ class JavaDownload : public QDialog {
 
    protected slots:
     void setSelectedVersion(BaseVersion::Ptr version);
-    void setSelectedVersion2(BaseVersion::Ptr version);
 
    private:
     Ui::JavaDownload* ui;
-    Java::JavaRuntimePtr m_selectedVersion;
 };

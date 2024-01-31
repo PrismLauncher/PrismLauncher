@@ -21,6 +21,7 @@
 #include <memory>
 
 #include "Json.h"
+#include "StringUtils.h"
 #include "java/JavaVersion.h"
 #include "minecraft/ParseUtils.h"
 
@@ -47,7 +48,7 @@ MetaPtr parseJavaMeta(const QJsonObject& in)
 {
     auto meta = std::make_shared<Meta>();
 
-    meta->name = Json::ensureString(in, "name", "");
+    meta->m_name = Json::ensureString(in, "name", "");
     meta->vendor = Json::ensureString(in, "vendor", "");
     meta->url = Json::ensureString(in, "url", "");
     meta->releaseTime = timeFromS3Time(Json::ensureString(in, "releaseTime", ""));
@@ -72,4 +73,45 @@ MetaPtr parseJavaMeta(const QJsonObject& in)
     }
     return meta;
 }
+
+bool Meta::operator<(const Meta& rhs)
+{
+    auto id = version;
+    if (id < rhs.version) {
+        return true;
+    }
+    if (id > rhs.version) {
+        return false;
+    }
+    return StringUtils::naturalCompare(m_name, rhs.m_name, Qt::CaseInsensitive) < 0;
+}
+
+bool Meta::operator==(const Meta& rhs)
+{
+    return version == rhs.version && m_name == rhs.m_name;
+}
+
+bool Meta::operator>(const Meta& rhs)
+{
+    return (!operator<(rhs)) && (!operator==(rhs));
+}
+
+bool Meta::operator<(BaseVersion& a)
+{
+    try {
+        return operator<(dynamic_cast<Meta&>(a));
+    } catch (const std::bad_cast& e) {
+        return BaseVersion::operator<(a);
+    }
+}
+
+bool Meta::operator>(BaseVersion& a)
+{
+    try {
+        return operator>(dynamic_cast<Meta&>(a));
+    } catch (const std::bad_cast& e) {
+        return BaseVersion::operator>(a);
+    }
+}
+
 }  // namespace JavaRuntime

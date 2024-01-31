@@ -17,11 +17,12 @@
  */
 
 #include "ListModel.h"
-#include <qlogging.h>
+
 #include <memory>
+
 #include "BaseVersionList.h"
-#include "StringUtils.h"
 #include "SysInfo.h"
+#include "java/JavaRuntime.h"
 
 namespace Java {
 
@@ -71,13 +72,13 @@ QVariant InstallList::data(const QModelIndex& index, int role) const
         case VersionIdRole:
             return version->descriptor();
         case VersionRole:
-            return version->meta->version.toString();
+            return version->version.toString();
         case RecommendedRole:
-            return version->meta->recommended;
+            return version->recommended;
         case AliasRole:
-            return version->meta->name;
+            return version->name();
         case ArchitectureRole:
-            return version->meta->vendor;
+            return version->vendor;
         default:
             return QVariant();
     }
@@ -90,8 +91,8 @@ BaseVersionList::RoleList InstallList::providesRoles() const
 
 bool sortJavas(BaseVersion::Ptr left, BaseVersion::Ptr right)
 {
-    auto rleft = std::dynamic_pointer_cast<JavaRuntime2>(right);
-    auto rright = std::dynamic_pointer_cast<JavaRuntime2>(left);
+    auto rleft = std::dynamic_pointer_cast<JavaRuntime::Meta>(right);
+    auto rright = std::dynamic_pointer_cast<JavaRuntime::Meta>(left);
     return (*rleft) > (*rright);
 }
 
@@ -100,55 +101,13 @@ void InstallList::sortVersions()
     QString versionStr = SysInfo::getSupportedJavaArchitecture();
     beginResetModel();
     auto runtimes = m_version->data()->runtimes;
-    if (versionStr.isEmpty() || !runtimes.contains(versionStr)) {
-        return;
+    if (!versionStr.isEmpty() && runtimes.contains(versionStr)) {
+        m_vlist = runtimes.value(versionStr);
+        std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
+    } else {
+        m_vlist = {};
     }
-    auto javaruntimes = runtimes.value(versionStr);
-    for (auto v : javaruntimes) {
-        m_vlist.append(std::make_shared<JavaRuntime2>(v));
-    }
-    std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
     endResetModel();
-}
-
-bool JavaRuntime2::operator<(const JavaRuntime2& rhs)
-{
-    auto id = meta->version;
-    if (id < rhs.meta->version) {
-        return true;
-    }
-    if (id > rhs.meta->version) {
-        return false;
-    }
-    return StringUtils::naturalCompare(meta->name, rhs.meta->name, Qt::CaseInsensitive) < 0;
-}
-
-bool JavaRuntime2::operator==(const JavaRuntime2& rhs)
-{
-    return meta->version == rhs.meta->version && meta->name == rhs.meta->name;
-}
-
-bool JavaRuntime2::operator>(const JavaRuntime2& rhs)
-{
-    return (!operator<(rhs)) && (!operator==(rhs));
-}
-
-bool JavaRuntime2::operator<(BaseVersion& a)
-{
-    try {
-        return operator<(dynamic_cast<JavaRuntime2&>(a));
-    } catch (const std::bad_cast& e) {
-        return BaseVersion::operator<(a);
-    }
-}
-
-bool JavaRuntime2::operator>(BaseVersion& a)
-{
-    try {
-        return operator>(dynamic_cast<JavaRuntime2&>(a));
-    } catch (const std::bad_cast& e) {
-        return BaseVersion::operator>(a);
-    }
 }
 
 }  // namespace Java
