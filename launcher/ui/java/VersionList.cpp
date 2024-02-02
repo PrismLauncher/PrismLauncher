@@ -23,6 +23,7 @@
 #include "BaseVersionList.h"
 #include "SysInfo.h"
 #include "java/JavaMetadata.h"
+#include "meta/VersionList.h"
 
 namespace Java {
 
@@ -77,8 +78,12 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
             return version->recommended;
         case JavaNameRole:
             return version->name();
-        case CPUArchitectureRole:
+        case JavaVendorRole:
             return version->vendor;
+        case TypeRole:
+            return version->packageType;
+        case Meta::VersionList::TimeRole:
+            return version->releaseTime;
         default:
             return QVariant();
     }
@@ -86,7 +91,8 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
 
 BaseVersionList::RoleList VersionList::providesRoles() const
 {
-    return { VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, JavaNameRole, CPUArchitectureRole };
+    return { VersionPointerRole, VersionIdRole,  VersionRole, RecommendedRole,
+             JavaNameRole,       JavaVendorRole, TypeRole,    Meta::VersionList::TimeRole };
 }
 
 bool sortJavas(BaseVersion::Ptr left, BaseVersion::Ptr right)
@@ -106,6 +112,7 @@ void VersionList::sortVersions()
         std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
     } else {
         m_vlist = {};
+        qWarning() << "Your operating system is not yet supported: " << SysInfo::currentSystem() << " " << SysInfo::useQTForArch();
     }
     endResetModel();
 }

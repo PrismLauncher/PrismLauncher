@@ -116,6 +116,8 @@ QVariant VersionProxyModel::headerData(int section, Qt::Orientation orientation,
                 return tr("Type");
             case CPUArchitecture:
                 return tr("Architecture");
+            case JavaVendor:
+                return tr("Vendor");
             case Path:
                 return tr("Path");
             case JavaName:
@@ -135,6 +137,8 @@ QVariant VersionProxyModel::headerData(int section, Qt::Orientation orientation,
                 return tr("The version's type");
             case CPUArchitecture:
                 return tr("CPU Architecture");
+            case JavaVendor:
+                return tr("Java vendor");
             case Path:
                 return tr("Filesystem path to this version");
             case JavaName:
@@ -171,6 +175,8 @@ QVariant VersionProxyModel::data(const QModelIndex& index, int role) const
                     return sourceModel()->data(parentIndex, BaseVersionList::TypeRole);
                 case CPUArchitecture:
                     return sourceModel()->data(parentIndex, BaseVersionList::CPUArchitectureRole);
+                case JavaVendor:
+                    return sourceModel()->data(parentIndex, BaseVersionList::JavaVendorRole);
                 case Path:
                     return sourceModel()->data(parentIndex, BaseVersionList::PathRole);
                 case JavaName:
@@ -316,6 +322,9 @@ void VersionProxyModel::setSourceModel(QAbstractItemModel* replacingRaw)
     */
     if (roles.contains(BaseVersionList::CPUArchitectureRole)) {
         m_columns.push_back(CPUArchitecture);
+    }
+    if (roles.contains(BaseVersionList::JavaVendorRole)) {
+        m_columns.push_back(JavaVendor);
     }
     if (roles.contains(BaseVersionList::PathRole)) {
         m_columns.push_back(Path);

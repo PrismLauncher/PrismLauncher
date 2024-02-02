@@ -50,6 +50,7 @@ class BaseVersionList : public QAbstractListModel {
         PathRole,
         JavaNameRole,
         CPUArchitectureRole,
+        JavaVendorRole,
         SortRole
     };
     using RoleList = QList<int>;
