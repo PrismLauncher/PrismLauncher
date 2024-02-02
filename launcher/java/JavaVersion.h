@@ -30,11 +30,11 @@ class JavaVersion {
 
     QString toString() const;
 
-    int major() { return m_major; }
-    int minor() { return m_minor; }
-    int security() { return m_security; }
-    QString build() { return m_prerelease; }
-    QString name() { return m_name; }
+    int major() const { return m_major; }
+    int minor() const { return m_minor; }
+    int security() const { return m_security; }
+    QString build() const { return m_prerelease; }
+    QString name() const { return m_name; }
 
    private:
     QString m_string;

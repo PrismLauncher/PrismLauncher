@@ -45,9 +45,9 @@ namespace Java {
 Downloader::Downloader(QWidget* parent) : QDialog(parent), ui(new Ui::JavaDownloader)
 {
     ui->setupUi(this);
-    auto versionList = new Meta::VersionList("net.minecraft.java", this);
+    auto versionList = APPLICATION->metadataIndex()->get("net.minecraft.java");
     versionList->setProvidedRoles({ BaseVersionList::VersionRole, BaseVersionList::RecommendedRole, BaseVersionList::VersionPointerRole });
-    ui->majorVersionSelect->initialize(versionList);
+    ui->majorVersionSelect->initialize(versionList.get());
     ui->majorVersionSelect->selectCurrent();
     ui->majorVersionSelect->setEmptyString(tr("No java versions are currently available in the meta"));
     ui->majorVersionSelect->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
@@ -85,7 +85,7 @@ void Downloader::accept()
         return;
     }
     Task::Ptr task;
-    auto final_path = FS::PathCombine(APPLICATION->dataRoot(), "java", meta->m_name);
+    auto final_path = FS::PathCombine(APPLICATION->dataRoot(), "java", meta->vendor, meta->m_name);
     switch (meta->downloadType) {
         case Java::DownloadType::Manifest:
             task = makeShared<ManifestDownloadTask>(meta->url, final_path, meta->checksumType, meta->checksumHash);
