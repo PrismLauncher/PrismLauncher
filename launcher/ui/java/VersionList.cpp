@@ -16,46 +16,46 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ListModel.h"
+#include "VersionList.h"
 
 #include <memory>
 
 #include "BaseVersionList.h"
 #include "SysInfo.h"
-#include "java/JavaRuntime.h"
+#include "java/JavaMetadata.h"
 
 namespace Java {
 
-InstallList::InstallList(Meta::Version::Ptr version, QObject* parent) : BaseVersionList(parent), m_version(version)
+VersionList::VersionList(Meta::Version::Ptr version, QObject* parent) : BaseVersionList(parent), m_version(version)
 {
     if (version->isLoaded())
         sortVersions();
 }
 
-Task::Ptr InstallList::getLoadTask()
+Task::Ptr VersionList::getLoadTask()
 {
     m_version->load(Net::Mode::Online);
     auto task = m_version->getCurrentTask();
-    connect(task.get(), &Task::finished, this, &InstallList::sortVersions);
+    connect(task.get(), &Task::finished, this, &VersionList::sortVersions);
     return task;
 }
 
-const BaseVersion::Ptr InstallList::at(int i) const
+const BaseVersion::Ptr VersionList::at(int i) const
 {
     return m_vlist.at(i);
 }
 
-bool InstallList::isLoaded()
+bool VersionList::isLoaded()
 {
     return m_version->isLoaded();
 }
 
-int InstallList::count() const
+int VersionList::count() const
 {
     return m_vlist.count();
 }
 
-QVariant InstallList::data(const QModelIndex& index, int role) const
+QVariant VersionList::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -75,28 +75,28 @@ QVariant InstallList::data(const QModelIndex& index, int role) const
             return version->version.toString();
         case RecommendedRole:
             return version->recommended;
-        case AliasRole:
+        case JavaNameRole:
             return version->name();
-        case ArchitectureRole:
+        case CPUArchitectureRole:
             return version->vendor;
         default:
             return QVariant();
     }
 }
 
-BaseVersionList::RoleList InstallList::providesRoles() const
+BaseVersionList::RoleList VersionList::providesRoles() const
 {
-    return { VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, AliasRole, ArchitectureRole };
+    return { VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, JavaNameRole, CPUArchitectureRole };
 }
 
 bool sortJavas(BaseVersion::Ptr left, BaseVersion::Ptr right)
 {
-    auto rleft = std::dynamic_pointer_cast<JavaRuntime::Meta>(right);
-    auto rright = std::dynamic_pointer_cast<JavaRuntime::Meta>(left);
+    auto rleft = std::dynamic_pointer_cast<Java::Metadata>(right);
+    auto rright = std::dynamic_pointer_cast<Java::Metadata>(left);
     return (*rleft) > (*rright);
 }
 
-void InstallList::sortVersions()
+void VersionList::sortVersions()
 {
     QString versionStr = SysInfo::getSupportedJavaArchitecture();
     beginResetModel();

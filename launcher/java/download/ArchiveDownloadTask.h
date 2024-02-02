@@ -21,11 +21,12 @@
 #include <QUrl>
 #include "tasks/Task.h"
 
-class ArchiveJavaDownloader : public Task {
+namespace Java {
+class ArchiveDownloadTask : public Task {
     Q_OBJECT
    public:
-    ArchiveJavaDownloader(QUrl url, QString final_path, QString checksumType = "", QString checksumHash = "");
-    virtual ~ArchiveJavaDownloader() = default;
+    ArchiveDownloadTask(QUrl url, QString final_path, QString checksumType = "", QString checksumHash = "");
+    virtual ~ArchiveDownloadTask() = default;
 
     [[nodiscard]] bool canAbort() const override { return true; }
     void executeTask() override;
@@ -38,6 +39,5 @@ class ArchiveJavaDownloader : public Task {
     QString m_final_path;
     QString m_checksum_type;
     QString m_checksum_hash;
-
-    Task::Ptr m_current_task;
 };
+}  // namespace Java

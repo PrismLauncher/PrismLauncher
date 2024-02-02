@@ -18,23 +18,17 @@
 
 #pragma once
 
-#include "java/JavaRuntime.h"
-#include "meta/VersionList.h"
+#include "BaseVersionList.h"
+#include "java/JavaMetadata.h"
+#include "meta/Version.h"
 
 namespace Java {
 
-class JavaBaseVersionList : public Meta::VersionList {
-    Q_OBJECT
-   public:
-    explicit JavaBaseVersionList(const QString& uid, QObject* parent = nullptr) : VersionList(uid, parent) {}
-    BaseVersionList::RoleList providesRoles() const { return { VersionRole, RecommendedRole, VersionPointerRole }; }
-};
-
-class InstallList : public BaseVersionList {
+class VersionList : public BaseVersionList {
     Q_OBJECT
 
    public:
-    explicit InstallList(Meta::Version::Ptr m_version, QObject* parent = 0);
+    explicit VersionList(Meta::Version::Ptr m_version, QObject* parent = 0);
 
     Task::Ptr getLoadTask() override;
     bool isLoaded() override;
@@ -50,7 +44,7 @@ class InstallList : public BaseVersionList {
 
    protected:
     Meta::Version::Ptr m_version;
-    QList<JavaRuntime::MetaPtr> m_vlist;
+    QList<Java::MetadataPtr> m_vlist;
 };
 
 }  // namespace Java

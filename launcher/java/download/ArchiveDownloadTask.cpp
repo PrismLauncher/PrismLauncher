@@ -15,7 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "java/download/ArchiveJavaDownloader.h"
+#include "java/download/ArchiveDownloadTask.h"
 #include <quazip.h>
 #include <memory>
 #include "MMCZip.h"
@@ -25,11 +25,12 @@
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
-ArchiveJavaDownloader::ArchiveJavaDownloader(QUrl url, QString final_path, QString checksumType, QString checksumHash)
+namespace Java {
+ArchiveDownloadTask::ArchiveDownloadTask(QUrl url, QString final_path, QString checksumType, QString checksumHash)
     : m_url(url), m_final_path(final_path), m_checksum_type(checksumType), m_checksum_hash(checksumHash)
 {}
 
-void ArchiveJavaDownloader::executeTask()
+void ArchiveDownloadTask::executeTask()
 {
     // JRE found ! download the zip
     setStatus(tr("Downloading Java"));
@@ -49,8 +50,8 @@ void ArchiveJavaDownloader::executeTask()
     auto fullPath = entry->getFullPath();
 
     connect(download.get(), &NetJob::finished, [download, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
-    connect(download.get(), &NetJob::progress, this, &ArchiveJavaDownloader::progress);
-    connect(download.get(), &NetJob::failed, this, &ArchiveJavaDownloader::emitFailed);
+    connect(download.get(), &NetJob::progress, this, &ArchiveDownloadTask::progress);
+    connect(download.get(), &NetJob::failed, this, &ArchiveDownloadTask::emitFailed);
     connect(this, &Task::aborted, download.get(), &NetJob::abort);
     connect(download.get(), &NetJob::succeeded, [this, fullPath] {
         // This should do all of the extracting and creating folders
@@ -59,7 +60,7 @@ void ArchiveJavaDownloader::executeTask()
     download->start();
 }
 
-void ArchiveJavaDownloader::extractJava(QString input)
+void ArchiveDownloadTask::extractJava(QString input)
 {
     setStatus(tr("Extracting java"));
     auto zip = std::make_shared<QuaZip>(input);
@@ -79,14 +80,14 @@ void ArchiveJavaDownloader::extractJava(QString input)
     connect(this, &Task::aborted, zipTask.get(), &Task::abort);
     connect(zipTask.get(), &Task::finished, [zipTask, this] { disconnect(this, &Task::aborted, zipTask.get(), &Task::abort); });
 
-    connect(zipTask.get(), &Task::succeeded, this, &ArchiveJavaDownloader::emitSucceeded);
-    connect(zipTask.get(), &Task::aborted, this, &ArchiveJavaDownloader::emitAborted);
+    connect(zipTask.get(), &Task::succeeded, this, &ArchiveDownloadTask::emitSucceeded);
+    connect(zipTask.get(), &Task::aborted, this, &ArchiveDownloadTask::emitAborted);
     connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
         emitFailed(reason);
     });
-    connect(zipTask.get(), &Task::stepProgress, this, &ArchiveJavaDownloader::propagateStepProgress);
+    connect(zipTask.get(), &Task::stepProgress, this, &ArchiveDownloadTask::propagateStepProgress);
 
     connect(zipTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);
@@ -98,3 +99,4 @@ void ArchiveJavaDownloader::extractJava(QString input)
     });
     zipTask->start();
 }
+}  // namespace Java

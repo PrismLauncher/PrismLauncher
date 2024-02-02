@@ -36,7 +36,7 @@
 
 #include "JavaPage.h"
 #include "JavaCommon.h"
-#include "ui/java/JavaDownload.h"
+#include "ui/java/JavaDownloader.h"
 #include "ui_JavaPage.h"
 
 #include <QDir>
@@ -169,7 +169,7 @@ void JavaPage::on_javaTestBtn_clicked()
 
 void JavaPage::on_javaDownloadBtn_clicked()
 {
-    auto jdialog = new JavaDownload(this);
+    auto jdialog = new Java::Downloader(this);
     jdialog->exec();
 }
 

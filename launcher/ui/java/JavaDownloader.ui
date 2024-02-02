@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>JavaDownload</class>
- <widget class="QDialog" name="JavaDownload">
+ <class>JavaDownloader</class>
+ <widget class="QDialog" name="JavaDownloader">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,7 +23,7 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="VersionSelectWidget" name="widget" native="true"/>
+         <widget class="VersionSelectWidget" name="majorVersionSelect" native="true"/>
         </item>
        </layout>
       </widget>
@@ -35,7 +35,7 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="VersionSelectWidget" name="widget_2" native="true"/>
+         <widget class="VersionSelectWidget" name="javaVersionSelect" native="true"/>
         </item>
        </layout>
       </widget>
@@ -67,7 +67,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>JavaDownload</receiver>
+   <receiver>JavaDownloader</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -83,7 +83,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>JavaDownload</receiver>
+   <receiver>JavaDownloader</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -47,7 +47,7 @@
 #include "Agent.h"
 #include "Library.h"
 #include "ProblemProvider.h"
-#include "java/JavaRuntime.h"
+#include "java/JavaMetadata.h"
 #include "minecraft/Rule.h"
 
 class PackProfile;
@@ -155,7 +155,7 @@ class VersionFile : public ProblemContainer {
     /// is volatile -- may be removed as soon as it is no longer needed by something else
     bool m_volatile = false;
 
-    QHash<QString, QList<JavaRuntime::MetaPtr>> runtimes;
+    QHash<QString, QList<Java::MetadataPtr>> runtimes;
 
    public:
     // Mojang: DEPRECATED list of 'downloads' - client jar, server jar, windows server exe, maybe more.

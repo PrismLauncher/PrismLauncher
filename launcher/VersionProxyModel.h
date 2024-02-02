@@ -9,7 +9,7 @@ class VersionFilterModel;
 class VersionProxyModel : public QAbstractProxyModel {
     Q_OBJECT
    public:
-    enum Column { Name, ParentVersion, Branch, Type, Architecture, Path, Time, Alias };
+    enum Column { Name, ParentVersion, Branch, Type, CPUArchitecture, Path, Time, JavaName };
     using FilterMap = QHash<BaseVersionList::ModelRoles, std::shared_ptr<Filter>>;
 
    public:

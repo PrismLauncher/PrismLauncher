@@ -15,7 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "java/download/ManifestJavaDownloader.h"
+#include "java/download/ManifestDownloadTask.h"
 
 #include "Application.h"
 #include "FileSystem.h"
@@ -30,11 +30,12 @@ struct File {
     bool isExec;
 };
 
-ManifestJavaDownloader::ManifestJavaDownloader(QUrl url, QString final_path, QString checksumType, QString checksumHash)
+namespace Java {
+ManifestDownloadTask::ManifestDownloadTask(QUrl url, QString final_path, QString checksumType, QString checksumHash)
     : m_url(url), m_final_path(final_path), m_checksum_type(checksumType), m_checksum_hash(checksumHash)
 {}
 
-void ManifestJavaDownloader::executeTask()
+void ManifestDownloadTask::executeTask()
 {
     setStatus(tr("Downloading Java"));
     auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
@@ -51,8 +52,8 @@ void ManifestJavaDownloader::executeTask()
     download->addNetAction(action);
 
     connect(download.get(), &NetJob::finished, [download, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
-    connect(download.get(), &NetJob::progress, this, &ManifestJavaDownloader::progress);
-    connect(download.get(), &NetJob::failed, this, &ManifestJavaDownloader::emitFailed);
+    connect(download.get(), &NetJob::progress, this, &ManifestDownloadTask::progress);
+    connect(download.get(), &NetJob::failed, this, &ManifestDownloadTask::emitFailed);
     connect(this, &Task::aborted, download.get(), &NetJob::abort);
 
     connect(download.get(), &NetJob::succeeded, [files, this] {
@@ -69,7 +70,7 @@ void ManifestJavaDownloader::executeTask()
     download->start();
 }
 
-void ManifestJavaDownloader::downloadJava(const QJsonDocument& doc)
+void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
 {
     // valid json doc, begin making jre spot
     FS::ensureFolderPathExists(m_final_path);
@@ -116,10 +117,11 @@ void ManifestJavaDownloader::downloadJava(const QJsonDocument& doc)
         disconnect(this, &Task::aborted, elementDownload, &NetJob::abort);
         elementDownload->deleteLater();
     });
-    connect(elementDownload, &NetJob::progress, this, &ManifestJavaDownloader::progress);
-    connect(elementDownload, &NetJob::failed, this, &ManifestJavaDownloader::emitFailed);
+    connect(elementDownload, &NetJob::progress, this, &ManifestDownloadTask::progress);
+    connect(elementDownload, &NetJob::failed, this, &ManifestDownloadTask::emitFailed);
 
     connect(this, &Task::aborted, elementDownload, &NetJob::abort);
     connect(elementDownload, &NetJob::succeeded, [this] { emitSucceeded(); });
     elementDownload->start();
 }
+}  // namespace Java

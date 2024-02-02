@@ -431,17 +431,17 @@ set(JAVA_SOURCES
     java/JavaVersion.h
     java/JavaVersion.cpp
 
-    java/JavaRuntime.h
-    java/JavaRuntime.cpp
-    java/download/ArchiveJavaDownloader.cpp
-    java/download/ArchiveJavaDownloader.h
-    java/download/ManifestJavaDownloader.cpp
-    java/download/ManifestJavaDownloader.h
+    java/JavaMetadata.h
+    java/JavaMetadata.cpp
+    java/download/ArchiveDownloadTask.cpp
+    java/download/ArchiveDownloadTask.h
+    java/download/ManifestDownloadTask.cpp
+    java/download/ManifestDownloadTask.h
 
-    ui/java/JavaDownload.h
-    ui/java/JavaDownload.cpp
-    ui/java/ListModel.h
-    ui/java/ListModel.cpp
+    ui/java/JavaDownloader.h
+    ui/java/JavaDownloader.cpp
+    ui/java/VersionList.h
+    ui/java/VersionList.cpp
 )
 
 set(TRANSLATIONS_SOURCES
@@ -1192,7 +1192,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ScrollMessageBox.ui
     ui/dialogs/BlockedModsDialog.ui
     ui/dialogs/ChooseProviderDialog.ui
-    ui/java/JavaDownload.ui
+    ui/java/JavaDownloader.ui
 )
 
 qt_wrap_ui(PRISM_UPDATE_UI

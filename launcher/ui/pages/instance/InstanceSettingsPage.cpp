@@ -36,7 +36,7 @@
  */
 
 #include "InstanceSettingsPage.h"
-#include "ui/java/JavaDownload.h"
+#include "ui/java/JavaDownloader.h"
 #include "ui_InstanceSettingsPage.h"
 
 #include <QDialog>
@@ -387,7 +387,7 @@ void InstanceSettingsPage::loadSettings()
 
 void InstanceSettingsPage::on_javaDownloadBtn_clicked()
 {
-    auto jdialog = new JavaDownload(this);
+    auto jdialog = new Java::Downloader(this);
     jdialog->exec();
 }
 

@@ -26,11 +26,11 @@
 #include "BaseVersion.h"
 #include "java/JavaVersion.h"
 
-namespace JavaRuntime {
+namespace Java {
 
 enum class DownloadType { Manifest, Archive };
 
-class Meta : public BaseVersion {
+class Metadata : public BaseVersion {
    public:
     virtual QString descriptor() override { return version.toString(); }
 
@@ -40,9 +40,9 @@ class Meta : public BaseVersion {
 
     virtual bool operator<(BaseVersion& a) override;
     virtual bool operator>(BaseVersion& a) override;
-    bool operator<(const Meta& rhs);
-    bool operator==(const Meta& rhs);
-    bool operator>(const Meta& rhs);
+    bool operator<(const Metadata& rhs);
+    bool operator==(const Metadata& rhs);
+    bool operator>(const Metadata& rhs);
 
     QString m_name;
     QString vendor;
@@ -55,10 +55,10 @@ class Meta : public BaseVersion {
     QString packageType;
     JavaVersion version;
 };
-using MetaPtr = std::shared_ptr<Meta>;
+using MetadataPtr = std::shared_ptr<Metadata>;
 
 DownloadType parseDownloadType(QString javaDownload);
 QString downloadTypeToString(DownloadType javaDownload);
-MetaPtr parseJavaMeta(const QJsonObject& libObj);
+MetadataPtr parseJavaMeta(const QJsonObject& libObj);
 
-}  // namespace JavaRuntime
+}  // namespace Java

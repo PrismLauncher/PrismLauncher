@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2024 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,28 +18,27 @@
 
 #pragma once
 
-#include <QDialog>
-#include "BaseVersion.h"
+#include <QUrl>
+#include "tasks/Task.h"
 
-namespace Ui {
-class JavaDownload;
-}
+namespace Java {
 
-class JavaDownload : public QDialog {
+class ManifestDownloadTask : public Task {
     Q_OBJECT
-
    public:
-    explicit JavaDownload(QWidget* parent = 0);
-    ~JavaDownload();
+    ManifestDownloadTask(QUrl url, QString final_path, QString checksumType = "", QString checksumHash = "");
+    virtual ~ManifestDownloadTask() = default;
 
-    void accept();
+    [[nodiscard]] bool canAbort() const override { return true; }
+    void executeTask() override;
 
-   public slots:
-    void refresh();
+   private slots:
+    void downloadJava(const QJsonDocument& doc);
 
-   protected slots:
-    void setSelectedVersion(BaseVersion::Ptr version);
-
-   private:
-    Ui::JavaDownload* ui;
+   protected:
+    QUrl m_url;
+    QString m_final_path;
+    QString m_checksum_type;
+    QString m_checksum_hash;
 };
+}  // namespace Java

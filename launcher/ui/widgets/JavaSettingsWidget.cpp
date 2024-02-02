@@ -19,7 +19,7 @@
 #include "java/JavaUtils.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/java/JavaDownload.h"
+#include "ui/java/JavaDownloader.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
 #include "Application.h"
@@ -274,7 +274,7 @@ void JavaSettingsWidget::on_javaBrowseBtn_clicked()
 }
 void JavaSettingsWidget::on_javaDownloadBtn_clicked()
 {
-    auto jdialog = new JavaDownload(this);
+    auto jdialog = new Java::Downloader(this);
     jdialog->exec();
 }
 void JavaSettingsWidget::on_javaStatusBtn_clicked()

@@ -37,7 +37,7 @@
 #include <Json.h>
 #include <minecraft/MojangVersionFormat.h>
 #include <QList>
-#include "java/JavaRuntime.h"
+#include "java/JavaMetadata.h"
 #include "minecraft/Agent.h"
 #include "minecraft/ParseUtils.h"
 
@@ -261,9 +261,9 @@ VersionFilePtr OneSixVersionFormat::versionFileFromJson(const QJsonDocument& doc
         auto runtimes = requireObject(root, "runtimes");
         out->runtimes = {};
         for (auto key : runtimes.keys()) {
-            QList<JavaRuntime::MetaPtr> list;
+            QList<Java::MetadataPtr> list;
             for (auto runtime : ensureArray(runtimes, key)) {
-                list.append(JavaRuntime::parseJavaMeta(ensureObject(runtime)));
+                list.append(Java::parseJavaMeta(ensureObject(runtime)));
             }
             out->runtimes[key] = list;
         }

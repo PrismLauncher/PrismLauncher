@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "java/JavaRuntime.h"
+#include "java/JavaMetadata.h"
 
 #include <memory>
 
@@ -25,7 +25,7 @@
 #include "java/JavaVersion.h"
 #include "minecraft/ParseUtils.h"
 
-namespace JavaRuntime {
+namespace Java {
 
 DownloadType parseDownloadType(QString javaDownload)
 {
@@ -44,9 +44,9 @@ QString downloadTypeToString(DownloadType javaDownload)
     }
     return "";
 }
-MetaPtr parseJavaMeta(const QJsonObject& in)
+MetadataPtr parseJavaMeta(const QJsonObject& in)
 {
-    auto meta = std::make_shared<Meta>();
+    auto meta = std::make_shared<Metadata>();
 
     meta->m_name = Json::ensureString(in, "name", "");
     meta->vendor = Json::ensureString(in, "vendor", "");
@@ -74,7 +74,7 @@ MetaPtr parseJavaMeta(const QJsonObject& in)
     return meta;
 }
 
-bool Meta::operator<(const Meta& rhs)
+bool Metadata::operator<(const Metadata& rhs)
 {
     auto id = version;
     if (id < rhs.version) {
@@ -86,32 +86,32 @@ bool Meta::operator<(const Meta& rhs)
     return StringUtils::naturalCompare(m_name, rhs.m_name, Qt::CaseInsensitive) < 0;
 }
 
-bool Meta::operator==(const Meta& rhs)
+bool Metadata::operator==(const Metadata& rhs)
 {
     return version == rhs.version && m_name == rhs.m_name;
 }
 
-bool Meta::operator>(const Meta& rhs)
+bool Metadata::operator>(const Metadata& rhs)
 {
     return (!operator<(rhs)) && (!operator==(rhs));
 }
 
-bool Meta::operator<(BaseVersion& a)
+bool Metadata::operator<(BaseVersion& a)
 {
     try {
-        return operator<(dynamic_cast<Meta&>(a));
+        return operator<(dynamic_cast<Metadata&>(a));
     } catch (const std::bad_cast& e) {
         return BaseVersion::operator<(a);
     }
 }
 
-bool Meta::operator>(BaseVersion& a)
+bool Metadata::operator>(BaseVersion& a)
 {
     try {
-        return operator>(dynamic_cast<Meta&>(a));
+        return operator>(dynamic_cast<Metadata&>(a));
     } catch (const std::bad_cast& e) {
         return BaseVersion::operator>(a);
     }
 }
 
-}  // namespace JavaRuntime
+}  // namespace Java
