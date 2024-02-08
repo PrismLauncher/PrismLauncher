@@ -586,6 +586,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("IconsDir", "icons");
         m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
         m_settings->registerSetting("DownloadsDirWatchRecursive", false);
+        m_settings->registerSetting("JavaDir", "java");
 
         // Editors
         m_settings->registerSetting("JsonEditor", QString());
@@ -1832,5 +1833,5 @@ QUrl Application::normalizeImportUrl(QString const& url)
 }
 const QString Application::javaPath()
 {
-    return FS::PathCombine(m_dataPath, "java");
+    return m_settings->get("JavaDir").toString();
 }
