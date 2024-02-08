@@ -337,6 +337,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     }
 
     candidates.append(getMinecraftJavaBundle());
+    candidates.append(getPrismJavaBundle());
     candidates = addJavasFromEnv(candidates);
     candidates.removeDuplicates();
     return candidates;
@@ -363,6 +364,7 @@ QList<QString> JavaUtils::FindJavaPaths()
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
     }
     javas.append(getMinecraftJavaBundle());
+    javas.append(getPrismJavaBundle());
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;
@@ -393,7 +395,6 @@ QList<QString> JavaUtils::FindJavaPaths()
             scanJavaDir(snap + dirPath);
         }
     };
-    scanJavaDir(FS::PathCombine(APPLICATION->dataRoot(), "java"));
     // oracle RPMs
     scanJavaDirs("/usr/java");
     // general locations used by distro packaging
@@ -416,6 +417,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs(FS::PathCombine(home, ".sdkman/candidates/java"));
 
     javas.append(getMinecraftJavaBundle());
+    javas.append(getPrismJavaBundle());
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;
@@ -429,6 +431,8 @@ QList<QString> JavaUtils::FindJavaPaths()
     javas.append(this->GetDefaultJava()->path);
 
     javas.append(getMinecraftJavaBundle());
+    javas.append(getPrismJavaBundle());
+    javas.removeDuplicates();
     return addJavasFromEnv(javas);
 }
 #endif
@@ -481,6 +485,28 @@ QStringList getMinecraftJavaBundle()
                 processpaths << entry.canonicalFilePath();
             }
         }
+    }
+    return javas;
+}
+
+QStringList getPrismJavaBundle()
+{
+    QList<QString> javas;
+    QDir dir(APPLICATION->javaPath());
+    if (!dir.exists())
+        return javas;
+
+    QString executable = "java";
+#if defined(Q_OS_WIN32)
+    executable += "w.exe";
+#endif
+
+    auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (auto& entry : entries) {
+        QString prefix;
+        prefix = entry.canonicalFilePath();
+        javas.append(FS::PathCombine(prefix, "jre", "bin", executable));
+        javas.append(FS::PathCombine(prefix, "bin", executable));
     }
     return javas;
 }

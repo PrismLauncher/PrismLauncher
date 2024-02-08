@@ -48,7 +48,6 @@
 #include "net/PasteUpload.h"
 #include "pathmatcher/MultiMatcher.h"
 #include "pathmatcher/SimplePrefixMatcher.h"
-#include "settings/INIFile.h"
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 
@@ -105,8 +104,6 @@
 #include <minecraft/auth/AccountList.h>
 #include "icons/IconList.h"
 #include "net/HttpMetaCache.h"
-
-#include "java/JavaUtils.h"
 
 #include "updater/ExternalUpdater.h"
 
@@ -1832,4 +1829,8 @@ QUrl Application::normalizeImportUrl(QString const& url)
     } else {
         return QUrl::fromUserInput(url);
     }
+}
+const QString Application::javaPath()
+{
+    return FS::PathCombine(m_dataPath, "java");
 }

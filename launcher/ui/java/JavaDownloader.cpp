@@ -85,7 +85,7 @@ void Downloader::accept()
         return;
     }
     Task::Ptr task;
-    auto final_path = FS::PathCombine(APPLICATION->dataRoot(), "java", meta->vendor, meta->m_name);
+    auto final_path = FS::PathCombine(APPLICATION->javaPath(), meta->m_name);
     switch (meta->downloadType) {
         case Java::DownloadType::Manifest:
             task = makeShared<ManifestDownloadTask>(meta->url, final_path, meta->checksumType, meta->checksumHash);
