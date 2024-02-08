@@ -629,6 +629,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("JvmArgs", "");
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
+        m_settings->registerSetting("JavaExtraSearchPaths", QStringList());
 
         // Legacy settings
         m_settings->registerSetting("OnlineFixes", false);

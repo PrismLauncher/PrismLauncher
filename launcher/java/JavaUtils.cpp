@@ -492,21 +492,34 @@ QStringList getMinecraftJavaBundle()
 QStringList getPrismJavaBundle()
 {
     QList<QString> javas;
-    QDir dir(APPLICATION->javaPath());
-    if (!dir.exists())
-        return javas;
 
     QString executable = "java";
 #if defined(Q_OS_WIN32)
     executable += "w.exe";
 #endif
 
-    auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-    for (auto& entry : entries) {
-        QString prefix;
-        prefix = entry.canonicalFilePath();
+    auto scanDir = [&](QString prefix) {
         javas.append(FS::PathCombine(prefix, "jre", "bin", executable));
         javas.append(FS::PathCombine(prefix, "bin", executable));
+        javas.append(FS::PathCombine(prefix, executable));
+    };
+    auto scanJavaDir = [&](const QString& dirPath) {
+        QDir dir(dirPath);
+        if (!dir.exists())
+            return;
+        auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (auto& entry : entries) {
+            scanDir(entry.canonicalFilePath());
+        }
+    };
+
+    scanJavaDir(APPLICATION->javaPath());
+
+    auto extra_paths = APPLICATION->settings()->get("JavaExtraSearchPaths").toStringList();
+    for (auto& entry : extra_paths) {
+        scanDir(entry);
+        scanJavaDir(entry);
     }
+
     return javas;
 }

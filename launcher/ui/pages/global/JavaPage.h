@@ -38,7 +38,7 @@
 #include <Application.h>
 #include <QObjectPtr.h>
 #include <QDialog>
-#include <memory>
+#include <QStringListModel>
 #include "JavaCommon.h"
 #include "ui/pages/BasePage.h"
 
@@ -73,10 +73,13 @@ class JavaPage : public QWidget, public BasePage {
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();
     void on_javaDownloadBtn_clicked();
+    void on_addExtraPathButton_clicked();
+    void on_removeExtraPathButton_clicked();
     void on_maxMemSpinBox_valueChanged(int i);
     void checkerFinished();
 
    private:
     Ui::JavaPage* ui;
     unique_qobject_ptr<JavaCommon::TestCheck> checker;
+    QStringListModel* m_extra_paths;
 };
