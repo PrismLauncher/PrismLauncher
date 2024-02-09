@@ -36,6 +36,7 @@
  */
 
 #include "InstanceSettingsPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/java/JavaDownloader.h"
 #include "ui_InstanceSettingsPage.h"
 
@@ -412,6 +413,15 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
         ui->labelPermGen->setVisible(visible);
         ui->labelPermgenNote->setVisible(visible);
         m_settings->set("PermGenVisible", visible);
+
+        if (!java->is_64bit && m_settings->get("MaxMemAlloc").toInt() > 2048) {
+            CustomMessageBox::selectable(this, tr("Confirm Selection"),
+                                         tr("You selected an x86 java version.\n"
+                                            "This means that will not support more than 2Gb(2048Mb) of ram.\n"
+                                            "Please make sure that the maximum memory value is lower."),
+                                         QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
+                ->exec();
+        }
     }
 }
 

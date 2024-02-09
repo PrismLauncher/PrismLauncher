@@ -193,6 +193,7 @@ void JavaListLoadTask::javaCheckerFinished()
             javaVersion->id = result.javaVersion;
             javaVersion->arch = result.realPlatform;
             javaVersion->path = result.path;
+            javaVersion->is_64bit = result.is_64bit;
             candidates.append(javaVersion);
 
             qDebug() << " " << javaVersion->id.toString() << javaVersion->arch << javaVersion->path;

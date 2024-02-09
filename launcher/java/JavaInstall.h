@@ -40,6 +40,7 @@ struct JavaInstall : public BaseVersion {
     QString arch;
     QString path;
     bool recommended = false;
+    bool is_64bit = false;
 };
 
 using JavaInstallPtr = std::shared_ptr<JavaInstall>;
