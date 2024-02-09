@@ -83,7 +83,7 @@ public abstract class AbstractLauncher implements Launcher {
 
         String windowParams = params.getString("windowParams", null);
 
-        if ("max".equals(windowParams) || windowParams == null) {
+        if ("maximized".equals(windowParams) || windowParams == null) {
             maximize = windowParams != null;
 
             width = DEFAULT_WINDOW_WIDTH;

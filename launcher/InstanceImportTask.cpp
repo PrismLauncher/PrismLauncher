@@ -59,7 +59,7 @@
 
 #include <quazip/quazipdir.h>
 
-InstanceImportTask::InstanceImportTask(const QUrl sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
+InstanceImportTask::InstanceImportTask(const QUrl& sourceUrl, QWidget* parent, QMap<QString, QString>&& extra_info)
     : m_sourceUrl(sourceUrl), m_extra_info(extra_info), m_parent(parent)
 {}
 
@@ -164,8 +164,8 @@ void InstanceImportTask::processZipPack()
     } else if (technicFound) {
         // process as Technic pack
         qDebug() << "Technic:" << technicFound;
-        extractDir.mkpath(".minecraft");
-        extractDir.cd(".minecraft");
+        extractDir.mkpath("minecraft");
+        extractDir.cd("minecraft");
         m_modpackType = ModpackType::Technic;
     } else {
         QStringList paths_to_ignore{ "overrides/" };

@@ -36,12 +36,12 @@
 
 #include "LaunchController.h"
 #include "Application.h"
+#include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AccountList.h"
 
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ProfileSelectDialog.h"
 #include "ui/dialogs/ProfileSetupDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -89,7 +89,7 @@ void LaunchController::decideAccount()
         // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
                                                   tr("In order to play Minecraft, you must have at least one Microsoft "
-                                                     "account which owns Minecraft logged in."
+                                                     "account which owns Minecraft logged in. "
                                                      "Would you like to open the account manager to add an account now?"),
                                                   QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
                          ->exec();
@@ -106,7 +106,7 @@ void LaunchController::decideAccount()
     // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
     auto instanceAccountId = m_instance->settings()->get("InstanceAccountId").toString();
     auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId);
-    if (instanceAccountIndex == -1) {
+    if (instanceAccountIndex == -1 || instanceAccountId.isEmpty()) {
         m_accountToUse = accounts->defaultAccount();
     } else {
         m_accountToUse = accounts->at(instanceAccountIndex);
@@ -143,6 +143,12 @@ void LaunchController::login()
     bool tryagain = true;
     unsigned int tries = 0;
 
+    if (m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) {
+        // Force account refresh on the account used to launch the instance updating the AccountState
+        //  only on first try and if it is not meant to be offline
+        auto accounts = APPLICATION->accounts();
+        accounts->requestRefresh(m_accountToUse->internalId());
+    }
     while (tryagain) {
         if (tries > 0 && tries % 3 == 0) {
             auto result =
@@ -161,7 +167,7 @@ void LaunchController::login()
         m_accountToUse->fillSession(m_session);
 
         // Launch immediately in true offline mode
-        if (m_accountToUse->isOffline()) {
+        if (m_accountToUse->accountType() == AccountType::Offline) {
             launchInstance();
             return;
         }
@@ -249,12 +255,6 @@ void LaunchController::login()
                 progDialog.execWithTask(task.get());
                 continue;
             }
-            // FIXME: this is missing - the meaning is that the account is queued for refresh and we should wait for that
-            /*
-            case AccountState::Queued: {
-                return;
-            }
-            */
             case AccountState::Expired: {
                 auto errorString = tr("The account has expired and needs to be logged into manually again.");
                 QMessageBox::warning(m_parentWidget, tr("Account refresh failed"), errorString, QMessageBox::StandardButton::Ok,

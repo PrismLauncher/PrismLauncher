@@ -1,6 +1,6 @@
 id: org.prismlauncher.PrismLauncher
 runtime: org.kde.Platform
-runtime-version: "5.15-22.08"
+runtime-version: 5.15-23.08
 sdk: org.kde.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk17
@@ -104,9 +104,9 @@ modules:
       - install -Dm755 ../data/gamemoderun -t /app/bin
     sources:
       - type: archive
-        archive-type: tar-gzip
-        url: https://api.github.com/repos/FeralInteractive/gamemode/tarball/1.7
-        sha256: 57ce73ba605d1cf12f8d13725006a895182308d93eba0f69f285648449641803
+        dest-filename: gamemode.tar.gz
+        url: https://api.github.com/repos/FeralInteractive/gamemode/tarball/1.8.1
+        sha256: 969cf85b5ca3944f3e315cd73a0ee9bea4f9c968cd7d485e9f4745bc1e679c4e
         x-checker-data:
           type: json
           url: https://api.github.com/repos/FeralInteractive/gamemode/releases/latest

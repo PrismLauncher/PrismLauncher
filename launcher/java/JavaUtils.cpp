@@ -34,6 +34,7 @@
  */
 
 #include <QDir>
+#include <QFileInfo>
 #include <QString>
 #include <QStringList>
 
@@ -335,6 +336,7 @@ QList<QString> JavaUtils::FindJavaPaths()
         }
     }
 
+    candidates.append(getMinecraftJavaBundle());
     candidates = addJavasFromEnv(candidates);
     candidates.removeDuplicates();
     return candidates;
@@ -360,6 +362,7 @@ QList<QString> JavaUtils::FindJavaPaths()
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/bin/java");
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
     }
+    javas.append(getMinecraftJavaBundle());
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;
@@ -411,6 +414,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     // javas downloaded by sdkman
     scanJavaDirs(FS::PathCombine(home, ".sdkman/candidates/java"));
 
+    javas.append(getMinecraftJavaBundle());
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;
@@ -423,6 +427,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     QList<QString> javas;
     javas.append(this->GetDefaultJava()->path);
 
+    javas.append(getMinecraftJavaBundle());
     return addJavasFromEnv(javas);
 }
 #endif
@@ -430,4 +435,51 @@ QList<QString> JavaUtils::FindJavaPaths()
 QString JavaUtils::getJavaCheckPath()
 {
     return APPLICATION->getJarPath("JavaCheck.jar");
+}
+
+QStringList getMinecraftJavaBundle()
+{
+    QString partialPath;
+    QString executable = "java";
+    QStringList processpaths;
+#if defined(Q_OS_OSX)
+    partialPath = FS::PathCombine(QDir::homePath(), "Library/Application Support");
+#elif defined(Q_OS_WIN32)
+    partialPath = QProcessEnvironment::systemEnvironment().value("LOCALAPPDATA", "");
+    executable += "w.exe";
+
+    // add the microsoft store version of the launcher to the search. the current path is:
+    // C:\Users\USERNAME\AppData\Local\Packages\Microsoft.4297127D64EC6_8wekyb3d8bbwe\LocalCache\Local\runtime
+    auto minecraftMSStorePath =
+        FS::PathCombine(QFileInfo(partialPath).absolutePath(), "Local", "Packages", "Microsoft.4297127D64EC6_8wekyb3d8bbwe");
+    minecraftMSStorePath = FS::PathCombine(minecraftMSStorePath, "LocalCache", "Local", "runtime");
+    processpaths << minecraftMSStorePath;
+#else
+    partialPath = QDir::homePath();
+#endif
+    auto minecraftDataPath = FS::PathCombine(partialPath, ".minecraft", "runtime");
+    processpaths << minecraftDataPath;
+
+    QStringList javas;
+    while (!processpaths.isEmpty()) {
+        auto dirPath = processpaths.takeFirst();
+        QDir dir(dirPath);
+        if (!dir.exists())
+            continue;
+        auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+        auto binFound = false;
+        for (auto& entry : entries) {
+            if (entry.baseName() == "bin") {
+                javas.append(FS::PathCombine(entry.canonicalFilePath(), executable));
+                binFound = true;
+                break;
+            }
+        }
+        if (!binFound) {
+            for (auto& entry : entries) {
+                processpaths << entry.canonicalFilePath();
+            }
+        }
+    }
+    return javas;
 }

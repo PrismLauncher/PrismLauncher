@@ -48,6 +48,7 @@
 #include "FileSystem.h"
 #include "net/ApiDownload.h"
 #include "net/ChecksumValidator.h"
+#include "net/Download.h"
 
 #include "Application.h"
 

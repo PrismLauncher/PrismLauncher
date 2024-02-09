@@ -221,8 +221,12 @@ void LauncherPage::applySettings()
             break;
     }
 
+    // Cat
+    s->set("CatOpacity", ui->catOpacitySpinBox->value());
+
     // Mods
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
+    s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -275,9 +279,13 @@ void LauncherPage::loadSettings()
         ui->sortByNameBtn->setChecked(true);
     }
 
+    // Cat
+    ui->catOpacitySpinBox->setValue(s->get("CatOpacity").toInt());
+
     // Mods
     ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
+    ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
 }
 
 void LauncherPage::refreshFontPreview()

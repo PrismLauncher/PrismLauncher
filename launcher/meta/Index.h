@@ -60,6 +60,6 @@ class Index : public QAbstractListModel, public BaseEntity {
     QHash<QString, VersionList::Ptr> m_uids;
     shared_qobject_ptr<Meta::Property> m_properties;
 
-    void connectVersionList(const int row, const VersionList::Ptr& list);
+    void connectVersionList(int row, const VersionList::Ptr& list);
 };
 }  // namespace Meta

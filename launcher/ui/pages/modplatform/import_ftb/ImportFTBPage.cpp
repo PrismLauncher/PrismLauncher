@@ -20,6 +20,7 @@
 #include "ui/widgets/ProjectItem.h"
 #include "ui_ImportFTBPage.h"
 
+#include <QFileDialog>
 #include <QWidget>
 #include "FileSystem.h"
 #include "ListModel.h"
@@ -56,6 +57,13 @@ ImportFTBPage::ImportFTBPage(NewInstanceDialog* dialog, QWidget* parent) : QWidg
 
     connect(ui->searchEdit, &QLineEdit::textChanged, this, &ImportFTBPage::triggerSearch);
 
+    connect(ui->browseButton, &QPushButton::clicked, this, [this] {
+        auto path = listModel->getPath();
+        QString dir = QFileDialog::getExistingDirectory(this, tr("Select FTBApp instances directory"), path, QFileDialog::ShowDirsOnly);
+        if (!dir.isEmpty())
+            listModel->setPath(dir);
+    });
+
     ui->modpackList->setItemDelegate(new ProjectItemDelegate(this));
     ui->modpackList->selectionModel()->reset();
 }
@@ -90,7 +98,7 @@ void ImportFTBPage::suggestCurrent()
     }
 
     dialog->setSuggestedPack(selected.name, new PackInstallTask(selected));
-    QString editedLogoName = QString("ftb_%1_%2,jpg").arg(selected.name, selected.id);
+    QString editedLogoName = QString("ftb_%1_%2.jpg").arg(selected.name, QString::number(selected.id));
     dialog->setSuggestedIconFromFile(FS::PathCombine(selected.path, "folder.jpg"), editedLogoName);
 }
 

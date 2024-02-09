@@ -137,10 +137,11 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
     auto provider = pDep->pack->provider == m_flame_provider.name ? m_flame_provider : m_modrinth_provider;
     auto responseInfo = std::make_shared<QByteArray>();
     auto info = provider.api->getProject(pDep->pack->addonId.toString(), responseInfo);
-    QObject::connect(info.get(), &NetJob::succeeded, [responseInfo, provider, pDep] {
+    QObject::connect(info.get(), &NetJob::succeeded, [this, responseInfo, provider, pDep] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
+            removePack(pDep->pack->addonId);
             qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
             qDebug() << *responseInfo;
@@ -151,6 +152,7 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
                                                                              : Json::requireObject(doc);
             provider.mod->loadIndexedPack(*pDep->pack, obj);
         } catch (const JSONValidationError& e) {
+            removePack(pDep->pack->addonId);
             qDebug() << doc;
             qWarning() << "Error while reading mod info: " << e.cause();
         }
@@ -180,7 +182,9 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
 
     ResourceAPI::DependencySearchArgs args = { dep, m_version, m_loaderType };
     ResourceAPI::DependencySearchCallbacks callbacks;
-
+    callbacks.on_fail = [](QString reason, int) {
+        qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
+    };
     callbacks.on_succeed = [dep, provider, pDep, level, this](auto& doc, [[maybe_unused]] auto& pack) {
         try {
             QJsonArray arr;
@@ -211,11 +215,13 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             pDep->pack->versionsLoaded = true;
 
         } catch (const JSONValidationError& e) {
+            removePack(dep.addonId);
             qDebug() << doc;
             qWarning() << "Error while reading mod version: " << e.cause();
             return;
         }
         if (level == 0) {
+            removePack(dep.addonId);
             qWarning() << "Dependency cycle exceeded";
             return;
         }
@@ -238,7 +244,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     return tasks;
 }
 
-void GetModDependenciesTask::removePack(const QVariant addonId)
+void GetModDependenciesTask::removePack(const QVariant& addonId)
 {
     auto pred = [addonId](const std::shared_ptr<PackDependency>& v) { return v->pack->addonId == addonId; };
 #if QT_VERSION >= QT_VERSION_CHECK(6, 1, 0)

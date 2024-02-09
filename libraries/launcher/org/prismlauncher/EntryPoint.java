@@ -81,10 +81,9 @@ public final class EntryPoint {
         PreLaunchAction action = PreLaunchAction.PROCEED;
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
-            String line;
-
             while (action == PreLaunchAction.PROCEED) {
-                if ((line = reader.readLine()) != null)
+                String line = reader.readLine();
+                if (line != null)
                     action = parseLine(line, params);
                 else
                     action = PreLaunchAction.ABORT;
@@ -105,13 +104,16 @@ public final class EntryPoint {
             return ExitCode.ABORT;
         }
 
+        SystemProperties.apply(params);
+
+        String launcherType = params.getString("launcher");
+
         try {
             LegacyProxy.applyOnlineFixes(params);
 
             Launcher launcher;
-            String type = params.getString("launcher");
 
-            switch (type) {
+            switch (launcherType) {
                 case "standard":
                     launcher = new StandardLauncher(params);
                     break;
@@ -121,7 +123,7 @@ public final class EntryPoint {
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid launcher type: " + type);
+                    throw new IllegalArgumentException("Invalid launcher type: " + launcherType);
             }
 
             launcher.launch();
@@ -141,7 +143,7 @@ public final class EntryPoint {
     private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
         switch (input) {
             case "":
-                break;
+                return PreLaunchAction.PROCEED;
 
             case "launch":
                 return PreLaunchAction.LAUNCH;
@@ -156,9 +158,9 @@ public final class EntryPoint {
                     throw new ParseException(input, "[key] [value]");
 
                 params.add(pair[0], pair[1]);
-        }
 
-        return PreLaunchAction.PROCEED;
+                return PreLaunchAction.PROCEED;
+        }
     }
 
     private enum PreLaunchAction { PROCEED, LAUNCH, ABORT }

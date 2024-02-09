@@ -54,7 +54,7 @@ class Task;
 class AccountTask;
 class MinecraftAccount;
 
-typedef shared_qobject_ptr<MinecraftAccount> MinecraftAccountPtr;
+using MinecraftAccountPtr = shared_qobject_ptr<MinecraftAccount>;
 Q_DECLARE_METATYPE(MinecraftAccountPtr)
 
 /**
@@ -118,9 +118,7 @@ class MinecraftAccount : public QObject, public Usable {
 
     bool isActive() const;
 
-    bool isMSA() const { return data.type == AccountType::MSA; }
-
-    bool isOffline() const { return data.type == AccountType::Offline; }
+    [[nodiscard]] AccountType accountType() const noexcept { return data.type; }
 
     bool ownsMinecraft() const { return data.minecraftEntitlement.ownsMinecraft; }
 

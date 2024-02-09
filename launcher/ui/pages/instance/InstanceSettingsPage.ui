@@ -35,13 +35,10 @@
    </item>
    <item>
     <widget class="QTabWidget" name="settingsTabs">
-     <property name="tabShape">
-      <enum>QTabWidget::Rounded</enum>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="minecraftTab">
+     <widget class="QWidget" name="minecraftPage">
       <attribute name="title">
        <string notr="true">Java</string>
       </attribute>
@@ -158,7 +155,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -180,7 +177,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -202,7 +199,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>64</number>
+             <number>4</number>
             </property>
             <property name="maximum">
              <number>999999999</number>
@@ -254,7 +251,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="javaTab">
+     <widget class="QWidget" name="javaPage">
       <attribute name="title">
        <string>Game windows</string>
       </attribute>
@@ -414,13 +411,23 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="customCommandsPage">
       <attribute name="title">
        <string>Custom commands</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="CustomCommands" name="customCommands" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="environmentVariablesPage">
+      <attribute name="title">
+       <string>Environment variables</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_16">
+       <item>
+        <widget class="EnvironmentVariables" name="environmentVariables" native="true"/>
        </item>
       </layout>
      </widget>
@@ -598,7 +605,7 @@
           <item>
            <widget class="QCheckBox" name="onlineFixes">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;This currently allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;Current fixes include: skin and online mode support.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Enable online fixes (experimental)</string>
@@ -734,6 +741,12 @@
    <class>CustomCommands</class>
    <extends>QWidget</extends>
    <header>ui/widgets/CustomCommands.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>EnvironmentVariables</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/EnvironmentVariables.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

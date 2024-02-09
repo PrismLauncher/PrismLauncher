@@ -122,6 +122,8 @@ struct ExtraPackData {
     QString wikiUrl;
     QString discordUrl;
 
+    QString status;
+
     QString body;
 };
 
