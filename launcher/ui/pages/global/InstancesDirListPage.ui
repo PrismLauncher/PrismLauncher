@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>InstancesDirListPage</class>
+    <widget class="QMainWindow" name="InstancesDirListPage">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>800</width>
+                <height>600</height>
+            </rect>
+        </property>
+        <widget class="QWidget" name="centralwidget">
+            <layout class="QVBoxLayout" name="verticalLayout">
+                <item>
+                    <widget class="VersionListView" name="listView">
+                        <property name="alternatingRowColors">
+                            <bool>true</bool>
+                        </property>
+                        <property name="rootIsDecorated">
+                            <bool>false</bool>
+                        </property>
+                        <property name="itemsExpandable">
+                            <bool>false</bool>
+                        </property>
+                        <property name="allColumnsShowFocus">
+                            <bool>true</bool>
+                        </property>
+                        <attribute name="headerStretchLastSection">
+                            <bool>false</bool>
+                        </attribute>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+        <widget class="WideBar" name="toolBar">
+            <attribute name="toolBarArea">
+                <enum>RightToolBarArea</enum>
+            </attribute>
+            <attribute name="toolBarBreak">
+                <bool>false</bool>
+            </attribute>
+            <addaction name="actionAddExtInst"/>
+            <addaction name="actionRemove"/>
+        </widget>
+        <action name="actionRemove">
+            <property name="text">
+                <string>Remove</string>
+            </property>
+        </action>
+        <action name="actionAddExtInst">
+            <property name="text">
+                <string>Add Instance Dir</string>
+            </property>
+        </action>
+    </widget>
+    <customwidgets>
+        <customwidget>
+            <class>VersionListView</class>
+            <extends>QTreeView</extends>
+            <header>ui/widgets/VersionListView.h</header>
+        </customwidget>
+        <customwidget>
+            <class>WideBar</class>
+            <extends>QToolBar</extends>
+            <header>ui/widgets/WideBar.h</header>
+        </customwidget>
+    </customwidgets>
+    <resources/>
+    <connections/>
+</ui>

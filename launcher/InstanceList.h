@@ -94,6 +94,9 @@ class InstanceList : public QAbstractListModel {
 
     int count() const { return m_instances.count(); }
 
+    QStringList getExtInstDir();
+    void setExtInstDir(const QStringList& newValue);
+
     InstListError loadList();
     void saveNow();
 
@@ -176,8 +179,9 @@ class InstanceList : public QAbstractListModel {
     void add(const QList<InstancePtr>& list);
     void loadGroupList();
     void saveGroupList();
-    QList<InstanceId> discoverInstances();
-    InstancePtr loadInstance(const InstanceId& id);
+    void loadExtInstDir();
+    void saveExtInstDir();
+    InstancePtr loadInstance(const InstanceId& id, const QString& instDir);
 
     void increaseGroupCount(const QString& group);
     void decreaseGroupCount(const QString& group);
@@ -191,7 +195,7 @@ class InstanceList : public QAbstractListModel {
     QMap<QString, int> m_groupNameCache;
 
     SettingsObjectPtr m_globalSettings;
-    QString m_instDir;
+    QString m_instRootDir;
     QFileSystemWatcher* m_watcher;
     // FIXME: this is so inefficient that looking at it is almost painful.
     QSet<QString> m_collapsedGroups;
@@ -201,4 +205,6 @@ class InstanceList : public QAbstractListModel {
     bool m_instancesProbed = false;
 
     QStack<TrashHistoryItem> m_trashHistory;
+    QStringList m_extInstDir;
+    bool m_extInstDirLoaded = false;
 };

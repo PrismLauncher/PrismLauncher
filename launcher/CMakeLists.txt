@@ -887,6 +887,8 @@ SET(LAUNCHER_SOURCES
     # GUI - global settings pages
     ui/pages/global/AccountListPage.cpp
     ui/pages/global/AccountListPage.h
+    ui/pages/global/InstancesDirListPage.cpp
+    ui/pages/global/InstancesDirListPage.h
     ui/pages/global/CustomCommandsPage.cpp
     ui/pages/global/CustomCommandsPage.h
     ui/pages/global/EnvironmentVariablesPage.cpp
@@ -1124,6 +1126,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/setupwizard/PasteWizardPage.ui
     ui/setupwizard/ThemeWizardPage.ui
     ui/pages/global/AccountListPage.ui
+    ui/pages/global/InstancesDirListPage.ui
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
     ui/pages/global/APIPage.ui

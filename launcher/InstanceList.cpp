@@ -66,6 +66,7 @@
 #endif
 
 const static int GROUP_FILE_FORMAT_VERSION = 1;
+const static int EXT_INST_FILE_FORMAT_VERSION = 1;
 
 InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, QObject* parent)
     : QAbstractListModel(parent), m_globalSettings(settings)
@@ -79,10 +80,10 @@ InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, Q
     connect(this, &InstanceList::instancesChanged, this, &InstanceList::providerUpdated);
 
     // NOTE: canonicalPath requires the path to exist. Do not move this above the creation block!
-    m_instDir = QDir(instDir).canonicalPath();
+    m_instRootDir = QDir(instDir).canonicalPath();
     m_watcher = new QFileSystemWatcher(this);
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &InstanceList::instanceDirContentsChanged);
-    m_watcher->addPath(m_instDir);
+    m_watcher->addPath(m_instRootDir);
 }
 
 InstanceList::~InstanceList() {}
@@ -425,11 +426,11 @@ static QMap<InstanceId, InstanceLocator> getIdMapping(const QList<InstancePtr>& 
     return out;
 }
 
-QList<InstanceId> InstanceList::discoverInstances()
+QList<InstanceId> discoverInstancesFormDir(QString& path)
 {
-    qDebug() << "Discovering instances in" << m_instDir;
+    qDebug() << "Discovering instances in" << path;
     QList<InstanceId> out;
-    QDirIterator iter(m_instDir, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
+    QDirIterator iter(path, QDir::Dirs | QDir::NoDot | QDir::NoDotDot | QDir::Readable | QDir::Hidden, QDirIterator::FollowSymlinks);
     while (iter.hasNext()) {
         QString subDir = iter.next();
         QFileInfo dirInfo(subDir);
@@ -438,7 +439,7 @@ QList<InstanceId> InstanceList::discoverInstances()
         // if it is a symlink, ignore it if it goes to the instance folder
         if (dirInfo.isSymLink()) {
             QFileInfo targetInfo(dirInfo.symLinkTarget());
-            QFileInfo instDirInfo(m_instDir);
+            QFileInfo instDirInfo(path);
             if (targetInfo.canonicalPath() == instDirInfo.canonicalFilePath()) {
                 qDebug() << "Ignoring symlink" << subDir << "that leads into the instances folder";
                 continue;
@@ -448,13 +449,97 @@ QList<InstanceId> InstanceList::discoverInstances()
         out.append(id);
         qDebug() << "Found instance ID" << id;
     }
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    instanceSet = QSet<QString>(out.begin(), out.end());
-#else
-    instanceSet = out.toSet();
-#endif
-    m_instancesProbed = true;
     return out;
+}
+
+void InstanceList::saveExtInstDir()
+{
+    qDebug() << "Will save external instance directory now.";
+
+    WatchLock foo(m_watcher, m_instRootDir);
+    QString extInstDirFileName = m_instRootDir + "/extinstdir.json";
+
+    QJsonObject jsonObject;
+    jsonObject.insert("formatVersion", QJsonValue(QString("1")));
+
+    QJsonArray extArray;
+    for (auto& string : m_extInstDir) {
+        if (!QFileInfo(string).isDir()) {
+            qWarning() << "Skip" << string << "because it is not a Directory.";
+            continue;
+        }
+        extArray.append(string);
+    }
+
+    jsonObject.insert("ext", extArray);
+    QJsonDocument doc(jsonObject);
+    try {
+        FS::write(extInstDirFileName, doc.toJson());
+        qDebug() << "External instance directory saved.";
+    } catch (const FS::FileSystemException& e) {
+        qCritical() << "Failed to write external instance directory file :" << e.cause();
+    }
+}
+
+void InstanceList::loadExtInstDir()
+{
+    qDebug() << "Will load external instance directory now.";
+
+    QString extInstDirFileName = m_instRootDir + "/extinstdir.json";
+
+    if (!QFileInfo(extInstDirFileName).exists())
+        return;
+
+    QByteArray jsonData;
+    try {
+        jsonData = FS::read(extInstDirFileName);
+    } catch (const FS::FileSystemException& e) {
+        qCritical() << "Failed to read external instance directory file :" << e.cause();
+        return;
+    }
+
+    QJsonParseError error;
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(jsonData, &error);
+
+    // if the json was bad, fail
+    if (error.error != QJsonParseError::NoError) {
+        qCritical() << QString("Failed to parse external instance directory file: %1 at offset %2")
+                           .arg(error.errorString(), QString::number(error.offset))
+                           .toUtf8();
+        return;
+    }
+
+    // if the root of the json wasn't an object, fail
+    if (!jsonDoc.isObject()) {
+        qWarning() << "Invalid external instance directory file. Root entry should be an object.";
+        return;
+    }
+
+    QJsonObject rootObj = jsonDoc.object();
+
+    // Make sure the format version matches, otherwise fail.
+    if (rootObj.value("formatVersion").toVariant().toInt() != EXT_INST_FILE_FORMAT_VERSION)
+        return;
+
+    // Get the ext instance dir. if it's not an object, fail
+    if (!rootObj.value("ext").isArray()) {
+        qWarning() << "Invalid external instance directory JSON: 'ext' should be an object.";
+        return;
+    }
+
+    m_extInstDir.clear();
+
+    QJsonArray extArray = rootObj.value("ext").toArray();
+    for (auto value : extArray) {
+        auto string = value.toString();
+        if (!QFileInfo(string).isDir()) {
+            qWarning() << "Skip" << string << "because it is not a Directory.";
+            continue;
+        }
+        m_extInstDir.append(string);
+    }
+    m_extInstDirLoaded = true;
+    qDebug() << "External instance directory loaded.";
 }
 
 InstanceList::InstListError InstanceList::loadList()
@@ -463,18 +548,40 @@ InstanceList::InstListError InstanceList::loadList()
 
     QList<InstancePtr> newList;
 
-    for (auto& id : discoverInstances()) {
-        if (existingIds.contains(id)) {
-            auto instPair = existingIds[id];
-            existingIds.remove(id);
-            qDebug() << "Should keep and soft-reload" << id;
-        } else {
-            InstancePtr instPtr = loadInstance(id);
-            if (instPtr) {
-                newList.append(instPtr);
+    if (!m_extInstDirLoaded) {
+        loadExtInstDir();
+    }
+    QList<QString> allInstDir(m_instRootDir);
+    allInstDir.append(m_extInstDir);
+
+    QList<InstanceId> allInst;
+    for (auto& path : allInstDir) {
+        auto list = discoverInstancesFormDir(path);
+        for (auto& id : list) {
+            if (allInst.contains(id)) {
+                qWarning() << "The" << id << "of the same name already exists in the previous directory, so this instance of" << path
+                           << "is skipped.";
+                continue;
+            }
+            allInst.append(id);
+            if (existingIds.contains(id)) {
+                auto instPair = existingIds[id];
+                existingIds.remove(id);
+                qDebug() << "Should keep and soft-reload" << id;
+            } else {
+                InstancePtr instPtr = loadInstance(id, path);
+                if (instPtr) {
+                    newList.append(instPtr);
+                }
             }
         }
     }
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    instanceSet = QSet<QString>(allInst.begin(), allInst.end());
+#else
+    instanceSet = allInst.toSet();
+#endif
+    m_instancesProbed = true;
 
     // TODO: looks like a general algorithm with a few specifics inserted. Do something about it.
     if (!existingIds.isEmpty()) {
@@ -620,13 +727,13 @@ void InstanceList::propertiesChanged(BaseInstance* inst)
     }
 }
 
-InstancePtr InstanceList::loadInstance(const InstanceId& id)
+InstancePtr InstanceList::loadInstance(const InstanceId& id, const QString& instDir)
 {
     if (!m_groupsLoaded) {
         loadGroupList();
     }
 
-    auto instanceRoot = FS::PathCombine(m_instDir, id);
+    auto instanceRoot = FS::PathCombine(instDir, id);
     auto instanceSettings = std::make_shared<INISettingsObject>(FS::PathCombine(instanceRoot, "instance.cfg"));
     InstancePtr inst;
 
@@ -671,8 +778,8 @@ void InstanceList::saveGroupList()
         qDebug() << "Group saving prevented because we don't know the full list of instances yet.";
         return;
     }
-    WatchLock foo(m_watcher, m_instDir);
-    QString groupFileName = m_instDir + "/instgroups.json";
+    WatchLock foo(m_watcher, m_instRootDir);
+    QString groupFileName = m_instRootDir + "/instgroups.json";
     QMap<QString, QSet<QString>> reverseGroupMap;
     for (auto iter = m_instanceGroupIndex.begin(); iter != m_instanceGroupIndex.end(); iter++) {
         const QString& id = iter.key();
@@ -722,7 +829,7 @@ void InstanceList::loadGroupList()
 {
     qDebug() << "Will load group list now.";
 
-    QString groupFileName = m_instDir + "/instgroups.json";
+    QString groupFileName = m_instRootDir + "/instgroups.json";
 
     // if there's no group file, fail
     if (!QFileInfo(groupFileName).exists())
@@ -817,15 +924,22 @@ void InstanceList::instanceDirContentsChanged(const QString& path)
 void InstanceList::on_InstFolderChanged([[maybe_unused]] const Setting& setting, QVariant value)
 {
     QString newInstDir = QDir(value.toString()).canonicalPath();
-    if (newInstDir != m_instDir) {
+    if (newInstDir != m_instRootDir) {
         if (m_groupsLoaded) {
             saveGroupList();
+            m_groupsLoaded = false;
         }
-        m_instDir = newInstDir;
-        m_groupsLoaded = false;
-        beginRemoveRows(QModelIndex(), 0, count());
-        m_instances.erase(m_instances.begin(), m_instances.end());
-        endRemoveRows();
+        if (m_extInstDirLoaded) {
+            saveExtInstDir();
+            m_extInstDirLoaded = false;
+        }
+        m_instRootDir = newInstDir;
+
+        if (count() > 0) {
+            beginRemoveRows(QModelIndex(), 0, count() - 1);
+            m_instances.erase(m_instances.begin(), m_instances.end());
+            endRemoveRows();
+        }
         emit instancesChanged();
     }
 }
@@ -936,13 +1050,13 @@ QString InstanceList::getStagedInstancePath()
     QString key = QUuid::createUuid().toString(QUuid::WithoutBraces);
     QString tempDir = ".LAUNCHER_TEMP/";
     QString relPath = FS::PathCombine(tempDir, key);
-    QDir rootPath(m_instDir);
-    auto path = FS::PathCombine(m_instDir, relPath);
+    QDir rootPath(m_instRootDir);
+    auto path = FS::PathCombine(m_instRootDir, relPath);
     if (!rootPath.mkpath(relPath)) {
         return QString();
     }
 #ifdef Q_OS_WIN32
-    auto tempPath = FS::PathCombine(m_instDir, tempDir);
+    auto tempPath = FS::PathCombine(m_instRootDir, tempDir);
     SetFileAttributesA(tempPath.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 #endif
     return path;
@@ -965,14 +1079,14 @@ bool InstanceList::commitStagedInstance(const QString& path,
     if (should_override) {
         instID = commiting.originalInstanceID();
     } else {
-        instID = FS::DirNameFromString(instanceName.modifiedName(), m_instDir);
+        instID = FS::DirNameFromString(instanceName.modifiedName(), m_instRootDir);
     }
 
     Q_ASSERT(!instID.isEmpty());
 
     {
-        WatchLock lock(m_watcher, m_instDir);
-        QString destination = FS::PathCombine(m_instDir, instID);
+        WatchLock lock(m_watcher, m_instRootDir);
+        QString destination = FS::PathCombine(m_instRootDir, instID);
 
         if (should_override) {
             if (!FS::overrideFolder(destination, path)) {
@@ -1008,6 +1122,19 @@ int InstanceList::getTotalPlayTime()
 {
     updateTotalPlayTime();
     return totalPlayTime;
+}
+QStringList InstanceList::getExtInstDir()
+{
+    if (!m_extInstDirLoaded)
+        loadExtInstDir();
+    return m_extInstDir;
+}
+void InstanceList::setExtInstDir(const QStringList& newValue)
+{
+    if (m_extInstDir == newValue)
+        return;
+    m_extInstDir = newValue;
+    saveExtInstDir();
 }
 
 #include "InstanceList.moc"
