@@ -25,7 +25,7 @@ class JavaSettingsWidget : public QWidget {
 
    public:
     explicit JavaSettingsWidget(QWidget* parent);
-    virtual ~JavaSettingsWidget(){};
+    virtual ~JavaSettingsWidget() = default;
 
     enum class JavaStatus { NotSet, Pending, Good, DoesNotExist, DoesNotStart, ReturnedInvalidData } javaStatus = JavaStatus::NotSet;
 
@@ -51,6 +51,7 @@ class JavaSettingsWidget : public QWidget {
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
     void on_javaDownloadBtn_clicked();
+    void on_addJavaPathBtn_clicked();
     void checkFinished(const JavaChecker::Result& result);
 
    protected: /* methods */
@@ -78,7 +79,9 @@ class JavaSettingsWidget : public QWidget {
     QLabel* m_labelPermGen = nullptr;
     QSpinBox* m_permGenSpinBox = nullptr;
 
+    QHBoxLayout* m_horizontalBtnLayout = nullptr;
     QPushButton* m_javaDownloadBtn = nullptr;
+    QPushButton* m_addJavaPathBtn = nullptr;
     QIcon goodIcon;
     QIcon yellowIcon;
     QIcon badIcon;
