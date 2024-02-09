@@ -46,7 +46,9 @@
 #include "java/JavaUtils.h"
 #include "tasks/ConcurrentTask.h"
 
-JavaInstallList::JavaInstallList(QObject* parent) : BaseVersionList(parent) {}
+JavaInstallList::JavaInstallList(QObject* parent, bool onlyManagedVersions)
+    : BaseVersionList(parent), m_only_managed_versions(onlyManagedVersions)
+{}
 
 Task::Ptr JavaInstallList::getLoadTask()
 {
@@ -66,7 +68,7 @@ void JavaInstallList::load()
 {
     if (m_status != Status::InProgress) {
         m_status = Status::InProgress;
-        m_load_task.reset(new JavaListLoadTask(this));
+        m_load_task.reset(new JavaListLoadTask(this, m_only_managed_versions));
         m_load_task->start();
     }
 }
@@ -148,7 +150,7 @@ void JavaInstallList::sortVersions()
     endResetModel();
 }
 
-JavaListLoadTask::JavaListLoadTask(JavaInstallList* vlist) : Task()
+JavaListLoadTask::JavaListLoadTask(JavaInstallList* vlist, bool onlyManagedVersions) : Task(), m_only_managed_versions(onlyManagedVersions)
 {
     m_list = vlist;
     m_current_recommended = NULL;
@@ -159,7 +161,7 @@ void JavaListLoadTask::executeTask()
     setStatus(tr("Detecting Java installations..."));
 
     JavaUtils ju;
-    QList<QString> candidate_paths = ju.FindJavaPaths();
+    QList<QString> candidate_paths = m_only_managed_versions ? getPrismJavaBundle() : ju.FindJavaPaths();
 
     ConcurrentTask::Ptr job(new ConcurrentTask(this, "Java detection", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
     m_job.reset(job);

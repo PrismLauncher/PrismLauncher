@@ -75,6 +75,8 @@ class JavaPage : public QWidget, public BasePage {
     void on_javaDownloadBtn_clicked();
     void on_addExtraPathButton_clicked();
     void on_removeExtraPathButton_clicked();
+    void on_downloadJavaButton_clicked();
+    void on_removeJavaButton_clicked();
     void on_maxMemSpinBox_valueChanged(int i);
     void checkerFinished();
 

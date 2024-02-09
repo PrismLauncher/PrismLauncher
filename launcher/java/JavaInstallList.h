@@ -33,7 +33,7 @@ class JavaInstallList : public BaseVersionList {
     enum class Status { NotDone, InProgress, Done };
 
    public:
-    explicit JavaInstallList(QObject* parent = 0);
+    explicit JavaInstallList(QObject* parent = 0, bool onlyManagedVersions = false);
 
     Task::Ptr getLoadTask() override;
     bool isLoaded() override;
@@ -55,13 +55,14 @@ class JavaInstallList : public BaseVersionList {
     Status m_status = Status::NotDone;
     shared_qobject_ptr<JavaListLoadTask> m_load_task;
     QList<BaseVersion::Ptr> m_vlist;
+    bool m_only_managed_versions;
 };
 
 class JavaListLoadTask : public Task {
     Q_OBJECT
 
    public:
-    explicit JavaListLoadTask(JavaInstallList* vlist);
+    explicit JavaListLoadTask(JavaInstallList* vlist, bool onlyManagedVersions = false);
     virtual ~JavaListLoadTask() = default;
 
    protected:
@@ -74,4 +75,5 @@ class JavaListLoadTask : public Task {
     JavaInstallList* m_list;
     JavaInstall* m_current_recommended;
     QList<JavaChecker::Result> m_results;
+    bool m_only_managed_versions;
 };
