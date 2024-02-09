@@ -551,7 +551,8 @@ InstanceList::InstListError InstanceList::loadList()
     if (!m_extInstDirLoaded) {
         loadExtInstDir();
     }
-    QList<QString> allInstDir(m_instRootDir);
+    QList<QString> allInstDir;
+    allInstDir.append(m_instRootDir);
     allInstDir.append(m_extInstDir);
 
     QList<InstanceId> allInst;
