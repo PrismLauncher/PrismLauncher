@@ -298,23 +298,29 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         adjustedBy = "Command line";
         dataPath = dirParam;
     } else {
-        QDir foo;
-        if (DesktopServices::isSnap()) {
-            foo = QDir(getenv("SNAP_USER_COMMON"));
+        auto env = QString(getenv("PRISM_LAUNCHER_COMMON_DIR"));
+        if (!env.isEmpty() && FS::ensureFolderPathExists(env)) {
+            dataPath = QDir(env).absolutePath();
+            adjustedBy = "Environment variable PRISM_LAUNCHER_COMMON_DIR";
         } else {
-            foo = QDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
-        }
+            QDir foo;
+            if (DesktopServices::isSnap()) {
+                foo = QDir(getenv("SNAP_USER_COMMON"));
+            } else {
+                foo = QDir(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
+            }
 
-        dataPath = foo.absolutePath();
-        adjustedBy = "Persistent data path";
+            dataPath = foo.absolutePath();
+            adjustedBy = "Persistent data path";
 
 #ifndef Q_OS_MACOS
-        if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
-            dataPath = m_rootPath;
-            adjustedBy = "Portable data path";
-            m_portable = true;
-        }
+            if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
+                dataPath = m_rootPath;
+                adjustedBy = "Portable data path";
+                m_portable = true;
+            }
 #endif
+        }
     }
 
     if (!FS::ensureFolderPathExists(dataPath)) {
