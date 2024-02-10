@@ -34,6 +34,51 @@
 #include "DesktopServices.h"
 #include "FileSystem.h"
 #include "InstanceList.h"
+class EditWidget : public QWidget {
+    Q_OBJECT
+   public:
+    explicit EditWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()) : QWidget(parent, f)
+    {
+        auto* layout = new QHBoxLayout(this);
+        m_lineEdit = new QLineEdit(this);
+        m_lineEdit->installEventFilter(const_cast<EditWidget*>(this));
+        auto* pushButton = new QPushButton(tr("Open"), this);
+        connect(pushButton, &QPushButton::clicked, [=]() {
+            QString raw_dir = QFileDialog::getExistingDirectory(pushButton, tr("External Instance Folder"), m_lineEdit->text());
+            if (!raw_dir.isEmpty())
+                m_lineEdit->setText(raw_dir);
+        });
+
+        layout->addWidget(m_lineEdit);
+        layout->addWidget(pushButton);
+
+        layout->setContentsMargins(0, 0, 0, 0);
+        this->setLayout(layout);
+    };
+
+    ~EditWidget() override = default;
+    bool eventFilter(QObject* obj, QEvent* event) override
+    {
+        if (event->type() == QEvent::KeyPress) {
+            auto* keyEvent = static_cast<QKeyEvent*>(event);
+            if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
+                emit editDone();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    inline void setData(const QString& data) { m_lineEdit->setText(data); }
+    inline QString getData() { return m_lineEdit->text(); }
+
+   signals:
+    void editDone();
+
+   private:
+    QLineEdit* m_lineEdit;
+};
+
 class FolderButtonDelegate : public QStyledItemDelegate {
     Q_OBJECT
    public:
@@ -42,49 +87,20 @@ class FolderButtonDelegate : public QStyledItemDelegate {
     {
         Q_UNUSED(index);
         Q_UNUSED(option);
-        auto* editorWidget = new QWidget(parent);
-        auto* layout = new QHBoxLayout(editorWidget);
-
-        auto* lineEdit = new QLineEdit(editorWidget);
-        lineEdit->installEventFilter(const_cast<FolderButtonDelegate*>(this));
-        auto* pushButton = new QPushButton(tr("Open"), editorWidget);
-        connect(pushButton, &QPushButton::clicked, [=]() {
-            QString raw_dir = QFileDialog::getExistingDirectory(editorWidget, tr("External Instance Folder"), lineEdit->text());
-            if (!raw_dir.isEmpty())
-                lineEdit->setText(raw_dir);
-        });
-        layout->addWidget(lineEdit);
-        layout->addWidget(pushButton);
-
-        layout->setContentsMargins(0, 0, 0, 0);
-        editorWidget->setLayout(layout);
+        auto* editorWidget = new EditWidget(parent);
+        connect(editorWidget, &EditWidget::editDone, this, &FolderButtonDelegate::editDone);
 
         return editorWidget;
-    }
-
-    bool eventFilter(QObject* obj, QEvent* event) override
-    {
-        if (event->type() == QEvent::KeyPress) {
-            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-            if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
-                emit commitData(dynamic_cast<QWidget*>(obj));
-                emit closeEditor(dynamic_cast<QWidget*>(obj));
-                return true;
-            }
-        }
-        return false;
     }
 
     void setEditorData(QWidget* editor, const QModelIndex& index) const override
     {
         auto text = index.data(Qt::EditRole).toString();
-        auto* lineEdit = qobject_cast<QLineEdit*>(editor->layout()->itemAt(0)->widget());
-        lineEdit->setText(text);
+        qobject_cast<EditWidget*>(editor)->setData(text);
     }
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override
     {
-        auto* lineEdit = qobject_cast<QLineEdit*>(editor->layout()->itemAt(0)->widget());
-        auto text = lineEdit->text();
+        auto text = qobject_cast<EditWidget*>(editor)->getData();
         if (ExternalInstancePage::verifyInstDirPath(text)) {
             QString cooked_dir = FS::NormalizePath(text);
             if (!dynamic_cast<QStringListModel*>(model)->stringList().contains(cooked_dir))
@@ -96,6 +112,14 @@ class FolderButtonDelegate : public QStyledItemDelegate {
         Q_UNUSED(index);
         editor->setGeometry(option.rect);
     }
+
+   public slots:
+    void editDone()
+    {
+        auto* editor = qobject_cast<EditWidget*>(sender());
+        emit commitData(editor);
+        emit closeEditor(editor);
+    };
 };
 
 ExternalInstancePage::ExternalInstancePage(QWidget* parent) : QMainWindow(parent), ui(new Ui::ExternalInstancePage)
