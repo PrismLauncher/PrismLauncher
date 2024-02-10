@@ -290,12 +290,12 @@ void ExternalResourcesPage::disableItem()
 
 void ExternalResourcesPage::viewConfigs()
 {
-    DesktopServices::openDirectory(m_instance->instanceConfigFolder(), true);
+    DesktopServices::openPath(m_instance->instanceConfigFolder(), true);
 }
 
 void ExternalResourcesPage::viewFolder()
 {
-    DesktopServices::openDirectory(m_model->dir().absolutePath(), true);
+    DesktopServices::openPath(m_model->dir().absolutePath(), true);
 }
 
 bool ExternalResourcesPage::current(const QModelIndex& current, const QModelIndex& previous)

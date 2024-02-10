@@ -25,13 +25,14 @@ set(LEGACY_SRC
     legacy/org/prismlauncher/legacy/LegacyLauncher.java
     legacy/org/prismlauncher/legacy/fix/online/Handler.java
     legacy/org/prismlauncher/legacy/fix/online/OnlineFixes.java
+    legacy/org/prismlauncher/legacy/fix/online/OnlineModeFix.java
     legacy/org/prismlauncher/legacy/fix/online/SkinFix.java
     legacy/org/prismlauncher/legacy/utils/Base64.java
     legacy/org/prismlauncher/legacy/utils/api/MojangApi.java
     legacy/org/prismlauncher/legacy/utils/api/Texture.java
     legacy/org/prismlauncher/legacy/utils/json/JsonParseException.java
     legacy/org/prismlauncher/legacy/utils/json/JsonParser.java
-    legacy/org/prismlauncher/legacy/utils/url/CustomUrlConnection.java
+    legacy/org/prismlauncher/legacy/utils/url/ByteArrayUrlConnection.java
     legacy/org/prismlauncher/legacy/utils/url/UrlUtils.java
     legacy/net/minecraft/Launcher.java
     legacy/org/prismlauncher/legacy/LegacyProxy.java
