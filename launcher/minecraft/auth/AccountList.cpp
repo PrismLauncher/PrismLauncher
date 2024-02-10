@@ -52,8 +52,6 @@
 #include <FileSystem.h>
 #include <QSaveFile>
 
-#include <chrono>
-
 enum AccountListVersion { MojangMSA = 3 };
 
 AccountList::AccountList(QObject* parent) : QAbstractListModel(parent)

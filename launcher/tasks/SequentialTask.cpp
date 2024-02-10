@@ -36,18 +36,15 @@
 #include "SequentialTask.h"
 
 #include <QDebug>
+#include "tasks/ConcurrentTask.h"
 
 SequentialTask::SequentialTask(QObject* parent, QString task_name) : ConcurrentTask(parent, task_name, 1) {}
 
-void SequentialTask::startNext()
+void SequentialTask::subTaskFailed(Task::Ptr task, const QString& msg)
 {
-    if (m_failed.size() > 0) {
-        emitFailed(tr("One of the tasks failed!"));
-        qWarning() << m_failed.constBegin()->get()->failReason();
-        return;
-    }
-
-    ConcurrentTask::startNext();
+    emitFailed(msg);
+    qWarning() << msg;
+    ConcurrentTask::subTaskFailed(task, msg);
 }
 
 void SequentialTask::updateState()

@@ -171,8 +171,8 @@ void InstanceImportTask::processZipPack()
     } else if (packZipDir.exists("/bin/modpack.jar") || packZipDir.exists("/bin/version.json")) {
         // process as Technic pack
         qDebug() << "Technic:" << true;
-        extractDir.mkpath(".minecraft");
-        extractDir.cd(".minecraft");
+        extractDir.mkpath("minecraft");
+        extractDir.cd("minecraft");
         m_modpackType = ModpackType::Technic;
     } else {
         root = getRootFromZip(packZip.get());

@@ -77,6 +77,8 @@ struct ModpackExtra {
     QString discordUrl;
 
     QList<DonationData> donate;
+
+    QString status;
 };
 
 struct ModpackVersion {
