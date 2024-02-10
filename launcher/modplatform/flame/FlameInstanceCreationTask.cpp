@@ -354,6 +354,8 @@ bool FlameCreationTask::createInstance()
         auto id = loader.id;
         if (id.startsWith("neoforge-")) {
             id.remove("neoforge-");
+            if (id.startsWith("1.20.1-"))
+                id = id.mid(7);  // this is a mess for curseforge
             loaderType = "neoforge";
             loaderUid = "net.neoforged";
         } else if (id.startsWith("forge-")) {
