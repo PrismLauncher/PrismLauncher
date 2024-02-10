@@ -16,8 +16,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "InstancesDirListPage.h"
-#include "ui_InstancesDirListPage.h"
+#include "ExternalInstancePage.h"
+#include "ui_ExternalInstancePage.h"
 
 #include <QMenu>
 #include <QStringListModel>
@@ -85,7 +85,7 @@ class FolderButtonDelegate : public QStyledItemDelegate {
     {
         auto* lineEdit = qobject_cast<QLineEdit*>(editor->layout()->itemAt(0)->widget());
         auto text = lineEdit->text();
-        if (InstancesDirListPage::verifyInstDirPath(text)) {
+        if (ExternalInstancePage::verifyInstDirPath(text)) {
             QString cooked_dir = FS::NormalizePath(text);
             if (!dynamic_cast<QStringListModel*>(model)->stringList().contains(cooked_dir))
                 model->setData(index, cooked_dir, Qt::EditRole);
@@ -98,7 +98,7 @@ class FolderButtonDelegate : public QStyledItemDelegate {
     }
 };
 
-InstancesDirListPage::InstancesDirListPage(QWidget* parent) : QMainWindow(parent), ui(new Ui::InstancesDirListPage)
+ExternalInstancePage::ExternalInstancePage(QWidget* parent) : QMainWindow(parent), ui(new Ui::ExternalInstancePage)
 {
     ui->setupUi(this);
     ui->listView->setEmptyString(
@@ -116,27 +116,27 @@ InstancesDirListPage::InstancesDirListPage(QWidget* parent) : QMainWindow(parent
     ui->listView->setModel(m_model);
 
     ui->listView->setItemDelegate(new FolderButtonDelegate(ui->listView));
-    connect(ui->listView, &VersionListView::customContextMenuRequested, this, &InstancesDirListPage::ShowContextMenu);
+    connect(ui->listView, &VersionListView::customContextMenuRequested, this, &ExternalInstancePage::ShowContextMenu);
 }
 
-InstancesDirListPage::~InstancesDirListPage()
+ExternalInstancePage::~ExternalInstancePage()
 {
     delete ui;
 }
 
-void InstancesDirListPage::retranslate()
+void ExternalInstancePage::retranslate()
 {
     ui->retranslateUi(this);
 }
 
-void InstancesDirListPage::ShowContextMenu(const QPoint& pos)
+void ExternalInstancePage::ShowContextMenu(const QPoint& pos)
 {
     auto menu = ui->toolBar->createContextMenu(this, tr("Context menu"));
     menu->exec(ui->listView->mapToGlobal(pos));
     delete menu;
 }
 
-void InstancesDirListPage::changeEvent(QEvent* event)
+void ExternalInstancePage::changeEvent(QEvent* event)
 {
     if (event->type() == QEvent::LanguageChange) {
         ui->retranslateUi(this);
@@ -144,14 +144,14 @@ void InstancesDirListPage::changeEvent(QEvent* event)
     QMainWindow::changeEvent(event);
 }
 
-QMenu* InstancesDirListPage::createPopupMenu()
+QMenu* ExternalInstancePage::createPopupMenu()
 {
     QMenu* filteredMenu = QMainWindow::createPopupMenu();
     filteredMenu->removeAction(ui->toolBar->toggleViewAction());
     return filteredMenu;
 }
 
-inline bool InstancesDirListPage::verifyInstDirPath(const QString& raw_dir)
+inline bool ExternalInstancePage::verifyInstDirPath(const QString& raw_dir)
 {
     bool result = false;
     if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
@@ -199,7 +199,7 @@ inline bool InstancesDirListPage::verifyInstDirPath(const QString& raw_dir)
     return result;
 }
 
-void InstancesDirListPage::on_actionAddExtInst_triggered()
+void ExternalInstancePage::on_actionAddExtInst_triggered()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("External Instance Folder"));
 
@@ -212,24 +212,24 @@ void InstancesDirListPage::on_actionAddExtInst_triggered()
     }
 }
 
-void InstancesDirListPage::on_actionRemove_triggered()
+void ExternalInstancePage::on_actionRemove_triggered()
 {
     auto index = ui->listView->currentIndex();
 
     m_model->removeRow(index.row());
 }
 
-void InstancesDirListPage::on_actionHide_triggered() {}
-bool InstancesDirListPage::apply()
+void ExternalInstancePage::on_actionHide_triggered() {}
+bool ExternalInstancePage::apply()
 {
     if (m_rootInstDir == APPLICATION->settings()->get("InstanceDir").toString())
         APPLICATION->instances()->setExtInstDir(m_model->stringList());
 
     return true;
 }
-void InstancesDirListPage::openedImpl()
+void ExternalInstancePage::openedImpl()
 {
     m_rootInstDir = APPLICATION->settings()->get("InstanceDir").toString();
     m_model->setStringList(APPLICATION->instances()->getExtInstDir());
 }
-#include "InstancesDirListPage.moc"
+#include "ExternalInstancePage.moc"

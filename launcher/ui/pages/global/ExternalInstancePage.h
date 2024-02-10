@@ -27,27 +27,20 @@
 class QStringListModel;
 
 namespace Ui {
-class InstancesDirListPage;
+class ExternalInstancePage;
 }
 
-class InstancesDirListPage : public QMainWindow, public BasePage {
+class ExternalInstancePage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
     inline static bool verifyInstDirPath(const QString& raw_dir);
 
-    explicit InstancesDirListPage(QWidget* parent = 0);
-    ~InstancesDirListPage();
+    explicit ExternalInstancePage(QWidget* parent = 0);
+    ~ExternalInstancePage();
 
     QString displayName() const override { return tr("External Instance"); }
-    QIcon icon() const override
-    {
-        auto icon = APPLICATION->getThemedIcon("accounts");
-        if (icon.isNull()) {
-            icon = APPLICATION->getThemedIcon("noaccount");
-        }
-        return icon;
-    }
+    QIcon icon() const override { return APPLICATION->getThemedIcon("viewfolder"); }
     QString id() const override { return "external-Instance-directory"; }
     QString helpPage() const override { return "Getting-Started#adding-an-account"; }
     void retranslate() override;
@@ -67,5 +60,5 @@ class InstancesDirListPage : public QMainWindow, public BasePage {
 
     QString m_rootInstDir;
     QStringListModel* m_model;
-    Ui::InstancesDirListPage* ui;
+    Ui::ExternalInstancePage* ui;
 };

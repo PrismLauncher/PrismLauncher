@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <class>InstancesDirListPage</class>
-    <widget class="QMainWindow" name="InstancesDirListPage">
+    <class>ExternalInstancePage</class>
+    <widget class="QMainWindow" name="ExternalInstancePage">
         <property name="geometry">
             <rect>
                 <x>0</x>

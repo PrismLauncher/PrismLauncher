@@ -59,8 +59,8 @@
 #include "ui/pages/global/AccountListPage.h"
 #include "ui/pages/global/CustomCommandsPage.h"
 #include "ui/pages/global/EnvironmentVariablesPage.h"
+#include "ui/pages/global/ExternalInstancePage.h"
 #include "ui/pages/global/ExternalToolsPage.h"
-#include "ui/pages/global/InstancesDirListPage.h"
 #include "ui/pages/global/JavaPage.h"
 #include "ui/pages/global/LanguagePage.h"
 #include "ui/pages/global/LauncherPage.h"
@@ -765,7 +765,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         {
             m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
             m_globalSettingsProvider->addPage<LauncherPage>();
-            m_globalSettingsProvider->addPage<InstancesDirListPage>();
+            m_globalSettingsProvider->addPage<ExternalInstancePage>();
             m_globalSettingsProvider->addPage<MinecraftPage>();
             m_globalSettingsProvider->addPage<JavaPage>();
             m_globalSettingsProvider->addPage<LanguagePage>();
