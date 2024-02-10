@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,45 +33,34 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.prismlauncher.legacy.utils.url;
+package org.prismlauncher.legacy.fix.online;
 
-import java.io.ByteArrayInputStream;
+import org.prismlauncher.legacy.utils.url.UrlUtils;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
 
-public final class CustomUrlConnection extends HttpURLConnection {
-    private final InputStream in;
+public final class OnlineModeFix {
+    public static URLConnection openConnection(URL address, Proxy proxy) throws IOException {
+        // we start with "http://www.minecraft.net/game/joinserver.jsp?user=..."
+        if (!(address.getHost().equals("www.minecraft.net") && address.getPath().equals("/game/joinserver.jsp")))
+            return null;
 
-    public CustomUrlConnection(byte[] data) {
-        this(new ByteArrayInputStream(data));
-    }
-
-    public CustomUrlConnection(InputStream in) {
-        super(null);
-        this.in = in;
-    }
-
-    @Override
-    public void connect() throws IOException {
-        responseCode = 200;
-    }
-
-    @Override
-    public void disconnect() {
+        // change it to "https://session.minecraft.net/game/joinserver.jsp?user=..."
+        // this seems to be the modern version of the same endpoint...
+        // maybe Mojang planned to patch old versions of the game to use it
+        // if it ever disappears this should be changed to use sessionserver.mojang.com/session/minecraft/join
+        // which of course has a different usage requiring JSON serialisation...
+        URL url;
         try {
-            in.close();
-        } catch (IOException e) {
+            url = new URL("https", "session.minecraft.net", address.getPort(), address.getFile());
+        } catch (MalformedURLException e) {
+            throw new AssertionError("url should be valid", e);
         }
-    }
 
-    @Override
-    public InputStream getInputStream() throws IOException {
-        return in;
-    }
-
-    @Override
-    public boolean usingProxy() {
-        return false;
+        return UrlUtils.openConnection(url, proxy);
     }
 }

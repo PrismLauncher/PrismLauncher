@@ -37,7 +37,7 @@ void PackInstallTask::executeTask()
     progress(1, 2);
 
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this] {
-        FS::copy folderCopy(m_pack.path, FS::PathCombine(m_stagingPath, ".minecraft"));
+        FS::copy folderCopy(m_pack.path, FS::PathCombine(m_stagingPath, "minecraft"));
         folderCopy.followSymlinks(true);
         return folderCopy();
     });

@@ -282,7 +282,7 @@ void PackInstallTask::deleteExistingFiles()
 
     // Delete the files
     for (const auto& item : filesToDelete) {
-        QFile::remove(item);
+        FS::deletePath(item);
     }
 }
 
@@ -987,7 +987,7 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
         // the copy from the Configs.zip
         QFileInfo fileInfo(to);
         if (fileInfo.exists()) {
-            if (!QFile::remove(to)) {
+            if (!FS::deletePath(to)) {
                 qWarning() << "Failed to delete" << to;
                 return false;
             }

@@ -132,6 +132,15 @@
 #include "gamemode_client.h"
 #endif
 
+#if defined(Q_OS_LINUX)
+#include <sys/statvfs.h>
+#endif
+
+#if defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+#include <sys/mount.h>
+#include <sys/types.h>
+#endif
+
 #if defined(Q_OS_MAC)
 #if defined(SPARKLE_ENABLED)
 #include "updater/MacSparkleUpdater.h"
@@ -380,20 +389,15 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     {
         static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "-%0.log";
         static const QString logBase = FS::PathCombine("logs", baseLogFile);
-        auto moveFile = [](const QString& oldName, const QString& newName) {
-            QFile::remove(newName);
-            QFile::copy(oldName, newName);
-            QFile::remove(oldName);
-        };
         if (FS::ensureFolderPathExists("logs")) {  // if this did not fail
             for (auto i = 0; i <= 4; i++)
                 if (auto oldName = baseLogFile.arg(i);
                     QFile::exists(oldName))  // do not pointlessly delete new files if the old ones are not there
-                    moveFile(oldName, logBase.arg(i));
+                    FS::move(oldName, logBase.arg(i));
         }
 
         for (auto i = 4; i > 0; i--)
-            moveFile(logBase.arg(i - 1), logBase.arg(i));
+            FS::move(logBase.arg(i - 1), logBase.arg(i));
 
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
         if (!logFile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
@@ -485,8 +489,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     {
-        qDebug() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME) << ", (c) 2022-2023 "
-                 << qPrintable(QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
+        qDebug() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME + ", " + QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
         qDebug() << "Platform                   : " << BuildConfig.BUILD_PLATFORM;
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
@@ -658,6 +661,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // The cat
         m_settings->registerSetting("TheCat", false);
+        m_settings->registerSetting("CatOpacity", 100);
+
+        m_settings->registerSetting("StatusBarVisible", true);
 
         m_settings->registerSetting("ToolbarsLocked", false);
 
@@ -739,6 +745,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
         m_settings->registerSetting("ModrinthToken", "");
         m_settings->registerSetting("UserAgentOverride", "");
+
+        // FTBApp instances
+        m_settings->registerSetting("FTBAppInstancesPath", "");
 
         // Init page provider
         {
@@ -985,6 +994,37 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             msgBox->adjustSize();
             msgBox->open();
             FS::deletePath(update_success_marker.absoluteFilePath());
+        }
+    }
+
+    // notify user if /tmp is mounted with `noexec` (#1693)
+    {
+        bool is_tmp_noexec = false;
+
+#if defined(Q_OS_LINUX)
+
+        struct statvfs tmp_stat;
+        statvfs("/tmp", &tmp_stat);
+        is_tmp_noexec = tmp_stat.f_flag & ST_NOEXEC;
+
+#elif defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
+
+        struct statfs tmp_stat;
+        statfs("/tmp", &tmp_stat);
+        is_tmp_noexec = tmp_stat.f_flags & MNT_NOEXEC;
+
+#endif
+
+        if (is_tmp_noexec) {
+            auto infoMsg =
+                tr("Your /tmp directory is currently mounted with the 'noexec' flag enabled.\n"
+                   "Some versions of Minecraft may not launch.\n");
+            auto msgBox = new QMessageBox(QMessageBox::Information, tr("Incompatible system configuration"), infoMsg, QMessageBox::Ok);
+            msgBox->setDefaultButton(QMessageBox::Ok);
+            msgBox->setAttribute(Qt::WA_DeleteOnClose);
+            msgBox->setMinimumWidth(460);
+            msgBox->adjustSize();
+            msgBox->open();
         }
     }
 
@@ -1471,6 +1511,17 @@ InstanceWindow* Application::showInstanceWindow(InstancePtr instance, QString pa
     auto& window = extras.window;
 
     if (window) {
+// If the window is minimized on macOS or Windows, activate and bring it up
+#ifdef Q_OS_MACOS
+        if (window->isMinimized()) {
+            window->setWindowState(window->windowState() & ~Qt::WindowMinimized);
+        }
+#elif defined(Q_OS_WIN)
+        if (window->isMinimized()) {
+            window->showNormal();
+        }
+#endif
+
         window->raise();
         window->activateWindow();
     } else {
@@ -1478,6 +1529,7 @@ InstanceWindow* Application::showInstanceWindow(InstancePtr instance, QString pa
         m_openWindows++;
         connect(window, &InstanceWindow::isClosing, this, &Application::on_windowClose);
     }
+
     if (!page.isEmpty()) {
         window->selectPage(page);
     }

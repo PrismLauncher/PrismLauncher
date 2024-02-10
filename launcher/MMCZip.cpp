@@ -122,7 +122,7 @@ bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, 
     QuaZip zip(fileCompressed);
     QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
     if (!zip.open(QuaZip::mdCreate)) {
-        QFile::remove(fileCompressed);
+        FS::deletePath(fileCompressed);
         return false;
     }
 
@@ -130,7 +130,7 @@ bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, 
 
     zip.close();
     if (zip.getZipError() != 0) {
-        QFile::remove(fileCompressed);
+        FS::deletePath(fileCompressed);
         return false;
     }
 
@@ -143,7 +143,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 {
     QuaZip zipOut(targetJarPath);
     if (!zipOut.open(QuaZip::mdCreate)) {
-        QFile::remove(targetJarPath);
+        FS::deletePath(targetJarPath);
         qCritical() << "Failed to open the minecraft.jar for modding";
         return false;
     }
@@ -161,7 +161,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
         if (mod->type() == ResourceType::ZIPFILE) {
             if (!mergeZipFiles(&zipOut, mod->fileinfo(), addedFiles)) {
                 zipOut.close();
-                QFile::remove(targetJarPath);
+                FS::deletePath(targetJarPath);
                 qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
                 return false;
             }
@@ -170,7 +170,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
             auto filename = mod->fileinfo();
             if (!JlCompress::compressFile(&zipOut, filename.absoluteFilePath(), filename.fileName())) {
                 zipOut.close();
-                QFile::remove(targetJarPath);
+                FS::deletePath(targetJarPath);
                 qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
                 return false;
             }
@@ -193,7 +193,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 
             if (!compressDirFiles(&zipOut, parent_dir, files)) {
                 zipOut.close();
-                QFile::remove(targetJarPath);
+                FS::deletePath(targetJarPath);
                 qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
                 return false;
             }
@@ -201,7 +201,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
         } else {
             // Make sure we do not continue launching when something is missing or undefined...
             zipOut.close();
-            QFile::remove(targetJarPath);
+            FS::deletePath(targetJarPath);
             qCritical() << "Failed to add unknown mod type" << mod->fileinfo().fileName() << "to the jar.";
             return false;
         }
@@ -209,7 +209,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 
     if (!mergeZipFiles(&zipOut, QFileInfo(sourceJarPath), addedFiles, [](const QString key) { return !key.contains("META-INF"); })) {
         zipOut.close();
-        QFile::remove(targetJarPath);
+        FS::deletePath(targetJarPath);
         qCritical() << "Failed to insert minecraft.jar contents.";
         return false;
     }
@@ -217,7 +217,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
     // Recompress the jar
     zipOut.close();
     if (zipOut.getZipError() != 0) {
-        QFile::remove(targetJarPath);
+        FS::deletePath(targetJarPath);
         qCritical() << "Failed to finalize minecraft.jar!";
         return false;
     }
@@ -499,10 +499,10 @@ auto ExportToZipTask::exportZip() -> ZipResult
 void ExportToZipTask::finish()
 {
     if (m_build_zip_future.isCanceled()) {
-        QFile::remove(m_output_path);
+        FS::deletePath(m_output_path);
         emitAborted();
     } else if (auto result = m_build_zip_future.result(); result.has_value()) {
-        QFile::remove(m_output_path);
+        FS::deletePath(m_output_path);
         emitFailed(result.value());
     } else {
         emitSucceeded();
