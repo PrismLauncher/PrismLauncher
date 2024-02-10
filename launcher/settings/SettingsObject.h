@@ -77,6 +77,14 @@ class SettingsObject : public QObject {
     std::shared_ptr<Setting> registerPassthrough(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate);
 
     /*!
+     * Register a constant setting. Only Settings that are already in place can be overridden.
+     * This setting will not be saved to a file. No changes will be made to the original
+     * Settings (including those stored in files).
+     * \return A valid Setting shared pointer if successful.
+     */
+    std::shared_ptr<Setting> registerConstant(const QString& id, QVariant val);
+
+    /*!
      * Registers the given setting with this SettingsObject and connects the necessary  signals.
      *
      * This will fail if there is already a setting with the same ID as

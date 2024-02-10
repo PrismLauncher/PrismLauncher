@@ -413,6 +413,8 @@ set(SETTINGS_SOURCES
     settings/OverrideSetting.h
     settings/PassthroughSetting.cpp
     settings/PassthroughSetting.h
+    settings/ConstantSetting.cpp
+    settings/ConstantSetting.h
     settings/Setting.cpp
     settings/Setting.h
     settings/SettingsObject.cpp

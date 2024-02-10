@@ -238,7 +238,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
           { "alive", "Write a small '" + liveCheckFile + "' file after the launcher starts" },
           { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
-          { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
+          { "show", "Opens the window for the specified instance (by instance ID)", "show" },
+          { "settings", "Override the configuration entry in the configuration file. Usage:--settings key1=value1&key2=value2...",
+            "settings" } });
     // Has to be positional for some OS to handle that properly
     parser.addPositionalArgument("URL", "Import the resource(s) at the given URL(s) (same as -I / --import)", "[URL...]");
 
@@ -253,6 +255,19 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_liveCheck = parser.isSet("alive");
 
     m_instanceIdToShowWindowOf = parser.value("show");
+
+    for (const auto& setting1 : parser.values("settings")) {
+        for (const auto& setting2 : setting1.split("&")) {
+            auto index = setting2.indexOf('=');
+            if (index != -1) {
+                QString key = setting2.left(index);
+                QString value = setting2.right(setting2.length() - index - 1);
+                m_settingsOverride.append(QPair<QString, QString>(key, value));
+            } else {
+                std::cerr << "Error format, please provide as key=value." << std::endl;
+            }
+        }
+    }
 
     for (auto url : parser.values("import")) {
         m_urlsToImport.append(normalizeImportUrl(url));
@@ -298,10 +313,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         adjustedBy = "Command line";
         dataPath = dirParam;
     } else {
-        auto env = QString(getenv("PRISM_LAUNCHER_COMMON_DIR"));
+        auto varName = (BuildConfig.LAUNCHER_NAME.toUpper() + "_COMMON_DIR");
+        auto env = QString(qEnvironmentVariable(varName.toUtf8().constData()));
         if (!env.isEmpty() && FS::ensureFolderPathExists(env)) {
             dataPath = QDir(env).absolutePath();
-            adjustedBy = "Environment variable PRISM_LAUNCHER_COMMON_DIR";
+            adjustedBy = "Environment variable" + varName;
         } else {
             QDir foo;
             if (DesktopServices::isSnap()) {
@@ -760,6 +776,22 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // FTBApp instances
         m_settings->registerSetting("FTBAppInstancesPath", "");
+
+        // The command line sets the override
+        {
+            for (auto& setting1 : m_settingsOverride) {
+                if (m_settings->contains(setting1.first)) {
+                    auto setting2 = m_settings->get(setting1.first);
+                    if (setting2.isValid()) {
+                        qDebug() << "The <> of setting option has an override option from the command line, <> -> <>" << setting1.first
+                                 << setting2 << setting1.second;
+                        m_settings->registerConstant(setting1.first, setting1.second);
+                    } else {
+                        qDebug() << "The <> of setting option does not exist. skip." << setting1.first;
+                    }
+                }
+            }
+        }
 
         // Init page provider
         {

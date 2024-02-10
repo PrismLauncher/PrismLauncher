@@ -292,6 +292,7 @@ class Application : public QApplication {
     QString m_profileToUse;
     bool m_liveCheck = false;
     QList<QUrl> m_urlsToImport;
+    QList<QPair<QString, QString>> m_settingsOverride;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
 };
