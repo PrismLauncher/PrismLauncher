@@ -281,6 +281,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ScanModFolders.h
     minecraft/launch/VerifyJavaInstall.cpp
     minecraft/launch/VerifyJavaInstall.h
+    minecraft/launch/AutoInstallJava.cpp
+    minecraft/launch/AutoInstallJava.h
 
     minecraft/GradleSpecifier.h
     minecraft/MinecraftInstance.cpp

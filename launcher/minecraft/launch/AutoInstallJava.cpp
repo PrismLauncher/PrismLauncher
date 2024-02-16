@@ -1,0 +1,192 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
+#include "AutoInstallJava.h"
+#include <qdir.h>
+#include <qfileinfo.h>
+#include <memory>
+
+#include "Application.h"
+#include "FileSystem.h"
+#include "MessageLevel.h"
+#include "SysInfo.h"
+#include "java/JavaInstall.h"
+#include "java/JavaInstallList.h"
+#include "java/JavaVersion.h"
+#include "java/download/ArchiveDownloadTask.h"
+#include "java/download/ManifestDownloadTask.h"
+#include "meta/Index.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
+#include "net/Mode.h"
+
+AutoInstallJava::AutoInstallJava(LaunchTask* parent)
+    : LaunchStep(parent)
+    , m_instance(std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance()))
+    , m_supported_arch(SysInfo::getSupportedJavaArchitecture()){};
+
+void AutoInstallJava::executeTask()
+{
+    auto settings = m_instance->settings();
+    if (!APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() ||
+        (settings->get("OverrideJava").toBool() && settings->get("OverrideJavaLocation").toBool())) {
+        emitSucceeded();
+        return;
+    }
+    auto packProfile = m_instance->getPackProfile();
+    if (!APPLICATION->settings()->get("AutomaticJavaDownload").toBool()) {
+        auto javas = APPLICATION->javalist().get();
+        m_current_task = javas->getLoadTask();
+        connect(m_current_task.get(), &Task::finished, this, [this, javas, packProfile] {
+            for (auto i = 0; i < javas->count(); i++) {
+                auto java = std::dynamic_pointer_cast<JavaInstall>(javas->at(i));
+                if (java && packProfile->getProfile()->getCompatibleJavaMajors().contains(java->id.major())) {
+                    setJavaPath(java->path);
+                    return;
+                }
+            }
+            emit logLine(tr("No comptatible java version was found. Using the default one."), MessageLevel::Warning);
+            emitSucceeded();
+        });
+        return;
+    }
+    auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
+    QDir javaDir(APPLICATION->javaPath());
+    auto wantedJavaPath = javaDir.absoluteFilePath(wantedJavaName);
+    if (QFileInfo::exists(wantedJavaPath)) {
+        setJavaPathFromPartial();
+        return;
+    }
+    auto versionList = APPLICATION->metadataIndex()->get("net.minecraft.java");
+    m_current_task = versionList->getLoadTask();
+    connect(m_current_task.get(), &Task::succeeded, this, &AutoInstallJava::tryNextMajorJava);
+    connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::emitFailed);
+}
+
+void AutoInstallJava::setJavaPath(QString path)
+{
+    auto settings = m_instance->settings();
+    settings->set("OverrideJava", true);
+    settings->set("OverrideJavaLocation", true);
+    settings->set("JavaPath", path);
+    emit logLine(tr("Compatible java found at: %1.").arg(path), MessageLevel::Info);
+    emitSucceeded();
+}
+
+void AutoInstallJava::setJavaPathFromPartial()
+{
+    QString executable = "java";
+#if defined(Q_OS_WIN32)
+    executable += "w.exe";
+#endif
+    auto packProfile = m_instance->getPackProfile();
+    auto javaName = packProfile->getProfile()->getCompatibleJavaName();
+    QDir javaDir(APPLICATION->javaPath());
+    // just checking if the executable is there should suffice
+    // but if needed this can be achieved through refreshing the javalist
+    // and retrieving the path that contains the java name
+    auto relativeBinary = FS::PathCombine(javaName, "bin", executable);
+    auto finalPath = javaDir.absoluteFilePath(relativeBinary);
+    if (QFileInfo::exists(finalPath)) {
+        setJavaPath(finalPath);
+    } else {
+        emit logLine(tr("No comptatible java version was found. Using the default one."), MessageLevel::Warning);
+        emitSucceeded();
+    }
+    return;
+}
+
+void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
+{
+    auto runtimes = version->data()->runtimes;
+    if (runtimes.contains(m_supported_arch)) {
+        for (auto java : runtimes.value(m_supported_arch)) {
+            if (java->name() == javaName) {
+                Task::Ptr task;
+                QDir javaDir(APPLICATION->javaPath());
+                auto final_path = javaDir.absoluteFilePath(java->m_name);
+                switch (java->downloadType) {
+                    case Java::DownloadType::Manifest:
+                        task = makeShared<Java::ManifestDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
+                        break;
+                    case Java::DownloadType::Archive:
+                        task = makeShared<Java::ArchiveDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
+                        break;
+                }
+                QEventLoop loop;
+                auto deletePath = [final_path] { FS::deletePath(final_path); };
+                connect(task.get(), &Task::failed, this, [this, deletePath](QString reason) {
+                    deletePath();
+                    emitFailed(reason);
+                });
+                connect(this, &Task::aborted, this, [task, deletePath] {
+                    task->abort();
+                    deletePath();
+                });
+                connect(task.get(), &Task::succeeded, this, &AutoInstallJava::setJavaPathFromPartial);
+                task->start();
+                return;
+            }
+        }
+    }
+    tryNextMajorJava();
+}
+
+void AutoInstallJava::tryNextMajorJava()
+{
+    if (!isRunning())
+        return;
+    auto versionList = APPLICATION->metadataIndex()->get("net.minecraft.java");
+    auto packProfile = m_instance->getPackProfile();
+    auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
+    auto majorJavaVersions = packProfile->getProfile()->getCompatibleJavaMajors();
+    if (m_majorJavaVersionIndex >= majorJavaVersions.length()) {
+        emit logLine(tr("No comptatible java version was found. Using the default one."), MessageLevel::Warning);
+        emitSucceeded();
+        return;
+    }
+    auto majorJavaVersion = majorJavaVersions[m_majorJavaVersionIndex];
+    m_majorJavaVersionIndex++;
+
+    auto javaMajor = versionList->getVersion(QString("java%1").arg(majorJavaVersion));
+    javaMajor->load(Net::Mode::Online);
+    auto task = javaMajor->getCurrentTask();
+    if (javaMajor->isLoaded() || !task) {
+        downloadJava(javaMajor, wantedJavaName);
+    } else {
+        connect(task.get(), &Task::succeeded, this, [this, javaMajor, wantedJavaName] { downloadJava(javaMajor, wantedJavaName); });
+        connect(task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);
+    }
+}

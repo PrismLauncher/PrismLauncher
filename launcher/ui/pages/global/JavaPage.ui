@@ -160,25 +160,6 @@
           <string>Java Runtime</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="7" column="0" colspan="3">
-           <widget class="QPlainTextEdit" name="jvmArgsTextBox">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>100</height>
-             </size>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="0">
            <widget class="QCheckBox" name="skipCompatibilityCheckbox">
             <property name="sizePolicy">
@@ -232,7 +213,7 @@
             </item>
            </layout>
           </item>
-          <item row="6" column="0">
+          <item row="8" column="0">
            <widget class="QLabel" name="labelJVMArgs">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -245,6 +226,42 @@
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="skipJavaWizardCheckbox">
+            <property name="toolTip">
+             <string>If enabled, the launcher will not prompt you to choose a Java version if one isn't found.</string>
+            </property>
+            <property name="text">
+             <string>Skip Java &amp;Wizard</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0" colspan="3">
+           <widget class="QPlainTextEdit" name="jvmArgsTextBox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>100</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="autodetectJavaCheckBox">
+            <property name="text">
+             <string>Autodetect Java version</string>
             </property>
            </widget>
           </item>
@@ -284,13 +301,10 @@
             </item>
            </layout>
           </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="skipJavaWizardCheckbox">
-            <property name="toolTip">
-             <string>If enabled, the launcher will not prompt you to choose a Java version if one isn't found.</string>
-            </property>
+          <item row="7" column="0">
+           <widget class="QCheckBox" name="autodownloadCheckBox">
             <property name="text">
-             <string>Skip Java &amp;Wizard</string>
+             <string>Autodownload Mojang Java</string>
             </property>
            </widget>
           </item>

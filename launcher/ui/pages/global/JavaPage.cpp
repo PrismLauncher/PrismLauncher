@@ -102,6 +102,8 @@ void JavaPage::applySettings()
     s->set("JvmArgs", ui->jvmArgsTextBox->toPlainText().replace("\n", " "));
     s->set("IgnoreJavaCompatibility", ui->skipCompatibilityCheckbox->isChecked());
     s->set("IgnoreJavaWizard", ui->skipJavaWizardCheckbox->isChecked());
+    s->set("AutomaticJavaSwitch", ui->autodetectJavaCheckBox->isChecked());
+    s->set("AutomaticJavaDownload", ui->autodownloadCheckBox->isChecked());
     s->set("JavaExtraSearchPaths", m_extra_paths->stringList());
     JavaCommon::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
 }
@@ -125,6 +127,8 @@ void JavaPage::loadSettings()
     ui->jvmArgsTextBox->setPlainText(s->get("JvmArgs").toString());
     ui->skipCompatibilityCheckbox->setChecked(s->get("IgnoreJavaCompatibility").toBool());
     ui->skipJavaWizardCheckbox->setChecked(s->get("IgnoreJavaWizard").toBool());
+    ui->autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
+    ui->autodownloadCheckBox->setChecked(s->get("AutomaticJavaDownload").toBool());
     m_extra_paths = new QStringListModel(s->get("JavaExtraSearchPaths").toStringList());
     ui->extraJavaPathsList->setModel(m_extra_paths);
 }

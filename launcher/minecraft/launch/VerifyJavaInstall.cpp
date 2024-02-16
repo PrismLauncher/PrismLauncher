@@ -50,7 +50,6 @@ void VerifyJavaInstall::executeTask()
     auto settings = instance->settings();
     auto storedVersion = settings->get("JavaVersion").toString();
     auto ignoreCompatibility = settings->get("IgnoreJavaCompatibility").toBool();
-    auto automaticJavaSwitch = settings->get("AutomaticJavaSwitch").toBool();
 
     auto compatibleMajors = packProfile->getProfile()->getCompatibleJavaMajors();
 
@@ -67,38 +66,16 @@ void VerifyJavaInstall::executeTask()
         return;
     }
 
-    auto logFail = [this, &javaVersion, compatibleMajors] {
-        emit logLine(tr("This instance is not compatible with Java version %1.\n"
-                        "Please switch to one of the following Java versions for this instance:")
-                         .arg(javaVersion.major()),
-                     MessageLevel::Error);
-        for (auto major : compatibleMajors) {
-            emit logLine(tr("Java version %1").arg(major), MessageLevel::Error);
-        }
-        emit logLine(tr("Go to instance Java settings to change your Java version or disable the Java compatibility check if you know what "
-                        "you're doing."),
-                     MessageLevel::Error);
-
-        emitFailed(QString("Incompatible Java major version"));
-    };
-
-    if (automaticJavaSwitch || true) {
-        settings->set("OverrideJava", true);
-        auto javas = APPLICATION->javalist().get();
-        auto task = javas->getLoadTask();
-        connect(task.get(), &Task::finished, this, [this, javas, compatibleMajors, settings, &logFail] {
-            for (auto i = 0; i < javas->count(); i++) {
-                auto java = std::dynamic_pointer_cast<JavaInstall>(javas->at(i));
-                if (java && compatibleMajors.contains(java->id.major())) {
-                    settings->set("OverrideJavaLocation", true);
-                    settings->set("JavaPath", java->path);
-                    emitSucceeded();
-                    return;
-                }
-            }
-            logFail();
-        });
-    } else {
-        logFail();
+    emit logLine(tr("This instance is not compatible with Java version %1.\n"
+                    "Please switch to one of the following Java versions for this instance:")
+                     .arg(javaVersion.major()),
+                 MessageLevel::Error);
+    for (auto major : compatibleMajors) {
+        emit logLine(tr("Java version %1").arg(major), MessageLevel::Error);
     }
+    emit logLine(tr("Go to instance Java settings to change your Java version or disable the Java compatibility check if you know what "
+                    "you're doing."),
+                 MessageLevel::Error);
+
+    emitFailed(QString("Incompatible Java major version"));
 }
