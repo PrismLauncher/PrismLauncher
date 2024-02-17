@@ -37,6 +37,7 @@
 #include <memory>
 
 #include "Application.h"
+#include "MessageLevel.h"
 #include "java/JavaInstall.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaVersion.h"
@@ -50,6 +51,16 @@ void VerifyJavaInstall::executeTask()
     auto settings = instance->settings();
     auto storedVersion = settings->get("JavaVersion").toString();
     auto ignoreCompatibility = settings->get("IgnoreJavaCompatibility").toBool();
+    auto javaArchitecture = settings->get("JavaArchitecture").toString();
+    auto maxMemAlloc = settings->get("MaxMemAlloc").toInt();
+
+    emit logLine(tr("Java architecture is x%1.").arg(javaArchitecture), MessageLevel::Info);
+    if (javaArchitecture == "32" && maxMemAlloc > 2048) {
+        emit logLine(tr("Max memory allocation exceeds the supported value.\n"
+                        "The selected java is 32 bit and doesn't support more than 2GB of ram.\n"
+                        "The instance may not start due to this."),
+                     MessageLevel::Error);
+    }
 
     auto compatibleMajors = packProfile->getProfile()->getCompatibleJavaMajors();
 

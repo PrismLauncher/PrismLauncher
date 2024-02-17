@@ -68,12 +68,15 @@ void AutoInstallJava::executeTask()
     }
     auto packProfile = m_instance->getPackProfile();
     if (!APPLICATION->settings()->get("AutomaticJavaDownload").toBool()) {
-        auto javas = APPLICATION->javalist().get();
+        auto javas = APPLICATION->javalist();
         m_current_task = javas->getLoadTask();
         connect(m_current_task.get(), &Task::finished, this, [this, javas, packProfile] {
             for (auto i = 0; i < javas->count(); i++) {
                 auto java = std::dynamic_pointer_cast<JavaInstall>(javas->at(i));
                 if (java && packProfile->getProfile()->getCompatibleJavaMajors().contains(java->id.major())) {
+                    if (!java->is_64bit) {
+                        emit logLine(tr("The automatic Java mechanism detected a x32 java."), MessageLevel::Info);
+                    }
                     setJavaPath(java->path);
                     return;
                 }

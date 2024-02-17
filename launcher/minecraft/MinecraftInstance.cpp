@@ -1078,6 +1078,12 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         process->appendStep(makeShared<Update>(pptr, Net::Mode::Offline));
     }
 
+    // check java
+    {
+        process->appendStep(makeShared<AutoInstallJava>(pptr));
+        process->appendStep(makeShared<CheckJava>(pptr));
+    }
+
     // if there are any jar mods
     {
         process->appendStep(makeShared<ModMinecraftJar>(pptr));
@@ -1101,11 +1107,6 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
     // reconstruct assets if needed
     {
         process->appendStep(makeShared<ReconstructAssets>(pptr));
-    }
-    // check java
-    {
-        process->appendStep(makeShared<AutoInstallJava>(pptr));
-        process->appendStep(makeShared<CheckJava>(pptr));
     }
 
     // verify that minimum Java requirements are met
