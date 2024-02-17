@@ -52,9 +52,12 @@ void ManifestDownloadTask::executeTask()
     download->addNetAction(action);
 
     connect(download.get(), &NetJob::finished, [download, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
-    connect(download.get(), &NetJob::progress, this, &ManifestDownloadTask::progress);
     connect(download.get(), &NetJob::failed, this, &ManifestDownloadTask::emitFailed);
     connect(this, &Task::aborted, download.get(), &NetJob::abort);
+    connect(download.get(), &Task::progress, this, &ManifestDownloadTask::setProgress);
+    connect(download.get(), &Task::stepProgress, this, &ManifestDownloadTask::propagateStepProgress);
+    connect(download.get(), &Task::status, this, &ManifestDownloadTask::setStatus);
+    connect(download.get(), &Task::details, this, &ManifestDownloadTask::setDetails);
 
     connect(download.get(), &NetJob::succeeded, [files, this] {
         QJsonParseError parse_error{};
@@ -117,8 +120,11 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
         disconnect(this, &Task::aborted, elementDownload, &NetJob::abort);
         elementDownload->deleteLater();
     });
-    connect(elementDownload, &NetJob::progress, this, &ManifestDownloadTask::progress);
     connect(elementDownload, &NetJob::failed, this, &ManifestDownloadTask::emitFailed);
+    connect(elementDownload, &Task::progress, this, &ManifestDownloadTask::setProgress);
+    connect(elementDownload, &Task::stepProgress, this, &ManifestDownloadTask::propagateStepProgress);
+    connect(elementDownload, &Task::status, this, &ManifestDownloadTask::setStatus);
+    connect(elementDownload, &Task::details, this, &ManifestDownloadTask::setDetails);
 
     connect(this, &Task::aborted, elementDownload, &NetJob::abort);
     connect(elementDownload, &NetJob::succeeded, [this] { emitSucceeded(); });

@@ -34,8 +34,8 @@
  */
 
 #include "AutoInstallJava.h"
-#include <qdir.h>
-#include <qfileinfo.h>
+#include <QDir>
+#include <QFileInfo>
 #include <memory>
 
 #include "Application.h"
@@ -61,7 +61,8 @@ void AutoInstallJava::executeTask()
 {
     auto settings = m_instance->settings();
     if (!APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() ||
-        (settings->get("OverrideJava").toBool() && settings->get("OverrideJavaLocation").toBool())) {
+        (settings->get("OverrideJava").toBool() && settings->get("OverrideJavaLocation").toBool() &&
+         QFileInfo::exists(settings->get("JavaPath").toString()))) {
         emitSucceeded();
         return;
     }
@@ -80,6 +81,11 @@ void AutoInstallJava::executeTask()
             emit logLine(tr("No comptatible java version was found. Using the default one."), MessageLevel::Warning);
             emitSucceeded();
         });
+        connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
+        connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
+        connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
+        connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
+        emit progressReportingRequest();
         return;
     }
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
@@ -93,6 +99,11 @@ void AutoInstallJava::executeTask()
     m_current_task = versionList->getLoadTask();
     connect(m_current_task.get(), &Task::succeeded, this, &AutoInstallJava::tryNextMajorJava);
     connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::emitFailed);
+    connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
+    connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
+    connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
+    connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
+    emit progressReportingRequest();
 }
 
 void AutoInstallJava::setJavaPath(QString path)
@@ -134,29 +145,34 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
     if (runtimes.contains(m_supported_arch)) {
         for (auto java : runtimes.value(m_supported_arch)) {
             if (java->name() == javaName) {
-                Task::Ptr task;
                 QDir javaDir(APPLICATION->javaPath());
                 auto final_path = javaDir.absoluteFilePath(java->m_name);
                 switch (java->downloadType) {
                     case Java::DownloadType::Manifest:
-                        task = makeShared<Java::ManifestDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
+                        m_current_task =
+                            makeShared<Java::ManifestDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
                         break;
                     case Java::DownloadType::Archive:
-                        task = makeShared<Java::ArchiveDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
+                        m_current_task =
+                            makeShared<Java::ArchiveDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
                         break;
                 }
-                QEventLoop loop;
                 auto deletePath = [final_path] { FS::deletePath(final_path); };
-                connect(task.get(), &Task::failed, this, [this, deletePath](QString reason) {
+                connect(m_current_task.get(), &Task::failed, this, [this, deletePath](QString reason) {
                     deletePath();
                     emitFailed(reason);
                 });
-                connect(this, &Task::aborted, this, [task, deletePath] {
-                    task->abort();
+                connect(this, &Task::aborted, this, [this, deletePath] {
+                    m_current_task->abort();
                     deletePath();
                 });
-                connect(task.get(), &Task::succeeded, this, &AutoInstallJava::setJavaPathFromPartial);
-                task->start();
+                connect(m_current_task.get(), &Task::succeeded, this, &AutoInstallJava::setJavaPathFromPartial);
+                connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);
+                connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
+                connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
+                connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
+                connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
+                m_current_task->start();
                 return;
             }
         }
@@ -182,11 +198,22 @@ void AutoInstallJava::tryNextMajorJava()
 
     auto javaMajor = versionList->getVersion(QString("java%1").arg(majorJavaVersion));
     javaMajor->load(Net::Mode::Online);
-    auto task = javaMajor->getCurrentTask();
-    if (javaMajor->isLoaded() || !task) {
+    m_current_task = javaMajor->getCurrentTask();
+    if (javaMajor->isLoaded() || !m_current_task) {
         downloadJava(javaMajor, wantedJavaName);
     } else {
-        connect(task.get(), &Task::succeeded, this, [this, javaMajor, wantedJavaName] { downloadJava(javaMajor, wantedJavaName); });
-        connect(task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);
+        connect(m_current_task.get(), &Task::succeeded, this,
+                [this, javaMajor, wantedJavaName] { downloadJava(javaMajor, wantedJavaName); });
+        connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);
+        connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
+        connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
+        connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
+        connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
     }
+}
+bool AutoInstallJava::abort()
+{
+    if (m_current_task && m_current_task->canAbort())
+        return m_current_task->abort();
+    return true;
 }

@@ -51,6 +51,7 @@ class AutoInstallJava : public LaunchStep {
 
     void executeTask() override;
     bool canAbort() const override { return m_current_task ? m_current_task->canAbort() : false; }
+    bool abort() override;
 
    protected:
     void setJavaPath(QString path);

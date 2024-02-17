@@ -50,9 +50,12 @@ void ArchiveDownloadTask::executeTask()
     auto fullPath = entry->getFullPath();
 
     connect(download.get(), &NetJob::finished, [download, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
-    connect(download.get(), &NetJob::progress, this, &ArchiveDownloadTask::progress);
     connect(download.get(), &NetJob::failed, this, &ArchiveDownloadTask::emitFailed);
     connect(this, &Task::aborted, download.get(), &NetJob::abort);
+    connect(download.get(), &Task::progress, this, &ArchiveDownloadTask::setProgress);
+    connect(download.get(), &Task::stepProgress, this, &ArchiveDownloadTask::propagateStepProgress);
+    connect(download.get(), &Task::status, this, &ArchiveDownloadTask::setStatus);
+    connect(download.get(), &Task::details, this, &ArchiveDownloadTask::setDetails);
     connect(download.get(), &NetJob::succeeded, [this, fullPath] {
         // This should do all of the extracting and creating folders
         extractJava(fullPath);
