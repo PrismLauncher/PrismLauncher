@@ -54,7 +54,6 @@ class JavaSettingsWidget : public QWidget {
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
     void on_javaDownloadBtn_clicked();
-    void on_addJavaPathBtn_clicked();
     void checkFinished(const JavaChecker::Result& result);
 
    protected: /* methods */
@@ -84,7 +83,6 @@ class JavaSettingsWidget : public QWidget {
 
     QHBoxLayout* m_horizontalBtnLayout = nullptr;
     QPushButton* m_javaDownloadBtn = nullptr;
-    QPushButton* m_addJavaPathBtn = nullptr;
     QIcon goodIcon;
     QIcon yellowIcon;
     QIcon badIcon;
