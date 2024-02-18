@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023-2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -75,13 +75,13 @@ void AutoInstallJava::executeTask()
                 auto java = std::dynamic_pointer_cast<JavaInstall>(javas->at(i));
                 if (java && packProfile->getProfile()->getCompatibleJavaMajors().contains(java->id.major())) {
                     if (!java->is_64bit) {
-                        emit logLine(tr("The automatic Java mechanism detected a x32 java."), MessageLevel::Info);
+                        emit logLine(tr("The automatic Java mechanism detected an x32 java."), MessageLevel::Info);
                     }
                     setJavaPath(java->path);
                     return;
                 }
             }
-            emit logLine(tr("No comptatible java version was found. Using the default one."), MessageLevel::Warning);
+            emit logLine(tr("No compatible java version was found. Using the default one."), MessageLevel::Warning);
             emitSucceeded();
         });
         connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
@@ -136,7 +136,7 @@ void AutoInstallJava::setJavaPathFromPartial()
     if (QFileInfo::exists(finalPath)) {
         setJavaPath(finalPath);
     } else {
-        emit logLine(tr("No comptatible java version was found. Using the default one."), MessageLevel::Warning);
+        emit logLine(tr("No compatible java version was found. Using the default one."), MessageLevel::Warning);
         emitSucceeded();
     }
     return;
@@ -192,7 +192,7 @@ void AutoInstallJava::tryNextMajorJava()
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
     auto majorJavaVersions = packProfile->getProfile()->getCompatibleJavaMajors();
     if (m_majorJavaVersionIndex >= majorJavaVersions.length()) {
-        emit logLine(tr("No comptatible java version was found. Using the default one."), MessageLevel::Warning);
+        emit logLine(tr("No compatible java version was found. Using the default one."), MessageLevel::Warning);
         emitSucceeded();
         return;
     }

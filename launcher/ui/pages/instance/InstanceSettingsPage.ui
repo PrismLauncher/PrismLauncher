@@ -617,9 +617,6 @@
             <property name="text">
              <string>Enable online fixes (experimental)</string>
             </property>
-            <property name="text">
-             <string>Disable Quilt Loader Beacon</string>
-            </property>
            </widget>
           </item>
          </layout>

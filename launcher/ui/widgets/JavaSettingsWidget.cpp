@@ -216,7 +216,7 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
                 if (m_result.mojangPlatform == "32" && maxHeapSize() > 2048) {
                     button = CustomMessageBox::selectable(
                                  this, tr("Java x32 detected"),
-                                 tr("You selected a 32 bit java, but allocated more than 2048MiB as maximum memory.\n"
+                                 tr("You selected an 32-bit java, but allocated more than 2048MiB as maximum memory.\n"
                                     "%1 will not be able to start Minecraft.\n"
                                     "Do you wish to proceed?"
                                     "\n\n"
@@ -488,7 +488,7 @@ void JavaSettingsWidget::retranslate()
     m_minMemSpinBox->setToolTip(tr("The amount of memory Minecraft is started with."));
     m_permGenSpinBox->setToolTip(tr("The amount of memory available to store loaded Java classes."));
     m_javaBrowseBtn->setText(tr("Browse"));
-    m_autodownloadCheckBox->setText(tr("Autodownload Mojang Java"));
+    m_autodownloadCheckBox->setText(tr("Auto-download Mojang Java"));
     m_autodetectJavaCheckBox->setText(tr("Autodetect Java version"));
     m_autoJavaGroupBox->setTitle(tr("Autodetect Java"));
 }
@@ -509,7 +509,7 @@ void JavaSettingsWidget::updateThresholds()
     } else if (observedMaxMemory > 2048 && m_result.is_64bit) {
         iconName = "status-bad";
         m_labelMaxMemIcon->setToolTip(
-            tr("Your maximum memory allocation exceeds selected java posible memory(due to x86 applicatiion limitations)."));
+            tr("Your maximum memory allocation exceeds selected java possible memory(due to x86 application limitations)."));
     } else {
         iconName = "status-good";
         m_labelMaxMemIcon->setToolTip("");

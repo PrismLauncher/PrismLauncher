@@ -57,7 +57,7 @@ void VerifyJavaInstall::executeTask()
     emit logLine(tr("Java architecture is x%1.").arg(javaArchitecture), MessageLevel::Info);
     if (javaArchitecture == "32" && maxMemAlloc > 2048) {
         emit logLine(tr("Max memory allocation exceeds the supported value.\n"
-                        "The selected java is 32 bit and doesn't support more than 2GB of ram.\n"
+                        "The selected java is 32-bit and doesn't support more than 2048MiB of RAM.\n"
                         "The instance may not start due to this."),
                      MessageLevel::Error);
     }

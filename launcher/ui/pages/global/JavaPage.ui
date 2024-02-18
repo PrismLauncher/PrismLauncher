@@ -307,7 +307,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Autodownload Mojang Java</string>
+             <string>Auto-download Mojang Java</string>
             </property>
            </widget>
           </item>

@@ -49,7 +49,7 @@ Downloader::Downloader(QWidget* parent) : QDialog(parent), ui(new Ui::JavaDownlo
     versionList->setProvidedRoles({ BaseVersionList::VersionRole, BaseVersionList::RecommendedRole, BaseVersionList::VersionPointerRole });
     ui->majorVersionSelect->initialize(versionList.get());
     ui->majorVersionSelect->selectCurrent();
-    ui->majorVersionSelect->setEmptyString(tr("No java versions are currently available in the meta"));
+    ui->majorVersionSelect->setEmptyString(tr("No java versions are currently available in the meta."));
     ui->majorVersionSelect->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
 
     ui->javaVersionSelect->setEmptyString(tr("No java versions are currently available for your OS."));
