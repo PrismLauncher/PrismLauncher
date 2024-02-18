@@ -49,7 +49,10 @@ void ArchiveDownloadTask::executeTask()
     download->addNetAction(action);
     auto fullPath = entry->getFullPath();
 
-    connect(download.get(), &NetJob::finished, [download, this] { disconnect(this, &Task::aborted, download.get(), &NetJob::abort); });
+    connect(download.get(), &NetJob::finished, [download, this] {
+        disconnect(this, &Task::aborted, download.get(), &NetJob::abort);
+        download->deleteLater();
+    });
     connect(download.get(), &NetJob::failed, this, &ArchiveDownloadTask::emitFailed);
     connect(this, &Task::aborted, download.get(), &NetJob::abort);
     connect(download.get(), &Task::progress, this, &ArchiveDownloadTask::setProgress);

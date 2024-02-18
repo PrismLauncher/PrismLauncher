@@ -135,7 +135,7 @@ void JavaPage::loadSettings()
     ui->skipJavaWizardCheckbox->setChecked(s->get("IgnoreJavaWizard").toBool());
     ui->autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
     ui->autodownloadCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool() && s->get("AutomaticJavaDownload").toBool());
-    m_extra_paths = new QStringListModel(s->get("JavaExtraSearchPaths").toStringList());
+    m_extra_paths = new QStringListModel(s->get("JavaExtraSearchPaths").toStringList(), this);
     ui->extraJavaPathsList->setModel(m_extra_paths);
 }
 
@@ -199,6 +199,7 @@ void JavaPage::on_javaDownloadBtn_clicked()
 {
     auto jdialog = new Java::Downloader(this);
     jdialog->exec();
+    ui->managedJavaList->loadList();
 }
 
 void JavaPage::on_maxMemSpinBox_valueChanged([[maybe_unused]] int i)
