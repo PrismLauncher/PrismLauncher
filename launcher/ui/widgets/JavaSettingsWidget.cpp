@@ -4,6 +4,7 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
 #include <QToolButton>
@@ -11,6 +12,7 @@
 
 #include <sys.h>
 
+#include "DesktopServices.h"
 #include "FileSystem.h"
 #include "JavaCommon.h"
 #include "java/JavaChecker.h"
@@ -174,8 +176,19 @@ void JavaSettingsWidget::initialize()
     m_permGenSpinBox->setValue(observedPermGenMemory);
     updateThresholds();
 
-    m_autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
-    m_autodownloadCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool() && s->get("AutomaticJavaDownload").toBool());
+    auto button = CustomMessageBox::selectable(this, tr("Auto Java Download"),
+                                               tr("%1 has now the ability to auto downloand the correct java for each minecraft version.\n"
+                                                  "Do you want to enable java auto-download?\n")
+                                                   .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                                               QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
+                      ->exec();
+    if (button == QMessageBox::Yes) {
+        m_autodetectJavaCheckBox->setChecked(true);
+        m_autodownloadCheckBox->setChecked(true);
+    } else {
+        m_autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
+        m_autodownloadCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool() && s->get("AutomaticJavaDownload").toBool());
+    }
 }
 
 void JavaSettingsWidget::refresh()
@@ -192,20 +205,52 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
     switch (javaStatus) {
         default:
         case JavaStatus::NotSet:
+            /* fallthrough */
         case JavaStatus::DoesNotExist:
+            /* fallthrough */
         case JavaStatus::DoesNotStart:
+            /* fallthrough */
         case JavaStatus::ReturnedInvalidData: {
-            int button = CustomMessageBox::selectable(this, tr("No Java version selected"),
-                                                      tr("You didn't select a Java version or selected something that doesn't work.\n"
-                                                         "%1 will not be able to start Minecraft.\n"
-                                                         "Do you wish to proceed without any Java?"
-                                                         "\n\n"
-                                                         "You can change the Java version in the settings later.\n")
-                                                          .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
-                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton)
-                             ->exec();
-            if (button == QMessageBox::No) {
-                return ValidationStatus::Bad;
+            if (!m_autodownloadCheckBox->isChecked()) {  // the java will not be autodownloaded
+                int button = QMessageBox::No;
+                if (m_result.mojangPlatform == "32" && maxHeapSize() > 2048) {
+                    button = CustomMessageBox::selectable(
+                                 this, tr("Java x32 detected"),
+                                 tr("You selected a 32 bit java, but allocated more than 2048MiB as maximum memory.\n"
+                                    "%1 will not be able to start Minecraft.\n"
+                                    "Do you wish to proceed?"
+                                    "\n\n"
+                                    "You can change the Java version in the settings later.\n")
+                                     .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Help, QMessageBox::NoButton)
+                                 ->exec();
+
+                } else {
+                    button = CustomMessageBox::selectable(this, tr("No Java version selected"),
+                                                          tr("You didn't select a Java version or selected something that doesn't work.\n"
+                                                             "%1 will not be able to start Minecraft.\n"
+                                                             "Do you wish to proceed without any Java?"
+                                                             "\n\n"
+                                                             "You can change the Java version in the settings later.\n")
+                                                              .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                                                          QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Help,
+                                                          QMessageBox::NoButton)
+                                 ->exec();
+                }
+                switch (button) {
+                    case QMessageBox::Yes:
+                        return ValidationStatus::JavaBad;
+                    case QMessageBox::Help:
+                        DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("java-wizzard")));
+                    /* fallthrough */
+                    case QMessageBox::No:
+                    /* fallthrough */
+                    default:
+                        return ValidationStatus::Bad;
+                }
+                if (button == QMessageBox::No) {
+                    return ValidationStatus::Bad;
+                }
             }
             return ValidationStatus::JavaBad;
         } break;
