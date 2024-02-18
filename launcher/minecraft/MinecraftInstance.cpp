@@ -173,11 +173,12 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("CustomGLFWPath"), nativeLibraryWorkaroundsOverride);
 
-        // Peformance related options
+        // Performance related options
         auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
         m_settings->registerOverride(global_settings->getSetting("EnableFeralGamemode"), performanceOverride);
         m_settings->registerOverride(global_settings->getSetting("EnableMangoHud"), performanceOverride);
         m_settings->registerOverride(global_settings->getSetting("UseDiscreteGpu"), performanceOverride);
+        m_settings->registerOverride(global_settings->getSetting("UseZink"), performanceOverride);
 
         // Miscellaneous
         auto miscellaneousOverride = m_settings->registerSetting("OverrideMiscellaneous", false);
@@ -621,6 +622,13 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
         env.insert("__NV_PRIME_RENDER_OFFLOAD", "1");
         env.insert("__VK_LAYER_NV_optimus", "NVIDIA_only");
         env.insert("__GLX_VENDOR_LIBRARY_NAME", "nvidia");
+    }
+
+    if (settings()->get("UseZink").toBool()) {
+        // taken from https://wiki.archlinux.org/title/OpenGL#OpenGL_over_Vulkan_(Zink)
+        env.insert("__GLX_VENDOR_LIBRARY_NAME", "mesa");
+        env.insert("MESA_LOADER_DRIVER_OVERRIDE", "zink");
+        env.insert("GALLIUM_DRIVER", "zink");
     }
 #endif
     return env;
