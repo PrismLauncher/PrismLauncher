@@ -4,6 +4,7 @@
 #include <BaseVersion.h>
 #include <QObjectPtr.h>
 #include <java/JavaChecker.h>
+#include <qcheckbox.h>
 #include <QIcon>
 
 class QLineEdit;
@@ -41,6 +42,8 @@ class JavaSettingsWidget : public QWidget {
     int minHeapSize() const;
     int maxHeapSize() const;
     QString javaPath() const;
+    bool autodetectJava() const;
+    bool autodownloadJava() const;
 
     void updateThresholds();
 
@@ -85,6 +88,11 @@ class JavaSettingsWidget : public QWidget {
     QIcon goodIcon;
     QIcon yellowIcon;
     QIcon badIcon;
+
+    QGroupBox* m_autoJavaGroupBox = nullptr;
+    QVBoxLayout* m_veriticalJavaLayout = nullptr;
+    QCheckBox* m_autodetectJavaCheckBox = nullptr;
+    QCheckBox* m_autodownloadCheckBox = nullptr;
 
     unsigned int observedMinMemory = 0;
     unsigned int observedMaxMemory = 0;

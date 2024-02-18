@@ -136,6 +136,26 @@ void JavaSettingsWidget::setupUi()
 
     m_verticalLayout->addLayout(m_horizontalBtnLayout);
 
+    m_autoJavaGroupBox = new QGroupBox(this);
+    m_autoJavaGroupBox->setObjectName(QStringLiteral("autoJavaGroupBox"));
+    m_veriticalJavaLayout = new QVBoxLayout(m_autoJavaGroupBox);
+    m_veriticalJavaLayout->setObjectName(QStringLiteral("veriticalJavaLayout"));
+
+    m_autodetectJavaCheckBox = new QCheckBox(m_autoJavaGroupBox);
+    m_autodetectJavaCheckBox->setObjectName("autodetectJavaCheckBox");
+    m_veriticalJavaLayout->addWidget(m_autodetectJavaCheckBox);
+
+    m_autodownloadCheckBox = new QCheckBox(m_autoJavaGroupBox);
+    m_autodownloadCheckBox->setObjectName("autodownloadCheckBox");
+    m_autodownloadCheckBox->setEnabled(false);
+    m_veriticalJavaLayout->addWidget(m_autodownloadCheckBox);
+    connect(m_autodetectJavaCheckBox, &QCheckBox::stateChanged, this, [this] {
+        m_autodownloadCheckBox->setEnabled(m_autodetectJavaCheckBox->isChecked());
+        if (!m_autodetectJavaCheckBox->isChecked())
+            m_autodownloadCheckBox->setChecked(false);
+    });
+    m_verticalLayout->addWidget(m_autoJavaGroupBox);
+
     retranslate();
 }
 
@@ -153,6 +173,9 @@ void JavaSettingsWidget::initialize()
     m_maxMemSpinBox->setValue(observedMaxMemory);
     m_permGenSpinBox->setValue(observedPermGenMemory);
     updateThresholds();
+
+    m_autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
+    m_autodownloadCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool() && s->get("AutomaticJavaDownload").toBool());
 }
 
 void JavaSettingsWidget::refresh()
@@ -280,11 +303,13 @@ void JavaSettingsWidget::on_javaBrowseBtn_clicked()
     m_javaPathTextBox->setText(cooked_path);
     checkJavaPath(cooked_path);
 }
+
 void JavaSettingsWidget::on_javaDownloadBtn_clicked()
 {
     auto jdialog = new Java::Downloader(this);
     jdialog->exec();
 }
+
 void JavaSettingsWidget::on_javaStatusBtn_clicked()
 {
     QString text;
@@ -418,6 +443,9 @@ void JavaSettingsWidget::retranslate()
     m_minMemSpinBox->setToolTip(tr("The amount of memory Minecraft is started with."));
     m_permGenSpinBox->setToolTip(tr("The amount of memory available to store loaded Java classes."));
     m_javaBrowseBtn->setText(tr("Browse"));
+    m_autodownloadCheckBox->setText(tr("Autodownload Mojang Java"));
+    m_autodetectJavaCheckBox->setText(tr("Autodetect Java version"));
+    m_autoJavaGroupBox->setTitle(tr("Autodetect Java"));
 }
 
 void JavaSettingsWidget::updateThresholds()
@@ -463,4 +491,14 @@ void JavaSettingsWidget::on_addJavaPathBtn_clicked()
     }
     APPLICATION->settings()->set("JavaExtraSearchPaths", currentList);
     refresh();
+}
+
+bool JavaSettingsWidget::autodownloadJava() const
+{
+    return m_autodetectJavaCheckBox->isChecked();
+}
+
+bool JavaSettingsWidget::autodetectJava() const
+{
+    return m_autodownloadCheckBox->isChecked();
 }
