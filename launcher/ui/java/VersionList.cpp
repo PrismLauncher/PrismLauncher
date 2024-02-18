@@ -104,10 +104,12 @@ bool sortJavas(BaseVersion::Ptr left, BaseVersion::Ptr right)
 
 void VersionList::sortVersions()
 {
+    if (!m_version || !m_version->data())
+        return;
     QString versionStr = SysInfo::getSupportedJavaArchitecture();
     beginResetModel();
     auto runtimes = m_version->data()->runtimes;
-    if (!versionStr.isEmpty() && runtimes.contains(versionStr)) {
+    if (!versionStr.isEmpty() && !runtimes.isEmpty() && runtimes.contains(versionStr)) {
         m_vlist = runtimes.value(versionStr);
         std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
     } else {

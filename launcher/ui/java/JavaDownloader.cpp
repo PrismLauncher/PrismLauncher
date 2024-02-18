@@ -55,7 +55,7 @@ Downloader::Downloader(QWidget* parent) : QDialog(parent), ui(new Ui::JavaDownlo
     ui->javaVersionSelect->setEmptyString(tr("No java versions are currently available for your OS."));
     ui->javaVersionSelect->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
 
-    ui->buttonBox->button(QDialogButtonBox::Retry)->setText(tr("Refresh"));
+    ui->buttonBox->button(QDialogButtonBox::Reset)->setText(tr("Refresh"));
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Download"));
 
     connect(ui->majorVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &Downloader::setSelectedVersion);
@@ -98,6 +98,7 @@ void Downloader::accept()
     connect(task.get(), &Task::failed, this, deletePath);
     connect(task.get(), &Task::aborted, this, deletePath);
     ProgressDialog pg(this);
+    pg.setSkipButton(true, tr("Abort"));
     pg.execWithTask(task.get());
     QDialog::accept();
 }
