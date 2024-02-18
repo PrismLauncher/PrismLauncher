@@ -41,6 +41,7 @@
 #include "ui/java/JavaDownloader.h"
 #include "ui_JavaPage.h"
 
+#include <QCheckBox>
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -65,6 +66,11 @@ JavaPage::JavaPage(QWidget* parent) : QWidget(parent), ui(new Ui::JavaPage)
     ui->managedJavaList->selectCurrent();
     ui->managedJavaList->setEmptyString(tr("No java versions are currently available in the meta"));
     ui->managedJavaList->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
+    connect(ui->autodetectJavaCheckBox, &QCheckBox::stateChanged, this, [this] {
+        ui->autodownloadCheckBox->setEnabled(ui->autodetectJavaCheckBox->isChecked());
+        if (!ui->autodetectJavaCheckBox->isChecked())
+            ui->autodownloadCheckBox->setChecked(false);
+    });
 
     loadSettings();
     updateThresholds();
@@ -128,7 +134,7 @@ void JavaPage::loadSettings()
     ui->skipCompatibilityCheckbox->setChecked(s->get("IgnoreJavaCompatibility").toBool());
     ui->skipJavaWizardCheckbox->setChecked(s->get("IgnoreJavaWizard").toBool());
     ui->autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
-    ui->autodownloadCheckBox->setChecked(s->get("AutomaticJavaDownload").toBool());
+    ui->autodownloadCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool() && s->get("AutomaticJavaDownload").toBool());
     m_extra_paths = new QStringListModel(s->get("JavaExtraSearchPaths").toStringList());
     ui->extraJavaPathsList->setModel(m_extra_paths);
 }

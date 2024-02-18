@@ -303,6 +303,9 @@
           </item>
           <item row="7" column="0">
            <widget class="QCheckBox" name="autodownloadCheckBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Autodownload Mojang Java</string>
             </property>
