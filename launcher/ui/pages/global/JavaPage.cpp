@@ -296,3 +296,7 @@ void JavaPage::on_removeJavaButton_clicked()
         }
     }
 }
+void JavaPage::on_refreshJavaButton_clicked()
+{
+    ui->managedJavaList->loadList();
+}

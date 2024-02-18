@@ -376,6 +376,13 @@
               </property>
              </spacer>
             </item>
+            <item>
+             <widget class="QPushButton" name="refreshJavaButton">
+              <property name="text">
+               <string>Refresh</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>
