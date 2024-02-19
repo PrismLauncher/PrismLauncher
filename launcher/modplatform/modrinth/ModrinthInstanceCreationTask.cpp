@@ -334,11 +334,7 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                 // 'env' field is optional
                 if (!env.isEmpty()) {
                     QString support = Json::ensureString(env, "client", "unsupported");
-                    if (support == "unsupported") {
-                        continue;
-                    } else if (support == "optional") {
-                        file.required = false;
-                    }
+                    file.required = support == "required";
                 }
 
                 QJsonObject hashes = Json::requireObject(modInfo, "hashes");
