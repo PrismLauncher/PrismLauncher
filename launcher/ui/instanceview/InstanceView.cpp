@@ -482,32 +482,42 @@ void InstanceView::paintEvent([[maybe_unused]] QPaintEvent* event)
 
     if (model()->rowCount() == 0) {
         painter.save();
-        const QString line1 = tr("Welcome!");
-        const QString line2 = tr("Click \"Add Instance\" to get started.");
-        auto rect = this->viewport()->rect();
-        auto font = option.font;
-        font.setPointSize(37);
-        painter.setFont(font);
-        auto fm = painter.fontMetrics();
+        QString emptyString = tr("Welcome!") + "\n" + tr("Click \"Add Instance\" to get started.");
 
-        if (rect.height() <= (fm.height() * 5) || rect.width() <= fm.horizontalAdvance(line2)) {
-            auto s = rect.height() / (5. * fm.height());
-            auto sx = rect.width() * 1. / fm.horizontalAdvance(line2);
-            if (s >= sx)
-                s = sx;
-            auto ps = font.pointSize() * s;
-            if (ps <= 0)
-                ps = 1;
-            font.setPointSize(ps);
-            painter.setFont(font);
-            fm = painter.fontMetrics();
+        // calculate the rect for the overlay
+        painter.setRenderHint(QPainter::Antialiasing, true);
+        QFont font("sans", 20);
+        font.setBold(true);
+
+        QRect bounds = viewport()->geometry();
+        bounds.moveTop(0);
+        auto innerBounds = bounds;
+        innerBounds.adjust(10, 10, -10, -10);
+
+        QColor background = QApplication::palette().color(QPalette::WindowText);
+        QColor foreground = QApplication::palette().color(QPalette::Base);
+        foreground.setAlpha(190);
+        painter.setFont(font);
+        auto fontMetrics = painter.fontMetrics();
+        auto textRect = fontMetrics.boundingRect(innerBounds, Qt::AlignHCenter | Qt::TextWordWrap, emptyString);
+        textRect.moveCenter(bounds.center());
+
+        auto wrapRect = textRect;
+        wrapRect.adjust(-10, -10, 10, 10);
+
+        // check if we are allowed to draw in our area
+        if (!event->rect().intersects(wrapRect)) {
+            return;
         }
 
-        // text
-        rect.setTop(rect.top() + fm.height() * 1.5);
-        painter.drawText(rect, Qt::AlignHCenter, line1);
-        rect.setTop(rect.top() + fm.height());
-        painter.drawText(rect, Qt::AlignHCenter, line2);
+        painter.setBrush(QBrush(background));
+        painter.setPen(foreground);
+        painter.drawRoundedRect(wrapRect, 5.0, 5.0);
+
+        painter.setPen(foreground);
+        painter.setFont(font);
+        painter.drawText(textRect, Qt::AlignHCenter | Qt::TextWordWrap, emptyString);
+
         painter.restore();
         return;
     }
