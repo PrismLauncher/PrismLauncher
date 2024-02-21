@@ -639,10 +639,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("UseNativeGLFW", false);
         m_settings->registerSetting("CustomGLFWPath", "");
 
-        // Peformance related options
+        // Performance related options
         m_settings->registerSetting("EnableFeralGamemode", false);
         m_settings->registerSetting("EnableMangoHud", false);
         m_settings->registerSetting("UseDiscreteGpu", false);
+        m_settings->registerSetting("UseZink", false);
 
         // Game time
         m_settings->registerSetting("ShowGameTime", true);
