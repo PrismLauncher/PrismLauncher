@@ -38,6 +38,7 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
+#include <QFileInfo>
 #include <QFileSystemWatcher>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -933,8 +934,12 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath()
 {
-    QString key = QUuid::createUuid().toString(QUuid::WithoutBraces);
     QString tempDir = ".LAUNCHER_TEMP/";
+    auto tempPath = FS::PathCombine(m_instDir, tempDir);
+    if (QFileInfo::exists(tempPath)) {
+        FS::deletePath(tempPath);  // clean the path to prevent any collisions
+    }
+    QString key = QUuid::createUuid().toString(QUuid::WithoutBraces).left(6);  // reduce the size from 36 to 6
     QString relPath = FS::PathCombine(tempDir, key);
     QDir rootPath(m_instDir);
     auto path = FS::PathCombine(m_instDir, relPath);
@@ -942,7 +947,6 @@ QString InstanceList::getStagedInstancePath()
         return QString();
     }
 #ifdef Q_OS_WIN32
-    auto tempPath = FS::PathCombine(m_instDir, tempDir);
     SetFileAttributesA(tempPath.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 #endif
     return path;
