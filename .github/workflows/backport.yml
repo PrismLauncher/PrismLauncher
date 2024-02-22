@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: write # for korthout/backport-action to create branch
       pull-requests: write # for korthout/backport-action to create PR to backport
+      actions: write # for korthout/backport-action to create PR with workflow changes
     name: Backport Pull Request
     if: github.repository_owner == 'PrismLauncher' && github.event.pull_request.merged == true && (github.event_name != 'labeled' || startsWith('backport', github.event.label.name))
     runs-on: ubuntu-latest
