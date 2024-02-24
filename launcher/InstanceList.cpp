@@ -848,13 +848,10 @@ class InstanceStaging : public Task {
     const unsigned maxBackoff = 16;
 
    public:
-    InstanceStaging(InstanceList* parent, InstanceTask* child, QString stagingPath, InstanceName const& instanceName, QString groupName)
-        : m_parent(parent)
-        , backoff(minBackoff, maxBackoff)
-        , m_stagingPath(std::move(stagingPath))
-        , m_instance_name(std::move(instanceName))
-        , m_groupName(std::move(groupName))
+    InstanceStaging(InstanceList* parent, InstanceTask* child) : m_parent(parent), backoff(minBackoff, maxBackoff)
     {
+        m_stagingPath = parent->getStagedInstancePath();
+
         m_child.reset(child);
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceeded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
@@ -867,7 +864,7 @@ class InstanceStaging : public Task {
         connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceeded);
     }
 
-    virtual ~InstanceStaging(){};
+    virtual ~InstanceStaging() {}
 
     // FIXME/TODO: add ability to abort during instance commit retries
     bool abort() override
@@ -882,14 +879,22 @@ class InstanceStaging : public Task {
     bool canAbort() const override { return (m_child && m_child->canAbort()); }
 
    protected:
-    virtual void executeTask() override { m_child->start(); }
+    virtual void executeTask() override
+    {
+        if (m_stagingPath.isNull()) {
+            emitFailed(tr("Could not create staging folder"));
+            return;
+        }
+
+        m_child->start();
+    }
     QStringList warnings() const override { return m_child->warnings(); }
 
    private slots:
     void childSucceeded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, *m_child.get())) {
+        if (m_parent->commitStagedInstance(m_stagingPath, *m_child.get(), m_child->group(), *m_child.get())) {
             emitSucceeded();
             return;
         }
@@ -898,7 +903,7 @@ class InstanceStaging : public Task {
             emitFailed(tr("Failed to commit instance, even after multiple retries. It is being blocked by something."));
             return;
         }
-        qDebug() << "Failed to commit instance" << m_instance_name.name() << "Initiating backoff:" << sleepTime;
+        qDebug() << "Failed to commit instance" << m_child->name() << "Initiating backoff:" << sleepTime;
         m_backoffTimer.start(sleepTime * 500);
     }
     void childFailed(const QString& reason)
@@ -923,17 +928,12 @@ class InstanceStaging : public Task {
     ExponentialSeries backoff;
     QString m_stagingPath;
     unique_qobject_ptr<InstanceTask> m_child;
-    InstanceName m_instance_name;
-    QString m_groupName;
     QTimer m_backoffTimer;
 };
 
 Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 {
-    auto stagingPath = getStagedInstancePath();
-    task->setStagingPath(stagingPath);
-    task->setParentSettings(m_globalSettings);
-    return new InstanceStaging(this, task, stagingPath, *task, task->group());
+    return new InstanceStaging(this, task);
 }
 
 QString InstanceList::getStagedInstancePath()
