@@ -907,7 +907,11 @@ class InstanceStaging : public Task {
         emitFailed(reason);
     }
 
-    void childAborted() { emitAborted(); }
+    void childAborted()
+    {
+        m_parent->destroyStagingPath(m_stagingPath);
+        emitAborted();
+    }
 
    private:
     InstanceList* m_parent;
