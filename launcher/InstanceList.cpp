@@ -934,22 +934,21 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath()
 {
-    QString tempDir = ".LAUNCHER_TEMP/";
-    auto tempPath = FS::PathCombine(m_instDir, tempDir);
-    if (QFileInfo::exists(tempPath)) {
-        FS::deletePath(tempPath);  // clean the path to prevent any collisions
-    }
-    QString key = QUuid::createUuid().toString(QUuid::WithoutBraces).left(6);  // reduce the size from 36 to 6
-    QString relPath = FS::PathCombine(tempDir, key);
-    QDir rootPath(m_instDir);
-    auto path = FS::PathCombine(m_instDir, relPath);
-    if (!rootPath.mkpath(relPath)) {
-        return QString();
-    }
+    const QString tempRoot = FS::PathCombine(m_instDir, ".LAUNCHER_TEMP");
+
+    QString result;
+
+    do {
+        const QString key = QUuid::createUuid().toString(QUuid::Id128).left(6);
+        result = FS::PathCombine(tempRoot, key);
+    } while (QFileInfo::exists(result));
+
+    if (!QDir::current().mkpath(result))
+        return {};
 #ifdef Q_OS_WIN32
     SetFileAttributesA(tempPath.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 #endif
-    return path;
+    return result;
 }
 
 bool InstanceList::commitStagedInstance(const QString& path,
