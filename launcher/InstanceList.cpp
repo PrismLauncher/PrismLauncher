@@ -938,11 +938,15 @@ Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 
 QString InstanceList::getStagedInstancePath()
 {
-    const QString tempRoot = FS::PathCombine(m_instDir, ".LAUNCHER_TEMP");
+    const QString tempRoot = FS::PathCombine(m_instDir, ".tmp");
 
     QString result;
+    int tries = 0;
 
     do {
+        if (++tries > 256)
+            return {};
+
         const QString key = QUuid::createUuid().toString(QUuid::Id128).left(6);
         result = FS::PathCombine(tempRoot, key);
     } while (QFileInfo::exists(result));
