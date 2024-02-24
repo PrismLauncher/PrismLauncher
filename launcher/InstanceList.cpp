@@ -848,7 +848,8 @@ class InstanceStaging : public Task {
     const unsigned maxBackoff = 16;
 
    public:
-    InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObjectPtr settings) : m_parent(parent), backoff(minBackoff, maxBackoff)
+    InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObjectPtr settings)
+        : m_parent(parent), backoff(minBackoff, maxBackoff)
     {
         m_stagingPath = parent->getStagedInstancePath();
 
@@ -958,7 +959,7 @@ QString InstanceList::getStagedInstancePath()
     if (!QDir::current().mkpath(result))
         return {};
 #ifdef Q_OS_WIN32
-    SetFileAttributesA(tempPath.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
+    SetFileAttributesA(tempRoot.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 #endif
     return result;
 }
