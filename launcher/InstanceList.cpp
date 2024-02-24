@@ -848,11 +848,15 @@ class InstanceStaging : public Task {
     const unsigned maxBackoff = 16;
 
    public:
-    InstanceStaging(InstanceList* parent, InstanceTask* child) : m_parent(parent), backoff(minBackoff, maxBackoff)
+    InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObjectPtr settings) : m_parent(parent), backoff(minBackoff, maxBackoff)
     {
         m_stagingPath = parent->getStagedInstancePath();
 
         m_child.reset(child);
+
+        m_child->setStagingPath(m_stagingPath);
+        m_child->setParentSettings(std::move(settings));
+
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceeded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
         connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
@@ -933,7 +937,7 @@ class InstanceStaging : public Task {
 
 Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 {
-    return new InstanceStaging(this, task);
+    return new InstanceStaging(this, task, m_globalSettings);
 }
 
 QString InstanceList::getStagedInstancePath()
