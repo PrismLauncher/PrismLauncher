@@ -126,6 +126,12 @@ Config::Config()
     MATRIX_URL = "@Launcher_MATRIX_URL@";
     DISCORD_URL = "@Launcher_DISCORD_URL@";
     SUBREDDIT_URL = "@Launcher_SUBREDDIT_URL@";
+
+    RESOURCE_BASE = "@Launcher_RESOURCE_BASE@";
+    LIBRARY_BASE = "@Launcher_LIBRARY_BASE@";
+
+    FMLLIBS_BASE_URL = "@Launcher_FMLLIBS_BASE_URL@";
+    TRANSLATIONS_BASE_URL = "@Launcher_TRANSLATIONS_BASE_URL@";
 }
 
 QString Config::versionString() const

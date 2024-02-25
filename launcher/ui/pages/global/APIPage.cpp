@@ -49,6 +49,8 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
+#include "meta/Index.h"
+#include "meta/Property.h"
 #include "net/PasteUpload.h"
 #include "settings/SettingsObject.h"
 #include "tools/BaseProfiler.h"
@@ -76,11 +78,15 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     updateBaseURLPlaceholder(ui->pasteTypeComboBox->currentIndex());
     // NOTE: this allows http://, but we replace that with https later anyway
     ui->metaURL->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->metaURL));
+    ui->resourceURL->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->resourceURL));
+    ui->librariesURL->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->librariesURL));
     ui->baseURLEntry->setValidator(new QRegularExpressionValidator(validUrlRegExp, ui->baseURLEntry));
     ui->msaClientID->setValidator(new QRegularExpressionValidator(validMSAClientID, ui->msaClientID));
     ui->flameKey->setValidator(new QRegularExpressionValidator(validFlameKey, ui->flameKey));
 
     ui->metaURL->setPlaceholderText(BuildConfig.META_URL);
+    ui->resourceURL->setPlaceholderText(BuildConfig.RESOURCE_BASE);
+    ui->librariesURL->setPlaceholderText(BuildConfig.LIBRARY_BASE);
     ui->userAgentLineEdit->setPlaceholderText(BuildConfig.USER_AGENT);
 
     loadSettings();
@@ -88,6 +94,26 @@ APIPage::APIPage(QWidget* parent) : QWidget(parent), ui(new Ui::APIPage)
     resetBaseURLNote();
     connect(ui->pasteTypeComboBox, currentIndexChangedSignal, this, &APIPage::updateBaseURLNote);
     connect(ui->baseURLEntry, &QLineEdit::textEdited, this, &APIPage::resetBaseURLNote);
+    connect(APPLICATION->metadataIndex()->property().get(), &Meta::Property::succeededApplyProperties,
+            [&](const QHash<QString, QString> succeed) {
+                QString context;
+                for (auto& item : succeed.keys())
+                    context.append("\n").append(item).append(": ").append(succeed[item]);
+
+                QMessageBox::information(nullptr, tr("OK"),
+                                         tr("The following meta server properties were successfully obtained: %1").arg(context));
+                loadSettings();
+                ui->applyPropertiesBtn->setEnabled(true);
+                ui->applyPropertiesBtn->setText(tr("Download and Apply Properties in the Meta Server"));
+            });
+    connect(APPLICATION->metadataIndex()->property().get(), &Meta::Property::failedApplyProperties, [&](const QString reasons) {
+        QMessageBox::warning(nullptr, tr("FAILED"),
+                             tr("Unable to download the properties file from the \n%1\bReasons:%2")
+                                 .arg(APPLICATION->metadataIndex()->property()->url().toString())
+                                 .arg(reasons));
+        ui->applyPropertiesBtn->setEnabled(true);
+        ui->applyPropertiesBtn->setText(tr("Download and Apply Properties in the Meta Server"));
+    });
 }
 
 APIPage::~APIPage()
@@ -137,12 +163,32 @@ void APIPage::loadSettings()
     ui->msaClientID->setText(msaClientID);
     QString metaURL = s->get("MetaURLOverride").toString();
     ui->metaURL->setText(metaURL);
+    QString resourceURL = s->get("MinecraftResourceURLOverride").toString();
+    ui->resourceURL->setText(resourceURL);
+    QString librariesURL = s->get("MinecraftLibrariesURLOverride").toString();
+    ui->librariesURL->setText(librariesURL);
     QString flameKey = s->get("FlameKeyOverride").toString();
     ui->flameKey->setText(flameKey);
     QString modrinthToken = s->get("ModrinthToken").toString();
     ui->modrinthToken->setText(modrinthToken);
     QString customUserAgent = s->get("UserAgentOverride").toString();
     ui->userAgentLineEdit->setText(customUserAgent);
+}
+
+QString verifyUrl(const QString& url)
+{
+    QUrl qUrl(url);
+    // Add required trailing slash
+    if (!qUrl.isEmpty() && !qUrl.path().endsWith('/')) {
+        QString path = qUrl.path();
+        path.append('/');
+        qUrl.setPath(path);
+    }
+    // HTTP may not be allowed either?
+    if (!qUrl.isEmpty() && qUrl.scheme() == "http") {
+        qUrl.setScheme("https");
+    }
+    return qUrl.toString();
 }
 
 void APIPage::applySettings()
@@ -154,19 +200,9 @@ void APIPage::applySettings()
 
     QString msaClientID = ui->msaClientID->text();
     s->set("MSAClientIDOverride", msaClientID);
-    QUrl metaURL(ui->metaURL->text());
-    // Add required trailing slash
-    if (!metaURL.isEmpty() && !metaURL.path().endsWith('/')) {
-        QString path = metaURL.path();
-        path.append('/');
-        metaURL.setPath(path);
-    }
-    // Don't allow HTTP, since meta is basically RCE with all the jar files.
-    if (!metaURL.isEmpty() && metaURL.scheme() == "http") {
-        metaURL.setScheme("https");
-    }
-
-    s->set("MetaURLOverride", metaURL.toString());
+    s->set("MetaURLOverride", verifyUrl(ui->metaURL->text()));
+    s->set("MinecraftResourceURLOverride", verifyUrl(ui->resourceURL->text()));
+    s->set("MinecraftLibrariesURLOverride", verifyUrl(ui->librariesURL->text()));
     QString flameKey = ui->flameKey->text();
     s->set("FlameKeyOverride", flameKey);
     QString modrinthToken = ui->modrinthToken->text();
@@ -183,4 +219,13 @@ bool APIPage::apply()
 void APIPage::retranslate()
 {
     ui->retranslateUi(this);
+}
+
+void APIPage::on_applyPropertiesBtn_clicked()
+{
+    if (ui->applyPropertiesBtn->isEnabled()) {
+        ui->applyPropertiesBtn->setText(tr("Downloading and Applying..."));
+        ui->applyPropertiesBtn->setEnabled(false);
+        APPLICATION->metadataIndex()->property()->downloadAndApplyProperties();
+    }
 }

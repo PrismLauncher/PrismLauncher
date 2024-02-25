@@ -24,6 +24,7 @@
 
 namespace Meta {
 class Index;
+class Property;
 class Version;
 class VersionList;
 
@@ -45,6 +46,7 @@ struct Require {
 using RequireSet = std::set<Require>;
 
 void parseIndex(const QJsonObject& obj, Index* ptr);
+void parseProperty(const QJsonObject& obj, Property* ptr);
 void parseVersion(const QJsonObject& obj, Version* ptr);
 void parseVersionList(const QJsonObject& obj, VersionList* ptr);
 

@@ -467,6 +467,8 @@ set(META_SOURCES
     meta/Version.h
     meta/Index.cpp
     meta/Index.h
+    meta/Property.cpp
+    meta/Property.h
 )
 
 set(API_SOURCES

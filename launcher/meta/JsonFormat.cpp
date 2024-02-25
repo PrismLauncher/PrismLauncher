@@ -20,6 +20,7 @@
 #include "minecraft/OneSixVersionFormat.h"
 
 #include "Index.h"
+#include "Property.h"
 #include "Version.h"
 #include "VersionList.h"
 
@@ -44,6 +45,27 @@ static std::shared_ptr<Index> parseIndexInternal(const QJsonObject& obj)
         return list;
     });
     return std::make_shared<Index>(lists);
+}
+
+// Property
+static std::shared_ptr<Property> parsePropertyInternal(const QJsonObject& obj)
+{
+    const auto objects = requireIsArrayOf<QJsonObject>(obj, "properties");
+    QHash<QString, QString> properties;
+    properties.reserve(objects.size());
+
+    for (const auto& object : objects) {
+        auto type = requireString(object, "type");
+        if (type == "override") {
+            auto field1 = requireString(object, "target");
+            auto field2 = requireString(object, "value");
+            if (!field2.startsWith("https"))
+                continue;
+            if (field1 == "MinecraftLibrariesURLOverride" || field1 == "MinecraftResourceURLOverride")
+                properties[field1] = field2;
+        }
+    }
+    return std::make_shared<Property>(properties);
 }
 
 // Version
@@ -124,6 +146,18 @@ void parseIndex(const QJsonObject& obj, Index* ptr)
     switch (version) {
         case MetadataVersion::InitialRelease:
             ptr->merge(parseIndexInternal(obj));
+            break;
+        case MetadataVersion::Invalid:
+            throw ParseException(QObject::tr("Unknown format version!"));
+    }
+}
+
+void parseProperty(const QJsonObject& obj, Property* ptr)
+{
+    const MetadataVersion version = parseFormatVersion(obj);
+    switch (version) {
+        case MetadataVersion::InitialRelease:
+            ptr->configurate(parsePropertyInternal(obj));
             break;
         case MetadataVersion::Invalid:
             throw ParseException(QObject::tr("Unknown format version!"));
