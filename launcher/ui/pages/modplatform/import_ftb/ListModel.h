@@ -42,28 +42,30 @@ class FilterModel : public QSortFilterProxyModel {
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
    private:
-    QMap<QString, Sorting> sortings;
-    Sorting currentSorting;
-    QString searchTerm;
+    QMap<QString, Sorting> m_sortings;
+    Sorting m_currentSorting;
+    QString m_searchTerm;
 };
 
 class ListModel : public QAbstractListModel {
     Q_OBJECT
 
    public:
-    ListModel(QObject* parent) : QAbstractListModel(parent) {}
+    ListModel(QObject* parent);
     virtual ~ListModel() = default;
 
-    int rowCount(const QModelIndex& parent) const { return modpacks.size(); }
+    int rowCount(const QModelIndex& parent) const { return m_modpacks.size(); }
     int columnCount(const QModelIndex& parent) const { return 1; }
     QVariant data(const QModelIndex& index, int role) const;
 
     void update();
 
-    QString getPath();
+    QStringList getPosiblePaths();
     void setPath(QString path);
 
    private:
-    ModpackList modpacks;
+    ModpackList m_modpacks;
+    const QString m_static_path;
+    const QString m_dynamic_path;
 };
 }  // namespace FTBImportAPP
