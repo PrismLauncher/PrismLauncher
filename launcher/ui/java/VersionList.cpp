@@ -114,7 +114,7 @@ void VersionList::sortVersions()
         std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
     } else {
         m_vlist = {};
-        qWarning() << "Your operating system is not yet supported: " << SysInfo::currentSystem() << " " << SysInfo::useQTForArch();
+        qWarning() << "No Java versions found for your operating system." << SysInfo::currentSystem() << " " << SysInfo::useQTForArch();
     }
     endResetModel();
 }

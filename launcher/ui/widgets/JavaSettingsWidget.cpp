@@ -173,8 +173,8 @@ void JavaSettingsWidget::initialize()
     updateThresholds();
 
     auto button = CustomMessageBox::selectable(this, tr("Auto Java Download"),
-                                               tr("%1 has now the ability to auto downloand the correct java for each minecraft version.\n"
-                                                  "Do you want to enable java auto-download?\n")
+                                               tr("%1 can automatically download the correct Java version for each version of Minecraft..\n"
+                                                  "Do you want to enable Java auto-download?\n")
                                                    .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
                                                QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
                       ->exec();
@@ -505,7 +505,7 @@ void JavaSettingsWidget::updateThresholds()
     } else if (observedMaxMemory > 2048 && m_result.is_64bit) {
         iconName = "status-bad";
         m_labelMaxMemIcon->setToolTip(
-            tr("Your maximum memory allocation exceeds selected java possible memory(due to x86 application limitations)."));
+            tr("Because you're using 32 bit Java, you're exceeding the maximum possible allocation."));
     } else {
         iconName = "status-good";
         m_labelMaxMemIcon->setToolTip("");

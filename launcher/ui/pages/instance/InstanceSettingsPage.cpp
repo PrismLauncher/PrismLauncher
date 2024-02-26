@@ -416,7 +416,7 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
 
         if (!java->is_64bit && m_settings->get("MaxMemAlloc").toInt() > 2048) {
             CustomMessageBox::selectable(this, tr("Confirm Selection"),
-                                         tr("You selected an x86 java version.\n"
+                                         tr("You selected a 32 bit java version.\n"
                                             "This means that will not support more than 2048MiB of RAM.\n"
                                             "Please make sure that the maximum memory value is lower."),
                                          QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
