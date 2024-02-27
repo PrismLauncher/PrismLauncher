@@ -60,12 +60,11 @@ class ListModel : public QAbstractListModel {
 
     void update();
 
-    QStringList getPosiblePaths();
+    QString getUserPath();
     void setPath(QString path);
 
    private:
     ModpackList m_modpacks;
-    const QString m_static_path;
-    const QString m_dynamic_path;
+    const QString m_instances_path;
 };
 }  // namespace FTBImportAPP
