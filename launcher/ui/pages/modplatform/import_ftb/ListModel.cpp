@@ -33,22 +33,18 @@
 
 namespace FTBImportAPP {
 
-QString getStaticPath()
+QString getFTBRoot()
 {
-    QString partialPath;
+    QString partialPath = QDir::homePath();
 #if defined(Q_OS_OSX)
-    partialPath = FS::PathCombine(QDir::homePath(), "Library/Application Support");
-#elif defined(Q_OS_WIN32)
-    partialPath = QProcessEnvironment::systemEnvironment().value("LOCALAPPDATA", "");
-#else
-    partialPath = QDir::homePath();
+    partialPath = FS::PathCombine(partialPath, "Library/Application Support");
 #endif
-    return FS::PathCombine(partialPath, ".ftba", "instances");
+    return FS::PathCombine(partialPath, ".ftba");
 }
 
 QString getDynamicPath()
 {
-    auto settingsPath = FS::PathCombine(QDir::homePath(), ".ftba", "bin", "settings.json");
+    auto settingsPath = FS::PathCombine(getFTBRoot(), "bin", "settings.json");
     if (!QFileInfo::exists(settingsPath)) {
         qWarning() << "The ftb app setings doesn't exist.";
         return {};
@@ -62,36 +58,40 @@ QString getDynamicPath()
     return {};
 }
 
-ListModel::ListModel(QObject* parent) : QAbstractListModel(parent), m_static_path(getStaticPath()), m_dynamic_path(getDynamicPath()) {}
+ListModel::ListModel(QObject* parent) : QAbstractListModel(parent), m_instances_path(getDynamicPath()) {}
 
 void ListModel::update()
 {
     beginResetModel();
     m_modpacks.clear();
 
-    auto paths = getPosiblePaths();
-    paths.removeDuplicates();
-    for (auto instancesPath : paths) {
-        if (auto instancesInfo = QFileInfo(instancesPath); instancesInfo.exists() && instancesInfo.isDir()) {
-            QDirIterator directoryIterator(instancesPath, QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable | QDir::Hidden,
-                                           QDirIterator::FollowSymlinks);
-            while (directoryIterator.hasNext()) {
-                auto currentPath = directoryIterator.next();
-                bool wasAdded = false;
-                for (auto pack : m_modpacks) {
-                    if (pack.path == currentPath) {
-                        wasAdded = true;
-                        break;
-                    }
-                }
-                if (!wasAdded) {
-                    auto modpack = parseDirectory(currentPath);
-                    if (!modpack.path.isEmpty())
-                        m_modpacks.append(modpack);
-                }
+    auto wasPathAdded = [this](QString path) {
+        for (auto pack : m_modpacks) {
+            if (pack.path == path)
+                return true;
+        }
+        return false;
+    };
+
+    auto scanPath = [this, wasPathAdded](QString path) {
+        if (path.isEmpty())
+            return;
+        if (auto instancesInfo = QFileInfo(path); !instancesInfo.exists() || !instancesInfo.isDir())
+            return;
+        QDirIterator directoryIterator(path, QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable | QDir::Hidden,
+                                       QDirIterator::FollowSymlinks);
+        while (directoryIterator.hasNext()) {
+            auto currentPath = directoryIterator.next();
+            if (!wasPathAdded(currentPath)) {
+                auto modpack = parseDirectory(currentPath);
+                if (!modpack.path.isEmpty())
+                    m_modpacks.append(modpack);
             }
         }
-    }
+    };
+
+    scanPath(APPLICATION->settings()->get("FTBAppInstancesPath").toString());
+    scanPath(m_instances_path);
 
     endResetModel();
 }
@@ -205,8 +205,11 @@ void ListModel::setPath(QString path)
     update();
 }
 
-QStringList ListModel::getPosiblePaths()
+QString ListModel::getUserPath()
 {
-    return { APPLICATION->settings()->get("FTBAppInstancesPath").toString(), m_dynamic_path, m_static_path };
+    auto path = APPLICATION->settings()->get("FTBAppInstancesPath").toString();
+    if (path.isEmpty())
+        path = m_instances_path;
+    return path;
 }
 }  // namespace FTBImportAPP
