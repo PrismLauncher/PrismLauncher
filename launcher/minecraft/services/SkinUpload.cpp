@@ -79,11 +79,7 @@ void SkinUpload::executeTask()
 
     setStatus(tr("Uploading skin"));
     connect(rep, &QNetworkReply::uploadProgress, this, &SkinUpload::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &SkinUpload::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &SkinUpload::downloadError);
-#endif
     connect(rep, &QNetworkReply::sslErrors, this, &SkinUpload::sslErrors);
     connect(rep, &QNetworkReply::finished, this, &SkinUpload::downloadFinished);
 }

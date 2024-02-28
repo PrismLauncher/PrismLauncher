@@ -53,11 +53,7 @@ void CapeChange::setCape([[maybe_unused]] QString& cape)
 
     m_reply = shared_qobject_ptr<QNetworkReply>(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &CapeChange::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &CapeChange::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &CapeChange::downloadError);
-#endif
     connect(rep, &QNetworkReply::sslErrors, this, &CapeChange::sslErrors);
     connect(rep, &QNetworkReply::finished, this, &CapeChange::downloadFinished);
 }
@@ -73,11 +69,7 @@ void CapeChange::clearCape()
 
     m_reply = shared_qobject_ptr<QNetworkReply>(rep);
     connect(rep, &QNetworkReply::uploadProgress, this, &CapeChange::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &CapeChange::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &CapeChange::downloadError);
-#endif
     connect(rep, &QNetworkReply::sslErrors, this, &CapeChange::sslErrors);
     connect(rep, &QNetworkReply::finished, this, &CapeChange::downloadFinished);
 }
