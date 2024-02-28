@@ -133,6 +133,7 @@ void ResourceDownloadDialog::confirm()
     confirm_dialog->retranslateUi(resourcesString());
 
     QHash<QString, QStringList> getRequiredBy;
+    QStringList depNames;
     if (auto task = getModDependenciesTask(); task) {
         connect(task.get(), &Task::failed, this,
                 [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
@@ -155,8 +156,10 @@ void ResourceDownloadDialog::confirm()
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
         } else {
-            for (auto dep : task->getDependecies())
+            for (auto dep : task->getDependecies()) {
                 addResource(dep->pack, dep->version);
+                depNames << dep->pack->name;
+            }
             getRequiredBy = task->getRequiredBy();
         }
     }
@@ -180,6 +183,9 @@ void ResourceDownloadDialog::confirm()
         }
 
         this->accept();
+    } else {
+        for (auto name : depNames)
+            removeResource(name);
     }
 }
 
