@@ -413,6 +413,8 @@ set(SETTINGS_SOURCES
     settings/OverrideSetting.h
     settings/PassthroughSetting.cpp
     settings/PassthroughSetting.h
+    settings/ConstantSetting.cpp
+    settings/ConstantSetting.h
     settings/Setting.cpp
     settings/Setting.h
     settings/SettingsObject.cpp
@@ -887,6 +889,8 @@ SET(LAUNCHER_SOURCES
     # GUI - global settings pages
     ui/pages/global/AccountListPage.cpp
     ui/pages/global/AccountListPage.h
+    ui/pages/global/ExternalInstancePage.cpp
+    ui/pages/global/ExternalInstancePage.h
     ui/pages/global/CustomCommandsPage.cpp
     ui/pages/global/CustomCommandsPage.h
     ui/pages/global/EnvironmentVariablesPage.cpp
@@ -1124,6 +1128,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/setupwizard/PasteWizardPage.ui
     ui/setupwizard/ThemeWizardPage.ui
     ui/pages/global/AccountListPage.ui
+    ui/pages/global/ExternalInstancePage.ui
     ui/pages/global/JavaPage.ui
     ui/pages/global/LauncherPage.ui
     ui/pages/global/APIPage.ui

@@ -15,6 +15,7 @@
 
 #include "settings/SettingsObject.h"
 #include <QDebug>
+#include "ConstantSetting.h"
 #include "PassthroughSetting.h"
 #include "settings/OverrideSetting.h"
 #include "settings/Setting.h"
@@ -52,6 +53,19 @@ std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Set
     connectSignals(*passthrough);
     m_settings.insert(passthrough->id(), passthrough);
     return passthrough;
+}
+
+std::shared_ptr<Setting> SettingsObject::registerConstant(const QString& id, QVariant val)
+{
+    if (!contains(id)) {
+        qCritical() << QString("Failed to register setting %1. ID does not exists.").arg(id);
+        return nullptr;  // Fail
+    }
+    auto constant = std::make_shared<ConstantSetting>(m_settings[id], val);
+    constant->m_storage = this;
+    // connectSignals(*constant); // Don't need it
+    m_settings[id] = constant;
+    return constant;
 }
 
 std::shared_ptr<Setting> SettingsObject::registerSetting(QStringList synonyms, QVariant defVal)
