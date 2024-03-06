@@ -35,6 +35,7 @@
  */
 
 #include "JavaPage.h"
+#include "BuildConfig.h"
 #include "JavaCommon.h"
 #include "java/JavaInstall.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -62,15 +63,21 @@ JavaPage::JavaPage(QWidget* parent) : QWidget(parent), ui(new Ui::JavaPage)
 {
     ui->setupUi(this);
 
-    ui->managedJavaList->initialize(new JavaInstallList(this, true));
-    ui->managedJavaList->selectCurrent();
-    ui->managedJavaList->setEmptyString(tr("No java versions are currently available in the meta"));
-    ui->managedJavaList->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
-    connect(ui->autodetectJavaCheckBox, &QCheckBox::stateChanged, this, [this] {
-        ui->autodownloadCheckBox->setEnabled(ui->autodetectJavaCheckBox->isChecked());
-        if (!ui->autodetectJavaCheckBox->isChecked())
-            ui->autodownloadCheckBox->setChecked(false);
-    });
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        ui->managedJavaList->initialize(new JavaInstallList(this, true));
+        ui->managedJavaList->selectCurrent();
+        ui->managedJavaList->setEmptyString(tr("No java versions are currently available in the meta"));
+        ui->managedJavaList->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
+        connect(ui->autodetectJavaCheckBox, &QCheckBox::stateChanged, this, [this] {
+            ui->autodownloadCheckBox->setEnabled(ui->autodetectJavaCheckBox->isChecked());
+            if (!ui->autodetectJavaCheckBox->isChecked())
+                ui->autodownloadCheckBox->setChecked(false);
+        });
+    } else {
+        ui->autodownloadCheckBox->setHidden(true);
+        ui->javaDownloadBtn->setHidden(true);
+        ui->tabWidget->tabBar()->hide();
+    }
 
     loadSettings();
     updateThresholds();

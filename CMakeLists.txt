@@ -219,6 +219,9 @@ set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL 
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
 set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
 
+# Java downloader
+option(ENABLE_JAVA_DOWNLOADER "Build the java downloader feature" ON)
+
 # Native libraries
 if(UNIX AND APPLE)
     set(Launcher_GLFW_LIBRARY_NAME "libglfw.dylib" CACHE STRING "Name of native glfw library")

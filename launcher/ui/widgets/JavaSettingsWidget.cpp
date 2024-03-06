@@ -129,8 +129,10 @@ void JavaSettingsWidget::setupUi()
     m_horizontalBtnLayout = new QHBoxLayout();
     m_horizontalBtnLayout->setObjectName(QStringLiteral("horizontalBtnLayout"));
 
-    m_javaDownloadBtn = new QPushButton(tr("Download Java"), this);
-    m_horizontalBtnLayout->addWidget(m_javaDownloadBtn);
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        m_javaDownloadBtn = new QPushButton(tr("Download Java"), this);
+        m_horizontalBtnLayout->addWidget(m_javaDownloadBtn);
+    }
 
     m_verticalLayout->addLayout(m_horizontalBtnLayout);
 
@@ -143,15 +145,17 @@ void JavaSettingsWidget::setupUi()
     m_autodetectJavaCheckBox->setObjectName("autodetectJavaCheckBox");
     m_veriticalJavaLayout->addWidget(m_autodetectJavaCheckBox);
 
-    m_autodownloadCheckBox = new QCheckBox(m_autoJavaGroupBox);
-    m_autodownloadCheckBox->setObjectName("autodownloadCheckBox");
-    m_autodownloadCheckBox->setEnabled(false);
-    m_veriticalJavaLayout->addWidget(m_autodownloadCheckBox);
-    connect(m_autodetectJavaCheckBox, &QCheckBox::stateChanged, this, [this] {
-        m_autodownloadCheckBox->setEnabled(m_autodetectJavaCheckBox->isChecked());
-        if (!m_autodetectJavaCheckBox->isChecked())
-            m_autodownloadCheckBox->setChecked(false);
-    });
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        m_autodownloadCheckBox = new QCheckBox(m_autoJavaGroupBox);
+        m_autodownloadCheckBox->setObjectName("autodownloadCheckBox");
+        m_autodownloadCheckBox->setEnabled(false);
+        m_veriticalJavaLayout->addWidget(m_autodownloadCheckBox);
+        connect(m_autodetectJavaCheckBox, &QCheckBox::stateChanged, this, [this] {
+            m_autodownloadCheckBox->setEnabled(m_autodetectJavaCheckBox->isChecked());
+            if (!m_autodetectJavaCheckBox->isChecked())
+                m_autodownloadCheckBox->setChecked(false);
+        });
+    }
     m_verticalLayout->addWidget(m_autoJavaGroupBox);
 
     retranslate();

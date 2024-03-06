@@ -64,6 +64,8 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance* inst, QWidget* parent)
     m_settings = inst->settings();
     ui->setupUi(this);
 
+    ui->javaDownloadBtn->setHidden(!BuildConfig.JAVA_DOWNLOADER_ENABLED);
+
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
     connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);

@@ -1320,6 +1320,10 @@ if(DEFINED Launcher_APP_BINARY_DEFS)
     target_compile_definitions(Launcher_logic PRIVATE ${Launcher_APP_BINARY_DEFS})
 endif()
 
+if(ENABLE_JAVA_DOWNLOADER)
+    target_compile_definitions(Launcher_logic PUBLIC ENABLE_JAVA_DOWNLOADER)
+endif()
+
 install(TARGETS ${Launcher_Name}
     BUNDLE DESTINATION "." COMPONENT Runtime
     LIBRARY DESTINATION ${LIBRARY_DEST_DIR} COMPONENT Runtime
