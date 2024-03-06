@@ -59,5 +59,12 @@ class ResourcePackPage : public ExternalResourcesPage {
 
    public slots:
     bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
-    void downloadRPs();
+
+   private slots:
+    void downloadResourcePacks();
+    void updateResourcePacks();
+    void deleteResourcePackMetadata();
+
+   protected:
+    std::shared_ptr<ResourcePackFolderModel> m_model;
 };

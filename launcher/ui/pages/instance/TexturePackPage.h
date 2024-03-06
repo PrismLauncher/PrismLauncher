@@ -56,5 +56,10 @@ class TexturePackPage : public ExternalResourcesPage {
 
    public slots:
     bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
-    void downloadTPs();
+    void downloadTexturePacks();
+    void updateTexturePacks();
+    void deleteTexturePackMetadata();
+
+   private:
+    std::shared_ptr<TexturePackFolderModel> m_model;
 };

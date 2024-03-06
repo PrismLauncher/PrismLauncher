@@ -20,4 +20,6 @@ class ShaderPackFolderModel : public ResourceFolderModel {
     {
         return new LocalShaderPackParseTask(m_next_resolution_ticket, static_cast<ShaderPack&>(resource));
     }
+
+    RESOURCE_HELPERS(ShaderPack);
 };

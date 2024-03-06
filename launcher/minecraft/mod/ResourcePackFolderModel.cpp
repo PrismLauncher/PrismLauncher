@@ -51,8 +51,9 @@ ResourcePackFolderModel::ResourcePackFolderModel(const QDir& dir, BaseInstance* 
     : ResourceFolderModel(dir, instance, is_indexed, create_dir, parent)
 {
     m_column_names = QStringList({ "Enable", "Image", "Name", "Pack Format", "Last Modified", "Provider" });
-    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified"), tr("Provider") });
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE };
+    m_column_names_translated =
+        QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified"), tr("Provider") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE, SortType::PROVIDER };
     m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive,
                               QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true };

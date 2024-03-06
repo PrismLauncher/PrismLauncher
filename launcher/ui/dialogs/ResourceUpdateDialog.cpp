@@ -38,7 +38,8 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
                                            BaseInstance* instance,
                                            const std::shared_ptr<ResourceFolderModel> resource_model,
                                            QList<Resource*>& search_for,
-                                           bool includeDeps)
+                                           bool include_deps,
+                                           bool filter_loaders)
     : ReviewMessageBox(parent, tr("Confirm mods to update"), "")
     , m_parent(parent)
     , m_resource_model(resource_model)
@@ -46,7 +47,8 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
     , m_second_try_metadata(
           new ConcurrentTask(nullptr, "Second Metadata Search", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()))
     , m_instance(instance)
-    , m_include_deps(includeDeps)
+    , m_include_deps(include_deps)
+    , m_filter_loaders(filter_loaders)
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
@@ -85,7 +87,7 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     auto versions = mcVersions(m_instance);
-    auto loaders = mcLoaders(m_instance);
+    auto loaders = m_filter_loaders ? mcLoaders(m_instance) : std::optional<ModPlatform::ModLoaderTypes>();
 
     SequentialTask check_task(m_parent, tr("Checking for updates"));
 
@@ -224,10 +226,10 @@ void ResourceUpdateDialog::checkCandidates()
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
                     changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resource_model);
-                CheckUpdateTask::Update updatable = {
-                    dep->pack->name, dep->version.hash,   tr("Not installed"),           dep->version.version, dep->version.version_type,
-                    changelog,       dep->pack->provider, download_task
-                };
+                CheckUpdateTask::Update updatable = { dep->pack->name,           dep->version.hash,
+                                                      tr("Not installed"),       dep->version.version,
+                                                      dep->version.version_type, changelog,
+                                                      dep->pack->provider,       download_task };
 
                 appendResource(updatable, getRequiredBy.value(dep->version.addonId.toString()));
                 m_tasks.insert(updatable.name, updatable.download);

@@ -20,7 +20,8 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
                                   BaseInstance* instance,
                                   std::shared_ptr<ResourceFolderModel> resource_model,
                                   QList<Resource*>& search_for,
-                                  bool includeDeps);
+                                  bool include_deps,
+                                  bool filter_loaders);
 
     void checkCandidates();
 
@@ -63,4 +64,5 @@ class ResourceUpdateDialog final : public ReviewMessageBox {
     bool m_no_updates = false;
     bool m_aborted = false;
     bool m_include_deps = false;
+    bool m_filter_loaders = false;
 };

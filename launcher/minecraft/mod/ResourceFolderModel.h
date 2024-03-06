@@ -255,7 +255,7 @@ class ResourceFolderModel : public QAbstractListModel {
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
-    QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE };
+    QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE, SortType::PROVIDER };
     QStringList m_column_names = { "Enable", "Name", "Last Modified", "Provider" };
     QStringList m_column_names_translated = { tr("Enable"), tr("Name"), tr("Last Modified"), tr("Provider") };
     QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive };

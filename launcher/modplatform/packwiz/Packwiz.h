@@ -52,9 +52,9 @@ class V1 {
 
         // [update]
         ModPlatform::ResourceProvider provider{};
-        QString version_number{};
         QVariant file_id{};
         QVariant project_id{};
+        QString version_number{};
 
        public:
         // This is a totally heuristic, but should work for now.

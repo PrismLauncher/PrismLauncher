@@ -70,14 +70,14 @@
    </layout>
   </widget>
   <widget class="WideBar" name="actionsToolbar">
-   <property name="useDefaultAction" stdset="0">
-    <bool>true</bool>
-   </property>
    <property name="windowTitle">
     <string>Actions</string>
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextOnly</enum>
+   </property>
+   <property name="useDefaultAction" stdset="0">
+    <bool>true</bool>
    </property>
    <attribute name="toolBarArea">
     <enum>RightToolBarArea</enum>
@@ -95,10 +95,10 @@
   </widget>
   <action name="actionAddItem">
    <property name="text">
-    <string>&amp;Add</string>
+    <string>&amp;Add File</string>
    </property>
    <property name="toolTip">
-    <string>Add</string>
+    <string>Add a locally downloaded file.</string>
    </property>
   </action>
   <action name="actionRemoveItem">
@@ -106,7 +106,7 @@
     <string>&amp;Remove</string>
    </property>
    <property name="toolTip">
-    <string>Remove selected item</string>
+    <string>Remove all selected items.</string>
    </property>
   </action>
   <action name="actionEnableItem">
@@ -114,7 +114,7 @@
     <string>&amp;Enable</string>
    </property>
    <property name="toolTip">
-    <string>Enable selected item</string>
+    <string>Enable all selected items.</string>
    </property>
   </action>
   <action name="actionDisableItem">
@@ -122,7 +122,7 @@
     <string>&amp;Disable</string>
    </property>
    <property name="toolTip">
-    <string>Disable selected item</string>
+    <string>Disable all selected items.</string>
    </property>
   </action>
   <action name="actionViewConfigs">
@@ -137,6 +137,9 @@
    <property name="text">
     <string>View &amp;Folder</string>
    </property>
+   <property name="toolTip">
+    <string>Open the folder in the system file manager.</string>
+   </property>
   </action>
   <action name="actionDownloadItem">
    <property name="enabled">
@@ -146,18 +149,7 @@
     <string>&amp;Download</string>
    </property>
    <property name="toolTip">
-    <string>Download a new resource</string>
-   </property>
-  </action>
-  <action name="actionVisitItemPage">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Visit mod's page</string>
-   </property>
-   <property name="toolTip">
-    <string>Go to mods home page</string>
+    <string>Download resources from online mod platforms.</string>
    </property>
   </action>
   <action name="actionUpdateItem">
@@ -168,7 +160,23 @@
     <string>Check for &amp;Updates</string>
    </property>
    <property name="toolTip">
-    <string>Try to check or update all selected resources (all resources if none are selected)</string>
+    <string>Try to check or update all selected resources (all resources if none are selected).</string>
+   </property>
+  </action>
+  <action name="actionResetItemMetadata">
+   <property name="text">
+    <string>Reset Update Metadata</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionVerifyItemDependencies">
+   <property name="text">
+    <string>Verify Dependencies</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>
