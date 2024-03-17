@@ -463,7 +463,7 @@ auto ExportToZipTask::exportZip() -> ZipResult
 
         auto absolute = file.absoluteFilePath();
         auto relative = m_dir.relativeFilePath(absolute);
-        setStatus("Compresing: " + relative);
+        setStatus("Compressing: " + relative);
         setProgress(m_progress + 1, m_progressTotal);
         if (m_follow_symlinks) {
             if (file.isSymLink())
