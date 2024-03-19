@@ -75,11 +75,9 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
         case VersionRole:
             return version->version.toString();
         case RecommendedRole:
-            return version->recommended;
+            return false;  // do not recommend any version
         case JavaNameRole:
             return version->name();
-        case JavaVendorRole:
-            return version->vendor;
         case TypeRole:
             return version->packageType;
         case Meta::VersionList::TimeRole:
@@ -91,8 +89,7 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
 
 BaseVersionList::RoleList VersionList::providesRoles() const
 {
-    return { VersionPointerRole, VersionIdRole,  VersionRole, RecommendedRole,
-             JavaNameRole,       JavaVendorRole, TypeRole,    Meta::VersionList::TimeRole };
+    return { VersionPointerRole, VersionIdRole, VersionRole, RecommendedRole, JavaNameRole, TypeRole, Meta::VersionList::TimeRole };
 }
 
 bool sortJavas(BaseVersion::Ptr left, BaseVersion::Ptr right)
@@ -109,11 +106,12 @@ void VersionList::sortVersions()
     QString versionStr = SysInfo::getSupportedJavaArchitecture();
     beginResetModel();
     auto runtimes = m_version->data()->runtimes;
-    if (!versionStr.isEmpty() && !runtimes.isEmpty() && runtimes.contains(versionStr)) {
-        m_vlist = runtimes.value(versionStr);
+    m_vlist = {};
+    if (!versionStr.isEmpty() && !runtimes.isEmpty()) {
+        std::copy_if(runtimes.begin(), runtimes.end(), std::back_inserter(m_vlist),
+                     [versionStr](Java::MetadataPtr val) { return val->runtimeOS == versionStr; });
         std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
     } else {
-        m_vlist = {};
         qWarning() << "No Java versions found for your operating system." << SysInfo::currentSystem() << " " << SysInfo::useQTForArch();
     }
     endResetModel();

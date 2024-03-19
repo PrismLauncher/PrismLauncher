@@ -19,30 +19,28 @@
 #pragma once
 
 #include <QDialog>
-#include "BaseVersion.h"
+#include "ui/pages/BasePageProvider.h"
 
-namespace Ui {
-class JavaDownloader;
-}
+class MinecraftInstance;
+class PageContainer;
+class PackProfile;
+class QDialogButtonBox;
 
 namespace Java {
-
-class Downloader : public QDialog {
+class InstallDialog final : public QDialog, protected BasePageProvider {
     Q_OBJECT
 
    public:
-    explicit Downloader(QWidget* parent = 0);
-    ~Downloader();
+    explicit InstallDialog(const QString& uid = QString(), QWidget* parent = nullptr);
 
-    void accept();
+    QList<BasePage*> getPages() override;
+    QString dialogTitle() override;
 
-   public slots:
-    void refresh();
-
-   protected slots:
-    void setSelectedVersion(BaseVersion::Ptr version);
+    void validate(BasePage* page);
+    void done(int result) override;
 
    private:
-    Ui::JavaDownloader* ui;
+    PageContainer* container;
+    QDialogButtonBox* buttons;
 };
 }  // namespace Java

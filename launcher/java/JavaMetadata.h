@@ -50,10 +50,10 @@ class Metadata : public BaseVersion {
     QDateTime releaseTime;
     QString checksumType;
     QString checksumHash;
-    bool recommended;
     DownloadType downloadType;
     QString packageType;
     JavaVersion version;
+    QString runtimeOS;
 };
 using MetadataPtr = std::shared_ptr<Metadata>;
 

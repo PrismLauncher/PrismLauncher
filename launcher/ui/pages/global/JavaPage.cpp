@@ -39,7 +39,7 @@
 #include "JavaCommon.h"
 #include "java/JavaInstall.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/java/JavaDownloader.h"
+#include "ui/java/InstallJavaDialog.h"
 #include "ui_JavaPage.h"
 
 #include <QCheckBox>
@@ -201,7 +201,7 @@ void JavaPage::on_javaTestBtn_clicked()
 
 void JavaPage::on_javaDownloadBtn_clicked()
 {
-    auto jdialog = new Java::Downloader(this);
+    auto jdialog = new Java::InstallDialog({}, this);
     jdialog->exec();
     ui->managedJavaList->loadList();
 }

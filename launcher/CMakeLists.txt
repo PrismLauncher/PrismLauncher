@@ -440,8 +440,8 @@ set(JAVA_SOURCES
     java/download/ManifestDownloadTask.cpp
     java/download/ManifestDownloadTask.h
 
-    ui/java/JavaDownloader.h
-    ui/java/JavaDownloader.cpp
+    ui/java/InstallJavaDialog.h
+    ui/java/InstallJavaDialog.cpp
     ui/java/VersionList.h
     ui/java/VersionList.cpp
 )
@@ -1194,7 +1194,6 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ScrollMessageBox.ui
     ui/dialogs/BlockedModsDialog.ui
     ui/dialogs/ChooseProviderDialog.ui
-    ui/java/JavaDownloader.ui
 )
 
 qt_wrap_ui(PRISM_UPDATE_UI

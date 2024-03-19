@@ -112,6 +112,5 @@ QHash<int, QByteArray> BaseVersionList::roleNames() const
     roles.insert(PathRole, "path");
     roles.insert(JavaNameRole, "javaName");
     roles.insert(CPUArchitectureRole, "architecture");
-    roles.insert(JavaVendorRole, "javaVendor");
     return roles;
 }

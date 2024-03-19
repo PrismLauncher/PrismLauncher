@@ -52,9 +52,9 @@ MetadataPtr parseJavaMeta(const QJsonObject& in)
     meta->vendor = Json::ensureString(in, "vendor", "");
     meta->url = Json::ensureString(in, "url", "");
     meta->releaseTime = timeFromS3Time(Json::ensureString(in, "releaseTime", ""));
-    meta->recommended = Json::ensureBoolean(in, "recommended", false);
     meta->downloadType = parseDownloadType(Json::ensureString(in, "downloadType", ""));
     meta->packageType = Json::ensureString(in, "packageType", "");
+    meta->runtimeOS = Json::ensureString(in, "runtimeOS", "unknown");
 
     if (in.contains("checksum")) {
         auto obj = Json::requireObject(in, "checksum");

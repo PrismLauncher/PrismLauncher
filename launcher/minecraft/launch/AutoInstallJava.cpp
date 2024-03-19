@@ -145,39 +145,35 @@ void AutoInstallJava::setJavaPathFromPartial()
 void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
 {
     auto runtimes = version->data()->runtimes;
-    if (runtimes.contains(m_supported_arch)) {
-        for (auto java : runtimes.value(m_supported_arch)) {
-            if (java->name() == javaName) {
-                QDir javaDir(APPLICATION->javaPath());
-                auto final_path = javaDir.absoluteFilePath(java->m_name);
-                switch (java->downloadType) {
-                    case Java::DownloadType::Manifest:
-                        m_current_task =
-                            makeShared<Java::ManifestDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
-                        break;
-                    case Java::DownloadType::Archive:
-                        m_current_task =
-                            makeShared<Java::ArchiveDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
-                        break;
-                }
-                auto deletePath = [final_path] { FS::deletePath(final_path); };
-                connect(m_current_task.get(), &Task::failed, this, [this, deletePath](QString reason) {
-                    deletePath();
-                    emitFailed(reason);
-                });
-                connect(this, &Task::aborted, this, [this, deletePath] {
-                    m_current_task->abort();
-                    deletePath();
-                });
-                connect(m_current_task.get(), &Task::succeeded, this, &AutoInstallJava::setJavaPathFromPartial);
-                connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);
-                connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
-                connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
-                connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
-                connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
-                m_current_task->start();
-                return;
+    for (auto java : runtimes) {
+        if (java->runtimeOS == m_supported_arch && java->name() == javaName) {
+            QDir javaDir(APPLICATION->javaPath());
+            auto final_path = javaDir.absoluteFilePath(java->m_name);
+            switch (java->downloadType) {
+                case Java::DownloadType::Manifest:
+                    m_current_task = makeShared<Java::ManifestDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
+                    break;
+                case Java::DownloadType::Archive:
+                    m_current_task = makeShared<Java::ArchiveDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
+                    break;
             }
+            auto deletePath = [final_path] { FS::deletePath(final_path); };
+            connect(m_current_task.get(), &Task::failed, this, [this, deletePath](QString reason) {
+                deletePath();
+                emitFailed(reason);
+            });
+            connect(this, &Task::aborted, this, [this, deletePath] {
+                m_current_task->abort();
+                deletePath();
+            });
+            connect(m_current_task.get(), &Task::succeeded, this, &AutoInstallJava::setJavaPathFromPartial);
+            connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);
+            connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
+            connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
+            connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
+            connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
+            m_current_task->start();
+            return;
         }
     }
     tryNextMajorJava();

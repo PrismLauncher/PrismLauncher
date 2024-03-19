@@ -37,7 +37,7 @@
 
 #include "InstanceSettingsPage.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/java/JavaDownloader.h"
+#include "ui/java/InstallJavaDialog.h"
 #include "ui_InstanceSettingsPage.h"
 
 #include <QDialog>
@@ -394,7 +394,7 @@ void InstanceSettingsPage::loadSettings()
 
 void InstanceSettingsPage::on_javaDownloadBtn_clicked()
 {
-    auto jdialog = new Java::Downloader(this);
+    auto jdialog = new Java::InstallDialog({}, this);
     jdialog->exec();
 }
 
