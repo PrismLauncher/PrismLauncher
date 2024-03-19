@@ -34,11 +34,11 @@
 #include "ui/widgets/PageContainer.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
-class InstallLoaderPage : public QWidget, public BasePage {
+class InstallJavaPage : public QWidget, public BasePage {
    public:
     Q_OBJECT
    public:
-    explicit InstallLoaderPage(const QString& id, const QString& iconName, const QString& name, QWidget* parent = nullptr)
+    explicit InstallJavaPage(const QString& id, const QString& iconName, const QString& name, QWidget* parent = nullptr)
         : QWidget(parent), uid(id), iconName(iconName), name(name)
     {
         setObjectName(QStringLiteral("VersionSelectWidget"));
@@ -56,12 +56,12 @@ class InstallLoaderPage : public QWidget, public BasePage {
         javaVersionSelect->setEmptyString(tr("No java versions are currently available for your OS."));
         javaVersionSelect->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
         horizontalLayout->addWidget(javaVersionSelect, 4);
-        connect(majorVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallLoaderPage::setSelectedVersion);
-        connect(javaVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallLoaderPage::selectedVersionChanged);
+        connect(majorVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::setSelectedVersion);
+        connect(javaVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::selectedVersionChanged);
 
         QMetaObject::connectSlotsByName(this);
     }
-    ~InstallLoaderPage()
+    ~InstallJavaPage()
     {
         delete horizontalLayout;
         delete majorVersionSelect;
@@ -129,9 +129,9 @@ class InstallLoaderPage : public QWidget, public BasePage {
     VersionSelectWidget* javaVersionSelect = nullptr;
 };
 
-static InstallLoaderPage* pageCast(BasePage* page)
+static InstallJavaPage* pageCast(BasePage* page)
 {
-    auto result = dynamic_cast<InstallLoaderPage*>(page);
+    auto result = dynamic_cast<InstallJavaPage*>(page);
     Q_ASSERT(result != nullptr);
     return result;
 }
@@ -168,7 +168,7 @@ InstallDialog::InstallDialog(const QString& uid, QWidget* parent)
         if (page->id() == uid)
             container->selectPage(page->id());
 
-        connect(pageCast(page), &InstallLoaderPage::selectedVersionChanged, this, [this, page] {
+        connect(pageCast(page), &InstallJavaPage::selectedVersionChanged, this, [this, page] {
             if (page->id() == container->selectedPage()->id())
                 validate(container->selectedPage());
         });
@@ -182,11 +182,11 @@ QList<BasePage*> InstallDialog::getPages()
 {
     return {
         // NeoForge
-        new InstallLoaderPage("net.minecraft.java", "", tr("Mojang")),
+        new InstallJavaPage("net.minecraft.java", "", tr("Mojang")),
         // Forge
-        new InstallLoaderPage("net.adoptium.java", "", tr("Adoptium")),
+        new InstallJavaPage("net.adoptium.java", "", tr("Adoptium")),
         // Fabric
-        new InstallLoaderPage("com.azul.java", "", tr("Azul")),
+        new InstallJavaPage("com.azul.java", "", tr("Azul")),
     };
 }
 
