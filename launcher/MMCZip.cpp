@@ -119,6 +119,7 @@ bool compressDirFiles(QuaZip* zip, QString dir, QFileInfoList files, bool follow
 bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks)
 {
     QuaZip zip(fileCompressed);
+    zip.setUtf8Enabled(true);
     QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
     if (!zip.open(QuaZip::mdCreate)) {
         QFile::remove(fileCompressed);
@@ -141,6 +142,7 @@ bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, 
 bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
 {
     QuaZip zipOut(targetJarPath);
+    zipOut.setUtf8Enabled(true);
     if (!zipOut.open(QuaZip::mdCreate)) {
         QFile::remove(targetJarPath);
         qCritical() << "Failed to open the minecraft.jar for modding";
