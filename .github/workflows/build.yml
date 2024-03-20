@@ -496,7 +496,6 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
           for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_DIR }}/manifest.txt
-
           cd ${{ env.INSTALL_DIR }}
           tar --owner root --group root -czf ../PrismLauncher.tar.gz *
 
@@ -505,9 +504,12 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+
+          # workaround to make portable installs to work on fedora
+          mkdir  ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /lib/x86_64-linux-gnu/libbz2.so.1.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
+
           for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
-
-
           cd ${{ env.INSTALL_PORTABLE_DIR }}
           tar -czf ../PrismLauncher-portable.tar.gz *
 
