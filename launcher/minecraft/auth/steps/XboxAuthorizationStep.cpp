@@ -129,6 +129,7 @@ bool XboxAuthorizationStep::processSTSError(QNetworkReply::NetworkError error, Q
                         .arg("<a href=\"https://help.minecraft.net/hc/en-us/articles/4408968616077\">help.minecraft.net</a>"));
                 return true;
             }
+            // the following codes where copied from: https://github.com/PrismarineJS/prismarine-auth/pull/44
             case 2148916236: {
                 emit finished(AccountTaskState::STATE_FAILED_SOFT,
                               tr("This Microsoft account requires proof of age to play. Please login to %1 to provide proof of age.")
