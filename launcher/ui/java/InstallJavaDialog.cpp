@@ -72,6 +72,7 @@ class InstallJavaPage : public QWidget, public BasePage {
     void initialize(Meta::VersionList::Ptr vlist)
     {
         vlist->setProvidedRoles({ BaseVersionList::VersionRole, BaseVersionList::RecommendedRole, BaseVersionList::VersionPointerRole });
+        vlist->sort(1);
         majorVersionSelect->initialize(vlist.get());
     }
 

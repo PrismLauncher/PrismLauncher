@@ -66,8 +66,8 @@ JavaPage::JavaPage(QWidget* parent) : QWidget(parent), ui(new Ui::JavaPage)
     if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
         ui->managedJavaList->initialize(new JavaInstallList(this, true));
         ui->managedJavaList->selectCurrent();
-        ui->managedJavaList->setEmptyString(tr("No java versions are currently available in the meta"));
-        ui->managedJavaList->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
+        ui->managedJavaList->setEmptyString(tr("No managed java versions are installed"));
+        ui->managedJavaList->setEmptyErrorString(tr("Couldn't load the managed java list!"));
         connect(ui->autodetectJavaCheckBox, &QCheckBox::stateChanged, this, [this] {
             ui->autodownloadCheckBox->setEnabled(ui->autodetectJavaCheckBox->isChecked());
             if (!ui->autodetectJavaCheckBox->isChecked())
@@ -75,7 +75,6 @@ JavaPage::JavaPage(QWidget* parent) : QWidget(parent), ui(new Ui::JavaPage)
         });
     } else {
         ui->autodownloadCheckBox->setHidden(true);
-        ui->javaDownloadBtn->setHidden(true);
         ui->tabWidget->tabBar()->hide();
     }
 

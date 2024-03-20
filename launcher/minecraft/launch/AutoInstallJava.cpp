@@ -91,7 +91,21 @@ void AutoInstallJava::executeTask()
         emit progressReportingRequest();
         return;
     }
+    if (m_supported_arch.isEmpty()) {
+        emit logLine(tr("Your system(%1 %2) is not compatible with auto java download. Using the default java path.")
+                         .arg(SysInfo::currentSystem(), SysInfo::useQTForArch()),
+                     MessageLevel::Warning);
+        emitSucceeded();
+        return;
+    }
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
+    if (wantedJavaName.isEmpty()) {
+        emit logLine(tr("Your meta informtation is old or doesn't have the information necesary to determine what java should be used. "
+                        "Using the default java path."),
+                     MessageLevel::Warning);
+        emitSucceeded();
+        return;
+    }
     QDir javaDir(APPLICATION->javaPath());
     auto wantedJavaPath = javaDir.absoluteFilePath(wantedJavaName);
     if (QFileInfo::exists(wantedJavaPath)) {
@@ -136,7 +150,8 @@ void AutoInstallJava::setJavaPathFromPartial()
     if (QFileInfo::exists(finalPath)) {
         setJavaPath(finalPath);
     } else {
-        emit logLine(tr("No compatible java version was found. Using the default one."), MessageLevel::Warning);
+        emit logLine(tr("No compatible java version was found(the binary file doesn't exists). Using the default one."),
+                     MessageLevel::Warning);
         emitSucceeded();
     }
     return;
@@ -188,6 +203,8 @@ void AutoInstallJava::tryNextMajorJava()
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
     auto majorJavaVersions = packProfile->getProfile()->getCompatibleJavaMajors();
     if (m_majorJavaVersionIndex >= majorJavaVersions.length()) {
+        emit logLine(tr("No Java versions found for your operating system: %1 %2").arg(SysInfo::currentSystem(), SysInfo::useQTForArch()),
+                     MessageLevel::Warning);
         emit logLine(tr("No compatible java version was found. Using the default one."), MessageLevel::Warning);
         emitSucceeded();
         return;
