@@ -35,7 +35,7 @@ void ArchiveDownloadTask::executeTask()
     // JRE found ! download the zip
     setStatus(tr("Downloading Java"));
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("java", m_url.toLocalFile());
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("java", m_url.fileName());
 
     auto download = makeShared<NetJob>(QString("JRE::DownloadJava"), APPLICATION->network());
     auto action = Net::Download::makeCached(m_url, entry);
@@ -70,12 +70,16 @@ void ArchiveDownloadTask::extractJava(QString input)
 {
     setStatus(tr("Extracting java"));
     auto zip = std::make_shared<QuaZip>(input);
+    if (!zip->open(QuaZip::mdUnzip)) {
+        emitFailed(tr("Unable to open supplied zip file."));
+        return;
+    }
     auto files = zip->getFileNameList();
     if (files.isEmpty()) {
         emitFailed("Empty archive");
         return;
     }
-    auto zipTask = makeShared<MMCZip::ExtractZipTask>(input, m_final_path, files[0]);
+    auto zipTask = makeShared<MMCZip::ExtractZipTask>(zip, m_final_path, files[0]);
 
     auto progressStep = std::make_shared<TaskStepProgress>();
     connect(zipTask.get(), &Task::finished, this, [this, progressStep] {

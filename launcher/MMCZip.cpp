@@ -510,6 +510,10 @@ bool ExportToZipTask::abort()
 
 void ExtractZipTask::executeTask()
 {
+    if (!m_input->isOpen() && !m_input->open(QuaZip::mdUnzip)) {
+        emitFailed(tr("Unable to open supplied zip file."));
+        return;
+    }
     m_zip_future = QtConcurrent::run(QThreadPool::globalInstance(), [this]() { return extractZip(); });
     connect(&m_zip_watcher, &QFutureWatcher<ZipResult>::finished, this, &ExtractZipTask::finish);
     m_zip_watcher.setFuture(m_zip_future);
