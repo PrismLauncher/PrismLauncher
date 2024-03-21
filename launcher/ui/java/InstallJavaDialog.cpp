@@ -19,16 +19,19 @@
 #include "InstallJavaDialog.h"
 
 #include <QDialogButtonBox>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QWidget>
 
 #include "Application.h"
+#include "BaseVersionList.h"
 #include "FileSystem.h"
 #include "java/download/ArchiveDownloadTask.h"
 #include "java/download/ManifestDownloadTask.h"
 #include "meta/Index.h"
 #include "meta/VersionList.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/java/VersionList.h"
 #include "ui/widgets/PageContainer.h"
@@ -71,8 +74,7 @@ class InstallJavaPage : public QWidget, public BasePage {
     //! loads the list if needed.
     void initialize(Meta::VersionList::Ptr vlist)
     {
-        vlist->setProvidedRoles({ BaseVersionList::VersionRole, BaseVersionList::RecommendedRole, BaseVersionList::VersionPointerRole });
-        vlist->sort(1);
+        vlist->setProvidedRoles({ BaseVersionList::JavaMajorRole, BaseVersionList::RecommendedRole, BaseVersionList::VersionPointerRole });
         majorVersionSelect->initialize(vlist.get());
     }
 
@@ -219,7 +221,11 @@ void InstallDialog::done(int result)
                         break;
                 }
                 auto deletePath = [final_path] { FS::deletePath(final_path); };
-                connect(task.get(), &Task::failed, this, deletePath);
+                connect(task.get(), &Task::failed, this, [this, &deletePath](QString reason) {
+                    QString error = QString("Java download failed: %1").arg(reason);
+                    CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
+                    deletePath();
+                });
                 connect(task.get(), &Task::aborted, this, deletePath);
                 ProgressDialog pg(this);
                 pg.setSkipButton(true, tr("Abort"));

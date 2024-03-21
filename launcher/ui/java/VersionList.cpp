@@ -78,6 +78,13 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
             return false;  // do not recommend any version
         case JavaNameRole:
             return version->name();
+        case JavaMajorRole: {
+            auto major = version->version.toString();
+            if (major.startsWith("java")) {
+                major = "Java " + major.mid(4);
+            }
+            return major;
+        }
         case TypeRole:
             return version->packageType;
         case Meta::VersionList::TimeRole:

@@ -180,7 +180,7 @@ void JavaSettingsWidget::initialize()
                                                tr("%1 can automatically download the correct Java version for each version of Minecraft..\n"
                                                   "Do you want to enable Java auto-download?\n")
                                                    .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
-                                               QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
+                                               QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
                       ->exec();
     if (button == QMessageBox::Yes) {
         m_autodetectJavaCheckBox->setChecked(true);

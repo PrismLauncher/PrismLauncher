@@ -24,6 +24,8 @@ set(CORE_SOURCES
     NullInstance.h
     MMCZip.h
     MMCZip.cpp
+    Untar.h
+    Untar.cpp
     StringUtils.h
     StringUtils.cpp
     QVariantUtils.h

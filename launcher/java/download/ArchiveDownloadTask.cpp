@@ -21,6 +21,7 @@
 #include "MMCZip.h"
 
 #include "Application.h"
+#include "Untar.h"
 #include "net/ChecksumValidator.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
@@ -69,6 +70,28 @@ void ArchiveDownloadTask::executeTask()
 void ArchiveDownloadTask::extractJava(QString input)
 {
     setStatus(tr("Extracting java"));
+    if (input.endsWith("tar")) {
+        setStatus(tr("Extracting java(the progress will not be reported for tar)"));
+        QFile in(input);
+        if (!in.open(QFile::ReadOnly)) {
+            emitFailed(tr("Unable to open supplied tar file."));
+            return;
+        }
+        if (!Tar::extract(&in, QDir(m_final_path).absolutePath())) {
+            emitFailed(tr("Unable to extract supplied tar file."));
+            return;
+        }
+        emitSucceeded();
+        return;
+    } else if (input.endsWith("tar.gz") || input.endsWith("taz") || input.endsWith("tgz")) {
+        setStatus(tr("Extracting java(the progress will not be reported for tar)"));
+        if (!GZTar::extract(input, QDir(m_final_path).absolutePath())) {
+            emitFailed(tr("Unable to extract supplied tar file."));
+            return;
+        }
+        emitSucceeded();
+        return;
+    }
     auto zip = std::make_shared<QuaZip>(input);
     if (!zip->open(QuaZip::mdUnzip)) {
         emitFailed(tr("Unable to open supplied zip file."));
