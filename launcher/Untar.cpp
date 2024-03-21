@@ -175,7 +175,7 @@ bool Tar::extract(QIODevice* in, QString dst)
                         qCritical() << "The expected blocksize was not respected when reading file";
                         return false;
                     }
-                    tmp.truncate(qMin(BLOCKSIZE, size));
+                    tmp.truncate(qMin(qint64(BLOCKSIZE), size));
                     out.write(tmp);
                     size -= BLOCKSIZE;
                 }

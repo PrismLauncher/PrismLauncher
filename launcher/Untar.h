@@ -39,8 +39,8 @@
 // both extract functions will extract the first folder inside dest(disregarding the prefix)
 namespace Tar {
 bool extract(QIODevice* in, QString dst);
-};
+}
 
 namespace GZTar {
 bool extract(QString src, QString dst);
-};
+}
