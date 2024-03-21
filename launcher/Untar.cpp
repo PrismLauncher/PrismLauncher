@@ -158,10 +158,11 @@ bool Tar::extract(QIODevice* in, QString dst)
                     return false;
                 }
                 QFile out(fileName);
-                if (!out.open(QFile::WriteOnly, QFile::Permission(mode))) {
+                if (!out.open(QFile::WriteOnly)) {
                     qCritical() << "Can't open file:" << fileName;
                     return false;
                 }
+                out.setPermissions(QFile::Permissions(mode));
                 qint64 size = strtoll(buffer.header.size, NULL, 8);
                 if (errno == ERANGE) {
                     qCritical() << "The file size can't be read";
@@ -178,7 +179,6 @@ bool Tar::extract(QIODevice* in, QString dst)
                     out.write(tmp);
                     size -= BLOCKSIZE;
                 }
-                QFile::setPermissions(fileName, QFile::Permissions(mode));
                 break;
             }
             case TypeFlag::Directory: {
