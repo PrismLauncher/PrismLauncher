@@ -352,15 +352,10 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         FS::ensureFolderPathExists(FS::PathCombine(m_dataPath, "logs"));
         static const QString baseLogFile = BuildConfig.LAUNCHER_NAME + "Updater" + (m_checkOnly ? "-CheckOnly" : "") + "-%0.log";
         static const QString logBase = FS::PathCombine(m_dataPath, "logs", baseLogFile);
-        auto moveFile = [](const QString& oldName, const QString& newName) {
-            QFile::remove(newName);
-            QFile::copy(oldName, newName);
-            QFile::remove(oldName);
-        };
 
         if (FS::ensureFolderPathExists("logs")) {  // enough history to track both launches of the updater during a portable install
-            moveFile(logBase.arg(1), logBase.arg(2));
-            moveFile(logBase.arg(0), logBase.arg(1));
+            FS::move(logBase.arg(1), logBase.arg(2));
+            FS::move(logBase.arg(0), logBase.arg(1));
         }
 
         logFile = std::unique_ptr<QFile>(new QFile(logBase.arg(0)));
@@ -924,7 +919,7 @@ bool PrismUpdaterApp::callAppImageUpdate()
 
 void PrismUpdaterApp::clearUpdateLog()
 {
-    QFile::remove(m_updateLogPath);
+    FS::deletePath(m_updateLogPath);
 }
 
 void PrismUpdaterApp::logUpdate(const QString& msg)
