@@ -20,7 +20,7 @@
   libnbtplusplus,
 }:
 assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is only available on Linux";
-  stdenv.mkDerivation rec {
+  stdenv.mkDerivation {
     pname = "prismlauncher-unwrapped";
     inherit version;
 
@@ -78,8 +78,7 @@ assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is on
         their associated options with a simple interface.
       '';
       platforms = with platforms; linux ++ darwin;
-      changelog = "https://github.com/PrismLauncher/PrismLauncher/releases/tag/${version}";
       license = licenses.gpl3Only;
-      maintainers = with maintainers; [minion3665 Scrumplex getchoo];
+      maintainers = with maintainers; [Scrumplex getchoo];
     };
   }
