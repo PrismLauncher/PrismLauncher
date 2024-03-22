@@ -66,6 +66,7 @@ class NetJob : public ConcurrentTask {
    public slots:
     // Qt can't handle auto at the start for some reason?
     bool abort() override;
+    void emitFailed(QString reason) override;
 
    protected slots:
     void executeNextSubTask() override;
