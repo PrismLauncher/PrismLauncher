@@ -471,7 +471,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
-        if (result.fileName.endsWith(".zip")) {
+        if (result.resourceType != PackedResourceType::Mod) {
             m_ZIP_resources.append(std::make_pair(result.fileName, result.targetFolder));
         }
 
@@ -685,6 +685,7 @@ void FlameCreationTask::validateZIPResources()
                 installWorld(worldPath);
                 break;
             case PackedResourceType::UNKNOWN:
+            /* fallthrough */
             default:
                 qDebug() << "Can't Identify" << fileName << "at" << localPath << ", leaving it where it is.";
                 break;

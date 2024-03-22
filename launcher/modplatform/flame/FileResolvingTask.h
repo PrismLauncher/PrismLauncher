@@ -26,6 +26,7 @@ class FileResolvingTask : public Task {
     shared_qobject_ptr<QNetworkAccessManager> m_network;
     Flame::Manifest m_toProcess;
     std::shared_ptr<QByteArray> result;
+    std::shared_ptr<QByteArray> mods_result;
     NetJob::Ptr m_dljob;
     NetJob::Ptr m_checkJob;
     NetJob::Ptr m_slugJob;

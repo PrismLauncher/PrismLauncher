@@ -1,10 +1,10 @@
 #include "FileResolvingTask.h"
 
 #include "Json.h"
+#include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "modplatform/ModIndex.h"
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
-#include "net/Upload.h"
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
@@ -32,6 +32,7 @@ void Flame::FileResolvingTask::executeTask()
     setProgress(0, 3);
     m_dljob.reset(new NetJob("Mod id resolver", m_network));
     result.reset(new QByteArray());
+    mods_result.reset(new QByteArray());
     // build json data to send
     QJsonObject object;
 
@@ -40,9 +41,20 @@ void Flame::FileResolvingTask::executeTask()
             l.push_back(s.fileId);
             return l;
         }));
+
+    QJsonObject mods_object;
+
+    mods_object["modIds"] = QJsonArray::fromVariantList(
+        std::accumulate(m_toProcess.files.begin(), m_toProcess.files.end(), QVariantList(), [](QVariantList& l, const File& s) {
+            l.push_back(s.projectId);
+            return l;
+        }));
     QByteArray data = Json::toText(object);
+    QByteArray mods_data = Json::toText(mods_object);
     auto dl = Net::ApiUpload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result, data);
     m_dljob->addNetAction(dl);
+    auto dl2 = Net::Upload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods"), mods_result, mods_data);
+    m_dljob->addNetAction(dl2);
 
     auto step_progress = std::make_shared<TaskStepProgress>();
     connect(m_dljob.get(), &NetJob::finished, this, [this, step_progress]() {
@@ -69,6 +81,30 @@ void Flame::FileResolvingTask::executeTask()
     m_dljob->start();
 }
 
+PackedResourceType getResourceType(int classId)
+{
+    switch (classId) {
+        case 17:  // Worlds
+            return PackedResourceType::WorldSave;
+        case 6:  // Mods
+            return PackedResourceType::Mod;
+        case 12:  // Resource Packs
+                  // return PackedResourceType::ResourcePack; // not really a resourcepack
+            /* fallthrough */
+        case 4546:  // Customization
+                    // return PackedResourceType::ShaderPack; // not really a shaderPack
+            /* fallthrough */
+        case 4471:  // Modpacks
+            /* fallthrough */
+        case 5:  // Bukkit Plugins
+            /* fallthrough */
+        case 4559:  // Addons
+            /* fallthrough */
+        default:
+            return PackedResourceType::UNKNOWN;
+    }
+}
+
 void Flame::FileResolvingTask::netJobFinished()
 {
     setProgress(1, 3);
@@ -78,10 +114,21 @@ void Flame::FileResolvingTask::netJobFinished()
 
     QJsonDocument doc;
     QJsonArray array;
+    QHash<int, PackedResourceType> resourceTypes;
 
     try {
         doc = Json::requireDocument(*result);
         array = Json::requireArray(doc.object()["data"]);
+        doc = Json::requireDocument(*mods_result);
+        auto obj = Json::requireObject(doc);
+        auto mods_array = Json::requireArray(obj, "data", "data");
+        for (auto element : mods_array) {
+            auto mod = Json::requireObject(element);
+            auto id = Json::requireInteger(mod, "id", "modId");
+            auto classId = Json::requireInteger(mod, "classId", "modClassId");
+            resourceTypes.insert(id, getResourceType(classId));
+        }
+
     } catch (Json::JsonException& e) {
         qCritical() << "Non-JSON data returned from the CF API";
         qCritical() << e.cause();
@@ -108,6 +155,10 @@ void Flame::FileResolvingTask::netJobFinished()
                 m_checkJob->addNetAction(dl);
                 blockedProjects.insert(&out, output);
             }
+        }
+        out.resourceType = resourceTypes.value(out.projectId, PackedResourceType::UNKNOWN);
+        if (out.resourceType == PackedResourceType::WorldSave) {
+            out.targetFolder = "saves";
         }
     }
     auto step_progress = std::make_shared<TaskStepProgress>();
