@@ -94,7 +94,7 @@ union Buffer {
     struct Header header;
 };
 
-bool readLonglink(QIODevice* in, Buffer buffer, QByteArray& longlink)
+bool readLonglink(QIODevice* in, Buffer& buffer, QByteArray& longlink)
 {
     qint64 n = 0;
     qint64 size = strtoll(buffer.header.size, NULL, 8);
