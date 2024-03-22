@@ -4,6 +4,7 @@
   symlinkJoin,
   prismlauncher-unwrapped,
   wrapQtAppsHook,
+  makeWrapper,
   addOpenGLRunpath,
   qtbase, # needed for wrapQtAppsHook
   qtsvg,
@@ -12,34 +13,49 @@
   libpulseaudio,
   libGL,
   glfw,
+  glfw-wayland-minecraft,
   openal,
   jdk8,
   jdk17,
   gamemode,
   flite,
   mesa-demos,
+  pciutils,
   udev,
   libusb1,
   msaClientID ? null,
   gamemodeSupport ? stdenv.isLinux,
   textToSpeechSupport ? stdenv.isLinux,
   controllerSupport ? stdenv.isLinux,
+  # Adds `glfw-wayland-minecraft` to `LD_LIBRARY_PATH`
+  # when launched on wayland, allowing for the game to be run natively.
+  # Make sure to enable "Use system installation of GLFW" in instance settings
+  # for this to take effect
+  #
+  # Warning: This build of glfw may be unstable, and the launcher
+  # itself can take slightly longer to start
+  withWaylandGLFW ? false,
   jdks ? [jdk17 jdk8],
   additionalLibs ? [],
   additionalPrograms ? [],
-}: let
-  prismlauncherFinal = prismlauncher-unwrapped.override {
+}:
+assert lib.assertMsg (withWaylandGLFW -> stdenv.isLinux) "withWaylandGLFW is only available on Linux"; let
+  unwrapped = prismlauncher-unwrapped.override {
     inherit msaClientID gamemodeSupport;
   };
 in
   symlinkJoin {
-    name = "prismlauncher-${prismlauncherFinal.version}";
+    name = "prismlauncher-${unwrapped.version}";
 
-    paths = [prismlauncherFinal];
+    paths = [unwrapped];
 
-    nativeBuildInputs = [
-      wrapQtAppsHook
-    ];
+    nativeBuildInputs =
+      [
+        wrapQtAppsHook
+      ]
+      # purposefully using a shell wrapper here for variable expansion
+      # see https://github.com/NixOS/nixpkgs/issues/172583
+      ++ lib.optional withWaylandGLFW makeWrapper;
 
     buildInputs =
       [
@@ -48,20 +64,28 @@ in
       ]
       ++ lib.optional (lib.versionAtLeast qtbase.version "6" && stdenv.isLinux) qtwayland;
 
+    env.waylandPreExec = lib.optionalString withWaylandGLFW ''
+      if [ -n "$WAYLAND_DISPLAY" ]; then
+        export LD_LIBRARY_PATH=${lib.getLib glfw-wayland-minecraft}/lib:"$LD_LIBRARY_PATH"
+      fi
+    '';
+
     postBuild = ''
+      qtWrapperArgs+=(
+        ${lib.optionalString withWaylandGLFW "--run \"$waylandPreExec\""}
+      )
       wrapQtAppsHook
     '';
 
     qtWrapperArgs = let
       runtimeLibs =
-        (with xorg; [
-          libX11
-          libXext
-          libXcursor
-          libXrandr
-          libXxf86vm
-        ])
-        ++ [
+        [
+          xorg.libX11
+          xorg.libXext
+          xorg.libXcursor
+          xorg.libXrandr
+          xorg.libXxf86vm
+
           # lwjgl
           libpulseaudio
           libGL
@@ -81,6 +105,7 @@ in
         [
           xorg.xrandr
           mesa-demos # need glxinfo
+          pciutils # need lspci
         ]
         ++ additionalPrograms;
     in
@@ -91,5 +116,5 @@ in
         "--prefix PATH : ${lib.makeBinPath runtimePrograms}"
       ];
 
-    inherit (prismlauncherFinal) meta;
+    inherit (unwrapped) meta;
   }

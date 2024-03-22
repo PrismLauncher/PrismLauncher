@@ -15,7 +15,6 @@ to temporarily enable it when using `nix` commands.
 Example (NixOS):
 
 ```nix
-{...}:
 {
   nix.settings = {
     trusted-substituters = [
@@ -118,7 +117,6 @@ If you want to avoid rebuilds you may add the garnix cache to your substitutors.
 Example (NixOS):
 
 ```nix
-{...}:
 {
   nix.settings = {
     trusted-substituters = [
@@ -132,21 +130,34 @@ Example (NixOS):
 }
 ```
 
-### Using the overlay (`fetchTarball`)
+### Using the overlay (stable Nix)
 
-We use flake-compat to allow using this Flake on a system that doesn't use flakes.
+We offer standard Nix expressions and a channel to allow using this flake on a system that doesn't use flakes.
+
+To add the channel:
+
+```shell
+nix-channel --add https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz prismlauncher
+
+nix-channel --update prismlauncher
+```
 
 Example:
 
 ```nix
-{pkgs, ...}: {
-  nixpkgs.overlays = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz")).overlays.default];
+{pkgs, ...}: let
+  # with channels
+  prismOverlay = import <prismlauncher/overlay.nix>;
+  # with fetchTarball
+  prismOverlay = import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz" + "/overlay.nix");
+in {
+  nixpkgs.overlays = [prismOverlay];
 
   environment.systemPackages = [pkgs.prismlauncher];
 }
 ```
 
-### Installing the package directly (`fetchTarball`)
+### Installing the package directly (stable Nix)
 
 Alternatively, if you don't want to use an overlay, you can install Prism Launcher directly by installing the `prismlauncher` package.
 This way the installed package is fully reproducible.
@@ -154,8 +165,11 @@ This way the installed package is fully reproducible.
 Example:
 
 ```nix
-{pkgs, ...}: {
-  environment.systemPackages = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz")).packages.${pkgs.system}.prismlauncher];
+let
+  prismlauncher = import <prismlauncher> {};
+  prismlauncher = import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz") {};
+in {
+  environment.systemPackages = [prismlauncher.prismlauncher];
 }
 ```
 
@@ -166,10 +180,6 @@ You can add this repository as a channel and install its packages that way.
 Example:
 
 ```shell
-nix-channel --add https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz prismlauncher
-
-nix-channel --update prismlauncher
-
 nix-env -iA prismlauncher.prismlauncher
 ```
 
@@ -189,6 +199,9 @@ The wrapped packages (`prismlauncher` and `prismlauncher-qt5`) offer some build 
 The following parameters can be overridden:
 
 - `msaClientID` (default: `null`, requires full rebuild!) Client ID used for Microsoft Authentication
-- `gamemodeSupport` (default: `true`) Turn on/off support for [Feral GameMode](https://github.com/FeralInteractive/gamemode)
+- `gamemodeSupport` (default: `true`, requires full rebuild!) Turn on/off support for [Feral GameMode](https://github.com/FeralInteractive/gamemode). Only available for Linux
+- `withWaylandGLFW` (default: `false`) Turn on/off unstable, native GLFW patched to run Minecraft on Wayland. Only available on Linux, see [this](pkg/wrapper.nix#L30) comment for more.
+- `textToSpeechSupport` (default: `stdenv.isLinux`) Turn on/off support for narrator. Only has an effect on Linux
+- `controllerSupport` (default: `stdenv.isLinux`) Turn on/off support for controllers; useful for mods. Only has an effect on Linux
 - `jdks` (default: `[ jdk17 jdk8 ]`) Java runtimes added to `PRISMLAUNCHER_JAVA_PATHS` variable
-- `additionalLibs` (default: `[ ]`) Additional libraries that will be added to `LD_LIBRARY_PATH`
+- `additionalLibs` (default: `[ ]`) Additional libraries that will be added to `LD_LIBRARY_PATH`. Only has an effect on Linux
