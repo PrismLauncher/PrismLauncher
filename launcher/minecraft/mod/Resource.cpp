@@ -130,15 +130,15 @@ bool Resource::enable(EnableAction action)
         if (!path.endsWith(".disabled"))
             return false;
         path.chop(9);
-
-        if (!file.rename(path))
-            return false;
     } else {
         path += ".disabled";
-
-        if (!file.rename(path))
+    }
+    if (QFileInfo::exists(path)) {  // the path exists so just remove the file at path
+        if (!QFile::remove(path))
             return false;
     }
+    if (!file.rename(path))
+        return false;
 
     setFile(QFileInfo(path));
 
