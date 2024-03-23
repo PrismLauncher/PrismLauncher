@@ -164,8 +164,8 @@ void InstanceImportTask::processZipPack()
     } else if (technicFound) {
         // process as Technic pack
         qDebug() << "Technic:" << technicFound;
-        extractDir.mkpath(".minecraft");
-        extractDir.cd(".minecraft");
+        extractDir.mkpath("minecraft");
+        extractDir.cd("minecraft");
         m_modpackType = ModpackType::Technic;
     } else {
         QStringList paths_to_ignore{ "overrides/" };

@@ -443,6 +443,9 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStri
                 reqItem->insertChildren(i++, { reqItem });
             }
         }
+
+        ui->toggleDepsButton->show();
+        m_deps << item_top;
     }
 
     auto changelog_item = new QTreeWidgetItem(item_top);

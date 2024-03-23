@@ -1197,43 +1197,43 @@ void MainWindow::undoTrashInstance()
 
 void MainWindow::on_actionViewLauncherRootFolder_triggered()
 {
-    DesktopServices::openDirectory(".");
+    DesktopServices::openPath(".");
 }
 
 void MainWindow::on_actionViewInstanceFolder_triggered()
 {
     QString str = APPLICATION->settings()->get("InstanceDir").toString();
-    DesktopServices::openDirectory(str);
+    DesktopServices::openPath(str);
 }
 
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->settings()->get("CentralModsDir").toString(), true);
+    DesktopServices::openPath(APPLICATION->settings()->get("CentralModsDir").toString(), true);
 }
 
 void MainWindow::on_actionViewIconThemeFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getIconThemesFolder().path(), true);
+    DesktopServices::openPath(APPLICATION->themeManager()->getIconThemesFolder().path(), true);
 }
 
 void MainWindow::on_actionViewWidgetThemeFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getApplicationThemesFolder().path(), true);
+    DesktopServices::openPath(APPLICATION->themeManager()->getApplicationThemesFolder().path(), true);
 }
 
 void MainWindow::on_actionViewCatPackFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->themeManager()->getCatPacksFolder().path(), true);
+    DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path(), true);
 }
 
 void MainWindow::on_actionViewIconsFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->icons()->getDirectory(), true);
+    DesktopServices::openPath(APPLICATION->icons()->getDirectory(), true);
 }
 
 void MainWindow::on_actionViewLogsFolder_triggered()
 {
-    DesktopServices::openDirectory("logs", true);
+    DesktopServices::openPath("logs", true);
 }
 
 void MainWindow::refreshInstances()
@@ -1452,7 +1452,7 @@ void MainWindow::on_actionViewSelectedInstFolder_triggered()
 {
     if (m_selectedInstance) {
         QString str = m_selectedInstance->instanceRoot();
-        DesktopServices::openDirectory(QDir(str).absolutePath());
+        DesktopServices::openPath(QFileInfo(str));
     }
 }
 

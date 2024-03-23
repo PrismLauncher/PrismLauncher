@@ -494,8 +494,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     {
-        qDebug() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME) << ", (c) 2022-2023 "
-                 << qPrintable(QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
+        qDebug() << qPrintable(BuildConfig.LAUNCHER_DISPLAYNAME + ", " + QString(BuildConfig.LAUNCHER_COPYRIGHT).replace("\n", ", "));
         qDebug() << "Version                    : " << BuildConfig.printableVersionString();
         qDebug() << "Platform                   : " << BuildConfig.BUILD_PLATFORM;
         qDebug() << "Git commit                 : " << BuildConfig.GIT_COMMIT;
@@ -640,10 +639,11 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("UseNativeGLFW", false);
         m_settings->registerSetting("CustomGLFWPath", "");
 
-        // Peformance related options
+        // Performance related options
         m_settings->registerSetting("EnableFeralGamemode", false);
         m_settings->registerSetting("EnableMangoHud", false);
         m_settings->registerSetting("UseDiscreteGpu", false);
+        m_settings->registerSetting("UseZink", false);
 
         // Game time
         m_settings->registerSetting("ShowGameTime", true);
@@ -667,6 +667,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // The cat
         m_settings->registerSetting("TheCat", false);
+        m_settings->registerSetting("CatOpacity", 100);
 
         m_settings->registerSetting("StatusBarVisible", true);
 
@@ -750,6 +751,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
         m_settings->registerSetting("ModrinthToken", "");
         m_settings->registerSetting("UserAgentOverride", "");
+
+        // FTBApp instances
+        m_settings->registerSetting("FTBAppInstancesPath", "");
 
         // Init page provider
         {

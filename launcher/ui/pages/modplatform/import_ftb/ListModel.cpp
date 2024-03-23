@@ -17,11 +17,13 @@
  */
 
 #include "ListModel.h"
+#include <qfileinfo.h>
 #include <QDir>
 #include <QDirIterator>
 #include <QFileInfo>
 #include <QIcon>
 #include <QProcessEnvironment>
+#include "Application.h"
 #include "FileSystem.h"
 #include "StringUtils.h"
 #include "modplatform/import_ftb/PackHelpers.h"
@@ -29,7 +31,7 @@
 
 namespace FTBImportAPP {
 
-QString getPath()
+QString getStaticPath()
 {
     QString partialPath;
 #if defined(Q_OS_OSX)
@@ -42,14 +44,14 @@ QString getPath()
     return FS::PathCombine(partialPath, ".ftba");
 }
 
-const QString ListModel::FTB_APP_PATH = getPath();
+static const QString FTB_APP_PATH = FS::PathCombine(getStaticPath(), "instances");
 
 void ListModel::update()
 {
     beginResetModel();
     modpacks.clear();
 
-    QString instancesPath = FS::PathCombine(FTB_APP_PATH, "instances");
+    QString instancesPath = getPath();
     if (auto instancesInfo = QFileInfo(instancesPath); instancesInfo.exists() && instancesInfo.isDir()) {
         QDirIterator directoryIterator(instancesPath, QDir::Dirs | QDir::NoDotAndDotDot | QDir::Readable | QDir::Hidden,
                                        QDirIterator::FollowSymlinks);
@@ -167,5 +169,18 @@ void FilterModel::setSorting(Sorting s)
 FilterModel::Sorting FilterModel::getCurrentSorting()
 {
     return currentSorting;
+}
+void ListModel::setPath(QString path)
+{
+    APPLICATION->settings()->set("FTBAppInstancesPath", path);
+    update();
+}
+
+QString ListModel::getPath()
+{
+    auto path = APPLICATION->settings()->get("FTBAppInstancesPath").toString();
+    if (path.isEmpty() || !QFileInfo(path).exists())
+        path = FTB_APP_PATH;
+    return path;
 }
 }  // namespace FTBImportAPP

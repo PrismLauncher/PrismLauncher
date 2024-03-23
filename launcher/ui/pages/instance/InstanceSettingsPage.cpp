@@ -232,10 +232,13 @@ void InstanceSettingsPage::applySettings()
         m_settings->set("EnableFeralGamemode", ui->enableFeralGamemodeCheck->isChecked());
         m_settings->set("EnableMangoHud", ui->enableMangoHud->isChecked());
         m_settings->set("UseDiscreteGpu", ui->useDiscreteGpuCheck->isChecked());
+        m_settings->set("UseZink", ui->useZink->isChecked());
+
     } else {
         m_settings->reset("EnableFeralGamemode");
         m_settings->reset("EnableMangoHud");
         m_settings->reset("UseDiscreteGpu");
+        m_settings->reset("UseZink");
     }
 
     // Game time
@@ -346,7 +349,7 @@ void InstanceSettingsPage::loadSettings()
 #ifdef Q_OS_LINUX
     ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
 #else
-    ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
+    ui->lineEditOpenALPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
 #endif
 
     // Performance
@@ -354,6 +357,7 @@ void InstanceSettingsPage::loadSettings()
     ui->enableFeralGamemodeCheck->setChecked(m_settings->get("EnableFeralGamemode").toBool());
     ui->enableMangoHud->setChecked(m_settings->get("EnableMangoHud").toBool());
     ui->useDiscreteGpuCheck->setChecked(m_settings->get("UseDiscreteGpu").toBool());
+    ui->useZink->setChecked(m_settings->get("UseZink").toBool());
 
 #if !defined(Q_OS_LINUX)
     ui->settingsTabs->setTabVisible(ui->settingsTabs->indexOf(ui->performancePage), false);
