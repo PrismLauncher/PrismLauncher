@@ -90,6 +90,9 @@
 #include "tools/BaseProfiler.h"
 
 #include <QActionGroup>
+#include <QMainWindow>
+#include <QScreen>
+#include <QWindow>
 
 #ifdef Q_OS_LINUX
 #include "MangoHud.h"
@@ -532,7 +535,7 @@ QStringList MinecraftInstance::javaArguments()
 QString MinecraftInstance::getLauncher()
 {
     // use legacy launcher if the traits are set
-    if (traits().contains("legacyLaunch") || traits().contains("alphaLaunch"))
+    if (isLegacy())
         return "legacy";
 
     return "standard";
@@ -742,11 +745,34 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
     // window size, title and state, legacy
     {
         QString windowParams;
-        if (settings()->get("LaunchMaximized").toBool())
-            windowParams = "maximized";
-        else
+        if (settings()->get("LaunchMaximized").toBool()) {
+            // FIXME doesn't support maximisation
+            if (!isLegacy()) {
+                auto screen = QGuiApplication::primaryScreen();
+                auto screenGeometry = screen->availableSize();
+
+                // small hack to get the widow decorations
+                for (auto w : QApplication::topLevelWidgets()) {
+                    auto mainWindow = qobject_cast<QMainWindow*>(w);
+                    if (mainWindow) {
+                        auto m = mainWindow->windowHandle()->frameMargins();
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+                        screenGeometry = screenGeometry.shrunkBy(m);
+#else
+                        screenGeometry = { screenGeometry.width() - m.left() - m.right(), screenGeometry.height() - m.top() - m.bottom() };
+#endif
+                        break;
+                    }
+                }
+
+                windowParams = QString("%1x%2").arg(screenGeometry.width()).arg(screenGeometry.height());
+            } else {
+                windowParams = "maximized";
+            }
+        } else {
             windowParams =
                 QString("%1x%2").arg(settings()->get("MinecraftWinWidth").toInt()).arg(settings()->get("MinecraftWinHeight").toInt());
+        }
         launchScript += "windowTitle " + windowTitle() + "\n";
         launchScript += "windowParams " + windowParams + "\n";
     }
