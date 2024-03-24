@@ -222,8 +222,8 @@ void ModUpdateDialog::checkCandidates()
                 changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
             auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_mod_model);
             CheckUpdateTask::UpdatableMod updatable = {
-                dep->pack->name, dep->version.hash,   "",           dep->version.version, dep->version.version_type,
-                changelog,       dep->pack->provider, download_task
+                dep->pack->name,     dep->version.hash, "", dep->version.version, dep->version.version_type, changelog, true,
+                dep->pack->provider, download_task
             };
 
             appendMod(updatable, getRequiredBy.value(dep->version.addonId.toString()));
@@ -412,7 +412,7 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
 void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStringList requiredBy)
 {
     auto item_top = new QTreeWidgetItem(ui->modTreeWidget);
-    item_top->setCheckState(0, Qt::CheckState::Checked);
+    item_top->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     item_top->setText(0, info.name);
     item_top->setExpanded(true);
 
