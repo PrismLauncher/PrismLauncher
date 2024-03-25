@@ -13,6 +13,7 @@
 
 #include "FileSystem.h"
 #include "JavaCommon.h"
+#include "JavaDownloader.h"
 #include "java/JavaInstall.h"
 #include "java/JavaUtils.h"
 
@@ -38,6 +39,7 @@ JavaSettingsWidget::JavaSettingsWidget(QWidget* parent) : QWidget(parent)
     connect(m_javaBrowseBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_javaBrowseBtn_clicked);
     connect(m_javaPathTextBox, &QLineEdit::textEdited, this, &JavaSettingsWidget::javaPathEdited);
     connect(m_javaStatusBtn, &QToolButton::clicked, this, &JavaSettingsWidget::on_javaStatusBtn_clicked);
+    connect(m_javaDownloadBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_javaDownloadBtn_clicked);
 }
 
 void JavaSettingsWidget::setupUi()
@@ -119,6 +121,10 @@ void JavaSettingsWidget::setupUi()
     m_permGenSpinBox->setVisible(false);
 
     m_verticalLayout->addWidget(m_memoryGroupBox);
+
+    m_javaDownloadBtn = new QPushButton(tr("Download Java"), this);
+
+    m_verticalLayout->addWidget(m_javaDownloadBtn);
 
     retranslate();
 }
@@ -264,7 +270,10 @@ void JavaSettingsWidget::on_javaBrowseBtn_clicked()
     m_javaPathTextBox->setText(cooked_path);
     checkJavaPath(cooked_path);
 }
-
+void JavaSettingsWidget::on_javaDownloadBtn_clicked()
+{
+    JavaDownloader::showPrompts(this);
+}
 void JavaSettingsWidget::on_javaStatusBtn_clicked()
 {
     QString text;

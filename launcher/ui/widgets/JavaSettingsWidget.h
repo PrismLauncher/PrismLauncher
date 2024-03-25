@@ -50,6 +50,7 @@ class JavaSettingsWidget : public QWidget {
     void javaVersionSelected(BaseVersion::Ptr version);
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
+    void on_javaDownloadBtn_clicked();
     void checkFinished(JavaCheckResult result);
 
    protected: /* methods */
@@ -76,6 +77,8 @@ class JavaSettingsWidget : public QWidget {
     QSpinBox* m_minMemSpinBox = nullptr;
     QLabel* m_labelPermGen = nullptr;
     QSpinBox* m_permGenSpinBox = nullptr;
+
+    QPushButton* m_javaDownloadBtn = nullptr;
     QIcon goodIcon;
     QIcon yellowIcon;
     QIcon badIcon;

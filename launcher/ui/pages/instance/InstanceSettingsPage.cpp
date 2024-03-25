@@ -53,6 +53,7 @@
 #include "minecraft/auth/AccountList.h"
 
 #include "FileSystem.h"
+#include "JavaDownloader.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 
@@ -386,6 +387,11 @@ void InstanceSettingsPage::loadSettings()
 
     ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
     ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
+}
+
+void InstanceSettingsPage::on_javaDownloadBtn_clicked()
+{
+    JavaDownloader::showPrompts(this);
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

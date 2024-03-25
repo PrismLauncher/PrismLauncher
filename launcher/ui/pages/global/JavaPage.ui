@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>545</width>
-    <height>580</height>
+    <width>559</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -198,6 +198,13 @@
           <item row="2" column="0" colspan="3">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
+             <widget class="QPushButton" name="javaDownloadBtn">
+              <property name="text">
+               <string>Download Java</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="javaDetectBtn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -313,8 +320,14 @@
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>
   <tabstop>permGenSpinBox</tabstop>
-  <tabstop>javaBrowseBtn</tabstop>
   <tabstop>javaPathTextBox</tabstop>
+  <tabstop>javaBrowseBtn</tabstop>
+  <tabstop>javaDownloadBtn</tabstop>
+  <tabstop>javaDetectBtn</tabstop>
+  <tabstop>javaTestBtn</tabstop>
+  <tabstop>skipCompatibilityCheckbox</tabstop>
+  <tabstop>skipJavaWizardCheckbox</tabstop>
+  <tabstop>jvmArgsTextBox</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>
