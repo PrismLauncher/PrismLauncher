@@ -68,7 +68,7 @@ public final class StandardLauncher extends AbstractLauncher {
         super(params);
 
         List<String> traits = params.getList("traits", Collections.<String>emptyList());
-        quickPlaySupported = traits.contains("quickPlay");
+        quickPlaySupported = traits.contains("feature:is_quick_play_multiplayer");
     }
 
     @Override
