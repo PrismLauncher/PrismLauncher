@@ -548,7 +548,7 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
     }
 
     if (serverToJoin && !serverToJoin->address.isEmpty()) {
-        if (profile->hasTrait("quickPlay")) {
+        if (profile->hasTrait("feature:is_quick_play_multiplayer")) {
             args_pattern += " --quickPlayMultiplayer " + serverToJoin->address + ':' + QString::number(serverToJoin->port);
         } else {
             args_pattern += " --server " + serverToJoin->address;
