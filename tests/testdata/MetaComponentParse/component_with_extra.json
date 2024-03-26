@@ -1,0 +1,21 @@
+{
+    "description": [
+        {
+            "text": "Hello, ",
+            "color": "red",
+            "bold": true,
+            "italic": true,
+            "extra": [
+                {
+                    "extra": [
+                        "Component!"
+                    ],
+                    "bold": false,
+                    "italic": false
+                }
+            ]
+        }
+    ],
+    "expected_output":
+        "<span style=\"color: red; font-weight: bold; font-style: italic;\">Hello, <span style=\"font-weight: normal; font-style: normal;\">Component!</span></span>"
+}

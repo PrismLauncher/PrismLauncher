@@ -1,0 +1,13 @@
+{
+    "description": [
+        {
+            "text": "Hello, Component!",
+            "color": "blue",
+            "bold": true,
+            "italic": true,
+            "underlined": true,
+            "strikethrough": true
+        }
+    ],
+    "expected_output": "<span style=\"color: blue; font-weight: bold; font-style: italic;\"><s><u>Hello, Component!</u></s></span>"
+}
