@@ -37,7 +37,7 @@ void PackInstallTask::executeTask()
     progress(1, 2);
 
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this] {
-        FS::copy folderCopy(m_pack.path, FS::PathCombine(m_stagingPath, ".minecraft"));
+        FS::copy folderCopy(m_pack.path, FS::PathCombine(m_stagingPath, "minecraft"));
         folderCopy.followSymlinks(true);
         return folderCopy();
     });
@@ -68,21 +68,25 @@ void PackInstallTask::copySettings()
     auto modloader = m_pack.loaderType;
     if (modloader.has_value())
         switch (modloader.value()) {
-            case ResourceAPI::Forge: {
+            case ModPlatform::NeoForge: {
+                components->setComponentVersion("net.neoforged", m_pack.version, true);
+                break;
+            }
+            case ModPlatform::Forge: {
                 components->setComponentVersion("net.minecraftforge", m_pack.version, true);
                 break;
             }
-            case ResourceAPI::Fabric: {
+            case ModPlatform::Fabric: {
                 components->setComponentVersion("net.fabricmc.fabric-loader", m_pack.version, true);
                 break;
             }
-            case ResourceAPI::Quilt: {
+            case ModPlatform::Quilt: {
                 components->setComponentVersion("org.quiltmc.quilt-loader", m_pack.version, true);
                 break;
             }
-            case ResourceAPI::Cauldron:
+            case ModPlatform::Cauldron:
                 break;
-            case ResourceAPI::LiteLoader:
+            case ModPlatform::LiteLoader:
                 break;
         }
     components->saveNow();

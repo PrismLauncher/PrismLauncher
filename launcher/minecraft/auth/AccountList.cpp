@@ -52,9 +52,7 @@
 #include <FileSystem.h>
 #include <QSaveFile>
 
-#include <chrono>
-
-enum AccountListVersion { MojangOnly = 2, MojangMSA = 3 };
+enum AccountListVersion { MojangMSA = 3 };
 
 AccountList::AccountList(QObject* parent) : QAbstractListModel(parent)
 {
@@ -283,9 +281,15 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                     return account->accountDisplayString();
 
                 case TypeColumn: {
-                    auto typeStr = account->typeString();
-                    typeStr[0] = typeStr[0].toUpper();
-                    return typeStr;
+                    switch (account->accountType()) {
+                        case AccountType::MSA: {
+                            return tr("MSA", "Account type");
+                        }
+                        case AccountType::Offline: {
+                            return tr("Offline", "Account type");
+                        }
+                    }
+                    return tr("Unknown", "Account type");
                 }
 
                 case StatusColumn: {
@@ -320,17 +324,6 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                     }
                 }
 
-                case MigrationColumn: {
-                    if (account->isMSA() || account->isOffline()) {
-                        return tr("N/A", "Can Migrate");
-                    }
-                    if (account->canMigrate()) {
-                        return tr("Yes", "Can Migrate");
-                    } else {
-                        return tr("No", "Can Migrate");
-                    }
-                }
-
                 default:
                     return QVariant();
             }
@@ -353,7 +346,7 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
     }
 }
 
-QVariant AccountList::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant AccountList::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
         case Qt::DisplayRole:
@@ -366,8 +359,6 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
                     return tr("Type");
                 case StatusColumn:
                     return tr("Status");
-                case MigrationColumn:
-                    return tr("Can Migrate?");
                 default:
                     return QVariant();
             }
@@ -379,11 +370,9 @@ QVariant AccountList::headerData(int section, Qt::Orientation orientation, int r
                 case NameColumn:
                     return tr("User name of the account.");
                 case TypeColumn:
-                    return tr("Type of the account - Mojang or MSA.");
+                    return tr("Type of the account (MSA or Offline)");
                 case StatusColumn:
                     return tr("Current status of the account.");
-                case MigrationColumn:
-                    return tr("Can this account migrate to a Microsoft account?");
                 default:
                     return QVariant();
             }
@@ -415,7 +404,7 @@ Qt::ItemFlags AccountList::flags(const QModelIndex& index) const
 
 bool AccountList::setData(const QModelIndex& idx, const QVariant& value, int role)
 {
-    if (idx.row() < 0 || idx.row() >= rowCount(idx) || !idx.isValid()) {
+    if (idx.row() < 0 || idx.row() >= rowCount(idx.parent()) || !idx.isValid()) {
         return false;
     }
 
@@ -423,7 +412,8 @@ bool AccountList::setData(const QModelIndex& idx, const QVariant& value, int rol
         if (value == Qt::Checked) {
             MinecraftAccountPtr account = at(idx.row());
             setDefaultAccount(account);
-        }
+        } else if (m_defaultAccount == at(idx.row()))
+            setDefaultAccount(nullptr);
     }
 
     emit dataChanged(idx, index(idx.row(), columnCount(QModelIndex()) - 1));
@@ -472,9 +462,6 @@ bool AccountList::loadList()
     // Make sure the format version matches.
     auto listVersion = root.value("formatVersion").toVariant().toInt();
     switch (listVersion) {
-        case AccountListVersion::MojangOnly: {
-            return loadV2(root);
-        } break;
         case AccountListVersion::MojangMSA: {
             return loadV3(root);
         } break;
@@ -486,36 +473,6 @@ bool AccountList::loadList()
             return false;
         }
     }
-}
-
-bool AccountList::loadV2(QJsonObject& root)
-{
-    beginResetModel();
-    auto defaultUserName = root.value("activeAccount").toString("");
-    QJsonArray accounts = root.value("accounts").toArray();
-    for (QJsonValue accountVal : accounts) {
-        QJsonObject accountObj = accountVal.toObject();
-        MinecraftAccountPtr account = MinecraftAccount::loadFromJsonV2(accountObj);
-        if (account.get() != nullptr) {
-            auto profileId = account->profileId();
-            if (!profileId.size()) {
-                continue;
-            }
-            if (findAccountByProfileId(profileId) != -1) {
-                continue;
-            }
-            connect(account.get(), &MinecraftAccount::changed, this, &AccountList::accountChanged);
-            connect(account.get(), &MinecraftAccount::activityChanged, this, &AccountList::accountActivityChanged);
-            m_accounts.append(account);
-            if (defaultUserName.size() && account->mojangUserName() == defaultUserName) {
-                m_defaultAccount = account;
-            }
-        } else {
-            qWarning() << "Failed to load an account.";
-        }
-    }
-    endResetModel();
-    return true;
 }
 
 bool AccountList::loadV3(QJsonObject& root)

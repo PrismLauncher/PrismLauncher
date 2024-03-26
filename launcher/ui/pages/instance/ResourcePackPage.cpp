@@ -55,7 +55,7 @@ ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, std::shared_ptr<
     ui->actionViewConfigs->setVisible(false);
 }
 
-bool ResourcePackPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+bool ResourcePackPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
@@ -72,7 +72,8 @@ void ResourcePackPage::downloadRPs()
 
     ResourceDownload::ResourcePackDownloadDialog mdownload(this, std::static_pointer_cast<ResourcePackFolderModel>(m_model), m_instance);
     if (mdownload.exec()) {
-        auto tasks = new ConcurrentTask(this);
+        auto tasks =
+            new ConcurrentTask(this, "Download Resource Pack", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();

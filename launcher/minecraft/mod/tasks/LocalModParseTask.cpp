@@ -104,14 +104,15 @@ ModDetails ReadMCModTOML(QByteArray contents)
 #if TOML_EXCEPTIONS
     try {
         tomlData = toml::parse(contents.toStdString());
-    } catch (const toml::parse_error& err) {
+    } catch ([[maybe_unused]] const toml::parse_error& err) {
         return {};
     }
 #else
-    tomlData = toml::parse(contents.toStdString());
-    if (!tomlData) {
+    toml::parse_result result = toml::parse(contents.toStdString());
+    if (!result) {
         return {};
     }
+    tomlData = result.table();
 #endif
 
     // array defined by [[mods]]
@@ -151,8 +152,8 @@ ModDetails ReadMCModTOML(QByteArray contents)
     QString authors = "";
     if (auto authorsDatum = tomlData["authors"].as_string()) {
         authors = QString::fromStdString(authorsDatum->get());
-    } else if (auto authorsDatum = (*modsTable)["authors"].as_string()) {
-        authors = QString::fromStdString(authorsDatum->get());
+    } else if (auto authorsDatumMods = (*modsTable)["authors"].as_string()) {
+        authors = QString::fromStdString(authorsDatumMods->get());
     }
     if (!authors.isEmpty()) {
         details.authors.append(authors);
@@ -161,8 +162,8 @@ ModDetails ReadMCModTOML(QByteArray contents)
     QString homeurl = "";
     if (auto homeurlDatum = tomlData["displayURL"].as_string()) {
         homeurl = QString::fromStdString(homeurlDatum->get());
-    } else if (auto homeurlDatum = (*modsTable)["displayURL"].as_string()) {
-        homeurl = QString::fromStdString(homeurlDatum->get());
+    } else if (auto homeurlDatumMods = (*modsTable)["displayURL"].as_string()) {
+        homeurl = QString::fromStdString(homeurlDatumMods->get());
     }
     // fix up url.
     if (!homeurl.isEmpty() && !homeurl.startsWith("http://") && !homeurl.startsWith("https://") && !homeurl.startsWith("ftp://")) {
@@ -173,16 +174,16 @@ ModDetails ReadMCModTOML(QByteArray contents)
     QString issueTrackerURL = "";
     if (auto issueTrackerURLDatum = tomlData["issueTrackerURL"].as_string()) {
         issueTrackerURL = QString::fromStdString(issueTrackerURLDatum->get());
-    } else if (auto issueTrackerURLDatum = (*modsTable)["issueTrackerURL"].as_string()) {
-        issueTrackerURL = QString::fromStdString(issueTrackerURLDatum->get());
+    } else if (auto issueTrackerURLDatumMods = (*modsTable)["issueTrackerURL"].as_string()) {
+        issueTrackerURL = QString::fromStdString(issueTrackerURLDatumMods->get());
     }
     details.issue_tracker = issueTrackerURL;
 
     QString license = "";
     if (auto licenseDatum = tomlData["license"].as_string()) {
         license = QString::fromStdString(licenseDatum->get());
-    } else if (auto licenseDatum = (*modsTable)["license"].as_string()) {
-        license = QString::fromStdString(licenseDatum->get());
+    } else if (auto licenseDatumMods = (*modsTable)["license"].as_string()) {
+        license = QString::fromStdString(licenseDatumMods->get());
     }
     if (!license.isEmpty())
         details.licenses.append(ModLicense(license));
@@ -190,8 +191,8 @@ ModDetails ReadMCModTOML(QByteArray contents)
     QString logoFile = "";
     if (auto logoFileDatum = tomlData["logoFile"].as_string()) {
         logoFile = QString::fromStdString(logoFileDatum->get());
-    } else if (auto logoFileDatum = (*modsTable)["logoFile"].as_string()) {
-        logoFile = QString::fromStdString(logoFileDatum->get());
+    } else if (auto logoFileDatumMods = (*modsTable)["logoFile"].as_string()) {
+        logoFile = QString::fromStdString(logoFileDatumMods->get());
     }
     details.icon_file = logoFile;
 
@@ -458,7 +459,7 @@ bool process(Mod& mod, ProcessingLevel level)
     }
 }
 
-bool processZIP(Mod& mod, ProcessingLevel level)
+bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
 {
     ModDetails details;
 
@@ -591,7 +592,7 @@ bool processZIP(Mod& mod, ProcessingLevel level)
     return false;  // no valid mod found in archive
 }
 
-bool processFolder(Mod& mod, ProcessingLevel level)
+bool processFolder(Mod& mod, [[maybe_unused]] ProcessingLevel level)
 {
     ModDetails details;
 
@@ -612,7 +613,7 @@ bool processFolder(Mod& mod, ProcessingLevel level)
     return false;  // no valid mcmod.info file found
 }
 
-bool processLitemod(Mod& mod, ProcessingLevel level)
+bool processLitemod(Mod& mod, [[maybe_unused]] ProcessingLevel level)
 {
     ModDetails details;
 
@@ -687,6 +688,7 @@ bool loadIconFile(const Mod& mod)
                     return png_invalid();  // icon invalid
                 }
             }
+            return false;
         }
         case ResourceType::ZIPFILE: {
             QuaZip zip(mod.fileinfo().filePath());
@@ -713,6 +715,7 @@ bool loadIconFile(const Mod& mod)
             } else {
                 return png_invalid();  // could not set icon as current file.
             }
+            return false;
         }
         case ResourceType::LITEMOD: {
             return false;  // can lightmods even have icons?

@@ -29,6 +29,16 @@ class ExactFilter : public Filter {
     QString pattern;
 };
 
+class ExactIfPresentFilter : public Filter {
+   public:
+    ExactIfPresentFilter(const QString& pattern);
+    ~ExactIfPresentFilter() override = default;
+    bool accepts(const QString& value) override;
+
+   private:
+    QString pattern;
+};
+
 class RegexpFilter : public Filter {
    public:
     RegexpFilter(const QString& regexp, bool invert);

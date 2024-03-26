@@ -37,6 +37,7 @@
 
 #include "MinecraftAccount.h"
 
+#include <QColor>
 #include <QCryptographicHash>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -50,21 +51,12 @@
 #include <QPainter>
 
 #include "flows/MSA.h"
-#include "flows/Mojang.h"
 #include "flows/Offline.h"
+#include "minecraft/auth/AccountData.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
 {
     data.internalId = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
-}
-
-MinecraftAccountPtr MinecraftAccount::loadFromJsonV2(const QJsonObject& json)
-{
-    MinecraftAccountPtr account(new MinecraftAccount());
-    if (account->data.resumeStateFromV2(json)) {
-        return account;
-    }
-    return nullptr;
 }
 
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json)
@@ -74,15 +66,6 @@ MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json)
         return account;
     }
     return nullptr;
-}
-
-MinecraftAccountPtr MinecraftAccount::createFromUsername(const QString& username)
-{
-    auto account = makeShared<MinecraftAccount>();
-    account->data.type = AccountType::Mojang;
-    account->data.yggdrasilToken.extra["userName"] = username;
-    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
-    return account;
 }
 
 MinecraftAccountPtr MinecraftAccount::createBlankMSA()
@@ -126,22 +109,15 @@ QPixmap MinecraftAccount::getFace() const
         return QPixmap();
     }
     QPixmap skin = QPixmap(8, 8);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    skin.fill(QColorConstants::Transparent);
+#else
+    skin.fill(QColor(0, 0, 0, 0));
+#endif
     QPainter painter(&skin);
     painter.drawPixmap(0, 0, skinTexture.copy(8, 8, 8, 8));
     painter.drawPixmap(0, 0, skinTexture.copy(40, 8, 8, 8));
     return skin.scaled(64, 64, Qt::KeepAspectRatio);
-}
-
-shared_qobject_ptr<AccountTask> MinecraftAccount::login(QString password)
-{
-    Q_ASSERT(m_currentTask.get() == nullptr);
-
-    m_currentTask.reset(new MojangLogin(&data, password));
-    connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
-    connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
-    connect(m_currentTask.get(), &Task::aborted, this, [this] { authFailed(tr("Aborted")); });
-    emit activityChanged(true);
-    return m_currentTask;
 }
 
 shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA()
@@ -176,10 +152,8 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh()
 
     if (data.type == AccountType::MSA) {
         m_currentTask.reset(new MSASilent(&data));
-    } else if (data.type == AccountType::Offline) {
-        m_currentTask.reset(new OfflineRefresh(&data));
     } else {
-        m_currentTask.reset(new MojangRefresh(&data));
+        m_currentTask.reset(new OfflineRefresh(&data));
     }
 
     connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
@@ -212,7 +186,7 @@ void MinecraftAccount::authFailed(QString reason)
             // NOTE: this doesn't do much. There was an error of some sort.
         } break;
         case AccountTaskState::STATE_FAILED_HARD: {
-            if (isMSA()) {
+            if (accountType() == AccountType::MSA) {
                 data.msaToken.token = QString();
                 data.msaToken.refresh_token = QString();
                 data.msaToken.validity = Katabasis::Validity::None;
@@ -290,13 +264,8 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
         }
     }
 
-    // the user name. you have to have an user name
-    // FIXME: not with MSA
-    session->username = data.userName();
     // volatile auth token
     session->access_token = data.accessToken();
-    // the semi-permanent client token
-    session->client_token = data.clientToken();
     // profile name
     session->player_name = data.profileName();
     // profile ID

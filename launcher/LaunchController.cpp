@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,12 +36,12 @@
 
 #include "LaunchController.h"
 #include "Application.h"
+#include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AccountList.h"
 
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ProfileSelectDialog.h"
 #include "ui/dialogs/ProfileSetupDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -87,8 +88,8 @@ void LaunchController::decideAccount()
     if (accounts->count() <= 0) {
         // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
-                                                  tr("In order to play Minecraft, you must have at least one Microsoft or Mojang "
-                                                     "account logged in. Mojang accounts can only be used offline. "
+                                                  tr("In order to play Minecraft, you must have at least one Microsoft "
+                                                     "account which owns Minecraft logged in. "
                                                      "Would you like to open the account manager to add an account now?"),
                                                   QMessageBox::Information, QMessageBox::Yes | QMessageBox::No)
                          ->exec();
@@ -105,7 +106,7 @@ void LaunchController::decideAccount()
     // Select the account to use. If the instance has a specific account set, that will be used. Otherwise, the default account will be used
     auto instanceAccountId = m_instance->settings()->get("InstanceAccountId").toString();
     auto instanceAccountIndex = accounts->findAccountByProfileId(instanceAccountId);
-    if (instanceAccountIndex == -1) {
+    if (instanceAccountIndex == -1 || instanceAccountId.isEmpty()) {
         m_accountToUse = accounts->defaultAccount();
     } else {
         m_accountToUse = accounts->at(instanceAccountIndex);
@@ -142,6 +143,12 @@ void LaunchController::login()
     bool tryagain = true;
     unsigned int tries = 0;
 
+    if (m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) {
+        // Force account refresh on the account used to launch the instance updating the AccountState
+        //  only on first try and if it is not meant to be offline
+        auto accounts = APPLICATION->accounts();
+        accounts->requestRefresh(m_accountToUse->internalId());
+    }
     while (tryagain) {
         if (tries > 0 && tries % 3 == 0) {
             auto result =
@@ -160,7 +167,7 @@ void LaunchController::login()
         m_accountToUse->fillSession(m_session);
 
         // Launch immediately in true offline mode
-        if (m_accountToUse->isOffline()) {
+        if (m_accountToUse->accountType() == AccountType::Offline) {
             launchInstance();
             return;
         }
@@ -248,12 +255,6 @@ void LaunchController::login()
                 progDialog.execWithTask(task.get());
                 continue;
             }
-            // FIXME: this is missing - the meaning is that the account is queued for refresh and we should wait for that
-            /*
-            case AccountState::Queued: {
-                return;
-            }
-            */
             case AccountState::Expired: {
                 auto errorString = tr("The account has expired and needs to be logged into manually again.");
                 QMessageBox::warning(m_parentWidget, tr("Account refresh failed"), errorString, QMessageBox::StandardButton::Ok,
@@ -361,22 +362,21 @@ void LaunchController::readyForLaunch()
     QString error;
     if (!m_profiler->check(&error)) {
         m_launcher->abort();
-        QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Couldn't start profiler: %1").arg(error));
         emitFailed("Profiler startup failed!");
+        QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Profiler check for %1 failed: %2").arg(m_profiler->name(), error));
         return;
     }
     BaseProfiler* profilerInstance = m_profiler->createProfiler(m_launcher->instance(), this);
 
     connect(profilerInstance, &BaseProfiler::readyToLaunch, [this](const QString& message) {
-        QMessageBox msg;
+        QMessageBox msg(m_parentWidget);
         msg.setText(tr("The game launch is delayed until you press the "
                        "button. This is the right time to setup the profiler, as the "
                        "profiler server is running now.\n\n%1")
                         .arg(message));
         msg.setWindowTitle(tr("Waiting."));
         msg.setIcon(QMessageBox::Information);
-        msg.addButton(tr("Launch"), QMessageBox::AcceptRole);
-        msg.setModal(true);
+        msg.addButton(tr("&Launch"), QMessageBox::AcceptRole);
         msg.exec();
         m_launcher->proceed();
     });

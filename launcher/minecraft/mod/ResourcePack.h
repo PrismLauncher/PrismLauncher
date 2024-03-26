@@ -51,7 +51,7 @@ class ResourcePack : public Resource {
     mutable QMutex m_data_lock;
 
     /* The 'version' of a resource pack, as defined in the pack.mcmeta file.
-     * See https://minecraft.fandom.com/wiki/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
+     * See https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
      */
     int m_pack_format = 0;
 

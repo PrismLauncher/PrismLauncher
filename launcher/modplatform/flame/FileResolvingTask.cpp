@@ -1,6 +1,9 @@
 #include "FileResolvingTask.h"
 
 #include "Json.h"
+#include "modplatform/ModIndex.h"
+#include "net/ApiDownload.h"
+#include "net/ApiUpload.h"
 #include "net/Upload.h"
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
@@ -38,7 +41,7 @@ void Flame::FileResolvingTask::executeTask()
             return l;
         }));
     QByteArray data = Json::toText(object);
-    auto dl = Net::Upload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result, data);
+    auto dl = Net::ApiUpload::makeByteArray(QUrl("https://api.curseforge.com/v1/mods/files"), result, data);
     m_dljob->addNetAction(dl);
 
     auto step_progress = std::make_shared<TaskStepProgress>();
@@ -93,14 +96,14 @@ void Flame::FileResolvingTask::netJobFinished()
         auto& out = m_toProcess.files[fileid];
         try {
             out.parseFromObject(Json::requireObject(file));
-        } catch (const JSONValidationError& e) {
+        } catch ([[maybe_unused]] const JSONValidationError& e) {
             qDebug() << "Blocked mod on curseforge" << out.fileName;
             auto hash = out.hash;
             if (!hash.isEmpty()) {
                 auto url = QString("https://api.modrinth.com/v2/version_file/%1?algorithm=sha1").arg(hash);
                 auto output = std::make_shared<QByteArray>();
-                auto dl = Net::Download::makeByteArray(QUrl(url), output);
-                QObject::connect(dl.get(), &Net::Download::succeeded, [&out]() { out.resolved = true; });
+                auto dl = Net::ApiDownload::makeByteArray(QUrl(url), output);
+                QObject::connect(dl.get(), &Net::ApiDownload::succeeded, [&out]() { out.resolved = true; });
 
                 m_checkJob->addNetAction(dl);
                 blockedProjects.insert(&out, output);
@@ -116,7 +119,6 @@ void Flame::FileResolvingTask::netJobFinished()
     connect(m_checkJob.get(), &NetJob::failed, this, [this, step_progress](QString reason) {
         step_progress->state = TaskStepState::Failed;
         stepProgress(*step_progress);
-        emitFailed(reason);
     });
     connect(m_checkJob.get(), &NetJob::stepProgress, this, &FileResolvingTask::propagateStepProgress);
     connect(m_checkJob.get(), &NetJob::progress, this, [this, step_progress](qint64 current, qint64 total) {
@@ -151,7 +153,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
         // If there's more than one mod loader for this version, we can't know for sure
         // which file is relative to each loader, so it's best to not use any one and
         // let the user download it manually.
-        if (file.loaders.size() <= 1) {
+        if (!file.loaders || hasSingleModLoaderSelected(file.loaders)) {
             out->url = file.downloadUrl;
             qDebug() << "Found alternative on modrinth " << out->fileName;
         } else {
@@ -171,9 +173,9 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
             auto projectId = mod->projectId;
             auto output = std::make_shared<QByteArray>();
             auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(projectId);
-            auto dl = Net::Download::makeByteArray(url, output);
+            auto dl = Net::ApiDownload::makeByteArray(url, output);
             qDebug() << "Fetching url slug for file:" << mod->fileName;
-            QObject::connect(dl.get(), &Net::Download::succeeded, [block, index, output]() {
+            QObject::connect(dl.get(), &Net::ApiDownload::succeeded, [block, index, output]() {
                 auto mod = block->at(index);  // use the shared_ptr so it is captured and only freed when we are done
                 auto json = QJsonDocument::fromJson(*output);
                 auto base =

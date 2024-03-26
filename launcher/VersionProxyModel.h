@@ -10,7 +10,7 @@ class VersionProxyModel : public QAbstractProxyModel {
     Q_OBJECT
    public:
     enum Column { Name, ParentVersion, Branch, Type, Architecture, Path, Time };
-    typedef QHash<BaseVersionList::ModelRoles, std::shared_ptr<Filter>> FilterMap;
+    using FilterMap = QHash<BaseVersionList::ModelRoles, std::shared_ptr<Filter>>;
 
    public:
     VersionProxyModel(QObject* parent = 0);
@@ -28,7 +28,7 @@ class VersionProxyModel : public QAbstractProxyModel {
 
     const FilterMap& filters() const;
     const QString& search() const;
-    void setFilter(const BaseVersionList::ModelRoles column, Filter* filter);
+    void setFilter(BaseVersionList::ModelRoles column, Filter* filter);
     void setSearch(const QString& search);
     void clearFilters();
     QModelIndex getRecommended() const;

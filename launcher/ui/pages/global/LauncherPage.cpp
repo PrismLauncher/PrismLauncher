@@ -189,6 +189,9 @@ void LauncherPage::applySettings()
 
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
 
+    s->set("NumberOfConcurrentTasks", ui->numberOfConcurrentTasksSpinBox->value());
+    s->set("NumberOfConcurrentDownloads", ui->numberOfConcurrentDownloadsSpinBox->value());
+
     // Console settings
     s->set("ShowConsole", ui->showConsoleCheck->isChecked());
     s->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
@@ -218,8 +221,12 @@ void LauncherPage::applySettings()
             break;
     }
 
+    // Cat
+    s->set("CatOpacity", ui->catOpacitySpinBox->value());
+
     // Mods
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
+    s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -235,6 +242,9 @@ void LauncherPage::loadSettings()
     ui->toolsBox->setVisible(!QMenuBar().isNativeMenuBar());
 #endif
     ui->preferMenuBarCheckBox->setChecked(s->get("MenuBarInsteadOfToolBar").toBool());
+
+    ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
+    ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
 
     // Console settings
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
@@ -269,9 +279,13 @@ void LauncherPage::loadSettings()
         ui->sortByNameBtn->setChecked(true);
     }
 
+    // Cat
+    ui->catOpacitySpinBox->setValue(s->get("CatOpacity").toInt());
+
     // Mods
     ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
+    ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
 }
 
 void LauncherPage::refreshFontPreview()

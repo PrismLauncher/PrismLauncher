@@ -78,7 +78,7 @@ class ResourcePage : public QWidget, public BasePage {
     void addResourceToDialog(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
     void removeResourceFromDialog(const QString& pack_name);
     virtual void removeResourceFromPage(const QString& name);
-    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, const std::shared_ptr<ResourceFolderModel>);
+    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>);
 
     QList<DownloadTaskPtr> selectedPacks() { return m_model->selectedPacks(); }
     bool hasSelectedPacks() { return !(m_model->selectedPacks().isEmpty()); }
@@ -97,7 +97,11 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void openUrl(const QUrl&);
 
     /** Whether the version is opted out or not. Currently only makes sense in CF. */
-    virtual bool optedOut(ModPlatform::IndexedVersion& ver) const { return false; };
+    virtual bool optedOut(ModPlatform::IndexedVersion& ver) const
+    {
+        Q_UNUSED(ver);
+        return false;
+    };
 
    public:
     BaseInstance& m_base_instance;

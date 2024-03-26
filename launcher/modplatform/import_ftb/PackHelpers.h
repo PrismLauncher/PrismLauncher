@@ -39,13 +39,13 @@ struct Modpack {
     // not needed for instance creation
     QVariant jvmArgs;
 
-    std::optional<ResourceAPI::ModLoaderType> loaderType;
+    std::optional<ModPlatform::ModLoaderType> loaderType;
     QString loaderVersion;
 
     QIcon icon;
 };
 
-typedef QList<Modpack> ModpackList;
+using ModpackList = QList<Modpack>;
 
 Modpack parseDirectory(QString path);
 

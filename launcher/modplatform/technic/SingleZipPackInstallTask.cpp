@@ -23,6 +23,8 @@
 
 #include "Application.h"
 
+#include "net/ApiDownload.h"
+
 Technic::SingleZipPackInstallTask::SingleZipPackInstallTask(const QUrl& sourceUrl, const QString& minecraftVersion)
 {
     m_sourceUrl = sourceUrl;
@@ -45,7 +47,7 @@ void Technic::SingleZipPackInstallTask::executeTask()
     auto entry = APPLICATION->metacache()->resolveEntry("general", path);
     entry->setStale(true);
     m_filesNetJob.reset(new NetJob(tr("Modpack download"), APPLICATION->network()));
-    m_filesNetJob->addNetAction(Net::Download::makeCached(m_sourceUrl, entry));
+    m_filesNetJob->addNetAction(Net::ApiDownload::makeCached(m_sourceUrl, entry));
     m_archivePath = entry->getFullPath();
     auto job = m_filesNetJob.get();
     connect(job, &NetJob::succeeded, this, &Technic::SingleZipPackInstallTask::downloadSucceeded);
@@ -60,7 +62,7 @@ void Technic::SingleZipPackInstallTask::downloadSucceeded()
     m_abortable = false;
 
     setStatus(tr("Extracting modpack"));
-    QDir extractDir(FS::PathCombine(m_stagingPath, ".minecraft"));
+    QDir extractDir(FS::PathCombine(m_stagingPath, "minecraft"));
     qDebug() << "Attempting to create instance from" << m_archivePath;
 
     // open the zip and find relevant files in it

@@ -4,7 +4,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,9 +44,6 @@
 #include <QKeyEvent>
 
 #include "Markdown.h"
-#include "ResourceDownloadTask.h"
-
-#include "minecraft/MinecraftInstance.h"
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/pages/modplatform/ResourceModel.h"
@@ -203,6 +200,11 @@ void ResourcePage::updateUi()
     }
 
     if (current_pack->extraDataLoaded) {
+        if (current_pack->extraData.status == "archived") {
+            text += "<br><br>" + tr("<b>This project has been archived. It will not receive any further updates unless the author decides "
+                                    "to unarchive the project.</b>");
+        }
+
         if (!current_pack->extraData.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
             auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
@@ -269,6 +271,9 @@ void ResourcePage::updateVersionList()
             if (optedOut(version))
                 continue;
 
+            auto release_type = current_pack->versions[i].version_type.isValid()
+                                    ? QString(" [%1]").arg(current_pack->versions[i].version_type.toString())
+                                    : "";
             m_ui->versionSelectionBox->addItem(current_pack->versions[i].version, QVariant(i));
         }
 
@@ -280,7 +285,7 @@ void ResourcePage::updateVersionList()
     updateSelectionButton();
 }
 
-void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void ResourcePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     if (!curr.isValid()) {
         return;
@@ -307,9 +312,9 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     updateUi();
 }
 
-void ResourcePage::onVersionSelectionChanged(QString data)
+void ResourcePage::onVersionSelectionChanged(QString versionData)
 {
-    if (data.isNull() || data.isEmpty()) {
+    if (versionData.isNull() || versionData.isEmpty()) {
         m_selected_version_index = -1;
         return;
     }
@@ -395,7 +400,7 @@ void ResourcePage::openUrl(const QUrl& url)
         if (auto current_pack = getCurrentPack(); current_pack && slug != current_pack->slug) {
             m_parent_dialog->selectPage(page);
 
-            auto newPage = m_parent_dialog->getSelectedPage();
+            auto newPage = m_parent_dialog->selectedPage();
 
             QLineEdit* searchEdit = newPage->m_ui->searchEdit;
             auto model = newPage->m_model;
@@ -404,9 +409,9 @@ void ResourcePage::openUrl(const QUrl& url)
             auto jump = [url, slug, model, view] {
                 for (int row = 0; row < model->rowCount({}); row++) {
                     const QModelIndex index = model->index(row);
-                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
-                    if (pack.slug == slug) {
+                    if (pack->slug == slug) {
                         view->setCurrentIndex(index);
                         return;
                     }

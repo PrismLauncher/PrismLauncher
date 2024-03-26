@@ -42,6 +42,7 @@
 #include "minecraft/mod/ResourceFolderModel.h"
 #include "ui/GuiUtil.h"
 
+#include <QHeaderView>
 #include <QKeyEvent>
 #include <QMenu>
 #include <algorithm>
@@ -95,7 +96,8 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
 
     connect(viewHeader, &QHeaderView::customContextMenuRequested, this, &ExternalResourcesPage::ShowHeaderContextMenu);
 
-    m_model->loadHiddenColumns(ui->treeView);
+    m_model->loadColumns(ui->treeView);
+    connect(ui->treeView->header(), &QHeaderView::sectionResized, this, [this] { m_model->saveColumns(ui->treeView); });
 }
 
 ExternalResourcesPage::~ExternalResourcesPage()
@@ -152,6 +154,7 @@ void ExternalResourcesPage::retranslate()
 void ExternalResourcesPage::itemActivated(const QModelIndex&)
 {
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection());
+    m_model->setResourceEnabled(selection.indexes(), EnableAction::TOGGLE);
 }
 
 void ExternalResourcesPage::filterTextChanged(const QString& newContents)
@@ -251,9 +254,9 @@ void ExternalResourcesPage::removeItem()
 void ExternalResourcesPage::removeItems(const QItemSelection& selection)
 {
     if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response = CustomMessageBox::selectable(this, "Confirm Delete",
-                                                     "If you remove this resource while the game is running it may crash your game.\n"
-                                                     "Are you sure you want to do this?",
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Delete"),
+                                                     tr("If you remove this resource while the game is running it may crash your game.\n"
+                                                        "Are you sure you want to do this?"),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
@@ -272,9 +275,9 @@ void ExternalResourcesPage::enableItem()
 void ExternalResourcesPage::disableItem()
 {
     if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response = CustomMessageBox::selectable(this, "Confirm disable",
-                                                     "If you disable this resource while the game is running it may crash your game.\n"
-                                                     "Are you sure you want to do this?",
+        auto response = CustomMessageBox::selectable(this, tr("Confirm disable"),
+                                                     tr("If you disable this resource while the game is running it may crash your game.\n"
+                                                        "Are you sure you want to do this?"),
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
 
@@ -287,12 +290,12 @@ void ExternalResourcesPage::disableItem()
 
 void ExternalResourcesPage::viewConfigs()
 {
-    DesktopServices::openDirectory(m_instance->instanceConfigFolder(), true);
+    DesktopServices::openPath(m_instance->instanceConfigFolder(), true);
 }
 
 void ExternalResourcesPage::viewFolder()
 {
-    DesktopServices::openDirectory(m_model->dir().absolutePath(), true);
+    DesktopServices::openPath(m_model->dir().absolutePath(), true);
 }
 
 bool ExternalResourcesPage::current(const QModelIndex& current, const QModelIndex& previous)
@@ -305,7 +308,7 @@ bool ExternalResourcesPage::current(const QModelIndex& current, const QModelInde
     return onSelectionChanged(current, previous);
 }
 
-bool ExternalResourcesPage::onSelectionChanged(const QModelIndex& current, const QModelIndex& previous)
+bool ExternalResourcesPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();

@@ -122,7 +122,7 @@ void ModFolderLoadTask::getFromMetadata()
         auto metadata = Metadata::get(m_index_dir, entry);
 
         if (!metadata.isValid()) {
-            return;
+            continue;
         }
 
         auto* mod = new Mod(m_mods_dir, metadata);

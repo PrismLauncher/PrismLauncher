@@ -33,7 +33,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
 
     auto sort = getCurrentSortingMethodByIndex();
 
-    return { ModPlatform::ResourceType::MOD, m_next_search_offset, m_search_term, sort, profile->getModLoaders(), versions };
+    return { ModPlatform::ResourceType::MOD, m_next_search_offset, m_search_term, sort, profile->getSupportedModLoaders(), versions };
 }
 
 ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& entry)
@@ -48,7 +48,7 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(QModelIndex& en
     if (!m_filter->versions.empty())
         versions = m_filter->versions;
 
-    return { pack, versions, profile->getModLoaders() };
+    return { pack, versions, profile->getSupportedModLoaders() };
 }
 
 ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(QModelIndex& entry)

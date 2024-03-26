@@ -6,6 +6,8 @@
 
 #include "Application.h"
 #include "Json.h"
+#include "net/ApiDownload.h"
+#include "net/ApiUpload.h"
 #include "net/NetJob.h"
 #include "net/Upload.h"
 
@@ -13,7 +15,7 @@ Task::Ptr ModrinthAPI::currentVersion(QString hash, QString hash_format, std::sh
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
 
-    netJob->addNetAction(Net::Download::makeByteArray(
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hash_format), response));
 
     return netJob;
@@ -31,7 +33,7 @@ Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_f
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), response, body_raw));
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), response, body_raw));
 
     return netJob;
 }
@@ -39,7 +41,7 @@ Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_f
 Task::Ptr ModrinthAPI::latestVersion(QString hash,
                                      QString hash_format,
                                      std::optional<std::list<Version>> mcVersions,
-                                     std::optional<ModLoaderTypes> loaders,
+                                     std::optional<ModPlatform::ModLoaderTypes> loaders,
                                      std::shared_ptr<QByteArray> response)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
@@ -60,7 +62,7 @@ Task::Ptr ModrinthAPI::latestVersion(QString hash,
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(
         QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hash_format), response, body_raw));
 
     return netJob;
@@ -69,7 +71,7 @@ Task::Ptr ModrinthAPI::latestVersion(QString hash,
 Task::Ptr ModrinthAPI::latestVersions(const QStringList& hashes,
                                       QString hash_format,
                                       std::optional<std::list<Version>> mcVersions,
-                                      std::optional<ModLoaderTypes> loaders,
+                                      std::optional<ModPlatform::ModLoaderTypes> loaders,
                                       std::shared_ptr<QByteArray> response)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
@@ -93,7 +95,8 @@ Task::Ptr ModrinthAPI::latestVersions(const QStringList& hashes,
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), response, body_raw));
+    netJob->addNetAction(
+        Net::ApiUpload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), response, body_raw));
 
     return netJob;
 }
@@ -103,19 +106,17 @@ Task::Ptr ModrinthAPI::getProjects(QStringList addonIds, std::shared_ptr<QByteAr
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetProjects"), APPLICATION->network());
     auto searchUrl = getMultipleModInfoURL(addonIds);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
 
     return netJob;
 }
 
-// https://docs.modrinth.com/api-spec/#tag/projects/operation/searchProjects
-static QList<ResourceAPI::SortingMethod> s_sorts = { { 1, "relevance", QObject::tr("Sort by Relevance") },
-                                                     { 2, "downloads", QObject::tr("Sort by Downloads") },
-                                                     { 3, "follows", QObject::tr("Sort by Follows") },
-                                                     { 4, "newest", QObject::tr("Sort by Last Updated") },
-                                                     { 5, "updated", QObject::tr("Sort by Newest") } };
-
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 {
-    return s_sorts;
+    // https://docs.modrinth.com/api-spec/#tag/projects/operation/searchProjects
+    return { { 1, "relevance", QObject::tr("Sort by Relevance") },
+             { 2, "downloads", QObject::tr("Sort by Downloads") },
+             { 3, "follows", QObject::tr("Sort by Follows") },
+             { 4, "newest", QObject::tr("Sort by Newest") },
+             { 5, "updated", QObject::tr("Sort by Last Updated") } };
 }

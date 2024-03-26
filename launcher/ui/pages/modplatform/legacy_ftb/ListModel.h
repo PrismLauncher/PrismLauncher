@@ -13,8 +13,8 @@
 
 namespace LegacyFTB {
 
-typedef QMap<QString, QIcon> FTBLogoMap;
-typedef std::function<void(QString)> LogoCallback;
+using FTBLogoMap = QMap<QString, QIcon>;
+using LogoCallback = std::function<void(QString)>;
 
 class FilterModel : public QSortFilterProxyModel {
     Q_OBJECT
@@ -25,6 +25,7 @@ class FilterModel : public QSortFilterProxyModel {
     QString translateCurrentSorting();
     void setSorting(Sorting sorting);
     Sorting getCurrentSorting();
+    void setSearchTerm(QString term);
 
    protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
@@ -33,6 +34,7 @@ class FilterModel : public QSortFilterProxyModel {
    private:
     QMap<QString, Sorting> sortings;
     Sorting currentSorting;
+    QString searchTerm;
 };
 
 class ListModel : public QAbstractListModel {

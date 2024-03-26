@@ -350,6 +350,7 @@ Section "@Launcher_DisplayName@"
 
   File "@Launcher_APP_BINARY_NAME@.exe"
   File "@Launcher_APP_BINARY_NAME@_filelink.exe"
+  File "@Launcher_APP_BINARY_NAME@_updater.exe"
   File "qt.conf"
   File "qtlogging.ini"
   File *.dll
@@ -362,6 +363,10 @@ Section "@Launcher_DisplayName@"
 
   ; Write the installation path into the registry
   WriteRegStr HKCU Software\@Launcher_CommonName@ "InstallDir" "$INSTDIR"
+
+  ; Write the URL Handler into registry for curseforge
+  WriteRegStr HKCU Software\Classes\curseforge "URL Protocol" ""
+  WriteRegStr HKCU Software\Classes\curseforge\shell\open\command "" '"$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "%1"'
 
   ; Write the uninstall keys for Windows
   ${GetParameters} $R0
@@ -431,6 +436,7 @@ Section "Uninstall"
 
   Delete $INSTDIR\@Launcher_APP_BINARY_NAME@.exe
   Delete $INSTDIR\@Launcher_APP_BINARY_NAME@_filelink.exe
+  Delete $INSTDIR\@Launcher_APP_BINARY_NAME@_updater.exe
   Delete $INSTDIR\qt.conf
   Delete $INSTDIR\*.dll
 
@@ -468,7 +474,6 @@ Function .onInit
 ${GetParameters} $R0
 ${GetOptions} $R0 "/NoShortcuts" $R1
 ${IfNot} ${Errors}
-${OrIf} ${FileExists} "$InstDir\@Launcher_APP_BINARY_NAME@.exe"
   !insertmacro UnselectSection ${SM_SHORTCUTS}
   !insertmacro UnselectSection ${DESKTOP_SHORTCUTS}
 ${EndIf}

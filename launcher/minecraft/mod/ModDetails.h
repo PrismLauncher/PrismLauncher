@@ -60,17 +60,17 @@ struct ModLicense {
 
     ModLicense(const QString license)
     {
-        // FIXME: come up with a better license parseing.
+        // FIXME: come up with a better license parsing.
         // handle SPDX identifiers? https://spdx.org/licenses/
         auto parts = license.split(' ');
         QStringList notNameParts = {};
         for (auto part : parts) {
-            auto url = QUrl(part);
+            auto _url = QUrl(part);
             if (part.startsWith("(") && part.endsWith(")"))
-                url = QUrl(part.mid(1, part.size() - 2));
+                _url = QUrl(part.mid(1, part.size() - 2));
 
-            if (url.isValid() && !url.scheme().isEmpty() && !url.host().isEmpty()) {
-                this->url = url.toString();
+            if (_url.isValid() && !_url.scheme().isEmpty() && !_url.host().isEmpty()) {
+                this->url = _url.toString();
                 notNameParts.append(part);
                 continue;
             }
@@ -89,13 +89,9 @@ struct ModLicense {
         }
     }
 
-    ModLicense(const QString name, const QString id, const QString url, const QString description)
-    {
-        this->name = name;
-        this->id = id;
-        this->url = url;
-        this->description = description;
-    }
+    ModLicense(const QString& name_, const QString& id_, const QString& url_, const QString& description_)
+        : name(name_), id(id_), url(url_), description(description_)
+    {}
 
     ModLicense(const ModLicense& other) : name(other.name), id(other.id), url(other.url), description(other.description) {}
 

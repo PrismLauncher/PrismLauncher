@@ -82,7 +82,7 @@ bool readOverrideOrders(QString path, PatchOrder& order)
         for (auto item : orderArray) {
             order.append(Json::requireString(item));
         }
-    } catch (const JSONValidationError& err) {
+    } catch ([[maybe_unused]] const JSONValidationError& err) {
         qCritical() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
         qWarning() << "Ignoring overriden order";
         order.clear();
@@ -140,7 +140,7 @@ VersionFilePtr parseJsonFile(const QFileInfo& fileInfo, const bool requireOrder)
     return guardedParseJson(doc, fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), requireOrder);
 }
 
-bool saveJsonFile(const QJsonDocument doc, const QString& filename)
+bool saveJsonFile(const QJsonDocument& doc, const QString& filename)
 {
     auto data = doc.toJson();
     QSaveFile jsonFile(filename);

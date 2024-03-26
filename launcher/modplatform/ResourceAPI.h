@@ -54,9 +54,6 @@ class ResourceAPI {
    public:
     virtual ~ResourceAPI() = default;
 
-    enum ModLoaderType { Forge = 1 << 0, Cauldron = 1 << 1, LiteLoader = 1 << 2, Fabric = 1 << 3, Quilt = 1 << 4 };
-    Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
-
     struct SortingMethod {
         // The index of the sorting method. Used to allow for arbitrary ordering in the list of methods.
         // Used by Flame in the API request.
@@ -74,7 +71,7 @@ class ResourceAPI {
 
         std::optional<QString> search;
         std::optional<SortingMethod> sorting;
-        std::optional<ModLoaderTypes> loaders;
+        std::optional<ModPlatform::ModLoaderTypes> loaders;
         std::optional<std::list<Version> > versions;
     };
     struct SearchCallbacks {
@@ -87,7 +84,7 @@ class ResourceAPI {
         ModPlatform::IndexedPack pack;
 
         std::optional<std::list<Version> > mcVersions;
-        std::optional<ModLoaderTypes> loaders;
+        std::optional<ModPlatform::ModLoaderTypes> loaders;
 
         VersionSearchArgs(VersionSearchArgs const&) = default;
         void operator=(VersionSearchArgs other)
@@ -99,6 +96,7 @@ class ResourceAPI {
     };
     struct VersionSearchCallbacks {
         std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
+        std::function<void(QString const& reason, int network_error_code)> on_fail;
     };
 
     struct ProjectInfoArgs {
@@ -108,17 +106,20 @@ class ResourceAPI {
         void operator=(ProjectInfoArgs other) { pack = other.pack; }
     };
     struct ProjectInfoCallbacks {
-        std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
+        std::function<void(QJsonDocument&, const ModPlatform::IndexedPack&)> on_succeed;
+        std::function<void(QString const& reason)> on_fail;
+        std::function<void()> on_abort;
     };
 
     struct DependencySearchArgs {
         ModPlatform::Dependency dependency;
         Version mcVersion;
-        ModLoaderTypes loader;
+        ModPlatform::ModLoaderTypes loader;
     };
 
     struct DependencySearchCallbacks {
         std::function<void(QJsonDocument&, const ModPlatform::Dependency&)> on_succeed;
+        std::function<void(QString const& reason, int network_error_code)> on_fail;
     };
 
    public:
@@ -128,28 +129,30 @@ class ResourceAPI {
    public slots:
     [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::searchProjects";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, std::shared_ptr<QByteArray> response) const
+    [[nodiscard]] virtual Task::Ptr getProject([[maybe_unused]] QString addonId,
+                                               [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProject";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const
+    [[nodiscard]] virtual Task::Ptr getProjects([[maybe_unused]] QStringList addonIds,
+                                                [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjects";
         return nullptr;
     }
 
     [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjectInfo";
         return nullptr;
     }
     [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
     {
-        qWarning() << "TODO";
+        qWarning() << "TODO: ResourceAPI::getProjectVersions";
         return nullptr;
     }
 
@@ -157,25 +160,6 @@ class ResourceAPI {
     {
         qWarning() << "TODO";
         return nullptr;
-    }
-
-    static auto getModLoaderString(ModLoaderType type) -> const QString
-    {
-        switch (type) {
-            case Forge:
-                return "forge";
-            case Cauldron:
-                return "cauldron";
-            case LiteLoader:
-                return "liteloader";
-            case Fabric:
-                return "fabric";
-            case Quilt:
-                return "quilt";
-            default:
-                break;
-        }
-        return "";
     }
 
    protected:

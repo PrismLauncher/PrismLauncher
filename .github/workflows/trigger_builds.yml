@@ -3,26 +3,25 @@ name: Build Application
 on:
   push:
     branches-ignore:
-      - 'renovate/**'
+      - "renovate/**"
     paths-ignore:
-      - '**.md'
-      - '**/LICENSE'
-      - 'flake.lock'
-      - 'packages/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.markdownlint**'
+      - "**.md"
+      - "**/LICENSE"
+      - "flake.lock"
+      - "packages/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".markdownlint**"
   pull_request:
     paths-ignore:
-      - '**.md'
-      - '**/LICENSE'
-      - 'flake.lock'
-      - 'packages/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.markdownlint**'
+      - "**.md"
+      - "**/LICENSE"
+      - "flake.lock"
+      - "packages/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".markdownlint**"
   workflow_dispatch:
 
 jobs:
-
   build_debug:
     name: Build Debug
     uses: ./.github/workflows/build.yml
@@ -33,4 +32,11 @@ jobs:
       SPARKLE_ED25519_KEY: ${{ secrets.SPARKLE_ED25519_KEY }}
       WINDOWS_CODESIGN_CERT: ${{ secrets.WINDOWS_CODESIGN_CERT }}
       WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
-      CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      APPLE_CODESIGN_CERT: ${{ secrets.APPLE_CODESIGN_CERT }}
+      APPLE_CODESIGN_PASSWORD: ${{ secrets.APPLE_CODESIGN_PASSWORD }}
+      APPLE_CODESIGN_ID: ${{ secrets.APPLE_CODESIGN_ID }}
+      APPLE_NOTARIZE_APPLE_ID: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
+      APPLE_NOTARIZE_TEAM_ID: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
+      APPLE_NOTARIZE_PASSWORD: ${{ secrets.APPLE_NOTARIZE_PASSWORD }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PRIVATE_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY_ID }}

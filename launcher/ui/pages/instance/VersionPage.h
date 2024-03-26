@@ -68,11 +68,8 @@ class VersionPage : public QMainWindow, public BasePage {
 
    private slots:
     void on_actionChange_version_triggered();
-    void on_actionInstall_Forge_triggered();
-    void on_actionInstall_Fabric_triggered();
-    void on_actionInstall_Quilt_triggered();
+    void on_actionInstall_Loader_triggered();
     void on_actionAdd_Empty_triggered();
-    void on_actionInstall_LiteLoader_triggered();
     void on_actionReload_triggered();
     void on_actionRemove_triggered();
     void on_actionMove_up_triggered();
@@ -83,7 +80,6 @@ class VersionPage : public QMainWindow, public BasePage {
     void on_actionAdd_Agents_triggered();
     void on_actionRevert_triggered();
     void on_actionEdit_triggered();
-    void on_actionInstall_mods_triggered();
     void on_actionCustomize_triggered();
     void on_actionDownload_All_triggered();
 

@@ -20,6 +20,9 @@
 #include <BuildConfig.h>
 #include <Json.h>
 
+#include "net/ApiDownload.h"
+#include "ui/widgets/ProjectItem.h"
+
 namespace Atl {
 
 ListModel::ListModel(QObject* parent) : QAbstractListModel(parent) {}
@@ -44,27 +47,50 @@ QVariant ListModel::data(const QModelIndex& index, int role) const
     }
 
     ATLauncher::IndexedPack pack = modpacks.at(pos);
-    if (role == Qt::DisplayRole) {
-        return pack.name;
-    } else if (role == Qt::ToolTipRole) {
-        return pack.name;
-    } else if (role == Qt::DecorationRole) {
-        if (m_logoMap.contains(pack.safeName)) {
-            return (m_logoMap.value(pack.safeName));
+    switch (role) {
+        case Qt::ToolTipRole: {
+            if (pack.description.length() > 100) {
+                // some magic to prevent to long tooltips and replace html linebreaks
+                QString edit = pack.description.left(97);
+                edit = edit.left(edit.lastIndexOf("<br>")).left(edit.lastIndexOf(" ")).append("...");
+                return edit;
+            }
+            return pack.description;
         }
-        auto icon = APPLICATION->getThemedIcon("atlauncher-placeholder");
+        case Qt::DecorationRole: {
+            if (m_logoMap.contains(pack.safeName)) {
+                return (m_logoMap.value(pack.safeName));
+            }
+            auto icon = APPLICATION->getThemedIcon("atlauncher-placeholder");
 
-        auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1.png").arg(pack.safeName.toLower());
-        ((ListModel*)this)->requestLogo(pack.safeName, url);
+            auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1").arg(pack.safeName);
+            ((ListModel*)this)->requestLogo(pack.safeName, url);
 
-        return icon;
-    } else if (role == Qt::UserRole) {
-        QVariant v;
-        v.setValue(pack);
-        return v;
+            return icon;
+        }
+        case Qt::UserRole: {
+            QVariant v;
+            v.setValue(pack);
+            return v;
+        }
+        case Qt::DisplayRole:
+            return pack.name;
+        case Qt::SizeHintRole:
+            return QSize(0, 58);
+        // Custom data
+        case UserDataTypes::TITLE:
+            return pack.name;
+        case UserDataTypes::DESCRIPTION:
+            return pack.description;
+        case UserDataTypes::SELECTED:
+            return false;
+        case UserDataTypes::INSTALLED:
+            return false;
+        default:
+            break;
     }
 
-    return QVariant();
+    return {};
 }
 
 void ListModel::request()
@@ -75,7 +101,7 @@ void ListModel::request()
 
     auto netJob = makeShared<NetJob>("Atl::Request", APPLICATION->network());
     auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/json/packsnew.json");
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(url), response));
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
     jobPtr = netJob;
     jobPtr->start();
 
@@ -137,8 +163,7 @@ void ListModel::requestFailed(QString reason)
 void ListModel::getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback)
 {
     if (m_logoMap.contains(logo)) {
-        callback(
-            APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(logo.section(".", 0, 0)))->getFullPath());
+        callback(APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(logo))->getFullPath());
     } else {
         requestLogo(logo, logoUrl);
     }
@@ -168,9 +193,9 @@ void ListModel::requestLogo(QString file, QString url)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(file.section(".", 0, 0)));
+    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("ATLauncherPacks", QString("logos/%1").arg(file));
     auto job = new NetJob(QString("ATLauncher Icon Download %1").arg(file), APPLICATION->network());
-    job->addNetAction(Net::Download::makeCached(QUrl(url), entry));
+    job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
     QObject::connect(job, &NetJob::succeeded, this, [this, file, fullPath, job] {

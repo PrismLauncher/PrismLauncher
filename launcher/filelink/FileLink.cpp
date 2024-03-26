@@ -37,11 +37,7 @@
 #include <sys.h>
 
 #if defined Q_OS_WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <stdio.h>
-#include <windows.h>
+#include "WindowsConsole.h"
 #endif
 
 // Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
@@ -67,21 +63,7 @@ FileLinkApp::FileLinkApp(int& argc, char** argv) : QCoreApplication(argc, argv),
 {
 #if defined Q_OS_WIN32
     // attach the parent console
-    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
-        // if attach succeeds, reopen and sync all the i/o
-        if (freopen("CON", "w", stdout)) {
-            std::cout.sync_with_stdio();
-        }
-        if (freopen("CON", "w", stderr)) {
-            std::cerr.sync_with_stdio();
-        }
-        if (freopen("CON", "r", stdin)) {
-            std::cin.sync_with_stdio();
-        }
-        auto out = GetStdHandle(STD_OUTPUT_HANDLE);
-        DWORD written;
-        const char* endline = "\n";
-        WriteConsole(out, endline, strlen(endline), &written, NULL);
+    if (AttachWindowsConsole()) {
         consoleAttached = true;
     }
 #endif
@@ -111,6 +93,7 @@ FileLinkApp::FileLinkApp(int& argc, char** argv) : QCoreApplication(argc, argv),
         joinServer(serverToJoin);
     } else {
         qDebug() << "no server to join";
+        m_status = Failed;
         exit();
     }
 }
@@ -126,6 +109,7 @@ void FileLinkApp::joinServer(QString server)
     connect(&socket, &QLocalSocket::readyRead, this, &FileLinkApp::readPathPairs);
 
     connect(&socket, &QLocalSocket::errorOccurred, this, [&](QLocalSocket::LocalSocketError socketError) {
+        m_status = Failed;
         switch (socketError) {
             case QLocalSocket::ServerNotFoundError:
                 qDebug()
@@ -150,6 +134,7 @@ void FileLinkApp::joinServer(QString server)
 
     connect(&socket, &QLocalSocket::disconnected, this, [&]() {
         qDebug() << "disconnected from server, should exit";
+        m_status = Succeeded;
         exit();
     });
 
@@ -188,7 +173,7 @@ void FileLinkApp::runLink()
             FS::LinkResult result = { src_path, dst_path, QString::fromStdString(os_err.message()), os_err.value() };
             m_path_results.append(result);
         } else {
-            FS::LinkResult result = { src_path, dst_path };
+            FS::LinkResult result = { src_path, dst_path, "", 0 };
             m_path_results.append(result);
         }
     }
@@ -248,7 +233,7 @@ void FileLinkApp::readPathPairs()
     in >> numLinks;
     qDebug() << "numLinks" << numLinks;
 
-    for (int i = 0; i < numLinks; i++) {
+    for (quint32 i = 0; i < numLinks; i++) {
         FS::LinkPair pair;
         in >> pair.src;
         in >> pair.dst;
@@ -271,7 +256,6 @@ FileLinkApp::~FileLinkApp()
         fclose(stdout);
         fclose(stdin);
         fclose(stderr);
-        FreeConsole();
     }
 #endif
 }

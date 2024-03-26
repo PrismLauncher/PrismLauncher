@@ -127,6 +127,9 @@ void CustomPage::loaderFilterChanged()
         ui->loaderVersionList->setEmptyString(tr("No mod loader is selected."));
         ui->loaderVersionList->setEmptyMode(VersionListView::String);
         return;
+    } else if (ui->neoForgeFilter->isChecked()) {
+        ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
+        m_selectedLoader = "net.neoforged";
     } else if (ui->forgeFilter->isChecked()) {
         ui->loaderVersionList->setExactFilter(BaseVersionList::ParentVersionRole, minecraftVersion);
         m_selectedLoader = "net.minecraftforge";

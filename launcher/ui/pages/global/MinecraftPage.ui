@@ -138,6 +138,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="showGameTimeWithoutDays">
+            <property name="text">
+             <string>Show time spent playing in hours</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -191,18 +198,18 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_12">
        <item>
-        <widget class="QGroupBox" name="modLoaderSettingsGroupBox">
+        <widget class="QGroupBox" name="legacySettingsGroupBox">
          <property name="title">
-          <string>Mod loader settings</string>
+          <string>Legacy settings</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_13">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <widget class="QCheckBox" name="disableQuiltBeaconCheckBox">
-            <property name="text">
-             <string>Disable Quilt Loader Beacon</string>
-            </property>
+           <widget class="QCheckBox" name="onlineFixes">
             <property name="toolTip">
-             <string>Disable Quilt loader's beacon for counting monthly active users</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;Current fixes include: skin and online mode support.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable online fixes (experimental)</string>
             </property>
            </widget>
           </item>
@@ -214,18 +221,52 @@
          <property name="title">
           <string>Native library workarounds</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
            <widget class="QCheckBox" name="useNativeGLFWCheck">
             <property name="text">
              <string>Use system installation of &amp;GLFW</string>
             </property>
            </widget>
           </item>
-          <item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelGLFWPath">
+            <property name="text">
+             <string>&amp;GLFW library path</string>
+            </property>
+            <property name="buddy">
+             <cstring>lineEditGLFWPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
            <widget class="QCheckBox" name="useNativeOpenALCheck">
             <property name="text">
              <string>Use system installation of &amp;OpenAL</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelOpenALPath">
+            <property name="text">
+             <string>&amp;OpenAL library path</string>
+            </property>
+            <property name="buddy">
+             <cstring>lineEditOpenALPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditGLFWPath">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="lineEditOpenALPath">
+            <property name="enabled">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -265,6 +306,16 @@
             </property>
             <property name="text">
              <string>Use discrete GPU</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="useZink">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use Zink, a Mesa OpenGL driver that implements OpenGL on top of Vulkan. Performance may vary depending on the situation. Note: If no suitable Vulkan driver is found, software rendering will be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Use Zink</string>
             </property>
            </widget>
           </item>

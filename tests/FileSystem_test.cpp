@@ -81,10 +81,10 @@ class LinkTask : public Task {
         } else {
             emitSucceeded();
         }
-    };
+    }
 
     FS::create_link* m_lnk;
-    bool m_useHard = false;
+    [[maybe_unused]] bool m_useHard = false;
     bool m_linkRecursive = true;
 };
 
@@ -353,15 +353,12 @@ class FileSystemTest : public QObject {
         }
     }
 
-    void test_getDesktop()
-    {
-        QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
-    }
+    void test_getDesktop() { QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)); }
 
     void test_link()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder, this]() {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -630,7 +627,7 @@ class FileSystemTest : public QObject {
     void test_link_with_max_depth()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder, this]() {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();

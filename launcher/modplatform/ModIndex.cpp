@@ -24,6 +24,40 @@
 
 namespace ModPlatform {
 
+static const QMap<QString, IndexedVersionType::VersionType> s_indexed_version_type_names = {
+    { "release", IndexedVersionType::VersionType::Release },
+    { "beta", IndexedVersionType::VersionType::Beta },
+    { "alpha", IndexedVersionType::VersionType::Alpha }
+};
+
+IndexedVersionType::IndexedVersionType(const QString& type) : IndexedVersionType(enumFromString(type)) {}
+
+IndexedVersionType::IndexedVersionType(const IndexedVersionType::VersionType& type)
+{
+    m_type = type;
+}
+
+IndexedVersionType::IndexedVersionType(const IndexedVersionType& other)
+{
+    m_type = other.m_type;
+}
+
+IndexedVersionType& IndexedVersionType::operator=(const IndexedVersionType& other)
+{
+    m_type = other.m_type;
+    return *this;
+}
+
+const QString IndexedVersionType::toString(const IndexedVersionType::VersionType& type)
+{
+    return s_indexed_version_type_names.key(type, "unknown");
+}
+
+IndexedVersionType::VersionType IndexedVersionType::enumFromString(const QString& type)
+{
+    return s_indexed_version_type_names.value(type, IndexedVersionType::VersionType::Unknown);
+}
+
 auto ProviderCapabilities::name(ResourceProvider p) -> const char*
 {
     switch (p) {
@@ -81,6 +115,27 @@ QString getMetaURL(ResourceProvider provider, QVariant projectID)
 {
     return ((provider == ModPlatform::ResourceProvider::FLAME) ? "https://www.curseforge.com/projects/" : "https://modrinth.com/mod/") +
            projectID.toString();
+}
+
+auto getModLoaderString(ModLoaderType type) -> const QString
+{
+    switch (type) {
+        case NeoForge:
+            return "neoforge";
+        case Forge:
+            return "forge";
+        case Cauldron:
+            return "cauldron";
+        case LiteLoader:
+            return "liteloader";
+        case Fabric:
+            return "fabric";
+        case Quilt:
+            return "quilt";
+        default:
+            break;
+    }
+    return "";
 }
 
 }  // namespace ModPlatform

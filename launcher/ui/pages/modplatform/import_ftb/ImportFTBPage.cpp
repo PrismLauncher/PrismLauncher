@@ -17,8 +17,10 @@
  */
 
 #include "ImportFTBPage.h"
+#include "ui/widgets/ProjectItem.h"
 #include "ui_ImportFTBPage.h"
 
+#include <QFileDialog>
 #include <QWidget>
 #include "FileSystem.h"
 #include "ListModel.h"
@@ -32,17 +34,37 @@ ImportFTBPage::ImportFTBPage(NewInstanceDialog* dialog, QWidget* parent) : QWidg
     ui->setupUi(this);
 
     {
+        currentModel = new FilterModel(this);
         listModel = new ListModel(this);
+        currentModel->setSourceModel(listModel);
 
-        ui->modpackList->setModel(listModel);
+        ui->modpackList->setModel(currentModel);
         ui->modpackList->setSortingEnabled(true);
         ui->modpackList->header()->hide();
         ui->modpackList->setIndentation(0);
         ui->modpackList->setIconSize(QSize(42, 42));
+
+        for (int i = 0; i < currentModel->getAvailableSortings().size(); i++) {
+            ui->sortByBox->addItem(currentModel->getAvailableSortings().keys().at(i));
+        }
+
+        ui->sortByBox->setCurrentText(currentModel->translateCurrentSorting());
     }
 
     connect(ui->modpackList->selectionModel(), &QItemSelectionModel::currentChanged, this, &ImportFTBPage::onPublicPackSelectionChanged);
 
+    connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &ImportFTBPage::onSortingSelectionChanged);
+
+    connect(ui->searchEdit, &QLineEdit::textChanged, this, &ImportFTBPage::triggerSearch);
+
+    connect(ui->browseButton, &QPushButton::clicked, this, [this] {
+        auto path = listModel->getPath();
+        QString dir = QFileDialog::getExistingDirectory(this, tr("Select FTBApp instances directory"), path, QFileDialog::ShowDirsOnly);
+        if (!dir.isEmpty())
+            listModel->setPath(dir);
+    });
+
+    ui->modpackList->setItemDelegate(new ProjectItemDelegate(this));
     ui->modpackList->selectionModel()->reset();
 }
 
@@ -76,7 +98,7 @@ void ImportFTBPage::suggestCurrent()
     }
 
     dialog->setSuggestedPack(selected.name, new PackInstallTask(selected));
-    QString editedLogoName = QString("ftb_%1").arg(selected.id);
+    QString editedLogoName = QString("ftb_%1_%2.jpg").arg(selected.name, QString::number(selected.id));
     dialog->setSuggestedIconFromFile(FS::PathCombine(selected.path, "folder.jpg"), editedLogoName);
 }
 
@@ -86,7 +108,7 @@ void ImportFTBPage::onPublicPackSelectionChanged(QModelIndex now, QModelIndex pr
         onPackSelectionChanged();
         return;
     }
-    Modpack selectedPack = listModel->data(now, Qt::UserRole).value<Modpack>();
+    Modpack selectedPack = currentModel->data(now, Qt::UserRole).value<Modpack>();
     onPackSelectionChanged(&selectedPack);
 }
 
@@ -99,6 +121,17 @@ void ImportFTBPage::onPackSelectionChanged(Modpack* pack)
     }
     if (isOpened)
         dialog->setSuggestedPack();
+}
+
+void ImportFTBPage::onSortingSelectionChanged(QString sort)
+{
+    FilterModel::Sorting toSet = currentModel->getAvailableSortings().value(sort);
+    currentModel->setSorting(toSet);
+}
+
+void ImportFTBPage::triggerSearch()
+{
+    currentModel->setSearchTerm(ui->searchEdit->text());
 }
 
 }  // namespace FTBImportAPP

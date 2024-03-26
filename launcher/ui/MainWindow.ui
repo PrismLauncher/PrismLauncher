@@ -176,6 +176,7 @@
     <addaction name="actionChangeTheme"/>
     <addaction name="separator"/>
     <addaction name="actionCAT"/>
+    <addaction name="actionToggleStatusBar"/>
     <addaction name="actionLockToolbars"/>
     <addaction name="separator"/>
    </widget>
@@ -186,9 +187,17 @@
     <property name="toolTipsVisible">
      <bool>true</bool>
     </property>
-    <addaction name="actionViewInstanceFolder"/>
     <addaction name="actionViewLauncherRootFolder"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewInstanceFolder"/>
     <addaction name="actionViewCentralModsFolder"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewIconThemeFolder"/>
+    <addaction name="actionViewWidgetThemeFolder"/>
+    <addaction name="actionViewCatPackFolder"/>
+    <addaction name="actionViewIconsFolder"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewLogsFolder"/>
    </widget>
    <widget class="QMenu" name="accountsMenu">
     <property name="title">
@@ -247,6 +256,14 @@
    </property>
    <property name="toolTip">
     <string>It's a fluffy kitty :3</string>
+   </property>
+  </action>
+  <action name="actionToggleStatusBar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Status Bar</string>
    </property>
   </action>
   <action name="actionLockToolbars">
@@ -435,22 +452,6 @@
     <string>Ctrl+D</string>
    </property>
   </action>
-  <action name="actionLaunchInstanceOffline">
-   <property name="text">
-    <string>Launch &amp;Offline</string>
-   </property>
-   <property name="toolTip">
-    <string>Launch the selected instance in offline mode.</string>
-   </property>
-  </action>
-  <action name="actionLaunchInstanceDemo">
-   <property name="text">
-    <string>Launch &amp;Demo</string>
-   </property>
-   <property name="toolTip">
-    <string>Launch the selected instance in demo mode.</string>
-   </property>
-  </action>
   <action name="actionExportInstance">
    <property name="icon">
     <iconset theme="export">
@@ -465,7 +466,8 @@
   </action>
   <action name="actionExportInstanceZip">
    <property name="icon">
-    <iconset theme="launcher"/>
+    <iconset theme="launcher">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Prism Launcher (zip)</string>
@@ -473,7 +475,8 @@
   </action>
   <action name="actionExportInstanceMrPack">
    <property name="icon">
-    <iconset theme="modrinth"/>
+    <iconset theme="modrinth">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Modrinth (mrpack)</string>
@@ -481,15 +484,17 @@
   </action>
   <action name="actionExportInstanceFlamePack">
    <property name="icon">
-    <iconset theme="flame"/>
+    <iconset theme="flame">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>CurseForge (zip)</string>  
+    <string>CurseForge (zip)</string>
    </property>
   </action>
   <action name="actionExportInstanceToModList">
    <property name="icon">
-    <iconset theme="new"/>
+    <iconset theme="new">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Mod List</string>
@@ -552,10 +557,10 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>&amp;View Instance Folder</string>
+    <string>&amp;Instances</string>
    </property>
    <property name="toolTip">
-    <string>Open the instance folder in a file browser.</string>
+    <string>Open the instances folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewLauncherRootFolder">
@@ -564,7 +569,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>&amp;View Launcher Root Folder</string>
+    <string>Launcher &amp;Root</string>
    </property>
    <property name="toolTip">
     <string>Open the launcher's root folder in a file browser.</string>
@@ -576,10 +581,34 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>View &amp;Central Mods Folder</string>
+    <string>&amp;Central Mods</string>
    </property>
    <property name="toolTip">
     <string>Open the central mods folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewIconsFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Instance Icons</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the instance icons folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewLogsFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Logs</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the logs folder in a file browser.</string>
    </property>
   </action>
   <action name="actionChangeTheme">
@@ -717,6 +746,42 @@
    </property>
    <property name="toolTip">
     <string>Open the %1 wiki</string>
+   </property>
+  </action>
+  <action name="actionViewWidgetThemeFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Widget Themes</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the widget themes folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewIconThemeFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>I&amp;con Theme</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the icon theme folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewCatPackFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Cat Packs</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the cat packs folder in a file browser.</string>
    </property>
   </action>
  </widget>

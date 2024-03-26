@@ -25,6 +25,7 @@
 #include "Json.h"
 #include "MMCZip.h"
 #include "minecraft/PackProfile.h"
+#include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
@@ -33,12 +34,14 @@ const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "z
 ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
                                                const QString& version,
                                                const QString& summary,
+                                               bool optionalFiles,
                                                InstancePtr instance,
                                                const QString& output,
                                                MMCZip::FilterFunction filter)
     : name(name)
     , version(version)
     , summary(summary)
+    , optionalFiles(optionalFiles)
     , instance(instance)
     , mcInstance(dynamic_cast<MinecraftInstance*>(instance.get()))
     , gameRoot(instance->gameRoot())
@@ -127,7 +130,8 @@ void ModrinthPackExportTask::collectHashes()
                     QCryptographicHash sha1(QCryptographicHash::Algorithm::Sha1);
                     sha1.addData(data);
 
-                    ResolvedFile resolvedFile{ sha1.result().toHex(), sha512.result().toHex(), url.toEncoded(), openFile.size() };
+                    ResolvedFile resolvedFile{ sha1.result().toHex(), sha512.result().toHex(), url.toEncoded(), openFile.size(),
+                                               mod->metadata()->side };
                     resolvedFiles[relative] = resolvedFile;
 
                     // nice! we've managed to resolve based on local metadata!
@@ -174,10 +178,10 @@ void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<QByteArray> 
             if (obj.isEmpty())
                 continue;
 
-            const QJsonArray files = obj["files"].toArray();
-            if (auto fileIter = std::find_if(files.begin(), files.end(),
+            const QJsonArray files_array = obj["files"].toArray();
+            if (auto fileIter = std::find_if(files_array.begin(), files_array.end(),
                                              [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
-                fileIter != files.end()) {
+                fileIter != files_array.end()) {
                 // map the file to the url
                 resolvedFiles[iterator.key()] =
                     ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), iterator.value(),
@@ -245,6 +249,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
         const ComponentPtr quilt = profile->getComponent("org.quiltmc.quilt-loader");
         const ComponentPtr fabric = profile->getComponent("net.fabricmc.fabric-loader");
         const ComponentPtr forge = profile->getComponent("net.minecraftforge");
+        const ComponentPtr neoForge = profile->getComponent("net.neoforged");
 
         // convert all available components to mrpack dependencies
         QJsonObject dependencies;
@@ -256,6 +261,8 @@ QByteArray ModrinthPackExportTask::generateIndex()
             dependencies["fabric-loader"] = fabric->m_version;
         if (forge != nullptr)
             dependencies["forge"] = forge->m_version;
+        if (neoForge != nullptr)
+            dependencies["neoforge"] = neoForge->m_version;
 
         out["dependencies"] = dependencies;
     }
@@ -267,20 +274,33 @@ QByteArray ModrinthPackExportTask::generateIndex()
         QString path = iterator.key();
         const ResolvedFile& value = iterator.value();
 
+        QJsonObject env;
+
         // detect disabled mod
         const QFileInfo pathInfo(path);
-        if (pathInfo.suffix() == "disabled") {
+        if (optionalFiles && pathInfo.suffix() == "disabled") {
             // rename it
             path = pathInfo.dir().filePath(pathInfo.completeBaseName());
-            // ...and make it optional
-            QJsonObject env;
             env["client"] = "optional";
             env["server"] = "optional";
-            fileOut["env"] = env;
+        } else {
+            env["client"] = "required";
+            env["server"] = "required";
         }
+        switch (iterator->side) {
+            case Metadata::ModSide::ClientSide:
+                env["server"] = "unsupported";
+                break;
+            case Metadata::ModSide::ServerSide:
+                env["client"] = "unsupported";
+                break;
+            case Metadata::ModSide::UniversalSide:
+                break;
+        }
+        fileOut["env"] = env;
 
         fileOut["path"] = path;
-        fileOut["downloads"] = QJsonArray{ iterator.value().url };
+        fileOut["downloads"] = QJsonArray{ iterator->url };
 
         QJsonObject hashes;
         hashes["sha1"] = value.sha1;

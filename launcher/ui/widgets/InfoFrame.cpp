@@ -158,12 +158,12 @@ QString InfoFrame::renderColorCodes(QString input)
     //
     // TODO: Wrap links inside <a> tags
 
-    // https://minecraft.fandom.com/wiki/Formatting_codes#Color_codes
+    // https://minecraft.wiki/w/Formatting_codes#Color_codes
     const QMap<QChar, QString> color_codes_map = { { '0', "#000000" }, { '1', "#0000AA" }, { '2', "#00AA00" }, { '3', "#00AAAA" },
                                                    { '4', "#AA0000" }, { '5', "#AA00AA" }, { '6', "#FFAA00" }, { '7', "#AAAAAA" },
                                                    { '8', "#555555" }, { '9', "#5555FF" }, { 'a', "#55FF55" }, { 'b', "#55FFFF" },
                                                    { 'c', "#FF5555" }, { 'd', "#FF55FF" }, { 'e', "#FFFF55" }, { 'f', "#FFFFFF" } };
-    // https://minecraft.fandom.com/wiki/Formatting_codes#Formatting_codes
+    // https://minecraft.wiki/w/Formatting_codes#Formatting_codes
     const QMap<QChar, QString> formatting_codes_map = { { 'l', "b" }, { 'm', "s" }, { 'n', "u" }, { 'o', "i" } };
 
     QString html("<html>");
@@ -348,7 +348,7 @@ void InfoFrame::setImage(QPixmap img)
     }
 }
 
-void InfoFrame::descriptionEllipsisHandler(QString link)
+void InfoFrame::descriptionEllipsisHandler([[maybe_unused]] QString link)
 {
     if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_description);
@@ -359,7 +359,7 @@ void InfoFrame::descriptionEllipsisHandler(QString link)
     }
 }
 
-void InfoFrame::licenseEllipsisHandler(QString link)
+void InfoFrame::licenseEllipsisHandler([[maybe_unused]] QString link)
 {
     if (!m_current_box) {
         m_current_box = CustomMessageBox::selectable(this, "", m_license);
@@ -370,7 +370,7 @@ void InfoFrame::licenseEllipsisHandler(QString link)
     }
 }
 
-void InfoFrame::boxClosed(int result)
+void InfoFrame::boxClosed([[maybe_unused]] int result)
 {
     m_current_box = nullptr;
 }

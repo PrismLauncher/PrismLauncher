@@ -57,7 +57,7 @@ package org.prismlauncher;
 import org.prismlauncher.exception.ParseException;
 import org.prismlauncher.launcher.Launcher;
 import org.prismlauncher.launcher.impl.StandardLauncher;
-import org.prismlauncher.launcher.impl.legacy.LegacyLauncher;
+import org.prismlauncher.legacy.LegacyProxy;
 import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.logging.Log;
 
@@ -81,10 +81,9 @@ public final class EntryPoint {
         PreLaunchAction action = PreLaunchAction.PROCEED;
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
-            String line;
-
             while (action == PreLaunchAction.PROCEED) {
-                if ((line = reader.readLine()) != null)
+                String line = reader.readLine();
+                if (line != null)
                     action = parseLine(line, params);
                 else
                     action = PreLaunchAction.ABORT;
@@ -105,21 +104,26 @@ public final class EntryPoint {
             return ExitCode.ABORT;
         }
 
-        try {
-            Launcher launcher;
-            String type = params.getString("launcher");
+        SystemProperties.apply(params);
 
-            switch (type) {
+        String launcherType = params.getString("launcher");
+
+        try {
+            LegacyProxy.applyOnlineFixes(params);
+
+            Launcher launcher;
+
+            switch (launcherType) {
                 case "standard":
                     launcher = new StandardLauncher(params);
                     break;
 
                 case "legacy":
-                    launcher = new LegacyLauncher(params);
+                    launcher = LegacyProxy.createLauncher(params);
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid launcher type: " + type);
+                    throw new IllegalArgumentException("Invalid launcher type: " + launcherType);
             }
 
             launcher.launch();
@@ -139,7 +143,7 @@ public final class EntryPoint {
     private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
         switch (input) {
             case "":
-                break;
+                return PreLaunchAction.PROCEED;
 
             case "launch":
                 return PreLaunchAction.LAUNCH;
@@ -154,9 +158,9 @@ public final class EntryPoint {
                     throw new ParseException(input, "[key] [value]");
 
                 params.add(pair[0], pair[1]);
-        }
 
-        return PreLaunchAction.PROCEED;
+                return PreLaunchAction.PROCEED;
+        }
     }
 
     private enum PreLaunchAction { PROCEED, LAUNCH, ABORT }

@@ -3,6 +3,7 @@
 #include <MurmurHash2.h>
 #include <QDebug>
 
+#include "Application.h"
 #include "Json.h"
 
 #include "minecraft/mod/Mod.h"
@@ -33,7 +34,7 @@ EnsureMetadataTask::EnsureMetadataTask(Mod* mod, QDir dir, ModPlatform::Resource
 EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform::ResourceProvider prov)
     : Task(nullptr), m_index_dir(dir), m_provider(prov), m_current_task(nullptr)
 {
-    m_hashing_task.reset(new ConcurrentTask(this, "MakeHashesTask", 10));
+    m_hashing_task.reset(new ConcurrentTask(this, "MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
     for (auto* mod : mods) {
         auto hash_task = createNewHash(mod);
         if (!hash_task)
@@ -148,6 +149,7 @@ void EnsureMetadataTask::executeTask()
             if (m_current_task)
                 m_current_task.reset();
         });
+        connect(project_task.get(), &Task::failed, this, &EnsureMetadataTask::emitFailed);
 
         m_current_task = project_task;
         project_task->start();

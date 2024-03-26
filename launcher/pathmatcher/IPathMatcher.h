@@ -4,9 +4,9 @@
 
 class IPathMatcher {
    public:
-    typedef std::shared_ptr<IPathMatcher> Ptr;
+    using Ptr = std::shared_ptr<IPathMatcher>;
 
    public:
-    virtual ~IPathMatcher(){};
+    virtual ~IPathMatcher() {}
     virtual bool matches(const QString& string) const = 0;
 };

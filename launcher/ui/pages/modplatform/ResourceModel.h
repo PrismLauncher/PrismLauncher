@@ -42,7 +42,10 @@ class ResourceModel : public QAbstractListModel {
     [[nodiscard]] virtual auto debugName() const -> QString;
     [[nodiscard]] virtual auto metaEntryBase() const -> QString = 0;
 
-    [[nodiscard]] inline int rowCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : m_packs.size(); }
+    [[nodiscard]] inline int rowCount(const QModelIndex& parent) const override
+    {
+        return parent.isValid() ? 0 : static_cast<int>(m_packs.size());
+    }
     [[nodiscard]] inline int columnCount(const QModelIndex& parent) const override { return parent.isValid() ? 0 : 1; }
     [[nodiscard]] inline auto flags(const QModelIndex& index) const -> Qt::ItemFlags override { return QAbstractListModel::flags(index); }
 
@@ -85,7 +88,7 @@ class ResourceModel : public QAbstractListModel {
 
     void addPack(ModPlatform::IndexedPack::Ptr pack,
                  ModPlatform::IndexedVersion& version,
-                 const std::shared_ptr<ResourceFolderModel> packs,
+                 std::shared_ptr<ResourceFolderModel> packs,
                  bool is_indexed = false,
                  QString custom_target_folder = {});
     void removePack(const QString& rem);
@@ -146,6 +149,7 @@ class ResourceModel : public QAbstractListModel {
    private:
     /* Default search request callbacks */
     void searchRequestSucceeded(QJsonDocument&);
+    void searchRequestForOneSucceeded(QJsonDocument&);
     void searchRequestFailed(QString reason, int network_error_code);
     void searchRequestAborted();
 

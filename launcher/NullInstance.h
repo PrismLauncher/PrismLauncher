@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,7 +53,7 @@ class NullInstance : public BaseInstance {
     QSet<QString> traits() const override { return {}; };
     QString instanceConfigFolder() const override { return instanceRoot(); };
     shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr, MinecraftServerTargetPtr) override { return nullptr; }
-    shared_qobject_ptr<Task> createUpdateTask(Net::Mode mode) override { return nullptr; }
+    shared_qobject_ptr<Task> createUpdateTask([[maybe_unused]] Net::Mode mode) override { return nullptr; }
     QProcessEnvironment createEnvironment() override { return QProcessEnvironment(); }
     QProcessEnvironment createLaunchEnvironment() override { return QProcessEnvironment(); }
     QMap<QString, QString> getVariables() override { return QMap<QString, QString>(); }
@@ -62,6 +63,7 @@ class NullInstance : public BaseInstance {
     bool canExport() const override { return false; }
     bool canEdit() const override { return false; }
     bool canLaunch() const override { return false; }
+    void populateLaunchMenu(QMenu* menu) override {}
     QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) override
     {
         QStringList out;

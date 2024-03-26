@@ -14,7 +14,7 @@ class JavaVersion {
     friend class JavaVersionTest;
 
    public:
-    JavaVersion(){};
+    JavaVersion() {}
     JavaVersion(const QString& rhs);
 
     JavaVersion& operator=(const QString& rhs);
@@ -24,6 +24,8 @@ class JavaVersion {
     bool operator>(const JavaVersion& rhs);
 
     bool requiresPermGen();
+
+    bool isModular();
 
     QString toString() const;
 
