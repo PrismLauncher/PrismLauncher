@@ -28,7 +28,7 @@ class CheckJava : public LaunchStep {
     virtual void executeTask();
     virtual bool canAbort() const { return false; }
    private slots:
-    void checkJavaFinished(JavaCheckResult result);
+    void checkJavaFinished(const JavaCheckResult& result);
 
    private:
     void printJavaInfo(const QString& version, const QString& architecture, const QString& realArchitecture, const QString& vendor);

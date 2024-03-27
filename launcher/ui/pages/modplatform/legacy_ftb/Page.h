@@ -80,7 +80,7 @@ class Page : public QWidget, public BasePage {
     void ftbPackDataDownloadFailed(QString reason);
     void ftbPackDataDownloadAborted();
 
-    void ftbPrivatePackDataDownloadSuccessfully(Modpack pack);
+    void ftbPrivatePackDataDownloadSuccessfully(const Modpack& pack);
     void ftbPrivatePackDataDownloadFailed(QString reason, QString packCode);
 
     void onSortingSelectionChanged(QString data);

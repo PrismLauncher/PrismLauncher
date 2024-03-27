@@ -57,13 +57,13 @@ void InstanceCopyTask::executeTask()
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this, copySaves] {
         if (m_useClone) {
             FS::clone folderClone(m_origInstance->instanceRoot(), m_stagingPath);
-            folderClone.matcher(m_matcher.get());
+            folderClone.matcher(m_matcher);
 
             return folderClone();
         } else if (m_useLinks || m_useHardLinks) {
             FS::create_link folderLink(m_origInstance->instanceRoot(), m_stagingPath);
             int depth = m_linkRecursively ? -1 : 0;  // we need to at least link the top level instead of the instance folder
-            folderLink.linkRecursively(true).setMaxDepth(depth).useHardLinks(m_useHardLinks).matcher(m_matcher.get());
+            folderLink.linkRecursively(true).setMaxDepth(depth).useHardLinks(m_useHardLinks).matcher(m_matcher);
 
             bool there_were_errors = false;
 
@@ -115,7 +115,7 @@ void InstanceCopyTask::executeTask()
             return !there_were_errors;
         } else {
             FS::copy folderCopy(m_origInstance->instanceRoot(), m_stagingPath);
-            folderCopy.followSymlinks(false).matcher(m_matcher.get());
+            folderCopy.followSymlinks(false).matcher(m_matcher);
 
             return folderCopy();
         }

@@ -32,8 +32,8 @@ class TestCheck : public QObject {
     void finished();
 
    private slots:
-    void checkFinished(JavaCheckResult result);
-    void checkFinishedWithArgs(JavaCheckResult result);
+    void checkFinished(const JavaCheckResult& result);
+    void checkFinishedWithArgs(const JavaCheckResult& result);
 
    private:
     std::shared_ptr<JavaChecker> checker;

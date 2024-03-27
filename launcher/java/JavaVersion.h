@@ -23,7 +23,7 @@ class JavaVersion {
     bool operator==(const JavaVersion& rhs);
     bool operator>(const JavaVersion& rhs);
 
-    bool requiresPermGen();
+    bool requiresPermGen() const;
 
     bool isModular();
 

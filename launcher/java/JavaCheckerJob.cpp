@@ -17,7 +17,7 @@
 
 #include <QDebug>
 
-void JavaCheckerJob::partFinished(JavaCheckResult result)
+void JavaCheckerJob::partFinished(const JavaCheckResult& result)
 {
     num_finished++;
     qDebug() << m_job_name.toLocal8Bit() << "progress:" << num_finished << "/" << javacheckers.size();

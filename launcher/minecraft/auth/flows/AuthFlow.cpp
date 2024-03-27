@@ -45,18 +45,12 @@ void AuthFlow::nextStep()
 
 QString AuthFlow::getStateMessage() const
 {
-    switch (m_taskState) {
-        case AccountTaskState::STATE_WORKING: {
-            if (m_currentStep) {
-                return m_currentStep->describe();
-            } else {
-                return tr("Working...");
-            }
-        }
-        default: {
-            return AccountTask::getStateMessage();
-        }
+    if (m_taskState == AccountTaskState::STATE_WORKING) {
+        if (m_currentStep)
+            return m_currentStep->describe();
+        return tr("Working...");
     }
+    return AccountTask::getStateMessage();
 }
 
 void AuthFlow::stepFinished(AccountTaskState resultingState, QString message)
