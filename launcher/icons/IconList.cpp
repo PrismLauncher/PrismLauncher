@@ -322,7 +322,7 @@ const MMCIcon* IconList::icon(const QString& key) const
 
 bool IconList::deleteIcon(const QString& key)
 {
-    return iconFileExists(key) && QFile::remove(icon(key)->getFilePath());
+    return iconFileExists(key) && FS::deletePath(icon(key)->getFilePath());
 }
 
 bool IconList::trashIcon(const QString& key)

@@ -10,7 +10,7 @@ void createOverrides(const QString& name, const QString& parent_folder, const QS
 {
     QString file_path(FS::PathCombine(parent_folder, name + ".txt"));
     if (QFile::exists(file_path))
-        QFile::remove(file_path);
+        FS::deletePath(file_path);
 
     FS::ensureFilePathExists(file_path);
 
