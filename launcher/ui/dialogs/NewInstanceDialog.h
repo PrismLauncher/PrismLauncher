@@ -82,6 +82,7 @@ class NewInstanceDialog : public QDialog, public BasePageProvider {
    private slots:
     void on_iconButton_clicked();
     void on_instNameTextBox_textChanged(const QString& arg1);
+    void on_okButton_clicked();
 
    private:
     Ui::NewInstanceDialog* ui = nullptr;

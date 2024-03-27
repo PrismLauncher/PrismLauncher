@@ -36,6 +36,7 @@
 
 #include "NewInstanceDialog.h"
 #include "Application.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/pages/modplatform/import_ftb/ImportFTBPage.h"
 #include "ui_NewInstanceDialog.h"
 
@@ -53,6 +54,7 @@
 #include <QLayout>
 #include <QPushButton>
 #include <QValidator>
+#include <algorithm>
 #include <utility>
 
 #include "ui/pages/modplatform/CustomPage.h"
@@ -106,7 +108,8 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
     OkButton->setDefault(true);
     OkButton->setAutoDefault(true);
-    connect(OkButton, &QPushButton::clicked, this, &NewInstanceDialog::accept);
+
+    connect(OkButton, &QPushButton::clicked, this, &NewInstanceDialog::on_okButton_clicked);
 
     auto CancelButton = m_buttons->button(QDialogButtonBox::Cancel);
     CancelButton->setDefault(false);
@@ -138,6 +141,27 @@ void NewInstanceDialog::reject()
     m_container->prepareToClose();
 
     QDialog::reject();
+}
+void NewInstanceDialog::on_okButton_clicked()
+{
+#ifdef Q_OS_WIN
+    auto instanceName = instName();
+    // check the name of the instance:
+    // https://github.com/PrismLauncher/PrismLauncher/issues/131
+    // https://github.com/PrismLauncher/PrismLauncher/issues/1659
+    if (std::any_of(instanceName.cbegin(), instanceName.cend(), [](const QChar& c) { return c.unicode() > 127; })) {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm instance name"),
+                                                     tr("It looks like your instance name contains non-ascii characters.\n"
+                                                        "This may cause the instance to not launch or crash.\n"
+                                                        "Are you sure you want to create the instance with this name?"),
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+#endif
+    NewInstanceDialog::accept();
 }
 
 void NewInstanceDialog::accept()
