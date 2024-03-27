@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string notr="true">Form</string>
   </property>
-  <layout class="QFormLayout" name="formLayout">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <property name="sizeConstraint">
     <enum>QLayout::SetMinimumSize</enum>
    </property>
@@ -29,141 +29,179 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="0" column="0">
-    <widget class="QLabel" name="iconsLabel">
-     <property name="text">
-      <string>&amp;Icons</string>
-     </property>
-     <property name="buddy">
-      <cstring>iconsComboBox</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <layout class="QHBoxLayout" name="iconsLayout">
-     <item>
-      <widget class="QComboBox" name="iconsComboBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="iconsFolder">
-       <property name="toolTip">
-        <string>View icon themes folder.</string>
-       </property>
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="iconsLabel">
        <property name="text">
-        <string/>
+        <string>&amp;Icons</string>
        </property>
-       <property name="icon">
-        <iconset theme="viewfolder">
-         <normaloff>.</normaloff>.</iconset>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
+       <property name="buddy">
+        <cstring>iconsComboBox</cstring>
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="widgetStyleLabel">
-     <property name="text">
-      <string>&amp;Widgets</string>
-     </property>
-     <property name="buddy">
-      <cstring>widgetStyleComboBox</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <layout class="QHBoxLayout" name="widgetStyleLayout">
-     <item>
-      <widget class="QComboBox" name="widgetStyleComboBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
-      </widget>
+     <item row="0" column="1">
+      <layout class="QHBoxLayout" name="iconsLayout">
+       <item>
+        <widget class="QComboBox" name="iconsComboBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="iconsFolder">
+         <property name="toolTip">
+          <string>View icon themes folder.</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="viewfolder"/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
-     <item>
-      <widget class="QPushButton" name="widgetStyleFolder">
-       <property name="toolTip">
-        <string>View widget themes folder.</string>
-       </property>
+     <item row="1" column="0">
+      <widget class="QLabel" name="widgetStyleLabel">
        <property name="text">
-        <string/>
+        <string>&amp;Widgets</string>
        </property>
-       <property name="icon">
-        <iconset theme="viewfolder">
-         <normaloff>.</normaloff>.</iconset>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
+       <property name="buddy">
+        <cstring>widgetStyleComboBox</cstring>
        </property>
       </widget>
      </item>
-    </layout>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="backgroundCatLabel">
-     <property name="toolTip">
-      <string>The cat appears in the background and is not shown by default. It is only made visible when pressing the Cat button in the Toolbar.</string>
-     </property>
-     <property name="text">
-      <string>C&amp;at</string>
-     </property>
-     <property name="buddy">
-      <cstring>backgroundCatComboBox</cstring>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <layout class="QHBoxLayout" name="catLayout">
-     <item>
-      <widget class="QComboBox" name="backgroundCatComboBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
+     <item row="1" column="1">
+      <layout class="QHBoxLayout" name="widgetStyleLayout">
+       <item>
+        <widget class="QComboBox" name="widgetStyleComboBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="widgetStyleFolder">
+         <property name="toolTip">
+          <string>View widget themes folder.</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="viewfolder"/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="backgroundCatLabel">
        <property name="toolTip">
         <string>The cat appears in the background and is not shown by default. It is only made visible when pressing the Cat button in the Toolbar.</string>
        </property>
+       <property name="text">
+        <string>C&amp;at</string>
+       </property>
+       <property name="buddy">
+        <cstring>backgroundCatComboBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <layout class="QHBoxLayout" name="catLayout">
+       <item>
+        <widget class="QComboBox" name="backgroundCatComboBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
+         <property name="toolTip">
+          <string>The cat appears in the background and is not shown by default. It is only made visible when pressing the Cat button in the Toolbar.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="catPackFolder">
+         <property name="toolTip">
+          <string>View cat packs folder.</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset theme="viewfolder"/>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="refreshLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="refreshButton">
+       <property name="text">
+        <string>Refresh all</string>
+       </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="catPackFolder">
-       <property name="toolTip">
-        <string>View cat packs folder.</string>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
-       <property name="text">
-        <string/>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
        </property>
-       <property name="icon">
-        <iconset theme="viewfolder">
-         <normaloff>.</normaloff>.</iconset>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-      </widget>
+      </spacer>
      </item>
     </layout>
    </item>

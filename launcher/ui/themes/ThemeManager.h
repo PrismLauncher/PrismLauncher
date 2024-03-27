@@ -55,6 +55,8 @@ class ThemeManager {
     QString getCatPack(QString catName = "");
     QList<CatPack*> getValidCatPacks();
 
+    void refresh();
+
    private:
     std::map<QString, std::unique_ptr<ITheme>> m_themes;
     std::map<QString, IconTheme> m_icons;
