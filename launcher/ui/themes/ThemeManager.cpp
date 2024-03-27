@@ -266,6 +266,18 @@ QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
     return id;
 }
 
+void ThemeManager::removeCatPack(const QString& id)
+{
+    m_catPacks.erase(id);
+    if (APPLICATION->settings()->get("BackgroundCat").toString() == id) {
+        // set the selected cat to a first of the remaining ones...
+        auto item = m_catPacks.begin();
+        if (item != m_catPacks.end()) {
+            APPLICATION->settings()->set("BackgroundCat", item->first);
+        }
+    }
+}
+
 void ThemeManager::initializeCatPacks()
 {
     QList<std::pair<QString, QString>> defaultCats{ { "kitteh", QObject::tr("Background Cat (from MultiMC)") },

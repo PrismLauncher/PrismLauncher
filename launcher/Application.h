@@ -72,6 +72,7 @@ class ITheme;
 class MCEditTool;
 class ThemeManager;
 class IconTheme;
+class PluginList;
 
 namespace Meta {
 class Index;
@@ -123,6 +124,8 @@ class Application : public QApplication {
     std::shared_ptr<InstanceList> instances() const { return m_instances; }
 
     std::shared_ptr<IconList> icons() const { return m_icons; }
+
+    std::shared_ptr<PluginList> plugins() const { return m_plugins; }
 
     MCEditTool* mcedit() const { return m_mcedit.get(); }
 
@@ -246,6 +249,7 @@ class Application : public QApplication {
     std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
     std::unique_ptr<ThemeManager> m_themeManager;
+    std::shared_ptr<PluginList> m_plugins;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 

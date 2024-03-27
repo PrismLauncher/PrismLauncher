@@ -178,6 +178,17 @@ void LauncherPage::on_metadataDisableBtn_clicked()
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
 }
 
+void LauncherPage::on_pluginsDirBrowseBtn_clicked()
+{
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Plugins Folder"), ui->pluginsDirTextBox->text());
+
+    // do not allow current dir - it's dirty. Do not allow dirs that don't exist
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
+        QString cooked_dir = FS::NormalizePath(raw_dir);
+        ui->pluginsDirTextBox->setText(cooked_dir);
+    }
+}
+
 void LauncherPage::applySettings()
 {
     auto s = APPLICATION->settings();
@@ -209,6 +220,7 @@ void LauncherPage::applySettings()
     s->set("IconsDir", ui->iconsDirTextBox->text());
     s->set("DownloadsDir", ui->downloadsDirTextBox->text());
     s->set("DownloadsDirWatchRecursive", ui->downloadsDirWatchRecursiveCheckBox->isChecked());
+    s->set("PluginsDir", ui->pluginsDirTextBox->text());
 
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
     switch (sortMode) {
@@ -270,6 +282,7 @@ void LauncherPage::loadSettings()
     ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
     ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
     ui->downloadsDirWatchRecursiveCheckBox->setChecked(s->get("DownloadsDirWatchRecursive").toBool());
+    ui->pluginsDirTextBox->setText(s->get("PluginsDir").toString());
 
     QString sortMode = s->get("InstSortMode").toString();
 

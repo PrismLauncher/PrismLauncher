@@ -20,6 +20,7 @@
 
 #include "Application.h"
 #include "DesktopServices.h"
+#include "plugin/PluginList.h"
 #include "ui/themes/ITheme.h"
 #include "ui/themes/ThemeManager.h"
 
@@ -39,6 +40,8 @@ ThemeCustomizationWidget::ThemeCustomizationWidget(QWidget* parent) : QWidget(pa
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getApplicationThemesFolder().path()); });
     connect(ui->catPackFolder, &QPushButton::clicked, this,
             [] { DesktopServices::openPath(APPLICATION->themeManager()->getCatPacksFolder().path()); });
+
+    connect(APPLICATION->plugins().get(), &PluginList::pluginsReloaded, this, &ThemeCustomizationWidget::loadSettings);
 }
 
 ThemeCustomizationWidget::~ThemeCustomizationWidget()
@@ -82,6 +85,9 @@ void ThemeCustomizationWidget::showFeatures(ThemeFields features)
 
 void ThemeCustomizationWidget::applyIconTheme(int index)
 {
+    if (m_isReloading)
+        return;
+
     auto settings = APPLICATION->settings();
     auto originalIconTheme = settings->get("IconTheme").toString();
     auto newIconTheme = ui->iconsComboBox->currentData().toString();
@@ -95,6 +101,9 @@ void ThemeCustomizationWidget::applyIconTheme(int index)
 
 void ThemeCustomizationWidget::applyWidgetTheme(int index)
 {
+    if (m_isReloading)
+        return;
+
     auto settings = APPLICATION->settings();
     auto originalAppTheme = settings->get("ApplicationTheme").toString();
     auto newAppTheme = ui->widgetStyleComboBox->currentData().toString();
@@ -108,6 +117,9 @@ void ThemeCustomizationWidget::applyWidgetTheme(int index)
 
 void ThemeCustomizationWidget::applyCatTheme(int index)
 {
+    if (m_isReloading)
+        return;
+
     auto settings = APPLICATION->settings();
     auto originalCat = settings->get("BackgroundCat").toString();
     auto newCat = ui->backgroundCatComboBox->currentData().toString();
@@ -126,6 +138,12 @@ void ThemeCustomizationWidget::applySettings()
 }
 void ThemeCustomizationWidget::loadSettings()
 {
+    m_isReloading = true;
+    ui->iconsComboBox->clear();
+    ui->widgetStyleComboBox->clear();
+    ui->backgroundCatComboBox->clear();
+    m_isReloading = false;
+
     auto settings = APPLICATION->settings();
 
     {
