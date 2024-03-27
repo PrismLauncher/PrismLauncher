@@ -84,6 +84,7 @@ struct ModpackExtra {
 struct ModpackVersion {
     QString name;
     QString version;
+    QString gameVersion;
     ModPlatform::IndexedVersionType version_type;
     QString changelog;
 
