@@ -51,8 +51,8 @@
 
 #include "ui/GuiUtil.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/ModUpdateDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
+#include "ui/dialogs/ResourceUpdateDialog.h"
 
 #include "DesktopServices.h"
 
@@ -68,88 +68,37 @@
 #include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/ProgressDialog.h"
 
-ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
-    : ExternalResourcesPage(inst, mods, parent), m_model(mods)
+ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> model, QWidget* parent)
+    : ExternalResourcesPage(inst, model, parent), m_model(model)
 {
-    // This is structured like that so that these changes
-    // do not affect the Resource pack and Shader pack tabs
-    {
-        ui->actionDownloadItem->setText(tr("Download mods"));
-        ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
-        ui->actionDownloadItem->setEnabled(true);
-        ui->actionAddItem->setText(tr("Add file"));
-        ui->actionAddItem->setToolTip(tr("Add a locally downloaded file"));
+    ui->actionDownloadItem->setText(tr("Download Mods"));
+    ui->actionDownloadItem->setToolTip(tr("Download mods from online mod platforms"));
+    ui->actionDownloadItem->setEnabled(true);
+    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
 
-        ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
+    connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::downloadMods);
 
-        connect(ui->actionDownloadItem, &QAction::triggered, this, &ModFolderPage::installMods);
+    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
+    connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
+    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
 
-        // update menu
-        auto updateMenu = ui->actionUpdateItem->menu();
-        if (updateMenu) {
-            updateMenu->clear();
-        } else {
-            updateMenu = new QMenu(this);
-        }
+    auto updateMenu = new QMenu(this);
 
-        auto update = updateMenu->addAction(tr("Check for Updates"));
-        update->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-        connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
+    auto update = updateMenu->addAction(tr("Check for Updates"));
+    connect(update, &QAction::triggered, this, &ModFolderPage::updateMods);
 
-        auto updateWithDeps = updateMenu->addAction(tr("Verify Dependencies"));
-        updateWithDeps->setToolTip(
-            tr("Try to update and check for missing dependencies all selected mods (all mods if none are selected)"));
-        connect(updateWithDeps, &QAction::triggered, this, [this] { updateMods(true); });
+    updateMenu->addAction(ui->actionVerifyItemDependencies);
+    connect(ui->actionVerifyItemDependencies, &QAction::triggered, this, [this] { updateMods(true); });
 
-        auto depsDisabled = APPLICATION->settings()->getSetting("ModDependenciesDisabled");
-        updateWithDeps->setVisible(!depsDisabled->get().toBool());
-        connect(depsDisabled.get(), &Setting::SettingChanged, this,
-                [updateWithDeps](const Setting& setting, QVariant value) { updateWithDeps->setVisible(!value.toBool()); });
+    auto depsDisabled = APPLICATION->settings()->getSetting("ModDependenciesDisabled");
+    ui->actionVerifyItemDependencies->setVisible(!depsDisabled->get().toBool());
+    connect(depsDisabled.get(), &Setting::SettingChanged, this,
+            [this](const Setting& setting, const QVariant& value) { ui->actionVerifyItemDependencies->setVisible(!value.toBool()); });
 
-        auto actionRemoveItemMetadata = updateMenu->addAction(tr("Reset update metadata"));
-        actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
-        connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
-        actionRemoveItemMetadata->setEnabled(false);
+    updateMenu->addAction(ui->actionResetItemMetadata);
+    connect(ui->actionResetItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
 
-        ui->actionUpdateItem->setMenu(updateMenu);
-
-        ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
-        connect(ui->actionUpdateItem, &QAction::triggered, this, &ModFolderPage::updateMods);
-        ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
-
-        ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
-        ui->actionsToolbar->addAction(ui->actionVisitItemPage);
-        connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
-
-        auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
-
-        connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-                [this, check_allow_update, actionRemoveItemMetadata] {
-                    ui->actionUpdateItem->setEnabled(check_allow_update());
-
-                    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-                    auto mods_list = m_model->selectedMods(selection);
-                    auto selected = std::count_if(mods_list.cbegin(), mods_list.cend(),
-                                                  [](Mod* v) { return v->metadata() != nullptr || v->homeurl().size() != 0; });
-                    if (selected <= 1) {
-                        ui->actionVisitItemPage->setText(tr("Visit mod's page"));
-                        ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
-
-                    } else {
-                        ui->actionVisitItemPage->setText(tr("Visit mods' pages"));
-                        ui->actionVisitItemPage->setToolTip(tr("Go to the pages of the selected mods"));
-                    }
-                    ui->actionVisitItemPage->setEnabled(selected != 0);
-                    actionRemoveItemMetadata->setEnabled(selected != 0);
-                });
-
-        auto updateButtons = [this, check_allow_update] { ui->actionUpdateItem->setEnabled(check_allow_update()); };
-        connect(mods.get(), &ModFolderModel::rowsInserted, this, updateButtons);
-
-        connect(mods.get(), &ModFolderModel::rowsRemoved, this, updateButtons);
-
-        connect(mods.get(), &ModFolderModel::updateFinished, this, updateButtons);
-    }
+    ui->actionUpdateItem->setMenu(updateMenu);
 }
 
 bool ModFolderPage::shouldDisplay() const
@@ -161,9 +110,8 @@ bool ModFolderPage::onSelectionChanged(const QModelIndex& current, [[maybe_unuse
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
-    Mod const* m = m_model->at(row);
-    if (m)
-        ui->frame->updateWithMod(*m);
+    const Mod& mod = m_model->at(row);
+    ui->frame->updateWithMod(mod);
 
     return true;
 }
@@ -180,10 +128,10 @@ void ModFolderPage::removeItems(const QItemSelection& selection)
         if (response != QMessageBox::Yes)
             return;
     }
-    m_model->deleteMods(selection.indexes());
+    m_model->deleteResources(selection.indexes());
 }
 
-void ModFolderPage::installMods()
+void ModFolderPage::downloadMods()
 {
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
@@ -196,7 +144,7 @@ void ModFolderPage::installMods()
 
     ResourceDownload::ModDownloadDialog mdownload(this, m_model, m_instance);
     if (mdownload.exec()) {
-        auto tasks = new ConcurrentTask(this, "Download Mods", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        auto tasks = new ConcurrentTask(this, tr("Download Mods"), APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();
@@ -253,12 +201,12 @@ void ModFolderPage::updateMods(bool includeDeps)
     }
     auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
 
-    auto mods_list = m_model->selectedMods(selection);
+    auto mods_list = m_model->selectedResources(selection);
     bool use_all = mods_list.empty();
     if (use_all)
-        mods_list = m_model->allMods();
+        mods_list = m_model->allResources();
 
-    ModUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps);
+    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, includeDeps, true);
     update_dialog.checkCandidates();
 
     if (update_dialog.aborted()) {
@@ -308,6 +256,27 @@ void ModFolderPage::updateMods(bool includeDeps)
     }
 }
 
+void ModFolderPage::deleteModMetadata()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selectionCount = m_model->selectedMods(selection).length();
+    if (selectionCount == 0)
+        return;
+    if (selectionCount > 1) {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
+                                                     tr("You are about to remove the metadata for %1 mods.\n"
+                                                        "Are you sure?")
+                                                         .arg(selectionCount),
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+
+    m_model->deleteMetadata(selection);
+}
+
 CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
     : ModFolderPage(inst, mods, parent)
 {}
@@ -340,35 +309,4 @@ NilModFolderPage::NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolder
 bool NilModFolderPage::shouldDisplay() const
 {
     return m_model->dir().exists();
-}
-
-void ModFolderPage::visitModPages()
-{
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    for (auto mod : m_model->selectedMods(selection)) {
-        auto url = mod->metaurl();
-        if (!url.isEmpty())
-            DesktopServices::openUrl(url);
-    }
-}
-
-void ModFolderPage::deleteModMetadata()
-{
-    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
-    auto selectionCount = m_model->selectedMods(selection).length();
-    if (selectionCount == 0)
-        return;
-    if (selectionCount > 1) {
-        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
-                                                     tr("You are about to remove the metadata for %1 mods.\n"
-                                                        "Are you sure?")
-                                                         .arg(selectionCount),
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                            ->exec();
-
-        if (response != QMessageBox::Yes)
-            return;
-    }
-
-    m_model->deleteModsMetadata(selection);
 }

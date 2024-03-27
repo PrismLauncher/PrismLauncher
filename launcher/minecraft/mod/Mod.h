@@ -56,7 +56,6 @@ class Mod : public Resource {
 
     Mod() = default;
     Mod(const QFileInfo& file);
-    Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata);
     Mod(QString file_path) : Mod(QFileInfo(file_path)) {}
 
     auto details() const -> const ModDetails&;
@@ -65,11 +64,10 @@ class Mod : public Resource {
     auto homeurl() const -> QString;
     auto description() const -> QString;
     auto authors() const -> QStringList;
-    auto status() const -> ModStatus;
-    auto provider() const -> std::optional<QString>;
     auto licenses() const -> const QList<ModLicense>&;
     auto issueTracker() const -> QString;
     auto metaurl() const -> QString;
+    void setDetails(const ModDetails& details);
 
     /** Get the intneral path to the mod's icon file*/
     QString iconPath() const { return m_local_details.icon_file; }
@@ -78,23 +76,10 @@ class Mod : public Resource {
     /** Thread-safe. */
     void setIcon(QImage new_image) const;
 
-    auto metadata() -> std::shared_ptr<Metadata::ModStruct>;
-    auto metadata() const -> const std::shared_ptr<Metadata::ModStruct>;
-
-    void setStatus(ModStatus status);
-    void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
-    void setMetadata(const Metadata::ModStruct& metadata) { setMetadata(std::make_shared<Metadata::ModStruct>(metadata)); }
-    void setDetails(const ModDetails& details);
-
     bool valid() const override;
 
     [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
-
-    // Delete all the files of this mod
-    auto destroy(QDir& index_dir, bool preserve_metadata = false, bool attempt_trash = true) -> bool;
-    // Delete the metadata only
-    void destroyMetadata(QDir& index_dir);
 
     void finishResolvingWithDetails(ModDetails&& details);
 

@@ -54,11 +54,35 @@ void Resource::parseFile()
     m_changed_date_time = m_file_info.lastModified();
 }
 
+auto Resource::name() const -> QString
+{
+    if (metadata())
+        return metadata()->name;
+
+    return m_name;
+}
+
 static void removeThePrefix(QString& string)
 {
     QRegularExpression regex(QStringLiteral("^(?:the|teh) +"), QRegularExpression::CaseInsensitiveOption);
     string.remove(regex);
     string = string.trimmed();
+}
+
+auto Resource::provider() const -> QString
+{
+    if (metadata())
+        return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
+
+    return tr("Unknown");
+}
+
+void Resource::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
+{
+    if (status() == ResourceStatus::NO_METADATA)
+        setStatus(ResourceStatus::INSTALLED);
+
+    m_metadata = metadata;
 }
 
 std::pair<int, bool> Resource::compare(const Resource& other, SortType type) const
@@ -146,10 +170,27 @@ bool Resource::enable(EnableAction action)
     return true;
 }
 
-bool Resource::destroy(bool attemptTrash)
+auto Resource::destroy(const QDir& index_dir, bool preserve_metadata, bool attempt_trash) -> bool
 {
     m_type = ResourceType::UNKNOWN;
-    return (attemptTrash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
+
+    if (!preserve_metadata) {
+        qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
+        destroyMetadata(index_dir);
+    }
+
+    return (attempt_trash && FS::trash(m_file_info.filePath())) || FS::deletePath(m_file_info.filePath());
+}
+
+auto Resource::destroyMetadata(const QDir& index_dir) -> void
+{
+    if (metadata()) {
+        Metadata::remove(index_dir, metadata()->slug);
+    } else {
+        auto n = name();
+        Metadata::remove(index_dir, n);
+    }
+    m_metadata = nullptr;
 }
 
 bool Resource::isSymLinkUnder(const QString& instPath) const

@@ -36,40 +36,20 @@
 
 #include "Mod.h"
 
-#include <QDebug>
 #include <QDir>
 #include <QRegularExpression>
 #include <QString>
 
 #include "MTPixmapCache.h"
 #include "MetadataHandler.h"
+#include "Resource.h"
 #include "Version.h"
 #include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
     m_enabled = (file.suffix() != "disabled");
-}
-
-Mod::Mod(const QDir& mods_dir, const Metadata::ModStruct& metadata) : Mod(mods_dir.absoluteFilePath(metadata.filename))
-{
-    m_name = metadata.name;
-    m_local_details.metadata = std::make_shared<Metadata::ModStruct>(std::move(metadata));
-}
-
-void Mod::setStatus(ModStatus status)
-{
-    m_local_details.status = status;
-}
-void Mod::setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata)
-{
-    if (status() == ModStatus::NoMetadata)
-        setStatus(ModStatus::Installed);
-
-    m_local_details.metadata = metadata;
 }
 
 void Mod::setDetails(const ModDetails& details)
@@ -103,8 +83,7 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
             break;
         }
         case SortType::PROVIDER: {
-            auto compare_result =
-                QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
+            auto compare_result = QString::compare(provider(), cast_other->provider(), Qt::CaseInsensitive);
             if (compare_result != 0)
                 return { compare_result, type == SortType::PROVIDER };
             break;
@@ -127,28 +106,6 @@ bool Mod::applyFilter(QRegularExpression filter) const
     return Resource::applyFilter(filter);
 }
 
-auto Mod::destroy(QDir& index_dir, bool preserve_metadata, bool attempt_trash) -> bool
-{
-    if (!preserve_metadata) {
-        qDebug() << QString("Destroying metadata for '%1' on purpose").arg(name());
-
-        destroyMetadata(index_dir);
-    }
-
-    return Resource::destroy(attempt_trash);
-}
-
-void Mod::destroyMetadata(QDir& index_dir)
-{
-    if (metadata()) {
-        Metadata::remove(index_dir, metadata()->slug);
-    } else {
-        auto n = name();
-        Metadata::remove(index_dir, n);
-    }
-    m_local_details.metadata = nullptr;
-}
-
 auto Mod::details() const -> const ModDetails&
 {
     return m_local_details;
@@ -160,10 +117,7 @@ auto Mod::name() const -> QString
     if (!d_name.isEmpty())
         return d_name;
 
-    if (metadata())
-        return metadata()->name;
-
-    return m_name;
+    return Resource::name();
 }
 
 auto Mod::version() const -> QString
@@ -193,43 +147,15 @@ auto Mod::authors() const -> QStringList
     return details().authors;
 }
 
-auto Mod::status() const -> ModStatus
-{
-    return details().status;
-}
-
-auto Mod::metadata() -> std::shared_ptr<Metadata::ModStruct>
-{
-    return m_local_details.metadata;
-}
-
-auto Mod::metadata() const -> const std::shared_ptr<Metadata::ModStruct>
-{
-    return m_local_details.metadata;
-}
-
 void Mod::finishResolvingWithDetails(ModDetails&& details)
 {
     m_is_resolving = false;
     m_is_resolved = true;
 
-    std::shared_ptr<Metadata::ModStruct> metadata = details.metadata;
-    if (details.status == ModStatus::Unknown)
-        details.status = m_local_details.status;
-
     m_local_details = std::move(details);
-    if (metadata)
-        setMetadata(std::move(metadata));
     if (!iconPath().isEmpty()) {
         m_pack_image_cache_key.was_read_attempt = false;
     }
-}
-
-auto Mod::provider() const -> std::optional<QString>
-{
-    if (metadata())
-        return ProviderCaps.readableName(metadata()->provider);
-    return {};
 }
 
 auto Mod::licenses() const -> const QList<ModLicense>&

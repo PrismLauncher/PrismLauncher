@@ -6,8 +6,6 @@
 
 #include "modplatform/ModIndex.h"
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 ChooseProviderDialog::ChooseProviderDialog(QWidget* parent, bool single_choice, bool allow_skipping)
     : QDialog(parent), ui(new Ui::ChooseProviderDialog)
 {
@@ -78,7 +76,7 @@ void ChooseProviderDialog::addProviders()
     QRadioButton* btn;
 
     for (auto& provider : { ModPlatform::ResourceProvider::MODRINTH, ModPlatform::ResourceProvider::FLAME }) {
-        btn = new QRadioButton(ProviderCaps.readableName(provider), this);
+        btn = new QRadioButton(ModPlatform::ProviderCapabilities::readableName(provider), this);
         m_providers.addButton(btn, btn_index++);
         ui->providersLayout->addWidget(btn);
     }

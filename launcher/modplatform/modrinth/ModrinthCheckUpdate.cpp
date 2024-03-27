@@ -13,7 +13,6 @@
 #include "minecraft/mod/ModFolderModel.h"
 
 static ModrinthAPI api;
-static ModPlatform::ProviderCapabilities ProviderCaps;
 
 bool ModrinthCheckUpdate::abort()
 {
@@ -29,38 +28,38 @@ bool ModrinthCheckUpdate::abort()
  * */
 void ModrinthCheckUpdate::executeTask()
 {
-    setStatus(tr("Preparing mods for Modrinth..."));
+    setStatus(tr("Preparing resources for Modrinth..."));
     setProgress(0, 3);
 
-    QHash<QString, Mod*> mappings;
+    QHash<QString, Resource*> mappings;
 
     // Create all hashes
     QStringList hashes;
-    auto best_hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    auto best_hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
     ConcurrentTask hashing_task(this, "MakeModrinthHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
-    for (auto* mod : m_mods) {
-        if (!mod->enabled()) {
-            emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
+    for (auto* resource : m_resources) {
+        if (!resource->enabled()) {
+            emit checkFailed(resource, tr("Disabled resources won't be updated, to prevent resource duplication issues!"));
             continue;
         }
 
-        auto hash = mod->metadata()->hash;
+        auto hash = resource->metadata()->hash;
 
         // Sadly the API can only handle one hash type per call, se we
         // need to generate a new hash if the current one is innadequate
         // (though it will rarely happen, if at all)
-        if (mod->metadata()->hash_format != best_hash_type) {
-            auto hash_task = Hashing::createModrinthHasher(mod->fileinfo().absoluteFilePath());
-            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [&hashes, &mappings, mod](QString hash) {
+        if (resource->metadata()->hash_format != best_hash_type) {
+            auto hash_task = Hashing::createModrinthHasher(resource->fileinfo().absoluteFilePath());
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [&hashes, &mappings, resource](QString hash) {
                 hashes.append(hash);
-                mappings.insert(hash, mod);
+                mappings.insert(hash, resource);
             });
             connect(hash_task.get(), &Task::failed, [this] { failed("Failed to generate hash"); });
             hashing_task.addTask(hash_task);
         } else {
             hashes.append(hash);
-            mappings.insert(hash, mod);
+            mappings.insert(hash, resource);
         }
     }
 
@@ -88,19 +87,26 @@ void ModrinthCheckUpdate::executeTask()
         setProgress(2, 3);
 
         try {
-            for (auto hash : mappings.keys()) {
+            for (auto iter = mappings.begin(); iter != mappings.end(); iter++) {
+                const QString& hash = iter.key();
+                Resource* resource = iter.value();
                 auto project_obj = doc[hash].toObject();
 
                 // If the returned project is empty, but we have Modrinth metadata,
                 // it means this specific version is not available
                 if (project_obj.isEmpty()) {
-                    qDebug() << "Mod " << mappings.find(hash).value()->name() << " got an empty response.";
+                    qDebug() << "Resource " << resource->name() << " got an empty response.";
                     qDebug() << "Hash: " << hash;
 
-                    emit checkFailed(
-                        mappings.find(hash).value(),
-                        tr("No valid version found for this mod. It's probably unavailable for the current game version / mod loader."));
+                    QString reason;
+                    if (dynamic_cast<Mod*>(resource) != nullptr)
+                        reason =
+                            tr("No valid version found for this resource. It's probably unavailable for the current game "
+                               "version / mod loader.");
+                    else
+                        reason = tr("No valid version found for this resource. It's probably unavailable for the current game version.");
 
+                    emit checkFailed(resource, reason);
                     continue;
                 }
 
@@ -109,7 +115,8 @@ void ModrinthCheckUpdate::executeTask()
                 QString loader_filter;
                 if (m_loaders.has_value()) {
                     static auto flags = { ModPlatform::ModLoaderType::NeoForge, ModPlatform::ModLoaderType::Forge,
-                                          ModPlatform::ModLoaderType::Fabric, ModPlatform::ModLoaderType::Quilt };
+                                          ModPlatform::ModLoaderType::Fabric, ModPlatform::ModLoaderType::Quilt,
+                                          ModPlatform::ModLoaderType::LiteLoader };
                     for (auto flag : flags) {
                         if (m_loaders.value().testFlag(flag)) {
                             loader_filter = ModPlatform::getModLoaderString(flag);
@@ -126,46 +133,44 @@ void ModrinthCheckUpdate::executeTask()
 
                 auto project_ver = Modrinth::loadIndexedPackVersion(project_obj, best_hash_type, loader_filter);
                 if (project_ver.downloadUrl.isEmpty()) {
-                    qCritical() << "Modrinth mod without download url!";
+                    qCritical() << "Modrinth resource without download url!";
                     qCritical() << project_ver.fileName;
 
-                    emit checkFailed(mappings.find(hash).value(), tr("Mod has an empty download URL"));
+                    emit checkFailed(mappings.find(hash).value(), tr("Resource has an empty download URL"));
 
                     continue;
                 }
 
-                auto mod_iter = mappings.find(hash);
-                if (mod_iter == mappings.end()) {
-                    qCritical() << "Failed to remap mod from Modrinth!";
+                auto resource_iter = mappings.find(hash);
+                if (resource_iter == mappings.end()) {
+                    qCritical() << "Failed to remap resource from Modrinth!";
                     continue;
                 }
-                auto mod = *mod_iter;
-
-                auto key = project_ver.hash;
 
                 // Fake pack with the necessary info to pass to the download task :)
                 auto pack = std::make_shared<ModPlatform::IndexedPack>();
-                pack->name = mod->name();
-                pack->slug = mod->metadata()->slug;
-                pack->addonId = mod->metadata()->project_id;
-                pack->websiteUrl = mod->homeurl();
-                for (auto& author : mod->authors())
-                    pack->authors.append({ author });
-                pack->description = mod->description();
+                pack->name = resource->name();
+                pack->slug = resource->metadata()->slug;
+                pack->addonId = resource->metadata()->project_id;
                 pack->provider = ModPlatform::ResourceProvider::MODRINTH;
-                if ((key != hash && project_ver.is_preferred) || (mod->status() == ModStatus::NotInstalled)) {
-                    if (mod->version() == project_ver.version_number)
-                        continue;
+                if ((project_ver.hash != hash && project_ver.is_preferred) || (resource->status() == ResourceStatus::NOT_INSTALLED)) {
+                    auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resource_model);
 
-                    auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_mods_folder);
+                    QString old_version = resource->metadata()->version_number;
+                    if (old_version.isEmpty()) {
+                        if (resource->status() == ResourceStatus::NOT_INSTALLED)
+                            old_version = tr("Not installed");
+                        else
+                            old_version = tr("Unknown");
+                    }
 
-                    m_updatable.emplace_back(pack->name, hash, mod->version(), project_ver.version_number, project_ver.version_type,
-                                             project_ver.changelog, ModPlatform::ResourceProvider::MODRINTH, download_task);
+                    m_updates.emplace_back(pack->name, hash, old_version, project_ver.version_number, project_ver.version_type,
+                                           project_ver.changelog, ModPlatform::ResourceProvider::MODRINTH, download_task);
                 }
                 m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, project_ver));
             }
         } catch (Json::JsonException& e) {
-            emitFailed(e.cause() + " : " + e.what());
+            emitFailed(e.cause() + ": " + e.what());
             return;
         }
         emitSucceeded();

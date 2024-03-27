@@ -44,17 +44,21 @@
 #include "minecraft/mod/Mod.h"
 #include "tasks/Task.h"
 
-class ModFolderLoadTask : public Task {
+class ResourceFolderLoadTask : public Task {
     Q_OBJECT
    public:
     struct Result {
-        QMap<QString, Mod::Ptr> mods;
+        QMap<QString, Resource::Ptr> resources;
     };
     using ResultPtr = std::shared_ptr<Result>;
     ResultPtr result() const { return m_result; }
 
    public:
-    ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan = false);
+    ResourceFolderLoadTask(const QDir& resource_dir,
+                           const QDir& index_dir,
+                           bool is_indexed,
+                           bool clean_orphan,
+                           std::function<Resource*(const QFileInfo&)> create_function);
 
     [[nodiscard]] bool canAbort() const override { return true; }
     bool abort() override
@@ -69,9 +73,10 @@ class ModFolderLoadTask : public Task {
     void getFromMetadata();
 
    private:
-    QDir m_mods_dir, m_index_dir;
+    QDir m_resource_dir, m_index_dir;
     bool m_is_indexed;
     bool m_clean_orphan;
+    std::function<Resource*(QFileInfo const&)> m_create_func;
     ResultPtr m_result;
 
     std::atomic<bool> m_aborted = false;

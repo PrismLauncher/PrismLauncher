@@ -39,21 +39,17 @@
 
 #include "TexturePackFolderModel.h"
 
-#include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 #include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
+#include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
-TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance* instance) : ResourceFolderModel(QDir(dir), instance)
+TexturePackFolderModel::TexturePackFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
+    : ResourceFolderModel(QDir(dir), instance, is_indexed, create_dir, parent)
 {
-    m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified" });
-    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified") });
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified", "Provider" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified"), tr("Provider") });
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::DATE };
     m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true };
-}
-
-Task* TexturePackFolderModel::createUpdateTask()
-{
-    return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return makeShared<TexturePack>(entry); });
+    m_columnsHideable = { false, true, false, true, true };
 }
 
 Task* TexturePackFolderModel::createParseTask(Resource& resource)
@@ -76,19 +72,21 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
                     return m_resources[row]->name();
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
+                case ProviderColumn:
+                    return m_resources[row]->provider();
                 default:
                     return {};
             }
         case Qt::ToolTipRole:
             if (column == NameColumn) {
-                if (at(row)->isSymLinkUnder(instDirPath())) {
+                if (at(row).isSymLinkUnder(instDirPath())) {
                     return m_resources[row]->internal_id() +
                            tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
                               "\nCanonical Path: %1")
-                               .arg(at(row)->fileinfo().canonicalFilePath());
+                               .arg(at(row).fileinfo().canonicalFilePath());
                     ;
                 }
-                if (at(row)->isMoreThanOneHardLink()) {
+                if (at(row).isMoreThanOneHardLink()) {
                     return m_resources[row]->internal_id() +
                            tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
                 }
@@ -96,10 +94,10 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
 
             return m_resources[row]->internal_id();
         case Qt::DecorationRole: {
-            if (column == NameColumn && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
+            if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
             if (column == ImageColumn) {
-                return at(row)->image({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+                return at(row).image({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }
             return {};
         }
@@ -127,6 +125,7 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
                 case NameColumn:
                 case DateColumn:
                 case ImageColumn:
+                case ProviderColumn:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -134,14 +133,13 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
         case Qt::ToolTipRole: {
             switch (section) {
                 case ActiveColumn:
-                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
-                    return tr("Is the resource enabled?");
+                    return tr("Is the texture pack enabled?");
                 case NameColumn:
-                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
-                    return tr("The name of the resource.");
+                    return tr("The name of the texture pack.");
                 case DateColumn:
-                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
-                    return tr("The date and time this resource was last changed (or added).");
+                    return tr("The date and time this texture pack was last changed (or added).");
+                case ProviderColumn:
+                    return tr("The source provider of the texture pack.");
                 default:
                     return {};
             }
