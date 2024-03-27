@@ -257,7 +257,7 @@ void PrismExternalUpdater::setBetaAllowed(bool allowed)
 
 void PrismExternalUpdater::resetAutoCheckTimer()
 {
-    if (priv->autoCheck) {
+    if (priv->autoCheck && priv->updateInterval > 0) {
         int timeoutDuration = 0;
         auto now = QDateTime::currentDateTime();
         if (priv->lastCheck.isValid()) {
