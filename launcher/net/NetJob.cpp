@@ -36,6 +36,7 @@
  */
 
 #include "NetJob.h"
+#include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
 #endif
@@ -56,18 +57,15 @@ auto NetJob::addNetAction(NetAction::Ptr action) -> bool
     return true;
 }
 
-void NetJob::startNext()
+void NetJob::executeNextSubTask()
 {
-    if (m_queue.isEmpty() && m_doing.isEmpty()) {
-        // We're finished, check for failures and retry if we can (up to 3 times)
-        if (!m_failed.isEmpty() && m_try < 3) {
-            m_try += 1;
-            while (!m_failed.isEmpty())
-                m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
-        }
+    // We're finished, check for failures and retry if we can (up to 3 times)
+    if (isRunning() && m_queue.isEmpty() && m_doing.isEmpty() && !m_failed.isEmpty() && m_try < 3) {
+        m_try += 1;
+        while (!m_failed.isEmpty())
+            m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
     }
-
-    ConcurrentTask::startNext();
+    ConcurrentTask::executeNextSubTask();
 }
 
 auto NetJob::size() const -> int

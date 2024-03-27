@@ -207,6 +207,11 @@ void ResourceModel::loadEntry(QModelIndex& entry)
                     return;
                 versionRequestSucceeded(doc, pack, entry);
             };
+        if (!callbacks.on_fail)
+            callbacks.on_fail = [](QString reason, int) {
+                QMessageBox::critical(nullptr, tr("Error"),
+                                      tr("A network error occurred. Could not load project versions: %1").arg(reason));
+            };
 
         if (auto job = m_api->getProjectVersions(std::move(args), std::move(callbacks)); job)
             runInfoJob(job);
@@ -228,7 +233,13 @@ void ResourceModel::loadEntry(QModelIndex& entry)
             callbacks.on_fail = [this](QString reason) {
                 if (!s_running_models.constFind(this).value())
                     return;
-                QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info:%1").arg(reason));
+                QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info: %1").arg(reason));
+            };
+        if (!callbacks.on_abort)
+            callbacks.on_abort = [this] {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                qCritical() << tr("The request was aborted for an unknown reason");
             };
 
         if (auto job = m_api->getProjectInfo(std::move(args), std::move(callbacks)); job)
