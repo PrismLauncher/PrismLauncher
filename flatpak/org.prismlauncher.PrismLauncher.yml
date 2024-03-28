@@ -1,6 +1,6 @@
 id: org.prismlauncher.PrismLauncher
 runtime: org.kde.Platform
-runtime-version: 5.15-23.08
+runtime-version: 6.6
 sdk: org.kde.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.openjdk17
@@ -37,7 +37,6 @@ modules:
     config-opts:
       - -DLauncher_BUILD_PLATFORM=flatpak
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
-      - -DLauncher_QT_VERSION_MAJOR=5
     build-options:
       env:
         JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17

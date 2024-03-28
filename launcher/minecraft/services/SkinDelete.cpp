@@ -51,11 +51,7 @@ void SkinDelete::executeTask()
 
     setStatus(tr("Deleting skin"));
     connect(rep, &QNetworkReply::uploadProgress, this, &SkinDelete::setProgress);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &SkinDelete::downloadError);
-#else
-    connect(rep, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, &SkinDelete::downloadError);
-#endif
     connect(rep, &QNetworkReply::sslErrors, this, &SkinDelete::sslErrors);
     connect(rep, &QNetworkReply::finished, this, &SkinDelete::downloadFinished);
 }

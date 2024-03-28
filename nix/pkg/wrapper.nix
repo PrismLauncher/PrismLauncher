@@ -41,12 +41,11 @@ in
       wrapQtAppsHook
     ];
 
-    buildInputs =
-      [
-        qtbase
-        qtsvg
-      ]
-      ++ lib.optional (lib.versionAtLeast qtbase.version "6" && stdenv.isLinux) qtwayland;
+    buildInputs = [
+      qtbase
+      qtsvg
+      qtwayland
+    ];
 
     postBuild = ''
       wrapQtAppsHook
