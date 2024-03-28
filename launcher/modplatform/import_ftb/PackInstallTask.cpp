@@ -55,6 +55,7 @@ void PackInstallTask::copySettings()
     instanceSettings->suspendSave();
     MinecraftInstance instance(m_globalSettings, instanceSettings, m_stagingPath);
     instance.settings()->set("InstanceType", "OneSix");
+    instance.settings()->set("totalTimePlayed", m_pack.totalPlayTime / 1000);
 
     if (m_pack.jvmArgs.isValid() && !m_pack.jvmArgs.toString().isEmpty()) {
         instance.settings()->set("OverrideJavaArgs", true);
