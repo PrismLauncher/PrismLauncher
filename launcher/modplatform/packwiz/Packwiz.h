@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,6 +42,9 @@ class V1 {
         QString name{};
         QString filename{};
         Side side{ Side::UniversalSide };
+        ModPlatform::ModLoaderTypes loaders;
+        QStringList mcVersions;
+        ModPlatform::IndexedVersionType releaseType;
 
         // [download]
         QString mode{};

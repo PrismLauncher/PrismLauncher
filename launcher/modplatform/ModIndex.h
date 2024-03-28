@@ -109,6 +109,7 @@ struct IndexedVersion {
     bool is_preferred = true;
     QString changelog;
     QList<Dependency> dependencies;
+    QString side;  // this is for flame API
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
@@ -183,13 +184,19 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
-auto getModLoaderString(ModLoaderType type) -> const QString;
+auto getModLoaderAsString(ModLoaderType type) -> const QString;
+auto getModLoaderFromString(QString type) -> ModLoaderType;
 
 constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
 {
     auto x = static_cast<int>(l);
     return x && !(x & (x - 1));
 }
+
+struct Category {
+    QString name;
+    QString id;
+};
 
 }  // namespace ModPlatform
 

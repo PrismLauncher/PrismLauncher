@@ -5,6 +5,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -71,13 +72,14 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
 
     m_ui->gridLayout_3->addWidget(m_filter_widget.get(), 0, 0, 1, m_ui->gridLayout_3->columnCount());
 
-    m_filter_widget->setInstance(&static_cast<MinecraftInstance&>(m_base_instance));
     m_filter = m_filter_widget->getFilter();
 
+    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, &ResourcePage::updateVersionList);
     connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this,
             [&] { m_ui->searchButton->setStyleSheet("text-decoration: underline"); });
     connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this,
             [&] { m_ui->searchButton->setStyleSheet("text-decoration: none"); });
+    prepareProviderCategories();
 }
 
 /******** Callbacks to events in the UI (set up in the derived classes) ********/
@@ -89,6 +91,7 @@ void ModPage::filterMods()
 
 void ModPage::triggerSearch()
 {
+    auto changed = m_filter_widget->changed();
     m_filter = m_filter_widget->getFilter();
     m_ui->packView->selectionModel()->setCurrentIndex({}, QItemSelectionModel::SelectionFlag::ClearAndSelect);
     m_ui->packView->clearSelection();
@@ -96,7 +99,7 @@ void ModPage::triggerSearch()
     m_ui->versionSelectionBox->clear();
     updateSelectionButton();
 
-    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), m_filter_widget->changed());
+    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), changed);
     m_fetch_progress.watch(m_model->activeSearchJob().get());
 }
 
@@ -110,40 +113,6 @@ QMap<QString, QString> ModPage::urlHandlers() const
 }
 
 /******** Make changes to the UI ********/
-
-void ModPage::updateVersionList()
-{
-    m_ui->versionSelectionBox->clear();
-    auto packProfile = (dynamic_cast<MinecraftInstance&>(m_base_instance)).getPackProfile();
-
-    QString mcVersion = packProfile->getComponentVersion("net.minecraft");
-
-    auto current_pack = getCurrentPack();
-    if (!current_pack)
-        return;
-    for (int i = 0; i < current_pack->versions.size(); i++) {
-        auto version = current_pack->versions[i];
-        bool valid = false;
-        for (auto& mcVer : m_filter->versions) {
-            if (validateVersion(version, mcVer.toString(), packProfile->getSupportedModLoaders())) {
-                valid = true;
-                break;
-            }
-        }
-
-        // Only add the version if it's valid or using the 'Any' filter, but never if the version is opted out
-        if ((valid || m_filter->versions.empty()) && !optedOut(version)) {
-            auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
-            m_ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(i));
-        }
-    }
-    if (m_ui->versionSelectionBox->count() == 0) {
-        m_ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1));
-        m_ui->resourceSelectionButton->setText(tr("Cannot select invalid version :("));
-    }
-
-    updateSelectionButton();
-}
 
 void ModPage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                 ModPlatform::IndexedVersion& version,

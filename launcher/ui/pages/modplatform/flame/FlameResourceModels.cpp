@@ -6,10 +6,16 @@
 
 #include "Json.h"
 
+#include "minecraft/PackProfile.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 
 namespace ResourceDownload {
+
+static bool isOptedOut(const ModPlatform::IndexedVersion& ver)
+{
+    return ver.downloadUrl.isEmpty();
+}
 
 FlameModModel::FlameModModel(BaseInstance& base) : ModModel(base, new FlameAPI) {}
 
@@ -34,6 +40,11 @@ auto FlameModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJs
     return FlameMod::loadDependencyVersions(m, arr, &m_base_instance);
 }
 
+bool FlameModModel::optedOut(const ModPlatform::IndexedVersion& ver) const
+{
+    return isOptedOut(ver);
+}
+
 auto FlameModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return Json::ensureArray(obj.object(), "data");
@@ -55,6 +66,11 @@ void FlameResourcePackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJso
 void FlameResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
     FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
+}
+
+bool FlameResourcePackModel::optedOut(const ModPlatform::IndexedVersion& ver) const
+{
+    return isOptedOut(ver);
 }
 
 auto FlameResourcePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
@@ -116,6 +132,11 @@ ResourceAPI::VersionSearchArgs FlameTexturePackModel::createVersionsArguments(QM
     return args;
 }
 
+bool FlameTexturePackModel::optedOut(const ModPlatform::IndexedVersion& ver) const
+{
+    return isOptedOut(ver);
+}
+
 auto FlameTexturePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
 {
     return Json::ensureArray(obj.object(), "data");
@@ -137,6 +158,11 @@ void FlameShaderPackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonO
 void FlameShaderPackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
 {
     FlameMod::loadIndexedPackVersions(m, arr, APPLICATION->network(), &m_base_instance);
+}
+
+bool FlameShaderPackModel::optedOut(const ModPlatform::IndexedVersion& ver) const
+{
+    return isOptedOut(ver);
 }
 
 auto FlameShaderPackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray

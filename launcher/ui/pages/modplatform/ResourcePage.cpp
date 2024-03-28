@@ -5,6 +5,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -268,7 +269,7 @@ void ResourcePage::updateVersionList()
     if (current_pack)
         for (int i = 0; i < current_pack->versions.size(); i++) {
             auto& version = current_pack->versions[i];
-            if (optedOut(version))
+            if (!m_model->checkVersionFilters(version))
                 continue;
 
             auto release_type = current_pack->versions[i].version_type.isValid()

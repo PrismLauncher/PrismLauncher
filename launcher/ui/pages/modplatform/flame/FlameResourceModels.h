@@ -17,6 +17,8 @@ class FlameModModel : public ModModel {
     FlameModModel(BaseInstance&);
     ~FlameModModel() override = default;
 
+    bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
+
    private:
     [[nodiscard]] QString debugName() const override { return Flame::debugName() + " (Model)"; }
     [[nodiscard]] QString metaEntryBase() const override { return Flame::metaEntryBase(); }
@@ -36,6 +38,8 @@ class FlameResourcePackModel : public ResourcePackResourceModel {
     FlameResourcePackModel(const BaseInstance&);
     ~FlameResourcePackModel() override = default;
 
+    bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
+
    private:
     [[nodiscard]] QString debugName() const override { return Flame::debugName() + " (Model)"; }
     [[nodiscard]] QString metaEntryBase() const override { return Flame::metaEntryBase(); }
@@ -53,6 +57,8 @@ class FlameTexturePackModel : public TexturePackResourceModel {
    public:
     FlameTexturePackModel(const BaseInstance&);
     ~FlameTexturePackModel() override = default;
+
+    bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
 
    private:
     [[nodiscard]] QString debugName() const override { return Flame::debugName() + " (Model)"; }
@@ -74,6 +80,8 @@ class FlameShaderPackModel : public ShaderPackResourceModel {
    public:
     FlameShaderPackModel(const BaseInstance&);
     ~FlameShaderPackModel() override = default;
+
+    bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
 
    private:
     [[nodiscard]] QString debugName() const override { return Flame::debugName() + " (Model)"; }

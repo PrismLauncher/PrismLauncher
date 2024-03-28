@@ -5,6 +5,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,17 +38,16 @@
  */
 
 #include "FlameResourcePages.h"
+#include <QList>
+#include <memory>
+#include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui_ResourcePage.h"
 
 #include "FlameResourceModels.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
 namespace ResourceDownload {
-
-static bool isOptedOut(ModPlatform::IndexedVersion const& ver)
-{
-    return ver.downloadUrl.isEmpty();
-}
 
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
@@ -64,19 +64,6 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : 
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameModPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
-}
-
-auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver,
-                                   QString mineVer,
-                                   std::optional<ModPlatform::ModLoaderTypes> loaders) const -> bool
-{
-    return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty() &&
-           (!loaders.has_value() || !ver.loaders || loaders.value() & ver.loaders);
-}
-
-bool FlameModPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
 }
 
 void FlameModPage::openUrl(const QUrl& url)
@@ -113,11 +100,6 @@ FlameResourcePackPage::FlameResourcePackPage(ResourcePackDownloadDialog* dialog,
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-bool FlameResourcePackPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
-}
-
 void FlameResourcePackPage::openUrl(const QUrl& url)
 {
     if (url.scheme().isEmpty()) {
@@ -152,11 +134,6 @@ FlameTexturePackPage::FlameTexturePackPage(TexturePackDownloadDialog* dialog, Ba
     m_ui->packDescription->setMetaEntry(metaEntryBase());
 }
 
-bool FlameTexturePackPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
-}
-
 void FlameTexturePackPage::openUrl(const QUrl& url)
 {
     if (url.scheme().isEmpty()) {
@@ -189,11 +166,6 @@ FlameShaderPackPage::FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseI
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameShaderPackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
-}
-
-bool FlameShaderPackPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
 }
 
 void FlameShaderPackPage::openUrl(const QUrl& url)
@@ -232,4 +204,19 @@ auto FlameShaderPackPage::shouldDisplay() const -> bool
     return true;
 }
 
+unique_qobject_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
+{
+    return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_base_instance), false, this);
+}
+
+void FlameModPage::prepareProviderCategories()
+{
+    auto response = std::make_shared<QByteArray>();
+    auto task = FlameAPI::getModCategories(response);
+    QObject::connect(task.get(), &Task::succeeded, [this, response]() {
+        auto categories = FlameAPI::loadModCategories(response);
+        m_filter_widget->setCategories(categories);
+    });
+    task->start();
+};
 }  // namespace ResourceDownload

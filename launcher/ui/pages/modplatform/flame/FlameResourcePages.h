@@ -5,6 +5,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -94,12 +95,11 @@ class FlameModPage : public ModPage {
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
-    bool validateVersion(ModPlatform::IndexedVersion& ver,
-                         QString mineVer,
-                         std::optional<ModPlatform::ModLoaderTypes> loaders = {}) const override;
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
-
     void openUrl(const QUrl& url) override;
+    unique_qobject_ptr<ModFilterWidget> createFilterWidget() override;
+
+   protected:
+    virtual void prepareProviderCategories() override;
 };
 
 class FlameResourcePackPage : public ResourcePackResourcePage {
@@ -123,8 +123,6 @@ class FlameResourcePackPage : public ResourcePackResourcePage {
     [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
-
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     void openUrl(const QUrl& url) override;
 };
@@ -151,8 +149,6 @@ class FlameTexturePackPage : public TexturePackResourcePage {
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
 
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
-
     void openUrl(const QUrl& url) override;
 };
 
@@ -177,8 +173,6 @@ class FlameShaderPackPage : public ShaderPackResourcePage {
     [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
-
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     void openUrl(const QUrl& url) override;
 };

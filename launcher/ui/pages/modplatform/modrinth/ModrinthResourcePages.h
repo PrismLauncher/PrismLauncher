@@ -4,6 +4,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -93,8 +94,10 @@ class ModrinthModPage : public ModPage {
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
-    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ModPlatform::ModLoaderTypes> loaders = {}) const
-        -> bool override;
+    unique_qobject_ptr<ModFilterWidget> createFilterWidget() override;
+
+   protected:
+    virtual void prepareProviderCategories() override;
 };
 
 class ModrinthResourcePackPage : public ResourcePackResourcePage {
