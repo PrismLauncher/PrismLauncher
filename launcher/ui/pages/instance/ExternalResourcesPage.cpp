@@ -88,6 +88,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     };
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
     connect(model.get(), &ResourceFolderModel::updateFinished, this, updateExtra);
+    connect(model.get(), &ResourceFolderModel::parseFinished, this, updateExtra);
 
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
 

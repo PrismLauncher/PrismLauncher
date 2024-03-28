@@ -54,7 +54,6 @@ class ShaderPack : public Resource {
     void setPackFormat(ShaderPackFormat new_format);
 
     bool valid() const override;
-    [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
 
    protected:
     mutable QMutex m_data_lock;
