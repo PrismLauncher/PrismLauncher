@@ -118,6 +118,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QCheckBox" name="filenameCheckBox">
+             <property name="text">
+              <string>Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="versionButton">
              <property name="text">
               <string>Version</string>
@@ -135,6 +142,13 @@
             <widget class="QPushButton" name="urlButton">
              <property name="text">
               <string>URL</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="filenameButton">
+             <property name="text">
+              <string>Filename</string>
              </property>
             </widget>
            </item>

@@ -37,6 +37,7 @@
  */
 
 #include "ModFolderPage.h"
+#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui_ExternalResourcesPage.h"
 
 #include <QAbstractItemModel>
@@ -110,6 +111,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         actionRemoveItemMetadata->setToolTip(tr("Remove mod's metadata"));
         connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
         actionRemoveItemMetadata->setEnabled(false);
+
+        auto actionExportMetadata = updateMenu->addAction(tr("Export metadata"));
+        actionExportMetadata->setToolTip(tr("Export mod's metadata to text"));
+        connect(actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
 
         ui->actionUpdateItem->setMenu(updateMenu);
 
@@ -371,4 +376,16 @@ void ModFolderPage::deleteModMetadata()
     }
 
     m_model->deleteModsMetadata(selection);
+}
+
+void ModFolderPage::exportModMetadata()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selectedMods = m_model->selectedMods(selection);
+    if (selectedMods.length() == 0)
+        selectedMods = m_model->allMods();
+
+    std::sort(selectedMods.begin(), selectedMods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
+    ExportToModListDialog dlg(m_instance->name(), selectedMods, this);
+    dlg.exec();
 }

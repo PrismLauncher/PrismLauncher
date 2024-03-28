@@ -42,17 +42,28 @@ QString toHTML(QList<Mod*> mods, OptionalData extraData)
         }
         if (extraData & Authors && !mod->authors().isEmpty())
             line += " by " + mod->authors().join(", ").toHtmlEscaped();
+        if (extraData & FileName)
+            line += QString(" (%1)").arg(mod->fileinfo().fileName().toHtmlEscaped());
+
         lines.append(QString("<li>%1</li>").arg(line));
     }
     return QString("<html><body><ul>\n\t%1\n</ul></body></html>").arg(lines.join("\n\t"));
 }
 
+QString toMarkdownEscaped(QString src)
+{
+    for (auto ch : "\\`*_{}[]<>()#+-.!|")
+        src.replace(ch, QString("\\%1").arg(ch));
+    return src;
+}
+
 QString toMarkdown(QList<Mod*> mods, OptionalData extraData)
 {
     QStringList lines;
+
     for (auto mod : mods) {
         auto meta = mod->metadata();
-        auto modName = mod->name();
+        auto modName = toMarkdownEscaped(mod->name());
         if (extraData & Url) {
             auto url = mod->metaurl();
             if (!url.isEmpty())
@@ -60,14 +71,16 @@ QString toMarkdown(QList<Mod*> mods, OptionalData extraData)
         }
         auto line = modName;
         if (extraData & Version) {
-            auto ver = mod->version();
+            auto ver = toMarkdownEscaped(mod->version());
             if (ver.isEmpty() && meta != nullptr)
-                ver = meta->version().toString();
+                ver = toMarkdownEscaped(meta->version().toString());
             if (!ver.isEmpty())
                 line += QString(" [%1]").arg(ver);
         }
         if (extraData & Authors && !mod->authors().isEmpty())
-            line += " by " + mod->authors().join(", ");
+            line += " by " + toMarkdownEscaped(mod->authors().join(", "));
+        if (extraData & FileName)
+            line += QString(" (%1)").arg(toMarkdownEscaped(mod->fileinfo().fileName()));
         lines << "- " + line;
     }
     return lines.join("\n");
@@ -95,6 +108,8 @@ QString toPlainTXT(QList<Mod*> mods, OptionalData extraData)
         }
         if (extraData & Authors && !mod->authors().isEmpty())
             line += " by " + mod->authors().join(", ");
+        if (extraData & FileName)
+            line += QString(" (%1)").arg(mod->fileinfo().fileName());
         lines << line;
     }
     return lines.join("\n");
@@ -122,6 +137,8 @@ QString toJSON(QList<Mod*> mods, OptionalData extraData)
         }
         if (extraData & Authors && !mod->authors().isEmpty())
             line["authors"] = QJsonArray::fromStringList(mod->authors());
+        if (extraData & FileName)
+            line["filename"] = mod->fileinfo().fileName();
         lines << line;
     }
     QJsonDocument doc;
@@ -154,6 +171,8 @@ QString toCSV(QList<Mod*> mods, OptionalData extraData)
                 authors = QString("\"%1\"").arg(mod->authors().join(","));
             data << authors;
         }
+        if (extraData & FileName)
+            data << mod->fileinfo().fileName();
         lines << data.join(",");
     }
     return lines.join("\n");
@@ -189,11 +208,13 @@ QString exportToModList(QList<Mod*> mods, QString lineTemplate)
         if (ver.isEmpty() && meta != nullptr)
             ver = meta->version().toString();
         auto authors = mod->authors().join(", ");
+        auto filename = mod->fileinfo().fileName();
         lines << QString(lineTemplate)
                      .replace("{name}", modName)
                      .replace("{url}", url)
                      .replace("{version}", ver)
-                     .replace("{authors}", authors);
+                     .replace("{authors}", authors)
+                     .replace("{filename}", filename);
     }
     return lines.join("\n");
 }

@@ -491,15 +491,6 @@
     <string>CurseForge (zip)</string>
    </property>
   </action>
-  <action name="actionExportInstanceToModList">
-   <property name="icon">
-    <iconset theme="new">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Mod List</string>
-   </property>
-  </action>
   <action name="actionCreateInstanceShortcut">
    <property name="icon">
     <iconset theme="shortcut">
