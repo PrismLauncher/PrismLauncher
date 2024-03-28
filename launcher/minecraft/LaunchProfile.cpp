@@ -164,6 +164,10 @@ void LaunchProfile::applyCompatibleJavaMajors(QList<int>& javaMajor)
 {
     m_compatibleJavaMajors.append(javaMajor);
 }
+void LaunchProfile::applyCompatibleJavaName(QString javaName)
+{
+    m_compatibleJavaName = javaName;
+}
 
 void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext& runtimeContext)
 {
@@ -332,6 +336,11 @@ const QList<AgentPtr>& LaunchProfile::getAgents() const
 const QList<int>& LaunchProfile::getCompatibleJavaMajors() const
 {
     return m_compatibleJavaMajors;
+}
+
+const QString LaunchProfile::getCompatibleJavaName() const
+{
+    return m_compatibleJavaName;
 }
 
 void LaunchProfile::getLibraryFiles(const RuntimeContext& runtimeContext,

@@ -78,6 +78,14 @@ QVariant BaseVersionList::data(const QModelIndex& index, int role) const
         case TypeRole:
             return version->typeString();
 
+        case JavaMajorRole: {
+            auto major = version->name();
+            if (major.startsWith("java")) {
+                major = "Java " + major.mid(4);
+            }
+            return major;
+        }
+
         default:
             return QVariant();
     }
@@ -110,6 +118,8 @@ QHash<int, QByteArray> BaseVersionList::roleNames() const
     roles.insert(TypeRole, "type");
     roles.insert(BranchRole, "branch");
     roles.insert(PathRole, "path");
-    roles.insert(ArchitectureRole, "architecture");
+    roles.insert(JavaNameRole, "javaName");
+    roles.insert(CPUArchitectureRole, "architecture");
+    roles.insert(JavaMajorRole, "javaMajor");
     return roles;
 }

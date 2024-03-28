@@ -337,6 +337,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     }
 
     candidates.append(getMinecraftJavaBundle());
+    candidates.append(getPrismJavaBundle());
     candidates = addJavasFromEnv(candidates);
     candidates.removeDuplicates();
     return candidates;
@@ -363,6 +364,7 @@ QList<QString> JavaUtils::FindJavaPaths()
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
     }
     javas.append(getMinecraftJavaBundle());
+    javas.append(getPrismJavaBundle());
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;
@@ -415,6 +417,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs(FS::PathCombine(home, ".sdkman/candidates/java"));
 
     javas.append(getMinecraftJavaBundle());
+    javas.append(getPrismJavaBundle());
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
     return javas;
@@ -428,6 +431,8 @@ QList<QString> JavaUtils::FindJavaPaths()
     javas.append(this->GetDefaultJava()->path);
 
     javas.append(getMinecraftJavaBundle());
+    javas.append(getPrismJavaBundle());
+    javas.removeDuplicates();
     return addJavasFromEnv(javas);
 }
 #endif
@@ -481,5 +486,34 @@ QStringList getMinecraftJavaBundle()
             }
         }
     }
+    return javas;
+}
+
+QStringList getPrismJavaBundle()
+{
+    QList<QString> javas;
+
+    QString executable = "java";
+#if defined(Q_OS_WIN32)
+    executable += "w.exe";
+#endif
+
+    auto scanDir = [&](QString prefix) {
+        javas.append(FS::PathCombine(prefix, "jre", "bin", executable));
+        javas.append(FS::PathCombine(prefix, "bin", executable));
+        javas.append(FS::PathCombine(prefix, executable));
+    };
+    auto scanJavaDir = [&](const QString& dirPath) {
+        QDir dir(dirPath);
+        if (!dir.exists())
+            return;
+        auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for (auto& entry : entries) {
+            scanDir(entry.canonicalFilePath());
+        }
+    };
+
+    scanJavaDir(APPLICATION->javaPath());
+
     return javas;
 }

@@ -26,10 +26,6 @@ class QDialogButtonBox;
 class VersionSelectWidget;
 class QPushButton;
 
-namespace Ui {
-class VersionSelectDialog;
-}
-
 class VersionProxyModel;
 
 class VersionSelectDialog : public QDialog {

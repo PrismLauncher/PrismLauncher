@@ -57,6 +57,8 @@ bool JavaWizardPage::validatePage()
 {
     auto settings = APPLICATION->settings();
     auto result = m_java_widget->validate();
+    settings->set("AutomaticJavaSwitch", m_java_widget->autodetectJava());
+    settings->set("AutomaticJavaDownload", m_java_widget->autodownloadJava());
     switch (result) {
         default:
         case JavaSettingsWidget::ValidationStatus::Bad: {

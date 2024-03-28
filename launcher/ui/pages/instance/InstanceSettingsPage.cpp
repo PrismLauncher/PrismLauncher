@@ -36,6 +36,8 @@
  */
 
 #include "InstanceSettingsPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/java/InstallJavaDialog.h"
 #include "ui_InstanceSettingsPage.h"
 
 #include <QDialog>
@@ -61,6 +63,8 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance* inst, QWidget* parent)
 {
     m_settings = inst->settings();
     ui->setupUi(this);
+
+    ui->javaDownloadBtn->setHidden(!BuildConfig.JAVA_DOWNLOADER_ENABLED);
 
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
@@ -388,6 +392,12 @@ void InstanceSettingsPage::loadSettings()
     ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
 }
 
+void InstanceSettingsPage::on_javaDownloadBtn_clicked()
+{
+    auto jdialog = new Java::InstallDialog({}, this);
+    jdialog->exec();
+}
+
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
 {
     if (JavaUtils::getJavaCheckPath().isEmpty()) {
@@ -409,6 +419,15 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
         ui->labelPermGen->setVisible(visible);
         ui->labelPermgenNote->setVisible(visible);
         m_settings->set("PermGenVisible", visible);
+
+        if (!java->is_64bit && m_settings->get("MaxMemAlloc").toInt() > 2048) {
+            CustomMessageBox::selectable(this, tr("Confirm Selection"),
+                                         tr("You selected a 32 bit java version.\n"
+                                            "This means that will not support more than 2048MiB of RAM.\n"
+                                            "Please make sure that the maximum memory value is lower."),
+                                         QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
+                ->exec();
+        }
     }
 }
 

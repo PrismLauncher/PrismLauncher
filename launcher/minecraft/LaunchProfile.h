@@ -59,6 +59,7 @@ class LaunchProfile : public ProblemProvider {
     void applyMavenFile(LibraryPtr library, const RuntimeContext& runtimeContext);
     void applyAgent(AgentPtr agent, const RuntimeContext& runtimeContext);
     void applyCompatibleJavaMajors(QList<int>& javaMajor);
+    void applyCompatibleJavaName(QString javaName);
     void applyMainJar(LibraryPtr jar);
     void applyProblemSeverity(ProblemSeverity severity);
     /// clear the profile
@@ -80,6 +81,7 @@ class LaunchProfile : public ProblemProvider {
     const QList<LibraryPtr>& getMavenFiles() const;
     const QList<AgentPtr>& getAgents() const;
     const QList<int>& getCompatibleJavaMajors() const;
+    const QString getCompatibleJavaName() const;
     const LibraryPtr getMainJar() const;
     void getLibraryFiles(const RuntimeContext& runtimeContext,
                          QStringList& jars,
@@ -149,6 +151,8 @@ class LaunchProfile : public ProblemProvider {
 
     /// compatible java major versions
     QList<int> m_compatibleJavaMajors;
+
+    QString m_compatibleJavaName;
 
     ProblemSeverity m_problemSeverity = ProblemSeverity::None;
 };
