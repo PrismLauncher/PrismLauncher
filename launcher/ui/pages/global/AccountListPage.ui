@@ -59,14 +59,8 @@
    <addaction name="actionSetDefault"/>
    <addaction name="actionNoDefault"/>
    <addaction name="separator"/>
-   <addaction name="actionUploadSkin"/>
-   <addaction name="actionDeleteSkin"/>
+   <addaction name="actionManageSkins"/>
   </widget>
-  <action name="actionRemove">
-   <property name="text">
-    <string>Remo&amp;ve</string>
-   </property>
-  </action>
   <action name="actionSetDefault">
    <property name="text">
     <string>&amp;Set Default</string>
@@ -80,17 +74,12 @@
     <string>&amp;No Default</string>
    </property>
   </action>
-  <action name="actionUploadSkin">
+  <action name="actionManageSkins">
    <property name="text">
-    <string>&amp;Upload Skin</string>
-   </property>
-  </action>
-  <action name="actionDeleteSkin">
-   <property name="text">
-    <string>&amp;Delete Skin</string>
+    <string>&amp;Manage Skins</string>
    </property>
    <property name="toolTip">
-    <string>Delete the currently active skin and go back to the default one</string>
+    <string>Manage Skins</string>
    </property>
   </action>
   <action name="actionAddMicrosoft">
@@ -109,6 +98,11 @@
    </property>
    <property name="toolTip">
     <string>Refresh the account tokens</string>
+   </property>
+  </action>
+  <action name="actionRemove">
+   <property name="text">
+    <string>Remo&amp;ve</string>
    </property>
   </action>
  </widget>

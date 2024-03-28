@@ -347,7 +347,7 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
     Skin skinOut;
     // fill in default skin info ourselves, as this endpoint doesn't provide it
     bool steve = isDefaultModelSteve(output.id);
-    skinOut.variant = steve ? "classic" : "slim";
+    skinOut.variant = steve ? "CLASSIC" : "SLIM";
     skinOut.url = steve ? SKIN_URL_STEVE : SKIN_URL_ALEX;
     // sadly we can't figure this out, but I don't think it really matters...
     skinOut.id = "00000000-0000-0000-0000-000000000000";
