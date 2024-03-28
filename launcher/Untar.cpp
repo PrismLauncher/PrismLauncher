@@ -33,13 +33,11 @@
  *      limitations under the License.
  */
 #include "Untar.h"
-#include <qfileinfo.h>
-#include <qlogging.h>
 #include <quagzipfile.h>
 #include <QByteArray>
+#include <QFileInfo>
 #include <QIODevice>
 #include <QString>
-#include <cstdlib>
 #include "FileSystem.h"
 
 // adaptation of the:
@@ -69,40 +67,30 @@ enum class TypeFlag : char {
     GNULongName = 'L', /* long file name */
 };
 
-struct Header {         /* byte offset */
-    char name[100];     /*   0 */
-    char mode[8];       /* 100 */
-    char uid[8];        /* 108 */
-    char gid[8];        /* 116 */
-    char size[12];      /* 124 */
-    char mtime[12];     /* 136 */
-    char chksum[8];     /* 148 */
-    TypeFlag typeflag;  /* 156 */
-    char linkname[100]; /* 157 */
-    char magic[6];      /* 257 */
-    char version[2];    /* 263 */
-    char uname[32];     /* 265 */
-    char gname[32];     /* 297 */
-    char devmajor[8];   /* 329 */
-    char devminor[8];   /* 337 */
-    char prefix[155];   /* 345 */
-                        /* 500 */
-};
+// struct Header {         /* byte offset */
+//     char name[100];     /*   0 */
+//     char mode[8];       /* 100 */
+//     char uid[8];        /* 108 */
+//     char gid[8];        /* 116 */
+//     char size[12];      /* 124 */
+//     char mtime[12];     /* 136 */
+//     char chksum[8];     /* 148 */
+//     TypeFlag typeflag;  /* 156 */
+//     char linkname[100]; /* 157 */
+//     char magic[6];      /* 257 */
+//     char version[2];    /* 263 */
+//     char uname[32];     /* 265 */
+//     char gname[32];     /* 297 */
+//     char devmajor[8];   /* 329 */
+//     char devminor[8];   /* 337 */
+//     char prefix[155];   /* 345 */
+//                         /* 500 */
+// };
 
-union Buffer {
-    char buffer[BLOCKSIZE];
-    struct Header header;
-};
-
-bool readLonglink(QIODevice* in, Buffer& buffer, QByteArray& longlink)
+bool readLonglink(QIODevice* in, qint64 size, QByteArray& longlink)
 {
     qint64 n = 0;
-    qint64 size = strtoll(buffer.header.size, NULL, 8);
     size--;  // ignore trailing null
-    if (errno == ERANGE) {
-        qCritical() << "The filename size can't be read";
-        return false;
-    }
     if (size < 0) {
         qCritical() << "The filename size is negative";
         return false;
@@ -119,36 +107,51 @@ bool readLonglink(QIODevice* in, Buffer& buffer, QByteArray& longlink)
     return true;
 }
 
+int getOctal(char* buffer, int maxlenght, bool* ok)
+{
+    return QByteArray(buffer, qstrnlen(buffer, maxlenght)).toInt(ok, 8);
+}
+
+QString decodeName(char* name)
+{
+    return QFile::decodeName(QByteArray(name, qstrnlen(name, 100)));
+}
 bool Tar::extract(QIODevice* in, QString dst)
 {
-    Buffer buffer;
+    char buffer[BLOCKSIZE];
     QString name, symlink, firstFolderName;
-    bool doNotReset = false;
+    bool doNotReset = false, ok;
     while (true) {
-        auto n = in->read(buffer.buffer, BLOCKSIZE);
+        auto n = in->read(buffer, BLOCKSIZE);
         if (n != BLOCKSIZE) {  // allways expect complete blocks
             qCritical() << "The expected blocksize was not respected";
             return false;
         }
-        if (buffer.header.name[0] == 0) {  // end of archive
+        if (buffer[0] == 0) {  // end of archive
             return true;
         }
-        int mode = strtol(buffer.header.mode, NULL, 8) | QFile::ReadUser | QFile::WriteUser;  // hack to ensure write and read permisions
-        if (errno == ERANGE) {
+        int mode = getOctal(buffer + 100, 8, &ok) | QFile::ReadUser | QFile::WriteUser;  // hack to ensure write and read permisions
+        if (!ok) {
             qCritical() << "The file mode can't be read";
             return false;
         }
         // there are names that are exactly 100 bytes long
         // and neither longlink nor \0 terminated (bug:101472)
+
         if (name.isEmpty()) {
-            name = QFile::decodeName(QByteArray(buffer.header.name, qstrnlen(buffer.header.name, 100)));
+            name = decodeName(buffer);
             if (!firstFolderName.isEmpty() && name.startsWith(firstFolderName)) {
                 name = name.mid(firstFolderName.size());
             }
         }
         if (symlink.isEmpty())
-            symlink = QFile::decodeName(QByteArray(buffer.header.linkname, qstrnlen(buffer.header.linkname, 100)));
-        switch (buffer.header.typeflag) {
+            symlink = decodeName(buffer);
+        qint64 size = getOctal(buffer + 124, 12, &ok);
+        if (!ok) {
+            qCritical() << "The file size can't be read";
+            return false;
+        }
+        switch (TypeFlag(buffer[156])) {
             case TypeFlag::Regular:
                 /* fallthrough */
             case TypeFlag::ARegular: {
@@ -163,11 +166,6 @@ bool Tar::extract(QIODevice* in, QString dst)
                     return false;
                 }
                 out.setPermissions(QFile::Permissions(mode));
-                qint64 size = strtoll(buffer.header.size, NULL, 8);
-                if (errno == ERANGE) {
-                    qCritical() << "The file size can't be read";
-                    return false;
-                }
                 while (size > 0) {
                     QByteArray tmp(BLOCKSIZE, 0);
                     n = in->read(tmp.data(), BLOCKSIZE);
@@ -196,7 +194,7 @@ bool Tar::extract(QIODevice* in, QString dst)
             case TypeFlag::GNULongLink: {
                 doNotReset = true;
                 QByteArray longlink;
-                if (readLonglink(in, buffer, longlink)) {
+                if (readLonglink(in, size, longlink)) {
                     symlink = QFile::decodeName(longlink.constData());
                 } else {
                     qCritical() << "Failed to read long link";
@@ -207,7 +205,7 @@ bool Tar::extract(QIODevice* in, QString dst)
             case TypeFlag::GNULongName: {
                 doNotReset = true;
                 QByteArray longlink;
-                if (readLonglink(in, buffer, longlink)) {
+                if (readLonglink(in, size, longlink)) {
                     name = QFile::decodeName(longlink.constData());
                 } else {
                     qCritical() << "Failed to read long name";
