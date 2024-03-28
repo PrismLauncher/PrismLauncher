@@ -36,6 +36,7 @@
 
 #pragma once
 
+#include <QListView>
 #include <QModelIndex>
 #include <QWidget>
 
@@ -85,6 +86,8 @@ class PageContainer : public QWidget, public BasePageContainer {
     virtual void setParentContainer(BasePageContainer* container) { m_container = container; };
 
     void changeEvent(QEvent*) override;
+
+    void hidePageList() { m_pageList->hide(); }
 
    private:
     void createUI();

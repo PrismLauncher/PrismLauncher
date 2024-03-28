@@ -55,6 +55,8 @@ class ResourceModel : public QAbstractListModel {
 
     [[nodiscard]] auto getSortingMethods() const { return m_api->getSortingMethods(); }
 
+    virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const { return {}; }
+
    public slots:
     void fetchMore(const QModelIndex& parent) override;
     // NOTE: Can't use [[nodiscard]] here because of https://bugreports.qt.io/browse/QTBUG-58628 on Qt 5.12
