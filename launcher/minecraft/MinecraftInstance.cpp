@@ -657,8 +657,12 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
     }
 
     if (serverToJoin && !serverToJoin->address.isEmpty()) {
-        args_pattern += " --server " + serverToJoin->address;
-        args_pattern += " --port " + QString::number(serverToJoin->port);
+        if (profile->hasTrait("feature:is_quick_play_multiplayer")) {
+            args_pattern += " --quickPlayMultiplayer " + serverToJoin->address + ':' + QString::number(serverToJoin->port);
+        } else {
+            args_pattern += " --server " + serverToJoin->address;
+            args_pattern += " --port " + QString::number(serverToJoin->port);
+        }
     }
 
     QMap<QString, QString> token_mapping;
