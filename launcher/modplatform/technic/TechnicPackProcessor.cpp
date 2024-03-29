@@ -33,7 +33,7 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
                                         const QString& minecraftVersion,
                                         [[maybe_unused]] const bool isSolder)
 {
-    QString minecraftPath = FS::PathCombine(stagingPath, ".minecraft");
+    QString minecraftPath = FS::PathCombine(stagingPath, "minecraft");
     QString configPath = FS::PathCombine(stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
     MinecraftInstance instance(globalSettings, instanceSettings, stagingPath);

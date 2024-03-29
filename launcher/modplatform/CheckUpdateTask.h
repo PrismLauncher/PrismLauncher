@@ -26,9 +26,9 @@ class CheckUpdateTask : public Task {
         QString new_version;
         std::optional<ModPlatform::IndexedVersionType> new_version_type;
         QString changelog;
-        bool enabled;
         ModPlatform::ResourceProvider provider;
         shared_qobject_ptr<ResourceDownloadTask> download;
+        bool enabled = true;
 
        public:
         UpdatableMod(QString name,
@@ -37,18 +37,18 @@ class CheckUpdateTask : public Task {
                      QString new_v,
                      std::optional<ModPlatform::IndexedVersionType> new_v_type,
                      QString changelog,
-                     bool enabled,
                      ModPlatform::ResourceProvider p,
-                     shared_qobject_ptr<ResourceDownloadTask> t)
+                     shared_qobject_ptr<ResourceDownloadTask> t,
+                     bool enabled = true)
             : name(name)
             , old_hash(old_h)
             , old_version(old_v)
             , new_version(new_v)
             , new_version_type(new_v_type)
             , changelog(changelog)
-            , enabled(enabled)
             , provider(p)
             , download(t)
+            , enabled(enabled)
         {}
     };
 

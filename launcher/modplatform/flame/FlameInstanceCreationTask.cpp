@@ -227,6 +227,7 @@ bool FlameCreationTask::updateInstance()
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
             }
         });
+        connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files: " << reason; });
         connect(job.get(), &Task::finished, &loop, &QEventLoop::quit);
 
         m_process_update_file_info_job = job;
@@ -353,6 +354,8 @@ bool FlameCreationTask::createInstance()
         auto id = loader.id;
         if (id.startsWith("neoforge-")) {
             id.remove("neoforge-");
+            if (id.startsWith("1.20.1-"))
+                id.remove("1.20.1-");  // this is a mess for curseforge
             loaderType = "neoforge";
             loaderUid = "net.neoforged";
         } else if (id.startsWith("forge-")) {
@@ -427,6 +430,9 @@ bool FlameCreationTask::createInstance()
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managed_id.isEmpty())
         instance.setManagedPack("flame", m_managed_id, m_pack.name, m_managed_version_id, m_pack.version);
+    else
+        instance.setManagedPack("flame", "", name(), "", "");
+
     instance.setName(name());
 
     m_mod_id_resolver.reset(new Flame::FileResolvingTask(APPLICATION->network(), m_pack));
