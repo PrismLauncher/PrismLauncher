@@ -132,7 +132,7 @@ void ResourceDownloadDialog::confirm()
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
     confirm_dialog->retranslateUi(resourcesString());
 
-    QHash<QString, QStringList> getRequiredBy;
+    QHash<QString, GetModDependenciesTask::PackDependencyExtraInfo> dependencyExtraInfo;
     QStringList depNames;
     if (auto task = getModDependenciesTask(); task) {
         connect(task.get(), &Task::failed, this,
@@ -160,7 +160,7 @@ void ResourceDownloadDialog::confirm()
                 addResource(dep->pack, dep->version);
                 depNames << dep->pack->name;
             }
-            getRequiredBy = task->getRequiredBy();
+            dependencyExtraInfo = task->getExtraInfo();
         }
     }
 
@@ -169,9 +169,10 @@ void ResourceDownloadDialog::confirm()
         return QString::compare(a->getName(), b->getName(), Qt::CaseInsensitive) < 0;
     });
     for (auto& task : selected) {
+        auto extraInfo = dependencyExtraInfo.value(task->getPack()->addonId.toString());
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ProviderCaps.name(task->getProvider()), getRequiredBy.value(task->getPack()->addonId.toString()),
-                                         task->getVersion().version_type.toString() });
+                                         ProviderCaps.name(task->getProvider()), extraInfo.required_by,
+                                         task->getVersion().version_type.toString(), !extraInfo.maybe_installed });
     }
 
     if (confirm_dialog->exec()) {
