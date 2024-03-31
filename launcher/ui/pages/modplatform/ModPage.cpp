@@ -93,6 +93,7 @@ void ModPage::triggerSearch()
 {
     auto changed = m_filter_widget->changed();
     m_filter = m_filter_widget->getFilter();
+    m_ui->packView->selectionModel()->setCurrentIndex({}, QItemSelectionModel::SelectionFlag::ClearAndSelect);
     m_ui->packView->clearSelection();
     m_ui->packDescription->clear();
     m_ui->versionSelectionBox->clear();
