@@ -47,7 +47,7 @@
        <item>
         <widget class="QGroupBox" name="categoryGroup">
          <property name="title">
-          <string>Category</string>
+          <string>Categories</string>
          </property>
          <property name="checkable">
           <bool>false</bool>
@@ -60,7 +60,7 @@
        <item>
         <widget class="QGroupBox" name="loaderGroup">
          <property name="title">
-          <string>Loader</string>
+          <string>Loaders</string>
          </property>
          <property name="checkable">
           <bool>false</bool>
@@ -103,7 +103,7 @@
        <item>
         <widget class="QGroupBox" name="minecraftVersionGroup">
          <property name="title">
-          <string>Version</string>
+          <string>Versions</string>
          </property>
          <property name="checkable">
           <bool>false</bool>
@@ -113,17 +113,17 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="CheckComboBox" name="versions"/>
-          </item>
-          <item>
-           <widget class="QComboBox" name="version"/>
-          </item>
-          <item>
            <widget class="QCheckBox" name="showAllVersions">
             <property name="text">
              <string>Show all versions</string>
             </property>
            </widget>
+          </item>
+          <item>
+           <widget class="CheckComboBox" name="versions"/>
+          </item>
+          <item>
+           <widget class="QComboBox" name="version"/>
           </item>
          </layout>
         </widget>
@@ -131,7 +131,7 @@
        <item>
         <widget class="QGroupBox" name="environmentGroup">
          <property name="title">
-          <string>Environment</string>
+          <string>Environments</string>
          </property>
          <property name="checkable">
           <bool>false</bool>
