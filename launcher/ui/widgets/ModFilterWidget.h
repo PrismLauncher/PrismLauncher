@@ -73,7 +73,7 @@ class ModFilterWidget : public QTabWidget {
         bool operator!=(const Filter& other) const { return !(*this == other); }
     };
 
-    static unique_qobject_ptr<ModFilterWidget> create(MinecraftInstance* instance, bool extendedSupport, QWidget* parent = nullptr);
+    static unique_qobject_ptr<ModFilterWidget> create(MinecraftInstance* instance, bool extended, QWidget* parent = nullptr);
     virtual ~ModFilterWidget();
 
     auto getFilter() -> std::shared_ptr<Filter>;
@@ -84,7 +84,7 @@ class ModFilterWidget : public QTabWidget {
     void filterUnchanged();
 
    public slots:
-    void setCategories(QList<ModPlatform::Category>);
+    void setCategories(const QList<ModPlatform::Category>&);
 
    private:
     ModFilterWidget(MinecraftInstance* instance, bool extendedSupport, QWidget* parent = nullptr);
@@ -94,13 +94,11 @@ class ModFilterWidget : public QTabWidget {
 
    private slots:
     void onVersionFilterChanged(int);
-    void onVersionFilterTextChanged(QString version);
-    void onReleaseFilterChanged();
+    void onVersionFilterTextChanged(const QString& version);
     void onLoadersFilterChanged();
     void onSideFilterChanged();
     void onHideInstalledFilterChanged();
-    void onIncludeSnapshotsChanged();
-    void onCategoryClicked(QListWidgetItem* item);
+    void onShowAllVersionsChanged();
 
    private:
     Ui::ModFilterWidget* ui;

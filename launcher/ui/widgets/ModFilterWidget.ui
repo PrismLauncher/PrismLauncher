@@ -1,237 +1,187 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>ModFilterWidget</class>
- <widget class="QTabWidget" name="ModFilterWidget">
+ <widget class="QWidget" name="ModFilterWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>460</width>
-    <height>132</height>
+    <width>553</width>
+    <height>604</height>
    </rect>
   </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
+  <property name="windowTitle">
+   <string>Form</string>
   </property>
-  <property name="currentIndex">
-   <number>0</number>
-  </property>
-  <widget class="QWidget" name="VersionPage">
-   <attribute name="title">
-    <string>Minecraft versions</string>
-   </attribute>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="1">
-     <widget class="QCheckBox" name="snapshotsCb">
-      <property name="text">
-       <string>Include Snapshots</string>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>553</width>
+        <height>604</height>
+       </rect>
       </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="CheckComboBox" name="versionsCb">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="maxVisibleItems">
-       <number>5</number>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QComboBox" name="versionsSimpleCb"/>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="LoadersPage">
-   <attribute name="title">
-    <string>Loaders</string>
-   </attribute>
-   <layout class="QGridLayout" name="gridLayout_2">
-    <property name="sizeConstraint">
-     <enum>QLayout::SetMinimumSize</enum>
-    </property>
-    <item row="0" column="2">
-     <widget class="QCheckBox" name="fabricCb">
-      <property name="text">
-       <string>Fabric</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QCheckBox" name="neoForgeCb">
-      <property name="text">
-       <string>NeoForge</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QCheckBox" name="forgeCb">
-      <property name="text">
-       <string>Forge</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="4">
-     <widget class="QCheckBox" name="cauldronCb">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>Cauldron</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="3">
-     <widget class="QCheckBox" name="quiltCb">
-      <property name="text">
-       <string>Quilt</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="5">
-     <widget class="QCheckBox" name="liteLoaderCb">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="text">
-       <string>LiteLoader</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="ReleasePage">
-   <attribute name="title">
-    <string>Release type</string>
-   </attribute>
-   <layout class="QHBoxLayout" name="horizontalLayout_3">
-    <item>
-     <widget class="QCheckBox" name="releaseCb">
-      <property name="text">
-       <string>Release</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="betaCb">
-      <property name="text">
-       <string>Beta</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="alphaCb">
-      <property name="text">
-       <string>Alpha</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="unknownCb">
-      <property name="text">
-       <string>Unknown</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="CategoryPage">
-   <attribute name="title">
-    <string>Categories</string>
-   </attribute>
-   <layout class="QHBoxLayout" name="horizontalLayout_4">
-    <item>
-     <widget class="QListWidget" name="categoriesList">
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustToContents</enum>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
-      </property>
-      <property name="showDropIndicator" stdset="0">
-       <bool>false</bool>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::NoSelection</enum>
-      </property>
-      <property name="horizontalScrollMode">
-       <enum>QAbstractItemView::ScrollPerItem</enum>
-      </property>
-      <property name="flow">
-       <enum>QListView::LeftToRight</enum>
-      </property>
-      <property name="isWrapping" stdset="0">
-       <bool>true</bool>
-      </property>
-      <property name="viewMode">
-       <enum>QListView::ListMode</enum>
-      </property>
-      <property name="modelColumn">
-       <number>0</number>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QWidget" name="ModPage">
-   <attribute name="title">
-    <string>Others</string>
-   </attribute>
-   <layout class="QGridLayout" name="gridLayout1">
-    <item row="0" column="0">
-     <widget class="QGroupBox" name="envBox">
-      <property name="title">
-       <string>Environments</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetDefaultConstraint</enum>
-       </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QCheckBox" name="clientEnv">
-         <property name="text">
-          <string>Client</string>
+        <widget class="QGroupBox" name="categoryGroup">
+         <property name="title">
+          <string>Category</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="serverEnv">
+        <widget class="QGroupBox" name="loaderGroup">
+         <property name="title">
+          <string>Loader</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="neoForge">
+            <property name="text">
+             <string>NeoForge</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="forge">
+            <property name="text">
+             <string>Forge</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="fabric">
+            <property name="text">
+             <string>Fabric</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="quilt">
+            <property name="text">
+             <string>Quilt</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="minecraftVersionGroup">
+         <property name="title">
+          <string>Version</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="CheckComboBox" name="versions"/>
+          </item>
+          <item>
+           <widget class="QComboBox" name="version"/>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="showAllVersions">
+            <property name="text">
+             <string>Show all versions</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="environmentGroup">
+         <property name="title">
+          <string>Environment</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QCheckBox" name="clientSide">
+            <property name="text">
+             <string>Client</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="serverSide">
+            <property name="text">
+             <string>Server</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="hideInstalled">
          <property name="text">
-          <string>Server</string>
+          <string>Hide installed items</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="title">
-       <string>Instaled status</string>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QCheckBox" name="hide_installed">
-         <property name="text">
-          <string>Hide already installed</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-   </layout>
-  </widget>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <customwidgets>
   <customwidget>
