@@ -551,4 +551,8 @@ bool canLink(const QString& src, const QString& dst);
 
 uintmax_t hardLinkCount(const QString& path);
 
+#ifdef Q_OS_WIN
+QString getPathNameInLocal8bit(const QString& file);
+#endif
+
 }  // namespace FS
