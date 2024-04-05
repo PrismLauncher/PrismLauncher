@@ -801,15 +801,24 @@ QString NormalizePath(QString path)
     }
 }
 
-QString badFilenameChars = "\"\\/?<>:;*|!+\r\n";
+static const QString BAD_PATH_CHARS = "\"?<>:;*|!+\r\n";
+static const QString BAD_FILENAME_CHARS = BAD_PATH_CHARS + "\\/";
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
-    for (int i = 0; i < string.length(); i++) {
-        if (badFilenameChars.contains(string[i])) {
+    for (int i = 0; i < string.length(); i++)
+        if (string.at(i).toLatin1() < ' ' || BAD_FILENAME_CHARS.contains(string.at(i)))
             string[i] = replaceWith;
-        }
-    }
+
+    return string;
+}
+
+QString RemoveInvalidPathChars(QString string, QChar replaceWith)
+{
+    for (int i = 0; i < string.length(); i++)
+        if (string.at(i) < ' ' || BAD_PATH_CHARS.contains(string.at(i)))
+            string[i] = replaceWith;
+
     return string;
 }
 
