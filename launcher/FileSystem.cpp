@@ -807,7 +807,7 @@ static const QString BAD_FILENAME_CHARS = BAD_PATH_CHARS + "\\/";
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
     for (int i = 0; i < string.length(); i++)
-        if (string.at(i).toLatin1() < ' ' || BAD_FILENAME_CHARS.contains(string.at(i)))
+        if (string.at(i) < ' ' || BAD_FILENAME_CHARS.contains(string.at(i)))
             string[i] = replaceWith;
 
     return string;
