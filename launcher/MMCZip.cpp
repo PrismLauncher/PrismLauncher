@@ -286,10 +286,13 @@ std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, con
 
     do {
         QString file_name = zip->getCurrentFileName();
+#ifdef Q_OS_WIN
+        file_name = FS::RemoveInvalidPathChars(file_name);
+#endif
         if (!file_name.startsWith(subdir))
             continue;
 
-        auto relative_file_name = QDir::fromNativeSeparators(file_name.remove(0, subdir.size()));
+        auto relative_file_name = QDir::fromNativeSeparators(file_name.mid(subdir.size()));
         auto original_name = relative_file_name;
 
         // Fix subdirs/files ending with a / getting transformed into absolute paths
