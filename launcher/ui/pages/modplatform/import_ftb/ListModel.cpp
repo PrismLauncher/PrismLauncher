@@ -44,7 +44,9 @@ QString getFTBRoot()
 
 QString getDynamicPath()
 {
-    auto settingsPath = FS::PathCombine(getFTBRoot(), "bin", "settings.json");
+    auto settingsPath = FS::PathCombine(getFTBRoot(), "storage", "settings.json");
+    if (!QFileInfo::exists(settingsPath))
+        settingsPath = FS::PathCombine(getFTBRoot(), "bin", "settings.json");
     if (!QFileInfo::exists(settingsPath)) {
         qWarning() << "The ftb app setings doesn't exist.";
         return {};
