@@ -528,12 +528,14 @@ jobs:
 
           chmod +x linuxdeploy-*.AppImage
 
-          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-{8,17}-openjdk
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-{8,17,21}-openjdk
           mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
 
           cp -r ${{ github.workspace }}/JREs/jre8/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk
 
           cp -r ${{ github.workspace }}/JREs/jre17/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk
+
+          cp -r ${{ github.workspace }}/JREs/jre21/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-21-openjdk
 
           cp -r ${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
 
@@ -546,6 +548,8 @@ jobs:
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk/lib/amd64"
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib/server"
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib"
+          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-21-openjdk/lib/server"
+          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-21-openjdk/lib"
           export LD_LIBRARY_PATH
 
           chmod +x AppImageUpdate-x86_64.AppImage

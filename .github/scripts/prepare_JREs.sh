@@ -2,25 +2,24 @@
 
 URL_JDK8="https://api.adoptium.net/v3/binary/version/jdk8u312-b07/linux/x64/jre/hotspot/normal/eclipse"
 URL_JDK17="https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jre/hotspot/normal/eclipse"
+URL_JDK21="https://api.adoptium.net/v3/binary/latest/21/ga/linux/x64/jre/hotspot/normal/eclipse"
 
 mkdir -p JREs
 pushd JREs
 
 wget --content-disposition "$URL_JDK8"
 wget --content-disposition "$URL_JDK17"
+wget --content-disposition "$URL_JDK21"
 
-for file in *;
-do
+for file in *; do
     mkdir temp
 
     re='(OpenJDK([[:digit:]]+)U-jre_x64_linux_hotspot_([[:digit:]]+)(.*).tar.gz)'
-    if [[ $file =~ $re ]];
-    then
+    if [[ $file =~ $re ]]; then
         version_major=${BASH_REMATCH[2]}
         version_trailing=${BASH_REMATCH[4]}
 
-        if [ $version_major = 17 ];
-        then
+        if [ $version_major = 17 ] || [ $version_major = 21 ]; then
             hyphen='-'
         else
             hyphen=''
