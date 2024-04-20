@@ -56,7 +56,7 @@ jobs:
             qt_ver: 6
             qt_host: linux
             qt_arch: ""
-            qt_version: "6.2.4"
+            qt_version: "6.7.0"
             qt_modules: "qt5compat qtimageformats"
             qt_tools: ""
 
@@ -96,6 +96,15 @@ jobs:
             qt_host: mac
             qt_arch: ''
             qt_version: '6.7.0'
+            qt_modules: 'qt5compat qtimageformats'
+            qt_tools: ''
+
+          - os: macos-12
+            name: macOS-Legacy
+            macosx_deployment_target: 10.13
+            qt_ver: 6
+            qt_host: mac
+            qt_version: '6.4.3'
             qt_modules: 'qt5compat qtimageformats'
             qt_tools: ''
             qt_tools: ""
