@@ -3,6 +3,7 @@ runtime: org.kde.Platform
 runtime-version: 6.6
 sdk: org.kde.Sdk
 sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk21
   - org.freedesktop.Sdk.Extension.openjdk17
   - org.freedesktop.Sdk.Extension.openjdk8
 
@@ -49,6 +50,8 @@ modules:
     buildsystem: simple
     build-commands:
       - mkdir -p /app/jdk/
+      - /usr/lib/sdk/openjdk21/install.sh
+      - mv /app/jre /app/jdk/21
       - /usr/lib/sdk/openjdk17/install.sh
       - mv /app/jre /app/jdk/17
       - /usr/lib/sdk/openjdk8/install.sh

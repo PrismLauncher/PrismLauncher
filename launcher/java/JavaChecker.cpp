@@ -55,6 +55,9 @@ void JavaChecker::performCheck()
         qDebug() << "Java checker library could not be found. Please check your installation.";
         return;
     }
+#ifdef Q_OS_WIN
+    checkerJar = FS::getPathNameInLocal8bit(checkerJar);
+#endif
 
     QStringList args;
 

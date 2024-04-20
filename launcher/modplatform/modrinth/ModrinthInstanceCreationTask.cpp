@@ -20,6 +20,7 @@
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
 #include <QAbstractButton>
+#include <QFileInfo>
 #include <vector>
 
 bool ModrinthCreationTask::abort()
@@ -58,6 +59,7 @@ bool ModrinthCreationTask::updateInstance()
         return false;
 
     auto version_name = inst->getManagedPackVersionName();
+    m_root_path = QFileInfo(inst->gameRoot()).fileName();
     auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
     if (shouldConfirmUpdate()) {
@@ -173,7 +175,7 @@ bool ModrinthCreationTask::createInstance()
     FS::ensureFilePathExists(new_index_place);
     QFile::rename(index_path, new_index_place);
 
-    auto mcPath = FS::PathCombine(m_stagingPath, "minecraft");
+    auto mcPath = FS::PathCombine(m_stagingPath, m_root_path);
 
     auto override_path = FS::PathCombine(m_stagingPath, "overrides");
     if (QFile::exists(override_path)) {
@@ -234,7 +236,7 @@ bool ModrinthCreationTask::createInstance()
 
     m_files_job.reset(new NetJob(tr("Mod Download Modrinth"), APPLICATION->network()));
 
-    auto root_modpack_path = FS::PathCombine(m_stagingPath, "minecraft");
+    auto root_modpack_path = FS::PathCombine(m_stagingPath, m_root_path);
     auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
 
     for (auto file : m_files) {
