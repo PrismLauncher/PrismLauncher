@@ -112,10 +112,6 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         connect(actionRemoveItemMetadata, &QAction::triggered, this, &ModFolderPage::deleteModMetadata);
         actionRemoveItemMetadata->setEnabled(false);
 
-        auto actionExportMetadata = updateMenu->addAction(tr("Export metadata"));
-        actionExportMetadata->setToolTip(tr("Export mod's metadata to text"));
-        connect(actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
-
         ui->actionUpdateItem->setMenu(updateMenu);
 
         ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected mods (all mods if none are selected)"));
@@ -125,6 +121,9 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
+
+        ui->actionsToolbar->insertActionAfter(ui->actionVisitItemPage, ui->actionExportMetadata);
+        connect(ui->actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
 
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
