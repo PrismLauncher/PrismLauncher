@@ -413,6 +413,8 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs(FS::PathCombine(home, ".jdks"));
     // javas downloaded by sdkman
     scanJavaDirs(FS::PathCombine(home, ".sdkman/candidates/java"));
+    // javas downloaded by gradle (toolchains)
+    scanJavaDirs(FS::PathCombine(home, ".gradle/jdks"));
 
     javas.append(getMinecraftJavaBundle());
     javas = addJavasFromEnv(javas);
