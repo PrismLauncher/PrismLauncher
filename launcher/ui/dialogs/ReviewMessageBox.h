@@ -20,6 +20,7 @@ class ReviewMessageBox : public QDialog {
         QString provider;
         QStringList required_by;
         QString version_type;
+        bool enabled = true;
     };
 
     void appendResource(ResourceInformation&& info);
