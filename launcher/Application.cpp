@@ -236,10 +236,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { { "l", "launch" }, "Launch the specified instance (by instance ID)", "instance" },
           { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
           { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
-          { { "o", "offline" }, "Launch offline (only valid in combination with --launch)", "offline" },
-          { { "n", "name" },
-            "When launching offline, use specified name (only makes sense in combination with --launch and --offline)",
-            "name" },
+          { { "o", "offline" }, "Launch offline, with given player name (only valid in combination with --launch)", "offline" },
           { "alive", "Write a small '" + liveCheckFile + "' file after the launcher starts" },
           { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
           { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
@@ -256,7 +253,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_profileToUse = parser.value("profile");
     if (parser.isSet("offline")) {
         m_offline = true;
-        m_offlineName = parser.value("name");
+        m_offlineName = parser.value("offline");
     }
     m_liveCheck = parser.isSet("alive");
 
@@ -272,9 +269,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     // error if --launch is missing with --server or --profile
-    if ((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_offline || !m_offlineName.isEmpty()) &&
-        m_instanceIdToLaunch.isEmpty()) {
-        std::cerr << "--server, --profile, --offline and --name can only be used in combination with --launch!" << std::endl;
+    if ((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_offline) && m_instanceIdToLaunch.isEmpty()) {
+        std::cerr << "--server, --profile and --offline can only be used in combination with --launch!" << std::endl;
         m_status = Application::Failed;
         return;
     }
