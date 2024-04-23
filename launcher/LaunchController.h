@@ -48,7 +48,7 @@ class LaunchController : public Task {
     void executeTask() override;
 
     LaunchController(QObject* parent = nullptr);
-    virtual ~LaunchController(){};
+    virtual ~LaunchController() {};
 
     void setInstance(InstancePtr instance) { m_instance = instance; }
 
@@ -56,7 +56,7 @@ class LaunchController : public Task {
 
     void setOnline(bool online) { m_online = online; }
 
-    void setOfflineName(const QString &offlineName) { m_offlineName = offlineName; }
+    void setOfflineName(const QString& offlineName) { m_offlineName = offlineName; }
 
     void setDemo(bool demo) { m_demo = demo; }
 

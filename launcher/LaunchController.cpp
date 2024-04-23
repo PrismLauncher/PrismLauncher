@@ -188,9 +188,9 @@ void LaunchController::login()
                     }
 
                     QString usedname;
-                    if(m_offlineName.isEmpty()) {
+                    if (m_offlineName.isEmpty()) {
                         QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
-                        QString usedname = lastOfflinePlayerName.isEmpty() ? m_session->player_name : lastOfflinePlayerName;
+                        usedname = lastOfflinePlayerName.isEmpty() ? m_session->player_name : lastOfflinePlayerName;
                         QString name = QInputDialog::getText(m_parentWidget, tr("Player name"), message, QLineEdit::Normal, usedname, &ok);
                         if (!ok) {
                             tryagain = false;
@@ -200,8 +200,7 @@ void LaunchController::login()
                             usedname = name;
                             APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
                         }
-                    }
-                    else {
+                    } else {
                         usedname = m_offlineName;
                     }
                     m_session->MakeOffline(usedname);
