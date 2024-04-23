@@ -236,6 +236,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
           { { "l", "launch" }, "Launch the specified instance (by instance ID)", "instance" },
           { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
           { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
+          { { "o", "offline" }, "Launch offline (only valid in combination with --launch)", "offline" },
+          { { "n", "name" }, "When launching offline, use specified name (only makes sense in combination with --launch and --offline)", "name" },
           { "alive", "Write a small '" + liveCheckFile + "' file after the launcher starts" },
           { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
           { "show", "Opens the window for the specified instance (by instance ID)", "show" } });
@@ -250,6 +252,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     m_instanceIdToLaunch = parser.value("launch");
     m_serverToJoin = parser.value("server");
     m_profileToUse = parser.value("profile");
+    if (parser.isSet("offline")) {
+        m_offline = true;
+        m_offlineName = parser.value("name");
+    }
     m_liveCheck = parser.isSet("alive");
 
     m_instanceIdToShowWindowOf = parser.value("show");
@@ -264,8 +270,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     // error if --launch is missing with --server or --profile
-    if ((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty()) {
-        std::cerr << "--server and --profile can only be used in combination with --launch!" << std::endl;
+    if ((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty() || m_offline || !m_offlineName.isEmpty()) && m_instanceIdToLaunch.isEmpty()) {
+        std::cerr << "--server, --profile, --offline and --name can only be used in combination with --launch!" << std::endl;
         m_status = Application::Failed;
         return;
     }
@@ -382,6 +388,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                 }
                 if (!m_profileToUse.isEmpty()) {
                     launch.args["profile"] = m_profileToUse;
+                }
+                if (m_offline) {
+                    launch.args["offline_enabled"] = "true";
+                    launch.args["offline_name"] = m_offlineName;
                 }
                 m_peerInstance->sendMessage(launch.serialize(), timeout);
             }
@@ -1178,7 +1188,7 @@ void Application::performMainStartupAction()
                 qDebug() << "   Launching with account" << m_profileToUse;
             }
 
-            launch(inst, true, false, serverToJoin, accountToUse);
+            launch(inst, !m_offline, false, serverToJoin, accountToUse, m_offlineName);
             return;
         }
     }
@@ -1263,6 +1273,8 @@ void Application::messageReceived(const QByteArray& message)
         QString id = received.args["id"];
         QString server = received.args["server"];
         QString profile = received.args["profile"];
+        bool offline = received.args["offline_enabled"] == "true";
+        QString offlineName = received.args["offline_name"];
 
         InstancePtr instance;
         if (!id.isEmpty()) {
@@ -1291,7 +1303,7 @@ void Application::messageReceived(const QByteArray& message)
             }
         }
 
-        launch(instance, true, false, serverObject, accountObject);
+        launch(instance, !offline, false, serverObject, accountObject, offlineName);
     } else {
         qWarning() << "Received invalid message" << message;
     }
@@ -1333,7 +1345,8 @@ bool Application::launch(InstancePtr instance,
                          bool online,
                          bool demo,
                          MinecraftServerTargetPtr serverToJoin,
-                         MinecraftAccountPtr accountToUse)
+                         MinecraftAccountPtr accountToUse,
+                         const QString& offlineName)
 {
     if (m_updateRunning) {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
@@ -1353,6 +1366,7 @@ bool Application::launch(InstancePtr instance,
         controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
         controller->setServerToJoin(serverToJoin);
         controller->setAccountToUse(accountToUse);
+        controller->setOfflineName(offlineName);
         if (window) {
             controller->setParentWidget(window);
         } else if (m_mainWindow) {
