@@ -441,13 +441,13 @@ QString JavaUtils::getJavaCheckPath()
 
 QStringList getMinecraftJavaBundle()
 {
-    QString partialPath;
     QString executable = "java";
     QStringList processpaths;
 #if defined(Q_OS_OSX)
-    partialPath = FS::PathCombine(QDir::homePath(), "Library/Application Support");
+    processpaths << FS::PathCombine(QDir::homePath(), FS::PathCombine("Library", "Application Support", "minecraft", "runtime"));
 #elif defined(Q_OS_WIN32)
-    partialPath = QProcessEnvironment::systemEnvironment().value("LOCALAPPDATA", "");
+    QString partialPath = QProcessEnvironment::systemEnvironment().value("LOCALAPPDATA", "");
+    processpaths << FS::PathCombine(partialPath, ".minecraft", "runtime");
     executable += "w.exe";
 
     // add the microsoft store version of the launcher to the search. the current path is:
@@ -457,10 +457,8 @@ QStringList getMinecraftJavaBundle()
     minecraftMSStorePath = FS::PathCombine(minecraftMSStorePath, "LocalCache", "Local", "runtime");
     processpaths << minecraftMSStorePath;
 #else
-    partialPath = QDir::homePath();
+    processpaths << FS::PathCombine(QDir::homePath(), ".minecraft", "runtime");
 #endif
-    auto minecraftDataPath = FS::PathCombine(partialPath, ".minecraft", "runtime");
-    processpaths << minecraftDataPath;
 
     QStringList javas;
     while (!processpaths.isEmpty()) {
