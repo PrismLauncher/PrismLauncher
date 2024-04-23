@@ -393,13 +393,17 @@ QByteArray FlamePackExportTask::generateIndex()
             version["version"] = minecraft->m_version;
         QString id;
         if (quilt != nullptr)
-            id = "quilt-" + quilt->getVersion();
+            id = "quilt-" + quilt->m_version;
         else if (fabric != nullptr)
-            id = "fabric-" + fabric->getVersion();
+            id = "fabric-" + fabric->m_version;
         else if (forge != nullptr)
-            id = "forge-" + forge->getVersion();
-        else if (neoforge != nullptr)
-            id = "neoforge-" + neoforge->getVersion();
+            id = "forge-" + forge->m_version;
+        else if (neoforge != nullptr) {
+            id = "neoforge-";
+            if (minecraft->m_version == "1.20.1")
+                id += "1.20.1-";
+            id += neoforge->m_version;
+        }
         version["modLoaders"] = QJsonArray();
         if (!id.isEmpty()) {
             QJsonObject loader;

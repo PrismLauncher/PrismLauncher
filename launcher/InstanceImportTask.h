@@ -44,9 +44,6 @@
 #include <optional>
 
 class QuaZip;
-namespace Flame {
-class FileResolvingTask;
-}
 
 class InstanceImportTask : public InstanceTask {
     Q_OBJECT

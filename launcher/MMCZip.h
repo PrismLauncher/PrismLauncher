@@ -163,6 +163,7 @@ class ExportToZipTask : public Task {
         , m_follow_symlinks(followSymlinks)
     {
         setAbortable(true);
+        m_output.setUtf8Enabled(true);
     };
     ExportToZipTask(QString outputPath, QString dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
         : ExportToZipTask(outputPath, QDir(dir), files, destinationPrefix, followSymlinks){};
