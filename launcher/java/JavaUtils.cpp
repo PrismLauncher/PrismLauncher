@@ -441,26 +441,25 @@ QString JavaUtils::getJavaCheckPath()
 
 QStringList getMinecraftJavaBundle()
 {
-    QString partialPath;
     QString executable = "java";
     QStringList processpaths;
 #if defined(Q_OS_OSX)
-    partialPath = FS::PathCombine(QDir::homePath(), "Library/Application Support");
+    processpaths << FS::PathCombine(QDir::homePath(), FS::PathCombine("Library", "Application Support", "minecraft", "runtime"));
 #elif defined(Q_OS_WIN32)
-    partialPath = QProcessEnvironment::systemEnvironment().value("LOCALAPPDATA", "");
     executable += "w.exe";
+
+    auto appDataPath = QProcessEnvironment::systemEnvironment().value("APPDATA", "");
+    processpaths << FS::PathCombine(QFileInfo(appDataPath).absolutePath(), ".minecraft", "runtime");
 
     // add the microsoft store version of the launcher to the search. the current path is:
     // C:\Users\USERNAME\AppData\Local\Packages\Microsoft.4297127D64EC6_8wekyb3d8bbwe\LocalCache\Local\runtime
+    auto localAppDataPath = QProcessEnvironment::systemEnvironment().value("LOCALAPPDATA", "");
     auto minecraftMSStorePath =
-        FS::PathCombine(QFileInfo(partialPath).absolutePath(), "Local", "Packages", "Microsoft.4297127D64EC6_8wekyb3d8bbwe");
-    minecraftMSStorePath = FS::PathCombine(minecraftMSStorePath, "LocalCache", "Local", "runtime");
-    processpaths << minecraftMSStorePath;
+        FS::PathCombine(QFileInfo(localAppDataPath).absolutePath(), "Packages", "Microsoft.4297127D64EC6_8wekyb3d8bbwe");
+    processpaths << FS::PathCombine(minecraftMSStorePath, "LocalCache", "Local", "runtime");
 #else
-    partialPath = QDir::homePath();
+    processpaths << FS::PathCombine(QDir::homePath(), ".minecraft", "runtime");
 #endif
-    auto minecraftDataPath = FS::PathCombine(partialPath, ".minecraft", "runtime");
-    processpaths << minecraftDataPath;
 
     QStringList javas;
     while (!processpaths.isEmpty()) {
