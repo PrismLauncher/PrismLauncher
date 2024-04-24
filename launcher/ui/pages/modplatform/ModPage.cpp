@@ -68,9 +68,8 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
     if (m_filter_widget)
         disconnect(m_filter_widget.get(), nullptr, nullptr, nullptr);
 
+    m_ui->horizontalLayout->replaceWidget(m_filter_widget == nullptr ? m_ui->filterWidget : m_filter_widget.get(), widget.get());
     m_filter_widget.swap(widget);
-
-    m_ui->gridLayout_3->addWidget(m_filter_widget.get(), 0, 0, 1, m_ui->gridLayout_3->columnCount());
 
     m_filter = m_filter_widget->getFilter();
 
