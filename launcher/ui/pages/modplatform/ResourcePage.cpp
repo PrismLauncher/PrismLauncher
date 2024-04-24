@@ -71,7 +71,7 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& base_in
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    m_ui->gridLayout_3->addWidget(&m_fetch_progress, 0, 0, 1, m_ui->gridLayout_3->columnCount());
+    layout()->replaceWidget(m_ui->fetchProgress, &m_fetch_progress);
 
     m_ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     m_ui->packView->installEventFilter(this);
@@ -93,8 +93,10 @@ void ResourcePage::retranslate()
 
 void ResourcePage::openedImpl()
 {
-    if (!supportsFiltering())
+    if (!supportsFiltering()) {
         m_ui->resourceFilterButton->setVisible(false);
+        m_ui->filterWidget->hide();
+    }
 
     //: String in the search bar of the mod downloading dialog
     m_ui->searchEdit->setPlaceholderText(tr("Search for %1...").arg(resourcesString()));
