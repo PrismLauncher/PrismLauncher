@@ -85,6 +85,7 @@ class ModFilterWidget : public QTabWidget {
 
    public slots:
     void setCategories(const QList<ModPlatform::Category>&);
+    bool eventFilter(QObject* obj, QEvent* evt);
 
    private:
     ModFilterWidget(MinecraftInstance* instance, bool extendedSupport, QWidget* parent = nullptr);

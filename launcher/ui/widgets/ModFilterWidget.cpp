@@ -89,6 +89,8 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended, QWi
 
     ui->versions->setStyleSheet("combobox-popup: 0;");
     ui->version->setStyleSheet("combobox-popup: 0;");
+    ui->versions->installEventFilter(this);
+    ui->version->installEventFilter(this);
     connect(ui->showAllVersions, &QCheckBox::stateChanged, this, &ModFilterWidget::onShowAllVersionsChanged);
     connect(ui->versions, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModFilterWidget::onVersionFilterChanged);
     connect(ui->version, &QComboBox::currentTextChanged, this, &ModFilterWidget::onVersionFilterTextChanged);
@@ -113,6 +115,13 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended, QWi
     setHidden(true);
     loadVersionList();
     prepareBasicFilter();
+}
+
+bool ModFilterWidget::eventFilter(QObject* obj, QEvent* evt)
+{
+    if ((obj != ui->versions && obj != ui->version) || evt->type() != QEvent::Wheel)
+        return QTabWidget::eventFilter(obj, evt);
+    return true;
 }
 
 auto ModFilterWidget::getFilter() -> std::shared_ptr<Filter>

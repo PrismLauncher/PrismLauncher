@@ -68,10 +68,10 @@ class CheckComboModel : public QIdentityProxyModel {
     QStringList checked;
 };
 
-CheckComboBox::CheckComboBox(QWidget* parent) : QComboBox(parent), m_separator(",")
+CheckComboBox::CheckComboBox(QWidget* parent) : QComboBox(parent), m_separator(", ")
 {
     QLineEdit* lineEdit = new QLineEdit(this);
-    lineEdit->setReadOnly(false);
+    lineEdit->setReadOnly(true);
     setLineEdit(lineEdit);
     lineEdit->disconnect(this);
     setInsertPolicy(QComboBox::NoInsert);
