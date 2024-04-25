@@ -24,16 +24,20 @@ QString markdownToHTML(const QString& markdown)
     char* buffer = cmark_markdown_to_html(markdownData.constData(), markdownData.length(), CMARK_OPT_NOBREAKS | CMARK_OPT_UNSAFE);
 
     QString htmlStr(buffer);
-    int first_pos = htmlStr.indexOf("</ul>");
-    int img_pos = 0;
-    while( first_pos != -1 )
-    {
-        img_pos = htmlStr.indexOf("<img", first_pos);
-        if ( img_pos - (first_pos + 5) < 3 && img_pos - (first_pos + 5) != -1)
-            htmlStr.insert(img_pos, "<br>");
-        first_pos = htmlStr.indexOf("</ul>", first_pos+5);
-    }
+
     free(buffer);
+    
+    // Insert a breakpoint between a </ul> and <img> tag as this can cause visual bugs
+    int first_pos = htmlStr.indexOf("</ul>");
+    int img_pos;
+    while (first_pos != -1) {
+        img_pos = htmlStr.indexOf("<img", first_pos);
+
+        if (img_pos - (first_pos + 5) < 3 && img_pos - (first_pos + 5) > -1)  // 5 is the size of the </ul> tag
+            htmlStr.insert(img_pos, "<br>");
+
+        first_pos = htmlStr.indexOf("</ul>", first_pos + 5);
+    }
 
     return htmlStr;
 }
