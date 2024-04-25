@@ -49,8 +49,11 @@ class CheckComboBox : public QComboBox {
    signals:
     void checkedItemsChanged(const QStringList& items);
 
+   protected:
+    void paintEvent(QPaintEvent*) override;
+
    private:
-    void updateCheckedItems();
+    void emitCheckedItemsChanged();
     bool eventFilter(QObject* receiver, QEvent* event) override;
     void toggleCheckState(int index);
 

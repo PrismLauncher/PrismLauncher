@@ -26,6 +26,7 @@
 #include <QLineEdit>
 #include <QListView>
 #include <QStringList>
+#include <QStylePainter>
 
 class CheckComboModel : public QIdentityProxyModel {
     Q_OBJECT
@@ -70,12 +71,6 @@ class CheckComboModel : public QIdentityProxyModel {
 
 CheckComboBox::CheckComboBox(QWidget* parent) : QComboBox(parent), m_separator(", ")
 {
-    QLineEdit* lineEdit = new QLineEdit(this);
-    lineEdit->setReadOnly(true);
-    setLineEdit(lineEdit);
-    lineEdit->disconnect(this);
-    setInsertPolicy(QComboBox::NoInsert);
-
     view()->installEventFilter(this);
     view()->window()->installEventFilter(this);
     view()->viewport()->installEventFilter(this);
@@ -89,9 +84,9 @@ void CheckComboBox::setSourceModel(QAbstractItemModel* new_model)
     model()->disconnect(this);
     QComboBox::setModel(proxy);
     connect(this, QOverload<int>::of(&QComboBox::activated), this, &CheckComboBox::toggleCheckState);
-    connect(proxy, &CheckComboModel::checkStateChanged, this, &CheckComboBox::updateCheckedItems);
-    connect(model(), &CheckComboModel::rowsInserted, this, &CheckComboBox::updateCheckedItems);
-    connect(model(), &CheckComboModel::rowsRemoved, this, &CheckComboBox::updateCheckedItems);
+    connect(proxy, &CheckComboModel::checkStateChanged, this, &CheckComboBox::emitCheckedItemsChanged);
+    connect(model(), &CheckComboModel::rowsInserted, this, &CheckComboBox::emitCheckedItemsChanged);
+    connect(model(), &CheckComboModel::rowsRemoved, this, &CheckComboBox::emitCheckedItemsChanged);
 }
 
 void CheckComboBox::hidePopup()
@@ -100,15 +95,9 @@ void CheckComboBox::hidePopup()
         QComboBox::hidePopup();
 }
 
-void CheckComboBox::updateCheckedItems()
+void CheckComboBox::emitCheckedItemsChanged()
 {
-    QStringList items = checkedItems();
-    if (items.isEmpty())
-        setEditText(defaultText());
-    else
-        setEditText(items.join(separator()));
-
-    emit checkedItemsChanged(items);
+    emit checkedItemsChanged(checkedItems());
 }
 
 QString CheckComboBox::defaultText() const
@@ -118,10 +107,7 @@ QString CheckComboBox::defaultText() const
 
 void CheckComboBox::setDefaultText(const QString& text)
 {
-    if (m_default_text != text) {
-        m_default_text = text;
-        updateCheckedItems();
-    }
+    m_default_text = text;
 }
 
 QString CheckComboBox::separator() const
@@ -131,10 +117,7 @@ QString CheckComboBox::separator() const
 
 void CheckComboBox::setSeparator(const QString& separator)
 {
-    if (m_separator != separator) {
-        m_separator = separator;
-        updateCheckedItems();
-    }
+    m_separator = separator;
 }
 
 bool CheckComboBox::eventFilter(QObject* receiver, QEvent* event)
@@ -157,6 +140,8 @@ bool CheckComboBox::eventFilter(QObject* receiver, QEvent* event)
         case QEvent::MouseButtonRelease:
             containerMousePress = false;
             break;
+        case QEvent::Wheel:
+            return receiver == this;
         default:
             break;
     }
@@ -170,7 +155,7 @@ void CheckComboBox::toggleCheckState(int index)
         Qt::CheckState state = static_cast<Qt::CheckState>(value.toInt());
         setItemData(index, (state == Qt::Unchecked ? Qt::Checked : Qt::Unchecked), Qt::CheckStateRole);
     }
-    updateCheckedItems();
+    emitCheckedItemsChanged();
 }
 
 Qt::CheckState CheckComboBox::itemCheckState(int index) const
@@ -196,6 +181,25 @@ void CheckComboBox::setCheckedItems(const QStringList& items)
         auto index = findText(text);
         setItemCheckState(index, index != -1 ? Qt::Checked : Qt::Unchecked);
     }
+}
+
+void CheckComboBox::paintEvent(QPaintEvent*)
+{
+    QStylePainter painter(this);
+    painter.setPen(palette().color(QPalette::Text));
+
+    // draw the combobox frame, focusrect and selected etc.
+    QStyleOptionComboBox opt;
+    initStyleOption(&opt);
+    QStringList items = checkedItems();
+    if (items.isEmpty())
+        opt.currentText = defaultText();
+    else
+        opt.currentText = items.join(separator());
+    painter.drawComplexControl(QStyle::CC_ComboBox, opt);
+
+    // draw the icon and text
+    painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
 }
 
 #include "CheckComboBox.moc"
