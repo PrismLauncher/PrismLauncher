@@ -36,7 +36,10 @@
 #include "ui/themes/CatPack.h"
 #include <QDate>
 #include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
+#include <QImageReader>
+#include <QRandomGenerator>
 #include "FileSystem.h"
 #include "Json.h"
 
@@ -79,7 +82,7 @@ JsonCatPack::JsonCatPack(QFileInfo& manifestInfo) : BasicCatPack(manifestInfo.di
     auto doc = Json::requireDocument(manifestInfo.absoluteFilePath(), "CatPack JSON file");
     const auto root = doc.object();
     m_name = Json::requireString(root, "name", "Catpack name");
-    m_defaultPath = FS::PathCombine(path, Json::requireString(root, "default", "Default Cat"));
+    m_default_path = FS::PathCombine(path, Json::requireString(root, "default", "Default Cat"));
     auto variants = Json::ensureArray(root, "variants", QJsonArray(), "Catpack Variants");
     for (auto v : variants) {
         auto variant = Json::ensureObject(v, QJsonObject(), "Cat variant");
@@ -117,5 +120,21 @@ QString JsonCatPack::path(QDate now)
         if (startDate <= now && now <= endDate)
             return var.path;
     }
-    return m_defaultPath;
+    auto dInfo = QFileInfo(m_default_path);
+    if (!dInfo.isDir())
+        return m_default_path;
+
+    QStringList supportedImageFormats;
+    for (auto format : QImageReader::supportedImageFormats()) {
+        supportedImageFormats.append("*." + format);
+    }
+
+    auto files = QDir(m_default_path).entryInfoList(supportedImageFormats, QDir::Files, QDir::Name);
+    if (files.length() == 0)
+        return "";
+    auto idx = (now.dayOfYear() - 1) % files.length();
+    auto isRandom = dInfo.fileName().compare("random", Qt::CaseInsensitive) == 0;
+    if (isRandom)
+        idx = QRandomGenerator::global()->bounded(0, files.length());
+    return files[idx].absoluteFilePath();
 }

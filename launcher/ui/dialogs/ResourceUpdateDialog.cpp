@@ -219,19 +219,20 @@ void ResourceUpdateDialog::checkCandidates()
             }
             static FlameAPI api;
 
-            auto getRequiredBy = depTask->getRequiredBy();
+            auto dependencyExtraInfo = depTask->getExtraInfo();
 
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
                     changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resource_model);
-                CheckUpdateTask::Update updatable = { dep->pack->name,           dep->version.hash,
-                                                      tr("Not installed"),       dep->version.version,
-                                                      dep->version.version_type, changelog,
-                                                      dep->pack->provider,       download_task };
+                auto extraInfo = dependencyExtraInfo.value(dep->version.addonId.toString());
+                CheckUpdateTask::Update updatable = {
+                    dep->pack->name, dep->version.hash,   tr("Not installed"), dep->version.version,      dep->version.version_type,
+                    changelog,       dep->pack->provider, download_task,       !extraInfo.maybe_installed
+                };
 
-                appendResource(updatable, getRequiredBy.value(dep->version.addonId.toString()));
+                appendResource(updatable, extraInfo.required_by);
                 m_tasks.insert(updatable.name, updatable.download);
             }
         }
@@ -418,7 +419,10 @@ void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool try_others,
 void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, QStringList requiredBy)
 {
     auto item_top = new QTreeWidgetItem(ui->modTreeWidget);
-    item_top->setCheckState(0, Qt::CheckState::Checked);
+    item_top->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    if (!info.enabled) {
+        item_top->setToolTip(0, tr("Mod was disabled as it may be already instaled."));
+    }
     item_top->setText(0, info.name);
     item_top->setExpanded(true);
 

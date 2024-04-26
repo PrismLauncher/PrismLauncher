@@ -16,8 +16,6 @@
 #pragma once
 
 #include <launch/LaunchStep.h>
-#include <memory>
-#include "minecraft/auth/AuthSession.h"
 
 // FIXME: temporary wrapper for existing task.
 class ExtractNatives : public LaunchStep {
