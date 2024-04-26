@@ -43,6 +43,5 @@ QString markdownToHTML(const QString& markdown)
         pos = htmlStr.indexOf("</ul>", pos);
     }
 
-
     return htmlStr;
 }
