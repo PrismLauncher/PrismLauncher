@@ -102,7 +102,6 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, [this] { updateActions(); });
     connect(m_model.get(), &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });
     connect(m_model.get(), &ResourceFolderModel::rowsRemoved, this, [this] { updateActions(); });
-    connect(m_model.get(), &ResourceFolderModel::updateFinished, this, [this] { updateActions(); });
 
     auto viewHeader = ui->treeView->header();
     viewHeader->setContextMenuPolicy(Qt::CustomContextMenu);
