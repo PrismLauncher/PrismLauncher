@@ -31,7 +31,7 @@ QString markdownToHTML(const QString& markdown)
     int imgPos;
     while (pos != -1) {
         pos = pos + 5;  // 5 is the size of the </ul> tag
-        imgPos = htmlStr.indexOf("<img", pos);
+        imgPos = htmlStr.indexOf("<img ", pos);
         if (imgPos == -1)
             break;  // no image after the tag
 
