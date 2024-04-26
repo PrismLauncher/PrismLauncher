@@ -71,14 +71,12 @@ TexturePackPage::TexturePackPage(MinecraftInstance* instance, std::shared_ptr<Te
     ui->actionUpdateItem->setMenu(updateMenu);
 }
 
-bool TexturePackPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void TexturePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     auto& rp = static_cast<TexturePack&>(m_model->at(row));
     ui->frame->updateWithTexturePack(rp);
-
-    return true;
 }
 
 void TexturePackPage::downloadTexturePacks()
@@ -129,13 +127,13 @@ void TexturePackPage::updateTexturePacks()
         return;
     }
     if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response =
-            CustomMessageBox::selectable(this, tr("Confirm Update"),
-                                         tr("Updating texture packs while the game is running may cause pack duplication and game crashes.\n"
-                                            "The old files may not be deleted as they are in use.\n"
-                                            "Are you sure you want to do this?"),
-                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                ->exec();
+        auto response = CustomMessageBox::selectable(
+                            this, tr("Confirm Update"),
+                            tr("Updating texture packs while the game is running may cause pack duplication and game crashes.\n"
+                               "The old files may not be deleted as they are in use.\n"
+                               "Are you sure you want to do this?"),
+                            QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
 
         if (response != QMessageBox::Yes)
             return;
@@ -168,7 +166,8 @@ void TexturePackPage::updateTexturePacks()
     }
 
     if (update_dialog.exec()) {
-        auto tasks = new ConcurrentTask(this, "Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        auto tasks =
+            new ConcurrentTask(this, "Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();

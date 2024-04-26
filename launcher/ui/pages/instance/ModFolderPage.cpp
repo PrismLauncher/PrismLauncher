@@ -106,14 +106,12 @@ bool ModFolderPage::shouldDisplay() const
     return true;
 }
 
-bool ModFolderPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void ModFolderPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     const Mod& mod = m_model->at(row);
     ui->frame->updateWithMod(mod);
-
-    return true;
 }
 
 void ModFolderPage::removeItems(const QItemSelection& selection)

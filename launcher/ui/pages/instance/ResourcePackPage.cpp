@@ -69,14 +69,12 @@ ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, std::shared_ptr<
     ui->actionUpdateItem->setMenu(updateMenu);
 }
 
-bool ResourcePackPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void ResourcePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     auto& rp = static_cast<ResourcePack&>(m_model->at(row));
     ui->frame->updateWithResourcePack(rp);
-
-    return true;
 }
 
 void ResourcePackPage::downloadResourcePacks()
@@ -127,13 +125,13 @@ void ResourcePackPage::updateResourcePacks()
         return;
     }
     if (m_instance != nullptr && m_instance->isRunning()) {
-        auto response =
-            CustomMessageBox::selectable(this, tr("Confirm Update"),
-                                         tr("Updating resource packs while the game is running may cause pack duplication and game crashes.\n"
-                                            "The old files may not be deleted as they are in use.\n"
-                                            "Are you sure you want to do this?"),
-                                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                ->exec();
+        auto response = CustomMessageBox::selectable(
+                            this, tr("Confirm Update"),
+                            tr("Updating resource packs while the game is running may cause pack duplication and game crashes.\n"
+                               "The old files may not be deleted as they are in use.\n"
+                               "Are you sure you want to do this?"),
+                            QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
 
         if (response != QMessageBox::Yes)
             return;
@@ -166,7 +164,8 @@ void ResourcePackPage::updateResourcePacks()
     }
 
     if (update_dialog.exec()) {
-        auto tasks = new ConcurrentTask(this, "Download Resource Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        auto tasks =
+            new ConcurrentTask(this, "Download Resource Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();

@@ -58,7 +58,7 @@ class ResourcePackPage : public ExternalResourcesPage {
     }
 
    public slots:
-    bool onSelectionChanged(const QModelIndex& current, const QModelIndex& previous) override;
+    void updateFrame(const QModelIndex& current, const QModelIndex& previous) override;
 
    private slots:
     void downloadResourcePacks();

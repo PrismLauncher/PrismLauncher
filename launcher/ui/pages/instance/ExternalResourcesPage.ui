@@ -102,6 +102,9 @@
    </property>
   </action>
   <action name="actionRemoveItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Remove</string>
    </property>
@@ -110,6 +113,9 @@
    </property>
   </action>
   <action name="actionEnableItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Enable</string>
    </property>
@@ -118,6 +124,9 @@
    </property>
   </action>
   <action name="actionDisableItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Disable</string>
    </property>
@@ -154,7 +163,7 @@
   </action>
   <action name="actionUpdateItem">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Check for &amp;Updates</string>
