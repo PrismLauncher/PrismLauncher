@@ -26,18 +26,23 @@ QString markdownToHTML(const QString& markdown)
     QString htmlStr(buffer);
 
     free(buffer);
-    
-    // Insert a breakpoint between a </ul> and <img> tag as this can cause visual bugs
-    int first_pos = htmlStr.indexOf("</ul>");
-    int img_pos;
-    while (first_pos != -1) {
-        img_pos = htmlStr.indexOf("<img", first_pos);
 
-        if (img_pos - (first_pos + 5) < 3 && img_pos - (first_pos + 5) > -1)  // 5 is the size of the </ul> tag
-            htmlStr.insert(img_pos, "<br>");
+    int pos = htmlStr.indexOf("</ul>");
+    int imgPos;
+    while (pos != -1) {
+        pos = pos + 5;  // 5 is the size of the </ul> tag
+        imgPos = htmlStr.indexOf("<img", pos);
+        if (imgPos == -1)
+            break;  // no image after the tag
 
-        first_pos = htmlStr.indexOf("</ul>", first_pos + 5);
+        auto textBetween = htmlStr.mid(pos, imgPos - pos).trimmed();  // trim all white spaces
+
+        if (textBetween.isEmpty())
+            htmlStr.insert(pos, "<br>");
+
+        pos = htmlStr.indexOf("</ul>", pos);
     }
+
 
     return htmlStr;
 }
