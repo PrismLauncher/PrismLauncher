@@ -37,7 +37,7 @@ QSizeF VariableSizedImageObject::intrinsicSize(QTextDocument* doc, int posInDocu
 
     auto image = qvariant_cast<QImage>(format.property(ImageData));
     auto size = image.size();
-    if (size.isEmpty())  // can't resize a empty image
+    if (size.isEmpty())  // can't resize an empty image
         return { size };
 
     // calculate the new image size based on the properties
