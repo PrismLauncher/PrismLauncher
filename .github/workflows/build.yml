@@ -490,14 +490,6 @@ jobs:
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
 
-      - name: Package (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
-          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_DIR }}/manifest.txt
-          cd ${{ env.INSTALL_DIR }}
-          tar --owner root --group root -czf ../PrismLauncher.tar.gz *
-
       - name: Package (Linux, portable)
         if: runner.os == 'Linux'
         run: |
@@ -590,26 +582,12 @@ jobs:
           name: PrismLauncher-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher-Setup.exe
 
-      - name: Upload binary tarball (Linux, Qt 5)
-        if: runner.os == 'Linux' && matrix.qt_ver != 6
-        uses: actions/upload-artifact@v4
-        with:
-          name: PrismLauncher-${{ runner.os }}-Qt5-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PrismLauncher.tar.gz
-
       - name: Upload binary tarball (Linux, portable, Qt 5)
         if: runner.os == 'Linux' && matrix.qt_ver != 6
         uses: actions/upload-artifact@v4
         with:
           name: PrismLauncher-${{ runner.os }}-Qt5-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher-portable.tar.gz
-
-      - name: Upload binary tarball (Linux, Qt 6)
-        if: runner.os == 'Linux' && matrix.qt_ver !=5
-        uses: actions/upload-artifact@v4
-        with:
-          name: PrismLauncher-${{ runner.os }}-Qt6-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PrismLauncher.tar.gz
 
       - name: Upload binary tarball (Linux, portable, Qt 6)
         if: runner.os == 'Linux' && matrix.qt_ver != 5

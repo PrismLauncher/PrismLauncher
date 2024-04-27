@@ -1492,7 +1492,6 @@ if(INSTALL_BUNDLE STREQUAL "full")
             CONFIGURATIONS Debug RelWithDebInfo ""
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            PATTERN "*qopensslbackend*" EXCLUDE
             PATTERN "*qcertonlybackend*" EXCLUDE
         )
         install(
@@ -1503,14 +1502,16 @@ if(INSTALL_BUNDLE STREQUAL "full")
             REGEX "dd\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
-            PATTERN "*qopensslbackend*" EXCLUDE
             PATTERN "*qcertonlybackend*" EXCLUDE
         )
     endif()
-    configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
-        @ONLY
-    )
-    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
+    # ignore fixup_bundle on Linux
+    if (NOT (UNIX AND NOT APPLE))
+        configure_file(
+            "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
+            "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
+            @ONLY
+            )
+        install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
+    endif()
 endif()
