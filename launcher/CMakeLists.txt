@@ -1505,13 +1505,79 @@ if(INSTALL_BUNDLE STREQUAL "full")
             PATTERN "*qcertonlybackend*" EXCLUDE
         )
     endif()
-    # ignore fixup_bundle on Linux
-    if (NOT (UNIX AND NOT APPLE))
-        configure_file(
-            "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
-            "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
-            @ONLY
-            )
-        install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
+    # Wayland support
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-graphics-integration-client")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-client"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-client"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
     endif()
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-graphics-integration-server")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-server"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-server"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-decoration-client")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-decoration-client"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-decoration-client"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-shell-integration")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-shell-integration"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-shell-integration"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"
+        @ONLY
+    )
+    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake" COMPONENT Runtime)
 endif()
