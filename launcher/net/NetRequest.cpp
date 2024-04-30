@@ -68,7 +68,8 @@ void NetRequest::executeTask()
 
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(logCat) << getUid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
-        emitAborted();
+        emit aborted();
+        emit finished();
         return;
     }
 
@@ -85,10 +86,12 @@ void NetRequest::executeTask()
             break;
         case State::Inactive:
         case State::Failed:
-            emitFailed();
+            emit failed("Failed to initilize sink");
+            emit finished();
             return;
         case State::AbortedByUser:
-            emitAborted();
+            emit aborted();
+            emit finished();
             return;
     }
 
