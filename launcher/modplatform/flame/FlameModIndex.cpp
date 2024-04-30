@@ -1,5 +1,6 @@
 #include "FlameModIndex.h"
 
+#include "FileSystem.h"
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"

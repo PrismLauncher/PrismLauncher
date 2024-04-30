@@ -17,6 +17,7 @@
  */
 
 #include "ModrinthPackIndex.h"
+#include "FileSystem.h"
 #include "ModrinthAPI.h"
 
 #include "Json.h"
