@@ -26,6 +26,7 @@
 #include "BuildConfig.h"
 #include "Markdown.h"
 #include "ui_UpdateAvailableDialog.h"
+#include "StringUtils.h"
 
 UpdateAvailableDialog::UpdateAvailableDialog(const QString& currentVersion,
                                              const QString& availableVersion,
@@ -43,7 +44,7 @@ UpdateAvailableDialog::UpdateAvailableDialog(const QString& currentVersion,
     ui->icon->setPixmap(APPLICATION->getThemedIcon("checkupdate").pixmap(64));
 
     auto releaseNotesHtml = markdownToHTML(releaseNotes);
-    ui->releaseNotes->setHtml(releaseNotesHtml);
+    ui->releaseNotes->setHtml(StringUtils::htmlListPatch(releaseNotesHtml));
     ui->releaseNotes->setOpenExternalLinks(true);
 
     connect(ui->skipButton, &QPushButton::clicked, this, [this]() {

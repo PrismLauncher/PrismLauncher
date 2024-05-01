@@ -46,6 +46,7 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
+#include "StringUtils.h"
 
 #include "net/ApiDownload.h"
 
@@ -292,6 +293,6 @@ void FlamePage::updateUi()
     text += "<hr>";
     text += api.getModDescription(current.addonId).toUtf8();
 
-    ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
     ui->packDescription->flush();
 }

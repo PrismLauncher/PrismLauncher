@@ -39,6 +39,7 @@
 #include "ui_AtlPage.h"
 
 #include "BuildConfig.h"
+#include "StringUtils.h"
 
 #include "AtlUserInteractionSupportImpl.h"
 #include "modplatform/atlauncher/ATLPackInstallTask.h"
@@ -144,7 +145,7 @@ void AtlPage::onSelectionChanged(QModelIndex first, [[maybe_unused]] QModelIndex
 
     selected = filterModel->data(first, Qt::UserRole).value<ATLauncher::IndexedPack>();
 
-    ui->packDescription->setHtml(selected.description.replace("\n", "<br>"));
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(selected.description.replace("\n", "<br>")));
 
     for (const auto& version : selected.versions) {
         ui->versionSelectionBox->addItem(version.version);
