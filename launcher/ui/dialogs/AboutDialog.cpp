@@ -39,6 +39,7 @@
 #include "BuildConfig.h"
 #include "Markdown.h"
 #include "ui_AboutDialog.h"
+#include "StringUtils.h"
 
 #include <net/NetJob.h>
 #include <qobject.h>
@@ -139,10 +140,10 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDia
     setWindowTitle(tr("About %1").arg(launcherName));
 
     QString chtml = getCreditsHtml();
-    ui->creditsText->setHtml(chtml);
+    ui->creditsText->setHtml(StringUtils::htmlListPatch(chtml));
 
     QString lhtml = getLicenseHtml();
-    ui->licenseText->setHtml(lhtml);
+    ui->licenseText->setHtml(StringUtils::htmlListPatch(lhtml));
 
     ui->urlLabel->setOpenExternalLinks(true);
 

@@ -7,6 +7,7 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "ui_ReviewMessageBox.h"
+#include "StringUtils.h"
 
 #include "Markdown.h"
 
@@ -473,7 +474,7 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStri
             break;
     }
 
-    changelog_area->setHtml(text);
+    changelog_area->setHtml(StringUtils::htmlListPatch(text));
     changelog_area->setOpenExternalLinks(true);
     changelog_area->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     changelog_area->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
