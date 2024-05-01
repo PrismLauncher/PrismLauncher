@@ -219,7 +219,7 @@ QString StringUtils::htmlListPatch(QString htmlStr)
     int pos = htmlStr.indexOf(match);
     int imgPos, dist;
     while (pos != -1) {
-        dist = htmlStr.indexOf(">", pos) - pos + 1; // Get the size of the </ul> tag. Add one for zeroeth index
+        dist = htmlStr.indexOf(">", pos) - pos + 1;  // Get the size of the </ul> tag. Add one for zeroeth index
         pos = pos + dist;
         imgPos = htmlStr.indexOf("<img ", pos);
         if (imgPos == -1)

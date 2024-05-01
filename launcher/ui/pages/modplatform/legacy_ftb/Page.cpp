@@ -262,8 +262,8 @@ void Page::onPackSelectionChanged(Modpack* pack)
     ui->versionSelectionBox->clear();
     if (pack) {
         currentModpackInfo->setHtml(StringUtils::htmlListPatch("Pack by <b>" + pack->author + "</b>" + "<br>Minecraft " + pack->mcVersion +
-                                                               "<br>" + "<br>" +
-                                                               pack->description + "<ul><li>" + pack->mods.replace(";", "</li><li>") + "</li></ul>"));
+                                                               "<br>" + "<br>" + pack->description + "<ul><li>" +
+                                                               pack->mods.replace(";", "</li><li>") + "</li></ul>"));
         bool currentAdded = false;
 
         for (int i = 0; i < pack->oldVersions.size(); i++) {

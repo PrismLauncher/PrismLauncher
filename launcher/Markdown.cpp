@@ -26,6 +26,6 @@ QString markdownToHTML(const QString& markdown)
     QString htmlStr(buffer);
 
     free(buffer);
-    
+
     return htmlStr;
 }
