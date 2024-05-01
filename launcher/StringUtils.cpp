@@ -212,3 +212,23 @@ QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegular
     right = s.mid(end);
     return qMakePair(left, right);
 }
+
+QString StringUtils::htmlListPatch(QString htmlStr)
+{
+    int pos = htmlStr.indexOf("</ul>");
+    int imgPos;
+    while (pos != -1) {
+        pos = pos + 5;  // 5 is the size of the </ul> tag
+        imgPos = htmlStr.indexOf("<img", pos);
+        if (imgPos == -1)
+            break;  // no image after the tag
+
+        auto textBetween = htmlStr.mid(pos, imgPos - pos).trimmed();  // trim all white spaces
+
+        if (textBetween.isEmpty())
+            htmlStr.insert(pos, "<br>");
+
+        pos = htmlStr.indexOf("</ul>", pos);
+    }
+    return htmlStr;
+}
