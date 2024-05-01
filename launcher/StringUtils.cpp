@@ -213,14 +213,14 @@ QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegular
     return qMakePair(left, right);
 }
 
+static const QRegularExpression ulMatcher("<\\s*/\\s*ul\\s*>");
+
 QString StringUtils::htmlListPatch(QString htmlStr)
 {
-    QRegularExpression match("<\\s/\\s*ul\\s*>");
-    int pos = htmlStr.indexOf(match);
-    int imgPos, dist;
+    int pos = htmlStr.indexOf(ulMatcher);
+    int imgPos;
     while (pos != -1) {
-        dist = htmlStr.indexOf(">", pos) - pos + 1;  // Get the size of the </ul> tag. Add one for zeroeth index
-        pos = pos + dist;
+        pos = htmlStr.indexOf(">", pos) + 1;  // Get the size of the </ul> tag. Add one for zeroeth index
         imgPos = htmlStr.indexOf("<img ", pos);
         if (imgPos == -1)
             break;  // no image after the tag
@@ -230,7 +230,7 @@ QString StringUtils::htmlListPatch(QString htmlStr)
         if (textBetween.isEmpty())
             htmlStr.insert(pos, "<br>");
 
-        pos = htmlStr.indexOf(match, pos);
+        pos = htmlStr.indexOf(ulMatcher, pos);
     }
     return htmlStr;
 }
