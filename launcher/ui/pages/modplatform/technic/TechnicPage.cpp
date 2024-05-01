@@ -44,10 +44,10 @@
 
 #include "BuildConfig.h"
 #include "Json.h"
+#include "StringUtils.h"
 #include "TechnicModel.h"
 #include "modplatform/technic/SingleZipPackInstallTask.h"
 #include "modplatform/technic/SolderPackInstallTask.h"
-#include "StringUtils.h"
 
 #include "Application.h"
 #include "modplatform/technic/SolderPackManifest.h"
