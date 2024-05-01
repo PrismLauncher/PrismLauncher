@@ -503,8 +503,8 @@ void FlameManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(
-        m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId)));
+    ui->changelogTextBrowser->setHtml(
+        StringUtils::htmlListPatch(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId)));
 
     ManagedPackPage::suggestVersion();
 }

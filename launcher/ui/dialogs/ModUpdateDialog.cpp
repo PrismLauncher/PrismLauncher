@@ -3,11 +3,11 @@
 #include "CustomMessageBox.h"
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
+#include "StringUtils.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "ui_ReviewMessageBox.h"
-#include "StringUtils.h"
 
 #include "Markdown.h"
 

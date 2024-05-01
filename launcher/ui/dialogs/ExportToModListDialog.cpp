@@ -22,11 +22,11 @@
 #include <QTextEdit>
 #include "FileSystem.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/helpers/ExportToModList.h"
 #include "ui_ExportToModListDialog.h"
-#include "StringUtils.h"
 
 #include <QFileDialog>
 #include <QFileSystemModel>
