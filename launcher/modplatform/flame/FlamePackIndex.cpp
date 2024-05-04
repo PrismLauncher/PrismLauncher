@@ -108,6 +108,11 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
         }
         file.version_type = ModPlatform::IndexedVersionType(ver_type);
         file.downloadUrl = Json::ensureString(version, "downloadUrl");
+        auto fileName = Json::requireString(version, "fileName");
+        if (file.downloadUrl.isEmpty() && !fileName.isEmpty()) {
+            auto fileId = QString::number(file.fileId);
+            file.downloadUrl = QString("https://edge.forgecdn.net/files/%1/%2/%3").arg(fileId.left(4), fileId.mid(4), fileName);
+        }
 
         // only add if we have a download URL (third party distribution is enabled)
         if (!file.downloadUrl.isEmpty()) {

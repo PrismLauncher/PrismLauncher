@@ -136,8 +136,12 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     file.fileId = Json::requireInteger(obj, "id");
     file.date = Json::requireString(obj, "fileDate");
     file.version = Json::requireString(obj, "displayName");
-    file.downloadUrl = Json::ensureString(obj, "downloadUrl");
     file.fileName = Json::requireString(obj, "fileName");
+    file.downloadUrl = Json::ensureString(obj, "downloadUrl");
+    if (file.downloadUrl.isEmpty() && !file.fileName.isEmpty()) {
+        auto fileId = file.fileId.toString();
+        file.downloadUrl = QString("https://edge.forgecdn.net/files/%1/%2/%3").arg(fileId.left(4), fileId.mid(4), file.fileName);
+    }
 
     ModPlatform::IndexedVersionType::VersionType ver_type;
     switch (Json::requireInteger(obj, "releaseType")) {

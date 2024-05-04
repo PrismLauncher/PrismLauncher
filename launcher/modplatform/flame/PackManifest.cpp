@@ -92,6 +92,10 @@ bool Flame::File::parseFromObject(const QJsonObject& obj, bool throw_on_blocked)
 
     // may throw, if the project is blocked
     QString rawUrl = Json::ensureString(obj, "downloadUrl");
+    if (rawUrl.isEmpty() && !fileName.isEmpty()) {
+        auto fileId_ = QString::number(fileId);
+        rawUrl = QString("https://edge.forgecdn.net/files/%1/%2/%3").arg(fileId_.left(4), fileId_.mid(4), fileName);
+    }
     url = QUrl(rawUrl, QUrl::TolerantMode);
     if (!url.isValid() && throw_on_blocked) {
         throw JSONValidationError(QString("Invalid URL: %1").arg(rawUrl));
