@@ -734,6 +734,21 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             if (!metaUrl.isValid() || (metaUrl.scheme() != "http" && metaUrl.scheme() != "https"))
                 m_settings->reset("MetaURLOverride");
         }
+        // Some custom urls from Mojang
+        {
+            // Resource Base Url
+            m_settings->registerSetting("MinecraftResourceURLOverride", "");
+            // Libraries Base Url
+            m_settings->registerSetting("MinecraftLibrariesURLOverride", "");
+
+            QUrl resourceUrl(m_settings->get("MinecraftResourceURLOverride").toString());
+            QUrl librariesUrl(m_settings->get("MinecraftLibrariesURLOverride").toString());
+
+            if (!resourceUrl.isValid() || (resourceUrl.scheme() != "http" && resourceUrl.scheme() != "https"))
+                m_settings->reset("MinecraftResourceURLOverride");
+            if (!librariesUrl.isValid() || (librariesUrl.scheme() != "http" && librariesUrl.scheme() != "https"))
+                m_settings->reset("MinecraftLibrariesURLOverride");
+        }
 
         m_settings->registerSetting("CloseAfterLaunch", false);
         m_settings->registerSetting("QuitAfterGameStop", false);

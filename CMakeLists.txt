@@ -197,6 +197,12 @@ set(Launcher_BUILD_ARTIFACT "" CACHE STRING "Artifact name to help the updater i
 # The metadata server
 set(Launcher_META_URL "https://meta.prismlauncher.org/v1/" CACHE STRING "URL to fetch Launcher's meta files from.")
 
+# The fmllibs server
+set(Launcher_FMLLIBS_BASE_URL "https://files.prismlauncher.org/fmllibs/" CACHE STRING "URL to fetch Launcher's meta files from.")
+
+# The i18n server
+set(Launcher_TRANSLATIONS_BASE_URL "https://i18n.prismlauncher.org/" CACHE STRING "URL to fetch Launcher's i18n files from.")
+
 # Imgur API Client ID
 set(Launcher_IMGUR_CLIENT_ID "5b97b0713fba4a3" CACHE STRING "Client ID you can get from Imgur when you register an application")
 
@@ -214,6 +220,12 @@ set(Launcher_DISCORD_URL "https://prismlauncher.org/discord" CACHE STRING "URL f
 
 # Subreddit URL
 set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL for the subreddit.")
+
+# Minecraft Resources URL
+set(Launcher_RESOURCE_BASE "https://resources.download.minecraft.net/" CACHE STRING "URL for the Minecraft resources.")
+
+# Minecraft Libraries URL
+set(Launcher_LIBRARY_BASE "https://libraries.minecraft.net/" CACHE STRING "URL for the Minecraft Libraries.")
 
 # Builds
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")

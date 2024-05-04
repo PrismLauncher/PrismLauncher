@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "BaseEntity.h"
+#include "Property.h"
 #include "meta/VersionList.h"
 
 class Task;
@@ -47,6 +48,9 @@ class Index : public QAbstractListModel, public BaseEntity {
 
     QVector<VersionList::Ptr> lists() const { return m_lists; }
 
+    // Properties
+    shared_qobject_ptr<Meta::Property> property();
+
    public:  // for usage by parsers only
     void merge(const std::shared_ptr<Index>& other);
     void parse(const QJsonObject& obj) override;
@@ -54,6 +58,7 @@ class Index : public QAbstractListModel, public BaseEntity {
    private:
     QVector<VersionList::Ptr> m_lists;
     QHash<QString, VersionList::Ptr> m_uids;
+    shared_qobject_ptr<Meta::Property> m_properties;
 
     void connectVersionList(int row, const VersionList::Ptr& list);
 };
