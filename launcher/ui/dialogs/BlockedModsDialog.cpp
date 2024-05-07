@@ -164,7 +164,8 @@ void BlockedModsDialog::update()
 
     QString watching;
     for (auto& dir : m_watcher.directories()) {
-        watching += QString("<a href=\"%1\">%1</a><br/>").arg(dir);
+        QUrl fileURL = QUrl::fromLocalFile(dir);
+        watching += QString("<a href=\"%1\">%2</a><br/>").arg(fileURL.toString(), dir);
     }
 
     ui->textBrowserWatched->setText(watching);
