@@ -1494,7 +1494,6 @@ if(INSTALL_BUNDLE STREQUAL "full")
             CONFIGURATIONS Debug RelWithDebInfo ""
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            PATTERN "*qopensslbackend*" EXCLUDE
             PATTERN "*qcertonlybackend*" EXCLUDE
         )
         install(
@@ -1505,8 +1504,76 @@ if(INSTALL_BUNDLE STREQUAL "full")
             REGEX "dd\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
-            PATTERN "*qopensslbackend*" EXCLUDE
             PATTERN "*qcertonlybackend*" EXCLUDE
+        )
+    endif()
+    # Wayland support
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-graphics-integration-client")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-client"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-client"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-graphics-integration-server")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-server"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-server"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-decoration-client")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-decoration-client"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-decoration-client"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-shell-integration")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-shell-integration"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-shell-integration"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
         )
     endif()
     configure_file(
