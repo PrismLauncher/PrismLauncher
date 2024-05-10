@@ -1209,6 +1209,12 @@ void Application::performMainStartupAction()
         qDebug() << "<> Updater started.";
     }
 
+    {  // delete instances tmp dirctory
+        auto instDir = m_settings->get("InstanceDir").toString();
+        const QString tempRoot = FS::PathCombine(instDir, ".tmp");
+        FS::deletePath(tempRoot);
+    }
+
     if (!m_urlsToImport.isEmpty()) {
         qDebug() << "<> Importing from url:" << m_urlsToImport;
         m_mainWindow->processURLs(m_urlsToImport);
