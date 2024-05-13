@@ -35,7 +35,6 @@
 
 #include "AccountList.h"
 #include "AccountData.h"
-#include "AccountTask.h"
 #include "tasks/Task.h"
 
 #include <QDir>

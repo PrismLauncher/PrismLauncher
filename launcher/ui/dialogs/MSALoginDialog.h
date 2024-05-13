@@ -20,6 +20,7 @@
 #include <QtWidgets/QDialog>
 
 #include "minecraft/auth/MinecraftAccount.h"
+#include "minecraft/auth/flows/AuthFlow.h"
 
 namespace Ui {
 class MSALoginDialog;
@@ -52,7 +53,7 @@ class MSALoginDialog : public QDialog {
    private:
     Ui::MSALoginDialog* ui;
     MinecraftAccountPtr m_account;
-    shared_qobject_ptr<AccountTask> m_loginTask;
+    shared_qobject_ptr<AuthFlow> m_loginTask;
     QTimer m_externalLoginTimer;
     int m_externalLoginElapsed = 0;
     int m_externalLoginTimeout = 0;

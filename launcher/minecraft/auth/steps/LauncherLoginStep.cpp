@@ -5,7 +5,6 @@
 
 #include "Application.h"
 #include "Logging.h"
-#include "minecraft/auth/AccountTask.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
 #include "net/StaticHeaderProxy.h"

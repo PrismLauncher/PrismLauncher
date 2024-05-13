@@ -37,7 +37,7 @@
 #include "ui_MSALoginDialog.h"
 
 #include "DesktopServices.h"
-#include "minecraft/auth/AccountTask.h"
+#include "minecraft/auth/flows/AuthFlow.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -67,8 +67,8 @@ int MSALoginDialog::exec()
     connect(m_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
     connect(m_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
     connect(m_loginTask.get(), &Task::progress, this, &MSALoginDialog::onTaskProgress);
-    connect(m_loginTask.get(), &AccountTask::showVerificationUriAndCode, this, &MSALoginDialog::showVerificationUriAndCode);
-    connect(m_loginTask.get(), &AccountTask::hideVerificationUriAndCode, this, &MSALoginDialog::hideVerificationUriAndCode);
+    connect(m_loginTask.get(), &AuthFlow::showVerificationUriAndCode, this, &MSALoginDialog::showVerificationUriAndCode);
+    connect(m_loginTask.get(), &AuthFlow::hideVerificationUriAndCode, this, &MSALoginDialog::hideVerificationUriAndCode);
     connect(&m_externalLoginTimer, &QTimer::timeout, this, &MSALoginDialog::externalLoginTick);
     m_loginTask->start();
 

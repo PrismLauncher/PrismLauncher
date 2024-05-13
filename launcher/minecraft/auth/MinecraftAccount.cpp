@@ -53,6 +53,8 @@
 #include "flows/MSA.h"
 #include "flows/Offline.h"
 #include "minecraft/auth/AccountData.h"
+#include "minecraft/auth/flows/AuthFlow.h"
+#include "tasks/Task.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
 {
@@ -120,7 +122,7 @@ QPixmap MinecraftAccount::getFace() const
     return skin.scaled(64, 64, Qt::KeepAspectRatio);
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA()
+shared_qobject_ptr<AuthFlow> MinecraftAccount::loginMSA()
 {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
@@ -132,7 +134,7 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA()
     return m_currentTask;
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::loginOffline()
+shared_qobject_ptr<AuthFlow> MinecraftAccount::loginOffline()
 {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
@@ -144,7 +146,7 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::loginOffline()
     return m_currentTask;
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::refresh()
+shared_qobject_ptr<AuthFlow> MinecraftAccount::refresh()
 {
     if (m_currentTask) {
         return m_currentTask;
@@ -163,7 +165,7 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh()
     return m_currentTask;
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::currentTask()
+shared_qobject_ptr<AuthFlow> MinecraftAccount::currentTask()
 {
     return m_currentTask;
 }

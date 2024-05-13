@@ -43,15 +43,13 @@
 #include <QPixmap>
 #include <QString>
 
-#include <memory>
-
 #include "AccountData.h"
 #include "AuthSession.h"
 #include "QObjectPtr.h"
 #include "Usable.h"
+#include "minecraft/auth/flows/AuthFlow.h"
 
 class Task;
-class AccountTask;
 class MinecraftAccount;
 
 using MinecraftAccountPtr = shared_qobject_ptr<MinecraftAccount>;
@@ -97,13 +95,13 @@ class MinecraftAccount : public QObject, public Usable {
     QJsonObject saveToJson() const;
 
    public: /* manipulation */
-    shared_qobject_ptr<AccountTask> loginMSA();
+    shared_qobject_ptr<AuthFlow> loginMSA();
 
-    shared_qobject_ptr<AccountTask> loginOffline();
+    shared_qobject_ptr<AuthFlow> loginOffline();
 
-    shared_qobject_ptr<AccountTask> refresh();
+    shared_qobject_ptr<AuthFlow> refresh();
 
-    shared_qobject_ptr<AccountTask> currentTask();
+    shared_qobject_ptr<AuthFlow> currentTask();
 
    public: /* queries */
     QString internalId() const { return data.internalId; }
@@ -166,7 +164,7 @@ class MinecraftAccount : public QObject, public Usable {
     AccountData data;
 
     // current task we are executing here
-    shared_qobject_ptr<AccountTask> m_currentTask;
+    shared_qobject_ptr<AuthFlow> m_currentTask;
 
    protected: /* methods */
     void incrementUses() override;

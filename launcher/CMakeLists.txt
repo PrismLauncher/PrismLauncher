@@ -209,11 +209,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/AccountData.h
     minecraft/auth/AccountList.cpp
     minecraft/auth/AccountList.h
-    minecraft/auth/AccountTask.cpp
-    minecraft/auth/AccountTask.h
     minecraft/auth/AuthSession.cpp
     minecraft/auth/AuthSession.h
-    minecraft/auth/AuthStep.cpp
     minecraft/auth/AuthStep.h
     minecraft/auth/MinecraftAccount.cpp
     minecraft/auth/MinecraftAccount.h

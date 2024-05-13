@@ -1,8 +1,6 @@
 #include "OfflineLoginDialog.h"
 #include "ui_OfflineLoginDialog.h"
 
-#include "minecraft/auth/AccountTask.h"
-
 #include <QtWidgets/QPushButton>
 
 OfflineLoginDialog::OfflineLoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::OfflineLoginDialog)
