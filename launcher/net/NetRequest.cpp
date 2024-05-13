@@ -105,7 +105,9 @@ void NetRequest::executeTask()
         header_proxy->writeHeaders(request);
     }
 
-    request.setTransferTimeout(QNetworkRequest::DefaultTransferTimeoutConstant);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+    request.setTransferTimeout();
+#endif
 
     m_last_progress_time = m_clock.now();
     m_last_progress_bytes = 0;
