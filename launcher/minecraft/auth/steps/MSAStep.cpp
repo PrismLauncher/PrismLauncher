@@ -37,10 +37,6 @@
 
 #include <QNetworkRequest>
 
-#include "BuildConfig.h"
-#include "minecraft/auth/AuthRequest.h"
-#include "minecraft/auth/Parsers.h"
-
 #include "Application.h"
 #include "Logging.h"
 
@@ -63,25 +59,9 @@ MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(ac
     connect(m_oauth2, &OAuth2::showVerificationUriAndCode, this, &MSAStep::showVerificationUriAndCode);
 }
 
-MSAStep::~MSAStep() noexcept = default;
-
 QString MSAStep::describe()
 {
     return tr("Logging in with Microsoft account.");
-}
-
-void MSAStep::rehydrate()
-{
-    switch (m_action) {
-        case Refresh: {
-            // TODO: check the tokens and see if they are old (older than a day)
-            return;
-        }
-        case Login: {
-            // NOOP
-            return;
-        }
-    }
 }
 
 void MSAStep::perform()

@@ -126,7 +126,6 @@ set(NET_SOURCES
     net/MetaCacheSink.h
     net/Logging.h
     net/Logging.cpp
-    net/NetAction.h
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
@@ -212,8 +211,6 @@ set(MINECRAFT_SOURCES
     minecraft/auth/AccountList.h
     minecraft/auth/AccountTask.cpp
     minecraft/auth/AccountTask.h
-    minecraft/auth/AuthRequest.cpp
-    minecraft/auth/AuthRequest.h
     minecraft/auth/AuthSession.cpp
     minecraft/auth/AuthSession.h
     minecraft/auth/AuthStep.cpp
@@ -624,7 +621,6 @@ set(PRISMUPDATER_SOURCES
     net/HttpMetaCache.h
     net/Logging.h
     net/Logging.cpp
-    net/NetAction.h
     net/NetRequest.cpp
     net/NetRequest.h
     net/NetJob.cpp

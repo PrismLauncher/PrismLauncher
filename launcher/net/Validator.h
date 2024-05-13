@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "net/NetAction.h"
+#include <QNetworkReply>
 
 namespace Net {
 class Validator {

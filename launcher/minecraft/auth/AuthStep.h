@@ -15,13 +15,12 @@ class AuthStep : public QObject {
 
    public:
     explicit AuthStep(AccountData* data);
-    virtual ~AuthStep() noexcept;
+    virtual ~AuthStep() noexcept = default;
 
     virtual QString describe() = 0;
 
    public slots:
     virtual void perform() = 0;
-    virtual void rehydrate() = 0;
 
    signals:
     void finished(AccountTaskState resultingState, QString message);

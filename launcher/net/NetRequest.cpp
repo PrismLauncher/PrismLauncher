@@ -37,6 +37,7 @@
  */
 
 #include "NetRequest.h"
+#include <qnetworkreply.h>
 #include <QUrl>
 
 #include <QDateTime>
@@ -47,8 +48,6 @@
 #include "Application.h"
 #endif
 #include "BuildConfig.h"
-
-#include "net/NetAction.h"
 
 #include "MMCTime.h"
 #include "StringUtils.h"
@@ -105,20 +104,18 @@ void NetRequest::executeTask()
     for (auto& header_proxy : m_headerProxies) {
         header_proxy->writeHeaders(request);
     }
-    // TODO remove duplication
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    request.setTransferTimeout();
-#endif
+    request.setTransferTimeout(QNetworkRequest::DefaultTransferTimeoutConstant);
 
     m_last_progress_time = m_clock.now();
     m_last_progress_bytes = 0;
 
-    QNetworkReply* rep = getReply(request);
+    auto rep = getReply(request);
     if (rep == nullptr)  // it failed
         return;
     m_reply.reset(rep);
-    connect(rep, &QNetworkReply::downloadProgress, this, &NetRequest::downloadProgress);
+    connect(rep, &QNetworkReply::uploadProgress, this, &NetRequest::onProgress);
+    connect(rep, &QNetworkReply::downloadProgress, this, &NetRequest::onProgress);
     connect(rep, &QNetworkReply::finished, this, &NetRequest::downloadFinished);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &NetRequest::downloadError);
@@ -129,7 +126,7 @@ void NetRequest::executeTask()
     connect(rep, &QNetworkReply::readyRead, this, &NetRequest::downloadReadyRead);
 }
 
-void NetRequest::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     auto now = m_clock.now();
     auto elapsed = now - m_last_progress_time;
@@ -237,7 +234,7 @@ auto NetRequest::handleRedirect() -> bool
 
     m_url = QUrl(redirect.toString());
     qCDebug(logCat) << getUid().toString() << "Following redirect to " << m_url.toString();
-    startAction(m_network);
+    executeTask();
 
     return true;
 }
@@ -334,4 +331,23 @@ auto NetRequest::abort() -> bool
     return true;
 }
 
+int NetRequest::replyStatusCode() const
+{
+    return m_reply ? m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() : -1;
+}
+
+QNetworkReply::NetworkError NetRequest::error() const
+{
+    return m_reply ? m_reply->error() : QNetworkReply::NoError;
+}
+
+QUrl NetRequest::url() const
+{
+    return m_url;
+}
+
+QString NetRequest::errorString() const
+{
+    return m_reply ? m_reply->errorString() : "";
+}
 }  // namespace Net

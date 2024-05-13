@@ -48,10 +48,9 @@ class MSAStep : public AuthStep {
 
    public:
     explicit MSAStep(AccountData* data, Action action);
-    virtual ~MSAStep() noexcept;
+    virtual ~MSAStep() noexcept = default;
 
     void perform() override;
-    void rehydrate() override;
 
     QString describe() override;
 
