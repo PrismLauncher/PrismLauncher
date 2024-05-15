@@ -1234,7 +1234,6 @@ target_link_libraries(Launcher_logic
     tomlplusplus::tomlplusplus
     qdcss
     BuildConfig
-    Katabasis
     Qt${QT_VERSION_MAJOR}::Widgets
     ghcFilesystem::ghc_filesystem
 )
@@ -1252,6 +1251,7 @@ target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::NetworkAuth
     ${Launcher_QT_LIBS}
 )
 target_link_libraries(Launcher_logic
@@ -1322,7 +1322,6 @@ if(Launcher_BUILD_UPDATER)
         Qt${QT_VERSION_MAJOR}::Network
         ${Launcher_QT_LIBS}
         cmark::cmark
-        Katabasis
     )
 
     add_executable("${Launcher_Name}_updater" WIN32 updater/prismupdater/updater_main.cpp)

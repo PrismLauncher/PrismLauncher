@@ -67,9 +67,6 @@ int MSALoginDialog::exec()
     connect(m_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
     connect(m_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
     connect(m_loginTask.get(), &Task::progress, this, &MSALoginDialog::onTaskProgress);
-    connect(m_loginTask.get(), &AuthFlow::showVerificationUriAndCode, this, &MSALoginDialog::showVerificationUriAndCode);
-    connect(m_loginTask.get(), &AuthFlow::hideVerificationUriAndCode, this, &MSALoginDialog::hideVerificationUriAndCode);
-    connect(&m_externalLoginTimer, &QTimer::timeout, this, &MSALoginDialog::externalLoginTick);
     m_loginTask->start();
 
     return QDialog::exec();
@@ -78,55 +75,6 @@ int MSALoginDialog::exec()
 MSALoginDialog::~MSALoginDialog()
 {
     delete ui;
-}
-
-void MSALoginDialog::externalLoginTick()
-{
-    m_externalLoginElapsed++;
-    ui->progressBar->setValue(m_externalLoginElapsed);
-    ui->progressBar->repaint();
-
-    if (m_externalLoginElapsed >= m_externalLoginTimeout) {
-        m_externalLoginTimer.stop();
-    }
-}
-
-void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn)
-{
-    m_externalLoginElapsed = 0;
-    m_externalLoginTimeout = expiresIn;
-
-    m_externalLoginTimer.setInterval(1000);
-    m_externalLoginTimer.setSingleShot(false);
-    m_externalLoginTimer.start();
-
-    ui->progressBar->setMaximum(expiresIn);
-    ui->progressBar->setValue(m_externalLoginElapsed);
-
-    QString urlString = uri.toString();
-    QString linkString = QString("<a href=\"%1\">%2</a>").arg(urlString, urlString);
-    if (urlString == "https://www.microsoft.com/link" && !code.isEmpty()) {
-        urlString += QString("?otc=%1").arg(code);
-        DesktopServices::openUrl(urlString);
-        ui->label->setText(tr("<p>Please login in the opened browser. If no browser was opened, please open up %1 in "
-                              "a browser and put in the code <b>%2</b> to proceed with login.</p>")
-                               .arg(linkString, code));
-    } else {
-        ui->label->setText(
-            tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
-    }
-    ui->actionButton->setVisible(true);
-    connect(ui->actionButton, &QPushButton::clicked, [=]() {
-        DesktopServices::openUrl(uri);
-        QClipboard* cb = QApplication::clipboard();
-        cb->setText(code);
-    });
-}
-
-void MSALoginDialog::hideVerificationUriAndCode()
-{
-    m_externalLoginTimer.stop();
-    ui->actionButton->setVisible(false);
 }
 
 void MSALoginDialog::setUserInputsEnabled(bool enable)

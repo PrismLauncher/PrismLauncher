@@ -171,9 +171,9 @@ void NetRequest::downloadError(QNetworkReply::NetworkError error)
             }
         }
         // error happened during download.
-        qCCritical(logCat) << getUid().toString() << "Failed " << m_url.toString() << " with reason " << error;
+        qCCritical(logCat) << getUid().toString() << "Failed" << m_url.toString() << "with reason" << error;
         if (m_reply)
-            qCCritical(logCat) << getUid().toString() << "HTTP Status " << replyStatusCode() << ";error " << errorString();
+            qCCritical(logCat) << getUid().toString() << "HTTP Status" << replyStatusCode() << ";error" << errorString();
         m_state = State::Failed;
     }
 }

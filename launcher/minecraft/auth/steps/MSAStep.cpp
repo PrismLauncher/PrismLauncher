@@ -35,28 +35,44 @@
 
 #include "MSAStep.h"
 
+#include <QtNetworkAuth/qoauthhttpserverreplyhandler.h>
+#include <QAbstractOAuth2>
+#include <QDesktopServices>
 #include <QNetworkRequest>
 
 #include "Application.h"
-#include "Logging.h"
-
-using OAuth2 = Katabasis::DeviceFlow;
-using Activity = Katabasis::Activity;
 
 MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(action)
 {
     m_clientId = APPLICATION->getMSAClientID();
-    OAuth2::Options opts;
-    opts.scope = "XboxLive.signin offline_access";
-    opts.clientIdentifier = m_clientId;
-    opts.authorizationUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
-    opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
 
-    // FIXME: OAuth2 is not aware of our fancy shared pointers
-    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, APPLICATION->network().get());
+    auto replyHandler = new QOAuthHttpServerReplyHandler(1337, this);
+    oauth2.setReplyHandler(replyHandler);
+    oauth2.setAuthorizationUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"));
+    oauth2.setAccessTokenUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/token"));
+    oauth2.setScope("XboxLive.SignIn XboxLive.offline_access");
+    oauth2.setClientIdentifier(m_clientId);
+    oauth2.setNetworkAccessManager(APPLICATION->network().get());
 
-    connect(m_oauth2, &OAuth2::activityChanged, this, &MSAStep::onOAuthActivityChanged);
-    connect(m_oauth2, &OAuth2::showVerificationUriAndCode, this, &MSAStep::showVerificationUriAndCode);
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::granted, this, [this] {
+        m_data->msaClientID = oauth2.clientIdentifier();
+        m_data->msaToken.issueInstant = QDateTime::currentDateTimeUtc();
+        m_data->msaToken.notAfter = oauth2.expirationAt();
+        m_data->msaToken.extra = oauth2.extraTokens();
+        m_data->msaToken.refresh_token = oauth2.refreshToken();
+        m_data->msaToken.token = oauth2.token();
+        emit finished(AccountTaskState::STATE_WORKING, tr("Got "));
+    });
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, this, &QDesktopServices::openUrl);
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::requestFailed, this, [this](const QAbstractOAuth2::Error err) {
+        emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Microsoft user authentication failed."));
+    });
+
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::extraTokensChanged, this,
+            [this](const QVariantMap& tokens) { m_data->msaToken.extra = tokens; });
+
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::clientIdentifierChanged, this,
+            [this](const QString& clientIdentifier) { m_data->msaClientID = clientIdentifier; });
 }
 
 QString MSAStep::describe()
@@ -69,68 +85,22 @@ void MSAStep::perform()
     switch (m_action) {
         case Refresh: {
             if (m_data->msaClientID != m_clientId) {
-                emit hideVerificationUriAndCode();
                 emit finished(AccountTaskState::STATE_DISABLED,
                               tr("Microsoft user authentication failed - client identification has changed."));
             }
-            m_oauth2->refresh();
+            oauth2.setRefreshToken(m_data->msaToken.refresh_token);
+            oauth2.refreshAccessToken();
             return;
         }
         case Login: {
-            QVariantMap extraOpts;
-            extraOpts["prompt"] = "select_account";
-            m_oauth2->setExtraRequestParams(extraOpts);
+            oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) {
+                map->insert("prompt", "select_account");
+                map->insert("cobrandid", "8058f65d-ce06-4c30-9559-473c9275a65d");
+            });
 
             *m_data = AccountData();
             m_data->msaClientID = m_clientId;
-            m_oauth2->login();
-            return;
-        }
-    }
-}
-
-void MSAStep::onOAuthActivityChanged(Katabasis::Activity activity)
-{
-    switch (activity) {
-        case Katabasis::Activity::Idle:
-        case Katabasis::Activity::LoggingIn:
-        case Katabasis::Activity::Refreshing:
-        case Katabasis::Activity::LoggingOut: {
-            // We asked it to do something, it's doing it. Nothing to act upon.
-            return;
-        }
-        case Katabasis::Activity::Succeeded: {
-            // Succeeded or did not invalidate tokens
-            emit hideVerificationUriAndCode();
-            QVariantMap extraTokens = m_oauth2->extraTokens();
-            if (!extraTokens.isEmpty()) {
-                qCDebug(authCredentials()) << "Extra tokens in response:";
-                foreach (QString key, extraTokens.keys()) {
-                    qCDebug(authCredentials()) << "\t" << key << ":" << extraTokens.value(key);
-                }
-            }
-            emit finished(AccountTaskState::STATE_WORKING, tr("Got "));
-            return;
-        }
-        case Katabasis::Activity::FailedSoft: {
-            // NOTE: soft error in the first step means 'offline'
-            emit hideVerificationUriAndCode();
-            emit finished(AccountTaskState::STATE_OFFLINE, tr("Microsoft user authentication ended with a network error."));
-            return;
-        }
-        case Katabasis::Activity::FailedGone: {
-            emit hideVerificationUriAndCode();
-            emit finished(AccountTaskState::STATE_FAILED_GONE, tr("Microsoft user authentication failed - user no longer exists."));
-            return;
-        }
-        case Katabasis::Activity::FailedHard: {
-            emit hideVerificationUriAndCode();
-            emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Microsoft user authentication failed."));
-            return;
-        }
-        default: {
-            emit hideVerificationUriAndCode();
-            emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Microsoft user authentication completed with an unrecognized result."));
+            oauth2.grant();
             return;
         }
     }

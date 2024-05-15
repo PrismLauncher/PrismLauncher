@@ -36,11 +36,9 @@
 #pragma once
 #include <QObject>
 
-#include "QObjectPtr.h"
 #include "minecraft/auth/AuthStep.h"
 
-#include <katabasis/DeviceFlow.h>
-
+#include <QtNetworkAuth/qoauth2authorizationcodeflow.h>
 class MSAStep : public AuthStep {
     Q_OBJECT
    public:
@@ -54,11 +52,8 @@ class MSAStep : public AuthStep {
 
     QString describe() override;
 
-   private slots:
-    void onOAuthActivityChanged(Katabasis::Activity activity);
-
    private:
-    Katabasis::DeviceFlow* m_oauth2 = nullptr;
     Action m_action;
     QString m_clientId;
+    QOAuth2AuthorizationCodeFlow oauth2;
 };

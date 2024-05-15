@@ -21,6 +21,7 @@ void AuthFlow::succeed()
 void AuthFlow::executeTask()
 {
     if (m_currentStep) {
+        emitFailed("No task");
         return;
     }
     changeState(AccountTaskState::STATE_WORKING, tr("Initializing"));
@@ -39,36 +40,8 @@ void AuthFlow::nextStep()
     qDebug() << "AuthFlow:" << m_currentStep->describe();
     m_steps.pop_front();
     connect(m_currentStep.get(), &AuthStep::finished, this, &AuthFlow::stepFinished);
-    connect(m_currentStep.get(), &AuthStep::showVerificationUriAndCode, this, &AuthFlow::showVerificationUriAndCode);
-    connect(m_currentStep.get(), &AuthStep::hideVerificationUriAndCode, this, &AuthFlow::hideVerificationUriAndCode);
 
     m_currentStep->perform();
-}
-
-QString AuthFlow::getStateMessage() const
-{
-    switch (m_taskState) {
-        case AccountTaskState::STATE_CREATED:
-            return "Waiting...";
-        case AccountTaskState::STATE_WORKING:
-            if (m_currentStep)
-                return m_currentStep->describe();
-            return tr("Working...");
-        case AccountTaskState::STATE_SUCCEEDED:
-            return tr("Authentication task succeeded.");
-        case AccountTaskState::STATE_OFFLINE:
-            return tr("Failed to contact the authentication server.");
-        case AccountTaskState::STATE_DISABLED:
-            return tr("Client ID has changed. New session needs to be created.");
-        case AccountTaskState::STATE_FAILED_SOFT:
-            return tr("Encountered an error during authentication.");
-        case AccountTaskState::STATE_FAILED_HARD:
-            return tr("Failed to authenticate. The session has expired.");
-        case AccountTaskState::STATE_FAILED_GONE:
-            return tr("Failed to authenticate. The account no longer exists.");
-        default:
-            return tr("...");
-    }
 }
 
 void AuthFlow::stepFinished(AccountTaskState resultingState, QString message)
@@ -81,54 +54,61 @@ void AuthFlow::stepFinished(AccountTaskState resultingState, QString message)
 bool AuthFlow::changeState(AccountTaskState newState, QString reason)
 {
     m_taskState = newState;
-    // FIXME: virtual method invoked in constructor.
-    // We want that behavior, but maybe make it less weird?
-    setStatus(getStateMessage());
+    setDetails(reason);
     switch (newState) {
         case AccountTaskState::STATE_CREATED: {
+            setStatus(tr("Waiting..."));
             m_data->errorString.clear();
             return true;
         }
         case AccountTaskState::STATE_WORKING: {
+            setStatus(m_currentStep ? m_currentStep->describe() : tr("Working..."));
             m_data->accountState = AccountState::Working;
             return true;
         }
         case AccountTaskState::STATE_SUCCEEDED: {
+            setStatus(tr("Authentication task succeeded."));
             m_data->accountState = AccountState::Online;
             emitSucceeded();
             return false;
         }
         case AccountTaskState::STATE_OFFLINE: {
+            setStatus(tr("Failed to contact the authentication server."));
             m_data->errorString = reason;
             m_data->accountState = AccountState::Offline;
             emitFailed(reason);
             return false;
         }
         case AccountTaskState::STATE_DISABLED: {
+            setStatus(tr("Client ID has changed. New session needs to be created."));
             m_data->errorString = reason;
             m_data->accountState = AccountState::Disabled;
             emitFailed(reason);
             return false;
         }
         case AccountTaskState::STATE_FAILED_SOFT: {
+            setStatus(tr("Encountered an error during authentication."));
             m_data->errorString = reason;
             m_data->accountState = AccountState::Errored;
             emitFailed(reason);
             return false;
         }
         case AccountTaskState::STATE_FAILED_HARD: {
+            setStatus(tr("Failed to authenticate. The session has expired."));
             m_data->errorString = reason;
             m_data->accountState = AccountState::Expired;
             emitFailed(reason);
             return false;
         }
         case AccountTaskState::STATE_FAILED_GONE: {
+            setStatus(tr("Failed to authenticate. The account no longer exists."));
             m_data->errorString = reason;
             m_data->accountState = AccountState::Gone;
             emitFailed(reason);
             return false;
         }
         default: {
+            setStatus(tr("..."));
             QString error = tr("Unknown account task state: %1").arg(int(newState));
             m_data->accountState = AccountState::Errored;
             emitFailed(error);

@@ -37,8 +37,6 @@ class AuthStep : public QObject {
 
    signals:
     void finished(AccountTaskState resultingState, QString message);
-    void showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn);
-    void hideVerificationUriAndCode();
 
    protected:
     AccountData* m_data;

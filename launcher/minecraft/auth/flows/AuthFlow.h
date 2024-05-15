@@ -7,8 +7,6 @@
 #include <QSet>
 #include <QVector>
 
-#include <katabasis/DeviceFlow.h>
-
 #include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AuthStep.h"
 #include "tasks/Task.h"
@@ -27,18 +25,9 @@ class AuthFlow : public Task {
     AccountTaskState taskState() { return m_taskState; }
 
    signals:
-    void showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn);
-    void hideVerificationUriAndCode();
-
     void activityChanged(Katabasis::Activity activity);
 
    protected:
-    /**
-     * Returns the state message for the given state.
-     * Used to set the status message for the task.
-     * Should be overridden by subclasses that want to change messages for a given state.
-     */
-    virtual QString getStateMessage() const;
     void succeed();
     void nextStep();
 
