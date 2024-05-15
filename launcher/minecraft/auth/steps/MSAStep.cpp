@@ -93,7 +93,11 @@ void MSAStep::perform()
             return;
         }
         case Login: {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)  // QMultiMap param changed in 6.0
             oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) {
+#else
+            oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMap<QString, QVariant>* map) {
+#endif
                 map->insert("prompt", "select_account");
                 map->insert("cobrandid", "8058f65d-ce06-4c30-9559-473c9275a65d");
             });
