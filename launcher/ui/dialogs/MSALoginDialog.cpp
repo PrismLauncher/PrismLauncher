@@ -37,7 +37,7 @@
 #include "ui_MSALoginDialog.h"
 
 #include "DesktopServices.h"
-#include "minecraft/auth/flows/AuthFlow.h"
+#include "minecraft/auth/AuthFlow.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -47,26 +47,24 @@
 MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
 {
     ui->setupUi(this);
-    ui->progressBar->setVisible(false);
-    ui->actionButton->setVisible(false);
-    // ui->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
 
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    ui->cancel->setEnabled(false);
+    ui->link->setVisible(false);
+    ui->copy->setVisible(false);
+
+    connect(ui->cancel, &QPushButton::pressed, this, &QDialog::reject);
+    connect(ui->copy, &QPushButton::pressed, this, &MSALoginDialog::copyUrl);
 }
 
 int MSALoginDialog::exec()
 {
-    setUserInputsEnabled(false);
-    ui->progressBar->setVisible(true);
-
     // Setup the login task and start it
     m_account = MinecraftAccount::createBlankMSA();
-    m_loginTask = m_account->loginMSA();
+    m_loginTask = m_account->login();
     connect(m_loginTask.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
     connect(m_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
     connect(m_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
-    connect(m_loginTask.get(), &Task::progress, this, &MSALoginDialog::onTaskProgress);
+    connect(m_loginTask.get(), &AuthFlow::authorizeWithBrowser, this, &MSALoginDialog::authorizeWithBrowser);
     m_loginTask->start();
 
     return QDialog::exec();
@@ -75,11 +73,6 @@ int MSALoginDialog::exec()
 MSALoginDialog::~MSALoginDialog()
 {
     delete ui;
-}
-
-void MSALoginDialog::setUserInputsEnabled(bool enable)
-{
-    ui->buttonBox->setEnabled(enable);
 }
 
 void MSALoginDialog::onTaskFailed(const QString& reason)
@@ -94,12 +87,7 @@ void MSALoginDialog::onTaskFailed(const QString& reason)
             processed += "<br />";
         }
     }
-    ui->label->setText(processed);
-
-    // Re-enable user-interaction
-    setUserInputsEnabled(true);
-    ui->progressBar->setVisible(false);
-    ui->actionButton->setVisible(false);
+    ui->message->setText(processed);
 }
 
 void MSALoginDialog::onTaskSucceeded()
@@ -109,22 +97,38 @@ void MSALoginDialog::onTaskSucceeded()
 
 void MSALoginDialog::onTaskStatus(const QString& status)
 {
-    ui->label->setText(status);
-}
-
-void MSALoginDialog::onTaskProgress(qint64 current, qint64 total)
-{
-    ui->progressBar->setMaximum(total);
-    ui->progressBar->setValue(current);
+    ui->message->setText(status);
+    ui->cancel->setEnabled(false);
+    ui->link->setVisible(false);
+    ui->copy->setVisible(false);
 }
 
 // Public interface
 MinecraftAccountPtr MSALoginDialog::newAccount(QWidget* parent, QString msg)
 {
     MSALoginDialog dlg(parent);
-    dlg.ui->label->setText(msg);
+    dlg.ui->message->setText(msg);
     if (dlg.exec() == QDialog::Accepted) {
         return dlg.m_account;
     }
     return nullptr;
+}
+
+void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
+{
+    ui->cancel->setEnabled(true);
+    ui->link->setVisible(true);
+    ui->copy->setVisible(true);
+    DesktopServices::openUrl(url);
+    ui->link->setText(url.toDisplayString());
+    ui->message->setText(
+        tr("Browser opened to complete the login process."
+           "<br /><br />"
+           "If your browser hasn't opened, please manually open the bellow link in your browser:"));
+}
+
+void MSALoginDialog::copyUrl()
+{
+    QClipboard* cb = QApplication::clipboard();
+    cb->setText(ui->link->text());
 }

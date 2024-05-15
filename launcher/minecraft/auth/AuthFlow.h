@@ -15,30 +15,26 @@ class AuthFlow : public Task {
     Q_OBJECT
 
    public:
-    explicit AuthFlow(AccountData* data, QObject* parent = 0);
+    explicit AuthFlow(AccountData* data, bool silent = false, QObject* parent = 0);
     virtual ~AuthFlow() = default;
-
-    Katabasis::Validity validity() { return m_data->validity_; };
 
     void executeTask() override;
 
     AccountTaskState taskState() { return m_taskState; }
 
    signals:
-    void activityChanged(Katabasis::Activity activity);
+    void authorizeWithBrowser(const QUrl& url);
 
    protected:
     void succeed();
     void nextStep();
 
-   protected slots:
+   private slots:
     // NOTE: true -> non-terminal state, false -> terminal state
     bool changeState(AccountTaskState newState, QString reason = QString());
-
-   private slots:
     void stepFinished(AccountTaskState resultingState, QString message);
 
-   protected:
+   private:
     AccountTaskState m_taskState = AccountTaskState::STATE_CREATED;
     QList<AuthStep::Ptr> m_steps;
     AuthStep::Ptr m_currentStep;

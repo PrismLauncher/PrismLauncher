@@ -37,12 +37,11 @@
 
 #include <QtNetworkAuth/qoauthhttpserverreplyhandler.h>
 #include <QAbstractOAuth2>
-#include <QDesktopServices>
 #include <QNetworkRequest>
 
 #include "Application.h"
 
-MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(action)
+MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(silent)
 {
     m_clientId = APPLICATION->getMSAClientID();
 
@@ -63,7 +62,7 @@ MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(ac
         m_data->msaToken.token = oauth2.token();
         emit finished(AccountTaskState::STATE_WORKING, tr("Got "));
     });
-    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, this, &QDesktopServices::openUrl);
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, this, &MSAStep::authorizeWithBrowser);
     connect(&oauth2, &QOAuth2AuthorizationCodeFlow::requestFailed, this, [this](const QAbstractOAuth2::Error err) {
         emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Microsoft user authentication failed."));
     });
@@ -82,30 +81,25 @@ QString MSAStep::describe()
 
 void MSAStep::perform()
 {
-    switch (m_action) {
-        case Refresh: {
-            if (m_data->msaClientID != m_clientId) {
-                emit finished(AccountTaskState::STATE_DISABLED,
-                              tr("Microsoft user authentication failed - client identification has changed."));
-            }
-            oauth2.setRefreshToken(m_data->msaToken.refresh_token);
-            oauth2.refreshAccessToken();
-            return;
+    if (m_silent) {
+        if (m_data->msaClientID != m_clientId) {
+            emit finished(AccountTaskState::STATE_DISABLED,
+                          tr("Microsoft user authentication failed - client identification has changed."));
         }
-        case Login: {
+        oauth2.setRefreshToken(m_data->msaToken.refresh_token);
+        oauth2.refreshAccessToken();
+    } else {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)  // QMultiMap param changed in 6.0
-            oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) {
+        oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) {
 #else
-            oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMap<QString, QVariant>* map) {
+        oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMap<QString, QVariant>* map) {
 #endif
-                map->insert("prompt", "select_account");
-                map->insert("cobrandid", "8058f65d-ce06-4c30-9559-473c9275a65d");
-            });
+            map->insert("prompt", "select_account");
+            map->insert("cobrandid", "8058f65d-ce06-4c30-9559-473c9275a65d");
+        });
 
-            *m_data = AccountData();
-            m_data->msaClientID = m_clientId;
-            oauth2.grant();
-            return;
-        }
+        *m_data = AccountData();
+        m_data->msaClientID = m_clientId;
+        oauth2.grant();
     }
 }

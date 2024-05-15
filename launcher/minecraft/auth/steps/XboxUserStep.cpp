@@ -60,7 +60,7 @@ void XboxUserStep::onRequestDone()
         return;
     }
 
-    Katabasis::Token temp;
+    Token temp;
     if (!Parsers::parseXTokenResponse(*m_response, temp, "UToken")) {
         qWarning() << "Could not parse user authentication response...";
         emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication response could not be understood."));

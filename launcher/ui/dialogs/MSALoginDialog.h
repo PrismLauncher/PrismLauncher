@@ -18,8 +18,8 @@
 #include <QtCore/QEventLoop>
 #include <QtWidgets/QDialog>
 
+#include "minecraft/auth/AuthFlow.h"
 #include "minecraft/auth/MinecraftAccount.h"
-#include "minecraft/auth/flows/AuthFlow.h"
 
 namespace Ui {
 class MSALoginDialog;
@@ -37,13 +37,12 @@ class MSALoginDialog : public QDialog {
    private:
     explicit MSALoginDialog(QWidget* parent = 0);
 
-    void setUserInputsEnabled(bool enable);
-
    protected slots:
     void onTaskFailed(const QString& reason);
     void onTaskSucceeded();
     void onTaskStatus(const QString& status);
-    void onTaskProgress(qint64 current, qint64 total);
+    void authorizeWithBrowser(const QUrl& url);
+    void copyUrl();
 
    private:
     Ui::MSALoginDialog* ui;

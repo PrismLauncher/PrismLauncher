@@ -3,27 +3,47 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
+#include "minecraft/auth/AccountData.h"
+#include "minecraft/auth/steps/EntitlementsStep.h"
+#include "minecraft/auth/steps/GetSkinStep.h"
+#include "minecraft/auth/steps/LauncherLoginStep.h"
+#include "minecraft/auth/steps/MSAStep.h"
+#include "minecraft/auth/steps/MinecraftProfileStep.h"
+#include "minecraft/auth/steps/XboxAuthorizationStep.h"
+#include "minecraft/auth/steps/XboxProfileStep.h"
+#include "minecraft/auth/steps/XboxUserStep.h"
+
 #include "AuthFlow.h"
 
 #include <Application.h>
 
-AuthFlow::AuthFlow(AccountData* data, QObject* parent) : Task(parent), m_data(data)
+AuthFlow::AuthFlow(AccountData* data, bool silent, QObject* parent) : Task(parent), m_data(data)
 {
+    if (data->type == AccountType::MSA) {
+        auto oauthStep = makeShared<MSAStep>(m_data, silent);
+        connect(oauthStep.get(), &MSAStep::authorizeWithBrowser, this, &AuthFlow::authorizeWithBrowser);
+        m_steps.append(oauthStep);
+        m_steps.append(makeShared<XboxUserStep>(m_data));
+        m_steps.append(makeShared<XboxAuthorizationStep>(m_data, &m_data->xboxApiToken, "http://xboxlive.com", "Xbox"));
+        m_steps.append(
+            makeShared<XboxAuthorizationStep>(m_data, &m_data->mojangservicesToken, "rp://api.minecraftservices.com/", "Mojang"));
+        m_steps.append(makeShared<LauncherLoginStep>(m_data));
+        m_steps.append(makeShared<XboxProfileStep>(m_data));
+        m_steps.append(makeShared<EntitlementsStep>(m_data));
+        m_steps.append(makeShared<MinecraftProfileStep>(m_data));
+        m_steps.append(makeShared<GetSkinStep>(m_data));
+    }
     changeState(AccountTaskState::STATE_CREATED);
 }
 
 void AuthFlow::succeed()
 {
-    m_data->validity_ = Katabasis::Validity::Certain;
+    m_data->validity_ = Validity::Certain;
     changeState(AccountTaskState::STATE_SUCCEEDED, tr("Finished all authentication steps"));
 }
 
 void AuthFlow::executeTask()
 {
-    if (m_currentStep) {
-        emitFailed("No task");
-        return;
-    }
     changeState(AccountTaskState::STATE_WORKING, tr("Initializing"));
     nextStep();
 }
@@ -46,9 +66,8 @@ void AuthFlow::nextStep()
 
 void AuthFlow::stepFinished(AccountTaskState resultingState, QString message)
 {
-    if (changeState(resultingState, message)) {
+    if (changeState(resultingState, message))
         nextStep();
-    }
 }
 
 bool AuthFlow::changeState(AccountTaskState newState, QString reason)

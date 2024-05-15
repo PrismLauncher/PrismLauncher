@@ -44,18 +44,6 @@
 #include <QString>
 #include <QVariantMap>
 
-namespace Katabasis {
-enum class Activity {
-    Idle,
-    LoggingIn,
-    LoggingOut,
-    Refreshing,
-    FailedSoft,  //!< soft failure. this generally means the user auth details haven't been invalidated
-    FailedHard,  //!< hard failure. auth is invalid
-    FailedGone,  //!< hard failure. auth is invalid, and the account no longer exists
-    Succeeded
-};
-
 enum class Validity { None, Assumed, Certain };
 
 struct Token {
@@ -68,8 +56,6 @@ struct Token {
     Validity validity = Validity::None;
     bool persistent = true;
 };
-
-}  // namespace Katabasis
 
 struct Skin {
     QString id;
@@ -90,7 +76,7 @@ struct Cape {
 struct MinecraftEntitlement {
     bool ownsMinecraft = false;
     bool canPlayMinecraft = false;
-    Katabasis::Validity validity = Katabasis::Validity::None;
+    Validity validity = Validity::None;
 };
 
 struct MinecraftProfile {
@@ -99,7 +85,7 @@ struct MinecraftProfile {
     Skin skin;
     QString currentCape;
     QMap<QString, Cape> capes;
-    Katabasis::Validity validity = Katabasis::Validity::None;
+    Validity validity = Validity::None;
 };
 
 enum class AccountType { MSA, Offline };
@@ -124,15 +110,15 @@ struct AccountData {
     AccountType type = AccountType::MSA;
 
     QString msaClientID;
-    Katabasis::Token msaToken;
-    Katabasis::Token userToken;
-    Katabasis::Token xboxApiToken;
-    Katabasis::Token mojangservicesToken;
+    Token msaToken;
+    Token userToken;
+    Token xboxApiToken;
+    Token mojangservicesToken;
 
-    Katabasis::Token yggdrasilToken;
+    Token yggdrasilToken;
     MinecraftProfile minecraftProfile;
     MinecraftEntitlement minecraftEntitlement;
-    Katabasis::Validity validity_ = Katabasis::Validity::None;
+    Validity validity_ = Validity::None;
 
     // runtime only information (not saved with the account)
     QString internalId;

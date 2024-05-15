@@ -36,7 +36,7 @@
 #pragma once
 
 #include "MinecraftAccount.h"
-#include "minecraft/auth/flows/AuthFlow.h"
+#include "minecraft/auth/AuthFlow.h"
 
 #include <QAbstractListModel>
 #include <QObject>

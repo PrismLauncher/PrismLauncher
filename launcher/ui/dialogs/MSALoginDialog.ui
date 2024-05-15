@@ -21,11 +21,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="message">
      <property name="text">
-      <string notr="true">Message label placeholder.
-
-aaaaa</string>
+      <string notr="true"/>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>
@@ -39,35 +37,32 @@ aaaaa</string>
     </widget>
    </item>
    <item>
-    <widget class="QProgressBar" name="progressBar">
-     <property name="value">
-      <number>24</number>
-     </property>
-     <property name="textVisible">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="linkLayout">
      <item>
-      <widget class="QPushButton" name="actionButton">
-       <property name="text">
-        <string>Open page and copy code</string>
+      <widget class="QLineEdit" name="link">
+       <property name="readOnly">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDialogButtonBox" name="buttonBox">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="QPushButton" name="copy">
+       <property name="text">
+        <string/>
        </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel</set>
+       <property name="icon">
+        <iconset theme="copy"/>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="cancel">
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

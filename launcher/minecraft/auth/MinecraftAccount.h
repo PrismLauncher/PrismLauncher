@@ -47,7 +47,7 @@
 #include "AuthSession.h"
 #include "QObjectPtr.h"
 #include "Usable.h"
-#include "minecraft/auth/flows/AuthFlow.h"
+#include "minecraft/auth/AuthFlow.h"
 
 class Task;
 class MinecraftAccount;
@@ -95,9 +95,7 @@ class MinecraftAccount : public QObject, public Usable {
     QJsonObject saveToJson() const;
 
    public: /* manipulation */
-    shared_qobject_ptr<AuthFlow> loginMSA();
-
-    shared_qobject_ptr<AuthFlow> loginOffline();
+    shared_qobject_ptr<AuthFlow> login();
 
     shared_qobject_ptr<AuthFlow> refresh();
 

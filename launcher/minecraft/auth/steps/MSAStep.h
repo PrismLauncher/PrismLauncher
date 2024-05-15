@@ -42,18 +42,18 @@
 class MSAStep : public AuthStep {
     Q_OBJECT
    public:
-    enum Action { Refresh, Login };
-
-   public:
-    explicit MSAStep(AccountData* data, Action action);
+    explicit MSAStep(AccountData* data, bool silent = false);
     virtual ~MSAStep() noexcept = default;
 
     void perform() override;
 
     QString describe() override;
 
+   signals:
+    void authorizeWithBrowser(const QUrl& url);
+
    private:
-    Action m_action;
+    bool m_silent;
     QString m_clientId;
     QOAuth2AuthorizationCodeFlow oauth2;
 };

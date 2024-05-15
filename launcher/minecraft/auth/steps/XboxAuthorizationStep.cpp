@@ -11,7 +11,7 @@
 #include "net/StaticHeaderProxy.h"
 #include "net/Upload.h"
 
-XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Katabasis::Token* token, QString relyingParty, QString authorizationKind)
+XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Token* token, QString relyingParty, QString authorizationKind)
     : AuthStep(data), m_token(token), m_relyingParty(relyingParty), m_authorizationKind(authorizationKind)
 {}
 
@@ -72,7 +72,7 @@ void XboxAuthorizationStep::onRequestDone()
         return;
     }
 
-    Katabasis::Token temp;
+    Token temp;
     if (!Parsers::parseXTokenResponse(*m_response, temp, m_authorizationKind)) {
         emit finished(AccountTaskState::STATE_FAILED_SOFT,
                       tr("Could not parse authorization response for access to %1 services.").arg(m_authorizationKind));
