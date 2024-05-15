@@ -124,7 +124,7 @@ void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
     ui->message->setText(
         tr("Browser opened to complete the login process."
            "<br /><br />"
-           "If your browser hasn't opened, please manually open the bellow link in your browser:"));
+           "If your browser hasn't opened, please manually open the below link in your browser:"));
 }
 
 void MSALoginDialog::copyUrl()
