@@ -95,7 +95,6 @@ void MSAStep::perform()
         oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMap<QString, QVariant>* map) {
 #endif
             map->insert("prompt", "select_account");
-            map->insert("cobrandid", "8058f65d-ce06-4c30-9559-473c9275a65d");
         });
 
         *m_data = AccountData();

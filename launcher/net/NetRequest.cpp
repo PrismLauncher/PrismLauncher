@@ -37,11 +37,11 @@
  */
 
 #include "NetRequest.h"
-#include <qnetworkreply.h>
-#include <QUrl>
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <QNetworkReply>
+#include <QUrl>
 #include <memory>
 
 #if defined(LAUNCHER_APPLICATION)
