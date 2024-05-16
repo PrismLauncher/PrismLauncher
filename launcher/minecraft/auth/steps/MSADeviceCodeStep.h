@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,27 +33,44 @@
  *      limitations under the License.
  */
 
-#include "Upload.h"
+#pragma once
+#include <QObject>
+#include <QTimer>
 
-#include <memory>
-#include <utility>
-#include "ByteArraySink.h"
+#include "minecraft/auth/AuthStep.h"
+#include "net/Upload.h"
 
-namespace Net {
+class MSADeviceCodeStep : public AuthStep {
+    Q_OBJECT
+   public:
+    explicit MSADeviceCodeStep(AccountData* data);
+    virtual ~MSADeviceCodeStep() noexcept = default;
 
-QNetworkReply* Upload::getReply(QNetworkRequest& request)
-{
-    if (!request.hasRawHeader("Content-Type"))
-        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    return m_network->post(request, m_post_data);
-}
+    void perform() override;
 
-Upload::Ptr Upload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
-{
-    auto up = makeShared<Upload>();
-    up->m_url = std::move(url);
-    up->m_sink.reset(new ByteArraySink(output));
-    up->m_post_data = std::move(m_post_data);
-    return up;
-}
-}  // namespace Net
+    QString describe() override;
+
+   public slots:
+    void abort();
+
+   signals:
+    void authorizeWithBrowser(QString url, QString code, int expiresIn);
+
+   private slots:
+    void deviceAutorizationFinished();
+    void startPoolTimer();
+    void authenticateUser();
+    void authenticationFinished();
+
+   private:
+    QString m_clientId;
+    QString m_device_code;
+    bool m_is_aborted = false;
+    int interval = 5;
+
+    QTimer m_pool_timer;
+    QTimer m_expiration_timer;
+
+    std::shared_ptr<QByteArray> m_response;
+    Net::Upload::Ptr m_task;
+};

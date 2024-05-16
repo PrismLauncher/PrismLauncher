@@ -51,6 +51,7 @@ MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MS
     ui->cancel->setEnabled(false);
     ui->link->setVisible(false);
     ui->copy->setVisible(false);
+    ui->progressBar->setVisible(false);
 
     connect(ui->cancel, &QPushButton::pressed, this, &QDialog::reject);
     connect(ui->copy, &QPushButton::pressed, this, &MSALoginDialog::copyUrl);
@@ -60,12 +61,15 @@ int MSALoginDialog::exec()
 {
     // Setup the login task and start it
     m_account = MinecraftAccount::createBlankMSA();
-    m_loginTask = m_account->login();
-    connect(m_loginTask.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
-    connect(m_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
-    connect(m_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
-    connect(m_loginTask.get(), &AuthFlow::authorizeWithBrowser, this, &MSALoginDialog::authorizeWithBrowser);
-    m_loginTask->start();
+    m_task = m_account->login(m_using_device_code);
+    connect(m_task.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
+    connect(m_task.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
+    connect(m_task.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
+    connect(m_task.get(), &AuthFlow::authorizeWithBrowser, this, &MSALoginDialog::authorizeWithBrowser);
+    connect(m_task.get(), &AuthFlow::authorizeWithBrowserWithExtra, this, &MSALoginDialog::authorizeWithBrowserWithExtra);
+    connect(ui->cancel, &QPushButton::pressed, m_task.get(), &Task::abort);
+    connect(&m_external_timer, &QTimer::timeout, this, &MSALoginDialog::externalLoginTick);
+    m_task->start();
 
     return QDialog::exec();
 }
@@ -101,12 +105,14 @@ void MSALoginDialog::onTaskStatus(const QString& status)
     ui->cancel->setEnabled(false);
     ui->link->setVisible(false);
     ui->copy->setVisible(false);
+    ui->progressBar->setVisible(false);
 }
 
 // Public interface
-MinecraftAccountPtr MSALoginDialog::newAccount(QWidget* parent, QString msg)
+MinecraftAccountPtr MSALoginDialog::newAccount(QWidget* parent, QString msg, bool usingDeviceCode)
 {
     MSALoginDialog dlg(parent);
+    dlg.m_using_device_code = usingDeviceCode;
     dlg.ui->message->setText(msg);
     if (dlg.exec() == QDialog::Accepted) {
         return dlg.m_account;
@@ -131,4 +137,45 @@ void MSALoginDialog::copyUrl()
 {
     QClipboard* cb = QApplication::clipboard();
     cb->setText(ui->link->text());
+}
+
+void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn)
+{
+    m_external_elapsed = 0;
+    m_external_timeout = expiresIn;
+
+    m_external_timer.setInterval(1000);
+    m_external_timer.setSingleShot(false);
+    m_external_timer.start();
+
+    ui->progressBar->setMaximum(expiresIn);
+    ui->progressBar->setValue(m_external_elapsed);
+
+    QString linkString = QString("<a href=\"%1\">%2</a>").arg(url, url);
+    if (url == "https://www.microsoft.com/link" && !code.isEmpty()) {
+        url += QString("?otc=%1").arg(code);
+        ui->message->setText(tr("<p>Please login in the opened browser. If no browser was opened, please open up %1 in "
+                                "a browser and put in the code <b>%2</b> to proceed with login.</p>")
+                                 .arg(linkString, code));
+    } else {
+        ui->message->setText(
+            tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
+    }
+    ui->cancel->setEnabled(true);
+    ui->link->setVisible(true);
+    ui->copy->setVisible(true);
+    ui->progressBar->setVisible(true);
+    DesktopServices::openUrl(url);
+    ui->link->setText(code);
+}
+
+void MSALoginDialog::externalLoginTick()
+{
+    m_external_elapsed++;
+    ui->progressBar->setValue(m_external_elapsed);
+    ui->progressBar->repaint();
+
+    if (m_external_elapsed >= m_external_timeout) {
+        m_external_timer.stop();
+    }
 }

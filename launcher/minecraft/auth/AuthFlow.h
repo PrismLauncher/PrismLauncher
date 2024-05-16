@@ -15,7 +15,9 @@ class AuthFlow : public Task {
     Q_OBJECT
 
    public:
-    explicit AuthFlow(AccountData* data, bool silent = false, QObject* parent = 0);
+    enum class Action { Refresh, Login, DeviceCode };
+
+    explicit AuthFlow(AccountData* data, Action action = Action::Refresh, QObject* parent = 0);
     virtual ~AuthFlow() = default;
 
     void executeTask() override;
@@ -24,6 +26,7 @@ class AuthFlow : public Task {
 
    signals:
     void authorizeWithBrowser(const QUrl& url);
+    void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);
 
    protected:
     void succeed();

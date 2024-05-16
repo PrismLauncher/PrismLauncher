@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <QTimer>
 #include <QtCore/QEventLoop>
 #include <QtWidgets/QDialog>
 
@@ -31,7 +32,7 @@ class MSALoginDialog : public QDialog {
    public:
     ~MSALoginDialog();
 
-    static MinecraftAccountPtr newAccount(QWidget* parent, QString message);
+    static MinecraftAccountPtr newAccount(QWidget* parent, QString message, bool usingDeviceCode = false);
     int exec() override;
 
    private:
@@ -42,10 +43,18 @@ class MSALoginDialog : public QDialog {
     void onTaskSucceeded();
     void onTaskStatus(const QString& status);
     void authorizeWithBrowser(const QUrl& url);
+    void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);
     void copyUrl();
+    void externalLoginTick();
 
    private:
     Ui::MSALoginDialog* ui;
     MinecraftAccountPtr m_account;
-    shared_qobject_ptr<AuthFlow> m_loginTask;
+    shared_qobject_ptr<AuthFlow> m_task;
+
+    int m_external_elapsed;
+    int m_external_timeout;
+    QTimer m_external_timer;
+
+    bool m_using_device_code = false;
 };

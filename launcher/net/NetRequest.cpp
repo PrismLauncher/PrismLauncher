@@ -256,21 +256,18 @@ void NetRequest::downloadFinished()
     {
         qCDebug(logCat) << getUid().toString() << "Request failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
-        m_reply.reset();
         emit succeeded();
         emit finished();
         return;
     } else if (m_state == State::Failed) {
         qCDebug(logCat) << getUid().toString() << "Request failed in previous step:" << m_url.toString();
         m_sink->abort();
-        m_reply.reset();
-        emit failed("");
+        emit failed(m_reply->errorString());
         emit finished();
         return;
     } else if (m_state == State::AbortedByUser) {
         qCDebug(logCat) << getUid().toString() << "Request aborted in previous step:" << m_url.toString();
         m_sink->abort();
-        m_reply.reset();
         emit aborted();
         emit finished();
         return;
@@ -284,7 +281,7 @@ void NetRequest::downloadFinished()
         if (m_state != State::Succeeded) {
             qCDebug(logCat) << getUid().toString() << "Request failed to write:" << m_url.toString();
             m_sink->abort();
-            emit failed("");
+            emit failed("failed to write in sink");
             emit finished();
             return;
         }
@@ -295,13 +292,11 @@ void NetRequest::downloadFinished()
     if (m_state != State::Succeeded) {
         qCDebug(logCat) << getUid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
-        m_reply.reset();
-        emit failed("");
+        emit failed("failed to finalize the request");
         emit finished();
         return;
     }
 
-    m_reply.reset();
     qCDebug(logCat) << getUid().toString() << "Request succeeded:" << m_url.toString();
     emit succeeded();
     emit finished();

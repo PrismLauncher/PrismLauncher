@@ -119,11 +119,11 @@ QPixmap MinecraftAccount::getFace() const
     return skin.scaled(64, 64, Qt::KeepAspectRatio);
 }
 
-shared_qobject_ptr<AuthFlow> MinecraftAccount::login()
+shared_qobject_ptr<AuthFlow> MinecraftAccount::login(bool useDeviceCode)
 {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
-    m_currentTask.reset(new AuthFlow(&data, false, this));
+    m_currentTask.reset(new AuthFlow(&data, useDeviceCode ? AuthFlow::Action::DeviceCode : AuthFlow::Action::Login, this));
     connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
     connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
     connect(m_currentTask.get(), &Task::aborted, this, [this] { authFailed(tr("Aborted")); });
@@ -137,7 +137,7 @@ shared_qobject_ptr<AuthFlow> MinecraftAccount::refresh()
         return m_currentTask;
     }
 
-    m_currentTask.reset(new AuthFlow(&data, true, this));
+    m_currentTask.reset(new AuthFlow(&data, AuthFlow::Action::Refresh, this));
 
     connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
     connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);

@@ -7,22 +7,31 @@
 #include "minecraft/auth/steps/EntitlementsStep.h"
 #include "minecraft/auth/steps/GetSkinStep.h"
 #include "minecraft/auth/steps/LauncherLoginStep.h"
+#include "minecraft/auth/steps/MSADeviceCodeStep.h"
 #include "minecraft/auth/steps/MSAStep.h"
 #include "minecraft/auth/steps/MinecraftProfileStep.h"
 #include "minecraft/auth/steps/XboxAuthorizationStep.h"
 #include "minecraft/auth/steps/XboxProfileStep.h"
 #include "minecraft/auth/steps/XboxUserStep.h"
+#include "tasks/Task.h"
 
 #include "AuthFlow.h"
 
 #include <Application.h>
 
-AuthFlow::AuthFlow(AccountData* data, bool silent, QObject* parent) : Task(parent), m_data(data)
+AuthFlow::AuthFlow(AccountData* data, Action action, QObject* parent) : Task(parent), m_data(data)
 {
     if (data->type == AccountType::MSA) {
-        auto oauthStep = makeShared<MSAStep>(m_data, silent);
-        connect(oauthStep.get(), &MSAStep::authorizeWithBrowser, this, &AuthFlow::authorizeWithBrowser);
-        m_steps.append(oauthStep);
+        if (action == Action::DeviceCode) {
+            auto oauthStep = makeShared<MSADeviceCodeStep>(m_data);
+            connect(oauthStep.get(), &MSADeviceCodeStep::authorizeWithBrowser, this, &AuthFlow::authorizeWithBrowserWithExtra);
+            connect(this, &Task::aborted, oauthStep.get(), &MSADeviceCodeStep::abort);
+            m_steps.append(oauthStep);
+        } else {
+            auto oauthStep = makeShared<MSAStep>(m_data, action == Action::Refresh);
+            connect(oauthStep.get(), &MSAStep::authorizeWithBrowser, this, &AuthFlow::authorizeWithBrowser);
+            m_steps.append(oauthStep);
+        }
         m_steps.append(makeShared<XboxUserStep>(m_data));
         m_steps.append(makeShared<XboxAuthorizationStep>(m_data, &m_data->xboxApiToken, "http://xboxlive.com", "Xbox"));
         m_steps.append(
