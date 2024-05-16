@@ -34,10 +34,8 @@
  */
 
 #include "MSADeviceCodeStep.h"
-#include <qdatetime.h>
-#include <qlogging.h>
-#include <qtmetamacros.h>
 
+#include <QDateTime>
 #include <QUrlQuery>
 
 #include "Application.h"
