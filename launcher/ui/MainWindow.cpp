@@ -1213,7 +1213,7 @@ void MainWindow::on_actionViewCentralModsFolder_triggered()
 
 void MainWindow::on_actionViewSkinsFolder_triggered()
 {
-    DesktopServices::openDirectory(APPLICATION->settings()->get("SkinsDir").toString(), true);
+    DesktopServices::openPath(APPLICATION->settings()->get("SkinsDir").toString(), true);
 }
 
 void MainWindow::on_actionViewIconThemeFolder_triggered()

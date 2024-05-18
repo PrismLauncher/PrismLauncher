@@ -133,7 +133,7 @@ void SkinManageDialog::delayed_scroll(QModelIndex model_index)
 
 void SkinManageDialog::on_openDirBtn_clicked()
 {
-    DesktopServices::openDirectory(m_list.getDir(), true);
+    DesktopServices::openPath(m_list.getDir(), true);
 }
 
 void SkinManageDialog::on_fileBtn_clicked()
