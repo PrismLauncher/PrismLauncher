@@ -46,9 +46,7 @@ jobs:
         run: |
           mv ${{ github.workspace }}/PrismLauncher-source PrismLauncher-${{ env.VERSION }}
           mv PrismLauncher-Linux-Qt6-Portable*/PrismLauncher-portable.tar.gz PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
-          mv PrismLauncher-Linux-Qt6*/PrismLauncher.tar.gz PrismLauncher-Linux-Qt6-${{ env.VERSION }}.tar.gz
           mv PrismLauncher-Linux-Qt5-Portable*/PrismLauncher-portable.tar.gz PrismLauncher-Linux-Qt5-Portable-${{ env.VERSION }}.tar.gz
-          mv PrismLauncher-Linux-Qt5*/PrismLauncher.tar.gz PrismLauncher-Linux-Qt5-${{ env.VERSION }}.tar.gz       
           mv PrismLauncher-*.AppImage/PrismLauncher-*.AppImage PrismLauncher-Linux-x86_64.AppImage
           mv PrismLauncher-*.AppImage.zsync/PrismLauncher-*.AppImage.zsync PrismLauncher-Linux-x86_64.AppImage.zsync
           mv PrismLauncher-macOS-Legacy*/PrismLauncher.zip PrismLauncher-macOS-Legacy-${{ env.VERSION }}.zip
@@ -84,7 +82,7 @@ jobs:
 
       - name: Create release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.ref }}
@@ -92,11 +90,9 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            PrismLauncher-Linux-Qt5-${{ env.VERSION }}.tar.gz
             PrismLauncher-Linux-Qt5-Portable-${{ env.VERSION }}.tar.gz
             PrismLauncher-Linux-x86_64.AppImage
             PrismLauncher-Linux-x86_64.AppImage.zsync
-            PrismLauncher-Linux-Qt6-${{ env.VERSION }}.tar.gz
             PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
             PrismLauncher-Windows-MinGW-w64-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
