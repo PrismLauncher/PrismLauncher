@@ -142,7 +142,7 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
     auto deviceCode = box.addButton(tr("Legacy"), QMessageBox::ButtonRole::YesRole);
     auto authCode = box.addButton(tr("Recommended"), QMessageBox::ButtonRole::NoRole);
     auto cancel = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::RejectRole);
-    box.setDefaultButton(cancel);
+    box.setDefaultButton(authCode);
     box.exec();
     if ((box.clickedButton() != deviceCode && box.clickedButton() != authCode) || box.clickedButton() == cancel)
         return;
