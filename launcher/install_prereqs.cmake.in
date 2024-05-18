@@ -1,5 +1,4 @@
 set(CMAKE_MODULE_PATH "@CMAKE_MODULE_PATH@")
-
 file(GLOB_RECURSE    QTPLUGINS "${CMAKE_INSTALL_PREFIX}/@PLUGIN_DEST_DIR@/*@CMAKE_SHARED_LIBRARY_SUFFIX@")
 function(gp_resolved_file_type_override resolved_file type_var)
     if(resolved_file MATCHES "^/(usr/)?lib/libQt")

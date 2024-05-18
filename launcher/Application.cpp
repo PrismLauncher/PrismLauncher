@@ -48,6 +48,7 @@
 #include "pathmatcher/MultiMatcher.h"
 #include "pathmatcher/SimplePrefixMatcher.h"
 #include "settings/INIFile.h"
+#include "tools/GenericProfiler.h"
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 
@@ -879,6 +880,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // FIXME: what to do with these?
     m_profilers.insert("jprofiler", std::shared_ptr<BaseProfilerFactory>(new JProfilerFactory()));
     m_profilers.insert("jvisualvm", std::shared_ptr<BaseProfilerFactory>(new JVisualVMFactory()));
+    m_profilers.insert("generic", std::shared_ptr<BaseProfilerFactory>(new GenericProfilerFactory()));
     for (auto profiler : m_profilers.values()) {
         profiler->registerSettings(m_settings);
     }

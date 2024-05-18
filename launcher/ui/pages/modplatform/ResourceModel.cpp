@@ -331,7 +331,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     auto icon_fetch_action = Net::ApiDownload::makeCached(url, cache_entry);
 
     auto full_file_path = cache_entry->getFullPath();
-    connect(icon_fetch_action.get(), &NetAction::succeeded, this, [=] {
+    connect(icon_fetch_action.get(), &Task::succeeded, this, [=] {
         auto icon = QIcon(full_file_path);
         QPixmapCache::insert(url.toString(), icon.pixmap(icon.actualSize({ 64, 64 })));
 
@@ -339,7 +339,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
 
         emit dataChanged(index, index, { Qt::DecorationRole });
     });
-    connect(icon_fetch_action.get(), &NetAction::failed, this, [=] {
+    connect(icon_fetch_action.get(), &Task::failed, this, [=] {
         m_currently_running_icon_actions.remove(url);
         m_failed_icon_actions.insert(url);
     });
