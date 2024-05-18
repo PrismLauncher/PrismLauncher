@@ -35,7 +35,7 @@
 
 #include "AccountList.h"
 #include "AccountData.h"
-#include "AccountTask.h"
+#include "tasks/Task.h"
 
 #include <QDir>
 #include <QFile>
@@ -51,8 +51,6 @@
 
 #include <FileSystem.h>
 #include <QSaveFile>
-
-#include <chrono>
 
 enum AccountListVersion { MojangMSA = 3 };
 
@@ -641,8 +639,8 @@ void AccountList::tryNext()
             if (account->internalId() == accountId) {
                 m_currentTask = account->refresh();
                 if (m_currentTask) {
-                    connect(m_currentTask.get(), &AccountTask::succeeded, this, &AccountList::authSucceeded);
-                    connect(m_currentTask.get(), &AccountTask::failed, this, &AccountList::authFailed);
+                    connect(m_currentTask.get(), &Task::succeeded, this, &AccountList::authSucceeded);
+                    connect(m_currentTask.get(), &Task::failed, this, &AccountList::authFailed);
                     m_currentTask->start();
                     qDebug() << "RefreshSchedule: Processing account " << account->accountDisplayString() << " with internal ID "
                              << accountId;

@@ -36,6 +36,7 @@
 #pragma once
 
 #include "MinecraftAccount.h"
+#include "minecraft/auth/AuthFlow.h"
 
 #include <QAbstractListModel>
 #include <QObject>
@@ -144,7 +145,7 @@ class AccountList : public QAbstractListModel {
     QList<QString> m_refreshQueue;
     QTimer* m_refreshTimer;
     QTimer* m_nextTimer;
-    shared_qobject_ptr<AccountTask> m_currentTask;
+    shared_qobject_ptr<AuthFlow> m_currentTask;
 
     /*!
      * Called whenever the list changes.

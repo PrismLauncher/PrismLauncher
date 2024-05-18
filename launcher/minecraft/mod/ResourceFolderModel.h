@@ -143,6 +143,7 @@ class ResourceFolderModel : public QAbstractListModel {
 
    signals:
     void updateFinished();
+    void parseFinished();
 
    protected:
     /** This creates a new update task to be executed by update().
@@ -189,11 +190,7 @@ class ResourceFolderModel : public QAbstractListModel {
      *  if the resource is complex and has more stuff to parse.
      */
     virtual void onParseSucceeded(int ticket, QString resource_id);
-    virtual void onParseFailed(int ticket, QString resource_id)
-    {
-        Q_UNUSED(ticket);
-        Q_UNUSED(resource_id);
-    }
+    virtual void onParseFailed(int ticket, QString resource_id);
 
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
@@ -307,7 +304,6 @@ void ResourceFolderModel::applyUpdates(QSet<QString>& current_set, QSet<QString>
             auto removed_it = m_resources.begin() + removed_index;
 
             Q_ASSERT(removed_it != m_resources.end());
-            Q_ASSERT(removed_set.contains(removed_it->get()->internal_id()));
 
             if ((*removed_it)->isResolving()) {
                 auto ticket = (*removed_it)->resolutionTicket();

@@ -207,7 +207,7 @@ void WorldListPage::on_actionRemove_triggered()
 
 void WorldListPage::on_actionView_Folder_triggered()
 {
-    DesktopServices::openDirectory(m_worlds->dir().absolutePath(), true);
+    DesktopServices::openPath(m_worlds->dir().absolutePath(), true);
 }
 
 void WorldListPage::on_actionDatapacks_triggered()
@@ -223,7 +223,7 @@ void WorldListPage::on_actionDatapacks_triggered()
 
     auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
 
-    DesktopServices::openDirectory(FS::PathCombine(fullPath, "datapacks"), true);
+    DesktopServices::openPath(FS::PathCombine(fullPath, "datapacks"), true);
 }
 
 void WorldListPage::on_actionReset_Icon_triggered()
