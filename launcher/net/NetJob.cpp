@@ -36,6 +36,7 @@
  */
 
 #include "NetJob.h"
+#include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
@@ -52,7 +53,7 @@ NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> netwo
         setMaxConcurrent(max_concurrent);
 }
 
-auto NetJob::addNetAction(NetAction::Ptr action) -> bool
+auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> bool
 {
     action->setNetwork(m_network);
 
@@ -115,11 +116,11 @@ auto NetJob::abort() -> bool
     return fullyAborted;
 }
 
-auto NetJob::getFailedActions() -> QList<NetAction*>
+auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
 {
-    QList<NetAction*> failed;
+    QList<Net::NetRequest*> failed;
     for (auto index : m_failed) {
-        failed.push_back(dynamic_cast<NetAction*>(index.get()));
+        failed.push_back(dynamic_cast<Net::NetRequest*>(index.get()));
     }
     return failed;
 }
@@ -128,7 +129,7 @@ auto NetJob::getFailedFiles() -> QList<QString>
 {
     QList<QString> failed;
     for (auto index : m_failed) {
-        failed.append(static_cast<NetAction*>(index.get())->url().toString());
+        failed.append(static_cast<Net::NetRequest*>(index.get())->url().toString());
     }
     return failed;
 }

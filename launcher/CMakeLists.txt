@@ -126,7 +126,6 @@ set(NET_SOURCES
     net/MetaCacheSink.h
     net/Logging.h
     net/Logging.cpp
-    net/NetAction.h
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
@@ -210,28 +209,17 @@ set(MINECRAFT_SOURCES
     minecraft/auth/AccountData.h
     minecraft/auth/AccountList.cpp
     minecraft/auth/AccountList.h
-    minecraft/auth/AccountTask.cpp
-    minecraft/auth/AccountTask.h
-    minecraft/auth/AuthRequest.cpp
-    minecraft/auth/AuthRequest.h
     minecraft/auth/AuthSession.cpp
     minecraft/auth/AuthSession.h
-    minecraft/auth/AuthStep.cpp
     minecraft/auth/AuthStep.h
     minecraft/auth/MinecraftAccount.cpp
     minecraft/auth/MinecraftAccount.h
     minecraft/auth/Parsers.cpp
     minecraft/auth/Parsers.h
 
-    minecraft/auth/flows/AuthFlow.cpp
-    minecraft/auth/flows/AuthFlow.h
-    minecraft/auth/flows/MSA.cpp
-    minecraft/auth/flows/MSA.h
-    minecraft/auth/flows/Offline.cpp
-    minecraft/auth/flows/Offline.h
+    minecraft/auth/AuthFlow.cpp
+    minecraft/auth/AuthFlow.h
 
-    minecraft/auth/steps/OfflineStep.cpp
-    minecraft/auth/steps/OfflineStep.h
     minecraft/auth/steps/EntitlementsStep.cpp
     minecraft/auth/steps/EntitlementsStep.h
     minecraft/auth/steps/GetSkinStep.cpp
@@ -240,6 +228,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/steps/LauncherLoginStep.h
     minecraft/auth/steps/MinecraftProfileStep.cpp
     minecraft/auth/steps/MinecraftProfileStep.h
+    minecraft/auth/steps/MSADeviceCodeStep.cpp
+    minecraft/auth/steps/MSADeviceCodeStep.h
     minecraft/auth/steps/MSAStep.cpp
     minecraft/auth/steps/MSAStep.h
     minecraft/auth/steps/XboxAuthorizationStep.cpp
@@ -457,6 +447,8 @@ set(TOOLS_SOURCES
     tools/JVisualVM.h
     tools/MCEditTool.cpp
     tools/MCEditTool.h
+    tools/GenericProfiler.cpp
+    tools/GenericProfiler.h
 )
 
 set(META_SOURCES
@@ -628,7 +620,6 @@ set(PRISMUPDATER_SOURCES
     net/HttpMetaCache.h
     net/Logging.h
     net/Logging.cpp
-    net/NetAction.h
     net/NetRequest.cpp
     net/NetRequest.h
     net/NetJob.cpp
@@ -1245,7 +1236,6 @@ target_link_libraries(Launcher_logic
     tomlplusplus::tomlplusplus
     qdcss
     BuildConfig
-    Katabasis
     Qt${QT_VERSION_MAJOR}::Widgets
     ghcFilesystem::ghc_filesystem
 )
@@ -1263,6 +1253,7 @@ target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::NetworkAuth
     ${Launcher_QT_LIBS}
 )
 target_link_libraries(Launcher_logic
@@ -1333,7 +1324,6 @@ if(Launcher_BUILD_UPDATER)
         Qt${QT_VERSION_MAJOR}::Network
         ${Launcher_QT_LIBS}
         cmark::cmark
-        Katabasis
     )
 
     add_executable("${Launcher_Name}_updater" WIN32 updater/prismupdater/updater_main.cpp)
