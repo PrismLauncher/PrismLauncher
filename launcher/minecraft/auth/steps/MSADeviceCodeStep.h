@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,46 +34,43 @@
  */
 
 #pragma once
-
-#include <QtNetwork>
-
 #include <QObject>
-#include "net/NetRequest.h"
-#include "tasks/ConcurrentTask.h"
+#include <QTimer>
 
-// Those are included so that they are also included by anyone using NetJob
-#include "net/Download.h"
-#include "net/HttpMetaCache.h"
+#include "minecraft/auth/AuthStep.h"
+#include "net/Upload.h"
 
-class NetJob : public ConcurrentTask {
+class MSADeviceCodeStep : public AuthStep {
     Q_OBJECT
-
    public:
-    using Ptr = shared_qobject_ptr<NetJob>;
+    explicit MSADeviceCodeStep(AccountData* data);
+    virtual ~MSADeviceCodeStep() noexcept = default;
 
-    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network);
-    ~NetJob() override = default;
+    void perform() override;
 
-    auto size() const -> int;
-
-    auto canAbort() const -> bool override;
-    auto addNetAction(Net::NetRequest::Ptr action) -> bool;
-
-    auto getFailedActions() -> QList<Net::NetRequest*>;
-    auto getFailedFiles() -> QList<QString>;
+    QString describe() override;
 
    public slots:
-    // Qt can't handle auto at the start for some reason?
-    bool abort() override;
+    void abort();
 
-   protected slots:
-    void executeNextSubTask() override;
+   signals:
+    void authorizeWithBrowser(QString url, QString code, int expiresIn);
 
-   protected:
-    void updateState() override;
+   private slots:
+    void deviceAutorizationFinished();
+    void startPoolTimer();
+    void authenticateUser();
+    void authenticationFinished();
 
    private:
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
+    QString m_clientId;
+    QString m_device_code;
+    bool m_is_aborted = false;
+    int interval = 5;
 
-    int m_try = 1;
+    QTimer m_pool_timer;
+    QTimer m_expiration_timer;
+
+    std::shared_ptr<QByteArray> m_response;
+    Net::Upload::Ptr m_task;
 };

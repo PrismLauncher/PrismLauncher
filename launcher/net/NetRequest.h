@@ -39,20 +39,23 @@
 #pragma once
 
 #include <qloggingcategory.h>
+#include <QNetworkReply>
+#include <QUrl>
 #include <chrono>
 
-#include "NetAction.h"
+#include "HeaderProxy.h"
 #include "Sink.h"
 #include "Validator.h"
 
 #include "QObjectPtr.h"
 #include "net/Logging.h"
+#include "tasks/Task.h"
 
 namespace Net {
-class NetRequest : public NetAction {
+class NetRequest : public Task {
     Q_OBJECT
    protected:
-    explicit NetRequest() : NetAction() {}
+    explicit NetRequest() : Task() {}
 
    public:
     using Ptr = shared_qobject_ptr<class NetRequest>;
@@ -61,26 +64,30 @@ class NetRequest : public NetAction {
 
    public:
     ~NetRequest() override = default;
-
-    void init() override {}
-
-   public:
     void addValidator(Validator* v);
     auto abort() -> bool override;
     auto canAbort() const -> bool override { return true; }
+
+    void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
+    void addHeaderProxy(Net::HeaderProxy* proxy) { m_headerProxies.push_back(std::shared_ptr<Net::HeaderProxy>(proxy)); }
+
+    virtual void init() {}
+
+    QUrl url() const;
+    int replyStatusCode() const;
+    QNetworkReply::NetworkError error() const;
+    QString errorString() const;
 
    private:
     auto handleRedirect() -> bool;
     virtual QNetworkReply* getReply(QNetworkRequest&) = 0;
 
    protected slots:
-    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
-    void downloadError(QNetworkReply::NetworkError error) override;
-    void sslErrors(const QList<QSslError>& errors) override;
-    void downloadFinished() override;
-    void downloadReadyRead() override;
-
-   public slots:
+    void onProgress(qint64 bytesReceived, qint64 bytesTotal);
+    void downloadError(QNetworkReply::NetworkError error);
+    void sslErrors(const QList<QSslError>& errors);
+    void downloadFinished();
+    void downloadReadyRead();
     void executeTask() override;
 
    protected:
@@ -93,6 +100,15 @@ class NetRequest : public NetAction {
     std::chrono::steady_clock m_clock;
     std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;
     qint64 m_last_progress_bytes;
+
+    shared_qobject_ptr<QNetworkAccessManager> m_network;
+
+    /// the network reply
+    unique_qobject_ptr<QNetworkReply> m_reply;
+
+    /// source URL
+    QUrl m_url;
+    std::vector<std::shared_ptr<Net::HeaderProxy>> m_headerProxies;
 };
 }  // namespace Net
 

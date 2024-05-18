@@ -261,7 +261,7 @@ bool ModrinthCreationTask::createInstance()
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &NetAction::failed, [this, &file, file_path, param] {
+            connect(dl.get(), &Task::failed, [this, &file, file_path, param] {
                 auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 m_files_job->addNetAction(ndl);
