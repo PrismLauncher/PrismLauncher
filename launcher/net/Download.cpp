@@ -47,8 +47,6 @@
 #include "ChecksumValidator.h"
 #include "MetaCacheSink.h"
 
-#include "net/NetAction.h"
-
 namespace Net {
 
 #if defined(LAUNCHER_APPLICATION)

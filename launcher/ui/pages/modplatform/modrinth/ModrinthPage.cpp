@@ -35,6 +35,7 @@
  */
 
 #include "ModrinthPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ModrinthPage.h"
 
 #include "ModrinthModel.h"
@@ -103,6 +104,7 @@ void ModrinthPage::retranslate()
 void ModrinthPage::openedImpl()
 {
     BasePage::openedImpl();
+    suggestCurrent();
     triggerSearch();
 }
 
@@ -182,6 +184,8 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
     } else
         updateUI();
@@ -235,6 +239,8 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
 
     } else {
@@ -262,6 +268,11 @@ void ModrinthPage::updateUI()
     text += "<br>" + tr(" by ") + QString("<a href=%1>%2</a>").arg(std::get<1>(current.author).toString(), std::get<0>(current.author));
 
     if (current.extraInfoLoaded) {
+        if (current.extra.status == "archived") {
+            text += "<br><br>" + tr("<b>This project has been archived. It will not receive any further updates unless the author decides "
+                                    "to unarchive the project.</b>");
+        }
+
         if (!current.extra.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
             auto donateToStr = [](Modrinth::DonationData& donate) -> QString {
