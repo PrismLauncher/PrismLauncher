@@ -36,6 +36,8 @@
  */
 
 #include "NetJob.h"
+#include "net/NetRequest.h"
+#include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
 #endif
@@ -47,7 +49,7 @@ NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> netwo
 #endif
 }
 
-auto NetJob::addNetAction(NetAction::Ptr action) -> bool
+auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> bool
 {
     action->setNetwork(m_network);
 
@@ -56,18 +58,15 @@ auto NetJob::addNetAction(NetAction::Ptr action) -> bool
     return true;
 }
 
-void NetJob::startNext()
+void NetJob::executeNextSubTask()
 {
-    if (m_queue.isEmpty() && m_doing.isEmpty()) {
-        // We're finished, check for failures and retry if we can (up to 3 times)
-        if (!m_failed.isEmpty() && m_try < 3) {
-            m_try += 1;
-            while (!m_failed.isEmpty())
-                m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
-        }
+    // We're finished, check for failures and retry if we can (up to 3 times)
+    if (isRunning() && m_queue.isEmpty() && m_doing.isEmpty() && !m_failed.isEmpty() && m_try < 3) {
+        m_try += 1;
+        while (!m_failed.isEmpty())
+            m_queue.enqueue(m_failed.take(*m_failed.keyBegin()));
     }
-
-    ConcurrentTask::startNext();
+    ConcurrentTask::executeNextSubTask();
 }
 
 auto NetJob::size() const -> int
@@ -113,11 +112,11 @@ auto NetJob::abort() -> bool
     return fullyAborted;
 }
 
-auto NetJob::getFailedActions() -> QList<NetAction*>
+auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
 {
-    QList<NetAction*> failed;
+    QList<Net::NetRequest*> failed;
     for (auto index : m_failed) {
-        failed.push_back(dynamic_cast<NetAction*>(index.get()));
+        failed.push_back(dynamic_cast<Net::NetRequest*>(index.get()));
     }
     return failed;
 }
@@ -126,7 +125,7 @@ auto NetJob::getFailedFiles() -> QList<QString>
 {
     QList<QString> failed;
     for (auto index : m_failed) {
-        failed.append(static_cast<NetAction*>(index.get())->url().toString());
+        failed.append(static_cast<Net::NetRequest*>(index.get())->url().toString());
     }
     return failed;
 }

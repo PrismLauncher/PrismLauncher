@@ -3,12 +3,9 @@
 
 #include <QNetworkRequest>
 
-#include "minecraft/auth/AuthRequest.h"
-#include "minecraft/auth/Parsers.h"
+#include "Application.h"
 
 GetSkinStep::GetSkinStep(AccountData* data) : AuthStep(data) {}
-
-GetSkinStep::~GetSkinStep() noexcept = default;
 
 QString GetSkinStep::describe()
 {
@@ -17,25 +14,20 @@ QString GetSkinStep::describe()
 
 void GetSkinStep::perform()
 {
-    auto url = QUrl(m_data->minecraftProfile.skin.url);
-    QNetworkRequest request = QNetworkRequest(url);
-    AuthRequest* requestor = new AuthRequest(this);
-    connect(requestor, &AuthRequest::finished, this, &GetSkinStep::onRequestDone);
-    requestor->get(request);
+    QUrl url(m_data->minecraftProfile.skin.url);
+
+    m_response.reset(new QByteArray());
+    m_task = Net::Download::makeByteArray(url, m_response);
+
+    connect(m_task.get(), &Task::finished, this, &GetSkinStep::onRequestDone);
+
+    m_task->setNetwork(APPLICATION->network());
+    m_task->start();
 }
 
-void GetSkinStep::rehydrate()
+void GetSkinStep::onRequestDone()
 {
-    // NOOP, for now.
-}
-
-void GetSkinStep::onRequestDone(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers)
-{
-    auto requestor = qobject_cast<AuthRequest*>(QObject::sender());
-    requestor->deleteLater();
-
-    if (error == QNetworkReply::NoError) {
-        m_data->minecraftProfile.skin.data = data;
-    }
+    if (m_task->error() == QNetworkReply::NoError)
+        m_data->minecraftProfile.skin.data = *m_response;
     emit finished(AccountTaskState::STATE_SUCCEEDED, tr("Got skin"));
 }

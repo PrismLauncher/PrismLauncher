@@ -62,7 +62,7 @@ void Technic::SingleZipPackInstallTask::downloadSucceeded()
     m_abortable = false;
 
     setStatus(tr("Extracting modpack"));
-    QDir extractDir(FS::PathCombine(m_stagingPath, ".minecraft"));
+    QDir extractDir(FS::PathCombine(m_stagingPath, "minecraft"));
     qDebug() << "Attempting to create instance from" << m_archivePath;
 
     // open the zip and find relevant files in it

@@ -200,7 +200,7 @@ void ModrinthPackExportTask::buildZip()
 {
     setStatus(tr("Adding files..."));
 
-    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true);
+    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true, true);
     zipTask->addExtraFile("modrinth.index.json", generateIndex());
 
     zipTask->setExcludeFiles(resolvedFiles.keys());
@@ -287,16 +287,12 @@ QByteArray ModrinthPackExportTask::generateIndex()
             env["client"] = "required";
             env["server"] = "required";
         }
-        switch (iterator->side) {
-            case Metadata::ModSide::ClientSide:
-                env["server"] = "unsupported";
-                break;
-            case Metadata::ModSide::ServerSide:
-                env["client"] = "unsupported";
-                break;
-            case Metadata::ModSide::UniversalSide:
-                break;
-        }
+
+        // a server side mod does not imply that the mod does not work on the client
+        // however, if a mrpack mod is marked as server-only it will not install on the client
+        if (iterator->side == Metadata::ModSide::ClientSide)
+            env["server"] = "unsupported";
+
         fileOut["env"] = env;
 
         fileOut["path"] = path;

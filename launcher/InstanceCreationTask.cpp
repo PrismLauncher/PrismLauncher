@@ -3,8 +3,6 @@
 #include <QDebug>
 #include <QFile>
 
-InstanceCreationTask::InstanceCreationTask() = default;
-
 void InstanceCreationTask::executeTask()
 {
     setAbortable(true);

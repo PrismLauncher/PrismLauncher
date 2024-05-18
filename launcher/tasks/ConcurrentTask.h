@@ -72,10 +72,11 @@ class ConcurrentTask : public Task {
    protected slots:
     void executeTask() override;
 
-    virtual void startNext();
+    virtual void executeNextSubTask();
 
     void subTaskSucceeded(Task::Ptr);
-    void subTaskFailed(Task::Ptr, const QString& msg);
+    virtual void subTaskFailed(Task::Ptr, const QString& msg);
+    void subTaskFinished(Task::Ptr, TaskStepState);
     void subTaskStatus(Task::Ptr task, const QString& msg);
     void subTaskDetails(Task::Ptr task, const QString& msg);
     void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
@@ -89,6 +90,8 @@ class ConcurrentTask : public Task {
     void updateStepProgress(TaskStepProgress const& changed_progress, Operation);
 
     virtual void updateState();
+
+    void startSubTask(Task::Ptr task);
 
    protected:
     QString m_name;
@@ -107,6 +110,4 @@ class ConcurrentTask : public Task {
 
     qint64 m_stepProgress = 0;
     qint64 m_stepTotalProgress = 100;
-
-    bool m_aborted = false;
 };
