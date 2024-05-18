@@ -103,8 +103,10 @@ bool LocalShaderPackParseTask::abort()
 
 void LocalShaderPackParseTask::executeTask()
 {
-    if (!ShaderPackUtils::process(m_shader_pack))
+    if (!ShaderPackUtils::process(m_shader_pack)) {
+        emitFailed("this is not a shader pack");
         return;
+    }
 
     if (m_aborted)
         emitAborted();

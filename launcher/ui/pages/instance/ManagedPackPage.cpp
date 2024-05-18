@@ -131,6 +131,22 @@ ManagedPackPage::~ManagedPackPage()
 
 void ManagedPackPage::openedImpl()
 {
+    if (m_inst->getManagedPackID().isEmpty()) {
+        ui->packVersion->hide();
+        ui->packVersionLabel->hide();
+        ui->packOrigin->hide();
+        ui->packOriginLabel->hide();
+        ui->versionsComboBox->hide();
+        ui->updateButton->hide();
+        ui->updateToVersionLabel->hide();
+        ui->updateFromFileButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        ui->packName->setText(m_inst->name());
+        ui->changelogTextBrowser->setText(tr("This is a local modpack.\n"
+                                             "This can be updated only using a file in %1 format\n")
+                                              .arg(displayName()));
+        return;
+    }
     ui->packName->setText(m_inst->getManagedPackName());
     ui->packVersion->setText(m_inst->getManagedPackVersionName());
     ui->packOrigin->setText(tr("Website: <a href=%1>%2</a>    |    Pack ID: %3    |    Version ID: %4")
@@ -355,6 +371,8 @@ void ModrinthManagedPackPage::update()
 void ModrinthManagedPackPage::updateFromFile()
 {
     auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "Modrinth pack (*.mrpack *.zip)");
+    if (output.isEmpty())
+        return;
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", m_inst->getManagedPackID());
     extra_info.insert("pack_version_id", QString());
@@ -472,7 +490,7 @@ void FlameManagedPackPage::parseManagedPack()
 QString FlameManagedPackPage::url() const
 {
     // FIXME: We should display the websiteUrl field, but this requires doing the API request first :(
-    return {};
+    return "https://www.curseforge.com/projects/" + m_inst->getManagedPackID();
 }
 
 void FlameManagedPackPage::suggestVersion()
@@ -519,6 +537,8 @@ void FlameManagedPackPage::update()
 void FlameManagedPackPage::updateFromFile()
 {
     auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "CurseForge pack (*.zip)");
+    if (output.isEmpty())
+        return;
 
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", m_inst->getManagedPackID());

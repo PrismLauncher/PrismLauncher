@@ -13,7 +13,7 @@ jobs:
           submodules: 'true'
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           config-file: ./.github/codeql/codeql-config.yml
           queries: security-and-quality
@@ -23,7 +23,7 @@ jobs:
         run:  
           sudo apt-get -y update
 
-          sudo apt-get -y install ninja-build extra-cmake-modules scdoc qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
+          sudo apt-get -y install ninja-build extra-cmake-modules scdoc qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 libqt5networkauth5 libqt5networkauth5-dev
 
       - name: Configure and Build
         run: |
@@ -32,4 +32,4 @@ jobs:
           cmake --build build
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3

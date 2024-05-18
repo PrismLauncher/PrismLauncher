@@ -36,6 +36,7 @@
 #include "LogView.h"
 #include <QScrollBar>
 #include <QTextBlock>
+#include <QTextDocumentFragment>
 
 LogView::LogView(QWidget* parent) : QPlainTextEdit(parent)
 {
@@ -117,6 +118,9 @@ void LogView::rowsAboutToBeInserted(const QModelIndex& parent, int first, int la
 
 void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
 {
+    QTextDocument document;
+    QTextCursor cursor(&document);
+
     for (int i = first; i <= last; i++) {
         auto idx = m_model->index(i, 0, parent);
         auto text = m_model->data(idx, Qt::DisplayRole).toString();
@@ -133,11 +137,16 @@ void LogView::rowsInserted(const QModelIndex& parent, int first, int last)
         if (bg.isValid()) {
             format.setBackground(bg.value<QColor>());
         }
-        auto workCursor = textCursor();
-        workCursor.movePosition(QTextCursor::End);
-        workCursor.insertText(text, format);
-        workCursor.insertBlock();
+        cursor.movePosition(QTextCursor::End);
+        cursor.insertText(text, format);
+        cursor.insertBlock();
     }
+
+    QTextDocumentFragment fragment(&document);
+    QTextCursor workCursor = textCursor();
+    workCursor.movePosition(QTextCursor::End);
+    workCursor.insertFragment(fragment);
+
     if (m_scroll && !m_scrolling) {
         m_scrolling = true;
         QMetaObject::invokeMethod(this, "scrollToBottom", Qt::QueuedConnection);
