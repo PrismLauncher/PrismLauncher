@@ -123,6 +123,10 @@ void ImportPage::updateState()
             // need to find the download link for the modpack
             // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
             QUrlQuery query(url);
+            if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
+                qDebug() << "Invalid curseforge link:" << url;
+                return;
+            }
             auto addonId = query.allQueryItemValues("addonId")[0];
             auto fileId = query.allQueryItemValues("fileId")[0];
             auto array = std::make_shared<QByteArray>();

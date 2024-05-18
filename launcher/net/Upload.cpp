@@ -46,7 +46,8 @@ namespace Net {
 
 QNetworkReply* Upload::getReply(QNetworkRequest& request)
 {
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    if (!request.hasRawHeader("Content-Type"))
+        request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     return m_network->post(request, m_post_data);
 }
 

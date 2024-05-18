@@ -286,8 +286,10 @@ bool LocalResourcePackParseTask::abort()
 
 void LocalResourcePackParseTask::executeTask()
 {
-    if (!ResourcePackUtils::process(m_resource_pack))
+    if (!ResourcePackUtils::process(m_resource_pack)) {
+        emitFailed("this is not a resource pack");
         return;
+    }
 
     if (m_aborted)
         emitAborted();

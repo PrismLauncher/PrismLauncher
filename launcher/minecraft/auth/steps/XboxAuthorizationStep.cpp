@@ -4,25 +4,20 @@
 #include <QJsonParseError>
 #include <QNetworkRequest>
 
+#include "Application.h"
 #include "Logging.h"
-#include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
+#include "net/StaticHeaderProxy.h"
+#include "net/Upload.h"
 
-XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Katabasis::Token* token, QString relyingParty, QString authorizationKind)
+XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Token* token, QString relyingParty, QString authorizationKind)
     : AuthStep(data), m_token(token), m_relyingParty(relyingParty), m_authorizationKind(authorizationKind)
 {}
-
-XboxAuthorizationStep::~XboxAuthorizationStep() noexcept = default;
 
 QString XboxAuthorizationStep::describe()
 {
     return tr("Getting authorization to access %1 services.").arg(m_authorizationKind);
-}
-
-void XboxAuthorizationStep::rehydrate()
-{
-    // FIXME: check if the tokens are good?
 }
 
 void XboxAuthorizationStep::perform()
@@ -41,40 +36,44 @@ void XboxAuthorizationStep::perform()
 )XXX";
     auto xbox_auth_data = xbox_auth_template.arg(m_data->userToken.token, m_relyingParty);
     // http://xboxlive.com
-    QNetworkRequest request = QNetworkRequest(QUrl("https://xsts.auth.xboxlive.com/xsts/authorize"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Accept", "application/json");
-    AuthRequest* requestor = new AuthRequest(this);
-    connect(requestor, &AuthRequest::finished, this, &XboxAuthorizationStep::onRequestDone);
-    requestor->post(request, xbox_auth_data.toUtf8());
+    QUrl url("https://xsts.auth.xboxlive.com/xsts/authorize");
+    auto headers = QList<Net::HeaderPair>{
+        { "Content-Type", "application/json" },
+        { "Accept", "application/json" },
+    };
+    m_response.reset(new QByteArray());
+    m_task = Net::Upload::makeByteArray(url, m_response, xbox_auth_data.toUtf8());
+    m_task->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+
+    connect(m_task.get(), &Task::finished, this, &XboxAuthorizationStep::onRequestDone);
+
+    m_task->setNetwork(APPLICATION->network());
+    m_task->start();
     qDebug() << "Getting authorization token for " << m_relyingParty;
 }
 
-void XboxAuthorizationStep::onRequestDone(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers)
+void XboxAuthorizationStep::onRequestDone()
 {
-    auto requestor = qobject_cast<AuthRequest*>(QObject::sender());
-    requestor->deleteLater();
-
-    qCDebug(authCredentials()) << data;
-    if (error != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << error;
-        if (Net::isApplicationError(error)) {
-            if (!processSTSError(error, data, headers)) {
+    qCDebug(authCredentials()) << *m_response;
+    if (m_task->error() != QNetworkReply::NoError) {
+        qWarning() << "Reply error:" << m_task->error();
+        if (Net::isApplicationError(m_task->error())) {
+            if (!processSTSError()) {
                 emit finished(AccountTaskState::STATE_FAILED_SOFT,
-                              tr("Failed to get authorization for %1 services. Error %2.").arg(m_authorizationKind, error));
+                              tr("Failed to get authorization for %1 services. Error %2.").arg(m_authorizationKind, m_task->error()));
             } else {
                 emit finished(AccountTaskState::STATE_FAILED_SOFT,
-                              tr("Unknown STS error for %1 services: %2").arg(m_authorizationKind, requestor->errorString_));
+                              tr("Unknown STS error for %1 services: %2").arg(m_authorizationKind, m_task->errorString()));
             }
         } else {
             emit finished(AccountTaskState::STATE_OFFLINE,
-                          tr("Failed to get authorization for %1 services: %2").arg(m_authorizationKind, requestor->errorString_));
+                          tr("Failed to get authorization for %1 services: %2").arg(m_authorizationKind, m_task->errorString()));
         }
         return;
     }
 
-    Katabasis::Token temp;
-    if (!Parsers::parseXTokenResponse(data, temp, m_authorizationKind)) {
+    Token temp;
+    if (!Parsers::parseXTokenResponse(*m_response, temp, m_authorizationKind)) {
         emit finished(AccountTaskState::STATE_FAILED_SOFT,
                       tr("Could not parse authorization response for access to %1 services.").arg(m_authorizationKind));
         return;
@@ -91,11 +90,11 @@ void XboxAuthorizationStep::onRequestDone(QNetworkReply::NetworkError error, QBy
     emit finished(AccountTaskState::STATE_WORKING, tr("Got authorization to access %1").arg(m_relyingParty));
 }
 
-bool XboxAuthorizationStep::processSTSError(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers)
+bool XboxAuthorizationStep::processSTSError()
 {
-    if (error == QNetworkReply::AuthenticationRequiredError) {
+    if (m_task->error() == QNetworkReply::AuthenticationRequiredError) {
         QJsonParseError jsonError;
-        QJsonDocument doc = QJsonDocument::fromJson(data, &jsonError);
+        QJsonDocument doc = QJsonDocument::fromJson(*m_response, &jsonError);
         if (jsonError.error) {
             qWarning() << "Cannot parse error XSTS response as JSON: " << jsonError.errorString();
             emit finished(AccountTaskState::STATE_FAILED_SOFT,
