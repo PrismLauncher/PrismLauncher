@@ -6,7 +6,7 @@
 class InstanceCreationTask : public InstanceTask {
     Q_OBJECT
    public:
-    InstanceCreationTask();
+    InstanceCreationTask() = default;
     virtual ~InstanceCreationTask() = default;
 
    protected:

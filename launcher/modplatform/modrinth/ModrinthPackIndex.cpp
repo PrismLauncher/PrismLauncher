@@ -17,6 +17,7 @@
  */
 
 #include "ModrinthPackIndex.h"
+#include "FileSystem.h"
 #include "ModrinthAPI.h"
 
 #include "Json.h"
@@ -103,6 +104,8 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
 
         pack.extraData.donate.append(donate);
     }
+
+    pack.extraData.status = Json::ensureString(obj, "status");
 
     pack.extraData.body = Json::ensureString(obj, "body").remove("<br>");
 
@@ -224,6 +227,9 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     if (parent.contains("url")) {
         file.downloadUrl = Json::requireString(parent, "url");
         file.fileName = Json::requireString(parent, "filename");
+#ifdef Q_OS_WIN
+        file.fileName = FS::RemoveInvalidPathChars(file.fileName);
+#endif
         file.is_preferred = Json::requireBoolean(parent, "primary") || (files.count() == 1);
         auto hash_list = Json::requireObject(parent, "hashes");
 
