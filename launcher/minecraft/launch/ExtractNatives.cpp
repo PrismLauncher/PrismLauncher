@@ -79,6 +79,7 @@ void ExtractNatives::executeTask()
     auto settings = minecraftInstance->settings();
 
     auto outputPath = minecraftInstance->getNativePath();
+    FS::ensureFolderPathExists(outputPath);
     auto javaVersion = minecraftInstance->getJavaVersion();
     bool jniHackEnabled = javaVersion.major() >= 8;
     for (const auto& source : toExtract) {

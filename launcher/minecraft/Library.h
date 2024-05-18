@@ -34,7 +34,6 @@
  */
 
 #pragma once
-#include <net/NetAction.h>
 #include <QDir>
 #include <QList>
 #include <QMap>
@@ -48,6 +47,7 @@
 #include "MojangDownloadInfo.h"
 #include "Rule.h"
 #include "RuntimeContext.h"
+#include "net/NetRequest.h"
 
 class Library;
 class MinecraftInstance;
@@ -144,10 +144,10 @@ class Library {
     bool isForge() const;
 
     // Get a list of downloads for this library
-    QList<NetAction::Ptr> getDownloads(const RuntimeContext& runtimeContext,
-                                       class HttpMetaCache* cache,
-                                       QStringList& failedLocalFiles,
-                                       const QString& overridePath) const;
+    QList<Net::NetRequest::Ptr> getDownloads(const RuntimeContext& runtimeContext,
+                                             class HttpMetaCache* cache,
+                                             QStringList& failedLocalFiles,
+                                             const QString& overridePath) const;
 
     QString getCompatibleNative(const RuntimeContext& runtimeContext) const;
 

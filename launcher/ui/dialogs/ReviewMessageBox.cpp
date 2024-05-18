@@ -13,6 +13,7 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
     auto back_button = ui->buttonBox->button(QDialogButtonBox::Cancel);
     back_button->setText(tr("Back"));
 
+    ui->toggleDepsButton->hide();
     ui->modTreeWidget->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->modTreeWidget->header()->setStretchLastSection(false);
     ui->modTreeWidget->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -34,8 +35,11 @@ auto ReviewMessageBox::create(QWidget* parent, QString&& title, QString&& icon) 
 void ReviewMessageBox::appendResource(ResourceInformation&& info)
 {
     auto itemTop = new QTreeWidgetItem(ui->modTreeWidget);
-    itemTop->setCheckState(0, Qt::CheckState::Checked);
+    itemTop->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     itemTop->setText(0, info.name);
+    if (!info.enabled) {
+        itemTop->setToolTip(0, tr("Mod was disabled as it may be already instaled."));
+    }
 
     auto filenameItem = new QTreeWidgetItem(itemTop);
     filenameItem->setText(0, tr("Filename: %1").arg(info.filename));
@@ -75,6 +79,8 @@ void ReviewMessageBox::appendResource(ResourceInformation&& info)
         }
 
         itemTop->insertChildren(childIndx++, { requiredByItem });
+        ui->toggleDepsButton->show();
+        m_deps << itemTop;
     }
 
     auto versionTypeItem = new QTreeWidgetItem(itemTop);
@@ -108,3 +114,10 @@ void ReviewMessageBox::retranslateUi(QString resources_name)
     ui->explainLabel->setText(tr("You're about to download the following %1:").arg(resources_name));
     ui->onlyCheckedLabel->setText(tr("Only %1 with a check will be downloaded!").arg(resources_name));
 }
+void ReviewMessageBox::on_toggleDepsButton_clicked()
+{
+    m_deps_checked = !m_deps_checked;
+    auto state = m_deps_checked ? Qt::Checked : Qt::Unchecked;
+    for (auto dep : m_deps)
+        dep->setCheckState(0, state);
+};
