@@ -57,9 +57,11 @@ GetModDependenciesTask::GetModDependenciesTask(QObject* parent,
     , m_version(mcVersion(instance))
     , m_loaderType(mcLoaders(instance))
 {
-    for (auto mod : folder->allMods())
+    for (auto mod : folder->allMods()) {
+        m_mods_file_names << mod->fileinfo().fileName();
         if (auto meta = mod->metadata(); meta)
             m_mods.append(meta);
+    }
     prepare();
 }
 
@@ -231,8 +233,13 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
             if (dep_.addonId != pDep->version.addonId) {
                 removePack(pDep->version.addonId);
                 addTask(prepareDependencyTask(dep_, provider.name, level));
-            } else
+            } else {
                 addTask(getProjectInfoTask(pDep));
+            }
+        }
+        if (isLocalyInstalled(pDep)) {
+            removePack(pDep->version.addonId);
+            return;
         }
         for (auto dep_ : getDependenciesForVersion(pDep->version, provider.name)) {
             addTask(prepareDependencyTask(dep_, provider.name, level - 1));
@@ -258,9 +265,9 @@ void GetModDependenciesTask::removePack(const QVariant& addonId)
 #endif
 }
 
-QHash<QString, QStringList> GetModDependenciesTask::getRequiredBy()
+auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtraInfo>
 {
-    QHash<QString, QStringList> rby;
+    QHash<QString, PackDependencyExtraInfo> rby;
     auto fullList = m_selected + m_pack_dependencies;
     for (auto& mod : fullList) {
         auto addonId = mod->pack->addonId;
@@ -282,7 +289,61 @@ QHash<QString, QStringList> GetModDependenciesTask::getRequiredBy()
                 req.append(smod->pack->name);
             }
         }
-        rby[addonId.toString()] = req;
+        rby[addonId.toString()] = { maybeInstalled(mod), req };
     }
     return rby;
+}
+
+// super lax compare (but not fuzzy)
+// convert to lowercase
+// convert all speratores to whitespace
+// simplify sequence of internal whitespace to a single space
+// efectivly compare two strings ignoring all separators and case
+auto laxCompare = [](QString fsfilename, QString metadataFilename, bool excludeDigits = false) {
+    // allowed character seperators
+    QList<QChar> allowedSeperators = { '-', '+', '.', '_' };
+    if (excludeDigits)
+        allowedSeperators.append({ '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+
+    // copy in lowercase
+    auto fsName = fsfilename.toLower();
+    auto metaName = metadataFilename.toLower();
+
+    // replace all potential allowed seperatores with whitespace
+    for (auto sep : allowedSeperators) {
+        fsName = fsName.replace(sep, ' ');
+        metaName = metaName.replace(sep, ' ');
+    }
+
+    // remove extraneous whitespace
+    fsName = fsName.simplified();
+    metaName = metaName.simplified();
+
+    return fsName.compare(metaName) == 0;
+};
+
+bool GetModDependenciesTask::isLocalyInstalled(std::shared_ptr<PackDependency> pDep)
+{
+    return pDep->version.fileName.isEmpty() ||
+
+           std::find_if(m_selected.begin(), m_selected.end(),
+                        [pDep](std::shared_ptr<PackDependency> i) {
+                            return !i->version.fileName.isEmpty() && laxCompare(i->version.fileName, pDep->version.fileName);
+                        }) != m_selected.end() ||  // check the selected versions
+
+           std::find_if(m_mods_file_names.begin(), m_mods_file_names.end(),
+                        [pDep](QString i) { return !i.isEmpty() && laxCompare(i, pDep->version.fileName); }) !=
+               m_mods_file_names.end() ||  // check the existing mods
+
+           std::find_if(m_pack_dependencies.begin(), m_pack_dependencies.end(), [pDep](std::shared_ptr<PackDependency> i) {
+               return pDep->pack->addonId != i->pack->addonId && !i->version.fileName.isEmpty() &&
+                      laxCompare(pDep->version.fileName, i->version.fileName);
+           }) != m_pack_dependencies.end();  // check loaded dependencies
+}
+
+bool GetModDependenciesTask::maybeInstalled(std::shared_ptr<PackDependency> pDep)
+{
+    return std::find_if(m_mods_file_names.begin(), m_mods_file_names.end(), [pDep](QString i) {
+               return !i.isEmpty() && laxCompare(i, pDep->version.fileName, true);
+           }) != m_mods_file_names.end();  // check the existing mods
 }

@@ -43,6 +43,7 @@ Modpack parseDirectory(QString path)
         modpack.version = Json::requireString(root, "version", "version");
         modpack.mcVersion = Json::requireString(root, "mcVersion", "mcVersion");
         modpack.jvmArgs = Json::ensureVariant(root, "jvmArgs", {}, "jvmArgs");
+        modpack.totalPlayTime = Json::requireInteger(root, "totalPlayTime", "totalPlayTime");
     } catch (const Exception& e) {
         qDebug() << "Couldn't load ftb instance json: " << e.cause();
         return {};

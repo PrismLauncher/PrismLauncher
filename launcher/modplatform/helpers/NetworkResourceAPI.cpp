@@ -43,10 +43,10 @@ Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&
         callbacks.on_succeed(doc);
     });
 
-    QObject::connect(netJob.get(), &NetJob::failed, [&netJob, callbacks](QString reason) {
+    QObject::connect(netJob.get(), &NetJob::failed, [netJob, callbacks](const QString& reason) {
         int network_error_code = -1;
-        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action && failed_action->m_reply)
-            network_error_code = failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+            network_error_code = failed_action->replyStatusCode();
 
         callbacks.on_fail(reason, network_error_code);
     });
@@ -102,10 +102,10 @@ Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Versi
 
         callbacks.on_succeed(doc, args.pack);
     });
-    QObject::connect(netJob.get(), &NetJob::failed, [&netJob, callbacks](QString reason) {
+    QObject::connect(netJob.get(), &NetJob::failed, [netJob, callbacks](const QString& reason) {
         int network_error_code = -1;
-        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action && failed_action->m_reply)
-            network_error_code = failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+            network_error_code = failed_action->replyStatusCode();
 
         callbacks.on_fail(reason, network_error_code);
     });
@@ -153,10 +153,10 @@ Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, 
 
         callbacks.on_succeed(doc, args.dependency);
     });
-    QObject::connect(netJob.get(), &NetJob::failed, [&netJob, callbacks](QString reason) {
+    QObject::connect(netJob.get(), &NetJob::failed, [netJob, callbacks](const QString& reason) {
         int network_error_code = -1;
-        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action && failed_action->m_reply)
-            network_error_code = failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+            network_error_code = failed_action->replyStatusCode();
 
         callbacks.on_fail(reason, network_error_code);
     });

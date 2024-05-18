@@ -447,12 +447,12 @@ void VersionPage::on_actionAdd_Empty_triggered()
 
 void VersionPage::on_actionLibrariesFolder_triggered()
 {
-    DesktopServices::openDirectory(m_inst->getLocalLibraryPath(), true);
+    DesktopServices::openPath(m_inst->getLocalLibraryPath(), true);
 }
 
 void VersionPage::on_actionMinecraftFolder_triggered()
 {
-    DesktopServices::openDirectory(m_inst->gameRoot(), true);
+    DesktopServices::openPath(m_inst->gameRoot(), true);
 }
 
 void VersionPage::versionCurrent(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)

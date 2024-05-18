@@ -60,7 +60,8 @@ class ListModel : public QAbstractListModel {
 
     void update();
 
-    static const QString FTB_APP_PATH;
+    QString getPath();
+    void setPath(QString path);
 
    private:
     ModpackList modpacks;
