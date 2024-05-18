@@ -50,9 +50,8 @@
 
 #include <QPainter>
 
-#include "flows/MSA.h"
-#include "flows/Offline.h"
 #include "minecraft/auth/AccountData.h"
+#include "minecraft/auth/AuthFlow.h"
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent)
 {
@@ -80,7 +79,7 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     auto account = makeShared<MinecraftAccount>();
     account->data.type = AccountType::Offline;
     account->data.yggdrasilToken.token = "0";
-    account->data.yggdrasilToken.validity = Katabasis::Validity::Certain;
+    account->data.yggdrasilToken.validity = Validity::Certain;
     account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
     account->data.yggdrasilToken.extra["userName"] = username;
     account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
@@ -88,7 +87,7 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     account->data.minecraftEntitlement.canPlayMinecraft = true;
     account->data.minecraftProfile.id = uuidFromUsername(username).toString().remove(QRegularExpression("[{}-]"));
     account->data.minecraftProfile.name = username;
-    account->data.minecraftProfile.validity = Katabasis::Validity::Certain;
+    account->data.minecraftProfile.validity = Validity::Certain;
     return account;
 }
 
@@ -120,11 +119,11 @@ QPixmap MinecraftAccount::getFace() const
     return skin.scaled(64, 64, Qt::KeepAspectRatio);
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA()
+shared_qobject_ptr<AuthFlow> MinecraftAccount::login(bool useDeviceCode)
 {
     Q_ASSERT(m_currentTask.get() == nullptr);
 
-    m_currentTask.reset(new MSAInteractive(&data));
+    m_currentTask.reset(new AuthFlow(&data, useDeviceCode ? AuthFlow::Action::DeviceCode : AuthFlow::Action::Login, this));
     connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
     connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
     connect(m_currentTask.get(), &Task::aborted, this, [this] { authFailed(tr("Aborted")); });
@@ -132,29 +131,13 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::loginMSA()
     return m_currentTask;
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::loginOffline()
-{
-    Q_ASSERT(m_currentTask.get() == nullptr);
-
-    m_currentTask.reset(new OfflineLogin(&data));
-    connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
-    connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
-    connect(m_currentTask.get(), &Task::aborted, this, [this] { authFailed(tr("Aborted")); });
-    emit activityChanged(true);
-    return m_currentTask;
-}
-
-shared_qobject_ptr<AccountTask> MinecraftAccount::refresh()
+shared_qobject_ptr<AuthFlow> MinecraftAccount::refresh()
 {
     if (m_currentTask) {
         return m_currentTask;
     }
 
-    if (data.type == AccountType::MSA) {
-        m_currentTask.reset(new MSASilent(&data));
-    } else {
-        m_currentTask.reset(new OfflineRefresh(&data));
-    }
+    m_currentTask.reset(new AuthFlow(&data, AuthFlow::Action::Refresh, this));
 
     connect(m_currentTask.get(), &Task::succeeded, this, &MinecraftAccount::authSucceeded);
     connect(m_currentTask.get(), &Task::failed, this, &MinecraftAccount::authFailed);
@@ -163,7 +146,7 @@ shared_qobject_ptr<AccountTask> MinecraftAccount::refresh()
     return m_currentTask;
 }
 
-shared_qobject_ptr<AccountTask> MinecraftAccount::currentTask()
+shared_qobject_ptr<AuthFlow> MinecraftAccount::currentTask()
 {
     return m_currentTask;
 }
@@ -189,17 +172,17 @@ void MinecraftAccount::authFailed(QString reason)
             if (accountType() == AccountType::MSA) {
                 data.msaToken.token = QString();
                 data.msaToken.refresh_token = QString();
-                data.msaToken.validity = Katabasis::Validity::None;
-                data.validity_ = Katabasis::Validity::None;
+                data.msaToken.validity = Validity::None;
+                data.validity_ = Validity::None;
             } else {
                 data.yggdrasilToken.token = QString();
-                data.yggdrasilToken.validity = Katabasis::Validity::None;
-                data.validity_ = Katabasis::Validity::None;
+                data.yggdrasilToken.validity = Validity::None;
+                data.validity_ = Validity::None;
             }
             emit changed();
         } break;
         case AccountTaskState::STATE_FAILED_GONE: {
-            data.validity_ = Katabasis::Validity::None;
+            data.validity_ = Validity::None;
             emit changed();
         } break;
         case AccountTaskState::STATE_CREATED:
@@ -229,13 +212,13 @@ bool MinecraftAccount::shouldRefresh() const
         return false;
     }
     switch (data.validity_) {
-        case Katabasis::Validity::Certain: {
+        case Validity::Certain: {
             break;
         }
-        case Katabasis::Validity::None: {
+        case Validity::None: {
             return false;
         }
-        case Katabasis::Validity::Assumed: {
+        case Validity::Assumed: {
             return true;
         }
     }

@@ -22,6 +22,7 @@
 #include <QString>
 #include <QTextObjectInterface>
 #include <QUrl>
+#include <memory>
 
 /** Custom image text object to be used instead of the normal one in ProjectDescriptionPage.
  *
@@ -31,6 +32,14 @@
 class VariableSizedImageObject final : public QObject, public QTextObjectInterface {
     Q_OBJECT
     Q_INTERFACES(QTextObjectInterface)
+
+    struct ImageMetadata {
+        int posInDocument;
+        QUrl url;
+        QImage image;
+        int width;
+        int height;
+    };
 
    public:
     QSizeF intrinsicSize(QTextDocument* doc, int posInDocument, const QTextFormat& format) override;
@@ -49,13 +58,13 @@ class VariableSizedImageObject final : public QObject, public QTextObjectInterfa
    private:
     /** Adds the image to the document, in the given position.
      */
-    void parseImage(QTextDocument* doc, QImage image, int posInDocument);
+    void parseImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta);
 
     /** Loads an image from an external source, and adds it to the document.
      *
      *  This uses m_meta_entry to cache the image.
      */
-    void loadImage(QTextDocument* doc, const QUrl& source, int posInDocument);
+    void loadImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta);
 
    private:
     QString m_meta_entry;

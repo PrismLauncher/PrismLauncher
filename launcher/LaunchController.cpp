@@ -42,7 +42,6 @@
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ProfileSelectDialog.h"
 #include "ui/dialogs/ProfileSetupDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -58,7 +57,6 @@
 #include "BuildConfig.h"
 #include "JavaCommon.h"
 #include "launch/steps/TextPrint.h"
-#include "minecraft/auth/AccountTask.h"
 #include "tasks/Task.h"
 
 LaunchController::LaunchController(QObject* parent) : Task(parent) {}
@@ -195,6 +193,12 @@ void LaunchController::login()
     bool tryagain = true;
     unsigned int tries = 0;
 
+    if (m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) {
+        // Force account refresh on the account used to launch the instance updating the AccountState
+        //  only on first try and if it is not meant to be offline
+        auto accounts = APPLICATION->accounts();
+        accounts->requestRefresh(m_accountToUse->internalId());
+    }
     while (tryagain) {
         if (tries > 0 && tries % 3 == 0) {
             auto result =
@@ -279,12 +283,6 @@ void LaunchController::login()
                 progDialog.execWithTask(task.get());
                 continue;
             }
-            // FIXME: this is missing - the meaning is that the account is queued for refresh and we should wait for that
-            /*
-            case AccountState::Queued: {
-                return;
-            }
-            */
             case AccountState::Expired: {
                 auto errorString = tr("The account has expired and needs to be logged into manually again.");
                 QMessageBox::warning(m_parentWidget, tr("Account refresh failed"), errorString, QMessageBox::StandardButton::Ok,

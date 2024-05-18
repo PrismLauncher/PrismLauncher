@@ -354,6 +354,8 @@ bool FlameCreationTask::createInstance()
         auto id = loader.id;
         if (id.startsWith("neoforge-")) {
             id.remove("neoforge-");
+            if (id.startsWith("1.20.1-"))
+                id.remove("1.20.1-");  // this is a mess for curseforge
             loaderType = "neoforge";
             loaderUid = "net.neoforged";
         } else if (id.startsWith("forge-")) {
@@ -535,7 +537,12 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         selectedOptionalMods = optionalModDialog.getResult();
     }
     for (const auto& result : results) {
-        auto relpath = FS::PathCombine(result.targetFolder, result.fileName);
+        auto fileName = result.fileName;
+#ifdef Q_OS_WIN
+        fileName = FS::RemoveInvalidPathChars(fileName);
+#endif
+        auto relpath = FS::PathCombine(result.targetFolder, fileName);
+
         if (!result.required && !selectedOptionalMods.contains(relpath)) {
             relpath += ".disabled";
         }

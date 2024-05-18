@@ -88,6 +88,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
     };
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
     connect(model.get(), &ResourceFolderModel::updateFinished, this, updateExtra);
+    connect(model.get(), &ResourceFolderModel::parseFinished, this, updateExtra);
 
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ExternalResourcesPage::filterTextChanged);
 
@@ -290,12 +291,12 @@ void ExternalResourcesPage::disableItem()
 
 void ExternalResourcesPage::viewConfigs()
 {
-    DesktopServices::openDirectory(m_instance->instanceConfigFolder(), true);
+    DesktopServices::openPath(m_instance->instanceConfigFolder(), true);
 }
 
 void ExternalResourcesPage::viewFolder()
 {
-    DesktopServices::openDirectory(m_model->dir().absolutePath(), true);
+    DesktopServices::openPath(m_model->dir().absolutePath(), true);
 }
 
 bool ExternalResourcesPage::current(const QModelIndex& current, const QModelIndex& previous)
