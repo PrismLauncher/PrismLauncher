@@ -38,6 +38,7 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
+#include <QFileInfo>
 #include <QFileSystemWatcher>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -847,14 +848,16 @@ class InstanceStaging : public Task {
     const unsigned maxBackoff = 16;
 
    public:
-    InstanceStaging(InstanceList* parent, InstanceTask* child, QString stagingPath, InstanceName const& instanceName, QString groupName)
-        : m_parent(parent)
-        , backoff(minBackoff, maxBackoff)
-        , m_stagingPath(std::move(stagingPath))
-        , m_instance_name(std::move(instanceName))
-        , m_groupName(std::move(groupName))
+    InstanceStaging(InstanceList* parent, InstanceTask* child, SettingsObjectPtr settings)
+        : m_parent(parent), backoff(minBackoff, maxBackoff)
     {
+        m_stagingPath = parent->getStagedInstancePath();
+
         m_child.reset(child);
+
+        m_child->setStagingPath(m_stagingPath);
+        m_child->setParentSettings(std::move(settings));
+
         connect(child, &Task::succeeded, this, &InstanceStaging::childSucceeded);
         connect(child, &Task::failed, this, &InstanceStaging::childFailed);
         connect(child, &Task::aborted, this, &InstanceStaging::childAborted);
@@ -866,7 +869,7 @@ class InstanceStaging : public Task {
         connect(&m_backoffTimer, &QTimer::timeout, this, &InstanceStaging::childSucceeded);
     }
 
-    virtual ~InstanceStaging(){};
+    virtual ~InstanceStaging() {}
 
     // FIXME/TODO: add ability to abort during instance commit retries
     bool abort() override
@@ -881,14 +884,22 @@ class InstanceStaging : public Task {
     bool canAbort() const override { return (m_child && m_child->canAbort()); }
 
    protected:
-    virtual void executeTask() override { m_child->start(); }
+    virtual void executeTask() override
+    {
+        if (m_stagingPath.isNull()) {
+            emitFailed(tr("Could not create staging folder"));
+            return;
+        }
+
+        m_child->start();
+    }
     QStringList warnings() const override { return m_child->warnings(); }
 
    private slots:
     void childSucceeded()
     {
         unsigned sleepTime = backoff();
-        if (m_parent->commitStagedInstance(m_stagingPath, m_instance_name, m_groupName, *m_child.get())) {
+        if (m_parent->commitStagedInstance(m_stagingPath, *m_child.get(), m_child->group(), *m_child.get())) {
             emitSucceeded();
             return;
         }
@@ -897,7 +908,7 @@ class InstanceStaging : public Task {
             emitFailed(tr("Failed to commit instance, even after multiple retries. It is being blocked by something."));
             return;
         }
-        qDebug() << "Failed to commit instance" << m_instance_name.name() << "Initiating backoff:" << sleepTime;
+        qDebug() << "Failed to commit instance" << m_child->name() << "Initiating backoff:" << sleepTime;
         m_backoffTimer.start(sleepTime * 500);
     }
     void childFailed(const QString& reason)
@@ -906,7 +917,11 @@ class InstanceStaging : public Task {
         emitFailed(reason);
     }
 
-    void childAborted() { emitAborted(); }
+    void childAborted()
+    {
+        m_parent->destroyStagingPath(m_stagingPath);
+        emitAborted();
+    }
 
    private:
     InstanceList* m_parent;
@@ -918,34 +933,35 @@ class InstanceStaging : public Task {
     ExponentialSeries backoff;
     QString m_stagingPath;
     unique_qobject_ptr<InstanceTask> m_child;
-    InstanceName m_instance_name;
-    QString m_groupName;
     QTimer m_backoffTimer;
 };
 
 Task* InstanceList::wrapInstanceTask(InstanceTask* task)
 {
-    auto stagingPath = getStagedInstancePath();
-    task->setStagingPath(stagingPath);
-    task->setParentSettings(m_globalSettings);
-    return new InstanceStaging(this, task, stagingPath, *task, task->group());
+    return new InstanceStaging(this, task, m_globalSettings);
 }
 
 QString InstanceList::getStagedInstancePath()
 {
-    QString key = QUuid::createUuid().toString(QUuid::WithoutBraces);
-    QString tempDir = ".LAUNCHER_TEMP/";
-    QString relPath = FS::PathCombine(tempDir, key);
-    QDir rootPath(m_instDir);
-    auto path = FS::PathCombine(m_instDir, relPath);
-    if (!rootPath.mkpath(relPath)) {
-        return QString();
-    }
+    const QString tempRoot = FS::PathCombine(m_instDir, ".tmp");
+
+    QString result;
+    int tries = 0;
+
+    do {
+        if (++tries > 256)
+            return {};
+
+        const QString key = QUuid::createUuid().toString(QUuid::Id128).left(6);
+        result = FS::PathCombine(tempRoot, key);
+    } while (QFileInfo::exists(result));
+
+    if (!QDir::current().mkpath(result))
+        return {};
 #ifdef Q_OS_WIN32
-    auto tempPath = FS::PathCombine(m_instDir, tempDir);
-    SetFileAttributesA(tempPath.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
+    SetFileAttributesA(tempRoot.toStdString().c_str(), FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_NOT_CONTENT_INDEXED);
 #endif
-    return path;
+    return result;
 }
 
 bool InstanceList::commitStagedInstance(const QString& path,

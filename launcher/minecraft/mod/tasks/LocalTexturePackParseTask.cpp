@@ -241,8 +241,10 @@ bool LocalTexturePackParseTask::abort()
 
 void LocalTexturePackParseTask::executeTask()
 {
-    if (!TexturePackUtils::process(m_texture_pack))
+    if (!TexturePackUtils::process(m_texture_pack)) {
+        emitFailed("this is not a texture pack");
         return;
+    }
 
     if (m_aborted)
         emitAborted();
