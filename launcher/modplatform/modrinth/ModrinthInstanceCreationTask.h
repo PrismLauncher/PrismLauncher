@@ -46,4 +46,6 @@ class ModrinthCreationTask final : public InstanceCreationTask {
     NetJob::Ptr m_files_job;
 
     std::optional<InstancePtr> m_instance;
+
+    QString m_root_path = "minecraft";
 };
