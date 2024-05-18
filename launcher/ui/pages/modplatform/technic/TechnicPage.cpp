@@ -34,6 +34,7 @@
  */
 
 #include "TechnicPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ProjectItem.h"
 #include "ui_TechnicPage.h"
 
@@ -208,6 +209,8 @@ void TechnicPage::suggestCurrent()
 
         metadataLoaded();
     });
+    connect(jobPtr.get(), &NetJob::failed,
+            [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
     jobPtr = netJob;
     jobPtr->start();
@@ -258,6 +261,8 @@ void TechnicPage::metadataLoaded()
         netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
 
         QObject::connect(netJob.get(), &NetJob::succeeded, this, &TechnicPage::onSolderLoaded);
+        connect(jobPtr.get(), &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         jobPtr = netJob;
         jobPtr->start();

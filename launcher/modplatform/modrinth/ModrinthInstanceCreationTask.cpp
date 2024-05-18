@@ -20,6 +20,7 @@
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
 #include <QAbstractButton>
+#include <QFileInfo>
 #include <vector>
 
 bool ModrinthCreationTask::abort()
@@ -58,6 +59,7 @@ bool ModrinthCreationTask::updateInstance()
         return false;
 
     auto version_name = inst->getManagedPackVersionName();
+    m_root_path = QFileInfo(inst->gameRoot()).fileName();
     auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
     if (shouldConfirmUpdate()) {
@@ -173,7 +175,7 @@ bool ModrinthCreationTask::createInstance()
     FS::ensureFilePathExists(new_index_place);
     QFile::rename(index_path, new_index_place);
 
-    auto mcPath = FS::PathCombine(m_stagingPath, ".minecraft");
+    auto mcPath = FS::PathCombine(m_stagingPath, m_root_path);
 
     auto override_path = FS::PathCombine(m_stagingPath, "overrides");
     if (QFile::exists(override_path)) {
@@ -226,20 +228,27 @@ bool ModrinthCreationTask::createInstance()
     // Don't add managed info to packs without an ID (most likely imported from ZIP)
     if (!m_managed_id.isEmpty())
         instance.setManagedPack("modrinth", m_managed_id, m_managed_name, m_managed_version_id, version());
+    else
+        instance.setManagedPack("modrinth", "", name(), "", "");
+
     instance.setName(name());
     instance.saveNow();
 
     m_files_job.reset(new NetJob(tr("Mod Download Modrinth"), APPLICATION->network()));
 
-    auto root_modpack_path = FS::PathCombine(m_stagingPath, ".minecraft");
+    auto root_modpack_path = FS::PathCombine(m_stagingPath, m_root_path);
     auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
 
     for (auto file : m_files) {
-        auto file_path = FS::PathCombine(root_modpack_path, file.path);
+        auto fileName = file.path;
+#ifdef Q_OS_WIN
+        fileName = FS::RemoveInvalidPathChars(fileName);
+#endif
+        auto file_path = FS::PathCombine(root_modpack_path, fileName);
         if (!root_modpack_url.isParentOf(QUrl::fromLocalFile(file_path))) {
             // This means we somehow got out of the root folder, so abort here to prevent exploits
             setError(tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.")
-                         .arg(file.path));
+                         .arg(fileName));
             return false;
         }
 
@@ -289,7 +298,7 @@ bool ModrinthCreationTask::createInstance()
         // Only change the name if it didn't use a custom name, so that the previous custom name
         // is preserved, but if we're using the original one, we update the version string.
         // NOTE: This needs to come before the copyManagedPack call!
-        if (inst->name().contains(inst->getManagedPackVersionName())) {
+        if (inst->name().contains(inst->getManagedPackVersionName()) && inst->name() != instance.name()) {
             if (askForChangingInstanceName(m_parent, inst->name(), instance.name()) == InstanceNameChange::ShouldChange)
                 inst->setName(instance.name());
         }
