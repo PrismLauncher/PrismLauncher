@@ -318,7 +318,7 @@ void ThemeManager::refresh()
 {
     m_themes.clear();
     m_icons.clear();
-    m_catPacks.clear();
+    m_cat_packs.clear();
 
     initializeThemes();
     initializeCatPacks();
