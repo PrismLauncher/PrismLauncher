@@ -51,6 +51,7 @@
 #include "net/Download.h"
 
 #include "Application.h"
+#include "net/NetRequest.h"
 
 namespace {
 QSet<QString> collectPathsFromDir(QString dirPath)
@@ -276,7 +277,7 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
 
 }  // namespace AssetsUtils
 
-NetAction::Ptr AssetObject::getDownloadAction()
+Net::NetRequest::Ptr AssetObject::getDownloadAction()
 {
     QFileInfo objectFile(getLocalPath());
     if ((!objectFile.isFile()) || (objectFile.size() != size)) {

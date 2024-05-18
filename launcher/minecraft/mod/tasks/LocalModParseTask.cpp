@@ -469,7 +469,7 @@ bool processZIP(Mod& mod, [[maybe_unused]] ProcessingLevel level)
 
     QuaZipFile file(&zip);
 
-    if (zip.setCurrentFile("META-INF/mods.toml")) {
+    if (zip.setCurrentFile("META-INF/mods.toml") || zip.setCurrentFile("META-INF/neoforge.mods.toml")) {
         if (!file.open(QIODevice::ReadOnly)) {
             zip.close();
             return false;
@@ -746,7 +746,7 @@ void LocalModParseTask::executeTask()
     m_result->details = mod.details();
 
     if (m_aborted)
-        emit finished();
+        emitAborted();
     else
         emitSucceeded();
 }

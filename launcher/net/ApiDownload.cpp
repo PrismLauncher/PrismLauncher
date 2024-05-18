@@ -21,7 +21,6 @@
 #include "ByteArraySink.h"
 #include "ChecksumValidator.h"
 #include "MetaCacheSink.h"
-#include "net/NetAction.h"
 
 namespace Net {
 

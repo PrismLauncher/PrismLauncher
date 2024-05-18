@@ -1031,6 +1031,12 @@ void PackInstallTask::install()
             return;
 
         components->setComponentVersion("net.minecraftforge", version);
+    } else if (m_version.loader.type == QString("neoforge")) {
+        auto version = getVersionForLoader("net.neoforged");
+        if (version == Q_NULLPTR)
+            return;
+
+        components->setComponentVersion("net.neoforged", version);
     } else if (m_version.loader.type == QString("fabric")) {
         auto version = getVersionForLoader("net.fabricmc.fabric-loader");
         if (version == Q_NULLPTR)

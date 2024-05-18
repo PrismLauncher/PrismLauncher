@@ -43,10 +43,10 @@ void InstanceCopyTask::executeTask()
         QFileInfo dotMCDir(FS::PathCombine(m_stagingPath, ".minecraft"));
 
         QString staging_mc_dir;
-        if (mcDir.exists() && !dotMCDir.exists())
-            staging_mc_dir = mcDir.filePath();
-        else
+        if (dotMCDir.exists() && !mcDir.exists())
             staging_mc_dir = dotMCDir.filePath();
+        else
+            staging_mc_dir = mcDir.filePath();
 
         FS::copy savesCopy(FS::PathCombine(m_origInstance->gameRoot(), "saves"), FS::PathCombine(staging_mc_dir, "saves"));
         savesCopy.followSymlinks(true);

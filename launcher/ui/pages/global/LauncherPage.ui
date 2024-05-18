@@ -237,7 +237,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2">
+        <spacer name="verticalSpacer_FeaturesTab">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -251,7 +251,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="generalTab">
+     <widget class="QWidget" name="userInterfaceTab">
       <attribute name="title">
        <string>User Interface</string>
       </attribute>
@@ -374,7 +374,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="generalTabSpacer">
+        <spacer name="verticalSpacer_UserInterfaceTab">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>

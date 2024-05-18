@@ -801,15 +801,24 @@ QString NormalizePath(QString path)
     }
 }
 
-QString badFilenameChars = "\"\\/?<>:;*|!+\r\n";
+static const QString BAD_PATH_CHARS = "\"?<>:;*|!+\r\n";
+static const QString BAD_FILENAME_CHARS = BAD_PATH_CHARS + "\\/";
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
-    for (int i = 0; i < string.length(); i++) {
-        if (badFilenameChars.contains(string[i])) {
+    for (int i = 0; i < string.length(); i++)
+        if (string.at(i) < ' ' || BAD_FILENAME_CHARS.contains(string.at(i)))
             string[i] = replaceWith;
-        }
-    }
+
+    return string;
+}
+
+QString RemoveInvalidPathChars(QString string, QChar replaceWith)
+{
+    for (int i = 0; i < string.length(); i++)
+        if (string.at(i) < ' ' || BAD_PATH_CHARS.contains(string.at(i)))
+            string[i] = replaceWith;
+
     return string;
 }
 
@@ -1584,5 +1593,45 @@ uintmax_t hardLinkCount(const QString& path)
     }
     return count;
 }
+
+#ifdef Q_OS_WIN
+// returns 8.3 file format from long path
+QString shortPathName(const QString& file)
+{
+    auto input = file.toStdWString();
+    std::wstring output;
+    long length = GetShortPathNameW(input.c_str(), NULL, 0);
+    if (length == 0)
+        return {};
+    // NOTE: this resizing might seem weird...
+    // when GetShortPathNameW fails, it returns length including null character
+    // when it succeeds, it returns length excluding null character
+    // See: https://msdn.microsoft.com/en-us/library/windows/desktop/aa364989(v=vs.85).aspx
+    output.resize(length);
+    if (GetShortPathNameW(input.c_str(), (LPWSTR)output.c_str(), length) == 0)
+        return {};
+    output.resize(length - 1);
+    QString ret = QString::fromStdWString(output);
+    return ret;
+}
+
+// if the string survives roundtrip through local 8bit encoding...
+bool fitsInLocal8bit(const QString& string)
+{
+    return string == QString::fromLocal8Bit(string.toLocal8Bit());
+}
+
+QString getPathNameInLocal8bit(const QString& file)
+{
+    if (!fitsInLocal8bit(file)) {
+        auto path = shortPathName(file);
+        if (!path.isEmpty()) {
+            return path;
+        }
+        // in case shortPathName fails just return the path as is
+    }
+    return file;
+}
+#endif
 
 }  // namespace FS

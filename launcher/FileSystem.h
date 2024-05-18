@@ -342,6 +342,8 @@ QString NormalizePath(QString path);
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith = '-');
 
+QString RemoveInvalidPathChars(QString string, QChar replaceWith = '-');
+
 QString DirNameFromString(QString string, QString inDir = ".");
 
 /// Checks if the a given Path contains "!"
@@ -550,5 +552,9 @@ bool canLinkOnFS(FilesystemType type);
 bool canLink(const QString& src, const QString& dst);
 
 uintmax_t hardLinkCount(const QString& path);
+
+#ifdef Q_OS_WIN
+QString getPathNameInLocal8bit(const QString& file);
+#endif
 
 }  // namespace FS

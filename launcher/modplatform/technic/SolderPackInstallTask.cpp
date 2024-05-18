@@ -140,7 +140,7 @@ void Technic::SolderPackInstallTask::downloadSucceeded()
     m_filesNetJob.reset();
     m_extractFuture = QtConcurrent::run([this]() {
         int i = 0;
-        QString extractDir = FS::PathCombine(m_stagingPath, ".minecraft");
+        QString extractDir = FS::PathCombine(m_stagingPath, "minecraft");
         FS::ensureFolderPathExists(extractDir);
 
         while (m_modCount > i) {

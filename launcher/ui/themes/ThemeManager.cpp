@@ -178,8 +178,8 @@ QList<ITheme*> ThemeManager::getValidApplicationThemes()
 QList<CatPack*> ThemeManager::getValidCatPacks()
 {
     QList<CatPack*> ret;
-    ret.reserve(m_catPacks.size());
-    for (auto&& [id, theme] : m_catPacks) {
+    ret.reserve(m_cat_packs.size());
+    for (auto&& [id, theme] : m_cat_packs) {
         ret.append(theme.get());
     }
     return ret;
@@ -244,8 +244,8 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
 
 QString ThemeManager::getCatPack(QString catName)
 {
-    auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
-    if (catIter != m_catPacks.end()) {
+    auto catIter = m_cat_packs.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
+    if (catIter != m_cat_packs.end()) {
         auto& catPack = catIter->second;
         themeDebugLog() << "applying catpack" << catPack->id();
         return catPack->path();
@@ -253,14 +253,14 @@ QString ThemeManager::getCatPack(QString catName)
         themeWarningLog() << "Tried to get invalid catPack:" << catName;
     }
 
-    return m_catPacks.begin()->second->path();
+    return m_cat_packs.begin()->second->path();
 }
 
 QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
 {
     QString id = catPack->id();
-    if (m_catPacks.find(id) == m_catPacks.end())
-        m_catPacks.emplace(id, std::move(catPack));
+    if (m_cat_packs.find(id) == m_cat_packs.end())
+        m_cat_packs.emplace(id, std::move(catPack));
     else
         themeWarningLog() << "CatPack(" << id << ") not added to prevent id duplication";
     return id;
