@@ -191,6 +191,7 @@ void LauncherPage::applySettings()
 
     s->set("NumberOfConcurrentTasks", ui->numberOfConcurrentTasksSpinBox->value());
     s->set("NumberOfConcurrentDownloads", ui->numberOfConcurrentDownloadsSpinBox->value());
+    s->set("DownlodTransferTimeout", ui->timeoutSecondsSpinBox->value());
 
     // Console settings
     s->set("ShowConsole", ui->showConsoleCheck->isChecked());
@@ -245,6 +246,7 @@ void LauncherPage::loadSettings()
 
     ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
     ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
+    ui->timeoutSecondsSpinBox->setValue(s->get("DownlodTransferTimeout").toInt());
 
     // Console settings
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
