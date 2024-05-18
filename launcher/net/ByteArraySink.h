@@ -74,10 +74,6 @@ class ByteArraySink : public Sink {
 
     auto abort() -> Task::State override
     {
-        if (m_output)
-            m_output->clear();
-        else
-            qWarning() << "ByteArraySink did not clear the buffer because it's not addressable";
         failAllValidators();
         return Task::State::Failed;
     }

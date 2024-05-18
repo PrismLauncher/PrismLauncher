@@ -109,6 +109,7 @@ void MinecraftPage::applySettings()
     s->set("EnableFeralGamemode", ui->enableFeralGamemodeCheck->isChecked());
     s->set("EnableMangoHud", ui->enableMangoHud->isChecked());
     s->set("UseDiscreteGpu", ui->useDiscreteGpuCheck->isChecked());
+    s->set("UseZink", ui->useZink->isChecked());
 
     // Game time
     s->set("ShowGameTime", ui->showGameTime->isChecked());
@@ -151,6 +152,7 @@ void MinecraftPage::loadSettings()
     ui->enableFeralGamemodeCheck->setChecked(s->get("EnableFeralGamemode").toBool());
     ui->enableMangoHud->setChecked(s->get("EnableMangoHud").toBool());
     ui->useDiscreteGpuCheck->setChecked(s->get("UseDiscreteGpu").toBool());
+    ui->useZink->setChecked(s->get("UseZink").toBool());
 
 #if !defined(Q_OS_LINUX)
     ui->perfomanceGroupBox->setVisible(false);

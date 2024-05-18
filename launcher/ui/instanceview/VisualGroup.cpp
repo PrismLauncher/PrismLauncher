@@ -158,13 +158,14 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
     painter->setRenderHint(QPainter::Antialiasing);
 
     // sizes and offsets, to keep things consistent below
-    int arrowOffsetLeft = fontMetrics.height() / 2 + 7;
-    int textOffsetLeft = arrowOffsetLeft * 2;
-    int arrowSize = 6;
-    int centerHeight = optRect.top() + fontMetrics.height() / 2;
+    const int arrowOffsetLeft = fontMetrics.height() / 2 + 7;
+    const int textOffsetLeft = arrowOffsetLeft * 2;
+    const int centerHeight = optRect.top() + fontMetrics.height() / 2;
+    const QString& textToDraw = text.isEmpty() ? QObject::tr("Ungrouped") : text;
 
     // BEGIN: arrow
     {
+        constexpr int arrowSize = 6;
         QPolygon arrowPolygon;
         if (collapsed) {
             arrowPolygon << QPoint(arrowOffsetLeft - arrowSize / 2, centerHeight - arrowSize)
@@ -188,9 +189,26 @@ void VisualGroup::drawHeader(QPainter* painter, const QStyleOptionViewItem& opti
         textRect.setHeight(fontMetrics.height());
         textRect.setRight(textRect.right() - 7);
 
-        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, !text.isEmpty() ? text : QObject::tr("Ungrouped"));
+        painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, textToDraw);
     }
     // END: text
+
+    // BEGIN: horizontal line
+    {
+        penColor.setAlphaF(0.05);
+        pen.setColor(penColor);
+        painter->setPen(pen);
+        // startPoint is left + arrow + text + space
+        const int startPoint =
+            optRect.left() + fontMetrics.height() + fontMetrics.size(Qt::AlignLeft | Qt::AlignVCenter, textToDraw).width() + 20;
+        painter->setRenderHint(QPainter::Antialiasing, false);
+        QPolygon polygon;
+        // for some reason the height (yPos) doesn't look centered, so we are adding 1 to the center height
+        const int lineHeight = centerHeight + 1;
+        polygon << QPoint(startPoint, lineHeight) << QPoint(optRect.right() - 3, lineHeight);
+        painter->drawPolyline(polygon);
+    }
+    // END: horizontal line
 }
 
 int VisualGroup::totalHeight() const

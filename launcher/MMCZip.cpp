@@ -119,6 +119,7 @@ bool compressDirFiles(QuaZip* zip, QString dir, QFileInfoList files, bool follow
 bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, bool followSymlinks)
 {
     QuaZip zip(fileCompressed);
+    zip.setUtf8Enabled(true);
     QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
     if (!zip.open(QuaZip::mdCreate)) {
         QFile::remove(fileCompressed);
@@ -141,6 +142,7 @@ bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, 
 bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<Mod*>& mods)
 {
     QuaZip zipOut(targetJarPath);
+    zipOut.setUtf8Enabled(true);
     if (!zipOut.open(QuaZip::mdCreate)) {
         QFile::remove(targetJarPath);
         qCritical() << "Failed to open the minecraft.jar for modding";
@@ -286,10 +288,13 @@ std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, con
 
     do {
         QString file_name = zip->getCurrentFileName();
+#ifdef Q_OS_WIN
+        file_name = FS::RemoveInvalidPathChars(file_name);
+#endif
         if (!file_name.startsWith(subdir))
             continue;
 
-        auto relative_file_name = QDir::fromNativeSeparators(file_name.remove(0, subdir.size()));
+        auto relative_file_name = QDir::fromNativeSeparators(file_name.mid(subdir.size()));
         auto original_name = relative_file_name;
 
         // Fix subdirs/files ending with a / getting transformed into absolute paths
@@ -463,7 +468,7 @@ auto ExportToZipTask::exportZip() -> ZipResult
 
         auto absolute = file.absoluteFilePath();
         auto relative = m_dir.relativeFilePath(absolute);
-        setStatus("Compresing: " + relative);
+        setStatus("Compressing: " + relative);
         setProgress(m_progress + 1, m_progressTotal);
         if (m_follow_symlinks) {
             if (file.isSymLink())

@@ -58,10 +58,17 @@ import org.prismlauncher.utils.Parameters;
 import org.prismlauncher.utils.ReflectionUtils;
 
 import java.lang.invoke.MethodHandle;
+import java.util.Collections;
+import java.util.List;
 
 public final class StandardLauncher extends AbstractLauncher {
+    private final boolean quickPlaySupported;
+
     public StandardLauncher(Parameters params) {
         super(params);
+
+        List<String> traits = params.getList("traits", Collections.<String>emptyList());
+        quickPlaySupported = traits.contains("feature:is_quick_play_multiplayer");
     }
 
     @Override
@@ -76,10 +83,16 @@ public final class StandardLauncher extends AbstractLauncher {
         }
 
         if (serverAddress != null) {
-            gameArgs.add("--server");
-            gameArgs.add(serverAddress);
-            gameArgs.add("--port");
-            gameArgs.add(serverPort);
+            if (quickPlaySupported) {
+                // as of 23w14a
+                gameArgs.add("--quickPlayMultiplayer");
+                gameArgs.add(serverAddress + ':' + serverPort);
+            } else {
+                gameArgs.add("--server");
+                gameArgs.add(serverAddress);
+                gameArgs.add("--port");
+                gameArgs.add(serverPort);
+            }
         }
 
         // find and invoke the main method

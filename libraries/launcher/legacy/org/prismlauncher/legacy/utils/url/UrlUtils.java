@@ -101,7 +101,7 @@ public final class UrlUtils {
         } catch (IOException | Error | RuntimeException e) {
             throw e; // rethrow if possible
         } catch (Throwable e) {
-            throw new AssertionError(e); // oh dear! this isn't meant to happen
+            throw new AssertionError("openConnection should not throw", e); // oh dear! this isn't meant to happen
         }
     }
 }
