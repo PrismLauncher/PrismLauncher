@@ -362,6 +362,12 @@ QList<QString> JavaUtils::FindJavaPaths()
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/bin/java");
         javas.append(systemLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
     }
+
+    auto home = qEnvironmentVariable("HOME");
+
+    // javas downloaded by sdkman
+    javas.append(FS::PathCombine(home, ".sdkman/candidates/java"));
+
     javas.append(getMinecraftJavaBundle());
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
