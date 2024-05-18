@@ -284,7 +284,12 @@ void ResourceFolderModel::resolveResource(Resource* res)
     connect(
         task.get(), &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
     connect(
-        task.get(), &Task::finished, this, [=] { m_active_parse_tasks.remove(ticket); }, Qt::ConnectionType::QueuedConnection);
+        task.get(), &Task::finished, this,
+        [=] {
+            m_active_parse_tasks.remove(ticket);
+            emit parseFinished();
+        },
+        Qt::ConnectionType::QueuedConnection);
 
     m_helper_thread_task.addTask(task);
 
@@ -616,4 +621,27 @@ SortType ResourceFolderModel::columnToSortKey(size_t column) const
 QString ResourceFolderModel::instDirPath() const
 {
     return QFileInfo(m_instance->instanceRoot()).absoluteFilePath();
+}
+
+void ResourceFolderModel::onParseFailed(int ticket, QString resource_id)
+{
+    auto iter = m_active_parse_tasks.constFind(ticket);
+    if (iter == m_active_parse_tasks.constEnd())
+        return;
+
+    auto removed_index = m_resources_index[resource_id];
+    auto removed_it = m_resources.begin() + removed_index;
+    Q_ASSERT(removed_it != m_resources.end());
+
+    beginRemoveRows(QModelIndex(), removed_index, removed_index);
+    m_resources.erase(removed_it);
+
+    // update index
+    m_resources_index.clear();
+    int idx = 0;
+    for (auto const& mod : qAsConst(m_resources)) {
+        m_resources_index[mod->internal_id()] = idx;
+        idx++;
+    }
+    endRemoveRows();
 }

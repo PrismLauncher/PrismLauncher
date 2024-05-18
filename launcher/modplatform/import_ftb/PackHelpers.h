@@ -36,6 +36,7 @@ struct Modpack {
     QString name;
     QString version;
     QString mcVersion;
+    int totalPlayTime;
     // not needed for instance creation
     QVariant jvmArgs;
 
