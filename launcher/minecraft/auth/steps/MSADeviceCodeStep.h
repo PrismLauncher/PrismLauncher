@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <git@tayou.org>
- *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,43 +32,45 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-#include "ITheme.h"
-#include <QDir>
-#include <QStyleFactory>
-#include "Application.h"
-#include "HintOverrideProxyStyle.h"
-#include "rainbow.h"
 
-void ITheme::apply(bool)
-{
-    APPLICATION->setStyleSheet(QString());
-    QApplication::setStyle(new HintOverrideProxyStyle(QStyleFactory::create(qtTheme())));
-    if (hasColorScheme()) {
-        QApplication::setPalette(colorScheme());
-    }
-    APPLICATION->setStyleSheet(appStyleSheet());
-    QDir::setSearchPaths("theme", searchPaths());
-}
+#pragma once
+#include <QObject>
+#include <QTimer>
 
-QPalette ITheme::fadeInactive(QPalette in, qreal bias, QColor color)
-{
-    auto blend = [&in, bias, color](QPalette::ColorRole role) {
-        QColor from = in.color(QPalette::Active, role);
-        QColor blended = Rainbow::mix(from, color, bias);
-        in.setColor(QPalette::Disabled, role, blended);
-    };
-    blend(QPalette::Window);
-    blend(QPalette::WindowText);
-    blend(QPalette::Base);
-    blend(QPalette::AlternateBase);
-    blend(QPalette::ToolTipBase);
-    blend(QPalette::ToolTipText);
-    blend(QPalette::Text);
-    blend(QPalette::Button);
-    blend(QPalette::ButtonText);
-    blend(QPalette::BrightText);
-    blend(QPalette::Link);
-    blend(QPalette::Highlight);
-    blend(QPalette::HighlightedText);
-    return in;
-}
+#include "minecraft/auth/AuthStep.h"
+#include "net/Upload.h"
+
+class MSADeviceCodeStep : public AuthStep {
+    Q_OBJECT
+   public:
+    explicit MSADeviceCodeStep(AccountData* data);
+    virtual ~MSADeviceCodeStep() noexcept = default;
+
+    void perform() override;
+
+    QString describe() override;
+
+   public slots:
+    void abort();
+
+   signals:
+    void authorizeWithBrowser(QString url, QString code, int expiresIn);
+
+   private slots:
+    void deviceAutorizationFinished();
+    void startPoolTimer();
+    void authenticateUser();
+    void authenticationFinished();
+
+   private:
+    QString m_clientId;
+    QString m_device_code;
+    bool m_is_aborted = false;
+    int interval = 5;
+
+    QTimer m_pool_timer;
+    QTimer m_expiration_timer;
+
+    std::shared_ptr<QByteArray> m_response;
+    Net::Upload::Ptr m_task;
+};

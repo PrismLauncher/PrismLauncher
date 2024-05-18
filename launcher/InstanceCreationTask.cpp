@@ -4,8 +4,6 @@
 #include <QFile>
 #include "FileSystem.h"
 
-InstanceCreationTask::InstanceCreationTask() = default;
-
 void InstanceCreationTask::executeTask()
 {
     setAbortable(true);
