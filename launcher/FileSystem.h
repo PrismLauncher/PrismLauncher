@@ -91,7 +91,13 @@ bool ensureFilePathExists(QString filenamepath);
  * Creates all the folders in a path for the specified path
  * last segment of the path is treated as a folder name and is created!
  */
-bool ensureFolderPathExists(QString filenamepath);
+bool ensureFolderPathExists(const QFileInfo folderPath);
+
+/**
+ * Creates all the folders in a path for the specified path
+ * last segment of the path is treated as a folder name and is created!
+ */
+bool ensureFolderPathExists(const QString folderPathName);
 
 /**
  * @brief Copies a directory and it's contents from src to dest
@@ -336,6 +342,8 @@ QString NormalizePath(QString path);
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith = '-');
 
+QString RemoveInvalidPathChars(QString string, QChar replaceWith = '-');
+
 QString DirNameFromString(QString string, QString inDir = ".");
 
 /// Checks if the a given Path contains "!"
@@ -544,5 +552,9 @@ bool canLinkOnFS(FilesystemType type);
 bool canLink(const QString& src, const QString& dst);
 
 uintmax_t hardLinkCount(const QString& path);
+
+#ifdef Q_OS_WIN
+QString getPathNameInLocal8bit(const QString& file);
+#endif
 
 }  // namespace FS

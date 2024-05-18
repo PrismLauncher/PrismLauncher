@@ -50,6 +50,11 @@ class GetModDependenciesTask : public SequentialTask {
         }
     };
 
+    struct PackDependencyExtraInfo {
+        bool maybe_installed;
+        QStringList required_by;
+    };
+
     struct Provider {
         ModPlatform::ResourceProvider name;
         std::shared_ptr<ResourceDownload::ModModel> mod;
@@ -62,7 +67,7 @@ class GetModDependenciesTask : public SequentialTask {
                                     QList<std::shared_ptr<PackDependency>> selected);
 
     auto getDependecies() const -> QList<std::shared_ptr<PackDependency>> { return m_pack_dependencies; }
-    QHash<QString, QStringList> getRequiredBy();
+    QHash<QString, PackDependencyExtraInfo> getExtraInfo();
 
    protected slots:
     Task::Ptr prepareDependencyTask(const ModPlatform::Dependency&, ModPlatform::ResourceProvider, int);
@@ -73,10 +78,14 @@ class GetModDependenciesTask : public SequentialTask {
     ModPlatform::Dependency getOverride(const ModPlatform::Dependency&, ModPlatform::ResourceProvider providerName);
     void removePack(const QVariant& addonId);
 
+    bool isLocalyInstalled(std::shared_ptr<PackDependency> pDep);
+    bool maybeInstalled(std::shared_ptr<PackDependency> pDep);
+
    private:
     QList<std::shared_ptr<PackDependency>> m_pack_dependencies;
     QList<std::shared_ptr<Metadata::ModStruct>> m_mods;
     QList<std::shared_ptr<PackDependency>> m_selected;
+    QStringList m_mods_file_names;
     Provider m_flame_provider;
     Provider m_modrinth_provider;
 

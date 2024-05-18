@@ -22,6 +22,8 @@
 
 #include <minecraft/auth/MinecraftAccount.h>
 #include <memory>
+#include "net/Download.h"
+#include "net/Upload.h"
 
 namespace Ui {
 class ProfileSetupDialog;
@@ -40,10 +42,10 @@ class ProfileSetupDialog : public QDialog {
     void on_buttonBox_rejected();
 
     void nameEdited(const QString& name);
-    void checkFinished(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers);
     void startCheck();
 
-    void setupProfileFinished(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers);
+    void checkFinished();
+    void setupProfileFinished();
 
    protected:
     void scheduleCheck(const QString& name);
@@ -67,4 +69,10 @@ class ProfileSetupDialog : public QDialog {
     QString currentCheck;
 
     QTimer checkStartTimer;
+
+    std::shared_ptr<QByteArray> m_check_response;
+    Net::Download::Ptr m_check_task;
+
+    std::shared_ptr<QByteArray> m_profile_response;
+    Net::Upload::Ptr m_profile_task;
 };

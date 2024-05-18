@@ -54,7 +54,7 @@ package org.prismlauncher.legacy.fix.online;
 
 import org.prismlauncher.legacy.utils.api.MojangApi;
 import org.prismlauncher.legacy.utils.api.Texture;
-import org.prismlauncher.legacy.utils.url.CustomUrlConnection;
+import org.prismlauncher.legacy.utils.url.ByteArrayUrlConnection;
 import org.prismlauncher.legacy.utils.url.UrlUtils;
 
 import java.awt.AlphaComposite;
@@ -97,9 +97,9 @@ final class SkinFix {
 
         URLConnection connection = UrlUtils.openConnection(texture.getUrl(), proxy);
         try (InputStream in = connection.getInputStream()) {
-            // thank you craftycodie!
+            // thank you ahnewark!
             // this is heavily based on
-            // https://github.com/craftycodie/MineOnline/blob/4f4f86f9d051e0a6fd7ff0b95b2a05f7437683d7/src/main/java/gg/codie/mineonline/gui/textures/TextureHelper.java#L17
+            // https://github.com/ahnewark/MineOnline/blob/4f4f86f9d051e0a6fd7ff0b95b2a05f7437683d7/src/main/java/gg/codie/mineonline/gui/textures/TextureHelper.java#L17
             BufferedImage image = ImageIO.read(in);
             Graphics2D graphics = image.createGraphics();
             graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
@@ -131,7 +131,7 @@ final class SkinFix {
             image = image.getSubimage(0, 0, 64, 32);
             ImageIO.write(image, "png", out);
 
-            return new CustomUrlConnection(out.toByteArray());
+            return new ByteArrayUrlConnection(out.toByteArray());
         }
     }
 

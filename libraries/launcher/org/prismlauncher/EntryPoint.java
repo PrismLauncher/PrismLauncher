@@ -81,10 +81,9 @@ public final class EntryPoint {
         PreLaunchAction action = PreLaunchAction.PROCEED;
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8))) {
-            String line;
-
             while (action == PreLaunchAction.PROCEED) {
-                if ((line = reader.readLine()) != null)
+                String line = reader.readLine();
+                if (line != null)
                     action = parseLine(line, params);
                 else
                     action = PreLaunchAction.ABORT;
@@ -105,7 +104,7 @@ public final class EntryPoint {
             return ExitCode.ABORT;
         }
 
-        setProperties(params);
+        SystemProperties.apply(params);
 
         String launcherType = params.getString("launcher");
 
@@ -141,43 +140,10 @@ public final class EntryPoint {
         }
     }
 
-    private static void setProperties(Parameters params) {
-        String launcherBrand = params.getString("launcherBrand", null);
-        String launcherVersion = params.getString("launcherVersion", null);
-        String name = params.getString("instanceName", null);
-        String iconId = params.getString("instanceIconKey", null);
-        String iconPath = params.getString("instanceIconPath", null);
-        String windowTitle = params.getString("windowTitle", null);
-        String windowDimensions = params.getString("windowParams", null);
-
-        if (launcherBrand != null)
-            System.setProperty("minecraft.launcher.brand", launcherBrand);
-        if (launcherVersion != null)
-            System.setProperty("minecraft.launcher.version", launcherVersion);
-
-        // set useful properties for mods
-        if (name != null)
-            System.setProperty("org.prismlauncher.instance.name", name);
-        if (iconId != null)
-            System.setProperty("org.prismlauncher.instance.icon.id", iconId);
-        if (iconPath != null)
-            System.setProperty("org.prismlauncher.instance.icon.path", iconPath);
-        if (windowTitle != null)
-            System.setProperty("org.prismlauncher.window.title", windowTitle);
-        if (windowDimensions != null)
-            System.setProperty("org.prismlauncher.window.dimensions", windowDimensions);
-
-        // set multimc properties for compatibility
-        if (name != null)
-            System.setProperty("multimc.instance.title", name);
-        if (iconId != null)
-            System.setProperty("multimc.instance.icon", iconId);
-    }
-
     private static PreLaunchAction parseLine(String input, Parameters params) throws ParseException {
         switch (input) {
             case "":
-                break;
+                return PreLaunchAction.PROCEED;
 
             case "launch":
                 return PreLaunchAction.LAUNCH;
@@ -192,9 +158,9 @@ public final class EntryPoint {
                     throw new ParseException(input, "[key] [value]");
 
                 params.add(pair[0], pair[1]);
-        }
 
-        return PreLaunchAction.PROCEED;
+                return PreLaunchAction.PROCEED;
+        }
     }
 
     private enum PreLaunchAction { PROCEED, LAUNCH, ABORT }

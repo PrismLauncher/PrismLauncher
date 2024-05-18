@@ -42,7 +42,7 @@
 #include <QUuid>
 
 namespace {
-void tokenToJSONV3(QJsonObject& parent, Katabasis::Token t, const char* tokenName)
+void tokenToJSONV3(QJsonObject& parent, Token t, const char* tokenName)
 {
     if (!t.persistent) {
         return;
@@ -74,9 +74,9 @@ void tokenToJSONV3(QJsonObject& parent, Katabasis::Token t, const char* tokenNam
     }
 }
 
-Katabasis::Token tokenFromJSONV3(const QJsonObject& parent, const char* tokenName)
+Token tokenFromJSONV3(const QJsonObject& parent, const char* tokenName)
 {
-    Katabasis::Token out;
+    Token out;
     auto tokenObject = parent.value(tokenName).toObject();
     if (tokenObject.isEmpty()) {
         return out;
@@ -94,7 +94,7 @@ Katabasis::Token tokenFromJSONV3(const QJsonObject& parent, const char* tokenNam
     auto token = tokenObject.value("token");
     if (token.isString()) {
         out.token = token.toString();
-        out.validity = Katabasis::Validity::Assumed;
+        out.validity = Validity::Assumed;
     }
 
     auto refresh_token = tokenObject.value("refresh_token");
@@ -241,13 +241,13 @@ MinecraftProfile profileFromJSONV3(const QJsonObject& parent, const char* tokenN
             }
         }
     }
-    out.validity = Katabasis::Validity::Assumed;
+    out.validity = Validity::Assumed;
     return out;
 }
 
 void entitlementToJSONV3(QJsonObject& parent, MinecraftEntitlement p)
 {
-    if (p.validity == Katabasis::Validity::None) {
+    if (p.validity == Validity::None) {
         return;
     }
     QJsonObject out;
@@ -271,7 +271,7 @@ bool entitlementFromJSONV3(const QJsonObject& parent, MinecraftEntitlement& out)
         }
         out.canPlayMinecraft = canPlayMinecraftV.toBool(false);
         out.ownsMinecraft = ownsMinecraftV.toBool(false);
-        out.validity = Katabasis::Validity::Assumed;
+        out.validity = Validity::Assumed;
     }
     return true;
 }
@@ -313,10 +313,10 @@ bool AccountData::resumeStateFromV3(QJsonObject data)
 
     minecraftProfile = profileFromJSONV3(data, "profile");
     if (!entitlementFromJSONV3(data, minecraftEntitlement)) {
-        if (minecraftProfile.validity != Katabasis::Validity::None) {
+        if (minecraftProfile.validity != Validity::None) {
             minecraftEntitlement.canPlayMinecraft = true;
             minecraftEntitlement.ownsMinecraft = true;
-            minecraftEntitlement.validity = Katabasis::Validity::Assumed;
+            minecraftEntitlement.validity = Validity::Assumed;
         }
     }
 

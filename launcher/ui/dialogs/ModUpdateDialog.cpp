@@ -214,19 +214,25 @@ void ModUpdateDialog::checkCandidates()
         }
         static FlameAPI api;
 
-        auto getRequiredBy = depTask->getRequiredBy();
+        auto dependencyExtraInfo = depTask->getExtraInfo();
 
         for (auto dep : depTask->getDependecies()) {
             auto changelog = dep->version.changelog;
             if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
                 changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
             auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_mod_model);
-            CheckUpdateTask::UpdatableMod updatable = {
-                dep->pack->name, dep->version.hash,   "",           dep->version.version, dep->version.version_type,
-                changelog,       dep->pack->provider, download_task
-            };
+            auto extraInfo = dependencyExtraInfo.value(dep->version.addonId.toString());
+            CheckUpdateTask::UpdatableMod updatable = { dep->pack->name,
+                                                        dep->version.hash,
+                                                        "",
+                                                        dep->version.version,
+                                                        dep->version.version_type,
+                                                        changelog,
+                                                        dep->pack->provider,
+                                                        download_task,
+                                                        !extraInfo.maybe_installed };
 
-            appendMod(updatable, getRequiredBy.value(dep->version.addonId.toString()));
+            appendMod(updatable, extraInfo.required_by);
             m_tasks.insert(updatable.name, updatable.download);
         }
     }
@@ -331,6 +337,8 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         connect(modrinth_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });
+        connect(modrinth_task.get(), &EnsureMetadataTask::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (modrinth_task->getHashingTask())
             seq.addTask(modrinth_task->getHashingTask());
@@ -345,6 +353,8 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         connect(flame_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::FLAME);
         });
+        connect(flame_task.get(), &EnsureMetadataTask::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         if (flame_task->getHashingTask())
             seq.addTask(flame_task->getHashingTask());
@@ -399,6 +409,8 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
         auto task = makeShared<EnsureMetadataTask>(mod, index_dir, next(first_choice));
         connect(task.get(), &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
         connect(task.get(), &EnsureMetadataTask::metadataFailed, [this](Mod* candidate) { onMetadataFailed(candidate, false); });
+        connect(task.get(), &EnsureMetadataTask::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         m_second_try_metadata->addTask(task);
     } else {
@@ -411,7 +423,10 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
 void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStringList requiredBy)
 {
     auto item_top = new QTreeWidgetItem(ui->modTreeWidget);
-    item_top->setCheckState(0, Qt::CheckState::Checked);
+    item_top->setCheckState(0, info.enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    if (!info.enabled) {
+        item_top->setToolTip(0, tr("Mod was disabled as it may be already instaled."));
+    }
     item_top->setText(0, info.name);
     item_top->setExpanded(true);
 
@@ -442,6 +457,9 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStri
                 reqItem->insertChildren(i++, { reqItem });
             }
         }
+
+        ui->toggleDepsButton->show();
+        m_deps << item_top;
     }
 
     auto changelog_item = new QTreeWidgetItem(item_top);
