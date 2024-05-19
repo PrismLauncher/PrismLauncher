@@ -107,7 +107,7 @@ void NetRequest::executeTask()
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
 #if defined(LAUNCHER_APPLICATION)
-    request.setTransferTimeout(APPLICATION->settings()->get("DownlodTransferTimeout").toInt() * 1000);
+    request.setTransferTimeout(APPLICATION->settings()->get("RequestTimeout").toInt() * 1000);
 #else
     request.setTransferTimeout();
 #endif

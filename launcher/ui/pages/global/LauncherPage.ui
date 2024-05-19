@@ -239,7 +239,7 @@
              <string>Seconds to wait until the requests are terminated</string>
             </property>
             <property name="text">
-             <string>Transfer timeout</string>
+             <string>Timeout for HTTP requests</string>
             </property>
            </widget>
           </item>
