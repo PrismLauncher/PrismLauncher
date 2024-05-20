@@ -43,7 +43,9 @@ JavaSettingsWidget::JavaSettingsWidget(QWidget* parent) : QWidget(parent)
     connect(m_javaBrowseBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_javaBrowseBtn_clicked);
     connect(m_javaPathTextBox, &QLineEdit::textEdited, this, &JavaSettingsWidget::javaPathEdited);
     connect(m_javaStatusBtn, &QToolButton::clicked, this, &JavaSettingsWidget::on_javaStatusBtn_clicked);
-    connect(m_javaDownloadBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_javaDownloadBtn_clicked);
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        connect(m_javaDownloadBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_javaDownloadBtn_clicked);
+    }
 }
 
 void JavaSettingsWidget::setupUi()
@@ -176,18 +178,21 @@ void JavaSettingsWidget::initialize()
     m_permGenSpinBox->setValue(observedPermGenMemory);
     updateThresholds();
 
-    auto button = CustomMessageBox::selectable(this, tr("Auto Java Download"),
-                                               tr("%1 can automatically download the correct Java version for each version of Minecraft..\n"
-                                                  "Do you want to enable Java auto-download?\n")
-                                                   .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
-                                               QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
-                      ->exec();
-    if (button == QMessageBox::Yes) {
-        m_autodetectJavaCheckBox->setChecked(true);
-        m_autodownloadCheckBox->setChecked(true);
-    } else {
-        m_autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
-        m_autodownloadCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool() && s->get("AutomaticJavaDownload").toBool());
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        auto button =
+            CustomMessageBox::selectable(this, tr("Auto Java Download"),
+                                         tr("%1 can automatically download the correct Java version for each version of Minecraft..\n"
+                                            "Do you want to enable Java auto-download?\n")
+                                             .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                                         QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
+                ->exec();
+        if (button == QMessageBox::Yes) {
+            m_autodetectJavaCheckBox->setChecked(true);
+            m_autodownloadCheckBox->setChecked(true);
+        } else {
+            m_autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
+            m_autodownloadCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool() && s->get("AutomaticJavaDownload").toBool());
+        }
     }
 }
 
@@ -211,7 +216,7 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
         case JavaStatus::DoesNotStart:
             /* fallthrough */
         case JavaStatus::ReturnedInvalidData: {
-            if (!m_autodownloadCheckBox->isChecked()) {  // the java will not be autodownloaded
+            if (!(BuildConfig.JAVA_DOWNLOADER_ENABLED && m_autodownloadCheckBox->isChecked())) {  // the java will not be autodownloaded
                 int button = QMessageBox::No;
                 if (m_result.mojangPlatform == "32" && maxHeapSize() > 2048) {
                     button = CustomMessageBox::selectable(
@@ -488,7 +493,9 @@ void JavaSettingsWidget::retranslate()
     m_minMemSpinBox->setToolTip(tr("The amount of memory Minecraft is started with."));
     m_permGenSpinBox->setToolTip(tr("The amount of memory available to store loaded Java classes."));
     m_javaBrowseBtn->setText(tr("Browse"));
-    m_autodownloadCheckBox->setText(tr("Auto-download Mojang Java"));
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        m_autodownloadCheckBox->setText(tr("Auto-download Mojang Java"));
+    }
     m_autodetectJavaCheckBox->setText(tr("Autodetect Java version"));
     m_autoJavaGroupBox->setTitle(tr("Autodetect Java"));
 }
@@ -522,12 +529,12 @@ void JavaSettingsWidget::updateThresholds()
     }
 }
 
-bool JavaSettingsWidget::autodownloadJava() const
+bool JavaSettingsWidget::autoDownloadJava() const
 {
-    return m_autodetectJavaCheckBox->isChecked();
+    return m_autodownloadCheckBox && m_autodownloadCheckBox->isChecked();
 }
 
-bool JavaSettingsWidget::autodetectJava() const
+bool JavaSettingsWidget::autoDetectJava() const
 {
-    return m_autodownloadCheckBox->isChecked();
+    return m_autodetectJavaCheckBox->isChecked();
 }

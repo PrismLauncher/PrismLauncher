@@ -42,8 +42,8 @@ class JavaSettingsWidget : public QWidget {
     int minHeapSize() const;
     int maxHeapSize() const;
     QString javaPath() const;
-    bool autodetectJava() const;
-    bool autodownloadJava() const;
+    bool autoDetectJava() const;
+    bool autoDownloadJava() const;
 
     void updateThresholds();
 
