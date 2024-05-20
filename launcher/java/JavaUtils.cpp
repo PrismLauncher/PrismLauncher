@@ -283,6 +283,16 @@ QList<QString> JavaUtils::FindJavaPaths()
     QList<JavaInstallPtr> ADOPTIUMJDK64s =
         this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\Eclipse Adoptium\\JDK", "Path", "\\hotspot\\MSI");
 
+    // IBM Semeru
+    QList<JavaInstallPtr> SEMERUJRE32s =
+        this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\Semeru\\JRE", "Path", "\\openj9\\MSI");
+    QList<JavaInstallPtr> SEMERUJRE64s =
+        this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\Semeru\\JRE", "Path", "\\openj9\\MSI");
+    QList<JavaInstallPtr> SEMERUJDK32s =
+        this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\Semeru\\JDK", "Path", "\\openj9\\MSI");
+    QList<JavaInstallPtr> SEMERUJDK64s =
+        this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\Semeru\\JDK", "Path", "\\openj9\\MSI");
+
     // Microsoft
     QList<JavaInstallPtr> MICROSOFTJDK64s =
         this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\Microsoft\\JDK", "Path", "\\hotspot\\MSI");
@@ -300,6 +310,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(NEWJRE64s);
     java_candidates.append(ADOPTOPENJRE64s);
     java_candidates.append(ADOPTIUMJRE64s);
+    java_candidates.append(SEMERUJRE64s);
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre8/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre7/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files/Java/jre6/bin/javaw.exe"));
@@ -308,6 +319,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(ADOPTOPENJDK64s);
     java_candidates.append(FOUNDATIONJDK64s);
     java_candidates.append(ADOPTIUMJDK64s);
+    java_candidates.append(SEMERUJDK64s);
     java_candidates.append(MICROSOFTJDK64s);
     java_candidates.append(ZULU64s);
     java_candidates.append(LIBERICA64s);
@@ -316,6 +328,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(NEWJRE32s);
     java_candidates.append(ADOPTOPENJRE32s);
     java_candidates.append(ADOPTIUMJRE32s);
+    java_candidates.append(SEMERUJRE32s);
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre8/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre7/bin/javaw.exe"));
     java_candidates.append(MakeJavaPtr("C:/Program Files (x86)/Java/jre6/bin/javaw.exe"));
@@ -324,6 +337,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     java_candidates.append(ADOPTOPENJDK32s);
     java_candidates.append(FOUNDATIONJDK32s);
     java_candidates.append(ADOPTIUMJDK32s);
+    java_candidates.append(SEMERUJDK32s);
     java_candidates.append(ZULU32s);
     java_candidates.append(LIBERICA32s);
 
