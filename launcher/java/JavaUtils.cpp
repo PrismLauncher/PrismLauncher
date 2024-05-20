@@ -207,7 +207,7 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
                     QString newKeyName = keyName + "\\" + newSubkeyName + subkeySuffix;
 
                     HKEY newKey;
-                    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, newKeyName.toStdWString().c_str(), 0, KEY_READ | KEY_WOW64_64KEY, &newKey) ==
+                    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, newKeyName.toStdWString().c_str(), 0, KEY_READ | keyType, &newKey) ==
                         ERROR_SUCCESS) {
                         // Read the JavaHome value to find where Java is installed.
                         DWORD valueSz = 0;
