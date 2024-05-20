@@ -190,9 +190,6 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("JvmArgs");
     }
 
-    // old generic 'override both' is removed.
-    m_settings->reset("OverrideJava");
-
     // Custom Commands
     bool custcmd = ui->customCommands->checked();
     m_settings->set("OverrideCommands", custcmd);
@@ -321,9 +318,8 @@ void InstanceSettingsPage::loadSettings()
     ui->labelPermgenNote->setVisible(permGenVisible);
 
     // Java Settings
-    bool overrideJava = m_settings->get("OverrideJava").toBool();
-    bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool() || overrideJava;
-    bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool() || overrideJava;
+    bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool();
+    bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool();
 
     ui->javaSettingsGroupBox->setChecked(overrideLocation);
     ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString());
