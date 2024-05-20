@@ -103,7 +103,7 @@ bool sortJavas(BaseVersion::Ptr left, BaseVersion::Ptr right)
 {
     auto rleft = std::dynamic_pointer_cast<Java::Metadata>(right);
     auto rright = std::dynamic_pointer_cast<Java::Metadata>(left);
-    return (*rleft) > (*rright);
+    return (*rleft) < (*rright);
 }
 
 void VersionList::sortVersions()
