@@ -59,12 +59,6 @@ bool JavaVersion::operator<(const JavaVersion& rhs)
         auto major = m_major;
         auto rmajor = rhs.m_major;
 
-        // HACK: discourage using java 9
-        if (major > 8)
-            major = -major;
-        if (rmajor > 8)
-            rmajor = -rmajor;
-
         if (major < rmajor)
             return true;
         if (major > rmajor)

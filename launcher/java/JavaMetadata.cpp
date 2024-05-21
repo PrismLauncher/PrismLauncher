@@ -83,6 +83,13 @@ bool Metadata::operator<(const Metadata& rhs)
     if (id > rhs.version) {
         return false;
     }
+    auto date = releaseTime;
+    if (date < rhs.releaseTime) {
+        return true;
+    }
+    if (date > rhs.releaseTime) {
+        return false;
+    }
     return StringUtils::naturalCompare(m_name, rhs.m_name, Qt::CaseInsensitive) < 0;
 }
 
