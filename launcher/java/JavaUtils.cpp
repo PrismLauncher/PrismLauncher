@@ -284,14 +284,10 @@ QList<QString> JavaUtils::FindJavaPaths()
         this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\Eclipse Adoptium\\JDK", "Path", "\\hotspot\\MSI");
 
     // IBM Semeru
-    QList<JavaInstallPtr> SEMERUJRE32s =
-        this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\Semeru\\JRE", "Path", "\\openj9\\MSI");
-    QList<JavaInstallPtr> SEMERUJRE64s =
-        this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\Semeru\\JRE", "Path", "\\openj9\\MSI");
-    QList<JavaInstallPtr> SEMERUJDK32s =
-        this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\Semeru\\JDK", "Path", "\\openj9\\MSI");
-    QList<JavaInstallPtr> SEMERUJDK64s =
-        this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\Semeru\\JDK", "Path", "\\openj9\\MSI");
+    QList<JavaInstallPtr> SEMERUJRE32s = this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\Semeru\\JRE", "Path", "\\openj9\\MSI");
+    QList<JavaInstallPtr> SEMERUJRE64s = this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\Semeru\\JRE", "Path", "\\openj9\\MSI");
+    QList<JavaInstallPtr> SEMERUJDK32s = this->FindJavaFromRegistryKey(KEY_WOW64_32KEY, "SOFTWARE\\Semeru\\JDK", "Path", "\\openj9\\MSI");
+    QList<JavaInstallPtr> SEMERUJDK64s = this->FindJavaFromRegistryKey(KEY_WOW64_64KEY, "SOFTWARE\\Semeru\\JDK", "Path", "\\openj9\\MSI");
 
     // Microsoft
     QList<JavaInstallPtr> MICROSOFTJDK64s =
@@ -424,7 +420,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     // manually installed JDKs in /opt
     scanJavaDirs("/opt/jdk");
     scanJavaDirs("/opt/jdks");
-    scanJavaDirs("/opt/ibm"); // IBM Semeru Certified Edition
+    scanJavaDirs("/opt/ibm");  // IBM Semeru Certified Edition
     // flatpak
     scanJavaDirs("/app/jdk");
 
