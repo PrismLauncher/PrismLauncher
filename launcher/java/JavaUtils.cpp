@@ -405,6 +405,10 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs("/usr/lib/jvm");
     scanJavaDirs("/usr/lib64/jvm");
     scanJavaDirs("/usr/lib32/jvm");
+    // Gentoo's locations for openjdk and openjdk-bin respectively
+    scanJavaDir("/usr/lib64");
+    scanJavaDir("/usr/lib");
+    scanJavaDir("/opt");
     // javas stored in Prism Launcher's folder
     scanJavaDirs("java");
     // manually installed JDKs in /opt
