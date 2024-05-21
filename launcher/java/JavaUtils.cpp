@@ -424,6 +424,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     // manually installed JDKs in /opt
     scanJavaDirs("/opt/jdk");
     scanJavaDirs("/opt/jdks");
+    scanJavaDirs("/opt/ibm"); // IBM Semeru Certified Edition
     // flatpak
     scanJavaDirs("/app/jdk");
 
