@@ -871,7 +871,6 @@ void MainWindow::on_actionCopyInstance_triggered()
     runModalTask(task.get());
 }
 
-
 void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info)
 {
     QString groupName;
