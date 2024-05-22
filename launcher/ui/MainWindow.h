@@ -228,7 +228,6 @@ class MainWindow : public QMainWindow {
 
     void runModalTask(Task* task);
     void instanceFromInstanceTask(InstanceTask* task);
-    void finalizeInstance(InstancePtr inst);
 
    private:
     Ui::MainWindow* ui;
