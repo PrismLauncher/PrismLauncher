@@ -460,7 +460,7 @@ QString nearestExistentAncestor(const QString& path);
 FilesystemInfo statFS(const QString& path);
 
 static const QList<FilesystemType> s_clone_filesystems = { FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS,
-                                                           FilesystemType::XFS, FilesystemType::REFS, FilesystemType::BCACHEFS };
+                                                           FilesystemType::XFS,   FilesystemType::REFS, FilesystemType::BCACHEFS };
 
 /**
  * @brief if the Filesystem is reflink/clone capable
