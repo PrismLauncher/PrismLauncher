@@ -317,8 +317,10 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     if (QPixmapCache::find(url.toString(), &pixmap))
         return { pixmap };
 
-    if (!m_current_icon_job)
+    if (!m_current_icon_job) {
         m_current_icon_job.reset(new NetJob("IconJob", APPLICATION->network()));
+        m_current_icon_job->setAskRetry(false);
+    }
 
     if (m_currently_running_icon_actions.contains(url))
         return {};
