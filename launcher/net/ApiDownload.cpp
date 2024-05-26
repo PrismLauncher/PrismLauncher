@@ -58,7 +58,6 @@ auto ApiDownload::makeFile(QUrl url, QString path, Options options) -> Download:
 
 void ApiDownload::init()
 {
-    qDebug() << "Setting up api download";
     auto api_headers = new ApiHeaderProxy();
     addHeaderProxy(api_headers);
 }
