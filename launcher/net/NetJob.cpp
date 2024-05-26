@@ -147,11 +147,11 @@ void NetJob::emitFailed(QString reason)
     if (m_ask_retry || m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt()) {
         m_manual_try++;
         auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
-                                                     "The tasks failed\n"
+                                                     "The tasks failed.\n"
                                                      "Failed urls\n" +
                                                          getFailedFiles().join("\n\t") +
-                                                         "\n"
-                                                         "If this continues to happen please check the logs of the application"
+                                                         ".\n"
+                                                         "If this continues to happen please check the logs of the application.\n"
                                                          "Do you want to retry?",
                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                             ->exec();
