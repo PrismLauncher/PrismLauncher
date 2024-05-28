@@ -68,7 +68,7 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
     if (m_filter_widget)
         disconnect(m_filter_widget.get(), nullptr, nullptr, nullptr);
 
-    m_ui->horizontalLayout->replaceWidget(m_filter_widget == nullptr ? m_ui->filterWidget : m_filter_widget.get(), widget.get());
+    m_ui->spliter->replaceWidget(0, widget.get());
     m_filter_widget.swap(widget);
 
     m_filter = m_filter_widget->getFilter();
