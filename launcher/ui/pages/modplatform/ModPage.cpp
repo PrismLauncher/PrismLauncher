@@ -73,7 +73,7 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
 
     m_filter = m_filter_widget->getFilter();
 
-    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, &ResourcePage::updateVersionList);
+    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, &ModPage::triggerSearch);
     connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this,
             [&] { m_ui->searchButton->setStyleSheet("text-decoration: underline"); });
     connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this,

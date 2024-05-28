@@ -38,9 +38,12 @@
 #include <QComboBox>
 #include <QListWidget>
 #include <algorithm>
+#include <list>
 #include "BaseVersionList.h"
+#include "Version.h"
 #include "meta/Index.h"
 #include "modplatform/ModIndex.h"
+#include "ui/widgets/CheckComboBox.h"
 #include "ui_ModFilterWidget.h"
 
 #include "Application.h"
@@ -91,6 +94,7 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended, QWi
     ui->version->setStyleSheet("combobox-popup: 0;");
     connect(ui->showAllVersions, &QCheckBox::stateChanged, this, &ModFilterWidget::onShowAllVersionsChanged);
     connect(ui->versions, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModFilterWidget::onVersionFilterChanged);
+    connect(ui->versions, &CheckComboBox::checkedItemsChanged, this, [this] { onVersionFilterChanged(0); });
     connect(ui->version, &QComboBox::currentTextChanged, this, &ModFilterWidget::onVersionFilterTextChanged);
 
     connect(ui->neoForge, &QCheckBox::stateChanged, this, &ModFilterWidget::onLoadersFilterChanged);
@@ -184,13 +188,19 @@ void ModFilterWidget::onShowAllVersionsChanged()
 void ModFilterWidget::onVersionFilterChanged(int)
 {
     auto versions = ui->versions->checkedItems();
-    m_filter->versions.clear();
+    versions.sort();
+    std::list<Version> current_list;
 
     for (const QString& version : versions)
-        m_filter->versions.emplace_back(version);
+        current_list.emplace_back(version);
 
-    m_filter_changed = true;
-    emit filterChanged();
+    m_filter_changed = m_filter->versions.size() != current_list.size() ||
+                       !std::equal(m_filter->versions.begin(), m_filter->versions.end(), current_list.begin(), current_list.end());
+    m_filter->versions = current_list;
+    if (m_filter_changed)
+        emit filterChanged();
+    else
+        emit filterUnchanged();
 }
 
 void ModFilterWidget::onLoadersFilterChanged()
