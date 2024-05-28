@@ -133,12 +133,12 @@ bool CheckComboBox::eventFilter(QObject* receiver, QEvent* event)
                 QComboBox::hidePopup();
                 return (keyEvent->key() != Qt::Key_Escape);
             }
+            break;
         }
         case QEvent::MouseButtonPress:
-            containerMousePress = (receiver == view()->window());
-            break;
+            /* fallthrough */
         case QEvent::MouseButtonRelease:
-            containerMousePress = false;
+            containerMousePress = (receiver == view()->window());
             break;
         case QEvent::Wheel:
             return receiver == this;
