@@ -11,22 +11,18 @@
    </rect>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="2">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0" colspan="4">
     <widget class="ProgressWidget" name="fetchProgress" native="true"/>
    </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="resourceFilterButton">
+   <item row="0" column="3">
+    <widget class="QPushButton" name="searchButton">
      <property name="text">
-      <string>Filter options</string>
+      <string>Search</string>
      </property>
     </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QLineEdit" name="searchEdit"/>
    </item>
    <item row="4" column="0" colspan="4">
     <widget class="QSplitter" name="splitter">
@@ -61,13 +57,6 @@
      </widget>
     </widget>
    </item>
-   <item row="0" column="3">
-    <widget class="QPushButton" name="searchButton">
-     <property name="text">
-      <string>Search</string>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="0" colspan="4">
     <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0">
      <item row="0" column="2">
@@ -91,8 +80,12 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="0">
-    <widget class="QLineEdit" name="searchEdit"/>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="resourceFilterButton">
+     <property name="text">
+      <string>Filter options</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -110,7 +103,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>searchEdit</tabstop>
   <tabstop>searchButton</tabstop>
   <tabstop>packView</tabstop>
   <tabstop>packDescription</tabstop>
