@@ -25,6 +25,7 @@
 #include <QKeyEvent>
 #include <QLineEdit>
 #include <QListView>
+#include <QMouseEvent>
 #include <QStringList>
 #include <QStylePainter>
 
@@ -91,7 +92,7 @@ void CheckComboBox::setSourceModel(QAbstractItemModel* new_model)
 
 void CheckComboBox::hidePopup()
 {
-    if (containerMousePress)
+    if (!containerMousePress)
         QComboBox::hidePopup();
 }
 
@@ -135,11 +136,11 @@ bool CheckComboBox::eventFilter(QObject* receiver, QEvent* event)
             }
             break;
         }
-        case QEvent::MouseButtonPress:
-            /* fallthrough */
-        case QEvent::MouseButtonRelease:
-            containerMousePress = (receiver == view()->window());
+        case QEvent::MouseButtonPress: {
+            auto ev = static_cast<QMouseEvent*>(event);
+            containerMousePress = ev && view()->indexAt(ev->pos()).isValid();
             break;
+        }
         case QEvent::Wheel:
             return receiver == this;
         default:
