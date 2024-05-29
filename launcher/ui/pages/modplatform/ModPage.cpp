@@ -58,7 +58,6 @@ namespace ResourceDownload {
 
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
 {
-    connect(m_ui->searchButton, &QPushButton::clicked, this, &ModPage::triggerSearch);
     connect(m_ui->resourceFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
     connect(m_ui->packView, &QListView::doubleClicked, this, &ModPage::onResourceSelected);
 }
@@ -68,16 +67,17 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
     if (m_filter_widget)
         disconnect(m_filter_widget.get(), nullptr, nullptr, nullptr);
 
-    m_ui->splitter->replaceWidget(0, widget.get());
+    auto old = m_ui->splitter->replaceWidget(0, widget.get());
+    // because we replaced the widget we also need to delete it
+    if (old) {
+        delete old;
+    }
+
     m_filter_widget.swap(widget);
 
     m_filter = m_filter_widget->getFilter();
 
     connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, &ModPage::triggerSearch);
-    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this,
-            [&] { m_ui->searchButton->setStyleSheet("text-decoration: underline"); });
-    connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this,
-            [&] { m_ui->searchButton->setStyleSheet("text-decoration: none"); });
     prepareProviderCategories();
 }
 

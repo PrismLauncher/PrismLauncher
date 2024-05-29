@@ -84,7 +84,7 @@ class ResourcePage : public QWidget, public BasePage {
     bool hasSelectedPacks() { return !(m_model->selectedPacks().isEmpty()); }
 
    protected slots:
-    virtual void triggerSearch() {}
+    virtual void triggerSearch() = 0;
 
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);

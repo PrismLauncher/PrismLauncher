@@ -122,7 +122,6 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended, QWi
 auto ModFilterWidget::getFilter() -> std::shared_ptr<Filter>
 {
     m_filter_changed = false;
-    emit filterUnchanged();
     return m_filter;
 }
 
@@ -199,8 +198,6 @@ void ModFilterWidget::onVersionFilterChanged(int)
     m_filter->versions = current_list;
     if (m_filter_changed)
         emit filterChanged();
-    else
-        emit filterUnchanged();
 }
 
 void ModFilterWidget::onLoadersFilterChanged()
@@ -218,8 +215,6 @@ void ModFilterWidget::onLoadersFilterChanged()
     m_filter->loaders = loaders;
     if (m_filter_changed)
         emit filterChanged();
-    else
-        emit filterUnchanged();
 }
 
 void ModFilterWidget::onSideFilterChanged()
@@ -240,8 +235,6 @@ void ModFilterWidget::onSideFilterChanged()
     m_filter->side = side;
     if (m_filter_changed)
         emit filterChanged();
-    else
-        emit filterUnchanged();
 }
 
 void ModFilterWidget::onHideInstalledFilterChanged()
@@ -251,8 +244,6 @@ void ModFilterWidget::onHideInstalledFilterChanged()
     m_filter->hideInstalled = hide;
     if (m_filter_changed)
         emit filterChanged();
-    else
-        emit filterUnchanged();
 }
 
 void ModFilterWidget::onVersionFilterTextChanged(const QString& version)

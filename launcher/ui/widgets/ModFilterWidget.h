@@ -81,7 +81,6 @@ class ModFilterWidget : public QTabWidget {
 
    signals:
     void filterChanged();
-    void filterUnchanged();
 
    public slots:
     void setCategories(const QList<ModPlatform::Category>&);
