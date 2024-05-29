@@ -57,7 +57,6 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
-    connect(ui->searchButton, &QPushButton::clicked, this, &TechnicPage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
     model = new Technic::ListModel(this);
     ui->packView->setModel(model);

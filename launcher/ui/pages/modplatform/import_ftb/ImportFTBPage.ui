@@ -61,13 +61,6 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Search</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="browseButton">
        <property name="toolTip">
         <string>Select FTBApp instances directory</string>

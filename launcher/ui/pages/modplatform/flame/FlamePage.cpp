@@ -55,7 +55,6 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
-    connect(ui->searchButton, &QPushButton::clicked, this, &FlamePage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
     listModel = new Flame::ListModel(this);
     ui->packView->setModel(listModel);

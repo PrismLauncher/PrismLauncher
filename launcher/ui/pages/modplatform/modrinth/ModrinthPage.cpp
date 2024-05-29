@@ -58,7 +58,6 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
 {
     ui->setupUi(this);
 
-    connect(ui->searchButton, &QPushButton::clicked, this, &ModrinthPage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
     m_model = new Modrinth::ModpackListModel(this);
     ui->packView->setModel(m_model);
@@ -75,7 +74,7 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
+    ui->gridLayout->addWidget(&m_fetch_progress, 1, 0, 1, ui->gridLayout->columnCount());
 
     ui->sortByBox->addItem(tr("Sort by Relevance"));
     ui->sortByBox->addItem(tr("Sort by Total Downloads"));

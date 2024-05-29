@@ -11,6 +11,13 @@
    </rect>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QLineEdit" name="searchEdit">
+     <property name="placeholderText">
+      <string>Search and filter ...</string>
+     </property>
+    </widget>
+   </item>
    <item row="2" column="0">
     <layout class="QHBoxLayout">
      <item>
@@ -61,24 +68,6 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="0">
-    <layout class="QHBoxLayout">
-     <item>
-      <widget class="QLineEdit" name="searchEdit">
-       <property name="placeholderText">
-        <string>Search and filter ...</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="searchButton">
-       <property name="text">
-        <string>Search</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -89,8 +78,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>searchEdit</tabstop>
-  <tabstop>searchButton</tabstop>
   <tabstop>packView</tabstop>
   <tabstop>packDescription</tabstop>
   <tabstop>sortByBox</tabstop>
