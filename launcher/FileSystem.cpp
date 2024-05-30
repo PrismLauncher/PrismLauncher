@@ -831,14 +831,16 @@ QString RemoveInvalidPathChars(QString path, QChar replaceWith)
     invalidChars = BAD_WIN_CHARS;
 #endif
 
+    // the null character is ignored in this check as it was not a problem until now
     switch (statFS(path).fsType) {
         case FilesystemType::FAT:
             invalidChars += BAD_FAT_CHARS;
             break;
         case FilesystemType::NTFS:
+        /* fallthrough */
+        case FilesystemType::REFS:  // similar to NTFS(should be available only on windows)
             invalidChars += BAD_NTFS_CHARS;
             break;
-        // case FilesystemType::REFS:
         // case FilesystemType::EXT:
         // case FilesystemType::EXT_2_OLD:
         // case FilesystemType::EXT_2_3_4:
