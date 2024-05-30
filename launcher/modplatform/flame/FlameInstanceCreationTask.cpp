@@ -538,9 +538,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     }
     for (const auto& result : results) {
         auto fileName = result.fileName;
-#ifdef Q_OS_WIN
         fileName = FS::RemoveInvalidPathChars(fileName);
-#endif
         auto relpath = FS::PathCombine(result.targetFolder, fileName);
 
         if (!result.required && !selectedOptionalMods.contains(relpath)) {

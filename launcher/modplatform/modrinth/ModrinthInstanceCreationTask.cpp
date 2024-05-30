@@ -241,9 +241,7 @@ bool ModrinthCreationTask::createInstance()
 
     for (auto file : m_files) {
         auto fileName = file.path;
-#ifdef Q_OS_WIN
         fileName = FS::RemoveInvalidPathChars(fileName);
-#endif
         auto file_path = FS::PathCombine(root_modpack_path, fileName);
         if (!root_modpack_url.isParentOf(QUrl::fromLocalFile(file_path))) {
             // This means we somehow got out of the root folder, so abort here to prevent exploits

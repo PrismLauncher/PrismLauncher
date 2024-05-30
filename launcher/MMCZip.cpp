@@ -288,9 +288,7 @@ std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, con
 
     do {
         QString file_name = zip->getCurrentFileName();
-#ifdef Q_OS_WIN
         file_name = FS::RemoveInvalidPathChars(file_name);
-#endif
         if (!file_name.startsWith(subdir))
             continue;
 
