@@ -50,6 +50,7 @@ void Library::getApplicableFiles(const RuntimeContext& runtimeContext,
 {
     bool local = isLocal();
     auto actualPath = [&](QString relPath) {
+        relPath = FS::RemoveInvalidPathChars(relPath);
         QFileInfo out(FS::PathCombine(storagePrefix(), relPath));
         if (local && !overridePath.isEmpty()) {
             QString fileName = out.fileName();
