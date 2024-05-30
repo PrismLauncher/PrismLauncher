@@ -26,13 +26,6 @@
     </layout>
    </item>
    <item>
-    <widget class="ProgressWidget" name="fetchProgress" native="true">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -95,12 +88,6 @@
    <class>ProjectDescriptionPage</class>
    <extends>QTextBrowser</extends>
    <header>ui/widgets/ProjectDescriptionPage.h</header>
-  </customwidget>
-  <customwidget>
-   <class>ProgressWidget</class>
-   <extends>QWidget</extends>
-   <header>ui/widgets/ProgressWidget.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -67,18 +67,13 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& base_in
 
     connect(&m_search_timer, &QTimer::timeout, this, &ResourcePage::triggerSearch);
 
-    // hide both progress bars to prevent weird artifact
-    m_ui->fetchProgress->hide();
+    // hide progress bar to prevent weird artifact
     m_fetch_progress.hide();
     m_fetch_progress.hideIfInactive(true);
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    auto old = layout()->replaceWidget(m_ui->fetchProgress, &m_fetch_progress);
-    // because we replaced the widget we also need to delete it
-    if (old) {
-        delete old;
-    }
+    m_ui->verticalLayout->insertWidget(1, &m_fetch_progress);
 
     m_ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     m_ui->packView->installEventFilter(this);
