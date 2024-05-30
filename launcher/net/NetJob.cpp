@@ -144,7 +144,7 @@ void NetJob::updateState()
 void NetJob::emitFailed(QString reason)
 {
 #if defined(LAUNCHER_APPLICATION)
-    if (m_ask_retry || m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt()) {
+    if (m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt()) {
         m_manual_try++;
         auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
                                                      "The tasks failed.\n"

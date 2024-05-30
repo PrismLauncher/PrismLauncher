@@ -74,6 +74,7 @@ void Flame::FileResolvingTask::netJobFinished()
     setProgress(1, 3);
     // job to check modrinth for blocked projects
     m_checkJob.reset(new NetJob("Modrinth check", m_network));
+    m_checkJob->setAskRetry(false);
     blockedProjects = QMap<File*, std::shared_ptr<QByteArray>>();
 
     QJsonDocument doc;
