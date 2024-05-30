@@ -345,9 +345,9 @@ void SkinManageDialog::on_urlBtn_clicked()
         CustomMessageBox::selectable(this, tr("Invalid url"), tr("Invalid url"), QMessageBox::Critical)->show();
         return;
     }
-    ui->urlLine->setText("");
 
     NetJob::Ptr job{ new NetJob(tr("Download skin"), APPLICATION->network()) };
+    job->setAskRetry(false);
 
     auto path = FS::PathCombine(m_list.getDir(), url.fileName());
     job->addNetAction(Net::Download::makeFile(url, path));
@@ -361,6 +361,7 @@ void SkinManageDialog::on_urlBtn_clicked()
         QFile::remove(path);
         return;
     }
+    ui->urlLine->setText("");
     if (QFileInfo(path).suffix().isEmpty()) {
         QFile::rename(path, path + ".png");
     }
@@ -397,11 +398,11 @@ void SkinManageDialog::on_userBtn_clicked()
     if (user.isEmpty()) {
         return;
     }
-    ui->urlLine->setText("");
     MinecraftProfile mcProfile;
     auto path = FS::PathCombine(m_list.getDir(), user + ".png");
 
     NetJob::Ptr job{ new NetJob(tr("Download user skin"), APPLICATION->network(), 1) };
+    job->setAskRetry(false);
 
     auto uuidOut = std::make_shared<QByteArray>();
     auto profileOut = std::make_shared<QByteArray>();
@@ -459,6 +460,14 @@ void SkinManageDialog::on_userBtn_clicked()
     dlg.execWithTask(job.get());
 
     SkinModel s(path);
+    if (!s.isValid()) {
+        CustomMessageBox::selectable(this, tr("Usename not found"), tr("Unable to find the skin for '%1'.").arg(user),
+                                     QMessageBox::Critical)
+            ->show();
+        QFile::remove(path);
+        return;
+    }
+    ui->urlLine->setText("");
     s.setModel(mcProfile.skin.variant.toUpper() == "SLIM" ? SkinModel::SLIM : SkinModel::CLASSIC);
     s.setURL(mcProfile.skin.url);
     if (m_capes.contains(mcProfile.currentCape)) {

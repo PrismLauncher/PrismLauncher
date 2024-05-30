@@ -148,21 +148,28 @@ void NetJob::updateState()
 void NetJob::emitFailed(QString reason)
 {
 #if defined(LAUNCHER_APPLICATION)
-    auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
-                                                 "The tasks failed\n"
-                                                 "Failed urls\n" +
-                                                     getFailedFiles().join("\n\t") +
-                                                     "\n"
-                                                     "If this continues to happen please check the logs of the application"
-                                                     "Do you want to retry?",
-                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                        ->exec();
+    if (m_ask_retry) {
+        auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
+                                                     "The tasks failed.\n"
+                                                     "Failed urls\n" +
+                                                         getFailedFiles().join("\n\t") +
+                                                         ".\n"
+                                                         "If this continues to happen please check the logs of the application.\n"
+                                                         "Do you want to retry?",
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
 
-    if (response == QMessageBox::Yes) {
-        m_try = 0;
-        executeNextSubTask();
-        return;
+        if (response == QMessageBox::Yes) {
+            m_try = 0;
+            executeNextSubTask();
+            return;
+        }
     }
 #endif
     ConcurrentTask::emitFailed(reason);
+}
+
+void NetJob::setAskRetry(bool askRetry)
+{
+    m_ask_retry = askRetry;
 }
