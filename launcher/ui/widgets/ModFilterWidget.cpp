@@ -262,7 +262,14 @@ void ModFilterWidget::setCategories(const QList<ModPlatform::Category>& categori
     auto layout = new QVBoxLayout(ui->categoryGroup);
 
     for (const auto& category : categories) {
-        auto checkbox = new QCheckBox(category.name);
+        auto name = category.name;
+        name.replace("-", " ");
+        name.replace("&", "&&");
+        auto checkbox = new QCheckBox(name);
+        auto font = checkbox->font();
+        font.setCapitalization(QFont::Capitalize);
+        checkbox->setFont(font);
+
         layout->addWidget(checkbox);
 
         const QString id = category.id;
