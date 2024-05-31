@@ -71,7 +71,7 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
+    ui->verticalLayout->insertWidget(2, &m_fetch_progress);
 
     // index is used to set the sorting with the curseforge api
     ui->sortByBox->addItem(tr("Sort by Featured"));

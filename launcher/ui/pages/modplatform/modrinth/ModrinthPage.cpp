@@ -74,7 +74,7 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    ui->gridLayout->addWidget(&m_fetch_progress, 1, 0, 1, ui->gridLayout->columnCount());
+    ui->verticalLayout->insertWidget(1, &m_fetch_progress);
 
     ui->sortByBox->addItem(tr("Sort by Relevance"));
     ui->sortByBox->addItem(tr("Sort by Total Downloads"));

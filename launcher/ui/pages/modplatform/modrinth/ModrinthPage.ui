@@ -10,15 +10,15 @@
     <height>600</height>
    </rect>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <widget class="QLineEdit" name="searchEdit">
      <property name="placeholderText">
       <string>Search and filter ...</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item>
     <layout class="QHBoxLayout">
      <item>
       <widget class="QListView" name="packView">
@@ -48,7 +48,7 @@
      </item>
     </layout>
    </item>
-   <item row="3" column="0">
+   <item>
     <layout class="QHBoxLayout">
      <item>
       <widget class="QComboBox" name="sortByBox"/>
