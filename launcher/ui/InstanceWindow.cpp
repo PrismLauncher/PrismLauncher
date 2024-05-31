@@ -44,6 +44,7 @@
 #include <QPushButton>
 #include <QScrollBar>
 
+#include "DesktopServices.h"
 #include "ui/widgets/PageContainer.h"
 
 #include "InstancePageProvider.h"
@@ -118,8 +119,13 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget* parent) : QMainWin
     {
         auto base64State = APPLICATION->settings()->get("ConsoleWindowState").toString().toUtf8();
         restoreState(QByteArray::fromBase64(base64State));
-        auto base64Geometry = APPLICATION->settings()->get("ConsoleWindowGeometry").toString().toUtf8();
+        if (DesktopServices::isGameScope()) {
+            showFullScreen();
+            setFixedSize(this->width(), this->height());
+        } else {
+         auto base64Geometry = APPLICATION->settings()->get("ConsoleWindowGeometry").toString().toUtf8();
         restoreGeometry(QByteArray::fromBase64(base64Geometry));
+        }
     }
 
     // set up instance and launch process recognition

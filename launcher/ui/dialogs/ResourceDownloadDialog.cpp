@@ -24,6 +24,7 @@
 #include <algorithm>
 
 #include "Application.h"
+#include "DesktopServices.h"
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/PackProfile.h"
@@ -274,7 +275,10 @@ ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModF
     initializeContainer();
     connectButtons();
 
-    if (!geometrySaveKey().isEmpty())
+    if (DesktopServices::isGameScope()) {
+        showFullScreen();
+        setFixedSize(this->width(), this->height());
+    } else if (!geometrySaveKey().isEmpty())
         restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
 }
 
@@ -317,7 +321,10 @@ ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
     initializeContainer();
     connectButtons();
 
-    if (!geometrySaveKey().isEmpty())
+    if (DesktopServices::isGameScope()) {
+        showFullScreen();
+        setFixedSize(this->width(), this->height());
+    } else if (!geometrySaveKey().isEmpty())
         restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
 }
 
@@ -342,7 +349,10 @@ TexturePackDownloadDialog::TexturePackDownloadDialog(QWidget* parent,
     initializeContainer();
     connectButtons();
 
-    if (!geometrySaveKey().isEmpty())
+    if (DesktopServices::isGameScope()) {
+        showFullScreen();
+        setFixedSize(this->width(), this->height());
+    } else if (!geometrySaveKey().isEmpty())
         restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
 }
 
@@ -367,7 +377,10 @@ ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent,
     initializeContainer();
     connectButtons();
 
-    if (!geometrySaveKey().isEmpty())
+    if (DesktopServices::isGameScope()) {
+        showFullScreen();
+        setFixedSize(this->width(), this->height());
+    } else if (!geometrySaveKey().isEmpty())
         restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toString().toUtf8()));
 }
 
