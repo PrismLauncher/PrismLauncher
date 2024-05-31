@@ -1256,6 +1256,10 @@ bool Application::createSetupWizard()
             m_setupWizard->addPage(new LoginWizardPage(m_setupWizard));
         }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
+        if (DesktopServices::isGameScope()) {
+            m_setupWizard->showFullScreen();
+            m_setupWizard->setFixedSize(m_setupWizard->width(), m_setupWizard->height());
+        }
         m_setupWizard->show();
     }
 
