@@ -233,6 +233,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         // does not implement decorations
         if (qgetenv("XDG_CURRENT_DESKTOP") == "gamescope") {
             ui->mainToolBar->addAction(ui->actionCloseWindow);
+            showFullScreen();
+            setFixedSize(this->width(), this->height());
         }
     }
 
