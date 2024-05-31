@@ -68,6 +68,10 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget* parent) : QMainWin
     {
         auto provider = std::make_shared<InstancePageProvider>(m_instance);
         m_container = new PageContainer(provider.get(), "console", this);
+        if (DesktopServices::isGameScope()) {
+            m_container->showFullScreen();
+            m_container->setFixedSize(this->width(), this->height());
+        }
         m_container->setParentContainer(this);
         setCentralWidget(m_container);
         setContentsMargins(0, 0, 0, 0);
