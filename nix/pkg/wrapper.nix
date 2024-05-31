@@ -18,7 +18,7 @@
   jdk21,
   gamemode,
   flite,
-  mesa-demos,
+  glxinfo,
   udev,
   libusb1,
   msaClientID ? null,
@@ -80,7 +80,7 @@ in
       runtimePrograms =
         [
           xorg.xrandr
-          mesa-demos # need glxinfo
+          glxinfo
         ]
         ++ additionalPrograms;
     in

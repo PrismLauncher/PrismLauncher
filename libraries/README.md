@@ -32,14 +32,6 @@ Simple Java tool that prints the JVM details - version and platform bitness.
 
 Do what you want with it. It is so trivial that noone cares.
 
-## Katabasis
-
-Oauth2 library customized for Microsoft authentication.
-
-This is a fork of the [O2 library](https://github.com/pipacs/o2).
-
-MIT licensed.
-
 ## launcher
 
 Java launcher part for Minecraft.

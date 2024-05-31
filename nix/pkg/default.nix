@@ -9,6 +9,7 @@
   jdk17,
   zlib,
   qtbase,
+  qtnetworkauth,
   quazip,
   extra-cmake-modules,
   tomlplusplus,
@@ -42,6 +43,7 @@ assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is on
     buildInputs =
       [
         qtbase
+        qtnetworkauth
         zlib
         quazip
         ghc_filesystem

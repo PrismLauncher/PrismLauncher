@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,27 +14,16 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
+#pragma once
 
-#include "net/ApiUpload.h"
-#include "ByteArraySink.h"
+#include "BaseProfiler.h"
 
-namespace Net {
-
-Upload::Ptr ApiUpload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
-{
-    auto up = makeShared<ApiUpload>();
-    up->m_url = std::move(url);
-    up->m_sink.reset(new ByteArraySink(output));
-    up->m_post_data = std::move(m_post_data);
-    return up;
-}
-
-void ApiUpload::init()
-{
-    qDebug() << "Setting up api upload";
-    auto api_headers = new ApiHeaderProxy();
-    addHeaderProxy(api_headers);
-}
-}  // namespace Net
+class GenericProfilerFactory : public BaseProfilerFactory {
+   public:
+    QString name() const override { return "Generic"; }
+    void registerSettings([[maybe_unused]] SettingsObjectPtr settings) override{};
+    BaseExternalTool* createTool(InstancePtr instance, QObject* parent = 0) override;
+    bool check([[maybe_unused]] QString* error) override { return true; };
+    bool check([[maybe_unused]] const QString& path, [[maybe_unused]] QString* error) override { return true; };
+};
