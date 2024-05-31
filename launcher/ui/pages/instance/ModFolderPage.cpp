@@ -37,6 +37,7 @@
  */
 
 #include "ModFolderPage.h"
+#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui_ExternalResourcesPage.h"
 
 #include <QAbstractItemModel>
@@ -127,6 +128,9 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         changeVersion->setEnabled(false);
         ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, changeVersion);
         connect(changeVersion, &QAction::triggered, this, &ModFolderPage::changeModVersion);
+
+        ui->actionsToolbar->insertActionAfter(ui->actionVisitItemPage, ui->actionExportMetadata);
+        connect(ui->actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
 
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
@@ -430,4 +434,16 @@ void ModFolderPage::changeModVersion()
 
         m_model->update();
     }
+}
+
+void ModFolderPage::exportModMetadata()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selectedMods = m_model->selectedMods(selection);
+    if (selectedMods.length() == 0)
+        selectedMods = m_model->allMods();
+
+    std::sort(selectedMods.begin(), selectedMods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
+    ExportToModListDialog dlg(m_instance->name(), selectedMods, this);
+    dlg.exec();
 }
