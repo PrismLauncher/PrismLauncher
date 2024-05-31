@@ -44,6 +44,7 @@
 #include <icons/IconList.h>
 #include <tasks/Task.h>
 
+#include "DesktopServices.h"
 #include "IconPickerDialog.h"
 #include "ProgressDialog.h"
 #include "VersionSelectDialog.h"
@@ -127,7 +128,12 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     updateDialogState();
 
-    restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toByteArray()));
+    if (DesktopServices::isGameScope()) {
+        showFullScreen();
+        setFixedSize(this->width(), this->height());
+    } else {
+        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toByteArray()));
+    }
 }
 
 void NewInstanceDialog::reject()
