@@ -79,7 +79,7 @@ bool getBool(QJsonValue value, bool& out)
 // 2148916238 = child account not linked to a family
 */
 
-bool parseXTokenResponse(QByteArray& data, Katabasis::Token& output, QString name)
+bool parseXTokenResponse(QByteArray& data, Token& output, QString name)
 {
     qDebug() << "Parsing" << name << ":";
     qCDebug(authCredentials()) << data;
@@ -135,7 +135,7 @@ bool parseXTokenResponse(QByteArray& data, Katabasis::Token& output, QString nam
         qWarning() << "Missing uhs";
         return false;
     }
-    output.validity = Katabasis::Validity::Certain;
+    output.validity = Validity::Certain;
     qDebug() << name << "is valid.";
     return true;
 }
@@ -213,7 +213,7 @@ bool parseMinecraftProfile(QByteArray& data, MinecraftProfile& output)
         output.capes[capeOut.id] = capeOut;
     }
     output.currentCape = currentCape;
-    output.validity = Katabasis::Validity::Certain;
+    output.validity = Validity::Certain;
     return true;
 }
 
@@ -388,7 +388,7 @@ bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output)
         output.currentCape = capeOut.alias;
     }
 
-    output.validity = Katabasis::Validity::Certain;
+    output.validity = Validity::Certain;
     return true;
 }
 
@@ -422,7 +422,7 @@ bool parseMinecraftEntitlements(QByteArray& data, MinecraftEntitlement& output)
             output.ownsMinecraft = true;
         }
     }
-    output.validity = Katabasis::Validity::Certain;
+    output.validity = Validity::Certain;
     return true;
 }
 
@@ -456,7 +456,7 @@ bool parseRolloutResponse(QByteArray& data, bool& result)
     return true;
 }
 
-bool parseMojangResponse(QByteArray& data, Katabasis::Token& output)
+bool parseMojangResponse(QByteArray& data, Token& output)
 {
     QJsonParseError jsonError;
     qDebug() << "Parsing Mojang response...";
@@ -488,7 +488,7 @@ bool parseMojangResponse(QByteArray& data, Katabasis::Token& output)
         qWarning() << "access_token is not valid";
         return false;
     }
-    output.validity = Katabasis::Validity::Certain;
+    output.validity = Validity::Certain;
     qDebug() << "Mojang response is valid.";
     return true;
 }

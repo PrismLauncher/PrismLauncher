@@ -240,11 +240,15 @@ bool ModrinthCreationTask::createInstance()
     auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
 
     for (auto file : m_files) {
-        auto file_path = FS::PathCombine(root_modpack_path, file.path);
+        auto fileName = file.path;
+#ifdef Q_OS_WIN
+        fileName = FS::RemoveInvalidPathChars(fileName);
+#endif
+        auto file_path = FS::PathCombine(root_modpack_path, fileName);
         if (!root_modpack_url.isParentOf(QUrl::fromLocalFile(file_path))) {
             // This means we somehow got out of the root folder, so abort here to prevent exploits
             setError(tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.")
-                         .arg(file.path));
+                         .arg(fileName));
             return false;
         }
 
@@ -257,7 +261,7 @@ bool ModrinthCreationTask::createInstance()
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &NetAction::failed, [this, &file, file_path, param] {
+            connect(dl.get(), &Task::failed, [this, &file, file_path, param] {
                 auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 m_files_job->addNetAction(ndl);

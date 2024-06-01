@@ -57,7 +57,6 @@
 #include "BuildConfig.h"
 #include "JavaCommon.h"
 #include "launch/steps/TextPrint.h"
-#include "minecraft/auth/AccountTask.h"
 #include "tasks/Task.h"
 
 LaunchController::LaunchController(QObject* parent) : Task(parent) {}

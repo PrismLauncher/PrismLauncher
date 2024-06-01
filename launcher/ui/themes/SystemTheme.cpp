@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +38,7 @@
 #include <QDebug>
 #include <QStyle>
 #include <QStyleFactory>
+#include "HintOverrideProxyStyle.h"
 #include "ThemeManager.h"
 
 SystemTheme::SystemTheme()
@@ -64,8 +66,11 @@ void SystemTheme::apply(bool initial)
 {
     // See https://github.com/MultiMC/Launcher/issues/1790
     // or https://github.com/PrismLauncher/PrismLauncher/issues/490
-    if (initial)
+    if (initial) {
+        QApplication::setStyle(new HintOverrideProxyStyle(QStyleFactory::create(qtTheme())));
         return;
+    }
+
     ITheme::apply(initial);
 }
 

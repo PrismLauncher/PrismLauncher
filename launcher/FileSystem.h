@@ -378,6 +378,7 @@ enum class FilesystemType {
     HFSX,
     FUSEBLK,
     F2FS,
+    BCACHEFS,
     UNKNOWN
 };
 
@@ -406,6 +407,7 @@ static const QMap<FilesystemType, QStringList> s_filesystem_type_names = { { Fil
                                                                            { FilesystemType::HFSX, { "HFSX" } },
                                                                            { FilesystemType::FUSEBLK, { "FUSEBLK" } },
                                                                            { FilesystemType::F2FS, { "F2FS" } },
+                                                                           { FilesystemType::BCACHEFS, { "BCACHEFS" } },
                                                                            { FilesystemType::UNKNOWN, { "UNKNOWN" } } };
 
 /**
@@ -458,7 +460,7 @@ QString nearestExistentAncestor(const QString& path);
 FilesystemInfo statFS(const QString& path);
 
 static const QList<FilesystemType> s_clone_filesystems = { FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS,
-                                                           FilesystemType::XFS, FilesystemType::REFS };
+                                                           FilesystemType::XFS,   FilesystemType::REFS, FilesystemType::BCACHEFS };
 
 /**
  * @brief if the Filesystem is reflink/clone capable

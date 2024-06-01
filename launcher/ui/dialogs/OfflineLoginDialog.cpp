@@ -1,8 +1,6 @@
 #include "OfflineLoginDialog.h"
 #include "ui_OfflineLoginDialog.h"
 
-#include "minecraft/auth/AccountTask.h"
-
 #include <QtWidgets/QPushButton>
 
 OfflineLoginDialog::OfflineLoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::OfflineLoginDialog)
@@ -28,7 +26,7 @@ void OfflineLoginDialog::accept()
 
     // Setup the login task and start it
     m_account = MinecraftAccount::createOffline(ui->userTextBox->text());
-    m_loginTask = m_account->loginOffline();
+    m_loginTask = m_account->login();
     connect(m_loginTask.get(), &Task::failed, this, &OfflineLoginDialog::onTaskFailed);
     connect(m_loginTask.get(), &Task::succeeded, this, &OfflineLoginDialog::onTaskSucceeded);
     connect(m_loginTask.get(), &Task::status, this, &OfflineLoginDialog::onTaskStatus);

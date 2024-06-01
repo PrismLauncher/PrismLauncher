@@ -201,7 +201,7 @@ void FlamePackExportTask::makeApiRequest()
                        << " reason: " << parseError.errorString();
             qWarning() << *response;
 
-            failed(parseError.errorString());
+            emitFailed(parseError.errorString());
             return;
         }
 
@@ -213,6 +213,7 @@ void FlamePackExportTask::makeApiRequest()
             if (dataArr.isEmpty()) {
                 qWarning() << "No matches found for fingerprint search!";
 
+                getProjectsInfo();
                 return;
             }
             for (auto match : dataArr) {
@@ -243,9 +244,9 @@ void FlamePackExportTask::makeApiRequest()
             qDebug() << doc;
         }
         pendingHashes.clear();
+        getProjectsInfo();
     });
-    connect(task.get(), &Task::finished, this, &FlamePackExportTask::getProjectsInfo);
-    connect(task.get(), &NetJob::failed, this, &FlamePackExportTask::emitFailed);
+    connect(task.get(), &NetJob::failed, this, &FlamePackExportTask::getProjectsInfo);
     task->start();
 }
 
@@ -279,7 +280,7 @@ void FlamePackExportTask::getProjectsInfo()
             qWarning() << "Error while parsing JSON response from CurseForge projects task at " << parseError.offset
                        << " reason: " << parseError.errorString();
             qWarning() << *response;
-            failed(parseError.errorString());
+            emitFailed(parseError.errorString());
             return;
         }
 
@@ -333,7 +334,7 @@ void FlamePackExportTask::buildZip()
     setStatus(tr("Adding files..."));
     setProgress(4, 5);
 
-    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true);
+    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true, false);
     zipTask->addExtraFile("manifest.json", generateIndex());
     zipTask->addExtraFile("modlist.html", generateHTML());
 

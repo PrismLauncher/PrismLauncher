@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,27 +14,21 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
-#include "net/ApiUpload.h"
-#include "ByteArraySink.h"
+#pragma once
 
-namespace Net {
+#include <QProxyStyle>
+#include <iostream>
 
-Upload::Ptr ApiUpload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
-{
-    auto up = makeShared<ApiUpload>();
-    up->m_url = std::move(url);
-    up->m_sink.reset(new ByteArraySink(output));
-    up->m_post_data = std::move(m_post_data);
-    return up;
-}
+/// Used to override platform-specific behaviours which the launcher does work well with.
+class HintOverrideProxyStyle : public QProxyStyle {
+    Q_OBJECT
+   public:
+    HintOverrideProxyStyle(QStyle* style) : QProxyStyle(style) {}
 
-void ApiUpload::init()
-{
-    qDebug() << "Setting up api upload";
-    auto api_headers = new ApiHeaderProxy();
-    addHeaderProxy(api_headers);
-}
-}  // namespace Net
+    int styleHint(QStyle::StyleHint hint,
+                  const QStyleOption* option = nullptr,
+                  const QWidget* widget = nullptr,
+                  QStyleHintReturn* returnData = nullptr) const override;
+};

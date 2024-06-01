@@ -96,7 +96,6 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
-#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -209,7 +208,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
         exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
-        exportInstanceMenu->addAction(ui->actionExportInstanceToModList);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
 
@@ -231,7 +229,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         setInstanceActionsEnabled(false);
 
         // add a close button at the end of the main toolbar when running on gamescope / steam deck
-        // FIXME: detect if we don't have server side decorations instead
+        // this is only needed on gamescope because it defaults to an X11/XWayland session and
+        // does not implement decorations
         if (qgetenv("XDG_CURRENT_DESKTOP") == "gamescope") {
             ui->mainToolBar->addAction(ui->actionCloseWindow);
         }
@@ -1411,14 +1410,6 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
 {
     if (m_selectedInstance) {
         ExportPackDialog dlg(m_selectedInstance, this);
-        dlg.exec();
-    }
-}
-
-void MainWindow::on_actionExportInstanceToModList_triggered()
-{
-    if (m_selectedInstance) {
-        ExportToModListDialog dlg(m_selectedInstance, this);
         dlg.exec();
     }
 }
