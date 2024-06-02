@@ -537,7 +537,7 @@ endif()
 add_subdirectory(libraries/qdcss) # css parser
 if(NOT SDL2_FOUND)
     message(STATUS "Using bundled SDL2")
-    add_subdirectory(libraries/SLD) # toml parser
+    add_subdirectory(libraries/SDL) # SDL (used for gamepad support)
 else()
     message(STATUS "Using system SDL2")
 endif()
