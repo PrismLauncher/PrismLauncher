@@ -92,6 +92,9 @@ set(CORE_SOURCES
     MMCTime.cpp
 
     MTPixmapCache.h
+
+    Gamepad.h
+    Gamepad.cpp
 )
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
 set(CORE_SOURCES
@@ -1234,6 +1237,7 @@ target_link_libraries(Launcher_logic
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
     ghcFilesystem::ghc_filesystem
+    ${SDL2_LIBRARIES}
 )
 
 if (UNIX AND NOT CYGWIN AND NOT APPLE)

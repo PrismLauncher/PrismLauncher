@@ -335,6 +335,9 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
 
     # Find cmark
     find_package(cmark QUIET)
+
+    # Find sdl
+    find_package(SDL2 QUIET)
 endif()
 
 include(ECMQtDeclareLoggingCategory)
@@ -532,6 +535,12 @@ else()
     message(STATUS "Using system ghc_filesystem")
 endif()
 add_subdirectory(libraries/qdcss) # css parser
+if(NOT SDL2_FOUND)
+    message(STATUS "Using bundled SDL2")
+    add_subdirectory(libraries/SLD) # toml parser
+else()
+    message(STATUS "Using system SDL2")
+endif()
 
 ############################### Built Artifacts ###############################
 
