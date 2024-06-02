@@ -3,6 +3,7 @@
 #include "CustomMessageBox.h"
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
+#include "StringUtils.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -464,7 +465,7 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStri
             break;
     }
 
-    changelog_area->setHtml(text);
+    changelog_area->setHtml(StringUtils::htmlListPatch(text));
     changelog_area->setOpenExternalLinks(true);
     changelog_area->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     changelog_area->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);

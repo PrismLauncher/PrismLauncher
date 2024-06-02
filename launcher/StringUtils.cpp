@@ -212,3 +212,25 @@ QPair<QString, QString> StringUtils::splitFirst(const QString& s, const QRegular
     right = s.mid(end);
     return qMakePair(left, right);
 }
+
+static const QRegularExpression ulMatcher("<\\s*/\\s*ul\\s*>");
+
+QString StringUtils::htmlListPatch(QString htmlStr)
+{
+    int pos = htmlStr.indexOf(ulMatcher);
+    int imgPos;
+    while (pos != -1) {
+        pos = htmlStr.indexOf(">", pos) + 1;  // Get the size of the </ul> tag. Add one for zeroeth index
+        imgPos = htmlStr.indexOf("<img ", pos);
+        if (imgPos == -1)
+            break;  // no image after the tag
+
+        auto textBetween = htmlStr.mid(pos, imgPos - pos).trimmed();  // trim all white spaces
+
+        if (textBetween.isEmpty())
+            htmlStr.insert(pos, "<br>");
+
+        pos = htmlStr.indexOf(ulMatcher, pos);
+    }
+    return htmlStr;
+}

@@ -22,6 +22,7 @@
 #include <QTextEdit>
 #include "FileSystem.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/helpers/ExportToModList.h"
@@ -143,10 +144,10 @@ void ExportToModListDialog::triggerImp()
         case ExportToModList::CUSTOM:
             return;
         case ExportToModList::HTML:
-            ui->resultText->setHtml(txt);
+            ui->resultText->setHtml(StringUtils::htmlListPatch(txt));
             break;
         case ExportToModList::MARKDOWN:
-            ui->resultText->setHtml(markdownToHTML(txt));
+            ui->resultText->setHtml(StringUtils::htmlListPatch(markdownToHTML(txt)));
             break;
         case ExportToModList::PLAINTXT:
             break;

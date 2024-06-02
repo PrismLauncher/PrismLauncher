@@ -44,6 +44,7 @@
 #include "InstanceImportTask.h"
 #include "Json.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 
 #include "ui/widgets/ProjectItem.h"
 
@@ -303,7 +304,7 @@ void ModrinthPage::updateUI()
 
     text += markdownToHTML(current.extra.body.toUtf8());
 
-    ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
     ui->packDescription->flush();
 }
 
