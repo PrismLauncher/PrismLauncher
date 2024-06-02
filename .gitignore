@@ -56,3 +56,5 @@ flatbuild
 
 # Snap
 *.snap
+libraries/Qt
+aqtinstall.log

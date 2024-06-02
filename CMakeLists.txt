@@ -278,6 +278,49 @@ if(NOT ZLIB_FOUND)
     mark_as_advanced(FORCE_BUNDLED_ZLIB)
 endif()
 
+if(MSVC)
+    option(MSVC_QT_AUTOINSTALL "Automaticly install QT with aqtinstall" ON)
+    option(MSVC_QT_AUTOINSTALL_DEBUG_MODULES "Automaticly install QT debuginfo modules" ON)
+    if(MSVC_QT_AUTOINSTALL AND NOT MSVC_QT_INSTALL_COMPLETE)
+        message(STATUS "Installing Windows QT wint aqtinstall ...")
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            execute_process(
+                COMMAND powershell "${CMAKE_CURRENT_SOURCE_DIR}/libraries/installQtWin.ps1" -Action InstallQT -QTVersion ${Launcher_QT_VERSION_MAJOR} -IncludeDefultDebugInfoModules
+                ECHO_OUTPUT_VARIABLE
+                ECHO_ERROR_VARIABLE
+                OUTPUT_VARIABLE AQT_INSTALL_OUT
+                ERROR_VARIABLE AQT_INSTALL_ERROR
+                RESULT_VARIABLE AQT_INSTLL_RESULT
+            )
+        else()
+            execute_process(
+                COMMAND powershell "${CMAKE_CURRENT_SOURCE_DIR}/libraries/installQtWin.ps1" -Action InstallQT -QTVersion ${Launcher_QT_VERSION_MAJOR}
+                ECHO_OUTPUT_VARIABLE
+                ECHO_ERROR_VARIABLE
+                OUTPUT_VARIABLE AQT_INSTALL_OUT
+                ERROR_VARIABLE AQT_INSTALL_ERROR
+                RESULT_VARIABLE AQT_INSTLL_RESULT
+            )
+        endif()
+        if(AQT_INSTLL_RESULT EQUAL "0")
+            string(REGEX MATCH "Installing Qt .+ at \"(.+)\"" _ ${AQT_INSTALL_OUT})
+            file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/${CMAKE_MATCH_1}" AQT_QT_INSTALL_PATH_NATIVE)
+            set(AQT_QT_INSTALL_PATH ${AQT_QT_INSTALL_PATH_NATIVE} CACHE STRING "aqtinstall qt install path" FORCE)
+            set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}")
+            set(MSVC_QT_INSTALL_COMPLETE TRUE CACHE BOOL "aqtinsatll of QT completed previously" FORCE)
+            message(STATUS "Windows QT installed to ${AQT_QT_INSTALL_PATH}")
+        else()
+            message(WARNING "Automatic install of Windows QT failed:" ${AQT_INSTALL_OUT} ${AQT_INSTALL_ERROR})
+        endif()
+    endif()
+    if(MSVC_QT_AUTOINSTALL AND MSVC_QT_INSTALL_COMPLETE)
+        file(TO_NATIVE_PATH "${AQT_QT_INSTALL_PATH}/lib/cmake" AQT_CMAKE_PREFIX_PATH)
+        list(APPEND CMAKE_PREFIX_PATH ${AQT_CMAKE_PREFIX_PATH})
+        message(STATUS "Extending CMAKE_PREFIX_PATH with automaticly installed Windows QT at ${AQT_QT_INSTALL_PATH}")
+        message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+    endif()
+endif()
+
 # Find the required Qt parts
 include(QtVersionlessBackport)
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
