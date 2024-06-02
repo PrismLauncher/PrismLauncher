@@ -87,6 +87,6 @@ class JsonCatPack : public BasicCatPack {
     QString path(QDate now);
 
    private:
-    QString m_defaultPath;
+    QString m_default_path;
     QList<Variant> m_variants;
 };
