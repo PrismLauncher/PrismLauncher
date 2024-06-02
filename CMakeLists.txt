@@ -461,6 +461,11 @@ else()
 endif()
 
 
+########################## Nix Submodule workaround ###########################
+if(NOT EXISTS "libraries/SDL_GameControllerDB/gamecontrollerdb.txt")
+    file(MAKE_DIRECTORY "libraries/SDL_GameControllerDB/")
+    file(WRITE "libraries/SDL_GameControllerDB/gamecontrollerdb.txt" "")
+endif()
 
 ################################ Included Libs ################################
 
@@ -537,7 +542,12 @@ endif()
 add_subdirectory(libraries/qdcss) # css parser
 if(NOT SDL2_FOUND)
     message(STATUS "Using bundled SDL2")
+    set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.
+    set(SDL_SHARED OFF)
+    set(SDL_STATIC ON)
+    set(SDL_TEST OFF)
     add_subdirectory(libraries/SDL) # SDL (used for gamepad support)
+    set(SDL2_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libraries/SDL/include)
 else()
     message(STATUS "Using system SDL2")
 endif()

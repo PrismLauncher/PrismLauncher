@@ -1226,6 +1226,7 @@ set_project_warnings(Launcher_logic
     "${Launcher_GCC_WARNINGS}")
 target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_include_directories(Launcher_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(Launcher_logic PUBLIC ${SDL2_INCLUDE_DIRS})
 target_compile_definitions(Launcher_logic PUBLIC LAUNCHER_APPLICATION)
 target_link_libraries(Launcher_logic
     systeminfo
@@ -1237,7 +1238,7 @@ target_link_libraries(Launcher_logic
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
     ghcFilesystem::ghc_filesystem
-    ${SDL2_LIBRARIES}
+    SDL2
 )
 
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
