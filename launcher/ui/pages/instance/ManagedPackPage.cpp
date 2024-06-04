@@ -20,6 +20,7 @@
 #include "InstanceTask.h"
 #include "Json.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 
@@ -332,7 +333,7 @@ void ModrinthManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(markdownToHTML(version.changelog.toUtf8()));
+    ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(markdownToHTML(version.changelog.toUtf8())));
 
     ManagedPackPage::suggestVersion();
 }
@@ -420,7 +421,7 @@ void FlameManagedPackPage::parseManagedPack()
                "Don't worry though, it will ask you to update this instance instead, so you'll not lose this instance!"
                "</h4>");
 
-        ui->changelogTextBrowser->setHtml(message);
+        ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(message));
         return;
     }
 
@@ -502,7 +503,8 @@ void FlameManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId));
+    ui->changelogTextBrowser->setHtml(
+        StringUtils::htmlListPatch(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId)));
 
     ManagedPackPage::suggestVersion();
 }
