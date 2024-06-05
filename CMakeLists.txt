@@ -282,7 +282,7 @@ if(MSVC)
     option(MSVC_QT_AUTOINSTALL "Automaticly install QT with aqtinstall" ON)
     option(MSVC_QT_AUTOINSTALL_DEBUG_MODULES "Automaticly install QT debuginfo modules" ON)
     if(MSVC_QT_AUTOINSTALL AND NOT MSVC_QT_INSTALL_COMPLETE)
-        message(STATUS "Installing Windows QT wint aqtinstall ...")
+        message(STATUS "Installing Windows QT with aqtinstall ...")
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             execute_process(
                 COMMAND powershell "${CMAKE_CURRENT_SOURCE_DIR}/libraries/installQtWin.ps1" -Action InstallQT -QTVersion ${Launcher_QT_VERSION_MAJOR} -IncludeDefultDebugInfoModules
