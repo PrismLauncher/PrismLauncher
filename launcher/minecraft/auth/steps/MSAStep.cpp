@@ -46,10 +46,28 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
     m_clientId = APPLICATION->getMSAClientID();
 
     auto replyHandler = new QOAuthHttpServerReplyHandler(1337, this);
-    replyHandler->setCallbackText(
-        " <iframe src=\"https://prismlauncher.org/successful-login\" title=\"PrismLauncher Microsoft login\" style=\"position:fixed; "
-        "top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; "
-        "z-index:999999;\"/> ");
+    replyHandler->setCallbackText(R"XXX(
+    <noscript>
+      <meta
+        http-equiv="Refresh"
+        content="0; URL=https://prismlauncher.org/successful-login"
+      />
+      <iframe
+        src="https://prismlauncher.org/successful-login"
+        title="PrismLauncher Microsoft login"
+        style="
+          position: fixed;
+          width: 100%;
+          height: 100%;
+          border: none;
+          overflow: hidden;
+        "
+      />
+    </noscript>
+    <script>
+      window.location.replace("https://prismlauncher.org/successful-login");
+    </script>
+    )XXX");
     oauth2.setReplyHandler(replyHandler);
     oauth2.setAuthorizationUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"));
     oauth2.setAccessTokenUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/token"));
