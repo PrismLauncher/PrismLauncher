@@ -186,16 +186,21 @@ void LaunchController::login()
                         message = tr("Choose your demo mode player name.");
                     }
 
-                    QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
-                    QString usedname = lastOfflinePlayerName.isEmpty() ? m_session->player_name : lastOfflinePlayerName;
-                    QString name = QInputDialog::getText(m_parentWidget, tr("Player name"), message, QLineEdit::Normal, usedname, &ok);
-                    if (!ok) {
-                        tryagain = false;
-                        break;
-                    }
-                    if (name.length()) {
-                        usedname = name;
-                        APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
+                    QString usedname;
+                    if (m_offlineName.isEmpty()) {
+                        QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
+                        usedname = lastOfflinePlayerName.isEmpty() ? m_session->player_name : lastOfflinePlayerName;
+                        QString name = QInputDialog::getText(m_parentWidget, tr("Player name"), message, QLineEdit::Normal, usedname, &ok);
+                        if (!ok) {
+                            tryagain = false;
+                            break;
+                        }
+                        if (name.length()) {
+                            usedname = name;
+                            APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
+                        }
+                    } else {
+                        usedname = m_offlineName;
                     }
                     m_session->MakeOffline(usedname);
                     // offline flavored game from here :3

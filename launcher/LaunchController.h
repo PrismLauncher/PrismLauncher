@@ -56,6 +56,8 @@ class LaunchController : public Task {
 
     void setOnline(bool online) { m_online = online; }
 
+    void setOfflineName(const QString& offlineName) { m_offlineName = offlineName; }
+
     void setDemo(bool demo) { m_demo = demo; }
 
     void setProfiler(BaseProfilerFactory* profiler) { m_profiler = profiler; }
@@ -85,6 +87,7 @@ class LaunchController : public Task {
    private:
     BaseProfilerFactory* m_profiler = nullptr;
     bool m_online = true;
+    QString m_offlineName;
     bool m_demo = false;
     InstancePtr m_instance;
     QWidget* m_parentWidget = nullptr;

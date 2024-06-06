@@ -202,7 +202,8 @@ class Application : public QApplication {
                 bool online = true,
                 bool demo = false,
                 MinecraftServerTargetPtr serverToJoin = nullptr,
-                MinecraftAccountPtr accountToUse = nullptr);
+                MinecraftAccountPtr accountToUse = nullptr,
+                const QString& offlineName = QString());
     bool kill(InstancePtr instance);
     void closeCurrentWindow();
 
@@ -290,6 +291,8 @@ class Application : public QApplication {
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
     QString m_profileToUse;
+    bool m_offline = false;
+    QString m_offlineName;
     bool m_liveCheck = false;
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
