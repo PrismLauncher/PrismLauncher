@@ -66,7 +66,7 @@ void VisualGroup::update()
             rows[currentRow].height = maxRowHeight;
             rows[currentRow].top = offsetFromTop;
             currentRow++;
-            if(currentRow >= rows.size()) {
+            if (currentRow >= rows.size()) {
                 currentRow = rows.size() - 1;
             }
             offsetFromTop += maxRowHeight + 5;
