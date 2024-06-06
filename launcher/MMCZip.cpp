@@ -342,7 +342,7 @@ std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, con
 
             auto newPermisions = (permissions & maxPermisions) | minPermisions;
             if (newPermisions != permissions) {
-                if (!QFile::setPermissions(target_file_path, permissions)) {
+                if (!QFile::setPermissions(target_file_path, newPermisions)) {
                     qWarning() << (QObject::tr("Could not fix permissions for %1").arg(target_file_path));
                 }
             }
@@ -608,7 +608,7 @@ auto ExtractZipTask::extractZip() -> ZipResult
 
             auto newPermisions = (permissions & maxPermisions) | minPermisions;
             if (newPermisions != permissions) {
-                if (!QFile::setPermissions(target_file_path, permissions)) {
+                if (!QFile::setPermissions(target_file_path, newPermisions)) {
                     logWarning(tr("Could not fix permissions for %1").arg(target_file_path));
                 }
             }
