@@ -48,22 +48,9 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
     auto replyHandler = new QOAuthHttpServerReplyHandler(1337, this);
     replyHandler->setCallbackText(R"XXX(
     <noscript>
-      <meta
-        http-equiv="Refresh"
-        content="0; URL=https://prismlauncher.org/successful-login"
-      />
-      <iframe
-        src="https://prismlauncher.org/successful-login"
-        title="PrismLauncher Microsoft login"
-        style="
-          position: fixed;
-          width: 100%;
-          height: 100%;
-          border: none;
-          overflow: hidden;
-        "
-      />
+      <meta http-equiv="Refresh" content="0; URL=https://prismlauncher.org/successful-login" />
     </noscript>
+    Login Successful, redirecting...
     <script>
       window.location.replace("https://prismlauncher.org/successful-login");
     </script>
