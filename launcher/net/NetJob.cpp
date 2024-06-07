@@ -149,7 +149,7 @@ void NetJob::emitFailed(QString reason)
                                                  "Failed urls\n" +
                                                      getFailedFiles().join("\n\t") +
                                                      "\n"
-                                                     "If this continues to happen please check the logs of the application"
+                                                     "If this continues to happen please check the logs of the application. "
                                                      "Do you want to retry?",
                                                  QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                         ->exec();
