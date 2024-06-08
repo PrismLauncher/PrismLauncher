@@ -9,10 +9,12 @@ param (
   [Parameter(Mandatory=$false)]
   [string[]]$AdtionalModules,
   [Parameter(Mandatory=$false)]
-  [switch]$IncludeDefultDebugInfoModules = $false
+  [switch]$IncludeDefultDebugInfoModules = $false,
+  [Parameter(Mandatory=$false)]
+  [switch]$Force = $false
 )
 
-$qt_v6_recomended = "6.7.0"
+$qt_v6_recomended = "6.7.1"
 $qt_v5_recomended = "5.15.2"
 
 $aqt_url = "https://github.com/miurahr/aqtinstall/releases/latest/download/aqt.exe"
@@ -184,20 +186,26 @@ Switch ($Action)
       }
       $modules += $AdtionalModules
 
-      $aqt_install_args = @("install-qt", "windows", "desktop", $qt_ver, $qt_arch, "--outputdir", $qt_path, "-m"; $modules )
       $arch_dest = $qt_arch -replace "win64_"
-      Write-Host "Installing Qt ${qt_ver}:${qt_arch} at `"Qt\${qt_ver}\${arch_dest}`""
+      $dest_path = "${qt_path}\${qt_ver}\${arch_dest}"
+      $aqt_install_args = @("install-qt", "windows", "desktop", $qt_ver, $qt_arch, "--outputdir", $qt_path, "-m"; $modules )
+      Write-Host "Installing Qt ${qt_ver}:${qt_arch} at `"${dest_path}`""
 
-      Write-Host "Running: aqt ${aqt_install_args}"
+      if (!(Test-Path -Path "$dest_path\bin\qtdiag.exe") -Or $Force )
+      {
+        Write-Host "Running: aqt ${aqt_install_args}"
 
-      $pinfo = New-Object System.Diagnostics.ProcessStartInfo
-      $pinfo.FileName = $aqt_path
-      $pinfo.UseShellExecute = $false
-      $pinfo.Arguments = $aqt_install_args
-      $p = New-Object System.Diagnostics.Process
-      $p.StartInfo = $pinfo
-      $p.Start() | Out-Null
-      $p.WaitForExit()
+        $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+        $pinfo.FileName = $aqt_path
+        $pinfo.UseShellExecute = $false
+        $pinfo.Arguments = $aqt_install_args
+        $p = New-Object System.Diagnostics.Process
+        $p.StartInfo = $pinfo
+        $p.Start() | Out-Null
+        $p.WaitForExit()
+      } else {
+        Write-Host "Qt $qt_ver $qt_arch already installed, run with -Force to reinstall"
+      }
     }
 
   }
