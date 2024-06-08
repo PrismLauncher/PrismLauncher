@@ -52,4 +52,5 @@ class ThemeCustomizationWidget : public QWidget {
 
    private:
     Ui::ThemeCustomizationWidget* ui;
+    bool m_isReloading = false;
 };
