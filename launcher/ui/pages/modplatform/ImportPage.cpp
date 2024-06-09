@@ -40,6 +40,7 @@
 #include "ui_ImportPage.h"
 
 #include <QFileDialog>
+#include <QMimeDatabase>
 #include <QValidator>
 #include <utility>
 
@@ -51,6 +52,7 @@
 #include "Json.h"
 
 #include "InstanceImportTask.h"
+#include "net/NetJob.h"
 
 class UrlValidator : public QValidator {
    public:

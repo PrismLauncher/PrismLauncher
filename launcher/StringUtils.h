@@ -85,4 +85,6 @@ QPair<QString, QString> splitFirst(const QString& s, const QString& sep, Qt::Cas
 QPair<QString, QString> splitFirst(const QString& s, QChar sep, Qt::CaseSensitivity cs = Qt::CaseSensitive);
 QPair<QString, QString> splitFirst(const QString& s, const QRegularExpression& re);
 
+QString htmlListPatch(QString htmlStr);
+
 }  // namespace StringUtils
