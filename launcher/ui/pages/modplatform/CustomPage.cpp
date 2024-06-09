@@ -49,7 +49,6 @@
 CustomPage::CustomPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), dialog(dialog), ui(new Ui::CustomPage)
 {
     ui->setupUi(this);
-    ui->tabWidget->tabBar()->hide();
     connect(ui->versionList, &VersionSelectWidget::selectedVersionChanged, this, &CustomPage::setSelectedVersion);
     filterChanged();
     connect(ui->alphaFilter, &QCheckBox::stateChanged, this, &CustomPage::filterChanged);
