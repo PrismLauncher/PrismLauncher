@@ -78,11 +78,11 @@ void Mod::setDetails(const ModDetails& details)
     m_local_details = details;
 }
 
-int Mod::compare(const Resource& other, SortType type, Qt::SortOrder order) const
+int Mod::compare(const Resource& other, SortType type) const
 {
     auto cast_other = dynamic_cast<Mod const*>(&other);
     if (!cast_other)
-        return Resource::compare(other, type, order);
+        return Resource::compare(other, type);
 
     switch (type) {
         default:
@@ -90,7 +90,7 @@ int Mod::compare(const Resource& other, SortType type, Qt::SortOrder order) cons
         case SortType::NAME:
         case SortType::DATE:
         case SortType::SIZE:
-            return Resource::compare(other, type, order);
+            return Resource::compare(other, type);
         case SortType::VERSION: {
             auto this_ver = Version(version());
             auto other_ver = Version(cast_other->version());

@@ -65,12 +65,12 @@ std::pair<Version, Version> DataPack::compatibleVersions() const
     return s_pack_format_versions.constFind(m_pack_format).value();
 }
 
-int DataPack::compare(const Resource& other, SortType type, Qt::SortOrder order) const
+int DataPack::compare(const Resource& other, SortType type) const
 {
     auto const& cast_other = static_cast<DataPack const&>(other);
     switch (type) {
         default:
-            return Resource::compare(other, type, order);
+            return Resource::compare(other, type);
         case SortType::PACK_FORMAT: {
             auto this_ver = packFormat();
             auto other_ver = cast_other.packFormat();

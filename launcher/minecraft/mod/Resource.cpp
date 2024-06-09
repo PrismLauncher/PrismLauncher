@@ -79,7 +79,7 @@ static void removeThePrefix(QString& string)
     string = string.trimmed();
 }
 
-int Resource::compare(const Resource& other, SortType type, Qt::SortOrder order) const
+int Resource::compare(const Resource& other, SortType type) const
 {
     switch (type) {
         default:
@@ -105,12 +105,11 @@ int Resource::compare(const Resource& other, SortType type, Qt::SortOrder order)
                 return -1;
             break;
         case SortType::SIZE: {
-            auto order_op = order == Qt::SortOrder::AscendingOrder ? 1 : -1;
             if (this->type() != other.type()) {
                 if (this->type() == ResourceType::FOLDER)
-                    return -1 * order_op;
+                    return -1;
                 if (other.type() == ResourceType::FOLDER)
-                    return 1 * order_op;
+                    return 1;
             }
 
             if (sizeInfo() > other.sizeInfo())

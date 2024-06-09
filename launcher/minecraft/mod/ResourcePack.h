@@ -44,7 +44,7 @@ class ResourcePack : public Resource {
 
     bool valid() const override;
 
-    [[nodiscard]] int compare(Resource const& other, SortType type, Qt::SortOrder order = Qt::SortOrder::AscendingOrder) const override;
+    [[nodiscard]] int compare(Resource const& other, SortType type) const override;
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
 
    protected:
