@@ -43,6 +43,7 @@
 #include "FlameModel.h"
 #include "InstanceImportTask.h"
 #include "Json.h"
+#include "StringUtils.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
@@ -178,7 +179,11 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
             for (auto version : current.versions) {
                 auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
-                ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(version.downloadUrl));
+                auto mcVersion = !version.mcVersion.isEmpty() && !version.version.contains(version.mcVersion)
+                                     ? QString(" for %1").arg(version.mcVersion)
+                                     : "";
+                ui->versionSelectionBox->addItem(QString("%1%2%3").arg(version.version, mcVersion, release_type),
+                                                 QVariant(version.downloadUrl));
             }
 
             QVariant current_updated;
@@ -292,6 +297,6 @@ void FlamePage::updateUi()
     text += "<hr>";
     text += api.getModDescription(current.addonId).toUtf8();
 
-    ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
     ui->packDescription->flush();
 }

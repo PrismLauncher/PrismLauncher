@@ -46,6 +46,7 @@
 
 #include "Markdown.h"
 
+#include "StringUtils.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/widgets/ProjectItem.h"
@@ -239,8 +240,8 @@ void ResourcePage::updateUi()
 
     text += "<hr>";
 
-    m_ui->packDescription->setHtml(
-        text + (current_pack->extraData.body.isEmpty() ? current_pack->description : markdownToHTML(current_pack->extraData.body)));
+    m_ui->packDescription->setHtml(StringUtils::htmlListPatch(
+        text + (current_pack->extraData.body.isEmpty() ? current_pack->description : markdownToHTML(current_pack->extraData.body))));
     m_ui->packDescription->flush();
 }
 

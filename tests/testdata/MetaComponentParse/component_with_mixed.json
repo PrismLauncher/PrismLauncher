@@ -1,0 +1,45 @@
+{
+    "description": [
+        {
+            "text": "The quick ",
+            "color": "blue",
+            "italic": true
+        },
+        {
+            "text": "brown fox ",
+            "color": "#873600",
+            "bold": true,
+            "underlined": true,
+            "extra": [
+                {
+                    "text": "jumped over ",
+                    "color": "blue",
+                    "bold": false,
+                    "underlined": false,
+                    "italic": true,
+                    "strikethrough": true
+                }
+            ]
+        },
+        {
+            "text": "the lazy dog's back. ",
+            "color": "green",
+            "bold": true,
+            "italic": true,
+            "underlined": true,
+            "strikethrough": true,
+            "extra": [
+                {
+                    "text": "1234567890 ",
+                    "color": "black",
+                    "strikethrough": false,
+                    "extra": [
+                        "How vexingly quick daft zebras jump!"
+                    ]
+                }
+            ]
+        }
+    ],
+    "expected_output":
+        "<span style=\"color: blue; font-style: italic;\">The quick </span><span style=\"color: #873600; font-weight: bold;\"><u>brown fox </u><span style=\"color: blue; font-weight: normal; font-style: italic;\"><s>jumped over </s></span></span><span style=\"color: green; font-weight: bold; font-style: italic;\"><s><u>the lazy dog's back. </u></s><span style=\"color: black;\"><u>1234567890 </u>How vexingly quick daft zebras jump!</span></span>"
+}
