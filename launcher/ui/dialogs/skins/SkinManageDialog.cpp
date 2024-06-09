@@ -416,18 +416,33 @@ void SkinManageDialog::on_userBtn_clicked()
     auto getProfile = Net::Download::makeByteArray(QUrl(), profileOut);
     auto downloadSkin = Net::Download::makeFile(QUrl(), path);
 
+    QString failReason;
+
     connect(getUUID.get(), &Task::aborted, uuidLoop.get(), &WaitTask::quit);
+    connect(getUUID.get(), &Task::failed, this, [&failReason](QString reason) {
+        qCritical() << "Couldn't get user UUID:" << reason;
+        failReason = tr("failed to get user UUID");
+    });
     connect(getUUID.get(), &Task::failed, uuidLoop.get(), &WaitTask::quit);
     connect(getProfile.get(), &Task::aborted, profileLoop.get(), &WaitTask::quit);
     connect(getProfile.get(), &Task::failed, profileLoop.get(), &WaitTask::quit);
+    connect(getProfile.get(), &Task::failed, this, [&failReason](QString reason) {
+        qCritical() << "Couldn't get user profile:" << reason;
+        failReason = tr("failed to get user profile");
+    });
+    connect(downloadSkin.get(), &Task::failed, this, [&failReason](QString reason) {
+        qCritical() << "Couldn't download skin:" << reason;
+        failReason = tr("failed to download skin");
+    });
 
-    connect(getUUID.get(), &Task::succeeded, this, [uuidLoop, uuidOut, job, getProfile] {
+    connect(getUUID.get(), &Task::succeeded, this, [uuidLoop, uuidOut, job, getProfile, &failReason] {
         try {
             QJsonParseError parse_error{};
             QJsonDocument doc = QJsonDocument::fromJson(*uuidOut, &parse_error);
             if (parse_error.error != QJsonParseError::NoError) {
                 qWarning() << "Error while parsing JSON response from Minecraft skin service at " << parse_error.offset
                            << " reason: " << parse_error.errorString();
+                failReason = tr("failed to parse get user UUID response");
                 uuidLoop->quit();
                 return;
             }
@@ -436,18 +451,21 @@ void SkinManageDialog::on_userBtn_clicked()
             if (!id.isEmpty()) {
                 getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
             } else {
+                failReason = tr("user id is empty");
                 job->abort();
             }
         } catch (const Exception& e) {
             qCritical() << "Couldn't load skin json:" << e.cause();
+            failReason = tr("failed to parse get user UUID response");
         }
         uuidLoop->quit();
     });
 
-    connect(getProfile.get(), &Task::succeeded, this, [profileLoop, profileOut, job, getProfile, &mcProfile, downloadSkin] {
+    connect(getProfile.get(), &Task::succeeded, this, [profileLoop, profileOut, job, getProfile, &mcProfile, downloadSkin, &failReason] {
         if (Parsers::parseMinecraftProfileMojang(*profileOut, mcProfile)) {
             downloadSkin->setUrl(mcProfile.skin.url);
         } else {
+            failReason = tr("failed to parse get user profile response");
             job->abort();
         }
         profileLoop->quit();
@@ -463,8 +481,11 @@ void SkinManageDialog::on_userBtn_clicked()
 
     SkinModel s(path);
     if (!s.isValid()) {
-        CustomMessageBox::selectable(this, tr("Usename not found"), tr("Unable to find the skin for '%1'.").arg(user),
-                                     QMessageBox::Critical)
+        if (failReason.isEmpty()) {
+            failReason = tr("the skin is invalid");
+        }
+        CustomMessageBox::selectable(this, tr("Usename not found"),
+                                     tr("Unable to find the skin for '%1'\n because: %2.").arg(user, failReason), QMessageBox::Critical)
             ->show();
         QFile::remove(path);
         return;
