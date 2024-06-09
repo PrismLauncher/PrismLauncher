@@ -1,10 +1,12 @@
 #include "InstanceCopyTask.h"
 #include <QDebug>
 #include <QtConcurrentRun>
+#include <memory>
 #include "FileSystem.h"
 #include "NullInstance.h"
 #include "pathmatcher/RegexpMatcher.h"
 #include "settings/INISettingsObject.h"
+#include "tasks/Task.h"
 
 InstanceCopyTask::InstanceCopyTask(InstancePtr origInstance, const InstanceCopyPrefs& prefs)
 {
@@ -38,38 +40,50 @@ void InstanceCopyTask::executeTask()
 {
     setStatus(tr("Copying instance %1").arg(m_origInstance->name()));
 
-    auto copySaves = [&]() {
-        QFileInfo mcDir(FS::PathCombine(m_stagingPath, "minecraft"));
-        QFileInfo dotMCDir(FS::PathCombine(m_stagingPath, ".minecraft"));
-
-        QString staging_mc_dir;
-        if (dotMCDir.exists() && !mcDir.exists())
-            staging_mc_dir = dotMCDir.filePath();
-        else
-            staging_mc_dir = mcDir.filePath();
-
-        FS::copy savesCopy(FS::PathCombine(m_origInstance->gameRoot(), "saves"), FS::PathCombine(staging_mc_dir, "saves"));
-        savesCopy.followSymlinks(true);
-
-        return savesCopy();
-    };
-
-    m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this, copySaves] {
+    m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [this] {
         if (m_useClone) {
             FS::clone folderClone(m_origInstance->instanceRoot(), m_stagingPath);
             folderClone.matcher(m_matcher.get());
 
+            folderClone(true);
+            setProgress(0, folderClone.totalCloned());
+            connect(&folderClone, &FS::clone::fileCloned,
+                    [this](QString src, QString dst) { setProgress(m_progress + 1, m_progressTotal); });
             return folderClone();
-        } else if (m_useLinks || m_useHardLinks) {
+        }
+        if (m_useLinks || m_useHardLinks) {
+            std::unique_ptr<FS::copy> savesCopy;
+            if (m_copySaves) {
+                QFileInfo mcDir(FS::PathCombine(m_stagingPath, "minecraft"));
+                QFileInfo dotMCDir(FS::PathCombine(m_stagingPath, ".minecraft"));
+
+                QString staging_mc_dir;
+                if (dotMCDir.exists() && !mcDir.exists())
+                    staging_mc_dir = dotMCDir.filePath();
+                else
+                    staging_mc_dir = mcDir.filePath();
+
+                savesCopy = std::make_unique<FS::copy>(FS::PathCombine(m_origInstance->gameRoot(), "saves"),
+                                                       FS::PathCombine(staging_mc_dir, "saves"));
+                savesCopy->followSymlinks(true);
+                (*savesCopy)(true);
+                setProgress(0, savesCopy->totalCopied());
+                connect(savesCopy.get(), &FS::copy::fileCopied, [this](QString src) { setProgress(m_progress + 1, m_progressTotal); });
+            }
             FS::create_link folderLink(m_origInstance->instanceRoot(), m_stagingPath);
             int depth = m_linkRecursively ? -1 : 0;  // we need to at least link the top level instead of the instance folder
             folderLink.linkRecursively(true).setMaxDepth(depth).useHardLinks(m_useHardLinks).matcher(m_matcher.get());
 
+            folderLink(true);
+            setProgress(0, m_progressTotal + folderLink.totalToLink());
+            connect(&folderLink, &FS::create_link::fileLinked,
+                    [this](QString src, QString dst) { setProgress(m_progress + 1, m_progressTotal); });
             bool there_were_errors = false;
 
             if (!folderLink()) {
 #if defined Q_OS_WIN32
                 if (!m_useHardLinks) {
+                    setProgress(0, m_progressTotal);
                     qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
 
                     qDebug() << "attempting to run with privelage";
@@ -94,13 +108,11 @@ void InstanceCopyTask::executeTask()
                         }
                     }
 
-                    if (m_copySaves) {
-                        there_were_errors |= !copySaves();
+                    if (savesCopy) {
+                        there_were_errors |= !(*savesCopy)();
                     }
 
                     return got_priv_results && !there_were_errors;
-                } else {
-                    qDebug() << "Link Failed!" << folderLink.getOSError().value() << folderLink.getOSError().message().c_str();
                 }
 #else
                 qDebug() << "Link Failed!" << folderLink.getOSError().value() << folderLink.getOSError().message().c_str();
@@ -108,17 +120,19 @@ void InstanceCopyTask::executeTask()
                 return false;
             }
 
-            if (m_copySaves) {
-                there_were_errors |= !copySaves();
+            if (savesCopy) {
+                there_were_errors |= !(*savesCopy)();
             }
 
             return !there_were_errors;
-        } else {
-            FS::copy folderCopy(m_origInstance->instanceRoot(), m_stagingPath);
-            folderCopy.followSymlinks(false).matcher(m_matcher.get());
-
-            return folderCopy();
         }
+        FS::copy folderCopy(m_origInstance->instanceRoot(), m_stagingPath);
+        folderCopy.followSymlinks(false).matcher(m_matcher.get());
+
+        folderCopy(true);
+        setProgress(0, folderCopy.totalCopied());
+        connect(&folderCopy, &FS::copy::fileCopied, [this](QString src) { setProgress(m_progress + 1, m_progressTotal); });
+        return folderCopy();
     });
     connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::finished, this, &InstanceCopyTask::copyFinished);
     connect(&m_copyFutureWatcher, &QFutureWatcher<bool>::canceled, this, &InstanceCopyTask::copyAborted);
@@ -169,4 +183,15 @@ void InstanceCopyTask::copyAborted()
 {
     emitFailed(tr("Instance folder copy has been aborted."));
     return;
+}
+
+bool InstanceCopyTask::abort()
+{
+    if (m_copyFutureWatcher.isRunning()) {
+        m_copyFutureWatcher.cancel();
+        // NOTE: Here we don't do `emitAborted()` because it will be done when `m_copyFutureWatcher` actually cancels, which may not occur
+        // immediately.
+        return true;
+    }
+    return false;
 }

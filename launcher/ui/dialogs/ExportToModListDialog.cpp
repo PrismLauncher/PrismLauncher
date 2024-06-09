@@ -23,6 +23,7 @@
 #include "DesktopServices.h"
 #include "FileSystem.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 #include "modplatform/helpers/ExportToModList.h"
 #include "ui_ExportToModListDialog.h"
 
@@ -141,10 +142,10 @@ void ExportToModListDialog::triggerImp()
         case ExportToModList::CUSTOM:
             return;
         case ExportToModList::HTML:
-            ui->resultText->setHtml(txt);
+            ui->resultText->setHtml(StringUtils::htmlListPatch(txt));
             break;
         case ExportToModList::MARKDOWN:
-            ui->resultText->setHtml(markdownToHTML(txt));
+            ui->resultText->setHtml(StringUtils::htmlListPatch(markdownToHTML(txt)));
             break;
         case ExportToModList::PLAINTXT:
             break;

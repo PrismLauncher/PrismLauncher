@@ -44,6 +44,7 @@ class ThemeCustomizationWidget : public QWidget {
     void applyIconTheme(int index);
     void applyWidgetTheme(int index);
     void applyCatTheme(int index);
+    void refresh();
 
    signals:
     int currentIconThemeChanged(int index);

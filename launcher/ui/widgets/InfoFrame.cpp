@@ -36,6 +36,8 @@
 
 #include <QLabel>
 #include <QMessageBox>
+#include <QTextCursor>
+#include <QTextDocument>
 #include <QToolTip>
 
 #include "InfoFrame.h"
@@ -274,12 +276,27 @@ void InfoFrame::setDescription(QString text)
     }
     QString labeltext;
     labeltext.reserve(300);
-    if (finaltext.length() > 290) {
+
+    // elide rich text by getting characters without formatting
+    const int maxCharacterElide = 290;
+    QTextDocument doc;
+    doc.setHtml(text);
+
+    if (doc.characterCount() > maxCharacterElide) {
         ui->descriptionLabel->setOpenExternalLinks(false);
-        ui->descriptionLabel->setTextFormat(Qt::TextFormat::RichText);
+        ui->descriptionLabel->setTextFormat(Qt::TextFormat::RichText);  // This allows injecting HTML here.
         m_description = text;
-        // This allows injecting HTML here.
-        labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
+
+        // move the cursor to the character elide, doesn't see html
+        QTextCursor cursor(&doc);
+        cursor.movePosition(QTextCursor::End);
+        cursor.setPosition(maxCharacterElide, QTextCursor::KeepAnchor);
+        cursor.removeSelectedText();
+
+        // insert the post fix at the cursor
+        cursor.insertHtml("<a href=\"#mod_desc\">...</a>");
+
+        labeltext.append(doc.toHtml());
         QObject::connect(ui->descriptionLabel, &QLabel::linkActivated, this, &InfoFrame::descriptionEllipsisHandler);
     } else {
         ui->descriptionLabel->setTextFormat(Qt::TextFormat::AutoText);
@@ -316,7 +333,7 @@ void InfoFrame::setLicense(QString text)
     if (finaltext.length() > 290) {
         ui->licenseLabel->setOpenExternalLinks(false);
         ui->licenseLabel->setTextFormat(Qt::TextFormat::RichText);
-        m_description = text;
+        m_license = text;
         // This allows injecting HTML here.
         labeltext.append("<html><body>" + finaltext.left(287) + "<a href=\"#mod_desc\">...</a></body></html>");
         QObject::connect(ui->licenseLabel, &QLabel::linkActivated, this, &InfoFrame::licenseEllipsisHandler);
