@@ -55,10 +55,11 @@ class Resource : public QObject {
      *  > 0: 'this' comes after 'other'
      *  = 0: 'this' is equal to 'other'
      *  < 0: 'this' comes before 'other'
-     *
-     *  The second argument in the pair is true if the sorting type that decided which one is greater was 'type'.
+     * the order is used to force items to be allways at top and not used for sorting
      */
-    [[nodiscard]] virtual auto compare(Resource const& other, SortType type = SortType::NAME) const -> std::pair<int, bool>;
+    [[nodiscard]] virtual int compare(Resource const& other,
+                                      SortType type = SortType::NAME,
+                                      Qt::SortOrder order = Qt::SortOrder::AscendingOrder) const;
 
     /** Returns whether the given filter should filter out 'this' (false),
      *  or if such filter includes the Resource (true).

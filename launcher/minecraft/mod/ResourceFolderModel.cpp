@@ -615,13 +615,11 @@ SortType ResourceFolderModel::columnToSortKey(size_t column) const
     auto const& resource_left = model->at(source_left.row());
     auto const& resource_right = model->at(source_right.row());
 
-    auto compare_result = resource_left.compare(resource_right, column_sort_key);
-    if (compare_result.first == 0)
+    auto compare_result = resource_left.compare(resource_right, column_sort_key, sortOrder());
+    if (compare_result == 0)
         return QSortFilterProxyModel::lessThan(source_left, source_right);
 
-    if (compare_result.second || sortOrder() != Qt::DescendingOrder)
-        return (compare_result.first < 0);
-    return (compare_result.first > 0);
+    return compare_result < 0;
 }
 
 QString ResourceFolderModel::instDirPath() const

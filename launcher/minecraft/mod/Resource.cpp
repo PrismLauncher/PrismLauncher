@@ -30,7 +30,7 @@ std::tuple<QString, qint64> calculateFileSize(const QFileInfo& file)
         auto str = QObject::tr("item");
         if (count != 1)
             str = QObject::tr("items");
-        return { QString("%1 %2").arg(QString::number(count), str), -count };
+        return { QString("%1 %2").arg(QString::number(count), str), count };
     }
     return { StringUtils::humanReadableFileSize(file.size(), true), file.size() };
 }
@@ -79,15 +79,15 @@ static void removeThePrefix(QString& string)
     string = string.trimmed();
 }
 
-std::pair<int, bool> Resource::compare(const Resource& other, SortType type) const
+int Resource::compare(const Resource& other, SortType type, Qt::SortOrder order) const
 {
     switch (type) {
         default:
         case SortType::ENABLED:
             if (enabled() && !other.enabled())
-                return { 1, type == SortType::ENABLED };
+                return 1;
             if (!enabled() && other.enabled())
-                return { -1, type == SortType::ENABLED };
+                return -1;
             break;
         case SortType::NAME: {
             QString this_name{ name() };
@@ -96,27 +96,32 @@ std::pair<int, bool> Resource::compare(const Resource& other, SortType type) con
             removeThePrefix(this_name);
             removeThePrefix(other_name);
 
-            auto compare_result = QString::compare(this_name, other_name, Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return { compare_result, type == SortType::NAME };
-            break;
+            return QString::compare(this_name, other_name, Qt::CaseInsensitive);
         }
         case SortType::DATE:
             if (dateTimeChanged() > other.dateTimeChanged())
-                return { 1, type == SortType::DATE };
+                return 1;
             if (dateTimeChanged() < other.dateTimeChanged())
-                return { -1, type == SortType::DATE };
+                return -1;
             break;
         case SortType::SIZE: {
+            auto order_op = order == Qt::SortOrder::AscendingOrder ? 1 : -1;
+            if (this->type() != other.type()) {
+                if (this->type() == ResourceType::FOLDER)
+                    return -1 * order_op;
+                if (other.type() == ResourceType::FOLDER)
+                    return 1 * order_op;
+            }
+
             if (sizeInfo() > other.sizeInfo())
-                return { 1, type == SortType::SIZE };
+                return 1;
             if (sizeInfo() < other.sizeInfo())
-                return { -1, type == SortType::SIZE };
+                return -1;
             break;
         }
     }
 
-    return { 0, false };
+    return 0;
 }
 
 bool Resource::applyFilter(QRegularExpression filter) const

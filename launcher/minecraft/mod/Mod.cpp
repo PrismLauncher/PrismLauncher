@@ -78,41 +78,33 @@ void Mod::setDetails(const ModDetails& details)
     m_local_details = details;
 }
 
-std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
+int Mod::compare(const Resource& other, SortType type, Qt::SortOrder order) const
 {
     auto cast_other = dynamic_cast<Mod const*>(&other);
     if (!cast_other)
-        return Resource::compare(other, type);
+        return Resource::compare(other, type, order);
 
     switch (type) {
         default:
         case SortType::ENABLED:
         case SortType::NAME:
         case SortType::DATE:
-        case SortType::SIZE: {
-            auto res = Resource::compare(other, type);
-            if (res.first != 0)
-                return res;
-            break;
-        }
+        case SortType::SIZE:
+            return Resource::compare(other, type, order);
         case SortType::VERSION: {
             auto this_ver = Version(version());
             auto other_ver = Version(cast_other->version());
             if (this_ver > other_ver)
-                return { 1, type == SortType::VERSION };
+                return 1;
             if (this_ver < other_ver)
-                return { -1, type == SortType::VERSION };
+                return -1;
             break;
         }
         case SortType::PROVIDER: {
-            auto compare_result =
-                QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return { compare_result, type == SortType::PROVIDER };
-            break;
+            return QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
         }
     }
-    return { 0, false };
+    return 0;
 }
 
 bool Mod::applyFilter(QRegularExpression filter) const
