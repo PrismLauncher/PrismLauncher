@@ -21,6 +21,7 @@ CMakeCache.txt
 /.vs
 cmake-build-*/
 Debug
+CMakeUserPresets.json
 
 # Build dirs
 build
