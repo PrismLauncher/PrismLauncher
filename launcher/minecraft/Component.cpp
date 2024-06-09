@@ -336,7 +336,7 @@ bool Component::revert()
     bool result = true;
     // just kill the file and reload
     if (QFile::exists(filename)) {
-        result = QFile::remove(filename);
+        result = FS::deletePath(filename);
     }
     if (result) {
         // file gone...

@@ -205,5 +205,30 @@ class ExportToZipTask : public Task {
     QFuture<ZipResult> m_build_zip_future;
     QFutureWatcher<ZipResult> m_build_zip_watcher;
 };
+
+class ExtractZipTask : public Task {
+   public:
+    ExtractZipTask(std::shared_ptr<QuaZip> input, QDir outputDir, QString subdirectory = "")
+        : m_input(input), m_output_dir(outputDir), m_subdirectory(subdirectory)
+    {}
+    virtual ~ExtractZipTask() = default;
+
+    typedef std::optional<QString> ZipResult;
+
+   protected:
+    virtual void executeTask() override;
+    bool abort() override;
+
+    ZipResult extractZip();
+    void finish();
+
+   private:
+    std::shared_ptr<QuaZip> m_input;
+    QDir m_output_dir;
+    QString m_subdirectory;
+
+    QFuture<ZipResult> m_zip_future;
+    QFutureWatcher<ZipResult> m_zip_watcher;
+};
 #endif
 }  // namespace MMCZip

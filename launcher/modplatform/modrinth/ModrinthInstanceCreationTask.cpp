@@ -173,7 +173,7 @@ bool ModrinthCreationTask::createInstance()
     // Keep index file in case we need it some other time (like when changing versions)
     QString new_index_place(FS::PathCombine(parent_folder, "modrinth.index.json"));
     FS::ensureFilePathExists(new_index_place);
-    QFile::rename(index_path, new_index_place);
+    FS::move(index_path, new_index_place);
 
     auto mcPath = FS::PathCombine(m_stagingPath, m_root_path);
 
@@ -183,7 +183,7 @@ bool ModrinthCreationTask::createInstance()
         Override::createOverrides("overrides", parent_folder, override_path);
 
         // Apply the overrides
-        if (!QFile::rename(override_path, mcPath)) {
+        if (!FS::move(override_path, mcPath)) {
             setError(tr("Could not rename the overrides folder:\n") + "overrides");
             return false;
         }
