@@ -22,6 +22,10 @@ CMakeCache.txt
 cmake-build-*/
 Debug
 
+# Qt install
+libraries/Qt
+aqtinstall.log
+
 # Build dirs
 build
 /build-*
@@ -56,5 +60,3 @@ flatbuild
 
 # Snap
 *.snap
-libraries/Qt
-aqtinstall.log
