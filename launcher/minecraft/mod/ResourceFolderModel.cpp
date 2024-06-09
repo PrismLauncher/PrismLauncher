@@ -112,7 +112,7 @@ bool ResourceFolderModel::installResource(QString original_path)
         case ResourceType::ZIPFILE:
         case ResourceType::LITEMOD: {
             if (QFile::exists(new_path) || QFile::exists(new_path + QString(".disabled"))) {
-                if (!QFile::remove(new_path)) {
+                if (!FS::deletePath(new_path)) {
                     qCritical() << "Cleaning up new location (" << new_path << ") was unsuccessful!";
                     return false;
                 }

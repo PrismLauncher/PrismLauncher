@@ -15,6 +15,7 @@
 
 #include "BaseEntity.h"
 
+#include "FileSystem.h"
 #include "Json.h"
 #include "net/ApiDownload.h"
 #include "net/HttpMetaCache.h"
@@ -83,8 +84,7 @@ bool Meta::BaseEntity::loadLocalFile()
     } catch (const Exception& e) {
         qDebug() << QString("Unable to parse file %1: %2").arg(fname, e.cause());
         // just make sure it's gone and we never consider it again.
-        QFile::remove(fname);
-        return false;
+        return !FS::deletePath(fname);
     }
 }
 
