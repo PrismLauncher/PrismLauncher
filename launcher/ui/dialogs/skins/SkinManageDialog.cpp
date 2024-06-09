@@ -355,7 +355,9 @@ void SkinManageDialog::on_urlBtn_clicked()
     dlg.execWithTask(job.get());
     SkinModel s(path);
     if (!s.isValid()) {
-        CustomMessageBox::selectable(this, tr("URL is not a valid skin"), tr("Skin images must be 64x64 or 64x32 pixel PNG files."),
+        CustomMessageBox::selectable(this, tr("URL is not a valid skin"),
+                                     QFileInfo::exists(path) ? tr("Skin images must be 64x64 or 64x32 pixel PNG files.")
+                                                             : tr("Unable to download the skin: '%1'.").arg(ui->urlLine->text()),
                                      QMessageBox::Critical)
             ->show();
         QFile::remove(path);
