@@ -240,6 +240,7 @@ class create_link : public QObject {
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
     int totalLinked() { return m_linked; }
+    int totalToLink() { return static_cast<int>(m_links_to_make.size()); }
 
     void runPrivileged() { runPrivileged(QString()); }
     void runPrivileged(const QString& offset);
