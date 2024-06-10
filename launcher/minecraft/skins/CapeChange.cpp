@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,50 +34,41 @@
  *      limitations under the License.
  */
 
-#pragma once
+#include "CapeChange.h"
 
-#include <QtNetwork>
+#include <memory>
 
-#include <QObject>
-#include "net/NetRequest.h"
-#include "tasks/ConcurrentTask.h"
+#include "net/ByteArraySink.h"
+#include "net/StaticHeaderProxy.h"
 
-// Those are included so that they are also included by anyone using NetJob
-#include "net/Download.h"
-#include "net/HttpMetaCache.h"
+CapeChange::CapeChange(QString token, QString cape) : NetRequest(), m_capeId(cape), m_token(token)
+{
+    logCat = taskMCSkinsLogC;
+}
 
-class NetJob : public ConcurrentTask {
-    Q_OBJECT
+QNetworkReply* CapeChange::getReply(QNetworkRequest& request)
+{
+    if (m_capeId.isEmpty()) {
+        setStatus(tr("Removing cape"));
+        return m_network->deleteResource(request);
+    } else {
+        setStatus(tr("Equipping cape"));
+        return m_network->put(request, QString("{\"capeId\":\"%1\"}").arg(m_capeId).toUtf8());
+    }
+}
 
-   public:
-    using Ptr = shared_qobject_ptr<NetJob>;
+void CapeChange::init()
+{
+    addHeaderProxy(new Net::StaticHeaderProxy(QList<Net::HeaderPair>{
+        { "Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit() },
+    }));
+}
 
-    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent = -1);
-    ~NetJob() override = default;
-
-    auto size() const -> int;
-
-    auto canAbort() const -> bool override;
-    auto addNetAction(Net::NetRequest::Ptr action) -> bool;
-
-    auto getFailedActions() -> QList<Net::NetRequest*>;
-    auto getFailedFiles() -> QList<QString>;
-    void setAskRetry(bool askRetry);
-
-   public slots:
-    // Qt can't handle auto at the start for some reason?
-    bool abort() override;
-    void emitFailed(QString reason) override;
-
-   protected slots:
-    void executeNextSubTask() override;
-
-   protected:
-    void updateState() override;
-
-   private:
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
-
-    int m_try = 1;
-    bool m_ask_retry = true;
-};
+CapeChange::Ptr CapeChange::make(QString token, QString capeId)
+{
+    auto up = makeShared<CapeChange>(token, capeId);
+    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active");
+    up->setObjectName(QString("BYTES:") + up->m_url.toString());
+    up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
+    return up;
+}
