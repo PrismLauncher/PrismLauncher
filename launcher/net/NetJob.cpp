@@ -43,11 +43,15 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #endif
 
-NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network) : ConcurrentTask(nullptr, job_name), m_network(network)
+NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent)
+    : ConcurrentTask(nullptr, job_name), m_network(network)
 {
 #if defined(LAUNCHER_APPLICATION)
-    setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+    if (max_concurrent < 0)
+        max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
 #endif
+    if (max_concurrent > 0)
+        setMaxConcurrent(max_concurrent);
 }
 
 auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> bool
