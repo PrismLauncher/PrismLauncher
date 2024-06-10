@@ -131,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -191,6 +191,7 @@
     <addaction name="separator"/>
     <addaction name="actionViewInstanceFolder"/>
     <addaction name="actionViewCentralModsFolder"/>
+    <addaction name="actionViewSkinsFolder"/>
     <addaction name="separator"/>
     <addaction name="actionViewIconThemeFolder"/>
     <addaction name="actionViewWidgetThemeFolder"/>
@@ -491,15 +492,6 @@
     <string>CurseForge (zip)</string>
    </property>
   </action>
-  <action name="actionExportInstanceToModList">
-   <property name="icon">
-    <iconset theme="new">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
-   <property name="text">
-    <string>Mod List</string>
-   </property>
-  </action>
   <action name="actionCreateInstanceShortcut">
    <property name="icon">
     <iconset theme="shortcut">
@@ -585,6 +577,18 @@
    </property>
    <property name="toolTip">
     <string>Open the central mods folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewSkinsFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Skins</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the skins folder in a file browser.</string>
    </property>
   </action>
   <action name="actionViewIconsFolder">

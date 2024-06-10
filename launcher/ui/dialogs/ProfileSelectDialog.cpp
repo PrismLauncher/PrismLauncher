@@ -20,7 +20,6 @@
 #include <QItemSelectionModel>
 
 #include "Application.h"
-#include "SkinUtils.h"
 
 #include "ui/dialogs/ProgressDialog.h"
 

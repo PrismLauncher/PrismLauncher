@@ -52,6 +52,7 @@
 #include <QFileDialog>
 #include <QLayout>
 #include <QPushButton>
+#include <QScreen>
 #include <QValidator>
 #include <utility>
 
@@ -63,6 +64,7 @@
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 #include "ui/pages/modplatform/technic/TechnicPage.h"
 #include "ui/widgets/PageContainer.h"
+
 NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
                                      const QString& url,
                                      const QMap<QString, QString>& extra_info,
@@ -127,7 +129,17 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     updateDialogState();
 
-    restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toByteArray()));
+    if (APPLICATION->settings()->get("NewInstanceGeometry").isValid()) {
+        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toByteArray()));
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        auto screen = parent->screen();
+#else
+        auto screen = QGuiApplication::primaryScreen();
+#endif
+        auto geometry = screen->availableSize();
+        resize(width(), qMin(geometry.height() - 50, 710));
+    }
 }
 
 void NewInstanceDialog::reject()
