@@ -10,8 +10,8 @@
     <height>602</height>
    </rect>
   </property>
-  <layout class="QGridLayout" name="gridLayout_5">
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLineEdit" name="searchEdit">
@@ -23,16 +23,9 @@
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Search</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
-   <item row="4" column="0">
+   <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -134,9 +127,19 @@
      </widget>
     </widget>
    </item>
-   <item row="5" column="0">
-    <layout class="QGridLayout" name="gridLayout_4">
-     <item row="0" column="1">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QComboBox" name="sortByBox">
+       <property name="minimumSize">
+        <size>
+         <width>265</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Version selected:</string>
@@ -146,18 +149,8 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
+     <item>
       <widget class="QComboBox" name="versionSelectionBox"/>
-     </item>
-     <item row="0" column="0">
-      <widget class="QComboBox" name="sortByBox">
-       <property name="minimumSize">
-        <size>
-         <width>265</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>
