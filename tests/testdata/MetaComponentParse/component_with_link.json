@@ -1,0 +1,12 @@
+{
+    "description": [
+        {
+            "text": "Hello, Component!",
+            "clickEvent": {
+                "action": "open_url",
+                "value": "https://google.com"
+            }
+        }
+    ],
+    "expected_output": "<a href=\"https://google.com\">Hello, Component!</a>"
+}

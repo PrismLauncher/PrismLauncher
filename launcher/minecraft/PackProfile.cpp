@@ -835,7 +835,7 @@ bool PackProfile::installCustomJar_internal(QString filepath)
 
     QFileInfo jarInfo(finalPath);
     if (jarInfo.exists()) {
-        if (!QFile::remove(finalPath)) {
+        if (!FS::deletePath(finalPath)) {
             return false;
         }
     }

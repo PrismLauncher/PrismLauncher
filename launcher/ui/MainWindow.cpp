@@ -77,7 +77,6 @@
 #include <DesktopServices.h>
 #include <InstanceList.h>
 #include <MMCZip.h>
-#include <SkinUtils.h>
 #include <icons/IconList.h>
 #include <java/JavaInstallList.h>
 #include <java/JavaUtils.h>
@@ -1204,6 +1203,11 @@ void MainWindow::on_actionViewInstanceFolder_triggered()
 void MainWindow::on_actionViewCentralModsFolder_triggered()
 {
     DesktopServices::openPath(APPLICATION->settings()->get("CentralModsDir").toString(), true);
+}
+
+void MainWindow::on_actionViewSkinsFolder_triggered()
+{
+    DesktopServices::openPath(APPLICATION->settings()->get("SkinsDir").toString(), true);
 }
 
 void MainWindow::on_actionViewIconThemeFolder_triggered()

@@ -44,6 +44,7 @@
 
 #include "BuildConfig.h"
 #include "Json.h"
+#include "StringUtils.h"
 #include "TechnicModel.h"
 #include "modplatform/technic/SingleZipPackInstallTask.h"
 #include "modplatform/technic/SolderPackInstallTask.h"
@@ -233,7 +234,7 @@ void TechnicPage::metadataLoaded()
 
     text += "<br><br>";
 
-    ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
 
     // Strip trailing forward-slashes from Solder URL's
     if (current.isSolder) {
