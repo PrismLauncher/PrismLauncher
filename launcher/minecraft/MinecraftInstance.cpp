@@ -1000,7 +1000,7 @@ QString MinecraftInstance::getStatusbarDescription()
     QString description;
     description.append(tr("Minecraft %1").arg(mcVersion));
     if (m_settings->get("ShowGameTime").toBool()) {
-        if (lastTimePlayed() > 0) {
+        if (lastTimePlayed() > 0 && lastLaunch() > 0) {
             QDateTime lastLaunchTime = QDateTime::fromMSecsSinceEpoch(lastLaunch());
             description.append(
                 tr(", last played on %1 for %2")
