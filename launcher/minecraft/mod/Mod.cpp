@@ -80,7 +80,7 @@ void Mod::setDetails(const ModDetails& details)
     m_local_details = details;
 }
 
-std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
+int Mod::compare(const Resource& other, SortType type) const
 {
     auto cast_other = dynamic_cast<Mod const*>(&other);
     if (!cast_other)
@@ -90,59 +90,49 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
         default:
         case SortType::ENABLED:
         case SortType::NAME:
-        case SortType::DATE: {
-            auto res = Resource::compare(other, type);
-            if (res.first != 0)
-                return res;
-            break;
-        }
+        case SortType::DATE:
+        case SortType::SIZE:
+            return Resource::compare(other, type);
         case SortType::VERSION: {
             auto this_ver = Version(version());
             auto other_ver = Version(cast_other->version());
             if (this_ver > other_ver)
-                return { 1, type == SortType::VERSION };
+                return 1;
             if (this_ver < other_ver)
-                return { -1, type == SortType::VERSION };
+                return -1;
             break;
         }
         case SortType::PROVIDER: {
-            auto compare_result =
-                QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return { compare_result, type == SortType::PROVIDER };
-            break;
+            return QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
         }
         case SortType::SIDE: {
             if (side() > cast_other->side())
-                return { 1, type == SortType::SIDE };
+                return 1;
             else if (side() < cast_other->side())
-                return { -1, type == SortType::SIDE };
+                return -1;
             break;
         }
         case SortType::LOADERS: {
             if (loaders() > cast_other->loaders())
-                return { 1, type == SortType::LOADERS };
+                return 1;
             else if (loaders() < cast_other->loaders())
-                return { -1, type == SortType::LOADERS };
+                return -1;
             break;
         }
         case SortType::MC_VERSIONS: {
             auto thisVersion = mcVersions().join(",");
             auto otherVersion = cast_other->mcVersions().join(",");
-            auto compare_result = QString::compare(thisVersion, otherVersion, Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return { compare_result, type == SortType::MC_VERSIONS };
-            break;
+            return QString::compare(thisVersion, otherVersion, Qt::CaseInsensitive);
         }
         case SortType::RELEASE_TYPE: {
             if (releaseType() > cast_other->releaseType())
-                return { 1, type == SortType::RELEASE_TYPE };
+                return 1;
             else if (releaseType() < cast_other->releaseType())
-                return { -1, type == SortType::RELEASE_TYPE };
+                return -1;
             break;
         }
     }
-    return { 0, false };
+    return 0;
 }
 
 bool Mod::applyFilter(QRegularExpression filter) const

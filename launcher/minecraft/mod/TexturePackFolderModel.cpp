@@ -37,6 +37,7 @@
 
 #include "Application.h"
 
+#include "StringUtils.h"
 #include "TexturePackFolderModel.h"
 
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
@@ -49,7 +50,6 @@ TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance*
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::DATE };
     m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true };
-    m_columnsHiddenByDefault = { false, false, false, false };
 }
 
 Task* TexturePackFolderModel::createUpdateTask()
@@ -77,6 +77,8 @@ QVariant TexturePackFolderModel::data(const QModelIndex& index, int role) const
                     return m_resources[row]->name();
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
+                case SizeColumn:
+                    return m_resources[row]->sizeStr();
                 default:
                     return {};
             }
@@ -128,6 +130,7 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
                 case NameColumn:
                 case DateColumn:
                 case ImageColumn:
+                case SizeColumn:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -136,13 +139,15 @@ QVariant TexturePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Or
             switch (section) {
                 case ActiveColumn:
                     //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
-                    return tr("Is the resource enabled?");
+                    return tr("Is the texture pack enabled?");
                 case NameColumn:
                     //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
-                    return tr("The name of the resource.");
+                    return tr("The name of the texture pack.");
                 case DateColumn:
                     //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
-                    return tr("The date and time this resource was last changed (or added).");
+                    return tr("The date and time this texture pack was last changed (or added).");
+                case SizeColumn:
+                    return tr("The size of the texture pack.");
                 default:
                     return {};
             }

@@ -48,7 +48,6 @@
 #include <QThreadPool>
 #include <QUrl>
 #include <QUuid>
-#include <algorithm>
 
 #include "Application.h"
 
@@ -65,17 +64,18 @@
 ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_names = QStringList(
-        { "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Side", "Loaders", "Miecraft Versions", "Release Type" });
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders",
+                                   "Miecraft Versions", "Release Type" });
     m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"),
-                                              tr("Side"), tr("Loaders"), tr("Miecraft Versions"), tr("Release Type") });
-    m_column_sort_keys = { SortType::ENABLED,  SortType::NAME, SortType::NAME,    SortType::VERSION,     SortType::DATE,
-                           SortType::PROVIDER, SortType::SIDE, SortType::LOADERS, SortType::MC_VERSIONS, SortType::RELEASE_TYPE };
+                                              tr("Size"), tr("Side"), tr("Loaders"), tr("Miecraft Versions"), tr("Release Type") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME,        SortType::NAME,        SortType::VERSION,
+                           SortType::DATE,    SortType::PROVIDER,    SortType::SIZE,        SortType::SIDE,
+                           SortType::LOADERS, SortType::MC_VERSIONS, SortType::RELEASE_TYPE };
     m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
-                              QHeaderView::Interactive, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true, true, true, true, true, true, true };
-    m_columnsHiddenByDefault = { false, false, false, false, false, false, true, true, true, true };
+                              QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
+    m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true };
+    m_columnsHiddenByDefault = { false, false, false, false, false, false, false, true, true, true, true };
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
@@ -133,12 +133,14 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                 case ReleaseTypeColumn: {
                     return at(row)->releaseType().toString();
                 }
+                case SizeColumn:
+                    return m_resources[row]->sizeStr();
                 default:
                     return QVariant();
             }
 
         case Qt::ToolTipRole:
-            if (column == NAME_COLUMN) {
+            if (column == NameColumn) {
                 if (at(row)->isSymLinkUnder(instDirPath())) {
                     return m_resources[row]->internal_id() +
                            tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
@@ -152,7 +154,7 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
             }
             return m_resources[row]->internal_id();
         case Qt::DecorationRole: {
-            if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
+            if (column == NameColumn && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
             if (column == ImageColumn) {
                 return at(row)->icon({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
@@ -191,6 +193,7 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case LoadersColumn:
                 case McVersionsColumn:
                 case ReleaseTypeColumn:
+                case SizeColumn:
                     return columnNames().at(section);
                 default:
                     return QVariant();
@@ -216,6 +219,8 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                     return tr("The supported minecraft versions.");
                 case ReleaseTypeColumn:
                     return tr("The release type.");
+                case SizeColumn:
+                    return tr("The size of the mod.");
                 default:
                     return QVariant();
             }
