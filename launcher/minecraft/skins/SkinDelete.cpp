@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,50 +34,33 @@
  *      limitations under the License.
  */
 
-#pragma once
+#include "SkinDelete.h"
 
-#include <QtNetwork>
+#include "net/ByteArraySink.h"
+#include "net/StaticHeaderProxy.h"
 
-#include <QObject>
-#include "net/NetRequest.h"
-#include "tasks/ConcurrentTask.h"
+SkinDelete::SkinDelete(QString token) : NetRequest(), m_token(token)
+{
+    logCat = taskMCSkinsLogC;
+}
 
-// Those are included so that they are also included by anyone using NetJob
-#include "net/Download.h"
-#include "net/HttpMetaCache.h"
+QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)
+{
+    setStatus(tr("Deleting skin"));
+    return m_network->deleteResource(request);
+}
 
-class NetJob : public ConcurrentTask {
-    Q_OBJECT
+void SkinDelete::init()
+{
+    addHeaderProxy(new Net::StaticHeaderProxy(QList<Net::HeaderPair>{
+        { "Authorization", QString("Bearer %1").arg(m_token).toLocal8Bit() },
+    }));
+}
 
-   public:
-    using Ptr = shared_qobject_ptr<NetJob>;
-
-    explicit NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent = -1);
-    ~NetJob() override = default;
-
-    auto size() const -> int;
-
-    auto canAbort() const -> bool override;
-    auto addNetAction(Net::NetRequest::Ptr action) -> bool;
-
-    auto getFailedActions() -> QList<Net::NetRequest*>;
-    auto getFailedFiles() -> QList<QString>;
-    void setAskRetry(bool askRetry);
-
-   public slots:
-    // Qt can't handle auto at the start for some reason?
-    bool abort() override;
-    void emitFailed(QString reason) override;
-
-   protected slots:
-    void executeNextSubTask() override;
-
-   protected:
-    void updateState() override;
-
-   private:
-    shared_qobject_ptr<QNetworkAccessManager> m_network;
-
-    int m_try = 1;
-    bool m_ask_retry = true;
-};
+SkinDelete::Ptr SkinDelete::make(QString token)
+{
+    auto up = makeShared<SkinDelete>(token);
+    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/skins/active");
+    up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
+    return up;
+}

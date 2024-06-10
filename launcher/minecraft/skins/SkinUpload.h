@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,16 +14,29 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
 #pragma once
 
-#include <QLoggingCategory>
+#include "net/NetRequest.h"
 
-Q_DECLARE_LOGGING_CATEGORY(taskNetLogC)
-Q_DECLARE_LOGGING_CATEGORY(taskDownloadLogC)
-Q_DECLARE_LOGGING_CATEGORY(taskUploadLogC)
-Q_DECLARE_LOGGING_CATEGORY(taskMCSkinsLogC)
-Q_DECLARE_LOGGING_CATEGORY(taskMetaCacheLogC)
-Q_DECLARE_LOGGING_CATEGORY(taskHttpMetaCacheLogC)
+class SkinUpload : public Net::NetRequest {
+    Q_OBJECT
+   public:
+    using Ptr = shared_qobject_ptr<SkinUpload>;
+
+    // Note this class takes ownership of the file.
+    SkinUpload(QString token, QString path, QString variant);
+    virtual ~SkinUpload() = default;
+
+    static SkinUpload::Ptr make(QString token, QString path, QString variant);
+    void init() override;
+
+   protected:
+    virtual QNetworkReply* getReply(QNetworkRequest&) override;
+
+   private:
+    QString m_token;
+    QString m_path;
+    QString m_variant;
+};

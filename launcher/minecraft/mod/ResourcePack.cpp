@@ -94,7 +94,7 @@ std::pair<Version, Version> ResourcePack::compatibleVersions() const
     return s_pack_format_versions.constFind(m_pack_format).value();
 }
 
-std::pair<int, bool> ResourcePack::compare(const Resource& other, SortType type) const
+int ResourcePack::compare(const Resource& other, SortType type) const
 {
     auto const& cast_other = static_cast<ResourcePack const&>(other);
     if (type == SortType::PACK_FORMAT) {
@@ -102,15 +102,13 @@ std::pair<int, bool> ResourcePack::compare(const Resource& other, SortType type)
         auto other_ver = cast_other.packFormat();
 
         if (this_ver > other_ver)
-            return { 1, type == SortType::PACK_FORMAT };
+            return 1;
         if (this_ver < other_ver)
-            return { -1, type == SortType::PACK_FORMAT };
+            return -1;
     } else {
-        auto res = Resource::compare(other, type);
-        if (res.first != 0)
-            return res;
+        return Resource::compare(other, type);
     }
-    return { 0, false };
+    return 0;
 }
 
 bool ResourcePack::applyFilter(QRegularExpression filter) const

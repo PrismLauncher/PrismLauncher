@@ -7,7 +7,7 @@
 class ResourcePackFolderModel : public ResourceFolderModel {
     Q_OBJECT
    public:
-    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, PackFormatColumn, DateColumn, NUM_COLUMNS };
+    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, PackFormatColumn, DateColumn, SizeColumn, NUM_COLUMNS };
 
     explicit ResourcePackFolderModel(const QString& dir, BaseInstance* instance);
 
