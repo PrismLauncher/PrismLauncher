@@ -366,13 +366,17 @@ set(MINECRAFT_SOURCES
     minecraft/AssetsUtils.h
     minecraft/AssetsUtils.cpp
 
-    # Minecraft services
-    minecraft/services/CapeChange.cpp
-    minecraft/services/CapeChange.h
-    minecraft/services/SkinUpload.cpp
-    minecraft/services/SkinUpload.h
-    minecraft/services/SkinDelete.cpp
-    minecraft/services/SkinDelete.h
+    # Minecraft skins
+    minecraft/skins/CapeChange.cpp
+    minecraft/skins/CapeChange.h
+    minecraft/skins/SkinUpload.cpp
+    minecraft/skins/SkinUpload.h
+    minecraft/skins/SkinDelete.cpp
+    minecraft/skins/SkinDelete.h
+    minecraft/skins/SkinModel.cpp
+    minecraft/skins/SkinModel.h
+    minecraft/skins/SkinList.cpp
+    minecraft/skins/SkinList.h
 
     minecraft/Agent.h)
 
@@ -803,8 +807,6 @@ SET(LAUNCHER_SOURCES
     ui/InstanceWindow.cpp
 
     # FIXME: maybe find a better home for this.
-    SkinUtils.cpp
-    SkinUtils.h
     FileIgnoreProxy.cpp
     FileIgnoreProxy.h
     FastFileIconProvider.cpp
@@ -1031,8 +1033,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ReviewMessageBox.h
     ui/dialogs/VersionSelectDialog.cpp
     ui/dialogs/VersionSelectDialog.h
-    ui/dialogs/SkinUploadDialog.cpp
-    ui/dialogs/SkinUploadDialog.h
     ui/dialogs/ResourceDownloadDialog.cpp
     ui/dialogs/ResourceDownloadDialog.h
     ui/dialogs/ScrollMessageBox.cpp
@@ -1045,6 +1045,9 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ModUpdateDialog.h
     ui/dialogs/InstallLoaderDialog.cpp
     ui/dialogs/InstallLoaderDialog.h
+
+    ui/dialogs/skins/SkinManageDialog.cpp
+    ui/dialogs/skins/SkinManageDialog.h
 
     # GUI - widgets
     ui/widgets/Common.cpp
@@ -1175,7 +1178,6 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/NewComponentDialog.ui
     ui/dialogs/NewsDialog.ui
     ui/dialogs/ProfileSelectDialog.ui
-    ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
     ui/dialogs/ExportPackDialog.ui
     ui/dialogs/ExportToModListDialog.ui
@@ -1189,6 +1191,8 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ScrollMessageBox.ui
     ui/dialogs/BlockedModsDialog.ui
     ui/dialogs/ChooseProviderDialog.ui
+
+    ui/dialogs/skins/SkinManageDialog.ui
 )
 
 qt_wrap_ui(PRISM_UPDATE_UI
