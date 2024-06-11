@@ -34,6 +34,7 @@ class AuthStep : public QObject {
 
    public slots:
     virtual void perform() = 0;
+    virtual void abort() {}
 
    signals:
     void finished(AccountTaskState resultingState, QString message);

@@ -35,22 +35,35 @@
 
 #include "MSAStep.h"
 
-#include <QtNetworkAuth/qoauthhttpserverreplyhandler.h>
 #include <QAbstractOAuth2>
 #include <QNetworkRequest>
+#include <QOAuthOobReplyHandler>
 
 #include "Application.h"
+#include "BuildConfig.h"
+
+class CustomOAuthOobReplyHandler : public QOAuthOobReplyHandler {
+    Q_OBJECT
+
+   public:
+    explicit CustomOAuthOobReplyHandler(QObject* parent = nullptr) : QOAuthOobReplyHandler(parent)
+    {
+        connect(APPLICATION, &Application::oauthReplyRecieved, this, &QOAuthOobReplyHandler::callbackReceived);
+    }
+    ~CustomOAuthOobReplyHandler() override
+    {
+        disconnect(APPLICATION, &Application::oauthReplyRecieved, this, &QOAuthOobReplyHandler::callbackReceived);
+    }
+    QString callback() const override { return BuildConfig.LAUNCHER_APP_BINARY_NAME + "://oauth"; }
+};
 
 MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(silent)
 {
     m_clientId = APPLICATION->getMSAClientID();
 
-    auto replyHandler = new QOAuthHttpServerReplyHandler(1337, this);
-    replyHandler->setCallbackText(
-        " <iframe src=\"https://prismlauncher.org/successful-login\" title=\"PrismLauncher Microsoft login\" style=\"position:fixed; "
-        "top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; "
-        "z-index:999999;\"/> ");
-    oauth2.setReplyHandler(replyHandler);
+    auto bv = new CustomOAuthOobReplyHandler();
+
+    oauth2.setReplyHandler(bv);
     oauth2.setAuthorizationUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"));
     oauth2.setAccessTokenUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/token"));
     oauth2.setScope("XboxLive.SignIn XboxLive.offline_access");
@@ -106,3 +119,5 @@ void MSAStep::perform()
         oauth2.grant();
     }
 }
+
+#include "MSAStep.moc"
