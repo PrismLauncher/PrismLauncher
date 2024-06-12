@@ -32,7 +32,7 @@ class MSALoginDialog : public QDialog {
    public:
     ~MSALoginDialog();
 
-    static MinecraftAccountPtr newAccount(QWidget* parent, bool usingDeviceCode = false);
+    static MinecraftAccountPtr newAccount(QWidget* parent);
     int exec() override;
 
    private:
@@ -47,7 +47,8 @@ class MSALoginDialog : public QDialog {
    private:
     Ui::MSALoginDialog* ui;
     MinecraftAccountPtr m_account;
-    shared_qobject_ptr<AuthFlow> m_task;
+    shared_qobject_ptr<AuthFlow> m_devicecode_task;
+    shared_qobject_ptr<AuthFlow> m_authflow_task;
 
-    bool m_using_device_code = false;
+    QUrl m_url;
 };

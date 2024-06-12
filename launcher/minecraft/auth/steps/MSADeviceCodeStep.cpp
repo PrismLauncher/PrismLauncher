@@ -135,9 +135,9 @@ void MSADeviceCodeStep::deviceAutorizationFinished()
     m_expiration_timer.setSingleShot(true);
     connect(&m_expiration_timer, &QTimer::timeout, this, &MSADeviceCodeStep::abort);
     m_expiration_timer.start();
-
     m_pool_timer.setTimerType(Qt::VeryCoarseTimer);
     m_pool_timer.setSingleShot(true);
+    connect(&m_pool_timer, &QTimer::timeout, this, &MSADeviceCodeStep::authenticateUser);
     startPoolTimer();
 }
 
@@ -157,8 +157,12 @@ void MSADeviceCodeStep::startPoolTimer()
     if (m_is_aborted) {
         return;
     }
+    if (m_expiration_timer.remainingTime() < interval * 1000) {
+        perform();
+        return;
+    }
+
     m_pool_timer.setInterval(interval * 1000);
-    connect(&m_pool_timer, &QTimer::timeout, this, &MSADeviceCodeStep::authenticateUser);
     m_pool_timer.start();
 }
 
