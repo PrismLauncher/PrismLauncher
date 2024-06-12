@@ -60,8 +60,6 @@ MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MS
     font.setFixedPitch(true);
     ui->code->setFont(font);
 
-    // ui->buttonBox->button(QDialogButtonBox::Help)->setDefault(false);
-
     connect(ui->copyCode, &QPushButton::clicked, this, [this] { QApplication::clipboard()->setText(ui->code->text()); });
     ui->qr->setPixmap(QIcon((":/documents/login-qr.svg")).pixmap(QSize(75, 75)));
     ui->title->setText(tr("Login to %1").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
@@ -129,16 +127,7 @@ void MSALoginDialog::onTaskFailed(QString reason)
 void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
 {
     ui->stackedWidget->setCurrentIndex(1);
-    // DesktopServices::openUrl(url);
-    const auto uri = url.toString();
-    const auto linkString = QString("<a href=\"%1\">%2</a>").arg(uri, uri);
     m_url = url;
-    ui->link->setText(linkString);
-    // ui->urlInfo->setText(
-    //     tr("Browser opened to complete the login process."
-    //        "<br /><br />"
-    //        "If your browser hasn't opened, please manually open the following link and choose your account:</p>"));
-    // ui->url->setText(linkString);
 }
 
 void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn)
