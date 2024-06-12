@@ -126,14 +126,7 @@ void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, in
     const auto linkString = QString("<a href=\"%1\">%2</a>").arg(url, url);
     ui->code->setText(code);
     ui->codeInfo->setText(tr("<p>Enter this code into %1 and choose your account.</p>").arg(linkString));
-
-    const auto isDefaultUrl = url == "https://www.microsoft.com/link";
-
-    ui->qr->setVisible(isDefaultUrl);
-    if (isDefaultUrl && !code.isEmpty()) {
-        url += QString("?otc=%1").arg(code);
-    }
-    DesktopServices::openUrl(url);
+    ui->qr->setVisible(url == "https://www.microsoft.com/link");
 }
 
 void MSALoginDialog::onTaskStatus(QString status)

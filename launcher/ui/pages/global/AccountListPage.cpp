@@ -132,10 +132,10 @@ void AccountListPage::on_actionAddMicrosoft_triggered()
 {
     QMessageBox box(this);
     box.setWindowTitle(tr("Add account"));
-    box.setText(tr("How do you want to login?"));
+    box.setText(tr("Where would you like to login?"));
     box.setIcon(QMessageBox::Question);
-    auto deviceCode = box.addButton(tr("Remote"), QMessageBox::ButtonRole::YesRole);
-    auto authCode = box.addButton(tr("Recommended"), QMessageBox::ButtonRole::NoRole);
+    auto authCode = box.addButton(tr("On this device"), QMessageBox::ButtonRole::NoRole);
+    auto deviceCode = box.addButton(tr("On another device"), QMessageBox::ButtonRole::YesRole);
     auto cancel = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::RejectRole);
     box.setDefaultButton(authCode);
     box.exec();
