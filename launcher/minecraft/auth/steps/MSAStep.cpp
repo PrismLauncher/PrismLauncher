@@ -54,7 +54,7 @@ class CustomOAuthOobReplyHandler : public QOAuthOobReplyHandler {
     {
         disconnect(APPLICATION, &Application::oauthReplyRecieved, this, &QOAuthOobReplyHandler::callbackReceived);
     }
-    QString callback() const override { return BuildConfig.LAUNCHER_APP_BINARY_NAME + "://oauth"; }
+    QString callback() const override { return BuildConfig.LAUNCHER_APP_BINARY_NAME + "://oauth/microsoft"; }
 };
 
 MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(silent)
