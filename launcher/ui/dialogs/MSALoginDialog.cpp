@@ -64,8 +64,11 @@ MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MS
     ui->qr->setPixmap(QIcon((":/documents/login-qr.svg")).pixmap(QSize(150, 150)));
     ui->title->setText(tr("Login to %1").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
     connect(ui->loginButton, &QPushButton::clicked, this, [this] {
-        if (m_url.isValid())
-            DesktopServices::openUrl(m_url);
+        if (m_url.isValid()) {
+            if (!DesktopServices::openUrl(m_url)) {
+                QApplication::clipboard()->setText(m_url.toString());
+            }
+        }
     });
 }
 
@@ -104,6 +107,8 @@ MSALoginDialog::~MSALoginDialog()
 void MSALoginDialog::onTaskFailed(QString reason)
 {
     // Set message
+    m_authflow_task->disconnect();
+    m_devicecode_task->disconnect();
     ui->stackedWidget->setCurrentIndex(0);
     auto lines = reason.split('\n');
     QString processed;
@@ -127,6 +132,7 @@ void MSALoginDialog::onTaskFailed(QString reason)
 void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
 {
     ui->stackedWidget->setCurrentIndex(1);
+    ui->loginButton->setToolTip(QString("<div style='width: 200px;'>%1</div>").arg(url.toString()));
     m_url = url;
 }
 
