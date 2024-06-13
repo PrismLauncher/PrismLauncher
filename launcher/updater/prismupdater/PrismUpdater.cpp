@@ -1118,7 +1118,6 @@ void PrismUpdaterApp::backupAppDir()
                 "Qt*.dll",
             });
         }
-        file_list.append("portable.txt");
         logUpdate("manifest.txt empty or missing. making best guess at files to back up.");
     }
     logUpdate(tr("Backing up:\n  %1").arg(file_list.join(",\n  ")));
