@@ -972,7 +972,6 @@ bool InstanceList::commitStagedInstance(const QString& path,
     if (groupName.isEmpty() && !groupName.isNull())
         groupName = QString();
 
-    QDir dir;
     QString instID;
     InstancePtr inst;
 
@@ -996,7 +995,7 @@ bool InstanceList::commitStagedInstance(const QString& path,
                 return false;
             }
         } else {
-            if (!dir.rename(path, destination)) {
+            if (!FS::move(path, destination)) {
                 qWarning() << "Failed to move" << path << "to" << destination;
                 return false;
             }

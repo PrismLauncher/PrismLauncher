@@ -44,7 +44,7 @@ class TexturePackFolderModel : public ResourceFolderModel {
     Q_OBJECT
 
    public:
-    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, DateColumn, NUM_COLUMNS };
+    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, DateColumn, SizeColumn, NUM_COLUMNS };
 
     explicit TexturePackFolderModel(const QString& dir, std::shared_ptr<const BaseInstance> instance);
 

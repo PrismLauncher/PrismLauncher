@@ -45,6 +45,7 @@
 #include "MetadataHandler.h"
 #include "Version.h"
 #include "minecraft/mod/ModDetails.h"
+#include "minecraft/mod/Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
@@ -77,7 +78,7 @@ void Mod::setDetails(const ModDetails& details)
     m_local_details = details;
 }
 
-std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
+int Mod::compare(const Resource& other, SortType type) const
 {
     auto cast_other = dynamic_cast<Mod const*>(&other);
     if (!cast_other)
@@ -87,30 +88,23 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
         default:
         case SortType::ENABLED:
         case SortType::NAME:
-        case SortType::DATE: {
-            auto res = Resource::compare(other, type);
-            if (res.first != 0)
-                return res;
-            break;
-        }
+        case SortType::DATE:
+        case SortType::SIZE:
+            return Resource::compare(other, type);
         case SortType::VERSION: {
             auto this_ver = Version(version());
             auto other_ver = Version(cast_other->version());
             if (this_ver > other_ver)
-                return { 1, type == SortType::VERSION };
+                return 1;
             if (this_ver < other_ver)
-                return { -1, type == SortType::VERSION };
+                return -1;
             break;
         }
         case SortType::PROVIDER: {
-            auto compare_result =
-                QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return { compare_result, type == SortType::PROVIDER };
-            break;
+            return QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
         }
     }
-    return { 0, false };
+    return 0;
 }
 
 bool Mod::applyFilter(QRegularExpression filter) const

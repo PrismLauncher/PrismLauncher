@@ -83,8 +83,10 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
             data = file.readAll();
             file.close();
         } else {
-            if (minecraftVersion.isEmpty())
+            if (minecraftVersion.isEmpty()) {
                 emit failed(tr("Could not find \"version.json\" inside \"bin/modpack.jar\", but Minecraft version is unknown"));
+                return;
+            }
             components->setComponentVersion("net.minecraft", minecraftVersion, true);
             components->installJarMods({ modpackJar });
 
@@ -131,7 +133,9 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
         file.close();
     } else {
         // This is the "Vanilla" modpack, excluded by the search code
-        emit failed(tr("Unable to find a \"version.json\"!"));
+        components->setComponentVersion("net.minecraft", minecraftVersion, true);
+        components->saveNow();
+        emit succeeded();
         return;
     }
 
