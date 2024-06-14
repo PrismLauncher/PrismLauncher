@@ -501,6 +501,8 @@ void MainWindow::konamiTriggered()
 
 void MainWindow::showInstanceContextMenu(const QPoint& pos)
 {
+    if (!geometry().contains(view->mapToGlobal(pos)))
+        return;
     QList<QAction*> actions;
 
     QAction* actionSep = new QAction("", this);
