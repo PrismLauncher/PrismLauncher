@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "FileSystem.h"
 #include "minecraft/mod/Resource.h"
 
 #include "tasks/Task.h"
@@ -49,16 +50,16 @@ class BasicFolderLoadTask : public Task {
             connect(this, &Task::finished, this->thread(), &QThread::quit);
 
         m_dir.refresh();
-        QStringList names;
         for (auto entry : m_dir.entryInfoList()) {
-            auto resource = m_create_func(entry);
-            if (names.contains(resource->name())) {
-                resource->destroy();
-            } else {
-                names << resource->name();
-                resource->moveToThread(m_thread_to_spawn_into);
-                m_result->resources.insert(resource->internal_id(), resource);
+            auto filePath = entry.absoluteFilePath();
+            auto newFilePath = FS::getUniqueResourceName(filePath);
+            if (newFilePath != filePath) {
+                FS::move(filePath, newFilePath);
+                entry = QFileInfo(newFilePath);
             }
+            auto resource = m_create_func(entry);
+            resource->moveToThread(m_thread_to_spawn_into);
+            m_result->resources.insert(resource->internal_id(), resource);
         }
 
         if (m_aborted)

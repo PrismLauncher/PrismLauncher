@@ -36,6 +36,7 @@
 
 #include "ModFolderLoadTask.h"
 
+#include "FileSystem.h"
 #include "minecraft/mod/MetadataHandler.h"
 
 #include <QThread>
@@ -62,15 +63,15 @@ void ModFolderLoadTask::executeTask()
 
     // Read JAR files that don't have metadata
     m_mods_dir.refresh();
-    QStringList names;
     for (auto entry : m_mods_dir.entryInfoList()) {
+        auto filePath = entry.absoluteFilePath();
+        auto newFilePath = FS::getUniqueResourceName(filePath);
+        if (newFilePath != filePath) {
+            FS::move(filePath, newFilePath);
+            entry = QFileInfo(newFilePath);
+        }
         Mod* mod(new Mod(entry));
 
-        if (names.contains(mod->name())) {
-            mod->destroy(m_index_dir, true);
-            continue;
-        }
-        names << mod->name();
         if (mod->enabled()) {
             if (m_result->mods.contains(mod->internal_id())) {
                 m_result->mods[mod->internal_id()]->setStatus(ModStatus::Installed);
