@@ -114,7 +114,7 @@
             </size>
            </property>
            <property name="text">
-            <string>Login with Microsoft</string>
+            <string>Sign in with Microsoft</string>
            </property>
            <property name="default">
             <bool>true</bool>

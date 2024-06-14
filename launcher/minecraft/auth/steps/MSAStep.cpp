@@ -42,10 +42,10 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
-#include "FileSystem.h"
 
 #include <QFile>
 #include <QProcess>
+#include <QSettings>
 #include <QStandardPaths>
 
 bool isSchemeHandlerRegistered()
