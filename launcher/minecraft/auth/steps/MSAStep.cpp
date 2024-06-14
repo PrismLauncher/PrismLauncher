@@ -42,98 +42,27 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
+#include "FileSystem.h"
 
-#include <QFile>
 #include <QProcess>
 #include <QSettings>
 #include <QStandardPaths>
 
 bool isSchemeHandlerRegistered()
 {
+#ifdef Q_OS_LINUX
     QProcess process;
     process.start("xdg-mime", { "query", "default", "x-scheme-handler/" + BuildConfig.LAUNCHER_APP_BINARY_NAME });
     process.waitForFinished();
     QString output = process.readAllStandardOutput().trimmed();
 
     return output.contains(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-}
-
-bool registerSchemeHandler()
-{
-#ifdef Q_OS_LINUX
-
-    // Paths for user-specific installations
-    QString desktopFilePath = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) +
-                              QString("/%1.desktop").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-    QString mimeFilePath = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) +
-                           QString("/mime/packages/x-scheme-handler-%1.xml").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-    QFile desktopFile(desktopFilePath);
-    QFile mimeFile(mimeFilePath);
-    if ((desktopFile.exists() && mimeFile.exists()) || isSchemeHandlerRegistered()) {
-        return true;
-    }
-    // Create and write the .desktop file
-    if (desktopFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&desktopFile);
-        out << QString(R"XXX([Desktop Entry]
-Version=1.0
-Name=%1
-Comment=Discover, manage, and play Minecraft instances
-Type=Application
-Terminal=false
-Exec=%2 %U
-StartupNotify=true
-Icon=org.%2.%3
-Categories=Game;ActionGame;AdventureGame;Simulation;
-Keywords=game;minecraft;mc;
-StartupWMClass=%3
-MimeType=application/zip;application/x-modrinth-modpack+zip;x-scheme-handler/curseforge;x-scheme-handler/%2;
-)XXX")
-                   .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.LAUNCHER_APP_BINARY_NAME, BuildConfig.LAUNCHER_NAME);
-        desktopFile.close();
-    } else {
-        qDebug() << "Failed to write .desktop file:" << desktopFilePath;
-        return false;
-    }
-
-    // Create and write the MIME type XML file
-    if (mimeFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&mimeFile);
-        out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-        out << "<mime-info xmlns=\"http://www.freedesktop.org/standards/shared-mime-info\">\n";
-        out << QString("  <mime-type type=\"x-scheme-handler/%1\">\n").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-        out << QString("    <glob pattern=\"*.%1\"/>\n").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
-        out << "  </mime-type>\n";
-        out << "</mime-info>\n";
-        mimeFile.close();
-    } else {
-        qDebug() << "Failed to write MIME type XML file:" << mimeFilePath;
-        return false;
-    }
-
-    // Update the MIME database
-    QProcess::execute("update-mime-database", { QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) });
-
-    // Update the desktop database
-    QProcess::execute("update-desktop-database", { QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) });
-
-    qDebug() << "Custom URL scheme handler registered successfully.";
 
 #elif defined(Q_OS_WIN)
     QString regPath = QString("HKEY_CURRENT_USER\\Software\\Classes\\%1").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
     QSettings settings(regPath, QSettings::NativeFormat);
 
-    if (settings.contains("shell/open/command/.")) {
-        return true;
-    }
-    QString appPath = QCoreApplication::applicationFilePath().replace("/", "\\");
-
-    settings.setValue(".", QString("URL:%1 Protocol").arg(BuildConfig.LAUNCHER_NAME));
-    settings.setValue("URL Protocol", "");
-    settings.setValue("DefaultIcon/.", QString("\"%1\",1").arg(appPath));
-    settings.setValue("shell/open/command/.", QString("\"%1\" \"%2\"").arg(appPath).arg("%1"));
-
-    qDebug() << "Custom URL scheme handler registered successfully in Windows Registry.";
+    return settings.contains("shell/open/command/.");
 #endif
     return true;
 }
@@ -156,8 +85,8 @@ class CustomOAuthOobReplyHandler : public QOAuthOobReplyHandler {
 MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(silent)
 {
     m_clientId = APPLICATION->getMSAClientID();
-
-    if (!registerSchemeHandler())
+    if (QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") ||
+        QFile::exists(FS::PathCombine(APPLICATION->root(), "portable.txt")) || !isSchemeHandlerRegistered())
 
     {
         auto replyHandler = new QOAuthHttpServerReplyHandler(1337, this);
