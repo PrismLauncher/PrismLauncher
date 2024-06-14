@@ -36,7 +36,6 @@
 #include "MSALoginDialog.h"
 #include "Application.h"
 
-#include "BuildConfig.h"
 #include "ui_MSALoginDialog.h"
 
 #include "DesktopServices.h"
