@@ -37,6 +37,7 @@
  */
 
 #include "ModFolderPage.h"
+#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui_ExternalResourcesPage.h"
 
 #include <QAbstractItemModel>
@@ -120,6 +121,9 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionVisitItemPage->setToolTip(tr("Go to mod's home page"));
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
+
+        ui->actionsToolbar->insertActionAfter(ui->actionVisitItemPage, ui->actionExportMetadata);
+        connect(ui->actionExportMetadata, &QAction::triggered, this, &ModFolderPage::exportModMetadata);
 
         auto check_allow_update = [this] { return ui->treeView->selectionModel()->hasSelection() || !m_model->empty(); };
 
@@ -371,4 +375,16 @@ void ModFolderPage::deleteModMetadata()
     }
 
     m_model->deleteModsMetadata(selection);
+}
+
+void ModFolderPage::exportModMetadata()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selectedMods = m_model->selectedMods(selection);
+    if (selectedMods.length() == 0)
+        selectedMods = m_model->allMods();
+
+    std::sort(selectedMods.begin(), selectedMods.end(), [](const Mod* a, const Mod* b) { return a->name() < b->name(); });
+    ExportToModListDialog dlg(m_instance->name(), selectedMods, this);
+    dlg.exec();
 }

@@ -1,5 +1,6 @@
 #include "FlameModIndex.h"
 
+#include "FileSystem.h"
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
@@ -138,6 +139,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     file.version = Json::requireString(obj, "displayName");
     file.downloadUrl = Json::ensureString(obj, "downloadUrl");
     file.fileName = Json::requireString(obj, "fileName");
+    file.fileName = FS::RemoveInvalidPathChars(file.fileName);
 
     ModPlatform::IndexedVersionType::VersionType ver_type;
     switch (Json::requireInteger(obj, "releaseType")) {

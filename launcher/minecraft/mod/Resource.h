@@ -15,7 +15,7 @@ enum class ResourceType {
     LITEMOD,     //!< The resource is a litemod
 };
 
-enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER };
+enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER, SIZE };
 
 enum class EnableAction { ENABLE, DISABLE, TOGGLE };
 
@@ -45,6 +45,8 @@ class Resource : public QObject {
     [[nodiscard]] auto internal_id() const -> QString { return m_internal_id; }
     [[nodiscard]] auto type() const -> ResourceType { return m_type; }
     [[nodiscard]] bool enabled() const { return m_enabled; }
+    [[nodiscard]] QString sizeStr() const { return m_size_str; }
+    [[nodiscard]] qint64 sizeInfo() const { return m_size_info; }
 
     [[nodiscard]] virtual auto name() const -> QString { return m_name; }
     [[nodiscard]] virtual bool valid() const { return m_type != ResourceType::UNKNOWN; }
@@ -53,10 +55,8 @@ class Resource : public QObject {
      *  > 0: 'this' comes after 'other'
      *  = 0: 'this' is equal to 'other'
      *  < 0: 'this' comes before 'other'
-     *
-     *  The second argument in the pair is true if the sorting type that decided which one is greater was 'type'.
      */
-    [[nodiscard]] virtual auto compare(Resource const& other, SortType type = SortType::NAME) const -> std::pair<int, bool>;
+    [[nodiscard]] virtual int compare(Resource const& other, SortType type = SortType::NAME) const;
 
     /** Returns whether the given filter should filter out 'this' (false),
      *  or if such filter includes the Resource (true).
@@ -117,4 +117,6 @@ class Resource : public QObject {
     bool m_is_resolving = false;
     bool m_is_resolved = false;
     int m_resolution_ticket = 0;
+    QString m_size_str;
+    qint64 m_size_info;
 };

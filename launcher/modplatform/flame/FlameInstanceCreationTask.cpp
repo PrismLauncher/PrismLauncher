@@ -537,7 +537,10 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         selectedOptionalMods = optionalModDialog.getResult();
     }
     for (const auto& result : results) {
-        auto relpath = FS::PathCombine(result.targetFolder, result.fileName);
+        auto fileName = result.fileName;
+        fileName = FS::RemoveInvalidPathChars(fileName);
+        auto relpath = FS::PathCombine(result.targetFolder, fileName);
+
         if (!result.required && !selectedOptionalMods.contains(relpath)) {
             relpath += ".disabled";
         }

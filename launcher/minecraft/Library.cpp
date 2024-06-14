@@ -35,6 +35,7 @@
 
 #include "Library.h"
 #include "MinecraftInstance.h"
+#include "net/NetRequest.h"
 
 #include <BuildConfig.h>
 #include <FileSystem.h>
@@ -50,6 +51,7 @@ void Library::getApplicableFiles(const RuntimeContext& runtimeContext,
 {
     bool local = isLocal();
     auto actualPath = [&](QString relPath) {
+        relPath = FS::RemoveInvalidPathChars(relPath);
         QFileInfo out(FS::PathCombine(storagePrefix(), relPath));
         if (local && !overridePath.isEmpty()) {
             QString fileName = out.fileName();
@@ -74,12 +76,12 @@ void Library::getApplicableFiles(const RuntimeContext& runtimeContext,
     }
 }
 
-QList<NetAction::Ptr> Library::getDownloads(const RuntimeContext& runtimeContext,
-                                            class HttpMetaCache* cache,
-                                            QStringList& failedLocalFiles,
-                                            const QString& overridePath) const
+QList<Net::NetRequest::Ptr> Library::getDownloads(const RuntimeContext& runtimeContext,
+                                                  class HttpMetaCache* cache,
+                                                  QStringList& failedLocalFiles,
+                                                  const QString& overridePath) const
 {
-    QList<NetAction::Ptr> out;
+    QList<Net::NetRequest::Ptr> out;
     bool stale = isAlwaysStale();
     bool local = isLocal();
 

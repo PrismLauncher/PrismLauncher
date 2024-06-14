@@ -282,7 +282,7 @@ endif()
 include(QtVersionlessBackport)
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     set(QT_VERSION_MAJOR 5)
-    find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml)
+    find_package(Qt5 REQUIRED COMPONENTS Core Widgets Concurrent Network Test Xml NetworkAuth)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
         find_package(QuaZip-Qt5 1.3 QUIET)
@@ -296,7 +296,7 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE -D_UNICODE")
 elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
     set(QT_VERSION_MAJOR 6)
-    find_package(Qt6 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml Core5Compat)
+    find_package(Qt6 REQUIRED COMPONENTS Core CoreTools Widgets Concurrent Network Test Xml Core5Compat NetworkAuth)
     list(APPEND Launcher_QT_LIBS Qt6::Core5Compat)
 
     if(NOT Launcher_FORCE_BUNDLED_LIBS)
@@ -417,7 +417,19 @@ elseif(UNIX)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_mrpack_MIMEInfo} DESTINATION ${KDE_INSTALL_MIMEDIR})
 
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/launcher/qtlogging.ini" DESTINATION "share/${Launcher_Name}")
+
+    if (INSTALL_BUNDLE STREQUAL full)
+        set(PLUGIN_DEST_DIR "plugins")
+        set(BUNDLE_DEST_DIR ".")
+        set(RESOURCES_DEST_DIR ".")
     
+        # Apps to bundle
+        set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${Launcher_APP_BINARY_NAME}")
+    
+        # directories to look for dependencies
+        set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    endif()
+
     if(Launcher_ManPage)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${Launcher_ManPage} DESTINATION "${KDE_INSTALL_MANDIR}/man6")
     endif()
@@ -511,7 +523,6 @@ if(NOT cmark_FOUND)
 else()
     message(STATUS "Using system cmark")
 endif()
-add_subdirectory(libraries/katabasis) # An OAuth2 library that tried to do too much
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
 if (NOT ghc_filesystem_FOUND)

@@ -37,7 +37,7 @@
 #include "ui_MSALoginDialog.h"
 
 #include "DesktopServices.h"
-#include "minecraft/auth/AccountTask.h"
+#include "minecraft/auth/AuthFlow.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -47,30 +47,29 @@
 MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
 {
     ui->setupUi(this);
-    ui->progressBar->setVisible(false);
-    ui->actionButton->setVisible(false);
-    // ui->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
 
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    ui->cancel->setEnabled(false);
+    ui->link->setVisible(false);
+    ui->copy->setVisible(false);
+    ui->progressBar->setVisible(false);
+
+    connect(ui->cancel, &QPushButton::pressed, this, &QDialog::reject);
+    connect(ui->copy, &QPushButton::pressed, this, &MSALoginDialog::copyUrl);
 }
 
 int MSALoginDialog::exec()
 {
-    setUserInputsEnabled(false);
-    ui->progressBar->setVisible(true);
-
     // Setup the login task and start it
     m_account = MinecraftAccount::createBlankMSA();
-    m_loginTask = m_account->loginMSA();
-    connect(m_loginTask.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
-    connect(m_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
-    connect(m_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
-    connect(m_loginTask.get(), &Task::progress, this, &MSALoginDialog::onTaskProgress);
-    connect(m_loginTask.get(), &AccountTask::showVerificationUriAndCode, this, &MSALoginDialog::showVerificationUriAndCode);
-    connect(m_loginTask.get(), &AccountTask::hideVerificationUriAndCode, this, &MSALoginDialog::hideVerificationUriAndCode);
-    connect(&m_externalLoginTimer, &QTimer::timeout, this, &MSALoginDialog::externalLoginTick);
-    m_loginTask->start();
+    m_task = m_account->login(m_using_device_code);
+    connect(m_task.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
+    connect(m_task.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
+    connect(m_task.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
+    connect(m_task.get(), &AuthFlow::authorizeWithBrowser, this, &MSALoginDialog::authorizeWithBrowser);
+    connect(m_task.get(), &AuthFlow::authorizeWithBrowserWithExtra, this, &MSALoginDialog::authorizeWithBrowserWithExtra);
+    connect(ui->cancel, &QPushButton::pressed, m_task.get(), &Task::abort);
+    connect(&m_external_timer, &QTimer::timeout, this, &MSALoginDialog::externalLoginTick);
+    m_task->start();
 
     return QDialog::exec();
 }
@@ -78,60 +77,6 @@ int MSALoginDialog::exec()
 MSALoginDialog::~MSALoginDialog()
 {
     delete ui;
-}
-
-void MSALoginDialog::externalLoginTick()
-{
-    m_externalLoginElapsed++;
-    ui->progressBar->setValue(m_externalLoginElapsed);
-    ui->progressBar->repaint();
-
-    if (m_externalLoginElapsed >= m_externalLoginTimeout) {
-        m_externalLoginTimer.stop();
-    }
-}
-
-void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn)
-{
-    m_externalLoginElapsed = 0;
-    m_externalLoginTimeout = expiresIn;
-
-    m_externalLoginTimer.setInterval(1000);
-    m_externalLoginTimer.setSingleShot(false);
-    m_externalLoginTimer.start();
-
-    ui->progressBar->setMaximum(expiresIn);
-    ui->progressBar->setValue(m_externalLoginElapsed);
-
-    QString urlString = uri.toString();
-    QString linkString = QString("<a href=\"%1\">%2</a>").arg(urlString, urlString);
-    if (urlString == "https://www.microsoft.com/link" && !code.isEmpty()) {
-        urlString += QString("?otc=%1").arg(code);
-        DesktopServices::openUrl(urlString);
-        ui->label->setText(tr("<p>Please login in the opened browser. If no browser was opened, please open up %1 in "
-                              "a browser and put in the code <b>%2</b> to proceed with login.</p>")
-                               .arg(linkString, code));
-    } else {
-        ui->label->setText(
-            tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
-    }
-    ui->actionButton->setVisible(true);
-    connect(ui->actionButton, &QPushButton::clicked, [=]() {
-        DesktopServices::openUrl(uri);
-        QClipboard* cb = QApplication::clipboard();
-        cb->setText(code);
-    });
-}
-
-void MSALoginDialog::hideVerificationUriAndCode()
-{
-    m_externalLoginTimer.stop();
-    ui->actionButton->setVisible(false);
-}
-
-void MSALoginDialog::setUserInputsEnabled(bool enable)
-{
-    ui->buttonBox->setEnabled(enable);
 }
 
 void MSALoginDialog::onTaskFailed(const QString& reason)
@@ -146,12 +91,7 @@ void MSALoginDialog::onTaskFailed(const QString& reason)
             processed += "<br />";
         }
     }
-    ui->label->setText(processed);
-
-    // Re-enable user-interaction
-    setUserInputsEnabled(true);
-    ui->progressBar->setVisible(false);
-    ui->actionButton->setVisible(false);
+    ui->message->setText(processed);
 }
 
 void MSALoginDialog::onTaskSucceeded()
@@ -161,22 +101,81 @@ void MSALoginDialog::onTaskSucceeded()
 
 void MSALoginDialog::onTaskStatus(const QString& status)
 {
-    ui->label->setText(status);
-}
-
-void MSALoginDialog::onTaskProgress(qint64 current, qint64 total)
-{
-    ui->progressBar->setMaximum(total);
-    ui->progressBar->setValue(current);
+    ui->message->setText(status);
+    ui->cancel->setEnabled(false);
+    ui->link->setVisible(false);
+    ui->copy->setVisible(false);
+    ui->progressBar->setVisible(false);
 }
 
 // Public interface
-MinecraftAccountPtr MSALoginDialog::newAccount(QWidget* parent, QString msg)
+MinecraftAccountPtr MSALoginDialog::newAccount(QWidget* parent, QString msg, bool usingDeviceCode)
 {
     MSALoginDialog dlg(parent);
-    dlg.ui->label->setText(msg);
+    dlg.m_using_device_code = usingDeviceCode;
+    dlg.ui->message->setText(msg);
     if (dlg.exec() == QDialog::Accepted) {
         return dlg.m_account;
     }
     return nullptr;
+}
+
+void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
+{
+    ui->cancel->setEnabled(true);
+    ui->link->setVisible(true);
+    ui->copy->setVisible(true);
+    DesktopServices::openUrl(url);
+    ui->link->setText(url.toDisplayString());
+    ui->message->setText(
+        tr("Browser opened to complete the login process."
+           "<br /><br />"
+           "If your browser hasn't opened, please manually open the below link in your browser:"));
+}
+
+void MSALoginDialog::copyUrl()
+{
+    QClipboard* cb = QApplication::clipboard();
+    cb->setText(ui->link->text());
+}
+
+void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn)
+{
+    m_external_elapsed = 0;
+    m_external_timeout = expiresIn;
+
+    m_external_timer.setInterval(1000);
+    m_external_timer.setSingleShot(false);
+    m_external_timer.start();
+
+    ui->progressBar->setMaximum(expiresIn);
+    ui->progressBar->setValue(m_external_elapsed);
+
+    QString linkString = QString("<a href=\"%1\">%2</a>").arg(url, url);
+    if (url == "https://www.microsoft.com/link" && !code.isEmpty()) {
+        url += QString("?otc=%1").arg(code);
+        ui->message->setText(tr("<p>Please login in the opened browser. If no browser was opened, please open up %1 in "
+                                "a browser and put in the code <b>%2</b> to proceed with login.</p>")
+                                 .arg(linkString, code));
+    } else {
+        ui->message->setText(
+            tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
+    }
+    ui->cancel->setEnabled(true);
+    ui->link->setVisible(true);
+    ui->copy->setVisible(true);
+    ui->progressBar->setVisible(true);
+    DesktopServices::openUrl(url);
+    ui->link->setText(code);
+}
+
+void MSALoginDialog::externalLoginTick()
+{
+    m_external_elapsed++;
+    ui->progressBar->setValue(m_external_elapsed);
+    ui->progressBar->repaint();
+
+    if (m_external_elapsed >= m_external_timeout) {
+        m_external_timer.stop();
+    }
 }

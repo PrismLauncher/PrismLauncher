@@ -200,7 +200,7 @@ void ModrinthPackExportTask::buildZip()
 {
     setStatus(tr("Adding files..."));
 
-    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true);
+    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true, true);
     zipTask->addExtraFile("modrinth.index.json", generateIndex());
 
     zipTask->setExcludeFiles(resolvedFiles.keys());
