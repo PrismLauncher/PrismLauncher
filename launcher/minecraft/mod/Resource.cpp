@@ -161,7 +161,9 @@ bool Resource::enable(EnableAction action)
         path.chop(9);
     } else {
         path += ".disabled";
-        path = FS::getUniqueResourceName(path);
+        if (QFile::exists(path)) {
+            path = FS::getUniqueResourceName(path);
+        }
     }
     if (!file.rename(path))
         return false;
