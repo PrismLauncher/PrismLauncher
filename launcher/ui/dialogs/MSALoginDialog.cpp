@@ -60,7 +60,7 @@ MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MS
     ui->code->setFont(font);
 
     connect(ui->copyCode, &QPushButton::clicked, this, [this] { QApplication::clipboard()->setText(ui->code->text()); });
-    ui->qr->setPixmap(QIcon((":/documents/login-qr.svg")).pixmap(QSize(150, 150), Qt::KeepAspectRatio));
+    ui->qr->setPixmap(QIcon((":/documents/login-qr.svg")).pixmap(QSize(150, 150)));
     connect(ui->loginButton, &QPushButton::clicked, this, [this] {
         if (m_url.isValid()) {
             if (!DesktopServices::openUrl(m_url)) {
