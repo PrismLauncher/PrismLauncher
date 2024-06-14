@@ -128,7 +128,7 @@ MimeType=application/zip;application/x-modrinth-modpack+zip;x-scheme-handler/cur
     }
     QString appPath = QCoreApplication::applicationFilePath().replace("/", "\\");
 
-    settings.setValue(".", QString("URL:%1 Protocol")).arg(BuildConfig.LAUNCHER_NAME);
+    settings.setValue(".", QString("URL:%1 Protocol").arg(BuildConfig.LAUNCHER_NAME));
     settings.setValue("URL Protocol", "");
     settings.setValue("DefaultIcon/.", QString("\"%1\",1").arg(appPath));
     settings.setValue("shell/open/command/.", QString("\"%1\" \"%2\"").arg(appPath).arg("%1"));
