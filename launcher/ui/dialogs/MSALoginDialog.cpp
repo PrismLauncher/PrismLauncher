@@ -61,8 +61,7 @@ MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MS
     ui->code->setFont(font);
 
     connect(ui->copyCode, &QPushButton::clicked, this, [this] { QApplication::clipboard()->setText(ui->code->text()); });
-    ui->qr->setPixmap(QIcon((":/documents/login-qr.svg")).pixmap(QSize(150, 150)));
-    ui->title->setText(tr("Login to %1").arg(BuildConfig.LAUNCHER_DISPLAYNAME));
+    ui->qr->setPixmap(QIcon((":/documents/login-qr.svg")).pixmap(QSize(150, 150), Qt::KeepAspectRatio));
     connect(ui->loginButton, &QPushButton::clicked, this, [this] {
         if (m_url.isValid()) {
             if (!DesktopServices::openUrl(m_url)) {
@@ -119,8 +118,11 @@ void MSALoginDialog::onTaskFailed(QString reason)
             processed += "<br />";
         }
     }
-    auto task = qobject_cast<Task*>(sender());
     ui->status->setText(processed);
+    auto task = m_authflow_task;
+    if (task->failReason().isEmpty()) {
+        task = m_devicecode_task;
+    }
     if (task) {
         ui->loadingLabel->setText(task->getStatus());
     }

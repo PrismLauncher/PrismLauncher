@@ -37,10 +37,12 @@
 
 #include <QAbstractOAuth2>
 #include <QNetworkRequest>
+#include <QOAuthHttpServerReplyHandler>
 #include <QOAuthOobReplyHandler>
 
 #include "Application.h"
 #include "BuildConfig.h"
+#include "FileSystem.h"
 
 class CustomOAuthOobReplyHandler : public QOAuthOobReplyHandler {
     Q_OBJECT
@@ -61,9 +63,24 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
 {
     m_clientId = APPLICATION->getMSAClientID();
 
-    auto bv = new CustomOAuthOobReplyHandler();
+    if (QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") ||
+        QFile::exists(FS::PathCombine(APPLICATION->root(), "portable.txt")))
 
-    oauth2.setReplyHandler(bv);
+    {
+        auto replyHandler = new QOAuthHttpServerReplyHandler(1337, this);
+        replyHandler->setCallbackText(R"XXX(
+    <noscript>
+      <meta http-equiv="Refresh" content="0; URL=https://prismlauncher.org/successful-login" />
+    </noscript>
+    Login Successful, redirecting...
+    <script>
+      window.location.replace("https://prismlauncher.org/successful-login");
+    </script>
+    )XXX");
+        oauth2.setReplyHandler(replyHandler);
+    } else {
+        oauth2.setReplyHandler(new CustomOAuthOobReplyHandler(this));
+    }
     oauth2.setAuthorizationUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"));
     oauth2.setAccessTokenUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/token"));
     oauth2.setScope("XboxLive.SignIn XboxLive.offline_access");
