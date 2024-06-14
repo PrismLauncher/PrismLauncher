@@ -89,7 +89,7 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
         QFile::exists(FS::PathCombine(APPLICATION->root(), "portable.txt")) || !isSchemeHandlerRegistered())
 
     {
-        auto replyHandler = new QOAuthHttpServerReplyHandler(1337, this);
+        auto replyHandler = new QOAuthHttpServerReplyHandler(0, this);
         replyHandler->setCallbackText(R"XXX(
     <noscript>
       <meta http-equiv="Refresh" content="0; URL=https://prismlauncher.org/successful-login" />
