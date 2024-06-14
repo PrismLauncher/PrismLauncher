@@ -75,6 +75,8 @@ class LaunchController : public Task {
     void launchInstance();
     void decideAccount();
     bool reauthenticateCurrentAccount();
+    bool askPlayDemo();
+    QString askOfflineName(QString playerName, bool demo, bool& ok);
 
    private slots:
     void readyForLaunch();
