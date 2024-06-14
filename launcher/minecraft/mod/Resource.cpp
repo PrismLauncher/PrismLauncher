@@ -161,10 +161,7 @@ bool Resource::enable(EnableAction action)
         path.chop(9);
     } else {
         path += ".disabled";
-        auto newFilePath = FS::getUniqueResourceName(path);
-        if (newFilePath != path) {
-            FS::move(path, newFilePath);
-        }
+        path = FS::getUniqueResourceName(path);
     }
     if (QFileInfo::exists(path)) {  // the path exists so just remove the file at path
         return false;
