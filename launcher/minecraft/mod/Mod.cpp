@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,6 +48,7 @@
 #include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
+#include "modplatform/ModIndex.h"
 
 static ModPlatform::ProviderCapabilities ProviderCaps;
 
@@ -102,6 +104,32 @@ int Mod::compare(const Resource& other, SortType type) const
         }
         case SortType::PROVIDER: {
             return QString::compare(provider().value_or("Unknown"), cast_other->provider().value_or("Unknown"), Qt::CaseInsensitive);
+        }
+        case SortType::SIDE: {
+            if (side() > cast_other->side())
+                return 1;
+            else if (side() < cast_other->side())
+                return -1;
+            break;
+        }
+        case SortType::LOADERS: {
+            if (loaders() > cast_other->loaders())
+                return 1;
+            else if (loaders() < cast_other->loaders())
+                return -1;
+            break;
+        }
+        case SortType::MC_VERSIONS: {
+            auto thisVersion = mcVersions().join(",");
+            auto otherVersion = cast_other->mcVersions().join(",");
+            return QString::compare(thisVersion, otherVersion, Qt::CaseInsensitive);
+        }
+        case SortType::RELEASE_TYPE: {
+            if (releaseType() > cast_other->releaseType())
+                return 1;
+            else if (releaseType() < cast_other->releaseType())
+                return -1;
+            break;
         }
     }
     return 0;
@@ -223,6 +251,34 @@ auto Mod::provider() const -> std::optional<QString>
 {
     if (metadata())
         return ProviderCaps.readableName(metadata()->provider);
+    return {};
+}
+
+auto Mod::side() const -> Metadata::ModSide
+{
+    if (metadata())
+        return metadata()->side;
+    return Metadata::ModSide::UniversalSide;
+}
+
+auto Mod::releaseType() const -> ModPlatform::IndexedVersionType
+{
+    if (metadata())
+        return metadata()->releaseType;
+    return ModPlatform::IndexedVersionType::VersionType::Unknown;
+}
+
+auto Mod::loaders() const -> ModPlatform::ModLoaderTypes
+{
+    if (metadata())
+        return metadata()->loaders;
+    return {};
+}
+
+auto Mod::mcVersions() const -> QStringList
+{
+    if (metadata())
+        return metadata()->mcVersions;
     return {};
 }
 

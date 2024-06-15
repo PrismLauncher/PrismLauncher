@@ -80,10 +80,6 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
-    QString mcVersion = profile->getComponentVersion("net.minecraft");
-    auto loaders = profile->getSupportedModLoaders();
-
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
@@ -91,8 +87,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         if (!file.addonId.isValid())
             file.addonId = pack.addonId;
 
-        if (file.fileId.isValid() &&
-            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
 
@@ -118,19 +113,25 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
 
         if (str.contains('.'))
             file.mcVersion.append(str);
-        auto loader = str.toLower();
-        if (loader == "neoforge")
+
+        if (auto loader = str.toLower(); loader == "neoforge")
             file.loaders |= ModPlatform::NeoForge;
-        if (loader == "forge")
+        else if (loader == "forge")
             file.loaders |= ModPlatform::Forge;
-        if (loader == "cauldron")
+        else if (loader == "cauldron")
             file.loaders |= ModPlatform::Cauldron;
-        if (loader == "liteloader")
+        else if (loader == "liteloader")
             file.loaders |= ModPlatform::LiteLoader;
-        if (loader == "fabric")
+        else if (loader == "fabric")
             file.loaders |= ModPlatform::Fabric;
-        if (loader == "quilt")
+        else if (loader == "quilt")
             file.loaders |= ModPlatform::Quilt;
+        else if (loader == "server" || loader == "client") {
+            if (file.side.isEmpty())
+                file.side = loader;
+            else if (file.side != loader)
+                file.side = "both";
+        }
     }
 
     file.addonId = Json::requireInteger(obj, "modId");

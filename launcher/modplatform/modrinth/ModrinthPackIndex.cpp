@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -115,16 +116,11 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
 void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr, const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
-    QString mcVersion = profile->getComponentVersion("net.minecraft");
-    auto loaders = profile->getSupportedModLoaders();
-
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
         auto file = loadIndexedPackVersion(obj);
 
-        if (file.fileId.isValid() &&
-            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
     auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
@@ -155,15 +151,15 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     for (auto loader : loaders) {
         if (loader == "neoforge")
             file.loaders |= ModPlatform::NeoForge;
-        if (loader == "forge")
+        else if (loader == "forge")
             file.loaders |= ModPlatform::Forge;
-        if (loader == "cauldron")
+        else if (loader == "cauldron")
             file.loaders |= ModPlatform::Cauldron;
-        if (loader == "liteloader")
+        else if (loader == "liteloader")
             file.loaders |= ModPlatform::LiteLoader;
-        if (loader == "fabric")
+        else if (loader == "fabric")
             file.loaders |= ModPlatform::Fabric;
-        if (loader == "quilt")
+        else if (loader == "quilt")
             file.loaders |= ModPlatform::Quilt;
     }
     file.version = Json::requireString(obj, "name");
