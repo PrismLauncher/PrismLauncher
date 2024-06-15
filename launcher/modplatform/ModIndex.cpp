@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -94,10 +95,9 @@ auto ProviderCapabilities::hash(ResourceProvider p, QIODevice* device, QString t
 {
     QCryptographicHash::Algorithm algo = QCryptographicHash::Sha1;
     switch (p) {
-        case ResourceProvider::MODRINTH: {
+        case ResourceProvider::MODRINTH:
             algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Sha512;
             break;
-        }
         case ResourceProvider::FLAME:
             algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Md5;
             break;
@@ -117,7 +117,7 @@ QString getMetaURL(ResourceProvider provider, QVariant projectID)
            projectID.toString();
 }
 
-auto getModLoaderString(ModLoaderType type) -> const QString
+auto getModLoaderAsString(ModLoaderType type) -> const QString
 {
     switch (type) {
         case NeoForge:
@@ -136,6 +136,23 @@ auto getModLoaderString(ModLoaderType type) -> const QString
             break;
     }
     return "";
+}
+
+auto getModLoaderFromString(QString type) -> ModLoaderType
+{
+    if (type == "neoforge")
+        return NeoForge;
+    if (type == "forge")
+        return Forge;
+    if (type == "cauldron")
+        return Cauldron;
+    if (type == "liteloader")
+        return LiteLoader;
+    if (type == "fabric")
+        return Fabric;
+    if (type == "quilt")
+        return Quilt;
+    return {};
 }
 
 }  // namespace ModPlatform
