@@ -53,7 +53,7 @@ class JavaSettingsWidget : public QWidget {
     void javaVersionSelected(BaseVersion::Ptr version);
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
-    void on_javaDownloadBtn_clicked();
+    void javaDownloadBtn_clicked();
     void checkFinished(const JavaChecker::Result& result);
 
    protected: /* methods */

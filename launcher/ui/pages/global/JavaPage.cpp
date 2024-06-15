@@ -199,7 +199,7 @@ void JavaPage::on_javaTestBtn_clicked()
     checker->run();
 }
 
-void JavaPage::on_javaDownloadBtn_clicked()
+void JavaPage::on_downloadJavaButton_clicked()
 {
     auto jdialog = new Java::InstallDialog({}, this);
     jdialog->exec();
@@ -249,11 +249,6 @@ void JavaPage::updateThresholds()
         QPixmap pix = icon.pixmap(height, height);
         ui->labelMaxMemIcon->setPixmap(pix);
     }
-}
-
-void JavaPage::on_downloadJavaButton_clicked()
-{
-    on_javaDownloadBtn_clicked();
 }
 
 void JavaPage::on_removeJavaButton_clicked()

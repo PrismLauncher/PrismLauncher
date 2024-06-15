@@ -184,18 +184,18 @@ InstallDialog::InstallDialog(const QString& uid, QWidget* parent)
 QList<BasePage*> InstallDialog::getPages()
 {
     return {
-        // NeoForge
+        // Mojang
         new InstallJavaPage("net.minecraft.java", "", tr("Mojang")),
-        // Forge
+        // Adoptium
         new InstallJavaPage("net.adoptium.java", "", tr("Adoptium")),
-        // Fabric
+        // Azul
         new InstallJavaPage("com.azul.java", "", tr("Azul")),
     };
 }
 
 QString InstallDialog::dialogTitle()
 {
-    return tr("Install Loader");
+    return tr("Install Java");
 }
 
 void InstallDialog::validate(BasePage* page)
@@ -230,7 +230,11 @@ void InstallDialog::done(int result)
                 ProgressDialog pg(this);
                 pg.setSkipButton(true, tr("Abort"));
                 pg.execWithTask(task.get());
+            } else {
+                return;
             }
+        } else {
+            return;
         }
     }
 

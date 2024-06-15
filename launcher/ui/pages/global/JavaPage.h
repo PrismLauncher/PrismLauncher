@@ -72,7 +72,6 @@ class JavaPage : public QWidget, public BasePage {
     void on_javaDetectBtn_clicked();
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();
-    void on_javaDownloadBtn_clicked();
     void on_downloadJavaButton_clicked();
     void on_removeJavaButton_clicked();
     void on_refreshJavaButton_clicked();
