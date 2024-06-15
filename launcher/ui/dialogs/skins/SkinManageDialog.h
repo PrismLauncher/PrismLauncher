@@ -34,6 +34,7 @@ class SkinManageDialog : public QDialog {
    public:
     explicit SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct);
     virtual ~SkinManageDialog();
+    void resizeEvent(QResizeEvent* event) override;
 
    public slots:
     void selectionChanged(QItemSelection, QItemSelection);
