@@ -484,7 +484,7 @@ void SkinManageDialog::on_userBtn_clicked()
         if (failReason.isEmpty()) {
             failReason = tr("the skin is invalid");
         }
-        CustomMessageBox::selectable(this, tr("Usename not found"),
+        CustomMessageBox::selectable(this, tr("Username not found"),
                                      tr("Unable to find the skin for '%1'\n because: %2.").arg(user, failReason), QMessageBox::Critical)
             ->show();
         QFile::remove(path);
