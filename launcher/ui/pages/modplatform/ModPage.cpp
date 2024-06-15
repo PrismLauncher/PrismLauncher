@@ -113,48 +113,6 @@ QMap<QString, QString> ModPage::urlHandlers() const
 
 /******** Make changes to the UI ********/
 
-void ModPage::updateVersionList()
-{
-    m_ui->versionSelectionBox->clear();
-    auto packProfile = (dynamic_cast<MinecraftInstance&>(m_base_instance)).getPackProfile();
-
-    QString mcVersion = packProfile->getComponentVersion("net.minecraft");
-
-    auto current_pack = getCurrentPack();
-    if (!current_pack)
-        return;
-    auto installedVersion = m_model->getInstalledPackVersion(current_pack);
-    auto installedIndex = -1;
-    for (int i = 0; i < current_pack->versions.size(); i++) {
-        auto version = current_pack->versions[i];
-        bool valid = false;
-        for (auto& mcVer : m_filter->versions) {
-            if (validateVersion(version, mcVer.toString(), packProfile->getSupportedModLoaders())) {
-                valid = true;
-                break;
-            }
-        }
-        QString flag;
-        if (installedIndex == -1 && installedVersion.isValid() && installedVersion == version.fileId) {
-            flag = QString(" [%1]").arg(tr("installed", "Mod version select box"));
-            installedIndex = i;
-        }
-        // Only add the version if it's valid or using the 'Any' filter, but never if the version is opted out
-        if ((valid || m_filter->versions.empty()) && !optedOut(version)) {
-            auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
-            m_ui->versionSelectionBox->addItem(QString("%1%2%3").arg(version.version, release_type, flag), QVariant(i));
-        }
-    }
-    if (installedIndex != -1)
-        m_ui->versionSelectionBox->setCurrentIndex(installedIndex);
-    if (m_ui->versionSelectionBox->count() == 0) {
-        m_ui->versionSelectionBox->addItem(tr("No valid version found!"), QVariant(-1));
-        m_ui->resourceSelectionButton->setText(tr("Cannot select invalid version :("));
-    }
-
-    updateSelectionButton();
-}
-
 void ModPage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
                                 ModPlatform::IndexedVersion& version,
                                 const std::shared_ptr<ResourceFolderModel> base_model)

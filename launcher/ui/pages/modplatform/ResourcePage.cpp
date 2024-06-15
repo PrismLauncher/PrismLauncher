@@ -449,7 +449,6 @@ void ResourcePage::openUrl(const QUrl& url)
 void ResourcePage::openProject(QVariant projectID)
 {
     m_ui->sortByBox->hide();
-    m_ui->searchButton->hide();
     m_ui->searchEdit->hide();
     m_ui->resourceFilterButton->hide();
     m_ui->packView->hide();
