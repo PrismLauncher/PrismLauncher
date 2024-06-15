@@ -45,11 +45,12 @@
 
 TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance* instance) : ResourceFolderModel(QDir(dir), instance)
 {
-    m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified" });
-    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified") });
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Last Modified", "Size" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Last Modified"), tr("Size") });
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::DATE };
-    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true };
+    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive,
+                              QHeaderView::Interactive };
+    m_columnsHideable = { false, true, false, true, true };
 }
 
 Task* TexturePackFolderModel::createUpdateTask()
