@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,7 +62,20 @@ class QFileSystemWatcher;
 class ModFolderModel : public ResourceFolderModel {
     Q_OBJECT
    public:
-    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, VersionColumn, DateColumn, ProviderColumn, NUM_COLUMNS };
+    enum Columns {
+        ActiveColumn = 0,
+        ImageColumn,
+        NameColumn,
+        VersionColumn,
+        DateColumn,
+        ProviderColumn,
+        SizeColumn,
+        SideColumn,
+        LoadersColumn,
+        McVersionsColumn,
+        ReleaseTypeColumn,
+        NUM_COLUMNS
+    };
     enum ModStatusAction { Disable, Enable, Toggle };
     ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed = false, bool create_dir = true);
 

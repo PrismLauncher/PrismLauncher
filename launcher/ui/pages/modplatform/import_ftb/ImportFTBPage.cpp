@@ -21,6 +21,7 @@
 #include "ui_ImportFTBPage.h"
 
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QWidget>
 #include "FileSystem.h"
 #include "ListModel.h"
@@ -58,8 +59,8 @@ ImportFTBPage::ImportFTBPage(NewInstanceDialog* dialog, QWidget* parent) : QWidg
     connect(ui->searchEdit, &QLineEdit::textChanged, this, &ImportFTBPage::triggerSearch);
 
     connect(ui->browseButton, &QPushButton::clicked, this, [this] {
-        auto path = listModel->getPath();
-        QString dir = QFileDialog::getExistingDirectory(this, tr("Select FTBApp instances directory"), path, QFileDialog::ShowDirsOnly);
+        QString dir = QFileDialog::getExistingDirectory(this, tr("Select FTBApp instances directory"), listModel->getUserPath(),
+                                                        QFileDialog::ShowDirsOnly);
         if (!dir.isEmpty())
             listModel->setPath(dir);
     });

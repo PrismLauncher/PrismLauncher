@@ -5,6 +5,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,6 +46,7 @@
 
 #include "Markdown.h"
 
+#include "StringUtils.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/widgets/ProjectItem.h"
@@ -66,11 +68,13 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& base_in
 
     connect(&m_search_timer, &QTimer::timeout, this, &ResourcePage::triggerSearch);
 
+    // hide progress bar to prevent weird artifact
+    m_fetch_progress.hide();
     m_fetch_progress.hideIfInactive(true);
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    m_ui->gridLayout_3->addWidget(&m_fetch_progress, 0, 0, 1, m_ui->gridLayout_3->columnCount());
+    m_ui->verticalLayout->insertWidget(1, &m_fetch_progress);
 
     m_ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     m_ui->packView->installEventFilter(this);
@@ -92,8 +96,10 @@ void ResourcePage::retranslate()
 
 void ResourcePage::openedImpl()
 {
-    if (!supportsFiltering())
+    if (!supportsFiltering()) {
         m_ui->resourceFilterButton->setVisible(false);
+        m_ui->filterWidget->hide();
+    }
 
     //: String in the search bar of the mod downloading dialog
     m_ui->searchEdit->setPlaceholderText(tr("Search for %1...").arg(resourcesString()));
@@ -234,8 +240,8 @@ void ResourcePage::updateUi()
 
     text += "<hr>";
 
-    m_ui->packDescription->setHtml(
-        text + (current_pack->extraData.body.isEmpty() ? current_pack->description : markdownToHTML(current_pack->extraData.body)));
+    m_ui->packDescription->setHtml(StringUtils::htmlListPatch(
+        text + (current_pack->extraData.body.isEmpty() ? current_pack->description : markdownToHTML(current_pack->extraData.body))));
     m_ui->packDescription->flush();
 }
 
@@ -270,7 +276,7 @@ void ResourcePage::updateVersionList()
 
         for (int i = 0; i < current_pack->versions.size(); i++) {
             auto& version = current_pack->versions[i];
-            if (optedOut(version))
+            if (!m_model->checkVersionFilters(version))
                 continue;
 
             auto release_type = current_pack->versions[i].version_type.isValid()

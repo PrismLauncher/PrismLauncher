@@ -5,6 +5,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,7 +58,6 @@ namespace ResourceDownload {
 
 ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
 {
-    connect(m_ui->searchButton, &QPushButton::clicked, this, &ModPage::triggerSearch);
     connect(m_ui->resourceFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
     connect(m_ui->packView, &QListView::doubleClicked, this, &ModPage::onResourceSelected);
 }
@@ -67,17 +67,18 @@ void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
     if (m_filter_widget)
         disconnect(m_filter_widget.get(), nullptr, nullptr, nullptr);
 
+    auto old = m_ui->splitter->replaceWidget(0, widget.get());
+    // because we replaced the widget we also need to delete it
+    if (old) {
+        delete old;
+    }
+
     m_filter_widget.swap(widget);
 
-    m_ui->gridLayout_3->addWidget(m_filter_widget.get(), 0, 0, 1, m_ui->gridLayout_3->columnCount());
-
-    m_filter_widget->setInstance(&static_cast<MinecraftInstance&>(m_base_instance));
     m_filter = m_filter_widget->getFilter();
 
-    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this,
-            [&] { m_ui->searchButton->setStyleSheet("text-decoration: underline"); });
-    connect(m_filter_widget.get(), &ModFilterWidget::filterUnchanged, this,
-            [&] { m_ui->searchButton->setStyleSheet("text-decoration: none"); });
+    connect(m_filter_widget.get(), &ModFilterWidget::filterChanged, this, &ModPage::triggerSearch);
+    prepareProviderCategories();
 }
 
 /******** Callbacks to events in the UI (set up in the derived classes) ********/
@@ -89,6 +90,7 @@ void ModPage::filterMods()
 
 void ModPage::triggerSearch()
 {
+    auto changed = m_filter_widget->changed();
     m_filter = m_filter_widget->getFilter();
     m_ui->packView->selectionModel()->setCurrentIndex({}, QItemSelectionModel::SelectionFlag::ClearAndSelect);
     m_ui->packView->clearSelection();
@@ -96,7 +98,7 @@ void ModPage::triggerSearch()
     m_ui->versionSelectionBox->clear();
     updateSelectionButton();
 
-    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), m_filter_widget->changed());
+    static_cast<ModModel*>(m_model)->searchWithTerm(getSearchTerm(), m_ui->sortByBox->currentData().toUInt(), changed);
     m_fetch_progress.watch(m_model->activeSearchJob().get());
 }
 

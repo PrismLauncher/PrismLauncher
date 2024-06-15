@@ -647,6 +647,19 @@ void ExternalLinkFileProcess::runLinkFile()
     qDebug() << "Process exited";
 }
 
+bool moveByCopy(const QString& source, const QString& dest)
+{
+    if (!copy(source, dest)()) {  // copy
+        qDebug() << "Copy of" << source << "to" << dest << "failed!";
+        return false;
+    }
+    if (!deletePath(source)) {  // remove original
+        qDebug() << "Deletion of" << source << "failed!";
+        return false;
+    };
+    return true;
+}
+
 bool move(const QString& source, const QString& dest)
 {
     std::error_code err;
@@ -654,13 +667,14 @@ bool move(const QString& source, const QString& dest)
     ensureFilePathExists(dest);
     fs::rename(StringUtils::toStdString(source), StringUtils::toStdString(dest), err);
 
-    if (err) {
-        qWarning() << "Failed to move file:" << QString::fromStdString(err.message());
-        qDebug() << "Source file:" << source;
-        qDebug() << "Destination file:" << dest;
+    if (err.value() != 0) {
+        if (moveByCopy(source, dest))
+            return true;
+        qDebug() << "Move of" << source << "to" << dest << "failed!";
+        qWarning() << "Failed to move file:" << QString::fromStdString(err.message()) << QString::number(err.value());
+        return false;
     }
-
-    return err.value() == 0;
+    return true;
 }
 
 bool deletePath(QString path)
@@ -801,25 +815,78 @@ QString NormalizePath(QString path)
     }
 }
 
-static const QString BAD_PATH_CHARS = "\"?<>:;*|!+\r\n";
-static const QString BAD_FILENAME_CHARS = BAD_PATH_CHARS + "\\/";
+QString removeDuplicates(QString a)
+{
+    auto b = a.split("");
+    b.removeDuplicates();
+    return b.join("");
+}
+
+static const QString BAD_WIN_CHARS = "\"?<>:*|\r\n";
+
+static const QString BAD_FAT_CHARS = "<>:\"|?*+.,;=[]!";
+static const QString BAD_NTFS_CHARS = "<>:\"|?*";
+static const QString BAD_HFS_CHARS = ":";
+
+static const QString BAD_FILENAME_CHARS = removeDuplicates(BAD_WIN_CHARS + BAD_FAT_CHARS + BAD_NTFS_CHARS + BAD_HFS_CHARS) + "\\/";
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
     for (int i = 0; i < string.length(); i++)
         if (string.at(i) < ' ' || BAD_FILENAME_CHARS.contains(string.at(i)))
             string[i] = replaceWith;
-
     return string;
 }
 
-QString RemoveInvalidPathChars(QString string, QChar replaceWith)
+QString RemoveInvalidPathChars(QString path, QChar replaceWith)
 {
-    for (int i = 0; i < string.length(); i++)
-        if (string.at(i) < ' ' || BAD_PATH_CHARS.contains(string.at(i)))
-            string[i] = replaceWith;
+    QString invalidChars;
+#ifdef Q_OS_WIN
+    invalidChars = BAD_WIN_CHARS;
+#endif
 
-    return string;
+    // the null character is ignored in this check as it was not a problem until now
+    switch (statFS(path).fsType) {
+        case FilesystemType::FAT:
+            invalidChars += BAD_FAT_CHARS;
+            break;
+        case FilesystemType::NTFS:
+        /* fallthrough */
+        case FilesystemType::REFS:  // similar to NTFS(should be available only on windows)
+            invalidChars += BAD_NTFS_CHARS;
+            break;
+        // case FilesystemType::EXT:
+        // case FilesystemType::EXT_2_OLD:
+        // case FilesystemType::EXT_2_3_4:
+        // case FilesystemType::XFS:
+        // case FilesystemType::BTRFS:
+        // case FilesystemType::NFS:
+        // case FilesystemType::ZFS:
+        case FilesystemType::APFS:
+        /* fallthrough */
+        case FilesystemType::HFS:
+        /* fallthrough */
+        case FilesystemType::HFSPLUS:
+        /* fallthrough */
+        case FilesystemType::HFSX:
+            invalidChars += BAD_HFS_CHARS;
+            break;
+        // case FilesystemType::FUSEBLK:
+        // case FilesystemType::F2FS:
+        // case FilesystemType::UNKNOWN:
+        default:
+            break;
+    }
+
+    if (invalidChars.size() != 0) {
+        for (int i = 0; i < path.length(); i++) {
+            if (path.at(i) < ' ' || invalidChars.contains(path.at(i))) {
+                path[i] = replaceWith;
+            }
+        }
+    }
+
+    return path;
 }
 
 QString DirNameFromString(QString string, QString inDir)

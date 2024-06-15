@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -52,4 +53,6 @@ class Metadata {
     static auto get(QDir& index_dir, QString mod_slug) -> ModStruct { return Packwiz::V1::getIndexForMod(index_dir, mod_slug); }
 
     static auto get(QDir& index_dir, QVariant& mod_id) -> ModStruct { return Packwiz::V1::getIndexForMod(index_dir, mod_id); }
+
+    static auto modSideToString(ModSide side) -> QString { return Packwiz::V1::sideToString(side); }
 };
