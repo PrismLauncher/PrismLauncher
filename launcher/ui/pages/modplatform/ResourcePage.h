@@ -84,7 +84,7 @@ class ResourcePage : public QWidget, public BasePage {
     bool hasSelectedPacks() { return !(m_model->selectedPacks().isEmpty()); }
 
    protected slots:
-    virtual void triggerSearch() {}
+    virtual void triggerSearch() = 0;
 
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(QString data);
@@ -95,13 +95,6 @@ class ResourcePage : public QWidget, public BasePage {
     /** Associates regex expressions to pages in the order they're given in the map. */
     virtual QMap<QString, QString> urlHandlers() const = 0;
     virtual void openUrl(const QUrl&);
-
-    /** Whether the version is opted out or not. Currently only makes sense in CF. */
-    virtual bool optedOut(ModPlatform::IndexedVersion& ver) const
-    {
-        Q_UNUSED(ver);
-        return false;
-    };
 
    public:
     BaseInstance& m_base_instance;

@@ -539,6 +539,10 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
 
 void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
+    for (auto i = 0; i < m_columnsHiddenByDefault.size(); ++i) {
+        tree->setColumnHidden(i, m_columnsHiddenByDefault[i]);
+    }
+
     auto const setting_name = QString("UI/%1_Page/Columns").arg(id());
     auto setting = (m_instance->settings()->contains(setting_name)) ? m_instance->settings()->getSetting(setting_name)
                                                                     : m_instance->settings()->registerSetting(setting_name);
