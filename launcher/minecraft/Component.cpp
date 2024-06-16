@@ -56,18 +56,6 @@ Component::Component(PackProfile* parent, const QString& uid)
     m_uid = uid;
 }
 
-Component::Component(PackProfile* parent, std::shared_ptr<Meta::Version> version)
-{
-    assert(parent);
-    m_parent = parent;
-
-    m_metaVersion = version;
-    m_uid = version->uid();
-    m_version = m_cachedVersion = version->version();
-    m_cachedName = version->name();
-    m_loaded = version->isLoaded();
-}
-
 Component::Component(PackProfile* parent, const QString& uid, std::shared_ptr<VersionFile> file)
 {
     assert(parent);
@@ -103,7 +91,11 @@ std::shared_ptr<class VersionFile> Component::getVersionFile() const
 {
     if (m_metaVersion) {
         if (!m_metaVersion->isLoaded()) {
-            m_metaVersion->load(Net::Mode::Online);
+            QEventLoop ev;
+            auto task = APPLICATION->metadataIndex()->loadVersion(m_metaVersion->uid(), m_metaVersion->version(), Net::Mode::Online);
+            connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+            task->start();
+            ev.exec();
         }
         return m_metaVersion->data();
     } else {
@@ -228,7 +220,11 @@ bool Component::isVersionChangeable()
     auto list = getVersionList();
     if (list) {
         if (!list->isLoaded()) {
-            list->load(Net::Mode::Online);
+            QEventLoop ev;
+            auto task = list->getLoadTask();
+            connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+            task->start();
+            ev.exec();
         }
         return list->count() != 0;
     }

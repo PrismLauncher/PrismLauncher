@@ -47,7 +47,6 @@
 #include "net/PasteUpload.h"
 #include "pathmatcher/MultiMatcher.h"
 #include "pathmatcher/SimplePrefixMatcher.h"
-#include "settings/INIFile.h"
 #include "tools/GenericProfiler.h"
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
@@ -106,7 +105,7 @@
 #include "icons/IconList.h"
 #include "net/HttpMetaCache.h"
 
-#include "java/JavaUtils.h"
+#include "java/JavaInstallList.h"
 
 #include "updater/ExternalUpdater.h"
 
@@ -151,6 +150,7 @@
 #endif
 
 #if defined Q_OS_WIN32
+#include <windows.h>
 #include "WindowsConsole.h"
 #endif
 

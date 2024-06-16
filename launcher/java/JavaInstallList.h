@@ -35,7 +35,7 @@ class JavaInstallList : public BaseVersionList {
    public:
     explicit JavaInstallList(QObject* parent = 0);
 
-    Task::Ptr getLoadTask() override;
+    [[nodiscard]] Task::Ptr getLoadTask() override;
     bool isLoaded() override;
     const BaseVersion::Ptr at(int i) const override;
     int count() const override;

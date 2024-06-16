@@ -38,7 +38,7 @@ class Version : public QObject, public BaseVersion, public BaseEntity {
     using Ptr = std::shared_ptr<Version>;
 
     explicit Version(const QString& uid, const QString& version);
-    virtual ~Version();
+    virtual ~Version() = default;
 
     QString descriptor() override;
     QString name() override;

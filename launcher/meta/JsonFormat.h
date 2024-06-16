@@ -16,11 +16,9 @@
 #pragma once
 
 #include <QJsonObject>
-#include <memory>
 
 #include <set>
 #include "Exception.h"
-#include "meta/BaseEntity.h"
 
 namespace Meta {
 class Index;

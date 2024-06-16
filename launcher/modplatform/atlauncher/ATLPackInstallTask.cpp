@@ -36,6 +36,7 @@
 
 #include "ATLPackInstallTask.h"
 
+#include <QEventLoop>
 #include <QtConcurrent>
 #include <algorithm>
 
@@ -344,7 +345,11 @@ QString PackInstallTask::getVersionForLoader(QString uid)
         }
 
         if (!vlist->isLoaded()) {
-            vlist->load(Net::Mode::Online);
+            QEventLoop ev;
+            auto task = vlist->getLoadTask();
+            connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+            task->start();
+            ev.exec();
         }
 
         if (m_version.loader.recommended || m_version.loader.latest) {
@@ -638,8 +643,7 @@ void PackInstallTask::installConfigs()
 
     auto dl = Net::ApiDownload::makeCached(url, entry);
     if (!m_version.configs.sha1.isEmpty()) {
-        auto rawSha1 = QByteArray::fromHex(m_version.configs.sha1.toLatin1());
-        dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+        dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, m_version.configs.sha1));
     }
     jobPtr->addNetAction(dl);
     archivePath = entry->getFullPath();
@@ -758,8 +762,7 @@ void PackInstallTask::downloadMods()
 
             auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
-                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             jobPtr->addNetAction(dl);
         } else if (mod.type == ModType::Decomp) {
@@ -769,8 +772,7 @@ void PackInstallTask::downloadMods()
 
             auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
-                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             jobPtr->addNetAction(dl);
         } else {
@@ -783,8 +785,7 @@ void PackInstallTask::downloadMods()
 
             auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
-                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             jobPtr->addNetAction(dl);
 
@@ -1075,36 +1076,13 @@ void PackInstallTask::install()
 
 static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
 {
-    auto vlist = APPLICATION->metadataIndex()->get(uid);
-    if (!vlist)
-        return {};
+    QEventLoop ev;
+    auto task = APPLICATION->metadataIndex()->loadVersion(uid, version);
+    QObject::connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+    task->start();
+    ev.exec();
 
-    if (!vlist->isLoaded()) {
-        QEventLoop loadVersionLoop;
-        auto task = vlist->getLoadTask();
-        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
-        if (!task->isRunning())
-            task->start();
-
-        loadVersionLoop.exec();
-    }
-
-    auto ver = vlist->getVersion(version);
-    if (!ver)
-        return {};
-
-    if (!ver->isLoaded()) {
-        QEventLoop loadVersionLoop;
-        ver->load(Net::Mode::Online);
-        auto task = ver->getCurrentTask();
-        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
-        if (!task->isRunning())
-            task->start();
-
-        loadVersionLoop.exec();
-    }
-
-    return ver;
+    return APPLICATION->metadataIndex()->get(uid, version);
 }
 
 }  // namespace ATLauncher
