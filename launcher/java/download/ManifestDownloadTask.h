@@ -31,6 +31,7 @@ class ManifestDownloadTask : public Task {
 
     [[nodiscard]] bool canAbort() const override { return true; }
     void executeTask() override;
+    virtual bool abort() override;
 
    private slots:
     void downloadJava(const QJsonDocument& doc);
@@ -40,5 +41,6 @@ class ManifestDownloadTask : public Task {
     QString m_final_path;
     QString m_checksum_type;
     QString m_checksum_hash;
+    Task::Ptr m_task;
 };
 }  // namespace Java

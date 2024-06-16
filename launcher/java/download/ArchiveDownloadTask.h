@@ -30,6 +30,7 @@ class ArchiveDownloadTask : public Task {
 
     [[nodiscard]] bool canAbort() const override { return true; }
     void executeTask() override;
+    virtual bool abort() override;
 
    private slots:
     void extractJava(QString input);
@@ -39,5 +40,6 @@ class ArchiveDownloadTask : public Task {
     QString m_final_path;
     QString m_checksum_type;
     QString m_checksum_hash;
+    Task::Ptr m_task;
 };
 }  // namespace Java

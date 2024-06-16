@@ -51,18 +51,13 @@ void ManifestDownloadTask::executeTask()
     }
     download->addNetAction(action);
 
-    connect(download.get(), &NetJob::finished, [download, this] {
-        disconnect(this, &Task::aborted, download.get(), &NetJob::abort);
-        download->deleteLater();
-    });
-    connect(download.get(), &NetJob::failed, this, &ManifestDownloadTask::emitFailed);
-    connect(this, &Task::aborted, download.get(), &NetJob::abort);
+    connect(download.get(), &Task::failed, this, &ManifestDownloadTask::emitFailed);
     connect(download.get(), &Task::progress, this, &ManifestDownloadTask::setProgress);
     connect(download.get(), &Task::stepProgress, this, &ManifestDownloadTask::propagateStepProgress);
     connect(download.get(), &Task::status, this, &ManifestDownloadTask::setStatus);
     connect(download.get(), &Task::details, this, &ManifestDownloadTask::setDetails);
 
-    connect(download.get(), &NetJob::succeeded, [files, this] {
+    connect(download.get(), &Task::succeeded, [files, this] {
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*files, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -73,7 +68,8 @@ void ManifestDownloadTask::executeTask()
         }
         downloadJava(doc);
     });
-    download->start();
+    m_task = download;
+    m_task->start();
 }
 
 void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
@@ -107,7 +103,7 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
             }
         }
     }
-    auto elementDownload = new NetJob("JRE::FileDownload", APPLICATION->network());
+    auto elementDownload = makeShared<NetJob>("JRE::FileDownload", APPLICATION->network());
     for (const auto& file : toDownload) {
         auto dl = Net::Download::makeFile(file.url, file.path);
         if (!file.hash.isEmpty()) {
@@ -119,18 +115,24 @@ void ManifestDownloadTask::downloadJava(const QJsonDocument& doc)
         }
         elementDownload->addNetAction(dl);
     }
-    connect(elementDownload, &NetJob::finished, [elementDownload, this] {
-        disconnect(this, &Task::aborted, elementDownload, &NetJob::abort);
-        elementDownload->deleteLater();
-    });
-    connect(elementDownload, &NetJob::failed, this, &ManifestDownloadTask::emitFailed);
-    connect(elementDownload, &Task::progress, this, &ManifestDownloadTask::setProgress);
-    connect(elementDownload, &Task::stepProgress, this, &ManifestDownloadTask::propagateStepProgress);
-    connect(elementDownload, &Task::status, this, &ManifestDownloadTask::setStatus);
-    connect(elementDownload, &Task::details, this, &ManifestDownloadTask::setDetails);
 
-    connect(this, &Task::aborted, elementDownload, &NetJob::abort);
-    connect(elementDownload, &NetJob::succeeded, [this] { emitSucceeded(); });
-    elementDownload->start();
+    connect(elementDownload.get(), &Task::failed, this, &ManifestDownloadTask::emitFailed);
+    connect(elementDownload.get(), &Task::progress, this, &ManifestDownloadTask::setProgress);
+    connect(elementDownload.get(), &Task::stepProgress, this, &ManifestDownloadTask::propagateStepProgress);
+    connect(elementDownload.get(), &Task::status, this, &ManifestDownloadTask::setStatus);
+    connect(elementDownload.get(), &Task::details, this, &ManifestDownloadTask::setDetails);
+
+    connect(elementDownload.get(), &Task::succeeded, this, &ManifestDownloadTask::emitSucceeded);
+    m_task = elementDownload;
+    m_task->start();
 }
+
+bool ManifestDownloadTask::abort()
+{
+    auto aborted = canAbort();
+    if (m_task)
+        aborted = m_task->abort();
+    emitAborted();
+    return aborted;
+};
 }  // namespace Java

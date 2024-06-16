@@ -50,21 +50,17 @@ void ArchiveDownloadTask::executeTask()
     download->addNetAction(action);
     auto fullPath = entry->getFullPath();
 
-    connect(download.get(), &NetJob::finished, [download, this] {
-        disconnect(this, &Task::aborted, download.get(), &NetJob::abort);
-        download->deleteLater();
-    });
-    connect(download.get(), &NetJob::failed, this, &ArchiveDownloadTask::emitFailed);
-    connect(this, &Task::aborted, download.get(), &NetJob::abort);
+    connect(download.get(), &Task::failed, this, &ArchiveDownloadTask::emitFailed);
     connect(download.get(), &Task::progress, this, &ArchiveDownloadTask::setProgress);
     connect(download.get(), &Task::stepProgress, this, &ArchiveDownloadTask::propagateStepProgress);
     connect(download.get(), &Task::status, this, &ArchiveDownloadTask::setStatus);
     connect(download.get(), &Task::details, this, &ArchiveDownloadTask::setDetails);
-    connect(download.get(), &NetJob::succeeded, [this, fullPath] {
+    connect(download.get(), &Task::succeeded, [this, fullPath] {
         // This should do all of the extracting and creating folders
         extractJava(fullPath);
     });
-    download->start();
+    m_task = download;
+    m_task->start();
 }
 
 void ArchiveDownloadTask::extractJava(QString input)
@@ -102,34 +98,40 @@ void ArchiveDownloadTask::extractJava(QString input)
         emitFailed("Empty archive");
         return;
     }
-    auto zipTask = makeShared<MMCZip::ExtractZipTask>(zip, m_final_path, files[0]);
+    m_task = makeShared<MMCZip::ExtractZipTask>(zip, m_final_path, files[0]);
 
     auto progressStep = std::make_shared<TaskStepProgress>();
-    connect(zipTask.get(), &Task::finished, this, [this, progressStep] {
+    connect(m_task.get(), &Task::finished, this, [this, progressStep] {
         progressStep->state = TaskStepState::Succeeded;
         stepProgress(*progressStep);
     });
 
-    connect(this, &Task::aborted, zipTask.get(), &Task::abort);
-    connect(zipTask.get(), &Task::finished, [zipTask, this] { disconnect(this, &Task::aborted, zipTask.get(), &Task::abort); });
-
-    connect(zipTask.get(), &Task::succeeded, this, &ArchiveDownloadTask::emitSucceeded);
-    connect(zipTask.get(), &Task::aborted, this, &ArchiveDownloadTask::emitAborted);
-    connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
+    connect(m_task.get(), &Task::succeeded, this, &ArchiveDownloadTask::emitSucceeded);
+    connect(m_task.get(), &Task::aborted, this, &ArchiveDownloadTask::emitAborted);
+    connect(m_task.get(), &Task::failed, this, [this, progressStep](QString reason) {
         progressStep->state = TaskStepState::Failed;
         stepProgress(*progressStep);
         emitFailed(reason);
     });
-    connect(zipTask.get(), &Task::stepProgress, this, &ArchiveDownloadTask::propagateStepProgress);
+    connect(m_task.get(), &Task::stepProgress, this, &ArchiveDownloadTask::propagateStepProgress);
 
-    connect(zipTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
+    connect(m_task.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
         progressStep->update(current, total);
         stepProgress(*progressStep);
     });
-    connect(zipTask.get(), &Task::status, this, [this, progressStep](QString status) {
+    connect(m_task.get(), &Task::status, this, [this, progressStep](QString status) {
         progressStep->status = status;
         stepProgress(*progressStep);
     });
-    zipTask->start();
+    m_task->start();
 }
+
+bool ArchiveDownloadTask::abort()
+{
+    auto aborted = canAbort();
+    if (m_task)
+        aborted = m_task->abort();
+    emitAborted();
+    return aborted;
+};
 }  // namespace Java
