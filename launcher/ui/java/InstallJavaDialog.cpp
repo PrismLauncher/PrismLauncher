@@ -60,7 +60,8 @@ class InstallJavaPage : public QWidget, public BasePage {
         javaVersionSelect->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
         horizontalLayout->addWidget(javaVersionSelect, 4);
         connect(majorVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::setSelectedVersion);
-        connect(javaVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::selectedVersionChanged);
+        connect(majorVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::selectionChanged);
+        connect(javaVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::selectionChanged);
 
         QMetaObject::connectSlotsByName(this);
     }
@@ -119,7 +120,7 @@ class InstallJavaPage : public QWidget, public BasePage {
         javaVersionSelect->loadList();
     }
    signals:
-    void selectedVersionChanged(BaseVersion::Ptr version);
+    void selectionChanged();
 
    private:
     const QString uid;
@@ -171,14 +172,11 @@ InstallDialog::InstallDialog(const QString& uid, QWidget* parent)
         if (page->id() == uid)
             container->selectPage(page->id());
 
-        connect(pageCast(page), &InstallJavaPage::selectedVersionChanged, this, [this, page] {
-            if (page->id() == container->selectedPage()->id())
-                validate(container->selectedPage());
-        });
+        connect(pageCast(page), &InstallJavaPage::selectionChanged, this, [this] { validate(); });
     }
-    connect(container, &PageContainer::selectedPageChanged, this, [this](BasePage* previous, BasePage* current) { validate(current); });
+    connect(container, &PageContainer::selectedPageChanged, this, [this] { validate(); });
     pageCast(container->selectedPage())->selectSearch();
-    validate(container->selectedPage());
+    validate();
 }
 
 QList<BasePage*> InstallDialog::getPages()
@@ -198,9 +196,10 @@ QString InstallDialog::dialogTitle()
     return tr("Install Java");
 }
 
-void InstallDialog::validate(BasePage* page)
+void InstallDialog::validate()
 {
-    buttons->button(QDialogButtonBox::Ok)->setEnabled(pageCast(page)->selectedVersion() != nullptr);
+    buttons->button(QDialogButtonBox::Ok)
+        ->setEnabled(!!std::dynamic_pointer_cast<Java::Metadata>(pageCast(container->selectedPage())->selectedVersion()));
 }
 
 void InstallDialog::done(int result)

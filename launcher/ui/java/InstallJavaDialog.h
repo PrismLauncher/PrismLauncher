@@ -36,7 +36,7 @@ class InstallDialog final : public QDialog, private BasePageProvider {
     QList<BasePage*> getPages() override;
     QString dialogTitle() override;
 
-    void validate(BasePage* page);
+    void validate();
     void done(int result) override;
 
    private:
