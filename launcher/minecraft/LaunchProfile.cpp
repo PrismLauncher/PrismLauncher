@@ -166,7 +166,8 @@ void LaunchProfile::applyCompatibleJavaMajors(QList<int>& javaMajor)
 }
 void LaunchProfile::applyCompatibleJavaName(QString javaName)
 {
-    m_compatibleJavaName = javaName;
+    if (!javaName.isEmpty())
+        m_compatibleJavaName = javaName;
 }
 
 void LaunchProfile::applyLibrary(LibraryPtr library, const RuntimeContext& runtimeContext)
