@@ -41,8 +41,8 @@ class Hasher : public Task {
     QString m_path;
     Algorithm m_alg;
 
-    QFuture<QString> m_zip_future;
-    QFutureWatcher<QString> m_zip_watcher;
+    QFuture<QString> m_future;
+    QFutureWatcher<QString> m_watcher;
 };
 
 Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider);
