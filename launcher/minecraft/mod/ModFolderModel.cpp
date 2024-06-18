@@ -65,9 +65,9 @@ ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool 
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
     m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders",
-                                   "Miecraft Versions", "Release Type" });
+                                   "Minecraft Versions", "Release Type" });
     m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"),
-                                              tr("Size"), tr("Side"), tr("Loaders"), tr("Miecraft Versions"), tr("Release Type") });
+                                              tr("Size"), tr("Side"), tr("Loaders"), tr("Minecraft Versions"), tr("Release Type") });
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME,        SortType::NAME,        SortType::VERSION,
                            SortType::DATE,    SortType::PROVIDER,    SortType::SIZE,        SortType::SIDE,
                            SortType::LOADERS, SortType::MC_VERSIONS, SortType::RELEASE_TYPE };
