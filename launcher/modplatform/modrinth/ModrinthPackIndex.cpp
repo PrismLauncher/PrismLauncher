@@ -27,7 +27,6 @@
 #include "modplatform/ModIndex.h"
 
 static ModrinthAPI api;
-static ModPlatform::ProviderCapabilities ProviderCaps;
 
 bool shouldDownloadOnSide(QString side)
 {
@@ -231,7 +230,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
             file.hash = Json::requireString(hash_list, preferred_hash_type);
             file.hash_type = preferred_hash_type;
         } else {
-            auto hash_types = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH);
+            auto hash_types = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
             for (auto& hash_type : hash_types) {
                 if (hash_list.contains(hash_type)) {
                     file.hash = Json::requireString(hash_list, hash_type);
