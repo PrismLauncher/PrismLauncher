@@ -21,7 +21,7 @@ class Reader {
     virtual ~Reader() = default;
     virtual int read(char* s, int n) = 0;
     virtual bool eof() = 0;
-    virtual void goToBegining() = 0;
+    virtual void goToBeginning() = 0;
 };
 
 uint32_t hash(

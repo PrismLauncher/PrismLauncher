@@ -33,7 +33,7 @@ uint32_t hash(Reader* file_stream, std::size_t buffer_size, std::function<bool(c
         }
     } while (!file_stream->eof());
 
-    file_stream->goToBegining();
+    file_stream->goToBeginning();
 
     int index = 0;
 

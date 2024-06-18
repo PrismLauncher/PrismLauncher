@@ -35,7 +35,7 @@ class QIODeviceReader : public Murmur2::Reader {
     virtual ~QIODeviceReader() = default;
     virtual int read(char* s, int n) { return m_device->read(s, n); }
     virtual bool eof() { return m_device->atEnd(); }
-    virtual void goToBegining() { m_device->seek(0); }
+    virtual void goToBeginning() { m_device->seek(0); }
     virtual void close() { m_device->close(); }
 
    private:
