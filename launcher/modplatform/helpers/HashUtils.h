@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QCryptographicHash>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <QString>
 
 #include "modplatform/ModIndex.h"
@@ -24,8 +26,7 @@ class Hasher : public Task {
     Hasher(QString file_path, Algorithm alg) : m_path(file_path), m_alg(alg) {}
     Hasher(QString file_path, QString alg) : Hasher(file_path, algorithmFromString(alg)) {}
 
-    /* We can't really abort this task, but we can say we aborted and finish our thing quickly :) */
-    bool abort() override { return true; }
+    bool abort() override;
 
     void executeTask() override;
 
@@ -35,10 +36,13 @@ class Hasher : public Task {
    signals:
     void resultsReady(QString hash);
 
-   protected:
+   private:
     QString m_result;
     QString m_path;
     Algorithm m_alg;
+
+    QFuture<QString> m_zip_future;
+    QFutureWatcher<QString> m_zip_watcher;
 };
 
 Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider);

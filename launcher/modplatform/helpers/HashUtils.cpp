@@ -1,16 +1,11 @@
 #include "HashUtils.h"
 
+#include <QBuffer>
 #include <QDebug>
 #include <QFile>
-
-#include "FileSystem.h"
-#include "StringUtils.h"
+#include <QtConcurrentRun>
 
 #include <MurmurHash2.h>
-#include <qbuffer.h>
-#include <qcryptographichash.h>
-#include <qdebug.h>
-#include <qfiledevice.h>
 
 namespace Hashing {
 
@@ -143,12 +138,28 @@ QString hash(QByteArray data, Algorithm type)
 
 void Hasher::executeTask()
 {
-    m_result = hash(m_path, m_alg);
-    if (m_result.isEmpty()) {
-        emitFailed("Empty hash!");
-    } else {
-        emitSucceeded();
-        emit resultsReady(m_result);
+    m_zip_future = QtConcurrent::run(QThreadPool::globalInstance(), [this]() { return hash(m_path, m_alg); });
+    connect(&m_zip_watcher, &QFutureWatcher<QString>::finished, this, [this] {
+        if (m_zip_future.isCanceled()) {
+            emitAborted();
+        } else if (m_result = m_zip_future.result(); m_result.isEmpty()) {
+            emitFailed("Empty hash!");
+        } else {
+            emitSucceeded();
+            emit resultsReady(m_result);
+        }
+    });
+    m_zip_watcher.setFuture(m_zip_future);
+}
+
+bool Hasher::abort()
+{
+    if (m_zip_future.isRunning()) {
+        m_zip_future.cancel();
+        // NOTE: Here we don't do `emitAborted()` because it will be done when `m_build_zip_future` actually cancels, which may not
+        // occur immediately.
+        return true;
     }
+    return false;
 }
 }  // namespace Hashing
