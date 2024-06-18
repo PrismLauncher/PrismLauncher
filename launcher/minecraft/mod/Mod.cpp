@@ -50,8 +50,6 @@
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "modplatform/ModIndex.h"
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {
     m_enabled = (file.suffix() != "disabled");
@@ -250,7 +248,7 @@ void Mod::finishResolvingWithDetails(ModDetails&& details)
 auto Mod::provider() const -> std::optional<QString>
 {
     if (metadata())
-        return ProviderCaps.readableName(metadata()->provider);
+        return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
     return {};
 }
 

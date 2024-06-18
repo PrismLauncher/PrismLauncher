@@ -59,7 +59,7 @@ IndexedVersionType::VersionType IndexedVersionType::enumFromString(const QString
     return s_indexed_version_type_names.value(type, IndexedVersionType::VersionType::Unknown);
 }
 
-auto ProviderCapabilities::name(ResourceProvider p) -> const char*
+const char* ProviderCapabilities::name(ResourceProvider p)
 {
     switch (p) {
         case ResourceProvider::MODRINTH:
@@ -69,7 +69,8 @@ auto ProviderCapabilities::name(ResourceProvider p) -> const char*
     }
     return {};
 }
-auto ProviderCapabilities::readableName(ResourceProvider p) -> QString
+
+QString ProviderCapabilities::readableName(ResourceProvider p)
 {
     switch (p) {
         case ResourceProvider::MODRINTH:
@@ -79,7 +80,8 @@ auto ProviderCapabilities::readableName(ResourceProvider p) -> QString
     }
     return {};
 }
-auto ProviderCapabilities::hashType(ResourceProvider p) -> QStringList
+
+QStringList ProviderCapabilities::hashType(ResourceProvider p)
 {
     switch (p) {
         case ResourceProvider::MODRINTH:
@@ -89,26 +91,6 @@ auto ProviderCapabilities::hashType(ResourceProvider p) -> QStringList
             return { "sha1", "md5", "murmur2" };
     }
     return {};
-}
-
-auto ProviderCapabilities::hash(ResourceProvider p, QIODevice* device, QString type) -> QString
-{
-    QCryptographicHash::Algorithm algo = QCryptographicHash::Sha1;
-    switch (p) {
-        case ResourceProvider::MODRINTH:
-            algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Sha512;
-            break;
-        case ResourceProvider::FLAME:
-            algo = (type == "sha1") ? QCryptographicHash::Sha1 : QCryptographicHash::Md5;
-            break;
-    }
-
-    QCryptographicHash hash(algo);
-    if (!hash.addData(device))
-        qCritical() << "Failed to read JAR to create hash!";
-
-    Q_ASSERT(hash.result().length() == hash.hashLength(algo));
-    return { hash.result().toHex() };
 }
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID)

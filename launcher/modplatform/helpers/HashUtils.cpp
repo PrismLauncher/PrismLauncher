@@ -7,18 +7,21 @@
 #include "StringUtils.h"
 
 #include <MurmurHash2.h>
+#include <qbuffer.h>
+#include <qcryptographichash.h>
+#include <qdebug.h>
+#include <qfiledevice.h>
 
 namespace Hashing {
-
-static ModPlatform::ProviderCapabilities ProviderCaps;
 
 Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider)
 {
     switch (provider) {
         case ModPlatform::ResourceProvider::MODRINTH:
-            return createModrinthHasher(file_path);
+            return makeShared<Hasher>(file_path,
+                                      ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first());
         case ModPlatform::ResourceProvider::FLAME:
-            return createFlameHasher(file_path);
+            return makeShared<Hasher>(file_path, Algorithm::Murmur2);
         default:
             qCritical() << "[Hashing]"
                         << "Unrecognized mod platform!";
@@ -26,119 +29,126 @@ Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provid
     }
 }
 
-Hasher::Ptr createModrinthHasher(QString file_path)
+Hasher::Ptr createHasher(QString file_path, QString type)
 {
-    return makeShared<ModrinthHasher>(file_path);
+    return makeShared<Hasher>(file_path, type);
 }
 
-Hasher::Ptr createFlameHasher(QString file_path)
+class QIODeviceReader : public Murmur2::Reader {
+   public:
+    QIODeviceReader(QIODevice* device) : m_device(device) {}
+    virtual ~QIODeviceReader() = default;
+    virtual int read(char* s, int n) { return m_device->read(s, n); }
+    virtual bool eof() { return m_device->atEnd(); }
+    virtual void goToBegining() { m_device->seek(0); }
+    virtual void close() { m_device->close(); }
+
+   private:
+    QIODevice* m_device;
+};
+
+QString algorithmToString(Algorithm type)
 {
-    return makeShared<FlameHasher>(file_path);
+    switch (type) {
+        case Algorithm::Md4:
+            return "md4";
+        case Algorithm::Md5:
+            return "md5";
+        case Algorithm::Sha1:
+            return "sha1";
+        case Algorithm::Sha256:
+            return "sha256";
+        case Algorithm::Sha512:
+            return "sha512";
+        case Algorithm::Murmur2:
+            return "murmur2";
+        // case Algorithm::Unknown:
+        default:
+            break;
+    }
+    return "unknown";
 }
 
-Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider)
+Algorithm algorithmFromString(QString type)
 {
-    return makeShared<BlockedModHasher>(file_path, provider);
+    if (type == "md4")
+        return Algorithm::Md4;
+    if (type == "md5")
+        return Algorithm::Md5;
+    if (type == "sha1")
+        return Algorithm::Sha1;
+    if (type == "sha256")
+        return Algorithm::Sha256;
+    if (type == "sha512")
+        return Algorithm::Sha512;
+    if (type == "murmur2")
+        return Algorithm::Murmur2;
+    return Algorithm::Unknown;
 }
 
-Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider, QString type)
+QString hash(QIODevice* device, Algorithm type)
 {
-    auto hasher = makeShared<BlockedModHasher>(file_path, provider);
-    hasher->useHashType(type);
-    return hasher;
-}
-
-void ModrinthHasher::executeTask()
-{
-    QFile file(m_path);
-
-    try {
-        file.open(QFile::ReadOnly);
-    } catch (FS::FileSystemException& e) {
-        qCritical() << QString("Failed to open JAR file in %1").arg(m_path);
-        qCritical() << QString("Reason: ") << e.cause();
-
-        emitFailed("Failed to open file for hashing.");
-        return;
+    if (!device->isOpen() && !device->open(QFile::ReadOnly))
+        return "";
+    QCryptographicHash::Algorithm alg = QCryptographicHash::Sha1;
+    switch (type) {
+        case Algorithm::Md4:
+            alg = QCryptographicHash::Algorithm::Md4;
+            break;
+        case Algorithm::Md5:
+            alg = QCryptographicHash::Algorithm::Md5;
+            break;
+        case Algorithm::Sha1:
+            alg = QCryptographicHash::Algorithm::Sha1;
+            break;
+        case Algorithm::Sha256:
+            alg = QCryptographicHash::Algorithm::Sha256;
+            break;
+        case Algorithm::Sha512:
+            alg = QCryptographicHash::Algorithm::Sha512;
+            break;
+        case Algorithm::Murmur2: {  // CF-specific
+            auto should_filter_out = [](char c) { return (c == 9 || c == 10 || c == 13 || c == 32); };
+            auto reader = std::make_unique<QIODeviceReader>(device);
+            auto result = QString::number(Murmur2::hash(reader.get(), 4 * MiB, should_filter_out));
+            device->close();
+            return result;
+        }
+        case Algorithm::Unknown:
+            device->close();
+            return "";
     }
 
-    auto hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
-    m_hash = ProviderCaps.hash(ModPlatform::ResourceProvider::MODRINTH, &file, hash_type);
+    QCryptographicHash hash(alg);
+    if (!hash.addData(device))
+        qCritical() << "Failed to read JAR to create hash!";
 
-    file.close();
+    Q_ASSERT(hash.result().length() == hash.hashLength(alg));
+    auto result = hash.result().toHex();
+    device->close();
+    return result;
+}
 
-    if (m_hash.isEmpty()) {
+QString hash(QString fileName, Algorithm type)
+{
+    QFile file(fileName);
+    return hash(&file, type);
+}
+
+QString hash(QByteArray data, Algorithm type)
+{
+    QBuffer buff(&data);
+    return hash(&buff, type);
+}
+
+void Hasher::executeTask()
+{
+    m_result = hash(m_path, m_alg);
+    if (m_result.isEmpty()) {
         emitFailed("Empty hash!");
     } else {
         emitSucceeded();
-        emit resultsReady(m_hash);
+        emit resultsReady(m_result);
     }
 }
-
-void FlameHasher::executeTask()
-{
-    // CF-specific
-    auto should_filter_out = [](char c) { return (c == 9 || c == 10 || c == 13 || c == 32); };
-
-    std::ifstream file_stream(StringUtils::toStdString(m_path).c_str(), std::ifstream::binary);
-    // TODO: This is very heavy work, but apparently QtConcurrent can't use move semantics, so we can't boop this to another thread.
-    // How do we make this non-blocking then?
-    m_hash = QString::number(MurmurHash2(std::move(file_stream), 4 * MiB, should_filter_out));
-
-    if (m_hash.isEmpty()) {
-        emitFailed("Empty hash!");
-    } else {
-        emitSucceeded();
-        emit resultsReady(m_hash);
-    }
-}
-
-BlockedModHasher::BlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider) : Hasher(file_path), provider(provider)
-{
-    setObjectName(QString("BlockedModHasher: %1").arg(file_path));
-    hash_type = ProviderCaps.hashType(provider).first();
-}
-
-void BlockedModHasher::executeTask()
-{
-    QFile file(m_path);
-
-    try {
-        file.open(QFile::ReadOnly);
-    } catch (FS::FileSystemException& e) {
-        qCritical() << QString("Failed to open JAR file in %1").arg(m_path);
-        qCritical() << QString("Reason: ") << e.cause();
-
-        emitFailed("Failed to open file for hashing.");
-        return;
-    }
-
-    m_hash = ProviderCaps.hash(provider, &file, hash_type);
-
-    file.close();
-
-    if (m_hash.isEmpty()) {
-        emitFailed("Empty hash!");
-    } else {
-        emitSucceeded();
-        emit resultsReady(m_hash);
-    }
-}
-
-QStringList BlockedModHasher::getHashTypes()
-{
-    return ProviderCaps.hashType(provider);
-}
-
-bool BlockedModHasher::useHashType(QString type)
-{
-    auto types = ProviderCaps.hashType(provider);
-    if (types.contains(type)) {
-        hash_type = type;
-        return true;
-    }
-    qDebug() << "Bad hash type " << type << " for provider";
-    return false;
-}
-
 }  // namespace Hashing
