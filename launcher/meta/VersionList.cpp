@@ -99,7 +99,7 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
         case VersionPtrRole:
             return QVariant::fromValue(version);
         case RecommendedRole:
-            return version->isRecommended();
+            return version->isRecommended() || m_externalRecommendsVersions.contains(version->version());
         // FIXME: this should be determined in whatever view/proxy is used...
         // case LatestRole: return version == getLatestStable();
         default:
@@ -177,6 +177,16 @@ void VersionList::setVersions(const QVector<Version::Ptr>& versions)
 void VersionList::parse(const QJsonObject& obj)
 {
     parseVersionList(obj, this);
+}
+
+void VersionList::addExternalRecomends(const QVector<QString>& recomends)
+{
+    m_externalRecommendsVersions.append(recomends);
+}
+
+void VersionList::clearExternalRecomends()
+{
+    m_externalRecommendsVersions.clear();
 }
 
 // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
