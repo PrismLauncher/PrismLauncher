@@ -24,11 +24,6 @@ Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provid
     }
 }
 
-Hasher::Ptr createHasher(QString file_path, QString type)
-{
-    return makeShared<Hasher>(file_path, type);
-}
-
 class QIODeviceReader : public Murmur2::Reader {
    public:
     QIODeviceReader(QIODevice* device) : m_device(device) {}

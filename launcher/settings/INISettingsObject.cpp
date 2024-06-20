@@ -35,13 +35,13 @@ INISettingsObject::INISettingsObject(QStringList paths, QObject* parent) : Setti
     }
 
     m_filePath = first_path;
-    m_ini.loadFile(first_path);
+    m_ini->loadFile(first_path);
 }
 
 INISettingsObject::INISettingsObject(QString path, QObject* parent) : SettingsObject(parent)
 {
     m_filePath = path;
-    m_ini.loadFile(path);
+    m_ini->loadFile(path);
 }
 
 void INISettingsObject::setFilePath(const QString& filePath)
@@ -51,7 +51,7 @@ void INISettingsObject::setFilePath(const QString& filePath)
 
 bool INISettingsObject::reload()
 {
-    return m_ini.loadFile(m_filePath) && SettingsObject::reload();
+    return m_ini->loadFile(m_filePath) && SettingsObject::reload();
 }
 
 void INISettingsObject::suspendSave()
@@ -63,7 +63,7 @@ void INISettingsObject::resumeSave()
 {
     m_suspendSave = false;
     if (m_doSave) {
-        m_ini.saveFile(m_filePath);
+        m_ini->saveFile(m_filePath);
     }
 }
 
@@ -73,14 +73,14 @@ void INISettingsObject::changeSetting(const Setting& setting, QVariant value)
         // valid value -> set the main config, remove all the sysnonyms
         if (value.isValid()) {
             auto list = setting.configKeys();
-            m_ini.set(list.takeFirst(), value);
+            m_ini->set(list.takeFirst(), value);
             for (auto iter : list)
-                m_ini.remove(iter);
+                m_ini->remove(iter);
         }
         // invalid -> remove all (just like resetSetting)
         else {
             for (auto iter : setting.configKeys())
-                m_ini.remove(iter);
+                m_ini->remove(iter);
         }
         doSave();
     }
@@ -91,7 +91,7 @@ void INISettingsObject::doSave()
     if (m_suspendSave) {
         m_doSave = true;
     } else {
-        m_ini.saveFile(m_filePath);
+        m_ini->saveFile(m_filePath);
     }
 }
 
@@ -100,7 +100,7 @@ void INISettingsObject::resetSetting(const Setting& setting)
     // if we have the setting, remove all the synonyms. ALL OF THEM
     if (contains(setting.id())) {
         for (auto iter : setting.configKeys())
-            m_ini.remove(iter);
+            m_ini->remove(iter);
         doSave();
     }
 }
@@ -110,8 +110,8 @@ QVariant INISettingsObject::retrieveValue(const Setting& setting)
     // if we have the setting, return value of the first matching synonym
     if (contains(setting.id())) {
         for (auto iter : setting.configKeys()) {
-            if (m_ini.contains(iter))
-                return m_ini[iter];
+            if (m_ini->contains(iter))
+                return (*m_ini)[iter];
         }
     }
     return QVariant();

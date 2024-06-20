@@ -46,17 +46,15 @@
 
 #include <QSettings>
 
-INIFile::INIFile() {}
-
 bool INIFile::saveFile(QString fileName)
 {
     if (!contains("ConfigVersion"))
-        insert("ConfigVersion", "1.2");
+        m_values.insert("ConfigVersion", "1.2");
     QSettings _settings_obj{ fileName, QSettings::Format::IniFormat };
     _settings_obj.setFallbacksEnabled(false);
     _settings_obj.clear();
 
-    for (Iterator iter = begin(); iter != end(); iter++)
+    for (auto iter = m_values.begin(); iter != m_values.end(); iter++)
         _settings_obj.setValue(iter.key(), iter.value());
 
     _settings_obj.sync();
@@ -170,21 +168,21 @@ bool INIFile::loadFile(QString fileName)
         parseOldFileFormat(file, map);
         file.close();
         for (auto&& key : map.keys())
-            insert(key, map.value(key));
-        insert("ConfigVersion", "1.2");
+            m_values.insert(key, map.value(key));
+        m_values.insert("ConfigVersion", "1.2");
     } else if (_settings_obj.value("ConfigVersion").toString() == "1.1") {
         for (auto&& key : _settings_obj.allKeys()) {
             if (auto valueStr = _settings_obj.value(key).toString();
                 (valueStr.contains(QChar(';')) || valueStr.contains(QChar('=')) || valueStr.contains(QChar(','))) &&
                 valueStr.endsWith("\"") && valueStr.startsWith("\"")) {
-                insert(key, unquote(valueStr));
+                m_values.insert(key, unquote(valueStr));
             } else
-                insert(key, _settings_obj.value(key));
+                m_values.insert(key, _settings_obj.value(key));
         }
-        insert("ConfigVersion", "1.2");
+        m_values.insert("ConfigVersion", "1.2");
     } else
         for (auto&& key : _settings_obj.allKeys())
-            insert(key, _settings_obj.value(key));
+            m_values.insert(key, _settings_obj.value(key));
     return true;
 }
 
@@ -205,11 +203,29 @@ QVariant INIFile::get(QString key, QVariant def) const
 {
     if (!this->contains(key))
         return def;
-    else
-        return this->operator[](key);
+    return m_values[key];
 }
 
 void INIFile::set(QString key, QVariant val)
 {
-    this->operator[](key) = val;
+    m_values[key] = val;
+}
+
+void INIFile::remove(QString key)
+{
+    m_values.remove(key);
+}
+
+bool INIFile::contains(QString key) const
+{
+    return m_values.contains(key);
+}
+
+QVariant INIFile::operator[](const QString& key) const
+{
+    return m_values[key];
+}
+QStringList INIFile::keys()
+{
+    return m_values.keys();
 }

@@ -57,6 +57,10 @@ set(CORE_SOURCES
     Json.h
     Json.cpp
 
+    # Toml parsing helpers
+    Toml.h
+    Toml.cpp
+ 
     FileSystem.h
     FileSystem.cpp
 
@@ -411,6 +415,9 @@ set(SETTINGS_SOURCES
     settings/Setting.h
     settings/SettingsObject.cpp
     settings/SettingsObject.h
+    settings/TomlFile.cpp
+    settings/TomlFile.h
+    settings/SettingsFile.h
 )
 
 set(JAVA_SOURCES

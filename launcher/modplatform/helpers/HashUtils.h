@@ -46,6 +46,4 @@ class Hasher : public Task {
 };
 
 Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider);
-Hasher::Ptr createHasher(QString file_path, QString type);
-
 }  // namespace Hashing

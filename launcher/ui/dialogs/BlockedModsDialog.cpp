@@ -266,7 +266,7 @@ void BlockedModsDialog::addHashTask(QString path)
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::buildHashTask(QString path)
 {
-    auto hash_task = Hashing::createHasher(path, m_hash_type);
+    auto hash_task = makeShared<Hashing::Hasher>(path, m_hash_type);
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
 

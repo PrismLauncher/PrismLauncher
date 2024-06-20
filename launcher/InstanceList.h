@@ -52,10 +52,6 @@ using InstanceId = QString;
 using GroupId = QString;
 using InstanceLocator = std::pair<InstancePtr, int>;
 
-enum class InstCreateError { NoCreateError = 0, NoSuchVersion, UnknownCreateError, InstExists, CantCreateDir };
-
-enum class GroupsState { NotLoaded, Steady, Dirty };
-
 struct TrashHistoryItem {
     QString id;
     QString polyPath;
