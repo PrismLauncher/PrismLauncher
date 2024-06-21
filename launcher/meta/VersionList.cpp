@@ -16,6 +16,7 @@
 #include "VersionList.h"
 
 #include <QDateTime>
+#include <algorithm>
 
 #include "Application.h"
 #include "Index.h"
@@ -273,4 +274,31 @@ void VersionList::waitToLoad()
     task->start();
     ev.exec();
 }
+
+Version::Ptr VersionList::getRecommendedForParent(const QString& uid, const QString& version)
+{
+    auto foundExplicit = std::find_if(m_versions.begin(), m_versions.end(), [uid, version](Version::Ptr ver) -> bool {
+        auto& reqs = ver->requiredSet();
+        auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
+            return req.uid == uid && req.equalsVersion == version;
+        });
+        return parentReq != reqs.end() && ver->isRecommended();
+    });
+    if (foundExplicit != m_versions.end()) {
+        return *foundExplicit;
+    }
+
+    Version::Ptr latestCompat = nullptr;
+    for (auto ver : m_versions) {
+        auto& reqs = ver->requiredSet();
+        auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
+            return req.uid == uid && req.equalsVersion == version;
+        });
+        if (parentReq != reqs.end()) {
+            latestCompat = getBetterVersion(latestCompat, ver);
+        }
+    }
+    return latestCompat;
+}
+
 }  // namespace Meta
