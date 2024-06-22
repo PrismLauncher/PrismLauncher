@@ -1560,7 +1560,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         QFileDialog fileDialog;
         // workaround to make sure the portal file dialog opens in the desktop directory
         fileDialog.setDirectoryUrl(desktopPath);
-        desktopFilePath = fileDialog.getSaveFileName(this, tr("Create Shortcut"), desktopFilePath, tr("Desktop Entries (*.desktop)"));
+        desktopFilePath = fileDialog.getSaveFileName(this, tr("Create Shortcut"), desktopFilePath, tr("Desktop Entries") + " (*.desktop)");
         if (desktopFilePath.isEmpty())
             return;  // file dialog canceled by user
         appPath = "flatpak";
