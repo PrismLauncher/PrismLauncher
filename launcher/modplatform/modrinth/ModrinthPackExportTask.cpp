@@ -27,6 +27,7 @@
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "modplatform/helpers/HashUtils.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
 const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "zip" });
@@ -102,8 +103,6 @@ void ModrinthPackExportTask::collectHashes()
             }))
             continue;
 
-        QCryptographicHash sha512(QCryptographicHash::Algorithm::Sha512);
-
         QFile openFile(file.absoluteFilePath());
         if (!openFile.open(QFile::ReadOnly)) {
             qWarning() << "Could not open" << file << "for hashing";
@@ -115,7 +114,7 @@ void ModrinthPackExportTask::collectHashes()
             qWarning() << "Could not read" << file;
             continue;
         }
-        sha512.addData(data);
+        auto sha512 = Hashing::hash(data, Hashing::Algorithm::Sha512);
 
         auto allMods = mcInstance->loaderModList()->allMods();
         if (auto modIter = std::find_if(allMods.begin(), allMods.end(), [&file](Mod* mod) { return mod->fileinfo() == file; });
@@ -127,11 +126,9 @@ void ModrinthPackExportTask::collectHashes()
                 if (!url.isEmpty() && BuildConfig.MODRINTH_MRPACK_HOSTS.contains(url.host())) {
                     qDebug() << "Resolving" << relative << "from index";
 
-                    QCryptographicHash sha1(QCryptographicHash::Algorithm::Sha1);
-                    sha1.addData(data);
+                    auto sha1 = Hashing::hash(data, Hashing::Algorithm::Sha1);
 
-                    ResolvedFile resolvedFile{ sha1.result().toHex(), sha512.result().toHex(), url.toEncoded(), openFile.size(),
-                                               mod->metadata()->side };
+                    ResolvedFile resolvedFile{ sha1, sha512, url.toEncoded(), openFile.size(), mod->metadata()->side };
                     resolvedFiles[relative] = resolvedFile;
 
                     // nice! we've managed to resolve based on local metadata!
@@ -142,7 +139,7 @@ void ModrinthPackExportTask::collectHashes()
         }
 
         qDebug() << "Enqueueing" << relative << "for Modrinth query";
-        pendingHashes[relative] = sha512.result().toHex();
+        pendingHashes[relative] = sha512;
     }
 
     setAbortable(true);

@@ -213,7 +213,7 @@ class ExtractZipTask : public Task {
     {}
     virtual ~ExtractZipTask() = default;
 
-    typedef std::optional<QString> ZipResult;
+    using ZipResult = std::optional<QString>;
 
    protected:
     virtual void executeTask() override;
