@@ -59,6 +59,9 @@ class VersionList : public BaseVersionList, public BaseEntity {
 
     QVector<Version::Ptr> versions() const { return m_versions; }
 
+    // this blocks until the version list is loaded
+    void waitToLoad();
+
    public:  // for usage only by parsers
     void setName(const QString& name);
     void setVersions(const QVector<Version::Ptr>& versions);

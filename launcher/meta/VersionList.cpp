@@ -254,4 +254,14 @@ BaseVersion::Ptr VersionList::getRecommended() const
     return m_recommended;
 }
 
+void VersionList::waitToLoad()
+{
+    if (isLoaded())
+        return;
+    QEventLoop ev;
+    auto task = getLoadTask();
+    QObject::connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+    task->start();
+    ev.exec();
+}
 }  // namespace Meta

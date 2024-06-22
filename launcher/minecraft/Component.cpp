@@ -91,11 +91,8 @@ std::shared_ptr<class VersionFile> Component::getVersionFile() const
 {
     if (m_metaVersion) {
         if (!m_metaVersion->isLoaded()) {
-            QEventLoop ev;
-            auto task = APPLICATION->metadataIndex()->loadVersion(m_metaVersion->uid(), m_metaVersion->version(), Net::Mode::Online);
-            connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
-            task->start();
-            ev.exec();
+            // this method is const but the loading of meta changes the information
+            APPLICATION->metadataIndex()->getLoadedVersion(m_metaVersion->uid(), m_metaVersion->version());
         }
         return m_metaVersion->data();
     } else {
@@ -197,10 +194,12 @@ bool Component::isCustomizable()
     }
     return false;
 }
+
 bool Component::isRemovable()
 {
     return !m_important;
 }
+
 bool Component::isRevertible()
 {
     if (isCustom()) {
@@ -210,22 +209,18 @@ bool Component::isRevertible()
     }
     return false;
 }
+
 bool Component::isMoveable()
 {
     // HACK, FIXME: this was too dumb and wouldn't follow dependency constraints anyway. For now hardcoded to 'true'.
     return true;
 }
+
 bool Component::isVersionChangeable()
 {
     auto list = getVersionList();
     if (list) {
-        if (!list->isLoaded()) {
-            QEventLoop ev;
-            auto task = list->getLoadTask();
-            connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
-            task->start();
-            ev.exec();
-        }
+        list->waitToLoad();
         return list->count() != 0;
     }
     return false;

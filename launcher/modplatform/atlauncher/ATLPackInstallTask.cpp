@@ -36,7 +36,6 @@
 
 #include "ATLPackInstallTask.h"
 
-#include <QEventLoop>
 #include <QtConcurrent>
 #include <algorithm>
 
@@ -344,13 +343,7 @@ QString PackInstallTask::getVersionForLoader(QString uid)
             return Q_NULLPTR;
         }
 
-        if (!vlist->isLoaded()) {
-            QEventLoop ev;
-            auto task = vlist->getLoadTask();
-            connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
-            task->start();
-            ev.exec();
-        }
+        vlist->waitToLoad();
 
         if (m_version.loader.recommended || m_version.loader.latest) {
             for (int i = 0; i < vlist->versions().size(); i++) {
@@ -1076,13 +1069,7 @@ void PackInstallTask::install()
 
 static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
 {
-    QEventLoop ev;
-    auto task = APPLICATION->metadataIndex()->loadVersion(uid, version);
-    QObject::connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
-    task->start();
-    ev.exec();
-
-    return APPLICATION->metadataIndex()->get(uid, version);
+    return APPLICATION->metadataIndex()->getLoadedVersion(uid, version);
 }
 
 }  // namespace ATLauncher

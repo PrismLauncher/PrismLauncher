@@ -149,4 +149,14 @@ Task::Ptr Index::loadVersion(const QString& uid, const QString& version, Net::Mo
     loadTask->addTask(versionList->getVersion(version)->loadTask(mode));
     return loadTask;
 }
+
+Version::Ptr Index::getLoadedVersion(const QString& uid, const QString& version)
+{
+    QEventLoop ev;
+    auto task = loadVersion(uid, version);
+    QObject::connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+    task->start();
+    ev.exec();
+    return get(uid, version);
+}
 }  // namespace Meta

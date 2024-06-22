@@ -50,6 +50,9 @@ class Index : public QAbstractListModel, public BaseEntity {
 
     Task::Ptr loadVersion(const QString& uid, const QString& version = {}, Net::Mode mode = Net::Mode::Online, bool force = false);
 
+    // this blocks until the version is loaded
+    Version::Ptr getLoadedVersion(const QString& uid, const QString& version);
+
    public:  // for usage by parsers only
     void merge(const std::shared_ptr<Index>& other);
 
