@@ -119,9 +119,18 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
         emit finished(AccountTaskState::STATE_WORKING, tr("Got "));
     });
     connect(&oauth2, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, this, &MSAStep::authorizeWithBrowser);
-    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::requestFailed, this, [this](const QAbstractOAuth2::Error err) {
-        emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Microsoft user authentication failed."));
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::requestFailed, this, [this, silent](const QAbstractOAuth2::Error err) {
+        auto state = AccountTaskState::STATE_FAILED_HARD;
+        if (oauth2.status() == QAbstractOAuth::Status::Granted || silent) {
+            state = AccountTaskState::STATE_FAILED_SOFT;
+        }
+        emit finished(state, tr("Microsoft user authentication failed."));
     });
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::error, this,
+            [this](const QString& error, const QString& errorDescription, const QUrl& uri) {
+                qDebug() << "Failed to login because" << error << errorDescription;
+                emit finished(AccountTaskState::STATE_FAILED_HARD, errorDescription);
+            });
 
     connect(&oauth2, &QOAuth2AuthorizationCodeFlow::extraTokensChanged, this,
             [this](const QVariantMap& tokens) { m_data->msaToken.extra = tokens; });
@@ -141,17 +150,18 @@ void MSAStep::perform()
         if (m_data->msaClientID != m_clientId) {
             emit finished(AccountTaskState::STATE_DISABLED,
                           tr("Microsoft user authentication failed - client identification has changed."));
+            return;
         }
         oauth2.setRefreshToken(m_data->msaToken.refresh_token);
         oauth2.refreshAccessToken();
     } else {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)  // QMultiMap param changed in 6.0
-        oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) {
+        oauth2.setModifyParametersFunction(
+            [](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) { map->insert("prompt", "select_account"); });
 #else
-        oauth2.setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMap<QString, QVariant>* map) {
+        oauth2.setModifyParametersFunction(
+            [](QAbstractOAuth::Stage stage, QMap<QString, QVariant>* map) { map->insert("prompt", "select_account"); });
 #endif
-            map->insert("prompt", "select_account");
-        });
 
         *m_data = AccountData();
         m_data->msaClientID = m_clientId;
