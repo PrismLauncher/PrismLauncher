@@ -29,5 +29,4 @@ class ComponentUpdateTask : public Task {
 
    private:
     std::unique_ptr<ComponentUpdateTaskData> d;
-    QList<Task::Ptr> m_load_tasks;
 };

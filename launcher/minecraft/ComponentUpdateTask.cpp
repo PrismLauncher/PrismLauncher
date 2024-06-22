@@ -13,6 +13,7 @@
 #include "net/Mode.h"
 
 #include "Application.h"
+#include "tasks/Task.h"
 
 /*
  * This is responsible for loading the components of a component list AND resolving dependency issues between them
@@ -142,7 +143,6 @@ void ComponentUpdateTask::loadComponents()
     size_t componentIndex = 0;
     d->remoteLoadSuccessful = true;
 
-    m_load_tasks.clear();
     // load all the components OR their lists...
     for (auto component : d->m_list->d->components) {
         Task::Ptr loadTask;
@@ -175,14 +175,14 @@ void ComponentUpdateTask::loadComponents()
         }
         result = composeLoadResult(result, singleResult);
         if (loadTask) {
-            m_load_tasks.append(loadTask);
             qDebug() << "Remote loading is being run for" << component->getName();
-            connect(loadTask.get(), &Task::succeeded, [=]() { remoteLoadSucceeded(taskIndex); });
-            connect(loadTask.get(), &Task::failed, [=](const QString& error) { remoteLoadFailed(taskIndex, error); });
-            connect(loadTask.get(), &Task::aborted, [=]() { remoteLoadFailed(taskIndex, tr("Aborted")); });
+            connect(loadTask.get(), &Task::succeeded, this, [this, taskIndex]() { remoteLoadSucceeded(taskIndex); });
+            connect(loadTask.get(), &Task::failed, this, [this, taskIndex](const QString& error) { remoteLoadFailed(taskIndex, error); });
+            connect(loadTask.get(), &Task::aborted, this, [this, taskIndex]() { remoteLoadFailed(taskIndex, tr("Aborted")); });
             RemoteLoadStatus status;
             status.type = loadType;
             status.PackProfileIndex = componentIndex;
+            status.task = loadTask;
             d->remoteLoadStatusList.append(status);
             taskIndex++;
         }
@@ -489,7 +489,14 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
 
 void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
 {
+    if (static_cast<size_t>(d->remoteLoadStatusList.size()) < taskIndex) {
+        qWarning() << "Got task index outside of results" << taskIndex;
+        return;
+    }
     auto& taskSlot = d->remoteLoadStatusList[taskIndex];
+    disconnect(taskSlot.task.get(), &Task::succeeded, this, nullptr);
+    disconnect(taskSlot.task.get(), &Task::failed, this, nullptr);
+    disconnect(taskSlot.task.get(), &Task::aborted, this, nullptr);
     if (taskSlot.finished) {
         qWarning() << "Got multiple results from remote load task" << taskIndex;
         return;
@@ -509,7 +516,14 @@ void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
 
 void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg)
 {
+    if (static_cast<size_t>(d->remoteLoadStatusList.size()) < taskIndex) {
+        qWarning() << "Got task index outside of results" << taskIndex;
+        return;
+    }
     auto& taskSlot = d->remoteLoadStatusList[taskIndex];
+    disconnect(taskSlot.task.get(), &Task::succeeded, this, nullptr);
+    disconnect(taskSlot.task.get(), &Task::failed, this, nullptr);
+    disconnect(taskSlot.task.get(), &Task::aborted, this, nullptr);
     if (taskSlot.finished) {
         qWarning() << "Got multiple results from remote load task" << taskIndex;
         return;

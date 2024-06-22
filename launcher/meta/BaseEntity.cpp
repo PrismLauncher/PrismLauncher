@@ -122,7 +122,10 @@ void BaseEntityLoadTask::executeTask()
         }
     }
     // if we need remote update, run the update task
-    if (m_mode == Net::Mode::Offline || (!m_entity->m_sha256.isEmpty() && m_entity->m_sha256 == m_entity->m_file_sha256)) {
+    auto hashMatches = !m_entity->m_sha256.isEmpty() && m_entity->m_sha256 == m_entity->m_file_sha256;
+    auto wasLoadedOffline = m_entity->m_load_status != BaseEntity::LoadStatus::NotLoaded && m_mode == Net::Mode::Offline;
+    if (wasLoadedOffline || hashMatches) {
+        m_entity->m_load_status = BaseEntity::LoadStatus::Local;
         emitSucceeded();
         return;
     }
