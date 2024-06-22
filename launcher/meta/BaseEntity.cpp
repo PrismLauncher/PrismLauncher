@@ -102,7 +102,7 @@ void BaseEntityLoadTask::executeTask()
 {
     const QString fname = QDir("meta").absoluteFilePath(m_entity->localFilename());
     // load local file if nothing is loaded yet
-    if (m_entity->m_load_status != BaseEntity::LoadStatus::NotLoaded && QFile::exists(fname)) {
+    if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded && QFile::exists(fname)) {
         setStatus(tr("Loading local file"));
         try {
             auto fileData = FS::read(fname);
@@ -125,7 +125,6 @@ void BaseEntityLoadTask::executeTask()
     auto hashMatches = !m_entity->m_sha256.isEmpty() && m_entity->m_sha256 == m_entity->m_file_sha256;
     auto wasLoadedOffline = m_entity->m_load_status != BaseEntity::LoadStatus::NotLoaded && m_mode == Net::Mode::Offline;
     if (wasLoadedOffline || hashMatches) {
-        m_entity->m_load_status = BaseEntity::LoadStatus::Local;
         emitSucceeded();
         return;
     }
@@ -142,6 +141,7 @@ void BaseEntityLoadTask::executeTask()
         dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha256, m_entity->m_sha256));
     dl->addValidator(new ParsingValidator(m_entity));
     m_task->addNetAction(dl);
+    m_task->setAskRetry(false);
     connect(m_task.get(), &Task::failed, this, &BaseEntityLoadTask::emitFailed);
     connect(m_task.get(), &Task::succeeded, this, &BaseEntityLoadTask::emitSucceeded);
     connect(m_task.get(), &Task::succeeded, this, [this]() {
