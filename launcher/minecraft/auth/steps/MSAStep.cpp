@@ -124,11 +124,16 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
         if (oauth2.status() == QAbstractOAuth::Status::Granted || silent) {
             state = AccountTaskState::STATE_FAILED_SOFT;
         }
-        emit finished(state, tr("Microsoft user authentication failed."));
+        auto message = tr("Microsoft user authentication failed.");
+        if (silent) {
+            message = tr("Failed to refresh token.");
+        }
+        qWarning() << message;
+        emit finished(state, message);
     });
     connect(&oauth2, &QOAuth2AuthorizationCodeFlow::error, this,
             [this](const QString& error, const QString& errorDescription, const QUrl& uri) {
-                qDebug() << "Failed to login because" << error << errorDescription;
+                qWarning() << "Failed to login because" << error << errorDescription;
                 emit finished(AccountTaskState::STATE_FAILED_HARD, errorDescription);
             });
 
@@ -150,6 +155,10 @@ void MSAStep::perform()
         if (m_data->msaClientID != m_clientId) {
             emit finished(AccountTaskState::STATE_DISABLED,
                           tr("Microsoft user authentication failed - client identification has changed."));
+            return;
+        }
+        if (m_data->msaToken.refresh_token.isEmpty()) {
+            emit finished(AccountTaskState::STATE_DISABLED, tr("Microsoft user authentication failed - refresh token is empty."));
             return;
         }
         oauth2.setRefreshToken(m_data->msaToken.refresh_token);
