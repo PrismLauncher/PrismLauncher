@@ -45,6 +45,9 @@ class ModModel : public ResourceModel {
     auto documentToArray(QJsonDocument& obj) const -> QJsonArray override = 0;
     virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const override;
 
+    virtual bool checkFilters(ModPlatform::IndexedPack::Ptr) override;
+    virtual bool checkVersionFilters(const ModPlatform::IndexedVersion&) override;
+
    protected:
     BaseInstance& m_base_instance;
 

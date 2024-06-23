@@ -64,7 +64,8 @@ modules:
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - -DBUILD_SHARED_LIBS:BOOL=ON
-      - -DGLFW_USE_WAYLAND=ON
+      - -DGLFW_USE_WAYLAND:BOOL=ON
+      - -DGLFW_BUILD_DOCS:BOOL=OFF
     sources:
       - type: git
         url: https://github.com/glfw/glfw.git

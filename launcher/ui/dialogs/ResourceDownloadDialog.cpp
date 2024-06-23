@@ -27,6 +27,7 @@
 #include "Application.h"
 #include "ResourceDownloadTask.h"
 
+#include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourcePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
@@ -125,8 +126,6 @@ void ResourceDownloadDialog::connectButtons()
     connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
 }
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 void ResourceDownloadDialog::confirm()
 {
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
@@ -168,7 +167,7 @@ void ResourceDownloadDialog::confirm()
     for (auto& task : selected) {
         auto extraInfo = dependencyExtraInfo.value(task->getPack()->addonId.toString());
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ProviderCaps.name(task->getProvider()), extraInfo.required_by,
+                                         ModPlatform::ProviderCapabilities::name(task->getProvider()), extraInfo.required_by,
                                          task->getVersion().version_type.toString(), !extraInfo.maybe_installed });
     }
 
