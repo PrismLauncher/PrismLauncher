@@ -74,6 +74,7 @@ class NetJob : public ConcurrentTask {
 
    protected:
     void updateState() override;
+    bool isOnline();
 
    private:
     shared_qobject_ptr<QNetworkAccessManager> m_network;
