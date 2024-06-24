@@ -483,7 +483,7 @@ QStringList MinecraftInstance::javaArguments()
     // custom args go first. we want to override them if we have our own here.
     args.append(extraArguments());
     // Create required java.security file in instance folder.
-    if (settings()->get("AllowOldJarCiphers").toBool()){
+    if (settings()->get("AllowOldJarCiphers").toBool()) {
         QFile jarSecPolicyFile(instanceRoot() + "/java.security");
         jarSecPolicyFile.open(QIODevice::ReadWrite | QIODevice::Text);
         jarSecPolicyFile.resize(0);

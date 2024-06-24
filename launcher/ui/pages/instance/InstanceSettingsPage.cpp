@@ -232,7 +232,6 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("AllowOldJarCiphers");
     }
 
-
     // Performance
     bool performance = ui->perfomanceGroupBox->isChecked();
     m_settings->set("OverridePerformance", performance);
