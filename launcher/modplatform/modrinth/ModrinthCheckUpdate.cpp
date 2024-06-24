@@ -16,10 +16,9 @@ static ModrinthAPI api;
 
 ModrinthCheckUpdate::ModrinthCheckUpdate(QList<Mod*>& mods,
                                          std::list<Version>& mcVersions,
-                                         std::optional<ModPlatform::ModLoaderTypes> loaders,
                                          QList<ModPlatform::ModLoaderType> loadersList,
                                          std::shared_ptr<ModFolderModel> mods_folder)
-    : CheckUpdateTask(mods, mcVersions, loaders, loadersList, mods_folder)
+    : CheckUpdateTask(mods, mcVersions, loadersList, mods_folder)
     , m_hash_type(ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first())
 {}
 
@@ -88,7 +87,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
 
     try {
         for (auto hash : m_mappings.keys()) {
-            if (forceModLoaderCheck && !m_mappings[hash]->loaders().testAnyFlags(loader)) {
+            if (forceModLoaderCheck && !(m_mappings[hash]->loaders() & loader)) {
                 continue;
             }
             auto project_obj = doc[hash].toObject();
@@ -171,7 +170,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(ModPlatform::ModLoaderTypes loa
     QStringList hashes;
     if (forceModLoaderCheck) {
         for (auto hash : m_mappings.keys()) {
-            if (m_mappings[hash]->loaders().testAnyFlags(loader)) {
+            if (m_mappings[hash]->loaders() & loader) {
                 hashes.append(hash);
             }
         }
@@ -211,7 +210,7 @@ void ModrinthCheckUpdate::checkNextLoader()
             m_next_loader_idx++;
             setProgress(m_next_loader_idx * 2 - 1, 9);
             for (auto m : m_mappings) {
-                if (m->loaders().testAnyFlag(flag)) {
+                if (m->loaders() & flag) {
                     getUpdateModsForLoader(flag, true);
                     return;
                 }

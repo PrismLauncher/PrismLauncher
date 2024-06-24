@@ -9,10 +9,9 @@ class FlameCheckUpdate : public CheckUpdateTask {
    public:
     FlameCheckUpdate(QList<Mod*>& mods,
                      std::list<Version>& mcVersions,
-                     std::optional<ModPlatform::ModLoaderTypes> loaders,
                      QList<ModPlatform::ModLoaderType> loadersList,
                      std::shared_ptr<ModFolderModel> mods_folder)
-        : CheckUpdateTask(mods, mcVersions, loaders, loadersList, mods_folder)
+        : CheckUpdateTask(mods, mcVersions, loadersList, mods_folder)
     {}
 
    public slots:
