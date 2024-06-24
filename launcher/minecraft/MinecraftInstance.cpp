@@ -484,14 +484,14 @@ QStringList MinecraftInstance::javaArguments()
     args.append(extraArguments());
     // Create required java.security file in instance folder.
     if (settings()->get("AllowOldJarCiphers").toBool()) {
-        QFile jarSecPolicyFile(instanceRoot() + "/java.security");
-        jarSecPolicyFile.open(QIODevice::ReadWrite | QIODevice::Text);
-        jarSecPolicyFile.resize(0);
-        jarSecPolicyFile.write("jdk.jar.disabledAlgorithms=MD2, MD5, RSA keySize < 1024");
-        jarSecPolicyFile.flush();
-        jarSecPolicyFile.close();
-        QString oldJarCiphersArgument = "-Djava.security.properties=" + jarSecPolicyFile.fileName();
-        args.append(oldJarCiphersArgument);
+        try {
+            auto fileName=FS::PathCombine(instanceRoot(), "java.security");
+            FS::write(fileName, "jdk.jar.disabledAlgorithms=MD2, MD5, RSA keySize < 1024");
+            QString oldJarCiphersArgument = "-Djava.security.properties="+fileName;
+            args.append(oldJarCiphersArgument);
+        } catch (...) {
+            qWarning() << "Failed to write loosened JAR signature requirement profile";
+        }
     }
     // OSX dock icon and name
 #ifdef Q_OS_MAC
