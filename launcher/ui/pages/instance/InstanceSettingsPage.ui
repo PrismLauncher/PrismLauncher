@@ -36,7 +36,7 @@
    <item>
     <widget class="QTabWidget" name="settingsTabs">
      <property name="currentIndex">
-      <number>0</number>
+      <number>4</number>
      </property>
      <widget class="QWidget" name="minecraftPage">
       <attribute name="title">
@@ -496,6 +496,28 @@
            <widget class="QLineEdit" name="lineEditOpenALPath">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="signatureWorkaroundsGroupBox">
+         <property name="title">
+          <string>Signature validation</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="reenableOldCiphersForJarCheck">
+            <property name="text">
+             <string>Re-enable old ciphers for JAR validation. (Warning! Only do this to make older mods work.)</string>
             </property>
            </widget>
           </item>
