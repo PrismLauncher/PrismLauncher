@@ -485,9 +485,9 @@ QStringList MinecraftInstance::javaArguments()
     // Create required java.security file in instance folder.
     if (settings()->get("AllowOldJarCiphers").toBool()) {
         try {
-            auto fileName=FS::PathCombine(instanceRoot(), "java.security");
+            auto fileName = FS::PathCombine(instanceRoot(), "java.security");
             FS::write(fileName, "jdk.jar.disabledAlgorithms=MD2, MD5, RSA keySize < 1024");
-            QString oldJarCiphersArgument = "-Djava.security.properties="+fileName;
+            QString oldJarCiphersArgument = "-Djava.security.properties=" + fileName;
             args.append(oldJarCiphersArgument);
         } catch (...) {
             qWarning() << "Failed to write loosened JAR signature requirement profile";
