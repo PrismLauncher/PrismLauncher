@@ -1,4 +1,5 @@
 #include "ModUpdateDialog.h"
+#include "Application.h"
 #include "ChooseProviderDialog.h"
 #include "CustomMessageBox.h"
 #include "ProgressDialog.h"
@@ -32,7 +33,12 @@ static std::list<Version> mcVersions(BaseInstance* inst)
 
 static std::optional<ModPlatform::ModLoaderTypes> mcLoaders(BaseInstance* inst)
 {
-    return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders() };
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders();
+}
+
+static QList<ModPlatform::ModLoaderType> mcLoadersList(BaseInstance* inst)
+{
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoadersList();
 }
 
 ModUpdateDialog::ModUpdateDialog(QWidget* parent,
@@ -87,11 +93,12 @@ void ModUpdateDialog::checkCandidates()
 
     auto versions = mcVersions(m_instance);
     auto loaders = mcLoaders(m_instance);
+    auto loadersList = mcLoadersList(m_instance);
 
     SequentialTask check_task(m_parent, tr("Checking for updates"));
 
     if (!m_modrinth_to_update.empty()) {
-        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model));
+        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, loadersList, m_mod_model));
         connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
             m_failed_check_update.append({ mod, reason, recover_url });
         });
@@ -99,7 +106,7 @@ void ModUpdateDialog::checkCandidates()
     }
 
     if (!m_flame_to_update.empty()) {
-        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model));
+        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, loadersList, m_mod_model));
         connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
             m_failed_check_update.append({ mod, reason, recover_url });
         });

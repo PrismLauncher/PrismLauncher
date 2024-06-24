@@ -58,7 +58,6 @@
 #include "ComponentUpdateTask.h"
 #include "PackProfile.h"
 #include "PackProfile_p.h"
-#include "minecraft/mod/Mod.h"
 #include "modplatform/ModIndex.h"
 
 static const QMap<QString, ModPlatform::ModLoaderType> modloaderMapping{ { "net.neoforged", ModPlatform::NeoForge },
@@ -1021,4 +1020,24 @@ std::optional<ModPlatform::ModLoaderTypes> PackProfile::getSupportedModLoaders()
     if (getComponentVersion("net.minecraft") == "1.20.1" && (loaders & ModPlatform::NeoForge))
         loaders |= ModPlatform::Forge;
     return loaders;
+}
+
+QList<ModPlatform::ModLoaderType> PackProfile::getModLoadersList()
+{
+    QList<ModPlatform::ModLoaderType> result;
+    for (auto c : d->components) {
+        if (c->isEnabled() && modloaderMapping.contains(c->getID())) {
+            result.append(modloaderMapping[c->getID()]);
+        }
+    }
+
+    // TODO: remove this or add version condition once Quilt drops official Fabric support
+    if (result.contains(ModPlatform::Quilt) && !result.contains(ModPlatform::Fabric)) {
+        result.append(ModPlatform::Fabric);
+    }
+    if (getComponentVersion("net.minecraft") == "1.20.1" && result.contains(ModPlatform::NeoForge) &&
+        !result.contains(ModPlatform::Forge)) {
+        result.append(ModPlatform::Forge);
+    }
+    return result;
 }
