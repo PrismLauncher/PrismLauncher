@@ -95,6 +95,9 @@ void JavaPage::applySettings()
     s->set("IgnoreJavaCompatibility", ui->skipCompatibilityCheckbox->isChecked());
     s->set("IgnoreJavaWizard", ui->skipJavaWizardCheckbox->isChecked());
     JavaCommon::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
+
+    // Security Settings
+    s->set("AllowOldJarCiphers", ui->reenableOldCiphersForJarCheck->isChecked());
 }
 void JavaPage::loadSettings()
 {
@@ -116,6 +119,9 @@ void JavaPage::loadSettings()
     ui->jvmArgsTextBox->setPlainText(s->get("JvmArgs").toString());
     ui->skipCompatibilityCheckbox->setChecked(s->get("IgnoreJavaCompatibility").toBool());
     ui->skipJavaWizardCheckbox->setChecked(s->get("IgnoreJavaWizard").toBool());
+
+    // Security Settings
+    ui->reenableOldCiphersForJarCheck->setChecked(s->get("AllowOldJarCiphers").toBool());
 }
 
 void JavaPage::on_javaDetectBtn_clicked()

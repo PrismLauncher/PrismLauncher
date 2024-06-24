@@ -211,9 +211,9 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("Env");
 
     // Workarounds
-    bool workarounds = ui->nativeWorkaroundsGroupBox->isChecked();
-    m_settings->set("OverrideNativeWorkarounds", workarounds);
-    if (workarounds) {
+    bool nativeWorkarounds = ui->nativeWorkaroundsGroupBox->isChecked();
+    m_settings->set("OverrideNativeWorkarounds", nativeWorkarounds);
+    if (nativeWorkarounds) {
         m_settings->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
         m_settings->set("CustomGLFWPath", ui->lineEditGLFWPath->text());
         m_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
@@ -224,6 +224,14 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("UseNativeOpenAL");
         m_settings->reset("CustomOpenALPath");
     }
+    bool signatureWorkarounds = ui->signatureWorkaroundsGroupBox->isChecked();
+    m_settings->set("OverrideSignatureWorkarounds", signatureWorkarounds);
+    if (signatureWorkarounds) {
+        m_settings->set("AllowOldJarCiphers", ui->reenableOldCiphersForJarCheck->isChecked());
+    } else {
+        m_settings->reset("AllowOldJarCiphers");
+    }
+
 
     // Performance
     bool performance = ui->perfomanceGroupBox->isChecked();
@@ -351,6 +359,8 @@ void InstanceSettingsPage::loadSettings()
 #else
     ui->lineEditOpenALPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
 #endif
+    ui->signatureWorkaroundsGroupBox->setChecked(m_settings->get("OverrideSignatureWorkarounds").toBool());
+    ui->reenableOldCiphersForJarCheck->setChecked(m_settings->get("AllowOldJarCiphers").toBool());
 
     // Performance
     ui->perfomanceGroupBox->setChecked(m_settings->get("OverridePerformance").toBool());

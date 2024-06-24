@@ -291,6 +291,22 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="securityGroupBox">
+         <property name="title">
+          <string>Security</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="reenableOldCiphersForJarCheck">
+            <property name="text">
+             <string>Re-enable old ciphers for JAR validation</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
