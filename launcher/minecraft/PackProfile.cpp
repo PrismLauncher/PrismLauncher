@@ -961,8 +961,7 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
         if (component->revert()) {
             component->setVersion(version);
             component->setImportant(important);
-            component->updateCachedData();
-            // remove linked componants to let them reresolve their versions
+            // remove linked components to let them re-resolve their versions
             if (important) {
                 auto linked = collectTreeLinked(uid);
                 for (auto comp : linked) {
@@ -970,15 +969,15 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
                         continue;
                     }
                     if (modloaderMapping.contains(comp->getID())) {
-                        qDebug() << comp->getID() << "is a mod loader, setting new recomended version...";
+                        qDebug() << comp->getID() << "is a mod loader, setting new recommended version...";
                         auto versionList = APPLICATION->metadataIndex()->get(comp->getID());
                         if (versionList) {
-                            auto recomended = versionList->getRecommendedForParent(comp->getID(), version);
-                            if (recomended) {
-                                qDebug() << "Setting updated loader version: " << comp->getID() << " = " << recomended->version();
-                                setComponentVersion(comp->getID(), recomended->version());
+                            auto recommended = versionList->getRecommendedForParent(comp->getID(), version);
+                            if (recommended) {
+                                qDebug() << "Setting updated loader version: " << comp->getID() << " = " << recommended->version();
+                                setComponentVersion(comp->getID(), recommended->version());
                             } else {
-                                qDebug() << "no recomended verison for" << comp->getID();
+                                qDebug() << "no recommended version for" << comp->getID();
                             }
                         } else {
                             qDebug() << "no version list in metadata index for" << comp->getID();
