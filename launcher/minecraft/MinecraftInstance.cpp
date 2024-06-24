@@ -173,6 +173,10 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("UseNativeGLFW"), nativeLibraryWorkaroundsOverride);
         m_settings->registerOverride(global_settings->getSetting("CustomGLFWPath"), nativeLibraryWorkaroundsOverride);
 
+        // Java signature validation workarounds
+        auto signatureValidationWorkaroundsOverride = m_settings->registerSetting("OverrideSignatureWorkarounds", false);
+        m_settings->registerOverride(global_settings->getSetting("AllowOldJarCiphers"), signatureValidationWorkaroundsOverride);
+
         // Performance related options
         auto performanceOverride = m_settings->registerSetting("OverridePerformance", false);
         m_settings->registerOverride(global_settings->getSetting("EnableFeralGamemode"), performanceOverride);

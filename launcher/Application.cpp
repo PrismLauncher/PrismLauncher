@@ -641,6 +641,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("UseNativeGLFW", false);
         m_settings->registerSetting("CustomGLFWPath", "");
 
+        // Java signature validation workarounds
+        m_settings->registerSetting("AllowOldJarCiphers", false);
+
         // Performance related options
         m_settings->registerSetting("EnableFeralGamemode", false);
         m_settings->registerSetting("EnableMangoHud", false);
