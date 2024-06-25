@@ -180,12 +180,12 @@ void VersionList::parse(const QJsonObject& obj)
     parseVersionList(obj, this);
 }
 
-void VersionList::addExternalRecomends(const QVector<QString>& recomends)
+void VersionList::addExternalRecommends(const QStringList& recommends)
 {
-    m_externalRecommendsVersions.append(recomends);
+    m_externalRecommendsVersions.append(recommends);
 }
 
-void VersionList::clearExternalRecomends()
+void VersionList::clearExternalRecommends()
 {
     m_externalRecommendsVersions.clear();
 }

@@ -71,8 +71,8 @@ class VersionList : public BaseVersionList, public BaseEntity {
     void merge(const VersionList::Ptr& other);
     void mergeFromIndex(const VersionList::Ptr& other);
     void parse(const QJsonObject& obj) override;
-    void addExternalRecomends(const QVector<QString>& recomends);
-    void clearExternalRecomends();
+    void addExternalRecommends(const QStringList& recommends);
+    void clearExternalRecommends();
 
    signals:
     void nameChanged(const QString& name);

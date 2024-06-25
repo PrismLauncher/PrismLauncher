@@ -370,7 +370,7 @@ void VersionPage::on_actionChange_version_triggered()
     auto patch = m_profile->getComponent(versionRow);
     auto name = patch->getName();
     auto list = patch->getVersionList();
-    list->clearExternalRecomends();
+    list->clearExternalRecommends();
     if (!list) {
         return;
     }
@@ -384,7 +384,7 @@ void VersionPage::on_actionChange_version_triggered()
         if (lwjglReq != minecraft->m_cachedRequires.cend()) {
             auto lwjglVersion = !lwjglReq->equalsVersion.isEmpty() ? lwjglReq->equalsVersion : lwjglReq->suggests;
             if (!lwjglVersion.isEmpty()) {
-                list->addExternalRecomends({ lwjglVersion });
+                list->addExternalRecommends({ lwjglVersion });
             }
         }
     }
