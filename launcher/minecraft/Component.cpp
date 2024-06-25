@@ -403,6 +403,18 @@ void Component::updateCachedData()
     }
 }
 
+void Component::waitLoadMeta() {
+
+    if (!m_loaded) {
+        if (!m_metaVersion || !m_metaVersion->isLoaded()) {
+            // wait for the loaded version from meta
+            m_metaVersion = APPLICATION->metadataIndex()->getLoadedVersion(m_uid, m_version);
+        }
+        m_loaded = true;
+        updateCachedData();
+    }
+}
+
 QDebug operator<<(QDebug d, const Component& comp) {
     d << "Component(" << comp.m_uid << " : " << comp.m_cachedVersion << ")";
     return d;

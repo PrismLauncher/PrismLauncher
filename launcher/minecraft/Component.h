@@ -64,6 +64,8 @@ class Component : public QObject, public ProblemProvider {
     bool revert();
 
     void updateCachedData();
+    
+    void waitLoadMeta();
 
    signals:
     void dataChanged();

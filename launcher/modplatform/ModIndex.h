@@ -44,7 +44,7 @@ namespace ProviderCapabilities {
 const char* name(ResourceProvider);
 QString readableName(ResourceProvider);
 QStringList hashType(ResourceProvider);
-};  // namespace ProviderCapabilities
+}  // namespace ProviderCapabilities
 
 struct ModpackAuthor {
     QString name;

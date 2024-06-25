@@ -287,7 +287,11 @@ Version::Ptr VersionList::getRecommendedForParent(const QString& uid, const QStr
     if (foundExplicit != m_versions.end()) {
         return *foundExplicit;
     }
+    return nullptr;
+}
 
+Version::Ptr VersionList::getLatestForParent(const QString& uid, const QString& version)
+{
     Version::Ptr latestCompat = nullptr;
     for (auto ver : m_versions) {
         auto& reqs = ver->requiredSet();

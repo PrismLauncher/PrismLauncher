@@ -8,12 +8,15 @@
 #include "cassert"
 #include "meta/Index.h"
 #include "meta/Version.h"
+#include "minecraft/MinecraftInstance.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/ProfileUtils.h"
 #include "net/Mode.h"
 
 #include "Application.h"
 #include "tasks/Task.h"
+
+#include "minecraft/Logging.h"
 
 /*
  * This is responsible for loading the components of a component list AND resolving dependency issues between them
@@ -36,7 +39,7 @@
 ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list, QObject* parent) : Task(parent)
 {
     d.reset(new ComponentUpdateTaskData);
-    d->m_list = list;
+    d->m_profile = list;
     d->mode = mode;
     d->netmode = netmode;
 }
@@ -45,7 +48,7 @@ ComponentUpdateTask::~ComponentUpdateTask() {}
 
 void ComponentUpdateTask::executeTask()
 {
-    qDebug() << "Loading components";
+    qCDebug(instanceProfileResolveC) << "Loading components";
     loadComponents();
 }
 
@@ -63,7 +66,7 @@ LoadResult composeLoadResult(LoadResult a, LoadResult b)
 static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net::Mode netmode)
 {
     if (component->m_loaded) {
-        qDebug() << component->getName() << "is already loaded";
+        qCDebug(instanceProfileResolveC) << component->getName() << "is already loaded";
         return LoadResult::LoadedLocal;
     }
 
@@ -144,7 +147,7 @@ void ComponentUpdateTask::loadComponents()
     d->remoteLoadSuccessful = true;
 
     // load all the components OR their lists...
-    for (auto component : d->m_list->d->components) {
+    for (auto component : d->m_profile->d->components) {
         Task::Ptr loadTask;
         LoadResult singleResult;
         RemoteLoadStatus::Type loadType;
@@ -175,7 +178,7 @@ void ComponentUpdateTask::loadComponents()
         }
         result = composeLoadResult(result, singleResult);
         if (loadTask) {
-            qDebug() << "Remote loading is being run for" << component->getName();
+            qCDebug(instanceProfileResolveC) << d->m_profile->d->m_instance->name() << "|" << "Remote loading is being run for" << component->getName();
             connect(loadTask.get(), &Task::succeeded, this, [this, taskIndex]() { remoteLoadSucceeded(taskIndex); });
             connect(loadTask.get(), &Task::failed, this, [this, taskIndex](const QString& error) { remoteLoadFailed(taskIndex, error); });
             connect(loadTask.get(), &Task::aborted, this, [this, taskIndex]() { remoteLoadFailed(taskIndex, tr("Aborted")); });
@@ -270,7 +273,7 @@ static bool gatherRequirementsFromComponents(const ComponentContainer& input, Re
                     output.erase(componenRequireEx);
                     output.insert(result.outcome);
                 } else {
-                    qCritical() << "Conflicting requirements:" << componentRequire.uid << "versions:" << componentRequire.equalsVersion
+                    qCCritical(instanceProfileResolveC) << "Conflicting requirements:" << componentRequire.uid << "versions:" << componentRequire.equalsVersion
                                 << ";" << (*found).equalsVersion;
                 }
                 succeeded &= result.ok;
@@ -353,22 +356,22 @@ static bool getTrivialComponentChanges(const ComponentIndex& index, const Requir
         } while (false);
         switch (decision) {
             case Decision::Undetermined:
-                qCritical() << "No decision for" << reqStr;
+                qCCritical(instanceProfileResolveC) << "No decision for" << reqStr;
                 succeeded = false;
                 break;
             case Decision::Met:
-                qDebug() << reqStr << "Is met.";
+                qCDebug(instanceProfileResolveC) << reqStr << "Is met.";
                 break;
             case Decision::Missing:
-                qDebug() << reqStr << "Is missing and should be added at" << req.indexOfFirstDependee;
+                qCDebug(instanceProfileResolveC) << reqStr << "Is missing and should be added at" << req.indexOfFirstDependee;
                 toAdd.insert(req);
                 break;
             case Decision::VersionNotSame:
-                qDebug() << reqStr << "already has different version that can be changed.";
+                qCDebug(instanceProfileResolveC) << reqStr << "already has different version that can be changed.";
                 toChange.insert(req);
                 break;
             case Decision::LockedVersionNotSame:
-                qDebug() << reqStr << "already has different version that cannot be changed.";
+                qCDebug(instanceProfileResolveC) << reqStr << "already has different version that cannot be changed.";
                 succeeded = false;
                 break;
         }
@@ -381,7 +384,7 @@ static bool getTrivialComponentChanges(const ComponentIndex& index, const Requir
 // FIXME: throw all this away and use a graph
 void ComponentUpdateTask::resolveDependencies(bool checkOnly)
 {
-    qDebug() << "Resolving dependencies";
+    qCDebug(instanceProfileResolveC) << "Resolving dependencies";
     /*
      * this is a naive dependency resolving algorithm. all it does is check for following conditions and react in simple ways:
      * 1. There are conflicting dependencies on the same uid with different exact version numbers
@@ -393,8 +396,8 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
      *
      * NOTE: this is a placeholder and should eventually be replaced with something 'serious'
      */
-    auto& components = d->m_list->d->components;
-    auto& componentIndex = d->m_list->d->componentIndex;
+    auto& components = d->m_profile->d->components;
+    auto& componentIndex = d->m_profile->d->componentIndex;
 
     RequireExSet allRequires;
     QStringList toRemove;
@@ -407,10 +410,10 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
         }
         getTrivialRemovals(components, allRequires, toRemove);
         if (!toRemove.isEmpty()) {
-            qDebug() << "Removing obsolete components...";
+            qCDebug(instanceProfileResolveC) << "Removing obsolete components...";
             for (auto& remove : toRemove) {
-                qDebug() << "Removing" << remove;
-                d->m_list->remove(remove);
+                qCDebug(instanceProfileResolveC) << "Removing" << remove;
+                d->m_profile->remove(remove);
             }
         }
     } while (!toRemove.isEmpty());
@@ -434,14 +437,14 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
     if (toAdd.size()) {
         // add stuff...
         for (auto& add : toAdd) {
-            auto component = makeShared<Component>(d->m_list, add.uid);
+            auto component = makeShared<Component>(d->m_profile, add.uid);
             if (!add.equalsVersion.isEmpty()) {
                 // exact version
-                qDebug() << "Adding" << add.uid << "version" << add.equalsVersion << "at position" << add.indexOfFirstDependee;
+                qCDebug(instanceProfileResolveC) << "Adding" << add.uid << "version" << add.equalsVersion << "at position" << add.indexOfFirstDependee;
                 component->m_version = add.equalsVersion;
             } else {
                 // version needs to be decided
-                qDebug() << "Adding" << add.uid << "at position" << add.indexOfFirstDependee;
+                qCDebug(instanceProfileResolveC) << "Adding" << add.uid << "at position" << add.indexOfFirstDependee;
                 // ############################################################################################################
                 // HACK HACK HACK HACK FIXME: this is a placeholder for deciding what version to use. For now, it is hardcoded.
                 if (!add.suggests.isEmpty()) {
@@ -464,7 +467,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
             }
             component->m_dependencyOnly = true;
             // FIXME: this should not work directly with the component list
-            d->m_list->insertComponent(add.indexOfFirstDependee, component);
+            d->m_profile->insertComponent(add.indexOfFirstDependee, component);
             componentIndex[add.uid] = component;
         }
         recursionNeeded = true;
@@ -473,7 +476,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
         // change a version of something that exists
         for (auto& change : toChange) {
             // FIXME: this should not work directly with the component list
-            qDebug() << "Setting version of " << change.uid << "to" << change.equalsVersion;
+            qCDebug(instanceProfileResolveC) << "Setting version of " << change.uid << "to" << change.equalsVersion;
             auto component = componentIndex[change.uid];
             component->setVersion(change.equalsVersion);
         }
@@ -490,7 +493,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
 void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
 {
     if (static_cast<size_t>(d->remoteLoadStatusList.size()) < taskIndex) {
-        qWarning() << "Got task index outside of results" << taskIndex;
+        qCWarning(instanceProfileResolveC) << "Got task index outside of results" << taskIndex;
         return;
     }
     auto& taskSlot = d->remoteLoadStatusList[taskIndex];
@@ -498,16 +501,16 @@ void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
     disconnect(taskSlot.task.get(), &Task::failed, this, nullptr);
     disconnect(taskSlot.task.get(), &Task::aborted, this, nullptr);
     if (taskSlot.finished) {
-        qWarning() << "Got multiple results from remote load task" << taskIndex;
+        qCWarning(instanceProfileResolveC) << "Got multiple results from remote load task" << taskIndex;
         return;
     }
-    qDebug() << "Remote task" << taskIndex << "succeeded";
+    qCDebug(instanceProfileResolveC) << "Remote task" << taskIndex << "succeeded";
     taskSlot.succeeded = false;
     taskSlot.finished = true;
     d->remoteTasksInProgress--;
     // update the cached data of the component from the downloaded version file.
     if (taskSlot.type == RemoteLoadStatus::Type::Version) {
-        auto component = d->m_list->getComponent(taskSlot.PackProfileIndex);
+        auto component = d->m_profile->getComponent(taskSlot.PackProfileIndex);
         component->m_loaded = true;
         component->updateCachedData();
     }
@@ -517,7 +520,7 @@ void ComponentUpdateTask::remoteLoadSucceeded(size_t taskIndex)
 void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg)
 {
     if (static_cast<size_t>(d->remoteLoadStatusList.size()) < taskIndex) {
-        qWarning() << "Got task index outside of results" << taskIndex;
+        qCWarning(instanceProfileResolveC) << "Got task index outside of results" << taskIndex;
         return;
     }
     auto& taskSlot = d->remoteLoadStatusList[taskIndex];
@@ -525,10 +528,10 @@ void ComponentUpdateTask::remoteLoadFailed(size_t taskIndex, const QString& msg)
     disconnect(taskSlot.task.get(), &Task::failed, this, nullptr);
     disconnect(taskSlot.task.get(), &Task::aborted, this, nullptr);
     if (taskSlot.finished) {
-        qWarning() << "Got multiple results from remote load task" << taskIndex;
+        qCWarning(instanceProfileResolveC) << "Got multiple results from remote load task" << taskIndex;
         return;
     }
-    qDebug() << "Remote task" << taskIndex << "failed: " << msg;
+    qCDebug(instanceProfileResolveC) << "Remote task" << taskIndex << "failed: " << msg;
     d->remoteLoadSuccessful = false;
     taskSlot.succeeded = false;
     taskSlot.finished = true;
