@@ -105,9 +105,6 @@ void GamepadManager::loop()
         } else if (event.type == SDL_CONTROLLERBUTTONDOWN) {
             auto buttonEvent = event.cbutton;
             buttonPress(buttonEvent.button);
-        } else if (event.type == SDL_CONTROLLERBUTTONUP) {
-            // auto buttonEvent = event.cbutton;
-            // buttonPress(buttonEvent.button);
         } else if (event.type == SDL_CONTROLLERDEVICEADDED) {
             if (!m_controller) {
                 for (int i = 0; i < SDL_NumJoysticks(); i++) {
