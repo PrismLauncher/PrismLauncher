@@ -339,17 +339,12 @@ void JavaSettingsWidget::javaVersionSelected(BaseVersion::Ptr version)
 
 void JavaSettingsWidget::on_javaBrowseBtn_clicked()
 {
-    QString filter;
-#if defined Q_OS_WIN32
-    filter = "Java (javaw.exe)";
-#else
-    filter = "Java (java)";
-#endif
-    QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"), QString(), filter);
+    auto filter = QString("Java (%1)").arg(JavaUtils::javaExecutable);
+    auto raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"), QString(), filter);
     if (raw_path.isEmpty()) {
         return;
     }
-    QString cooked_path = FS::NormalizePath(raw_path);
+    auto cooked_path = FS::NormalizePath(raw_path);
     m_javaPathTextBox->setText(cooked_path);
     checkJavaPath(cooked_path);
 }

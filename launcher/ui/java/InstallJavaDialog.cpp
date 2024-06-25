@@ -211,6 +211,7 @@ void InstallDialog::done(int result)
             if (meta) {
                 Task::Ptr task;
                 auto final_path = FS::PathCombine(APPLICATION->javaPath(), meta->m_name);
+                auto deletePath = [final_path] { FS::deletePath(final_path); };
                 switch (meta->downloadType) {
                     case Java::DownloadType::Manifest:
                         task = makeShared<ManifestDownloadTask>(meta->url, final_path, meta->checksumType, meta->checksumHash);
@@ -218,8 +219,11 @@ void InstallDialog::done(int result)
                     case Java::DownloadType::Archive:
                         task = makeShared<ArchiveDownloadTask>(meta->url, final_path, meta->checksumType, meta->checksumHash);
                         break;
+                    case Java::DownloadType::Unknown:
+                        QString error = QString(tr("Could not determine Java download type!"));
+                        CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
+                        deletePath();
                 }
-                auto deletePath = [final_path] { FS::deletePath(final_path); };
                 connect(task.get(), &Task::failed, this, [this, &deletePath](QString reason) {
                     QString error = QString("Java download failed: %1").arg(reason);
                     CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();

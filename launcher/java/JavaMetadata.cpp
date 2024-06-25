@@ -31,8 +31,10 @@ DownloadType parseDownloadType(QString javaDownload)
 {
     if (javaDownload == "manifest")
         return DownloadType::Manifest;
-    // if (javaDownload == "archive")
-    return DownloadType::Archive;
+    else if (javaDownload == "archive")
+        return DownloadType::Archive;
+    else
+        return DownloadType::Unknown;
 }
 QString downloadTypeToString(DownloadType javaDownload)
 {
@@ -41,8 +43,10 @@ QString downloadTypeToString(DownloadType javaDownload)
             return "manifest";
         case DownloadType::Archive:
             return "archive";
+        case DownloadType::Unknown:
+            break;
     }
-    return "";
+    return "unknown";
 }
 MetadataPtr parseJavaMeta(const QJsonObject& in)
 {

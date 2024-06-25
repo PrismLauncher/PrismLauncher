@@ -42,4 +42,5 @@ class JavaUtils : public QObject {
 #endif
 
     static QString getJavaCheckPath();
+    static const QString javaExecutable;
 };

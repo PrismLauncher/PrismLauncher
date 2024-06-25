@@ -44,6 +44,7 @@
 #include "SysInfo.h"
 #include "java/JavaInstall.h"
 #include "java/JavaInstallList.h"
+#include "java/JavaUtils.h"
 #include "java/JavaVersion.h"
 #include "java/download/ArchiveDownloadTask.h"
 #include "java/download/ManifestDownloadTask.h"
@@ -91,7 +92,7 @@ void AutoInstallJava::executeTask()
         return;
     }
     if (m_supported_arch.isEmpty()) {
-        emit logLine(tr("Your system(%1 %2) is not compatible with automatic Java installation. Using the default Java path.")
+        emit logLine(tr("Your system (%1-%2) is not compatible with automatic Java installation. Using the default Java path.")
                          .arg(SysInfo::currentSystem(), SysInfo::useQTForArch()),
                      MessageLevel::Warning);
         emitSucceeded();
@@ -99,7 +100,8 @@ void AutoInstallJava::executeTask()
     }
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
     if (wantedJavaName.isEmpty()) {
-        emit logLine(tr("Your meta information is out of date or doesn't have the information necessary to determine what installation of Java should be used. "
+        emit logLine(tr("Your meta information is out of date or doesn't have the information necessary to determine what installation of "
+                        "Java should be used. "
                         "Using the default Java path."),
                      MessageLevel::Warning);
         emitSucceeded();
@@ -133,17 +135,13 @@ void AutoInstallJava::setJavaPath(QString path)
 
 void AutoInstallJava::setJavaPathFromPartial()
 {
-    QString executable = "java";
-#if defined(Q_OS_WIN32)
-    executable += "w.exe";
-#endif
     auto packProfile = m_instance->getPackProfile();
     auto javaName = packProfile->getProfile()->getCompatibleJavaName();
     QDir javaDir(APPLICATION->javaPath());
     // just checking if the executable is there should suffice
     // but if needed this can be achieved through refreshing the javalist
     // and retrieving the path that contains the java name
-    auto relativeBinary = FS::PathCombine(javaName, "bin", executable);
+    auto relativeBinary = FS::PathCombine(javaName, "bin", JavaUtils::javaExecutable);
     auto finalPath = javaDir.absoluteFilePath(relativeBinary);
     if (QFileInfo::exists(finalPath)) {
         setJavaPath(finalPath);
@@ -169,6 +167,9 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
                 case Java::DownloadType::Archive:
                     m_current_task = makeShared<Java::ArchiveDownloadTask>(java->url, final_path, java->checksumType, java->checksumHash);
                     break;
+                case Java::DownloadType::Unknown:
+                    emitFailed(tr("Could not determine Java download type!"));
+                    return;
             }
             auto deletePath = [final_path] { FS::deletePath(final_path); };
             connect(m_current_task.get(), &Task::failed, this, [this, deletePath](QString reason) {
@@ -201,8 +202,9 @@ void AutoInstallJava::tryNextMajorJava()
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
     auto majorJavaVersions = packProfile->getProfile()->getCompatibleJavaMajors();
     if (m_majorJavaVersionIndex >= majorJavaVersions.length()) {
-        emit logLine(tr("No versions of Java were found for your operating system: %1-%2").arg(SysInfo::currentSystem(), SysInfo::useQTForArch()),
-                     MessageLevel::Warning);
+        emit logLine(
+            tr("No versions of Java were found for your operating system: %1-%2").arg(SysInfo::currentSystem(), SysInfo::useQTForArch()),
+            MessageLevel::Warning);
         emit logLine(tr("No compatible version of Java was found. Using the default one."), MessageLevel::Warning);
         emitSucceeded();
         return;

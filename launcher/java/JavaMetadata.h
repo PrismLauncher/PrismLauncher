@@ -28,7 +28,7 @@
 
 namespace Java {
 
-enum class DownloadType { Manifest, Archive };
+enum class DownloadType { Manifest, Archive, Unknown };
 
 class Metadata : public BaseVersion {
    public:
