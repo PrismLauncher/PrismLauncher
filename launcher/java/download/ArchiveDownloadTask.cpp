@@ -67,7 +67,7 @@ void ArchiveDownloadTask::extractJava(QString input)
 {
     setStatus(tr("Extracting java"));
     if (input.endsWith("tar")) {
-        setStatus(tr("Extracting java(the progress will not be reported for tar)"));
+        setStatus(tr("Extracting Java (Progress is not reported for tar archives)"));
         QFile in(input);
         if (!in.open(QFile::ReadOnly)) {
             emitFailed(tr("Unable to open supplied tar file."));
@@ -80,7 +80,7 @@ void ArchiveDownloadTask::extractJava(QString input)
         emitSucceeded();
         return;
     } else if (input.endsWith("tar.gz") || input.endsWith("taz") || input.endsWith("tgz")) {
-        setStatus(tr("Extracting java(the progress will not be reported for tar)"));
+        setStatus(tr("Extracting Java (Progress is not reported for tar archives)"));
         if (!GZTar::extract(input, QDir(m_final_path).absolutePath())) {
             emitFailed(tr("Unable to extract supplied tar file."));
             return;
@@ -95,7 +95,7 @@ void ArchiveDownloadTask::extractJava(QString input)
     }
     auto files = zip->getFileNameList();
     if (files.isEmpty()) {
-        emitFailed("Empty archive");
+        emitFailed(tr("Empty archive"));
         return;
     }
     m_task = makeShared<MMCZip::ExtractZipTask>(zip, m_final_path, files[0]);
