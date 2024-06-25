@@ -61,7 +61,7 @@ void ManifestDownloadTask::executeTask()
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*files, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response at " << parse_error.offset << " reason: " << parse_error.errorString();
+            qWarning() << "Error while parsing JSON response at " << parse_error.offset << ". Reason: " << parse_error.errorString();
             qWarning() << *files;
             emitFailed(parse_error.errorString());
             return;
