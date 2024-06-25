@@ -74,13 +74,13 @@ void AutoInstallJava::executeTask()
                 auto java = std::dynamic_pointer_cast<JavaInstall>(javas->at(i));
                 if (java && packProfile->getProfile()->getCompatibleJavaMajors().contains(java->id.major())) {
                     if (!java->is_64bit) {
-                        emit logLine(tr("The automatic Java mechanism detected an x32 java."), MessageLevel::Info);
+                        emit logLine(tr("The automatic Java mechanism detected a 32-bit installation of Java."), MessageLevel::Info);
                     }
                     setJavaPath(java->path);
                     return;
                 }
             }
-            emit logLine(tr("No compatible java version was found. Using the default one."), MessageLevel::Warning);
+            emit logLine(tr("No compatible Java version was found. Using the default one."), MessageLevel::Warning);
             emitSucceeded();
         });
         connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
@@ -91,7 +91,7 @@ void AutoInstallJava::executeTask()
         return;
     }
     if (m_supported_arch.isEmpty()) {
-        emit logLine(tr("Your system(%1 %2) is not compatible with auto java download. Using the default java path.")
+        emit logLine(tr("Your system(%1 %2) is not compatible with automatic Java installation. Using the default Java path.")
                          .arg(SysInfo::currentSystem(), SysInfo::useQTForArch()),
                      MessageLevel::Warning);
         emitSucceeded();
@@ -99,8 +99,8 @@ void AutoInstallJava::executeTask()
     }
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
     if (wantedJavaName.isEmpty()) {
-        emit logLine(tr("Your meta informtation is old or doesn't have the information necesary to determine what java should be used. "
-                        "Using the default java path."),
+        emit logLine(tr("Your meta information is out of date or doesn't have the information necessary to determine what installation of Java should be used. "
+                        "Using the default Java path."),
                      MessageLevel::Warning);
         emitSucceeded();
         return;
@@ -127,7 +127,7 @@ void AutoInstallJava::setJavaPath(QString path)
     auto settings = m_instance->settings();
     settings->set("OverrideJavaLocation", true);
     settings->set("JavaPath", path);
-    emit logLine(tr("Compatible java found at: %1.").arg(path), MessageLevel::Info);
+    emit logLine(tr("Compatible Java found at: %1.").arg(path), MessageLevel::Info);
     emitSucceeded();
 }
 
@@ -148,7 +148,7 @@ void AutoInstallJava::setJavaPathFromPartial()
     if (QFileInfo::exists(finalPath)) {
         setJavaPath(finalPath);
     } else {
-        emit logLine(tr("No compatible java version was found(the binary file doesn't exists). Using the default one."),
+        emit logLine(tr("No compatible Java version was found (the binary file does not exist). Using the default one."),
                      MessageLevel::Warning);
         emitSucceeded();
     }
@@ -201,9 +201,9 @@ void AutoInstallJava::tryNextMajorJava()
     auto wantedJavaName = packProfile->getProfile()->getCompatibleJavaName();
     auto majorJavaVersions = packProfile->getProfile()->getCompatibleJavaMajors();
     if (m_majorJavaVersionIndex >= majorJavaVersions.length()) {
-        emit logLine(tr("No Java versions found for your operating system: %1 %2").arg(SysInfo::currentSystem(), SysInfo::useQTForArch()),
+        emit logLine(tr("No versions of Java were found for your operating system: %1-%2").arg(SysInfo::currentSystem(), SysInfo::useQTForArch()),
                      MessageLevel::Warning);
-        emit logLine(tr("No compatible java version was found. Using the default one."), MessageLevel::Warning);
+        emit logLine(tr("No compatible version of Java was found. Using the default one."), MessageLevel::Warning);
         emitSucceeded();
         return;
     }
