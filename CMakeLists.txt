@@ -348,6 +348,8 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
 
     # Find cmark
     find_package(cmark QUIET)
+
+    find_package(KF6Archive)
 endif()
 
 include(ECMQtDeclareLoggingCategory)
