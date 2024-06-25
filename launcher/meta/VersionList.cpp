@@ -254,8 +254,9 @@ void VersionList::setupAddedVersion(const int row, const Version::Ptr& version)
 
     connect(version.get(), &Version::requiresChanged, this,
             [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << RequiresRole); });
-    connect(version.get(), &Version::timeChanged, this,
-            [this, row]() { emit dataChanged(index(row), index(row), { TimeRole, SortRole }); });
+    connect(version.get(), &Version::timeChanged, this, [this, row]() {
+        emit dataChanged(index(row), index(row), { TimeRole, SortRole });
+    });
     connect(version.get(), &Version::typeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), { TypeRole }); });
 }
 

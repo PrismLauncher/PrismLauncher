@@ -178,7 +178,8 @@ void ComponentUpdateTask::loadComponents()
         }
         result = composeLoadResult(result, singleResult);
         if (loadTask) {
-            qCDebug(instanceProfileResolveC) << d->m_profile->d->m_instance->name() << "|" << "Remote loading is being run for" << component->getName();
+            qCDebug(instanceProfileResolveC) << d->m_profile->d->m_instance->name() << "|"
+                                             << "Remote loading is being run for" << component->getName();
             connect(loadTask.get(), &Task::succeeded, this, [this, taskIndex]() { remoteLoadSucceeded(taskIndex); });
             connect(loadTask.get(), &Task::failed, this, [this, taskIndex](const QString& error) { remoteLoadFailed(taskIndex, error); });
             connect(loadTask.get(), &Task::aborted, this, [this, taskIndex]() { remoteLoadFailed(taskIndex, tr("Aborted")); });
@@ -273,8 +274,8 @@ static bool gatherRequirementsFromComponents(const ComponentContainer& input, Re
                     output.erase(componenRequireEx);
                     output.insert(result.outcome);
                 } else {
-                    qCCritical(instanceProfileResolveC) << "Conflicting requirements:" << componentRequire.uid << "versions:" << componentRequire.equalsVersion
-                                << ";" << (*found).equalsVersion;
+                    qCCritical(instanceProfileResolveC) << "Conflicting requirements:" << componentRequire.uid
+                                                        << "versions:" << componentRequire.equalsVersion << ";" << (*found).equalsVersion;
                 }
                 succeeded &= result.ok;
             } else {
@@ -440,7 +441,8 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
             auto component = makeShared<Component>(d->m_profile, add.uid);
             if (!add.equalsVersion.isEmpty()) {
                 // exact version
-                qCDebug(instanceProfileResolveC) << "Adding" << add.uid << "version" << add.equalsVersion << "at position" << add.indexOfFirstDependee;
+                qCDebug(instanceProfileResolveC)
+                    << "Adding" << add.uid << "version" << add.equalsVersion << "at position" << add.indexOfFirstDependee;
                 component->m_version = add.equalsVersion;
             } else {
                 // version needs to be decided

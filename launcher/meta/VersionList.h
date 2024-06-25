@@ -46,7 +46,6 @@ class VersionList : public BaseVersionList, public BaseEntity {
     Version::Ptr getRecommendedForParent(const QString& uid, const QString& version);
     Version::Ptr getLatestForParent(const QString& uid, const QString& version);
 
-
     QVariant data(const QModelIndex& index, int role) const override;
     RoleList providesRoles() const override;
     QHash<int, QByteArray> roleNames() const override;
