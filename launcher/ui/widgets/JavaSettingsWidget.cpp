@@ -180,7 +180,7 @@ void JavaSettingsWidget::initialize()
 
     if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
         auto button =
-            CustomMessageBox::selectable(this, tr("Auto Java Download"),
+            CustomMessageBox::selectable(this, tr("Automatic Java Download"),
                                          tr("%1 can automatically download the correct Java version for each version of Minecraft..\n"
                                             "Do you want to enable Java auto-download?\n")
                                              .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
@@ -220,8 +220,8 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
                 int button = QMessageBox::No;
                 if (m_result.mojangPlatform == "32" && maxHeapSize() > 2048) {
                     button = CustomMessageBox::selectable(
-                                 this, tr("Java x32 detected"),
-                                 tr("You selected an 32-bit java, but allocated more than 2048MiB as maximum memory.\n"
+                                 this, tr("32-bit Java detected"),
+                                 tr("You selected a 32-bit installation of Java, but allocated more than 2048MiB as maximum memory.\n"
                                     "%1 will not be able to start Minecraft.\n"
                                     "Do you wish to proceed?"
                                     "\n\n"
@@ -232,9 +232,9 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
 
                 } else {
                     button = CustomMessageBox::selectable(this, tr("No Java version selected"),
-                                                          tr("You didn't select a Java version or selected something that doesn't work.\n"
+                                                          tr("You either didn't select a Java version or selected one that does not work.\n"
                                                              "%1 will not be able to start Minecraft.\n"
-                                                             "Do you wish to proceed without any Java?"
+                                                             "Do you wish to proceed without a functional version of Java?"
                                                              "\n\n"
                                                              "You can change the Java version in the settings later.\n")
                                                               .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
@@ -246,7 +246,7 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
                     case QMessageBox::Yes:
                         return ValidationStatus::JavaBad;
                     case QMessageBox::Help:
-                        DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("java-wizzard")));
+                        DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("java-wizard")));
                     /* fallthrough */
                     case QMessageBox::No:
                     /* fallthrough */
@@ -515,7 +515,7 @@ void JavaSettingsWidget::updateThresholds()
         m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
     } else if (observedMaxMemory > 2048 && m_result.is_64bit) {
         iconName = "status-bad";
-        m_labelMaxMemIcon->setToolTip(tr("Because you're using 32 bit Java, you're exceeding the maximum possible allocation."));
+        m_labelMaxMemIcon->setToolTip(tr("You are exceeding the maximum allocation supported by 32-bit installations of Java."));
     } else {
         iconName = "status-good";
         m_labelMaxMemIcon->setToolTip("");
