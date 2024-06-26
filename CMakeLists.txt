@@ -158,8 +158,7 @@ if(NOT ECM_FOUND)
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             RESULT_VARIABLE result
         )
-    elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
-    else()
+    endif()
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/CMakeLists.txt")
         message(STATUS "Using bundled ECM")
         set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/modules;${CMAKE_MODULE_PATH}")
@@ -361,7 +360,7 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
         find_package(KF5Archive)
     elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
         find_package(KF6Archive)
-    else()
+    endif()
 
 endif()
 
@@ -562,25 +561,25 @@ endif()
 add_subdirectory(libraries/qdcss) # css parser
 
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
-if(NOT KF5Archive_FOUND)
-    execute_process(
-        COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/karchive checkout kf5
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        RESULT_VARIABLE result
-    )
-    message(STATUS "Using bundled karchive")
-    add_subdirectory(libraries/karchive) 
-else()
-    message(STATUS "Using system karchive")
-endif()
+    if(NOT KF5Archive_FOUND)
+        execute_process(
+            COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/karchive checkout kf5
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            RESULT_VARIABLE result
+        )
+        message(STATUS "Using bundled karchive")
+        add_subdirectory(libraries/karchive) 
+    else()
+        message(STATUS "Using system karchive")
+    endif()
 elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
-if(NOT KF6Archive_FOUND)
-    message(STATUS "Using bundled karchive")
-    add_subdirectory(libraries/karchive) 
-else()
-    message(STATUS "Using system karchive")
+    if(NOT KF6Archive_FOUND)
+        message(STATUS "Using bundled karchive")
+        add_subdirectory(libraries/karchive) 
+    else()
+        message(STATUS "Using system karchive")
+    endif()
 endif()
-else()
 
 ############################### Built Artifacts ###############################
 
