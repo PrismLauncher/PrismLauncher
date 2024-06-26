@@ -378,6 +378,14 @@ QList<QString> JavaUtils::FindJavaPaths()
     // javas downloaded by sdkman
     javas.append(FS::PathCombine(home, ".sdkman/candidates/java"));
 
+    // java in user library folder (like from intellij downloads)
+    QDir userLibraryJVMDir(FS::PathCombine(home, "Library/Java/JavaVirtualMachines/"));
+    QStringList userLibraryJVMJavas = userLibraryJVMDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    foreach (const QString& java, userLibraryJVMJavas) {
+        javas.append(userLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/bin/java");
+        javas.append(userLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
+    }
+
     javas.append(getMinecraftJavaBundle());
     javas = addJavasFromEnv(javas);
     javas.removeDuplicates();
