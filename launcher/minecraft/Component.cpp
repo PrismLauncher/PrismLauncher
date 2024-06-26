@@ -90,10 +90,6 @@ void Component::applyTo(LaunchProfile* profile)
 std::shared_ptr<class VersionFile> Component::getVersionFile() const
 {
     if (m_metaVersion) {
-        if (!m_metaVersion->isLoaded()) {
-            // this method is const but the loading of meta changes the information
-            APPLICATION->metadataIndex()->getLoadedVersion(m_metaVersion->uid(), m_metaVersion->version());
-        }
         return m_metaVersion->data();
     } else {
         return m_file;
@@ -120,29 +116,35 @@ int Component::getOrder()
     }
     return 0;
 }
+
 void Component::setOrder(int order)
 {
     m_orderOverride = true;
     m_order = order;
 }
+
 QString Component::getID()
 {
     return m_uid;
 }
+
 QString Component::getName()
 {
     if (!m_cachedName.isEmpty())
         return m_cachedName;
     return m_uid;
 }
+
 QString Component::getVersion()
 {
     return m_cachedVersion;
 }
+
 QString Component::getFilename()
 {
     return m_parent->patchFilePathForUid(m_uid);
 }
+
 QDateTime Component::getReleaseDateTime()
 {
     if (m_metaVersion) {
@@ -187,12 +189,7 @@ bool Component::isCustom()
 
 bool Component::isCustomizable()
 {
-    if (m_metaVersion) {
-        if (getVersionFile()) {
-            return true;
-        }
-    }
-    return false;
+    return m_metaVersion && getVersionFile();
 }
 
 bool Component::isRemovable()
