@@ -150,11 +150,11 @@ endif()
 
 option(BUILD_TESTING "Build the testing tree." ON)
 
-find_package(ECM QUIET NO_MODULE)
+# find_package(ECM QUIET NO_MODULE)
 if(NOT ECM_FOUND)
     if(Launcher_QT_VERSION_MAJOR EQUAL 5)
         execute_process(
-            COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/extra-cmake-modules checkout kf5
+            COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/extra-cmake-modules checkout bbcbaff78283270c2beee69afd8d5b91da854af8
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             RESULT_VARIABLE result
         )
@@ -563,7 +563,7 @@ add_subdirectory(libraries/qdcss) # css parser
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
     if(NOT KF5Archive_FOUND)
         execute_process(
-            COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/karchive checkout kf5
+            COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/karchive checkout eba2cb37f128733561c9a03f0230e7836c76a045
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             RESULT_VARIABLE result
         )
