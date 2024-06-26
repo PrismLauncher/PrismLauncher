@@ -575,6 +575,15 @@ if(Launcher_QT_VERSION_MAJOR EQUAL 5)
 elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
     if(NOT KF6Archive_FOUND)
         message(STATUS "Using bundled karchive")
+        if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/CMakeLists.txt")
+            message(STATUS "Using bundled ECM")
+            set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/modules;${CMAKE_MODULE_PATH}")
+        else()
+            message(FATAL_ERROR
+                " Could not find ECM\n \n"
+                " Either install ECM using the system package manager or clone submodules\n"
+                " Submodules can be cloned with 'git submodule update --init --recursive'")
+        endif()
         add_subdirectory(libraries/karchive) 
     else()
         message(STATUS "Using system karchive")
