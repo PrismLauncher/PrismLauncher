@@ -46,6 +46,7 @@ JavaSettingsWidget::JavaSettingsWidget(QWidget* parent) : QWidget(parent)
     if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
         connect(m_javaDownloadBtn, &QPushButton::clicked, this, &JavaSettingsWidget::javaDownloadBtn_clicked);
     }
+    connect(m_addJavaPathBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_addJavaPathBtn_clicked);
 }
 
 void JavaSettingsWidget::setupUi()
@@ -135,6 +136,9 @@ void JavaSettingsWidget::setupUi()
         m_javaDownloadBtn = new QPushButton(tr("Download Java"), this);
         m_horizontalBtnLayout->addWidget(m_javaDownloadBtn);
     }
+
+    m_addJavaPathBtn = new QPushButton(tr("Add extra Java path"), this);
+    m_horizontalBtnLayout->addWidget(m_addJavaPathBtn);
 
     m_verticalLayout->addLayout(m_horizontalBtnLayout);
 
@@ -532,4 +536,19 @@ bool JavaSettingsWidget::autoDownloadJava() const
 bool JavaSettingsWidget::autoDetectJava() const
 {
     return m_autodetectJavaCheckBox->isChecked();
+}
+
+void JavaSettingsWidget::on_addJavaPathBtn_clicked()
+{
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Add Extra Java Folder"));
+
+    auto currentList = APPLICATION->settings()->get("JavaExtraSearchPaths").toStringList();
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
+        QString cooked_dir = FS::NormalizePath(raw_dir);
+        if (!currentList.contains(cooked_dir)) {
+            currentList << cooked_dir;
+        }
+    }
+    APPLICATION->settings()->set("JavaExtraSearchPaths", currentList);
+    refresh();
 }

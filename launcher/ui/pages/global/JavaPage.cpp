@@ -76,7 +76,7 @@ JavaPage::JavaPage(QWidget* parent) : QWidget(parent), ui(new Ui::JavaPage)
         });
     } else {
         ui->autodownloadCheckBox->setHidden(true);
-        ui->tabWidget->tabBar()->hide();
+        ui->downloadJava->hide();
     }
 
     loadSettings();
@@ -117,6 +117,7 @@ void JavaPage::applySettings()
     s->set("IgnoreJavaWizard", ui->skipJavaWizardCheckbox->isChecked());
     s->set("AutomaticJavaSwitch", ui->autodetectJavaCheckBox->isChecked());
     s->set("AutomaticJavaDownload", ui->autodownloadCheckBox->isChecked());
+    s->set("JavaExtraSearchPaths", m_extra_paths->stringList());
     JavaCommon::checkJVMArgs(s->get("JvmArgs").toString(), this->parentWidget());
 }
 void JavaPage::loadSettings()
@@ -141,6 +142,8 @@ void JavaPage::loadSettings()
     ui->skipJavaWizardCheckbox->setChecked(s->get("IgnoreJavaWizard").toBool());
     ui->autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
     ui->autodownloadCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool() && s->get("AutomaticJavaDownload").toBool());
+    m_extra_paths = new QStringListModel(s->get("JavaExtraSearchPaths").toStringList(), this);
+    ui->extraJavaPathsList->setModel(m_extra_paths);
 }
 
 void JavaPage::on_javaDetectBtn_clicked()
@@ -249,6 +252,30 @@ void JavaPage::updateThresholds()
         QPixmap pix = icon.pixmap(height, height);
         ui->labelMaxMemIcon->setPixmap(pix);
     }
+}
+
+void JavaPage::on_addExtraPathButton_clicked()
+{
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Add Extra Java Folder"));
+
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
+        QString cooked_dir = FS::NormalizePath(raw_dir);
+        auto currentList = m_extra_paths->stringList();
+        if (!currentList.contains(cooked_dir)) {
+            currentList << cooked_dir;
+            m_extra_paths->setStringList(currentList);
+        }
+    }
+    APPLICATION->settings()->set("JavaExtraSearchPaths", m_extra_paths->stringList());
+}
+
+void JavaPage::on_removeExtraPathButton_clicked()
+{
+    auto indexes = ui->extraJavaPathsList->selectionModel()->selectedIndexes();
+    if (indexes.size()) {
+        m_extra_paths->removeRow(indexes.first().row());
+    }
+    APPLICATION->settings()->set("JavaExtraSearchPaths", m_extra_paths->stringList());
 }
 
 void JavaPage::on_removeJavaButton_clicked()

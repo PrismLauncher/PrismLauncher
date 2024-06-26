@@ -72,6 +72,8 @@ class JavaPage : public QWidget, public BasePage {
     void on_javaDetectBtn_clicked();
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();
+    void on_addExtraPathButton_clicked();
+    void on_removeExtraPathButton_clicked();
     void on_downloadJavaButton_clicked();
     void on_removeJavaButton_clicked();
     void on_refreshJavaButton_clicked();
@@ -81,4 +83,5 @@ class JavaPage : public QWidget, public BasePage {
    private:
     Ui::JavaPage* ui;
     unique_qobject_ptr<JavaCommon::TestCheck> checker;
+    QStringListModel* m_extra_paths;
 };
