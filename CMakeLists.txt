@@ -548,6 +548,13 @@ else()
 endif()
 add_subdirectory(libraries/qdcss) # css parser
 
+if(NOT KF6Archive_FOUND)
+    message(STATUS "Using bundled karchive")
+    add_subdirectory(libraries/karchive) 
+else()
+    message(STATUS "Using system karchive")
+endif()
+
 ############################### Built Artifacts ###############################
 
 add_subdirectory(buildconfig)
