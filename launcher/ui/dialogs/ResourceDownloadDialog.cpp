@@ -92,6 +92,19 @@ void ResourceDownloadDialog::accept()
 
 void ResourceDownloadDialog::reject()
 {
+    auto selected = getTasks();
+    if (selected.count() > 0) {
+        auto reply = CustomMessageBox::selectable(this, tr("Confirmation Needed"),
+                                                  tr("You have %1 selected resources.\n"
+                                                     "Are you sure you want to close this dialog?")
+                                                      .arg(selected.count()),
+                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                         ->exec();
+        if (reply != QMessageBox::Yes) {
+            return;
+        }
+    }
+
     if (!geometrySaveKey().isEmpty())
         APPLICATION->settings()->set(geometrySaveKey(), saveGeometry().toBase64());
 
