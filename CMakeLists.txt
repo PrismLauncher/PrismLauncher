@@ -153,7 +153,11 @@ option(BUILD_TESTING "Build the testing tree." ON)
 find_package(ECM QUIET NO_MODULE)
 if(NOT ECM_FOUND)
     if(Launcher_QT_VERSION_MAJOR EQUAL 5)
-        COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/extra-cmake-modules checkout kf5
+        execute_process(
+            COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/extra-cmake-modules checkout kf5
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            RESULT_VARIABLE result
+        )
     elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
     else()
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/CMakeLists.txt")
@@ -559,7 +563,11 @@ add_subdirectory(libraries/qdcss) # css parser
 
 if(Launcher_QT_VERSION_MAJOR EQUAL 5)
 if(NOT KF5Archive_FOUND)
-    COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/karchive checkout kf5
+    execute_process(
+        COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/karchive checkout kf5
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        RESULT_VARIABLE result
+    )
     message(STATUS "Using bundled karchive")
     add_subdirectory(libraries/karchive) 
 else()
