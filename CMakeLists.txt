@@ -578,6 +578,7 @@ elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/CMakeLists.txt")
             message(STATUS "Using bundled ECM")
             set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/modules;${CMAKE_MODULE_PATH}")
+            find_package(ECM 6.3.0 REQUIRED NO_MODULE)
         else()
             message(FATAL_ERROR
                 " Could not find ECM\n \n"
