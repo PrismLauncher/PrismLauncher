@@ -152,6 +152,10 @@ option(BUILD_TESTING "Build the testing tree." ON)
 
 find_package(ECM QUIET NO_MODULE)
 if(NOT ECM_FOUND)
+    if(Launcher_QT_VERSION_MAJOR EQUAL 5)
+        COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/extra-cmake-modules checkout kf5
+    elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
+    else()
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/CMakeLists.txt")
         message(STATUS "Using bundled ECM")
         set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libraries/extra-cmake-modules/modules;${CMAKE_MODULE_PATH}")
@@ -349,7 +353,12 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
     # Find cmark
     find_package(cmark QUIET)
 
-    find_package(KF6Archive)
+    if(Launcher_QT_VERSION_MAJOR EQUAL 5)
+        find_package(KF5Archive)
+    elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
+        find_package(KF6Archive)
+    else()
+
 endif()
 
 include(ECMQtDeclareLoggingCategory)
@@ -548,12 +557,22 @@ else()
 endif()
 add_subdirectory(libraries/qdcss) # css parser
 
+if(Launcher_QT_VERSION_MAJOR EQUAL 5)
+if(NOT KF5Archive_FOUND)
+    COMMAND git -C ${CMAKE_SOURCE_DIR}/libraries/karchive checkout kf5
+    message(STATUS "Using bundled karchive")
+    add_subdirectory(libraries/karchive) 
+else()
+    message(STATUS "Using system karchive")
+endif()
+elseif(Launcher_QT_VERSION_MAJOR EQUAL 6)
 if(NOT KF6Archive_FOUND)
     message(STATUS "Using bundled karchive")
     add_subdirectory(libraries/karchive) 
 else()
     message(STATUS "Using system karchive")
 endif()
+else()
 
 ############################### Built Artifacts ###############################
 
