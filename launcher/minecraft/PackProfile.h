@@ -48,7 +48,6 @@
 
 #include "Component.h"
 #include "LaunchProfile.h"
-#include "minecraft/PackProfile_p.h"
 #include "modplatform/ModIndex.h"
 #include "net/Mode.h"
 
@@ -119,9 +118,6 @@ class PackProfile : public QAbstractListModel {
     QString getComponentVersion(const QString& uid) const;
 
     bool setComponentVersion(const QString& uid, const QString& version, bool important = false);
-
-    /// collects components that are dependant on or dependencies of the component
-    ComponentContainer collectTreeLinked(const QString& uid);
 
     bool installEmpty(const QString& uid, const QString& name);
 

@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QList>
 #include <memory>
+#include <optional>
 #include "ProblemProvider.h"
 #include "QObjectPtr.h"
 #include "meta/JsonFormat.h"
@@ -15,6 +16,26 @@ class Version;
 class VersionList;
 }  // namespace Meta
 class VersionFile;
+
+struct UpdateActionChangeVerison {
+    /// version to change to
+    QString targetVersion;
+};
+struct UpdateActionLatestRecommendedCompatable {
+    /// Parent uid
+    QString parentUid;
+    QString parentName;
+    /// Parent version
+    QString version;
+    ///
+};
+struct UpdateActionRemove {};
+struct UpdateActionImportantChanged {
+    QString oldVersion;
+};
+
+using UpdateAction =
+    std::variant<UpdateActionChangeVerison, UpdateActionLatestRecommendedCompatable, UpdateActionRemove, UpdateActionImportantChanged>;
 
 class Component : public QObject, public ProblemProvider {
     Q_OBJECT
@@ -58,6 +79,8 @@ class Component : public QObject, public ProblemProvider {
 
     const QList<PatchProblem> getProblems() const override;
     ProblemSeverity getProblemSeverity() const override;
+    void addComponentProblem(ProblemSeverity severity, const QString& description);
+    void resetComponentProblems();
 
     void setVersion(const QString& version);
     bool customize();
@@ -66,6 +89,11 @@ class Component : public QObject, public ProblemProvider {
     void updateCachedData();
 
     void waitLoadMeta();
+
+    void setUpdateAction(UpdateAction action);
+    void clearUpdateAction();
+    std::optional<UpdateAction> getUpdateAction();
+    std::optional<UpdateAction> takeUpdateAction();
 
    signals:
     void dataChanged();
@@ -104,6 +132,11 @@ class Component : public QObject, public ProblemProvider {
     std::shared_ptr<Meta::Version> m_metaVersion;
     std::shared_ptr<VersionFile> m_file;
     bool m_loaded = false;
+
+   private:
+    QList<PatchProblem> m_componentProblems;
+    ProblemSeverity m_componentProblemSeverity = ProblemSeverity::None;
+    std::optional<UpdateAction> m_updateAction = std::nullopt;
 };
 
 using ComponentPtr = shared_qobject_ptr<Component>;

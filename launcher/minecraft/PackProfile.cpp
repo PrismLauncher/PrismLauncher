@@ -49,6 +49,7 @@
 #include <QTimer>
 #include <QUuid>
 #include <algorithm>
+#include <utility>
 
 #include "Application.h"
 #include "Exception.h"
@@ -56,6 +57,7 @@
 #include "Json.h"
 #include "meta/Index.h"
 #include "meta/JsonFormat.h"
+#include "minecraft/Component.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/ProfileUtils.h"
@@ -66,6 +68,8 @@
 #include "modplatform/ModIndex.h"
 
 #include "minecraft/Logging.h"
+
+#include "ui/dialogs/CustomMessageBox.h"
 
 static const QMap<QString, ModPlatform::ModLoaderType> modloaderMapping{ { "net.neoforged", ModPlatform::NeoForge },
                                                                          { "net.minecraftforge", ModPlatform::Forge },
@@ -988,58 +992,16 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
         ComponentPtr component = *iter;
         // set existing
         if (component->revert()) {
-            // remove linked components to let them re-resolve their versions
-            if (important) {
-                component->waitLoadMeta();
-                auto linked = collectTreeLinked(uid);
-                for (auto comp : linked) {
-                    if (comp->isCustom()) {
-                        continue;
-                    }
-                    if (modloaderMapping.contains(comp->getID())) {
-                        qCDebug(instanceProfileC)
-                            << d->m_instance->name() << "|" << comp->getID() << "is a mod loader, updating it to a compatible version";
-
-                        auto versionList = APPLICATION->metadataIndex()->get(comp->getID());
-                        versionList->waitToLoad();
-                        if (versionList) {
-                            auto recommended = versionList->getRecommendedForParent(uid, version);
-                            if (recommended) {
-                                qCDebug(instanceProfileC) << d->m_instance->name() << "|"
-                                                          << "setting updated loader to recommended version: " << comp->getID() << " = "
-                                                          << recommended->version();
-                                comp->setVersion(recommended->version());
-                            } else {
-                                auto latest = versionList->getLatestForParent(uid, version);
-                                if (latest) {
-                                    qCDebug(instanceProfileC) << d->m_instance->name() << "|"
-                                                              << "setting updated loader to latest compatible version: " << comp->getID()
-                                                              << " = " << latest->version();
-                                    comp->setVersion(latest->version());
-                                } else {
-                                    qCDebug(instanceProfileC) << d->m_instance->name() << "|"
-                                                              << "no compatible version for" << comp->getID() << "removing";
-                                    remove(comp->getID());
-                                }
-                            }
-                        } else {
-                            qCDebug(instanceProfileC) << d->m_instance->name() << "|"
-                                                      << "no version list in metadata index for" << comp->getID();
-                        }
-                    } else {
-                        qCDebug(instanceProfileC) << d->m_instance->name() << "|" << comp->getID() << ":" << comp->getVersion()
-                                                  << "linked to important component: " << uid << " | Removing so it re-resolves";
-                        remove(comp->getID());
-                    }
-                }
-            }
             // set new version
+            auto oldVersion = component->getVersion();
             component->setVersion(version);
             component->setImportant(important);
 
             if (important) {
+                component->setUpdateAction(UpdateAction{ UpdateActionImportantChanged{ oldVersion } });
                 resolve(Net::Mode::Online);
             }
+
             return true;
         }
         return false;
@@ -1051,37 +1013,6 @@ bool PackProfile::setComponentVersion(const QString& uid, const QString& version
         appendComponent(component);
         return true;
     }
-}
-
-ComponentContainer PackProfile::collectTreeLinked(const QString& uid)
-{
-    ComponentContainer linked;
-    for (auto comp : d->components) {
-        qCDebug(instanceProfileC) << d->m_instance->name() << "|"
-                                  << "scanning" << comp->getID() << ":" << comp->getVersion() << "for tree link";
-        auto dep = std::find_if(comp->m_cachedRequires.cbegin(), comp->m_cachedRequires.cend(),
-                                [uid](const Meta::Require& req) -> bool { return req.uid == uid; });
-        if (dep != comp->m_cachedRequires.cend()) {
-            qCDebug(instanceProfileResolveC) << comp->getID() << ":" << comp->getVersion() << "depends on" << uid;
-            linked.append(comp);
-        }
-    }
-    auto iter = d->componentIndex.find(uid);
-    if (iter != d->componentIndex.end()) {
-        ComponentPtr comp = *iter;
-        comp->updateCachedData();
-        qCDebug(instanceProfileC) << d->m_instance->name() << "|" << comp->getID() << ":" << comp->getVersion() << "has"
-                                  << comp->m_cachedRequires.size() << "dependencies";
-        for (auto dep : comp->m_cachedRequires) {
-            qCDebug(instanceProfileC) << d->m_instance->name() << "|" << uid << "depends on" << dep.uid;
-            auto found = d->componentIndex.find(dep.uid);
-            if (found != d->componentIndex.end()) {
-                qCDebug(instanceProfileC) << d->m_instance->name() << "|" << (*found)->getID() << "is present";
-                linked.append(*found);
-            }
-        }
-    }
-    return linked;
 }
 
 QString PackProfile::getComponentVersion(const QString& uid) const

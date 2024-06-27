@@ -38,6 +38,7 @@
 #include <meta/VersionList.h>
 
 #include <QSaveFile>
+#include <optional>
 
 #include "Application.h"
 #include "FileSystem.h"
@@ -235,7 +236,8 @@ ProblemSeverity Component::getProblemSeverity() const
 {
     auto file = getVersionFile();
     if (file) {
-        return file->getProblemSeverity();
+        auto severity = file->getProblemSeverity();
+        return m_componentProblemSeverity > severity ? m_componentProblemSeverity : severity;
     }
     return ProblemSeverity::Error;
 }
@@ -244,9 +246,25 @@ const QList<PatchProblem> Component::getProblems() const
 {
     auto file = getVersionFile();
     if (file) {
-        return file->getProblems();
+        auto problems = file->getProblems();
+        problems.append(m_componentProblems);
+        return problems;
     }
     return { { ProblemSeverity::Error, QObject::tr("Patch is not loaded yet.") } };
+}
+
+void Component::addComponentProblem(ProblemSeverity severity, const QString& description)
+{
+    if (severity > m_componentProblemSeverity) {
+        m_componentProblemSeverity = severity;
+    }
+    m_componentProblems.append({ severity, description });
+}
+
+void Component::resetComponentProblems()
+{
+    m_componentProblems.clear();
+    m_componentProblemSeverity = ProblemSeverity::None;
 }
 
 void Component::setVersion(const QString& version)
@@ -413,6 +431,21 @@ void Component::waitLoadMeta()
         m_loaded = true;
         updateCachedData();
     }
+}
+
+void Component::setUpdateAction(UpdateAction action)
+{
+    m_updateAction = action;
+}
+
+std::optional<UpdateAction> Component::getUpdateAction()
+{
+    return m_updateAction;
+}
+
+void Component::clearUpdateAction()
+{
+    m_updateAction.reset();
 }
 
 QDebug operator<<(QDebug d, const Component& comp)
