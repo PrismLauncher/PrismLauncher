@@ -56,6 +56,7 @@ class ResourceModel : public QAbstractListModel {
 
     [[nodiscard]] auto getSortingMethods() const { return m_api->getSortingMethods(); }
 
+    virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const { return {}; }
     /** Whether the version is opted out or not. Currently only makes sense in CF. */
     virtual bool optedOut(const ModPlatform::IndexedVersion& ver) const
     {
