@@ -376,7 +376,11 @@ QList<QString> JavaUtils::FindJavaPaths()
     auto home = qEnvironmentVariable("HOME");
 
     // javas downloaded by sdkman
-    javas.append(FS::PathCombine(home, ".sdkman/candidates/java"));
+    QDir sdkmanDir(FS::PathCombine(home, ".sdkman/candidates/java"));
+    QStringList sdkmanJavas = sdkmanDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    foreach (const QString& java, sdkmanJavas) {
+        javas.append(sdkmanDir.absolutePath() + "/" + java + "/bin/java");
+    }
 
     // java in user library folder (like from intellij downloads)
     QDir userLibraryJVMDir(FS::PathCombine(home, "Library/Java/JavaVirtualMachines/"));
