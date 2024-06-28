@@ -45,6 +45,7 @@
 #include "OneSixVersionFormat.h"
 #include "VersionFile.h"
 #include "meta/Version.h"
+#include "minecraft/Component.h"
 #include "minecraft/PackProfile.h"
 
 #include <assert.h>
@@ -438,14 +439,14 @@ void Component::setUpdateAction(UpdateAction action)
     m_updateAction = action;
 }
 
-std::optional<UpdateAction> Component::getUpdateAction()
+UpdateAction Component::getUpdateAction()
 {
     return m_updateAction;
 }
 
 void Component::clearUpdateAction()
 {
-    m_updateAction.reset();
+    m_updateAction = UpdateAction{ UpdateActionNone{} };
 }
 
 QDebug operator<<(QDebug d, const Component& comp)

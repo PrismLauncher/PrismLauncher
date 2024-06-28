@@ -5,6 +5,7 @@
 #include <QList>
 #include <memory>
 #include <optional>
+#include <variant>
 #include "ProblemProvider.h"
 #include "QObjectPtr.h"
 #include "meta/JsonFormat.h"
@@ -17,7 +18,7 @@ class VersionList;
 }  // namespace Meta
 class VersionFile;
 
-struct UpdateActionChangeVerison {
+struct UpdateActionChangeVersion {
     /// version to change to
     QString targetVersion;
 };
@@ -34,8 +35,13 @@ struct UpdateActionImportantChanged {
     QString oldVersion;
 };
 
-using UpdateAction =
-    std::variant<UpdateActionChangeVerison, UpdateActionLatestRecommendedCompatable, UpdateActionRemove, UpdateActionImportantChanged>;
+using UpdateActionNone = std::monostate;
+
+using UpdateAction = std::variant<UpdateActionNone,
+                                  UpdateActionChangeVersion,
+                                  UpdateActionLatestRecommendedCompatable,
+                                  UpdateActionRemove,
+                                  UpdateActionImportantChanged>;
 
 class Component : public QObject, public ProblemProvider {
     Q_OBJECT
@@ -92,8 +98,7 @@ class Component : public QObject, public ProblemProvider {
 
     void setUpdateAction(UpdateAction action);
     void clearUpdateAction();
-    std::optional<UpdateAction> getUpdateAction();
-    std::optional<UpdateAction> takeUpdateAction();
+    UpdateAction getUpdateAction();
 
    signals:
     void dataChanged();
@@ -136,7 +141,7 @@ class Component : public QObject, public ProblemProvider {
    private:
     QList<PatchProblem> m_componentProblems;
     ProblemSeverity m_componentProblemSeverity = ProblemSeverity::None;
-    std::optional<UpdateAction> m_updateAction = std::nullopt;
+    UpdateAction m_updateAction = UpdateAction{ UpdateActionNone{} };
 };
 
 using ComponentPtr = shared_qobject_ptr<Component>;

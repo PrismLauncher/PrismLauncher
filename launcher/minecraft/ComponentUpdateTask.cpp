@@ -153,6 +153,7 @@ void ComponentUpdateTask::loadComponents()
         Task::Ptr loadTask;
         LoadResult singleResult;
         RemoteLoadStatus::Type loadType;
+        component->resetComponentProblems();
         // FIXME: to do this right, we need to load the lists and decide on which versions to use during dependency resolution. For now,
         // ignore all that...
 #if 0
@@ -445,6 +446,7 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
         allRequires.clear();
         toRemove.clear();
         if (!gatherRequirementsFromComponents(components, allRequires)) {
+            finalizeComponents();
             emitFailed(tr("Conflicting requirements detected during dependency checking!"));
             return;
         }
@@ -461,10 +463,12 @@ void ComponentUpdateTask::resolveDependencies(bool checkOnly)
     RequireExSet toChange;
     bool succeeded = getTrivialComponentChanges(componentIndex, allRequires, toAdd, toChange);
     if (!succeeded) {
+        finalizeComponents();
         emitFailed(tr("Instance has conflicting dependencies."));
         return;
     }
     if (checkOnly) {
+        finalizeComponents();
         if (toAdd.size() || toChange.size()) {
             emitFailed(tr("Instance has unresolved dependencies while loading/checking for launch."));
         } else {
@@ -542,77 +546,115 @@ overload(Ts...) -> overload<Ts...>;
 
 void ComponentUpdateTask::performUpdateActions()
 {
-    auto& components = d->m_profile->d->components;
-
+    auto& instance = d->m_profile->d->m_instance;
     bool addedActions;
+    QStringList toRemove;
     do {
         addedActions = false;
+        toRemove.clear();
+        auto& components = d->m_profile->d->components;
+        auto& componentIndex = d->m_profile->d->componentIndex;
         for (auto component : components) {
-            if (auto action = component->getUpdateAction()) {
-                auto visitor = overload{
-                    [&component](const UpdateActionChangeVerison& cv) {
-                        component->setVersion(cv.targetVersion);
-                        component->waitLoadMeta();
-                    },
-                    [&component](const UpdateActionLatestRecommendedCompatable lrc) {
-                        auto versionList = APPLICATION->metadataIndex()->get(component->getID());
-                        versionList->waitToLoad();
-                        if (versionList) {
-                            auto recommended = versionList->getRecommendedForParent(lrc.parentUid, lrc.version);
-                            if (recommended) {
-                                component->setVersion(recommended->version());
-                                component->waitLoadMeta();
-                                return;
-                            }
+            if (!component) {
+                continue;
+            }
+            auto action = component->getUpdateAction();
+            auto visitor =
+                overload{ [](const UpdateActionNone&) {
+                             // noop
+                         },
+                          [&component, &instance](const UpdateActionChangeVersion& cv) {
+                              qCDebug(instanceProfileResolveC) << instance->name() << "|"
+                                                               << "UpdateActionChangeVersion" << component->getID() << ":"
+                                                               << component->getVersion() << "change to" << cv.targetVersion;
+                              component->setVersion(cv.targetVersion);
+                              component->waitLoadMeta();
+                          },
+                          [&component, &instance](const UpdateActionLatestRecommendedCompatable lrc) {
+                              qCDebug(instanceProfileResolveC)
+                                  << instance->name() << "|"
+                                  << "UpdateActionLatestRecommendedCompatable" << component->getID() << ":" << component->getVersion()
+                                  << "updating to latest recommend or compatible with" << lrc.parentUid << lrc.version;
+                              auto versionList = APPLICATION->metadataIndex()->get(component->getID());
+                              versionList->waitToLoad();
+                              if (versionList) {
+                                  auto recommended = versionList->getRecommendedForParent(lrc.parentUid, lrc.version);
+                                  if (recommended) {
+                                      component->setVersion(recommended->version());
+                                      component->waitLoadMeta();
+                                      return;
+                                  }
 
-                            auto latest = versionList->getLatestForParent(lrc.parentUid, lrc.version);
-                            if (latest) {
-                                component->setVersion(latest->version());
-                                component->waitLoadMeta();
-                            } else {
-                                component->addComponentProblem(ProblemSeverity::Error,
-                                                               QObject::tr("No compatible version of %1 found for %2 %3")
-                                                                   .arg(component->getName(), lrc.parentName, lrc.version));
-                            }
-                        } else {
-                            component->addComponentProblem(ProblemSeverity::Error,
-                                                           QObject::tr("No version list in metadata index for %1").arg(component->getID()));
-                        }
-                    },
-                    [this, &component](const UpdateActionRemove&) { d->m_profile->remove(component->getID()); },
-                    [this, &component, &addedActions](const UpdateActionImportantChanged&) {
-                        auto linked = collectTreeLinked(component->getID());
-                        for (auto comp : linked) {
-                            if (comp->isCustom()) {
-                                continue;
-                            }
-                            auto compUid = comp->getID();
-                            auto parentReq = std::find_if(component->m_cachedRequires.begin(), component->m_cachedRequires.end(),
-                                                          [compUid](const Meta::Require& req) { return req.uid == compUid; });
-                            if (parentReq != component->m_cachedRequires.end()) {
-                                auto newVersion = parentReq->equalsVersion.isEmpty() ? parentReq->suggests : parentReq->equalsVersion;
-                                if (!newVersion.isEmpty()) {
-                                    comp->setUpdateAction(UpdateAction{ UpdateActionChangeVerison{ newVersion } });
-                                } else {
-                                    comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatable{
-                                        component->getID(),
-                                        component->getName(),
-                                        component->getVersion(),
-                                    } });
-                                }
-                            } else {
-                                comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatable{
-                                    component->getID(),
-                                    component->getName(),
-                                    component->getVersion(),
-                                } });
-                            }
-                            addedActions = true;
-                        }
-                    }
-                };
-                std::visit(visitor, *action);
-                component->clearUpdateAction();
+                                  auto latest = versionList->getLatestForParent(lrc.parentUid, lrc.version);
+                                  if (latest) {
+                                      component->setVersion(latest->version());
+                                      component->waitLoadMeta();
+                                  } else {
+                                      component->addComponentProblem(ProblemSeverity::Error,
+                                                                     QObject::tr("No compatible version of %1 found for %2 %3")
+                                                                         .arg(component->getName(), lrc.parentName, lrc.version));
+                                  }
+                              } else {
+                                  component->addComponentProblem(
+                                      ProblemSeverity::Error,
+                                      QObject::tr("No version list in metadata index for %1").arg(component->getID()));
+                              }
+                          },
+                          [&component, &instance, &toRemove](const UpdateActionRemove&) {
+                              qCDebug(instanceProfileResolveC)
+                                  << instance->name() << "|"
+                                  << "UpdateActionRemove" << component->getID() << ":" << component->getVersion() << "removing";
+                              toRemove.append(component->getID());
+                          },
+                          [this, &component, &instance, &addedActions, &componentIndex](const UpdateActionImportantChanged& ic) {
+                              qCDebug(instanceProfileResolveC)
+                                  << instance->name() << "|"
+                                  << "UpdateImportantChanged" << component->getID() << ":" << component->getVersion() << "was changed from"
+                                  << ic.oldVersion << "updating linked components";
+                              auto oldVersion = APPLICATION->metadataIndex()->getLoadedVersion(component->getID(), ic.oldVersion);
+                              for (auto oldReq : oldVersion->requiredSet()) {
+                                  auto currentlyRequired = component->m_cachedRequires.find(oldReq);
+                                  if (currentlyRequired == component->m_cachedRequires.cend()) {
+                                      auto oldReqComp = componentIndex.find(oldReq.uid);
+                                      if (oldReqComp != componentIndex.cend()) {
+                                          (*oldReqComp)->setUpdateAction(UpdateAction{ UpdateActionRemove{} });
+                                          addedActions = true;
+                                      }
+                                  }
+                              }
+                              auto linked = collectTreeLinked(component->getID());
+                              for (auto comp : linked) {
+                                  if (comp->isCustom()) {
+                                      continue;
+                                  }
+                                  auto compUid = comp->getID();
+                                  auto parentReq = std::find_if(component->m_cachedRequires.begin(), component->m_cachedRequires.end(),
+                                                                [compUid](const Meta::Require& req) { return req.uid == compUid; });
+                                  if (parentReq != component->m_cachedRequires.end()) {
+                                      auto newVersion = parentReq->equalsVersion.isEmpty() ? parentReq->suggests : parentReq->equalsVersion;
+                                      if (!newVersion.isEmpty()) {
+                                          comp->setUpdateAction(UpdateAction{ UpdateActionChangeVersion{ newVersion } });
+                                      } else {
+                                          comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatable{
+                                              component->getID(),
+                                              component->getName(),
+                                              component->getVersion(),
+                                          } });
+                                      }
+                                  } else {
+                                      comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatable{
+                                          component->getID(),
+                                          component->getName(),
+                                          component->getVersion(),
+                                      } });
+                                  }
+                                  addedActions = true;
+                              }
+                          } };
+            std::visit(visitor, action);
+            component->clearUpdateAction();
+            for (auto uid : toRemove) {
+                d->m_profile->remove(uid);
             }
         }
     } while (addedActions);
@@ -636,6 +678,15 @@ void ComponentUpdateTask::finalizeComponents()
                     component->addComponentProblem(
                         reqComp->getProblemSeverity(),
                         QObject::tr("%1, a dependency of this component, has reported issues").arg(reqComp->getName()));
+                }
+                if (!req.equalsVersion.isEmpty() && req.equalsVersion != reqComp->getVersion()) {
+                    component->addComponentProblem(ProblemSeverity::Error,
+                                                   QObject::tr("%1, a dependency of this component, is not the required version %2")
+                                                       .arg(reqComp->getName(), req.equalsVersion));
+                } else if (!req.suggests.isEmpty() && req.suggests != reqComp->getVersion()) {
+                    component->addComponentProblem(ProblemSeverity::Warning,
+                                                   QObject::tr("%1, a dependency of this component, is not the suggested version %2")
+                                                       .arg(reqComp->getName(), req.suggests));
                 }
             }
         }
