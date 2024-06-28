@@ -32,7 +32,7 @@ namespace Meta {
 
 class ParsingValidator : public Net::Validator {
    public: /* con/des */
-    ParsingValidator(BaseEntity* entity) : m_entity(entity){};
+    ParsingValidator(BaseEntity* entity) : m_entity(entity) {};
     virtual ~ParsingValidator() = default;
 
    public: /* methods */
