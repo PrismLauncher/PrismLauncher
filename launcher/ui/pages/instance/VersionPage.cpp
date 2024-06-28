@@ -297,7 +297,7 @@ void VersionPage::on_actionRemove_triggered()
 
 void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 {
-    auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods (*.zip *.jar)"),
+    auto list = GuiUtil::BrowseForFiles("jarmod", tr("Select jar mods"), tr("Minecraft.jar mods") + " (*.zip *.jar)",
                                         APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if (!list.empty()) {
         m_profile->installJarMods(list);
@@ -307,7 +307,7 @@ void VersionPage::on_actionAdd_to_Minecraft_jar_triggered()
 
 void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 {
-    auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement (*.jar)"),
+    auto jarPath = GuiUtil::BrowseForFile("jar", tr("Select jar"), tr("Minecraft.jar replacement") + " (*.jar)",
                                           APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
     if (!jarPath.isEmpty()) {
         m_profile->installCustomJar(jarPath);
@@ -317,7 +317,7 @@ void VersionPage::on_actionReplace_Minecraft_jar_triggered()
 
 void VersionPage::on_actionImport_Components_triggered()
 {
-    QStringList list = GuiUtil::BrowseForFiles("component", tr("Select components"), tr("Components (*.json)"),
+    QStringList list = GuiUtil::BrowseForFiles("component", tr("Select components"), tr("Components") + " (*.json)",
                                                APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty()) {
@@ -332,7 +332,7 @@ void VersionPage::on_actionImport_Components_triggered()
 
 void VersionPage::on_actionAdd_Agents_triggered()
 {
-    QStringList list = GuiUtil::BrowseForFiles("agent", tr("Select agents"), tr("Java agents (*.jar)"),
+    QStringList list = GuiUtil::BrowseForFiles("agent", tr("Select agents"), tr("Java agents") + " (*.jar)",
                                                APPLICATION->settings()->get("CentralModsDir").toString(), this->parentWidget());
 
     if (!list.isEmpty())

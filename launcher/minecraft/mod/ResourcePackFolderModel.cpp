@@ -42,7 +42,6 @@
 #include <QStyle>
 
 #include "Application.h"
-#include "StringUtils.h"
 #include "Version.h"
 
 #include "minecraft/mod/Resource.h"
@@ -57,6 +56,7 @@ ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, BaseInstanc
     m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true };
+    m_columnsHiddenByDefault = { false, false, false, false, false, false };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const

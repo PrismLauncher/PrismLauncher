@@ -7,7 +7,7 @@
 
 class SimplePrefixMatcher : public IPathMatcher {
    public:
-    virtual ~SimplePrefixMatcher(){};
+    virtual ~SimplePrefixMatcher() {};
     SimplePrefixMatcher(const QString& prefix)
     {
         m_prefix = prefix;
