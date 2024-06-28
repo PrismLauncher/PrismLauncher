@@ -107,6 +107,8 @@ class ModDownloadDialog final : public ResourceDownloadDialog {
     QList<BasePage*> getPages() override;
     GetModDependenciesTask::Ptr getModDependenciesTask() override;
 
+    void setModMetadata(std::shared_ptr<Metadata::ModStruct>);
+
    private:
     BaseInstance* m_instance;
 };

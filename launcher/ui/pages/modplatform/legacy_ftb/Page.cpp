@@ -35,6 +35,7 @@
  */
 
 #include "Page.h"
+#include "StringUtils.h"
 #include "ui/widgets/ProjectItem.h"
 #include "ui_Page.h"
 
@@ -260,8 +261,9 @@ void Page::onPackSelectionChanged(Modpack* pack)
 {
     ui->versionSelectionBox->clear();
     if (pack) {
-        currentModpackInfo->setHtml("Pack by <b>" + pack->author + "</b>" + "<br>Minecraft " + pack->mcVersion + "<br>" + "<br>" +
-                                    pack->description + "<ul><li>" + pack->mods.replace(";", "</li><li>") + "</li></ul>");
+        currentModpackInfo->setHtml(StringUtils::htmlListPatch("Pack by <b>" + pack->author + "</b>" + "<br>Minecraft " + pack->mcVersion +
+                                                               "<br>" + "<br>" + pack->description + "<ul><li>" +
+                                                               pack->mods.replace(";", "</li><li>") + "</li></ul>"));
         bool currentAdded = false;
 
         for (int i = 0; i < pack->oldVersions.size(); i++) {

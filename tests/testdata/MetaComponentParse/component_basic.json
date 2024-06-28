@@ -1,0 +1,8 @@
+{
+    "description": [
+        {
+            "text": "Hello, Component!"
+        }
+    ],
+    "expected_output": "Hello, Component!"
+}

@@ -48,7 +48,7 @@ class LaunchController : public Task {
     void executeTask() override;
 
     LaunchController(QObject* parent = nullptr);
-    virtual ~LaunchController(){};
+    virtual ~LaunchController() {};
 
     void setInstance(InstancePtr instance) { m_instance = instance; }
 
@@ -74,6 +74,8 @@ class LaunchController : public Task {
     void login();
     void launchInstance();
     void decideAccount();
+    bool askPlayDemo();
+    QString askOfflineName(QString playerName, bool demo, bool& ok);
 
    private slots:
     void readyForLaunch();

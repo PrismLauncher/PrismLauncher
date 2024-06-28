@@ -25,8 +25,8 @@
 class Update : public LaunchStep {
     Q_OBJECT
    public:
-    explicit Update(LaunchTask* parent, Net::Mode mode) : LaunchStep(parent), m_mode(mode){};
-    virtual ~Update(){};
+    explicit Update(LaunchTask* parent, Net::Mode mode) : LaunchStep(parent), m_mode(mode) {};
+    virtual ~Update() {};
 
     void executeTask() override;
     bool canAbort() const override;

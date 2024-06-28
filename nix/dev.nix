@@ -19,7 +19,7 @@
         };
       };
 
-      tools.clang-tools = lib.mkForce pkgs.clang-tools_16;
+      tools.clang-tools = lib.mkForce pkgs.clang-tools_18;
     };
 
     devShells.default = pkgs.mkShell {

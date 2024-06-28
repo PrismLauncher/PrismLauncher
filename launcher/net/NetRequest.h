@@ -4,6 +4,7 @@
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -74,6 +75,7 @@ class NetRequest : public Task {
     virtual void init() {}
 
     QUrl url() const;
+    void setUrl(QUrl url) { m_url = url; }
     int replyStatusCode() const;
     QNetworkReply::NetworkError error() const;
     QString errorString() const;

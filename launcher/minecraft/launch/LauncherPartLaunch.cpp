@@ -179,6 +179,7 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
                 APPLICATION->showMainWindow();
 
             m_parent->setPid(-1);
+            m_parent->instance()->setMinecraftRunning(false);
             // if the exit code wasn't 0, report this as a crash
             auto exitCode = m_process.exitCode();
             if (exitCode != 0) {
@@ -194,7 +195,6 @@ void LauncherPartLaunch::on_state(LoggedProcess::State state)
         case LoggedProcess::Running:
             emit logLine(QString("Minecraft process ID: %1\n\n").arg(m_process.processId()), MessageLevel::Launcher);
             m_parent->setPid(m_process.processId());
-            m_parent->instance()->setLastLaunch();
             // send the launch script to the launcher part
             m_process.write(m_launchScript.toUtf8());
 
@@ -214,6 +214,7 @@ void LauncherPartLaunch::setWorkingDirectory(const QString& wd)
 void LauncherPartLaunch::proceed()
 {
     if (mayProceed) {
+        m_parent->instance()->setMinecraftRunning(true);
         QString launchString("launch\n");
         m_process.write(launchString.toUtf8());
         mayProceed = false;

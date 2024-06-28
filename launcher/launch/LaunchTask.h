@@ -55,7 +55,7 @@ class LaunchTask : public Task {
 
    public: /* methods */
     static shared_qobject_ptr<LaunchTask> create(InstancePtr inst);
-    virtual ~LaunchTask(){};
+    virtual ~LaunchTask() {};
 
     void appendStep(shared_qobject_ptr<LaunchStep> step);
     void prependStep(shared_qobject_ptr<LaunchStep> step);
