@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,12 +48,11 @@
 #include <QThreadPool>
 #include <QUrl>
 #include <QUuid>
-#include <algorithm>
 
 #include "Application.h"
 
 #include "Json.h"
-#include "StringUtils.h"
+#include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/Resource.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "minecraft/mod/tasks/LocalModUpdateTask.h"
@@ -64,14 +64,18 @@
 ModFolderModel::ModFolderModel(const QString& dir, BaseInstance* instance, bool is_indexed, bool create_dir)
     : ResourceFolderModel(QDir(dir), instance, nullptr, create_dir), m_is_indexed(is_indexed)
 {
-    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Size" });
-    m_column_names_translated =
-        QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"), tr("Size") });
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME,     SortType::NAME, SortType::VERSION,
-                           SortType::DATE,    SortType::PROVIDER, SortType::SIZE };
-    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,    QHeaderView::Interactive,
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Version", "Last Modified", "Provider", "Size", "Side", "Loaders",
+                                   "Minecraft Versions", "Release Type" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Version"), tr("Last Modified"), tr("Provider"),
+                                              tr("Size"), tr("Side"), tr("Loaders"), tr("Minecraft Versions"), tr("Release Type") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME,        SortType::NAME,        SortType::VERSION,
+                           SortType::DATE,    SortType::PROVIDER,    SortType::SIZE,        SortType::SIDE,
+                           SortType::LOADERS, SortType::MC_VERSIONS, SortType::RELEASE_TYPE };
+    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
+                              QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true, true, true, true };
+    m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true };
+    m_columnsHiddenByDefault = { false, false, false, false, false, false, false, true, true, true, true };
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
@@ -108,6 +112,26 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
                     }
 
                     return provider.value();
+                }
+                case SideColumn: {
+                    return Metadata::modSideToString(at(row)->side());
+                }
+                case LoadersColumn: {
+                    QStringList loaders;
+                    auto modLoaders = at(row)->loaders();
+                    for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Cauldron, ModPlatform::LiteLoader,
+                                         ModPlatform::Fabric, ModPlatform::Quilt }) {
+                        if (modLoaders & loader) {
+                            loaders << getModLoaderAsString(loader);
+                        }
+                    }
+                    return loaders.join(", ");
+                }
+                case McVersionsColumn: {
+                    return at(row)->mcVersions().join(", ");
+                }
+                case ReleaseTypeColumn: {
+                    return at(row)->releaseType().toString();
                 }
                 case SizeColumn:
                     return m_resources[row]->sizeStr();
@@ -165,6 +189,10 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                 case DateColumn:
                 case ProviderColumn:
                 case ImageColumn:
+                case SideColumn:
+                case LoadersColumn:
+                case McVersionsColumn:
+                case ReleaseTypeColumn:
                 case SizeColumn:
                     return columnNames().at(section);
                 default:
@@ -183,6 +211,14 @@ QVariant ModFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientatio
                     return tr("The date and time this mod was last changed (or added).");
                 case ProviderColumn:
                     return tr("Where the mod was downloaded from.");
+                case SideColumn:
+                    return tr("On what environment the mod is running.");
+                case LoadersColumn:
+                    return tr("The mod loader.");
+                case McVersionsColumn:
+                    return tr("The supported minecraft versions.");
+                case ReleaseTypeColumn:
+                    return tr("The release type.");
                 case SizeColumn:
                     return tr("The size of the mod.");
                 default:

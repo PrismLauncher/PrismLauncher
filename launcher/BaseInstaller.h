@@ -29,7 +29,7 @@ class BaseVersion;
 class BaseInstaller {
    public:
     BaseInstaller();
-    virtual ~BaseInstaller(){};
+    virtual ~BaseInstaller() {};
     bool isApplied(MinecraftInstance* on);
 
     virtual bool add(MinecraftInstance* to);

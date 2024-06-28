@@ -58,7 +58,6 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
-    connect(ui->searchButton, &QPushButton::clicked, this, &TechnicPage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
     model = new Technic::ListModel(this);
     ui->packView->setModel(model);
@@ -72,7 +71,7 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
+    ui->verticalLayout->insertWidget(1, &m_fetch_progress);
 
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &TechnicPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &TechnicPage::onVersionSelectionChanged);

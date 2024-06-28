@@ -10,23 +10,41 @@
     <height>405</height>
    </rect>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="4" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="2">
-      <widget class="QComboBox" name="versionSelectionBox"/>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Version selected:</string>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLineEdit" name="searchEdit">
+     <property name="placeholderText">
+      <string>Search and filter...</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QListView" name="packView">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       <property name="iconSize">
+        <size>
+         <width>48</width>
+         <height>48</height>
+        </size>
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
+     <item>
+      <widget class="QTextBrowser" name="packDescription">
+       <property name="openExternalLinks">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -42,45 +60,20 @@
        </property>
       </spacer>
      </item>
-    </layout>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QListView" name="packView">
-       <property name="alternatingRowColors">
-        <bool>true</bool>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Version selected:</string>
        </property>
-       <property name="iconSize">
-        <size>
-         <width>48</width>
-         <height>48</height>
-        </size>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QTextBrowser" name="packDescription">
-       <property name="openExternalLinks">
-        <bool>true</bool>
-       </property>
-      </widget>
+     <item>
+      <widget class="QComboBox" name="versionSelectionBox"/>
      </item>
     </layout>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLineEdit" name="searchEdit">
-     <property name="placeholderText">
-      <string>Search and filter...</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="searchButton">
-     <property name="text">
-      <string>Search</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

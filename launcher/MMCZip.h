@@ -176,7 +176,7 @@ class ExportToZipTask : public Task {
                     QString destinationPrefix = "",
                     bool followSymlinks = false,
                     bool utf8Enabled = false)
-        : ExportToZipTask(outputPath, QDir(dir), files, destinationPrefix, followSymlinks, utf8Enabled){};
+        : ExportToZipTask(outputPath, QDir(dir), files, destinationPrefix, followSymlinks, utf8Enabled) {};
 
     virtual ~ExportToZipTask() = default;
 
@@ -213,7 +213,7 @@ class ExtractZipTask : public Task {
     {}
     virtual ~ExtractZipTask() = default;
 
-    typedef std::optional<QString> ZipResult;
+    using ZipResult = std::optional<QString>;
 
    protected:
     virtual void executeTask() override;

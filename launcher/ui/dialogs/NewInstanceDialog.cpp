@@ -200,7 +200,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
     importVersion.clear();
 
     if (!task) {
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon("default"));
+        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
         importIcon = false;
     }
 
@@ -216,7 +216,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
     importVersion = std::move(version);
 
     if (!task) {
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon("default"));
+        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
         importIcon = false;
     }
 
@@ -236,6 +236,9 @@ void NewInstanceDialog::setSuggestedIconFromFile(const QString& path, const QStr
 
 void NewInstanceDialog::setSuggestedIcon(const QString& key)
 {
+    if (key == "default")
+        return;
+
     auto icon = APPLICATION->icons()->getIcon(key);
     importIcon = false;
 
