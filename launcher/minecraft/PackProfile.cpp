@@ -71,7 +71,6 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-
 PackProfile::PackProfile(MinecraftInstance* instance) : QAbstractListModel()
 {
     d.reset(new PackProfileData);
