@@ -28,7 +28,7 @@ class TextPrint : public LaunchStep {
    public:
     explicit TextPrint(LaunchTask* parent, const QStringList& lines, MessageLevel::Enum level);
     explicit TextPrint(LaunchTask* parent, const QString& line, MessageLevel::Enum level);
-    virtual ~TextPrint(){};
+    virtual ~TextPrint() {};
 
     virtual void executeTask();
     virtual bool canAbort() const;

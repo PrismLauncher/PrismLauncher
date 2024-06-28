@@ -30,6 +30,9 @@ class ModrinthAPI : public NetworkResourceAPI {
 
     Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
 
+    static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
+    static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
+
    public:
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
@@ -41,7 +44,7 @@ class ModrinthAPI : public NetworkResourceAPI {
         for (auto loader :
              { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt, ModPlatform::LiteLoader }) {
             if (types & loader) {
-                l << getModLoaderString(loader);
+                l << getModLoaderAsString(loader);
             }
         }
         return l;
@@ -54,6 +57,27 @@ class ModrinthAPI : public NetworkResourceAPI {
             l << QString("\"categories:%1\"").arg(loader);
         }
         return l.join(',');
+    }
+
+    static auto getCategoriesFilters(QStringList categories) -> const QString
+    {
+        QStringList l;
+        for (auto cat : categories) {
+            l << QString("\"categories:%1\"").arg(cat);
+        }
+        return l.join(',');
+    }
+
+    static auto getSideFilters(QString side) -> const QString
+    {
+        if (side.isEmpty() || side == "both") {
+            return {};
+        }
+        if (side == "client")
+            return QString("\"client_side:required\",\"client_side:optional\"");
+        if (side == "server")
+            return QString("\"server_side:required\",\"server_side:optional\"");
+        return {};
     }
 
    private:
@@ -73,6 +97,7 @@ class ModrinthAPI : public NetworkResourceAPI {
 
         return "";
     }
+
     [[nodiscard]] QString createFacets(SearchArgs const& args) const
     {
         QStringList facets_list;
@@ -81,6 +106,14 @@ class ModrinthAPI : public NetworkResourceAPI {
             facets_list.append(QString("[%1]").arg(getModLoaderFilters(args.loaders.value())));
         if (args.versions.has_value())
             facets_list.append(QString("[%1]").arg(getGameVersionsArray(args.versions.value())));
+        if (args.side.has_value()) {
+            auto side = getSideFilters(args.side.value());
+            if (!side.isEmpty())
+                facets_list.append(QString("[%1]").arg(side));
+        }
+        if (args.categoryIds.has_value() && !args.categoryIds->empty())
+            facets_list.append(QString("[%1]").arg(getCategoriesFilters(args.categoryIds.value())));
+
         facets_list.append(QString("[\"project_type:%1\"]").arg(resourceTypeParameter(args.type)));
 
         return QString("[%1]").arg(facets_list.join(','));
