@@ -469,8 +469,7 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
             target_dir = QDir(m_rootPath).absoluteFilePath("..");
         }
 
-        QMetaObject::invokeMethod(
-            this, [this, target_dir]() { moveAndFinishUpdate(target_dir); }, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(this, [this, target_dir]() { moveAndFinishUpdate(target_dir); }, Qt::QueuedConnection);
 
     } else {
         QMetaObject::invokeMethod(this, &PrismUpdaterApp::loadReleaseList, Qt::QueuedConnection);

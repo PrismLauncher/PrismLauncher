@@ -92,6 +92,19 @@ void ResourceDownloadDialog::accept()
 
 void ResourceDownloadDialog::reject()
 {
+    auto selected = getTasks();
+    if (selected.count() > 0) {
+        auto reply = CustomMessageBox::selectable(this, tr("Confirmation Needed"),
+                                                  tr("You have %1 selected resources.\n"
+                                                     "Are you sure you want to close this dialog?")
+                                                      .arg(selected.count()),
+                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                         ->exec();
+        if (reply != QMessageBox::Yes) {
+            return;
+        }
+    }
+
     if (!geometrySaveKey().isEmpty())
         APPLICATION->settings()->set(geometrySaveKey(), saveGeometry().toBase64());
 
@@ -356,4 +369,20 @@ QList<BasePage*> ShaderPackDownloadDialog::getPages()
     return pages;
 }
 
+void ModDownloadDialog::setModMetadata(std::shared_ptr<Metadata::ModStruct> meta)
+{
+    switch (meta->provider) {
+        case ModPlatform::ResourceProvider::MODRINTH:
+            selectPage(Modrinth::id());
+            break;
+        case ModPlatform::ResourceProvider::FLAME:
+            selectPage(Flame::id());
+            break;
+    }
+    setWindowTitle(tr("Change %1 version").arg(meta->name));
+    m_container->hidePageList();
+    m_buttons.hide();
+    auto page = selectedPage();
+    page->openProject(meta->project_id);
+}
 }  // namespace ResourceDownload

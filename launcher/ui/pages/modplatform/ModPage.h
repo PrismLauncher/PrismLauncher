@@ -59,7 +59,7 @@ class ModPage : public ResourcePage {
    protected:
     ModPage(ModDownloadDialog* dialog, BaseInstance& instance);
 
-    virtual void prepareProviderCategories(){};
+    virtual void prepareProviderCategories() {};
 
    protected slots:
     virtual void filterMods();

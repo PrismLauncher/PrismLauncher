@@ -79,11 +79,9 @@ QProcessEnvironment CleanEnviroment()
 
     QStringList stripped = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        "LD_LIBRARY_PATH",
-        "LD_PRELOAD",
+        "LD_LIBRARY_PATH", "LD_PRELOAD",
 #endif
-        "QT_PLUGIN_PATH",
-        "QT_FONTPATH"
+        "QT_PLUGIN_PATH", "QT_FONTPATH"
     };
     for (auto key : rawenv.keys()) {
         auto value = rawenv.value(key);
@@ -376,7 +374,19 @@ QList<QString> JavaUtils::FindJavaPaths()
     auto home = qEnvironmentVariable("HOME");
 
     // javas downloaded by sdkman
-    javas.append(FS::PathCombine(home, ".sdkman/candidates/java"));
+    QDir sdkmanDir(FS::PathCombine(home, ".sdkman/candidates/java"));
+    QStringList sdkmanJavas = sdkmanDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    foreach (const QString& java, sdkmanJavas) {
+        javas.append(sdkmanDir.absolutePath() + "/" + java + "/bin/java");
+    }
+
+    // java in user library folder (like from intellij downloads)
+    QDir userLibraryJVMDir(FS::PathCombine(home, "Library/Java/JavaVirtualMachines/"));
+    QStringList userLibraryJVMJavas = userLibraryJVMDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    foreach (const QString& java, userLibraryJVMJavas) {
+        javas.append(userLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Home/bin/java");
+        javas.append(userLibraryJVMDir.absolutePath() + "/" + java + "/Contents/Commands/java");
+    }
 
     javas.append(getMinecraftJavaBundle());
     javas = addJavasFromEnv(javas);
