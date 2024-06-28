@@ -67,6 +67,7 @@ class Config {
     QString VERSION_CHANNEL;
 
     bool UPDATER_ENABLED = false;
+    bool JAVA_DOWNLOADER_ENABLED = false;
 
     /// A short string identifying this build's platform or distribution.
     QString BUILD_PLATFORM;

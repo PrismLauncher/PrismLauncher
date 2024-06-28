@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
+ *  Copyright (c) 2023-2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,50 +35,34 @@
 
 #pragma once
 
-#include <Application.h>
-#include <QObjectPtr.h>
-#include <QDialog>
-#include <QStringListModel>
-#include "JavaCommon.h"
-#include "ui/pages/BasePage.h"
+#include <launch/LaunchStep.h>
+#include <launch/LaunchTask.h>
+#include "java/JavaMetadata.h"
+#include "meta/Version.h"
+#include "minecraft/MinecraftInstance.h"
+#include "tasks/Task.h"
 
-class SettingsObject;
-
-namespace Ui {
-class JavaPage;
-}
-
-class JavaPage : public QWidget, public BasePage {
+class AutoInstallJava : public LaunchStep {
     Q_OBJECT
 
    public:
-    explicit JavaPage(QWidget* parent = 0);
-    ~JavaPage();
+    explicit AutoInstallJava(LaunchTask* parent);
+    ~AutoInstallJava() override = default;
 
-    QString displayName() const override { return tr("Java"); }
-    QIcon icon() const override { return APPLICATION->getThemedIcon("java"); }
-    QString id() const override { return "java-settings"; }
-    QString helpPage() const override { return "Java-settings"; }
-    bool apply() override;
-    void retranslate() override;
+    void executeTask() override;
+    bool canAbort() const override { return m_current_task ? m_current_task->canAbort() : false; }
+    bool abort() override;
 
-    void updateThresholds();
-
-   private:
-    void applySettings();
-    void loadSettings();
-
-   private slots:
-    void on_javaDetectBtn_clicked();
-    void on_javaTestBtn_clicked();
-    void on_javaBrowseBtn_clicked();
-    void on_downloadJavaButton_clicked();
-    void on_removeJavaButton_clicked();
-    void on_refreshJavaButton_clicked();
-    void on_maxMemSpinBox_valueChanged(int i);
-    void checkerFinished();
+   protected:
+    void setJavaPath(QString path);
+    void setJavaPathFromPartial();
+    void downloadJava(Meta::Version::Ptr version, QString javaName);
+    void tryNextMajorJava();
 
    private:
-    Ui::JavaPage* ui;
-    unique_qobject_ptr<JavaCommon::TestCheck> checker;
+    MinecraftInstancePtr m_instance;
+    Task::Ptr m_current_task;
+
+    qsizetype m_majorJavaVersionIndex = 0;
+    const QString m_supported_arch;
 };

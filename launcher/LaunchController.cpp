@@ -196,7 +196,7 @@ void LaunchController::login()
 
     if (m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) {
         // Force account refresh on the account used to launch the instance updating the AccountState
-        //  only on first try and if it is not meant to be offline
+        // only on first try and if it is not meant to be offline
         auto accounts = APPLICATION->accounts();
         accounts->requestRefresh(m_accountToUse->internalId());
     }

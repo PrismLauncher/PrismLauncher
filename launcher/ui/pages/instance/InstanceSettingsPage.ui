@@ -85,6 +85,13 @@
           <item row="2" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
+             <widget class="QPushButton" name="javaDownloadBtn">
+              <property name="text">
+               <string>Download Java</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="javaDetectBtn">
               <property name="text">
                <string>Auto-detect...</string>
@@ -764,6 +771,12 @@
   <tabstop>openGlobalJavaSettingsButton</tabstop>
   <tabstop>settingsTabs</tabstop>
   <tabstop>javaSettingsGroupBox</tabstop>
+  <tabstop>javaPathTextBox</tabstop>
+  <tabstop>javaBrowseBtn</tabstop>
+  <tabstop>javaDownloadBtn</tabstop>
+  <tabstop>javaDetectBtn</tabstop>
+  <tabstop>javaTestBtn</tabstop>
+  <tabstop>skipCompatibilityCheckbox</tabstop>
   <tabstop>memoryGroupBox</tabstop>
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>
@@ -783,6 +796,18 @@
   <tabstop>useNativeOpenALCheck</tabstop>
   <tabstop>showGameTime</tabstop>
   <tabstop>recordGameTime</tabstop>
+  <tabstop>miscellaneousSettingsBox</tabstop>
+  <tabstop>closeAfterLaunchCheck</tabstop>
+  <tabstop>quitAfterGameStopCheck</tabstop>
+  <tabstop>perfomanceGroupBox</tabstop>
+  <tabstop>enableFeralGamemodeCheck</tabstop>
+  <tabstop>enableMangoHud</tabstop>
+  <tabstop>useDiscreteGpuCheck</tabstop>
+  <tabstop>gameTimeGroupBox</tabstop>
+  <tabstop>serverJoinGroupBox</tabstop>
+  <tabstop>serverJoinAddress</tabstop>
+  <tabstop>instanceAccountGroupBox</tabstop>
+  <tabstop>instanceAccountSelector</tabstop>
  </tabstops>
  <resources/>
  <connections/>

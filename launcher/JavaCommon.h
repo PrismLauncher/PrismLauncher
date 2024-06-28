@@ -10,11 +10,11 @@ namespace JavaCommon {
 bool checkJVMArgs(QString args, QWidget* parent);
 
 // Show a dialog saying that the Java binary was usable
-void javaWasOk(QWidget* parent, const JavaCheckResult& result);
+void javaWasOk(QWidget* parent, const JavaChecker::Result& result);
 // Show a dialog saying that the Java binary was not usable because of bad options
-void javaArgsWereBad(QWidget* parent, const JavaCheckResult& result);
+void javaArgsWereBad(QWidget* parent, const JavaChecker::Result& result);
 // Show a dialog saying that the Java binary was not usable
-void javaBinaryWasBad(QWidget* parent, const JavaCheckResult& result);
+void javaBinaryWasBad(QWidget* parent, const JavaChecker::Result& result);
 // Show a dialog if we couldn't find Java Checker
 void javaCheckNotFound(QWidget* parent);
 
@@ -32,11 +32,11 @@ class TestCheck : public QObject {
     void finished();
 
    private slots:
-    void checkFinished(JavaCheckResult result);
-    void checkFinishedWithArgs(JavaCheckResult result);
+    void checkFinished(const JavaChecker::Result& result);
+    void checkFinishedWithArgs(const JavaChecker::Result& result);
 
    private:
-    std::shared_ptr<JavaChecker> checker;
+    JavaChecker::Ptr checker;
     QWidget* m_parent = nullptr;
     QString m_path;
     QString m_args;

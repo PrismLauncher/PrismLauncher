@@ -63,7 +63,7 @@ bool JavaCommon::checkJVMArgs(QString jvmargs, QWidget* parent)
     return true;
 }
 
-void JavaCommon::javaWasOk(QWidget* parent, const JavaCheckResult& result)
+void JavaCommon::javaWasOk(QWidget* parent, const JavaChecker::Result& result)
 {
     QString text;
     text += QObject::tr(
@@ -79,7 +79,7 @@ void JavaCommon::javaWasOk(QWidget* parent, const JavaCheckResult& result)
     CustomMessageBox::selectable(parent, QObject::tr("Java test success"), text, QMessageBox::Information)->show();
 }
 
-void JavaCommon::javaArgsWereBad(QWidget* parent, const JavaCheckResult& result)
+void JavaCommon::javaArgsWereBad(QWidget* parent, const JavaChecker::Result& result)
 {
     auto htmlError = result.errorLog;
     QString text;
@@ -89,7 +89,7 @@ void JavaCommon::javaArgsWereBad(QWidget* parent, const JavaCheckResult& result)
     CustomMessageBox::selectable(parent, QObject::tr("Java test failure"), text, QMessageBox::Warning)->show();
 }
 
-void JavaCommon::javaBinaryWasBad(QWidget* parent, const JavaCheckResult& result)
+void JavaCommon::javaBinaryWasBad(QWidget* parent, const JavaChecker::Result& result)
 {
     QString text;
     text += QObject::tr(
@@ -116,34 +116,26 @@ void JavaCommon::TestCheck::run()
         emit finished();
         return;
     }
-    checker.reset(new JavaChecker());
+    checker.reset(new JavaChecker(m_path, "", 0, 0, 0, 0, this));
     connect(checker.get(), &JavaChecker::checkFinished, this, &JavaCommon::TestCheck::checkFinished);
-    checker->m_path = m_path;
-    checker->performCheck();
+    checker->start();
 }
 
-void JavaCommon::TestCheck::checkFinished(JavaCheckResult result)
+void JavaCommon::TestCheck::checkFinished(const JavaChecker::Result& result)
 {
-    if (result.validity != JavaCheckResult::Validity::Valid) {
+    if (result.validity != JavaChecker::Result::Validity::Valid) {
         javaBinaryWasBad(m_parent, result);
         emit finished();
         return;
     }
-    checker.reset(new JavaChecker());
+    checker.reset(new JavaChecker(m_path, m_args, m_maxMem, m_maxMem, result.javaVersion.requiresPermGen() ? m_permGen : 0, 0, this));
     connect(checker.get(), &JavaChecker::checkFinished, this, &JavaCommon::TestCheck::checkFinishedWithArgs);
-    checker->m_path = m_path;
-    checker->m_args = m_args;
-    checker->m_minMem = m_minMem;
-    checker->m_maxMem = m_maxMem;
-    if (result.javaVersion.requiresPermGen()) {
-        checker->m_permGen = m_permGen;
-    }
-    checker->performCheck();
+    checker->start();
 }
 
-void JavaCommon::TestCheck::checkFinishedWithArgs(JavaCheckResult result)
+void JavaCommon::TestCheck::checkFinishedWithArgs(const JavaChecker::Result& result)
 {
-    if (result.validity == JavaCheckResult::Validity::Valid) {
+    if (result.validity == JavaChecker::Result::Validity::Valid) {
         javaWasOk(m_parent, result);
         emit finished();
         return;
