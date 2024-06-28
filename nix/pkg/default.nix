@@ -13,6 +13,7 @@
   quazip,
   extra-cmake-modules,
   tomlplusplus,
+  SDL2,
   ghc_filesystem,
   gamemode,
   msaClientID ? null,
@@ -49,6 +50,7 @@ assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is on
         ghc_filesystem
         tomlplusplus
         cmark
+        SDL2
       ]
       ++ lib.optional gamemodeSupport gamemode
       ++ lib.optionals stdenv.isDarwin [Cocoa];

@@ -335,6 +335,9 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
 
     # Find cmark
     find_package(cmark QUIET)
+
+    # Find sdl
+    find_package(SDL2 QUIET)
 endif()
 
 include(ECMQtDeclareLoggingCategory)
@@ -458,6 +461,11 @@ else()
 endif()
 
 
+########################## Nix Submodule workaround ###########################
+if(NOT EXISTS "libraries/SDL_GameControllerDB/gamecontrollerdb.txt")
+    file(MAKE_DIRECTORY "libraries/SDL_GameControllerDB/")
+    file(WRITE "libraries/SDL_GameControllerDB/gamecontrollerdb.txt" "")
+endif()
 
 ################################ Included Libs ################################
 
@@ -532,6 +540,19 @@ else()
     message(STATUS "Using system ghc_filesystem")
 endif()
 add_subdirectory(libraries/qdcss) # css parser
+if(NOT SDL2_FOUND)
+    message(STATUS "Using bundled SDL2")
+    set(BUILD_SHARED_LIBS 0)  # link statically to avoid conflicts.
+    set(SDL_SHARED OFF)
+    set(SDL_STATIC ON)
+    set(SDL_TEST OFF)
+    add_subdirectory(libraries/SDL) # SDL (used for gamepad support)
+    target_link_directories(SDL2-static INTERFACE "${SDL2_BINARY_DIR}")
+    set(SDL2-static SDL2::SDL2 CACHE STRING "sdl2 library name")
+    set(SDL2_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libraries/SDL/include)
+else()
+    message(STATUS "Using system SDL2")
+endif()
 
 ############################### Built Artifacts ###############################
 

@@ -47,6 +47,7 @@
 
 #include <BaseInstance.h>
 
+#include "Gamepad.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
 #include "ui/themes/CatPack.h"
 
@@ -294,4 +295,5 @@ class Application : public QApplication {
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
+    GamepadManager m_gamepad_support;  // this just needs to be initailized
 };

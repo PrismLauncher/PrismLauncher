@@ -2,6 +2,7 @@
 <RCC version="1.0">
     <qresource prefix="/documents">
         <file>../../../COPYING.md</file>
+        <file>../../../libraries/SDL_GameControllerDB/gamecontrollerdb.txt</file>
     </qresource>
 </RCC>
 
