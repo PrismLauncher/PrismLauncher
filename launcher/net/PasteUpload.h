@@ -84,7 +84,7 @@ class PasteUpload : public Net::NetRequest {
     class Sink : public Net::Sink {
        public:
         Sink(const PasteType pasteType, const QString base_url, ResultPtr result)
-            : m_paste_type(pasteType), m_base_url(base_url), m_result(result){};
+            : m_paste_type(pasteType), m_base_url(base_url), m_result(result) {};
         virtual ~Sink() = default;
 
        public:
