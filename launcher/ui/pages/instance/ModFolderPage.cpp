@@ -323,7 +323,27 @@ void ModFolderPage::updateMods(bool includeDeps)
 
 CoreModFolderPage::CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent)
     : ModFolderPage(inst, mods, parent)
-{}
+{
+    auto mcInst = dynamic_cast<MinecraftInstance*>(m_instance);
+    if (mcInst) {
+        auto version = mcInst->getPackProfile();
+        if (version && version->getComponent("net.minecraftforge") && version->getComponent("net.minecraft")) {
+            auto minecraftCmp = version->getComponent("net.minecraft");
+            if (!minecraftCmp->m_loaded) {
+                version->reload(Net::Mode::Offline);
+                auto update = version->getCurrentTask();
+                if (update) {
+                    connect(update.get(), &Task::finished, this, [this] {
+                        if (m_container) {
+                            m_container->refreshContainer();
+                        }
+                    });
+                    update->start();
+                }
+            }
+        }
+    }
+}
 
 bool CoreModFolderPage::shouldDisplay() const
 {
@@ -336,20 +356,7 @@ bool CoreModFolderPage::shouldDisplay() const
         if (!version || !version->getComponent("net.minecraftforge") || !version->getComponent("net.minecraft"))
             return false;
         auto minecraftCmp = version->getComponent("net.minecraft");
-        if (!minecraftCmp->m_loaded) {
-            version->reload(Net::Mode::Offline);
-            auto update = version->getCurrentTask();
-            if (update) {
-                connect(update.get(), &Task::finished, this, [this] {
-                    if (m_container) {
-                        m_container->refreshContainer();
-                    }
-                });
-                update->start();
-            }
-            return false;
-        }
-        return minecraftCmp->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate;
+        return minecraftCmp->m_loaded && minecraftCmp->getReleaseDateTime() < g_VersionFilterData.legacyCutoffDate;
     }
     return false;
 }
