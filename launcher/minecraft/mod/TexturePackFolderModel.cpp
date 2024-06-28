@@ -37,7 +37,6 @@
 
 #include "Application.h"
 
-#include "StringUtils.h"
 #include "TexturePackFolderModel.h"
 
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"

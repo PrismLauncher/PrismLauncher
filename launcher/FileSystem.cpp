@@ -815,20 +815,11 @@ QString NormalizePath(QString path)
     }
 }
 
-QString removeDuplicates(QString a)
-{
-    auto b = a.split("");
-    b.removeDuplicates();
-    return b.join("");
-}
-
-static const QString BAD_WIN_CHARS = "\"?<>:*|\r\n";
-
-static const QString BAD_FAT_CHARS = "<>:\"|?*+.,;=[]!";
+static const QString BAD_WIN_CHARS = "<>:\"|?*\r\n";
 static const QString BAD_NTFS_CHARS = "<>:\"|?*";
 static const QString BAD_HFS_CHARS = ":";
 
-static const QString BAD_FILENAME_CHARS = removeDuplicates(BAD_WIN_CHARS + BAD_FAT_CHARS + BAD_NTFS_CHARS + BAD_HFS_CHARS) + "\\/";
+static const QString BAD_FILENAME_CHARS = BAD_WIN_CHARS + "\\/";
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
@@ -847,9 +838,8 @@ QString RemoveInvalidPathChars(QString path, QChar replaceWith)
 
     // the null character is ignored in this check as it was not a problem until now
     switch (statFS(path).fsType) {
-        case FilesystemType::FAT:
-            invalidChars += BAD_FAT_CHARS;
-            break;
+        case FilesystemType::FAT:  // similar to NTFS
+        /* fallthrough */
         case FilesystemType::NTFS:
         /* fallthrough */
         case FilesystemType::REFS:  // similar to NTFS(should be available only on windows)

@@ -27,7 +27,6 @@
 #include "modplatform/ModIndex.h"
 
 static ModrinthAPI api;
-static ModPlatform::ProviderCapabilities ProviderCaps;
 
 bool shouldDownloadOnSide(QString side)
 {
@@ -132,8 +131,9 @@ void Modrinth::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArra
     pack.versionsLoaded = true;
 }
 
-auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_type, QString preferred_file_name)
-    -> ModPlatform::IndexedVersion
+auto Modrinth::loadIndexedPackVersion(QJsonObject& obj,
+                                      QString preferred_hash_type,
+                                      QString preferred_file_name) -> ModPlatform::IndexedVersion
 {
     ModPlatform::IndexedVersion file;
 
@@ -231,7 +231,7 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
             file.hash = Json::requireString(hash_list, preferred_hash_type);
             file.hash_type = preferred_hash_type;
         } else {
-            auto hash_types = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH);
+            auto hash_types = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH);
             for (auto& hash_type : hash_types) {
                 if (hash_list.contains(hash_type)) {
                     file.hash = Json::requireString(hash_list, hash_type);
@@ -247,8 +247,9 @@ auto Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_t
     return {};
 }
 
-auto Modrinth::loadDependencyVersions([[maybe_unused]] const ModPlatform::Dependency& m, QJsonArray& arr, const BaseInstance* inst)
-    -> ModPlatform::IndexedVersion
+auto Modrinth::loadDependencyVersions([[maybe_unused]] const ModPlatform::Dependency& m,
+                                      QJsonArray& arr,
+                                      const BaseInstance* inst) -> ModPlatform::IndexedVersion
 {
     auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
     QString mcVersion = profile->getComponentVersion("net.minecraft");

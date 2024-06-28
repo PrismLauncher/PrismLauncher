@@ -22,8 +22,8 @@
 class CheckJava : public LaunchStep {
     Q_OBJECT
    public:
-    explicit CheckJava(LaunchTask* parent) : LaunchStep(parent){};
-    virtual ~CheckJava(){};
+    explicit CheckJava(LaunchTask* parent) : LaunchStep(parent) {};
+    virtual ~CheckJava() {};
 
     virtual void executeTask();
     virtual bool canAbort() const { return false; }

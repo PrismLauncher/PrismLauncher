@@ -271,7 +271,9 @@ void ResourcePage::updateVersionList()
     m_ui->versionSelectionBox->clear();
     m_ui->versionSelectionBox->blockSignals(false);
 
-    if (current_pack)
+    if (current_pack) {
+        auto installedVersion = m_model->getInstalledPackVersion(current_pack);
+
         for (int i = 0; i < current_pack->versions.size(); i++) {
             auto& version = current_pack->versions[i];
             if (!m_model->checkVersionFilters(version))
@@ -280,9 +282,10 @@ void ResourcePage::updateVersionList()
             auto release_type = current_pack->versions[i].version_type.isValid()
                                     ? QString(" [%1]").arg(current_pack->versions[i].version_type.toString())
                                     : "";
-            m_ui->versionSelectionBox->addItem(current_pack->versions[i].version, QVariant(i));
-        }
 
+            m_ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(i));
+        }
+    }
     if (m_ui->versionSelectionBox->count() == 0) {
         m_ui->versionSelectionBox->addItem(tr("No valid version found."), QVariant(-1));
         m_ui->resourceSelectionButton->setText(tr("Cannot select invalid version :("));
@@ -399,7 +402,7 @@ void ResourcePage::openUrl(const QUrl& url)
         }
     }
 
-    if (!page.isNull()) {
+    if (!page.isNull() && !m_do_not_jump_to_mod) {
         const QString slug = match.captured(1);
 
         // ensure the user isn't opening the same mod
@@ -443,4 +446,52 @@ void ResourcePage::openUrl(const QUrl& url)
     QDesktopServices::openUrl(url);
 }
 
+void ResourcePage::openProject(QVariant projectID)
+{
+    m_ui->sortByBox->hide();
+    m_ui->searchEdit->hide();
+    m_ui->resourceFilterButton->hide();
+    m_ui->packView->hide();
+    m_ui->resourceSelectionButton->hide();
+    m_do_not_jump_to_mod = true;
+
+    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+
+    auto okBtn = buttonBox->button(QDialogButtonBox::Ok);
+    okBtn->setDefault(true);
+    okBtn->setAutoDefault(true);
+    okBtn->setText(tr("Reinstall"));
+    okBtn->setShortcut(tr("Ctrl+Return"));
+    okBtn->setEnabled(false);
+
+    auto cancelBtn = buttonBox->button(QDialogButtonBox::Cancel);
+    cancelBtn->setDefault(false);
+    cancelBtn->setAutoDefault(false);
+
+    connect(okBtn, &QPushButton::clicked, this, [this] {
+        onResourceSelected();
+        m_parent_dialog->accept();
+    });
+
+    connect(cancelBtn, &QPushButton::clicked, m_parent_dialog, &ResourceDownloadDialog::reject);
+    m_ui->gridLayout_4->addWidget(buttonBox, 1, 2);
+
+    auto jump = [this, okBtn] {
+        for (int row = 0; row < m_model->rowCount({}); row++) {
+            const QModelIndex index = m_model->index(row);
+            m_ui->packView->setCurrentIndex(index);
+            okBtn->setEnabled(true);
+            return;
+        }
+        m_ui->packDescription->setText(tr("The resource was not found"));
+    };
+
+    m_ui->searchEdit->setText("#" + projectID.toString());
+    triggerSearch();
+
+    if (m_model->hasActiveSearchJob())
+        connect(m_model->activeSearchJob().get(), &Task::finished, jump);
+    else
+        jump();
+}
 }  // namespace ResourceDownload
