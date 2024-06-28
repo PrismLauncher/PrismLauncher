@@ -70,14 +70,14 @@
    </layout>
   </widget>
   <widget class="WideBar" name="actionsToolbar">
-   <property name="useDefaultAction" stdset="0">
-    <bool>true</bool>
-   </property>
    <property name="windowTitle">
     <string>Actions</string>
    </property>
    <property name="toolButtonStyle">
     <enum>Qt::ToolButtonTextOnly</enum>
+   </property>
+   <property name="useDefaultAction" stdset="0">
+    <bool>true</bool>
    </property>
    <attribute name="toolBarArea">
     <enum>RightToolBarArea</enum>
@@ -169,6 +169,17 @@
    </property>
    <property name="toolTip">
     <string>Try to check or update all selected resources (all resources if none are selected)</string>
+   </property>
+  </action>
+  <action name="actionExportMetadata">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Export modlist</string>
+   </property>
+   <property name="toolTip">
+    <string>Export mod's metadata to text</string>
    </property>
   </action>
  </widget>

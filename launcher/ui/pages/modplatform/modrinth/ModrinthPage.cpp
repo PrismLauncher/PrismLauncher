@@ -44,6 +44,7 @@
 #include "InstanceImportTask.h"
 #include "Json.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 
 #include "ui/widgets/ProjectItem.h"
 
@@ -58,7 +59,6 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
 {
     ui->setupUi(this);
 
-    connect(ui->searchButton, &QPushButton::clicked, this, &ModrinthPage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
     m_model = new Modrinth::ModpackListModel(this);
     ui->packView->setModel(m_model);
@@ -75,7 +75,7 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
+    ui->verticalLayout->insertWidget(1, &m_fetch_progress);
 
     ui->sortByBox->addItem(tr("Sort by Relevance"));
     ui->sortByBox->addItem(tr("Sort by Total Downloads"));
@@ -223,11 +223,12 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             }
             for (auto version : current.versions) {
                 auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
-                if (!version.name.contains(version.version))
-                    ui->versionSelectionBox->addItem(QString("%1 — %2%3").arg(version.name, version.version, release_type),
-                                                     QVariant(version.id));
-                else
-                    ui->versionSelectionBox->addItem(QString("%1%2").arg(version.name, release_type), QVariant(version.id));
+                auto mcVersion = !version.gameVersion.isEmpty() && !version.name.contains(version.gameVersion)
+                                     ? QString(" for %1").arg(version.gameVersion)
+                                     : "";
+                auto versionStr = !version.name.contains(version.version) ? version.version : "";
+                ui->versionSelectionBox->addItem(QString("%1%2 — %3%4").arg(version.name, mcVersion, versionStr, release_type),
+                                                 QVariant(version.id));
             }
 
             QVariant current_updated;
@@ -304,7 +305,7 @@ void ModrinthPage::updateUI()
 
     text += markdownToHTML(current.extra.body.toUtf8());
 
-    ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
     ui->packDescription->flush();
 }
 

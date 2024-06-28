@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <QList>
 #include <algorithm>
 #include <memory>
 #include "modplatform/ModIndex.h"
@@ -21,6 +22,9 @@ class FlameAPI : public NetworkResourceAPI {
     Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
     Task::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
     Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
+
+    static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
+    static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
 
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
 
@@ -96,6 +100,9 @@ class FlameAPI : public NetworkResourceAPI {
         get_arguments.append("sortOrder=desc");
         if (args.loaders.has_value())
             get_arguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(args.loaders.value())));
+        if (args.categoryIds.has_value() && !args.categoryIds->empty())
+            get_arguments.append(QString("categoryIds=[%1]").arg(args.categoryIds->join(",")));
+
         get_arguments.append(gameVersionStr);
 
         return "https://api.curseforge.com/v1/mods/search?gameId=432&" + get_arguments.join('&');
