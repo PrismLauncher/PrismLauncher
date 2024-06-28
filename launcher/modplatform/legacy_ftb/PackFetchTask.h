@@ -13,7 +13,7 @@ class PackFetchTask : public QObject {
     Q_OBJECT
 
    public:
-    PackFetchTask(shared_qobject_ptr<QNetworkAccessManager> network) : QObject(nullptr), m_network(network){};
+    PackFetchTask(shared_qobject_ptr<QNetworkAccessManager> network) : QObject(nullptr), m_network(network) {};
     virtual ~PackFetchTask() = default;
 
     void fetch();
