@@ -50,7 +50,7 @@ class ManagedPackPage : public QWidget, public BasePage {
 
     /** Gets the necessary information about the managed pack, such as
      *  available versions*/
-    virtual void parseManagedPack(){};
+    virtual void parseManagedPack() {};
 
     /** URL of the managed pack.
      *  Not the version-specific one.
@@ -64,8 +64,8 @@ class ManagedPackPage : public QWidget, public BasePage {
      */
     virtual void suggestVersion();
 
-    virtual void update(){};
-    virtual void updateFromFile(){};
+    virtual void update() {};
+    virtual void updateFromFile() {};
 
    protected slots:
     /** Does the necessary UI changes for when something failed.

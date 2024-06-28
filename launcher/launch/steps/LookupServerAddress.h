@@ -25,7 +25,7 @@ class LookupServerAddress : public LaunchStep {
     Q_OBJECT
    public:
     explicit LookupServerAddress(LaunchTask* parent);
-    virtual ~LookupServerAddress(){};
+    virtual ~LookupServerAddress() {};
 
     virtual void executeTask();
     virtual bool abort();

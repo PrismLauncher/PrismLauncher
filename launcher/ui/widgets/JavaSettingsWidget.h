@@ -25,7 +25,7 @@ class JavaSettingsWidget : public QWidget {
 
    public:
     explicit JavaSettingsWidget(QWidget* parent);
-    virtual ~JavaSettingsWidget(){};
+    virtual ~JavaSettingsWidget() {};
 
     enum class JavaStatus { NotSet, Pending, Good, DoesNotExist, DoesNotStart, ReturnedInvalidData } javaStatus = JavaStatus::NotSet;
 

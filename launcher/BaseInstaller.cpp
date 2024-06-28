@@ -16,6 +16,7 @@
 #include <QFile>
 
 #include "BaseInstaller.h"
+#include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
 
 BaseInstaller::BaseInstaller() {}
@@ -42,7 +43,7 @@ bool BaseInstaller::add(MinecraftInstance* to)
 
 bool BaseInstaller::remove(MinecraftInstance* from)
 {
-    return QFile::remove(filename(from->instanceRoot()));
+    return FS::deletePath(filename(from->instanceRoot()));
 }
 
 QString BaseInstaller::filename(const QString& root) const

@@ -104,6 +104,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     /// be unique.
     virtual QString id() const;
 
+    void setMinecraftRunning(bool running);
     void setRunning(bool running);
     bool isRunning() const;
     int64_t totalTimePlayed() const;
