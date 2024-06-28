@@ -56,7 +56,7 @@
 AutoInstallJava::AutoInstallJava(LaunchTask* parent)
     : LaunchStep(parent)
     , m_instance(std::dynamic_pointer_cast<MinecraftInstance>(m_parent->instance()))
-    , m_supported_arch(SysInfo::getSupportedJavaArchitecture()){};
+    , m_supported_arch(SysInfo::getSupportedJavaArchitecture()) {};
 
 void AutoInstallJava::executeTask()
 {
