@@ -168,7 +168,7 @@ class ServersModel : public QAbstractListModel {
         m_saveTimer.setInterval(5000);
         connect(&m_saveTimer, &QTimer::timeout, this, &ServersModel::save_internal);
     }
-    virtual ~ServersModel(){};
+    virtual ~ServersModel() {};
 
     void observe()
     {
