@@ -14,7 +14,7 @@ class VersionProxyModel : public QAbstractProxyModel {
 
    public:
     VersionProxyModel(QObject* parent = 0);
-    virtual ~VersionProxyModel(){};
+    virtual ~VersionProxyModel() {};
 
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;

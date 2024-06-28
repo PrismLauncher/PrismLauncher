@@ -4,7 +4,7 @@
 
 class MultiMatcher : public IPathMatcher {
    public:
-    virtual ~MultiMatcher(){};
+    virtual ~MultiMatcher() {};
     MultiMatcher() {}
     MultiMatcher& add(Ptr add)
     {

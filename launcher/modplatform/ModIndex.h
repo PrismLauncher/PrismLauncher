@@ -40,13 +40,11 @@ enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
 
 enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 
-class ProviderCapabilities {
-   public:
-    auto name(ResourceProvider) -> const char*;
-    auto readableName(ResourceProvider) -> QString;
-    auto hashType(ResourceProvider) -> QStringList;
-    auto hash(ResourceProvider, QIODevice*, QString type = "") -> QString;
-};
+namespace ProviderCapabilities {
+const char* name(ResourceProvider);
+QString readableName(ResourceProvider);
+QStringList hashType(ResourceProvider);
+};  // namespace ProviderCapabilities
 
 struct ModpackAuthor {
     QString name;

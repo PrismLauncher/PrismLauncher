@@ -175,6 +175,8 @@ void HttpMetaCache::evictAll()
             if (!evictEntry(entry))
                 qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
         }
+        map.entry_list.clear();
+        FS::deletePath(map.base_path);
     }
 }
 
