@@ -42,6 +42,6 @@ class LocalModUpdateTask : public Task {
 
    private:
     QDir m_index_dir;
-    ModPlatform::IndexedPack& m_mod;
-    ModPlatform::IndexedVersion& m_mod_version;
+    ModPlatform::IndexedPack m_mod;
+    ModPlatform::IndexedVersion m_mod_version;
 };

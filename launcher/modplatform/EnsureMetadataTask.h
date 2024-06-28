@@ -1,14 +1,14 @@
 #pragma once
 
 #include "ModIndex.h"
-#include "net/NetJob.h"
 
 #include "modplatform/helpers/HashUtils.h"
 
 #include "tasks/ConcurrentTask.h"
 
+#include <QDir>
+
 class Mod;
-class QDir;
 
 class EnsureMetadataTask : public Task {
     Q_OBJECT
