@@ -11,6 +11,7 @@
 #include "QObjectPtr.h"
 
 #include "ResourceDownloadTask.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "tasks/ConcurrentTask.h"
@@ -54,6 +55,17 @@ class ResourceModel : public QAbstractListModel {
     [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? m_current_search_job : nullptr; }
 
     [[nodiscard]] auto getSortingMethods() const { return m_api->getSortingMethods(); }
+
+    virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const { return {}; }
+    /** Whether the version is opted out or not. Currently only makes sense in CF. */
+    virtual bool optedOut(const ModPlatform::IndexedVersion& ver) const
+    {
+        Q_UNUSED(ver);
+        return false;
+    };
+
+    virtual bool checkFilters(ModPlatform::IndexedPack::Ptr) { return true; }
+    virtual bool checkVersionFilters(const ModPlatform::IndexedVersion&);
 
    public slots:
     void fetchMore(const QModelIndex& parent) override;

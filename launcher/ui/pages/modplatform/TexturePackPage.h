@@ -41,7 +41,6 @@ class TexturePackResourcePage : public ResourcePackResourcePage {
    protected:
     TexturePackResourcePage(TexturePackDownloadDialog* dialog, BaseInstance& instance) : ResourcePackResourcePage(dialog, instance)
     {
-        connect(m_ui->searchButton, &QPushButton::clicked, this, &TexturePackResourcePage::triggerSearch);
         connect(m_ui->packView, &QListView::doubleClicked, this, &TexturePackResourcePage::onResourceSelected);
     }
 };

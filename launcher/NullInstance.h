@@ -46,7 +46,7 @@ class NullInstance : public BaseInstance {
     {
         setVersionBroken(true);
     }
-    virtual ~NullInstance(){};
+    virtual ~NullInstance() {};
     void saveNow() override {}
     void loadSpecificSettings() override { setSpecificSettingsLoaded(true); }
     QString getStatusbarDescription() override { return tr("Unknown instance type"); };
