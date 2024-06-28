@@ -92,17 +92,15 @@ void ModUpdateDialog::checkCandidates()
 
     if (!m_modrinth_to_update.empty()) {
         m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model));
-        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
-            m_failed_check_update.append({ mod, reason, recover_url });
-        });
+        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this,
+                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({ mod, reason, recover_url }); });
         check_task.addTask(m_modrinth_check_task);
     }
 
     if (!m_flame_to_update.empty()) {
         m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model));
-        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
-            m_failed_check_update.append({ mod, reason, recover_url });
-        });
+        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this,
+                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({ mod, reason, recover_url }); });
         check_task.addTask(m_flame_check_task);
     }
 

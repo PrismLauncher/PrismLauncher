@@ -79,11 +79,9 @@ QProcessEnvironment CleanEnviroment()
 
     QStringList stripped = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
-        "LD_LIBRARY_PATH",
-        "LD_PRELOAD",
+        "LD_LIBRARY_PATH", "LD_PRELOAD",
 #endif
-        "QT_PLUGIN_PATH",
-        "QT_FONTPATH"
+        "QT_PLUGIN_PATH", "QT_FONTPATH"
     };
     for (auto key : rawenv.keys()) {
         auto value = rawenv.value(key);

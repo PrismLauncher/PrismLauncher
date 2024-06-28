@@ -26,8 +26,8 @@
 
 class ParsingValidator : public Net::Validator {
    public: /* con/des */
-    ParsingValidator(Meta::BaseEntity* entity) : m_entity(entity){};
-    virtual ~ParsingValidator(){};
+    ParsingValidator(Meta::BaseEntity* entity) : m_entity(entity) {};
+    virtual ~ParsingValidator() {};
 
    public: /* methods */
     bool init(QNetworkRequest&) override { return true; }

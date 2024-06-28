@@ -43,7 +43,7 @@ class ImgurUpload : public Net::NetRequest {
    public:
     class Sink : public Net::Sink {
        public:
-        Sink(ScreenShot::Ptr shot) : m_shot(shot){};
+        Sink(ScreenShot::Ptr shot) : m_shot(shot) {};
         virtual ~Sink() = default;
 
        public:
