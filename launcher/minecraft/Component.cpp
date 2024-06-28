@@ -225,6 +225,22 @@ bool Component::isVersionChangeable()
     return false;
 }
 
+bool Component::isKnownModloader()
+{
+    auto iter = KNOWN_MODLOADERS.find(m_uid);
+    return iter != KNOWN_MODLOADERS.cend();
+}
+
+QStringList Component::knownConfictingComponents()
+{
+    auto iter = KNOWN_MODLOADERS.find(m_uid);
+    if (iter != KNOWN_MODLOADERS.cend()) {
+        return (*iter).knownConfictingComponents;
+    } else {
+        return {};
+    }
+}
+
 void Component::setImportant(bool state)
 {
     if (m_important != state) {

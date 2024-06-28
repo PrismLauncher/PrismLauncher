@@ -71,11 +71,6 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 
-static const QMap<QString, ModPlatform::ModLoaderType> modloaderMapping{ { "net.neoforged", ModPlatform::NeoForge },
-                                                                         { "net.minecraftforge", ModPlatform::Forge },
-                                                                         { "net.fabricmc.fabric-loader", ModPlatform::Fabric },
-                                                                         { "org.quiltmc.quilt-loader", ModPlatform::Quilt },
-                                                                         { "com.mumfrey.liteloader", ModPlatform::LiteLoader } };
 
 PackProfile::PackProfile(MinecraftInstance* instance) : QAbstractListModel()
 {
@@ -1040,12 +1035,12 @@ std::optional<ModPlatform::ModLoaderTypes> PackProfile::getModLoaders()
     ModPlatform::ModLoaderTypes result;
     bool has_any_loader = false;
 
-    QMapIterator<QString, ModPlatform::ModLoaderType> i(modloaderMapping);
+    QMapIterator<QString, ModloaderMapEntry> i(KNOWN_MODLOADERS);
 
     while (i.hasNext()) {
         i.next();
         if (auto c = getComponent(i.key()); c != nullptr && c->isEnabled()) {
-            result |= i.value();
+            result |= i.value().type;
             has_any_loader = true;
         }
     }

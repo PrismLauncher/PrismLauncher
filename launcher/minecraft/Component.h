@@ -9,6 +9,7 @@
 #include "ProblemProvider.h"
 #include "QObjectPtr.h"
 #include "meta/JsonFormat.h"
+#include "modplatform/ModIndex.h"
 
 class PackProfile;
 class LaunchProfile;
@@ -43,6 +44,18 @@ using UpdateAction = std::variant<UpdateActionNone,
                                   UpdateActionRemove,
                                   UpdateActionImportantChanged>;
 
+struct ModloaderMapEntry {
+    ModPlatform::ModLoaderType type;
+    QStringList knownConfictingComponents;
+};
+static const QMap<QString, ModloaderMapEntry> KNOWN_MODLOADERS{
+    { "net.neoforged", { ModPlatform::NeoForge, { "net.minecraftforge", "net.fabricmc.fabric-loader", "net.fabricmc.fabric-loader" } } },
+    { "net.minecraftforge", { ModPlatform::Forge, { "net.neoforged", "net.fabricmc.fabric-loader", "net.fabricmc.fabric-loader" } } },
+    { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, { "net.minecraftforge", "net.neoforged", "org.quiltmc.quilt-loader" } } },
+    { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, { "net.minecraftforge", "net.neoforged", "net.fabricmc.fabric-loader" } } },
+    { "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
+};
+
 class Component : public QObject, public ProblemProvider {
     Q_OBJECT
    public:
@@ -65,6 +78,8 @@ class Component : public QObject, public ProblemProvider {
     bool isRemovable();
     bool isCustom();
     bool isVersionChangeable();
+    bool isKnownModloader();
+    QStringList knownConfictingComponents();
 
     // DEPRECATED: explicit numeric order values, used for loading old non-component config. TODO: refactor and move to migration code
     void setOrder(int order);
