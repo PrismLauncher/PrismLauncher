@@ -17,7 +17,7 @@ class CheckUpdateTask : public Task {
                     std::list<Version>& mcVersions,
                     std::optional<ModPlatform::ModLoaderTypes> loaders,
                     std::shared_ptr<ModFolderModel> mods_folder)
-        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder){};
+        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder) {};
 
     struct UpdatableMod {
         QString name;
