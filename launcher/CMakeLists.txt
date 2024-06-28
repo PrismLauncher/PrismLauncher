@@ -163,6 +163,8 @@ set(LAUNCH_SOURCES
     launch/steps/Update.h
     launch/steps/QuitAfterGameStop.cpp
     launch/steps/QuitAfterGameStop.h
+    launch/steps/PrintServers.cpp
+    launch/steps/PrintServers.h
     launch/LaunchStep.cpp
     launch/LaunchStep.h
     launch/LaunchTask.cpp

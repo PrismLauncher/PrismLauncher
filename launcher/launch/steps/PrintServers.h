@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2024 Leia uwu <leia@tutamail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,26 +14,24 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
-
 #pragma once
 
-#include "net/HeaderProxy.h"
+#include <LoggedProcess.h>
+#include <java/JavaChecker.h>
+#include <launch/LaunchStep.h>
+#include <QHostInfo>
 
-namespace Net {
-
-class StaticHeaderProxy : public HeaderProxy {
+class PrintServers : public LaunchStep {
+    Q_OBJECT
    public:
-    StaticHeaderProxy(QList<HeaderPair> hdrs = {}) : HeaderProxy(), m_hdrs(hdrs) {};
-    virtual ~StaticHeaderProxy() = default;
+    PrintServers(LaunchTask* parent, const QStringList& servers);
 
-   public:
-    virtual QList<HeaderPair> headers(const QNetworkRequest&) const override { return m_hdrs; };
-    void setHeaders(QList<HeaderPair> hdrs) { m_hdrs = hdrs; };
+    virtual void executeTask();
+    virtual bool canAbort() const;
 
    private:
-    QList<HeaderPair> m_hdrs;
+    void resolveServer(const QHostInfo& host_info);
+    QMap<QString, QString> m_server_to_address;
+    QStringList m_servers;
 };
-
-}  // namespace Net

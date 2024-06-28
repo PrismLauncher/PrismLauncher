@@ -20,6 +20,9 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     QJsonObject logo = Json::ensureObject(obj, "logo");
     pack.logoName = Json::ensureString(logo, "title");
     pack.logoUrl = Json::ensureString(logo, "thumbnailUrl");
+    if (pack.logoUrl.isEmpty()) {
+        pack.logoUrl = Json::ensureString(logo, "url");
+    }
 
     auto authors = Json::ensureArray(obj, "authors");
     for (auto authorIter : authors) {
