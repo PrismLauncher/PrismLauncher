@@ -23,7 +23,7 @@ struct UpdateActionChangeVersion {
     /// version to change to
     QString targetVersion;
 };
-struct UpdateActionLatestRecommendedCompatable {
+struct UpdateActionLatestRecommendedCompatible {
     /// Parent uid
     QString parentUid;
     QString parentName;
@@ -40,20 +40,13 @@ using UpdateActionNone = std::monostate;
 
 using UpdateAction = std::variant<UpdateActionNone,
                                   UpdateActionChangeVersion,
-                                  UpdateActionLatestRecommendedCompatable,
+                                  UpdateActionLatestRecommendedCompatible,
                                   UpdateActionRemove,
                                   UpdateActionImportantChanged>;
 
 struct ModloaderMapEntry {
     ModPlatform::ModLoaderType type;
-    QStringList knownConfictingComponents;
-};
-static const QMap<QString, ModloaderMapEntry> KNOWN_MODLOADERS{
-    { "net.neoforged", { ModPlatform::NeoForge, { "net.minecraftforge", "net.fabricmc.fabric-loader", "net.fabricmc.fabric-loader" } } },
-    { "net.minecraftforge", { ModPlatform::Forge, { "net.neoforged", "net.fabricmc.fabric-loader", "net.fabricmc.fabric-loader" } } },
-    { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, { "net.minecraftforge", "net.neoforged", "org.quiltmc.quilt-loader" } } },
-    { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, { "net.minecraftforge", "net.neoforged", "net.fabricmc.fabric-loader" } } },
-    { "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
+    QStringList knownConflictingComponents;
 };
 
 class Component : public QObject, public ProblemProvider {
@@ -65,6 +58,8 @@ class Component : public QObject, public ProblemProvider {
     Component(PackProfile* parent, const QString& uid, std::shared_ptr<VersionFile> file);
 
     virtual ~Component() {}
+
+    static const QMap<QString, ModloaderMapEntry> KNOWN_MODLOADERS;
 
     void applyTo(LaunchProfile* profile);
 
@@ -79,7 +74,7 @@ class Component : public QObject, public ProblemProvider {
     bool isCustom();
     bool isVersionChangeable();
     bool isKnownModloader();
-    QStringList knownConfictingComponents();
+    QStringList knownConflictingComponents();
 
     // DEPRECATED: explicit numeric order values, used for loading old non-component config. TODO: refactor and move to migration code
     void setOrder(int order);

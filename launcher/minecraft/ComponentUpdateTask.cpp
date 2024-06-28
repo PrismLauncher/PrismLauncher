@@ -570,25 +570,22 @@ void ComponentUpdateTask::performUpdateActions()
                               component->setVersion(cv.targetVersion);
                               component->waitLoadMeta();
                           },
-                          [&component, &instance](const UpdateActionLatestRecommendedCompatable lrc) {
+                          [&component, &instance](const UpdateActionLatestRecommendedCompatible lrc) {
                               qCDebug(instanceProfileResolveC)
                                   << instance->name() << "|"
-                                  << "UpdateActionLatestRecommendedCompatable" << component->getID() << ":" << component->getVersion()
+                                  << "UpdateActionLatestRecommendedCompatible" << component->getID() << ":" << component->getVersion()
                                   << "updating to latest recommend or compatible with" << lrc.parentUid << lrc.version;
                               auto versionList = APPLICATION->metadataIndex()->get(component->getID());
-                              versionList->waitToLoad();
                               if (versionList) {
+                                  versionList->waitToLoad();
                                   auto recommended = versionList->getRecommendedForParent(lrc.parentUid, lrc.version);
+                                  if (!recommended) {
+                                      recommended = versionList->getLatestForParent(lrc.parentUid, lrc.version);
+                                  }
                                   if (recommended) {
                                       component->setVersion(recommended->version());
                                       component->waitLoadMeta();
                                       return;
-                                  }
-
-                                  auto latest = versionList->getLatestForParent(lrc.parentUid, lrc.version);
-                                  if (latest) {
-                                      component->setVersion(latest->version());
-                                      component->waitLoadMeta();
                                   } else {
                                       component->addComponentProblem(ProblemSeverity::Error,
                                                                      QObject::tr("No compatible version of %1 found for %2 %3")
@@ -635,14 +632,14 @@ void ComponentUpdateTask::performUpdateActions()
                                       if (!newVersion.isEmpty()) {
                                           comp->setUpdateAction(UpdateAction{ UpdateActionChangeVersion{ newVersion } });
                                       } else {
-                                          comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatable{
+                                          comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatible{
                                               component->getID(),
                                               component->getName(),
                                               component->getVersion(),
                                           } });
                                       }
                                   } else {
-                                      comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatable{
+                                      comp->setUpdateAction(UpdateAction{ UpdateActionLatestRecommendedCompatible{
                                           component->getID(),
                                           component->getName(),
                                           component->getVersion(),
@@ -690,7 +687,7 @@ void ComponentUpdateTask::finalizeComponents()
                 }
             }
         }
-        for (auto conflict : component->knownConfictingComponents()) {
+        for (auto conflict : component->knownConflictingComponents()) {
             auto found = componentIndex.find(conflict);
             if (found != componentIndex.cend()) {
                 auto foundComp = *found;

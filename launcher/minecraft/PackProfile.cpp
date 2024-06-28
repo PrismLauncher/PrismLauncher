@@ -1034,7 +1034,7 @@ std::optional<ModPlatform::ModLoaderTypes> PackProfile::getModLoaders()
     ModPlatform::ModLoaderTypes result;
     bool has_any_loader = false;
 
-    QMapIterator<QString, ModloaderMapEntry> i(KNOWN_MODLOADERS);
+    QMapIterator<QString, ModloaderMapEntry> i(Component::KNOWN_MODLOADERS);
 
     while (i.hasNext()) {
         i.next();
