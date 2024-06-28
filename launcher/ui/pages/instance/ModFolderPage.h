@@ -67,6 +67,7 @@ class ModFolderPage : public ExternalResourcesPage {
     void installMods();
     void updateMods(bool includeDeps = false);
     void visitModPages();
+    void changeModVersion();
 
    protected:
     std::shared_ptr<ModFolderModel> m_model;

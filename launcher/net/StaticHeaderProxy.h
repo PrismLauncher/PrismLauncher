@@ -25,7 +25,7 @@ namespace Net {
 
 class StaticHeaderProxy : public HeaderProxy {
    public:
-    StaticHeaderProxy(QList<HeaderPair> hdrs = {}) : HeaderProxy(), m_hdrs(hdrs){};
+    StaticHeaderProxy(QList<HeaderPair> hdrs = {}) : HeaderProxy(), m_hdrs(hdrs) {};
     virtual ~StaticHeaderProxy() = default;
 
    public:
