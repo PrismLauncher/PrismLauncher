@@ -36,6 +36,7 @@
 
 #include "LaunchController.h"
 #include "Application.h"
+#include "launch/steps/PrintServers.h"
 #include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AccountList.h"
 
@@ -193,7 +194,8 @@ void LaunchController::login()
     bool tryagain = true;
     unsigned int tries = 0;
 
-    if (m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) {
+    if ((m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) ||
+        m_accountToUse->shouldRefresh()) {
         // Force account refresh on the account used to launch the instance updating the AccountState
         //  only on first try and if it is not meant to be offline
         auto accounts = APPLICATION->accounts();
@@ -345,25 +347,8 @@ void LaunchController::launchInstance()
 
         // Prepend Server Status
         QStringList servers = { "login.microsoftonline.com", "session.minecraft.net", "textures.minecraft.net", "api.mojang.com" };
-        QString resolved_servers = "";
-        QHostInfo host_info;
 
-        for (QString server : servers) {
-            host_info = QHostInfo::fromName(server);
-            resolved_servers = resolved_servers + server + " resolves to:\n    [";
-            if (!host_info.addresses().isEmpty()) {
-                for (QHostAddress address : host_info.addresses()) {
-                    resolved_servers = resolved_servers + address.toString();
-                    if (!host_info.addresses().endsWith(address)) {
-                        resolved_servers = resolved_servers + ", ";
-                    }
-                }
-            } else {
-                resolved_servers = resolved_servers + "N/A";
-            }
-            resolved_servers = resolved_servers + "]\n\n";
-        }
-        m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
+        m_launcher->prependStep(makeShared<PrintServers>(m_launcher.get(), servers));
     } else {
         online_mode = m_demo ? "demo" : "offline";
     }

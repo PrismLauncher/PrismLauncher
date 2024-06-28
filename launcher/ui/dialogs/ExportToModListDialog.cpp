@@ -160,7 +160,7 @@ void ExportToModListDialog::done(int result)
         const QString filename = FS::RemoveInvalidFilenameChars(m_name);
         const QString output =
             QFileDialog::getSaveFileName(this, tr("Export %1").arg(m_name), FS::PathCombine(QDir::homePath(), filename + extension()),
-                                         "File (*.txt *.html *.md *.json *.csv)", nullptr);
+                                         tr("File") + " (*.txt *.html *.md *.json *.csv)", nullptr);
 
         if (output.isEmpty())
             return;
