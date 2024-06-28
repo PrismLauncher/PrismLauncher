@@ -42,7 +42,7 @@
 namespace Net {
 class FileSink : public Sink {
    public:
-    FileSink(QString filename) : m_filename(filename){};
+    FileSink(QString filename) : m_filename(filename) {};
     virtual ~FileSink() = default;
 
    public:

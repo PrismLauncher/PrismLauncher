@@ -322,7 +322,7 @@ bool FlameCreationTask::createInstance()
         // Keep index file in case we need it some other time (like when changing versions)
         QString new_index_place(FS::PathCombine(parent_folder, "manifest.json"));
         FS::ensureFilePathExists(new_index_place);
-        QFile::rename(index_path, new_index_place);
+        FS::move(index_path, new_index_place);
 
     } catch (const JSONValidationError& e) {
         setError(tr("Could not understand pack manifest:\n") + e.cause());
@@ -336,7 +336,7 @@ bool FlameCreationTask::createInstance()
             Override::createOverrides("overrides", parent_folder, overridePath);
 
             QString mcPath = FS::PathCombine(m_stagingPath, "minecraft");
-            if (!QFile::rename(overridePath, mcPath)) {
+            if (!FS::move(overridePath, mcPath)) {
                 setError(tr("Could not rename the overrides folder:\n") + m_pack.overrides);
                 return false;
             }
@@ -538,9 +538,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     }
     for (const auto& result : results) {
         auto fileName = result.fileName;
-#ifdef Q_OS_WIN
         fileName = FS::RemoveInvalidPathChars(fileName);
-#endif
         auto relpath = FS::PathCombine(result.targetFolder, fileName);
 
         if (!result.required && !selectedOptionalMods.contains(relpath)) {

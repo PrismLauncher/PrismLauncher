@@ -45,7 +45,7 @@ namespace Net {
  */
 class ByteArraySink : public Sink {
    public:
-    ByteArraySink(std::shared_ptr<QByteArray> output) : m_output(output){};
+    ByteArraySink(std::shared_ptr<QByteArray> output) : m_output(output) {};
 
     virtual ~ByteArraySink() = default;
 

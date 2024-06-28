@@ -9,7 +9,7 @@ class FileResolvingTask : public Task {
     Q_OBJECT
    public:
     explicit FileResolvingTask(const shared_qobject_ptr<QNetworkAccessManager>& network, Flame::Manifest& toProcess);
-    virtual ~FileResolvingTask(){};
+    virtual ~FileResolvingTask() {};
 
     bool canAbort() const override { return true; }
     bool abort() override;
