@@ -343,7 +343,7 @@ void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[
 
 void WorldListPage::on_actionAdd_triggered()
 {
-    auto list = GuiUtil::BrowseForFiles(displayName(), tr("Select a Minecraft world zip"), tr("Minecraft World Zip File (*.zip)"),
+    auto list = GuiUtil::BrowseForFiles(displayName(), tr("Select a Minecraft world zip"), tr("Minecraft World Zip File") + " (*.zip)",
                                         QString(), this->parentWidget());
     if (!list.empty()) {
         m_worlds->stopWatching();

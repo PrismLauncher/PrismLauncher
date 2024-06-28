@@ -28,15 +28,52 @@
 #include "Version.h"
 
 // Values taken from:
-// https://minecraft.wiki/w/Tutorials/Creating_a_data_pack#%22pack_format%22
-static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = {
-    { 4, { Version("1.13"), Version("1.14.4") } },    { 5, { Version("1.15"), Version("1.16.1") } },
-    { 6, { Version("1.16.2"), Version("1.16.5") } },  { 7, { Version("1.17"), Version("1.17.1") } },
-    { 8, { Version("1.18"), Version("1.18.1") } },    { 9, { Version("1.18.2"), Version("1.18.2") } },
-    { 10, { Version("1.19"), Version("1.19.3") } },   { 11, { Version("23w03a"), Version("23w05a") } },
-    { 12, { Version("1.19.4"), Version("1.19.4") } }, { 13, { Version("23w12a"), Version("23w14a") } },
-    { 14, { Version("23w16a"), Version("23w17a") } }, { 15, { Version("1.20"), Version("1.20") } },
-};
+// https://minecraft.wiki/w/Pack_format#List_of_data_pack_formats
+static const QMap<int, std::pair<Version, Version>> s_pack_format_versions = { { 4, { Version("1.13"), Version("1.14.4") } },
+                                                                               { 5, { Version("1.15"), Version("1.16.1") } },
+                                                                               { 6, { Version("1.16.2"), Version("1.16.5") } },
+                                                                               { 7, { Version("1.17"), Version("1.17.1") } },
+                                                                               { 8, { Version("1.18"), Version("1.18.1") } },
+                                                                               { 9, { Version("1.18.2"), Version("1.18.2") } },
+                                                                               { 10, { Version("1.19"), Version("1.19.3") } },
+                                                                               { 11, { Version("23w03a"), Version("23w05a") } },
+                                                                               { 12, { Version("1.19.4"), Version("1.19.4") } },
+                                                                               { 13, { Version("23w12a"), Version("23w14a") } },
+                                                                               { 14, { Version("23w16a"), Version("23w17a") } },
+                                                                               { 15, { Version("1.20"), Version("1.20.1") } },
+                                                                               { 16, { Version("23w31a"), Version("23w31a") } },
+                                                                               { 17, { Version("23w32a"), Version("23w35a") } },
+                                                                               { 18, { Version("1.20.2"), Version("1.20.2") } },
+                                                                               { 19, { Version("23w40a"), Version("23w40a") } },
+                                                                               { 20, { Version("23w41a"), Version("23w41a") } },
+                                                                               { 21, { Version("23w42a"), Version("23w42a") } },
+                                                                               { 22, { Version("23w43a"), Version("23w43b") } },
+                                                                               { 23, { Version("23w44a"), Version("23w44a") } },
+                                                                               { 24, { Version("23w45a"), Version("23w45a") } },
+                                                                               { 25, { Version("23w46a"), Version("23w46a") } },
+                                                                               { 26, { Version("1.20.3"), Version("1.20.4") } },
+                                                                               { 27, { Version("23w51a"), Version("23w51b") } },
+                                                                               { 28, { Version("24w05a"), Version("24w05b") } },
+                                                                               { 29, { Version("24w04a"), Version("24w04a") } },
+                                                                               { 30, { Version("24w05a"), Version("24w05b") } },
+                                                                               { 31, { Version("24w06a"), Version("24w06a") } },
+                                                                               { 32, { Version("24w07a"), Version("24w07a") } },
+                                                                               { 33, { Version("24w09a"), Version("24w09a") } },
+                                                                               { 34, { Version("24w10a"), Version("24w10a") } },
+                                                                               { 35, { Version("24w11a"), Version("24w11a") } },
+                                                                               { 36, { Version("24w12a"), Version("24w12a") } },
+                                                                               { 37, { Version("24w13a"), Version("24w13a") } },
+                                                                               { 38, { Version("24w14a"), Version("24w14a") } },
+                                                                               { 39, { Version("1.20.5-pre1"), Version("1.20.5-pre1") } },
+                                                                               { 40, { Version("1.20.5-pre2"), Version("1.20.5-pre2") } },
+                                                                               { 41, { Version("1.20.5"), Version("1.20.6") } },
+                                                                               { 42, { Version("24w18a"), Version("24w18a") } },
+                                                                               { 43, { Version("24w19a"), Version("24w19b") } },
+                                                                               { 44, { Version("24w20a"), Version("24w20a") } },
+                                                                               { 45, { Version("21w21a"), Version("21w21b") } },
+                                                                               { 46, { Version("1.21-pre1"), Version("1.21-pre1") } },
+                                                                               { 47, { Version("1.21-pre2"), Version("1.21-pre2") } },
+                                                                               { 48, { Version("1.21"), Version("1.21") } } };
 
 void DataPack::setPackFormat(int new_format_id)
 {
@@ -65,29 +102,24 @@ std::pair<Version, Version> DataPack::compatibleVersions() const
     return s_pack_format_versions.constFind(m_pack_format).value();
 }
 
-std::pair<int, bool> DataPack::compare(const Resource& other, SortType type) const
+int DataPack::compare(const Resource& other, SortType type) const
 {
     auto const& cast_other = static_cast<DataPack const&>(other);
-
     switch (type) {
-        default: {
-            auto res = Resource::compare(other, type);
-            if (res.first != 0)
-                return res;
-            break;
-        }
+        default:
+            return Resource::compare(other, type);
         case SortType::PACK_FORMAT: {
             auto this_ver = packFormat();
             auto other_ver = cast_other.packFormat();
 
             if (this_ver > other_ver)
-                return { 1, type == SortType::PACK_FORMAT };
+                return 1;
             if (this_ver < other_ver)
-                return { -1, type == SortType::PACK_FORMAT };
+                return -1;
             break;
         }
     }
-    return { 0, false };
+    return 0;
 }
 
 bool DataPack::applyFilter(QRegularExpression filter) const

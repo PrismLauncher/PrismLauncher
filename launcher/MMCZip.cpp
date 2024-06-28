@@ -42,6 +42,7 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFileInfo>
 #include <QUrl>
 
 #if defined(LAUNCHER_APPLICATION)
@@ -122,7 +123,7 @@ bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, 
     zip.setUtf8Enabled(true);
     QDir().mkpath(QFileInfo(fileCompressed).absolutePath());
     if (!zip.open(QuaZip::mdCreate)) {
-        QFile::remove(fileCompressed);
+        FS::deletePath(fileCompressed);
         return false;
     }
 
@@ -130,7 +131,7 @@ bool compressDirFiles(QString fileCompressed, QString dir, QFileInfoList files, 
 
     zip.close();
     if (zip.getZipError() != 0) {
-        QFile::remove(fileCompressed);
+        FS::deletePath(fileCompressed);
         return false;
     }
 
@@ -144,7 +145,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
     QuaZip zipOut(targetJarPath);
     zipOut.setUtf8Enabled(true);
     if (!zipOut.open(QuaZip::mdCreate)) {
-        QFile::remove(targetJarPath);
+        FS::deletePath(targetJarPath);
         qCritical() << "Failed to open the minecraft.jar for modding";
         return false;
     }
@@ -162,7 +163,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
         if (mod->type() == ResourceType::ZIPFILE) {
             if (!mergeZipFiles(&zipOut, mod->fileinfo(), addedFiles)) {
                 zipOut.close();
-                QFile::remove(targetJarPath);
+                FS::deletePath(targetJarPath);
                 qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
                 return false;
             }
@@ -171,7 +172,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
             auto filename = mod->fileinfo();
             if (!JlCompress::compressFile(&zipOut, filename.absoluteFilePath(), filename.fileName())) {
                 zipOut.close();
-                QFile::remove(targetJarPath);
+                FS::deletePath(targetJarPath);
                 qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
                 return false;
             }
@@ -194,7 +195,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 
             if (!compressDirFiles(&zipOut, parent_dir, files)) {
                 zipOut.close();
-                QFile::remove(targetJarPath);
+                FS::deletePath(targetJarPath);
                 qCritical() << "Failed to add" << mod->fileinfo().fileName() << "to the jar.";
                 return false;
             }
@@ -202,7 +203,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
         } else {
             // Make sure we do not continue launching when something is missing or undefined...
             zipOut.close();
-            QFile::remove(targetJarPath);
+            FS::deletePath(targetJarPath);
             qCritical() << "Failed to add unknown mod type" << mod->fileinfo().fileName() << "to the jar.";
             return false;
         }
@@ -210,7 +211,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
 
     if (!mergeZipFiles(&zipOut, QFileInfo(sourceJarPath), addedFiles, [](const QString key) { return !key.contains("META-INF"); })) {
         zipOut.close();
-        QFile::remove(targetJarPath);
+        FS::deletePath(targetJarPath);
         qCritical() << "Failed to insert minecraft.jar contents.";
         return false;
     }
@@ -218,7 +219,7 @@ bool createModdedJar(QString sourceJarPath, QString targetJarPath, const QList<M
     // Recompress the jar
     zipOut.close();
     if (zipOut.getZipError() != 0) {
-        QFile::remove(targetJarPath);
+        FS::deletePath(targetJarPath);
         qCritical() << "Failed to finalize minecraft.jar!";
         return false;
     }
@@ -288,9 +289,7 @@ std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, con
 
     do {
         QString file_name = zip->getCurrentFileName();
-#ifdef Q_OS_WIN
         file_name = FS::RemoveInvalidPathChars(file_name);
-#endif
         if (!file_name.startsWith(subdir))
             continue;
 
@@ -332,9 +331,20 @@ std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, con
         }
 
         extracted.append(target_file_path);
-        QFile::setPermissions(target_file_path,
-                              QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser);
+        auto fileInfo = QFileInfo(target_file_path);
+        if (fileInfo.isFile()) {
+            auto permissions = fileInfo.permissions();
+            auto maxPermisions = QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser |
+                                 QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther;
+            auto minPermisions = QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
 
+            auto newPermisions = (permissions & maxPermisions) | minPermisions;
+            if (newPermisions != permissions) {
+                if (!QFile::setPermissions(target_file_path, newPermisions)) {
+                    qWarning() << (QObject::tr("Could not fix permissions for %1").arg(target_file_path));
+                }
+            }
+        }
         qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
     } while (zip->goToNextFile());
 
@@ -492,10 +502,10 @@ auto ExportToZipTask::exportZip() -> ZipResult
 void ExportToZipTask::finish()
 {
     if (m_build_zip_future.isCanceled()) {
-        QFile::remove(m_output_path);
+        FS::deletePath(m_output_path);
         emitAborted();
     } else if (auto result = m_build_zip_future.result(); result.has_value()) {
-        QFile::remove(m_output_path);
+        FS::deletePath(m_output_path);
         emitFailed(result.value());
     } else {
         emitSucceeded();
@@ -512,6 +522,123 @@ bool ExportToZipTask::abort()
     }
     return false;
 }
-#endif
 
+void ExtractZipTask::executeTask()
+{
+    m_zip_future = QtConcurrent::run(QThreadPool::globalInstance(), [this]() { return extractZip(); });
+    connect(&m_zip_watcher, &QFutureWatcher<ZipResult>::finished, this, &ExtractZipTask::finish);
+    m_zip_watcher.setFuture(m_zip_future);
+}
+
+auto ExtractZipTask::extractZip() -> ZipResult
+{
+    auto target = m_output_dir.absolutePath();
+    auto target_top_dir = QUrl::fromLocalFile(target);
+
+    QStringList extracted;
+
+    qDebug() << "Extracting subdir" << m_subdirectory << "from" << m_input->getZipName() << "to" << target;
+    auto numEntries = m_input->getEntriesCount();
+    if (numEntries < 0) {
+        return ZipResult(tr("Failed to enumerate files in archive"));
+    }
+    if (numEntries == 0) {
+        logWarning(tr("Extracting empty archives seems odd..."));
+        return ZipResult();
+    }
+    if (!m_input->goToFirstFile()) {
+        return ZipResult(tr("Failed to seek to first file in zip"));
+    }
+
+    setStatus("Extracting files...");
+    setProgress(0, numEntries);
+    do {
+        if (m_zip_future.isCanceled())
+            return ZipResult();
+        setProgress(m_progress + 1, m_progressTotal);
+        QString file_name = m_input->getCurrentFileName();
+        if (!file_name.startsWith(m_subdirectory))
+            continue;
+
+        auto relative_file_name = QDir::fromNativeSeparators(file_name.remove(0, m_subdirectory.size()));
+        auto original_name = relative_file_name;
+        setStatus("Unziping: " + relative_file_name);
+
+        // Fix subdirs/files ending with a / getting transformed into absolute paths
+        if (relative_file_name.startsWith('/'))
+            relative_file_name = relative_file_name.mid(1);
+
+        // Fix weird "folders with a single file get squashed" thing
+        QString sub_path;
+        if (relative_file_name.contains('/') && !relative_file_name.endsWith('/')) {
+            sub_path = relative_file_name.section('/', 0, -2) + '/';
+            FS::ensureFolderPathExists(FS::PathCombine(target, sub_path));
+
+            relative_file_name = relative_file_name.split('/').last();
+        }
+
+        QString target_file_path;
+        if (relative_file_name.isEmpty()) {
+            target_file_path = target + '/';
+        } else {
+            target_file_path = FS::PathCombine(target_top_dir.toLocalFile(), sub_path, relative_file_name);
+            if (relative_file_name.endsWith('/') && !target_file_path.endsWith('/'))
+                target_file_path += '/';
+        }
+
+        if (!target_top_dir.isParentOf(QUrl::fromLocalFile(target_file_path))) {
+            return ZipResult(tr("Extracting %1 was cancelled, because it was effectively outside of the target path %2")
+                                 .arg(relative_file_name, target));
+        }
+
+        if (!JlCompress::extractFile(m_input.get(), "", target_file_path)) {
+            JlCompress::removeFile(extracted);
+            return ZipResult(tr("Failed to extract file %1 to %2").arg(original_name, target_file_path));
+        }
+
+        extracted.append(target_file_path);
+        auto fileInfo = QFileInfo(target_file_path);
+        if (fileInfo.isFile()) {
+            auto permissions = fileInfo.permissions();
+            auto maxPermisions = QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser | QFileDevice::Permission::ExeUser |
+                                 QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther;
+            auto minPermisions = QFileDevice::Permission::ReadUser | QFileDevice::Permission::WriteUser;
+
+            auto newPermisions = (permissions & maxPermisions) | minPermisions;
+            if (newPermisions != permissions) {
+                if (!QFile::setPermissions(target_file_path, newPermisions)) {
+                    logWarning(tr("Could not fix permissions for %1").arg(target_file_path));
+                }
+            }
+        }
+
+        qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
+    } while (m_input->goToNextFile());
+
+    return ZipResult();
+}
+
+void ExtractZipTask::finish()
+{
+    if (m_zip_future.isCanceled()) {
+        emitAborted();
+    } else if (auto result = m_zip_future.result(); result.has_value()) {
+        emitFailed(result.value());
+    } else {
+        emitSucceeded();
+    }
+}
+
+bool ExtractZipTask::abort()
+{
+    if (m_zip_future.isRunning()) {
+        m_zip_future.cancel();
+        // NOTE: Here we don't do `emitAborted()` because it will be done when `m_build_zip_future` actually cancels, which may not occur
+        // immediately.
+        return true;
+    }
+    return false;
+}
+
+#endif
 }  // namespace MMCZip
