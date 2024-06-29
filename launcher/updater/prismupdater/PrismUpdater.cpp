@@ -1020,7 +1020,7 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
     FS::write(changelog_path, m_install_release.body.toUtf8());
 
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
-    if (m_isPortable || file.suffix().toLower() == "zip") {
+    if (m_isPortable || file.fileName().endsWith(".zip") || file.fileName().endsWith(".tar.gz")) {
         write_lock_file(update_lock_path, QDateTime::currentDateTime(), m_prismVersion, m_install_release.tag_name, m_rootPath, m_dataPath);
         logUpdate(tr("Updating portable install at %1").arg(m_rootPath));
         unpackAndInstall(file);
