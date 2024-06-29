@@ -153,6 +153,11 @@
          </item>
          <item>
           <widget class="QLabel" name="orLabel">
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+            </font>
+           </property>
            <property name="text">
             <string>Or</string>
            </property>
