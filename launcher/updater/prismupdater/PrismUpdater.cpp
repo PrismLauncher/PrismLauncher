@@ -787,6 +787,10 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
     if (BuildConfig.BUILD_ARTIFACT.isEmpty())
         qWarning() << "Build platform is not set!";
     for (auto asset : release.assets) {
+        if (asset.name.endsWith("zsync")) {
+            qDebug() << "Rejecting zsync file" << asset.name;
+            continue;
+        }
         if (!m_isAppimage && asset.name.toLower().endsWith("appimage")) {
             qDebug() << "Rejecting" << asset.name << "because it is an AppImage";
             continue;
