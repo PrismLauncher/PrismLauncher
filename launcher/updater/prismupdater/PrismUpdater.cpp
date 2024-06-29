@@ -328,6 +328,9 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         adjustedBy = "Command line";
         m_dataPath = dirParam;
 #ifndef Q_OS_MACOS
+        if (QDir(FS::PathCombine(m_rootPath, "UserData")).exists()) {
+            m_isPortable = true;
+        }
         if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
             m_isPortable = true;
         }
@@ -338,7 +341,11 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         adjustedBy = "Persistent data path";
 
 #ifndef Q_OS_MACOS
-        if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
+        if (auto portableUserData = FS::PathCombine(m_rootPath, "UserData"); QDir(portableUserData).exists()) {
+            m_dataPath = portableUserData;
+            adjustedBy = "Portable user data path";
+            m_isPortable = true;
+        } else if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
             m_dataPath = m_rootPath;
             adjustedBy = "Portable data path";
             m_isPortable = true;
