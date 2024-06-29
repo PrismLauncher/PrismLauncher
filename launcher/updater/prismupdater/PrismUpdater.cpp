@@ -244,8 +244,9 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     auto updater_executable = QCoreApplication::applicationFilePath();
 
-    if (BuildConfig.BUILD_ARTIFACT.toLower() == "macos")
-        showFatalErrorMessage(tr("MacOS Not Supported"), tr("The updater does not support installations on MacOS"));
+#ifdef Q_OS_MACOS
+    showFatalErrorMessage(tr("MacOS Not Supported"), tr("The updater does not support installations on MacOS"));
+#endif
 
     if (updater_executable.startsWith("/tmp/.mount_")) {
         m_isAppimage = true;
@@ -578,12 +579,6 @@ void PrismUpdaterApp::run()
         if (need_update)
             result = callAppImageUpdate();
         return exit(result ? 0 : 1);
-    }
-
-    if (BuildConfig.BUILD_ARTIFACT.toLower() == "linux" && !m_isPortable) {
-        showFatalErrorMessage(tr("Updating Not Supported"),
-                              tr("Updating non-portable linux installations is not supported. Please use your system package manager"));
-        return;
     }
 
     if (need_update || m_forceUpdate || !m_userSelectedVersion.isEmpty()) {
@@ -1098,7 +1093,7 @@ void PrismUpdaterApp::backupAppDir()
 
     if (file_list.isEmpty()) {
         // best guess
-        if (BuildConfig.BUILD_ARTIFACT.toLower() == "linux") {
+        if (BuildConfig.BUILD_ARTIFACT.toLower().contains("linux")) {
             file_list.append({ "PrismLauncher", "bin", "share", "lib" });
         } else {  // windows by process of elimination
             file_list.append({
