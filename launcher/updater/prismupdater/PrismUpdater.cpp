@@ -332,6 +332,16 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
             m_isPortable = true;
         }
 #endif
+    } else if (auto dataDirEnv =
+                   QProcessEnvironment::systemEnvironment().value(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper()));
+               !dataDirEnv.isEmpty()) {
+        adjustedBy = "System environment";
+        m_dataPath = dataDirEnv;
+#ifndef Q_OS_MACOS
+        if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
+            m_isPortable = true;
+        }
+#endif
     } else {
         QDir foo(FS::PathCombine(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation), ".."));
         m_dataPath = foo.absolutePath();
