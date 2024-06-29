@@ -29,5 +29,5 @@ void GetSkinStep::onRequestDone()
 {
     if (m_task->error() == QNetworkReply::NoError)
         m_data->minecraftProfile.skin.data = *m_response;
-    emit finished(AccountTaskState::STATE_SUCCEEDED, tr("Got skin"));
+    emit finished(AccountTaskState::STATE_WORKING, tr("Got skin"));
 }

@@ -46,6 +46,8 @@
 MSADeviceCodeStep::MSADeviceCodeStep(AccountData* data) : AuthStep(data)
 {
     m_clientId = APPLICATION->getMSAClientID();
+    connect(&m_expiration_timer, &QTimer::timeout, this, &MSADeviceCodeStep::abort);
+    connect(&m_pool_timer, &QTimer::timeout, this, &MSADeviceCodeStep::authenticateUser);
 }
 
 QString MSADeviceCodeStep::describe()
@@ -133,9 +135,7 @@ void MSADeviceCodeStep::deviceAutorizationFinished()
     m_expiration_timer.setTimerType(Qt::VeryCoarseTimer);
     m_expiration_timer.setInterval(rsp.expires_in * 1000);
     m_expiration_timer.setSingleShot(true);
-    connect(&m_expiration_timer, &QTimer::timeout, this, &MSADeviceCodeStep::abort);
     m_expiration_timer.start();
-
     m_pool_timer.setTimerType(Qt::VeryCoarseTimer);
     m_pool_timer.setSingleShot(true);
     startPoolTimer();
@@ -157,8 +157,12 @@ void MSADeviceCodeStep::startPoolTimer()
     if (m_is_aborted) {
         return;
     }
+    if (m_expiration_timer.remainingTime() < interval * 1000) {
+        perform();
+        return;
+    }
+
     m_pool_timer.setInterval(interval * 1000);
-    connect(&m_pool_timer, &QTimer::timeout, this, &MSADeviceCodeStep::authenticateUser);
     m_pool_timer.start();
 }
 

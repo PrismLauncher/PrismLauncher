@@ -36,7 +36,7 @@ void MinecraftProfileStep::onRequestDone()
     if (m_task->error() == QNetworkReply::ContentNotFoundError) {
         // NOTE: Succeed even if we do not have a profile. This is a valid account state.
         m_data->minecraftProfile = MinecraftProfile();
-        emit finished(AccountTaskState::STATE_SUCCEEDED, tr("Account has no Minecraft profile."));
+        emit finished(AccountTaskState::STATE_WORKING, tr("Account has no Minecraft profile."));
         return;
     }
     if (m_task->error() != QNetworkReply::NoError) {
