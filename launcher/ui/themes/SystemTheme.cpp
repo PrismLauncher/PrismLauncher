@@ -43,23 +43,31 @@
 
 SystemTheme::SystemTheme()
 {
+    themeName = QObject::tr("System");
     themeDebugLog() << "Determining System Theme...";
     const auto& style = QApplication::style();
-    systemPalette = QApplication::palette();
-    QString lowerThemeName = style->objectName();
+    colorPalette = QApplication::palette();
+    QString lowerThemeName = style->name();
     themeDebugLog() << "System theme seems to be:" << lowerThemeName;
     QStringList styles = QStyleFactory::keys();
     for (auto& st : styles) {
         themeDebugLog() << "Considering theme from theme factory:" << st.toLower();
         if (st.toLower() == lowerThemeName) {
-            systemTheme = st;
-            themeDebugLog() << "System theme has been determined to be:" << systemTheme;
+            widgetTheme = st;
+            themeDebugLog() << "System theme has been determined to be:" << widgetTheme;
             return;
         }
     }
     // fall back to fusion if we can't find the current theme.
-    systemTheme = "Fusion";
+    widgetTheme = "Fusion";
     themeDebugLog() << "System theme not found, defaulted to Fusion";
+}
+
+SystemTheme::SystemTheme(QString& styleName)
+{
+    themeName = styleName;
+    widgetTheme = styleName;
+    colorPalette = QApplication::palette();
 }
 
 void SystemTheme::apply(bool initial)
@@ -76,22 +84,30 @@ void SystemTheme::apply(bool initial)
 
 QString SystemTheme::id()
 {
-    return "system";
+    return themeName;
 }
 
 QString SystemTheme::name()
 {
-    return QObject::tr("System");
+    if (themeName.toLower() == "windowsvista") {
+        return QObject::tr("Windows Vista");
+    } else if (themeName.toLower() == "windows") {
+        return QObject::tr("Windows 9x");
+    } else if (themeName.toLower() == "windows11") {
+        return QObject::tr("Windows 11");
+    } else {
+        return themeName;
+    }
 }
 
 QString SystemTheme::qtTheme()
 {
-    return systemTheme;
+    return widgetTheme;
 }
 
 QPalette SystemTheme::colorScheme()
 {
-    return systemPalette;
+    return colorPalette;
 }
 
 QString SystemTheme::appStyleSheet()

@@ -39,6 +39,7 @@
 class SystemTheme : public ITheme {
    public:
     SystemTheme();
+    explicit SystemTheme(QString& themeName);
     virtual ~SystemTheme() {}
     void apply(bool initial) override;
 
@@ -53,6 +54,7 @@ class SystemTheme : public ITheme {
     QColor fadeColor() override;
 
    private:
-    QPalette systemPalette;
-    QString systemTheme;
+    QPalette colorPalette;
+    QString widgetTheme;
+    QString themeName;
 };

@@ -23,6 +23,8 @@
 #include <QDirIterator>
 #include <QIcon>
 #include <QImageReader>
+#include <QStyleFactory>
+#include <QStyle>
 #include "Exception.h"
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CatPack.h"
@@ -119,14 +121,30 @@ void ThemeManager::initializeIcons()
 
 void ThemeManager::initializeWidgets()
 {
+    themeDebugLog() << "Determining System Widget Theme...";
+    const auto& style = QApplication::style();
+    currentlySelectedSystemTheme = style->name();
+    themeDebugLog() << "System theme seems to be:" << currentlySelectedSystemTheme;
+
     themeDebugLog() << "<> Initializing Widget Themes";
-    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
+    //themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
 
-    // TODO: need some way to differentiate same name themes in different subdirectories (maybe smaller grey text next to theme name in
-    // dropdown?)
+    themeDebugLog() << "<> Initializing System Themes";
+    QStringList styles = QStyleFactory::keys();
+    for (auto& st : styles) {
+#if Q_OS_WINDOWS
+        if (QSysInfo::productVersion() != "11" && st == "windows11") {
+            continue;
+        }
+#endif
+        themeDebugLog() << "Loading System Theme:" << addTheme(std::make_unique<SystemTheme>(st));
+    }
+
+    // TODO: need some way to differentiate same name themes in different subdirectories
+    //  (maybe smaller grey text next to theme name in dropdown?)
 
     if (!m_applicationThemeFolder.mkpath("."))
         themeWarningLog() << "Couldn't create theme folder";
@@ -238,7 +256,11 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
     auto settings = APPLICATION->settings();
     setIconTheme(settings->get("IconTheme").toString());
     themeDebugLog() << "<> Icon theme set.";
-    setApplicationTheme(settings->get("ApplicationTheme").toString(), initial);
+    auto applicationTheme = settings->get("ApplicationTheme").toString();
+    if (applicationTheme == "") {
+        applicationTheme = currentlySelectedSystemTheme;
+    }
+    setApplicationTheme(applicationTheme, initial);
     themeDebugLog() << "<> Application theme set.";
 }
 
