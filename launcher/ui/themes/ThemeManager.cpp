@@ -135,7 +135,7 @@ void ThemeManager::initializeWidgets()
     themeDebugLog() << "<> Initializing System Themes";
     QStringList styles = QStyleFactory::keys();
     for (auto& st : styles) {
-#if Q_OS_WINDOWS
+#ifdef Q_OS_WINDOWS
         if (QSysInfo::productVersion() != "11" && st == "windows11") {
             continue;
         }
