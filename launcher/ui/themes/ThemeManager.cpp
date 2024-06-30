@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 Tayou <git@tayou.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -127,12 +127,12 @@ void ThemeManager::initializeWidgets()
     themeDebugLog() << "System theme seems to be:" << currentlySelectedSystemTheme;
 
     themeDebugLog() << "<> Initializing Widget Themes";
-    // themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
 
-    themeDebugLog() << "<> Initializing System Themes";
+    themeDebugLog() << "<> Initializing System Widget Themes";
     QStringList styles = QStyleFactory::keys();
     for (auto& st : styles) {
 #ifdef Q_OS_WINDOWS
