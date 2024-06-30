@@ -123,7 +123,7 @@ void ThemeManager::initializeWidgets()
 {
     themeDebugLog() << "Determining System Widget Theme...";
     const auto& style = QApplication::style();
-    currentlySelectedSystemTheme = style->name();
+    currentlySelectedSystemTheme = style->objectName();
     themeDebugLog() << "System theme seems to be:" << currentlySelectedSystemTheme;
 
     themeDebugLog() << "<> Initializing Widget Themes";
