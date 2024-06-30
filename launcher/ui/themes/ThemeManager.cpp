@@ -23,8 +23,8 @@
 #include <QDirIterator>
 #include <QIcon>
 #include <QImageReader>
-#include <QStyleFactory>
 #include <QStyle>
+#include <QStyleFactory>
 #include "Exception.h"
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CatPack.h"
@@ -127,7 +127,7 @@ void ThemeManager::initializeWidgets()
     themeDebugLog() << "System theme seems to be:" << currentlySelectedSystemTheme;
 
     themeDebugLog() << "<> Initializing Widget Themes";
-    //themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
+    // themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
