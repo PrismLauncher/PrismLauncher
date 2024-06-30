@@ -972,6 +972,14 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     dlUrlDialod.execWithTask(job.get());
                 }
 
+            } else if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) {
+                QVariantMap receivedData;
+                const QUrlQuery query(url.query());
+                const auto items = query.queryItems();
+                for (auto it = items.begin(), end = items.end(); it != end; ++it)
+                    receivedData.insert(it->first, it->second);
+                emit APPLICATION->oauthReplyRecieved(receivedData);
+                continue;
             } else {
                 dl_url = url;
             }
