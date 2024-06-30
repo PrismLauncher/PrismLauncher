@@ -19,12 +19,13 @@
 
 #include "net/ApiUpload.h"
 #include "net/ApiHeaderProxy.h"
+#include "net/Upload.h"
 
 namespace Net {
 
-Upload::Ptr ApiUpload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
+Upload::Ptr ApiUpload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray postData)
 {
-    auto up = Upload::makeByteArray(url, output, m_post_data);
+    auto up = Upload::makeByteArray(url, output, postData);
     up->addHeaderProxy(new ApiHeaderProxy());
     return up;
 }

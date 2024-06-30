@@ -21,29 +21,17 @@
 
 #include <QDebug>
 #include <QNetworkRequest>
+#include <functional>
 
 namespace Net {
 
-struct HeaderPair {
-    QByteArray headerName;
-    QByteArray headerValue;
-};
-
 class HeaderProxy {
    public:
-    HeaderProxy() {}
-    virtual ~HeaderProxy() {}
+    HeaderProxy() = default;
+    virtual ~HeaderProxy() = default;
 
    public:
-    virtual QList<HeaderPair> headers(const QNetworkRequest& request) const = 0;
-
-   public:
-    void writeHeaders(QNetworkRequest& request)
-    {
-        for (auto header : headers(request)) {
-            request.setRawHeader(header.headerName, header.headerValue);
-        }
-    }
+    virtual void writeHeaders(QNetworkRequest& request) = 0;
 };
 
 }  // namespace Net

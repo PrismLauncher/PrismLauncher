@@ -67,8 +67,6 @@ PasteUpload::PasteUpload(QWidget* window, QString text, QString baseUrl, PasteTy
         m_uploadUrl = m_baseUrl + PasteTypes.at(pasteType).endpointPath;
 }
 
-PasteUpload::~PasteUpload() {}
-
 void PasteUpload::executeTask()
 {
     QNetworkRequest request{ QUrl(m_uploadUrl) };
@@ -231,3 +229,34 @@ void PasteUpload::downloadFinished()
     }
     emitSucceeded();
 }
+
+class PasteGGValidator : public Net::Validator {
+   public: /* con/des */
+    PasteGGValidator(QString* link) : m_link(link) {};
+    virtual ~PasteGGValidator() = default;
+
+   public: /* methods */
+    bool init(QNetworkRequest&) override { return true; }
+    bool write(QByteArray& data) override
+    {
+        m_data.append(data);
+        return true;
+    }
+    bool abort() override { return true; }
+    bool validate(QNetworkReply&) override
+    {
+        try {
+            auto doc = Json::requireDocument(m_data, fname);
+            auto obj = Json::requireObject(doc, fname);
+            m_entity->parse(obj);
+            return true;
+        } catch (const Exception& e) {
+            qWarning() << "Unable to parse response:" << e.cause();
+            return false;
+        }
+    }
+
+   private: /* data */
+    QByteArray m_data;
+    QString* m_link;
+};

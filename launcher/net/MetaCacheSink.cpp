@@ -129,9 +129,4 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
     return Task::State::Succeeded;
 }
 
-bool MetaCacheSink::hasLocalData()
-{
-    QFileInfo info(m_filename);
-    return info.exists() && info.size() != 0;
-}
 }  // namespace Net

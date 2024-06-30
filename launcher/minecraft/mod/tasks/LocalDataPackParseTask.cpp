@@ -24,6 +24,7 @@
 #include "FileSystem.h"
 #include "Json.h"
 
+#include <qloggingcategory.h>
 #include <quazip/quazip.h>
 #include <quazip/quazipdir.h>
 #include <quazip/quazipfile.h>
@@ -157,21 +158,15 @@ bool validate(QFileInfo file)
 
 }  // namespace DataPackUtils
 
-LocalDataPackParseTask::LocalDataPackParseTask(int token, DataPack& dp) : Task(nullptr, false), m_token(token), m_data_pack(dp) {}
-
-bool LocalDataPackParseTask::abort()
-{
-    m_aborted = true;
-    return true;
-}
+LocalDataPackParseTask::LocalDataPackParseTask(int token, DataPack& dp)
+    : TaskV2(nullptr, "launcher.task", QtMsgType::QtWarningMsg), m_token(token), m_data_pack(dp)
+{}
 
 void LocalDataPackParseTask::executeTask()
 {
-    if (!DataPackUtils::process(m_data_pack))
-        return;
-
-    if (m_aborted)
-        emitAborted();
-    else
+    if (!DataPackUtils::process(m_data_pack)) {
+        emitFailed("failed to process data pack");
+    } else {
         emitSucceeded();
+    }
 }

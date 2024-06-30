@@ -26,13 +26,23 @@
 
 namespace Net {
 
+struct HeaderPair {
+    QByteArray headerName;
+    QByteArray headerValue;
+};
+
 class RawHeaderProxy : public HeaderProxy {
    public:
-    RawHeaderProxy(QList<HeaderPair> headers = {}) : HeaderProxy(), m_headers(headers) {};
+    RawHeaderProxy(QList<HeaderPair> headers = {}) : HeaderProxy(), m_headers(headers){};
     virtual ~RawHeaderProxy() = default;
 
    public:
-    virtual QList<HeaderPair> headers(const QNetworkRequest&) const override { return m_headers; };
+    virtual void writeHeaders(QNetworkRequest& request) override
+    {
+        for (auto hdr : m_headers) {
+            request.setRawHeader(hdr.headerName, hdr.headerValue);
+        }
+    }
 
     void addHeader(const HeaderPair& header) { m_headers.append(header); }
     void addHeader(const QByteArray& headerName, const QByteArray& headerValue) { m_headers.append({ headerName, headerValue }); }

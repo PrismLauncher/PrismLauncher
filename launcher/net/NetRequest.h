@@ -53,10 +53,10 @@
 #include "tasks/Task.h"
 
 namespace Net {
-class NetRequest : public Task {
+class NetRequest : public TaskV2 {
     Q_OBJECT
    protected:
-    explicit NetRequest() : Task() {}
+    explicit NetRequest() : TaskV2() { setCapabilities(State::AbortedByUser); }
 
    public:
     using Ptr = shared_qobject_ptr<class NetRequest>;
@@ -64,10 +64,8 @@ class NetRequest : public Task {
     Q_DECLARE_FLAGS(Options, Option)
 
    public:
-    ~NetRequest() override = default;
+    ~NetRequest() = default;
     void addValidator(Validator* v);
-    auto abort() -> bool override;
-    auto canAbort() const -> bool override { return true; }
 
     void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
     void addHeaderProxy(Net::HeaderProxy* proxy) { m_headerProxies.push_back(std::shared_ptr<Net::HeaderProxy>(proxy)); }
@@ -79,16 +77,20 @@ class NetRequest : public Task {
     QString errorString() const;
 
    private:
-    auto handleRedirect() -> bool;
+    bool handleRedirect();
     virtual QNetworkReply* getReply(QNetworkRequest&) = 0;
 
    protected slots:
+    bool doAbort() override;
+    bool doPause() override;
+    bool doResume() override;
     void onProgress(qint64 bytesReceived, qint64 bytesTotal);
     void downloadError(QNetworkReply::NetworkError error);
     void sslErrors(const QList<QSslError>& errors);
     void downloadFinished();
     void downloadReadyRead();
     void executeTask() override;
+    void emitFailed(QString reason) override;
 
    protected:
     std::unique_ptr<Sink> m_sink;
@@ -109,6 +111,9 @@ class NetRequest : public Task {
     /// source URL
     QUrl m_url;
     std::vector<std::shared_ptr<Net::HeaderProxy>> m_headerProxies;
+
+   private:
+    int m_try = 1;
 };
 }  // namespace Net
 

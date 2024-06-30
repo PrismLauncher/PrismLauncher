@@ -68,7 +68,7 @@ class PasteUpload : public Task {
     static std::array<PasteTypeInfo, 4> PasteTypes;
 
     PasteUpload(QWidget* window, QString text, QString url, PasteType pasteType);
-    virtual ~PasteUpload();
+    virtual ~PasteUpload() = default;
 
     QString pasteLink() { return m_pasteLink; }
 

@@ -47,8 +47,9 @@
 
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
-#endif
+#else
 #include "BuildConfig.h"
+#endif
 
 #include "MMCTime.h"
 #include "StringUtils.h"
@@ -64,33 +65,30 @@ void NetRequest::executeTask()
 {
     setStatus(tr("Requesting %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
-    if (getState() == Task::State::AbortedByUser) {
-        qCWarning(logCat) << getUid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
-        emit aborted();
-        emit finished();
+    if (state() == TaskV2::State::AbortedByUser) {
+        qCWarning(logCat) << uuid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
         return;
     }
 
     QNetworkRequest request(m_url);
-    m_state = m_sink->init(request);
-    switch (m_state) {
+    switch (m_sink->init(request)) {
         case State::Succeeded:
-            qCDebug(logCat) << getUid().toString() << "Request cache hit " << m_url.toString();
-            emit succeeded();
-            emit finished();
+            qCDebug(logCat) << uuid().toString() << "Request cache hit " << m_url.toString();
+            emitSucceeded();
             return;
         case State::Running:
-            qCDebug(logCat) << getUid().toString() << "Runninng " << m_url.toString();
+            qCDebug(logCat) << uuid().toString() << "Runninng " << m_url.toString();
             break;
         case State::Inactive:
         case State::Failed:
-            emit failed("Failed to initilize sink");
-            emit finished();
+            emitFailed("Failed to initilize sink");
             return;
         case State::AbortedByUser:
-            emit aborted();
-            emit finished();
+            emitFailed("Aborted");
             return;
+        case TaskV2::Paused:
+        case TaskV2::Finished:
+            break;
     }
 
 #if defined(LAUNCHER_APPLICATION)
@@ -157,27 +155,27 @@ void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
     }
 
     setDetails(dl_progress + "\n" + dl_speed_str);
-
-    setProgress(bytesReceived, bytesTotal);
+    setProgressTotal(bytesTotal);
+    setProgress(bytesReceived);
 }
 
 void NetRequest::downloadError(QNetworkReply::NetworkError error)
 {
     if (error == QNetworkReply::OperationCanceledError) {
-        qCCritical(logCat) << getUid().toString() << "Aborted " << m_url.toString();
-        m_state = State::Failed;
+        qCCritical(logCat) << uuid().toString() << "Aborted " << m_url.toString();
+        emitFailed("Aborted");
     } else {
         if (m_options & Option::AcceptLocalFiles) {
             if (m_sink->hasLocalData()) {
-                m_state = State::Succeeded;
+                emitSucceeded();
                 return;
             }
         }
         // error happened during download.
-        qCCritical(logCat) << getUid().toString() << "Failed" << m_url.toString() << "with reason" << error;
+        qCCritical(logCat) << uuid().toString() << "Failed" << m_url.toString() << "with reason" << error;
         if (m_reply)
-            qCCritical(logCat) << getUid().toString() << "HTTP Status" << replyStatusCode() << ";error" << errorString();
-        m_state = State::Failed;
+            qCCritical(logCat) << uuid().toString() << "HTTP Status" << replyStatusCode() << ";error" << errorString();
+        emitFailed(errorString());
     }
 }
 
@@ -185,9 +183,9 @@ void NetRequest::sslErrors(const QList<QSslError>& errors)
 {
     int i = 1;
     for (auto error : errors) {
-        qCCritical(logCat) << getUid().toString() << "Request" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
+        qCCritical(logCat) << uuid().toString() << "Request" << m_url.toString() << "SSL Error #" << i << " : " << error.errorString();
         auto cert = error.certificate();
-        qCCritical(logCat) << getUid().toString() << "Certificate in question:\n" << cert.toText();
+        qCCritical(logCat) << uuid().toString() << "Certificate in question:\n" << cert.toText();
         i++;
     }
 }
@@ -230,17 +228,17 @@ auto NetRequest::handleRedirect() -> bool
          */
         redirect = QUrl(redirectStr, QUrl::TolerantMode);
         if (!redirect.isValid()) {
-            qCWarning(logCat) << getUid().toString() << "Failed to parse redirect URL:" << redirectStr;
+            qCWarning(logCat) << uuid().toString() << "Failed to parse redirect URL:" << redirectStr;
             downloadError(QNetworkReply::ProtocolFailure);
             return false;
         }
-        qCDebug(logCat) << getUid().toString() << "Fixed location header:" << redirect;
+        qCDebug(logCat) << uuid().toString() << "Fixed location header:" << redirect;
     } else {
-        qCDebug(logCat) << getUid().toString() << "Location header:" << redirect;
+        qCDebug(logCat) << uuid().toString() << "Location header:" << redirect;
     }
 
     m_url = QUrl(redirect.toString());
-    qCDebug(logCat) << getUid().toString() << "Following redirect to " << m_url.toString();
+    qCDebug(logCat) << uuid().toString() << "Following redirect to " << m_url.toString();
     executeTask();
 
     return true;
@@ -250,78 +248,65 @@ void NetRequest::downloadFinished()
 {
     // handle HTTP redirection first
     if (handleRedirect()) {
-        qCDebug(logCat) << getUid().toString() << "Request redirected:" << m_url.toString();
+        qCDebug(logCat) << uuid().toString() << "Request redirected:" << m_url.toString();
         return;
     }
 
     // if the download failed before this point ...
-    if (m_state == State::Succeeded)  // pretend to succeed so we continue processing :)
+    if (state() == State::Succeeded)  // pretend to succeed so we continue processing :)
     {
-        qCDebug(logCat) << getUid().toString() << "Request failed but we are allowed to proceed:" << m_url.toString();
+        qCDebug(logCat) << uuid().toString() << "Request failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
-        emit succeeded();
-        emit finished();
         return;
-    } else if (m_state == State::Failed) {
-        qCDebug(logCat) << getUid().toString() << "Request failed in previous step:" << m_url.toString();
+    } else if (state() == State::Failed) {
+        qCDebug(logCat) << uuid().toString() << "Request failed in previous step:" << m_url.toString();
         m_sink->abort();
-        emit failed(m_reply->errorString());
-        emit finished();
         return;
-    } else if (m_state == State::AbortedByUser) {
-        qCDebug(logCat) << getUid().toString() << "Request aborted in previous step:" << m_url.toString();
+    } else if (state() == State::AbortedByUser) {
+        qCDebug(logCat) << uuid().toString() << "Request aborted in previous step:" << m_url.toString();
         m_sink->abort();
-        emit aborted();
-        emit finished();
         return;
     }
 
     // make sure we got all the remaining data, if any
     auto data = m_reply->readAll();
     if (data.size()) {
-        qCDebug(logCat) << getUid().toString() << "Writing extra" << data.size() << "bytes";
-        m_state = m_sink->write(data);
-        if (m_state != State::Succeeded) {
-            qCDebug(logCat) << getUid().toString() << "Request failed to write:" << m_url.toString();
+        qCDebug(logCat) << uuid().toString() << "Writing extra" << data.size() << "bytes";
+        if (m_sink->write(data) != State::Succeeded) {
+            qCDebug(logCat) << uuid().toString() << "Request failed to write:" << m_url.toString();
             m_sink->abort();
-            emit failed("failed to write in sink");
-            emit finished();
+            emitFailed("failed to write in sink");
             return;
         }
     }
 
     // otherwise, finalize the whole graph
-    m_state = m_sink->finalize(*m_reply.get());
-    if (m_state != State::Succeeded) {
-        qCDebug(logCat) << getUid().toString() << "Request failed to finalize:" << m_url.toString();
+    if (m_sink->finalize(*m_reply.get()) != State::Succeeded) {
+        qCDebug(logCat) << uuid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
-        emit failed("failed to finalize the request");
-        emit finished();
+        emitFailed("failed to finalize the request");
         return;
     }
 
-    qCDebug(logCat) << getUid().toString() << "Request succeeded:" << m_url.toString();
-    emit succeeded();
-    emit finished();
+    qCDebug(logCat) << uuid().toString() << "Request succeeded:" << m_url.toString();
+    emitSucceeded();
 }
 
 void NetRequest::downloadReadyRead()
 {
-    if (m_state == State::Running) {
+    if (state() == State::Running) {
         auto data = m_reply->readAll();
-        m_state = m_sink->write(data);
-        if (m_state == State::Failed) {
-            qCCritical(logCat) << getUid().toString() << "Failed to process response chunk";
+        if (m_sink->write(data) == State::Failed) {
+            qCCritical(logCat) << uuid().toString() << "Failed to process response chunk";
         }
         // qDebug() << "Request" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {
-        qCCritical(logCat) << getUid().toString() << "Cannot write download data! illegal status " << m_status;
+        qCCritical(logCat) << uuid().toString() << "Cannot write download data! illegal status " << state();
     }
 }
 
-auto NetRequest::abort() -> bool
+auto NetRequest::doAbort() -> bool
 {
-    m_state = State::AbortedByUser;
     if (m_reply) {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
         disconnect(m_reply.get(), &QNetworkReply::errorOccurred, nullptr, nullptr);
@@ -351,5 +336,25 @@ QUrl NetRequest::url() const
 QString NetRequest::errorString() const
 {
     return m_reply ? m_reply->errorString() : "";
+}
+
+bool NetRequest::doPause()
+{
+    return false;
+}
+
+bool NetRequest::doResume()
+{
+    return false;
+}
+
+void NetRequest::emitFailed(QString reason)
+{
+    if (m_try < 3) {
+        m_try++;
+        executeTask();
+        return;
+    }
+    TaskV2::emitFailed(reason);
 }
 }  // namespace Net

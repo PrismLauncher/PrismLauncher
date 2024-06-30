@@ -3,6 +3,7 @@
  *  PrismLauncher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (c) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,159 +37,263 @@
 
 #pragma once
 
+#include <qobject.h>
+#include <QDebug>
 #include <QLoggingCategory>
 #include <QRunnable>
 #include <QUuid>
+#include <memory>
 
 #include "QObjectPtr.h"
 
 Q_DECLARE_LOGGING_CATEGORY(taskLogC)
-
-enum class TaskStepState { Waiting, Running, Failed, Succeeded };
-
-Q_DECLARE_METATYPE(TaskStepState)
-
-struct TaskStepProgress {
-    QUuid uid;
-    qint64 current = 0;
-    qint64 total = -1;
-
-    qint64 old_current = 0;
-    qint64 old_total = -1;
-
-    QString status = "";
-    QString details = "";
-    TaskStepState state = TaskStepState::Waiting;
-
-    TaskStepProgress() { this->uid = QUuid::createUuid(); }
-    TaskStepProgress(QUuid uid_) : uid(uid_) {}
-
-    bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
-    void update(qint64 new_current, qint64 new_total)
-    {
-        this->old_current = this->current;
-        this->old_total = this->total;
-
-        this->current = new_current;
-        this->total = new_total;
-        this->state = TaskStepState::Running;
-    }
-};
-
-Q_DECLARE_METATYPE(TaskStepProgress)
-
-using TaskStepProgressList = QList<std::shared_ptr<TaskStepProgress>>;
-
-class Task : public QObject, public QRunnable {
+class TaskV2 : public QObject, public QRunnable {
     Q_OBJECT
    public:
-    using Ptr = shared_qobject_ptr<Task>;
+    using Ptr = shared_qobject_ptr<TaskV2>;
 
-    enum class State { Inactive, Running, Succeeded, Failed, AbortedByUser };
+    enum State {
+        Inactive = 0,
+        Running = 1 << 0,
+        Paused = 1 << 1,
+        Succeeded = 1 << 2,
+        Failed = 1 << 3,
+        AbortedByUser = 1 << 4,
+        Finished = Succeeded | Failed | AbortedByUser,
+    };
+
+    Q_ENUM(State)
+    Q_DECLARE_FLAGS(Capabilities, State)
+    Q_FLAG(Capabilities)
 
    public:
-    explicit Task(QObject* parent = 0, bool show_debug_log = true);
-    virtual ~Task() = default;
+    explicit TaskV2(QObject* parent = nullptr, const char* categoryName = "launcher.task", QtMsgType enableForLevel = QtDebugMsg)
+        : QObject(parent), m_uuid(QUuid::createUuid()), m_log_cat(categoryName, enableForLevel)
+    {
+        setAutoDelete(false);
+    }
+    virtual ~TaskV2()
+    {
+        if (!isFinished()) {
+            emit finished(this);
+        }
+    };
 
-    bool isRunning() const;
-    bool isFinished() const;
-    bool wasSuccessful() const;
+    // properties
+   public:
+    QUuid uuid() const { return m_uuid; }
+    State state() const { return m_state; }
+    QString failReason() const { return m_fail_reason; }
+    QStringList warnings() const { return m_warnings; }
+    QString status() const { return m_status; }
+    QString details() const { return m_details; }
+    QString title() const { return m_title; }
+    double progress() const { return m_progress; }
+    double progressTotal() const { return m_progressTotal; }
 
-    /*!
-     * MultiStep tasks are combinations of multiple tasks into a single logical task.
-     * The main usage of this is in SequencialTask.
-     */
-    virtual auto isMultiStep() const -> bool { return false; }
+    Capabilities capabilities() const { return m_capabilities; }
+    void setCapabilities(Capabilities capabilities) { m_capabilities = capabilities; }
 
-    /*!
-     * Returns the string that was passed to emitFailed as the error message when the task failed.
-     * If the task hasn't failed, returns an empty string.
-     */
-    QString failReason() const;
+    bool isRunning() const { return m_state & State::Running; }
+    bool isFinished() const { return m_state & State::Finished; }
+    bool isPaused() const { return m_state & State::Paused; }
+    virtual bool isMultiStep() const { return false; }
 
-    virtual QStringList warnings() const;
+    virtual QList<Ptr> subTasks() const { return {}; }
 
-    virtual bool canAbort() const { return m_can_abort; }
+    // methods
+   public:
+    friend QDebug operator<<(QDebug debug, const TaskV2* v)
+    {
+        QDebugStateSaver saver(debug);
 
-    auto getState() const -> State { return m_state; }
+        debug.nospace() << v->metaObject()->className() << QChar('(');
+        auto name = v->objectName();
+        if (name.isEmpty()) {
+            debug.nospace() << QString("0x%1").arg(reinterpret_cast<quintptr>(v), 0, 16);
+        } else {
+            debug.nospace() << name;
+        }
+        debug.nospace() << " ID: " << v->uuid().toString(QUuid::WithoutBraces);
+        debug.nospace() << QChar(')');
 
-    QString getStatus() { return m_status; }
-    QString getDetails() { return m_details; }
-
-    qint64 getProgress() { return m_progress; }
-    qint64 getTotalProgress() { return m_progressTotal; }
-    virtual auto getStepProgress() const -> TaskStepProgressList { return {}; }
-
-    QUuid getUid() { return m_uid; }
-
-   protected:
-    void logWarning(const QString& line);
-
-   private:
-    QString describe();
+        return debug;
+    }
+    TaskV2* parentTask() { return dynamic_cast<TaskV2*>(parent()); }
 
    signals:
-    void started();
-    void progress(qint64 current, qint64 total);
-    void finished();
-    void succeeded();
-    void aborted();
-    void failed(QString reason);
-    void status(QString status);
-    void details(QString details);
-    void stepProgress(TaskStepProgress const& task_progress);
-
-    /** Emitted when the canAbort() status has changed.
-     */
-    void abortStatusChanged(bool can_abort);
+    void started(TaskV2* job);
+    void finished(TaskV2* job);
+    void resumed(TaskV2* job);
+    void paused(TaskV2* job);
+    void totalChanged(TaskV2* job, double total, double delta);
+    void processedChanged(TaskV2* job, double current, double delta);
+    void stateChanged(TaskV2* job);
+    void warning(TaskV2* job, const QString& message);
+    void subTaskAdded(TaskV2* job, TaskV2* subTask);
+    void subTaskRemoved(TaskV2* job, TaskV2* subTask);
 
    public slots:
     // QRunnable's interface
     void run() override { start(); }
 
-    virtual void start();
-    virtual bool abort()
+    bool start()
     {
-        if (canAbort())
-            emitAborted();
-        return canAbort();
+        switch (m_state) {
+            case State::Inactive: {
+                qCDebug(m_log_cat) << this << "starting for the first time";
+                break;
+            }
+            case State::AbortedByUser: {
+                qCDebug(m_log_cat) << this << "restarting for after being aborted by user";
+                break;
+            }
+            case State::Failed: {
+                qCDebug(m_log_cat) << this << "restarting for after failing at first";
+                break;
+            }
+            case State::Succeeded: {
+                qCDebug(m_log_cat) << this << "restarting for after succeeding at first";
+                break;
+            }
+            case State::Running: {
+                qCWarning(m_log_cat) << "The launcher tried to start " << this << "while it was already running!";
+                return false;
+            }
+            case Paused: {
+                qCWarning(m_log_cat) << "The launcher tried to start " << this << "while it was paused!";
+                resume();
+                return false;
+            }
+            case Finished:
+                break;
+        }
+        // NOTE: only fall through to here in end states
+        setState(State::Running);
+        m_warnings.clear();
+        m_fail_reason.clear();
+        emit started(this);
+        QMetaObject::invokeMethod(this, &TaskV2::executeTask, Qt::QueuedConnection);
+        return true;
     }
 
-    void setAbortable(bool can_abort)
-    {
-        m_can_abort = can_abort;
-        emit abortStatusChanged(can_abort);
+    bool pause()
+    {  // Don't pause twice.
+        if (!isRunning()) {
+            qCCritical(m_log_cat) << this << "paused while not running!!!!";
+            return false;
+        }
+        if (doPause()) {
+            setState(State::Paused);
+            emit paused(this);
+            return true;
+        }
+        return false;
+    }
+    bool resume()
+    {  // Don't resume twice.
+        if (!isPaused()) {
+            qCCritical(m_log_cat) << this << "resumed while not paused!!!!";
+            return false;
+        }
+        if (doResume()) {
+            setState(State::Running);
+            emit resumed(this);
+            return true;
+        }
+        return false;
+    }
+    bool abort()
+    {  // Don't abort twice.
+        if (!isRunning() && !isPaused()) {
+            qCCritical(m_log_cat) << this << "aborted while not running!!!!";
+            return false;
+        }
+        if (doAbort()) {
+            setState(State::AbortedByUser);
+            m_fail_reason = "Aborted.";
+            qCDebug(m_log_cat) << this << "aborted.";
+            emit finished(this);
+            return true;
+        }
+        return false;
     }
 
    protected:
-    virtual void executeTask() = 0;
+    Q_INVOKABLE virtual void executeTask() = 0;
 
    protected slots:
-    virtual void emitSucceeded();
-    virtual void emitAborted();
-    virtual void emitFailed(QString reason = "");
+    virtual void emitFailed(QString reason)
+    {
+        // Don't fail twice.
+        if (!isRunning()) {
+            qCCritical(m_log_cat) << this << "failed while not running!!!!: " << reason;
+            return;
+        }
+        setState(State::Failed);
+        m_fail_reason = reason;
+        qCCritical(m_log_cat) << this << "failed: " << reason;
+        emit finished(this);
+    }
 
-    virtual void propagateStepProgress(TaskStepProgress const& task_progress);
+    void emitSucceeded()
+    {
+        // Don't succeed twice.
+        if (!isRunning()) {
+            qCCritical(m_log_cat) << this << "succeeded while not running!!!!";
+            return;
+        }
+        setState(State::Succeeded);
+        qCDebug(m_log_cat) << this << "succeeded";
+        emit finished(this);
+    }
 
-   public slots:
-    void setStatus(const QString& status);
-    void setDetails(const QString& details);
-    void setProgress(qint64 current, qint64 total);
+    virtual bool doAbort() { return false; }
+    virtual bool doPause() { return false; }
+    virtual bool doResume() { return false; }
+
+    void addWarnings(const QString& msg)
+    {
+        qWarning(m_log_cat) << msg;
+        m_warnings.push_back(msg);
+        emit warning(this, msg);
+    }
+    void addWarnings(QStringList warnings) { m_warnings.append(warnings); }
 
    protected:
-    State m_state = State::Inactive;
-    QStringList m_Warnings;
-    QString m_failReason = "";
-    QString m_status;
-    QString m_details;
-    int m_progress = 0;
-    int m_progressTotal = 100;
+#define SET_FIELD(field, newValue, signal) \
+    if (field != newValue) {               \
+        field = newValue;                  \
+        emit signal;                       \
+    }
+    void setStatus(const QString& status) { SET_FIELD(m_status, status, stateChanged(this)); }
+    void setDetails(const QString& details) { SET_FIELD(m_details, details, stateChanged(this)); }
+    void setTitle(const QString& title) { SET_FIELD(m_title, title, stateChanged(this)); }
+    void setState(State state) { SET_FIELD(m_state, state, stateChanged(this)); }
+    void setProgress(double progress)
+    {
+        auto delta = progress - m_progress;
+        SET_FIELD(m_progress, progress, processedChanged(this, m_progress, delta));
+    }
+    void setProgressTotal(double progressTotal)
+    {
+        auto delta = progressTotal - m_progressTotal;
+        SET_FIELD(m_progressTotal, progressTotal, totalChanged(this, m_progressTotal, delta));
+    }
 
-    // TODO: Nuke in favor of QLoggingCategory
-    bool m_show_debug = true;
-
+   protected:
    private:
-    // Change using setAbortStatus
-    bool m_can_abort = false;
-    QUuid m_uid;
+    const QUuid m_uuid;
+    const QLoggingCategory m_log_cat;
+
+    Capabilities m_capabilities;
+
+    State m_state = State::Inactive;
+    QString m_fail_reason = {};
+    QStringList m_warnings = {};
+    QString m_status = {};
+    QString m_details = {};
+    QString m_title = {};
+    double m_progress = 0;
+    double m_progressTotal = 100;
 };

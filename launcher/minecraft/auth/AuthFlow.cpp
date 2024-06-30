@@ -19,13 +19,12 @@
 
 #include <Application.h>
 
-AuthFlow::AuthFlow(AccountData* data, Action action, QObject* parent) : Task(parent), m_data(data)
+AuthFlow::AuthFlow(AccountData* data, Action action, QObject* parent) : TaskV2(parent), m_data(data)
 {
     if (data->type == AccountType::MSA) {
         if (action == Action::DeviceCode) {
             auto oauthStep = makeShared<MSADeviceCodeStep>(m_data);
             connect(oauthStep.get(), &MSADeviceCodeStep::authorizeWithBrowser, this, &AuthFlow::authorizeWithBrowserWithExtra);
-            connect(this, &Task::aborted, oauthStep.get(), &MSADeviceCodeStep::abort);
             m_steps.append(oauthStep);
         } else {
             auto oauthStep = makeShared<MSAStep>(m_data, action == Action::Refresh);
@@ -59,7 +58,7 @@ void AuthFlow::executeTask()
 
 void AuthFlow::nextStep()
 {
-    if (!Task::isRunning()) {
+    if (!isRunning()) {
         return;
     }
     if (m_steps.size() == 0) {
@@ -147,9 +146,9 @@ bool AuthFlow::changeState(AccountTaskState newState, QString reason)
         }
     }
 }
-bool AuthFlow::abort()
+
+bool AuthFlow::doAbort()
 {
-    emitAborted();
     if (m_currentStep)
         m_currentStep->abort();
     return true;

@@ -47,6 +47,7 @@
 
 #include <BaseInstance.h>
 
+#include "minecraft/auth/MinecraftAccount.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
 
 class LaunchController;

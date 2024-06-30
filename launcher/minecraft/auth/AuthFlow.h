@@ -11,7 +11,7 @@
 #include "minecraft/auth/AuthStep.h"
 #include "tasks/Task.h"
 
-class AuthFlow : public Task {
+class AuthFlow : public TaskV2 {
     Q_OBJECT
 
    public:
@@ -20,12 +20,7 @@ class AuthFlow : public Task {
     explicit AuthFlow(AccountData* data, Action action = Action::Refresh, QObject* parent = 0);
     virtual ~AuthFlow() = default;
 
-    void executeTask() override;
-
     AccountTaskState taskState() { return m_taskState; }
-
-   public slots:
-    bool abort() override;
 
    signals:
     void authorizeWithBrowser(const QUrl& url);
@@ -34,11 +29,13 @@ class AuthFlow : public Task {
    protected:
     void succeed();
     void nextStep();
+    void executeTask() override;
 
    private slots:
     // NOTE: true -> non-terminal state, false -> terminal state
     bool changeState(AccountTaskState newState, QString reason = QString());
     void stepFinished(AccountTaskState resultingState, QString message);
+    bool doAbort() override;
 
    private:
     AccountTaskState m_taskState = AccountTaskState::STATE_CREATED;

@@ -16,7 +16,7 @@ DataMigrationTask::DataMigrationTask(QObject* parent,
                                      const QString& sourcePath,
                                      const QString& targetPath,
                                      const IPathMatcher::Ptr pathMatcher)
-    : Task(parent), m_sourcePath(sourcePath), m_targetPath(targetPath), m_pathMatcher(pathMatcher), m_copy(sourcePath, targetPath)
+    : TaskV2(parent), m_sourcePath(sourcePath), m_targetPath(targetPath), m_pathMatcher(pathMatcher), m_copy(sourcePath, targetPath)
 {
     m_copy.matcher(m_pathMatcher.get()).whitelist(true);
 }
@@ -51,13 +51,13 @@ void DataMigrationTask::dryRunFinished()
 
     // 2. Copy
     // Actually copy all files now.
-    m_toCopy = m_copy.totalCopied();
+    setProgressTotal(m_copy.totalCopied());
     connect(&m_copy, &FS::copy::fileCopied, [&, this](const QString& relativeName) {
         QString shortenedName = relativeName;
         // shorten the filename to hopefully fit into one line
         if (shortenedName.length() > 50)
             shortenedName = relativeName.left(20) + "…" + relativeName.right(29);
-        setProgress(m_copy.totalCopied(), m_toCopy);
+        setProgress(m_copy.totalCopied());
         setStatus(tr("Copying %1…").arg(shortenedName));
     });
     m_copyFuture = QtConcurrent::run(QThreadPool::globalInstance(), [&] {

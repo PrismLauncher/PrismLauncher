@@ -46,43 +46,46 @@ namespace Net {
 class ByteArraySink : public Sink {
    public:
     ByteArraySink(std::shared_ptr<QByteArray> output) : m_output(output) {};
-
     virtual ~ByteArraySink() = default;
 
    public:
-    auto init(QNetworkRequest& request) -> Task::State override
+    State init(QNetworkRequest& request) override
     {
         if (m_output)
             m_output->clear();
         else
             qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
         if (initAllValidators(request))
-            return Task::State::Running;
-        return Task::State::Failed;
+            return State::OK;
+        m_fail_reason = "failed to init validators";
+        return State::Failed;
     };
 
-    auto write(QByteArray& data) -> Task::State override
+    State write(QByteArray& data) override
     {
         if (m_output)
             m_output->append(data);
         else
             qWarning() << "ByteArraySink did not write the buffer because it's not addressable";
         if (writeAllValidators(data))
-            return Task::State::Running;
-        return Task::State::Failed;
+            return State::OK;
+        m_fail_reason = "failed to write validators";
+        return State::Failed;
     }
 
-    auto abort() -> Task::State override
+    State abort() override
     {
         failAllValidators();
-        return Task::State::Failed;
+        m_fail_reason = "Aborted";
+        return State::Failed;
     }
 
-    auto finalize(QNetworkReply& reply) -> Task::State override
+    State finalize(QNetworkReply& reply) override
     {
         if (finalizeAllValidators(reply))
-            return Task::State::Succeeded;
-        return Task::State::Failed;
+            return State::Succeeded;
+        m_fail_reason = "failed to finalize validators";
+        return State::Failed;
     }
 
     auto hasLocalData() -> bool override { return false; }

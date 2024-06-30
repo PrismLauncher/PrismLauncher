@@ -6,8 +6,6 @@ project(application)
 
 set(CORE_SOURCES
     # LOGIC - Base classes and infrastructure
-    BaseInstaller.h
-    BaseInstaller.cpp
     BaseVersionList.h
     BaseVersionList.cpp
     InstanceList.h
@@ -131,8 +129,8 @@ set(NET_SOURCES
     net/NetUtils.h
     net/PasteUpload.cpp
     net/PasteUpload.h
-    net/Sink.h
-    net/Validator.h
+    net/sinks/Sink.h
+    net/validators/Validator.h
     net/Upload.cpp
     net/Upload.h
     net/HeaderProxy.h
@@ -626,8 +624,8 @@ set(PRISMUPDATER_SOURCES
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
-    net/Sink.h
-    net/Validator.h
+    net/sinks/Sink.h
+    net/validators/Validator.h
     net/HeaderProxy.h
     net/RawHeaderProxy.h
 

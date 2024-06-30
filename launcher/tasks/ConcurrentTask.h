@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (c) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,14 +37,14 @@
 #pragma once
 
 #include <QHash>
+#include <QList>
 #include <QQueue>
 #include <QSet>
 #include <QUuid>
-#include <memory>
 
 #include "tasks/Task.h"
 
-class ConcurrentTask : public Task {
+class ConcurrentTask : public TaskV2 {
     Q_OBJECT
    public:
     using Ptr = shared_qobject_ptr<ConcurrentTask>;
@@ -54,15 +55,12 @@ class ConcurrentTask : public Task {
     // safe to call before starting the task
     void setMaxConcurrent(int max_concurrent) { m_total_max_size = max_concurrent; }
 
-    bool canAbort() const override { return true; }
+    inline bool isMultiStep() const override { return totalSize() > 1; }
+    virtual QList<TaskV2::Ptr> subTasks() const override { return m_queue.toList() + m_doing.values() + m_done.values(); }
 
-    inline auto isMultiStep() const -> bool override { return totalSize() > 1; }
-    auto getStepProgress() const -> TaskStepProgressList override;
-
-    void addTask(Task::Ptr task);
+    void addTask(TaskV2::Ptr task);
 
    public slots:
-    bool abort() override;
 
     /** Resets the internal state of the task.
      *  This allows the same task to be re-used.
@@ -71,43 +69,30 @@ class ConcurrentTask : public Task {
 
    protected slots:
     void executeTask() override;
+    bool doAbort() override;
+    bool doPause() override;
+    bool doResume() override;
 
     virtual void executeNextSubTask();
-
-    void subTaskSucceeded(Task::Ptr);
-    virtual void subTaskFailed(Task::Ptr, const QString& msg);
-    void subTaskFinished(Task::Ptr, TaskStepState);
-    void subTaskStatus(Task::Ptr task, const QString& msg);
-    void subTaskDetails(Task::Ptr task, const QString& msg);
-    void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
-    void subTaskStepProgress(Task::Ptr task, TaskStepProgress const& task_step_progress);
+    virtual void subTaskFinished(TaskV2*);
 
    protected:
     // NOTE: This is not thread-safe.
     [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
 
-    enum class Operation { ADDED, REMOVED, CHANGED };
-    void updateStepProgress(TaskStepProgress const& changed_progress, Operation);
-
     virtual void updateState();
 
-    void startSubTask(Task::Ptr task);
+    void startSubTask(TaskV2::Ptr task);
 
    protected:
-    QString m_name;
     QString m_step_status;
 
-    QQueue<Task::Ptr> m_queue;
+    QQueue<TaskV2::Ptr> m_queue;
 
-    QHash<Task*, Task::Ptr> m_doing;
-    QHash<Task*, Task::Ptr> m_done;
-    QHash<Task*, Task::Ptr> m_failed;
-    QHash<Task*, Task::Ptr> m_succeeded;
-
-    QHash<QUuid, std::shared_ptr<TaskStepProgress>> m_task_progress;
+    QHash<QUuid, TaskV2::Ptr> m_doing;
+    QHash<QUuid, TaskV2::Ptr> m_done;
+    QHash<QUuid, TaskV2::Ptr> m_failed;
+    QHash<QUuid, TaskV2::Ptr> m_succeeded;
 
     int m_total_max_size;
-
-    qint64 m_stepProgress = 0;
-    qint64 m_stepTotalProgress = 100;
 };

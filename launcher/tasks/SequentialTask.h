@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (c) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -51,8 +52,5 @@ class SequentialTask : public ConcurrentTask {
     ~SequentialTask() override = default;
 
    protected slots:
-    virtual void subTaskFailed(Task::Ptr, const QString& msg) override;
-
-   protected:
-    void updateState() override;
+    virtual void subTaskFinished(TaskV2*) override;
 };
