@@ -51,7 +51,7 @@ class MSADeviceCodeStep : public AuthStep {
     QString describe() override;
 
    public slots:
-    void abort();
+    void abort() override;
 
    signals:
     void authorizeWithBrowser(QString url, QString code, int expiresIn);
