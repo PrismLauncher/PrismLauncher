@@ -105,20 +105,43 @@ void drawFocusRect(QPainter* painter, const QStyleOptionViewItem& option, const 
 }
 
 // TODO this can be made a lot prettier
-void drawProgressOverlay(QPainter* painter, const QStyleOptionViewItem& option, const int value, const int maximum)
+void drawProgressOverlay(QPainter* painter, const QStyleOptionViewItem& option, const int size, const int value, const int maximum)
 {
     if (maximum == 0 || value == maximum) {
         return;
     }
 
+    // Draw a Pie over icon
+    // painter->save();
+    //
+    // qreal percent = (qreal)value / (qreal)maximum;
+    // QColor color = option.palette.color(QPalette::Accent);
+    // QRect progressBox(option.rect.x() + ((option.rect.width() - size) / 2), option.rect.y(), size, size);
+    //
+    // color.setAlphaF(0.55f);
+    // painter->setBrush(color);
+    // painter->setPen(QPen(QBrush(), 0));
+    // painter->setRenderHint(QPainter::Antialiasing, true);
+    // painter->drawPie(progressBox, 90 * 16, -percent * 360 * 16);
+    //
+    // painter->restore();
+
+    // Draw Arc with background
     painter->save();
 
     qreal percent = (qreal)value / (qreal)maximum;
-    QColor color = option.palette.color(QPalette::Dark);
-    color.setAlphaF(0.70f);
+    QColor color = option.palette.color(QPalette::Link);
+    QColor lineColor = option.palette.color(QPalette::Base);
+    QRect progressBox(option.rect.x() + ((option.rect.width() - size) / 2), option.rect.y() + ((48 - size) / 2), size,
+                      size);
+
+    color.setAlphaF(0.55f);
     painter->setBrush(color);
-    painter->setPen(QPen(QBrush(), 0));
-    painter->drawPie(option.rect, 90 * 16, -percent * 360 * 16);
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setPen(QPen(lineColor, 9, Qt::SolidLine, Qt::RoundCap));
+    painter->drawArc(progressBox, 90 * 16, -1 * 360 * 16);
+    painter->setPen(QPen(color, 5, Qt::SolidLine, Qt::RoundCap));
+    painter->drawArc(progressBox, 90 * 16, -percent * 360 * 16);
 
     painter->restore();
 }
@@ -201,6 +224,8 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     textHighlightRect.adjust(0, iconSize + 5, 0, 0);
 
+    iconbox.setHeight(iconSize);
+    // iconbox -= QMargins(2, 2, 2, 2); // pad out
     // draw background
     {
         // FIXME: unused
@@ -272,7 +297,8 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     // draw the icon
     {
-        iconbox.setHeight(iconSize);
+        // bool isRunningTask = index.data(InstanceViewRoles::ProgressMaximumRole).toInt() > 0;
+        // opt.icon.paint(painter, iconbox, Qt::AlignCenter, isRunningTask ? QIcon::Disabled : mode, state);
         opt.icon.paint(painter, iconbox, Qt::AlignCenter, mode, state);
     }
     // set the text colors
@@ -313,7 +339,7 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         drawBadges(painter, opt, instance, mode, state);
     }
 
-    drawProgressOverlay(painter, opt, index.data(InstanceViewRoles::ProgressValueRole).toInt(),
+    drawProgressOverlay(painter, opt, iconSize - 8, index.data(InstanceViewRoles::ProgressValueRole).toInt(),
                         index.data(InstanceViewRoles::ProgressMaximumRole).toInt());
 
     painter->restore();

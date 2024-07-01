@@ -43,6 +43,7 @@
 #include <QStack>
 
 #include "BaseInstance.h"
+#include "Application.h"
 
 class QFileSystemWatcher;
 class InstanceTask;

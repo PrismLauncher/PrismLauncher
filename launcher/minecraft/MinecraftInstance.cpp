@@ -1140,6 +1140,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         process->appendStep(makeShared<QuitAfterGameStop>(pptr));
     }
     m_launchProcess = process;
+    APPLICATION->taskManager()->addTask(m_launchProcess, id());
     emit launchTaskChanged(m_launchProcess);
     return m_launchProcess;
 }

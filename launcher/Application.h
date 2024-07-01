@@ -49,6 +49,7 @@
 
 #include "minecraft/launch/MinecraftServerTarget.h"
 #include "ui/themes/CatPack.h"
+#include "tasks/TaskManager.h"
 
 class LaunchController;
 class LocalPeer;
@@ -111,6 +112,8 @@ class Application : public QApplication {
     QIcon getThemedIcon(const QString& name);
 
     ThemeManager* themeManager() { return m_themeManager.get(); }
+    
+    TaskManager* taskManager() { return m_taskManager.get(); }
 
     shared_qobject_ptr<ExternalUpdater> updater() { return m_updater; }
 
@@ -246,6 +249,7 @@ class Application : public QApplication {
     std::unique_ptr<MCEditTool> m_mcedit;
     QSet<QString> m_features;
     std::unique_ptr<ThemeManager> m_themeManager;
+    std::unique_ptr<TaskManager> m_taskManager;
 
     QMap<QString, std::shared_ptr<BaseProfilerFactory>> m_profilers;
 

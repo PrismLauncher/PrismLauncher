@@ -391,6 +391,8 @@ set(TASKS_SOURCES
     # Tasks
     tasks/Task.h
     tasks/Task.cpp
+    tasks/TaskManager.h
+    tasks/TaskManager.cpp
     tasks/ConcurrentTask.h
     tasks/ConcurrentTask.cpp
     tasks/SequentialTask.h

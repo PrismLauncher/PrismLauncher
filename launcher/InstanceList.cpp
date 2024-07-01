@@ -61,6 +61,7 @@
 #include "WatchLock.h"
 #include "minecraft/MinecraftInstance.h"
 #include "settings/INISettingsObject.h"
+#include "ui/instanceview/InstanceView.h"
 
 #ifdef Q_OS_WIN32
 #include <Windows.h>
@@ -72,7 +73,7 @@ InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, Q
     : QAbstractListModel(parent), m_globalSettings(settings)
 {
     resumeWatch();
-    // Create aand normalize path
+    // Create and normalize path
     if (!QDir::current().exists(instDir)) {
         QDir::current().mkpath(instDir);
     }
@@ -83,6 +84,15 @@ InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, Q
     m_instDir = QDir(instDir).canonicalPath();
     m_watcher = new QFileSystemWatcher(this);
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &InstanceList::instanceDirContentsChanged);
+
+    TaskManager* taskManager = APPLICATION->taskManager();
+    connect(taskManager, &TaskManager::progress, this, [this](QUuid taskId, QString instanceId, qint64 current, qint64 total) {
+        InstancePtr inst = getInstanceById(instanceId);
+        if (inst) {
+            propertiesChanged(inst.get());
+        }
+    });
+
     m_watcher->addPath(m_instDir);
 }
 
@@ -193,6 +203,14 @@ QVariant InstanceList::data(const QModelIndex& index, int role) const
         // HACK: see InstanceView.h in gui!
         case GroupRole: {
             return getInstanceGroup(pdata->id());
+        }
+        case InstanceViewRoles::ProgressValueRole: {
+            auto [current, total] = APPLICATION->taskManager()->getProgress(pdata->id());
+            return current;
+        }
+        case InstanceViewRoles::ProgressMaximumRole: {
+            auto [current, total] = APPLICATION->taskManager()->getProgress(pdata->id());
+            return total;
         }
         default:
             break;
