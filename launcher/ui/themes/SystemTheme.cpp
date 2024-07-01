@@ -40,31 +40,9 @@
 #include "HintOverrideProxyStyle.h"
 #include "ThemeManager.h"
 
-SystemTheme::SystemTheme()
+SystemTheme::SystemTheme(QString& styleName, bool isSystemTheme)
 {
-    themeName = QObject::tr("System");
-    themeDebugLog() << "Determining System Theme...";
-    const auto& style = QApplication::style();
-    colorPalette = QApplication::palette();
-    QString lowerThemeName = style->objectName();
-    themeDebugLog() << "System theme seems to be:" << lowerThemeName;
-    QStringList styles = QStyleFactory::keys();
-    for (auto& st : styles) {
-        themeDebugLog() << "Considering theme from theme factory:" << st.toLower();
-        if (st.toLower() == lowerThemeName) {
-            widgetTheme = st;
-            themeDebugLog() << "System theme has been determined to be:" << widgetTheme;
-            return;
-        }
-    }
-    // fall back to fusion if we can't find the current theme.
-    widgetTheme = "Fusion";
-    themeDebugLog() << "System theme not found, defaulted to Fusion";
-}
-
-SystemTheme::SystemTheme(QString& styleName)
-{
-    themeName = styleName;
+    themeName = isSystemTheme ? "system" : styleName;
     widgetTheme = styleName;
     colorPalette = QApplication::palette();
 }
@@ -94,6 +72,8 @@ QString SystemTheme::name()
         return QObject::tr("Windows 9x");
     } else if (themeName.toLower() == "windows11") {
         return QObject::tr("Windows 11");
+    } else if (themeName.toLower() == "system") {
+        return QObject::tr("System");
     } else {
         return themeName;
     }
@@ -110,7 +90,7 @@ QString SystemTheme::tooltip()
     } else if (themeName.toLower() == "fusion") {
         return QObject::tr("The default Qt widget style");
     } else if (themeName.toLower() == "system") {
-        return QObject::tr("Your current system theme") + " (" + widgetTheme + ")";
+        return QObject::tr("Your current system theme");
     } else {
         return "";
     }

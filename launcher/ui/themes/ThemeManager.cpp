@@ -127,7 +127,7 @@ void ThemeManager::initializeWidgets()
     themeDebugLog() << "System theme seems to be:" << currentlySelectedSystemTheme;
 
     themeDebugLog() << "<> Initializing Widget Themes";
-    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>(currentlySelectedSystemTheme, true));
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());

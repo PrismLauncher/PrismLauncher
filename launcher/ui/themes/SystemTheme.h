@@ -38,8 +38,7 @@
 
 class SystemTheme : public ITheme {
    public:
-    SystemTheme();
-    explicit SystemTheme(QString& themeName);
+    SystemTheme(QString& themeName, bool isSystemTheme = false);
     virtual ~SystemTheme() {}
     void apply(bool initial) override;
 
