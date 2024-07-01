@@ -91,8 +91,8 @@ jobs:
           prerelease: false
           files: |
             PrismLauncher-Linux-Qt5-Portable-${{ env.VERSION }}.tar.gz
-            # PrismLauncher-Linux-x86_64.AppImage
-            # PrismLauncher-Linux-x86_64.AppImage.zsync
+            PrismLauncher-Linux-x86_64.AppImage
+            PrismLauncher-Linux-x86_64.AppImage.zsync
             PrismLauncher-Linux-Qt6-Portable-${{ env.VERSION }}.tar.gz
             PrismLauncher-Windows-MinGW-w64-${{ env.VERSION }}.zip
             PrismLauncher-Windows-MinGW-w64-Portable-${{ env.VERSION }}.zip
