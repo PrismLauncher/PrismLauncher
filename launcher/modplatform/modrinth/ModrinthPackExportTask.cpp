@@ -217,7 +217,7 @@ void ModrinthPackExportTask::buildZip()
     });
     connect(zipTask.get(), &Task::stepProgress, this, &ModrinthPackExportTask::propagateStepProgress);
 
-    connect(zipTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
+    connect(zipTask.get(), &Task::progress, this, [this, progressStep](double current, double total) {
         progressStep->update(current, total);
         stepProgress(*progressStep);
     });

@@ -84,7 +84,7 @@ void OfflineLoginDialog::onTaskStatus(const QString& status)
     ui->label->setText(status);
 }
 
-void OfflineLoginDialog::onTaskProgress(qint64 current, qint64 total)
+void OfflineLoginDialog::onTaskProgress(double current, double total)
 {
     ui->progressBar->setMaximum(total);
     ui->progressBar->setValue(current);

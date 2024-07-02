@@ -116,10 +116,10 @@ QString TaskManager::getTaskInstanceId(QUuid taskId)
     return "";
 }
 
-std::pair<qint64, qint64> TaskManager::getAllProgress()
+std::pair<double, double> TaskManager::getAllProgress()
 {
-    qint64 progress = 0;
-    qint64 total = 0;
+    double progress = 0;
+    double total = 0;
     for (auto instanceList : m_instanceTaskMap) {
         for (auto task : instanceList) {
             total += task->getProgress();
@@ -129,15 +129,15 @@ std::pair<qint64, qint64> TaskManager::getAllProgress()
     return { progress, total };
 }
 
-std::pair<qint64, qint64> TaskManager::getProgress(const QString& instanceId)
+std::pair<double, double> TaskManager::getProgress(const QString& instanceId)
 {
-    qint64 progress = 0;
-    qint64 total = 0;
+    double progress = 0;
+    double total = 0;
     auto instanceList = m_instanceTaskMap.find(instanceId);
     if (instanceList != m_instanceTaskMap.end()) {
         for (auto task : *instanceList) {
-            total += task->getProgress();
-            progress += task->getTotalProgress();
+            progress += task->getProgress();
+            total += task->getTotalProgress();
         }
     }
     return { progress, total };
@@ -148,7 +148,7 @@ void TaskManager::connectTask(Task::Ptr task)
     QUuid taskId = task->getUid();
     m_taskConnectionMap[taskId] << connect(task.get(), &Task::finished, this, [this, taskId]() { taskFinished(taskId); });
     m_taskConnectionMap[taskId] << connect(task.get(), &Task::progress, this,
-                                           [this, taskId](qint64 current, qint64 total) { taskProgress(taskId, current, total); });
+                                           [this, taskId](double current, double total) { taskProgress(taskId, current, total); });
 }
 void TaskManager::disconnectTask(Task::Ptr task)
 {
@@ -170,7 +170,7 @@ void TaskManager::taskFinished(QUuid taskId)
     }
 }
 
-void TaskManager::taskProgress(QUuid taskId, qint64 current, qint64 total)
+void TaskManager::taskProgress(QUuid taskId, double current, double total)
 {
     Task::Ptr task = getTask(taskId);
     if (task) {

@@ -105,7 +105,7 @@ void drawFocusRect(QPainter* painter, const QStyleOptionViewItem& option, const 
 }
 
 // TODO this can be made a lot prettier
-void drawProgressOverlay(QPainter* painter, const QStyleOptionViewItem& option, const int size, const int value, const int maximum)
+void drawProgressOverlay(QPainter* painter, const QStyleOptionViewItem& option, const int size, const double value, const double maximum)
 {
     if (maximum == 0 || value == maximum) {
         return;
@@ -128,11 +128,15 @@ void drawProgressOverlay(QPainter* painter, const QStyleOptionViewItem& option, 
 
     // Draw Arc with background
     painter->save();
+    
+    painter->translate(option.rect.topLeft());
 
     qreal percent = (qreal)value / (qreal)maximum;
     QColor color = option.palette.color(QPalette::Link);
     QColor lineColor = option.palette.color(QPalette::Base);
-    QRect progressBox(option.rect.x() + ((option.rect.width() - size) / 2), option.rect.y() + ((48 - size) / 2), size,
+    // QRect progressBox(option.rect.x() + ((option.rect.width() - size) / 2), option.rect.y() + ((48 - size) / 2), size,
+    //                   size);
+    QRect progressBox( ((option.rect.width() - size) / 2), ((48 - size) / 2), size,
                       size);
 
     color.setAlphaF(0.55f);
@@ -339,8 +343,8 @@ void ListViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
         drawBadges(painter, opt, instance, mode, state);
     }
 
-    drawProgressOverlay(painter, opt, iconSize - 8, index.data(InstanceViewRoles::ProgressValueRole).toInt(),
-                        index.data(InstanceViewRoles::ProgressMaximumRole).toInt());
+    drawProgressOverlay(painter, opt, iconSize - 8, index.data(InstanceViewRoles::ProgressValueRole).toDouble(),
+                        index.data(InstanceViewRoles::ProgressMaximumRole).toDouble());
 
     painter->restore();
 }

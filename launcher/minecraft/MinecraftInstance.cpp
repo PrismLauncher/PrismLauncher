@@ -1083,9 +1083,9 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         if (!session->demo) {
             process->appendStep(makeShared<ClaimAccount>(pptr, session));
         }
-        process->appendStep(makeShared<Update>(pptr, Net::Mode::Online));
+        process->appendStep(makeShared<Update>(pptr, Net::Mode::Online), 20);
     } else {
-        process->appendStep(makeShared<Update>(pptr, Net::Mode::Offline));
+        process->appendStep(makeShared<Update>(pptr, Net::Mode::Offline), 20);
     }
 
     // if there are any jar mods

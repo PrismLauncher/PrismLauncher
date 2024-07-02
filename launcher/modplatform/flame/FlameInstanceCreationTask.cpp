@@ -583,7 +583,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         m_files_job.reset();
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::progress, this, [this](qint64 current, qint64 total) {
+    connect(m_files_job.get(), &NetJob::progress, this, [this](double current, double total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);
     });

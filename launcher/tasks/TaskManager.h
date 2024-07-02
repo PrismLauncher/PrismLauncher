@@ -42,8 +42,8 @@ class TaskManager : public QObject {
     Task::Ptr getTask(QUuid taskId);
     QString getTaskInstanceId(QUuid taskId);
 
-    std::pair<qint64, qint64> getAllProgress();
-    std::pair<qint64, qint64> getProgress(const QString& instanceId = "");
+    std::pair<double, double> getAllProgress();
+    std::pair<double, double> getProgress(const QString& instanceId = "");
 
    private:
     void connectTask(Task::Ptr task);
@@ -54,10 +54,10 @@ class TaskManager : public QObject {
     QMap<QUuid, QList<QMetaObject::Connection>> m_taskConnectionMap;
 
    signals:
-    void progress(QUuid taskId, QString instanceId, qint64 current, qint64 total);
+    void progress(QUuid taskId, QString instanceId, double current, double total);
     void finished(QUuid taskId, QString instanceId);
 
    public slots:
     void taskFinished(QUuid taskId);
-    void taskProgress(QUuid taskId, qint64 current, qint64 total);
+    void taskProgress(QUuid taskId, double current, double total);
 };

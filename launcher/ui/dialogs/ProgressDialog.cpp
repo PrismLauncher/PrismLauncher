@@ -254,7 +254,7 @@ void ProgressDialog::changeStepProgress(TaskStepProgress const& task_progress)
     }
 }
 
-void ProgressDialog::changeProgress(qint64 current, qint64 total)
+void ProgressDialog::changeProgress(double current, double total)
 {
     ui->globalProgressBar->setMaximum(total);
     ui->globalProgressBar->setValue(current);

@@ -654,7 +654,7 @@ void PackInstallTask::installConfigs()
         jobPtr.reset();
         emitFailed(reason);
     });
-    connect(jobPtr.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
+    connect(jobPtr.get(), &NetJob::progress, [&](double current, double total) {
         abortable = true;
         setProgress(current, total);
     });
@@ -883,7 +883,7 @@ void PackInstallTask::downloadMods()
     }
 
     connect(jobPtr.get(), &NetJob::succeeded, this, &PackInstallTask::onModsDownloaded);
-    connect(jobPtr.get(), &NetJob::progress, [this](qint64 current, qint64 total) {
+    connect(jobPtr.get(), &NetJob::progress, [this](double current, double total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         abortable = true;
         setProgress(current, total);

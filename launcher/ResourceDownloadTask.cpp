@@ -81,7 +81,7 @@ void ResourceDownloadTask::downloadFailed(QString reason)
     m_filesNetJob.reset();
 }
 
-void ResourceDownloadTask::downloadProgressChanged(qint64 current, qint64 total)
+void ResourceDownloadTask::downloadProgressChanged(double current, double total)
 {
     emit progress(current, total);
 }

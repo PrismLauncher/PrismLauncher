@@ -62,7 +62,7 @@ void Task::setDetails(const QString& new_details)
     }
 }
 
-void Task::setProgress(qint64 current, qint64 total)
+void Task::setProgress(double current, double total)
 {
     if ((m_progress != current) || (m_progressTotal != total)) {
         m_progress = current;

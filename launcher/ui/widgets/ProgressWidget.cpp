@@ -104,7 +104,7 @@ void ProgressWidget::handleTaskStatus(const QString& status)
     if (m_label)
         m_label->setText(status);
 }
-void ProgressWidget::handleTaskProgress(qint64 current, qint64 total)
+void ProgressWidget::handleTaskProgress(double current, double total)
 {
     m_bar->setMaximum(total);
     m_bar->setValue(current);

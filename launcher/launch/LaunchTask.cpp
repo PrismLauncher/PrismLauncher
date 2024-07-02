@@ -37,12 +37,14 @@
 
 #include "launch/LaunchTask.h"
 #include <assert.h>
+#include <quuid.h>
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
 #include <QEventLoop>
 #include <QRegularExpression>
 #include <QStandardPaths>
+#include "LaunchStep.h"
 #include "MessageLevel.h"
 #include "java/JavaChecker.h"
 #include "tasks/Task.h"
@@ -61,14 +63,19 @@ shared_qobject_ptr<LaunchTask> LaunchTask::create(InstancePtr inst)
 
 LaunchTask::LaunchTask(InstancePtr instance) : m_instance(instance) {}
 
-void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step)
+TaskStepProgressList LaunchTask::getStepProgress() const
 {
-    m_steps.append(step);
+    return m_step_progress.values();
 }
 
-void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step)
+void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step, double weight)
 {
-    m_steps.prepend(step);
+    m_steps.append(std::make_pair(step, weight));
+}
+
+void LaunchTask::prependStep(shared_qobject_ptr<LaunchStep> step, double weight)
+{
+    m_steps.prepend(std::make_pair(step, weight));
 }
 
 void LaunchTask::executeTask()
@@ -93,29 +100,96 @@ void LaunchTask::onStepFinished()
     // initial -> just start the first step
     if (currentStep == -1) {
         currentStep++;
-        m_steps[currentStep]->start();
+        auto [step, weight] = m_steps[currentStep];
+        startStep(step, weight);
         return;
     }
 
-    auto step = m_steps[currentStep];
+    auto step = m_steps[currentStep].first;
+    auto step_progress = m_step_progress.value(step->getUid());
     if (step->wasSuccessful()) {
+        step_progress->state = TaskStepState::Succeeded;
+        emit stepProgress(*step_progress);
         // end?
         if (currentStep == m_steps.size() - 1) {
             finalizeSteps(true, QString());
         } else {
             currentStep++;
-            step = m_steps[currentStep];
-            step->start();
+            auto [step, weight] = m_steps[currentStep];
+            startStep(step, weight);
         }
     } else {
+        step_progress->state = TaskStepState::Failed;
+        emit stepProgress(*step_progress);
         finalizeSteps(false, step->failReason());
     }
+}
+
+void LaunchTask::startStep(shared_qobject_ptr<LaunchStep> step, double weight)
+{
+    auto step_progress = std::make_shared<TaskStepProgress>(step->getUid());
+    step_progress->setWeight(weight);
+    m_step_progress.insert(step->getUid(), step_progress);
+    QUuid taskId = step->getUid();
+
+    connect(step.get(), &Task::status, this, [this, taskId](QString msg) { stepStatus(taskId, msg); });
+    connect(step.get(), &Task::details, this, [this, taskId](QString msg) { stepDetails(taskId, msg); });
+    connect(step.get(), &LaunchStep::progress, this,
+            [this, taskId](double current, double total) { onStepProgress(taskId, current, total); });
+
+    step->start();
+}
+
+void LaunchTask::stepStatus(QUuid taskId, const QString& msg)
+{
+    auto step_progress = m_step_progress.value(taskId);
+    step_progress->status = msg;
+    step_progress->state = TaskStepState::Running;
+    emit stepProgress(*step_progress);
+}
+
+void LaunchTask::stepDetails(QUuid taskId, const QString& msg)
+{
+    auto step_progress = m_step_progress.value(taskId);
+    step_progress->details = msg;
+    step_progress->state = TaskStepState::Running;
+    emit stepProgress(*step_progress);
+}
+
+void LaunchTask::onStepProgress(QUuid taskId, double current, double total)
+{
+    auto step_progress = m_step_progress.value(taskId);
+
+    step_progress->update(current, total);
+
+    emit stepProgress(*step_progress);
+    updateState();
+}
+
+void LaunchTask::updateState()
+{
+    double current = 0;
+    double total = 0;
+    for (auto [step, weight] : m_steps) {
+        total += weight;
+        if (m_step_progress.contains(step->getUid())) {
+            auto progress = m_step_progress.value(step->getUid());
+            if (progress->state != TaskStepState::Succeeded && progress->state != TaskStepState::Failed) {
+                if (progress->current > 0 && progress->total > 0) {
+                    current += (progress->current / progress->total) * weight;
+                }
+            } else {
+                current += progress->total * weight;
+            }
+        }
+    }
+    setProgress(current, total);
 }
 
 void LaunchTask::finalizeSteps(bool successful, const QString& error)
 {
     for (auto step = currentStep; step >= 0; step--) {
-        m_steps[step]->finalize();
+        m_steps[step].first->finalize();
     }
     if (successful) {
         emitSucceeded();
@@ -127,7 +201,7 @@ void LaunchTask::finalizeSteps(bool successful, const QString& error)
 void LaunchTask::onProgressReportingRequested()
 {
     state = LaunchTask::Waiting;
-    emit requestProgress(m_steps[currentStep].get());
+    emit requestProgress(m_steps[currentStep].first.get());
 }
 
 void LaunchTask::setCensorFilter(QMap<QString, QString> filter)
@@ -150,7 +224,7 @@ void LaunchTask::proceed()
     if (state != LaunchTask::Waiting) {
         return;
     }
-    m_steps[currentStep]->proceed();
+    m_steps[currentStep].first->proceed();
 }
 
 bool LaunchTask::canAbort() const
@@ -164,7 +238,7 @@ bool LaunchTask::canAbort() const
             return true;
         case LaunchTask::Running:
         case LaunchTask::Waiting: {
-            auto step = m_steps[currentStep];
+            auto step = m_steps[currentStep].first;
             return step->canAbort();
         }
     }
@@ -185,7 +259,7 @@ bool LaunchTask::abort()
         }
         case LaunchTask::Running:
         case LaunchTask::Waiting: {
-            auto step = m_steps[currentStep];
+            auto step = m_steps[currentStep].first;
             if (!step->canAbort()) {
                 return false;
             }

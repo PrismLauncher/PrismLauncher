@@ -57,9 +57,9 @@ class ConcurrentTask : public Task {
     bool canAbort() const override { return true; }
 
     inline auto isMultiStep() const -> bool override { return totalSize() > 1; }
-    auto getStepProgress() const -> TaskStepProgressList override;
+    TaskStepProgressList getStepProgress() const override;
 
-    void addTask(Task::Ptr task);
+    void addTask(Task::Ptr task, double weight = 1);
 
    public slots:
     bool abort() override;
@@ -79,7 +79,7 @@ class ConcurrentTask : public Task {
     void subTaskFinished(Task::Ptr, TaskStepState);
     void subTaskStatus(Task::Ptr task, const QString& msg);
     void subTaskDetails(Task::Ptr task, const QString& msg);
-    void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
+    void subTaskProgress(Task::Ptr task, double current, double total);
     void subTaskStepProgress(Task::Ptr task, TaskStepProgress const& task_step_progress);
 
    protected:
@@ -91,18 +91,19 @@ class ConcurrentTask : public Task {
 
     virtual void updateState();
 
-    void startSubTask(Task::Ptr task);
+    void startSubTask(Task::Ptr task, double weight);
 
    protected:
     QString m_name;
     QString m_step_status;
 
-    QQueue<Task::Ptr> m_queue;
+    // queue of task, weight pairs
+    QQueue<std::pair<Task::Ptr, double>> m_queue;
 
-    QHash<Task*, Task::Ptr> m_doing;
-    QHash<Task*, Task::Ptr> m_done;
-    QHash<Task*, Task::Ptr> m_failed;
-    QHash<Task*, Task::Ptr> m_succeeded;
+    QHash<Task*, std::pair<Task::Ptr, double>> m_doing;
+    QHash<Task*, std::pair<Task::Ptr, double>> m_done;
+    QHash<Task*, std::pair<Task::Ptr, double>> m_failed;
+    QHash<Task*, std::pair<Task::Ptr, double>> m_succeeded;
 
     QHash<QUuid, std::shared_ptr<TaskStepProgress>> m_task_progress;
 

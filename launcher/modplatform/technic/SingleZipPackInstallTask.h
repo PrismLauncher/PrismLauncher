@@ -43,7 +43,7 @@ class SingleZipPackInstallTask : public InstanceTask {
    private slots:
     void downloadSucceeded();
     void downloadFailed(QString reason);
-    void downloadProgressChanged(qint64 current, qint64 total);
+    void downloadProgressChanged(double current, double total);
     void extractFinished();
     void extractAborted();
 

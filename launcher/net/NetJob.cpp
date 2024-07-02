@@ -36,6 +36,7 @@
  */
 
 #include "NetJob.h"
+#include <utility>
 #include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
@@ -69,9 +70,9 @@ void NetJob::executeNextSubTask()
     if (isRunning() && m_queue.isEmpty() && m_doing.isEmpty() && !m_failed.isEmpty() && m_try < 3) {
         m_try += 1;
         while (!m_failed.isEmpty()) {
-            auto task = m_failed.take(*m_failed.keyBegin());
+            auto [task, weight] = m_failed.take(*m_failed.keyBegin());
             m_done.remove(task.get());
-            m_queue.enqueue(task);
+            m_queue.enqueue(std::make_pair(task, weight));
         }
     }
     ConcurrentTask::executeNextSubTask();
@@ -87,11 +88,11 @@ auto NetJob::canAbort() const -> bool
     bool canFullyAbort = true;
 
     // can abort the downloads on the queue?
-    for (auto part : m_queue)
+    for (auto [part, _] : m_queue)
         canFullyAbort &= part->canAbort();
 
     // can abort the active downloads?
-    for (auto part : m_doing)
+    for (auto [part, _] : m_doing)
         canFullyAbort &= part->canAbort();
 
     return canFullyAbort;
@@ -102,13 +103,13 @@ auto NetJob::abort() -> bool
     bool fullyAborted = true;
 
     // fail all downloads on the queue
-    for (auto task : m_queue)
-        m_failed.insert(task.get(), task);
+    for (auto [task, weight] : m_queue)
+        m_failed.insert(task.get(), std::make_pair(task, weight));
     m_queue.clear();
 
     // abort active downloads
     auto toKill = m_doing.values();
-    for (auto part : toKill) {
+    for (auto [part, _] : toKill) {
         fullyAborted &= part->abort();
     }
 
@@ -123,7 +124,7 @@ auto NetJob::abort() -> bool
 auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
 {
     QList<Net::NetRequest*> failed;
-    for (auto index : m_failed) {
+    for (auto [index, _] : m_failed) {
         failed.push_back(dynamic_cast<Net::NetRequest*>(index.get()));
     }
     return failed;
@@ -132,7 +133,7 @@ auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
 auto NetJob::getFailedFiles() -> QList<QString>
 {
     QList<QString> failed;
-    for (auto index : m_failed) {
+    for (auto [index, _] : m_failed) {
         failed.append(static_cast<Net::NetRequest*>(index.get())->url().toString());
     }
     return failed;

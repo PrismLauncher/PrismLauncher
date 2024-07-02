@@ -63,7 +63,7 @@ class SolderPackInstallTask : public InstanceTask {
     void fileListSucceeded();
     void downloadSucceeded();
     void downloadFailed(QString reason);
-    void downloadProgressChanged(qint64 current, qint64 total);
+    void downloadProgressChanged(double current, double total);
     void downloadAborted();
     void extractFinished();
     void extractAborted();

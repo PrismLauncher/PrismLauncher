@@ -50,11 +50,13 @@ Q_DECLARE_METATYPE(TaskStepState)
 
 struct TaskStepProgress {
     QUuid uid;
-    qint64 current = 0;
-    qint64 total = -1;
+    double current = 0;
+    double total = -1;
+    /// set once, do not change
+    double weight = 1;
 
-    qint64 old_current = 0;
-    qint64 old_total = -1;
+    double old_current = 0;
+    double old_total = -1;
 
     QString status = "";
     QString details = "";
@@ -64,7 +66,7 @@ struct TaskStepProgress {
     TaskStepProgress(QUuid uid_) : uid(uid_) {}
 
     bool isDone() const { return (state == TaskStepState::Failed) || (state == TaskStepState::Succeeded); }
-    void update(qint64 new_current, qint64 new_total)
+    void update(double new_current, double new_total)
     {
         this->old_current = this->current;
         this->old_total = this->total;
@@ -72,6 +74,10 @@ struct TaskStepProgress {
         this->current = new_current;
         this->total = new_total;
         this->state = TaskStepState::Running;
+    }
+    void setWeight(double new_weight)
+    {
+        this->weight = new_weight;
     }
 };
 
@@ -115,9 +121,9 @@ class Task : public QObject, public QRunnable {
     QString getStatus() { return m_status; }
     QString getDetails() { return m_details; }
 
-    qint64 getProgress() { return m_progress; }
-    qint64 getTotalProgress() { return m_progressTotal; }
-    virtual auto getStepProgress() const -> TaskStepProgressList { return {}; }
+    double getProgress() { return m_progress; }
+    double getTotalProgress() { return m_progressTotal; }
+    virtual TaskStepProgressList getStepProgress() const { return {}; }
 
     QUuid getUid() { return m_uid; }
 
@@ -129,7 +135,7 @@ class Task : public QObject, public QRunnable {
 
    signals:
     void started();
-    void progress(qint64 current, qint64 total);
+    void progress(double current, double total);
     void finished();
     void succeeded();
     void aborted();
@@ -173,7 +179,7 @@ class Task : public QObject, public QRunnable {
    public slots:
     void setStatus(const QString& status);
     void setDetails(const QString& details);
-    void setProgress(qint64 current, qint64 total);
+    void setProgress(double current, double total);
 
    protected:
     State m_state = State::Inactive;
@@ -181,8 +187,8 @@ class Task : public QObject, public QRunnable {
     QString m_failReason = "";
     QString m_status;
     QString m_details;
-    int m_progress = 0;
-    int m_progressTotal = 100;
+    double m_progress = 0;
+    double m_progressTotal = 100;
 
     // TODO: Nuke in favor of QLoggingCategory
     bool m_show_debug = true;

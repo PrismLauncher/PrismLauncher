@@ -44,7 +44,7 @@ class ProgressWidget : public QWidget {
    private slots:
     void handleTaskFinish();
     void handleTaskStatus(const QString& status);
-    void handleTaskProgress(qint64 current, qint64 total);
+    void handleTaskProgress(double current, double total);
     void taskDestroyed();
 
    private:

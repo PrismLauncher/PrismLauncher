@@ -55,10 +55,12 @@ class LaunchTask : public Task {
 
    public: /* methods */
     static shared_qobject_ptr<LaunchTask> create(InstancePtr inst);
-    virtual ~LaunchTask(){};
+    virtual ~LaunchTask() {};
 
-    void appendStep(shared_qobject_ptr<LaunchStep> step);
-    void prependStep(shared_qobject_ptr<LaunchStep> step);
+    TaskStepProgressList getStepProgress() const override;
+
+    void appendStep(shared_qobject_ptr<LaunchStep> step, double weight = 1);
+    void prependStep(shared_qobject_ptr<LaunchStep> step, double weight = 1);
     void setCensorFilter(QMap<QString, QString> filter);
 
     InstancePtr instance() { return m_instance; }
@@ -104,6 +106,7 @@ class LaunchTask : public Task {
     void requestProgress(Task* task);
 
     void requestLogging();
+                
 
    public slots:
     void onLogLines(const QStringList& lines, MessageLevel::Enum defaultLevel = MessageLevel::Launcher);
@@ -111,16 +114,23 @@ class LaunchTask : public Task {
     void onReadyForLaunch();
     void onStepFinished();
     void onProgressReportingRequested();
+    void stepStatus(QUuid taskId, const QString& msg);
+    void stepDetails(QUuid taskId, const QString& msg);
+    void onStepProgress(QUuid taskId, double current, double total);
 
    private: /*methods */
+    void startStep(shared_qobject_ptr<LaunchStep> step, double weight);
     void finalizeSteps(bool successful, const QString& error);
+    void updateState();
 
    protected: /* data */
     InstancePtr m_instance;
     shared_qobject_ptr<LogModel> m_logModel;
-    QList<shared_qobject_ptr<LaunchStep>> m_steps;
+    QList<std::pair<shared_qobject_ptr<LaunchStep>, double>> m_steps;
     QMap<QString, QString> m_censorFilter;
     int currentStep = -1;
     State state = NotStarted;
     qint64 m_pid = -1;
+
+    QMap<QUuid, std::shared_ptr<TaskStepProgress>> m_step_progress;
 };

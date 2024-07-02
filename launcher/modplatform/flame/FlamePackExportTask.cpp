@@ -164,7 +164,7 @@ void FlamePackExportTask::collectHashes()
     });
     connect(hashingTask.get(), &Task::stepProgress, this, &FlamePackExportTask::propagateStepProgress);
 
-    connect(hashingTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
+    connect(hashingTask.get(), &Task::progress, this, [this, progressStep](double current, double total) {
         progressStep->update(current, total);
         stepProgress(*progressStep);
     });
@@ -358,7 +358,7 @@ void FlamePackExportTask::buildZip()
     });
     connect(zipTask.get(), &Task::stepProgress, this, &FlamePackExportTask::propagateStepProgress);
 
-    connect(zipTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
+    connect(zipTask.get(), &Task::progress, this, [this, progressStep](double current, double total) {
         progressStep->update(current, total);
         stepProgress(*progressStep);
     });

@@ -164,7 +164,7 @@ void Technic::SolderPackInstallTask::downloadFailed(QString reason)
     m_filesNetJob.reset();
 }
 
-void Technic::SolderPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)
+void Technic::SolderPackInstallTask::downloadProgressChanged(double current, double total)
 {
     m_abortable = true;
     setProgress(current / 2, total);

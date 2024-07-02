@@ -36,6 +36,7 @@
 #include "ConcurrentTask.h"
 
 #include <QDebug>
+#include <utility>
 #include "tasks/Task.h"
 
 ConcurrentTask::ConcurrentTask(QObject* parent, QString task_name, int max_concurrent)
@@ -46,20 +47,20 @@ ConcurrentTask::ConcurrentTask(QObject* parent, QString task_name, int max_concu
 
 ConcurrentTask::~ConcurrentTask()
 {
-    for (auto task : m_doing) {
+    for (auto [task, _] : m_doing) {
         if (task)
             task->disconnect(this);
     }
 }
 
-auto ConcurrentTask::getStepProgress() const -> TaskStepProgressList
+TaskStepProgressList ConcurrentTask::getStepProgress() const
 {
     return m_task_progress.values();
 }
 
-void ConcurrentTask::addTask(Task::Ptr task)
+void ConcurrentTask::addTask(Task::Ptr task, double weight)
 {
-    m_queue.append(task);
+    m_queue.append(std::make_pair(task, weight));
 }
 
 void ConcurrentTask::executeTask()
@@ -80,21 +81,21 @@ bool ConcurrentTask::abort()
         return true;
     }
 
-    bool suceedeed = true;
+    bool succeeded = true;
 
-    QMutableHashIterator<Task*, Task::Ptr> doing_iter(m_doing);
+    QMutableHashIterator<Task*, std::pair<Task::Ptr, double>> doing_iter(m_doing);
     while (doing_iter.hasNext()) {
-        auto task = doing_iter.next();
-        disconnect(task->get(), &Task::aborted, this, 0);
-        suceedeed &= (task.value())->abort();
+        auto [task, _] = doing_iter.next().value();
+        disconnect(task.get(), &Task::aborted, this, 0);
+        succeeded &= task->abort();
     }
 
-    if (suceedeed)
+    if (succeeded)
         emitAborted();
     else
         emitFailed(tr("Failed to abort all running tasks."));
 
-    return suceedeed;
+    return succeeded;
 }
 
 void ConcurrentTask::clear()
@@ -126,11 +127,11 @@ void ConcurrentTask::executeNextSubTask()
         }
         return;
     }
-
-    startSubTask(m_queue.dequeue());
+    auto [task, weight] = m_queue.dequeue();
+    startSubTask(task, weight);
 }
 
-void ConcurrentTask::startSubTask(Task::Ptr next)
+void ConcurrentTask::startSubTask(Task::Ptr next, double weight)
 {
     connect(next.get(), &Task::succeeded, this, [this, next]() { subTaskSucceeded(next); });
     connect(next.get(), &Task::failed, this, [this, next](QString msg) { subTaskFailed(next, msg); });
@@ -141,11 +142,12 @@ void ConcurrentTask::startSubTask(Task::Ptr next)
     connect(next.get(), &Task::details, this, [this, next](QString msg) { subTaskDetails(next, msg); });
     connect(next.get(), &Task::stepProgress, this, [this, next](TaskStepProgress const& tp) { subTaskStepProgress(next, tp); });
 
-    connect(next.get(), &Task::progress, this, [this, next](qint64 current, qint64 total) { subTaskProgress(next, current, total); });
+    connect(next.get(), &Task::progress, this, [this, next](double current, double total) { subTaskProgress(next, current, total); });
 
-    m_doing.insert(next.get(), next);
+    m_doing.insert(next.get(), std::make_pair(next, weight));
 
     auto task_progress = std::make_shared<TaskStepProgress>(next->getUid());
+    task_progress->setWeight(weight);
     m_task_progress.insert(next->getUid(), task_progress);
 
     updateState();
@@ -156,8 +158,9 @@ void ConcurrentTask::startSubTask(Task::Ptr next)
 
 void ConcurrentTask::subTaskFinished(Task::Ptr task, TaskStepState state)
 {
-    m_done.insert(task.get(), task);
-    (state == TaskStepState::Succeeded ? m_succeeded : m_failed).insert(task.get(), task);
+    auto [ _, weight ] = m_doing.value(task.get());
+    m_done.insert(task.get(), std::make_pair(task, weight));
+    (state == TaskStepState::Succeeded ? m_succeeded : m_failed).insert(task.get(), std::make_pair(task, weight));
 
     m_doing.remove(task.get());
 
@@ -208,7 +211,7 @@ void ConcurrentTask::subTaskDetails(Task::Ptr task, const QString& msg)
     }
 }
 
-void ConcurrentTask::subTaskProgress(Task::Ptr task, qint64 current, qint64 total)
+void ConcurrentTask::subTaskProgress(Task::Ptr task, double current, double total)
 {
     auto task_progress = m_task_progress.value(task->getUid());
 
@@ -253,18 +256,18 @@ void ConcurrentTask::updateStepProgress(TaskStepProgress const& changed_progress
 {
     switch (op) {
         case Operation::ADDED:
-            m_stepProgress += changed_progress.current;
-            m_stepTotalProgress += changed_progress.total;
+            m_stepProgress += changed_progress.current * changed_progress.weight;
+            m_stepTotalProgress += changed_progress.total * changed_progress.weight;
             break;
         case Operation::REMOVED:
-            m_stepProgress -= changed_progress.current;
-            m_stepTotalProgress -= changed_progress.total;
+            m_stepProgress -= changed_progress.current * changed_progress.weight;
+            m_stepTotalProgress -= changed_progress.total * changed_progress.weight;
             break;
         case Operation::CHANGED:
-            m_stepProgress -= changed_progress.old_current;
-            m_stepTotalProgress -= changed_progress.old_total;
-            m_stepProgress += changed_progress.current;
-            m_stepTotalProgress += changed_progress.total;
+            m_stepProgress -= changed_progress.old_current * changed_progress.weight;
+            m_stepTotalProgress -= changed_progress.old_total * changed_progress.weight;
+            m_stepProgress += changed_progress.current * changed_progress.weight;
+            m_stepTotalProgress += changed_progress.total * changed_progress.weight;
             break;
     }
 }

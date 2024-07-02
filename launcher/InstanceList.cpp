@@ -86,7 +86,7 @@ InstanceList::InstanceList(SettingsObjectPtr settings, const QString& instDir, Q
     connect(m_watcher, &QFileSystemWatcher::directoryChanged, this, &InstanceList::instanceDirContentsChanged);
 
     TaskManager* taskManager = APPLICATION->taskManager();
-    connect(taskManager, &TaskManager::progress, this, [this](QUuid taskId, QString instanceId, qint64 current, qint64 total) {
+    connect(taskManager, &TaskManager::progress, this, [this](QUuid taskId, QString instanceId, double current, double total) {
         InstancePtr inst = getInstanceById(instanceId);
         if (inst) {
             propertiesChanged(inst.get());

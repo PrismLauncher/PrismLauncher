@@ -52,7 +52,7 @@ class ResourceDownloadTask : public SequentialTask {
     NetJob::Ptr m_filesNetJob;
     LocalModUpdateTask::Ptr m_update_task;
 
-    void downloadProgressChanged(qint64 current, qint64 total);
+    void downloadProgressChanged(double current, double total);
     void downloadFailed(QString reason);
     void downloadSucceeded();
 

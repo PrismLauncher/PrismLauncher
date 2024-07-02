@@ -87,7 +87,7 @@ class VersionSelectWidget : public QWidget {
    private slots:
     void onTaskSucceeded();
     void onTaskFailed(const QString& reason);
-    void changeProgress(qint64 current, qint64 total);
+    void changeProgress(double current, double total);
     void currentRowChanged(const QModelIndex& current, const QModelIndex&);
 
    private:

@@ -86,7 +86,7 @@ void Technic::SingleZipPackInstallTask::downloadFailed(QString reason)
     m_filesNetJob.reset();
 }
 
-void Technic::SingleZipPackInstallTask::downloadProgressChanged(qint64 current, qint64 total)
+void Technic::SingleZipPackInstallTask::downloadProgressChanged(double current, double total)
 {
     m_abortable = true;
     setProgress(current / 2, total);

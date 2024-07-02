@@ -277,7 +277,7 @@ bool ModrinthCreationTask::createInstance()
         setError(reason);
     });
     connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
+    connect(m_files_job.get(), &NetJob::progress, [&](double current, double total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);
     });

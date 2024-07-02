@@ -159,7 +159,7 @@ void VersionSelectWidget::onTaskFailed(const QString& reason)
     onTaskSucceeded();
 }
 
-void VersionSelectWidget::changeProgress(qint64 current, qint64 total)
+void VersionSelectWidget::changeProgress(double current, double total)
 {
     sneakyProgressBar->setMaximum(total);
     sneakyProgressBar->setValue(current);

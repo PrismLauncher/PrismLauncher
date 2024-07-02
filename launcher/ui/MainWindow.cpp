@@ -286,7 +286,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         view->setSelectionMode(QAbstractItemView::SingleSelection);
         // FIXME: leaks ListViewDelegate
-        view->setItemDelegate(new ListViewDelegate(this));
+        view->setItemDelegate(new ListViewDelegate(ui->centralWidget));
         view->setFrameShape(QFrame::NoFrame);
         // do not show ugly blue border on the mac
         view->setAttribute(Qt::WA_MacShowFocusRect, false);
