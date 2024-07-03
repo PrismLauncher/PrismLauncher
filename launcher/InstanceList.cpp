@@ -710,6 +710,12 @@ void InstanceList::saveGroupList()
         groupsArr.insert(name, groupObj);
     }
     toplevel.insert("groups", groupsArr);
+    // empty string represents ungrouped "group"
+    if (m_collapsedGroups.contains("")) {
+        QJsonObject ungrouped;
+        ungrouped.insert("hidden", QJsonValue(true));
+        toplevel.insert("ungrouped", ungrouped);
+    }
     QJsonDocument doc(toplevel);
     try {
         FS::write(groupFileName, doc.toJson());
@@ -804,6 +810,16 @@ void InstanceList::loadGroupList()
             m_instanceGroupIndex[value.toString()] = groupName;
             increaseGroupCount(groupName);
         }
+    }
+
+    bool ungroupedHidden = false;
+    if (rootObj.value("ungrouped").isObject()) {
+        QJsonObject ungrouped = rootObj.value("ungrouped").toObject();
+        ungroupedHidden = ungrouped.value("hidden").toBool(false);
+    }
+    if (ungroupedHidden) {
+        // empty string represents ungrouped "group"
+        m_collapsedGroups.insert("");
     }
     m_groupsLoaded = true;
     qDebug() << "Group list loaded.";
