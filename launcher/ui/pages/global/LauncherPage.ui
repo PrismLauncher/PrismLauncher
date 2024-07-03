@@ -244,12 +244,12 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="modpackUpdatePromptDisableBtn">
+           <widget class="QCheckBox" name="skipModpackUpdatePromptBtn">
             <property name="toolTip">
-             <string>When creating a new modpack instance, do not suggest updating existing instances.</string>
+             <string>When creating a new modpack instance, do not suggest updating existing instances instead.</string>
             </property>
             <property name="text">
-             <string>Always create new modpack instance</string>
+             <string>Skip modpack update prompt</string>
             </property>
            </widget>
           </item>

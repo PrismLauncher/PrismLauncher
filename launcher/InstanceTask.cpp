@@ -24,7 +24,7 @@ InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& ol
 
 ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name)
 {
-    if (APPLICATION->settings()->get("ModpackUpdatePromptDisabled").toBool())
+    if (APPLICATION->settings()->get("SkipModpackUpdatePrompt").toBool())
         return ShouldUpdate::SkipUpdating;
 
     auto info = CustomMessageBox::selectable(
