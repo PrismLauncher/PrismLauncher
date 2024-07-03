@@ -243,6 +243,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="modpackUpdatePromptDisableBtn">
+            <property name="toolTip">
+             <string>When creating a new modpack instance, do not suggest updating existing instances.</string>
+            </property>
+            <property name="text">
+             <string>Always create new modpack instance</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
