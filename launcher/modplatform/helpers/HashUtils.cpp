@@ -128,10 +128,6 @@ QString hash(QString fileName, Algorithm type)
     QFile file(fileName);
     return hash(&file, type);
 }
-QString hashFile(QString fileName, Algorithm type)
-{
-    return hash(fileName, type);
-}
 
 QString hash(QByteArray data, Algorithm type)
 {
@@ -141,7 +137,8 @@ QString hash(QByteArray data, Algorithm type)
 
 void Hasher::executeTask()
 {
-    m_future = QtConcurrent::run(QThreadPool::globalInstance(), hashFile, m_path, m_alg);
+    m_future = QtConcurrent::run(
+        QThreadPool::globalInstance(), [](QString fileName, Algorithm type) { return hash(fileName, type); }, m_path, m_alg);
     connect(&m_watcher, &QFutureWatcher<QString>::finished, this, [this] {
         if (m_future.isCanceled()) {
             emitAborted();
