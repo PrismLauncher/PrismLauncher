@@ -294,12 +294,17 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     QString adjustedBy;
     QString dataPath;
     // change folder
+    QString dataDirEnv;
     QString dirParam = parser.value("dir");
     if (!dirParam.isEmpty()) {
         // the dir param. it makes multimc data path point to whatever the user specified
         // on command line
         adjustedBy = "Command line";
         dataPath = dirParam;
+    } else if (dataDirEnv = QProcessEnvironment::systemEnvironment().value(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper()));
+               !dataDirEnv.isEmpty()) {
+        adjustedBy = "System environment";
+        dataPath = dataDirEnv;
     } else {
         QDir foo;
         if (DesktopServices::isSnap()) {
@@ -445,7 +450,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // search the dataPath()
         // seach app data standard path
-        if (!foundLoggingRules && !isPortable() && dirParam.isEmpty()) {
+        if (!foundLoggingRules && !isPortable() && dirParam.isEmpty() && dataDirEnv.isEmpty()) {
             logRulesPath = QStandardPaths::locate(QStandardPaths::AppDataLocation, FS::PathCombine("..", logRulesFile));
             if (!logRulesPath.isEmpty()) {
                 qDebug() << "Found" << logRulesPath << "...";
@@ -556,6 +561,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("NumberOfConcurrentTasks", 10);
         m_settings->registerSetting("NumberOfConcurrentDownloads", 6);
+        m_settings->registerSetting("RequestTimeout", 60);
 
         QString defaultMonospace;
         int defaultSize = 11;
