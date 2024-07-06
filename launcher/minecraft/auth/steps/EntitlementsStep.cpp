@@ -10,7 +10,7 @@
 #include "Logging.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/Download.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/RawHeaderProxy.h"
 #include "tasks/Task.h"
 
 EntitlementsStep::EntitlementsStep(AccountData* data) : AuthStep(data) {}
@@ -32,7 +32,7 @@ void EntitlementsStep::perform()
 
     m_response.reset(new QByteArray());
     m_task = Net::Download::makeByteArray(url, m_response);
-    m_task->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     connect(m_task.get(), &Task::finished, this, &EntitlementsStep::onRequestDone);
 

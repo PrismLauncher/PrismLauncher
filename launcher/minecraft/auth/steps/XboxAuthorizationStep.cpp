@@ -8,7 +8,7 @@
 #include "Logging.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/RawHeaderProxy.h"
 #include "net/Upload.h"
 
 XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Token* token, QString relyingParty, QString authorizationKind)
@@ -43,7 +43,7 @@ void XboxAuthorizationStep::perform()
     };
     m_response.reset(new QByteArray());
     m_task = Net::Upload::makeByteArray(url, m_response, xbox_auth_data.toUtf8());
-    m_task->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     connect(m_task.get(), &Task::finished, this, &XboxAuthorizationStep::onRequestDone);
 
