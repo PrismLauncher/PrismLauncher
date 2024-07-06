@@ -291,7 +291,7 @@ void Component::resetComponentProblems()
 {
     m_componentProblems.clear();
     m_componentProblemSeverity = ProblemSeverity::None;
-    
+
     emit dataChanged();
 }
 
