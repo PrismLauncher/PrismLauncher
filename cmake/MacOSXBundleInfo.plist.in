@@ -79,6 +79,14 @@
             <string>curseforge</string>
             </array>
         </dict>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>Prismlauncher</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+            <string>prismlauncher</string>
+            </array>
+        </dict>
     </array>
 </dict>
 </plist>

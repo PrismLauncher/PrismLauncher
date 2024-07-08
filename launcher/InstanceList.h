@@ -58,7 +58,7 @@ enum class GroupsState { NotLoaded, Steady, Dirty };
 
 struct TrashHistoryItem {
     QString id;
-    QString rootPath;
+    QString path;
     QString trashPath;
     QString groupName;
 };
