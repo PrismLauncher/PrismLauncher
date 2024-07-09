@@ -90,6 +90,7 @@ class TaskV2 : public QObject, public QRunnable {
     QString title() const { return m_title; }
     double progress() const { return m_progress; }
     double progressTotal() const { return m_progressTotal; }
+    double weight() const { return m_weight; }
 
     Capabilities capabilities() const { return m_capabilities; }
     void setCapabilities(Capabilities capabilities) { m_capabilities = capabilities; }
@@ -129,10 +130,10 @@ class TaskV2 : public QObject, public QRunnable {
     void paused(TaskV2* job);
     void totalChanged(TaskV2* job, double total, double delta);
     void processedChanged(TaskV2* job, double current, double delta);
+    void weightChanged(TaskV2* job);
     void stateChanged(TaskV2* job);
     void warning(TaskV2* job, const QString& message);
     void subTaskAdded(TaskV2* job, TaskV2* subTask);
-    void subTaskRemoved(TaskV2* job, TaskV2* subTask);
 
    public slots:
     // QRunnable's interface
@@ -283,6 +284,7 @@ class TaskV2 : public QObject, public QRunnable {
         auto delta = progressTotal - m_progressTotal;
         SET_FIELD(m_progressTotal, progressTotal, totalChanged(this, m_progressTotal, delta));
     }
+    void setWeight(double weight) { SET_FIELD(m_weight, weight, weightChanged(this)); }
 
    protected:
    private:
@@ -299,4 +301,5 @@ class TaskV2 : public QObject, public QRunnable {
     QString m_title = {};
     double m_progress = 0;
     double m_progressTotal = 100;
+    double m_weight = 1;
 };
