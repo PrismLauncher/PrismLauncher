@@ -10,7 +10,7 @@
 #include "modplatform/helpers/OverrideUtils.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
-#include "net/ChecksumValidator.h"
+#include "net/validators/ChecksumValidator.h"
 
 #include "net/ApiDownload.h"
 #include "net/NetJob.h"

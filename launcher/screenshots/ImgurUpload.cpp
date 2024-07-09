@@ -36,7 +36,8 @@
 
 #include "ImgurUpload.h"
 #include "BuildConfig.h"
-#include "net/RawHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
+#include "net/sinks/Sink.h"
 
 #include <QDebug>
 #include <QFile>
@@ -52,7 +53,7 @@ QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
     auto file = new QFile(m_fileInfo.absoluteFilePath(), this);
 
     if (!file->open(QFile::ReadOnly)) {
-        emitFailed();
+        emitFailed("failed to open the screenshot");
         return nullptr;
     }
 
@@ -75,41 +76,41 @@ QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
     return m_network->post(request, multipart);
 };
 
-auto ImgurUpload::Sink::init(QNetworkRequest& request) -> Task::State
+Net::Sink::State ImgurUpload::Sink::init(QNetworkRequest& request)
 {
     m_output.clear();
-    return Task::State::Running;
+    return State::OK;
 };
 
-auto ImgurUpload::Sink::write(QByteArray& data) -> Task::State
+Net::Sink::State ImgurUpload::Sink::write(QByteArray& data)
 {
     m_output.append(data);
-    return Task::State::Running;
+    return State::OK;
 }
 
-auto ImgurUpload::Sink::abort() -> Task::State
+Net::Sink::State ImgurUpload::Sink::abort()
 {
     m_output.clear();
-    return Task::State::Failed;
+    return State::Failed;
 }
 
-auto ImgurUpload::Sink::finalize(QNetworkReply&) -> Task::State
+Net::Sink::State ImgurUpload::Sink::finalize(QNetworkReply&)
 {
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(m_output, &jsonError);
     if (jsonError.error != QJsonParseError::NoError) {
         qDebug() << "imgur server did not reply with JSON" << jsonError.errorString();
-        return Task::State::Failed;
+        return State::Failed;
     }
     auto object = doc.object();
     if (!object.value("success").toBool()) {
         qDebug() << "Screenshot upload not successful:" << doc.toJson();
-        return Task::State::Failed;
+        return State::Failed;
     }
     m_shot->m_imgurId = object.value("data").toObject().value("id").toString();
     m_shot->m_url = object.value("data").toObject().value("link").toString();
     m_shot->m_imgurDeleteHash = object.value("data").toObject().value("deletehash").toString();
-    return Task::State::Succeeded;
+    return State::Succeeded;
 }
 
 Net::NetRequest::Ptr ImgurUpload::make(ScreenShot::Ptr m_shot)

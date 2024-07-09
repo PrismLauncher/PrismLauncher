@@ -52,7 +52,7 @@
 #include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/atlauncher/ATLPackManifest.h"
-#include "net/ChecksumValidator.h"
+#include "net/validators/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
 
 #include "net/ApiDownload.h"

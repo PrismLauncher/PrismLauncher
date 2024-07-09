@@ -18,8 +18,8 @@
  */
 
 #include "net/ApiUpload.h"
-#include "net/ApiHeaderProxy.h"
 #include "net/Upload.h"
+#include "net/headers/ApiHeaderProxy.h"
 
 namespace Net {
 

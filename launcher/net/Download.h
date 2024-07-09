@@ -51,11 +51,11 @@ class Download : public NetRequest {
     explicit Download() : NetRequest() { logCat = taskDownloadLogC; }
 
 #if defined(LAUNCHER_APPLICATION)
-    static auto makeCached(QUrl url, MetaEntryPtr entry, Options options = Option::NoOptions) -> Download::Ptr;
+    static Download::Ptr makeCached(QUrl url, MetaEntry::Ptr entry, Options options = Option::NoOptions);
 #endif
 
-    static auto makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options = Option::NoOptions) -> Download::Ptr;
-    static auto makeFile(QUrl url, QString path, Options options = Option::NoOptions) -> Download::Ptr;
+    static Download::Ptr makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options = Option::NoOptions);
+    static Download::Ptr makeFile(QUrl url, QString path, Options options = Option::NoOptions);
 
    protected:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;

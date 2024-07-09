@@ -39,8 +39,8 @@
 #include <QHttpMultiPart>
 
 #include "FileSystem.h"
-#include "net/ByteArraySink.h"
-#include "net/RawHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
+#include "net/sinks/ByteArraySink.h"
 
 SkinUpload::SkinUpload(QString path, QString variant) : NetRequest(), m_path(path), m_variant(variant)
 {

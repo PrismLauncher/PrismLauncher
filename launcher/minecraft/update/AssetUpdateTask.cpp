@@ -3,7 +3,7 @@
 #include "minecraft/AssetsUtils.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "net/ChecksumValidator.h"
+#include "net/validators/ChecksumValidator.h"
 
 #include "Application.h"
 

@@ -8,8 +8,9 @@
 #include "Logging.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
-#include "net/RawHeaderProxy.h"
 #include "net/Upload.h"
+#include "net/headers/RawHeaderProxy.h"
+#include "tasks/Task.h"
 
 XboxAuthorizationStep::XboxAuthorizationStep(AccountData* data, Token* token, QString relyingParty, QString authorizationKind)
     : AuthStep(data), m_token(token), m_relyingParty(relyingParty), m_authorizationKind(authorizationKind)
@@ -46,10 +47,9 @@ void XboxAuthorizationStep::perform()
     m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     m_task.reset(new NetJob("XboxAuthorizationStep", APPLICATION->network()));
-    m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &XboxAuthorizationStep::onRequestDone);
+    connect(m_task.get(), &TaskV2::finished, this, &XboxAuthorizationStep::onRequestDone);
 
     m_task->start();
     qDebug() << "Getting authorization token for " << m_relyingParty;

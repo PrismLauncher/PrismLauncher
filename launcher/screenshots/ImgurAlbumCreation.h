@@ -53,11 +53,11 @@ class ImgurAlbumCreation : public Net::NetRequest {
         virtual ~Sink() = default;
 
        public:
-        auto init(QNetworkRequest& request) -> Task::State override;
-        auto write(QByteArray& data) -> Task::State override;
-        auto abort() -> Task::State override;
-        auto finalize(QNetworkReply& reply) -> Task::State override;
-        auto hasLocalData() -> bool override { return false; }
+        State init(QNetworkRequest& request) override;
+        State write(QByteArray& data) override;
+        State abort() override;
+        State finalize(QNetworkReply& reply) override;
+        bool hasLocalData() override { return false; }
 
        private:
         std::shared_ptr<Result> m_result;

@@ -47,8 +47,8 @@
 #include "BuildConfig.h"
 #include "FileSystem.h"
 #include "net/ApiDownload.h"
-#include "net/ChecksumValidator.h"
 #include "net/Download.h"
+#include "net/validators/ChecksumValidator.h"
 
 #include "Application.h"
 #include "net/NetRequest.h"
@@ -286,7 +286,7 @@ Net::NetRequest::Ptr AssetObject::getDownloadAction()
             auto rawHash = QByteArray::fromHex(hash.toLatin1());
             objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
         }
-        objectDL->setProgress(objectDL->getProgress(), size);
+        objectDL->setProgressTotal(static_cast<double>(size));
         return objectDL;
     }
     return nullptr;
@@ -316,7 +316,7 @@ NetJob::Ptr AssetsIndex::getDownloadJob()
             job->addNetAction(dl);
         }
     }
-    if (job->size())
+    if (job->totalSize())
         return job;
     return nullptr;
 }

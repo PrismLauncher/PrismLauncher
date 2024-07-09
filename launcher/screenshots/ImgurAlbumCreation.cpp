@@ -46,7 +46,7 @@
 #include <memory>
 
 #include "BuildConfig.h"
-#include "net/RawHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
 
 Net::NetRequest::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation::Result> output, QList<ScreenShot::Ptr> screenshots)
 {
@@ -71,38 +71,38 @@ QNetworkReply* ImgurAlbumCreation::getReply(QNetworkRequest& request)
     return m_network->post(request, data);
 };
 
-auto ImgurAlbumCreation::Sink::init(QNetworkRequest& request) -> Task::State
+Net::Sink::State ImgurAlbumCreation::Sink::init(QNetworkRequest&)
 {
     m_output.clear();
-    return Task::State::Running;
+    return State::OK;
 };
 
-auto ImgurAlbumCreation::Sink::write(QByteArray& data) -> Task::State
+Net::Sink::State ImgurAlbumCreation::Sink::write(QByteArray& data)
 {
     m_output.append(data);
-    return Task::State::Running;
+    return State::OK;
 }
 
-auto ImgurAlbumCreation::Sink::abort() -> Task::State
+Net::Sink::State ImgurAlbumCreation::Sink::abort()
 {
     m_output.clear();
-    return Task::State::Failed;
+    return State::Failed;
 }
 
-auto ImgurAlbumCreation::Sink::finalize(QNetworkReply&) -> Task::State
+Net::Sink::State ImgurAlbumCreation::Sink::finalize(QNetworkReply&)
 {
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(m_output, &jsonError);
     if (jsonError.error != QJsonParseError::NoError) {
         qDebug() << jsonError.errorString();
-        return Task::State::Failed;
+        return State::Failed;
     }
     auto object = doc.object();
     if (!object.value("success").toBool()) {
         qDebug() << doc.toJson();
-        return Task::State::Failed;
+        return State::Failed;
     }
     m_result->deleteHash = object.value("data").toObject().value("deletehash").toString();
     m_result->id = object.value("data").toObject().value("id").toString();
-    return Task::State::Succeeded;
+    return State::Succeeded;
 }

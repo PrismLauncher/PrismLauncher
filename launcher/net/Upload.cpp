@@ -40,7 +40,7 @@
 
 #include <memory>
 #include <utility>
-#include "ByteArraySink.h"
+#include "sinks/ByteArraySink.h"
 
 namespace Net {
 

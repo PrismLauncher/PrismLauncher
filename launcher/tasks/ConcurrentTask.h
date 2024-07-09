@@ -60,6 +60,9 @@ class ConcurrentTask : public TaskV2 {
 
     void addTask(TaskV2::Ptr task);
 
+    // NOTE: This is not thread-safe.
+    [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
+
    public slots:
 
     /** Resets the internal state of the task.
@@ -77,9 +80,6 @@ class ConcurrentTask : public TaskV2 {
     virtual void subTaskFinished(TaskV2*);
 
    protected:
-    // NOTE: This is not thread-safe.
-    [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
-
     virtual void updateState();
 
     void startSubTask(TaskV2::Ptr task);

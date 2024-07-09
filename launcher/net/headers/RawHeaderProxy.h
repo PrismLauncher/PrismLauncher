@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "net/HeaderProxy.h"
+#include "HeaderProxy.h"
 
 namespace Net {
 
@@ -33,7 +33,7 @@ struct HeaderPair {
 
 class RawHeaderProxy : public HeaderProxy {
    public:
-    RawHeaderProxy(QList<HeaderPair> headers = {}) : HeaderProxy(), m_headers(headers){};
+    RawHeaderProxy(QList<HeaderPair> headers = {}) : HeaderProxy(), m_headers(headers) {};
     virtual ~RawHeaderProxy() = default;
 
    public:

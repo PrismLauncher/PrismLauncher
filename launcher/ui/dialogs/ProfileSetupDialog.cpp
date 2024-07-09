@@ -34,7 +34,7 @@
  */
 
 #include "ProfileSetupDialog.h"
-#include "net/RawHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
 #include "ui_ProfileSetupDialog.h"
 
 #include <QAction>
@@ -42,8 +42,6 @@
 #include <QJsonDocument>
 #include <QPushButton>
 #include <QRegularExpressionValidator>
-
-#include "ui/dialogs/ProgressDialog.h"
 
 #include <Application.h>
 #include "minecraft/auth/Parsers.h"
@@ -162,7 +160,7 @@ void ProfileSetupDialog::checkName(const QString& name)
     m_check_task = Net::Download::makeByteArray(url, m_check_response);
     m_check_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
-    connect(m_check_task.get(), &Task::finished, this, &ProfileSetupDialog::checkFinished);
+    connect(m_check_task.get(), &TaskV2::finished, this, &ProfileSetupDialog::checkFinished);
 
     m_check_task->setNetwork(APPLICATION->network());
     m_check_task->start();
@@ -206,7 +204,7 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
     m_profile_task = Net::Upload::makeByteArray(url, m_profile_response, payloadTemplate.arg(profileName).toUtf8());
     m_profile_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
-    connect(m_profile_task.get(), &Task::finished, this, &ProfileSetupDialog::setupProfileFinished);
+    connect(m_profile_task.get(), &TaskV2::finished, this, &ProfileSetupDialog::setupProfileFinished);
 
     m_profile_task->setNetwork(APPLICATION->network());
     m_profile_task->start();

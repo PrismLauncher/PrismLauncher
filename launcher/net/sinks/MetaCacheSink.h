@@ -35,31 +35,23 @@
 
 #pragma once
 
-#include <QSaveFile>
-
-#include "Sink.h"
+#include "FileSink.h"
+#include "net/HttpMetaCache.h"
+#include "net/validators/ChecksumValidator.h"
 
 namespace Net {
-class FileSink : public Sink {
+class MetaCacheSink : public FileSink {
    public:
-    FileSink(QString filename) : m_filename(filename) {};
-    virtual ~FileSink() = default;
-
-   public:
-    auto init(QNetworkRequest& request) -> Task::State override;
-    auto write(QByteArray& data) -> Task::State override;
-    auto abort() -> Task::State override;
-    auto finalize(QNetworkReply& reply) -> Task::State override;
-
-    auto hasLocalData() -> bool override;
+    MetaCacheSink(MetaEntry::Ptr entry, ChecksumValidator* md5sum, bool is_eternal = false);
+    virtual ~MetaCacheSink() = default;
 
    protected:
-    virtual auto initCache(QNetworkRequest&) -> Task::State;
-    virtual auto finalizeCache(QNetworkReply& reply) -> Task::State;
+    State initCache(QNetworkRequest& request) override;
+    State finalizeCache(QNetworkReply& reply) override;
 
-   protected:
-    QString m_filename;
-    bool wroteAnyData = false;
-    std::unique_ptr<QSaveFile> m_output_file;
+   private:
+    MetaEntry::Ptr m_entry;
+    ChecksumValidator* m_md5Node;
+    bool m_is_eternal;
 };
 }  // namespace Net

@@ -43,14 +43,14 @@
 #include <QFileInfo>
 #include <memory>
 
-#include "ByteArraySink.h"
-#include "ChecksumValidator.h"
-#include "MetaCacheSink.h"
+#include "sinks/ByteArraySink.h"
+#include "sinks/MetaCacheSink.h"
+#include "validators/ChecksumValidator.h"
 
 namespace Net {
 
 #if defined(LAUNCHER_APPLICATION)
-auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
+Download::Ptr Download::makeCached(QUrl url, MetaEntry::Ptr entry, Options options)
 {
     auto dl = makeShared<Download>();
     dl->m_url = url;
@@ -63,7 +63,7 @@ auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Down
 }
 #endif
 
-auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
+Download::Ptr Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options)
 {
     auto dl = makeShared<Download>();
     dl->m_url = url;
@@ -73,7 +73,7 @@ auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Optio
     return dl;
 }
 
-auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
+Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
 {
     auto dl = makeShared<Download>();
     dl->m_url = url;

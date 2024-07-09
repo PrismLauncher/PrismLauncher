@@ -35,7 +35,6 @@
 
 #pragma once
 
-#include <qobject.h>
 #include "net/validators/Validator.h"
 
 namespace Net {
@@ -52,11 +51,9 @@ class Sink {
     virtual State write(QByteArray& data) = 0;
     virtual State abort() = 0;
     virtual State finalize(QNetworkReply& reply) = 0;
-    virtual State pause() = 0;
-    virtual State resume(QNetworkReply& reply) = 0;
-    virtual qint64 writtenData() = 0;
 
     virtual bool hasLocalData() = 0;
+    virtual bool canPause() { return false; }
 
     QString failReason() const { return m_fail_reason; }
     void addValidator(Validator* validator)

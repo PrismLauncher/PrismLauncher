@@ -44,9 +44,9 @@
 #include <QUrl>
 #include <chrono>
 
-#include "HeaderProxy.h"
-#include "Sink.h"
-#include "Validator.h"
+#include "headers/HeaderProxy.h"
+#include "sinks/Sink.h"
+#include "validators/Validator.h"
 
 #include "QObjectPtr.h"
 #include "net/Logging.h"

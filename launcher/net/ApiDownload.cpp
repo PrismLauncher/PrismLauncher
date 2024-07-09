@@ -18,11 +18,11 @@
  */
 
 #include "net/ApiDownload.h"
-#include "net/ApiHeaderProxy.h"
+#include "net/headers/ApiHeaderProxy.h"
 
 namespace Net {
 
-Download::Ptr ApiDownload::makeCached(QUrl url, MetaEntryPtr entry, Download::Options options)
+Download::Ptr ApiDownload::makeCached(QUrl url, MetaEntry::Ptr entry, Download::Options options)
 {
     auto dl = Download::makeCached(url, entry, options);
     dl->addHeaderProxy(new ApiHeaderProxy());

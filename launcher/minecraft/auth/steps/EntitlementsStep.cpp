@@ -11,7 +11,7 @@
 #include "minecraft/auth/Parsers.h"
 #include "net/Download.h"
 #include "net/NetJob.h"
-#include "net/RawHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
 #include "tasks/Task.h"
 
 EntitlementsStep::EntitlementsStep(AccountData* data) : AuthStep(data) {}
@@ -36,10 +36,9 @@ void EntitlementsStep::perform()
     m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     m_task.reset(new NetJob("EntitlementsStep", APPLICATION->network()));
-    m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &EntitlementsStep::onRequestDone);
+    connect(m_task.get(), &TaskV2::finished, this, &EntitlementsStep::onRequestDone);
 
     m_task->start();
     qDebug() << "Getting entitlements...";

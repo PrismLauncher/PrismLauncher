@@ -24,7 +24,7 @@
 namespace Net {
 
 namespace ApiDownload {
-Download::Ptr makeCached(QUrl url, MetaEntryPtr entry, Download::Options options = Download::Option::NoOptions);
+Download::Ptr makeCached(QUrl url, MetaEntry::Ptr entry, Download::Options options = Download::Option::NoOptions);
 Download::Ptr makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Download::Options options = Download::Option::NoOptions);
 Download::Ptr makeFile(QUrl url, QString path, Download::Options options = Download::Option::NoOptions);
 };  // namespace ApiDownload

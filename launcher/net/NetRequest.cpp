@@ -72,23 +72,16 @@ void NetRequest::executeTask()
 
     QNetworkRequest request(m_url);
     switch (m_sink->init(request)) {
-        case State::Succeeded:
+        case Sink::State::OK:
+            qCDebug(logCat) << uuid().toString() << "Runninng " << m_url.toString();
+            break;
+        case Sink::State::Succeeded:
             qCDebug(logCat) << uuid().toString() << "Request cache hit " << m_url.toString();
             emitSucceeded();
             return;
-        case State::Running:
-            qCDebug(logCat) << uuid().toString() << "Runninng " << m_url.toString();
-            break;
-        case State::Inactive:
-        case State::Failed:
+        case Sink::State::Failed:
             emitFailed("Failed to initilize sink");
             return;
-        case State::AbortedByUser:
-            emitFailed("Aborted");
-            return;
-        case TaskV2::Paused:
-        case TaskV2::Finished:
-            break;
     }
 
 #if defined(LAUNCHER_APPLICATION)
@@ -137,12 +130,13 @@ void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
     // use milliseconds for speed precision
     auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
     auto bytes_received_since = bytesReceived - m_last_progress_bytes;
-    auto dl_speed_bps = (double)bytes_received_since / elapsed_ms.count() * 1000;
-    auto remaining_time_s = (bytesTotal - bytesReceived) / dl_speed_bps;
+    auto dl_speed_bps = static_cast<double>(bytes_received_since) / static_cast<double>(elapsed_ms.count()) * 1000;
+    auto remaining_time_s = static_cast<double>(bytesTotal - bytesReceived) / dl_speed_bps;
 
     //: Current amount of bytes downloaded, out of the total amount of bytes in the download
-    QString dl_progress =
-        tr("%1 / %2").arg(StringUtils::humanReadableFileSize(bytesReceived)).arg(StringUtils::humanReadableFileSize(bytesTotal));
+    QString dl_progress = tr("%1 / %2")
+                              .arg(StringUtils::humanReadableFileSize(static_cast<double>(bytesReceived)))
+                              .arg(StringUtils::humanReadableFileSize(static_cast<double>(bytesTotal)));
 
     QString dl_speed_str;
     if (elapsed_ms.count() > 0) {
@@ -155,8 +149,8 @@ void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
     }
 
     setDetails(dl_progress + "\n" + dl_speed_str);
-    setProgressTotal(bytesTotal);
-    setProgress(bytesReceived);
+    setProgressTotal(static_cast<double>(bytesTotal));
+    setProgress(static_cast<double>(bytesReceived));
 }
 
 void NetRequest::downloadError(QNetworkReply::NetworkError error)
@@ -272,7 +266,7 @@ void NetRequest::downloadFinished()
     auto data = m_reply->readAll();
     if (data.size()) {
         qCDebug(logCat) << uuid().toString() << "Writing extra" << data.size() << "bytes";
-        if (m_sink->write(data) != State::Succeeded) {
+        if (m_sink->write(data) != Sink::State::Succeeded) {
             qCDebug(logCat) << uuid().toString() << "Request failed to write:" << m_url.toString();
             m_sink->abort();
             emitFailed("failed to write in sink");
@@ -281,7 +275,7 @@ void NetRequest::downloadFinished()
     }
 
     // otherwise, finalize the whole graph
-    if (m_sink->finalize(*m_reply.get()) != State::Succeeded) {
+    if (m_sink->finalize(*m_reply.get()) != Sink::State::Succeeded) {
         qCDebug(logCat) << uuid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
         emitFailed("failed to finalize the request");
@@ -296,7 +290,7 @@ void NetRequest::downloadReadyRead()
 {
     if (state() == State::Running) {
         auto data = m_reply->readAll();
-        if (m_sink->write(data) == State::Failed) {
+        if (m_sink->write(data) == Sink::State::Failed) {
             qCCritical(logCat) << uuid().toString() << "Failed to process response chunk";
         }
         // qDebug() << "Request" << m_url.toString() << "gained" << data.size() << "bytes";
@@ -340,12 +334,17 @@ QString NetRequest::errorString() const
 
 bool NetRequest::doPause()
 {
-    return false;
+    if (!m_sink->canPause() || !m_reply)
+        return false;
+    disconnect(m_reply.get(), nullptr, this, nullptr);
+    m_reply->abort();
+    return true;
 }
 
 bool NetRequest::doResume()
 {
-    return false;
+    QMetaObject::invokeMethod(this, &NetRequest::executeTask, Qt::QueuedConnection);
+    return true;
 }
 
 void NetRequest::emitFailed(QString reason)

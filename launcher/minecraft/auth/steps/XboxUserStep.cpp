@@ -5,7 +5,8 @@
 #include "Application.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
-#include "net/RawHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
+#include "tasks/Task.h"
 
 XboxUserStep::XboxUserStep(AccountData* data) : AuthStep(data) {}
 
@@ -42,10 +43,9 @@ void XboxUserStep::perform()
     m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     m_task.reset(new NetJob("XboxUserStep", APPLICATION->network()));
-    m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &XboxUserStep::onRequestDone);
+    connect(m_task.get(), &TaskV2::finished, this, &XboxUserStep::onRequestDone);
 
     m_task->start();
     qDebug() << "First layer of XBox auth ... commencing.";

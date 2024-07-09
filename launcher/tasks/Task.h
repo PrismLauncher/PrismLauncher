@@ -94,6 +94,7 @@ class TaskV2 : public QObject, public QRunnable {
     Capabilities capabilities() const { return m_capabilities; }
     void setCapabilities(Capabilities capabilities) { m_capabilities = capabilities; }
 
+    bool wasSuccessful() const { return m_state & State::Succeeded; }
     bool isRunning() const { return m_state & State::Running; }
     bool isFinished() const { return m_state & State::Finished; }
     bool isPaused() const { return m_state & State::Paused; }
@@ -275,6 +276,8 @@ class TaskV2 : public QObject, public QRunnable {
         auto delta = progress - m_progress;
         SET_FIELD(m_progress, progress, processedChanged(this, m_progress, delta));
     }
+
+   public:
     void setProgressTotal(double progressTotal)
     {
         auto delta = progressTotal - m_progressTotal;

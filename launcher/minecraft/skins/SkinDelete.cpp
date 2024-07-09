@@ -36,8 +36,8 @@
 
 #include "SkinDelete.h"
 
-#include "net/ByteArraySink.h"
-#include "net/RawHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
+#include "net/sinks/ByteArraySink.h"
 
 SkinDelete::SkinDelete() : NetRequest()
 {

@@ -21,7 +21,6 @@
 
 #include <QDebug>
 #include <QNetworkRequest>
-#include <functional>
 
 namespace Net {
 

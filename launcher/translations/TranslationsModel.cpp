@@ -47,8 +47,9 @@
 #include "BuildConfig.h"
 #include "FileSystem.h"
 #include "Json.h"
-#include "net/ChecksumValidator.h"
+#include "net/Download.h"
 #include "net/NetJob.h"
+#include "net/validators/ChecksumValidator.h"
 
 #include "POTranslator.h"
 
@@ -197,28 +198,33 @@ void TranslationsModel::translationDirChanged(const QString& path)
     selectLanguage(selectedLanguage());
 }
 
-void TranslationsModel::indexReceived()
+void TranslationsModel::indexFinished(TaskV2* task)
 {
-    qDebug() << "Got translations index!";
-    d->m_index_job.reset();
+    if (task->wasSuccessful()) {
+        qDebug() << "Got translations index!";
+        d->m_index_job.reset();
 
-    if (d->no_language_set) {
-        reloadLocalFiles();
+        if (d->no_language_set) {
+            reloadLocalFiles();
 
-        auto language = d->m_system_locale;
-        if (!findLanguageAsOptional(language).has_value()) {
-            language = d->m_system_language;
+            auto language = d->m_system_locale;
+            if (!findLanguageAsOptional(language).has_value()) {
+                language = d->m_system_language;
+            }
+            selectLanguage(language);
+            if (selectedLanguage() != defaultLangCode) {
+                updateLanguage(selectedLanguage());
+            }
+            APPLICATION->settings()->set("Language", selectedLanguage());
+            d->no_language_set = false;
         }
-        selectLanguage(language);
-        if (selectedLanguage() != defaultLangCode) {
-            updateLanguage(selectedLanguage());
-        }
-        APPLICATION->settings()->set("Language", selectedLanguage());
-        d->no_language_set = false;
-    }
 
-    else if (d->m_selectedLanguage != defaultLangCode) {
-        downloadTranslation(d->m_selectedLanguage);
+        else if (d->m_selectedLanguage != defaultLangCode) {
+            downloadTranslation(d->m_selectedLanguage);
+        }
+    } else {
+        qCritical() << "Translations Index Download Failed:" << task->failReason();
+        d->m_index_job.reset();
     }
 }
 
@@ -548,13 +554,12 @@ void TranslationsModel::downloadIndex()
     }
     qDebug() << "Downloading Translations Index...";
     d->m_index_job.reset(new NetJob("Translations Index", APPLICATION->network()));
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
+    MetaEntry::Ptr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
     auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
     d->m_index_task = task.get();
     d->m_index_job->addNetAction(task);
-    connect(d->m_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
-    connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexReceived);
+    connect(d->m_index_job.get(), &NetJob::finished, this, &TranslationsModel::indexFinished);
     d->m_index_job->start();
 }
 
@@ -587,19 +592,18 @@ void TranslationsModel::downloadTranslation(QString key)
     }
 
     d->m_downloadingTranslation = key;
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
+    MetaEntry::Ptr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
     auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + lang->file_name), entry);
     auto rawHash = QByteArray::fromHex(lang->file_sha1.toLatin1());
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
-    dl->setProgress(dl->getProgress(), lang->file_size);
+    dl->setProgressTotal(static_cast<double>(lang->file_size));
 
     d->m_dl_job.reset(new NetJob("Translation for " + key, APPLICATION->network()));
     d->m_dl_job->addNetAction(dl);
 
-    connect(d->m_dl_job.get(), &NetJob::succeeded, this, &TranslationsModel::dlGood);
-    connect(d->m_dl_job.get(), &NetJob::failed, this, &TranslationsModel::dlFailed);
+    connect(d->m_dl_job.get(), &NetJob::finished, this, &TranslationsModel::dlFinished);
 
     d->m_dl_job->start();
 }
@@ -612,26 +616,17 @@ void TranslationsModel::downloadNext()
     }
 }
 
-void TranslationsModel::dlFailed(QString reason)
+void TranslationsModel::dlFinished(TaskV2* task)
 {
-    qCritical() << "Translations Download Failed:" << reason;
-    d->m_dl_job.reset();
-    downloadNext();
-}
+    if (task->wasSuccessful()) {
+        qDebug() << "Got translation:" << d->m_downloadingTranslation;
 
-void TranslationsModel::dlGood()
-{
-    qDebug() << "Got translation:" << d->m_downloadingTranslation;
-
-    if (d->m_downloadingTranslation == d->m_selectedLanguage) {
-        selectLanguage(d->m_selectedLanguage);
+        if (d->m_downloadingTranslation == d->m_selectedLanguage) {
+            selectLanguage(d->m_selectedLanguage);
+        }
+    } else {
+        qCritical() << "Translations Download Failed:" << task->failReason();
     }
     d->m_dl_job.reset();
     downloadNext();
-}
-
-void TranslationsModel::indexFailed(QString reason)
-{
-    qCritical() << "Translations Index Download Failed:" << reason;
-    d->m_index_job.reset();
 }

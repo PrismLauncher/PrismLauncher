@@ -112,16 +112,16 @@ set(PATHMATCHER_SOURCES
 
 set(NET_SOURCES
     # network stuffs
-    net/ByteArraySink.h
-    net/ChecksumValidator.h
+    net/sinks/ByteArraySink.h
+    net/validators/ChecksumValidator.h
     net/Download.cpp
     net/Download.h
-    net/FileSink.cpp
-    net/FileSink.h
+    net/sinks/FileSink.cpp
+    net/sinks/FileSink.h
     net/HttpMetaCache.cpp
     net/HttpMetaCache.h
-    net/MetaCacheSink.cpp
-    net/MetaCacheSink.h
+    net/sinks/MetaCacheSink.cpp
+    net/sinks/MetaCacheSink.h
     net/Logging.h
     net/Logging.cpp
     net/NetJob.cpp
@@ -133,9 +133,9 @@ set(NET_SOURCES
     net/validators/Validator.h
     net/Upload.cpp
     net/Upload.h
-    net/HeaderProxy.h
-    net/RawHeaderProxy.h
-    net/ApiHeaderProxy.h
+    net/headers/HeaderProxy.h
+    net/headers/RawHeaderProxy.h
+    net/headers/ApiHeaderProxy.h
     net/ApiDownload.h
     net/ApiDownload.cpp
     net/ApiUpload.cpp
@@ -609,12 +609,12 @@ set(PRISMUPDATER_SOURCES
     MMCTime.h
     MMCTime.cpp
 
-    net/ByteArraySink.h
-    net/ChecksumValidator.h
+    net/sinks/ByteArraySink.h
+    net/validators/ChecksumValidator.h
     net/Download.cpp
     net/Download.h
-    net/FileSink.cpp
-    net/FileSink.h
+    net/sinks/FileSink.cpp
+    net/sinks/FileSink.h
     net/HttpMetaCache.cpp
     net/HttpMetaCache.h
     net/Logging.h
@@ -626,8 +626,8 @@ set(PRISMUPDATER_SOURCES
     net/NetUtils.h
     net/sinks/Sink.h
     net/validators/Validator.h
-    net/HeaderProxy.h
-    net/RawHeaderProxy.h
+    net/headers/HeaderProxy.h
+    net/headers/RawHeaderProxy.h
 
     ui/dialogs/ProgressDialog.cpp
     ui/dialogs/ProgressDialog.h
