@@ -276,6 +276,15 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("OnlineFixes");
     }
 
+    // Minecraft Arguments
+    bool mcArguments = ui->mcArgumentsGroupBox->isChecked();
+    m_settings->set("OverrideAdditionalMinecraftArguments", mcArguments);
+    if (mcArguments) {
+        m_settings->set("AdditionalMinecraftArguments", ui->additionalMcArgs->toPlainText().replace("\n", " "));
+    } else {
+        m_settings->reset("AdditionalMinecraftArguments");
+    }
+
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -386,6 +395,9 @@ void InstanceSettingsPage::loadSettings()
 
     ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
     ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
+
+    ui->mcArgumentsGroupBox->setChecked(m_settings->get("OverrideAdditionalMinecraftArguments").toBool());
+    ui->additionalMcArgs->setPlainText(m_settings->get("AdditionalMinecraftArguments").toString());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

@@ -105,6 +105,10 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("ManagedPackVersionName", "");
 
     m_settings->registerSetting("Profiler", "");
+
+    // Additional Minecraft arguments
+    auto mcArgsOverride = m_settings->registerSetting("OverrideAdditionalMinecraftArguments", false);
+    m_settings->registerOverride(globalSettings->getSetting("AdditionalMinecraftArguments"), mcArgsOverride);
 }
 
 QString BaseInstance::getPreLaunchCommand()

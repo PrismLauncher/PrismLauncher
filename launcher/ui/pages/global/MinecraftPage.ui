@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>936</width>
-    <height>541</height>
+    <height>800</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -318,6 +318,18 @@
              <string>Use Zink</string>
             </property>
            </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="mcArgsGroupBox">
+         <property name="title">
+          <string>Addtional Minecraft arguments</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QPlainTextEdit" name="additionalMcArgs"/>
           </item>
          </layout>
         </widget>

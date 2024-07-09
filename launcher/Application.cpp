@@ -641,6 +641,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Legacy settings
         m_settings->registerSetting("OnlineFixes", false);
 
+        // Minecraft arguments
+        m_settings->registerSetting("AdditionalMinecraftArguments", "");
+
         // Native library workarounds
         m_settings->registerSetting("UseNativeOpenAL", false);
         m_settings->registerSetting("CustomOpenALPath", "");

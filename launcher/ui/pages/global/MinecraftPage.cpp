@@ -123,6 +123,9 @@ void MinecraftPage::applySettings()
 
     // Legacy settings
     s->set("OnlineFixes", ui->onlineFixes->isChecked());
+
+    // Additional Minecraft arguments
+    s->set("AdditionalMinecraftArguments", ui->additionalMcArgs->toPlainText().replace("\n", " "));
 }
 
 void MinecraftPage::loadSettings()
@@ -177,6 +180,9 @@ void MinecraftPage::loadSettings()
     ui->quitAfterGameStopCheck->setChecked(s->get("QuitAfterGameStop").toBool());
 
     ui->onlineFixes->setChecked(s->get("OnlineFixes").toBool());
+
+    // Additional Minecraft arguments
+    ui->additionalMcArgs->setPlainText(s->get("AdditionalMinecraftArguments").toString());
 }
 
 void MinecraftPage::retranslate()

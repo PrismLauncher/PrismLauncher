@@ -728,6 +728,24 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="mcArgumentsGroupBox">
+         <property name="title">
+          <string>Additonal Minecraft arguments</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QPlainTextEdit" name="additionalMcArgs"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacerMiscellaneous">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

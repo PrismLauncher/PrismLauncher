@@ -523,8 +523,7 @@ QStringList MinecraftInstance::javaArguments()
 
     if (javaVersion.isModular() && shouldApplyOnlineFixes())
         // allow reflective access to java.net - required by the skin fix
-        args << "--add-opens"
-             << "java.base/java.net=ALL-UNNAMED";
+        args << "--add-opens" << "java.base/java.net=ALL-UNNAMED";
 
     return args;
 }
@@ -673,6 +672,10 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
         }
     }
 
+    if (auto args = m_settings->get("AdditionalMinecraftArguments").toString().trimmed(); !args.isEmpty()) {
+        args_pattern += " " + args;
+    }
+
     QMap<QString, QString> token_mapping;
     // yggdrasil!
     if (session) {
@@ -790,10 +793,8 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
 QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin)
 {
     QStringList out;
-    out << "Main Class:"
-        << "  " + getMainClass() << "";
-    out << "Native path:"
-        << "  " + getNativePath() << "";
+    out << "Main Class:" << "  " + getMainClass() << "";
+    out << "Native path:" << "  " + getNativePath() << "";
 
     auto profile = m_components->getProfile();
 
