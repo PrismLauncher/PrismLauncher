@@ -80,7 +80,7 @@ void NetRequest::executeTask()
             emitSucceeded();
             return;
         case Sink::State::Failed:
-            emitFailed("Failed to initilize sink");
+            emitFailed(m_sink->failReason());
             return;
     }
 
@@ -278,7 +278,7 @@ void NetRequest::downloadFinished()
     if (m_sink->finalize(*m_reply.get()) != Sink::State::Succeeded) {
         qCDebug(logCat) << uuid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
-        emitFailed("failed to finalize the request");
+        emitFailed(m_sink->failReason());
         return;
     }
 
@@ -291,7 +291,7 @@ void NetRequest::downloadReadyRead()
     if (state() == State::Running) {
         auto data = m_reply->readAll();
         if (m_sink->write(data) == Sink::State::Failed) {
-            qCCritical(logCat) << uuid().toString() << "Failed to process response chunk";
+            qCCritical(logCat) << uuid().toString() << "Failed to process response chunk:" << m_sink->failReason();
         }
         // qDebug() << "Request" << m_url.toString() << "gained" << data.size() << "bytes";
     } else {

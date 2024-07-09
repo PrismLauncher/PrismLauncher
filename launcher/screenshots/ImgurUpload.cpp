@@ -91,6 +91,7 @@ Net::Sink::State ImgurUpload::Sink::write(QByteArray& data)
 Net::Sink::State ImgurUpload::Sink::abort()
 {
     m_output.clear();
+    m_fail_reason = "Aborted";
     return State::Failed;
 }
 
@@ -100,11 +101,13 @@ Net::Sink::State ImgurUpload::Sink::finalize(QNetworkReply&)
     QJsonDocument doc = QJsonDocument::fromJson(m_output, &jsonError);
     if (jsonError.error != QJsonParseError::NoError) {
         qDebug() << "imgur server did not reply with JSON" << jsonError.errorString();
+        m_fail_reason = "invalid json reply";
         return State::Failed;
     }
     auto object = doc.object();
     if (!object.value("success").toBool()) {
         qDebug() << "Screenshot upload not successful:" << doc.toJson();
+        m_fail_reason = "screenshot was not uploaded successful";
         return State::Failed;
     }
     m_shot->m_imgurId = object.value("data").toObject().value("id").toString();

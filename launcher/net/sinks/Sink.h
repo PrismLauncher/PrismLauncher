@@ -56,6 +56,7 @@ class Sink {
     virtual bool canPause() { return false; }
 
     QString failReason() const { return m_fail_reason; }
+
     void addValidator(Validator* validator)
     {
         if (validator) {

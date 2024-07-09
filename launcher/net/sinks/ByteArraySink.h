@@ -57,7 +57,7 @@ class ByteArraySink : public Sink {
             qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
         if (initAllValidators(request))
             return State::OK;
-        m_fail_reason = "failed to init validators";
+        m_fail_reason = "failed to initialize validators";
         return State::Failed;
     };
 
@@ -90,7 +90,7 @@ class ByteArraySink : public Sink {
 
     auto hasLocalData() -> bool override { return false; }
 
-   private:
+   protected:
     std::shared_ptr<QByteArray> m_output;
 };
 }  // namespace Net

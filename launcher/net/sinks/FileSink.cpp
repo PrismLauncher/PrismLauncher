@@ -51,6 +51,7 @@ Sink::State FileSink::init(QNetworkRequest& request)
     // create a new save file and open it for writing
     if (!FS::ensureFilePathExists(m_filename)) {
         qCCritical(taskNetLogC) << "Could not create folder for " + m_filename;
+        m_fail_reason = "could not create folder";
         return State::Failed;
     }
 
@@ -62,12 +63,14 @@ Sink::State FileSink::init(QNetworkRequest& request)
         m_output_file.reset(new QSaveFile(m_filename));
         if (!m_output_file->open(QIODevice::WriteOnly)) {
             qCCritical(taskNetLogC) << "Could not open " + m_filename + " for writing";
+            m_fail_reason = "could not open file";
             return State::Failed;
         }
     }
 
     if (initAllValidators(request))
         return State::OK;
+    m_fail_reason = "failed to initialize validators";
     return State::Failed;
 }
 
@@ -78,6 +81,7 @@ Sink::State FileSink::write(QByteArray& data)
         m_output_file->cancelWriting();
         m_output_file.reset();
         m_bytes_writen = 0;
+        m_fail_reason = "failed to write validators";
         return State::Failed;
     }
 
@@ -109,8 +113,10 @@ Sink::State FileSink::finalize(QNetworkReply& reply)
     if (gotFile || m_bytes_writen) {
         // ask validators for data consistency
         // we only do this for actual downloads, not 'your data is still the same' cache hits
-        if (!finalizeAllValidators(reply))
+        if (!finalizeAllValidators(reply)) {
+            m_fail_reason = "failed to finalize validators";
             return State::Failed;
+        }
 
         // nothing went wrong...
         if (!m_output_file->commit()) {
