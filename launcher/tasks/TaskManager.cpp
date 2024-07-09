@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  PrismLauncher - Minecraft Launcher
- *  Copyright (c) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2024 Rachel Powers <508861+Ryex@users.noreply.github.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 bool TaskManager::addTask(Task::Ptr task, const QString& instanceId)
 {
+    auto taskId = task->getUid();
     auto instanceList = m_instanceTaskMap.find(instanceId);
     if (instanceList != m_instanceTaskMap.end()) {
         // don't add the same task more than once
@@ -28,14 +29,16 @@ bool TaskManager::addTask(Task::Ptr task, const QString& instanceId)
                                      [task](const Task::Ptr& instTask) { return instTask->getUid() == task->getUid(); });
         if (taskIter == instanceList->cend()) {
             instanceList->append(task);
-            m_taskInstanceMap[task->getUid()] = instanceId;
+            m_taskInstanceMap[taskId] = instanceId;
             connectTask(task);
+            emit taskAdded(taskId);
             return true;
         }
     } else {
         m_instanceTaskMap[instanceId].append(task);
-        m_taskInstanceMap[task->getUid()] = instanceId;
+        m_taskInstanceMap[taskId] = instanceId;
         connectTask(task);
+        emit taskAdded(taskId);
         return true;
     }
     return false;
@@ -43,19 +46,21 @@ bool TaskManager::addTask(Task::Ptr task, const QString& instanceId)
 
 bool TaskManager::removeTask(Task::Ptr task)
 {
-    auto iter = m_taskInstanceMap.find(task->getUid());
+    auto taskId = task->getUid();
+    auto iter = m_taskInstanceMap.find(taskId);
     if (iter != m_taskInstanceMap.end()) {
         QString instanceId = *iter;
         int i = 0;
         for (auto instTask : m_instanceTaskMap[instanceId]) {
-            if (instTask->getUid() == task->getUid()) {
+            if (instTask->getUid() == taskId) {
                 m_instanceTaskMap[instanceId].removeAt(i);
                 break;
             }
             i++;
         }
-        m_taskInstanceMap.remove(task->getUid());
+        m_taskInstanceMap.remove(taskId);
         disconnectTask(task);
+        emit taskRemoved(taskId);
         return true;
     }
     return false;
@@ -96,7 +101,7 @@ Task::Ptr TaskManager::getTask(QUuid taskId)
     if (taskInstanceIter != m_taskInstanceMap.end()) {
         auto taskListIter = m_instanceTaskMap.find(*taskInstanceIter);
         if (taskListIter != m_instanceTaskMap.end()) {
-            auto taskList = *taskListIter;
+            auto taskList = taskListIter.value();
             auto taskIter = std::find_if(taskList.begin(), taskList.end(),
                                          [taskId](const Task::Ptr& instTask) { return instTask->getUid() == taskId; });
             if (taskIter != taskList.end()) {
@@ -105,6 +110,38 @@ Task::Ptr TaskManager::getTask(QUuid taskId)
         }
     }
     return nullptr;
+}
+
+Task::Ptr TaskManager::getTask(int index)
+{
+    int count = index;
+    auto it = m_taskInstanceMap.cbegin();
+    while (it != m_taskInstanceMap.cend() && count > 0) {
+        it++;
+        count--;
+    }
+    if (count == 0 && it != m_taskInstanceMap.cend()) {
+        auto taskId = it.key();
+        auto taskInstanceIter = m_instanceTaskMap.find(it.value());
+        if (taskInstanceIter != m_instanceTaskMap.end()) {
+            auto taskList = taskInstanceIter.value();
+            auto taskIter = std::find_if(taskList.begin(), taskList.end(),
+                                         [taskId](const Task::Ptr& instTask) { return instTask->getUid() == taskId; });
+            if (taskIter != taskList.end()) {
+                return *taskIter;
+            }
+        }
+    }
+    return nullptr;
+}
+
+int TaskManager::getTaskIndex(QUuid taskId)
+{
+    QMap<QUuid, QString>::const_iterator it = m_taskInstanceMap.find(taskId);
+    if (it != m_taskInstanceMap.cend()) {
+        return std::distance(m_taskInstanceMap.cbegin(), it);
+    }
+    return -1;
 }
 
 QString TaskManager::getTaskInstanceId(QUuid taskId)
@@ -149,6 +186,9 @@ void TaskManager::connectTask(Task::Ptr task)
     m_taskConnectionMap[taskId] << connect(task.get(), &Task::finished, this, [this, taskId]() { taskFinished(taskId); });
     m_taskConnectionMap[taskId] << connect(task.get(), &Task::progress, this,
                                            [this, taskId](double current, double total) { taskProgress(taskId, current, total); });
+    m_taskConnectionMap[taskId] << connect(task.get(), &Task::stepProgress, this, [this, taskId](TaskStepProgress const& task_progress) {
+        subtaskProgress(taskId, task_progress);
+    });
 }
 void TaskManager::disconnectTask(Task::Ptr task)
 {
@@ -175,6 +215,15 @@ void TaskManager::taskProgress(QUuid taskId, double current, double total)
     Task::Ptr task = getTask(taskId);
     if (task) {
         QString instanceId = getTaskInstanceId(taskId);
-        emit progress(taskId, instanceId, current, total);
+        emit taskStateChanged(taskId, instanceId, current, total, task->getStatus(), task->getDetails(), task->getState());
+    }
+}
+
+void TaskManager::subtaskProgress(QUuid taskId, TaskStepProgress const& task_progress)
+{
+    Task::Ptr task = getTask(taskId);
+    if (task) {
+        QString instanceId = getTaskInstanceId(taskId);
+        emit subtaskStateChanged(taskId, instanceId, task_progress);
     }
 }

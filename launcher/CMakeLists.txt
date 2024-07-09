@@ -1102,6 +1102,10 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/InstanceDelegate.h
     ui/instanceview/VisualGroup.cpp
     ui/instanceview/VisualGroup.h
+
+    # GUI - task manager view
+    ui/taskmanager/TaskManagerModel.cpp
+    ui/taskmanager/TaskManagerModel.h
 )
 
 if (NOT Apple)
