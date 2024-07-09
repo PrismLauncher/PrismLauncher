@@ -73,8 +73,6 @@ class PasteUpload : public Net::NetRequest {
 
     QString pasteLink() { return m_pasteLink; }
 
-    // static NetRequest::Ptr make(ScreenShot::Ptr m_shot);
-
    private:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;
 
