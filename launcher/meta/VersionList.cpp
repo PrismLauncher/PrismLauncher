@@ -26,7 +26,7 @@ VersionList::VersionList(const QString& uid, QObject* parent) : BaseVersionList(
     setObjectName("Version list: " + uid);
 }
 
-Task::Ptr VersionList::getLoadTask()
+TaskV2::Ptr VersionList::getLoadTask()
 {
     load(Net::Mode::Online);
     return getCurrentTask();

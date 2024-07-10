@@ -3,11 +3,11 @@
 #include "tasks/Task.h"
 
 class MinecraftInstance;
-class FoldersTask : public Task {
+class FoldersTask : public TaskV2 {
     Q_OBJECT
    public:
     FoldersTask(MinecraftInstance* inst);
-    virtual ~FoldersTask() {};
+    virtual ~FoldersTask() = default;
 
     void executeTask() override;
 

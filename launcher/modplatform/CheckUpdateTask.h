@@ -9,7 +9,7 @@
 class ResourceDownloadTask;
 class ModFolderModel;
 
-class CheckUpdateTask : public Task {
+class CheckUpdateTask : public TaskV2 {
     Q_OBJECT
 
    public:
@@ -17,7 +17,7 @@ class CheckUpdateTask : public Task {
                     std::list<Version>& mcVersions,
                     std::optional<ModPlatform::ModLoaderTypes> loaders,
                     std::shared_ptr<ModFolderModel> mods_folder)
-        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder) {};
+        : TaskV2(), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder) {};
 
     struct UpdatableMod {
         QString name;
@@ -56,7 +56,7 @@ class CheckUpdateTask : public Task {
     auto getDependencies() -> QList<std::shared_ptr<GetModDependenciesTask::PackDependency>>&& { return std::move(m_deps); }
 
    public slots:
-    bool abort() override = 0;
+    bool doAbort() override = 0;
 
    protected slots:
     void executeTask() override = 0;

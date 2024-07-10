@@ -93,13 +93,9 @@ bool validate(QFileInfo file)
 
 }  // namespace ShaderPackUtils
 
-LocalShaderPackParseTask::LocalShaderPackParseTask(int token, ShaderPack& sp) : Task(nullptr, false), m_token(token), m_shader_pack(sp) {}
-
-bool LocalShaderPackParseTask::abort()
-{
-    m_aborted = true;
-    return true;
-}
+LocalShaderPackParseTask::LocalShaderPackParseTask(int token, ShaderPack& sp)
+    : TaskV2(nullptr, QtWarningMsg), m_token(token), m_shader_pack(sp)
+{}
 
 void LocalShaderPackParseTask::executeTask()
 {
@@ -107,9 +103,5 @@ void LocalShaderPackParseTask::executeTask()
         emitFailed("this is not a shader pack");
         return;
     }
-
-    if (m_aborted)
-        emitAborted();
-    else
-        emitSucceeded();
+    emitSucceeded();
 }

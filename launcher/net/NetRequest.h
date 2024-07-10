@@ -56,7 +56,7 @@ namespace Net {
 class NetRequest : public TaskV2 {
     Q_OBJECT
    protected:
-    explicit NetRequest() : TaskV2() { setCapabilities(State::AbortedByUser); }
+    explicit NetRequest() : TaskV2() { setCapabilities(Capability::Killable); }
 
    public:
     using Ptr = shared_qobject_ptr<class NetRequest>;
@@ -93,7 +93,13 @@ class NetRequest : public TaskV2 {
     void emitFailed(QString reason) override;
 
    protected:
-    std::unique_ptr<Sink> m_sink;
+    void setSink(Sink* s)
+    {
+        if (s && s->canPause()) {
+            setCapabilities(Capability::Killable | Capability::Suspendable);
+        }
+        m_sink.reset(s);
+    }
     Options m_options;
 
     using logCatFunc = const QLoggingCategory& (*)();
@@ -114,6 +120,7 @@ class NetRequest : public TaskV2 {
 
    private:
     int m_try = 1;
+    std::unique_ptr<Sink> m_sink;
 };
 }  // namespace Net
 

@@ -41,13 +41,10 @@ bool processFolder(ShaderPack& pack, ProcessingLevel level = ProcessingLevel::Fu
 bool validate(QFileInfo file);
 }  // namespace ShaderPackUtils
 
-class LocalShaderPackParseTask : public Task {
+class LocalShaderPackParseTask : public TaskV2 {
     Q_OBJECT
    public:
     LocalShaderPackParseTask(int token, ShaderPack& sp);
-
-    [[nodiscard]] bool canAbort() const override { return true; }
-    bool abort() override;
 
     void executeTask() override;
 
@@ -57,6 +54,4 @@ class LocalShaderPackParseTask : public Task {
     int m_token;
 
     ShaderPack& m_shader_pack;
-
-    bool m_aborted = false;
 };

@@ -16,7 +16,7 @@ class FlameCheckUpdate : public CheckUpdateTask {
     {}
 
    public slots:
-    bool abort() override;
+    bool doAbort() override;
 
    protected slots:
     void executeTask() override;

@@ -32,7 +32,7 @@
  * If the component list changes, start over.
  */
 
-ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list, QObject* parent) : Task(parent)
+ComponentUpdateTask::ComponentUpdateTask(Mode mode, Net::Mode netmode, PackProfile* list, QObject* parent) : TaskV2(parent)
 {
     d.reset(new ComponentUpdateTaskData);
     d->m_list = list;
@@ -59,7 +59,7 @@ LoadResult composeLoadResult(LoadResult a, LoadResult b)
     return a;
 }
 
-static LoadResult loadComponent(ComponentPtr component, Task::Ptr& loadTask, Net::Mode netmode)
+static LoadResult loadComponent(ComponentPtr component, TaskV2::Ptr& loadTask, Net::Mode netmode)
 {
     if (component->m_loaded) {
         qDebug() << component->getName() << "is already loaded";
@@ -133,7 +133,7 @@ static LoadResult loadPackProfile(ComponentPtr component, Task::Ptr& loadTask, N
 }
 */
 
-static LoadResult loadIndex(Task::Ptr& loadTask, Net::Mode netmode)
+static LoadResult loadIndex(TaskV2::Ptr& loadTask, Net::Mode netmode)
 {
     // FIXME: DECIDE. do we want to run the update task anyway?
     if (APPLICATION->metadataIndex()->isLoaded()) {
@@ -159,7 +159,7 @@ void ComponentUpdateTask::loadComponents()
     // load the main index (it is needed to determine if components can revert)
     {
         // FIXME: tear out as a method? or lambda?
-        Task::Ptr indexLoadTask;
+        TaskV2::Ptr indexLoadTask;
         auto singleResult = loadIndex(indexLoadTask, d->netmode);
         result = composeLoadResult(result, singleResult);
         if (indexLoadTask) {
@@ -167,15 +167,19 @@ void ComponentUpdateTask::loadComponents()
             RemoteLoadStatus status;
             status.type = RemoteLoadStatus::Type::Index;
             d->remoteLoadStatusList.append(status);
-            connect(indexLoadTask.get(), &Task::succeeded, [=]() { remoteLoadSucceeded(taskIndex); });
-            connect(indexLoadTask.get(), &Task::failed, [=](const QString& error) { remoteLoadFailed(taskIndex, error); });
-            connect(indexLoadTask.get(), &Task::aborted, [=]() { remoteLoadFailed(taskIndex, tr("Aborted")); });
+            connect(indexLoadTask.get(), &TaskV2::finished, [this, taskIndex](TaskV2* task) {
+                if (task->wasSuccessful()) {
+                    remoteLoadSucceeded(taskIndex);
+                } else {
+                    remoteLoadFailed(taskIndex, task->failReason());
+                }
+            });
             taskIndex++;
         }
     }
     // load all the components OR their lists...
     for (auto component : d->m_list->d->components) {
-        Task::Ptr loadTask;
+        TaskV2::Ptr loadTask;
         LoadResult singleResult;
         RemoteLoadStatus::Type loadType;
         // FIXME: to do this right, we need to load the lists and decide on which versions to use during dependency resolution. For now,
@@ -206,9 +210,13 @@ void ComponentUpdateTask::loadComponents()
         result = composeLoadResult(result, singleResult);
         if (loadTask) {
             qDebug() << "Remote loading is being run for" << component->getName();
-            connect(loadTask.get(), &Task::succeeded, [=]() { remoteLoadSucceeded(taskIndex); });
-            connect(loadTask.get(), &Task::failed, [=](const QString& error) { remoteLoadFailed(taskIndex, error); });
-            connect(loadTask.get(), &Task::aborted, [=]() { remoteLoadFailed(taskIndex, tr("Aborted")); });
+            connect(loadTask.get(), &TaskV2::finished, [this, taskIndex](TaskV2* task) {
+                if (task->wasSuccessful()) {
+                    remoteLoadSucceeded(taskIndex);
+                } else {
+                    remoteLoadFailed(taskIndex, task->failReason());
+                }
+            });
             RemoteLoadStatus status;
             status.type = loadType;
             status.PackProfileIndex = componentIndex;

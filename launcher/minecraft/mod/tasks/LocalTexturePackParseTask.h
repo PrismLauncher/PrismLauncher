@@ -45,13 +45,10 @@ bool processPackPNG(const TexturePack& pack);
 bool validate(QFileInfo file);
 }  // namespace TexturePackUtils
 
-class LocalTexturePackParseTask : public Task {
+class LocalTexturePackParseTask : public TaskV2 {
     Q_OBJECT
    public:
     LocalTexturePackParseTask(int token, TexturePack& rp);
-
-    [[nodiscard]] bool canAbort() const override { return true; }
-    bool abort() override;
 
     void executeTask() override;
 
@@ -61,6 +58,4 @@ class LocalTexturePackParseTask : public Task {
     int m_token;
 
     TexturePack& m_texture_pack;
-
-    bool m_aborted = false;
 };

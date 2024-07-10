@@ -70,11 +70,11 @@ class GetModDependenciesTask : public SequentialTask {
     QHash<QString, PackDependencyExtraInfo> getExtraInfo();
 
    protected slots:
-    Task::Ptr prepareDependencyTask(const ModPlatform::Dependency&, ModPlatform::ResourceProvider, int);
+    TaskV2::Ptr prepareDependencyTask(const ModPlatform::Dependency&, ModPlatform::ResourceProvider, int);
     QList<ModPlatform::Dependency> getDependenciesForVersion(const ModPlatform::IndexedVersion&,
                                                              ModPlatform::ResourceProvider providerName);
     void prepare();
-    Task::Ptr getProjectInfoTask(std::shared_ptr<PackDependency> pDep);
+    TaskV2::Ptr getProjectInfoTask(std::shared_ptr<PackDependency> pDep);
     ModPlatform::Dependency getOverride(const ModPlatform::Dependency&, ModPlatform::ResourceProvider providerName);
     void removePack(const QVariant& addonId);
 

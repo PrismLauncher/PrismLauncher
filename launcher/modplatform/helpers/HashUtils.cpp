@@ -141,8 +141,9 @@ void Hasher::executeTask()
         QThreadPool::globalInstance(), [](QString fileName, Algorithm type) { return hash(fileName, type); }, m_path, m_alg);
     connect(&m_watcher, &QFutureWatcher<QString>::finished, this, [this] {
         if (m_future.isCanceled()) {
-            emitAborted();
-        } else if (m_result = m_future.result(); m_result.isEmpty()) {
+            return;
+        }
+        if (m_result = m_future.result(); m_result.isEmpty()) {
             emitFailed("Empty hash!");
         } else {
             emitSucceeded();
@@ -152,12 +153,10 @@ void Hasher::executeTask()
     m_watcher.setFuture(m_future);
 }
 
-bool Hasher::abort()
+bool Hasher::doAbort()
 {
     if (m_future.isRunning()) {
         m_future.cancel();
-        // NOTE: Here we don't do `emitAborted()` because it will be done when `m_build_zip_future` actually cancels, which may not
-        // occur immediately.
         return true;
     }
     return false;

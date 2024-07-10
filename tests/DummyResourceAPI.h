@@ -4,7 +4,7 @@
 
 #include <modplatform/ResourceAPI.h>
 
-class SearchTask : public Task {
+class SearchTask : public TaskV2 {
     Q_OBJECT
 
    public:
@@ -34,10 +34,10 @@ class DummyResourceAPI : public ResourceAPI {
     DummyResourceAPI() : ResourceAPI() {}
     [[nodiscard]] auto getSortingMethods() const -> QList<SortingMethod> override { return {}; }
 
-    [[nodiscard]] Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&& callbacks) const override
+    [[nodiscard]] TaskV2::Ptr searchProjects(SearchArgs&&, SearchCallbacks&& callbacks) const override
     {
         auto task = makeShared<SearchTask>();
-        QObject::connect(task.get(), &Task::succeeded, [=] {
+        QObject::connect(task.get(), &TaskV2::finished, [=] {
             auto json = searchRequestResult();
             callbacks.on_succeed(json);
         });

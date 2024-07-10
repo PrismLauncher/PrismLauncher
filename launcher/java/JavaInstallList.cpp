@@ -46,13 +46,13 @@
 
 JavaInstallList::JavaInstallList(QObject* parent) : BaseVersionList(parent) {}
 
-Task::Ptr JavaInstallList::getLoadTask()
+TaskV2::Ptr JavaInstallList::getLoadTask()
 {
     load();
     return getCurrentTask();
 }
 
-Task::Ptr JavaInstallList::getCurrentTask()
+TaskV2::Ptr JavaInstallList::getCurrentTask()
 {
     if (m_status == Status::InProgress) {
         return m_loadTask;
@@ -146,7 +146,7 @@ void JavaInstallList::sortVersions()
     endResetModel();
 }
 
-JavaListLoadTask::JavaListLoadTask(JavaInstallList* vlist) : Task()
+JavaListLoadTask::JavaListLoadTask(JavaInstallList* vlist) : TaskV2()
 {
     m_list = vlist;
     m_currentRecommended = NULL;
@@ -162,8 +162,9 @@ void JavaListLoadTask::executeTask()
     QList<QString> candidate_paths = ju.FindJavaPaths();
 
     m_job.reset(new JavaCheckerJob("Java detection"));
-    connect(m_job.get(), &Task::finished, this, &JavaListLoadTask::javaCheckerFinished);
-    connect(m_job.get(), &Task::progress, this, &Task::setProgress);
+    connect(m_job.get(), &TaskV2::finished, this, &JavaListLoadTask::javaCheckerFinished);
+    connect(m_job.get(), &TaskV2::processedChanged, this, &TaskV2::processedChanged);
+    connect(m_job.get(), &TaskV2::totalChanged, this, &TaskV2::totalChanged);
 
     qDebug() << "Probing the following Java paths: ";
     int id = 0;

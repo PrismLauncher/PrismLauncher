@@ -14,7 +14,7 @@
 
 /** Very simple task that just loads a folder's contents directly.
  */
-class BasicFolderLoadTask : public Task {
+class BasicFolderLoadTask : public TaskV2 {
     Q_OBJECT
    public:
     struct Result {
@@ -25,29 +25,22 @@ class BasicFolderLoadTask : public Task {
     [[nodiscard]] ResultPtr result() const { return m_result; }
 
    public:
-    BasicFolderLoadTask(QDir dir) : Task(nullptr, false), m_dir(dir), m_result(new Result), m_thread_to_spawn_into(thread())
-    {
-        m_create_func = [](QFileInfo const& entry) -> Resource::Ptr { return makeShared<Resource>(entry); };
-    }
-    BasicFolderLoadTask(QDir dir, std::function<Resource::Ptr(QFileInfo const&)> create_function)
-        : Task(nullptr, false)
+    BasicFolderLoadTask(
+        QDir dir,
+        std::function<Resource::Ptr(QFileInfo const&)> create_function = [](QFileInfo const& entry) -> Resource::Ptr {
+            return makeShared<Resource>(entry);
+        })
+        : TaskV2(nullptr, QtWarningMsg)
         , m_dir(dir)
         , m_result(new Result)
         , m_create_func(std::move(create_function))
         , m_thread_to_spawn_into(thread())
     {}
 
-    [[nodiscard]] bool canAbort() const override { return true; }
-    bool abort() override
-    {
-        m_aborted.store(true);
-        return true;
-    }
-
     void executeTask() override
     {
         if (thread() != m_thread_to_spawn_into)
-            connect(this, &Task::finished, this->thread(), &QThread::quit);
+            connect(this, &TaskV2::finished, this->thread(), &QThread::quit);
 
         m_dir.refresh();
         for (auto entry : m_dir.entryInfoList()) {
@@ -62,17 +55,12 @@ class BasicFolderLoadTask : public Task {
             m_result->resources.insert(resource->internal_id(), resource);
         }
 
-        if (m_aborted)
-            emit finished();
-        else
-            emitSucceeded();
+        emitSucceeded();
     }
 
    private:
     QDir m_dir;
     ResultPtr m_result;
-
-    std::atomic<bool> m_aborted = false;
 
     std::function<Resource::Ptr(QFileInfo const&)> m_create_func;
 

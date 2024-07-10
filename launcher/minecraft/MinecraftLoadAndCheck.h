@@ -27,20 +27,16 @@
 class MinecraftVersion;
 class MinecraftInstance;
 
-class MinecraftLoadAndCheck : public Task {
+class MinecraftLoadAndCheck : public TaskV2 {
     Q_OBJECT
    public:
     explicit MinecraftLoadAndCheck(MinecraftInstance* inst, QObject* parent = 0);
-    virtual ~MinecraftLoadAndCheck() {};
+    virtual ~MinecraftLoadAndCheck() = default;
     void executeTask() override;
-
-   private slots:
-    void subtaskSucceeded();
-    void subtaskFailed(QString error);
 
    private:
     MinecraftInstance* m_inst = nullptr;
-    Task::Ptr m_task;
+    TaskV2::Ptr m_task;
     QString m_preFailure;
     QString m_fail_reason;
 };

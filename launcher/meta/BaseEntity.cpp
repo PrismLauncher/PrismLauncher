@@ -27,7 +27,7 @@
 class ParsingValidator : public Net::Validator {
    public: /* con/des */
     ParsingValidator(Meta::BaseEntity* entity) : m_entity(entity) {};
-    virtual ~ParsingValidator() {};
+    virtual ~ParsingValidator() = default;
 
    public: /* methods */
     bool init(QNetworkRequest&) override { return true; }
@@ -112,14 +112,15 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     dl->addValidator(new ParsingValidator(this));
     m_updateTask->addNetAction(dl);
     m_updateStatus = UpdateStatus::InProgress;
-    QObject::connect(m_updateTask.get(), &NetJob::succeeded, [&]() {
-        m_loadStatus = LoadStatus::Remote;
-        m_updateStatus = UpdateStatus::Succeeded;
-        m_updateTask.reset();
-    });
-    QObject::connect(m_updateTask.get(), &NetJob::failed, [&]() {
-        m_updateStatus = UpdateStatus::Failed;
-        m_updateTask.reset();
+    QObject::connect(m_updateTask.get(), &NetJob::finished, [&]() {
+        if (m_updateTask->wasSuccessful()) {
+            m_loadStatus = LoadStatus::Remote;
+            m_updateStatus = UpdateStatus::Succeeded;
+            m_updateTask.reset();
+        } else {
+            m_updateStatus = UpdateStatus::Failed;
+            m_updateTask.reset();
+        }
     });
     m_updateTask->start();
 }
@@ -135,7 +136,7 @@ bool Meta::BaseEntity::shouldStartRemoteUpdate() const
     return m_updateStatus != UpdateStatus::InProgress;
 }
 
-Task::Ptr Meta::BaseEntity::getCurrentTask()
+TaskV2::Ptr Meta::BaseEntity::getCurrentTask()
 {
     if (m_updateStatus == UpdateStatus::InProgress) {
         return m_updateTask;

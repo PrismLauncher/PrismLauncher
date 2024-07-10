@@ -86,8 +86,8 @@ class ModFolderModel : public ResourceFolderModel {
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     int columnCount(const QModelIndex& parent) const override;
 
-    [[nodiscard]] Task* createUpdateTask() override;
-    [[nodiscard]] Task* createParseTask(Resource&) override;
+    [[nodiscard]] TaskV2* createUpdateTask() override;
+    [[nodiscard]] TaskV2* createParseTask(Resource&) override;
 
     bool installMod(QString file_path) { return ResourceFolderModel::installResource(file_path); }
     bool installMod(QString file_path, ModPlatform::IndexedVersion& vers);

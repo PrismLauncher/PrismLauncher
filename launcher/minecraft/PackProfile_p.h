@@ -3,7 +3,6 @@
 #include <QList>
 #include <QMap>
 #include <QTimer>
-#include <map>
 #include "Component.h"
 
 class MinecraftInstance;
@@ -22,7 +21,7 @@ struct PackProfileData {
     ComponentIndex componentIndex;
     bool dirty = false;
     QTimer m_saveTimer;
-    Task::Ptr m_updateTask;
+    TaskV2::Ptr m_updateTask;
     bool loaded = false;
     bool interactionDisabled = true;
 };

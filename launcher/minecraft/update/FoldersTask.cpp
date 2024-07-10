@@ -37,7 +37,7 @@
 #include <QDir>
 #include "minecraft/MinecraftInstance.h"
 
-FoldersTask::FoldersTask(MinecraftInstance* inst) : Task()
+FoldersTask::FoldersTask(MinecraftInstance* inst) : TaskV2()
 {
     m_inst = inst;
 }

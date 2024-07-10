@@ -41,7 +41,7 @@
 ConcurrentTask::ConcurrentTask(QObject* parent, QString task_name, int max_concurrent) : TaskV2(parent), m_total_max_size(max_concurrent)
 {
     setObjectName(task_name);
-    setCapabilities(State::AbortedByUser);
+    setCapabilities(Capability::Killable | Capability::Suspendable);
 }
 
 ConcurrentTask::~ConcurrentTask()

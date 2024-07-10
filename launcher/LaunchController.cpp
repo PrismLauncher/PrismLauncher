@@ -374,7 +374,7 @@ void LaunchController::readyForLaunch()
 
     QString error;
     if (!m_profiler->check(&error)) {
-        m_launcher->abort();
+        m_launcher->doAbort();
         emitFailed("Profiler startup failed!");
         QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Profiler check for %1 failed: %2").arg(m_profiler->name(), error));
         return;
@@ -401,7 +401,7 @@ void LaunchController::readyForLaunch()
         msg.addButton(QMessageBox::Ok);
         msg.setModal(true);
         msg.exec();
-        m_launcher->abort();
+        m_launcher->doAbort();
         emitFailed("Profiler startup failed!");
     });
     profilerInstance->beginProfiling(m_launcher);
@@ -442,7 +442,7 @@ bool LaunchController::abort()
                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
                         ->exec();
     if (response == QMessageBox::Yes) {
-        return m_launcher->abort();
+        return m_launcher->doAbort();
     }
     return false;
 }

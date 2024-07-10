@@ -42,7 +42,6 @@
 #include <QLoggingCategory>
 #include <QRunnable>
 #include <QUuid>
-#include <memory>
 
 #include "QObjectPtr.h"
 
@@ -62,11 +61,16 @@ class TaskV2 : public QObject, public QRunnable {
         Finished = Succeeded | Failed | AbortedByUser,
     };
 
-    Q_ENUM(State)
-    Q_DECLARE_FLAGS(Capabilities, State)
+    enum Capability {
+        None = 0,
+        Killable = 1,
+        Suspendable = 2,
+    };
+    Q_DECLARE_FLAGS(Capabilities, Capability)
     Q_FLAG(Capabilities)
 
    public:
+    TaskV2(QObject* parent, QtMsgType enableForLevel) : TaskV2(parent, "launcher.task", enableForLevel) {}
     explicit TaskV2(QObject* parent = nullptr, const char* categoryName = "launcher.task", QtMsgType enableForLevel = QtDebugMsg)
         : QObject(parent), m_uuid(QUuid::createUuid()), m_log_cat(categoryName, enableForLevel)
     {
@@ -238,7 +242,7 @@ class TaskV2 : public QObject, public QRunnable {
         emit finished(this);
     }
 
-    void emitSucceeded()
+    virtual void emitSucceeded()
     {
         // Don't succeed twice.
         if (!isRunning()) {
@@ -303,3 +307,5 @@ class TaskV2 : public QObject, public QRunnable {
     double m_progressTotal = 100;
     double m_weight = 1;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(TaskV2::Capabilities)

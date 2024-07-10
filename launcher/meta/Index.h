@@ -21,7 +21,7 @@
 #include "BaseEntity.h"
 #include "meta/VersionList.h"
 
-class Task;
+class TaskV2;
 
 namespace Meta {
 

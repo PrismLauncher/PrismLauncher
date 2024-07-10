@@ -108,7 +108,7 @@ class PackProfile : public QAbstractListModel {
     void resolve(Net::Mode netmode);
 
     /// get current running task...
-    Task::Ptr getCurrentTask();
+    TaskV2::Ptr getCurrentTask();
 
     std::shared_ptr<LaunchProfile> getProfile() const;
 

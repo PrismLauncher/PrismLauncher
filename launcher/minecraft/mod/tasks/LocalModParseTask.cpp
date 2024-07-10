@@ -729,14 +729,8 @@ bool loadIconFile(const Mod& mod)
 }  // namespace ModUtils
 
 LocalModParseTask::LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile)
-    : Task(nullptr, false), m_token(token), m_type(type), m_modFile(modFile), m_result(new Result())
+    : TaskV2(nullptr, QtWarningMsg), m_token(token), m_type(type), m_modFile(modFile), m_result(new Result())
 {}
-
-bool LocalModParseTask::abort()
-{
-    m_aborted.store(true);
-    return true;
-}
 
 void LocalModParseTask::executeTask()
 {
@@ -745,8 +739,5 @@ void LocalModParseTask::executeTask()
 
     m_result->details = mod.details();
 
-    if (m_aborted)
-        emitAborted();
-    else
-        emitSucceeded();
+    emitSucceeded();
 }

@@ -153,7 +153,7 @@ PasteUpload::PasteUpload(QString text, QString baseUrl, PasteType pasteType)
     else
         m_url = m_baseUrl + PasteTypes.at(pasteType).endpointPath;
 
-    m_sink.reset(new PasteSink(this));
+    setSink(new PasteSink(this));
 }
 
 QNetworkReply* PasteUpload::getReply(QNetworkRequest& request)

@@ -58,7 +58,7 @@ Download::Ptr Download::makeCached(QUrl url, MetaEntry::Ptr entry, Options optio
     dl->m_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
     auto cachedNode = new MetaCacheSink(entry, md5Node, options.testFlag(Option::MakeEternal));
-    dl->m_sink.reset(cachedNode);
+    dl->setSink(cachedNode);
     return dl;
 }
 #endif
@@ -69,7 +69,7 @@ Download::Ptr Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> outp
     dl->m_url = url;
     dl->setObjectName(QString("BYTES:") + url.toString());
     dl->m_options = options;
-    dl->m_sink.reset(new ByteArraySink(output));
+    dl->setSink(new ByteArraySink(output));
     return dl;
 }
 
@@ -79,7 +79,7 @@ Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
     dl->m_url = url;
     dl->setObjectName(QString("FILE:") + url.toString());
     dl->m_options = options;
-    dl->m_sink.reset(new FileSink(path));
+    dl->setSink(new FileSink(path));
     return dl;
 }
 

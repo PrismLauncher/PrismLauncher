@@ -44,7 +44,6 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include "MessageLevel.h"
-#include "java/JavaChecker.h"
 #include "tasks/Task.h"
 
 void LaunchTask::init()
@@ -59,7 +58,10 @@ shared_qobject_ptr<LaunchTask> LaunchTask::create(InstancePtr inst)
     return proc;
 }
 
-LaunchTask::LaunchTask(InstancePtr instance) : m_instance(instance) {}
+LaunchTask::LaunchTask(InstancePtr instance) : m_instance(instance)
+{
+    setCapabilities(Capability::Killable);
+}
 
 void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step)
 {
@@ -153,44 +155,24 @@ void LaunchTask::proceed()
     m_steps[currentStep]->proceed();
 }
 
-bool LaunchTask::canAbort() const
+bool LaunchTask::doAbort()
 {
     switch (state) {
         case LaunchTask::Aborted:
         case LaunchTask::Failed:
         case LaunchTask::Finished:
-            return false;
-        case LaunchTask::NotStarted:
-            return true;
-        case LaunchTask::Running:
-        case LaunchTask::Waiting: {
-            auto step = m_steps[currentStep];
-            return step->canAbort();
-        }
-    }
-    return false;
-}
-
-bool LaunchTask::abort()
-{
-    switch (state) {
-        case LaunchTask::Aborted:
-        case LaunchTask::Failed:
-        case LaunchTask::Finished:
-            return true;
         case LaunchTask::NotStarted: {
-            state = LaunchTask::Aborted;
-            emitFailed("Aborted");
+            m_instance->setRunning(false);
+            m_instance->setCrashed(true);
             return true;
         }
         case LaunchTask::Running:
         case LaunchTask::Waiting: {
             auto step = m_steps[currentStep];
-            if (!step->canAbort()) {
-                return false;
-            }
             if (step->abort()) {
                 state = LaunchTask::Aborted;
+                m_instance->setRunning(false);
+                m_instance->setCrashed(true);
                 return true;
             }
         }
@@ -245,14 +227,14 @@ void LaunchTask::onLogLine(QString line, MessageLevel::Enum level)
 void LaunchTask::emitSucceeded()
 {
     m_instance->setRunning(false);
-    Task::emitSucceeded();
+    TaskV2::emitSucceeded();
 }
 
 void LaunchTask::emitFailed(QString reason)
 {
     m_instance->setRunning(false);
     m_instance->setCrashed(true);
-    Task::emitFailed(reason);
+    TaskV2::emitFailed(reason);
 }
 
 void LaunchTask::substituteVariables(QStringList& args) const

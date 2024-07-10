@@ -29,7 +29,7 @@ namespace fs = ghc::filesystem;
 
 #include <pathmatcher/RegexpMatcher.h>
 
-class LinkTask : public Task {
+class LinkTask : public TaskV2 {
     Q_OBJECT
 
     friend class FileSystemTest;
@@ -113,22 +113,12 @@ class FileSystemTest : public QObject {
         QTest::addColumn<QString>("path1");
         QTest::addColumn<QString>("path2");
 
-        QTest::newRow("qt 1") << "/abc/def/ghi/jkl"
-                              << "/abc/def"
-                              << "ghi/jkl";
-        QTest::newRow("qt 2") << "/abc/def/ghi/jkl"
-                              << "/abc/def/"
-                              << "ghi/jkl";
+        QTest::newRow("qt 1") << "/abc/def/ghi/jkl" << "/abc/def" << "ghi/jkl";
+        QTest::newRow("qt 2") << "/abc/def/ghi/jkl" << "/abc/def/" << "ghi/jkl";
 #if defined(Q_OS_WIN)
-        QTest::newRow("win native, from C:") << "C:/abc"
-                                             << "C:"
-                                             << "abc";
-        QTest::newRow("win native 1") << "C:/abc/def/ghi/jkl"
-                                      << "C:\\abc\\def"
-                                      << "ghi\\jkl";
-        QTest::newRow("win native 2") << "C:/abc/def/ghi/jkl"
-                                      << "C:\\abc\\def\\"
-                                      << "ghi\\jkl";
+        QTest::newRow("win native, from C:") << "C:/abc" << "C:" << "abc";
+        QTest::newRow("win native 1") << "C:/abc/def/ghi/jkl" << "C:\\abc\\def" << "ghi\\jkl";
+        QTest::newRow("win native 2") << "C:/abc/def/ghi/jkl" << "C:\\abc\\def\\" << "ghi\\jkl";
 #endif
     }
 
@@ -148,39 +138,15 @@ class FileSystemTest : public QObject {
         QTest::addColumn<QString>("path2");
         QTest::addColumn<QString>("path3");
 
-        QTest::newRow("qt 1") << "/abc/def/ghi/jkl"
-                              << "/abc"
-                              << "def"
-                              << "ghi/jkl";
-        QTest::newRow("qt 2") << "/abc/def/ghi/jkl"
-                              << "/abc/"
-                              << "def"
-                              << "ghi/jkl";
-        QTest::newRow("qt 3") << "/abc/def/ghi/jkl"
-                              << "/abc"
-                              << "def/"
-                              << "ghi/jkl";
-        QTest::newRow("qt 4") << "/abc/def/ghi/jkl"
-                              << "/abc/"
-                              << "def/"
-                              << "ghi/jkl";
+        QTest::newRow("qt 1") << "/abc/def/ghi/jkl" << "/abc" << "def" << "ghi/jkl";
+        QTest::newRow("qt 2") << "/abc/def/ghi/jkl" << "/abc/" << "def" << "ghi/jkl";
+        QTest::newRow("qt 3") << "/abc/def/ghi/jkl" << "/abc" << "def/" << "ghi/jkl";
+        QTest::newRow("qt 4") << "/abc/def/ghi/jkl" << "/abc/" << "def/" << "ghi/jkl";
 #if defined(Q_OS_WIN)
-        QTest::newRow("win 1") << "C:/abc/def/ghi/jkl"
-                               << "C:\\abc"
-                               << "def"
-                               << "ghi\\jkl";
-        QTest::newRow("win 2") << "C:/abc/def/ghi/jkl"
-                               << "C:\\abc\\"
-                               << "def"
-                               << "ghi\\jkl";
-        QTest::newRow("win 3") << "C:/abc/def/ghi/jkl"
-                               << "C:\\abc"
-                               << "def\\"
-                               << "ghi\\jkl";
-        QTest::newRow("win 4") << "C:/abc/def/ghi/jkl"
-                               << "C:\\abc\\"
-                               << "def"
-                               << "ghi\\jkl";
+        QTest::newRow("win 1") << "C:/abc/def/ghi/jkl" << "C:\\abc" << "def" << "ghi\\jkl";
+        QTest::newRow("win 2") << "C:/abc/def/ghi/jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
+        QTest::newRow("win 3") << "C:/abc/def/ghi/jkl" << "C:\\abc" << "def\\" << "ghi\\jkl";
+        QTest::newRow("win 4") << "C:/abc/def/ghi/jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
 #endif
     }
 
@@ -369,7 +335,7 @@ class FileSystemTest : public QObject {
 
             LinkTask lnk_tsk(folder, target_dir.path());
             lnk_tsk.linkRecursively(false);
-            QObject::connect(&lnk_tsk, &Task::finished,
+            QObject::connect(&lnk_tsk, &TaskV2::finished,
                              [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
@@ -465,7 +431,7 @@ class FileSystemTest : public QObject {
             RegexpMatcher re("[.]?mcmeta");
             lnk_tsk.matcher(&re);
             lnk_tsk.linkRecursively(true);
-            QObject::connect(&lnk_tsk, &Task::finished,
+            QObject::connect(&lnk_tsk, &TaskV2::finished,
                              [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
@@ -512,7 +478,7 @@ class FileSystemTest : public QObject {
             lnk_tsk.matcher(&re);
             lnk_tsk.linkRecursively(true);
             lnk_tsk.whitelist(true);
-            QObject::connect(&lnk_tsk, &Task::finished,
+            QObject::connect(&lnk_tsk, &TaskV2::finished,
                              [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
@@ -556,7 +522,7 @@ class FileSystemTest : public QObject {
 
             LinkTask lnk_tsk(folder, target_dir.path());
             lnk_tsk.linkRecursively(true);
-            QObject::connect(&lnk_tsk, &Task::finished,
+            QObject::connect(&lnk_tsk, &TaskV2::finished,
                              [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
@@ -604,7 +570,7 @@ class FileSystemTest : public QObject {
             qDebug() << target_dir.path();
 
             LinkTask lnk_tsk(file, target_dir.filePath("pack.mcmeta"));
-            QObject::connect(&lnk_tsk, &Task::finished,
+            QObject::connect(&lnk_tsk, &TaskV2::finished,
                              [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
@@ -639,7 +605,7 @@ class FileSystemTest : public QObject {
             LinkTask lnk_tsk(folder, target_dir.path());
             lnk_tsk.linkRecursively(true);
             lnk_tsk.setMaxDepth(0);
-            QObject::connect(&lnk_tsk, &Task::finished,
+            QObject::connect(&lnk_tsk, &TaskV2::finished,
                              [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
@@ -689,7 +655,7 @@ class FileSystemTest : public QObject {
             LinkTask lnk_tsk(folder, target_dir.path());
             lnk_tsk.linkRecursively(true);
             lnk_tsk.setMaxDepth(-1);
-            QObject::connect(&lnk_tsk, &Task::finished,
+            QObject::connect(&lnk_tsk, &TaskV2::finished,
                              [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 

@@ -44,7 +44,7 @@
 #include "minecraft/mod/Mod.h"
 #include "tasks/Task.h"
 
-class ModFolderLoadTask : public Task {
+class ModFolderLoadTask : public TaskV2 {
     Q_OBJECT
    public:
     struct Result {
@@ -56,13 +56,6 @@ class ModFolderLoadTask : public Task {
    public:
     ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan = false);
 
-    [[nodiscard]] bool canAbort() const override { return true; }
-    bool abort() override
-    {
-        m_aborted.store(true);
-        return true;
-    }
-
     void executeTask() override;
 
    private:
@@ -73,8 +66,6 @@ class ModFolderLoadTask : public Task {
     bool m_is_indexed;
     bool m_clean_orphan;
     ResultPtr m_result;
-
-    std::atomic<bool> m_aborted = false;
 
     /** This is the thread in which we should put new mod objects */
     QThread* m_thread_to_spawn_into;

@@ -42,6 +42,7 @@ AuthFlow::AuthFlow(AccountData* data, Action action, QObject* parent) : TaskV2(p
         m_steps.append(makeShared<GetSkinStep>(m_data));
     }
     changeState(AccountTaskState::STATE_CREATED);
+    setCapabilities(Capability::Killable);
 }
 
 void AuthFlow::succeed()

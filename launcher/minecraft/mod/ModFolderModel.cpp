@@ -235,7 +235,7 @@ int ModFolderModel::columnCount(const QModelIndex& parent) const
     return parent.isValid() ? 0 : NUM_COLUMNS;
 }
 
-Task* ModFolderModel::createUpdateTask()
+TaskV2* ModFolderModel::createUpdateTask()
 {
     auto index_dir = indexDir();
     auto task = new ModFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load);
@@ -243,7 +243,7 @@ Task* ModFolderModel::createUpdateTask()
     return task;
 }
 
-Task* ModFolderModel::createParseTask(Resource& resource)
+TaskV2* ModFolderModel::createParseTask(Resource& resource)
 {
     return new LocalModParseTask(m_next_resolution_ticket, resource.type(), resource.fileinfo());
 }

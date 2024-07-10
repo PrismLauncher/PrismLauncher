@@ -16,9 +16,8 @@
 
 static FlameAPI api;
 
-bool FlameCheckUpdate::abort()
+bool FlameCheckUpdate::doAbort()
 {
-    m_was_aborted = true;
     if (m_net_job)
         return m_net_job->abort();
     return true;
@@ -37,7 +36,11 @@ ModPlatform::IndexedPack FlameCheckUpdate::getProjectInfo(ModPlatform::IndexedVe
     auto dl = Net::ApiDownload::makeByteArray(url, response);
     get_project_job->addNetAction(dl);
 
-    QObject::connect(get_project_job, &NetJob::succeeded, [response, &pack]() {
+    connect(get_project_job, &NetJob::finished, this, [this, response, &pack](TaskV2* t) {
+        if (!t->wasSuccessful()) {
+            emitFailed(t->failReason());
+            return;
+        }
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -57,8 +60,7 @@ ModPlatform::IndexedPack FlameCheckUpdate::getProjectInfo(ModPlatform::IndexedVe
         }
     });
 
-    connect(get_project_job, &NetJob::failed, this, &FlameCheckUpdate::emitFailed);
-    QObject::connect(get_project_job, &NetJob::finished, [&loop, get_project_job] {
+    connect(get_project_job, &NetJob::finished, [&loop, get_project_job] {
         get_project_job->deleteLater();
         loop.quit();
     });

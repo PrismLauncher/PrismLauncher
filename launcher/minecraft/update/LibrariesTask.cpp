@@ -8,6 +8,7 @@
 LibrariesTask::LibrariesTask(MinecraftInstance* inst)
 {
     m_inst = inst;
+    setCapabilities(Capability::Killable);
 }
 
 void LibrariesTask::executeTask()
@@ -61,32 +62,28 @@ void LibrariesTask::executeTask()
                        .arg(failed_all));
         return;
     }
-
-    connect(downloadJob.get(), &NetJob::succeeded, this, &LibrariesTask::emitSucceeded);
-    connect(downloadJob.get(), &NetJob::failed, this, &LibrariesTask::jarlibFailed);
-    connect(downloadJob.get(), &NetJob::aborted, this, [this] { emitFailed(tr("Aborted")); });
+    setProgressTotal(downloadJob->progressTotal());
+    connect(downloadJob.get(), &NetJob::finished, this, [this](TaskV2*) {
+        if (downloadJob->wasSuccessful()) {
+            emitSucceeded();
+        } else {
+            emitFailed(
+                tr("Game update failed: it was impossible to fetch the required libraries.\nReason:\n%1").arg(downloadJob->failReason()));
+        }
+    });
     connect(downloadJob.get(), &NetJob::progress, this, &LibrariesTask::progress);
-    connect(downloadJob.get(), &NetJob::stepProgress, this, &LibrariesTask::propagateStepProgress);
+    connect(downloadJob.get(), &NetJob::totalChanged, this, &LibrariesTask::totalChanged);
+    connect(downloadJob.get(), &NetJob::processedChanged, this, &LibrariesTask::processedChanged);
+    connect(downloadJob.get(), &NetJob::stateChanged, this, &LibrariesTask::stateChanged);
 
     downloadJob->start();
 }
 
-bool LibrariesTask::canAbort() const
-{
-    return true;
-}
-
-void LibrariesTask::jarlibFailed(QString reason)
-{
-    emitFailed(tr("Game update failed: it was impossible to fetch the required libraries.\nReason:\n%1").arg(reason));
-}
-
-bool LibrariesTask::abort()
+bool LibrariesTask::doAbort()
 {
     if (downloadJob) {
         return downloadJob->abort();
-    } else {
-        qWarning() << "Prematurely aborted LibrariesTask";
     }
+    qWarning() << "Prematurely aborted LibrariesTask";
     return true;
 }

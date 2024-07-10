@@ -21,7 +21,8 @@ void JavaCheckerJob::partFinished(JavaCheckResult result)
 {
     num_finished++;
     qDebug() << m_job_name.toLocal8Bit() << "progress:" << num_finished << "/" << javacheckers.size();
-    setProgress(num_finished, javacheckers.size());
+    setProgressTotal(javacheckers.size());
+    setProgress(num_finished);
 
     javaresults.replace(result.id, result);
 

@@ -52,7 +52,7 @@ Net::NetRequest::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation
 {
     auto up = makeShared<ImgurAlbumCreation>();
     up->m_url = BuildConfig.IMGUR_BASE_URL + "album";
-    up->m_sink.reset(new Sink(output));
+    up->setSink(new Sink(output));
     up->m_screenshots = screenshots;
     up->addHeaderProxy(new Net::RawHeaderProxy(
         QList<Net::HeaderPair>{ { "Content-Type", "application/x-www-form-urlencoded" },

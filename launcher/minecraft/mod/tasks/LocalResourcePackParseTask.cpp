@@ -359,14 +359,8 @@ bool validate(QFileInfo file)
 }  // namespace ResourcePackUtils
 
 LocalResourcePackParseTask::LocalResourcePackParseTask(int token, ResourcePack& rp)
-    : Task(nullptr, false), m_token(token), m_resource_pack(rp)
+    : TaskV2(nullptr, QtWarningMsg), m_token(token), m_resource_pack(rp)
 {}
-
-bool LocalResourcePackParseTask::abort()
-{
-    m_aborted = true;
-    return true;
-}
 
 void LocalResourcePackParseTask::executeTask()
 {
@@ -375,8 +369,5 @@ void LocalResourcePackParseTask::executeTask()
         return;
     }
 
-    if (m_aborted)
-        emitAborted();
-    else
-        emitSucceeded();
+    emitSucceeded();
 }
