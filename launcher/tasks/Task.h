@@ -48,6 +48,7 @@
 Q_DECLARE_LOGGING_CATEGORY(taskLogC)
 class TaskV2 : public QObject, public QRunnable {
     Q_OBJECT
+    // public types
    public:
     using Ptr = shared_qobject_ptr<TaskV2>;
 
@@ -69,6 +70,7 @@ class TaskV2 : public QObject, public QRunnable {
     Q_DECLARE_FLAGS(Capabilities, Capability)
     Q_FLAG(Capabilities)
 
+    // con/des
    public:
     TaskV2(QObject* parent, QtMsgType enableForLevel) : TaskV2(parent, "launcher.task", enableForLevel) {}
     explicit TaskV2(QObject* parent = nullptr, const char* categoryName = "launcher.task", QtMsgType enableForLevel = QtDebugMsg)
@@ -96,19 +98,24 @@ class TaskV2 : public QObject, public QRunnable {
     double progressTotal() const { return m_progressTotal; }
     double weight() const { return m_weight; }
 
+    // capabilities are only used to tell UI what actions are supported(not used by the actual Task)
     Capabilities capabilities() const { return m_capabilities; }
     void setCapabilities(Capabilities capabilities) { m_capabilities = capabilities; }
 
+    // functions to check the state
     bool wasSuccessful() const { return m_state & State::Succeeded; }
     bool isRunning() const { return m_state & State::Running; }
     bool isFinished() const { return m_state & State::Finished; }
     bool isPaused() const { return m_state & State::Paused; }
+    // is it even used
     virtual bool isMultiStep() const { return false; }
 
+    // this reports all the subtasks associated with the current task
     virtual QList<Ptr> subTasks() const { return {}; }
 
     // methods
    public:
+    // debug operator so we can just log the task
     friend QDebug operator<<(QDebug debug, const TaskV2* v)
     {
         QDebugStateSaver saver(debug);
@@ -125,24 +132,31 @@ class TaskV2 : public QObject, public QRunnable {
 
         return debug;
     }
+    // just for association purposes this returns the parent task for the current subtask(null in case it is not a task)
     TaskV2* parentTask() { return dynamic_cast<TaskV2*>(parent()); }
 
    signals:
-    void started(TaskV2* job);
-    void finished(TaskV2* job);
-    void resumed(TaskV2* job);
-    void paused(TaskV2* job);
+    // allways connect if posible
+    void finished(TaskV2* job);  // this should be the only exit point of the task and allways be emited at least once per started task
+    // progress related signals( the delta is with how much was the value incremented comparaed to previous value)
     void totalChanged(TaskV2* job, double total, double delta);
     void processedChanged(TaskV2* job, double current, double delta);
+    // connect only if the task is suspendable
+    void resumed(TaskV2* job);
+    void paused(TaskV2* job);
+    // this should not be connected if the task weight doesn't change (right now not used)
     void weightChanged(TaskV2* job);
+    // mostly needed for UI
     void stateChanged(TaskV2* job);
-    void warning(TaskV2* job, const QString& message);
+    void started(TaskV2* job);
     void subTaskAdded(TaskV2* job, TaskV2* subTask);
+    // maybe deprecate this(warning functionality is not really used)
+    void warning(TaskV2* job, const QString& message);
 
    public slots:
     // QRunnable's interface
     void run() override { start(); }
-
+    // entry point to the task
     bool start()
     {
         switch (m_state) {
@@ -179,10 +193,13 @@ class TaskV2 : public QObject, public QRunnable {
         m_warnings.clear();
         m_fail_reason.clear();
         emit started(this);
+        // ensure that the executeTask is (partialy)async
+        // recomandation executeTask should never block
         QMetaObject::invokeMethod(this, &TaskV2::executeTask, Qt::QueuedConnection);
         return true;
     }
 
+    // wrapper for doPause
     bool pause()
     {  // Don't pause twice.
         if (!isRunning()) {
@@ -196,6 +213,7 @@ class TaskV2 : public QObject, public QRunnable {
         }
         return false;
     }
+    // wrapper for doResume
     bool resume()
     {  // Don't resume twice.
         if (!isPaused()) {
@@ -209,6 +227,7 @@ class TaskV2 : public QObject, public QRunnable {
         }
         return false;
     }
+    // wrapper for doAbort
     bool abort()
     {  // Don't abort twice.
         if (!isRunning() && !isPaused()) {
@@ -225,11 +244,13 @@ class TaskV2 : public QObject, public QRunnable {
         return false;
     }
 
+    // used to propagate proggress to the main task
     void propateTotalChanged(TaskV2* job, [[maybe_unused]] double, double delta)
     {
         setProgressTotal(m_progressTotal + delta * job->weight());
     }
     void propateProcessedChanged(TaskV2* job, [[maybe_unused]] double, double delta) { setProgress(m_progress + delta * job->weight()); }
+    // only used in case the subtask replaces the main task(it is not needed to be connected)
     void propateState(TaskV2* job)
     {
         m_status = job->status();
@@ -242,6 +263,7 @@ class TaskV2 : public QObject, public QRunnable {
     Q_INVOKABLE virtual void executeTask() = 0;
 
    protected slots:
+    // helper function to finalize the task( emit finished should always only be called from this two functions and abort)
     virtual void emitFailed(QString reason)
     {
         // Don't fail twice.
@@ -267,19 +289,24 @@ class TaskV2 : public QObject, public QRunnable {
         emit finished(this);
     }
 
+    // implement this to suport abort
     virtual bool doAbort() { return false; }
+    // implement this to suport pause
     virtual bool doPause() { return false; }
     virtual bool doResume() { return false; }
 
+    // used to report non-critical errors(did not see it used)
     void addWarnings(const QString& msg)
     {
         qWarning(m_log_cat) << msg;
         m_warnings.push_back(msg);
         emit warning(this, msg);
     }
+    // used by ConcurrentTask to collect previous warnings
     void addWarnings(QStringList warnings) { m_warnings.append(warnings); }
 
    protected:
+    // helper functions to set the properties(emmits apporopriate signals if changed)
 #define SET_FIELD(field, newValue, signal) \
     if (field != newValue) {               \
         field = newValue;                  \
