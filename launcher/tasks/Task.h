@@ -225,6 +225,19 @@ class TaskV2 : public QObject, public QRunnable {
         return false;
     }
 
+    void propateTotalChanged(TaskV2* job, [[maybe_unused]] double, double delta)
+    {
+        setProgressTotal(m_progressTotal + delta * job->weight());
+    }
+    void propateProcessedChanged(TaskV2* job, [[maybe_unused]] double, double delta) { setProgress(m_progress + delta * job->weight()); }
+    void propateState(TaskV2* job)
+    {
+        m_status = job->status();
+        m_details = job->details();
+        m_title = job->title();
+        emit stateChanged(this);
+    }
+
    protected:
     Q_INVOKABLE virtual void executeTask() = 0;
 
@@ -290,7 +303,6 @@ class TaskV2 : public QObject, public QRunnable {
     }
     void setWeight(double weight) { SET_FIELD(m_weight, weight, weightChanged(this)); }
 
-   protected:
    private:
     const QUuid m_uuid;
     const QLoggingCategory m_log_cat;

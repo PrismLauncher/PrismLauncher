@@ -163,8 +163,8 @@ void JavaListLoadTask::executeTask()
 
     m_job.reset(new JavaCheckerJob("Java detection"));
     connect(m_job.get(), &TaskV2::finished, this, &JavaListLoadTask::javaCheckerFinished);
-    connect(m_job.get(), &TaskV2::processedChanged, this, &TaskV2::processedChanged);
-    connect(m_job.get(), &TaskV2::totalChanged, this, &TaskV2::totalChanged);
+    connect(m_job.get(), &TaskV2::processedChanged, this, &JavaListLoadTask::propateProcessedChanged);
+    connect(m_job.get(), &TaskV2::totalChanged, this, &JavaListLoadTask::propateTotalChanged);
 
     qDebug() << "Probing the following Java paths: ";
     int id = 0;

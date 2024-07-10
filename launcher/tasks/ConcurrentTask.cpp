@@ -56,7 +56,7 @@ void ConcurrentTask::addTask(TaskV2::Ptr task)
 {
     m_queue.append(task);
     task->setParent(this);
-    setProgressTotal(progressTotal() + task->progressTotal());
+    setProgressTotal(progressTotal() + task->progressTotal() * task->weight());
     emit subTaskAdded(this, task.get());
 }
 
@@ -121,15 +121,10 @@ void ConcurrentTask::startSubTask(TaskV2::Ptr next)
 {
     connect(next.get(), &TaskV2::finished, this, &ConcurrentTask::subTaskFinished);
 
+    connect(next.get(), &TaskV2::processedChanged, this, &ConcurrentTask::propateProcessedChanged);
+    connect(next.get(), &TaskV2::totalChanged, this, &ConcurrentTask::propateTotalChanged);
     if (totalSize() == 1) {
-        connect(next.get(), &TaskV2::stateChanged, this, &ConcurrentTask::stateChanged);
-        connect(next.get(), &TaskV2::totalChanged, this, &ConcurrentTask::totalChanged);
-        connect(next.get(), &TaskV2::processedChanged, this, &ConcurrentTask::processedChanged);
-    } else {
-        connect(next.get(), &TaskV2::totalChanged, this,
-                [this](TaskV2* job, double total, double delta) { setProgressTotal(progressTotal() + delta); });
-        connect(next.get(), &TaskV2::processedChanged, this,
-                [this](TaskV2* job, double processed, double delta) { setProgress(progress() + delta); });
+        connect(next.get(), &TaskV2::stateChanged, this, &ConcurrentTask::propateState);
     }
 
     m_doing.insert(next->uuid(), next);

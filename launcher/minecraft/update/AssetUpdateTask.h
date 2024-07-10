@@ -3,23 +3,19 @@
 #include "tasks/Task.h"
 class MinecraftInstance;
 
-class AssetUpdateTask : public Task {
+class AssetUpdateTask : public TaskV2 {
     Q_OBJECT
    public:
     AssetUpdateTask(MinecraftInstance* inst);
-    virtual ~AssetUpdateTask();
+    virtual ~AssetUpdateTask() = default;
 
     void executeTask() override;
 
-    bool canAbort() const override;
-
    private slots:
-    void assetIndexFinished();
-    void assetIndexFailed(QString reason);
-    void assetsFailed(QString reason);
+    void assetIndexFinished(TaskV2*);
 
-   public slots:
-    bool abort() override;
+   protected slots:
+    bool doAbort() override;
 
    private:
     MinecraftInstance* m_inst;

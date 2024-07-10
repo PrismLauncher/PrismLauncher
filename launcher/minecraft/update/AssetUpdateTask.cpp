@@ -8,13 +8,13 @@
 #include "Application.h"
 
 #include "net/ApiDownload.h"
+#include "tasks/Task.h"
 
 AssetUpdateTask::AssetUpdateTask(MinecraftInstance* inst)
 {
     m_inst = inst;
+    setCapabilities(Capability::Killable);
 }
-
-AssetUpdateTask::~AssetUpdateTask() {}
 
 void AssetUpdateTask::executeTask()
 {
@@ -38,23 +38,22 @@ void AssetUpdateTask::executeTask()
 
     downloadJob.reset(job);
 
-    connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::assetIndexFinished);
-    connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetIndexFailed);
-    connect(downloadJob.get(), &NetJob::aborted, this, [this] { emitFailed(tr("Aborted")); });
-    connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
-    connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propagateStepProgress);
+    connect(downloadJob.get(), &TaskV2::finished, this, &AssetUpdateTask::assetIndexFinished);
+    connect(downloadJob.get(), &TaskV2::processedChanged, this, &AssetUpdateTask::propateProcessedChanged);
+    connect(downloadJob.get(), &TaskV2::totalChanged, this, &AssetUpdateTask::propateTotalChanged);
+    connect(downloadJob.get(), &TaskV2::stateChanged, this, &AssetUpdateTask::stateChanged);
 
     qDebug() << m_inst->name() << ": Starting asset index download";
     downloadJob->start();
 }
 
-bool AssetUpdateTask::canAbort() const
+void AssetUpdateTask::assetIndexFinished(TaskV2* t)
 {
-    return true;
-}
-
-void AssetUpdateTask::assetIndexFinished()
-{
+    if (!t->wasSuccessful()) {
+        qDebug() << m_inst->name() << ": Failed asset index download";
+        emitFailed(tr("Failed to download the assets index:\n%1").arg(t->failReason()));
+        return;
+    }
     AssetsIndex index;
     qDebug() << m_inst->name() << ": Finished asset index download";
 
@@ -75,34 +74,28 @@ void AssetUpdateTask::assetIndexFinished()
     if (job) {
         setStatus(tr("Getting the assets files from Mojang..."));
         downloadJob = job;
-        connect(downloadJob.get(), &NetJob::succeeded, this, &AssetUpdateTask::emitSucceeded);
-        connect(downloadJob.get(), &NetJob::failed, this, &AssetUpdateTask::assetsFailed);
-        connect(downloadJob.get(), &NetJob::aborted, this, [this] { emitFailed(tr("Aborted")); });
-        connect(downloadJob.get(), &NetJob::progress, this, &AssetUpdateTask::progress);
-        connect(downloadJob.get(), &NetJob::stepProgress, this, &AssetUpdateTask::propagateStepProgress);
+        connect(downloadJob.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+            if (t->wasSuccessful()) {
+                emitSucceeded();
+            } else {
+                emitFailed(tr("Failed to download assets:\n%1").arg(t->failReason()));
+            }
+        });
+        connect(downloadJob.get(), &TaskV2::processedChanged, this, &AssetUpdateTask::propateProcessedChanged);
+        connect(downloadJob.get(), &TaskV2::totalChanged, this, &AssetUpdateTask::propateTotalChanged);
+        connect(downloadJob.get(), &TaskV2::stateChanged, this, &AssetUpdateTask::stateChanged);
+
         downloadJob->start();
         return;
     }
     emitSucceeded();
 }
 
-void AssetUpdateTask::assetIndexFailed(QString reason)
-{
-    qDebug() << m_inst->name() << ": Failed asset index download";
-    emitFailed(tr("Failed to download the assets index:\n%1").arg(reason));
-}
-
-void AssetUpdateTask::assetsFailed(QString reason)
-{
-    emitFailed(tr("Failed to download assets:\n%1").arg(reason));
-}
-
-bool AssetUpdateTask::abort()
+bool AssetUpdateTask::doAbort()
 {
     if (downloadJob) {
         return downloadJob->abort();
-    } else {
-        qWarning() << "Prematurely aborted AssetUpdateTask";
     }
+    qWarning() << "Prematurely aborted AssetUpdateTask";
     return true;
 }

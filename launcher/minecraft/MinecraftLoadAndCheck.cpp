@@ -16,8 +16,7 @@ void MinecraftLoadAndCheck::executeTask()
         return;
     }
     connect(m_task.get(), &TaskV2::finished, this, &MinecraftLoadAndCheck::finished);
-    connect(m_task.get(), &TaskV2::totalChanged, this, &MinecraftLoadAndCheck::totalChanged);
-    connect(m_task.get(), &TaskV2::processedChanged, this, &MinecraftLoadAndCheck::processedChanged);
-    connect(m_task.get(), &TaskV2::weightChanged, this, &MinecraftLoadAndCheck::weightChanged);
-    connect(m_task.get(), &TaskV2::stateChanged, this, &MinecraftLoadAndCheck::stateChanged);
+    connect(m_task.get(), &TaskV2::processedChanged, this, &MinecraftLoadAndCheck::propateProcessedChanged);
+    connect(m_task.get(), &TaskV2::totalChanged, this, &MinecraftLoadAndCheck::propateTotalChanged);
+    connect(m_task.get(), &TaskV2::stateChanged, this, &MinecraftLoadAndCheck::propateState);
 }

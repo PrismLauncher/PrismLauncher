@@ -71,7 +71,8 @@ void FMLLibrariesTask::executeTask()
     }
 
     connect(dljob.get(), &NetJob::finished, this, &FMLLibrariesTask::fmllibsFinished);
-    connect(dljob.get(), &NetJob::processedChanged, this, &FMLLibrariesTask::processedChanged);
+    connect(dljob.get(), &TaskV2::processedChanged, this, &FMLLibrariesTask::propateProcessedChanged);
+    connect(dljob.get(), &TaskV2::totalChanged, this, &FMLLibrariesTask::propateTotalChanged);
     downloadJob.reset(dljob);
     downloadJob->start();
 }

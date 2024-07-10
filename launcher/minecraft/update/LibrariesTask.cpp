@@ -71,10 +71,10 @@ void LibrariesTask::executeTask()
                 tr("Game update failed: it was impossible to fetch the required libraries.\nReason:\n%1").arg(downloadJob->failReason()));
         }
     });
-    connect(downloadJob.get(), &NetJob::progress, this, &LibrariesTask::progress);
-    connect(downloadJob.get(), &NetJob::totalChanged, this, &LibrariesTask::totalChanged);
-    connect(downloadJob.get(), &NetJob::processedChanged, this, &LibrariesTask::processedChanged);
-    connect(downloadJob.get(), &NetJob::stateChanged, this, &LibrariesTask::stateChanged);
+
+    connect(downloadJob.get(), &TaskV2::processedChanged, this, &LibrariesTask::propateProcessedChanged);
+    connect(downloadJob.get(), &TaskV2::totalChanged, this, &LibrariesTask::propateTotalChanged);
+    connect(downloadJob.get(), &TaskV2::stateChanged, this, &LibrariesTask::stateChanged);
 
     downloadJob->start();
 }
