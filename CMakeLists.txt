@@ -427,6 +427,7 @@ elseif(UNIX)
         set(PLUGIN_DEST_DIR "plugins")
         set(BUNDLE_DEST_DIR ".")
         set(RESOURCES_DEST_DIR ".")
+        set(QML_DEST_DIR "qml")
     
         # Apps to bundle
         set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${Launcher_APP_BINARY_NAME}")
