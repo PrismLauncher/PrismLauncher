@@ -262,7 +262,6 @@ jobs:
 
           wget "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-x86_64.AppImage"
 
-          ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
           sudo apt install libopengl0 libfuse2
 
       - name: Add QT_HOST_PATH var (Windows MSVC arm64)
