@@ -61,7 +61,7 @@ class LogPage : public QQuickWidget, public BasePage {
     [[nodiscard]] bool shouldDisplay() const override;
 
     bool apply() override;
-    void retranslate() override{};
+    void retranslate() override {};
 
    private slots:
     void onInstanceLaunchTaskChanged(LaunchTask::Ptr);
