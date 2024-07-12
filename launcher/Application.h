@@ -193,6 +193,8 @@ class Application : public QApplication {
     void globalSettingsClosed();
     int currentCatChanged(int index);
 
+    void oauthReplyRecieved(QVariantMap);
+
 #ifdef Q_OS_MACOS
     void clickedOnDock();
 #endif

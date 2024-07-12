@@ -56,7 +56,7 @@ class MinecraftInstance : public BaseInstance {
     Q_OBJECT
    public:
     MinecraftInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr settings, const QString& rootDir);
-    virtual ~MinecraftInstance(){};
+    virtual ~MinecraftInstance() {};
     virtual void saveNow() override;
 
     void loadSpecificSettings() override;

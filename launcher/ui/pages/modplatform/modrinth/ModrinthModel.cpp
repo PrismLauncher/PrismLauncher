@@ -142,7 +142,7 @@ void ModpackListModel::performPaginatedSearch()
             callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
             callbacks.on_abort = [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
-                searchRequestFailed("Abborted");
+                searchRequestFailed("Aborted");
             };
             static const ModrinthAPI api;
             if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {
@@ -352,10 +352,10 @@ void ModpackListModel::searchRequestForOneSucceeded(QJsonDocument& doc)
 void ModpackListModel::searchRequestFailed(QString reason)
 {
     auto failed_action = dynamic_cast<NetJob*>(jobPtr.get())->getFailedActions().at(0);
-    if (!failed_action->m_reply) {
+    if (failed_action->replyStatusCode() == -1) {
         // Network error
         QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load modpacks."));
-    } else if (failed_action->m_reply && failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
+    } else if (failed_action->replyStatusCode() == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
                               //: %1 refers to the launcher itself

@@ -27,6 +27,7 @@
 #include "Application.h"
 #include "ResourceDownloadTask.h"
 
+#include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourcePackFolderModel.h"
 #include "minecraft/mod/ShaderPackFolderModel.h"
@@ -91,6 +92,19 @@ void ResourceDownloadDialog::accept()
 
 void ResourceDownloadDialog::reject()
 {
+    auto selected = getTasks();
+    if (selected.count() > 0) {
+        auto reply = CustomMessageBox::selectable(this, tr("Confirmation Needed"),
+                                                  tr("You have %1 selected resources.\n"
+                                                     "Are you sure you want to close this dialog?")
+                                                      .arg(selected.count()),
+                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                         ->exec();
+        if (reply != QMessageBox::Yes) {
+            return;
+        }
+    }
+
     if (!geometrySaveKey().isEmpty())
         APPLICATION->settings()->set(geometrySaveKey(), saveGeometry().toBase64());
 
@@ -125,14 +139,13 @@ void ResourceDownloadDialog::connectButtons()
     connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
 }
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 void ResourceDownloadDialog::confirm()
 {
     auto confirm_dialog = ReviewMessageBox::create(this, tr("Confirm %1 to download").arg(resourcesString()));
     confirm_dialog->retranslateUi(resourcesString());
 
-    QHash<QString, QStringList> getRequiredBy;
+    QHash<QString, GetModDependenciesTask::PackDependencyExtraInfo> dependencyExtraInfo;
+    QStringList depNames;
     if (auto task = getModDependenciesTask(); task) {
         connect(task.get(), &Task::failed, this,
                 [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
@@ -155,9 +168,11 @@ void ResourceDownloadDialog::confirm()
             QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
             return;
         } else {
-            for (auto dep : task->getDependecies())
+            for (auto dep : task->getDependecies()) {
                 addResource(dep->pack, dep->version);
-            getRequiredBy = task->getRequiredBy();
+                depNames << dep->pack->name;
+            }
+            dependencyExtraInfo = task->getExtraInfo();
         }
     }
 
@@ -166,9 +181,10 @@ void ResourceDownloadDialog::confirm()
         return QString::compare(a->getName(), b->getName(), Qt::CaseInsensitive) < 0;
     });
     for (auto& task : selected) {
+        auto extraInfo = dependencyExtraInfo.value(task->getPack()->addonId.toString());
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ProviderCaps.name(task->getProvider()), getRequiredBy.value(task->getPack()->addonId.toString()),
-                                         task->getVersion().version_type.toString() });
+                                         ModPlatform::ProviderCapabilities::name(task->getProvider()), extraInfo.required_by,
+                                         task->getVersion().version_type.toString(), !extraInfo.maybe_installed });
     }
 
     if (confirm_dialog->exec()) {
@@ -180,6 +196,9 @@ void ResourceDownloadDialog::confirm()
         }
 
         this->accept();
+    } else {
+        for (auto name : depNames)
+            removeResource(name);
     }
 }
 
@@ -356,4 +375,20 @@ QList<BasePage*> ShaderPackDownloadDialog::getPages()
     return pages;
 }
 
+void ModDownloadDialog::setModMetadata(std::shared_ptr<Metadata::ModStruct> meta)
+{
+    switch (meta->provider) {
+        case ModPlatform::ResourceProvider::MODRINTH:
+            selectPage(Modrinth::id());
+            break;
+        case ModPlatform::ResourceProvider::FLAME:
+            selectPage(Flame::id());
+            break;
+    }
+    setWindowTitle(tr("Change %1 version").arg(meta->name));
+    m_container->hidePageList();
+    m_buttons.hide();
+    auto page = selectedPage();
+    page->openProject(meta->project_id);
+}
 }  // namespace ResourceDownload

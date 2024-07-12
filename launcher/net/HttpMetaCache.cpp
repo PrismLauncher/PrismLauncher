@@ -84,6 +84,7 @@ auto HttpMetaCache::getEntry(QString base, QString resource_path) -> MetaEntryPt
 
 auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString expected_etag) -> MetaEntryPtr
 {
+    resource_path = FS::RemoveInvalidPathChars(resource_path);
     auto entry = getEntry(base, resource_path);
     // it's not present? generate a default stale entry
     if (!entry) {
@@ -174,6 +175,8 @@ void HttpMetaCache::evictAll()
             if (!evictEntry(entry))
                 qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
         }
+        map.entry_list.clear();
+        FS::deletePath(map.base_path);
     }
 }
 

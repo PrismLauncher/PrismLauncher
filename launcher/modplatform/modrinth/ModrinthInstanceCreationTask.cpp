@@ -20,6 +20,7 @@
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
 #include <QAbstractButton>
+#include <QFileInfo>
 #include <vector>
 
 bool ModrinthCreationTask::abort()
@@ -58,6 +59,7 @@ bool ModrinthCreationTask::updateInstance()
         return false;
 
     auto version_name = inst->getManagedPackVersionName();
+    m_root_path = QFileInfo(inst->gameRoot()).fileName();
     auto version_str = !version_name.isEmpty() ? tr(" (version %1)").arg(version_name) : "";
 
     if (shouldConfirmUpdate()) {
@@ -171,9 +173,9 @@ bool ModrinthCreationTask::createInstance()
     // Keep index file in case we need it some other time (like when changing versions)
     QString new_index_place(FS::PathCombine(parent_folder, "modrinth.index.json"));
     FS::ensureFilePathExists(new_index_place);
-    QFile::rename(index_path, new_index_place);
+    FS::move(index_path, new_index_place);
 
-    auto mcPath = FS::PathCombine(m_stagingPath, ".minecraft");
+    auto mcPath = FS::PathCombine(m_stagingPath, m_root_path);
 
     auto override_path = FS::PathCombine(m_stagingPath, "overrides");
     if (QFile::exists(override_path)) {
@@ -181,7 +183,7 @@ bool ModrinthCreationTask::createInstance()
         Override::createOverrides("overrides", parent_folder, override_path);
 
         // Apply the overrides
-        if (!QFile::rename(override_path, mcPath)) {
+        if (!FS::move(override_path, mcPath)) {
             setError(tr("Could not rename the overrides folder:\n") + "overrides");
             return false;
         }
@@ -234,15 +236,17 @@ bool ModrinthCreationTask::createInstance()
 
     m_files_job.reset(new NetJob(tr("Mod Download Modrinth"), APPLICATION->network()));
 
-    auto root_modpack_path = FS::PathCombine(m_stagingPath, ".minecraft");
+    auto root_modpack_path = FS::PathCombine(m_stagingPath, m_root_path);
     auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
 
     for (auto file : m_files) {
-        auto file_path = FS::PathCombine(root_modpack_path, file.path);
+        auto fileName = file.path;
+        fileName = FS::RemoveInvalidPathChars(fileName);
+        auto file_path = FS::PathCombine(root_modpack_path, fileName);
         if (!root_modpack_url.isParentOf(QUrl::fromLocalFile(file_path))) {
             // This means we somehow got out of the root folder, so abort here to prevent exploits
             setError(tr("One of the files has a path that leads to an arbitrary location (%1). This is a security risk and isn't allowed.")
-                         .arg(file.path));
+                         .arg(fileName));
             return false;
         }
 
@@ -255,7 +259,7 @@ bool ModrinthCreationTask::createInstance()
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &NetAction::failed, [this, &file, file_path, param] {
+            connect(dl.get(), &Task::failed, [this, &file, file_path, param] {
                 auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
                 m_files_job->addNetAction(ndl);

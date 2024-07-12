@@ -154,7 +154,12 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
 #if defined(LAUNCHER_APPLICATION)
 class ExportToZipTask : public Task {
    public:
-    ExportToZipTask(QString outputPath, QDir dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
+    ExportToZipTask(QString outputPath,
+                    QDir dir,
+                    QFileInfoList files,
+                    QString destinationPrefix = "",
+                    bool followSymlinks = false,
+                    bool utf8Enabled = false)
         : m_output_path(outputPath)
         , m_output(outputPath)
         , m_dir(dir)
@@ -163,9 +168,15 @@ class ExportToZipTask : public Task {
         , m_follow_symlinks(followSymlinks)
     {
         setAbortable(true);
+        m_output.setUtf8Enabled(utf8Enabled);
     };
-    ExportToZipTask(QString outputPath, QString dir, QFileInfoList files, QString destinationPrefix = "", bool followSymlinks = false)
-        : ExportToZipTask(outputPath, QDir(dir), files, destinationPrefix, followSymlinks){};
+    ExportToZipTask(QString outputPath,
+                    QString dir,
+                    QFileInfoList files,
+                    QString destinationPrefix = "",
+                    bool followSymlinks = false,
+                    bool utf8Enabled = false)
+        : ExportToZipTask(outputPath, QDir(dir), files, destinationPrefix, followSymlinks, utf8Enabled) {};
 
     virtual ~ExportToZipTask() = default;
 
@@ -193,6 +204,31 @@ class ExportToZipTask : public Task {
 
     QFuture<ZipResult> m_build_zip_future;
     QFutureWatcher<ZipResult> m_build_zip_watcher;
+};
+
+class ExtractZipTask : public Task {
+   public:
+    ExtractZipTask(std::shared_ptr<QuaZip> input, QDir outputDir, QString subdirectory = "")
+        : m_input(input), m_output_dir(outputDir), m_subdirectory(subdirectory)
+    {}
+    virtual ~ExtractZipTask() = default;
+
+    using ZipResult = std::optional<QString>;
+
+   protected:
+    virtual void executeTask() override;
+    bool abort() override;
+
+    ZipResult extractZip();
+    void finish();
+
+   private:
+    std::shared_ptr<QuaZip> m_input;
+    QDir m_output_dir;
+    QString m_subdirectory;
+
+    QFuture<ZipResult> m_zip_future;
+    QFutureWatcher<ZipResult> m_zip_watcher;
 };
 #endif
 }  // namespace MMCZip

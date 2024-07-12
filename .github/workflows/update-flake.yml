@@ -17,9 +17,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@7ac1ec25491415c381d9b62f0657c7a028df52a7 # v24
+      - uses: cachix/install-nix-action@ba0dd844c9180cbf77aa72a116d6fbc515d0e87b # v27
 
-      - uses: DeterminateSystems/update-flake-lock@v20
+      - uses: DeterminateSystems/update-flake-lock@v22
         with:
           commit-msg: "chore(nix): update lockfile"
           pr-title: "chore(nix): update lockfile"

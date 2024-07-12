@@ -207,7 +207,7 @@ void WorldListPage::on_actionRemove_triggered()
 
 void WorldListPage::on_actionView_Folder_triggered()
 {
-    DesktopServices::openDirectory(m_worlds->dir().absolutePath(), true);
+    DesktopServices::openPath(m_worlds->dir().absolutePath(), true);
 }
 
 void WorldListPage::on_actionDatapacks_triggered()
@@ -223,7 +223,7 @@ void WorldListPage::on_actionDatapacks_triggered()
 
     auto fullPath = m_worlds->data(index, WorldList::FolderRole).toString();
 
-    DesktopServices::openDirectory(FS::PathCombine(fullPath, "datapacks"), true);
+    DesktopServices::openPath(FS::PathCombine(fullPath, "datapacks"), true);
 }
 
 void WorldListPage::on_actionReset_Icon_triggered()
@@ -343,7 +343,7 @@ void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[
 
 void WorldListPage::on_actionAdd_triggered()
 {
-    auto list = GuiUtil::BrowseForFiles(displayName(), tr("Select a Minecraft world zip"), tr("Minecraft World Zip File (*.zip)"),
+    auto list = GuiUtil::BrowseForFiles(displayName(), tr("Select a Minecraft world zip"), tr("Minecraft World Zip File") + " (*.zip)",
                                         QString(), this->parentWidget());
     if (!list.empty()) {
         m_worlds->stopWatching();

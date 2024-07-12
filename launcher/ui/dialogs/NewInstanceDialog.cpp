@@ -52,6 +52,7 @@
 #include <QFileDialog>
 #include <QLayout>
 #include <QPushButton>
+#include <QScreen>
 #include <QValidator>
 #include <utility>
 
@@ -63,6 +64,7 @@
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 #include "ui/pages/modplatform/technic/TechnicPage.h"
 #include "ui/widgets/PageContainer.h"
+
 NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
                                      const QString& url,
                                      const QMap<QString, QString>& extra_info,
@@ -97,6 +99,9 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     ui->verticalLayout->insertWidget(2, m_container);
 
     m_container->addButtons(m_buttons);
+    connect(m_container, &PageContainer::selectedPageChanged, this, [this](BasePage* previous, BasePage* selected) {
+        m_buttons->button(QDialogButtonBox::Ok)->setEnabled(creationTask && !instName().isEmpty());
+    });
 
     // Bonk Qt over its stupid head and make sure it understands which button is the default one...
     // See: https://stackoverflow.com/questions/24556831/qbuttonbox-set-default-button
@@ -124,7 +129,17 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
 
     updateDialogState();
 
-    restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toByteArray()));
+    if (APPLICATION->settings()->get("NewInstanceGeometry").isValid()) {
+        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get("NewInstanceGeometry").toByteArray()));
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        auto screen = parent->screen();
+#else
+        auto screen = QGuiApplication::primaryScreen();
+#endif
+        auto geometry = screen->availableSize();
+        resize(width(), qMin(geometry.height() - 50, 710));
+    }
 }
 
 void NewInstanceDialog::reject()
@@ -185,7 +200,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
     importVersion.clear();
 
     if (!task) {
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon("default"));
+        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
         importIcon = false;
     }
 
@@ -201,7 +216,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, QString version, I
     importVersion = std::move(version);
 
     if (!task) {
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon("default"));
+        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
         importIcon = false;
     }
 
@@ -221,6 +236,9 @@ void NewInstanceDialog::setSuggestedIconFromFile(const QString& path, const QStr
 
 void NewInstanceDialog::setSuggestedIcon(const QString& key)
 {
+    if (key == "default")
+        return;
+
     auto icon = APPLICATION->icons()->getIcon(key);
     importIcon = false;
 

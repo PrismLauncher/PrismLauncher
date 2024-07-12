@@ -178,6 +178,88 @@ bool processZIP(ResourcePack& pack, ProcessingLevel level)
     return true;
 }
 
+QString buildStyle(const QJsonObject& obj)
+{
+    QStringList styles;
+    if (auto color = Json::ensureString(obj, "color"); !color.isEmpty()) {
+        styles << QString("color: %1;").arg(color);
+    }
+    if (obj.contains("bold")) {
+        QString weight = "normal";
+        if (Json::ensureBoolean(obj, "bold", false)) {
+            weight = "bold";
+        }
+        styles << QString("font-weight: %1;").arg(weight);
+    }
+    if (obj.contains("italic")) {
+        QString style = "normal";
+        if (Json::ensureBoolean(obj, "italic", false)) {
+            style = "italic";
+        }
+        styles << QString("font-style: %1;").arg(style);
+    }
+
+    return styles.isEmpty() ? "" : QString("style=\"%1\"").arg(styles.join(" "));
+}
+
+QString processComponent(const QJsonArray& value, bool strikethrough, bool underline)
+{
+    QString result;
+    for (auto current : value)
+        result += processComponent(current, strikethrough, underline);
+    return result;
+}
+
+QString processComponent(const QJsonObject& obj, bool strikethrough, bool underline)
+{
+    underline = Json::ensureBoolean(obj, "underlined", underline);
+    strikethrough = Json::ensureBoolean(obj, "strikethrough", strikethrough);
+
+    QString result = Json::ensureString(obj, "text");
+    if (underline) {
+        result = QString("<u>%1</u>").arg(result);
+    }
+    if (strikethrough) {
+        result = QString("<s>%1</s>").arg(result);
+    }
+    // the extra needs to be a array
+    result += processComponent(Json::ensureArray(obj, "extra"), strikethrough, underline);
+    if (auto style = buildStyle(obj); !style.isEmpty()) {
+        result = QString("<span %1>%2</span>").arg(style, result);
+    }
+    if (obj.contains("clickEvent")) {
+        auto click_event = Json::ensureObject(obj, "clickEvent");
+        auto action = Json::ensureString(click_event, "action");
+        auto value = Json::ensureString(click_event, "value");
+        if (action == "open_url" && !value.isEmpty()) {
+            result = QString("<a href=\"%1\">%2</a>").arg(value, result);
+        }
+    }
+    return result;
+}
+
+QString processComponent(const QJsonValue& value, bool strikethrough, bool underline)
+{
+    if (value.isString()) {
+        return value.toString();
+    }
+    if (value.isBool()) {
+        return value.toBool() ? "true" : "false";
+    }
+    if (value.isDouble()) {
+        return QString::number(value.toDouble());
+    }
+    if (value.isArray()) {
+        return processComponent(value.toArray(), strikethrough, underline);
+    }
+    if (value.isObject()) {
+        return processComponent(value.toObject(), strikethrough, underline);
+    }
+    qWarning() << "Invalid component type!";
+    return {};
+}
+
+// https://minecraft.wiki/w/Raw_JSON_text_format
 // https://minecraft.wiki/w/Tutorials/Creating_a_resource_pack#Formatting_pack.mcmeta
 bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
 {
@@ -186,7 +268,9 @@ bool processMCMeta(ResourcePack& pack, QByteArray&& raw_data)
         auto pack_obj = Json::requireObject(json_doc.object(), "pack", {});
 
         pack.setPackFormat(Json::ensureInteger(pack_obj, "pack_format", 0));
-        pack.setDescription(Json::ensureString(pack_obj, "description", ""));
+
+        pack.setDescription(processComponent(pack_obj.value("description")));
+
     } catch (Json::JsonException& e) {
         qWarning() << "JsonException: " << e.what() << e.cause();
         return false;
@@ -286,8 +370,10 @@ bool LocalResourcePackParseTask::abort()
 
 void LocalResourcePackParseTask::executeTask()
 {
-    if (!ResourcePackUtils::process(m_resource_pack))
+    if (!ResourcePackUtils::process(m_resource_pack)) {
+        emitFailed("this is not a resource pack");
         return;
+    }
 
     if (m_aborted)
         emitAborted();

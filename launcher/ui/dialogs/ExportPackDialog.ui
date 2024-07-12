@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>650</width>
-    <height>510</height>
+    <height>532</height>
    </rect>
   </property>
   <property name="sizeGripEnabled">
@@ -19,21 +19,8 @@
      <property name="title">
       <string>&amp;Description</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="0">
-       <widget class="QLabel" name="summaryLabel">
-        <property name="text">
-         <string>&amp;Summary</string>
-        </property>
-        <property name="buddy">
-         <cstring>summary</cstring>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QLineEdit" name="summary"/>
-      </item>
-      <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
        <widget class="QLabel" name="nameLabel">
         <property name="text">
          <string>&amp;Name</string>
@@ -43,7 +30,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item>
+       <widget class="QLineEdit" name="name"/>
+      </item>
+      <item>
        <widget class="QLabel" name="versionLabel">
         <property name="text">
          <string>&amp;Version</string>
@@ -53,15 +43,42 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="name"/>
-      </item>
-      <item row="1" column="1">
+      <item>
        <widget class="QLineEdit" name="version">
         <property name="text">
          <string>1.0.0</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="summaryLabel">
+        <property name="text">
+         <string>&amp;Summary</string>
+        </property>
+        <property name="buddy">
+         <cstring>summary</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="summary">
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="authorLabel">
+        <property name="text">
+         <string>&amp;Author</string>
+        </property>
+        <property name="buddy">
+         <cstring>author</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="author"/>
       </item>
      </layout>
     </widget>
@@ -124,6 +141,7 @@
   <tabstop>name</tabstop>
   <tabstop>version</tabstop>
   <tabstop>summary</tabstop>
+  <tabstop>author</tabstop>
   <tabstop>files</tabstop>
   <tabstop>optionalFiles</tabstop>
  </tabstops>

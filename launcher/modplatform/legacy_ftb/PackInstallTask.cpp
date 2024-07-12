@@ -137,7 +137,7 @@ void PackInstallTask::install()
     QDir unzipMcDir(m_stagingPath + "/unzip/minecraft");
     if (unzipMcDir.exists()) {
         // ok, found minecraft dir, move contents to instance dir
-        if (!QDir().rename(m_stagingPath + "/unzip/minecraft", m_stagingPath + "/.minecraft")) {
+        if (!FS::move(m_stagingPath + "/unzip/minecraft", m_stagingPath + "/minecraft")) {
             emitFailed(tr("Failed to move unzipped Minecraft!"));
             return;
         }
@@ -155,7 +155,7 @@ void PackInstallTask::install()
     bool fallback = true;
 
     // handle different versions
-    QFile packJson(m_stagingPath + "/.minecraft/pack.json");
+    QFile packJson(m_stagingPath + "/minecraft/pack.json");
     QDir jarmodDir = QDir(m_stagingPath + "/unzip/instMods");
     if (packJson.exists()) {
         packJson.open(QIODevice::ReadOnly | QIODevice::Text);

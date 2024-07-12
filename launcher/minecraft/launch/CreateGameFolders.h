@@ -24,7 +24,7 @@ class CreateGameFolders : public LaunchStep {
     Q_OBJECT
    public:
     explicit CreateGameFolders(LaunchTask* parent);
-    virtual ~CreateGameFolders(){};
+    virtual ~CreateGameFolders() {};
 
     virtual void executeTask();
     virtual bool canAbort() const { return false; }

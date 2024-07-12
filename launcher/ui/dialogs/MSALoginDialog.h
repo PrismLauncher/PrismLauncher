@@ -19,6 +19,7 @@
 #include <QtCore/QEventLoop>
 #include <QtWidgets/QDialog>
 
+#include "minecraft/auth/AuthFlow.h"
 #include "minecraft/auth/MinecraftAccount.h"
 
 namespace Ui {
@@ -31,29 +32,23 @@ class MSALoginDialog : public QDialog {
    public:
     ~MSALoginDialog();
 
-    static MinecraftAccountPtr newAccount(QWidget* parent, QString message);
+    static MinecraftAccountPtr newAccount(QWidget* parent);
     int exec() override;
 
    private:
     explicit MSALoginDialog(QWidget* parent = 0);
 
-    void setUserInputsEnabled(bool enable);
-
    protected slots:
-    void onTaskFailed(const QString& reason);
-    void onTaskSucceeded();
-    void onTaskStatus(const QString& status);
-    void onTaskProgress(qint64 current, qint64 total);
-    void showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn);
-    void hideVerificationUriAndCode();
-
-    void externalLoginTick();
+    void onTaskFailed(QString reason);
+    void onTaskStatus(QString status);
+    void authorizeWithBrowser(const QUrl& url);
+    void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);
 
    private:
     Ui::MSALoginDialog* ui;
     MinecraftAccountPtr m_account;
-    shared_qobject_ptr<AccountTask> m_loginTask;
-    QTimer m_externalLoginTimer;
-    int m_externalLoginElapsed = 0;
-    int m_externalLoginTimeout = 0;
+    shared_qobject_ptr<AuthFlow> m_devicecode_task;
+    shared_qobject_ptr<AuthFlow> m_authflow_task;
+
+    QUrl m_url;
 };

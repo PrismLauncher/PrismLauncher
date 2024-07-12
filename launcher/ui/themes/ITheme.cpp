@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,16 +40,16 @@
 #include <QStyleFactory>
 
 #include "Application.h"
+#include "HintOverrideProxyStyle.h"
 #include "rainbow.h"
 
 void ITheme::apply(bool)
 {
     APPLICATION->setStyleSheet(QString());
-
-    QApplication::setStyle(QStyleFactory::create(qtTheme()));
-
-    if (hasColorScheme())
+    QApplication::setStyle(new HintOverrideProxyStyle(QStyleFactory::create(qtTheme())));
+    if (hasColorScheme()) {
         QApplication::setPalette(colorScheme());
+    }
 
     APPLICATION->setStyleSheet(appStyleSheet());
 

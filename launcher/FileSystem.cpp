@@ -272,13 +272,17 @@ bool ensureFilePathExists(QString filenamepath)
     return success;
 }
 
-bool ensureFolderPathExists(QString foldernamepath)
+bool ensureFolderPathExists(const QFileInfo folderPath)
 {
-    QFileInfo a(foldernamepath);
     QDir dir;
-    QString ensuredPath = a.filePath();
+    QString ensuredPath = folderPath.filePath();
     bool success = dir.mkpath(ensuredPath);
     return success;
+}
+
+bool ensureFolderPathExists(const QString folderPathName)
+{
+    return ensureFolderPathExists(QFileInfo(folderPathName));
 }
 
 bool copyFileAttributes(QString src, QString dst)
@@ -643,6 +647,19 @@ void ExternalLinkFileProcess::runLinkFile()
     qDebug() << "Process exited";
 }
 
+bool moveByCopy(const QString& source, const QString& dest)
+{
+    if (!copy(source, dest)()) {  // copy
+        qDebug() << "Copy of" << source << "to" << dest << "failed!";
+        return false;
+    }
+    if (!deletePath(source)) {  // remove original
+        qDebug() << "Deletion of" << source << "failed!";
+        return false;
+    };
+    return true;
+}
+
 bool move(const QString& source, const QString& dest)
 {
     std::error_code err;
@@ -650,13 +667,14 @@ bool move(const QString& source, const QString& dest)
     ensureFilePathExists(dest);
     fs::rename(StringUtils::toStdString(source), StringUtils::toStdString(dest), err);
 
-    if (err) {
-        qWarning() << "Failed to move file:" << QString::fromStdString(err.message());
-        qDebug() << "Source file:" << source;
-        qDebug() << "Destination file:" << dest;
+    if (err.value() != 0) {
+        if (moveByCopy(source, dest))
+            return true;
+        qDebug() << "Move of" << source << "to" << dest << "failed!";
+        qWarning() << "Failed to move file:" << QString::fromStdString(err.message()) << QString::number(err.value());
+        return false;
     }
-
-    return err.value() == 0;
+    return true;
 }
 
 bool deletePath(QString path)
@@ -797,16 +815,68 @@ QString NormalizePath(QString path)
     }
 }
 
-QString badFilenameChars = "\"\\/?<>:;*|!+\r\n";
+static const QString BAD_WIN_CHARS = "<>:\"|?*\r\n";
+static const QString BAD_NTFS_CHARS = "<>:\"|?*";
+static const QString BAD_HFS_CHARS = ":";
+
+static const QString BAD_FILENAME_CHARS = BAD_WIN_CHARS + "\\/";
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
-    for (int i = 0; i < string.length(); i++) {
-        if (badFilenameChars.contains(string[i])) {
+    for (int i = 0; i < string.length(); i++)
+        if (string.at(i) < ' ' || BAD_FILENAME_CHARS.contains(string.at(i)))
             string[i] = replaceWith;
+    return string;
+}
+
+QString RemoveInvalidPathChars(QString path, QChar replaceWith)
+{
+    QString invalidChars;
+#ifdef Q_OS_WIN
+    invalidChars = BAD_WIN_CHARS;
+#endif
+
+    // the null character is ignored in this check as it was not a problem until now
+    switch (statFS(path).fsType) {
+        case FilesystemType::FAT:  // similar to NTFS
+        /* fallthrough */
+        case FilesystemType::NTFS:
+        /* fallthrough */
+        case FilesystemType::REFS:  // similar to NTFS(should be available only on windows)
+            invalidChars += BAD_NTFS_CHARS;
+            break;
+        // case FilesystemType::EXT:
+        // case FilesystemType::EXT_2_OLD:
+        // case FilesystemType::EXT_2_3_4:
+        // case FilesystemType::XFS:
+        // case FilesystemType::BTRFS:
+        // case FilesystemType::NFS:
+        // case FilesystemType::ZFS:
+        case FilesystemType::APFS:
+        /* fallthrough */
+        case FilesystemType::HFS:
+        /* fallthrough */
+        case FilesystemType::HFSPLUS:
+        /* fallthrough */
+        case FilesystemType::HFSX:
+            invalidChars += BAD_HFS_CHARS;
+            break;
+        // case FilesystemType::FUSEBLK:
+        // case FilesystemType::F2FS:
+        // case FilesystemType::UNKNOWN:
+        default:
+            break;
+    }
+
+    if (invalidChars.size() != 0) {
+        for (int i = 0; i < path.length(); i++) {
+            if (path.at(i) < ' ' || invalidChars.contains(path.at(i))) {
+                path[i] = replaceWith;
+            }
         }
     }
-    return string;
+
+    return path;
 }
 
 QString DirNameFromString(QString string, QString inDir)
@@ -1581,4 +1651,70 @@ uintmax_t hardLinkCount(const QString& path)
     return count;
 }
 
+#ifdef Q_OS_WIN
+// returns 8.3 file format from long path
+QString shortPathName(const QString& file)
+{
+    auto input = file.toStdWString();
+    std::wstring output;
+    long length = GetShortPathNameW(input.c_str(), NULL, 0);
+    if (length == 0)
+        return {};
+    // NOTE: this resizing might seem weird...
+    // when GetShortPathNameW fails, it returns length including null character
+    // when it succeeds, it returns length excluding null character
+    // See: https://msdn.microsoft.com/en-us/library/windows/desktop/aa364989(v=vs.85).aspx
+    output.resize(length);
+    if (GetShortPathNameW(input.c_str(), (LPWSTR)output.c_str(), length) == 0)
+        return {};
+    output.resize(length - 1);
+    QString ret = QString::fromStdWString(output);
+    return ret;
+}
+
+// if the string survives roundtrip through local 8bit encoding...
+bool fitsInLocal8bit(const QString& string)
+{
+    return string == QString::fromLocal8Bit(string.toLocal8Bit());
+}
+
+QString getPathNameInLocal8bit(const QString& file)
+{
+    if (!fitsInLocal8bit(file)) {
+        auto path = shortPathName(file);
+        if (!path.isEmpty()) {
+            return path;
+        }
+        // in case shortPathName fails just return the path as is
+    }
+    return file;
+}
+#endif
+
+QString getUniqueResourceName(const QString& filePath)
+{
+    auto newFileName = filePath;
+    if (!newFileName.endsWith(".disabled")) {
+        return newFileName;  // prioritize enabled mods
+    }
+    newFileName.chop(9);
+    if (!QFile::exists(newFileName)) {
+        return filePath;
+    }
+    QFileInfo fileInfo(filePath);
+    auto baseName = fileInfo.completeBaseName();
+    auto path = fileInfo.absolutePath();
+
+    int counter = 1;
+    do {
+        if (counter == 1) {
+            newFileName = FS::PathCombine(path, baseName + ".duplicate");
+        } else {
+            newFileName = FS::PathCombine(path, baseName + ".duplicate" + QString::number(counter));
+        }
+        counter++;
+    } while (QFile::exists(newFileName));
+
+    return newFileName;
+}
 }  // namespace FS

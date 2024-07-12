@@ -27,6 +27,7 @@
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "modplatform/helpers/HashUtils.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
 const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "zip" });
@@ -102,8 +103,6 @@ void ModrinthPackExportTask::collectHashes()
             }))
             continue;
 
-        QCryptographicHash sha512(QCryptographicHash::Algorithm::Sha512);
-
         QFile openFile(file.absoluteFilePath());
         if (!openFile.open(QFile::ReadOnly)) {
             qWarning() << "Could not open" << file << "for hashing";
@@ -115,7 +114,7 @@ void ModrinthPackExportTask::collectHashes()
             qWarning() << "Could not read" << file;
             continue;
         }
-        sha512.addData(data);
+        auto sha512 = Hashing::hash(data, Hashing::Algorithm::Sha512);
 
         auto allMods = mcInstance->loaderModList()->allMods();
         if (auto modIter = std::find_if(allMods.begin(), allMods.end(), [&file](Mod* mod) { return mod->fileinfo() == file; });
@@ -127,11 +126,9 @@ void ModrinthPackExportTask::collectHashes()
                 if (!url.isEmpty() && BuildConfig.MODRINTH_MRPACK_HOSTS.contains(url.host())) {
                     qDebug() << "Resolving" << relative << "from index";
 
-                    QCryptographicHash sha1(QCryptographicHash::Algorithm::Sha1);
-                    sha1.addData(data);
+                    auto sha1 = Hashing::hash(data, Hashing::Algorithm::Sha1);
 
-                    ResolvedFile resolvedFile{ sha1.result().toHex(), sha512.result().toHex(), url.toEncoded(), openFile.size(),
-                                               mod->metadata()->side };
+                    ResolvedFile resolvedFile{ sha1, sha512, url.toEncoded(), openFile.size(), mod->metadata()->side };
                     resolvedFiles[relative] = resolvedFile;
 
                     // nice! we've managed to resolve based on local metadata!
@@ -142,7 +139,7 @@ void ModrinthPackExportTask::collectHashes()
         }
 
         qDebug() << "Enqueueing" << relative << "for Modrinth query";
-        pendingHashes[relative] = sha512.result().toHex();
+        pendingHashes[relative] = sha512;
     }
 
     setAbortable(true);
@@ -200,7 +197,7 @@ void ModrinthPackExportTask::buildZip()
 {
     setStatus(tr("Adding files..."));
 
-    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true);
+    auto zipTask = makeShared<MMCZip::ExportToZipTask>(output, gameRoot, files, "overrides/", true, true);
     zipTask->addExtraFile("modrinth.index.json", generateIndex());
 
     zipTask->setExcludeFiles(resolvedFiles.keys());
@@ -287,16 +284,12 @@ QByteArray ModrinthPackExportTask::generateIndex()
             env["client"] = "required";
             env["server"] = "required";
         }
-        switch (iterator->side) {
-            case Metadata::ModSide::ClientSide:
-                env["server"] = "unsupported";
-                break;
-            case Metadata::ModSide::ServerSide:
-                env["client"] = "unsupported";
-                break;
-            case Metadata::ModSide::UniversalSide:
-                break;
-        }
+
+        // a server side mod does not imply that the mod does not work on the client
+        // however, if a mrpack mod is marked as server-only it will not install on the client
+        if (iterator->side == Metadata::ModSide::ClientSide)
+            env["server"] = "unsupported";
+
         fileOut["env"] = env;
 
         fileOut["path"] = path;

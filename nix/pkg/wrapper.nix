@@ -15,16 +15,17 @@
   openal,
   jdk8,
   jdk17,
+  jdk21,
   gamemode,
   flite,
-  mesa-demos,
+  glxinfo,
   udev,
   libusb1,
   msaClientID ? null,
   gamemodeSupport ? stdenv.isLinux,
   textToSpeechSupport ? stdenv.isLinux,
   controllerSupport ? stdenv.isLinux,
-  jdks ? [jdk17 jdk8],
+  jdks ? [jdk21 jdk17 jdk8],
   additionalLibs ? [],
   additionalPrograms ? [],
 }: let
@@ -80,7 +81,7 @@ in
       runtimePrograms =
         [
           xorg.xrandr
-          mesa-demos # need glxinfo
+          glxinfo
         ]
         ++ additionalPrograms;
     in

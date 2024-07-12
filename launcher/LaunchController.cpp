@@ -36,13 +36,13 @@
 
 #include "LaunchController.h"
 #include "Application.h"
+#include "launch/steps/PrintServers.h"
 #include "minecraft/auth/AccountData.h"
 #include "minecraft/auth/AccountList.h"
 
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
-#include "ui/dialogs/EditAccountDialog.h"
 #include "ui/dialogs/ProfileSelectDialog.h"
 #include "ui/dialogs/ProfileSetupDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -58,7 +58,6 @@
 #include "BuildConfig.h"
 #include "JavaCommon.h"
 #include "launch/steps/TextPrint.h"
-#include "minecraft/auth/AccountTask.h"
 #include "tasks/Task.h"
 
 LaunchController::LaunchController(QObject* parent) : Task(parent) {}
@@ -86,7 +85,7 @@ void LaunchController::decideAccount()
 
     // Find an account to use.
     auto accounts = APPLICATION->accounts();
-    if (accounts->count() <= 0) {
+    if (accounts->count() <= 0 || !accounts->anyAccountIsValid()) {
         // Tell the user they need to log in at least one account in order to play.
         auto reply = CustomMessageBox::selectable(m_parentWidget, tr("No Accounts"),
                                                   tr("In order to play Minecraft, you must have at least one Microsoft "
@@ -130,12 +129,63 @@ void LaunchController::decideAccount()
     }
 }
 
+bool LaunchController::askPlayDemo()
+{
+    QMessageBox box(m_parentWidget);
+    box.setWindowTitle(tr("Play demo?"));
+    box.setText(
+        tr("This account does not own Minecraft.\nYou need to purchase the game first to play it.\n\nDo you want to play "
+           "the demo?"));
+    box.setIcon(QMessageBox::Warning);
+    auto demoButton = box.addButton(tr("Play Demo"), QMessageBox::ButtonRole::YesRole);
+    auto cancelButton = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::NoRole);
+    box.setDefaultButton(cancelButton);
+
+    box.exec();
+    return box.clickedButton() == demoButton;
+}
+
+QString LaunchController::askOfflineName(QString playerName, bool demo, bool& ok)
+{
+    // we ask the user for a player name
+    QString message = tr("Choose your offline mode player name.");
+    if (demo) {
+        message = tr("Choose your demo mode player name.");
+    }
+
+    QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
+    QString usedname = lastOfflinePlayerName.isEmpty() ? playerName : lastOfflinePlayerName;
+    QString name = QInputDialog::getText(m_parentWidget, tr("Player name"), message, QLineEdit::Normal, usedname, &ok);
+    if (!ok)
+        return {};
+    if (name.length()) {
+        usedname = name;
+        APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
+    }
+    return usedname;
+}
+
 void LaunchController::login()
 {
     decideAccount();
 
-    // if no account is selected, we bail
     if (!m_accountToUse) {
+        // if no account is selected, ask about demo
+        if (!m_demo) {
+            m_demo = askPlayDemo();
+        }
+        if (m_demo) {
+            // we ask the user for a player name
+            bool ok = false;
+            auto name = askOfflineName("Player", m_demo, ok);
+            if (ok) {
+                m_session = std::make_shared<AuthSession>();
+                m_session->MakeDemo(name, MinecraftAccount::uuidFromUsername(name).toString().remove(QRegularExpression("[{}-]")));
+                launchInstance();
+                return;
+            }
+        }
+        // if no account is selected, we bail
         emitFailed(tr("No account selected for launch."));
         return;
     }
@@ -144,6 +194,13 @@ void LaunchController::login()
     bool tryagain = true;
     unsigned int tries = 0;
 
+    if ((m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) ||
+        m_accountToUse->shouldRefresh()) {
+        // Force account refresh on the account used to launch the instance updating the AccountState
+        //  only on first try and if it is not meant to be offline
+        auto accounts = APPLICATION->accounts();
+        accounts->requestRefresh(m_accountToUse->internalId());
+    }
     while (tryagain) {
         if (tries > 0 && tries % 3 == 0) {
             auto result =
@@ -176,24 +233,12 @@ void LaunchController::login()
                 if (!m_session->wants_online) {
                     // we ask the user for a player name
                     bool ok = false;
-
-                    QString message = tr("Choose your offline mode player name.");
-                    if (m_session->demo) {
-                        message = tr("Choose your demo mode player name.");
-                    }
-
-                    QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
-                    QString usedname = lastOfflinePlayerName.isEmpty() ? m_session->player_name : lastOfflinePlayerName;
-                    QString name = QInputDialog::getText(m_parentWidget, tr("Player name"), message, QLineEdit::Normal, usedname, &ok);
+                    auto name = askOfflineName(m_session->player_name, m_session->demo, ok);
                     if (!ok) {
                         tryagain = false;
                         break;
                     }
-                    if (name.length()) {
-                        usedname = name;
-                        APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
-                    }
-                    m_session->MakeOffline(usedname);
+                    m_session->MakeOffline(name);
                     // offline flavored game from here :3
                 }
                 if (m_accountToUse->ownsMinecraft()) {
@@ -213,20 +258,10 @@ void LaunchController::login()
                     return;
                 } else {
                     // play demo ?
-                    QMessageBox box(m_parentWidget);
-                    box.setWindowTitle(tr("Play demo?"));
-                    box.setText(
-                        tr("This account does not own Minecraft.\nYou need to purchase the game first to play it.\n\nDo you want to play "
-                           "the demo?"));
-                    box.setIcon(QMessageBox::Warning);
-                    auto demoButton = box.addButton(tr("Play Demo"), QMessageBox::ButtonRole::YesRole);
-                    auto cancelButton = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::NoRole);
-                    box.setDefaultButton(cancelButton);
-
-                    box.exec();
-                    if (box.clickedButton() == demoButton) {
-                        // play demo here
-                        m_session->MakeDemo();
+                    if (!m_session->demo) {
+                        m_session->demo = askPlayDemo();
+                    }
+                    if (m_session->demo) {  // play demo here
                         launchInstance();
                     } else {
                         emitFailed(tr("Launch cancelled - account does not own Minecraft."));
@@ -250,12 +285,6 @@ void LaunchController::login()
                 progDialog.execWithTask(task.get());
                 continue;
             }
-            // FIXME: this is missing - the meaning is that the account is queued for refresh and we should wait for that
-            /*
-            case AccountState::Queued: {
-                return;
-            }
-            */
             case AccountState::Expired: {
                 auto errorString = tr("The account has expired and needs to be logged into manually again.");
                 QMessageBox::warning(m_parentWidget, tr("Account refresh failed"), errorString, QMessageBox::StandardButton::Ok,
@@ -317,26 +346,9 @@ void LaunchController::launchInstance()
         online_mode = "online";
 
         // Prepend Server Status
-        QStringList servers = { "authserver.mojang.com", "session.minecraft.net", "textures.minecraft.net", "api.mojang.com" };
-        QString resolved_servers = "";
-        QHostInfo host_info;
+        QStringList servers = { "login.microsoftonline.com", "session.minecraft.net", "textures.minecraft.net", "api.mojang.com" };
 
-        for (QString server : servers) {
-            host_info = QHostInfo::fromName(server);
-            resolved_servers = resolved_servers + server + " resolves to:\n    [";
-            if (!host_info.addresses().isEmpty()) {
-                for (QHostAddress address : host_info.addresses()) {
-                    resolved_servers = resolved_servers + address.toString();
-                    if (!host_info.addresses().endsWith(address)) {
-                        resolved_servers = resolved_servers + ", ";
-                    }
-                }
-            } else {
-                resolved_servers = resolved_servers + "N/A";
-            }
-            resolved_servers = resolved_servers + "]\n\n";
-        }
-        m_launcher->prependStep(makeShared<TextPrint>(m_launcher.get(), resolved_servers, MessageLevel::Launcher));
+        m_launcher->prependStep(makeShared<PrintServers>(m_launcher.get(), servers));
     } else {
         online_mode = m_demo ? "demo" : "offline";
     }

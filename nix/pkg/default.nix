@@ -10,6 +10,7 @@
   zlib,
   qtbase,
   qtquickcontrols2 ? null,
+  qtnetworkauth,
   quazip,
   extra-cmake-modules,
   tomlplusplus,
@@ -17,7 +18,6 @@
   gamemode,
   msaClientID ? null,
   gamemodeSupport ? stdenv.isLinux,
-  self,
   version,
   libnbtplusplus,
 }:
@@ -26,12 +26,25 @@ assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is on
     pname = "prismlauncher-unwrapped";
     inherit version;
 
-    src = lib.cleanSource self;
+    src = lib.fileset.toSource {
+      root = ../../.;
+      fileset = lib.fileset.unions (map (fileName: ../../${fileName}) [
+        "buildconfig"
+        "cmake"
+        "launcher"
+        "libraries"
+        "program_info"
+        "tests"
+        "COPYING.md"
+        "CMakeLists.txt"
+      ]);
+    };
 
     nativeBuildInputs = [extra-cmake-modules cmake jdk17 ninja canonicalize-jars-hook];
     buildInputs =
       [
         qtbase
+        qtnetworkauth
         zlib
         quazip
         ghc_filesystem

@@ -126,7 +126,6 @@ set(NET_SOURCES
     net/MetaCacheSink.h
     net/Logging.h
     net/Logging.cpp
-    net/NetAction.h
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
@@ -164,6 +163,8 @@ set(LAUNCH_SOURCES
     launch/steps/Update.h
     launch/steps/QuitAfterGameStop.cpp
     launch/steps/QuitAfterGameStop.h
+    launch/steps/PrintServers.cpp
+    launch/steps/PrintServers.h
     launch/LaunchStep.cpp
     launch/LaunchStep.h
     launch/LaunchTask.cpp
@@ -210,28 +211,17 @@ set(MINECRAFT_SOURCES
     minecraft/auth/AccountData.h
     minecraft/auth/AccountList.cpp
     minecraft/auth/AccountList.h
-    minecraft/auth/AccountTask.cpp
-    minecraft/auth/AccountTask.h
-    minecraft/auth/AuthRequest.cpp
-    minecraft/auth/AuthRequest.h
     minecraft/auth/AuthSession.cpp
     minecraft/auth/AuthSession.h
-    minecraft/auth/AuthStep.cpp
     minecraft/auth/AuthStep.h
     minecraft/auth/MinecraftAccount.cpp
     minecraft/auth/MinecraftAccount.h
     minecraft/auth/Parsers.cpp
     minecraft/auth/Parsers.h
 
-    minecraft/auth/flows/AuthFlow.cpp
-    minecraft/auth/flows/AuthFlow.h
-    minecraft/auth/flows/MSA.cpp
-    minecraft/auth/flows/MSA.h
-    minecraft/auth/flows/Offline.cpp
-    minecraft/auth/flows/Offline.h
+    minecraft/auth/AuthFlow.cpp
+    minecraft/auth/AuthFlow.h
 
-    minecraft/auth/steps/OfflineStep.cpp
-    minecraft/auth/steps/OfflineStep.h
     minecraft/auth/steps/EntitlementsStep.cpp
     minecraft/auth/steps/EntitlementsStep.h
     minecraft/auth/steps/GetSkinStep.cpp
@@ -240,6 +230,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/steps/LauncherLoginStep.h
     minecraft/auth/steps/MinecraftProfileStep.cpp
     minecraft/auth/steps/MinecraftProfileStep.h
+    minecraft/auth/steps/MSADeviceCodeStep.cpp
+    minecraft/auth/steps/MSADeviceCodeStep.h
     minecraft/auth/steps/MSAStep.cpp
     minecraft/auth/steps/MSAStep.h
     minecraft/auth/steps/XboxAuthorizationStep.cpp
@@ -372,13 +364,17 @@ set(MINECRAFT_SOURCES
     minecraft/AssetsUtils.h
     minecraft/AssetsUtils.cpp
 
-    # Minecraft services
-    minecraft/services/CapeChange.cpp
-    minecraft/services/CapeChange.h
-    minecraft/services/SkinUpload.cpp
-    minecraft/services/SkinUpload.h
-    minecraft/services/SkinDelete.cpp
-    minecraft/services/SkinDelete.h
+    # Minecraft skins
+    minecraft/skins/CapeChange.cpp
+    minecraft/skins/CapeChange.h
+    minecraft/skins/SkinUpload.cpp
+    minecraft/skins/SkinUpload.h
+    minecraft/skins/SkinDelete.cpp
+    minecraft/skins/SkinDelete.h
+    minecraft/skins/SkinModel.cpp
+    minecraft/skins/SkinModel.h
+    minecraft/skins/SkinList.cpp
+    minecraft/skins/SkinList.h
 
     minecraft/Agent.h)
 
@@ -453,6 +449,8 @@ set(TOOLS_SOURCES
     tools/JVisualVM.h
     tools/MCEditTool.cpp
     tools/MCEditTool.h
+    tools/GenericProfiler.cpp
+    tools/GenericProfiler.h
 )
 
 set(META_SOURCES
@@ -624,7 +622,6 @@ set(PRISMUPDATER_SOURCES
     net/HttpMetaCache.h
     net/Logging.h
     net/Logging.cpp
-    net/NetAction.h
     net/NetRequest.cpp
     net/NetRequest.h
     net/NetJob.cpp
@@ -797,8 +794,6 @@ SET(LAUNCHER_SOURCES
     ui/InstanceWindow.cpp
 
     # FIXME: maybe find a better home for this.
-    SkinUtils.cpp
-    SkinUtils.h
     FileIgnoreProxy.cpp
     FileIgnoreProxy.h
     FastFileIconProvider.cpp
@@ -828,6 +823,8 @@ SET(LAUNCHER_SOURCES
     ui/themes/DarkTheme.h
     ui/themes/ITheme.cpp
     ui/themes/ITheme.h
+    ui/themes/HintOverrideProxyStyle.cpp
+    ui/themes/HintOverrideProxyStyle.h
     ui/themes/SystemTheme.cpp
     ui/themes/SystemTheme.h
     ui/themes/IconTheme.cpp
@@ -1023,8 +1020,6 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ReviewMessageBox.h
     ui/dialogs/VersionSelectDialog.cpp
     ui/dialogs/VersionSelectDialog.h
-    ui/dialogs/SkinUploadDialog.cpp
-    ui/dialogs/SkinUploadDialog.h
     ui/dialogs/ResourceDownloadDialog.cpp
     ui/dialogs/ResourceDownloadDialog.h
     ui/dialogs/ScrollMessageBox.cpp
@@ -1038,7 +1033,12 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/InstallLoaderDialog.cpp
     ui/dialogs/InstallLoaderDialog.h
 
+    ui/dialogs/skins/SkinManageDialog.cpp
+    ui/dialogs/skins/SkinManageDialog.h
+
     # GUI - widgets
+    ui/widgets/CheckComboBox.cpp
+    ui/widgets/CheckComboBox.h
     ui/widgets/Common.cpp
     ui/widgets/Common.h
     ui/widgets/CustomCommands.cpp
@@ -1164,7 +1164,6 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/NewComponentDialog.ui
     ui/dialogs/NewsDialog.ui
     ui/dialogs/ProfileSelectDialog.ui
-    ui/dialogs/SkinUploadDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
     ui/dialogs/ExportPackDialog.ui
     ui/dialogs/ExportToModListDialog.ui
@@ -1178,6 +1177,8 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ScrollMessageBox.ui
     ui/dialogs/BlockedModsDialog.ui
     ui/dialogs/ChooseProviderDialog.ui
+
+    ui/dialogs/skins/SkinManageDialog.ui
 )
 
 qt_wrap_ui(PRISM_UPDATE_UI
@@ -1238,7 +1239,6 @@ target_link_libraries(Launcher_logic
     tomlplusplus::tomlplusplus
     qdcss
     BuildConfig
-    Katabasis
     Qt${QT_VERSION_MAJOR}::Widgets
     ghcFilesystem::ghc_filesystem
 )
@@ -1260,6 +1260,7 @@ target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::QuickControls2
     Qt${QT_VERSION_MAJOR}::QuickWidgets
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::NetworkAuth
     ${Launcher_QT_LIBS}
 )
 target_link_libraries(Launcher_logic
@@ -1330,7 +1331,6 @@ if(Launcher_BUILD_UPDATER)
         Qt${QT_VERSION_MAJOR}::Network
         ${Launcher_QT_LIBS}
         cmark::cmark
-        Katabasis
     )
 
     add_executable("${Launcher_Name}_updater" WIN32 updater/prismupdater/updater_main.cpp)
@@ -1504,7 +1504,6 @@ if(INSTALL_BUNDLE STREQUAL "full")
             CONFIGURATIONS Debug RelWithDebInfo ""
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            PATTERN "*qopensslbackend*" EXCLUDE
             PATTERN "*qcertonlybackend*" EXCLUDE
         )
         install(
@@ -1515,7 +1514,6 @@ if(INSTALL_BUNDLE STREQUAL "full")
             REGEX "dd\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
-            PATTERN "*qopensslbackend*" EXCLUDE
             PATTERN "*qcertonlybackend*" EXCLUDE
         )
     endif()
@@ -1552,6 +1550,75 @@ if(INSTALL_BUNDLE STREQUAL "full")
         REGEX "\\.dSYM" EXCLUDE
     )
 
+    # Wayland support
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-graphics-integration-client")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-client"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-client"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-graphics-integration-server")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-server"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-graphics-integration-server"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-decoration-client")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-decoration-client"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-decoration-client"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
+    if(EXISTS "${QT_PLUGINS_DIR}/wayland-shell-integration")
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-shell-integration"
+            CONFIGURATIONS Debug RelWithDebInfo ""
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+        )
+        install(
+            DIRECTORY "${QT_PLUGINS_DIR}/wayland-shell-integration"
+            CONFIGURATIONS Release MinSizeRel
+            DESTINATION ${PLUGIN_DEST_DIR}
+            COMPONENT Runtime
+            REGEX "dd\\." EXCLUDE
+            REGEX "_debug\\." EXCLUDE
+            REGEX "\\.dSYM" EXCLUDE
+        )
+    endif()
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/install_prereqs.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/install_prereqs.cmake"

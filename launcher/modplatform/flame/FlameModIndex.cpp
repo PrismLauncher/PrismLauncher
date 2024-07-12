@@ -1,12 +1,12 @@
 #include "FlameModIndex.h"
 
+#include "FileSystem.h"
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/flame/FlameAPI.h"
 
 static FlameAPI api;
-static ModPlatform::ProviderCapabilities ProviderCaps;
 
 void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
 {
@@ -20,6 +20,9 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     QJsonObject logo = Json::ensureObject(obj, "logo");
     pack.logoName = Json::ensureString(logo, "title");
     pack.logoUrl = Json::ensureString(logo, "thumbnailUrl");
+    if (pack.logoUrl.isEmpty()) {
+        pack.logoUrl = Json::ensureString(logo, "url");
+    }
 
     auto authors = Json::ensureArray(obj, "authors");
     for (auto authorIter : authors) {
@@ -79,10 +82,6 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
                                        const BaseInstance* inst)
 {
     QVector<ModPlatform::IndexedVersion> unsortedVersions;
-    auto profile = (dynamic_cast<const MinecraftInstance*>(inst))->getPackProfile();
-    QString mcVersion = profile->getComponentVersion("net.minecraft");
-    auto loaders = profile->getSupportedModLoaders();
-
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
@@ -90,8 +89,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack,
         if (!file.addonId.isValid())
             file.addonId = pack.addonId;
 
-        if (file.fileId.isValid() &&
-            (!loaders.has_value() || !file.loaders || loaders.value() & file.loaders))  // Heuristic to check if the returned value is valid
+        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
 
@@ -117,19 +115,25 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
 
         if (str.contains('.'))
             file.mcVersion.append(str);
-        auto loader = str.toLower();
-        if (loader == "neoforge")
+
+        if (auto loader = str.toLower(); loader == "neoforge")
             file.loaders |= ModPlatform::NeoForge;
-        if (loader == "forge")
+        else if (loader == "forge")
             file.loaders |= ModPlatform::Forge;
-        if (loader == "cauldron")
+        else if (loader == "cauldron")
             file.loaders |= ModPlatform::Cauldron;
-        if (loader == "liteloader")
+        else if (loader == "liteloader")
             file.loaders |= ModPlatform::LiteLoader;
-        if (loader == "fabric")
+        else if (loader == "fabric")
             file.loaders |= ModPlatform::Fabric;
-        if (loader == "quilt")
+        else if (loader == "quilt")
             file.loaders |= ModPlatform::Quilt;
+        else if (loader == "server" || loader == "client") {
+            if (file.side.isEmpty())
+                file.side = loader;
+            else if (file.side != loader)
+                file.side = "both";
+        }
     }
 
     file.addonId = Json::requireInteger(obj, "modId");
@@ -138,6 +142,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     file.version = Json::requireString(obj, "displayName");
     file.downloadUrl = Json::ensureString(obj, "downloadUrl");
     file.fileName = Json::requireString(obj, "fileName");
+    file.fileName = FS::RemoveInvalidPathChars(file.fileName);
 
     ModPlatform::IndexedVersionType::VersionType ver_type;
     switch (Json::requireInteger(obj, "releaseType")) {
@@ -158,7 +163,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     auto hash_list = Json::ensureArray(obj, "hashes");
     for (auto h : hash_list) {
         auto hash_entry = Json::ensureObject(h);
-        auto hash_types = ProviderCaps.hashType(ModPlatform::ResourceProvider::FLAME);
+        auto hash_types = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::FLAME);
         auto hash_algo = enumToString(Json::ensureInteger(hash_entry, "algo", 1, "algorithm"));
         if (hash_types.contains(hash_algo)) {
             file.hash = Json::requireString(hash_entry, "value");

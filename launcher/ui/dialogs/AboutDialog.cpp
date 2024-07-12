@@ -38,6 +38,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 #include "ui_AboutDialog.h"
 
 #include <net/NetJob.h>
@@ -139,10 +140,10 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDia
     setWindowTitle(tr("About %1").arg(launcherName));
 
     QString chtml = getCreditsHtml();
-    ui->creditsText->setHtml(chtml);
+    ui->creditsText->setHtml(StringUtils::htmlListPatch(chtml));
 
     QString lhtml = getLicenseHtml();
-    ui->licenseText->setHtml(lhtml);
+    ui->licenseText->setHtml(StringUtils::htmlListPatch(lhtml));
 
     ui->urlLabel->setOpenExternalLinks(true);
 
@@ -174,8 +175,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDia
     QString urlText("<html><head/><body><p><a href=\"%1\">%1</a></p></body></html>");
     ui->urlLabel->setText(urlText.arg(BuildConfig.LAUNCHER_GIT));
 
-    QString copyText("© 2022-2023 %1");
-    ui->copyLabel->setText(copyText.arg(BuildConfig.LAUNCHER_COPYRIGHT));
+    ui->copyLabel->setText(BuildConfig.LAUNCHER_COPYRIGHT);
 
     connect(ui->closeButton, SIGNAL(clicked()), SLOT(close()));
 

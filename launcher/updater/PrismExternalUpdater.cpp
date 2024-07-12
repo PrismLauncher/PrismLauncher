@@ -86,6 +86,11 @@ PrismExternalUpdater::~PrismExternalUpdater()
 
 void PrismExternalUpdater::checkForUpdates()
 {
+    checkForUpdates(true);
+}
+
+void PrismExternalUpdater::checkForUpdates(bool triggeredByUser)
+{
     QProgressDialog progress(tr("Checking for updates..."), "", 0, 0, priv->parent);
     progress.setCancelButton(nullptr);
     progress.adjustSize();
@@ -160,7 +165,7 @@ void PrismExternalUpdater::checkForUpdates()
     switch (exit_code) {
         case 0:
             // no update available
-            {
+            if (triggeredByUser) {
                 qDebug() << "No update available";
                 auto msgBox = QMessageBox(QMessageBox::Information, tr("No Update Available"), tr("You are running the latest version."),
                                           QMessageBox::Ok, priv->parent);
@@ -257,7 +262,7 @@ void PrismExternalUpdater::setBetaAllowed(bool allowed)
 
 void PrismExternalUpdater::resetAutoCheckTimer()
 {
-    if (priv->autoCheck) {
+    if (priv->autoCheck && priv->updateInterval > 0) {
         int timeoutDuration = 0;
         auto now = QDateTime::currentDateTime();
         if (priv->lastCheck.isValid()) {
@@ -288,7 +293,7 @@ void PrismExternalUpdater::disconnectTimer()
 void PrismExternalUpdater::autoCheckTimerFired()
 {
     qDebug() << "Auto update Timer fired";
-    checkForUpdates();
+    checkForUpdates(false);
 }
 
 void PrismExternalUpdater::offerUpdate(const QString& version_name, const QString& version_tag, const QString& release_notes)

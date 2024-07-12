@@ -52,11 +52,11 @@ class LaunchTask : public Task {
 
    public:
     enum State { NotStarted, Running, Waiting, Failed, Aborted, Finished };
+    using Ptr = shared_qobject_ptr<LaunchTask>;
 
    public: /* methods */
-    using Ptr = shared_qobject_ptr<LaunchTask>;
     static LaunchTask::Ptr create(InstancePtr inst);
-    virtual ~LaunchTask(){};
+    virtual ~LaunchTask() = default;
 
     void appendStep(shared_qobject_ptr<LaunchStep> step);
     void prependStep(shared_qobject_ptr<LaunchStep> step);

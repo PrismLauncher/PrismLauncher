@@ -77,11 +77,14 @@ struct ModpackExtra {
     QString discordUrl;
 
     QList<DonationData> donate;
+
+    QString status;
 };
 
 struct ModpackVersion {
     QString name;
     QString version;
+    QString gameVersion;
     ModPlatform::IndexedVersionType version_type;
     QString changelog;
 
