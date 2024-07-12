@@ -562,7 +562,7 @@ jobs:
           cp /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
           cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_PORTABLE_DIR }}/lib
           cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_PORTABLE_DIR }}/lib
-          cp /usr/lib/x86_64-linux-gnu/libffi.so.7 ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /usr/lib/x86_64-linux-gnu/libffi.so.8 ${{ env.INSTALL_PORTABLE_DIR }}/lib
           mv ${{ env.INSTALL_PORTABLE_DIR }}/bin/*.so* ${{ env.INSTALL_PORTABLE_DIR }}/lib
 
           for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
