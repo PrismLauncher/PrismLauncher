@@ -53,6 +53,7 @@ Components.ThemedControl {
     Rectangle {
         anchors.fill: parent
         color: active_palette.window
+        Layout.preferredWidth: 825
 
         ColumnLayout {
             anchors { fill: parent; rightMargin: 6 }
@@ -135,7 +136,7 @@ Components.ThemedControl {
                 id: bottomRow
 
                 Layout.fillWidth: true
-                implicitHeight: 24
+                implicitHeight: 28
 
                 property bool isShiftPressed: false
                 Keys.onPressed: (event) => { if (event.key === Qt.Key_Shift) isShiftPressed = true; }

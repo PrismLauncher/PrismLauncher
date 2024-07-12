@@ -375,10 +375,16 @@ void ThemeManager::bootstrapThemeEnvironment()
     if (current_conf_path.isEmpty()) {
         // System theme: Restore the previous value and leave the style unchanged
         s_is_qml_system_theme = true;
-        if (!initial_conf_path.isEmpty())
+        if (!initial_conf_path.isEmpty()) {
             qputenv("QT_QUICK_CONTROLS_CONF", initial_conf_path);
-        else
+        } else {
             qunsetenv("QT_QUICK_CONTROLS_CONF");
+#ifdef Q_OS_WINDOWS
+            QQuickStyle::setStyle("Fusion"); //"Windows" Theme seems to be broken in Qt 6.7.[0-2]
+#else
+
+#endif  //
+        }
     } else {
         // Not system theme: May be an actual path (custom theme), or one of the built-in ones
         s_is_qml_system_theme = false;

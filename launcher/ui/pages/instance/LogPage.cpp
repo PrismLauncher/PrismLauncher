@@ -99,7 +99,12 @@ LogPage::LogPage(InstancePtr instance, QWidget* parent)
     : QQuickWidget(QStringLiteral("qrc:///pages/instance/LogPage.qml"), parent), m_instance(std::move(instance))
 {
     setResizeMode(QQuickWidget::SizeRootObjectToView);
-    connect(this, &QQuickWidget::statusChanged, this, &LogPage::onStatusChanged);
+    bool ready = false;
+    if (status() == QQuickWidget::Status::Ready) {
+        ready = true;
+    } else {
+        connect(this, &QQuickWidget::statusChanged, this, &LogPage::onStatusChanged);
+    }
 
     // set up text colors in the log proxy and adapt them to the current theme foreground and background
     auto origForeground = palette().color(foregroundRole());
@@ -119,6 +124,9 @@ LogPage::LogPage(InstancePtr instance, QWidget* parent)
         if (auto launchTask = m_instance->getLaunchTask(); launchTask)
             setInstanceLaunchTaskChanged(launchTask, true);
         connect(m_instance.get(), &BaseInstance::launchTaskChanged, this, &LogPage::onInstanceLaunchTaskChanged);
+    }
+    if (ready) {
+        onQuickWidgetReady();
     }
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
