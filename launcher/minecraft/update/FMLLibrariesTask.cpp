@@ -70,7 +70,7 @@ void FMLLibrariesTask::executeTask()
         dljob->addNetAction(Net::ApiDownload::makeCached(QUrl(urlString), entry, options));
     }
 
-    connect(dljob.get(), &NetJob::finished, this, &FMLLibrariesTask::fmllibsFinished);
+    connect(dljob.get(), &TaskV2::finished, this, &FMLLibrariesTask::fmllibsFinished);
     connect(dljob.get(), &TaskV2::processedChanged, this, &FMLLibrariesTask::propateProcessedChanged);
     connect(dljob.get(), &TaskV2::totalChanged, this, &FMLLibrariesTask::propateTotalChanged);
     downloadJob.reset(dljob);

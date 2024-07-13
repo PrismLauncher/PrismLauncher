@@ -138,8 +138,7 @@ class AccountList : public QAbstractListModel {
    private slots:
     void tryNext();
 
-    void authSucceeded();
-    void authFailed(QString reason);
+    void authFinished(TaskV2* t);
 
    protected:
     QList<QString> m_refreshQueue;

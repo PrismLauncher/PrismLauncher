@@ -185,12 +185,12 @@ int ResourcePackFolderModel::columnCount(const QModelIndex& parent) const
     return parent.isValid() ? 0 : NUM_COLUMNS;
 }
 
-Task* ResourcePackFolderModel::createUpdateTask()
+TaskV2* ResourcePackFolderModel::createUpdateTask()
 {
     return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return makeShared<ResourcePack>(entry); });
 }
 
-Task* ResourcePackFolderModel::createParseTask(Resource& resource)
+TaskV2* ResourcePackFolderModel::createParseTask(Resource& resource)
 {
     return new LocalResourcePackParseTask(m_next_resolution_ticket, static_cast<ResourcePack&>(resource));
 }

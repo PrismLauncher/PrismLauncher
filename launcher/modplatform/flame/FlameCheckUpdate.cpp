@@ -9,7 +9,6 @@
 
 #include "ResourceDownloadTask.h"
 
-#include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 
 #include "net/ApiDownload.h"
@@ -36,32 +35,29 @@ ModPlatform::IndexedPack FlameCheckUpdate::getProjectInfo(ModPlatform::IndexedVe
     auto dl = Net::ApiDownload::makeByteArray(url, response);
     get_project_job->addNetAction(dl);
 
-    connect(get_project_job, &NetJob::finished, this, [this, response, &pack](TaskV2* t) {
+    connect(get_project_job, &TaskV2::finished, this, [this, response, &pack, &loop](TaskV2* t) {
         if (!t->wasSuccessful()) {
             emitFailed(t->failReason());
-            return;
-        }
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from FlameCheckUpdate at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
-        }
+        } else {
+            QJsonParseError parse_error{};
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response from FlameCheckUpdate at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                qWarning() << *response;
+                return;
+            }
 
-        try {
-            auto doc_obj = Json::requireObject(doc);
-            auto data_obj = Json::requireObject(doc_obj, "data");
-            FlameMod::loadIndexedPack(pack, data_obj);
-        } catch (Json::JsonException& e) {
-            qWarning() << e.cause();
-            qDebug() << doc;
+            try {
+                auto doc_obj = Json::requireObject(doc);
+                auto data_obj = Json::requireObject(doc_obj, "data");
+                FlameMod::loadIndexedPack(pack, data_obj);
+            } catch (Json::JsonException& e) {
+                qWarning() << e.cause();
+                qDebug() << doc;
+            }
         }
-    });
-
-    connect(get_project_job, &NetJob::finished, [&loop, get_project_job] {
-        get_project_job->deleteLater();
+        t->deleteLater();
         loop.quit();
     });
 
@@ -84,27 +80,28 @@ ModPlatform::IndexedVersion FlameCheckUpdate::getFileInfo(int addonId, int fileI
     auto dl = Net::ApiDownload::makeByteArray(url, response);
     get_file_info_job->addNetAction(dl);
 
-    QObject::connect(get_file_info_job, &NetJob::succeeded, [response, &ver]() {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from FlameCheckUpdate at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
-        }
+    QObject::connect(get_file_info_job, &TaskV2::finished, [this, &loop, get_file_info_job, response, &ver](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            QJsonParseError parse_error{};
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response from FlameCheckUpdate at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                qWarning() << *response;
+                return;
+            }
 
-        try {
-            auto doc_obj = Json::requireObject(doc);
-            auto data_obj = Json::requireObject(doc_obj, "data");
-            ver = FlameMod::loadIndexedPackVersion(data_obj);
-        } catch (Json::JsonException& e) {
-            qWarning() << e.cause();
-            qDebug() << doc;
+            try {
+                auto doc_obj = Json::requireObject(doc);
+                auto data_obj = Json::requireObject(doc_obj, "data");
+                ver = FlameMod::loadIndexedPackVersion(data_obj);
+            } catch (Json::JsonException& e) {
+                qWarning() << e.cause();
+                qDebug() << doc;
+            }
+        } else {
+            emitFailed(t->failReason());
         }
-    });
-    connect(get_file_info_job, &NetJob::failed, this, &FlameCheckUpdate::emitFailed);
-    QObject::connect(get_file_info_job, &NetJob::finished, [&loop, get_file_info_job] {
         get_file_info_job->deleteLater();
         loop.quit();
     });
@@ -124,7 +121,7 @@ void FlameCheckUpdate::executeTask()
 {
     setStatus(tr("Preparing mods for CurseForge..."));
 
-    int i = 0;
+    setProgressTotal(m_mods.size());
     for (auto* mod : m_mods) {
         if (!mod->enabled()) {
             emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
@@ -132,13 +129,12 @@ void FlameCheckUpdate::executeTask()
         }
 
         setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
-        setProgress(i++, m_mods.size());
+        setProgress(progress() + 1);
 
         auto latest_ver = api.getLatestVersion({ { mod->metadata()->project_id.toString() }, m_game_versions, m_loaders });
 
         // Check if we were aborted while getting the latest version
-        if (m_was_aborted) {
-            aborted();
+        if (!isRunning()) {
             return;
         }
 

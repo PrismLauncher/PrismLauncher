@@ -135,7 +135,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
 {
     m_fetching_images.insert(meta->url);
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(
+    MetaEntry::Ptr entry = APPLICATION->metacache()->resolveEntry(
         m_meta_entry,
         QString("images/%1").arg(QString(QCryptographicHash::hash(meta->url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
 
@@ -158,24 +158,25 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
 
         m_fetching_images.remove(source_url);
     };
-    connect(job, &NetJob::succeeded, this, [this, full_entry_path, source_url, loadImage] {
-        qDebug() << "Loaded resource at:" << full_entry_path;
-        // If we flushed, don't proceed.
-        if (!m_fetching_images.contains(source_url))
-            return;
+    connect(job, &TaskV2::finished, this, [this, full_entry_path, source_url, loadImage](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            qDebug() << "Loaded resource at:" << full_entry_path;
+            // If we flushed, don't proceed.
+            if (!m_fetching_images.contains(source_url))
+                return;
 
-        QImage image(full_entry_path);
-        loadImage(image);
-    });
-    connect(job, &NetJob::failed, this, [this, full_entry_path, source_url, loadImage](QString reason) {
-        qWarning() << "Failed resource at:" << full_entry_path << " because:" << reason;
-        // If we flushed, don't proceed.
-        if (!m_fetching_images.contains(source_url))
-            return;
+            QImage image(full_entry_path);
+            loadImage(image);
+        } else {
+            qWarning() << "Failed resource at:" << full_entry_path << " because:" << t->failReason();
+            // If we flushed, don't proceed.
+            if (!m_fetching_images.contains(source_url))
+                return;
 
-        loadImage(QImage());
+            loadImage(QImage());
+        }
+        t->deleteLater();
     });
-    connect(job, &NetJob::finished, job, &NetJob::deleteLater);
 
     job->start();
 }

@@ -183,7 +183,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        QObject::connect(netJob, &TaskV2::finished, this, [response, netJob] { netJob->deleteLater(); });
         connect(netJob, &NetJob::failed,
                 [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
@@ -239,7 +239,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        QObject::connect(netJob, &TaskV2::finished, this, [response, netJob] { netJob->deleteLater(); });
         connect(netJob, &NetJob::failed,
                 [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();

@@ -48,6 +48,7 @@
 #include "pathmatcher/MultiMatcher.h"
 #include "pathmatcher/SimplePrefixMatcher.h"
 #include "settings/INIFile.h"
+#include "tasks/Task.h"
 #include "tools/GenericProfiler.h"
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
@@ -1360,9 +1361,12 @@ bool Application::launch(InstancePtr instance,
         } else if (m_mainWindow) {
             controller->setParentWidget(m_mainWindow);
         }
-        connect(controller.get(), &LaunchController::succeeded, this, &Application::controllerSucceeded);
-        connect(controller.get(), &LaunchController::failed, this, &Application::controllerFailed);
-        connect(controller.get(), &LaunchController::aborted, this, [this] { controllerFailed(tr("Aborted")); });
+        connect(controller.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+            if (t->wasSuccessful())
+                controllerSucceeded();
+            else
+                controllerFailed(t->failReason());
+        });
         addRunningInstance();
         controller->start();
         return true;

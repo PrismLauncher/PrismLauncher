@@ -1,4 +1,5 @@
 #include "ModrinthCheckUpdate.h"
+#include "Application.h"
 #include "ModrinthAPI.h"
 #include "ModrinthPackIndex.h"
 
@@ -10,11 +11,11 @@
 
 #include "tasks/ConcurrentTask.h"
 
-#include "minecraft/mod/ModFolderModel.h"
+#include "tasks/Task.h"
 
 static ModrinthAPI api;
 
-bool ModrinthCheckUpdate::abort()
+bool ModrinthCheckUpdate::doAbort()
 {
     if (m_net_job)
         return m_net_job->abort();
@@ -29,12 +30,10 @@ bool ModrinthCheckUpdate::abort()
 void ModrinthCheckUpdate::executeTask()
 {
     setStatus(tr("Preparing mods for Modrinth..."));
-    setProgress(0, 3);
-
-    QHash<QString, Mod*> mappings;
+    setProgressTotal(3);
+    setProgress(1);
 
     // Create all hashes
-    QStringList hashes;
     auto best_hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
 
     ConcurrentTask hashing_task(this, "MakeModrinthHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
@@ -51,27 +50,36 @@ void ModrinthCheckUpdate::executeTask()
         // (though it will rarely happen, if at all)
         if (mod->metadata()->hash_format != best_hash_type) {
             auto hash_task = Hashing::createHasher(mod->fileinfo().absoluteFilePath(), ModPlatform::ResourceProvider::MODRINTH);
-            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [&hashes, &mappings, mod](QString hash) {
+            connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, mod](QString hash) {
                 hashes.append(hash);
-                mappings.insert(hash, mod);
+                m_mappings.insert(hash, mod);
             });
-            connect(hash_task.get(), &Task::failed, [this] { failed("Failed to generate hash"); });
+            connect(hash_task.get(), &TaskV2::finished, [this](TaskV2* t) {
+                if (!t->wasSuccessful())
+                    emitFailed("Failed to generate hash");
+            });
             hashing_task.addTask(hash_task);
         } else {
             hashes.append(hash);
-            mappings.insert(hash, mod);
+            m_mappings.insert(hash, mod);
         }
     }
 
-    QEventLoop loop;
-    connect(&hashing_task, &Task::finished, [&loop] { loop.quit(); });
+    connect(&hashing_task, &TaskV2::finished, this, &ModrinthCheckUpdate::hashTaskFinished);
     hashing_task.start();
-    loop.exec();
+}
 
+void ModrinthCheckUpdate::hashTaskFinished()
+{
+    auto best_hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
     auto response = std::make_shared<QByteArray>();
     auto job = api.latestVersions(hashes, best_hash_type, m_game_versions, m_loaders, response);
 
-    connect(job.get(), &Task::succeeded, this, [this, response, mappings, best_hash_type, job] {
+    connect(job.get(), &TaskV2::finished, this, [this, response, best_hash_type, job](TaskV2* t) {
+        if (!t->wasSuccessful()) {
+            emitFailed(t->failReason());
+            return;
+        }
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -84,20 +92,20 @@ void ModrinthCheckUpdate::executeTask()
         }
 
         setStatus(tr("Parsing the API response from Modrinth..."));
-        setProgress(2, 3);
+        setProgress(3);
 
         try {
-            for (auto hash : mappings.keys()) {
+            for (auto hash : m_mappings.keys()) {
                 auto project_obj = doc[hash].toObject();
 
                 // If the returned project is empty, but we have Modrinth metadata,
                 // it means this specific version is not available
                 if (project_obj.isEmpty()) {
-                    qDebug() << "Mod " << mappings.find(hash).value()->name() << " got an empty response.";
+                    qDebug() << "Mod " << m_mappings.find(hash).value()->name() << " got an empty response.";
                     qDebug() << "Hash: " << hash;
 
                     emit checkFailed(
-                        mappings.find(hash).value(),
+                        m_mappings.find(hash).value(),
                         tr("No valid version found for this mod. It's probably unavailable for the current game version / mod loader."));
 
                     continue;
@@ -128,13 +136,13 @@ void ModrinthCheckUpdate::executeTask()
                     qCritical() << "Modrinth mod without download url!";
                     qCritical() << project_ver.fileName;
 
-                    emit checkFailed(mappings.find(hash).value(), tr("Mod has an empty download URL"));
+                    emit checkFailed(m_mappings.find(hash).value(), tr("Mod has an empty download URL"));
 
                     continue;
                 }
 
-                auto mod_iter = mappings.find(hash);
-                if (mod_iter == mappings.end()) {
+                auto mod_iter = m_mappings.find(hash);
+                if (mod_iter == m_mappings.end()) {
                     qCritical() << "Failed to remap mod from Modrinth!";
                     continue;
                 }
@@ -170,11 +178,9 @@ void ModrinthCheckUpdate::executeTask()
         emitSucceeded();
     });
 
-    connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::emitFailed);
-
     setStatus(tr("Waiting for the API response from Modrinth..."));
-    setProgress(1, 3);
+    setProgress(2);
 
-    m_net_job = qSharedPointerObjectCast<NetJob, Task>(job);
+    m_net_job = job;
     job->start();
 }

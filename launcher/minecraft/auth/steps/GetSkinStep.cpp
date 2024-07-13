@@ -20,10 +20,9 @@ void GetSkinStep::perform()
     m_request = Net::Download::makeByteArray(url, m_response);
 
     m_task.reset(new NetJob("GetSkinStep", APPLICATION->network()));
-    m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &GetSkinStep::onRequestDone);
+    connect(m_task.get(), &TaskV2::finished, this, &GetSkinStep::onRequestDone);
 
     m_task->start();
 }

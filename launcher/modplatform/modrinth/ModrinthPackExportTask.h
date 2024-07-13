@@ -26,7 +26,7 @@
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
-class ModrinthPackExportTask : public Task {
+class ModrinthPackExportTask : public TaskV2 {
    public:
     ModrinthPackExportTask(const QString& name,
                            const QString& version,
@@ -36,9 +36,9 @@ class ModrinthPackExportTask : public Task {
                            const QString& output,
                            MMCZip::FilterFunction filter);
 
-   protected:
+   protected slots:
     void executeTask() override;
-    bool abort() override;
+    bool doAbort() override;
 
    private:
     struct ResolvedFile {
@@ -63,7 +63,7 @@ class ModrinthPackExportTask : public Task {
     QFileInfoList files;
     QMap<QString, QString> pendingHashes;
     QMap<QString, ResolvedFile> resolvedFiles;
-    Task::Ptr task;
+    TaskV2::Ptr task;
 
     void collectFiles();
     void collectHashes();

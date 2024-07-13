@@ -9,13 +9,13 @@
 
 class NetworkResourceAPI : public ResourceAPI {
    public:
-    Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const override;
+    TaskV2::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const override;
 
-    Task::Ptr getProject(QString addonId, std::shared_ptr<QByteArray> response) const override;
+    TaskV2::Ptr getProject(QString addonId, std::shared_ptr<QByteArray> response) const override;
 
-    Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const override;
-    Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const override;
-    Task::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const override;
+    TaskV2::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const override;
+    TaskV2::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const override;
+    TaskV2::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const override;
 
    protected:
     [[nodiscard]] virtual auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> = 0;

@@ -18,8 +18,8 @@ class ResourcePackFolderModel : public ResourceFolderModel {
     [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     [[nodiscard]] int columnCount(const QModelIndex& parent) const override;
 
-    [[nodiscard]] Task* createUpdateTask() override;
-    [[nodiscard]] Task* createParseTask(Resource&) override;
+    [[nodiscard]] TaskV2* createUpdateTask() override;
+    [[nodiscard]] TaskV2* createParseTask(Resource&) override;
 
     RESOURCE_HELPERS(ResourcePack)
 };

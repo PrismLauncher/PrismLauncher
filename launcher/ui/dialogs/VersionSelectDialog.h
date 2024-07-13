@@ -71,6 +71,4 @@ class VersionSelectDialog : public QDialog {
     VersionProxyModel* m_proxyModel = nullptr;
 
     int resizeOnColumn = -1;
-
-    Task* loadTask = nullptr;
 };

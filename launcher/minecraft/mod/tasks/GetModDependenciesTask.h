@@ -22,7 +22,6 @@
 #include <QEventLoop>
 #include <QList>
 #include <QVariant>
-#include <functional>
 #include <memory>
 
 #include "minecraft/mod/MetadataHandler.h"

@@ -12,25 +12,25 @@
 
 class ModrinthAPI : public NetworkResourceAPI {
    public:
-    auto currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response) -> Task::Ptr;
+    TaskV2::Ptr currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response);
 
-    auto currentVersions(const QStringList& hashes, QString hash_format, std::shared_ptr<QByteArray> response) -> Task::Ptr;
+    TaskV2::Ptr currentVersions(const QStringList& hashes, QString hash_format, std::shared_ptr<QByteArray> response);
 
-    auto latestVersion(QString hash,
-                       QString hash_format,
-                       std::optional<std::list<Version>> mcVersions,
-                       std::optional<ModPlatform::ModLoaderTypes> loaders,
-                       std::shared_ptr<QByteArray> response) -> Task::Ptr;
+    TaskV2::Ptr latestVersion(QString hash,
+                              QString hash_format,
+                              std::optional<std::list<Version>> mcVersions,
+                              std::optional<ModPlatform::ModLoaderTypes> loaders,
+                              std::shared_ptr<QByteArray> response);
 
-    auto latestVersions(const QStringList& hashes,
-                        QString hash_format,
-                        std::optional<std::list<Version>> mcVersions,
-                        std::optional<ModPlatform::ModLoaderTypes> loaders,
-                        std::shared_ptr<QByteArray> response) -> Task::Ptr;
+    TaskV2::Ptr latestVersions(const QStringList& hashes,
+                               QString hash_format,
+                               std::optional<std::list<Version>> mcVersions,
+                               std::optional<ModPlatform::ModLoaderTypes> loaders,
+                               std::shared_ptr<QByteArray> response);
 
-    Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
+    TaskV2::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
 
-    static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
+    static TaskV2::Ptr getModCategories(std::shared_ptr<QByteArray> response);
     static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
 
    public:

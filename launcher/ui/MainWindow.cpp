@@ -826,7 +826,7 @@ void MainWindow::setCatBackground(bool enabled)
     view->viewport()->repaint();
 }
 
-void MainWindow::runModalTask(Task* task)
+void MainWindow::runModalTask(TaskV2* task)
 {
     connect(task, &Task::failed,
             [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
@@ -1628,16 +1628,12 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 void MainWindow::taskEnd()
 {
     QObject* sender = QObject::sender();
-    if (sender == m_versionLoadTask)
-        m_versionLoadTask = NULL;
-
     sender->deleteLater();
 }
 
-void MainWindow::startTask(Task* task)
+void MainWindow::startTask(TaskV2* task)
 {
-    connect(task, SIGNAL(succeeded()), SLOT(taskEnd()));
-    connect(task, SIGNAL(failed(QString)), SLOT(taskEnd()));
+    connect(task, SIGNAL(finished(TaskV2*)), SLOT(taskEnd()));
     task->start();
 }
 

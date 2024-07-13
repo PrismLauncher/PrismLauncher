@@ -45,7 +45,6 @@
 
 #include "ui/widgets/SubTaskProgressBar.h"
 
-class Task;
 class SequentialTask;
 
 namespace Ui {

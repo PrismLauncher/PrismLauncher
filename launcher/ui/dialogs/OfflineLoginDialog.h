@@ -37,5 +37,5 @@ class OfflineLoginDialog : public QDialog {
    private:
     Ui::OfflineLoginDialog* ui;
     MinecraftAccountPtr m_account;
-    Task::Ptr m_loginTask;
+    TaskV2::Ptr m_loginTask;
 };

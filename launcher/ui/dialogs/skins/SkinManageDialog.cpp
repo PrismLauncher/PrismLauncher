@@ -250,7 +250,7 @@ void SkinManageDialog::accept()
         skinUpload->addNetAction(CapeChange::make(m_acct->accessToken(), selectedCape));
     }
 
-    skinUpload->addTask(m_acct->refresh().staticCast<Task>());
+    skinUpload->addTask(m_acct->refresh().staticCast<TaskV2>());
     if (prog.execWithTask(skinUpload.get()) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Upload"), tr("Failed to upload skin!"), QMessageBox::Warning)->exec();
         reject();
@@ -265,7 +265,7 @@ void SkinManageDialog::on_resetBtn_clicked()
     ProgressDialog prog(this);
     NetJob::Ptr skinReset{ new NetJob(tr("Reset skin"), APPLICATION->network(), 1) };
     skinReset->addNetAction(SkinDelete::make(m_acct->accessToken()));
-    skinReset->addTask(m_acct->refresh().staticCast<Task>());
+    skinReset->addTask(m_acct->refresh().staticCast<TaskV2>());
     if (prog.execWithTask(skinReset.get()) != QDialog::Accepted) {
         CustomMessageBox::selectable(this, tr("Skin Delete"), tr("Failed to delete current skin!"), QMessageBox::Warning)->exec();
         reject();
@@ -347,7 +347,6 @@ void SkinManageDialog::on_urlBtn_clicked()
     }
 
     NetJob::Ptr job{ new NetJob(tr("Download skin"), APPLICATION->network()) };
-    job->setAskRetry(false);
 
     auto path = FS::PathCombine(m_list.getDir(), url.fileName());
     job->addNetAction(Net::Download::makeFile(url, path));
@@ -369,7 +368,7 @@ void SkinManageDialog::on_urlBtn_clicked()
     }
 }
 
-class WaitTask : public Task {
+class WaitTask : public TaskV2 {
    public:
     WaitTask() : m_loop(), m_done(false) {};
     virtual ~WaitTask() = default;
@@ -404,7 +403,6 @@ void SkinManageDialog::on_userBtn_clicked()
     auto path = FS::PathCombine(m_list.getDir(), user + ".png");
 
     NetJob::Ptr job{ new NetJob(tr("Download user skin"), APPLICATION->network(), 1) };
-    job->setAskRetry(false);
 
     auto uuidOut = std::make_shared<QByteArray>();
     auto profileOut = std::make_shared<QByteArray>();
@@ -418,57 +416,56 @@ void SkinManageDialog::on_userBtn_clicked()
 
     QString failReason;
 
-    connect(getUUID.get(), &Task::aborted, uuidLoop.get(), &WaitTask::quit);
-    connect(getUUID.get(), &Task::failed, this, [&failReason](QString reason) {
-        qCritical() << "Couldn't get user UUID:" << reason;
-        failReason = tr("failed to get user UUID");
-    });
-    connect(getUUID.get(), &Task::failed, uuidLoop.get(), &WaitTask::quit);
-    connect(getProfile.get(), &Task::aborted, profileLoop.get(), &WaitTask::quit);
-    connect(getProfile.get(), &Task::failed, profileLoop.get(), &WaitTask::quit);
-    connect(getProfile.get(), &Task::failed, this, [&failReason](QString reason) {
-        qCritical() << "Couldn't get user profile:" << reason;
-        failReason = tr("failed to get user profile");
-    });
-    connect(downloadSkin.get(), &Task::failed, this, [&failReason](QString reason) {
-        qCritical() << "Couldn't download skin:" << reason;
-        failReason = tr("failed to download skin");
-    });
-
-    connect(getUUID.get(), &Task::succeeded, this, [uuidLoop, uuidOut, job, getProfile, &failReason] {
-        try {
-            QJsonParseError parse_error{};
-            QJsonDocument doc = QJsonDocument::fromJson(*uuidOut, &parse_error);
-            if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from Minecraft skin service at " << parse_error.offset
-                           << " reason: " << parse_error.errorString();
+    connect(getUUID.get(), &TaskV2::finished, this, [uuidLoop, uuidOut, job, getProfile, &failReason](TaskV2* t) {
+        if (!t->wasSuccessful()) {
+            qCritical() << "Couldn't get user UUID:" << t->failReason();
+            failReason = tr("failed to get user UUID");
+        } else {
+            try {
+                QJsonParseError parse_error{};
+                QJsonDocument doc = QJsonDocument::fromJson(*uuidOut, &parse_error);
+                if (parse_error.error != QJsonParseError::NoError) {
+                    qWarning() << "Error while parsing JSON response from Minecraft skin service at " << parse_error.offset
+                               << " reason: " << parse_error.errorString();
+                    failReason = tr("failed to parse get user UUID response");
+                    uuidLoop->quit();
+                    return;
+                }
+                const auto root = doc.object();
+                auto id = Json::ensureString(root, "id");
+                if (!id.isEmpty()) {
+                    getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
+                } else {
+                    failReason = tr("user id is empty");
+                    job->abort();
+                }
+            } catch (const Exception& e) {
+                qCritical() << "Couldn't load skin json:" << e.cause();
                 failReason = tr("failed to parse get user UUID response");
-                uuidLoop->quit();
-                return;
             }
-            const auto root = doc.object();
-            auto id = Json::ensureString(root, "id");
-            if (!id.isEmpty()) {
-                getProfile->setUrl("https://sessionserver.mojang.com/session/minecraft/profile/" + id);
-            } else {
-                failReason = tr("user id is empty");
-                job->abort();
-            }
-        } catch (const Exception& e) {
-            qCritical() << "Couldn't load skin json:" << e.cause();
-            failReason = tr("failed to parse get user UUID response");
         }
         uuidLoop->quit();
     });
-
-    connect(getProfile.get(), &Task::succeeded, this, [profileLoop, profileOut, job, getProfile, &mcProfile, downloadSkin, &failReason] {
-        if (Parsers::parseMinecraftProfileMojang(*profileOut, mcProfile)) {
-            downloadSkin->setUrl(mcProfile.skin.url);
-        } else {
-            failReason = tr("failed to parse get user profile response");
-            job->abort();
+    connect(getProfile.get(), &TaskV2::finished, this,
+            [profileLoop, profileOut, job, getProfile, &mcProfile, downloadSkin, &failReason](TaskV2* t) {
+                if (!t->wasSuccessful()) {
+                    qCritical() << "Couldn't get user profile:" << t->failReason();
+                    failReason = tr("failed to get user profile");
+                } else {
+                    if (Parsers::parseMinecraftProfileMojang(*profileOut, mcProfile)) {
+                        downloadSkin->setUrl(mcProfile.skin.url);
+                    } else {
+                        failReason = tr("failed to parse get user profile response");
+                        job->abort();
+                    }
+                }
+                profileLoop->quit();
+            });
+    connect(downloadSkin.get(), &TaskV2::finished, this, [&failReason](TaskV2* t) {
+        if (!t->wasSuccessful()) {
+            qCritical() << "Couldn't download skin:" << t->failReason();
+            failReason = tr("failed to download skin");
         }
-        profileLoop->quit();
     });
 
     job->addNetAction(getUUID);

@@ -15,8 +15,6 @@
 #include "Application.h"
 #include "FileSystem.h"
 
-#include "QVariantUtils.h"
-#include "StringUtils.h"
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 
 #include "settings/Setting.h"

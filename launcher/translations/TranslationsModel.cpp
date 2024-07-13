@@ -559,7 +559,7 @@ void TranslationsModel::downloadIndex()
     auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
     d->m_index_task = task.get();
     d->m_index_job->addNetAction(task);
-    connect(d->m_index_job.get(), &NetJob::finished, this, &TranslationsModel::indexFinished);
+    connect(d->m_index_job.get(), &TaskV2::finished, this, &TranslationsModel::indexFinished);
     d->m_index_job->start();
 }
 
@@ -603,7 +603,7 @@ void TranslationsModel::downloadTranslation(QString key)
     d->m_dl_job.reset(new NetJob("Translation for " + key, APPLICATION->network()));
     d->m_dl_job->addNetAction(dl);
 
-    connect(d->m_dl_job.get(), &NetJob::finished, this, &TranslationsModel::dlFinished);
+    connect(d->m_dl_job.get(), &TaskV2::finished, this, &TranslationsModel::dlFinished);
 
     d->m_dl_job->start();
 }

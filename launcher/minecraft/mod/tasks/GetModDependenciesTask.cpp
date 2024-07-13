@@ -29,7 +29,6 @@
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
-#include "tasks/ConcurrentTask.h"
 #include "tasks/SequentialTask.h"
 #include "ui/pages/modplatform/ModModel.h"
 #include "ui/pages/modplatform/flame/FlameResourceModels.h"
@@ -144,12 +143,14 @@ QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion
     return c_dependencies;
 }
 
-Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDependency> pDep)
+TaskV2::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDependency> pDep)
 {
     auto provider = pDep->pack->provider == m_flame_provider.name ? m_flame_provider : m_modrinth_provider;
     auto responseInfo = std::make_shared<QByteArray>();
     auto info = provider.api->getProject(pDep->pack->addonId.toString(), responseInfo);
-    QObject::connect(info.get(), &NetJob::succeeded, [this, responseInfo, provider, pDep] {
+    QObject::connect(info.get(), &NetJob::finished, [this, responseInfo, provider, pDep](TaskV2* t) {
+        if (!t->wasSuccessful())
+            return;
         QJsonParseError parse_error{};
         QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
@@ -172,9 +173,9 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
     return info;
 }
 
-Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Dependency& dep,
-                                                        const ModPlatform::ResourceProvider providerName,
-                                                        int level)
+TaskV2::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Dependency& dep,
+                                                          const ModPlatform::ResourceProvider providerName,
+                                                          int level)
 {
     auto pDep = std::make_shared<PackDependency>();
     pDep->dependency = dep;

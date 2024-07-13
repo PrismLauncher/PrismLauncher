@@ -1,16 +1,16 @@
 #pragma once
 
 #include "ModIndex.h"
-#include "net/NetJob.h"
 
 #include "modplatform/helpers/HashUtils.h"
 
+#include <QDir>
 #include "tasks/ConcurrentTask.h"
 
 class Mod;
 class QDir;
 
-class EnsureMetadataTask : public Task {
+class EnsureMetadataTask : public TaskV2 {
     Q_OBJECT
 
    public:
@@ -19,20 +19,19 @@ class EnsureMetadataTask : public Task {
 
     ~EnsureMetadataTask() = default;
 
-    Task::Ptr getHashingTask() { return m_hashing_task; }
+    TaskV2::Ptr getHashingTask() { return m_hashing_task; }
 
-   public slots:
-    bool abort() override;
    protected slots:
+    bool doAbort() override;
     void executeTask() override;
 
    private:
     // FIXME: Move to their own namespace
-    auto modrinthVersionsTask() -> Task::Ptr;
-    auto modrinthProjectsTask() -> Task::Ptr;
+    TaskV2::Ptr modrinthVersionsTask();
+    TaskV2::Ptr modrinthProjectsTask();
 
-    auto flameVersionsTask() -> Task::Ptr;
-    auto flameProjectsTask() -> Task::Ptr;
+    TaskV2::Ptr flameVersionsTask();
+    TaskV2::Ptr flameProjectsTask();
 
     // Helpers
     enum class RemoveFromList { Yes, No };
@@ -58,5 +57,5 @@ class EnsureMetadataTask : public Task {
 
     QHash<QString, ModPlatform::IndexedVersion> m_temp_versions;
     ConcurrentTask::Ptr m_hashing_task;
-    Task::Ptr m_current_task;
+    TaskV2::Ptr m_current_task;
 };

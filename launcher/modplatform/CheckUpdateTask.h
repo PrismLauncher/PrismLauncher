@@ -3,7 +3,6 @@
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceAPI.h"
 #include "tasks/Task.h"
 
 class ResourceDownloadTask;

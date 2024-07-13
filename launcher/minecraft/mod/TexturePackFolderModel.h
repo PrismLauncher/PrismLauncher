@@ -56,8 +56,8 @@ class TexturePackFolderModel : public ResourceFolderModel {
     [[nodiscard]] int columnCount(const QModelIndex& parent) const override;
 
     explicit TexturePackFolderModel(const QString& dir, BaseInstance* instance);
-    [[nodiscard]] Task* createUpdateTask() override;
-    [[nodiscard]] Task* createParseTask(Resource&) override;
+    [[nodiscard]] TaskV2* createUpdateTask() override;
+    [[nodiscard]] TaskV2* createParseTask(Resource&) override;
 
     RESOURCE_HELPERS(TexturePack)
 };

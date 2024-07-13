@@ -17,6 +17,8 @@ void ClaimAccount::executeTask()
     if (m_account) {
         lock.reset(new UseLock(m_account));
         emitSucceeded();
+    } else {
+        emitFailed("no account");
     }
 }
 

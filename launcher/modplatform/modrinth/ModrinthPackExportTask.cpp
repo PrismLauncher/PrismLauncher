@@ -28,6 +28,7 @@
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/helpers/HashUtils.h"
+#include "tasks/Task.h"
 
 const QStringList ModrinthPackExportTask::PREFIXES({ "mods/", "coremods/", "resourcepacks/", "texturepacks/", "shaderpacks/" });
 const QStringList ModrinthPackExportTask::FILE_EXTENSIONS({ "jar", "litemod", "zip" });
@@ -53,23 +54,19 @@ ModrinthPackExportTask::ModrinthPackExportTask(const QString& name,
 void ModrinthPackExportTask::executeTask()
 {
     setStatus(tr("Searching for files..."));
-    setProgress(0, 0);
     collectFiles();
 }
 
-bool ModrinthPackExportTask::abort()
+bool ModrinthPackExportTask::doAbort()
 {
     if (task) {
-        task->abort();
-        emitAborted();
-        return true;
+        return task->abort();
     }
     return false;
 }
 
 void ModrinthPackExportTask::collectFiles()
 {
-    setAbortable(false);
     QCoreApplication::processEvents();
 
     files.clear();
@@ -142,7 +139,7 @@ void ModrinthPackExportTask::collectHashes()
         pendingHashes[relative] = sha512;
     }
 
-    setAbortable(true);
+    setCapabilities(Killable);
     makeApiRequest();
 }
 
@@ -154,8 +151,13 @@ void ModrinthPackExportTask::makeApiRequest()
         setStatus(tr("Finding versions for hashes..."));
         auto response = std::make_shared<QByteArray>();
         task = api.currentVersions(pendingHashes.values(), "sha512", response);
-        connect(task.get(), &NetJob::succeeded, [this, response]() { parseApiResponse(response); });
-        connect(task.get(), &NetJob::failed, this, &ModrinthPackExportTask::emitFailed);
+        connect(task.get(), &TaskV2::finished, [this, response](TaskV2* t) {
+            if (t->wasSuccessful()) {
+                parseApiResponse(response);
+            } else {
+                emitFailed(t->failReason());
+            }
+        });
         task->start();
     }
 }
@@ -202,29 +204,17 @@ void ModrinthPackExportTask::buildZip()
 
     zipTask->setExcludeFiles(resolvedFiles.keys());
 
-    auto progressStep = std::make_shared<TaskStepProgress>();
-    connect(zipTask.get(), &Task::finished, this, [this, progressStep] {
-        progressStep->state = TaskStepState::Succeeded;
-        stepProgress(*progressStep);
+    connect(zipTask.get(), &TaskV2::processedChanged, this, &ModrinthPackExportTask::propateProcessedChanged);
+    connect(zipTask.get(), &TaskV2::totalChanged, this, &ModrinthPackExportTask::propateTotalChanged);
+    connect(zipTask.get(), &TaskV2::stateChanged, this, &ModrinthPackExportTask::propateState);
+    connect(zipTask.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            emitSucceeded();
+        } else {
+            emitFailed(t->failReason());
+        }
     });
 
-    connect(zipTask.get(), &Task::succeeded, this, &ModrinthPackExportTask::emitSucceeded);
-    connect(zipTask.get(), &Task::aborted, this, &ModrinthPackExportTask::emitAborted);
-    connect(zipTask.get(), &Task::failed, this, [this, progressStep](QString reason) {
-        progressStep->state = TaskStepState::Failed;
-        stepProgress(*progressStep);
-        emitFailed(reason);
-    });
-    connect(zipTask.get(), &Task::stepProgress, this, &ModrinthPackExportTask::propagateStepProgress);
-
-    connect(zipTask.get(), &Task::progress, this, [this, progressStep](qint64 current, qint64 total) {
-        progressStep->update(current, total);
-        stepProgress(*progressStep);
-    });
-    connect(zipTask.get(), &Task::status, this, [this, progressStep](QString status) {
-        progressStep->status = status;
-        stepProgress(*progressStep);
-    });
     task.reset(zipTask);
     zipTask->start();
 }

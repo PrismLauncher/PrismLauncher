@@ -12,7 +12,7 @@
 
 #include "net/ApiDownload.h"
 
-Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&& callbacks) const
+TaskV2::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&& callbacks) const
 {
     auto search_url_optional = getSearchURL(args);
     if (!search_url_optional.has_value()) {
@@ -27,57 +27,92 @@ Task::Ptr NetworkResourceAPI::searchProjects(SearchArgs&& args, SearchCallbacks&
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(search_url), response));
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
+    QObject::connect(netJob.get(), &TaskV2::finished, [this, netJob, response, callbacks](TaskV2* t) {
+        switch (t->state()) {
+            case TaskV2::Succeeded: {
+                QJsonParseError parse_error{};
+                QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+                if (parse_error.error != QJsonParseError::NoError) {
+                    qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error.offset
+                               << " reason: " << parse_error.errorString();
+                    qWarning() << *response;
 
-            callbacks.on_fail(parse_error.errorString(), -1);
+                    callbacks.on_fail(parse_error.errorString(), -1);
 
-            return;
+                    return;
+                }
+
+                callbacks.on_succeed(doc);
+                break;
+            }
+            case TaskV2::AbortedByUser: {
+                callbacks.on_abort();
+                break;
+            }
+            case TaskV2::Inactive:
+                [[fallthrough]];
+            case TaskV2::Running:
+                [[fallthrough]];
+            case TaskV2::Paused:
+                [[fallthrough]];
+            case TaskV2::Finished:
+                [[fallthrough]];
+            case TaskV2::Failed: {
+                int network_error_code = -1;
+                if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+                    network_error_code = failed_action->replyStatusCode();
+
+                callbacks.on_fail(t->failReason(), network_error_code);
+                break;
+            }
         }
-
-        callbacks.on_succeed(doc);
     });
-
-    QObject::connect(netJob.get(), &NetJob::failed, [netJob, callbacks](const QString& reason) {
-        int network_error_code = -1;
-        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-            network_error_code = failed_action->replyStatusCode();
-
-        callbacks.on_fail(reason, network_error_code);
-    });
-    QObject::connect(netJob.get(), &NetJob::aborted, [callbacks] { callbacks.on_abort(); });
 
     return netJob;
 }
 
-Task::Ptr NetworkResourceAPI::getProjectInfo(ProjectInfoArgs&& args, ProjectInfoCallbacks&& callbacks) const
+TaskV2::Ptr NetworkResourceAPI::getProjectInfo(ProjectInfoArgs&& args, ProjectInfoCallbacks&& callbacks) const
 {
     auto response = std::make_shared<QByteArray>();
     auto job = getProject(args.pack.addonId.toString(), response);
 
-    QObject::connect(job.get(), &NetJob::succeeded, [response, callbacks, args] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
-        }
+    QObject::connect(job.get(), &TaskV2::finished, [response, callbacks, args](TaskV2* t) {
+        switch (t->state()) {
+            case TaskV2::Succeeded: {
+                QJsonParseError parse_error{};
+                QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+                if (parse_error.error != QJsonParseError::NoError) {
+                    qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
+                               << " reason: " << parse_error.errorString();
+                    qWarning() << *response;
+                    return;
+                }
 
-        callbacks.on_succeed(doc, args.pack);
+                callbacks.on_succeed(doc, args.pack);
+                break;
+            }
+            case TaskV2::AbortedByUser: {
+                callbacks.on_abort();
+                break;
+            }
+            case TaskV2::Inactive:
+                [[fallthrough]];
+            case TaskV2::Running:
+                [[fallthrough]];
+            case TaskV2::Paused:
+                [[fallthrough]];
+            case TaskV2::Finished:
+                [[fallthrough]];
+            case TaskV2::Failed: {
+                callbacks.on_fail(t->failReason());
+                break;
+            }
+        }
     });
-    QObject::connect(job.get(), &NetJob::failed, [callbacks](QString reason) { callbacks.on_fail(reason); });
-    QObject::connect(job.get(), &NetJob::aborted, [callbacks] { callbacks.on_abort(); });
     return job;
 }
 
-Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, VersionSearchCallbacks&& callbacks) const
+TaskV2::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, VersionSearchCallbacks&& callbacks) const
 {
     auto versions_url_optional = getVersionsURL(args);
     if (!versions_url_optional.has_value())
@@ -90,30 +125,31 @@ Task::Ptr NetworkResourceAPI::getProjectVersions(VersionSearchArgs&& args, Versi
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [response, callbacks, args] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
+    QObject::connect(netJob.get(), &TaskV2::finished, [response, callbacks, args, netJob](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            QJsonParseError parse_error{};
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                qWarning() << *response;
+                return;
+            }
+
+            callbacks.on_succeed(doc, args.pack);
+        } else {
+            int network_error_code = -1;
+            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+                network_error_code = failed_action->replyStatusCode();
+
+            callbacks.on_fail(t->failReason(), network_error_code);
         }
-
-        callbacks.on_succeed(doc, args.pack);
-    });
-    QObject::connect(netJob.get(), &NetJob::failed, [netJob, callbacks](const QString& reason) {
-        int network_error_code = -1;
-        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-            network_error_code = failed_action->replyStatusCode();
-
-        callbacks.on_fail(reason, network_error_code);
     });
 
     return netJob;
 }
 
-Task::Ptr NetworkResourceAPI::getProject(QString addonId, std::shared_ptr<QByteArray> response) const
+TaskV2::Ptr NetworkResourceAPI::getProject(QString addonId, std::shared_ptr<QByteArray> response) const
 {
     auto project_url_optional = getInfoURL(addonId);
     if (!project_url_optional.has_value())
@@ -128,7 +164,7 @@ Task::Ptr NetworkResourceAPI::getProject(QString addonId, std::shared_ptr<QByteA
     return netJob;
 }
 
-Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, DependencySearchCallbacks&& callbacks) const
+TaskV2::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, DependencySearchCallbacks&& callbacks) const
 {
     auto versions_url_optional = getDependencyURL(args);
     if (!versions_url_optional.has_value())
@@ -141,24 +177,25 @@ Task::Ptr NetworkResourceAPI::getDependencyVersion(DependencySearchArgs&& args, 
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [=] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
+    QObject::connect(netJob.get(), &TaskV2::finished, [response, callbacks, args, netJob](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            QJsonParseError parse_error{};
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                qWarning() << *response;
+                return;
+            }
+
+            callbacks.on_succeed(doc, args.dependency);
+        } else {
+            int network_error_code = -1;
+            if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
+                network_error_code = failed_action->replyStatusCode();
+
+            callbacks.on_fail(t->failReason(), network_error_code);
         }
-
-        callbacks.on_succeed(doc, args.dependency);
-    });
-    QObject::connect(netJob.get(), &NetJob::failed, [netJob, callbacks](const QString& reason) {
-        int network_error_code = -1;
-        if (auto* failed_action = netJob->getFailedActions().at(0); failed_action)
-            network_error_code = failed_action->replyStatusCode();
-
-        callbacks.on_fail(reason, network_error_code);
     });
     return netJob;
 }

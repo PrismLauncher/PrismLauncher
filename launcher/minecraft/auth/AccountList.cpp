@@ -639,8 +639,7 @@ void AccountList::tryNext()
             if (account->internalId() == accountId) {
                 m_currentTask = account->refresh();
                 if (m_currentTask) {
-                    connect(m_currentTask.get(), &Task::succeeded, this, &AccountList::authSucceeded);
-                    connect(m_currentTask.get(), &Task::failed, this, &AccountList::authFailed);
+                    connect(m_currentTask.get(), &TaskV2::finished, this, &AccountList::authFinished);
                     m_currentTask->start();
                     qDebug() << "RefreshSchedule: Processing account " << account->accountDisplayString() << " with internal ID "
                              << accountId;
@@ -654,16 +653,12 @@ void AccountList::tryNext()
     m_refreshTimer->start(1000 * 3600);
 }
 
-void AccountList::authSucceeded()
+void AccountList::authFinished(TaskV2* t)
 {
-    qDebug() << "RefreshSchedule: Background account refresh succeeded";
-    m_currentTask.reset();
-    m_nextTimer->start(1000 * 20);
-}
-
-void AccountList::authFailed(QString reason)
-{
-    qDebug() << "RefreshSchedule: Background account refresh failed: " << reason;
+    if (t->wasSuccessful())
+        qDebug() << "RefreshSchedule: Background account refresh succeeded";
+    else
+        qDebug() << "RefreshSchedule: Background account refresh failed: " << t->failReason();
     m_currentTask.reset();
     m_nextTimer->start(1000 * 20);
 }

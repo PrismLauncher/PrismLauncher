@@ -52,12 +52,12 @@ TexturePackFolderModel::TexturePackFolderModel(const QString& dir, BaseInstance*
     m_columnsHideable = { false, true, false, true, true };
 }
 
-Task* TexturePackFolderModel::createUpdateTask()
+TaskV2* TexturePackFolderModel::createUpdateTask()
 {
     return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return makeShared<TexturePack>(entry); });
 }
 
-Task* TexturePackFolderModel::createParseTask(Resource& resource)
+TaskV2* TexturePackFolderModel::createParseTask(Resource& resource)
 {
     return new LocalTexturePackParseTask(m_next_resolution_ticket, static_cast<TexturePack&>(resource));
 }

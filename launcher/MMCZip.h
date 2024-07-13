@@ -152,7 +152,7 @@ bool extractFile(QString fileCompressed, QString file, QString dir);
 bool collectFileListRecursively(const QString& rootDir, const QString& subDir, QFileInfoList* files, FilterFunction excludeFilter);
 
 #if defined(LAUNCHER_APPLICATION)
-class ExportToZipTask : public Task {
+class ExportToZipTask : public TaskV2 {
    public:
     ExportToZipTask(QString outputPath,
                     QDir dir,
@@ -167,7 +167,7 @@ class ExportToZipTask : public Task {
         , m_destination_prefix(destinationPrefix)
         , m_follow_symlinks(followSymlinks)
     {
-        setAbortable(true);
+        setCapabilities(Capability::Killable);
         m_output.setUtf8Enabled(utf8Enabled);
     };
     ExportToZipTask(QString outputPath,
@@ -185,9 +185,9 @@ class ExportToZipTask : public Task {
 
     using ZipResult = std::optional<QString>;
 
-   protected:
+   protected slots:
     virtual void executeTask() override;
-    bool abort() override;
+    bool doAbort() override;
 
     ZipResult exportZip();
     void finish();
@@ -206,7 +206,7 @@ class ExportToZipTask : public Task {
     QFutureWatcher<ZipResult> m_build_zip_watcher;
 };
 
-class ExtractZipTask : public Task {
+class ExtractZipTask : public TaskV2 {
    public:
     ExtractZipTask(std::shared_ptr<QuaZip> input, QDir outputDir, QString subdirectory = "")
         : m_input(input), m_output_dir(outputDir), m_subdirectory(subdirectory)
@@ -215,9 +215,9 @@ class ExtractZipTask : public Task {
 
     using ZipResult = std::optional<QString>;
 
-   protected:
+   protected slots:
     virtual void executeTask() override;
-    bool abort() override;
+    bool doAbort() override;
 
     ZipResult extractZip();
     void finish();

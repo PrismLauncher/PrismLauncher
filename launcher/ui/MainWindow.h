@@ -192,7 +192,7 @@ class MainWindow : public QMainWindow {
 
     void selectionBad();
 
-    void startTask(Task* task);
+    void startTask(TaskV2* task);
 
     void defaultAccountChanged();
 
@@ -227,7 +227,7 @@ class MainWindow : public QMainWindow {
     void updateStatusCenter();
     void setInstanceActionsEnabled(bool enabled);
 
-    void runModalTask(Task* task);
+    void runModalTask(TaskV2* task);
     void instanceFromInstanceTask(InstanceTask* task);
 
    private:
@@ -249,7 +249,4 @@ class MainWindow : public QMainWindow {
 
     InstancePtr m_selectedInstance;
     QString m_currentInstIcon;
-
-    // managed by the application object
-    Task* m_versionLoadTask = nullptr;
 };

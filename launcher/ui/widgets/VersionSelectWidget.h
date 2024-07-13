@@ -87,7 +87,6 @@ class VersionSelectWidget : public QWidget {
    private slots:
     void onTaskSucceeded();
     void onTaskFailed(const QString& reason);
-    void changeProgress(qint64 current, qint64 total);
     void currentRowChanged(const QModelIndex& current, const QModelIndex&);
 
    private:
@@ -98,7 +97,7 @@ class VersionSelectWidget : public QWidget {
     BaseVersionList* m_vlist = nullptr;
     VersionProxyModel* m_proxyModel = nullptr;
     int resizeOnColumn = 0;
-    Task* loadTask;
+    TaskV2* loadTask;
     bool preselectedAlready = false;
 
     QVBoxLayout* verticalLayout = nullptr;

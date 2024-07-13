@@ -63,7 +63,7 @@ void LibrariesTask::executeTask()
         return;
     }
     setProgressTotal(downloadJob->progressTotal());
-    connect(downloadJob.get(), &NetJob::finished, this, [this](TaskV2*) {
+    connect(downloadJob.get(), &TaskV2::finished, this, [this](TaskV2*) {
         if (downloadJob->wasSuccessful()) {
             emitSucceeded();
         } else {

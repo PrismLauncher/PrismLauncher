@@ -112,7 +112,7 @@ void Meta::BaseEntity::load(Net::Mode loadType)
     dl->addValidator(new ParsingValidator(this));
     m_updateTask->addNetAction(dl);
     m_updateStatus = UpdateStatus::InProgress;
-    QObject::connect(m_updateTask.get(), &NetJob::finished, [&]() {
+    QObject::connect(m_updateTask.get(), &TaskV2::finished, [&]() {
         if (m_updateTask->wasSuccessful()) {
             m_loadStatus = LoadStatus::Remote;
             m_updateStatus = UpdateStatus::Succeeded;

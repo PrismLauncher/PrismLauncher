@@ -60,7 +60,7 @@
 #include "launch/steps/TextPrint.h"
 #include "tasks/Task.h"
 
-LaunchController::LaunchController(QObject* parent) : Task(parent) {}
+LaunchController::LaunchController(QObject* parent) : TaskV2(parent) {}
 
 void LaunchController::executeTask()
 {
@@ -208,7 +208,7 @@ void LaunchController::login()
                                       tr("It looks like we couldn't launch after %1 tries. Do you want to continue trying?").arg(tries));
 
             if (result == QMessageBox::No) {
-                emitAborted();
+                abort();
                 return;
             }
         }
@@ -336,8 +336,12 @@ void LaunchController::launchInstance()
         APPLICATION->showInstanceWindow(m_instance);
     }
     connect(m_launcher.get(), &LaunchTask::readyForLaunch, this, &LaunchController::readyForLaunch);
-    connect(m_launcher.get(), &LaunchTask::succeeded, this, &LaunchController::onSucceeded);
-    connect(m_launcher.get(), &LaunchTask::failed, this, &LaunchController::onFailed);
+    connect(m_launcher.get(), &LaunchTask::finished, this, [this](TaskV2* t) {
+        if (t->wasSuccessful())
+            onSucceeded();
+        else
+            onFailed(t->failReason());
+    });
     connect(m_launcher.get(), &LaunchTask::requestProgress, this, &LaunchController::onProgressRequested);
 
     // Prepend Online and Auth Status
@@ -374,7 +378,7 @@ void LaunchController::readyForLaunch()
 
     QString error;
     if (!m_profiler->check(&error)) {
-        m_launcher->doAbort();
+        m_launcher->abort();
         emitFailed("Profiler startup failed!");
         QMessageBox::critical(m_parentWidget, tr("Error!"), tr("Profiler check for %1 failed: %2").arg(m_profiler->name(), error));
         return;
@@ -401,7 +405,7 @@ void LaunchController::readyForLaunch()
         msg.addButton(QMessageBox::Ok);
         msg.setModal(true);
         msg.exec();
-        m_launcher->doAbort();
+        m_launcher->abort();
         emitFailed("Profiler startup failed!");
     });
     profilerInstance->beginProfiling(m_launcher);
@@ -420,7 +424,7 @@ void LaunchController::onFailed(QString reason)
     emitFailed(reason);
 }
 
-void LaunchController::onProgressRequested(Task* task)
+void LaunchController::onProgressRequested(TaskV2* task)
 {
     ProgressDialog progDialog(m_parentWidget);
     progDialog.setSkipButton(true, tr("Abort"));
@@ -428,13 +432,10 @@ void LaunchController::onProgressRequested(Task* task)
     progDialog.execWithTask(task);
 }
 
-bool LaunchController::abort()
+bool LaunchController::doAbort()
 {
     if (!m_launcher) {
         return true;
-    }
-    if (!m_launcher->canAbort()) {
-        return false;
     }
     auto response = CustomMessageBox::selectable(m_parentWidget, tr("Kill Minecraft?"),
                                                  tr("This can cause the instance to get corrupted and should only be used if Minecraft "
@@ -442,7 +443,7 @@ bool LaunchController::abort()
                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
                         ->exec();
     if (response == QMessageBox::Yes) {
-        return m_launcher->doAbort();
+        return m_launcher->abort();
     }
     return false;
 }

@@ -25,7 +25,7 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "tasks/Task.h"
 
-class FlamePackExportTask : public Task {
+class FlamePackExportTask : public TaskV2 {
    public:
     FlamePackExportTask(const QString& name,
                         const QString& version,
@@ -37,7 +37,7 @@ class FlamePackExportTask : public Task {
 
    protected:
     void executeTask() override;
-    bool abort() override;
+    bool doAbort() override;
 
    private:
     static const QString TEMPLATE;
@@ -74,7 +74,7 @@ class FlamePackExportTask : public Task {
     QFileInfoList files;
     QMap<QString, HashInfo> pendingHashes{};
     QMap<QString, ResolvedFile> resolvedFiles{};
-    Task::Ptr task;
+    TaskV2::Ptr task;
 
     void collectFiles();
     void collectHashes();
