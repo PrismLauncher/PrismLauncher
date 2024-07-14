@@ -40,7 +40,6 @@
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
-#include "ui/dialogs/CustomMessageBox.h"
 #endif
 
 NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent)
@@ -54,73 +53,13 @@ NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> netwo
         setMaxConcurrent(max_concurrent);
 }
 
-auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> bool
+void NetJob::addNetAction(Net::NetRequest::Ptr action)
 {
     action->setNetwork(m_network);
-
     addTask(action);
-
-    return true;
 }
 
-void NetJob::executeNextSubTask()
-{
-    // We're finished, check for failures and retry if we can (up to 3 times)
-    if (isRunning() && m_queue.isEmpty() && m_doing.isEmpty() && !m_failed.isEmpty() && m_try < 3) {
-        m_try += 1;
-        while (!m_failed.isEmpty()) {
-            auto task = m_failed.take(*m_failed.keyBegin());
-            m_done.remove(task.get());
-            m_queue.enqueue(task);
-        }
-    }
-    ConcurrentTask::executeNextSubTask();
-}
-
-auto NetJob::size() const -> int
-{
-    return m_queue.size() + m_doing.size() + m_done.size();
-}
-
-auto NetJob::canAbort() const -> bool
-{
-    bool canFullyAbort = true;
-
-    // can abort the downloads on the queue?
-    for (auto part : m_queue)
-        canFullyAbort &= part->canAbort();
-
-    // can abort the active downloads?
-    for (auto part : m_doing)
-        canFullyAbort &= part->canAbort();
-
-    return canFullyAbort;
-}
-
-auto NetJob::abort() -> bool
-{
-    bool fullyAborted = true;
-
-    // fail all downloads on the queue
-    for (auto task : m_queue)
-        m_failed.insert(task.get(), task);
-    m_queue.clear();
-
-    // abort active downloads
-    auto toKill = m_doing.values();
-    for (auto part : toKill) {
-        fullyAborted &= part->abort();
-    }
-
-    if (fullyAborted)
-        emitAborted();
-    else
-        emitFailed(tr("Failed to abort all tasks in the NetJob!"));
-
-    return fullyAborted;
-}
-
-auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
+QList<Net::NetRequest*> NetJob::getFailedActions()
 {
     QList<Net::NetRequest*> failed;
     for (auto index : m_failed) {
@@ -129,47 +68,11 @@ auto NetJob::getFailedActions() -> QList<Net::NetRequest*>
     return failed;
 }
 
-auto NetJob::getFailedFiles() -> QList<QString>
+QList<QString> NetJob::getFailedFiles()
 {
     QList<QString> failed;
     for (auto index : m_failed) {
         failed.append(static_cast<Net::NetRequest*>(index.get())->url().toString());
     }
     return failed;
-}
-
-void NetJob::updateState()
-{
-    emit progress(m_done.count(), totalSize());
-    setStatus(tr("Executing %1 task(s) (%2 out of %3 are done)")
-                  .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
-}
-
-void NetJob::emitFailed(QString reason)
-{
-#if defined(LAUNCHER_APPLICATION)
-    if (m_ask_retry) {
-        auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
-                                                     "The tasks failed.\n"
-                                                     "Failed urls\n" +
-                                                         getFailedFiles().join("\n\t") +
-                                                         ".\n"
-                                                         "If this continues to happen please check the logs of the application.\n"
-                                                         "Do you want to retry?",
-                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                            ->exec();
-
-        if (response == QMessageBox::Yes) {
-            m_try = 0;
-            executeNextSubTask();
-            return;
-        }
-    }
-#endif
-    ConcurrentTask::emitFailed(reason);
-}
-
-void NetJob::setAskRetry(bool askRetry)
-{
-    m_ask_retry = askRetry;
 }

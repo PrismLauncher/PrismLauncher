@@ -18,23 +18,16 @@
  */
 
 #include "net/ApiUpload.h"
-#include "ByteArraySink.h"
+#include "net/Upload.h"
+#include "net/headers/ApiHeaderProxy.h"
 
 namespace Net {
 
-Upload::Ptr ApiUpload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data)
+Upload::Ptr ApiUpload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray postData)
 {
-    auto up = makeShared<ApiUpload>();
-    up->m_url = std::move(url);
-    up->m_sink.reset(new ByteArraySink(output));
-    up->m_post_data = std::move(m_post_data);
+    auto up = Upload::makeByteArray(url, output, postData);
+    up->addHeaderProxy(new ApiHeaderProxy());
     return up;
 }
 
-void ApiUpload::init()
-{
-    qDebug() << "Setting up api upload";
-    auto api_headers = new ApiHeaderProxy();
-    addHeaderProxy(api_headers);
-}
 }  // namespace Net

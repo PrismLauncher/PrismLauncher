@@ -41,7 +41,7 @@ class BaseEntity {
     bool shouldStartRemoteUpdate() const;
 
     void load(Net::Mode loadType);
-    Task::Ptr getCurrentTask();
+    TaskV2::Ptr getCurrentTask();
 
    protected: /* methods */
     bool loadLocalFile();

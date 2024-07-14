@@ -38,10 +38,9 @@
 #include <optional>
 
 #include "QObjectPtr.h"
-#include "net/Download.h"
+#include "tasks/Task.h"
 
 #define PRISM_EXTERNAL_EXE
-#include "FileSystem.h"
 
 #include "GitHubRelease.h"
 
@@ -129,7 +128,7 @@ class PrismUpdaterApp : public QApplication {
     Status m_status = Status::Starting;
     shared_qobject_ptr<QNetworkAccessManager> m_network;
     QString m_current_url;
-    Task::Ptr m_current_task;
+    TaskV2::Ptr m_current_task;
     QList<GitHubRelease> m_releases;
 
    public:

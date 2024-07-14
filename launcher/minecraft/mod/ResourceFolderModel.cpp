@@ -15,8 +15,6 @@
 #include "Application.h"
 #include "FileSystem.h"
 
-#include "QVariantUtils.h"
-#include "StringUtils.h"
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 
 #include "settings/Setting.h"
@@ -241,12 +239,14 @@ bool ResourceFolderModel::update()
     if (!m_current_update_task)
         return false;
 
-    connect(m_current_update_task.get(), &Task::succeeded, this, &ResourceFolderModel::onUpdateSucceeded,
-            Qt::ConnectionType::QueuedConnection);
-    connect(m_current_update_task.get(), &Task::failed, this, &ResourceFolderModel::onUpdateFailed, Qt::ConnectionType::QueuedConnection);
     connect(
-        m_current_update_task.get(), &Task::finished, this,
-        [=] {
+        m_current_update_task.get(), &TaskV2::finished, this,
+        [this](TaskV2* t) {
+            if (t->wasSuccessful()) {
+                onUpdateSucceeded();
+            } else {
+                onUpdateFailed();
+            }
             m_current_update_task.reset();
             if (m_scheduled_update) {
                 m_scheduled_update = false;
@@ -268,7 +268,7 @@ void ResourceFolderModel::resolveResource(Resource* res)
         return;
     }
 
-    Task::Ptr task{ createParseTask(*res) };
+    TaskV2::Ptr task{ createParseTask(*res) };
     if (!task)
         return;
 
@@ -278,11 +278,13 @@ void ResourceFolderModel::resolveResource(Resource* res)
     m_active_parse_tasks.insert(ticket, task);
 
     connect(
-        task.get(), &Task::succeeded, this, [=] { onParseSucceeded(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
-    connect(task.get(), &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
-    connect(
-        task.get(), &Task::finished, this,
-        [=] {
+        task.get(), &TaskV2::finished, this,
+        [this, ticket, res](TaskV2* t) {
+            if (t->wasSuccessful()) {
+                onParseSucceeded(ticket, res->internal_id());
+            } else {
+                onParseFailed(ticket, res->internal_id());
+            }
             m_active_parse_tasks.remove(ticket);
             emit parseFinished();
         },
@@ -325,7 +327,7 @@ void ResourceFolderModel::onParseSucceeded(int ticket, QString resource_id)
     emit dataChanged(index(row), index(row, columnCount(QModelIndex()) - 1));
 }
 
-Task* ResourceFolderModel::createUpdateTask()
+TaskV2* ResourceFolderModel::createUpdateTask()
 {
     return new BasicFolderLoadTask(m_dir);
 }

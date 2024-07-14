@@ -19,7 +19,7 @@
 #pragma once
 
 #include <QWidget>
-#include "QObjectPtr.h"
+#include "tasks/Task.h"
 
 namespace Ui {
 class SubTaskProgressBar;
@@ -27,18 +27,17 @@ class SubTaskProgressBar;
 
 class SubTaskProgressBar : public QWidget {
     Q_OBJECT
-
    public:
-    static unique_qobject_ptr<SubTaskProgressBar> create(QWidget* parent = nullptr);
-
     SubTaskProgressBar(QWidget* parent = nullptr);
     ~SubTaskProgressBar();
 
-    void setRange(int min, int max);
-    void setValue(int value);
-    void setStatus(QString status);
-    void setDetails(QString details);
+    void setTask(TaskV2* t);
+
+   private slots:
+    void addSubTask(TaskV2* subTask);
 
    private:
     Ui::SubTaskProgressBar* ui;
+    TaskV2* m_task;
+    int m_running_subtasks = 0;
 };

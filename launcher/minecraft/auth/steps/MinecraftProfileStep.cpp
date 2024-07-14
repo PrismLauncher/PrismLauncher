@@ -5,7 +5,7 @@
 #include "Application.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
 
 MinecraftProfileStep::MinecraftProfileStep(AccountData* data) : AuthStep(data) {}
 
@@ -23,13 +23,12 @@ void MinecraftProfileStep::perform()
 
     m_response.reset(new QByteArray());
     m_request = Net::Download::makeByteArray(url, m_response);
-    m_request->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     m_task.reset(new NetJob("MinecraftProfileStep", APPLICATION->network()));
-    m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &MinecraftProfileStep::onRequestDone);
+    connect(m_task.get(), &TaskV2::finished, this, &MinecraftProfileStep::onRequestDone);
 
     m_task->start();
 }

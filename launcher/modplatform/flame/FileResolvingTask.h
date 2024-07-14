@@ -5,21 +5,18 @@
 #include "tasks/Task.h"
 
 namespace Flame {
-class FileResolvingTask : public Task {
+class FileResolvingTask : public TaskV2 {
     Q_OBJECT
    public:
     explicit FileResolvingTask(const shared_qobject_ptr<QNetworkAccessManager>& network, Flame::Manifest& toProcess);
     virtual ~FileResolvingTask() {};
 
-    bool canAbort() const override { return true; }
-    bool abort() override;
-
     const Flame::Manifest& getResults() const { return m_toProcess; }
 
-   protected:
+   protected slots:
+    bool doAbort() override;
     virtual void executeTask() override;
 
-   protected slots:
     void netJobFinished();
 
    private: /* data */

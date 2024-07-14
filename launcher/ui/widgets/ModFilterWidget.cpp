@@ -43,6 +43,7 @@
 #include "Version.h"
 #include "meta/Index.h"
 #include "modplatform/ModIndex.h"
+#include "tasks/Task.h"
 #include "ui/widgets/CheckComboBox.h"
 #include "ui_ModFilterWidget.h"
 
@@ -144,11 +145,13 @@ void ModFilterWidget::loadVersionList()
 
         auto task = m_version_list->getLoadTask();
 
-        connect(task.get(), &Task::failed, [this] {
-            ui->versions->setEnabled(false);
-            ui->showAllVersions->setEnabled(false);
+        connect(task.get(), &TaskV2::finished, [this, &load_version_list_loop](TaskV2* t) {
+            if (!t->wasSuccessful()) {
+                ui->versions->setEnabled(false);
+                ui->showAllVersions->setEnabled(false);
+            }
+            load_version_list_loop.quit();
         });
-        connect(task.get(), &Task::finished, &load_version_list_loop, &QEventLoop::quit);
 
         if (!task->isRunning())
             task->start();

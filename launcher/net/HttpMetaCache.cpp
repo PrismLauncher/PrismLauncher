@@ -46,7 +46,7 @@
 
 #include "net/Logging.h"
 
-auto MetaEntry::getFullPath() -> QString
+QString MetaEntry::getFullPath() const
 {
     // FIXME: make local?
     return FS::PathCombine(m_basePath, m_relativePath);
@@ -66,7 +66,7 @@ HttpMetaCache::~HttpMetaCache()
     SaveNow();
 }
 
-auto HttpMetaCache::getEntry(QString base, QString resource_path) -> MetaEntryPtr
+MetaEntry::Ptr HttpMetaCache::getEntry(QString base, QString resource_path)
 {
     // no base. no base path. can't store
     if (!m_entries.contains(base)) {
@@ -82,7 +82,7 @@ auto HttpMetaCache::getEntry(QString base, QString resource_path) -> MetaEntryPt
     return {};
 }
 
-auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString expected_etag) -> MetaEntryPtr
+MetaEntry::Ptr HttpMetaCache::resolveEntry(QString base, QString resource_path, QString expected_etag)
 {
     resource_path = FS::RemoveInvalidPathChars(resource_path);
     auto entry = getEntry(base, resource_path);
@@ -127,8 +127,7 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
     // Get rid of old entries, to prevent cache problems
     auto current_time = QDateTime::currentSecsSinceEpoch();
     if (entry->isExpired(current_time - (file_last_changed / 1000))) {
-        qCWarning(taskNetLogC) << "[HttpMetaCache]"
-                               << "Removing cache entry because of old age!";
+        qCWarning(taskNetLogC) << "[HttpMetaCache]" << "Removing cache entry because of old age!";
         selected_base.entry_list.remove(resource_path);
         return staleEntry(base, resource_path);
     }
@@ -138,7 +137,7 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
     return entry;
 }
 
-auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
+bool HttpMetaCache::updateEntry(MetaEntry::Ptr stale_entry)
 {
     if (!m_entries.contains(stale_entry->m_baseId)) {
         qCCritical(taskHttpMetaCacheLogC) << "Cannot add entry with unknown base: " << stale_entry->m_baseId.toLocal8Bit();
@@ -156,7 +155,7 @@ auto HttpMetaCache::updateEntry(MetaEntryPtr stale_entry) -> bool
     return true;
 }
 
-auto HttpMetaCache::evictEntry(MetaEntryPtr entry) -> bool
+bool HttpMetaCache::evictEntry(MetaEntry::Ptr entry)
 {
     if (!entry)
         return false;
@@ -171,7 +170,7 @@ void HttpMetaCache::evictAll()
     for (QString& base : m_entries.keys()) {
         EntryMap& map = m_entries[base];
         qCDebug(taskHttpMetaCacheLogC) << "Evicting base" << base;
-        for (MetaEntryPtr entry : map.entry_list) {
+        for (auto entry : map.entry_list) {
             if (!evictEntry(entry))
                 qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
         }
@@ -180,7 +179,7 @@ void HttpMetaCache::evictAll()
     }
 }
 
-auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntryPtr
+MetaEntry::Ptr HttpMetaCache::staleEntry(QString base, QString resource_path)
 {
     auto foo = new MetaEntry();
     foo->m_baseId = base;
@@ -188,7 +187,7 @@ auto HttpMetaCache::staleEntry(QString base, QString resource_path) -> MetaEntry
     foo->m_relativePath = resource_path;
     foo->m_stale = true;
 
-    return MetaEntryPtr(foo);
+    return MetaEntry::Ptr(foo);
 }
 
 void HttpMetaCache::addBase(QString base, QString base_root)
@@ -260,19 +259,19 @@ void HttpMetaCache::Load()
         foo->m_relativePath = Json::ensureString(element_obj, "path");
         foo->m_md5sum = Json::ensureString(element_obj, "md5sum");
         foo->m_etag = Json::ensureString(element_obj, "etag");
-        foo->m_local_changed_timestamp = Json::ensureDouble(element_obj, "last_changed_timestamp");
+        foo->m_local_changed_timestamp = Json::ensureQint64(element_obj, "last_changed_timestamp");
         foo->m_remote_changed_timestamp = Json::ensureString(element_obj, "remote_changed_timestamp");
 
-        foo->makeEternal(Json::ensureBoolean(element_obj, (const QString)QStringLiteral("eternal"), false));
+        foo->makeEternal(Json::ensureBoolean(element_obj, "eternal", false));
         if (!foo->isEternal()) {
-            foo->m_current_age = Json::ensureDouble(element_obj, "current_age");
-            foo->m_max_age = Json::ensureDouble(element_obj, "max_age");
+            foo->m_current_age = Json::ensureQint64(element_obj, "current_age");
+            foo->m_max_age = Json::ensureQint64(element_obj, "max_age");
         }
 
         // presumed innocent until closer examination
         foo->m_stale = false;
 
-        entrymap.entry_list[foo->m_relativePath] = MetaEntryPtr(foo);
+        entrymap.entry_list[foo->m_relativePath] = MetaEntry::Ptr(foo);
     }
 }
 

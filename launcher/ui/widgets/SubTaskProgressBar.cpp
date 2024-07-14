@@ -18,39 +18,57 @@
  */
 
 #include "SubTaskProgressBar.h"
+#include "tasks/Task.h"
 #include "ui_SubTaskProgressBar.h"
-
-unique_qobject_ptr<SubTaskProgressBar> SubTaskProgressBar::create(QWidget* parent)
-{
-    auto progress_bar = new SubTaskProgressBar(parent);
-    return unique_qobject_ptr<SubTaskProgressBar>(progress_bar);
-}
 
 SubTaskProgressBar::SubTaskProgressBar(QWidget* parent) : QWidget(parent), ui(new Ui::SubTaskProgressBar)
 {
     ui->setupUi(this);
+    ui->taskProgressScrollArea->hide();
 }
+
 SubTaskProgressBar::~SubTaskProgressBar()
 {
     delete ui;
 }
 
-void SubTaskProgressBar::setRange(int min, int max)
+void SubTaskProgressBar::addSubTask(TaskV2* subTask)
 {
-    ui->progressBar->setRange(min, max);
+    auto p = new SubTaskProgressBar(this);
+    p->setTask(subTask);
+    ui->taskProgressLayout->addWidget(p);
+    m_running_subtasks++;
+    ui->taskProgressScrollArea->show();
+    connect(subTask, &TaskV2::finished, this, [this] {
+        m_running_subtasks--;
+        if (!m_running_subtasks) {
+            ui->taskProgressScrollArea->hide();
+        }
+    });
 }
 
-void SubTaskProgressBar::setValue(int value)
+void SubTaskProgressBar::setTask(TaskV2* t)
 {
-    ui->progressBar->setValue(value);
-}
-
-void SubTaskProgressBar::setStatus(QString status)
-{
-    ui->statusLabel->setText(status);
-}
-
-void SubTaskProgressBar::setDetails(QString details)
-{
-    ui->statusDetailsLabel->setText(details);
+    if (m_task) {
+        disconnect(m_task, nullptr, this, nullptr);
+    }
+    m_task = t;
+    connect(t, &TaskV2::finished, [this] { hide(); });
+    connect(t, &TaskV2::started, [this] { show(); });
+    connect(t, &TaskV2::totalChanged, [this](TaskV2* job, double total, double delta) { ui->progressBar->setRange(0, total); });
+    connect(t, &TaskV2::processedChanged, [this](TaskV2* job, double current, double delta) { ui->progressBar->setValue(current); });
+    connect(t, &TaskV2::stateChanged, [this](TaskV2* job) {
+        ui->statusLabel->setText(job->status());
+        ui->statusDetailsLabel->setText(job->details());
+    });
+    connect(t, &TaskV2::subTaskAdded, [this](TaskV2* job, TaskV2* subTask) { addSubTask(subTask); });
+    for (auto subTask : t->subTasks()) {
+        addSubTask(subTask.get());
+    }
+    if (t->isRunning()) {
+        ui->statusLabel->setText(t->status());
+        ui->statusDetailsLabel->setText(t->details());
+        ui->progressBar->setRange(0, t->progressTotal());
+        ui->progressBar->setValue(t->progress());
+    }
 }

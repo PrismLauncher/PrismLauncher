@@ -123,7 +123,7 @@ void MSALoginDialog::onTaskFailed(QString reason)
         task = m_devicecode_task;
     }
     if (task) {
-        ui->loadingLabel->setText(task->getStatus());
+        ui->loadingLabel->setText(task->status());
     }
     disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_authflow_task.get(), &Task::abort);
     disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_devicecode_task.get(), &Task::abort);

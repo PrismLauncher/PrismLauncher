@@ -46,5 +46,4 @@ class VerifyJavaInstall : public LaunchStep {
     ~VerifyJavaInstall() override = default;
 
     void executeTask() override;
-    bool canAbort() const override { return false; }
 };

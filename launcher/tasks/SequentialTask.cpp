@@ -3,6 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (c) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,20 +36,14 @@
  */
 #include "SequentialTask.h"
 
-#include <QDebug>
 #include "tasks/ConcurrentTask.h"
 
 SequentialTask::SequentialTask(QObject* parent, QString task_name) : ConcurrentTask(parent, task_name, 1) {}
 
-void SequentialTask::subTaskFailed(Task::Ptr task, const QString& msg)
+void SequentialTask::subTaskFinished(TaskV2* t)
 {
-    emitFailed(msg);
-    qWarning() << msg;
-    ConcurrentTask::subTaskFailed(task, msg);
-}
-
-void SequentialTask::updateState()
-{
-    setProgress(m_done.count(), totalSize());
-    setStatus(tr("Executing task %1 out of %2").arg(QString::number(m_doing.count() + m_done.count()), QString::number(totalSize())));
+    if (!t->failReason().isEmpty()) {
+        emitFailed(t->failReason());
+    }
+    ConcurrentTask::subTaskFinished(t);
 }

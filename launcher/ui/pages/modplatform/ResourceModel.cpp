@@ -280,12 +280,12 @@ void ResourceModel::clearData()
     endResetModel();
 }
 
-void ResourceModel::runSearchJob(Task::Ptr ptr)
+void ResourceModel::runSearchJob(TaskV2::Ptr ptr)
 {
     m_current_search_job.reset(ptr);  // clean up first
     m_current_search_job->start();
 }
-void ResourceModel::runInfoJob(Task::Ptr ptr)
+void ResourceModel::runInfoJob(TaskV2::Ptr ptr)
 {
     if (!m_current_info_job.isRunning())
         m_current_info_job.clear();
@@ -331,17 +331,18 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     auto icon_fetch_action = Net::ApiDownload::makeCached(url, cache_entry);
 
     auto full_file_path = cache_entry->getFullPath();
-    connect(icon_fetch_action.get(), &Task::succeeded, this, [=] {
-        auto icon = QIcon(full_file_path);
-        QPixmapCache::insert(url.toString(), icon.pixmap(icon.actualSize({ 64, 64 })));
+    connect(icon_fetch_action.get(), &TaskV2::finished, this, [this, url, full_file_path, index](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            auto icon = QIcon(full_file_path);
+            QPixmapCache::insert(url.toString(), icon.pixmap(icon.actualSize({ 64, 64 })));
 
-        m_currently_running_icon_actions.remove(url);
+            m_currently_running_icon_actions.remove(url);
 
-        emit dataChanged(index, index, { Qt::DecorationRole });
-    });
-    connect(icon_fetch_action.get(), &Task::failed, this, [=] {
-        m_currently_running_icon_actions.remove(url);
-        m_failed_icon_actions.insert(url);
+            emit dataChanged(index, index, { Qt::DecorationRole });
+        } else {
+            m_currently_running_icon_actions.remove(url);
+            m_failed_icon_actions.insert(url);
+        }
     });
 
     m_currently_running_icon_actions.insert(url);

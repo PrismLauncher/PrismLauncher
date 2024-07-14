@@ -49,7 +49,7 @@
 #include "Usable.h"
 #include "minecraft/auth/AuthFlow.h"
 
-class Task;
+class TaskV2;
 class MinecraftAccount;
 
 using MinecraftAccountPtr = shared_qobject_ptr<MinecraftAccount>;

@@ -392,15 +392,38 @@ void ScreenshotsPage::on_actionUpload_triggered()
         auto screenshot = std::make_shared<ScreenShot>(info);
         job->addNetAction(ImgurUpload::make(screenshot));
 
-        connect(job.get(), &Task::failed, [this](QString reason) {
-            CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
-        });
-        connect(job.get(), &Task::aborted, [this] {
-            CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
-                                         QMessageBox::Information)
-                ->show();
-        });
+        connect(job.get(), &TaskV2::finished, [this](TaskV2* tasks) {
+            switch (tasks->state()) {
+                case TaskV2::Succeeded: {
+                    QStringList warnings = tasks->warnings();
+                    if (warnings.count())
+                        CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
 
+                    break;
+                }
+                case TaskV2::AbortedByUser: {
+                    CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
+                                                 QMessageBox::Information)
+                        ->show();
+                    break;
+                }
+                case TaskV2::Inactive:
+                    [[fallthrough]];
+                case TaskV2::Running:
+                    [[fallthrough]];
+                case TaskV2::Paused:
+                    [[fallthrough]];
+                case TaskV2::Finished:
+                    [[fallthrough]];
+                case TaskV2::Failed: {
+                    CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), tasks->failReason(), QMessageBox::Critical)
+                        ->show();
+                    break;
+                }
+            }
+
+            tasks->deleteLater();
+        });
         m_uploadActive = true;
 
         if (dialog.execWithTask(job.get()) == QDialog::Accepted) {
@@ -433,15 +456,37 @@ void ScreenshotsPage::on_actionUpload_triggered()
     task.addTask(job);
     task.addTask(albumTask);
 
-    connect(&task, &Task::failed, [this](QString reason) {
-        CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), reason, QMessageBox::Critical)->show();
-    });
-    connect(&task, &Task::aborted, [this] {
-        CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
-                                     QMessageBox::Information)
-            ->show();
-    });
+    connect(job.get(), &TaskV2::finished, [this](TaskV2* tasks) {
+        switch (tasks->state()) {
+            case TaskV2::Succeeded: {
+                QStringList warnings = tasks->warnings();
+                if (warnings.count())
+                    CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
 
+                break;
+            }
+            case TaskV2::AbortedByUser: {
+                CustomMessageBox::selectable(this, tr("Screenshots upload aborted"), tr("The task has been aborted by the user."),
+                                             QMessageBox::Information)
+                    ->show();
+                break;
+            }
+            case TaskV2::Inactive:
+                [[fallthrough]];
+            case TaskV2::Running:
+                [[fallthrough]];
+            case TaskV2::Paused:
+                [[fallthrough]];
+            case TaskV2::Finished:
+                [[fallthrough]];
+            case TaskV2::Failed: {
+                CustomMessageBox::selectable(this, tr("Failed to upload screenshots!"), tasks->failReason(), QMessageBox::Critical)->show();
+                break;
+            }
+        }
+
+        tasks->deleteLater();
+    });
     m_uploadActive = true;
     if (dialog.execWithTask(&task) == QDialog::Accepted) {
         if (imgurResult->id.isEmpty()) {

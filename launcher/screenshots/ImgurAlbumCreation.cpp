@@ -46,14 +46,18 @@
 #include <memory>
 
 #include "BuildConfig.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
 
 Net::NetRequest::Ptr ImgurAlbumCreation::make(std::shared_ptr<ImgurAlbumCreation::Result> output, QList<ScreenShot::Ptr> screenshots)
 {
     auto up = makeShared<ImgurAlbumCreation>();
     up->m_url = BuildConfig.IMGUR_BASE_URL + "album";
-    up->m_sink.reset(new Sink(output));
+    up->setSink(new Sink(output));
     up->m_screenshots = screenshots;
+    up->addHeaderProxy(new Net::RawHeaderProxy(
+        QList<Net::HeaderPair>{ { "Content-Type", "application/x-www-form-urlencoded" },
+                                { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toUtf8() },
+                                { "Accept", "application/json" } }));
     return up;
 }
 
@@ -67,48 +71,41 @@ QNetworkReply* ImgurAlbumCreation::getReply(QNetworkRequest& request)
     return m_network->post(request, data);
 };
 
-void ImgurAlbumCreation::init()
-{
-    qDebug() << "Setting up imgur upload";
-    auto api_headers = new Net::StaticHeaderProxy(
-        QList<Net::HeaderPair>{ { "Content-Type", "application/x-www-form-urlencoded" },
-                                { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toUtf8() },
-                                { "Accept", "application/json" } });
-    addHeaderProxy(api_headers);
-}
-
-auto ImgurAlbumCreation::Sink::init(QNetworkRequest& request) -> Task::State
+Net::Sink::State ImgurAlbumCreation::Sink::init(QNetworkRequest&)
 {
     m_output.clear();
-    return Task::State::Running;
+    return State::OK;
 };
 
-auto ImgurAlbumCreation::Sink::write(QByteArray& data) -> Task::State
+Net::Sink::State ImgurAlbumCreation::Sink::write(QByteArray& data)
 {
     m_output.append(data);
-    return Task::State::Running;
+    return State::OK;
 }
 
-auto ImgurAlbumCreation::Sink::abort() -> Task::State
+Net::Sink::State ImgurAlbumCreation::Sink::abort()
 {
     m_output.clear();
-    return Task::State::Failed;
+    m_fail_reason = "Aborted";
+    return State::Failed;
 }
 
-auto ImgurAlbumCreation::Sink::finalize(QNetworkReply&) -> Task::State
+Net::Sink::State ImgurAlbumCreation::Sink::finalize(QNetworkReply&)
 {
     QJsonParseError jsonError;
     QJsonDocument doc = QJsonDocument::fromJson(m_output, &jsonError);
     if (jsonError.error != QJsonParseError::NoError) {
         qDebug() << jsonError.errorString();
-        return Task::State::Failed;
+        m_fail_reason = "invalid json reply";
+        return State::Failed;
     }
     auto object = doc.object();
     if (!object.value("success").toBool()) {
         qDebug() << doc.toJson();
-        return Task::State::Failed;
+        m_fail_reason = "failed to create album";
+        return State::Failed;
     }
     m_result->deleteHash = object.value("data").toObject().value("deletehash").toString();
     m_result->id = object.value("data").toObject().value("id").toString();
-    return Task::State::Succeeded;
+    return State::Succeeded;
 }

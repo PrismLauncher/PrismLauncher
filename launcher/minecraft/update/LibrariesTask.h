@@ -3,21 +3,17 @@
 #include "tasks/Task.h"
 class MinecraftInstance;
 
-class LibrariesTask : public Task {
+class LibrariesTask : public TaskV2 {
     Q_OBJECT
    public:
     LibrariesTask(MinecraftInstance* inst);
-    virtual ~LibrariesTask() {};
+    virtual ~LibrariesTask() = default;
 
+   protected:
     void executeTask() override;
 
-    bool canAbort() const override;
-
-   private slots:
-    void jarlibFailed(QString reason);
-
-   public slots:
-    bool abort() override;
+   protected slots:
+    bool doAbort() override;
 
    private:
     MinecraftInstance* m_inst;

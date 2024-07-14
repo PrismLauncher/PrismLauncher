@@ -120,7 +120,7 @@ class MinecraftInstance : public BaseInstance {
     std::shared_ptr<GameOptions> gameOptionsModel();
 
     //////  Launch stuff //////
-    Task::Ptr createUpdateTask(Net::Mode mode) override;
+    TaskV2::Ptr createUpdateTask(Net::Mode mode) override;
     shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) override;
     QStringList extraArguments() override;
     QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) override;

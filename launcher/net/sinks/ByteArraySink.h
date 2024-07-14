@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,31 +36,61 @@
 
 #pragma once
 
-#include <QSaveFile>
-
 #include "Sink.h"
 
 namespace Net {
-class FileSink : public Sink {
+
+/*
+ * Sink object for downloads that uses an external QByteArray it doesn't own as a target.
+ */
+class ByteArraySink : public Sink {
    public:
-    FileSink(QString filename) : m_filename(filename) {};
-    virtual ~FileSink() = default;
+    ByteArraySink(std::shared_ptr<QByteArray> output) : m_output(output) {};
+    virtual ~ByteArraySink() = default;
 
    public:
-    auto init(QNetworkRequest& request) -> Task::State override;
-    auto write(QByteArray& data) -> Task::State override;
-    auto abort() -> Task::State override;
-    auto finalize(QNetworkReply& reply) -> Task::State override;
+    State init(QNetworkRequest& request) override
+    {
+        if (m_output)
+            m_output->clear();
+        else
+            qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
+        if (initAllValidators(request))
+            return State::OK;
+        m_fail_reason = "failed to initialize validators";
+        return State::Failed;
+    };
 
-    auto hasLocalData() -> bool override;
+    State write(QByteArray& data) override
+    {
+        if (m_output)
+            m_output->append(data);
+        else
+            qWarning() << "ByteArraySink did not write the buffer because it's not addressable";
+        if (writeAllValidators(data))
+            return State::OK;
+        m_fail_reason = "failed to write validators";
+        return State::Failed;
+    }
+
+    State abort() override
+    {
+        failAllValidators();
+        m_fail_reason = "Aborted";
+        return State::Failed;
+    }
+
+    State finalize(QNetworkReply& reply) override
+    {
+        if (finalizeAllValidators(reply))
+            return State::Succeeded;
+        m_fail_reason = "failed to finalize validators";
+        return State::Failed;
+    }
+
+    auto hasLocalData() -> bool override { return false; }
 
    protected:
-    virtual auto initCache(QNetworkRequest&) -> Task::State;
-    virtual auto finalizeCache(QNetworkReply& reply) -> Task::State;
-
-   protected:
-    QString m_filename;
-    bool wroteAnyData = false;
-    std::unique_ptr<QSaveFile> m_output_file;
+    std::shared_ptr<QByteArray> m_output;
 };
 }  // namespace Net

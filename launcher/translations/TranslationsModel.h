@@ -18,6 +18,7 @@
 #include <QAbstractListModel>
 #include <memory>
 #include <optional>
+#include "tasks/Task.h"
 
 struct Language;
 
@@ -53,10 +54,8 @@ class TranslationsModel : public QAbstractListModel {
     TranslationsModel& operator=(const TranslationsModel&) = delete;
 
    private slots:
-    void indexReceived();
-    void indexFailed(QString reason);
-    void dlFailed(QString reason);
-    void dlGood();
+    void indexFinished(TaskV2* task);
+    void dlFinished(TaskV2* task);
     void translationDirChanged(const QString& path);
 
    private: /* data */

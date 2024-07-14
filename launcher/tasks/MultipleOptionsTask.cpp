@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -56,6 +57,5 @@ void MultipleOptionsTask::executeNextSubTask()
 
 void MultipleOptionsTask::updateState()
 {
-    setProgress(m_done.count(), totalSize());
     setStatus(tr("Attempting task %1 out of %2").arg(QString::number(m_doing.count() + m_done.count()), QString::number(totalSize())));
 }

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,18 +35,32 @@
 
 #pragma once
 
-#include <QNetworkReply>
+#include <QSaveFile>
+
+#include "Sink.h"
 
 namespace Net {
-class Validator {
-   public: /* con/des */
-    Validator() {}
-    virtual ~Validator() {}
+class FileSink : public Sink {
+   public:
+    FileSink(QString filename) : m_filename(filename) {};
+    virtual ~FileSink() = default;
 
-   public: /* methods */
-    virtual bool init(QNetworkRequest& request) = 0;
-    virtual bool write(QByteArray& data) = 0;
-    virtual bool abort() = 0;
-    virtual bool validate(QNetworkReply& reply) = 0;
+   public:
+    State init(QNetworkRequest& request) override;
+    State write(QByteArray& data) override;
+    State abort() override;
+    State finalize(QNetworkReply& reply) override;
+
+    bool hasLocalData() override;
+    bool canPause() override;
+
+   protected:
+    virtual State initCache(QNetworkRequest&);
+    virtual State finalizeCache(QNetworkReply& reply);
+
+   protected:
+    QString m_filename;
+    qint64 m_bytes_writen = 0;
+    std::unique_ptr<QSaveFile> m_output_file;
 };
 }  // namespace Net

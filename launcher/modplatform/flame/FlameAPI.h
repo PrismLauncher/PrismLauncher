@@ -18,12 +18,12 @@ class FlameAPI : public NetworkResourceAPI {
 
     auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;
 
-    Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
-    Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
-    Task::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
-    Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
+    TaskV2::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
+    TaskV2::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
+    TaskV2::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
+    TaskV2::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
 
-    static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
+    static TaskV2::Ptr getModCategories(std::shared_ptr<QByteArray> response);
     static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
 
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;

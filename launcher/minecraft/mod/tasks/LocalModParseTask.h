@@ -30,7 +30,7 @@ bool processIconPNG(const Mod& mod, QByteArray&& raw_data);
 bool loadIconFile(const Mod& mod);
 }  // namespace ModUtils
 
-class LocalModParseTask : public Task {
+class LocalModParseTask : public TaskV2 {
     Q_OBJECT
    public:
     struct Result {
@@ -38,9 +38,6 @@ class LocalModParseTask : public Task {
     };
     using ResultPtr = std::shared_ptr<Result>;
     ResultPtr result() const { return m_result; }
-
-    [[nodiscard]] bool canAbort() const override { return true; }
-    bool abort() override;
 
     LocalModParseTask(int token, ResourceType type, const QFileInfo& modFile);
     void executeTask() override;
@@ -57,6 +54,4 @@ class LocalModParseTask : public Task {
     ResourceType m_type;
     QFileInfo m_modFile;
     ResultPtr m_result;
-
-    std::atomic<bool> m_aborted = false;
 };

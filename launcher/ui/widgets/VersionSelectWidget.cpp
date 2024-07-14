@@ -9,6 +9,7 @@
 
 #include "VersionProxyModel.h"
 
+#include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
 VersionSelectWidget::VersionSelectWidget(QWidget* parent) : QWidget(parent)
@@ -134,9 +135,15 @@ void VersionSelectWidget::loadList()
         return;
     }
     loadTask = newTask.get();
-    connect(loadTask, &Task::succeeded, this, &VersionSelectWidget::onTaskSucceeded);
-    connect(loadTask, &Task::failed, this, &VersionSelectWidget::onTaskFailed);
-    connect(loadTask, &Task::progress, this, &VersionSelectWidget::changeProgress);
+    connect(loadTask, &TaskV2::finished, this, [this](TaskV2* t) {
+        if (t->wasSuccessful())
+            onTaskSucceeded();
+        else
+            onTaskFailed(t->failReason());
+    });
+    connect(loadTask, &TaskV2::totalChanged, this, [this](TaskV2* t, double total, double delta) { sneakyProgressBar->setMaximum(total); });
+    connect(loadTask, &TaskV2::processedChanged, this,
+            [this](TaskV2* t, double proggress, double delta) { sneakyProgressBar->setValue(proggress); });
     if (!loadTask->isRunning()) {
         loadTask->start();
     }
@@ -157,12 +164,6 @@ void VersionSelectWidget::onTaskFailed(const QString& reason)
 {
     CustomMessageBox::selectable(this, tr("Error"), tr("List update failed:\n%1").arg(reason), QMessageBox::Warning)->show();
     onTaskSucceeded();
-}
-
-void VersionSelectWidget::changeProgress(qint64 current, qint64 total)
-{
-    sneakyProgressBar->setMaximum(total);
-    sneakyProgressBar->setValue(current);
 }
 
 void VersionSelectWidget::currentRowChanged(const QModelIndex& current, const QModelIndex&)

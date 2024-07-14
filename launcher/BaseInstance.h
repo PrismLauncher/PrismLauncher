@@ -45,13 +45,12 @@
 #include <QSet>
 #include "QObjectPtr.h"
 
+#include "minecraft/auth/AuthSession.h"
 #include "settings/SettingsObject.h"
+#include "tasks/Task.h"
 
-#include "BaseVersionList.h"
 #include "MessageLevel.h"
-#include "minecraft/auth/MinecraftAccount.h"
 #include "pathmatcher/IPathMatcher.h"
-#include "settings/INIFile.h"
 
 #include "net/Mode.h"
 
@@ -59,7 +58,6 @@
 #include "minecraft/launch/MinecraftServerTarget.h"
 
 class QDir;
-class Task;
 class LaunchTask;
 class BaseInstance;
 
@@ -181,7 +179,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     virtual void loadSpecificSettings() = 0;
 
     /// returns a valid update task
-    virtual Task::Ptr createUpdateTask(Net::Mode mode) = 0;
+    virtual TaskV2::Ptr createUpdateTask(Net::Mode mode) = 0;
 
     /// returns a valid launcher (task container)
     virtual shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) = 0;

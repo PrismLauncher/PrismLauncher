@@ -42,13 +42,13 @@
 #include "minecraft/launch/MinecraftServerTarget.h"
 
 class InstanceWindow;
-class LaunchController : public Task {
+class LaunchController : public TaskV2 {
     Q_OBJECT
    public:
     void executeTask() override;
 
     LaunchController(QObject* parent = nullptr);
-    virtual ~LaunchController() {};
+    virtual ~LaunchController() = default;
 
     void setInstance(InstancePtr instance) { m_instance = instance; }
 
@@ -68,7 +68,7 @@ class LaunchController : public Task {
 
     QString id() { return m_instance->id(); }
 
-    bool abort() override;
+    bool doAbort() override;
 
    private:
     void login();
@@ -82,7 +82,7 @@ class LaunchController : public Task {
 
     void onSucceeded();
     void onFailed(QString reason);
-    void onProgressRequested(Task* task);
+    void onProgressRequested(TaskV2* task);
 
    private:
     BaseProfilerFactory* m_profiler = nullptr;

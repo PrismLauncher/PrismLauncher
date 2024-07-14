@@ -51,6 +51,8 @@
 #include <QUrl>
 
 #include "VersionPage.h"
+#include "icons/IconList.h"
+#include "tasks/Task.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
 #include "ui_VersionPage.h"
 
@@ -63,14 +65,10 @@
 
 #include "DesktopServices.h"
 #include "Exception.h"
-#include "Version.h"
-#include "icons/IconList.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/auth/AccountList.h"
-#include "minecraft/mod/Mod.h"
 
 #include "meta/Index.h"
-#include "meta/VersionList.h"
 
 class IconProxy : public QIdentityProxyModel {
     Q_OBJECT
@@ -415,7 +413,10 @@ void VersionPage::on_actionDownload_All_triggered()
         return;
     }
     ProgressDialog tDialog(this);
-    connect(updateTask.get(), &Task::failed, this, &VersionPage::onGameUpdateError);
+    connect(updateTask.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+        if (!t->wasSuccessful())
+            onGameUpdateError(t->failReason());
+    });
     // FIXME: unused return value
     tDialog.execWithTask(updateTask.get());
     updateButtons();

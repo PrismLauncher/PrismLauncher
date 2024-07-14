@@ -52,7 +52,7 @@
 #include "minecraft/OneSixVersionFormat.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/atlauncher/ATLPackManifest.h"
-#include "net/ChecksumValidator.h"
+#include "net/validators/ChecksumValidator.h"
 #include "settings/INISettingsObject.h"
 
 #include "net/ApiDownload.h"
@@ -1082,7 +1082,7 @@ static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString&
     if (!vlist->isLoaded()) {
         QEventLoop loadVersionLoop;
         auto task = vlist->getLoadTask();
-        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+        QObject::connect(task.get(), &TaskV2::finished, &loadVersionLoop, &QEventLoop::quit);
         if (!task->isRunning())
             task->start();
 
@@ -1097,7 +1097,7 @@ static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString&
         QEventLoop loadVersionLoop;
         ver->load(Net::Mode::Online);
         auto task = ver->getCurrentTask();
-        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
+        QObject::connect(task.get(), &TaskV2::finished, &loadVersionLoop, &QEventLoop::quit);
         if (!task->isRunning())
             task->start();
 

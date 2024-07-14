@@ -153,14 +153,14 @@ class ResourceFolderModel : public QAbstractListModel {
      *  This Task is normally executed when opening a page, so it shouldn't contain much heavy work.
      *  If such work is needed, try using it in the Task create by createParseTask() instead!
      */
-    [[nodiscard]] virtual Task* createUpdateTask();
+    [[nodiscard]] virtual TaskV2* createUpdateTask();
 
     /** This creates a new parse task to be executed by onUpdateSucceeded().
      *
      *  This task should load and parse all heavy info needed by a resource, such as parsing a manifest. It gets executed
      *  in the background, so it slowly updates the UI as tasks get done.
      */
-    [[nodiscard]] virtual Task* createParseTask(Resource&) { return nullptr; }
+    [[nodiscard]] virtual TaskV2* createParseTask(Resource&) { return nullptr; }
 
     /** Standard implementation of the model update logic.
      *
@@ -208,7 +208,7 @@ class ResourceFolderModel : public QAbstractListModel {
     QFileSystemWatcher m_watcher;
     bool m_is_watching = false;
 
-    Task::Ptr m_current_update_task = nullptr;
+    TaskV2::Ptr m_current_update_task = nullptr;
     bool m_scheduled_update = false;
 
     QList<Resource::Ptr> m_resources;
@@ -217,7 +217,7 @@ class ResourceFolderModel : public QAbstractListModel {
     QMap<QString, int> m_resources_index;
 
     ConcurrentTask m_helper_thread_task;
-    QMap<int, Task::Ptr> m_active_parse_tasks;
+    QMap<int, TaskV2::Ptr> m_active_parse_tasks;
     std::atomic<int> m_next_resolution_ticket = 0;
 };
 

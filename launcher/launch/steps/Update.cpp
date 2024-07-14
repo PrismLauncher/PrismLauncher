@@ -18,17 +18,12 @@
 
 void Update::executeTask()
 {
-    if (m_aborted) {
-        emitFailed(tr("Task aborted."));
-        return;
-    }
     m_updateTask.reset(m_parent->instance()->createUpdateTask(m_mode));
     if (m_updateTask) {
-        connect(m_updateTask.get(), &Task::finished, this, &Update::updateFinished);
-        connect(m_updateTask.get(), &Task::progress, this, &Update::setProgress);
-        connect(m_updateTask.get(), &Task::stepProgress, this, &Update::propagateStepProgress);
-        connect(m_updateTask.get(), &Task::status, this, &Update::setStatus);
-        connect(m_updateTask.get(), &Task::details, this, &Update::setDetails);
+        connect(m_updateTask.get(), &TaskV2::finished, this, &Update::updateFinished);
+        connect(m_updateTask.get(), &TaskV2::processedChanged, this, &Update::propateProcessedChanged);
+        connect(m_updateTask.get(), &TaskV2::totalChanged, this, &Update::propateTotalChanged);
+        connect(m_updateTask.get(), &TaskV2::stateChanged, this, &Update::propateState);
         emit progressReportingRequest();
         return;
     }
@@ -53,21 +48,10 @@ void Update::updateFinished()
     }
 }
 
-bool Update::canAbort() const
+bool Update::doAbort()
 {
     if (m_updateTask) {
-        return m_updateTask->canAbort();
+        return m_updateTask->abort();
     }
-    return true;
-}
-
-bool Update::abort()
-{
-    m_aborted = true;
-    if (m_updateTask) {
-        if (m_updateTask->canAbort()) {
-            return m_updateTask->abort();
-        }
-    }
-    return true;
+    return false;
 }

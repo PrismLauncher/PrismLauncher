@@ -61,7 +61,7 @@ class BaseVersionList : public QAbstractListModel {
      * The task returned by this function should reset the model when it's done.
      * \return A pointer to a task that reloads the version list.
      */
-    virtual Task::Ptr getLoadTask() = 0;
+    virtual TaskV2::Ptr getLoadTask() = 0;
 
     //! Checks whether or not the list is loaded. If this returns false, the list should be
     // loaded.

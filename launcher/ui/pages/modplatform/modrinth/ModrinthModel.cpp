@@ -166,21 +166,23 @@ void ModpackListModel::performPaginatedSearch()
                             .arg(currentSort);
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchAllUrl), m_all_response));
+    QObject::connect(netJob.get(), &NetJob::finished, this, [this](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            QJsonParseError parse_error_all{};
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, this, [this] {
-        QJsonParseError parse_error_all{};
+            QJsonDocument doc_all = QJsonDocument::fromJson(*m_all_response, &parse_error_all);
+            if (parse_error_all.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error_all.offset
+                           << " reason: " << parse_error_all.errorString();
+                qWarning() << *m_all_response;
+                return;
+            }
 
-        QJsonDocument doc_all = QJsonDocument::fromJson(*m_all_response, &parse_error_all);
-        if (parse_error_all.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error_all.offset
-                       << " reason: " << parse_error_all.errorString();
-            qWarning() << *m_all_response;
-            return;
+            searchRequestFinished(doc_all);
+        } else {
+            searchRequestFailed(t->failReason());
         }
-
-        searchRequestFinished(doc_all);
     });
-    QObject::connect(netJob.get(), &NetJob::failed, this, &ModpackListModel::searchRequestFailed);
 
     jobPtr = netJob;
     jobPtr->start();
@@ -252,22 +254,21 @@ void ModpackListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
+    MetaEntry::Ptr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
-        job->deleteLater();
-        emit logoLoaded(logo, QIcon(fullPath));
-        if (waitingCallbacks.contains(logo)) {
-            waitingCallbacks.value(logo)(fullPath);
+    QObject::connect(job, &NetJob::finished, this, [this, logo, fullPath](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            emit logoLoaded(logo, QIcon(fullPath));
+            if (waitingCallbacks.contains(logo)) {
+                waitingCallbacks.value(logo)(fullPath);
+            }
+        } else {
+            emit logoFailed(logo);
         }
-    });
-
-    QObject::connect(job, &NetJob::failed, this, [this, logo, job] {
-        job->deleteLater();
-        emit logoFailed(logo);
+        t->deleteLater();
     });
 
     job->start();

@@ -24,6 +24,7 @@
 
 #include "FileSystem.h"
 
+#include <qlogging.h>
 #include <quazip/quazip.h>
 #include <quazip/quazipdir.h>
 #include <quazip/quazipfile.h>
@@ -170,21 +171,13 @@ bool validate(QFileInfo file)
 
 }  // namespace WorldSaveUtils
 
-LocalWorldSaveParseTask::LocalWorldSaveParseTask(int token, WorldSave& save) : Task(nullptr, false), m_token(token), m_save(save) {}
-
-bool LocalWorldSaveParseTask::abort()
-{
-    m_aborted = true;
-    return true;
-}
+LocalWorldSaveParseTask::LocalWorldSaveParseTask(int token, WorldSave& save) : TaskV2(nullptr, QtWarningMsg), m_token(token), m_save(save)
+{}
 
 void LocalWorldSaveParseTask::executeTask()
 {
     if (!WorldSaveUtils::process(m_save))
         return;
 
-    if (m_aborted)
-        emitAborted();
-    else
-        emitSucceeded();
+    emitSucceeded();
 }

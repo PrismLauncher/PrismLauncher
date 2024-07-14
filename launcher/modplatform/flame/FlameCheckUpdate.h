@@ -16,7 +16,7 @@ class FlameCheckUpdate : public CheckUpdateTask {
     {}
 
    public slots:
-    bool abort() override;
+    bool doAbort() override;
 
    protected slots:
     void executeTask() override;
@@ -26,6 +26,4 @@ class FlameCheckUpdate : public CheckUpdateTask {
     ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId);
 
     NetJob* m_net_job = nullptr;
-
-    bool m_was_aborted = false;
 };

@@ -7,7 +7,7 @@
 class PackProfile;
 struct ComponentUpdateTaskData;
 
-class ComponentUpdateTask : public Task {
+class ComponentUpdateTask : public TaskV2 {
     Q_OBJECT
    public:
     enum class Mode { Launch, Resolution };
@@ -17,7 +17,7 @@ class ComponentUpdateTask : public Task {
     virtual ~ComponentUpdateTask();
 
    protected:
-    void executeTask();
+    void executeTask() override;
 
    private:
     void loadComponents();

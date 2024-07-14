@@ -35,7 +35,7 @@ class JavaInstallList : public BaseVersionList {
    public:
     explicit JavaInstallList(QObject* parent = 0);
 
-    Task::Ptr getLoadTask() override;
+    TaskV2::Ptr getLoadTask() override;
     bool isLoaded() override;
     const BaseVersion::Ptr at(int i) const override;
     int count() const override;
@@ -49,7 +49,7 @@ class JavaInstallList : public BaseVersionList {
 
    protected:
     void load();
-    Task::Ptr getCurrentTask();
+    TaskV2::Ptr getCurrentTask();
 
    protected:
     Status m_status = Status::NotDone;
@@ -57,7 +57,7 @@ class JavaInstallList : public BaseVersionList {
     QList<BaseVersion::Ptr> m_vlist;
 };
 
-class JavaListLoadTask : public Task {
+class JavaListLoadTask : public TaskV2 {
     Q_OBJECT
 
    public:

@@ -52,7 +52,7 @@ class ResourceModel : public QAbstractListModel {
 
     [[nodiscard]] bool hasActiveSearchJob() const { return m_current_search_job && m_current_search_job->isRunning(); }
     [[nodiscard]] bool hasActiveInfoJob() const { return m_current_info_job.isRunning(); }
-    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? m_current_search_job : nullptr; }
+    [[nodiscard]] TaskV2::Ptr activeSearchJob() { return hasActiveSearchJob() ? m_current_search_job : nullptr; }
 
     [[nodiscard]] auto getSortingMethods() const { return m_api->getSortingMethods(); }
 
@@ -110,8 +110,8 @@ class ResourceModel : public QAbstractListModel {
     /** Resets the model's data. */
     void clearData();
 
-    void runSearchJob(Task::Ptr);
-    void runInfoJob(Task::Ptr);
+    void runSearchJob(TaskV2::Ptr);
+    void runInfoJob(TaskV2::Ptr);
 
     [[nodiscard]] auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
 
@@ -143,7 +143,7 @@ class ResourceModel : public QAbstractListModel {
     std::unique_ptr<ResourceAPI> m_api;
 
     // Job for searching for new entries
-    shared_qobject_ptr<Task> m_current_search_job;
+    TaskV2::Ptr m_current_search_job;
     // Job for fetching versions and extra info on existing entries
     ConcurrentTask m_current_info_job;
 

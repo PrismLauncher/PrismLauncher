@@ -24,6 +24,7 @@
  */
 
 #include "BlockedModsDialog.h"
+#include "tasks/Task.h"
 #include "ui_BlockedModsDialog.h"
 
 #include "Application.h"
@@ -47,7 +48,7 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
 {
     m_hashing_task = shared_qobject_ptr<ConcurrentTask>(
         new ConcurrentTask(this, "MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
-    connect(m_hashing_task.get(), &Task::finished, this, &BlockedModsDialog::hashTaskFinished);
+    connect(m_hashing_task.get(), &TaskV2::finished, this, &BlockedModsDialog::hashTaskFinished);
 
     ui->setupUi(this);
 
@@ -270,8 +271,12 @@ void BlockedModsDialog::buildHashTask(QString path)
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
 
-    connect(hash_task.get(), &Task::succeeded, this, [this, hash_task, path] { checkMatchHash(hash_task->getResult(), path); });
-    connect(hash_task.get(), &Task::failed, this, [path] { qDebug() << "Failed to hash path: " << path; });
+    connect(hash_task.get(), &TaskV2::finished, this, [this, hash_task, path](TaskV2* t) {
+        if (t->wasSuccessful())
+            checkMatchHash(hash_task->getResult(), path);
+        else
+            qDebug() << "Failed to hash path: " << path;
+    });
 
     m_hashing_task->addTask(hash_task);
 }

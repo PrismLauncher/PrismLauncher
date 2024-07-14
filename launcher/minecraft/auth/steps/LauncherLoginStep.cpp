@@ -7,8 +7,8 @@
 #include "Logging.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
-#include "net/StaticHeaderProxy.h"
 #include "net/Upload.h"
+#include "net/headers/RawHeaderProxy.h"
 
 LauncherLoginStep::LauncherLoginStep(AccountData* data) : AuthStep(data) {}
 
@@ -38,13 +38,12 @@ void LauncherLoginStep::perform()
 
     m_response.reset(new QByteArray());
     m_request = Net::Upload::makeByteArray(url, m_response, requestBody.toUtf8());
-    m_request->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     m_task.reset(new NetJob("LauncherLoginStep", APPLICATION->network()));
-    m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &LauncherLoginStep::onRequestDone);
+    connect(m_task.get(), &TaskV2::finished, this, &LauncherLoginStep::onRequestDone);
 
     m_task->start();
     qDebug() << "Getting Minecraft access token...";

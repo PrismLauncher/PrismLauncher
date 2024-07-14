@@ -104,13 +104,14 @@ void ModUpdateDialog::checkCandidates()
         check_task.addTask(m_flame_check_task);
     }
 
-    connect(&check_task, &Task::failed, this,
-            [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
-
-    connect(&check_task, &Task::succeeded, this, [&]() {
-        QStringList warnings = check_task.warnings();
-        if (warnings.count()) {
-            CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+    connect(&check_task, &TaskV2::finished, this, [this](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            QStringList warnings = t->warnings();
+            if (warnings.count()) {
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+            }
+        } else {
+            CustomMessageBox::selectable(this, tr("Error"), t->failReason(), QMessageBox::Critical)->exec();
         }
     });
 
@@ -188,13 +189,14 @@ void ModUpdateDialog::checkCandidates()
     if (m_include_deps && !APPLICATION->settings()->get("ModDependenciesDisabled").toBool()) {  // dependencies
         auto depTask = makeShared<GetModDependenciesTask>(this, m_instance, m_mod_model.get(), selectedVers);
 
-        connect(depTask.get(), &Task::failed, this,
-                [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
-
-        connect(depTask.get(), &Task::succeeded, this, [&]() {
-            QStringList warnings = depTask->warnings();
-            if (warnings.count()) {
-                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+        connect(depTask.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+            if (t->wasSuccessful()) {
+                QStringList warnings = t->warnings();
+                if (warnings.count()) {
+                    CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+                }
+            } else {
+                CustomMessageBox::selectable(this, tr("Error"), t->failReason(), QMessageBox::Critical)->exec();
             }
         });
 
@@ -331,8 +333,11 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         connect(modrinth_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::MODRINTH);
         });
-        connect(modrinth_task.get(), &EnsureMetadataTask::failed,
-                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+        connect(modrinth_task.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+            if (!t->wasSuccessful()) {
+                CustomMessageBox::selectable(this, tr("Error"), t->failReason(), QMessageBox::Critical)->exec();
+            }
+        });
 
         if (modrinth_task->getHashingTask())
             seq.addTask(modrinth_task->getHashingTask());
@@ -346,8 +351,11 @@ auto ModUpdateDialog::ensureMetadata() -> bool
         connect(flame_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Mod* candidate) {
             onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::FLAME);
         });
-        connect(flame_task.get(), &EnsureMetadataTask::failed,
-                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
+        connect(flame_task.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+            if (!t->wasSuccessful()) {
+                CustomMessageBox::selectable(this, tr("Error"), t->failReason(), QMessageBox::Critical)->exec();
+            }
+        });
 
         if (flame_task->getHashingTask())
             seq.addTask(flame_task->getHashingTask());
@@ -401,9 +409,11 @@ void ModUpdateDialog::onMetadataFailed(Mod* mod, bool try_others, ModPlatform::R
         auto task = makeShared<EnsureMetadataTask>(mod, index_dir, next(first_choice));
         connect(task.get(), &EnsureMetadataTask::metadataReady, [this](Mod* candidate) { onMetadataEnsured(candidate); });
         connect(task.get(), &EnsureMetadataTask::metadataFailed, [this](Mod* candidate) { onMetadataFailed(candidate, false); });
-        connect(task.get(), &EnsureMetadataTask::failed,
-                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
-
+        connect(task.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+            if (!t->wasSuccessful()) {
+                CustomMessageBox::selectable(this, tr("Error"), t->failReason(), QMessageBox::Critical)->exec();
+            }
+        });
         m_second_try_metadata->addTask(task);
     } else {
         QString reason{ tr("Couldn't find a valid version on the selected mod provider(s)") };

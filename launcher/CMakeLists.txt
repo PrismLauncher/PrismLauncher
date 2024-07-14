@@ -6,8 +6,6 @@ project(application)
 
 set(CORE_SOURCES
     # LOGIC - Base classes and infrastructure
-    BaseInstaller.h
-    BaseInstaller.cpp
     BaseVersionList.h
     BaseVersionList.cpp
     InstanceList.h
@@ -114,16 +112,16 @@ set(PATHMATCHER_SOURCES
 
 set(NET_SOURCES
     # network stuffs
-    net/ByteArraySink.h
-    net/ChecksumValidator.h
+    net/sinks/ByteArraySink.h
+    net/validators/ChecksumValidator.h
     net/Download.cpp
     net/Download.h
-    net/FileSink.cpp
-    net/FileSink.h
+    net/sinks/FileSink.cpp
+    net/sinks/FileSink.h
     net/HttpMetaCache.cpp
     net/HttpMetaCache.h
-    net/MetaCacheSink.cpp
-    net/MetaCacheSink.h
+    net/sinks/MetaCacheSink.cpp
+    net/sinks/MetaCacheSink.h
     net/Logging.h
     net/Logging.cpp
     net/NetJob.cpp
@@ -131,14 +129,13 @@ set(NET_SOURCES
     net/NetUtils.h
     net/PasteUpload.cpp
     net/PasteUpload.h
-    net/Sink.h
-    net/Validator.h
+    net/sinks/Sink.h
+    net/validators/Validator.h
     net/Upload.cpp
     net/Upload.h
-    net/HeaderProxy.h
-    net/RawHeaderProxy.h
-    net/ApiHeaderProxy.h
-    net/StaticHeaderProxy.h
+    net/headers/HeaderProxy.h
+    net/headers/RawHeaderProxy.h
+    net/headers/ApiHeaderProxy.h
     net/ApiDownload.h
     net/ApiDownload.cpp
     net/ApiUpload.cpp
@@ -612,12 +609,12 @@ set(PRISMUPDATER_SOURCES
     MMCTime.h
     MMCTime.cpp
 
-    net/ByteArraySink.h
-    net/ChecksumValidator.h
+    net/sinks/ByteArraySink.h
+    net/validators/ChecksumValidator.h
     net/Download.cpp
     net/Download.h
-    net/FileSink.cpp
-    net/FileSink.h
+    net/sinks/FileSink.cpp
+    net/sinks/FileSink.h
     net/HttpMetaCache.cpp
     net/HttpMetaCache.h
     net/Logging.h
@@ -627,10 +624,10 @@ set(PRISMUPDATER_SOURCES
     net/NetJob.cpp
     net/NetJob.h
     net/NetUtils.h
-    net/Sink.h
-    net/Validator.h
-    net/HeaderProxy.h
-    net/RawHeaderProxy.h
+    net/sinks/Sink.h
+    net/validators/Validator.h
+    net/headers/HeaderProxy.h
+    net/headers/RawHeaderProxy.h
 
     ui/dialogs/ProgressDialog.cpp
     ui/dialogs/ProgressDialog.h

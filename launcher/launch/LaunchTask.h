@@ -44,7 +44,7 @@
 #include "LoggedProcess.h"
 #include "MessageLevel.h"
 
-class LaunchTask : public Task {
+class LaunchTask : public TaskV2 {
     Q_OBJECT
    protected:
     explicit LaunchTask(InstancePtr instance);
@@ -55,7 +55,7 @@ class LaunchTask : public Task {
 
    public: /* methods */
     static shared_qobject_ptr<LaunchTask> create(InstancePtr inst);
-    virtual ~LaunchTask() {};
+    virtual ~LaunchTask() = default;
 
     void appendStep(shared_qobject_ptr<LaunchStep> step);
     void prependStep(shared_qobject_ptr<LaunchStep> step);
@@ -80,9 +80,7 @@ class LaunchTask : public Task {
     /**
      * @brief abort launch
      */
-    bool abort() override;
-
-    bool canAbort() const override;
+    bool doAbort() override;
 
     shared_qobject_ptr<LogModel> getLogModel();
 
@@ -101,7 +99,7 @@ class LaunchTask : public Task {
      */
     void readyForLaunch();
 
-    void requestProgress(Task* task);
+    void requestProgress(TaskV2* task);
 
     void requestLogging();
 

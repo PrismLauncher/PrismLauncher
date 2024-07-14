@@ -42,7 +42,7 @@
 #include <QThread>
 
 ModFolderLoadTask::ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_indexed, bool clean_orphan)
-    : Task(nullptr, false)
+    : TaskV2(nullptr, QtWarningMsg)
     , m_mods_dir(mods_dir)
     , m_index_dir(index_dir)
     , m_is_indexed(is_indexed)
@@ -54,7 +54,7 @@ ModFolderLoadTask::ModFolderLoadTask(QDir mods_dir, QDir index_dir, bool is_inde
 void ModFolderLoadTask::executeTask()
 {
     if (thread() != m_thread_to_spawn_into)
-        connect(this, &Task::finished, this->thread(), &QThread::quit);
+        connect(this, &TaskV2::finished, this->thread(), &QThread::quit);
 
     if (m_is_indexed) {
         // Read metadata first
@@ -116,10 +116,7 @@ void ModFolderLoadTask::executeTask()
     for (auto mod : m_result->mods)
         mod->moveToThread(m_thread_to_spawn_into);
 
-    if (m_aborted)
-        emit finished();
-    else
-        emitSucceeded();
+    emitSucceeded();
 }
 
 void ModFolderLoadTask::getFromMetadata()

@@ -523,8 +523,7 @@ QStringList MinecraftInstance::javaArguments()
 
     if (javaVersion.isModular() && shouldApplyOnlineFixes())
         // allow reflective access to java.net - required by the skin fix
-        args << "--add-opens"
-             << "java.base/java.net=ALL-UNNAMED";
+        args << "--add-opens" << "java.base/java.net=ALL-UNNAMED";
 
     return args;
 }
@@ -790,10 +789,8 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, MinecraftS
 QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin)
 {
     QStringList out;
-    out << "Main Class:"
-        << "  " + getMainClass() << "";
-    out << "Native path:"
-        << "  " + getNativePath() << "";
+    out << "Main Class:" << "  " + getMainClass() << "";
+    out << "Native path:" << "  " + getNativePath() << "";
 
     auto profile = m_components->getProfile();
 
@@ -1020,15 +1017,15 @@ QString MinecraftInstance::getStatusbarDescription()
     return description;
 }
 
-Task::Ptr MinecraftInstance::createUpdateTask(Net::Mode mode)
+TaskV2::Ptr MinecraftInstance::createUpdateTask(Net::Mode mode)
 {
     updateRuntimeContext();
     switch (mode) {
         case Net::Mode::Offline: {
-            return Task::Ptr(new MinecraftLoadAndCheck(this));
+            return TaskV2::Ptr(new MinecraftLoadAndCheck(this));
         }
         case Net::Mode::Online: {
-            return Task::Ptr(new MinecraftUpdate(this));
+            return TaskV2::Ptr(new MinecraftUpdate(this));
         }
     }
     return nullptr;

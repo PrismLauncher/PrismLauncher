@@ -262,22 +262,20 @@ void ListModel::requestLogo(QString file)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file));
+    MetaEntry::Ptr entry = APPLICATION->metacache()->resolveEntry("FTBPacks", QString("logos/%1").arg(file));
     NetJob* job = new NetJob(QString("FTB Icon Download for %1").arg(file), APPLICATION->network());
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(QString(BuildConfig.LEGACY_FTB_CDN_BASE_URL + "static/%1").arg(file)), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::finished, this, [this, file, fullPath, job] {
-        job->deleteLater();
+    QObject::connect(job, &TaskV2::finished, this, [this, file, fullPath](TaskV2* t) {
+        if (!t->wasSuccessful()) {
+            emit logoFailed(file);
+        }
+        t->deleteLater();
         emit logoLoaded(file, QIcon(fullPath));
         if (waitingCallbacks.contains(file)) {
             waitingCallbacks.value(file)(fullPath);
         }
-    });
-
-    QObject::connect(job, &NetJob::failed, this, [this, file, job] {
-        job->deleteLater();
-        emit logoFailed(file);
     });
 
     job->start();

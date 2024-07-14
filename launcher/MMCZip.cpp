@@ -447,7 +447,7 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
 void ExportToZipTask::executeTask()
 {
     setStatus("Adding files...");
-    setProgress(0, m_files.length());
+    setProgressTotal(m_files.length());
     m_build_zip_future = QtConcurrent::run(QThreadPool::globalInstance(), [this]() { return exportZip(); });
     connect(&m_build_zip_watcher, &QFutureWatcher<ZipResult>::finished, this, &ExportToZipTask::finish);
     m_build_zip_watcher.setFuture(m_build_zip_future);
@@ -479,7 +479,7 @@ auto ExportToZipTask::exportZip() -> ZipResult
         auto absolute = file.absoluteFilePath();
         auto relative = m_dir.relativeFilePath(absolute);
         setStatus("Compressing: " + relative);
-        setProgress(m_progress + 1, m_progressTotal);
+        setProgress(progress() + 1);
         if (m_follow_symlinks) {
             if (file.isSymLink())
                 absolute = file.symLinkTarget();
@@ -503,7 +503,6 @@ void ExportToZipTask::finish()
 {
     if (m_build_zip_future.isCanceled()) {
         FS::deletePath(m_output_path);
-        emitAborted();
     } else if (auto result = m_build_zip_future.result(); result.has_value()) {
         FS::deletePath(m_output_path);
         emitFailed(result.value());
@@ -512,12 +511,10 @@ void ExportToZipTask::finish()
     }
 }
 
-bool ExportToZipTask::abort()
+bool ExportToZipTask::doAbort()
 {
     if (m_build_zip_future.isRunning()) {
         m_build_zip_future.cancel();
-        // NOTE: Here we don't do `emitAborted()` because it will be done when `m_build_zip_future` actually cancels, which may not occur
-        // immediately.
         return true;
     }
     return false;
@@ -543,7 +540,7 @@ auto ExtractZipTask::extractZip() -> ZipResult
         return ZipResult(tr("Failed to enumerate files in archive"));
     }
     if (numEntries == 0) {
-        logWarning(tr("Extracting empty archives seems odd..."));
+        addWarnings(tr("Extracting empty archives seems odd..."));
         return ZipResult();
     }
     if (!m_input->goToFirstFile()) {
@@ -551,11 +548,11 @@ auto ExtractZipTask::extractZip() -> ZipResult
     }
 
     setStatus("Extracting files...");
-    setProgress(0, numEntries);
+    setProgressTotal(numEntries);
     do {
         if (m_zip_future.isCanceled())
             return ZipResult();
-        setProgress(m_progress + 1, m_progressTotal);
+        setProgress(progress() + 1);
         QString file_name = m_input->getCurrentFileName();
         if (!file_name.startsWith(m_subdirectory))
             continue;
@@ -607,7 +604,7 @@ auto ExtractZipTask::extractZip() -> ZipResult
             auto newPermisions = (permissions & maxPermisions) | minPermisions;
             if (newPermisions != permissions) {
                 if (!QFile::setPermissions(target_file_path, newPermisions)) {
-                    logWarning(tr("Could not fix permissions for %1").arg(target_file_path));
+                    addWarnings(tr("Could not fix permissions for %1").arg(target_file_path));
                 }
             }
         }
@@ -621,7 +618,6 @@ auto ExtractZipTask::extractZip() -> ZipResult
 void ExtractZipTask::finish()
 {
     if (m_zip_future.isCanceled()) {
-        emitAborted();
     } else if (auto result = m_zip_future.result(); result.has_value()) {
         emitFailed(result.value());
     } else {
@@ -629,12 +625,10 @@ void ExtractZipTask::finish()
     }
 }
 
-bool ExtractZipTask::abort()
+bool ExtractZipTask::doAbort()
 {
     if (m_zip_future.isRunning()) {
         m_zip_future.cancel();
-        // NOTE: Here we don't do `emitAborted()` because it will be done when `m_build_zip_future` actually cancels, which may not occur
-        // immediately.
         return true;
     }
     return false;

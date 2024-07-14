@@ -23,18 +23,19 @@ class JavaCheckerJob;
 using JavaCheckerJobPtr = shared_qobject_ptr<JavaCheckerJob>;
 
 // FIXME: this just seems horribly redundant
-class JavaCheckerJob : public Task {
+class JavaCheckerJob : public TaskV2 {
     Q_OBJECT
    public:
-    explicit JavaCheckerJob(QString job_name) : Task(), m_job_name(job_name) {};
-    virtual ~JavaCheckerJob() {};
+    explicit JavaCheckerJob(QString job_name) : TaskV2(), m_job_name(job_name) {};
+    virtual ~JavaCheckerJob() = default;
 
     bool addJavaCheckerAction(JavaCheckerPtr base)
     {
         javacheckers.append(base);
         // if this is already running, the action needs to be started right away!
         if (isRunning()) {
-            setProgress(num_finished, javacheckers.size());
+            setProgressTotal(javacheckers.size());
+            setProgress(num_finished);
             connect(base.get(), &JavaChecker::checkFinished, this, &JavaCheckerJob::partFinished);
             base->performCheck();
         }

@@ -10,7 +10,7 @@
 #include "modplatform/helpers/OverrideUtils.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
-#include "net/ChecksumValidator.h"
+#include "net/validators/ChecksumValidator.h"
 
 #include "net/ApiDownload.h"
 #include "net/NetJob.h"
@@ -276,7 +276,7 @@ bool ModrinthCreationTask::createInstance()
         ended_well = false;
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
+    connect(m_files_job.get(), &TaskV2::finished, &loop, &QEventLoop::quit);
     connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);

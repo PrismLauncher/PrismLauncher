@@ -18,23 +18,25 @@ QString hash(QIODevice* device, Algorithm type);
 QString hash(QString fileName, Algorithm type);
 QString hash(QByteArray data, Algorithm type);
 
-class Hasher : public Task {
+class Hasher : public TaskV2 {
     Q_OBJECT
    public:
     using Ptr = shared_qobject_ptr<Hasher>;
 
-    Hasher(QString file_path, Algorithm alg) : m_path(file_path), m_alg(alg) {}
+    Hasher(QString file_path, Algorithm alg) : m_path(file_path), m_alg(alg) { setCapabilities(Capability::Killable); }
     Hasher(QString file_path, QString alg) : Hasher(file_path, algorithmFromString(alg)) {}
-
-    bool abort() override;
-
-    void executeTask() override;
 
     QString getResult() const { return m_result; };
     QString getPath() const { return m_path; };
 
    signals:
     void resultsReady(QString hash);
+
+   protected:
+    bool doAbort() override;
+
+   protected slots:
+    void executeTask() override;
 
    private:
     QString m_result;

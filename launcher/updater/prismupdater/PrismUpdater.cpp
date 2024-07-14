@@ -81,7 +81,7 @@ namespace fs = ghc::filesystem;
 #include "StringUtils.h"
 
 #include "net/Download.h"
-#include "net/RawHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
 
 #include "MMCZip.h"
 
@@ -1314,26 +1314,26 @@ void PrismUpdaterApp::downloadReleasePage(const QString& api_url, int page)
     });
     download->addHeaderProxy(github_api_headers);
 
-    connect(download.get(), &Net::Download::succeeded, this, [this, response, per_page, api_url, page]() {
-        int num_found = parseReleasePage(response.get());
-        if (!(num_found < per_page)) {  // there may be more, fetch next page
-            downloadReleasePage(api_url, page + 1);
-        } else {
-            run();
-        }
-    });
-    connect(download.get(), &Net::Download::failed, this, &PrismUpdaterApp::downloadError);
-
     m_current_task.reset(download);
-    connect(download.get(), &Net::Download::finished, this, [this]() {
-        qDebug() << "Download" << m_current_task->getUid().toString() << "finished";
+    connect(download.get(), &Net::Download::finished, this, [this, response, page, api_url, per_page](TaskV2* task) {
+        qDebug() << "Download" << m_current_task->uuid().toString() << "finished";
+        if (task && task->wasSuccessful()) {
+            int num_found = parseReleasePage(response.get());
+            if (!(num_found < per_page)) {  // there may be more, fetch next page
+                downloadReleasePage(api_url, page + 1);
+            } else {
+                run();
+            }
+        } else {
+            downloadError(task ? task->failReason() : "empty task");
+        }
         m_current_task.reset();
         m_current_url = "";
     });
 
     QCoreApplication::processEvents();
 
-    QMetaObject::invokeMethod(download.get(), &Task::start, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(download.get(), &TaskV2::start, Qt::QueuedConnection);
 }
 
 int PrismUpdaterApp::parseReleasePage(const QByteArray* response)

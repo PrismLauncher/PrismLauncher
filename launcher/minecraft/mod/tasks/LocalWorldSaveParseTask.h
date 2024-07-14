@@ -41,13 +41,10 @@ bool validate(QFileInfo file);
 
 }  // namespace WorldSaveUtils
 
-class LocalWorldSaveParseTask : public Task {
+class LocalWorldSaveParseTask : public TaskV2 {
     Q_OBJECT
    public:
     LocalWorldSaveParseTask(int token, WorldSave& save);
-
-    [[nodiscard]] bool canAbort() const override { return true; }
-    bool abort() override;
 
     void executeTask() override;
 
@@ -57,6 +54,4 @@ class LocalWorldSaveParseTask : public Task {
     int m_token;
 
     WorldSave& m_save;
-
-    bool m_aborted = false;
 };

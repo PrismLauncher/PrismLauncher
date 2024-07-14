@@ -3,9 +3,6 @@
 #include <QObject>
 #include <QSharedPointer>
 
-#include <functional>
-#include <memory>
-
 /**
  * A unique pointer class with unique pointer semantics intended for derivates of QObject
  * Calls deleteLater() instead of destroying the contained object immediately

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,25 +34,18 @@
 
 #pragma once
 
-#include "ChecksumValidator.h"
-#include "FileSink.h"
-#include "net/HttpMetaCache.h"
+#include <QNetworkReply>
 
 namespace Net {
-class MetaCacheSink : public FileSink {
-   public:
-    MetaCacheSink(MetaEntryPtr entry, ChecksumValidator* md5sum, bool is_eternal = false);
-    virtual ~MetaCacheSink() = default;
+class Validator {
+   public: /* con/des */
+    Validator() = default;
+    virtual ~Validator() = default;
 
-    auto hasLocalData() -> bool override;
-
-   protected:
-    auto initCache(QNetworkRequest& request) -> Task::State override;
-    auto finalizeCache(QNetworkReply& reply) -> Task::State override;
-
-   private:
-    MetaEntryPtr m_entry;
-    ChecksumValidator* m_md5Node;
-    bool m_is_eternal;
+   public: /* methods */
+    virtual bool init(QNetworkRequest& request) = 0;
+    virtual bool write(QByteArray& data) = 0;
+    virtual bool abort() = 0;
+    virtual bool validate(QNetworkReply& reply) = 0;
 };
 }  // namespace Net

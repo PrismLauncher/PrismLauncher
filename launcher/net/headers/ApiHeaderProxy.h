@@ -19,31 +19,29 @@
 
 #pragma once
 
-#include <QDebug>
-#include <QNetworkRequest>
+#include "Application.h"
+#include "BuildConfig.h"
+#include "HeaderProxy.h"
 
 namespace Net {
 
-struct HeaderPair {
-    QByteArray headerName;
-    QByteArray headerValue;
-};
-
-class HeaderProxy {
+class ApiHeaderProxy : public HeaderProxy {
    public:
-    HeaderProxy() {}
-    virtual ~HeaderProxy() {}
+    ApiHeaderProxy() : HeaderProxy() {}
+    virtual ~ApiHeaderProxy() = default;
 
    public:
-    virtual QList<HeaderPair> headers(const QNetworkRequest& request) const = 0;
-
-   public:
-    void writeHeaders(QNetworkRequest& request)
+    virtual void writeHeaders(QNetworkRequest& request) override
     {
-        for (auto header : headers(request)) {
-            request.setRawHeader(header.headerName, header.headerValue);
+        if (APPLICATION->capabilities() & Application::SupportsFlame && request.url().host() == QUrl(BuildConfig.FLAME_BASE_URL).host()) {
+            request.setRawHeader("x-api-key", APPLICATION->getFlameAPIKey().toUtf8());
+        } else if (request.url().host() == QUrl(BuildConfig.MODRINTH_PROD_URL).host() ||
+                   request.url().host() == QUrl(BuildConfig.MODRINTH_STAGING_URL).host()) {
+            QString token = APPLICATION->getModrinthAPIToken();
+            if (!token.isNull())
+                request.setRawHeader("Authorization", token.toUtf8());
         }
-    }
+    };
 };
 
 }  // namespace Net

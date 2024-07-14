@@ -48,16 +48,16 @@ namespace Net {
  */
 #define MAX_TIME_TO_EXPIRE 1 * 7 * 24 * 60 * 60
 
-MetaCacheSink::MetaCacheSink(MetaEntryPtr entry, ChecksumValidator* md5sum, bool is_eternal)
+MetaCacheSink::MetaCacheSink(MetaEntry::Ptr entry, ChecksumValidator* md5sum, bool is_eternal)
     : Net::FileSink(entry->getFullPath()), m_entry(entry), m_md5Node(md5sum), m_is_eternal(is_eternal)
 {
     addValidator(md5sum);
 }
 
-Task::State MetaCacheSink::initCache(QNetworkRequest& request)
+Sink::State MetaCacheSink::initCache(QNetworkRequest& request)
 {
     if (!m_entry->isStale()) {
-        return Task::State::Succeeded;
+        return State::Succeeded;
     }
 
     // check if file exists, if it does, use its information for the request
@@ -71,14 +71,14 @@ Task::State MetaCacheSink::initCache(QNetworkRequest& request)
         }
     }
 
-    return Task::State::Running;
+    return State::OK;
 }
 
-Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
+Sink::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
 {
     QFileInfo output_file_info(m_filename);
 
-    if (wroteAnyData) {
+    if (m_bytes_writen > 0) {
         m_entry->setMD5Sum(m_md5Node->hash().toHex().constData());
     }
 
@@ -126,12 +126,7 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
     m_entry->setStale(false);
     APPLICATION->metacache()->updateEntry(m_entry);
 
-    return Task::State::Succeeded;
+    return State::Succeeded;
 }
 
-bool MetaCacheSink::hasLocalData()
-{
-    QFileInfo info(m_filename);
-    return info.exists() && info.size() != 0;
-}
 }  // namespace Net

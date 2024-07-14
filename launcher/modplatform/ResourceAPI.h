@@ -130,36 +130,36 @@ class ResourceAPI {
     [[nodiscard]] virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
-    [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
+    [[nodiscard]] virtual TaskV2::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
     {
         qWarning() << "TODO: ResourceAPI::searchProjects";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProject([[maybe_unused]] QString addonId,
-                                               [[maybe_unused]] std::shared_ptr<QByteArray> response) const
+    [[nodiscard]] virtual TaskV2::Ptr getProject([[maybe_unused]] QString addonId,
+                                                 [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
         qWarning() << "TODO: ResourceAPI::getProject";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjects([[maybe_unused]] QStringList addonIds,
-                                                [[maybe_unused]] std::shared_ptr<QByteArray> response) const
+    [[nodiscard]] virtual TaskV2::Ptr getProjects([[maybe_unused]] QStringList addonIds,
+                                                  [[maybe_unused]] std::shared_ptr<QByteArray> response) const
     {
         qWarning() << "TODO: ResourceAPI::getProjects";
         return nullptr;
     }
 
-    [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
+    [[nodiscard]] virtual TaskV2::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
     {
         qWarning() << "TODO: ResourceAPI::getProjectInfo";
         return nullptr;
     }
-    [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
+    [[nodiscard]] virtual TaskV2::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
     {
         qWarning() << "TODO: ResourceAPI::getProjectVersions";
         return nullptr;
     }
 
-    [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const
+    [[nodiscard]] virtual TaskV2::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const
     {
         qWarning() << "TODO";
         return nullptr;

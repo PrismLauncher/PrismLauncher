@@ -2,7 +2,7 @@
 #include "MinecraftInstance.h"
 #include "PackProfile.h"
 
-MinecraftLoadAndCheck::MinecraftLoadAndCheck(MinecraftInstance* inst, QObject* parent) : Task(parent), m_inst(inst) {}
+MinecraftLoadAndCheck::MinecraftLoadAndCheck(MinecraftInstance* inst, QObject* parent) : TaskV2(parent), m_inst(inst) {}
 
 void MinecraftLoadAndCheck::executeTask()
 {
@@ -15,28 +15,8 @@ void MinecraftLoadAndCheck::executeTask()
         emitSucceeded();
         return;
     }
-    connect(m_task.get(), &Task::succeeded, this, &MinecraftLoadAndCheck::subtaskSucceeded);
-    connect(m_task.get(), &Task::failed, this, &MinecraftLoadAndCheck::subtaskFailed);
-    connect(m_task.get(), &Task::aborted, this, [this] { subtaskFailed(tr("Aborted")); });
-    connect(m_task.get(), &Task::progress, this, &MinecraftLoadAndCheck::progress);
-    connect(m_task.get(), &Task::stepProgress, this, &MinecraftLoadAndCheck::propagateStepProgress);
-    connect(m_task.get(), &Task::status, this, &MinecraftLoadAndCheck::setStatus);
-}
-
-void MinecraftLoadAndCheck::subtaskSucceeded()
-{
-    if (isFinished()) {
-        qCritical() << "MinecraftUpdate: Subtask" << sender() << "succeeded, but work was already done!";
-        return;
-    }
-    emitSucceeded();
-}
-
-void MinecraftLoadAndCheck::subtaskFailed(QString error)
-{
-    if (isFinished()) {
-        qCritical() << "MinecraftUpdate: Subtask" << sender() << "failed, but work was already done!";
-        return;
-    }
-    emitFailed(error);
+    connect(m_task.get(), &TaskV2::finished, this, &MinecraftLoadAndCheck::finished);
+    connect(m_task.get(), &TaskV2::processedChanged, this, &MinecraftLoadAndCheck::propateProcessedChanged);
+    connect(m_task.get(), &TaskV2::totalChanged, this, &MinecraftLoadAndCheck::propateTotalChanged);
+    connect(m_task.get(), &TaskV2::stateChanged, this, &MinecraftLoadAndCheck::propateState);
 }

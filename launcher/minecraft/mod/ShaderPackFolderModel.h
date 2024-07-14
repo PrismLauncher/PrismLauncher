@@ -13,12 +13,12 @@ class ShaderPackFolderModel : public ResourceFolderModel {
 
     virtual QString id() const override { return "shaderpacks"; }
 
-    [[nodiscard]] Task* createUpdateTask() override
+    [[nodiscard]] TaskV2* createUpdateTask() override
     {
         return new BasicFolderLoadTask(m_dir, [](QFileInfo const& entry) { return makeShared<ShaderPack>(entry); });
     }
 
-    [[nodiscard]] Task* createParseTask(Resource& resource) override
+    [[nodiscard]] TaskV2* createParseTask(Resource& resource) override
     {
         return new LocalShaderPackParseTask(m_next_resolution_ticket, static_cast<ShaderPack&>(resource));
     }

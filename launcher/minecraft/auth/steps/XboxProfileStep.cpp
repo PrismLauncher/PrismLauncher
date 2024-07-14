@@ -6,7 +6,7 @@
 #include "Application.h"
 #include "Logging.h"
 #include "net/NetUtils.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/headers/RawHeaderProxy.h"
 
 XboxProfileStep::XboxProfileStep(AccountData* data) : AuthStep(data) {}
 
@@ -35,13 +35,12 @@ void XboxProfileStep::perform()
 
     m_response.reset(new QByteArray());
     m_request = Net::Download::makeByteArray(url, m_response);
-    m_request->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     m_task.reset(new NetJob("XboxProfileStep", APPLICATION->network()));
-    m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
-    connect(m_task.get(), &Task::finished, this, &XboxProfileStep::onRequestDone);
+    connect(m_task.get(), &TaskV2::finished, this, &XboxProfileStep::onRequestDone);
 
     m_task->start();
     qDebug() << "Getting Xbox profile...";

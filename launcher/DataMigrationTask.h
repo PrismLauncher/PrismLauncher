@@ -15,11 +15,11 @@
  * Migrate existing data from other MMC-like launchers.
  */
 
-class DataMigrationTask : public Task {
+class DataMigrationTask : public TaskV2 {
     Q_OBJECT
    public:
     explicit DataMigrationTask(QObject* parent, const QString& sourcePath, const QString& targetPath, IPathMatcher::Ptr pathmatcher);
-    ~DataMigrationTask() override = default;
+    ~DataMigrationTask() = default;
 
    protected:
     virtual void executeTask() override;
@@ -36,7 +36,6 @@ class DataMigrationTask : public Task {
     const IPathMatcher::Ptr m_pathMatcher;
 
     FS::copy m_copy;
-    int m_toCopy = 0;
     QFuture<bool> m_copyFuture;
     QFutureWatcher<bool> m_copyFutureWatcher;
 };

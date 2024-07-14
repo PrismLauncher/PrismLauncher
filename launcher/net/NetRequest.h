@@ -44,19 +44,19 @@
 #include <QUrl>
 #include <chrono>
 
-#include "HeaderProxy.h"
-#include "Sink.h"
-#include "Validator.h"
+#include "headers/HeaderProxy.h"
+#include "sinks/Sink.h"
+#include "validators/Validator.h"
 
 #include "QObjectPtr.h"
 #include "net/Logging.h"
 #include "tasks/Task.h"
 
 namespace Net {
-class NetRequest : public Task {
+class NetRequest : public TaskV2 {
     Q_OBJECT
    protected:
-    explicit NetRequest() : Task() {}
+    explicit NetRequest() : TaskV2() { setCapabilities(Capability::Killable); }
 
    public:
     using Ptr = shared_qobject_ptr<class NetRequest>;
@@ -64,15 +64,11 @@ class NetRequest : public Task {
     Q_DECLARE_FLAGS(Options, Option)
 
    public:
-    ~NetRequest() override = default;
+    ~NetRequest() = default;
     void addValidator(Validator* v);
-    auto abort() -> bool override;
-    auto canAbort() const -> bool override { return true; }
 
     void setNetwork(shared_qobject_ptr<QNetworkAccessManager> network) { m_network = network; }
     void addHeaderProxy(Net::HeaderProxy* proxy) { m_headerProxies.push_back(std::shared_ptr<Net::HeaderProxy>(proxy)); }
-
-    virtual void init() {}
 
     QUrl url() const;
     void setUrl(QUrl url) { m_url = url; }
@@ -81,19 +77,29 @@ class NetRequest : public Task {
     QString errorString() const;
 
    private:
-    auto handleRedirect() -> bool;
+    bool handleRedirect();
     virtual QNetworkReply* getReply(QNetworkRequest&) = 0;
 
    protected slots:
+    bool doAbort() override;
+    bool doPause() override;
+    bool doResume() override;
     void onProgress(qint64 bytesReceived, qint64 bytesTotal);
     void downloadError(QNetworkReply::NetworkError error);
     void sslErrors(const QList<QSslError>& errors);
     void downloadFinished();
     void downloadReadyRead();
     void executeTask() override;
+    void emitFailed(QString reason) override;
 
    protected:
-    std::unique_ptr<Sink> m_sink;
+    void setSink(Sink* s)
+    {
+        if (s && s->canPause()) {
+            setCapabilities(Capability::Killable | Capability::Suspendable);
+        }
+        m_sink.reset(s);
+    }
     Options m_options;
 
     using logCatFunc = const QLoggingCategory& (*)();
@@ -111,6 +117,10 @@ class NetRequest : public Task {
     /// source URL
     QUrl m_url;
     std::vector<std::shared_ptr<Net::HeaderProxy>> m_headerProxies;
+
+   private:
+    int m_try = 1;
+    std::unique_ptr<Sink> m_sink;
 };
 }  // namespace Net
 

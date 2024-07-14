@@ -2,7 +2,6 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,58 +35,71 @@
 
 #pragma once
 
-#include "Sink.h"
+#include "net/validators/Validator.h"
 
 namespace Net {
-
-/*
- * Sink object for downloads that uses an external QByteArray it doesn't own as a target.
- */
-class ByteArraySink : public Sink {
+class Sink {
    public:
-    ByteArraySink(std::shared_ptr<QByteArray> output) : m_output(output) {};
-
-    virtual ~ByteArraySink() = default;
+    enum class State { OK, Succeeded, Failed };
 
    public:
-    auto init(QNetworkRequest& request) -> Task::State override
-    {
-        if (m_output)
-            m_output->clear();
-        else
-            qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
-        if (initAllValidators(request))
-            return Task::State::Running;
-        return Task::State::Failed;
-    };
+    Sink() = default;
+    virtual ~Sink() = default;
 
-    auto write(QByteArray& data) -> Task::State override
+   public:
+    virtual State init(QNetworkRequest& request) = 0;
+    virtual State write(QByteArray& data) = 0;
+    virtual State abort() = 0;
+    virtual State finalize(QNetworkReply& reply) = 0;
+
+    virtual bool hasLocalData() = 0;
+    virtual bool canPause() { return false; }
+
+    QString failReason() const { return m_fail_reason; }
+
+    void addValidator(Validator* validator)
     {
-        if (m_output)
-            m_output->append(data);
-        else
-            qWarning() << "ByteArraySink did not write the buffer because it's not addressable";
-        if (writeAllValidators(data))
-            return Task::State::Running;
-        return Task::State::Failed;
+        if (validator) {
+            m_validators.push_back(std::shared_ptr<Validator>(validator));
+        }
     }
 
-    auto abort() -> Task::State override
+   protected:
+    bool initAllValidators(QNetworkRequest& request)
     {
-        failAllValidators();
-        return Task::State::Failed;
+        for (auto& validator : m_validators) {
+            if (!validator->init(request))
+                return false;
+        }
+        return true;
+    }
+    bool finalizeAllValidators(QNetworkReply& reply)
+    {
+        for (auto& validator : m_validators) {
+            if (!validator->validate(reply))
+                return false;
+        }
+        return true;
+    }
+    bool failAllValidators()
+    {
+        bool success = true;
+        for (auto& validator : m_validators) {
+            success &= validator->abort();
+        }
+        return success;
+    }
+    bool writeAllValidators(QByteArray& data)
+    {
+        for (auto& validator : m_validators) {
+            if (!validator->write(data))
+                return false;
+        }
+        return true;
     }
 
-    auto finalize(QNetworkReply& reply) -> Task::State override
-    {
-        if (finalizeAllValidators(reply))
-            return Task::State::Succeeded;
-        return Task::State::Failed;
-    }
-
-    auto hasLocalData() -> bool override { return false; }
-
-   private:
-    std::shared_ptr<QByteArray> m_output;
+   protected:
+    std::vector<std::shared_ptr<Validator>> m_validators;
+    QString m_fail_reason;
 };
 }  // namespace Net

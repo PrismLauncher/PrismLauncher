@@ -34,7 +34,7 @@ void waitOnVersionListLoad(Meta::VersionList::Ptr version_list)
     time_limit_for_list_load.start(4000);
 
     auto task = version_list->getLoadTask();
-    QObject::connect(task.get(), &Task::finished, &load_version_list_loop, &QEventLoop::quit);
+    QObject::connect(task.get(), &TaskV2::finished, &load_version_list_loop, &QEventLoop::quit);
 
     load_version_list_loop.exec();
     if (time_limit_for_list_load.isActive())

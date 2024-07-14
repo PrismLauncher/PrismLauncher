@@ -588,7 +588,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         setProgress(current, total);
     });
     connect(m_files_job.get(), &NetJob::stepProgress, this, &FlameCreationTask::propagateStepProgress);
-    connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
+    connect(m_files_job.get(), &TaskV2::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));
     m_files_job->start();

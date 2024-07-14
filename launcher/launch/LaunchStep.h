@@ -21,11 +21,11 @@
 #include <QStringList>
 
 class LaunchTask;
-class LaunchStep : public Task {
+class LaunchStep : public TaskV2 {
     Q_OBJECT
    public: /* methods */
-    explicit LaunchStep(LaunchTask* parent) : Task(nullptr), m_parent(parent) { bind(parent); };
-    virtual ~LaunchStep() {};
+    explicit LaunchStep(LaunchTask* parent) : TaskV2(), m_parent(parent) { bind(parent); };
+    virtual ~LaunchStep() = default;
 
    private: /* methods */
     void bind(LaunchTask* parent);

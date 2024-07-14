@@ -59,9 +59,3 @@ void LocalModUpdateTask::executeTask()
         emitFailed(tr("Invalid metadata"));
     }
 }
-
-auto LocalModUpdateTask::abort() -> bool
-{
-    emitAborted();
-    return true;
-}

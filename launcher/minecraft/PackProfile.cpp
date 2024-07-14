@@ -330,7 +330,7 @@ void PackProfile::reload(Net::Mode netmode)
     }
 }
 
-Task::Ptr PackProfile::getCurrentTask()
+TaskV2::Ptr PackProfile::getCurrentTask()
 {
     return d->m_updateTask;
 }

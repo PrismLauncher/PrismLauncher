@@ -35,65 +35,23 @@
 
 #pragma once
 
-#include "Validator.h"
-#include "tasks/Task.h"
+#include "FileSink.h"
+#include "net/HttpMetaCache.h"
+#include "net/validators/ChecksumValidator.h"
 
 namespace Net {
-class Sink {
+class MetaCacheSink : public FileSink {
    public:
-    Sink() = default;
-    virtual ~Sink() = default;
-
-   public:
-    virtual auto init(QNetworkRequest& request) -> Task::State = 0;
-    virtual auto write(QByteArray& data) -> Task::State = 0;
-    virtual auto abort() -> Task::State = 0;
-    virtual auto finalize(QNetworkReply& reply) -> Task::State = 0;
-
-    virtual auto hasLocalData() -> bool = 0;
-
-    void addValidator(Validator* validator)
-    {
-        if (validator) {
-            validators.push_back(std::shared_ptr<Validator>(validator));
-        }
-    }
+    MetaCacheSink(MetaEntry::Ptr entry, ChecksumValidator* md5sum, bool is_eternal = false);
+    virtual ~MetaCacheSink() = default;
 
    protected:
-    bool initAllValidators(QNetworkRequest& request)
-    {
-        for (auto& validator : validators) {
-            if (!validator->init(request))
-                return false;
-        }
-        return true;
-    }
-    bool finalizeAllValidators(QNetworkReply& reply)
-    {
-        for (auto& validator : validators) {
-            if (!validator->validate(reply))
-                return false;
-        }
-        return true;
-    }
-    bool failAllValidators()
-    {
-        bool success = true;
-        for (auto& validator : validators) {
-            success &= validator->abort();
-        }
-        return success;
-    }
-    bool writeAllValidators(QByteArray& data)
-    {
-        for (auto& validator : validators) {
-            if (!validator->write(data))
-                return false;
-        }
-        return true;
-    }
+    State initCache(QNetworkRequest& request) override;
+    State finalizeCache(QNetworkReply& reply) override;
 
-   protected:
-    std::vector<std::shared_ptr<Validator>> validators;
+   private:
+    MetaEntry::Ptr m_entry;
+    ChecksumValidator* m_md5Node;
+    bool m_is_eternal;
 };
 }  // namespace Net

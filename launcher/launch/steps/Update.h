@@ -25,20 +25,18 @@
 class Update : public LaunchStep {
     Q_OBJECT
    public:
-    explicit Update(LaunchTask* parent, Net::Mode mode) : LaunchStep(parent), m_mode(mode) {};
-    virtual ~Update() {};
+    explicit Update(LaunchTask* parent, Net::Mode mode) : LaunchStep(parent), m_mode(mode) { setCapabilities(Capability::Killable); };
+    virtual ~Update() = default;
 
     void executeTask() override;
-    bool canAbort() const override;
     void proceed() override;
-   public slots:
-    bool abort() override;
+   protected slots:
+    bool doAbort() override;
 
    private slots:
     void updateFinished();
 
    private:
-    Task::Ptr m_updateTask;
-    bool m_aborted = false;
+    TaskV2::Ptr m_updateTask;
     Net::Mode m_mode = Net::Mode::Offline;
 };
