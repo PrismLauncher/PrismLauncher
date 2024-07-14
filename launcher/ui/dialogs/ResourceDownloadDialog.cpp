@@ -147,13 +147,14 @@ void ResourceDownloadDialog::confirm()
     QHash<QString, GetModDependenciesTask::PackDependencyExtraInfo> dependencyExtraInfo;
     QStringList depNames;
     if (auto task = getModDependenciesTask(); task) {
-        connect(task.get(), &Task::failed, this,
-                [&](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
-
-        connect(task.get(), &Task::succeeded, this, [&]() {
-            QStringList warnings = task->warnings();
-            if (warnings.count()) {
-                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+        connect(task.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+            if (t->wasSuccessful()) {
+                QStringList warnings = t->warnings();
+                if (warnings.count()) {
+                    CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->exec();
+                }
+            } else {
+                CustomMessageBox::selectable(this, tr("Error"), t->failReason(), QMessageBox::Critical)->exec();
             }
         });
 

@@ -26,10 +26,10 @@ class OfflineLoginDialog : public QDialog {
    protected slots:
     void accept();
 
-    void onTaskFailed(const QString& reason);
-    void onTaskSucceeded();
-    void onTaskStatus(const QString& status);
-    void onTaskProgress(qint64 current, qint64 total);
+    void onTaskFinished(TaskV2* t);
+    void onTaskStatus(TaskV2* t);
+    void onTaskProgress(TaskV2* t, double current, double delta);
+    void onTaskProgressTotal(TaskV2* t, double total, double delta);
 
     void on_userTextBox_textEdited(const QString& newText);
     void on_allowLongUsernames_stateChanged(int value);

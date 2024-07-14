@@ -1,4 +1,5 @@
 #include "OfflineLoginDialog.h"
+#include "tasks/Task.h"
 #include "ui_OfflineLoginDialog.h"
 
 #include <QtWidgets/QPushButton>
@@ -27,10 +28,10 @@ void OfflineLoginDialog::accept()
     // Setup the login task and start it
     m_account = MinecraftAccount::createOffline(ui->userTextBox->text());
     m_loginTask = m_account->login();
-    connect(m_loginTask.get(), &Task::failed, this, &OfflineLoginDialog::onTaskFailed);
-    connect(m_loginTask.get(), &Task::succeeded, this, &OfflineLoginDialog::onTaskSucceeded);
-    connect(m_loginTask.get(), &Task::status, this, &OfflineLoginDialog::onTaskStatus);
-    connect(m_loginTask.get(), &Task::progress, this, &OfflineLoginDialog::onTaskProgress);
+    connect(m_loginTask.get(), &TaskV2::finished, this, &OfflineLoginDialog::onTaskFinished);
+    connect(m_loginTask.get(), &TaskV2::stateChanged, this, &OfflineLoginDialog::onTaskStatus);
+    connect(m_loginTask.get(), &TaskV2::processedChanged, this, &OfflineLoginDialog::onTaskProgress);
+    connect(m_loginTask.get(), &TaskV2::propateTotalChanged, this, &OfflineLoginDialog::onTaskProgressTotal);
     m_loginTask->start();
 }
 
@@ -55,10 +56,14 @@ void OfflineLoginDialog::on_userTextBox_textEdited(const QString& newText)
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!newText.isEmpty());
 }
 
-void OfflineLoginDialog::onTaskFailed(const QString& reason)
+void OfflineLoginDialog::onTaskFinished(TaskV2* t)
 {
+    if (t->wasSuccessful()) {
+        QDialog::accept();
+        return;
+    }
     // Set message
-    auto lines = reason.split('\n');
+    auto lines = t->failReason().split('\n');
     QString processed;
     for (auto line : lines) {
         if (line.size()) {
@@ -74,19 +79,13 @@ void OfflineLoginDialog::onTaskFailed(const QString& reason)
     ui->progressBar->setVisible(false);
 }
 
-void OfflineLoginDialog::onTaskSucceeded()
+void OfflineLoginDialog::onTaskStatus(TaskV2* t)
 {
-    QDialog::accept();
+    ui->label->setText(t->status());
 }
 
-void OfflineLoginDialog::onTaskStatus(const QString& status)
+void OfflineLoginDialog::onTaskProgress(TaskV2* t, double current, double delta)
 {
-    ui->label->setText(status);
-}
-
-void OfflineLoginDialog::onTaskProgress(qint64 current, qint64 total)
-{
-    ui->progressBar->setMaximum(total);
     ui->progressBar->setValue(current);
 }
 
@@ -99,4 +98,9 @@ MinecraftAccountPtr OfflineLoginDialog::newAccount(QWidget* parent, QString msg)
         return dlg.m_account;
     }
     return nullptr;
+}
+
+void OfflineLoginDialog::onTaskProgressTotal(TaskV2* t, double total, double delta)
+{
+    ui->progressBar->setMaximum(total);
 }

@@ -48,7 +48,6 @@
 
 #include "BaseInstance.h"
 #include "minecraft/auth/MinecraftAccount.h"
-#include "net/NetJob.h"
 
 class LaunchController;
 class NewsChecker;

@@ -39,7 +39,7 @@ void ProgressWidget::progressFormat(QString format)
         m_bar->setFormat(format);
 }
 
-void ProgressWidget::watch(const Task* task)
+void ProgressWidget::watch(TaskV2* task)
 {
     if (!task)
         return;
@@ -49,30 +49,31 @@ void ProgressWidget::watch(const Task* task)
 
     m_task = task;
 
-    connect(m_task, &Task::finished, this, &ProgressWidget::handleTaskFinish);
-    connect(m_task, &Task::status, this, &ProgressWidget::handleTaskStatus);
+    connect(m_task, &TaskV2::finished, this, &ProgressWidget::handleTaskFinish);
+    connect(m_task, &TaskV2::stateChanged, this, &ProgressWidget::handleTaskStatus);
     // TODO: should we connect &Task::details
-    connect(m_task, &Task::progress, this, &ProgressWidget::handleTaskProgress);
-    connect(m_task, &Task::destroyed, this, &ProgressWidget::taskDestroyed);
+    connect(m_task, &TaskV2::totalChanged, this, [this](TaskV2* job, double total, double delta) { m_bar->setMaximum(total); });
+    connect(m_task, &TaskV2::processedChanged, this, [this](TaskV2* job, double current, double delta) { m_bar->setValue(current); });
+    connect(m_task, &TaskV2::destroyed, this, &ProgressWidget::taskDestroyed);
 
     if (m_task->isRunning())
         show();
     else
-        connect(m_task, &Task::started, this, &ProgressWidget::show);
+        connect(m_task, &TaskV2::started, this, &ProgressWidget::show);
 }
 
-void ProgressWidget::start(const Task* task)
+void ProgressWidget::start(TaskV2* task)
 {
     watch(task);
     if (!m_task->isRunning())
-        QMetaObject::invokeMethod(const_cast<Task*>(m_task), "start", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(m_task, &TaskV2::start, Qt::QueuedConnection);
 }
 
-bool ProgressWidget::exec(std::shared_ptr<Task> task)
+bool ProgressWidget::exec(TaskV2::Ptr task)
 {
     QEventLoop loop;
 
-    connect(task.get(), &Task::finished, &loop, &QEventLoop::quit);
+    connect(task.get(), &TaskV2::finished, &loop, &QEventLoop::quit);
 
     start(task.get());
 
@@ -99,16 +100,12 @@ void ProgressWidget::handleTaskFinish()
     if (m_hide_if_inactive)
         hide();
 }
-void ProgressWidget::handleTaskStatus(const QString& status)
+void ProgressWidget::handleTaskStatus(TaskV2* t)
 {
     if (m_label)
-        m_label->setText(status);
+        m_label->setText(t->status());
 }
-void ProgressWidget::handleTaskProgress(qint64 current, qint64 total)
-{
-    m_bar->setMaximum(total);
-    m_bar->setValue(current);
-}
+
 void ProgressWidget::taskDestroyed()
 {
     m_task = nullptr;

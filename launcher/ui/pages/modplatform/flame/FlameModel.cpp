@@ -3,6 +3,7 @@
 #include "Application.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameAPI.h"
+#include "tasks/Task.h"
 #include "ui/widgets/ProjectItem.h"
 
 #include "net/ApiDownload.h"
@@ -108,22 +109,21 @@ void ListModel::requestLogo(QString logo, QString url)
         return;
     }
 
-    MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo));
+    MetaEntry::Ptr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
-    QObject::connect(job, &NetJob::succeeded, this, [this, logo, fullPath, job] {
-        job->deleteLater();
-        emit logoLoaded(logo, QIcon(fullPath));
-        if (waitingCallbacks.contains(logo)) {
-            waitingCallbacks.value(logo)(fullPath);
+    QObject::connect(job, &NetJob::finished, this, [this, logo, fullPath](TaskV2* t) {
+        if (t->wasSuccessful()) {
+            emit logoLoaded(logo, QIcon(fullPath));
+            if (waitingCallbacks.contains(logo)) {
+                waitingCallbacks.value(logo)(fullPath);
+            }
+        } else {
+            emit logoFailed(logo);
         }
-    });
-
-    QObject::connect(job, &NetJob::failed, this, [this, logo, job] {
-        job->deleteLater();
-        emit logoFailed(logo);
+        t->deleteLater();
     });
 
     job->start();
@@ -199,8 +199,12 @@ void ListModel::performPaginatedSearch()
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
     jobPtr = netJob;
     jobPtr->start();
-    QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
-    QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::searchRequestFailed);
+    QObject::connect(netJob.get(), &NetJob::finished, this, [this](TaskV2* t) {
+        if (t->wasSuccessful())
+            searchRequestFinished();
+        else
+            searchRequestFailed(t->failReason());
+    });
 }
 
 void ListModel::searchWithTerm(const QString& term, int sort)

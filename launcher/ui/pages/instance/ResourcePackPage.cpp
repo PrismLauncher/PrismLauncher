@@ -74,18 +74,32 @@ void ResourcePackPage::downloadRPs()
     if (mdownload.exec()) {
         auto tasks =
             new ConcurrentTask(this, "Download Resource Pack", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-        connect(tasks, &Task::failed, [this, tasks](QString reason) {
-            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::aborted, [this, tasks]() {
-            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
-            tasks->deleteLater();
-        });
-        connect(tasks, &Task::succeeded, [this, tasks]() {
-            QStringList warnings = tasks->warnings();
-            if (warnings.count())
-                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+        connect(tasks, &TaskV2::finished, [this](TaskV2* tasks) {
+            switch (tasks->state()) {
+                case TaskV2::Succeeded: {
+                    QStringList warnings = tasks->warnings();
+                    if (warnings.count())
+                        CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+
+                    break;
+                }
+                case TaskV2::AbortedByUser: {
+                    CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
+                    break;
+                }
+                case TaskV2::Inactive:
+                    [[fallthrough]];
+                case TaskV2::Running:
+                    [[fallthrough]];
+                case TaskV2::Paused:
+                    [[fallthrough]];
+                case TaskV2::Finished:
+                    [[fallthrough]];
+                case TaskV2::Failed: {
+                    CustomMessageBox::selectable(this, tr("Error"), tasks->failReason(), QMessageBox::Critical)->show();
+                    break;
+                }
+            }
 
             tasks->deleteLater();
         });

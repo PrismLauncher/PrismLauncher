@@ -43,6 +43,7 @@
 #include <QMessageBox>
 #include "FileIgnoreProxy.h"
 #include "QObjectPtr.h"
+#include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ExportInstanceDialog.h"
@@ -147,10 +148,11 @@ void ExportInstanceDialog::doExport()
     }
 
     auto task = makeShared<MMCZip::ExportToZipTask>(output, m_instance->instanceRoot(), files, "", true, true);
-
-    connect(task.get(), &Task::failed, this,
-            [this, output](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-    connect(task.get(), &Task::finished, this, [task] { task->deleteLater(); });
+    connect(task.get(), &TaskV2::finished, this, [this](TaskV2* t) {
+        if (!t->wasSuccessful())
+            CustomMessageBox::selectable(this, tr("Error"), t->failReason(), QMessageBox::Critical)->show();
+        t->deleteLater();
+    });
 
     ProgressDialog progress(this);
     progress.setSkipButton(true, tr("Abort"));

@@ -41,7 +41,7 @@ class ListModel : public QAbstractListModel {
     void searchWithTerm(const QString& term, int sort);
 
     [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
-    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
+    [[nodiscard]] TaskV2::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
 
    private slots:
     void performPaginatedSearch();
@@ -67,7 +67,7 @@ class ListModel : public QAbstractListModel {
     int currentSort = 0;
     int nextSearchOffset = 0;
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
-    Task::Ptr jobPtr;
+    TaskV2::Ptr jobPtr;
     std::shared_ptr<QByteArray> response = std::make_shared<QByteArray>();
 };
 

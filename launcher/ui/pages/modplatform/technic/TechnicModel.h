@@ -59,7 +59,7 @@ class ListModel : public QAbstractListModel {
     void searchWithTerm(const QString& term);
 
     [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
-    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
+    [[nodiscard]] TaskV2::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
 
    private slots:
     void searchRequestFinished();

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>312</width>
-    <height>86</height>
+    <height>160</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -85,6 +85,49 @@
      <property name="textVisible">
       <bool>true</bool>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QScrollArea" name="taskProgressScrollArea">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustToContents</enum>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="taskProgressContainer">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>292</width>
+        <height>98</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="taskProgressLayout">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>

@@ -147,7 +147,7 @@ void ModrinthModPage::prepareProviderCategories()
 {
     auto response = std::make_shared<QByteArray>();
     auto task = ModrinthAPI::getModCategories(response);
-    QObject::connect(task.get(), &Task::succeeded, [this, response]() {
+    QObject::connect(task.get(), &TaskV2::finished, [this, response]() {
         auto categories = ModrinthAPI::loadModCategories(response);
         m_filter_widget->setCategories(categories);
     });

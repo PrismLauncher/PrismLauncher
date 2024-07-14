@@ -3,9 +3,8 @@
 #pragma once
 
 #include <QWidget>
-#include <memory>
+#include "tasks/Task.h"
 
-class Task;
 class QProgressBar;
 class QLabel;
 
@@ -27,13 +26,13 @@ class ProgressWidget : public QWidget {
 
    public slots:
     /** Watch the progress of a task. */
-    void watch(const Task* task);
+    void watch(TaskV2* taskV2);
 
     /** Watch the progress of a task, and start it if needed */
-    void start(const Task* task);
+    void start(TaskV2* task);
 
     /** Blocking way of waiting for a task to finish. */
-    bool exec(std::shared_ptr<Task> task);
+    bool exec(TaskV2::Ptr task);
 
     /** Un-hide the widget if needed. */
     void show();
@@ -43,14 +42,13 @@ class ProgressWidget : public QWidget {
 
    private slots:
     void handleTaskFinish();
-    void handleTaskStatus(const QString& status);
-    void handleTaskProgress(qint64 current, qint64 total);
+    void handleTaskStatus(TaskV2* t);
     void taskDestroyed();
 
    private:
     QLabel* m_label = nullptr;
     QProgressBar* m_bar = nullptr;
-    const Task* m_task = nullptr;
+    TaskV2* m_task = nullptr;
 
     bool m_hide_if_inactive = false;
 };

@@ -40,7 +40,6 @@
 #include <QUuid>
 #include <memory>
 
-#include "QObjectPtr.h"
 #include "tasks/Task.h"
 
 #include "ui/widgets/SubTaskProgressBar.h"
@@ -58,24 +57,16 @@ class ProgressDialog : public QDialog {
     explicit ProgressDialog(QWidget* parent = 0);
     ~ProgressDialog();
 
-    void updateSize(bool recenterParent = false);
-
-    int execWithTask(Task* task);
-    int execWithTask(std::unique_ptr<Task>&& task);
-    int execWithTask(std::unique_ptr<Task>& task);
+    int execWithTask(TaskV2* task);
+    int execWithTask(std::unique_ptr<TaskV2>&& task);
+    int execWithTask(std::unique_ptr<TaskV2>& task);
 
     void setSkipButton(bool present, QString label = QString());
 
-    Task* getTask();
+    TaskV2* getTask();
 
    public slots:
-    void onTaskStarted();
-    void onTaskFailed(QString failure);
-    void onTaskSucceeded();
-
-    void changeStatus(const QString& status);
-    void changeProgress(qint64 current, qint64 total);
-    void changeStepProgress(TaskStepProgress const& task_progress);
+    void onTaskFinished(TaskV2* t);
 
    private slots:
     void on_skipButton_clicked(bool checked);
@@ -86,13 +77,9 @@ class ProgressDialog : public QDialog {
 
    private:
     bool handleImmediateResult(QDialog::DialogCode& result);
-    void addTaskProgress(TaskStepProgress const& progress);
 
    private:
     Ui::ProgressDialog* ui;
 
-    Task* m_task;
-
-    bool m_is_multi_step = false;
-    QHash<QUuid, SubTaskProgressBar*> taskProgress;
+    TaskV2* m_task;
 };

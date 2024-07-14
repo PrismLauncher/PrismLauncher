@@ -74,7 +74,7 @@ class ModpackListModel : public QAbstractListModel {
     void searchWithTerm(const QString& term, int sort);
 
     [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
-    [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
+    [[nodiscard]] TaskV2::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
 
     void getLogo(const QString& logo, const QString& logoUrl, LogoCallback callback);
 
@@ -115,7 +115,7 @@ class ModpackListModel : public QAbstractListModel {
     int nextSearchOffset = 0;
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
 
-    Task::Ptr jobPtr;
+    TaskV2::Ptr jobPtr;
 
     std::shared_ptr<QByteArray> m_all_response = std::make_shared<QByteArray>();
     QByteArray m_specific_response;

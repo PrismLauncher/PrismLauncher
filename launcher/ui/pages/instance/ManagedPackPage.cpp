@@ -190,25 +190,44 @@ bool ManagedPackPage::runUpdateTask(InstanceTask* task)
 {
     Q_ASSERT(task);
 
-    unique_qobject_ptr<Task> wrapped_task(APPLICATION->instances()->wrapInstanceTask(task));
+    unique_qobject_ptr<TaskV2> wrapped_task(APPLICATION->instances()->wrapInstanceTask(task));
 
-    connect(task, &Task::failed,
-            [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-    connect(task, &Task::succeeded, [this, task]() {
-        QStringList warnings = task->warnings();
-        if (warnings.count())
-            CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
-    });
-    connect(task, &Task::aborted, [this] {
-        CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
-            ->show();
+    connect(wrapped_task.get(), &TaskV2::finished, [this](TaskV2* tasks) {
+        switch (tasks->state()) {
+            case TaskV2::Succeeded: {
+                QStringList warnings = tasks->warnings();
+                if (warnings.count())
+                    CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+
+                break;
+            }
+            case TaskV2::AbortedByUser: {
+                CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."),
+                                             QMessageBox::Information);
+                break;
+            }
+            case TaskV2::Inactive:
+                [[fallthrough]];
+            case TaskV2::Running:
+                [[fallthrough]];
+            case TaskV2::Paused:
+                [[fallthrough]];
+            case TaskV2::Finished:
+                [[fallthrough]];
+            case TaskV2::Failed: {
+                CustomMessageBox::selectable(this, tr("Error"), tasks->failReason(), QMessageBox::Critical)->show();
+                break;
+            }
+        }
+
+        tasks->deleteLater();
     });
 
     ProgressDialog loadDialog(this);
     loadDialog.setSkipButton(true, tr("Abort"));
-    loadDialog.execWithTask(task);
+    loadDialog.execWithTask(wrapped_task.get());
 
-    return task->wasSuccessful();
+    return wrapped_task->wasSuccessful();
 }
 
 void ManagedPackPage::suggestVersion()
