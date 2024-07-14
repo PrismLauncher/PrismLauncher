@@ -143,7 +143,7 @@ void ExportPackDialog::done(int result)
                 output.append(".zip");
         }
 
-        Task* task;
+        TaskV2* task;
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
             task = new ModrinthPackExportTask(name, ui->version->text(), ui->summary->toPlainText(), ui->optionalFiles->isChecked(),
                                               instance, output, std::bind(&FileIgnoreProxy::filterFile, proxy, std::placeholders::_1));
@@ -152,14 +152,37 @@ void ExportPackDialog::done(int result)
                                            std::bind(&FileIgnoreProxy::filterFile, proxy, std::placeholders::_1));
         }
 
-        connect(task, &Task::failed,
-                [this](const QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-        connect(task, &Task::aborted, [this] {
-            CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."), QMessageBox::Information)
-                ->show();
-        });
-        connect(task, &Task::finished, [task] { task->deleteLater(); });
+        connect(task, &TaskV2::finished, [this](TaskV2* tasks) {
+            switch (tasks->state()) {
+                case TaskV2::Succeeded: {
+                    QStringList warnings = tasks->warnings();
+                    if (warnings.count())
+                        CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
 
+                    break;
+                }
+                case TaskV2::AbortedByUser: {
+                    CustomMessageBox::selectable(this, tr("Task aborted"), tr("The task has been aborted by the user."),
+                                                 QMessageBox::Information)
+                        ->show();
+                    break;
+                }
+                case TaskV2::Inactive:
+                    [[fallthrough]];
+                case TaskV2::Running:
+                    [[fallthrough]];
+                case TaskV2::Paused:
+                    [[fallthrough]];
+                case TaskV2::Finished:
+                    [[fallthrough]];
+                case TaskV2::Failed: {
+                    CustomMessageBox::selectable(this, tr("Error"), tasks->failReason(), QMessageBox::Critical)->show();
+                    break;
+                }
+            }
+
+            tasks->deleteLater();
+        });
         ProgressDialog progress(this);
         progress.setSkipButton(true, tr("Abort"));
         if (progress.execWithTask(task) != QDialog::Accepted)
