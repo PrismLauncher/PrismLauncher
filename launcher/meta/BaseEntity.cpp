@@ -30,13 +30,21 @@ class ParsingValidator : public Net::Validator {
     virtual ~ParsingValidator() {};
 
    public: /* methods */
-    bool init(QNetworkRequest&) override { return true; }
+    bool init(QNetworkRequest&) override
+    {
+        m_data.clear();
+        return true;
+    }
     bool write(QByteArray& data) override
     {
         this->m_data.append(data);
         return true;
     }
-    bool abort() override { return true; }
+    bool abort() override
+    {
+        m_data.clear();
+        return true;
+    }
     bool validate(QNetworkReply&) override
     {
         auto fname = m_entity->localFilename();

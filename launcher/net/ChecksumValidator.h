@@ -60,7 +60,11 @@ class ChecksumValidator : public Validator {
         return true;
     }
 
-    auto abort() -> bool override { return true; }
+    auto abort() -> bool override
+    {
+        m_checksum.reset();
+        return true;
+    }
 
     auto validate(QNetworkReply&) -> bool override
     {
