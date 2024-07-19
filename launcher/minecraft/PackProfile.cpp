@@ -1048,8 +1048,8 @@ QList<ModPlatform::ModLoaderType> PackProfile::getModLoadersList()
 {
     QList<ModPlatform::ModLoaderType> result;
     for (auto c : d->components) {
-        if (c->isEnabled() && modloaderMapping.contains(c->getID())) {
-            result.append(modloaderMapping[c->getID()]);
+        if (c->isEnabled() && Component::KNOWN_MODLOADERS.contains(c->getID())) {
+            result.append(Component::KNOWN_MODLOADERS[c->getID()].type);
         }
     }
 
