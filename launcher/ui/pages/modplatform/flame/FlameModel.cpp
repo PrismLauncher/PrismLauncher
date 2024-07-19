@@ -172,7 +172,7 @@ void ListModel::performPaginatedSearch()
             callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
             callbacks.on_abort = [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
-                searchRequestFailed("Abborted");
+                searchRequestFailed("Aborted");
             };
             static const FlameAPI api;
             if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {
