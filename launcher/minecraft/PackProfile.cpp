@@ -181,7 +181,7 @@ static bool loadPackProfile(PackProfile* parent,
     }
     if (!componentsFile.open(QFile::ReadOnly)) {
         qCritical() << "Couldn't open" << componentsFile.fileName() << " for reading:" << componentsFile.errorString();
-        qWarning() << "Ignoring overriden order";
+        qWarning() << "Ignoring overridden order";
         return false;
     }
 
@@ -190,7 +190,7 @@ static bool loadPackProfile(PackProfile* parent,
     QJsonDocument doc = QJsonDocument::fromJson(componentsFile.readAll(), &error);
     if (error.error != QJsonParseError::NoError) {
         qCritical() << "Couldn't parse" << componentsFile.fileName() << ":" << error.errorString();
-        qWarning() << "Ignoring overriden order";
+        qWarning() << "Ignoring overridden order";
         return false;
     }
 

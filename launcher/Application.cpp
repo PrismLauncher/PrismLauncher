@@ -817,7 +817,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_icons.reset(new IconList(instFolders, setting->get().toString()));
         connect(setting.get(), &Setting::SettingChanged,
                 [&](const Setting&, QVariant value) { m_icons->directoryChanged(value.toString()); });
-        qDebug() << "<> Instance icons intialized.";
+        qDebug() << "<> Instance icons initialized.";
     }
 
     // Themes
