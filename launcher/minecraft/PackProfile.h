@@ -146,6 +146,7 @@ class PackProfile : public QAbstractListModel {
     std::optional<ModPlatform::ModLoaderTypes> getModLoaders();
     // this returns aditional loaders(Quilt supports fabric and NeoForge supports Forge)
     std::optional<ModPlatform::ModLoaderTypes> getSupportedModLoaders();
+    QList<ModPlatform::ModLoaderType> getModLoadersList();
 
    private:
     void scheduleSave();
