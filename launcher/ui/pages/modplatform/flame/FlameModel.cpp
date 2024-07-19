@@ -110,6 +110,7 @@ void ListModel::requestLogo(QString logo, QString url)
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
+    job->setAskRetry(false);
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
