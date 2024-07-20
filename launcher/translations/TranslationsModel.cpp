@@ -553,6 +553,7 @@ void TranslationsModel::downloadIndex()
     auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
     d->m_index_task = task.get();
     d->m_index_job->addNetAction(task);
+    d->m_index_job->setAskRetry(false);
     connect(d->m_index_job.get(), &NetJob::failed, this, &TranslationsModel::indexFailed);
     connect(d->m_index_job.get(), &NetJob::succeeded, this, &TranslationsModel::indexReceived);
     d->m_index_job->start();

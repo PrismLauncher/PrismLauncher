@@ -66,7 +66,7 @@ class Page : public QWidget, public BasePage {
     QString displayName() const override { return "FTB Legacy"; }
     QIcon icon() const override { return APPLICATION->getThemedIcon("ftb_logo"); }
     QString id() const override { return "legacy_ftb"; }
-    QString helpPage() const override { return "FTB-platform"; }
+    QString helpPage() const override { return "FTB-legacy"; }
     bool shouldDisplay() const override;
     void openedImpl() override;
     void retranslate() override;

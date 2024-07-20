@@ -86,7 +86,7 @@ void NetRequest::executeTask()
             break;
         case State::Inactive:
         case State::Failed:
-            emit failed("Failed to initilize sink");
+            emit failed("Failed to initialize sink");
             emit finished();
             return;
         case State::AbortedByUser:
@@ -107,7 +107,11 @@ void NetRequest::executeTask()
     }
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+#if defined(LAUNCHER_APPLICATION)
+    request.setTransferTimeout(APPLICATION->settings()->get("RequestTimeout").toInt() * 1000);
+#else
     request.setTransferTimeout();
+#endif
 #endif
 
     m_last_progress_time = m_clock.now();
