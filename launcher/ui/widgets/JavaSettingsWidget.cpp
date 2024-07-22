@@ -351,7 +351,7 @@ void JavaSettingsWidget::on_javaBrowseBtn_clicked()
 
 void JavaSettingsWidget::javaDownloadBtn_clicked()
 {
-    auto jdialog = new Java::InstallDialog({}, this);
+    auto jdialog = new Java::InstallDialog({}, nullptr, this);
     jdialog->exec();
 }
 

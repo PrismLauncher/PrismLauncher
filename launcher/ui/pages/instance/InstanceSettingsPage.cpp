@@ -390,7 +390,7 @@ void InstanceSettingsPage::loadSettings()
 
 void InstanceSettingsPage::on_javaDownloadBtn_clicked()
 {
-    auto jdialog = new Java::InstallDialog({}, this);
+    auto jdialog = new Java::InstallDialog({}, m_instance, this);
     jdialog->exec();
 }
 

@@ -201,7 +201,7 @@ void JavaPage::on_javaTestBtn_clicked()
 
 void JavaPage::on_downloadJavaButton_clicked()
 {
-    auto jdialog = new Java::InstallDialog({}, this);
+    auto jdialog = new Java::InstallDialog({}, nullptr, this);
     jdialog->exec();
     ui->managedJavaList->loadList();
 }

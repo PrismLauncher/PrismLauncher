@@ -18,6 +18,7 @@
 
 #include "InstallJavaDialog.h"
 
+#include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QMessageBox>
 #include <QPushButton>
@@ -27,10 +28,13 @@
 #include "Application.h"
 #include "BaseVersionList.h"
 #include "FileSystem.h"
+#include "Filter.h"
 #include "java/download/ArchiveDownloadTask.h"
 #include "java/download/ManifestDownloadTask.h"
 #include "meta/Index.h"
 #include "meta/VersionList.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/java/VersionList.h"
@@ -119,6 +123,27 @@ class InstallJavaPage : public QWidget, public BasePage {
         majorVersionSelect->loadList();
         javaVersionSelect->loadList();
     }
+
+   public slots:
+    void setRecommendedMajors(const QStringList& majors)
+    {
+        m_recommended_majors = majors;
+        recommendedFilterChanged();
+    }
+    void setRecomend(bool recomend)
+    {
+        m_recommend = recomend;
+        recommendedFilterChanged();
+    }
+    void recommendedFilterChanged()
+    {
+        if (m_recommend) {
+            majorVersionSelect->setFilter(BaseVersionList::ModelRoles::JavaMajorRole, new ExactListFilter(m_recommended_majors));
+        } else {
+            majorVersionSelect->setFilter(BaseVersionList::ModelRoles::JavaMajorRole, new ExactListFilter());
+        }
+    }
+
    signals:
     void selectionChanged();
 
@@ -131,6 +156,9 @@ class InstallJavaPage : public QWidget, public BasePage {
     QHBoxLayout* horizontalLayout = nullptr;
     VersionSelectWidget* majorVersionSelect = nullptr;
     VersionSelectWidget* javaVersionSelect = nullptr;
+
+    QStringList m_recommended_majors;
+    bool m_recommend;
 };
 
 static InstallJavaPage* pageCast(BasePage* page)
@@ -140,8 +168,20 @@ static InstallJavaPage* pageCast(BasePage* page)
     return result;
 }
 namespace Java {
+QStringList getRecommendedJavaVersionsFromVersionList(Meta::VersionList::Ptr list)
+{
+    QStringList recommendedJavas;
+    for (auto ver : list->versions()) {
+        auto major = ver->version();
+        if (major.startsWith("java")) {
+            major = "Java " + major.mid(4);
+        }
+        recommendedJavas.append(major);
+    }
+    return recommendedJavas;
+}
 
-InstallDialog::InstallDialog(const QString& uid, QWidget* parent)
+InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget* parent)
     : QDialog(parent), container(new PageContainer(this, QString(), this)), buttons(new QDialogButtonBox(this))
 {
     auto layout = new QVBoxLayout(this);
@@ -150,10 +190,22 @@ InstallDialog::InstallDialog(const QString& uid, QWidget* parent)
     layout->addWidget(container);
 
     auto buttonLayout = new QHBoxLayout(this);
+    auto refreshLayout = new QHBoxLayout(this);
 
     auto refreshButton = new QPushButton(tr("&Refresh"), this);
     connect(refreshButton, &QPushButton::clicked, this, [this] { pageCast(container->selectedPage())->loadList(); });
-    buttonLayout->addWidget(refreshButton);
+    refreshLayout->addWidget(refreshButton);
+
+    auto recommendedCheckBox = new QCheckBox("Recommended", this);
+    recommendedCheckBox->setCheckState(Qt::CheckState::Checked);
+    connect(recommendedCheckBox, &QCheckBox::stateChanged, this, [this](int state) {
+        for (BasePage* page : container->getPages()) {
+            pageCast(page)->setRecomend(state == Qt::Checked);
+        }
+    });
+
+    refreshLayout->addWidget(recommendedCheckBox);
+    buttonLayout->addLayout(refreshLayout);
 
     buttons->setOrientation(Qt::Horizontal);
     buttons->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
@@ -168,11 +220,49 @@ InstallDialog::InstallDialog(const QString& uid, QWidget* parent)
     setWindowModality(Qt::WindowModal);
     resize(840, 480);
 
+    QStringList recommendedJavas;
+    if (auto mcInst = dynamic_cast<MinecraftInstance*>(instance); mcInst) {
+        auto mc = mcInst->getPackProfile()->getComponent("net.minecraft");
+        if (mc) {
+            auto file = mc->getVersionFile();  // no need for load as it should already be loaded
+            if (file) {
+                for (auto major : file->compatibleJavaMajors) {
+                    recommendedJavas.append(QString("Java %1").arg(major));
+                }
+            }
+        }
+    } else {
+        const auto versions = APPLICATION->metadataIndex()->get("net.minecraft.java");
+        if (versions) {
+            if (versions->isLoaded()) {
+                recommendedJavas = getRecommendedJavaVersionsFromVersionList(versions);
+            } else {
+                auto newTask = versions->getLoadTask();
+                if (newTask) {
+                    connect(newTask.get(), &Task::succeeded, this, [this, versions] {
+                        auto recommendedJavas = getRecommendedJavaVersionsFromVersionList(versions);
+                        for (BasePage* page : container->getPages()) {
+                            pageCast(page)->setRecommendedMajors(recommendedJavas);
+                        }
+                    });
+                    if (!newTask->isRunning())
+                        newTask->start();
+                } else {
+                    recommendedJavas = getRecommendedJavaVersionsFromVersionList(versions);
+                }
+            }
+        }
+    }
     for (BasePage* page : container->getPages()) {
         if (page->id() == uid)
             container->selectPage(page->id());
 
-        connect(pageCast(page), &InstallJavaPage::selectionChanged, this, [this] { validate(); });
+        auto cast = pageCast(page);
+        cast->setRecomend(true);
+        connect(cast, &InstallJavaPage::selectionChanged, this, [this] { validate(); });
+        if (!recommendedJavas.isEmpty()) {
+            cast->setRecommendedMajors(recommendedJavas);
+        }
     }
     connect(container, &PageContainer::selectedPageChanged, this, [this] { validate(); });
     pageCast(container->selectedPage())->selectSearch();
@@ -243,6 +333,7 @@ void InstallDialog::done(int result)
 
     QDialog::done(result);
 }
+
 }  // namespace Java
 
 #include "InstallJavaDialog.moc"
