@@ -29,7 +29,6 @@
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
-#include "tasks/ConcurrentTask.h"
 #include "tasks/SequentialTask.h"
 #include "ui/pages/modplatform/ModModel.h"
 #include "ui/pages/modplatform/flame/FlameResourceModels.h"
