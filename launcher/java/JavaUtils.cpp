@@ -396,7 +396,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     return javas;
 }
 
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX) || defined(Q_OS_OPENBSD) || defined(Q_OS_FREEBSD)
 QList<QString> JavaUtils::FindJavaPaths()
 {
     QList<QString> javas;
@@ -421,6 +421,7 @@ QList<QString> JavaUtils::FindJavaPaths()
             scanJavaDir(snap + dirPath);
         }
     };
+#if defined(Q_OS_LINUX)
     // oracle RPMs
     scanJavaDirs("/usr/java");
     // general locations used by distro packaging
@@ -439,7 +440,10 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs("/opt/ibm");  // IBM Semeru Certified Edition
     // flatpak
     scanJavaDirs("/app/jdk");
-
+#elif defined(Q_OS_OPENBSD) || defined(Q_OS_FREEBSD)
+    // ports install to /usr/local on OpenBSD & FreeBSD
+    scanJavaDirs("/usr/local");
+#endif
     auto home = qEnvironmentVariable("HOME");
 
     // javas downloaded by IntelliJ

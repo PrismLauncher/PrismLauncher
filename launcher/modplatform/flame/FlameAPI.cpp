@@ -4,6 +4,7 @@
 
 #include "FlameAPI.h"
 #include <memory>
+#include <optional>
 #include "FlameModIndex.h"
 
 #include "Application.h"
@@ -12,7 +13,6 @@
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
 #include "net/NetJob.h"
-#include "net/Upload.h"
 
 Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response)
 {
@@ -34,7 +34,7 @@ Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, std::shar
     return netJob;
 }
 
-auto FlameAPI::getModFileChangelog(int modId, int fileId) -> QString
+QString FlameAPI::getModFileChangelog(int modId, int fileId)
 {
     QEventLoop lock;
     QString changelog;
@@ -69,7 +69,7 @@ auto FlameAPI::getModFileChangelog(int modId, int fileId) -> QString
     return changelog;
 }
 
-auto FlameAPI::getModDescription(int modId) -> QString
+QString FlameAPI::getModDescription(int modId)
 {
     QEventLoop lock;
     QString description;
@@ -102,7 +102,7 @@ auto FlameAPI::getModDescription(int modId) -> QString
     return description;
 }
 
-auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion
+QList<ModPlatform::IndexedVersion> FlameAPI::getLatestVersions(VersionSearchArgs&& args)
 {
     auto versions_url_optional = getVersionsURL(args);
     if (!versions_url_optional.has_value())
@@ -114,7 +114,7 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
 
     auto netJob = makeShared<NetJob>(QString("Flame::GetLatestVersion(%1)").arg(args.pack.name), APPLICATION->network());
     auto response = std::make_shared<QByteArray>();
-    ModPlatform::IndexedVersion ver;
+    QList<ModPlatform::IndexedVersion> ver;
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
 
@@ -134,9 +134,7 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
 
             for (auto file : arr) {
                 auto file_obj = Json::requireObject(file);
-                auto file_tmp = FlameMod::loadIndexedPackVersion(file_obj);
-                if (file_tmp.date > ver.date && (!args.loaders.has_value() || !file_tmp.loaders || args.loaders.value() & file_tmp.loaders))
-                    ver = file_tmp;
+                ver.append(FlameMod::loadIndexedPackVersion(file_obj));
             }
 
         } catch (Json::JsonException& e) {
@@ -146,7 +144,7 @@ auto FlameAPI::getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::Indexe
         }
     });
 
-    QObject::connect(netJob.get(), &NetJob::finished, [&loop] { loop.quit(); });
+    QObject::connect(netJob.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     netJob->start();
 
@@ -261,3 +259,26 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(std::shared_ptr<QByteAr
     }
     return categories;
 };
+
+std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
+                                                                      QList<ModPlatform::ModLoaderType> instanceLoaders,
+                                                                      ModPlatform::ModLoaderTypes modLoaders)
+{
+    // edge case: mod has installed for forge but the instance is fabric => fabric version will be prioritizated on update
+    auto bestVersion = [&versions](ModPlatform::ModLoaderTypes loader) {
+        std::optional<ModPlatform::IndexedVersion> ver;
+        for (auto file_tmp : versions) {
+            if (file_tmp.loaders & loader && (!ver.has_value() || file_tmp.date > ver->date)) {
+                ver = file_tmp;
+            }
+        }
+        return ver;
+    };
+    for (auto l : instanceLoaders) {
+        auto ver = bestVersion(l);
+        if (ver.has_value()) {
+            return ver;
+        }
+    }
+    return bestVersion(modLoaders);
+}
