@@ -65,7 +65,7 @@ QNetworkReply* ImgurAlbumCreation::getReply(QNetworkRequest& request)
     }
     const QByteArray data = "deletehashes=" + hashes.join(',').toUtf8() + "&title=Minecraft%20Screenshots&privacy=hidden";
     return m_network->post(request, data);
-};
+}
 
 void ImgurAlbumCreation::init()
 {
@@ -81,7 +81,7 @@ auto ImgurAlbumCreation::Sink::init(QNetworkRequest& request) -> Task::State
 {
     m_output.clear();
     return Task::State::Running;
-};
+}
 
 auto ImgurAlbumCreation::Sink::write(QByteArray& data) -> Task::State
 {

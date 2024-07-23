@@ -86,7 +86,7 @@ void NetRequest::executeTask()
             break;
         case State::Inactive:
         case State::Failed:
-            emit failed("Failed to initilize sink");
+            emit failed("Failed to initialize sink");
             emit finished();
             return;
         case State::AbortedByUser:
