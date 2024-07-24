@@ -91,8 +91,6 @@ void Flame::FileResolvingTask::netJobFinished()
 {
     setProgress(1, 3);
     // job to check modrinth for blocked projects
-    auto checkJob = makeShared<NetJob>("Modrinth check", m_network);
-
     QJsonDocument doc;
     QJsonArray array;
 
@@ -134,6 +132,7 @@ void Flame::FileResolvingTask::netJobFinished()
     }
     m_result.reset(new QByteArray());
     m_task = modrinthAPI.currentVersions(hashes, "sha1", m_result);
+    (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
     auto step_progress = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::finished, this, [this, step_progress]() {
         step_progress->state = TaskStepState::Succeeded;

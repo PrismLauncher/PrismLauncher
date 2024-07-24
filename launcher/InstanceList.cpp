@@ -372,13 +372,13 @@ void InstanceList::undoTrashInstance()
 
     auto top = m_trashHistory.pop();
 
-    while (QDir(top.polyPath).exists()) {
+    while (QDir(top.path).exists()) {
         top.id += "1";
-        top.polyPath += "1";
+        top.path += "1";
     }
 
-    qDebug() << "Moving" << top.trashPath << "back to" << top.polyPath;
-    QFile(top.trashPath).rename(top.polyPath);
+    qDebug() << "Moving" << top.trashPath << "back to" << top.path;
+    QFile(top.trashPath).rename(top.path);
 
     m_instanceGroupIndex[top.id] = top.groupName;
     increaseGroupCount(top.groupName);
@@ -635,8 +635,8 @@ InstancePtr InstanceList::loadInstance(const InstanceId& id)
 
     QString inst_type = instanceSettings->get("InstanceType").toString();
 
-    // NOTE: Some PolyMC versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a OneSix
-    // instance
+    // NOTE: Some launcher versions didn't save the InstanceType properly. We will just bank on the probability that this is probably a
+    // OneSix instance
     if (inst_type == "OneSix" || inst_type.isEmpty()) {
         inst.reset(new MinecraftInstance(m_globalSettings, instanceSettings, instanceRoot));
     } else {
@@ -710,6 +710,12 @@ void InstanceList::saveGroupList()
         groupsArr.insert(name, groupObj);
     }
     toplevel.insert("groups", groupsArr);
+    // empty string represents ungrouped "group"
+    if (m_collapsedGroups.contains("")) {
+        QJsonObject ungrouped;
+        ungrouped.insert("hidden", QJsonValue(true));
+        toplevel.insert("ungrouped", ungrouped);
+    }
     QJsonDocument doc(toplevel);
     try {
         FS::write(groupFileName, doc.toJson());
@@ -804,6 +810,16 @@ void InstanceList::loadGroupList()
             m_instanceGroupIndex[value.toString()] = groupName;
             increaseGroupCount(groupName);
         }
+    }
+
+    bool ungroupedHidden = false;
+    if (rootObj.value("ungrouped").isObject()) {
+        QJsonObject ungrouped = rootObj.value("ungrouped").toObject();
+        ungroupedHidden = ungrouped.value("hidden").toBool(false);
+    }
+    if (ungroupedHidden) {
+        // empty string represents ungrouped "group"
+        m_collapsedGroups.insert("");
     }
     m_groupsLoaded = true;
     qDebug() << "Group list loaded.";

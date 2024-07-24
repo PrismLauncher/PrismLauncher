@@ -36,6 +36,7 @@
  */
 
 #include "NetJob.h"
+#include <QNetworkReply>
 #include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
@@ -145,10 +146,23 @@ void NetJob::updateState()
                   .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
 }
 
+bool NetJob::isOnline()
+{
+    // check some errors that are ussually associated with the lack of internet
+    for (auto job : getFailedActions()) {
+        auto err = job->error();
+        if (err != QNetworkReply::HostNotFoundError && err != QNetworkReply::NetworkSessionFailedError) {
+            return true;
+        }
+    }
+    return false;
+};
+
 void NetJob::emitFailed(QString reason)
 {
 #if defined(LAUNCHER_APPLICATION)
-    if (m_ask_retry) {
+    if (m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
+        m_manual_try++;
         auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
                                                      "The tasks failed.\n"
                                                      "Failed urls\n" +

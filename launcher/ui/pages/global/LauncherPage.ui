@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>511</width>
-    <height>629</height>
+    <height>691</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -243,6 +243,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="skipModpackUpdatePromptBtn">
+            <property name="toolTip">
+             <string>When creating a new modpack instance, do not suggest updating existing instances instead.</string>
+            </property>
+            <property name="text">
+             <string>Skip modpack update prompt</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -252,6 +262,13 @@
           <string>Miscellaneous</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="numberOfConcurrentDownloadsSpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="numberOfConcurrentTasksLabel">
             <property name="text">
@@ -273,10 +290,34 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="numberOfConcurrentDownloadsSpinBox">
+          <item row="2" column="0">
+           <widget class="QLabel" name="numberOfManualRetriesLabel">
+            <property name="text">
+             <string>Number of manual retries</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="numberOfManualRetriesSpinBox">
             <property name="minimum">
-             <number>1</number>
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="timeoutSecondsLabel">
+            <property name="toolTip">
+             <string>Seconds to wait until the requests are terminated</string>
+            </property>
+            <property name="text">
+             <string>Timeout for HTTP requests</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="timeoutSecondsSpinBox">
+            <property name="suffix">
+             <string>s</string>
             </property>
            </widget>
           </item>
