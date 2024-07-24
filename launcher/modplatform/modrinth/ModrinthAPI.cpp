@@ -124,8 +124,7 @@ QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 
 Task::Ptr ModrinthAPI::getVersionFromHash(QString hash, ModPlatform::IndexedVersion& output)
 {
-    static ModPlatform::ProviderCapabilities ProviderCaps;
-    auto hash_type = ProviderCaps.hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
     auto response = std::make_shared<QByteArray>();
     auto ver_task = currentVersion(hash, hash_type, response);
     QObject::connect(ver_task.get(), &Task::succeeded, [response, &output] {
