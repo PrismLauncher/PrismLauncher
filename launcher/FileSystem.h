@@ -560,4 +560,6 @@ uintmax_t hardLinkCount(const QString& path);
 QString getPathNameInLocal8bit(const QString& file);
 #endif
 
+QString getUniqueResourceName(const QString& filePath);
+
 }  // namespace FS
