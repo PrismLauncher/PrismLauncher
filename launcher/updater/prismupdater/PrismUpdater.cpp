@@ -244,8 +244,9 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
 
     auto updater_executable = QCoreApplication::applicationFilePath();
 
-    if (BuildConfig.BUILD_ARTIFACT.toLower() == "macos")
-        showFatalErrorMessage(tr("MacOS Not Supported"), tr("The updater does not support installations on MacOS"));
+#ifdef Q_OS_MACOS
+    showFatalErrorMessage(tr("MacOS Not Supported"), tr("The updater does not support installations on MacOS"));
+#endif
 
     if (updater_executable.startsWith("/tmp/.mount_")) {
         m_isAppimage = true;
@@ -328,6 +329,19 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         adjustedBy = "Command line";
         m_dataPath = dirParam;
 #ifndef Q_OS_MACOS
+        if (QDir(FS::PathCombine(m_rootPath, "UserData")).exists()) {
+            m_isPortable = true;
+        }
+        if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
+            m_isPortable = true;
+        }
+#endif
+    } else if (auto dataDirEnv =
+                   QProcessEnvironment::systemEnvironment().value(QString("%1_DATA_DIR").arg(BuildConfig.LAUNCHER_NAME.toUpper()));
+               !dataDirEnv.isEmpty()) {
+        adjustedBy = "System environment";
+        m_dataPath = dataDirEnv;
+#ifndef Q_OS_MACOS
         if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
             m_isPortable = true;
         }
@@ -338,7 +352,11 @@ PrismUpdaterApp::PrismUpdaterApp(int& argc, char** argv) : QApplication(argc, ar
         adjustedBy = "Persistent data path";
 
 #ifndef Q_OS_MACOS
-        if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
+        if (auto portableUserData = FS::PathCombine(m_rootPath, "UserData"); QDir(portableUserData).exists()) {
+            m_dataPath = portableUserData;
+            adjustedBy = "Portable user data path";
+            m_isPortable = true;
+        } else if (QFile::exists(FS::PathCombine(m_rootPath, "portable.txt"))) {
             m_dataPath = m_rootPath;
             adjustedBy = "Portable data path";
             m_isPortable = true;
@@ -580,12 +598,6 @@ void PrismUpdaterApp::run()
         return exit(result ? 0 : 1);
     }
 
-    if (BuildConfig.BUILD_ARTIFACT.toLower() == "linux" && !m_isPortable) {
-        showFatalErrorMessage(tr("Updating Not Supported"),
-                              tr("Updating non-portable linux installations is not supported. Please use your system package manager"));
-        return;
-    }
-
     if (need_update || m_forceUpdate || !m_userSelectedVersion.isEmpty()) {
         GitHubRelease update_release = latest;
         if (!m_userSelectedVersion.isEmpty()) {
@@ -787,6 +799,10 @@ QList<GitHubReleaseAsset> PrismUpdaterApp::validReleaseArtifacts(const GitHubRel
     if (BuildConfig.BUILD_ARTIFACT.isEmpty())
         qWarning() << "Build platform is not set!";
     for (auto asset : release.assets) {
+        if (asset.name.endsWith(".zsync")) {
+            qDebug() << "Rejecting zsync file" << asset.name;
+            continue;
+        }
         if (!m_isAppimage && asset.name.toLower().endsWith("appimage")) {
             qDebug() << "Rejecting" << asset.name << "because it is an AppImage";
             continue;
@@ -1020,7 +1036,7 @@ void PrismUpdaterApp::performInstall(QFileInfo file)
     FS::write(changelog_path, m_install_release.body.toUtf8());
 
     logUpdate(tr("Updating from %1 to %2").arg(m_prismVersion).arg(m_install_release.tag_name));
-    if (m_isPortable || file.suffix().toLower() == "zip") {
+    if (m_isPortable || file.fileName().endsWith(".zip") || file.fileName().endsWith(".tar.gz")) {
         write_lock_file(update_lock_path, QDateTime::currentDateTime(), m_prismVersion, m_install_release.tag_name, m_rootPath, m_dataPath);
         logUpdate(tr("Updating portable install at %1").arg(m_rootPath));
         unpackAndInstall(file);
@@ -1094,7 +1110,7 @@ void PrismUpdaterApp::backupAppDir()
 
     if (file_list.isEmpty()) {
         // best guess
-        if (BuildConfig.BUILD_ARTIFACT.toLower() == "linux") {
+        if (BuildConfig.BUILD_ARTIFACT.toLower().contains("linux")) {
             file_list.append({ "PrismLauncher", "bin", "share", "lib" });
         } else {  // windows by process of elimination
             file_list.append({

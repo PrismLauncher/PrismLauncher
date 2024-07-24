@@ -5,7 +5,6 @@
 #pragma once
 
 #include <QList>
-#include <algorithm>
 #include <memory>
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
@@ -13,10 +12,13 @@
 
 class FlameAPI : public NetworkResourceAPI {
    public:
-    auto getModFileChangelog(int modId, int fileId) -> QString;
-    auto getModDescription(int modId) -> QString;
+    QString getModFileChangelog(int modId, int fileId);
+    QString getModDescription(int modId);
 
-    auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;
+    QList<ModPlatform::IndexedVersion> getLatestVersions(VersionSearchArgs&& args);
+    std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
+                                                                QList<ModPlatform::ModLoaderType> instanceLoaders,
+                                                                ModPlatform::ModLoaderTypes fallback);
 
     Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
     Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
@@ -26,9 +28,9 @@ class FlameAPI : public NetworkResourceAPI {
     static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
     static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
 
-    [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
+    [[nodiscard]] QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 
-    static inline auto validateModLoaders(ModPlatform::ModLoaderTypes loaders) -> bool
+    static inline bool validateModLoaders(ModPlatform::ModLoaderTypes loaders)
     {
         return loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
     }
@@ -67,7 +69,7 @@ class FlameAPI : public NetworkResourceAPI {
         return 0;
     }
 
-    static auto getModLoaderStrings(const ModPlatform::ModLoaderTypes types) -> const QStringList
+    static const QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
     {
         QStringList l;
         for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
@@ -78,10 +80,7 @@ class FlameAPI : public NetworkResourceAPI {
         return l;
     }
 
-    static auto getModLoaderFilters(ModPlatform::ModLoaderTypes types) -> const QString
-    {
-        return "[" + getModLoaderStrings(types).join(',') + "]";
-    }
+    static const QString getModLoaderFilters(ModPlatform::ModLoaderTypes types) { return "[" + getModLoaderStrings(types).join(',') + "]"; }
 
    private:
     [[nodiscard]] std::optional<QString> getSearchURL(SearchArgs const& args) const override
