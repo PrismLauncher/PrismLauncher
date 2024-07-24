@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "minecraft/auth/AuthStep.h"
+#include "net/NetJob.h"
 #include "net/Upload.h"
 
 class LauncherLoginStep : public AuthStep {
@@ -21,5 +22,6 @@ class LauncherLoginStep : public AuthStep {
 
    private:
     std::shared_ptr<QByteArray> m_response;
-    Net::Upload::Ptr m_task;
+    Net::Upload::Ptr m_request;
+    NetJob::Ptr m_task;
 };

@@ -33,7 +33,6 @@ Upload::Ptr ApiUpload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> outpu
 
 void ApiUpload::init()
 {
-    qDebug() << "Setting up api upload";
     auto api_headers = new ApiHeaderProxy();
     addHeaderProxy(api_headers);
 }

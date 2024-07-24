@@ -48,7 +48,6 @@
 #include <BaseInstance.h>
 
 #include "minecraft/launch/MinecraftServerTarget.h"
-#include "ui/themes/CatPack.h"
 
 class LaunchController;
 class LocalPeer;
@@ -191,6 +190,8 @@ class Application : public QApplication {
     void globalSettingsAboutToOpen();
     void globalSettingsClosed();
     int currentCatChanged(int index);
+
+    void oauthReplyRecieved(QVariantMap);
 
 #ifdef Q_OS_MACOS
     void clickedOnDock();

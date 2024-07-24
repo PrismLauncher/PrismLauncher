@@ -38,6 +38,7 @@
 #include <QTimer>
 
 #include "minecraft/auth/AuthStep.h"
+#include "net/NetJob.h"
 #include "net/Upload.h"
 
 class MSADeviceCodeStep : public AuthStep {
@@ -51,7 +52,7 @@ class MSADeviceCodeStep : public AuthStep {
     QString describe() override;
 
    public slots:
-    void abort();
+    void abort() override;
 
    signals:
     void authorizeWithBrowser(QString url, QString code, int expiresIn);
@@ -72,5 +73,6 @@ class MSADeviceCodeStep : public AuthStep {
     QTimer m_expiration_timer;
 
     std::shared_ptr<QByteArray> m_response;
-    Net::Upload::Ptr m_task;
+    Net::Upload::Ptr m_request;
+    NetJob::Ptr m_task;
 };

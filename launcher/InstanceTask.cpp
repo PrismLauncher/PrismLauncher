@@ -1,5 +1,7 @@
 #include "InstanceTask.h"
 
+#include "Application.h"
+#include "settings/SettingsObject.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
 #include <QPushButton>
@@ -22,6 +24,9 @@ InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& ol
 
 ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name)
 {
+    if (APPLICATION->settings()->get("SkipModpackUpdatePrompt").toBool())
+        return ShouldUpdate::SkipUpdating;
+
     auto info = CustomMessageBox::selectable(
         parent, QObject::tr("Similar modpack was found!"),
         QObject::tr(
