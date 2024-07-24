@@ -24,6 +24,9 @@ class AuthFlow : public Task {
 
     AccountTaskState taskState() { return m_taskState; }
 
+   public slots:
+    bool abort() override;
+
    signals:
     void authorizeWithBrowser(const QUrl& url);
     void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);

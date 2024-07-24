@@ -42,6 +42,8 @@ class ShaderPackResourcePage : public ResourcePage {
 
     [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
 
+    [[nodiscard]] inline auto helpPage() const -> QString override { return "shaderpack-platform"; }
+
    protected:
     ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);
 
