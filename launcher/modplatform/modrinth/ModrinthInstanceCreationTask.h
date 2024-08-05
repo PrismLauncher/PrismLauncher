@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include "BaseInstance.h"
 #include "InstanceCreationTask.h"
 
