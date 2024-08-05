@@ -74,6 +74,8 @@ void MSADeviceCodeStep::perform()
     m_task->setAskRetry(false);
     m_task->addNetAction(m_request);
 
+    connect(m_task.get(), &Task::finished, this, &MSADeviceCodeStep::deviceAutorizationFinished);
+
     m_task->start();
 }
 
