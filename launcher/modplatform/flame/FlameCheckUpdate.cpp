@@ -1,4 +1,5 @@
 #include "FlameCheckUpdate.h"
+#include "Application.h"
 #include "FlameAPI.h"
 #include "FlameModIndex.h"
 
