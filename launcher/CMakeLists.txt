@@ -773,6 +773,7 @@ SET(LAUNCHER_SOURCES
     resources/flat/flat.qrc
     resources/flat_white/flat_white.qrc
     resources/documents/documents.qrc
+    ui/QMLResources.qrc
     ../${Launcher_Branding_LogoQRC}
 
     # Icons
@@ -1057,8 +1058,6 @@ SET(LAUNCHER_SOURCES
     ui/widgets/LanguageSelectionWidget.h
     ui/widgets/LineSeparator.cpp
     ui/widgets/LineSeparator.h
-    ui/widgets/LogView.cpp
-    ui/widgets/LogView.h
     ui/widgets/InfoFrame.cpp
     ui/widgets/InfoFrame.h
     ui/widgets/ModFilterWidget.cpp
@@ -1131,7 +1130,6 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/global/ExternalToolsPage.ui
     ui/pages/instance/ExternalResourcesPage.ui
     ui/pages/instance/NotesPage.ui
-    ui/pages/instance/LogPage.ui
     ui/pages/instance/ServersPage.ui
     ui/pages/instance/GameOptionsPage.ui
     ui/pages/instance/OtherLogsPage.ui
@@ -1203,6 +1201,7 @@ qt_add_resources(LAUNCHER_RESOURCES
     resources/iOS/iOS.qrc
     resources/flat/flat.qrc
     resources/documents/documents.qrc
+    ui/QMLResources.qrc
     ../${Launcher_Branding_LogoQRC}
 )
 
@@ -1255,6 +1254,10 @@ target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Concurrent
     Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Qml
+    Qt${QT_VERSION_MAJOR}::Quick
+    Qt${QT_VERSION_MAJOR}::QuickControls2
+    Qt${QT_VERSION_MAJOR}::QuickWidgets
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::NetworkAuth
     ${Launcher_QT_LIBS}
@@ -1401,10 +1404,19 @@ endif()
 # NOTE: it seems that this absolutely has to be here, and nowhere else.
 if(INSTALL_BUNDLE STREQUAL "full")
     # Add qt.conf - this makes Qt stop looking for things outside the bundle
-    install(
-        CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \" \")"
-        COMPONENT Runtime
-    )
+    if (UNIX AND APPLE)
+        install(
+            FILES "../${Launcher_QtConf_MacOS}"
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}"
+            COMPONENT Runtime
+            RENAME "qt.conf"
+        )
+    else()
+        install(
+            CODE "file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${RESOURCES_DEST_DIR}/qt.conf\" \" \")"
+            COMPONENT Runtime
+        )
+    endif()
     # add qtlogging.ini as a config file
     install(
         FILES "qtlogging.ini"
@@ -1504,6 +1516,39 @@ if(INSTALL_BUNDLE STREQUAL "full")
             PATTERN "*qcertonlybackend*" EXCLUDE
         )
     endif()
+    # QML plugins
+    install(
+        DIRECTORY "${QT_QML_DIR}/QtQml"
+        CONFIGURATIONS Debug RelWithDebInfo ""
+        DESTINATION ${QML_DEST_DIR}
+        COMPONENT Runtime
+    )
+    install(
+        DIRECTORY "${QT_QML_DIR}/QtQml"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${QML_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+    # QtQuick plugins
+    install(
+        DIRECTORY "${QT_QML_DIR}/QtQuick"
+        CONFIGURATIONS Debug RelWithDebInfo ""
+        DESTINATION ${QML_DEST_DIR}
+        COMPONENT Runtime
+    )
+    install(
+        DIRECTORY "${QT_QML_DIR}/QtQuick"
+        CONFIGURATIONS Release MinSizeRel
+        DESTINATION ${QML_DEST_DIR}
+        COMPONENT Runtime
+        REGEX "d\\." EXCLUDE
+        REGEX "_debug\\." EXCLUDE
+        REGEX "\\.dSYM" EXCLUDE
+    )
+
     # Wayland support
     if(EXISTS "${QT_PLUGINS_DIR}/wayland-graphics-integration-client")
         install(

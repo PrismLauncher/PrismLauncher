@@ -34,8 +34,11 @@
  *      limitations under the License.
  */
 #include "ITheme.h"
+
 #include <QDir>
+#include <QQuickStyle>
 #include <QStyleFactory>
+
 #include "Application.h"
 #include "HintOverrideProxyStyle.h"
 #include "rainbow.h"
@@ -47,7 +50,9 @@ void ITheme::apply(bool)
     if (hasColorScheme()) {
         QApplication::setPalette(colorScheme());
     }
+
     APPLICATION->setStyleSheet(appStyleSheet());
+
     QDir::setSearchPaths("theme", searchPaths());
 }
 

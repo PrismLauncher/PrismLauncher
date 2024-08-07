@@ -52,14 +52,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             qt_ver: 5
             qt_host: linux
             qt_arch: ""
             qt_version: "5.12.8"
             qt_modules: "qtnetworkauth"
 
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             qt_ver: 6
             qt_host: linux
             qt_arch: ""
@@ -120,6 +120,7 @@ jobs:
       BUILD_DIR: "build"
       CCACHE_VAR: ""
       HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+      QML_SOURCES_PATHS: "./"
 
     steps:
       ##
@@ -152,6 +153,7 @@ jobs:
             qt6-5compat:p
             qt6-networkauth:p
             cmark:p
+            qt6-declarative:p
 
       - name: Force newer ccache
         if: runner.os == 'Windows' && matrix.msystem == '' && inputs.build_type == 'Debug'
@@ -200,12 +202,15 @@ jobs:
         run: |
           sudo apt-get -y update
           sudo apt-get -y install ninja-build extra-cmake-modules scdoc appstream
+          # Test dependecies
+          sudo apt-get -y install xvfb x11-utils libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
           brew update
           brew install ninja extra-cmake-modules
+          python3 -m pip install macholib
 
       - name: Install host Qt (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
@@ -223,8 +228,13 @@ jobs:
           dir: ${{ github.workspace }}\HostQt
           set-env: false
 
-      - name: Install Qt (macOS, Linux & Windows MSVC)
-        if: matrix.msystem == ''
+      - name: Install Qt (Linux Qt5)
+        if: runner.os == 'Linux' && matrix.qt_ver != 6
+        run: |
+          sudo apt-get -y install ninja-build extra-cmake-modules scdoc qtbase5-dev qtdeclarative5-dev qtquickcontrols2-5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5 libqt5qml5 qml-module-qtquick-layouts qml-module-qtqml-models2 libqt5networkauth5 libqt5networkauth5-dev
+
+      - name: Install Qt (macOS, Linux Qt6, & Windows MSVC)
+        if: (runner.os == 'Linux' && matrix.qt_ver == 6) || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
         uses: jurplel/install-qt-action@v3
         with:
           aqtversion: "==3.1.*"
@@ -252,7 +262,7 @@ jobs:
 
           wget "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-x86_64.AppImage"
 
-          sudo apt install libopengl0
+          sudo apt install libopengl0 libfuse2
 
       - name: Add QT_HOST_PATH var (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
@@ -323,8 +333,13 @@ jobs:
       # TEST
       ##
 
-      - name: Test
-        if: runner.os != 'Windows'
+      - name: Test (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          xvfb-run --auto-servernum ctest -E "^example64|example$" --test-dir build --output-on-failure
+
+      - name: Test (macOS)
+        if: runner.os == 'macOS'
         run: |
           ctest -E "^example64|example$" --test-dir build --output-on-failure
 
@@ -362,7 +377,8 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }}
 
-          cd ${{ env.INSTALL_DIR }}
+          cd "${{ env.INSTALL_DIR }}"
+
           chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
 
           if [ -n '${{ secrets.APPLE_CODESIGN_ID }}' ]; then
@@ -370,8 +386,19 @@ jobs:
           else
             APPLE_CODESIGN_ID='-'
           fi
+          export CODESIGN_LOC="PrismLauncher.app/Contents/MacOS/prismlauncher"
 
-          sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
+          echo "Codesign"
+
+          # Sign stuff in Contents/Resources
+          find "PrismLauncher.app/Contents/Resources" -name '*.dylib' -exec codesign --sign - --deep --force --options runtime '{}' ';'
+
+          # Sign stuff in the other places
+          sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "../program_info/App.entitlements" --options runtime $CODESIGN_LOC
+
+          # Verify signature
+          sudo codesign --verify --deep --strict $CODESIGN_LOC --verbose=2
+
           mv "PrismLauncher.app" "Prism Launcher.app"
 
       - name: Notarize (macOS)
@@ -535,7 +562,7 @@ jobs:
           cp /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
           cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_PORTABLE_DIR }}/lib
           cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_PORTABLE_DIR }}/lib
-          cp /usr/lib/x86_64-linux-gnu/libffi.so.7 ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /usr/lib/x86_64-linux-gnu/libffi.so.8 ${{ env.INSTALL_PORTABLE_DIR }}/lib
           mv ${{ env.INSTALL_PORTABLE_DIR }}/bin/*.so* ${{ env.INSTALL_PORTABLE_DIR }}/lib
 
           for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt

@@ -33,9 +33,12 @@
  *      limitations under the License.
  */
 #include "CustomTheme.h"
+
+#include "FusionTheme.h"
+#include "ThemeManager.h"
+
 #include <FileSystem.h>
 #include <Json.h>
-#include "ThemeManager.h"
 
 const char* themeFile = "theme.json";
 
@@ -157,7 +160,7 @@ static bool writeThemeJson(const QString& path,
 /// @param baseTheme Base Theme
 /// @param fileInfo FileInfo object for file to load
 /// @param isManifest whether to load a theme manifest or a qss file
-CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest)
+CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, QDir themeDir, bool isManifest) : m_themeDirectory(fileInfo.dir())
 {
     if (isManifest) {
         m_id = fileInfo.dir().dirName();
@@ -230,6 +233,21 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
             m_styleSheet = baseTheme->appStyleSheet();
         }
     }
+}
+
+void CustomTheme::apply(bool initial)
+{
+    auto qqc_conf_path = themeDirectory().absoluteFilePath("qtquickcontrols2.conf");
+    QFileInfo qqc_conf_file{ qqc_conf_path };
+
+    auto old_qqc_conf_path = qgetenv("QT_QUICK_CONTROLS_CONF");
+
+    // FIXME: This check should be more precise, looking at the themes instead of only the paths
+    changed_qqc_theme = qqc_conf_path != old_qqc_conf_path;
+
+    ThemeManager::writeGlobalQMLTheme(qqc_conf_file.exists() ? qqc_conf_path : FusionTheme::USE_FUSION_QML_GLOBAL_THEME);
+
+    ITheme::apply(initial);
 }
 
 QStringList CustomTheme::searchPaths()

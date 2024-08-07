@@ -1,8 +1,18 @@
 #include "LogModel.h"
 
+#include <QDebug>
+
 LogModel::LogModel(QObject* parent) : QAbstractListModel(parent)
 {
     m_content.resize(m_maxLines);
+}
+
+QHash<int, QByteArray> LogModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[Qt::DisplayRole] = "line";
+    roles[LevelRole] = "level";
+    return roles;
 }
 
 int LogModel::rowCount(const QModelIndex& parent) const
@@ -16,32 +26,31 @@ int LogModel::rowCount(const QModelIndex& parent) const
 QVariant LogModel::data(const QModelIndex& index, int role) const
 {
     if (index.row() < 0 || index.row() >= m_numLines)
-        return QVariant();
+        return {};
 
     auto row = index.row();
     auto realRow = (row + m_firstLine) % m_maxLines;
-    if (role == Qt::DisplayRole || role == Qt::EditRole) {
-        return m_content[realRow].line;
-    }
-    if (role == LevelRole) {
-        return m_content[realRow].level;
-    }
 
-    return QVariant();
+    if (role == Qt::DisplayRole || role == Qt::EditRole)
+        return m_content.at(realRow).line;
+    if (role == LevelRole)
+        return m_content.at(realRow).level;
+
+    return {};
 }
 
 void LogModel::append(MessageLevel::Enum level, QString line)
 {
-    if (m_suspended) {
+    if (m_suspended)
         return;
-    }
-    int lineNum = (m_firstLine + m_numLines) % m_maxLines;
+
     // overflow
     if (m_numLines == m_maxLines) {
         if (m_stopOnOverflow) {
             // nothing more to do, the buffer is full
             return;
         }
+
         beginRemoveRows(QModelIndex(), 0, 0);
         m_firstLine = (m_firstLine + 1) % m_maxLines;
         m_numLines--;
@@ -50,10 +59,17 @@ void LogModel::append(MessageLevel::Enum level, QString line)
         level = MessageLevel::Fatal;
         line = m_overflowMessage;
     }
+
+    // If the level is still undetermined, try to guess it.
+    if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown)
+        level = MessageLevel::guessLevel(line, level);
+
+    int lineNum = (m_firstLine + m_numLines) % m_maxLines;
+    entry line_entry{ line, level };
+
     beginInsertRows(QModelIndex(), m_numLines, m_numLines);
+    m_content[lineNum] = line_entry;
     m_numLines++;
-    m_content[lineNum].level = level;
-    m_content[lineNum].line = line;
     endInsertRows();
 }
 
@@ -85,6 +101,42 @@ QString LogModel::toPlainText()
     }
     out.squeeze();
     return out;
+}
+
+QVector<std::tuple<int, int, int>> LogModel::search(QString text_to_search, bool use_regex) const
+{
+    QVector<std::tuple<int, int, int>> matches;
+
+    if (use_regex) {
+        QRegularExpression regex{ text_to_search };
+        regex.optimize();
+
+        if (!regex.isValid()) {
+            qCritical() << "Error in regex pattern:" << regex.errorString();
+            return {};
+        }
+
+        for (int i = 0; i < m_numLines; i++) {
+            auto matches_on_line = regex.globalMatch(m_content.at(i).line);
+            while (matches_on_line.hasNext()) {
+                auto match = matches_on_line.next();
+                for (int k = 0; k <= match.lastCapturedIndex(); k++)
+                    matches.append(std::make_tuple(i + 1, match.capturedStart(k), match.capturedEnd(k)));
+            }
+        }
+    } else {
+        for (int i = 0; i < m_numLines; i++) {
+            auto line = m_content.at(i).line;
+            int begin = -1;
+            do {
+                begin = line.indexOf(text_to_search, begin + 1);
+                if (begin >= 0)
+                    matches.append(std::make_tuple(i + 1, begin, begin + text_to_search.length()));
+            } while (begin >= 0);
+        }
+    }
+
+    return matches;
 }
 
 void LogModel::setMaxLines(int maxLines)
@@ -136,16 +188,4 @@ void LogModel::setStopOnOverflow(bool stop)
 void LogModel::setOverflowMessage(const QString& overflowMessage)
 {
     m_overflowMessage = overflowMessage;
-}
-
-void LogModel::setLineWrap(bool state)
-{
-    if (m_lineWrap != state) {
-        m_lineWrap = state;
-    }
-}
-
-bool LogModel::wrapLines() const
-{
-    return m_lineWrap;
 }

@@ -42,6 +42,7 @@
 #include <QFileSystemWatcher>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QMimeData>
 #include <QPair>
 #include <QSet>

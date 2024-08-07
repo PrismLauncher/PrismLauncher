@@ -56,6 +56,9 @@ void SystemTheme::apply(bool initial)
         return;
     }
 
+    this->changed_qqc_theme = !ThemeManager::usingQmlSystemTheme();
+    ThemeManager::writeGlobalQMLTheme();
+
     ITheme::apply(initial);
 }
 

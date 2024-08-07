@@ -18,10 +18,12 @@
  */
 #pragma once
 
+#include <QDebug>
+#include <QDir>
 #include <QString>
+#include <memory>
 
 #include "IconTheme.h"
-#include "ui/MainWindow.h"
 #include "ui/themes/CatPack.h"
 #include "ui/themes/ITheme.h"
 
@@ -49,11 +51,22 @@ class ThemeManager {
     void setIconTheme(const QString& name);
     void setApplicationTheme(const QString& name, bool initial = false);
 
+    [[nodiscard]] bool needsRestart() const;
+
     /// @brief Returns the background based on selected and with events (Birthday, XMas, etc.)
     /// @param catName Optional, if you need a specific background.
     /// @return
     QString getCatPack(QString catName = "");
     QList<CatPack*> getValidCatPacks();
+
+    /** Sets up the environment variables required for QQC themes to work properly.
+     *  This MUST be called before the Qt Application object is created.
+     */
+    static void bootstrapThemeEnvironment();
+
+    static void writeGlobalQMLTheme(const QString& conf_file_path = "");
+
+    static bool usingQmlSystemTheme() { return s_is_qml_system_theme; }
 
     void refresh();
 
@@ -66,10 +79,13 @@ class ThemeManager {
     std::map<QString, std::unique_ptr<CatPack>> m_cat_packs;
     QString currentlySelectedSystemTheme;
 
+    static bool s_is_qml_system_theme;
+
     void initializeThemes();
     void initializeCatPacks();
     QString addTheme(std::unique_ptr<ITheme> theme);
     ITheme* getTheme(QString themeId);
+
     QString addIconTheme(IconTheme theme);
     QString addCatPack(std::unique_ptr<CatPack> catPack);
     void initializeIcons();

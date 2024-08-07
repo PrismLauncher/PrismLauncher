@@ -358,6 +358,8 @@ Section "@Launcher_DisplayName@"
   File /r "imageformats"
   File /r "jars"
   File /r "platforms"
+  File /r "QtQml"
+  File /r "QtQuick"
   File /r "styles"
   File /nonfatal /r "tls"
 
@@ -450,6 +452,8 @@ Section "Uninstall"
   RMDir /r $INSTDIR\imageformats
   RMDir /r $INSTDIR\jars
   RMDir /r $INSTDIR\platforms
+  RMDir /r $INSTDIR\QtQml
+  RMDir /r $INSTDIR\QtQuick
   RMDir /r $INSTDIR\styles
   RMDir /r $INSTDIR\tls
 

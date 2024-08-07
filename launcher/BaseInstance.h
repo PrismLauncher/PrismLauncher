@@ -45,18 +45,16 @@
 #include <QSet>
 #include "QObjectPtr.h"
 
+#include "minecraft/auth/AuthSession.h"
 #include "settings/SettingsObject.h"
 
-#include "BaseVersionList.h"
-#include "MessageLevel.h"
-#include "minecraft/auth/MinecraftAccount.h"
 #include "pathmatcher/IPathMatcher.h"
-#include "settings/INIFile.h"
 
 #include "net/Mode.h"
 
 #include "RuntimeContext.h"
 #include "minecraft/launch/MinecraftServerTarget.h"
+#include "tasks/Task.h"
 
 class QDir;
 class Task;
@@ -147,9 +145,6 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     QString getManagedPackVersionName() const;
     void setManagedPack(const QString& type, const QString& id, const QString& name, const QString& versionId, const QString& version);
     void copyManagedPack(BaseInstance& other);
-
-    /// guess log level from a line of game log
-    virtual MessageLevel::Enum guessLevel([[maybe_unused]] const QString& line, MessageLevel::Enum level) { return level; }
 
     virtual QStringList extraArguments();
 

@@ -34,13 +34,17 @@
  */
 #pragma once
 
+#include <QDir>
 #include <QFileInfo>
+
 #include "ITheme.h"
 
 class CustomTheme : public ITheme {
    public:
-    CustomTheme(ITheme* baseTheme, QFileInfo& file, bool isManifest);
+    CustomTheme(ITheme* baseTheme, QFileInfo& file, QDir themeDir, bool isManifest);
     virtual ~CustomTheme() {}
+
+    void apply(bool initial) override;
 
     QString id() override;
     QString name() override;
@@ -54,7 +58,10 @@ class CustomTheme : public ITheme {
     QString qtTheme() override;
     QStringList searchPaths() override;
 
+    [[nodiscard]] QDir themeDirectory() const { return m_themeDirectory; }
+
    private: /* data */
+    QDir m_themeDirectory;
     QPalette m_palette;
     QColor m_fadeColor;
     double m_fadeAmount;

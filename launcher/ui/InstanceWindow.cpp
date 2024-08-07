@@ -61,6 +61,9 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget* parent) : QMainWin
     {
         setWindowIcon(icon);
         setWindowTitle(windowTitle);
+
+        // This is about the width required to have the log page be nicely laid out :-)
+        setMinimumWidth(620);
     }
 
     // Add page container

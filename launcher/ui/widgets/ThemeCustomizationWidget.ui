@@ -205,6 +205,16 @@
      </item>
     </layout>
    </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="QLabel" name="needsRestartLabel">
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#f5c211;&quot;&gt;Note&lt;/span&gt;&lt;span style=&quot; color:#f5c211;&quot;&gt;: This theme may set QML styles that can only get applied by restarting your application!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>

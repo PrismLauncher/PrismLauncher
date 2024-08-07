@@ -1,5 +1,6 @@
 set(CMAKE_MODULE_PATH "@CMAKE_MODULE_PATH@")
 file(GLOB_RECURSE    QTPLUGINS "${CMAKE_INSTALL_PREFIX}/@PLUGIN_DEST_DIR@/*@CMAKE_SHARED_LIBRARY_SUFFIX@")
+file(GLOB_RECURSE    QTQML     "${CMAKE_INSTALL_PREFIX}/@QML_DEST_DIR@/*@CMAKE_SHARED_LIBRARY_SUFFIX@")
 function(gp_resolved_file_type_override resolved_file type_var)
     if(resolved_file MATCHES "^/(usr/)?lib/libQt")
         set(${type_var} other PARENT_SCOPE)
@@ -22,5 +23,11 @@ set(gp_cmd_paths ${gp_cmd_paths}
 )
 
 include(BundleUtilities)
-fixup_bundle("@APPS@" "${QTPLUGINS}" "@DIRS@")
+fixup_bundle("@APPS@" "${QTPLUGINS};${QTQML}" "@DIRS@")
 
+if (UNIX AND APPLE)
+    # Fix doted Qt bundle paths for code signing
+    execute_process(
+      COMMAND "python3" "${CMAKE_SOURCE_DIR}/cmake/fix_macos_bundle.py" "@APPS@"
+    )
+endif()
