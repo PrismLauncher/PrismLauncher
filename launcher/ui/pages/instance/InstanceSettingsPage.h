@@ -70,6 +70,8 @@ class InstanceSettingsPage : public QWidget, public BasePage {
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();
     void on_maxMemSpinBox_valueChanged(int i);
+    void on_serverJoinAddressButton_toggled(bool checked);
+    void on_worldJoinButton_toggled(bool checked);
 
     void onUseNativeGLFWChanged(bool checked);
     void onUseNativeOpenALChanged(bool checked);
@@ -90,4 +92,5 @@ class InstanceSettingsPage : public QWidget, public BasePage {
     BaseInstance* m_instance;
     SettingsObjectPtr m_settings;
     unique_qobject_ptr<JavaCommon::TestCheck> checker;
+    bool m_world_quickplay_supported;
 };

@@ -129,6 +129,6 @@ void PrintInstanceInfo::executeTask()
 #endif
 
     logLines(log, MessageLevel::Launcher);
-    logLines(instance->verboseDescription(m_session, m_serverToJoin), MessageLevel::Launcher);
+    logLines(instance->verboseDescription(m_session, m_target_to_join), MessageLevel::Launcher);
     emitSucceeded();
 }

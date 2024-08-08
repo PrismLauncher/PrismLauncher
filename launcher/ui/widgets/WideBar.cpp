@@ -309,4 +309,17 @@ bool WideBar::checkHash(QByteArray const& old_hash) const
     return old_hash == getHash();
 }
 
+void WideBar::setActionVisible(QAction* action, bool visible)
+{
+    auto iter = getMatching(action);
+    if (iter == m_entries.end()) {
+        return;
+    }
+
+    iter->bar_action->setVisible(visible);
+
+    // NOTE: This is needed so that disabled actions get reflected on the button when it is made visible.
+    static_cast<ActionButton*>(widgetForAction(iter->bar_action))->actionChanged();
+}
+
 #include "WideBar.moc"
