@@ -113,6 +113,11 @@ void WorldListPage::openedImpl()
 {
     m_worlds->startWatching();
 
+    auto mInst = std::dynamic_pointer_cast<MinecraftInstance>(m_inst);
+    if (!mInst || !mInst->traits().contains("feature:is_quick_play_singleplayer")) {
+        ui->toolBar->removeAction(ui->actionJoin);
+    }
+
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     if (!APPLICATION->settings()->contains(setting_name))
         m_wide_bar_setting = APPLICATION->settings()->registerSetting(setting_name);
@@ -120,8 +125,6 @@ void WorldListPage::openedImpl()
         m_wide_bar_setting = APPLICATION->settings()->getSetting(setting_name);
 
     ui->toolBar->setVisibilityState(m_wide_bar_setting->get().toByteArray());
-    auto mInst = std::dynamic_pointer_cast<MinecraftInstance>(m_inst);
-    ui->toolBar->setActionVisible(ui->actionJoin, mInst && mInst->traits().contains("feature:is_quick_play_singleplayer"));
 }
 
 void WorldListPage::closedImpl()
@@ -341,9 +344,14 @@ void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[
     ui->actionDatapacks->setEnabled(enable);
     bool hasIcon = !index.data(WorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
+
     auto mInst = std::dynamic_pointer_cast<MinecraftInstance>(m_inst);
-    ui->actionJoin->setEnabled(enable);
-    ui->toolBar->setActionVisible(ui->actionJoin, mInst && mInst->traits().contains("feature:is_quick_play_singleplayer"));
+    auto supportsJoin = mInst && mInst->traits().contains("feature:is_quick_play_singleplayer");
+    ui->actionJoin->setEnabled(enable && supportsJoin);
+
+    if (!supportsJoin) {
+        ui->toolBar->removeAction(ui->actionJoin);
+    }
 }
 
 void WorldListPage::on_actionAdd_triggered()
