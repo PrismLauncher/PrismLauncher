@@ -608,7 +608,7 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
             // dlsym variant is only needed for OpenGL and not included in the vulkan layer
             appendLib("libMangoHud_dlsym.so");
             appendLib("libMangoHud_opengl.so");
-            appendLib(mangoHudLib.fileName());
+            preloadList << mangoHudLibString;
         }
 
         env.insert("LD_PRELOAD", preloadList.join(QLatin1String(":")));
