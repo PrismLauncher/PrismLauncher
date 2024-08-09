@@ -289,8 +289,8 @@ class Application : public QApplication {
     QString m_detectedGLFWPath;
     QString m_detectedOpenALPath;
     QString m_instanceIdToLaunch;
-    QString m_server_to_join;
-    QString m_world_to_join;
+    QString m_serverToJoin;
+    QString m_worldToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
     QList<QUrl> m_urlsToImport;

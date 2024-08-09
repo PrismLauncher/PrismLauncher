@@ -250,8 +250,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     parser.process(arguments());
 
     m_instanceIdToLaunch = parser.value("launch");
-    m_server_to_join = parser.value("server");
-    m_world_to_join = parser.value("world");
+    m_serverToJoin = parser.value("server");
+    m_worldToJoin = parser.value("world");
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
 
@@ -267,7 +267,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     // error if --launch is missing with --server or --profile
-    if (((!m_server_to_join.isEmpty() || !m_world_to_join.isEmpty()) || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty()) {
+    if (((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty()) || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty()) {
         std::cerr << "--server and --profile can only be used in combination with --launch!" << std::endl;
         m_status = Application::Failed;
         return;
@@ -385,10 +385,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
                 launch.command = "launch";
                 launch.args["id"] = m_instanceIdToLaunch;
 
-                if (!m_server_to_join.isEmpty()) {
-                    launch.args["server"] = m_server_to_join;
-                } else if (!m_world_to_join.isEmpty()) {
-                    launch.args["world"] = m_world_to_join;
+                if (!m_serverToJoin.isEmpty()) {
+                    launch.args["server"] = m_serverToJoin;
+                } else if (!m_worldToJoin.isEmpty()) {
+                    launch.args["world"] = m_worldToJoin;
                 }
                 if (!m_profileToUse.isEmpty()) {
                     launch.args["profile"] = m_profileToUse;
@@ -525,10 +525,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         if (!m_instanceIdToLaunch.isEmpty()) {
             qDebug() << "ID of instance to launch   : " << m_instanceIdToLaunch;
         }
-        if (!m_server_to_join.isEmpty()) {
-            qDebug() << "Address of server to join  :" << m_server_to_join;
-        } else if (!m_world_to_join.isEmpty()) {
-            qDebug() << "Name of the world to join  :" << m_world_to_join;
+        if (!m_serverToJoin.isEmpty()) {
+            qDebug() << "Address of server to join  :" << m_serverToJoin;
+        } else if (!m_worldToJoin.isEmpty()) {
+            qDebug() << "Name of the world to join  :" << m_worldToJoin;
         }
         qDebug() << "<> Paths set.";
     }
@@ -1167,13 +1167,13 @@ void Application::performMainStartupAction()
             MinecraftAccountPtr accountToUse = nullptr;
 
             qDebug() << "<> Instance" << m_instanceIdToLaunch << "launching";
-            if (!m_server_to_join.isEmpty()) {
+            if (!m_serverToJoin.isEmpty()) {
                 // FIXME: validate the server string
-                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_server_to_join, false)));
-                qDebug() << "   Launching with server" << m_server_to_join;
-            } else if (!m_world_to_join.isEmpty()) {
-                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_world_to_join, true)));
-                qDebug() << "   Launching with world" << m_world_to_join;
+                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_serverToJoin, false)));
+                qDebug() << "   Launching with server" << m_serverToJoin;
+            } else if (!m_worldToJoin.isEmpty()) {
+                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_worldToJoin, true)));
+                qDebug() << "   Launching with world" << m_worldToJoin;
             }
 
             if (!m_profileToUse.isEmpty()) {

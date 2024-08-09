@@ -62,7 +62,7 @@ class LaunchController : public Task {
 
     void setParentWidget(QWidget* widget) { m_parentWidget = widget; }
 
-    void setTargetToJoin(MinecraftTarget::Ptr targetToJoin) { m_target_to_join = std::move(targetToJoin); }
+    void setTargetToJoin(MinecraftTarget::Ptr targetToJoin) { m_targetToJoin = std::move(targetToJoin); }
 
     void setAccountToUse(MinecraftAccountPtr accountToUse) { m_accountToUse = std::move(accountToUse); }
 
@@ -94,5 +94,5 @@ class LaunchController : public Task {
     MinecraftAccountPtr m_accountToUse = nullptr;
     AuthSessionPtr m_session;
     shared_qobject_ptr<LaunchTask> m_launcher;
-    MinecraftTarget::Ptr m_target_to_join;
+    MinecraftTarget::Ptr m_targetToJoin;
 };

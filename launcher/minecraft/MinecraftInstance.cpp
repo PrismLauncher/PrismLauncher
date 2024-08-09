@@ -803,6 +803,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
 
     auto profile = m_components->getProfile();
 
+    // traits
     auto alltraits = traits();
     if (alltraits.size()) {
         out << "Traits:";
@@ -812,6 +813,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         out << "";
     }
 
+    // native libraries
     auto settings = this->settings();
     bool nativeOpenAL = settings->get("UseNativeOpenAL").toBool();
     bool nativeGLFW = settings->get("UseNativeGLFW").toBool();
@@ -847,6 +849,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         out << "";
     }
 
+    // mods and core mods
     auto printModList = [&](const QString& label, ModFolderModel& model) {
         if (model.size()) {
             out << QString("%1:").arg(label);
@@ -875,6 +878,7 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
     printModList("Mods", *(loaderModList().get()));
     printModList("Core Mods", *(coreModList().get()));
 
+    // jar mods
     auto& jarMods = profile->getJarMods();
     if (jarMods.size()) {
         out << "Jar Mods:";
@@ -890,11 +894,13 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, Minecr
         out << "";
     }
 
+    // minecraft arguments
     auto params = processMinecraftArgs(nullptr, targetToJoin);
     out << "Params:";
     out << "  " + params.join(' ');
     out << "";
 
+    // window size
     QString windowParams;
     if (settings->get("LaunchMaximized").toBool()) {
         out << "Window size: max (if available)";

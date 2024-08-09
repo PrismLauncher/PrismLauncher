@@ -24,7 +24,7 @@ class PrintInstanceInfo : public LaunchStep {
     Q_OBJECT
    public:
     explicit PrintInstanceInfo(LaunchTask* parent, AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
-        : LaunchStep(parent), m_session(session), m_target_to_join(targetToJoin) {};
+        : LaunchStep(parent), m_session(session), m_targetToJoin(targetToJoin) {};
     virtual ~PrintInstanceInfo() = default;
 
     virtual void executeTask();
@@ -32,5 +32,5 @@ class PrintInstanceInfo : public LaunchStep {
 
    private:
     AuthSessionPtr m_session;
-    MinecraftTarget::Ptr m_target_to_join;
+    MinecraftTarget::Ptr m_targetToJoin;
 };
