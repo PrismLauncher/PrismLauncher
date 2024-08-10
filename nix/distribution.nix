@@ -15,6 +15,7 @@
         (ourPackages)
         prismlauncher-unwrapped
         prismlauncher
+        prismlauncher-launchscript
         ;
       default = ourPackages.prismlauncher;
     };
@@ -32,6 +33,9 @@
       prismlauncher = prev.qt6Packages.callPackage ./pkg/wrapper.nix {
         inherit (final) prismlauncher-unwrapped;
       };
+
+      prismlauncher-launchscript-unwrapped = prev.callPackage ./pkg/launch-script.nix {};
+      prismlauncher-launchscript = prev.qt6Packages.callPackage ./pkg/wrapper.nix {prismlauncher-unwrapped = final.prismlauncher-launchscript-unwrapped;};
     };
   };
 }

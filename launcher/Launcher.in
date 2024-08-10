@@ -15,7 +15,8 @@ fi
 
 
 LAUNCHER_NAME=@Launcher_APP_BINARY_NAME@
-LAUNCHER_DIR="$(dirname "$(readlink -f "$0")")"
+DIR="$(dirname "$(readlink -f "$0")")"
+LAUNCHER_DIR=${LAUNCHER_DIR:-$DIR}
 echo "Launcher Dir: ${LAUNCHER_DIR}"
 
 # Set up env.
