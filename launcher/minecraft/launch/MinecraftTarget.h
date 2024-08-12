@@ -19,11 +19,11 @@
 
 #include <QString>
 
-struct MinecraftServerTarget {
+struct MinecraftTarget {
     QString address;
     quint16 port;
 
-    static MinecraftServerTarget parse(const QString& fullAddress);
+    QString world;
+    static MinecraftTarget parse(const QString& fullAddress, bool useWorld);
+    using Ptr = std::shared_ptr<MinecraftTarget>;
 };
-
-using MinecraftServerTargetPtr = std::shared_ptr<MinecraftServerTarget>;
