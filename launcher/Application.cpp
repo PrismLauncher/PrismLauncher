@@ -559,6 +559,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         m_settings->registerSetting("NumberOfConcurrentTasks", 10);
         m_settings->registerSetting("NumberOfConcurrentDownloads", 6);
+        m_settings->registerSetting("NumberOfManualRetries", 1);
         m_settings->registerSetting("RequestTimeout", 60);
 
         QString defaultMonospace;
@@ -662,6 +663,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // Minecraft mods
         m_settings->registerSetting("ModMetadataDisabled", false);
         m_settings->registerSetting("ModDependenciesDisabled", false);
+        m_settings->registerSetting("SkipModpackUpdatePrompt", false);
 
         // Minecraft offline player name
         m_settings->registerSetting("LastOfflinePlayerName", "");
@@ -816,7 +818,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_icons.reset(new IconList(instFolders, setting->get().toString()));
         connect(setting.get(), &Setting::SettingChanged,
                 [&](const Setting&, QVariant value) { m_icons->directoryChanged(value.toString()); });
-        qDebug() << "<> Instance icons intialized.";
+        qDebug() << "<> Instance icons initialized.";
     }
 
     // Themes

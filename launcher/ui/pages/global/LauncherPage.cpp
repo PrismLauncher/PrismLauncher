@@ -203,6 +203,7 @@ void LauncherPage::applySettings()
 
     s->set("NumberOfConcurrentTasks", ui->numberOfConcurrentTasksSpinBox->value());
     s->set("NumberOfConcurrentDownloads", ui->numberOfConcurrentDownloadsSpinBox->value());
+    s->set("NumberOfManualRetries", ui->numberOfManualRetriesSpinBox->value());
     s->set("RequestTimeout", ui->timeoutSecondsSpinBox->value());
 
     // Console settings
@@ -241,6 +242,7 @@ void LauncherPage::applySettings()
     // Mods
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
     s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
+    s->set("SkipModpackUpdatePrompt", ui->skipModpackUpdatePromptBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -260,6 +262,7 @@ void LauncherPage::loadSettings()
 
     ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
     ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
+    ui->numberOfManualRetriesSpinBox->setValue(s->get("NumberOfManualRetries").toInt());
     ui->timeoutSecondsSpinBox->setValue(s->get("RequestTimeout").toInt());
 
     // Console settings
@@ -303,6 +306,7 @@ void LauncherPage::loadSettings()
     ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
     ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
+    ui->skipModpackUpdatePromptBtn->setChecked(s->get("SkipModpackUpdatePrompt").toBool());
 }
 
 void LauncherPage::refreshFontPreview()
