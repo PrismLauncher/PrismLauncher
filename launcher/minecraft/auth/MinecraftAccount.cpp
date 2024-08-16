@@ -83,8 +83,6 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     account->data.yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
     account->data.yggdrasilToken.extra["userName"] = username;
     account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
-    account->data.minecraftEntitlement.ownsMinecraft = true;
-    account->data.minecraftEntitlement.canPlayMinecraft = true;
     account->data.minecraftProfile.id = uuidFromUsername(username).toString().remove(QRegularExpression("[{}-]"));
     account->data.minecraftProfile.name = username;
     account->data.minecraftProfile.validity = Validity::Certain;
@@ -253,6 +251,8 @@ void MinecraftAccount::fillSession(AuthSessionPtr session)
     session->player_name = data.profileName();
     // profile ID
     session->uuid = data.profileId();
+    if (session->uuid.isEmpty())
+        session->uuid = uuidFromUsername(session->player_name).toString().remove(QRegularExpression("[{}-]"));
     // 'legacy' or 'mojang', depending on account type
     session->user_type = typeString();
     if (!session->access_token.isEmpty()) {

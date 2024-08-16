@@ -815,25 +815,68 @@ QString NormalizePath(QString path)
     }
 }
 
-static const QString BAD_PATH_CHARS = "\"?<>:;*|!+\r\n";
-static const QString BAD_FILENAME_CHARS = BAD_PATH_CHARS + "\\/";
+static const QString BAD_WIN_CHARS = "<>:\"|?*\r\n";
+static const QString BAD_NTFS_CHARS = "<>:\"|?*";
+static const QString BAD_HFS_CHARS = ":";
+
+static const QString BAD_FILENAME_CHARS = BAD_WIN_CHARS + "\\/";
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith)
 {
     for (int i = 0; i < string.length(); i++)
         if (string.at(i) < ' ' || BAD_FILENAME_CHARS.contains(string.at(i)))
             string[i] = replaceWith;
-
     return string;
 }
 
-QString RemoveInvalidPathChars(QString string, QChar replaceWith)
+QString RemoveInvalidPathChars(QString path, QChar replaceWith)
 {
-    for (int i = 0; i < string.length(); i++)
-        if (string.at(i) < ' ' || BAD_PATH_CHARS.contains(string.at(i)))
-            string[i] = replaceWith;
+    QString invalidChars;
+#ifdef Q_OS_WIN
+    invalidChars = BAD_WIN_CHARS;
+#endif
 
-    return string;
+    // the null character is ignored in this check as it was not a problem until now
+    switch (statFS(path).fsType) {
+        case FilesystemType::FAT:  // similar to NTFS
+        /* fallthrough */
+        case FilesystemType::NTFS:
+        /* fallthrough */
+        case FilesystemType::REFS:  // similar to NTFS(should be available only on windows)
+            invalidChars += BAD_NTFS_CHARS;
+            break;
+        // case FilesystemType::EXT:
+        // case FilesystemType::EXT_2_OLD:
+        // case FilesystemType::EXT_2_3_4:
+        // case FilesystemType::XFS:
+        // case FilesystemType::BTRFS:
+        // case FilesystemType::NFS:
+        // case FilesystemType::ZFS:
+        case FilesystemType::APFS:
+        /* fallthrough */
+        case FilesystemType::HFS:
+        /* fallthrough */
+        case FilesystemType::HFSPLUS:
+        /* fallthrough */
+        case FilesystemType::HFSX:
+            invalidChars += BAD_HFS_CHARS;
+            break;
+        // case FilesystemType::FUSEBLK:
+        // case FilesystemType::F2FS:
+        // case FilesystemType::UNKNOWN:
+        default:
+            break;
+    }
+
+    if (invalidChars.size() != 0) {
+        for (int i = 0; i < path.length(); i++) {
+            if (path.at(i) < ' ' || invalidChars.contains(path.at(i))) {
+                path[i] = replaceWith;
+            }
+        }
+    }
+
+    return path;
 }
 
 QString DirNameFromString(QString string, QString inDir)
@@ -1648,4 +1691,30 @@ QString getPathNameInLocal8bit(const QString& file)
 }
 #endif
 
+QString getUniqueResourceName(const QString& filePath)
+{
+    auto newFileName = filePath;
+    if (!newFileName.endsWith(".disabled")) {
+        return newFileName;  // prioritize enabled mods
+    }
+    newFileName.chop(9);
+    if (!QFile::exists(newFileName)) {
+        return filePath;
+    }
+    QFileInfo fileInfo(filePath);
+    auto baseName = fileInfo.completeBaseName();
+    auto path = fileInfo.absolutePath();
+
+    int counter = 1;
+    do {
+        if (counter == 1) {
+            newFileName = FS::PathCombine(path, baseName + ".duplicate");
+        } else {
+            newFileName = FS::PathCombine(path, baseName + ".duplicate" + QString::number(counter));
+        }
+        counter++;
+    } while (QFile::exists(newFileName));
+
+    return newFileName;
+}
 }  // namespace FS

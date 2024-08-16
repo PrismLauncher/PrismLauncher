@@ -43,7 +43,7 @@ class ImgurUpload : public Net::NetRequest {
    public:
     class Sink : public Net::Sink {
        public:
-        Sink(ScreenShot::Ptr shot) : m_shot(shot){};
+        Sink(ScreenShot::Ptr shot) : m_shot(shot) {};
         virtual ~Sink() = default;
 
        public:
@@ -61,8 +61,6 @@ class ImgurUpload : public Net::NetRequest {
     virtual ~ImgurUpload() = default;
 
     static NetRequest::Ptr make(ScreenShot::Ptr m_shot);
-
-    void init() override;
 
    private:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;

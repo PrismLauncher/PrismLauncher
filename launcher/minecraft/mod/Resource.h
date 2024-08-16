@@ -1,3 +1,38 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
+
 #pragma once
 
 #include <QDateTime>
@@ -15,7 +50,7 @@ enum class ResourceType {
     LITEMOD,     //!< The resource is a litemod
 };
 
-enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER };
+enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER, SIZE, SIDE, LOADERS, MC_VERSIONS, RELEASE_TYPE };
 
 enum class EnableAction { ENABLE, DISABLE, TOGGLE };
 
@@ -45,6 +80,9 @@ class Resource : public QObject {
     [[nodiscard]] auto internal_id() const -> QString { return m_internal_id; }
     [[nodiscard]] auto type() const -> ResourceType { return m_type; }
     [[nodiscard]] bool enabled() const { return m_enabled; }
+    [[nodiscard]] auto getOriginalFileName() const -> QString;
+    [[nodiscard]] QString sizeStr() const { return m_size_str; }
+    [[nodiscard]] qint64 sizeInfo() const { return m_size_info; }
 
     [[nodiscard]] virtual auto name() const -> QString { return m_name; }
     [[nodiscard]] virtual bool valid() const { return m_type != ResourceType::UNKNOWN; }
@@ -53,10 +91,8 @@ class Resource : public QObject {
      *  > 0: 'this' comes after 'other'
      *  = 0: 'this' is equal to 'other'
      *  < 0: 'this' comes before 'other'
-     *
-     *  The second argument in the pair is true if the sorting type that decided which one is greater was 'type'.
      */
-    [[nodiscard]] virtual auto compare(Resource const& other, SortType type = SortType::NAME) const -> std::pair<int, bool>;
+    [[nodiscard]] virtual int compare(Resource const& other, SortType type = SortType::NAME) const;
 
     /** Returns whether the given filter should filter out 'this' (false),
      *  or if such filter includes the Resource (true).
@@ -117,4 +153,6 @@ class Resource : public QObject {
     bool m_is_resolving = false;
     bool m_is_resolved = false;
     int m_resolution_ticket = 0;
+    QString m_size_str;
+    qint64 m_size_info;
 };

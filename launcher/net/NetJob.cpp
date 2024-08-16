@@ -36,6 +36,7 @@
  */
 
 #include "NetJob.h"
+#include <QNetworkReply>
 #include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
 #if defined(LAUNCHER_APPLICATION)
@@ -43,11 +44,15 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #endif
 
-NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network) : ConcurrentTask(nullptr, job_name), m_network(network)
+NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent)
+    : ConcurrentTask(nullptr, job_name), m_network(network)
 {
 #if defined(LAUNCHER_APPLICATION)
-    setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+    if (max_concurrent < 0)
+        max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
 #endif
+    if (max_concurrent > 0)
+        setMaxConcurrent(max_concurrent);
 }
 
 auto NetJob::addNetAction(Net::NetRequest::Ptr action) -> bool
@@ -141,24 +146,44 @@ void NetJob::updateState()
                   .arg(QString::number(m_doing.count()), QString::number(m_done.count()), QString::number(totalSize())));
 }
 
+bool NetJob::isOnline()
+{
+    // check some errors that are ussually associated with the lack of internet
+    for (auto job : getFailedActions()) {
+        auto err = job->error();
+        if (err != QNetworkReply::HostNotFoundError && err != QNetworkReply::NetworkSessionFailedError) {
+            return true;
+        }
+    }
+    return false;
+};
+
 void NetJob::emitFailed(QString reason)
 {
 #if defined(LAUNCHER_APPLICATION)
-    auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
-                                                 "The tasks failed\n"
-                                                 "Failed urls\n" +
-                                                     getFailedFiles().join("\n\t") +
-                                                     "\n"
-                                                     "If this continues to happen please check the logs of the application"
-                                                     "Do you want to retry?",
-                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                        ->exec();
+    if (m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
+        m_manual_try++;
+        auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
+                                                     "The tasks failed.\n"
+                                                     "Failed urls\n" +
+                                                         getFailedFiles().join("\n\t") +
+                                                         ".\n"
+                                                         "If this continues to happen please check the logs of the application.\n"
+                                                         "Do you want to retry?",
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
 
-    if (response == QMessageBox::Yes) {
-        m_try = 0;
-        executeNextSubTask();
-        return;
+        if (response == QMessageBox::Yes) {
+            m_try = 0;
+            executeNextSubTask();
+            return;
+        }
     }
 #endif
     ConcurrentTask::emitFailed(reason);
+}
+
+void NetJob::setAskRetry(bool askRetry)
+{
+    m_ask_retry = askRetry;
 }

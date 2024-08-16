@@ -317,8 +317,10 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     if (QPixmapCache::find(url.toString(), &pixmap))
         return { pixmap };
 
-    if (!m_current_icon_job)
+    if (!m_current_icon_job) {
         m_current_icon_job.reset(new NetJob("IconJob", APPLICATION->network()));
+        m_current_icon_job->setAskRetry(false);
+    }
 
     if (m_currently_running_icon_actions.contains(url))
         return {};
@@ -410,12 +412,17 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
         m_search_state = SearchState::CanFetchMore;
     }
 
+    QList<ModPlatform::IndexedPack::Ptr> filteredNewList;
+    for (auto p : newList)
+        if (checkFilters(p))
+            filteredNewList << p;
+
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.size() == 0)
+    if (filteredNewList.size() == 0)
         return;
 
-    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + newList.size() - 1);
-    m_packs.append(newList);
+    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + filteredNewList.size() - 1);
+    m_packs.append(filteredNewList);
     endInsertRows();
 }
 
@@ -558,4 +565,8 @@ void ResourceModel::removePack(const QString& rem)
         ver.is_currently_selected = false;
 }
 
+bool ResourceModel::checkVersionFilters(const ModPlatform::IndexedVersion& v)
+{
+    return (!optedOut(v));
+}
 }  // namespace ResourceDownload

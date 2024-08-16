@@ -1,4 +1,5 @@
 #include "ModUpdateDialog.h"
+#include "Application.h"
 #include "ChooseProviderDialog.h"
 #include "CustomMessageBox.h"
 #include "ProgressDialog.h"
@@ -25,16 +26,14 @@
 
 #include <optional>
 
-static ModPlatform::ProviderCapabilities ProviderCaps;
-
 static std::list<Version> mcVersions(BaseInstance* inst)
 {
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
 
-static std::optional<ModPlatform::ModLoaderTypes> mcLoaders(BaseInstance* inst)
+static QList<ModPlatform::ModLoaderType> mcLoadersList(BaseInstance* inst)
 {
-    return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders() };
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoadersList();
 }
 
 ModUpdateDialog::ModUpdateDialog(QWidget* parent,
@@ -88,23 +87,21 @@ void ModUpdateDialog::checkCandidates()
     }
 
     auto versions = mcVersions(m_instance);
-    auto loaders = mcLoaders(m_instance);
+    auto loadersList = mcLoadersList(m_instance);
 
     SequentialTask check_task(m_parent, tr("Checking for updates"));
 
     if (!m_modrinth_to_update.empty()) {
-        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_mod_model));
-        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
-            m_failed_check_update.append({ mod, reason, recover_url });
-        });
+        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loadersList, m_mod_model));
+        connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this,
+                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({ mod, reason, recover_url }); });
         check_task.addTask(m_modrinth_check_task);
     }
 
     if (!m_flame_to_update.empty()) {
-        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_mod_model));
-        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this, [this](Mod* mod, QString reason, QUrl recover_url) {
-            m_failed_check_update.append({ mod, reason, recover_url });
-        });
+        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loadersList, m_mod_model));
+        connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this,
+                [this](Mod* mod, QString reason, QUrl recover_url) { m_failed_check_update.append({ mod, reason, recover_url }); });
         check_task.addTask(m_flame_check_task);
     }
 
@@ -427,7 +424,7 @@ void ModUpdateDialog::appendMod(CheckUpdateTask::UpdatableMod const& info, QStri
     item_top->setExpanded(true);
 
     auto provider_item = new QTreeWidgetItem(item_top);
-    provider_item->setText(0, tr("Provider: %1").arg(ProviderCaps.readableName(info.provider)));
+    provider_item->setText(0, tr("Provider: %1").arg(ModPlatform::ProviderCapabilities::readableName(info.provider)));
 
     auto old_version_item = new QTreeWidgetItem(item_top);
     old_version_item->setText(0, tr("Old version: %1").arg(info.old_version.isEmpty() ? tr("Not installed") : info.old_version));

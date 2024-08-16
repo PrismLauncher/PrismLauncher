@@ -25,7 +25,6 @@
 #include <QVariant>
 #include <QVector>
 #include <memory>
-#include <optional>
 
 class QIODevice;
 
@@ -40,13 +39,11 @@ enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
 
 enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 
-class ProviderCapabilities {
-   public:
-    auto name(ResourceProvider) -> const char*;
-    auto readableName(ResourceProvider) -> QString;
-    auto hashType(ResourceProvider) -> QStringList;
-    auto hash(ResourceProvider, QIODevice*, QString type = "") -> QString;
-};
+namespace ProviderCapabilities {
+const char* name(ResourceProvider);
+QString readableName(ResourceProvider);
+QStringList hashType(ResourceProvider);
+}  // namespace ProviderCapabilities
 
 struct ModpackAuthor {
     QString name;
@@ -109,6 +106,7 @@ struct IndexedVersion {
     bool is_preferred = true;
     QString changelog;
     QList<Dependency> dependencies;
+    QString side;  // this is for flame API
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
@@ -183,13 +181,19 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
-auto getModLoaderString(ModLoaderType type) -> const QString;
+auto getModLoaderAsString(ModLoaderType type) -> const QString;
+auto getModLoaderFromString(QString type) -> ModLoaderType;
 
 constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
 {
     auto x = static_cast<int>(l);
     return x && !(x & (x - 1));
 }
+
+struct Category {
+    QString name;
+    QString id;
+};
 
 }  // namespace ModPlatform
 

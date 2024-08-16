@@ -1,13 +1,13 @@
 [Desktop Entry]
 Version=1.0
-Name=Prism Launcher
-Comment=A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once.
+Name=@Launcher_DisplayName@
+Comment=Discover, manage, and play Minecraft instances
 Type=Application
 Terminal=false
 Exec=@Launcher_APP_BINARY_NAME@ %U
 StartupNotify=true
-Icon=org.prismlauncher.PrismLauncher
+Icon=org.@Launcher_APP_BINARY_NAME@.@Launcher_CommonName@
 Categories=Game;ActionGame;AdventureGame;Simulation;
 Keywords=game;minecraft;mc;
-StartupWMClass=PrismLauncher
-MimeType=application/zip;application/x-modrinth-modpack+zip;x-scheme-handler/curseforge;
+StartupWMClass=@Launcher_CommonName@
+MimeType=application/zip;application/x-modrinth-modpack+zip;x-scheme-handler/curseforge;x-scheme-handler/@Launcher_APP_BINARY_NAME@;

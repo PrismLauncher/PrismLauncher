@@ -173,6 +173,17 @@ void LauncherPage::on_downloadsDirBrowseBtn_clicked()
     }
 }
 
+void LauncherPage::on_skinsDirBrowseBtn_clicked()
+{
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Skins Folder"), ui->skinsDirTextBox->text());
+
+    // do not allow current dir - it's dirty. Do not allow dirs that don't exist
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
+        QString cooked_dir = FS::NormalizePath(raw_dir);
+        ui->skinsDirTextBox->setText(cooked_dir);
+    }
+}
+
 void LauncherPage::on_metadataDisableBtn_clicked()
 {
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
@@ -185,12 +196,15 @@ void LauncherPage::applySettings()
     // Updates
     if (APPLICATION->updater()) {
         APPLICATION->updater()->setAutomaticallyChecksForUpdates(ui->autoUpdateCheckBox->isChecked());
+        APPLICATION->updater()->setUpdateCheckInterval(ui->updateIntervalSpinBox->value() * 3600);
     }
 
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
 
     s->set("NumberOfConcurrentTasks", ui->numberOfConcurrentTasksSpinBox->value());
     s->set("NumberOfConcurrentDownloads", ui->numberOfConcurrentDownloadsSpinBox->value());
+    s->set("NumberOfManualRetries", ui->numberOfManualRetriesSpinBox->value());
+    s->set("RequestTimeout", ui->timeoutSecondsSpinBox->value());
 
     // Console settings
     s->set("ShowConsole", ui->showConsoleCheck->isChecked());
@@ -208,6 +222,7 @@ void LauncherPage::applySettings()
     s->set("CentralModsDir", ui->modsDirTextBox->text());
     s->set("IconsDir", ui->iconsDirTextBox->text());
     s->set("DownloadsDir", ui->downloadsDirTextBox->text());
+    s->set("SkinsDir", ui->skinsDirTextBox->text());
     s->set("DownloadsDirWatchRecursive", ui->downloadsDirWatchRecursiveCheckBox->isChecked());
 
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
@@ -227,6 +242,7 @@ void LauncherPage::applySettings()
     // Mods
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
     s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
+    s->set("SkipModpackUpdatePrompt", ui->skipModpackUpdatePromptBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -234,6 +250,7 @@ void LauncherPage::loadSettings()
     // Updates
     if (APPLICATION->updater()) {
         ui->autoUpdateCheckBox->setChecked(APPLICATION->updater()->getAutomaticallyChecksForUpdates());
+        ui->updateIntervalSpinBox->setValue(APPLICATION->updater()->getUpdateCheckInterval() / 3600);
     }
 
     // Toolbar/menu bar settings (not applicable if native menu bar is present)
@@ -245,6 +262,8 @@ void LauncherPage::loadSettings()
 
     ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
     ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
+    ui->numberOfManualRetriesSpinBox->setValue(s->get("NumberOfManualRetries").toInt());
+    ui->timeoutSecondsSpinBox->setValue(s->get("RequestTimeout").toInt());
 
     // Console settings
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
@@ -269,6 +288,7 @@ void LauncherPage::loadSettings()
     ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
     ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
     ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
+    ui->skinsDirTextBox->setText(s->get("SkinsDir").toString());
     ui->downloadsDirWatchRecursiveCheckBox->setChecked(s->get("DownloadsDirWatchRecursive").toBool());
 
     QString sortMode = s->get("InstSortMode").toString();
@@ -286,6 +306,7 @@ void LauncherPage::loadSettings()
     ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
     ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
+    ui->skipModpackUpdatePromptBtn->setChecked(s->get("SkipModpackUpdatePrompt").toBool());
 }
 
 void LauncherPage::refreshFontPreview()

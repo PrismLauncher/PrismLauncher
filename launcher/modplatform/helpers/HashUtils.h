@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QCryptographicHash>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <QString>
 
 #include "modplatform/ModIndex.h"
@@ -7,61 +10,42 @@
 
 namespace Hashing {
 
+enum class Algorithm { Md4, Md5, Sha1, Sha256, Sha512, Murmur2, Unknown };
+
+QString algorithmToString(Algorithm type);
+Algorithm algorithmFromString(QString type);
+QString hash(QIODevice* device, Algorithm type);
+QString hash(QString fileName, Algorithm type);
+QString hash(QByteArray data, Algorithm type);
+
 class Hasher : public Task {
     Q_OBJECT
    public:
     using Ptr = shared_qobject_ptr<Hasher>;
 
-    Hasher(QString file_path) : m_path(std::move(file_path)) {}
+    Hasher(QString file_path, Algorithm alg) : m_path(file_path), m_alg(alg) {}
+    Hasher(QString file_path, QString alg) : Hasher(file_path, algorithmFromString(alg)) {}
 
-    /* We can't really abort this task, but we can say we aborted and finish our thing quickly :) */
-    bool abort() override { return true; }
+    bool abort() override;
 
-    void executeTask() override = 0;
+    void executeTask() override;
 
-    QString getResult() const { return m_hash; };
+    QString getResult() const { return m_result; };
     QString getPath() const { return m_path; };
 
    signals:
     void resultsReady(QString hash);
 
-   protected:
-    QString m_hash;
-    QString m_path;
-};
-
-class FlameHasher : public Hasher {
-   public:
-    FlameHasher(QString file_path) : Hasher(file_path) { setObjectName(QString("FlameHasher: %1").arg(file_path)); }
-
-    void executeTask() override;
-};
-
-class ModrinthHasher : public Hasher {
-   public:
-    ModrinthHasher(QString file_path) : Hasher(file_path) { setObjectName(QString("ModrinthHasher: %1").arg(file_path)); }
-
-    void executeTask() override;
-};
-
-class BlockedModHasher : public Hasher {
-   public:
-    BlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider);
-
-    void executeTask() override;
-
-    QStringList getHashTypes();
-    bool useHashType(QString type);
-
    private:
-    ModPlatform::ResourceProvider provider;
-    QString hash_type;
+    QString m_result;
+    QString m_path;
+    Algorithm m_alg;
+
+    QFuture<QString> m_future;
+    QFutureWatcher<QString> m_watcher;
 };
 
 Hasher::Ptr createHasher(QString file_path, ModPlatform::ResourceProvider provider);
-Hasher::Ptr createFlameHasher(QString file_path);
-Hasher::Ptr createModrinthHasher(QString file_path);
-Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider);
-Hasher::Ptr createBlockedModHasher(QString file_path, ModPlatform::ResourceProvider provider, QString type);
+Hasher::Ptr createHasher(QString file_path, QString type);
 
 }  // namespace Hashing

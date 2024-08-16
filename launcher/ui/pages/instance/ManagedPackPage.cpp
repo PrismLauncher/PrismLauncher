@@ -371,7 +371,7 @@ void ModrinthManagedPackPage::update()
 
 void ModrinthManagedPackPage::updateFromFile()
 {
-    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "Modrinth pack (*.mrpack *.zip)");
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), tr("Modrinth pack") + " (*.mrpack *.zip)");
     if (output.isEmpty())
         return;
     QMap<QString, QString> extra_info;
@@ -538,7 +538,7 @@ void FlameManagedPackPage::update()
 
 void FlameManagedPackPage::updateFromFile()
 {
-    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "CurseForge pack (*.zip)");
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), tr("CurseForge pack") + " (*.zip)");
     if (output.isEmpty())
         return;
 

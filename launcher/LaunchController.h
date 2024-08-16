@@ -39,7 +39,7 @@
 #include <QObject>
 
 #include "minecraft/auth/MinecraftAccount.h"
-#include "minecraft/launch/MinecraftServerTarget.h"
+#include "minecraft/launch/MinecraftTarget.h"
 
 class InstanceWindow;
 class LaunchController : public Task {
@@ -48,7 +48,7 @@ class LaunchController : public Task {
     void executeTask() override;
 
     LaunchController(QObject* parent = nullptr);
-    virtual ~LaunchController(){};
+    virtual ~LaunchController() = default;
 
     void setInstance(InstancePtr instance) { m_instance = instance; }
 
@@ -62,7 +62,7 @@ class LaunchController : public Task {
 
     void setParentWidget(QWidget* widget) { m_parentWidget = widget; }
 
-    void setServerToJoin(MinecraftServerTargetPtr serverToJoin) { m_serverToJoin = std::move(serverToJoin); }
+    void setTargetToJoin(MinecraftTarget::Ptr targetToJoin) { m_targetToJoin = std::move(targetToJoin); }
 
     void setAccountToUse(MinecraftAccountPtr accountToUse) { m_accountToUse = std::move(accountToUse); }
 
@@ -74,6 +74,8 @@ class LaunchController : public Task {
     void login();
     void launchInstance();
     void decideAccount();
+    bool askPlayDemo();
+    QString askOfflineName(QString playerName, bool demo, bool& ok);
 
    private slots:
     void readyForLaunch();
@@ -92,5 +94,5 @@ class LaunchController : public Task {
     MinecraftAccountPtr m_accountToUse = nullptr;
     AuthSessionPtr m_session;
     shared_qobject_ptr<LaunchTask> m_launcher;
-    MinecraftServerTargetPtr m_serverToJoin;
+    MinecraftTarget::Ptr m_targetToJoin;
 };

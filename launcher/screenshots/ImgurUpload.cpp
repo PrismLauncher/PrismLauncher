@@ -36,7 +36,7 @@
 
 #include "ImgurUpload.h"
 #include "BuildConfig.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/RawHeaderProxy.h"
 
 #include <QDebug>
 #include <QFile>
@@ -46,15 +46,6 @@
 #include <QJsonObject>
 #include <QNetworkRequest>
 #include <QUrl>
-
-void ImgurUpload::init()
-{
-    qDebug() << "Setting up imgur upload";
-    auto api_headers = new Net::StaticHeaderProxy(
-        QList<Net::HeaderPair>{ { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toStdString().c_str() },
-                                { "Accept", "application/json" } });
-    addHeaderProxy(api_headers);
-}
 
 QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
 {
@@ -70,25 +61,25 @@ QNetworkReply* ImgurUpload::getReply(QNetworkRequest& request)
     QHttpPart filePart;
     filePart.setBodyDevice(file);
     filePart.setHeader(QNetworkRequest::ContentTypeHeader, "image/png");
-    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"image\"");
+    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"image\"; filename=\"" + file->fileName() + "\"");
     multipart->append(filePart);
     QHttpPart typePart;
     typePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"type\"");
     typePart.setBody("file");
     multipart->append(typePart);
     QHttpPart namePart;
-    namePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"name\"");
+    namePart.setHeader(QNetworkRequest::ContentDispositionHeader, "form-data; name=\"title\"");
     namePart.setBody(m_fileInfo.baseName().toUtf8());
     multipart->append(namePart);
 
     return m_network->post(request, multipart);
-};
+}
 
 auto ImgurUpload::Sink::init(QNetworkRequest& request) -> Task::State
 {
     m_output.clear();
     return Task::State::Running;
-};
+}
 
 auto ImgurUpload::Sink::write(QByteArray& data) -> Task::State
 {
@@ -124,7 +115,9 @@ auto ImgurUpload::Sink::finalize(QNetworkReply&) -> Task::State
 Net::NetRequest::Ptr ImgurUpload::make(ScreenShot::Ptr m_shot)
 {
     auto up = makeShared<ImgurUpload>(m_shot->m_file);
-    up->m_url = std::move(BuildConfig.IMGUR_BASE_URL + "upload.json");
+    up->m_url = std::move(BuildConfig.IMGUR_BASE_URL + "image");
     up->m_sink.reset(new Sink(m_shot));
+    up->addHeaderProxy(new Net::RawHeaderProxy(QList<Net::HeaderPair>{
+        { "Authorization", QString("Client-ID %1").arg(BuildConfig.IMGUR_CLIENT_ID).toUtf8() }, { "Accept", "application/json" } }));
     return up;
 }

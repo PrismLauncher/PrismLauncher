@@ -15,8 +15,15 @@
 
 #pragma once
 
-#include <QPixmap>
+#include <memory>
 
-namespace SkinUtils {
-QPixmap getFaceFromCache(QString id, int height = 64, int width = 64);
-}
+#include <QString>
+
+struct MinecraftTarget {
+    QString address;
+    quint16 port;
+
+    QString world;
+    static MinecraftTarget parse(const QString& fullAddress, bool useWorld);
+    using Ptr = std::shared_ptr<MinecraftTarget>;
+};

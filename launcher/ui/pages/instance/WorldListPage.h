@@ -53,7 +53,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     Q_OBJECT
 
    public:
-    explicit WorldListPage(BaseInstance* inst, std::shared_ptr<WorldList> worlds, QWidget* parent = 0);
+    explicit WorldListPage(InstancePtr inst, std::shared_ptr<WorldList> worlds, QWidget* parent = 0);
     virtual ~WorldListPage();
 
     virtual QString displayName() const override { return tr("Worlds"); }
@@ -72,7 +72,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     QMenu* createPopupMenu() override;
 
    protected:
-    BaseInstance* m_inst;
+    InstancePtr m_inst;
 
    private:
     QModelIndex getSelectedWorld();
@@ -101,6 +101,7 @@ class WorldListPage : public QMainWindow, public BasePage {
     void on_actionReset_Icon_triggered();
     void worldChanged(const QModelIndex& current, const QModelIndex& previous);
     void mceditState(LoggedProcess::State state);
+    void on_actionJoin_triggered();
 
     void ShowContextMenu(const QPoint& pos);
 };

@@ -16,6 +16,7 @@
 #include "FileSystem.h"
 
 #include "QVariantUtils.h"
+#include "StringUtils.h"
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 
 #include "settings/Setting.h"
@@ -214,9 +215,6 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
         }
 
         auto new_id = resource->internal_id();
-        if (m_resources_index.contains(new_id)) {
-            // FIXME: https://github.com/PolyMC/PolyMC/issues/550
-        }
 
         m_resources_index.remove(old_id);
         m_resources_index[new_id] = row;
@@ -281,8 +279,7 @@ void ResourceFolderModel::resolveResource(Resource* res)
 
     connect(
         task.get(), &Task::succeeded, this, [=] { onParseSucceeded(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
-    connect(
-        task.get(), &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
+    connect(task.get(), &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
     connect(
         task.get(), &Task::finished, this,
         [=] {
@@ -416,15 +413,17 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
     switch (role) {
         case Qt::DisplayRole:
             switch (column) {
-                case NAME_COLUMN:
+                case NameColumn:
                     return m_resources[row]->name();
-                case DATE_COLUMN:
+                case DateColumn:
                     return m_resources[row]->dateTimeChanged();
+                case SizeColumn:
+                    return m_resources[row]->sizeStr();
                 default:
                     return {};
             }
         case Qt::ToolTipRole:
-            if (column == NAME_COLUMN) {
+            if (column == NameColumn) {
                 if (at(row).isSymLinkUnder(instDirPath())) {
                     return m_resources[row]->internal_id() +
                            tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
@@ -440,14 +439,14 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
 
             return m_resources[row]->internal_id();
         case Qt::DecorationRole: {
-            if (column == NAME_COLUMN && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
+            if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
 
             return {};
         }
         case Qt::CheckStateRole:
             switch (column) {
-                case ACTIVE_COLUMN:
+                case ActiveColumn:
                     return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
                 default:
                     return {};
@@ -486,24 +485,27 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
     switch (role) {
         case Qt::DisplayRole:
             switch (section) {
-                case ACTIVE_COLUMN:
-                case NAME_COLUMN:
-                case DATE_COLUMN:
+                case ActiveColumn:
+                case NameColumn:
+                case DateColumn:
+                case SizeColumn:
                     return columnNames().at(section);
                 default:
                     return {};
             }
         case Qt::ToolTipRole: {
             switch (section) {
-                case ACTIVE_COLUMN:
+                case ActiveColumn:
                     //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
                     return tr("Is the resource enabled?");
-                case NAME_COLUMN:
+                case NameColumn:
                     //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
                     return tr("The name of the resource.");
-                case DATE_COLUMN:
+                case DateColumn:
                     //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
                     return tr("The date and time this resource was last changed (or added).");
+                case SizeColumn:
+                    return tr("The size of the resource.");
                 default:
                     return {};
             }
@@ -533,6 +535,10 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
 
 void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
+    for (auto i = 0; i < m_columnsHiddenByDefault.size(); ++i) {
+        tree->setColumnHidden(i, m_columnsHiddenByDefault[i]);
+    }
+
     auto const setting_name = QString("UI/%1_Page/Columns").arg(id());
     auto setting = (m_instance->settings()->contains(setting_name)) ? m_instance->settings()->getSetting(setting_name)
                                                                     : m_instance->settings()->registerSetting(setting_name);
@@ -610,12 +616,10 @@ SortType ResourceFolderModel::columnToSortKey(size_t column) const
     auto const& resource_right = model->at(source_right.row());
 
     auto compare_result = resource_left.compare(resource_right, column_sort_key);
-    if (compare_result.first == 0)
+    if (compare_result == 0)
         return QSortFilterProxyModel::lessThan(source_left, source_right);
 
-    if (compare_result.second || sortOrder() != Qt::DescendingOrder)
-        return (compare_result.first < 0);
-    return (compare_result.first > 0);
+    return compare_result < 0;
 }
 
 QString ResourceFolderModel::instDirPath() const

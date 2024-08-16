@@ -44,7 +44,7 @@ namespace Net {
 class ChecksumValidator : public Validator {
    public:
     ChecksumValidator(QCryptographicHash::Algorithm algorithm, QByteArray expected = QByteArray())
-        : m_checksum(algorithm), m_expected(expected){};
+        : m_checksum(algorithm), m_expected(expected) {};
     virtual ~ChecksumValidator() = default;
 
    public:
@@ -60,7 +60,11 @@ class ChecksumValidator : public Validator {
         return true;
     }
 
-    auto abort() -> bool override { return true; }
+    auto abort() -> bool override
+    {
+        m_checksum.reset();
+        return true;
+    }
 
     auto validate(QNetworkReply&) -> bool override
     {

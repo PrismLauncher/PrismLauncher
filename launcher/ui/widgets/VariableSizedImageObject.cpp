@@ -80,7 +80,7 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
 {
     if (!format.hasProperty(ImageData)) {
         QUrl image_url{ qvariant_cast<QString>(format.property(QTextFormat::ImageName)) };
-        if (m_fetching_images.contains(image_url))
+        if (m_fetching_images.contains(image_url) || image_url.isEmpty())
             return;
 
         auto meta = std::make_shared<ImageMetadata>();
@@ -140,6 +140,7 @@ void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<Ima
         QString("images/%1").arg(QString(QCryptographicHash::hash(meta->url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
 
     auto job = new NetJob(QString("Load Image: %1").arg(meta->url.fileName()), APPLICATION->network());
+    job->setAskRetry(false);
     job->addNetAction(Net::ApiDownload::makeCached(meta->url, entry));
 
     auto full_entry_path = entry->getFullPath();
