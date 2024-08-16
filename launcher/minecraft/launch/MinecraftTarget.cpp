@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 
-#include "MinecraftServerTarget.h"
+#include "MinecraftTarget.h"
 
 #include <QStringList>
 
 // FIXME: the way this is written, it can't ever do any sort of validation and can accept total junk
-MinecraftServerTarget MinecraftServerTarget::parse(const QString& fullAddress)
+MinecraftTarget MinecraftTarget::parse(const QString& fullAddress, bool useWorld)
 {
+    if (useWorld) {
+        MinecraftTarget target;
+        target.world = fullAddress;
+        return target;
+    }
     QStringList split = fullAddress.split(":");
 
     // The logic below replicates the exact logic minecraft uses for parsing server addresses.
@@ -56,5 +61,5 @@ MinecraftServerTarget MinecraftServerTarget::parse(const QString& fullAddress)
         }
     }
 
-    return MinecraftServerTarget{ realAddress, realPort };
+    return MinecraftTarget{ realAddress, realPort };
 }

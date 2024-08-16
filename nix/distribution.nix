@@ -24,9 +24,8 @@
     overlays.default = final: prev: let
       version = builtins.substring 0 8 self.lastModifiedDate or "dirty";
     in {
-      prismlauncher-unwrapped = prev.qt6Packages.callPackage ./pkg {
+      prismlauncher-unwrapped = prev.callPackage ./pkg {
         inherit (inputs) libnbtplusplus;
-        inherit ((final.darwin or prev.darwin).apple_sdk.frameworks) Cocoa;
         inherit version;
       };
 
