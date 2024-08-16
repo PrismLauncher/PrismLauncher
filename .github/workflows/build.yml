@@ -73,7 +73,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ""
-            qt_version: "6.7.1"
+            qt_version: "6.7.2"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: windows-2022
@@ -84,7 +84,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: "win64_msvc2019_arm64"
-            qt_version: "6.7.1"
+            qt_version: "6.7.2"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: macos-12
@@ -93,7 +93,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ""
-            qt_version: "6.7.1"
+            qt_version: "6.7.2"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: macos-12
@@ -154,7 +154,7 @@ jobs:
 
       - name: Setup ccache
         if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
-        uses: hendrikmuhs/ccache-action@v1.2.13
+        uses: hendrikmuhs/ccache-action@v1.2.14
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
 
