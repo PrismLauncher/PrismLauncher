@@ -250,7 +250,7 @@ void FlamePage::onVersionSelectionChanged(int index)
         return;
     }
 
-    m_selected_version_index = ui->versionSelectionBox->currentIndex();
+    m_selected_version_index = index;
 
     Q_ASSERT(current.versions.at(m_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
 
