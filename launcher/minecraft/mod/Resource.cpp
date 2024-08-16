@@ -197,3 +197,11 @@ bool Resource::isMoreThanOneHardLink() const
 {
     return FS::hardLinkCount(m_file_info.absoluteFilePath()) > 1;
 }
+
+auto Resource::getOriginalFileName() const -> QString
+{
+    auto fileName = m_file_info.fileName();
+    if (!m_enabled)
+        fileName.chop(9);
+    return fileName;
+}
