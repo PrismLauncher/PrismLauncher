@@ -276,6 +276,13 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("OnlineFixes");
     }
 
+    // Global folders
+    m_settings->set("UseGlobalScreenshotsFolder", ui->useGlobalScreenshotsFolder->isChecked());
+    m_settings->set("UseGlobalSavesFolder", ui->useGlobalSavesFolder->isChecked());
+    m_settings->set("UseGlobalResourcePacksFolder", ui->useGlobalResourcePacksFolder->isChecked());
+
+    m_instance->applySettings();
+
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -386,6 +393,10 @@ void InstanceSettingsPage::loadSettings()
 
     ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
     ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
+
+    ui->useGlobalScreenshotsFolder->setChecked(m_settings->get("UseGlobalScreenshotsFolder").toBool());
+    ui->useGlobalSavesFolder->setChecked(m_settings->get("UseGlobalSavesFolder").toBool());
+    ui->useGlobalResourcePacksFolder->setChecked(m_settings->get("UseGlobalResourcePacksFolder").toBool());
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -25,6 +25,13 @@
      <number>0</number>
     </property>
     <item>
+     <widget class="QLabel" name="globalSavesFolderWarninglabel">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#f5c211;&quot;&gt;Warning: This is the global saves folder&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QTreeView" name="worldTreeView">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -36,7 +43,7 @@
        <bool>true</bool>
       </property>
       <property name="dragDropMode">
-       <enum>QAbstractItemView::DragDrop</enum>
+       <enum>QAbstractItemView::DragDropMode::DragDrop</enum>
       </property>
       <property name="alternatingRowColors">
        <bool>true</bool>
@@ -65,10 +72,10 @@
     <string>Actions</string>
    </property>
    <property name="allowedAreas">
-    <set>Qt::LeftToolBarArea|Qt::RightToolBarArea</set>
+    <set>Qt::ToolBarArea::LeftToolBarArea|Qt::ToolBarArea::RightToolBarArea</set>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextOnly</enum>
+    <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
    </property>
    <property name="floatable">
     <bool>false</bool>

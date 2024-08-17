@@ -285,6 +285,16 @@ bool ensureFolderPathExists(const QString folderPathName)
     return ensureFolderPathExists(QFileInfo(folderPathName));
 }
 
+bool checkFolderPathExists(const QString& folderPathName)
+{
+    return QDir(folderPathName).exists();
+}
+
+bool checkFolderPathEmpty(const QString& folderPathName)
+{
+    return QDir(folderPathName).isEmpty(QDir::Filters(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System));
+}
+
 bool copyFileAttributes(QString src, QString dst)
 {
 #ifdef Q_OS_WIN32
@@ -1716,5 +1726,15 @@ QString getUniqueResourceName(const QString& filePath)
     } while (QFile::exists(newFileName));
 
     return newFileName;
+}
+
+bool isSymLink(const QString& path)
+{
+    return QFileInfo(path).isSymLink();
+}
+
+QString getSymLinkTarget(const QString& path)
+{
+    return QFileInfo(path).symLinkTarget();
 }
 }  // namespace FS

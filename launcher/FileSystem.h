@@ -100,6 +100,20 @@ bool ensureFolderPathExists(const QFileInfo folderPath);
 bool ensureFolderPathExists(const QString folderPathName);
 
 /**
+ * @brief Check if the given folder exists
+ * @param folderPathName The path to a folder to check
+ * @return True if the given folder exists
+ */
+bool checkFolderPathExists(const QString& folderPathName);
+
+/**
+ * @brief Check if the given folder is empty or doesn't exist
+ * @param folderPathName The path to a folder to check
+ * @return True if the given folder is empty or doesn't exist
+ */
+bool checkFolderPathEmpty(const QString& folderPathName);
+
+/**
  * @brief Copies a directory and it's contents from src to dest
  */
 class copy : public QObject {
@@ -561,5 +575,19 @@ QString getPathNameInLocal8bit(const QString& file);
 #endif
 
 QString getUniqueResourceName(const QString& filePath);
+
+/**
+ * @brief Check if a file or folder is a symbolic link
+ * @param path The path to check
+ * @return True if the object exists and is an symbolic link
+ */
+bool isSymLink(const QString& path);
+
+/**
+ * @brief Get the target of a symbolic link
+ * @param path The path to check
+ * @return The target of a symbolic link. Empty if path is not a symbolic link.
+ */
+QString getSymLinkTarget(const QString& path);
 
 }  // namespace FS

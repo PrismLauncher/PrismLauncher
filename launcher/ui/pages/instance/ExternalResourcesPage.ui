@@ -60,10 +60,17 @@
        <bool>true</bool>
       </property>
       <property name="dragDropMode">
-       <enum>QAbstractItemView::DropOnly</enum>
+       <enum>QAbstractItemView::DragDropMode::DropOnly</enum>
       </property>
       <property name="uniformRowHeights">
        <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" colspan="3">
+     <widget class="QLabel" name="isSymlinkWarning">
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#f5c211;&quot;&gt;Warning: This is the global folder&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </item>
@@ -74,7 +81,7 @@
     <string>Actions</string>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextOnly</enum>
+    <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
    </property>
    <property name="useDefaultAction" stdset="0">
     <bool>true</bool>
@@ -185,6 +192,11 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>WideBar</class>
+   <extends>QToolBar</extends>
+   <header>ui/widgets/WideBar.h</header>
+  </customwidget>
+  <customwidget>
    <class>ModListView</class>
    <extends>QTreeView</extends>
    <header>ui/widgets/ModListView.h</header>
@@ -194,11 +206,6 @@
    <extends>QFrame</extends>
    <header>ui/widgets/InfoFrame.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>WideBar</class>
-   <extends>QToolBar</extends>
-   <header>ui/widgets/WideBar.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

@@ -105,6 +105,11 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("ManagedPackVersionName", "");
 
     m_settings->registerSetting("Profiler", "");
+
+    // Global folders
+    m_settings->registerSetting("UseGlobalScreenshotsFolder", false);
+    m_settings->registerSetting("UseGlobalSavesFolder", false);
+    m_settings->registerSetting("UseGlobalResourcePacksFolder", false);
 }
 
 QString BaseInstance::getPreLaunchCommand()

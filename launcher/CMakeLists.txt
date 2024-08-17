@@ -302,6 +302,8 @@ set(MINECRAFT_SOURCES
     minecraft/Library.cpp
     minecraft/Library.h
     minecraft/MojangDownloadInfo.h
+    minecraft/UpdateGlobalDirectoriesTask.cpp
+    minecraft/UpdateGlobalDirectoriesTask.h
     minecraft/VanillaInstanceCreationTask.cpp
     minecraft/VanillaInstanceCreationTask.h
     minecraft/VersionFile.cpp
