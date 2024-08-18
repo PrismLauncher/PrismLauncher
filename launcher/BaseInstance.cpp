@@ -48,6 +48,7 @@
 #include "settings/OverrideSetting.h"
 #include "settings/Setting.h"
 
+#include "Application.h"
 #include "BuildConfig.h"
 #include "Commandline.h"
 #include "FileSystem.h"
@@ -108,8 +109,11 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
 
     // Global folders
     m_settings->registerSetting("UseGlobalScreenshotsFolder", false);
+    m_settings->registerSetting("GlobalScreenshotsPath", FS::PathCombine(APPLICATION->dataRoot(), "screenshots"));
     m_settings->registerSetting("UseGlobalSavesFolder", false);
+    m_settings->registerSetting("GlobalSavesPath", FS::PathCombine(APPLICATION->dataRoot(), "saves"));
     m_settings->registerSetting("UseGlobalResourcePacksFolder", false);
+    m_settings->registerSetting("GlobalResourcePacksPath", FS::PathCombine(APPLICATION->dataRoot(), "resourcepacks"));
 }
 
 QString BaseInstance::getPreLaunchCommand()

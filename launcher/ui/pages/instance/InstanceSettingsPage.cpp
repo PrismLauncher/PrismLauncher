@@ -277,9 +277,12 @@ void InstanceSettingsPage::applySettings()
     }
 
     // Global folders
-    m_settings->set("UseGlobalScreenshotsFolder", ui->useGlobalScreenshotsFolder->isChecked());
-    m_settings->set("UseGlobalSavesFolder", ui->useGlobalSavesFolder->isChecked());
-    m_settings->set("UseGlobalResourcePacksFolder", ui->useGlobalResourcePacksFolder->isChecked());
+    m_settings->set("UseGlobalScreenshotsFolder", ui->globalScreenshotsFolder->isEnabled());
+    m_settings->set("GlobalScreenshotsPath", ui->globalScreenshotsFolder->getPath());
+    m_settings->set("UseGlobalSavesFolder", ui->globalSavesFolder->isEnabled());
+    m_settings->set("GlobalSavesPath", ui->globalSavesFolder->getPath());
+    m_settings->set("UseGlobalResourcePacksFolder", ui->globalResourcePackFolder->isEnabled());
+    m_settings->set("GlobalResourcePacksPath", ui->globalResourcePackFolder->getPath());
 
     m_instance->applySettings();
 
@@ -394,9 +397,12 @@ void InstanceSettingsPage::loadSettings()
     ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
     ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
 
-    ui->useGlobalScreenshotsFolder->setChecked(m_settings->get("UseGlobalScreenshotsFolder").toBool());
-    ui->useGlobalSavesFolder->setChecked(m_settings->get("UseGlobalSavesFolder").toBool());
-    ui->useGlobalResourcePacksFolder->setChecked(m_settings->get("UseGlobalResourcePacksFolder").toBool());
+    ui->globalScreenshotsFolder->initialize(m_settings->get("UseGlobalScreenshotsFolder").toBool(),
+                                            m_settings->get("GlobalScreenshotsPath").toString(), "Use global screenshots folder");
+    ui->globalSavesFolder->initialize(m_settings->get("UseGlobalSavesFolder").toBool(), m_settings->get("GlobalSavesPath").toString(),
+                                      "Use global saves folder");
+    ui->globalResourcePackFolder->initialize(m_settings->get("UseGlobalResourcePacksFolder").toBool(),
+                                             m_settings->get("GlobalResourcePacksPath").toString(), "Use global resource packs folder");
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()

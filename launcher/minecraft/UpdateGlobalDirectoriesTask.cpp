@@ -38,20 +38,28 @@ class TryCreateSymlinkTask : public Task {
         }
 
         // Check if the destination already exists.
-        if (FS::checkFolderPathExists(m_destination)) {
-            // If it's already a symlink, it might already be correct.
-            if (FS::isSymLink(m_destination)) {
-                // If the target of the symlink is already the source, there's nothing to do.
-                if (FS::getSymLinkTarget(m_destination) == m_source) {
-                    emitSucceeded();
-                    return;
-                }
-            } else if (!FS::checkFolderPathEmpty(m_destination)) {
+        // If it's already a symlink, it might already be correct.
+        if (FS::isSymLink(m_destination)) {
+            // If the target of the symlink is already the source, there's nothing to do.
+            if (FS::getSymLinkTarget(m_destination) == m_source) {
+                emitSucceeded();
+                return;
+            }
+
+            FS::deletePath(m_destination);
+        } else if (FS::checkFolderPathExists(m_destination)) {
+            if (!FS::checkFolderPathEmpty(m_destination)) {
                 fail(tr("Failed to create global folder.\nEnsure that \"%1\" is empty.").arg(m_destination));
                 return;
             }
 
             FS::deletePath(m_destination);
+        }
+
+        // Make sure the source folder exists
+        if (!FS::ensureFolderPathExists(m_source)) {
+            fail(tr("Failed to create global folder.\nEnsure that \"%1\" exists.").arg(m_source));
+            return;
         }
 
         FS::create_link folderLink(m_source, m_destination);
@@ -85,22 +93,22 @@ void UpdateGlobalDirectoriesTask::executeTask()
 {
     auto tasks = makeShared<ConcurrentTask>(this, "UpdateGlobalDirectoriesTask");
 
-    auto screenshotsTask = makeShared<TryCreateSymlinkTask>(FS::PathCombine(APPLICATION->dataRoot(), "screenshots"),
+    auto screenshotsTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("GlobalScreenshotsPath").toString(),
                                                             m_inst->screenshotsDir(), m_inst, "UseGlobalScreenshotsFolder");
     connect(screenshotsTask.get(), &Task::failed, this, &UpdateGlobalDirectoriesTask::notifyFailed);
     tasks->addTask(screenshotsTask);
 
-    auto savesTask = makeShared<TryCreateSymlinkTask>(FS::PathCombine(APPLICATION->dataRoot(), "saves"), m_inst->worldDir(), m_inst,
+    auto savesTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("GlobalSavesPath").toString(), m_inst->worldDir(), m_inst,
                                                       "UseGlobalSavesFolder");
     connect(savesTask.get(), &Task::failed, this, &UpdateGlobalDirectoriesTask::notifyFailed);
     tasks->addTask(savesTask);
 
-    auto resoucePacksTask = makeShared<TryCreateSymlinkTask>(FS::PathCombine(APPLICATION->dataRoot(), "resourcepacks"),
+    auto resoucePacksTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("GlobalResourcePacksPath").toString(),
                                                              m_inst->resourcePacksDir(), m_inst, "UseGlobalResourcePacksFolder");
     connect(resoucePacksTask.get(), &Task::failed, this, &UpdateGlobalDirectoriesTask::notifyFailed);
     tasks->addTask(resoucePacksTask);
 
-    auto texturePacksTask = makeShared<TryCreateSymlinkTask>(FS::PathCombine(APPLICATION->dataRoot(), "resourcepacks"),
+    auto texturePacksTask = makeShared<TryCreateSymlinkTask>(m_inst->settings()->get("GlobalResourcePacksPath").toString(),
                                                              m_inst->texturePacksDir(), m_inst, "UseGlobalResourcePacksFolder");
     connect(texturePacksTask.get(), &Task::failed, this, &UpdateGlobalDirectoriesTask::notifyFailed);
     tasks->addTask(texturePacksTask);

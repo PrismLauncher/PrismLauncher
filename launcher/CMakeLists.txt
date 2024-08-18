@@ -1050,6 +1050,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/DropLabel.h
     ui/widgets/FocusLineEdit.cpp
     ui/widgets/FocusLineEdit.h
+    ui/widgets/GlobalFolderWidget.cpp
+    ui/widgets/GlobalFolderWidget.h
     ui/widgets/IconLabel.cpp
     ui/widgets/IconLabel.h
     ui/widgets/JavaSettingsWidget.cpp
@@ -1157,6 +1159,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
     ui/widgets/EnvironmentVariables.ui
+    ui/widgets/GlobalFolderWidget.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
     ui/widgets/SubTaskProgressBar.ui

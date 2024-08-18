@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>691</width>
-    <height>581</height>
+    <height>591</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -36,7 +36,7 @@
    <item>
     <widget class="QTabWidget" name="settingsTabs">
      <property name="currentIndex">
-      <number>6</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="minecraftPage">
       <attribute name="title">
@@ -750,25 +750,13 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="useGlobalScreenshotsFolder">
-            <property name="text">
-             <string>Use global screenshots folder</string>
-            </property>
-           </widget>
+           <widget class="GlobalFolderWidget" name="globalScreenshotsFolder" native="true"/>
           </item>
           <item>
-           <widget class="QCheckBox" name="useGlobalSavesFolder">
-            <property name="text">
-             <string>Use global saves folder</string>
-            </property>
-           </widget>
+           <widget class="GlobalFolderWidget" name="globalSavesFolder" native="true"/>
           </item>
           <item>
-           <widget class="QCheckBox" name="useGlobalResourcePacksFolder">
-            <property name="text">
-             <string>Use global resource packs folder</string>
-            </property>
-           </widget>
+           <widget class="GlobalFolderWidget" name="globalResourcePackFolder" native="true"/>
           </item>
          </layout>
         </widget>
@@ -803,6 +791,12 @@
    <class>EnvironmentVariables</class>
    <extends>QWidget</extends>
    <header>ui/widgets/EnvironmentVariables.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GlobalFolderWidget</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/GlobalFolderWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
