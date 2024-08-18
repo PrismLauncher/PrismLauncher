@@ -139,6 +139,8 @@ Version::Ptr VersionList::getVersion(const QString& version)
     if (!out) {
         out = std::make_shared<Version>(m_uid, version);
         m_lookup[version] = out;
+        setupAddedVersion(m_versions.size(), out);
+        m_versions.append(out);
     }
     return out;
 }
