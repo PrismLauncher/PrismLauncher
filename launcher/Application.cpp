@@ -236,6 +236,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         { { { "d", "dir" }, "Use a custom path as application root (use '.' for current directory)", "directory" },
           { { "l", "launch" }, "Launch the specified instance (by instance ID)", "instance" },
           { { "s", "server" }, "Join the specified server on launch (only valid in combination with --launch)", "address" },
+          { { "w", "world" }, "Join the specified world on launch (only valid in combination with --launch)", "world" },
           { { "a", "profile" }, "Use the account specified by its profile name (only valid in combination with --launch)", "profile" },
           { "alive", "Write a small '" + liveCheckFile + "' file after the launcher starts" },
           { { "I", "import" }, "Import instance or resource from specified local path or URL", "url" },
@@ -250,6 +251,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     m_instanceIdToLaunch = parser.value("launch");
     m_serverToJoin = parser.value("server");
+    m_worldToJoin = parser.value("world");
     m_profileToUse = parser.value("profile");
     m_liveCheck = parser.isSet("alive");
 
@@ -265,7 +267,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     }
 
     // error if --launch is missing with --server or --profile
-    if ((!m_serverToJoin.isEmpty() || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty()) {
+    if (((!m_serverToJoin.isEmpty() || !m_worldToJoin.isEmpty()) || !m_profileToUse.isEmpty()) && m_instanceIdToLaunch.isEmpty()) {
         std::cerr << "--server and --profile can only be used in combination with --launch!" << std::endl;
         m_status = Application::Failed;
         return;
@@ -385,6 +387,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
                 if (!m_serverToJoin.isEmpty()) {
                     launch.args["server"] = m_serverToJoin;
+                } else if (!m_worldToJoin.isEmpty()) {
+                    launch.args["world"] = m_worldToJoin;
                 }
                 if (!m_profileToUse.isEmpty()) {
                     launch.args["profile"] = m_profileToUse;
@@ -523,6 +527,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         }
         if (!m_serverToJoin.isEmpty()) {
             qDebug() << "Address of server to join  :" << m_serverToJoin;
+        } else if (!m_worldToJoin.isEmpty()) {
+            qDebug() << "Name of the world to join  :" << m_worldToJoin;
         }
         qDebug() << "<> Paths set.";
     }
@@ -1157,14 +1163,17 @@ void Application::performMainStartupAction()
     if (!m_instanceIdToLaunch.isEmpty()) {
         auto inst = instances()->getInstanceById(m_instanceIdToLaunch);
         if (inst) {
-            MinecraftServerTargetPtr serverToJoin = nullptr;
+            MinecraftTarget::Ptr targetToJoin = nullptr;
             MinecraftAccountPtr accountToUse = nullptr;
 
             qDebug() << "<> Instance" << m_instanceIdToLaunch << "launching";
             if (!m_serverToJoin.isEmpty()) {
                 // FIXME: validate the server string
-                serverToJoin.reset(new MinecraftServerTarget(MinecraftServerTarget::parse(m_serverToJoin)));
+                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_serverToJoin, false)));
                 qDebug() << "   Launching with server" << m_serverToJoin;
+            } else if (!m_worldToJoin.isEmpty()) {
+                targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(m_worldToJoin, true)));
+                qDebug() << "   Launching with world" << m_worldToJoin;
             }
 
             if (!m_profileToUse.isEmpty()) {
@@ -1175,7 +1184,7 @@ void Application::performMainStartupAction()
                 qDebug() << "   Launching with account" << m_profileToUse;
             }
 
-            launch(inst, true, false, serverToJoin, accountToUse);
+            launch(inst, true, false, targetToJoin, accountToUse);
             return;
         }
     }
@@ -1265,6 +1274,7 @@ void Application::messageReceived(const QByteArray& message)
     } else if (command == "launch") {
         QString id = received.args["id"];
         QString server = received.args["server"];
+        QString world = received.args["world"];
         QString profile = received.args["profile"];
 
         InstancePtr instance;
@@ -1279,11 +1289,12 @@ void Application::messageReceived(const QByteArray& message)
             return;
         }
 
-        MinecraftServerTargetPtr serverObject = nullptr;
+        MinecraftTarget::Ptr serverObject = nullptr;
         if (!server.isEmpty()) {
-            serverObject = std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(server));
+            serverObject = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(server, false));
+        } else if (!world.isEmpty()) {
+            serverObject = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world, true));
         }
-
         MinecraftAccountPtr accountObject;
         if (!profile.isEmpty()) {
             accountObject = accounts()->getAccountByProfileName(profile);
@@ -1332,11 +1343,7 @@ bool Application::openJsonEditor(const QString& filename)
     }
 }
 
-bool Application::launch(InstancePtr instance,
-                         bool online,
-                         bool demo,
-                         MinecraftServerTargetPtr serverToJoin,
-                         MinecraftAccountPtr accountToUse)
+bool Application::launch(InstancePtr instance, bool online, bool demo, MinecraftTarget::Ptr targetToJoin, MinecraftAccountPtr accountToUse)
 {
     if (m_updateRunning) {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
@@ -1354,7 +1361,7 @@ bool Application::launch(InstancePtr instance,
         controller->setOnline(online);
         controller->setDemo(demo);
         controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
-        controller->setServerToJoin(serverToJoin);
+        controller->setTargetToJoin(targetToJoin);
         controller->setAccountToUse(accountToUse);
         if (window) {
             controller->setParentWidget(window);

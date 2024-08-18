@@ -660,7 +660,7 @@
        <item>
         <widget class="QGroupBox" name="serverJoinGroupBox">
          <property name="title">
-          <string>Set a server to join on launch</string>
+          <string>Set a target to join on launch</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -668,26 +668,26 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <item>
-           <layout class="QGridLayout" name="serverJoinLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="serverJoinAddressLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Server address:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="serverJoinAddress"/>
-            </item>
-           </layout>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="serverJoinAddressButton">
+            <property name="text">
+             <string>Server address:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="serverJoinAddress"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="worldJoinButton">
+            <property name="text">
+             <string>Singleplayer world</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QComboBox" name="worldsCb"/>
           </item>
          </layout>
         </widget>

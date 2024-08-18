@@ -78,7 +78,7 @@ class FlamePage : public QWidget, public BasePage {
    private slots:
     void triggerSearch();
     void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
+    void onVersionSelectionChanged(int index);
 
    private:
     Ui::FlamePage* ui = nullptr;
