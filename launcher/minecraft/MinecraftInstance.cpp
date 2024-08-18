@@ -84,9 +84,9 @@
 #include "MinecraftLoadAndCheck.h"
 #include "MinecraftUpdate.h"
 #include "PackProfile.h"
+#include "minecraft/UpdateGlobalDirectoriesTask.h"
 #include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
-#include "minecraft/UpdateGlobalDirectoriesTask.h"
 
 #include "tools/BaseProfiler.h"
 
