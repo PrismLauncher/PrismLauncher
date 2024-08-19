@@ -132,6 +132,7 @@ void AutoInstallJava::setJavaPath(QString path)
     auto settings = m_instance->settings();
     settings->set("OverrideJavaLocation", true);
     settings->set("JavaPath", path);
+    settings->set("AutomaticJava", true);
     emit logLine(tr("Compatible Java found at: %1.").arg(path), MessageLevel::Info);
     emitSucceeded();
 }

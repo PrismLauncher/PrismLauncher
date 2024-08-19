@@ -38,6 +38,7 @@
 #include "InstanceSettingsPage.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/WorldList.h"
+#include "settings/Setting.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/java/InstallJavaDialog.h"
 #include "ui_InstanceSettingsPage.h"
@@ -346,6 +347,8 @@ void InstanceSettingsPage::loadSettings()
     bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool();
     bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool();
 
+    connect(m_settings->getSetting("OverrideJavaLocation").get(), &Setting::SettingChanged, ui->javaSettingsGroupBox,
+            [this] { ui->javaSettingsGroupBox->setChecked(m_settings->get("OverrideJavaLocation").toBool()); });
     ui->javaSettingsGroupBox->setChecked(overrideLocation);
     ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString());
     ui->skipCompatibilityCheckbox->setChecked(m_settings->get("IgnoreJavaCompatibility").toBool());
