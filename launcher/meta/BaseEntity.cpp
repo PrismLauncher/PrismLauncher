@@ -15,6 +15,7 @@
 
 #include "BaseEntity.h"
 
+#include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
 #include "modplatform/helpers/HashUtils.h"
@@ -91,7 +92,8 @@ Task::Ptr BaseEntity::loadTask(Net::Mode mode)
 
 bool BaseEntity::isLoaded() const
 {
-    return m_load_status != LoadStatus::NotLoaded;
+    // consider it loaded only if the main hash is either empty and was remote loadded or the hashes match and was loaded
+    return m_sha256.isEmpty() ? m_load_status == LoadStatus::Remote : m_load_status != LoadStatus::NotLoaded && m_sha256 == m_file_sha256;
 }
 
 void BaseEntity::setSha256(QString sha256)
@@ -109,30 +111,44 @@ BaseEntityLoadTask::BaseEntityLoadTask(BaseEntity* parent, Net::Mode mode) : m_e
 void BaseEntityLoadTask::executeTask()
 {
     const QString fname = QDir("meta").absoluteFilePath(m_entity->localFilename());
-    // load local file if nothing is loaded yet
-    if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded && QFile::exists(fname)) {
-        setStatus(tr("Loading local file"));
+    auto hashMatches = false;
+    // the file exists on disk try to load it
+    if (QFile::exists(fname)) {
         try {
-            auto fileData = FS::read(fname);
-            m_entity->m_file_sha256 = Hashing::hash(fileData, Hashing::Algorithm::Sha256);
-            if (m_mode == Net::Mode::Online && !m_entity->m_sha256.isEmpty() && m_entity->m_sha256 != m_entity->m_file_sha256) {
-                FS::deletePath(fname);
-            } else {
+            QByteArray fileData;
+            // read local file if nothing is loaded yet
+            if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded || m_entity->m_file_sha256.isEmpty()) {
+                setStatus(tr("Loading local file"));
+                fileData = FS::read(fname);
+                m_entity->m_file_sha256 = Hashing::hash(fileData, Hashing::Algorithm::Sha256);
+            }
+
+            // on online the hash needs to match
+            hashMatches = m_entity->m_sha256 == m_entity->m_file_sha256;
+            if (m_mode == Net::Mode::Online && !m_entity->m_sha256.isEmpty() && !hashMatches) {
+                throw Exception("mismatched checksum");
+            }
+
+            // load local file
+            if (m_entity->m_load_status == BaseEntity::LoadStatus::NotLoaded) {
                 auto doc = Json::requireDocument(fileData, fname);
                 auto obj = Json::requireObject(doc, fname);
                 m_entity->parse(obj);
                 m_entity->m_load_status = BaseEntity::LoadStatus::Local;
             }
+
         } catch (const Exception& e) {
             qDebug() << QString("Unable to parse file %1: %2").arg(fname, e.cause());
             // just make sure it's gone and we never consider it again.
             FS::deletePath(fname);
+            m_entity->m_load_status = BaseEntity::LoadStatus::NotLoaded;
         }
     }
     // if we need remote update, run the update task
-    auto hashMatches = !m_entity->m_sha256.isEmpty() && m_entity->m_sha256 == m_entity->m_file_sha256;
     auto wasLoadedOffline = m_entity->m_load_status != BaseEntity::LoadStatus::NotLoaded && m_mode == Net::Mode::Offline;
-    if (wasLoadedOffline || hashMatches) {
+    // if has is not present allways fetch from remote(e.g. the main index file), else only fetch if hash doesn't match
+    auto wasLoadedRemote = m_entity->m_sha256.isEmpty() ? m_entity->m_load_status == BaseEntity::LoadStatus::Remote : hashMatches;
+    if (wasLoadedOffline || wasLoadedRemote) {
         emitSucceeded();
         return;
     }

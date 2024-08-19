@@ -62,8 +62,6 @@ void NetRequest::addValidator(Validator* v)
 
 void NetRequest::executeTask()
 {
-    init();
-
     setStatus(tr("Requesting %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
     if (getState() == Task::State::AbortedByUser) {

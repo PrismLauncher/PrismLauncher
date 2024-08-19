@@ -84,7 +84,7 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
 
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlamePage::onSelectionChanged);
-    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlamePage::onVersionSelectionChanged);
+    connect(ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlamePage::onVersionSelectionChanged);
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     ui->packDescription->setMetaEntry("FlamePacks");
@@ -240,17 +240,17 @@ void FlamePage::suggestCurrent()
                        [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }
 
-void FlamePage::onVersionSelectionChanged(QString version)
+void FlamePage::onVersionSelectionChanged(int index)
 {
     bool is_blocked = false;
     ui->versionSelectionBox->currentData().toInt(&is_blocked);
 
-    if (version.isNull() || version.isEmpty() || is_blocked) {
+    if (index == -1 || is_blocked) {
         m_selected_version_index = -1;
         return;
     }
 
-    m_selected_version_index = ui->versionSelectionBox->currentIndex();
+    m_selected_version_index = index;
 
     Q_ASSERT(current.versions.at(m_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
 

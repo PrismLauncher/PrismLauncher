@@ -1,27 +1,27 @@
 {
   lib,
   stdenv,
-  canonicalize-jars-hook,
   cmake,
   cmark,
-  Cocoa,
-  ninja,
-  jdk17,
-  zlib,
-  qtbase,
-  qtnetworkauth,
-  quazip,
+  darwin,
   extra-cmake-modules,
-  tomlplusplus,
-  ghc_filesystem,
   gamemode,
+  ghc_filesystem,
+  jdk17,
+  kdePackages,
+  ninja,
+  stripJavaArchivesHook,
+  tomlplusplus,
+  zlib,
   msaClientID ? null,
   gamemodeSupport ? stdenv.isLinux,
   version,
   libnbtplusplus,
 }:
-assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is only available on Linux";
-  stdenv.mkDerivation rec {
+assert lib.assertMsg (
+  gamemodeSupport -> stdenv.isLinux
+) "gamemodeSupport is only available on Linux.";
+  stdenv.mkDerivation {
     pname = "prismlauncher-unwrapped";
     inherit version;
 
@@ -39,49 +39,68 @@ assert lib.assertMsg (stdenv.isLinux || !gamemodeSupport) "gamemodeSupport is on
       ]);
     };
 
-    nativeBuildInputs = [extra-cmake-modules cmake jdk17 ninja canonicalize-jars-hook];
-    buildInputs =
-      [
-        qtbase
-        qtnetworkauth
-        zlib
-        quazip
-        ghc_filesystem
-        tomlplusplus
-        cmark
-      ]
-      ++ lib.optional gamemodeSupport gamemode
-      ++ lib.optionals stdenv.isDarwin [Cocoa];
-
-    hardeningEnable = lib.optionals stdenv.isLinux ["pie"];
-
-    cmakeFlags =
-      [
-        "-DLauncher_BUILD_PLATFORM=nixpkgs"
-      ]
-      ++ lib.optionals (msaClientID != null) ["-DLauncher_MSA_CLIENT_ID=${msaClientID}"]
-      ++ lib.optionals (lib.versionOlder qtbase.version "6") ["-DLauncher_QT_VERSION_MAJOR=5"]
-      ++ lib.optionals stdenv.isDarwin ["-DINSTALL_BUNDLE=nodeps" "-DMACOSX_SPARKLE_UPDATE_FEED_URL=''"];
-
     postUnpack = ''
       rm -rf source/libraries/libnbtplusplus
       ln -s ${libnbtplusplus} source/libraries/libnbtplusplus
     '';
 
+    nativeBuildInputs = [
+      cmake
+      ninja
+      extra-cmake-modules
+      jdk17
+      stripJavaArchivesHook
+    ];
+
+    buildInputs =
+      [
+        cmark
+        ghc_filesystem
+        kdePackages.qtbase
+        kdePackages.qtnetworkauth
+        kdePackages.quazip
+        tomlplusplus
+        zlib
+      ]
+      ++ lib.optionals stdenv.isDarwin [darwin.apple_sdk.frameworks.Cocoa]
+      ++ lib.optional gamemodeSupport gamemode;
+
+    hardeningEnable = lib.optionals stdenv.isLinux ["pie"];
+
+    cmakeFlags =
+      [
+        (lib.cmakeFeature "Launcher_BUILD_PLATFORM" "nixpkgs")
+      ]
+      ++ lib.optionals (msaClientID != null) [
+        (lib.cmakeFeature "Launcher_MSA_CLIENT_ID" (toString msaClientID))
+      ]
+      ++ lib.optionals (lib.versionOlder kdePackages.qtbase.version "6") [
+        (lib.cmakeFeature "Launcher_QT_VERSION_MAJOR" "5")
+      ]
+      ++ lib.optionals stdenv.isDarwin [
+        # we wrap our binary manually
+        (lib.cmakeFeature "INSTALL_BUNDLE" "nodeps")
+        # disable built-in updater
+        (lib.cmakeFeature "MACOSX_SPARKLE_UPDATE_FEED_URL" "''")
+        (lib.cmakeFeature "CMAKE_INSTALL_PREFIX" "${placeholder "out"}/Applications/")
+      ];
+
     dontWrapQtApps = true;
 
-    meta = with lib; {
-      mainProgram = "prismlauncher";
-      homepage = "https://prismlauncher.org/";
-      description = "A free, open source launcher for Minecraft";
+    meta = {
+      description = "Free, open source launcher for Minecraft";
       longDescription = ''
         Allows you to have multiple, separate instances of Minecraft (each with
         their own mods, texture packs, saves, etc) and helps you manage them and
         their associated options with a simple interface.
       '';
-      platforms = with platforms; linux ++ darwin;
-      changelog = "https://github.com/PrismLauncher/PrismLauncher/releases/tag/${version}";
-      license = licenses.gpl3Only;
-      maintainers = with maintainers; [minion3665 Scrumplex getchoo];
+      homepage = "https://prismlauncher.org/";
+      license = lib.licenses.gpl3Only;
+      maintainers = with lib.maintainers; [
+        Scrumplex
+        getchoo
+      ];
+      mainProgram = "prismlauncher";
+      platforms = lib.platforms.linux ++ lib.platforms.darwin;
     };
   }
