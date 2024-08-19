@@ -30,13 +30,14 @@ class VersionList : public BaseVersionList, public BaseEntity {
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
    public:
     explicit VersionList(const QString& uid, QObject* parent = nullptr);
+    virtual ~VersionList() = default;
 
     using Ptr = std::shared_ptr<VersionList>;
 
     enum Roles { UidRole = Qt::UserRole + 100, TimeRole, RequiresRole, VersionPtrRole };
 
-    Task::Ptr getLoadTask() override;
     bool isLoaded() override;
+    [[nodiscard]] Task::Ptr getLoadTask() override;
     const BaseVersion::Ptr at(int i) const override;
     int count() const override;
     void sortVersions() override;
@@ -57,6 +58,9 @@ class VersionList : public BaseVersionList, public BaseEntity {
     bool hasVersion(QString version) const;
 
     QVector<Version::Ptr> versions() const { return m_versions; }
+
+    // this blocks until the version list is loaded
+    void waitToLoad();
 
    public:  // for usage only by parsers
     void setName(const QString& name);

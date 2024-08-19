@@ -17,8 +17,13 @@
 
 #include <QDateTime>
 
+#include "Application.h"
+#include "Index.h"
 #include "JsonFormat.h"
 #include "Version.h"
+#include "meta/BaseEntity.h"
+#include "net/Mode.h"
+#include "tasks/SequentialTask.h"
 
 namespace Meta {
 VersionList::VersionList(const QString& uid, QObject* parent) : BaseVersionList(parent), m_uid(uid)
@@ -28,8 +33,11 @@ VersionList::VersionList(const QString& uid, QObject* parent) : BaseVersionList(
 
 Task::Ptr VersionList::getLoadTask()
 {
-    load(Net::Mode::Online);
-    return getCurrentTask();
+    auto loadTask =
+        makeShared<SequentialTask>(this, tr("Load meta for %1", "This is for the task name that loads the meta index.").arg(m_uid));
+    loadTask->addTask(APPLICATION->metadataIndex()->loadTask(Net::Mode::Online));
+    loadTask->addTask(this->loadTask(Net::Mode::Online));
+    return loadTask;
 }
 
 bool VersionList::isLoaded()
@@ -131,6 +139,8 @@ Version::Ptr VersionList::getVersion(const QString& version)
     if (!out) {
         out = std::make_shared<Version>(m_uid, version);
         m_lookup[version] = out;
+        setupAddedVersion(m_versions.size(), out);
+        m_versions.append(out);
     }
     return out;
 }
@@ -191,6 +201,9 @@ void VersionList::mergeFromIndex(const VersionList::Ptr& other)
     if (m_name != other->m_name) {
         setName(other->m_name);
     }
+    if (!other->m_sha256.isEmpty()) {
+        m_sha256 = other->m_sha256;
+    }
 }
 
 void VersionList::merge(const VersionList::Ptr& other)
@@ -198,23 +211,27 @@ void VersionList::merge(const VersionList::Ptr& other)
     if (m_name != other->m_name) {
         setName(other->m_name);
     }
+    if (!other->m_sha256.isEmpty()) {
+        m_sha256 = other->m_sha256;
+    }
 
     // TODO: do not reset the whole model. maybe?
     beginResetModel();
-    m_versions.clear();
     if (other->m_versions.isEmpty()) {
         qWarning() << "Empty list loaded ...";
     }
-    for (const Version::Ptr& version : other->m_versions) {
+    for (auto version : other->m_versions) {
         // we already have the version. merge the contents
         if (m_lookup.contains(version->version())) {
-            m_lookup.value(version->version())->mergeFromList(version);
+            auto existing = m_lookup.value(version->version());
+            existing->mergeFromList(version);
+            version = existing;
         } else {
-            m_lookup.insert(version->uid(), version);
+            m_lookup.insert(version->version(), version);
+            // connect it.
+            setupAddedVersion(m_versions.size(), version);
+            m_versions.append(version);
         }
-        // connect it.
-        setupAddedVersion(m_versions.size(), version);
-        m_versions.append(version);
         m_recommended = getBetterVersion(m_recommended, version);
     }
     endResetModel();
@@ -222,14 +239,15 @@ void VersionList::merge(const VersionList::Ptr& other)
 
 void VersionList::setupAddedVersion(const int row, const Version::Ptr& version)
 {
-    // FIXME: do not disconnect from everythin, disconnect only the lambdas here
-    version->disconnect();
+    disconnect(version.get(), &Version::requiresChanged, this, nullptr);
+    disconnect(version.get(), &Version::timeChanged, this, nullptr);
+    disconnect(version.get(), &Version::typeChanged, this, nullptr);
+
     connect(version.get(), &Version::requiresChanged, this,
             [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << RequiresRole); });
     connect(version.get(), &Version::timeChanged, this,
-            [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TimeRole << SortRole); });
-    connect(version.get(), &Version::typeChanged, this,
-            [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << TypeRole); });
+            [this, row]() { emit dataChanged(index(row), index(row), { TimeRole, SortRole }); });
+    connect(version.get(), &Version::typeChanged, this, [this, row]() { emit dataChanged(index(row), index(row), { TypeRole }); });
 }
 
 BaseVersion::Ptr VersionList::getRecommended() const
@@ -237,4 +255,14 @@ BaseVersion::Ptr VersionList::getRecommended() const
     return m_recommended;
 }
 
+void VersionList::waitToLoad()
+{
+    if (isLoaded())
+        return;
+    QEventLoop ev;
+    auto task = getLoadTask();
+    QObject::connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+    task->start();
+    ev.exec();
+}
 }  // namespace Meta

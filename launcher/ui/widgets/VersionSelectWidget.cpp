@@ -129,16 +129,12 @@ void VersionSelectWidget::closeEvent(QCloseEvent* event)
 
 void VersionSelectWidget::loadList()
 {
-    auto newTask = m_vlist->getLoadTask();
-    if (!newTask) {
-        return;
-    }
-    loadTask = newTask.get();
-    connect(loadTask, &Task::succeeded, this, &VersionSelectWidget::onTaskSucceeded);
-    connect(loadTask, &Task::failed, this, &VersionSelectWidget::onTaskFailed);
-    connect(loadTask, &Task::progress, this, &VersionSelectWidget::changeProgress);
-    if (!loadTask->isRunning()) {
-        loadTask->start();
+    m_load_task = m_vlist->getLoadTask();
+    connect(m_load_task.get(), &Task::succeeded, this, &VersionSelectWidget::onTaskSucceeded);
+    connect(m_load_task.get(), &Task::failed, this, &VersionSelectWidget::onTaskFailed);
+    connect(m_load_task.get(), &Task::progress, this, &VersionSelectWidget::changeProgress);
+    if (!m_load_task->isRunning()) {
+        m_load_task->start();
     }
     sneakyProgressBar->setHidden(false);
 }
@@ -150,7 +146,7 @@ void VersionSelectWidget::onTaskSucceeded()
     }
     sneakyProgressBar->setHidden(true);
     preselect();
-    loadTask = nullptr;
+    m_load_task.reset();
 }
 
 void VersionSelectWidget::onTaskFailed(const QString& reason)
