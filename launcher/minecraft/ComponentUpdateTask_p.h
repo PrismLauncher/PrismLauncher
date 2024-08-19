@@ -4,6 +4,7 @@
 #include <QString>
 #include <cstddef>
 #include "net/Mode.h"
+#include "tasks/Task.h"
 
 class PackProfile;
 
@@ -13,6 +14,7 @@ struct RemoteLoadStatus {
     bool finished = false;
     bool succeeded = false;
     QString error;
+    Task::Ptr task;
 };
 
 struct ComponentUpdateTaskData {

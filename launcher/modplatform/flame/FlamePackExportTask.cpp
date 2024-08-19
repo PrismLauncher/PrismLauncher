@@ -246,7 +246,7 @@ void FlamePackExportTask::makeApiRequest()
         pendingHashes.clear();
         getProjectsInfo();
     });
-    connect(task.get(), &NetJob::failed, this, &FlamePackExportTask::getProjectsInfo);
+    connect(task.get(), &Task::failed, this, &FlamePackExportTask::getProjectsInfo);
     task->start();
 }
 
