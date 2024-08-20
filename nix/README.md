@@ -28,9 +28,9 @@ Example (NixOS):
 }
 ```
 
-### Using the overlay
+### Installing the package directly
 
-After adding `github:PrismLauncher/PrismLauncher` to your flake inputs, you can add the `default` overlay to your nixpkgs instance.
+After adding `github:PrismLauncher/PrismLauncher` to your flake inputs, you can access the flake's `packages` output.
 
 Example:
 
@@ -41,8 +41,58 @@ Example:
 
     prismlauncher = {
       url = "github:PrismLauncher/PrismLauncher";
+
       # Optional: Override the nixpkgs input of prismlauncher to use the same revision as the rest of your flake
-      # Note that overriding any input of prismlauncher may break reproducibility
+      # Note that this may break the reproducibility mentioned above, and you might not be able to access the binary cache
+      #
+      # inputs.nixpkgs.follows = "nixpkgs";
+
+      # This is not required for Flakes
+      inputs.flake-compat.follows = "";
+    };
+  };
+
+  outputs =
+    { nixpkgs, prismlauncher, ... }:
+    {
+      nixosConfigurations.foo = nixpkgs.lib.nixosSystem {
+        modules = [
+          ./configuration.nix
+
+          (
+            { pkgs, ... }:
+            {
+              environment.systemPackages = [ prismlauncher.packages.${pkgs.system}.prismlauncher ];
+            }
+          )
+        ];
+      };
+    };
+}
+```
+
+### Using the overlay
+
+Alternatively, if you don't want to use our `packages` output, you can add our overlay to your nixpkgs instance.
+This will ensure Prism is built with your system's packages.
+
+> [!WARNING]
+> Depending on what revision of nixpkgs your system uses, this may result in binaries that differ from the above `packages` output
+> If this is the case, you will not be able to use the binary cache
+
+Example:
+
+```nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    prismlauncher = {
+      url = "github:PrismLauncher/PrismLauncher";
+
+      # Optional: Override the nixpkgs input of prismlauncher to use the same revision as the rest of your flake
+      # Note that this may break the reproducibility mentioned above, and you might not be able to access the binary cache
+      #
       # inputs.nixpkgs.follows = "nixpkgs";
 
       # This is not required for Flakes
@@ -63,48 +113,6 @@ Example:
               nixpkgs.overlays = [ prismlauncher.overlays.default ];
 
               environment.systemPackages = [ pkgs.prismlauncher ];
-            }
-          )
-        ];
-      };
-    };
-}
-```
-
-### Installing the package directly
-
-Alternatively, if you don't want to use an overlay, you can install Prism Launcher directly by installing the `prismlauncher` package.
-This way the installed package is fully reproducible.
-
-Example:
-
-```nix
-{
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
-    prismlauncher = {
-      url = "github:PrismLauncher/PrismLauncher";
-      # Optional: Override the nixpkgs input of prismlauncher to use the same revision as the rest of your flake
-      # Note that overriding any input of prismlauncher may break reproducibility
-      # inputs.nixpkgs.follows = "nixpkgs";
-
-      # This is not required for Flakes
-      inputs.flake-compat.follows = "";
-    };
-  };
-
-  outputs =
-    { nixpkgs, prismlauncher, ... }:
-    {
-      nixosConfigurations.foo = nixpkgs.lib.nixosSystem {
-        modules = [
-          ./configuration.nix
-
-          (
-            { pkgs, ... }:
-            {
-              environment.systemPackages = [ prismlauncher.packages.${pkgs.system}.prismlauncher ];
             }
           )
         ];
@@ -148,9 +156,27 @@ Example (NixOS):
 }
 ```
 
-### Using the overlay (`fetchTarball`)
+### Installing the package directly (`fetchTarball`)
 
 We use flake-compat to allow using this Flake on a system that doesn't use flakes.
+
+Example:
+
+```nix
+{ pkgs, ... }:
+{
+  environment.systemPackages = [
+    (import (
+      builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz"
+    )).packages.${pkgs.system}.prismlauncher
+  ];
+}
+```
+
+### Using the overlay (`fetchTarball`)
+
+Alternatively, if you don't want to use our `packages` output, you can add our overlay to your instance of nixpkgs.
+This results in Prism using your system's libraries
 
 Example:
 
@@ -164,24 +190,6 @@ Example:
   ];
 
   environment.systemPackages = [ pkgs.prismlauncher ];
-}
-```
-
-### Installing the package directly (`fetchTarball`)
-
-Alternatively, if you don't want to use an overlay, you can install Prism Launcher directly by installing the `prismlauncher` package.
-This way the installed package is fully reproducible.
-
-Example:
-
-```nix
-{ pkgs, ... }:
-{
-  environment.systemPackages = [
-    (import (
-      builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz"
-    )).packages.${pkgs.system}.prismlauncher
-  ];
 }
 ```
 
