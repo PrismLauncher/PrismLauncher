@@ -53,7 +53,7 @@ constexpr int MaxMclogsLines = 25000;
 constexpr int InitialMclogsLines = 10000;
 constexpr int FinalMclogsLines = 14900;
 
-QString truncateLogForMclogs(const QString &logContent)
+QString truncateLogForMclogs(const QString& logContent)
 {
     QStringList lines = logContent.split("\n");
     if (lines.size() > MaxMclogsLines) {
