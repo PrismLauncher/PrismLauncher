@@ -22,8 +22,8 @@
   udev,
   vulkan-loader,
   xorg,
-  additionalLibs ? [],
-  additionalPrograms ? [],
+  additionalLibs ? [ ],
+  additionalPrograms ? [ ],
   controllerSupport ? stdenv.isLinux,
   gamemodeSupport ? stdenv.isLinux,
   jdks ? [
@@ -42,55 +42,60 @@
   # itself can take slightly longer to start
   withWaylandGLFW ? false,
 }:
+
 assert lib.assertMsg (
   controllerSupport -> stdenv.isLinux
 ) "controllerSupport only has an effect on Linux.";
+
 assert lib.assertMsg (
   textToSpeechSupport -> stdenv.isLinux
 ) "textToSpeechSupport only has an effect on Linux.";
+
 assert lib.assertMsg (
   withWaylandGLFW -> stdenv.isLinux
-) "withWaylandGLFW is only available on Linux."; let
-  prismlauncher' = prismlauncher-unwrapped.override {inherit msaClientID gamemodeSupport;};
+) "withWaylandGLFW is only available on Linux.";
+
+let
+  prismlauncher' = prismlauncher-unwrapped.override { inherit msaClientID gamemodeSupport; };
 in
-  symlinkJoin {
-    name = "prismlauncher-${prismlauncher'.version}";
+symlinkJoin {
+  name = "prismlauncher-${prismlauncher'.version}";
 
-    paths = [prismlauncher'];
+  paths = [ prismlauncher' ];
 
-    nativeBuildInputs =
-      [kdePackages.wrapQtAppsHook]
-      # purposefully using a shell wrapper here for variable expansion
-      # see https://github.com/NixOS/nixpkgs/issues/172583
-      ++ lib.optional withWaylandGLFW makeWrapper;
+  nativeBuildInputs =
+    [ kdePackages.wrapQtAppsHook ]
+    # purposefully using a shell wrapper here for variable expansion
+    # see https://github.com/NixOS/nixpkgs/issues/172583
+    ++ lib.optional withWaylandGLFW makeWrapper;
 
-    buildInputs =
-      [
-        kdePackages.qtbase
-        kdePackages.qtsvg
-      ]
-      ++ lib.optional (
-        lib.versionAtLeast kdePackages.qtbase.version "6" && stdenv.isLinux
-      )
-      kdePackages.qtwayland;
+  buildInputs =
+    [
+      kdePackages.qtbase
+      kdePackages.qtsvg
+    ]
+    ++ lib.optional (
+      lib.versionAtLeast kdePackages.qtbase.version "6" && stdenv.isLinux
+    ) kdePackages.qtwayland;
 
-    env = {
-      waylandPreExec = lib.optionalString withWaylandGLFW ''
-        if [ -n "$WAYLAND_DISPLAY" ]; then
-          export LD_LIBRARY_PATH=${lib.getLib glfw-wayland-minecraft}/lib:"$LD_LIBRARY_PATH"
-        fi
-      '';
-    };
+  env = {
+    waylandPreExec = lib.optionalString withWaylandGLFW ''
+      if [ -n "$WAYLAND_DISPLAY" ]; then
+        export LD_LIBRARY_PATH=${lib.getLib glfw-wayland-minecraft}/lib:"$LD_LIBRARY_PATH"
+      fi
+    '';
+  };
 
-    postBuild =
-      lib.optionalString withWaylandGLFW ''
-        qtWrapperArgs+=(--run "$waylandPreExec")
-      ''
-      + ''
-        wrapQtAppsHook
-      '';
+  postBuild =
+    lib.optionalString withWaylandGLFW ''
+      qtWrapperArgs+=(--run "$waylandPreExec")
+    ''
+    + ''
+      wrapQtAppsHook
+    '';
 
-    qtWrapperArgs = let
+  qtWrapperArgs =
+    let
       runtimeLibs =
         [
           # lwjgl
@@ -115,31 +120,28 @@ in
         ++ lib.optional controllerSupport libusb1
         ++ additionalLibs;
 
-      runtimePrograms =
-        [
-          glxinfo
-          pciutils # need lspci
-          xorg.xrandr # needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
-        ]
-        ++ additionalPrograms;
+      runtimePrograms = [
+        glxinfo
+        pciutils # need lspci
+        xorg.xrandr # needed for LWJGL [2.9.2, 3) https://github.com/LWJGL/lwjgl/issues/128
+      ] ++ additionalPrograms;
     in
-      ["--prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}"]
-      ++ lib.optionals stdenv.isLinux [
-        "--set LD_LIBRARY_PATH ${addOpenGLRunpath.driverLink}/lib:${lib.makeLibraryPath runtimeLibs}"
-        "--prefix PATH : ${lib.makeBinPath runtimePrograms}"
-      ];
+    [ "--prefix PRISMLAUNCHER_JAVA_PATHS : ${lib.makeSearchPath "bin/java" jdks}" ]
+    ++ lib.optionals stdenv.isLinux [
+      "--set LD_LIBRARY_PATH ${addOpenGLRunpath.driverLink}/lib:${lib.makeLibraryPath runtimeLibs}"
+      "--prefix PATH : ${lib.makeBinPath runtimePrograms}"
+    ];
 
-    meta = {
-      inherit
-        (prismlauncher'.meta)
-        description
-        longDescription
-        homepage
-        changelog
-        license
-        maintainers
-        mainProgram
-        platforms
-        ;
-    };
-  }
+  meta = {
+    inherit (prismlauncher'.meta)
+      description
+      longDescription
+      homepage
+      changelog
+      license
+      maintainers
+      mainProgram
+      platforms
+      ;
+  };
+}

@@ -15,7 +15,6 @@ to temporarily enable it when using `nix` commands.
 Example (NixOS):
 
 ```nix
-{...}:
 {
   nix.settings = {
     trusted-substituters = [
@@ -39,6 +38,7 @@ Example:
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     prismlauncher = {
       url = "github:PrismLauncher/PrismLauncher";
       # Optional: Override the nixpkgs input of prismlauncher to use the same revision as the rest of your flake
@@ -47,19 +47,24 @@ Example:
     };
   };
 
-  outputs = {nixpkgs, prismlauncher}: {
-    nixosConfigurations.foo = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
+  outputs =
+    { nixpkgs, prismlauncher }:
+    {
+      nixosConfigurations.foo = nixpkgs.lib.nixosSystem {
+        modules = [
+          ./configuration.nix
 
-      modules = [
-        ({pkgs, ...}: {
-          nixpkgs.overlays = [prismlauncher.overlays.default];
+          (
+            { pkgs, ... }:
+            {
+              nixpkgs.overlays = [ prismlauncher.overlays.default ];
 
-          environment.systemPackages = [pkgs.prismlauncher];
-        })
-      ];
+              environment.systemPackages = [ pkgs.prismlauncher ];
+            }
+          )
+        ];
+      };
     };
-  }
 }
 ```
 
@@ -74,6 +79,7 @@ Example:
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+
     prismlauncher = {
       url = "github:PrismLauncher/PrismLauncher";
       # Optional: Override the nixpkgs input of prismlauncher to use the same revision as the rest of your flake
@@ -82,17 +88,22 @@ Example:
     };
   };
 
-  outputs = {nixpkgs, prismlauncher}: {
-    nixosConfigurations.foo = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
+  outputs =
+    { nixpkgs, prismlauncher }:
+    {
+      nixosConfigurations.foo = nixpkgs.lib.nixosSystem {
+        modules = [
+          ./configuration.nix
 
-      modules = [
-        ({pkgs, ...}: {
-          environment.systemPackages = [prismlauncher.packages.${pkgs.system}.prismlauncher];
-        })
-      ];
+          (
+            { pkgs, ... }:
+            {
+              environment.systemPackages = [ prismlauncher.packages.${pkgs.system}.prismlauncher ];
+            }
+          )
+        ];
+      };
     };
-  }
 }
 ```
 
@@ -118,7 +129,6 @@ If you want to avoid rebuilds you may add the garnix cache to your substitutors.
 Example (NixOS):
 
 ```nix
-{...}:
 {
   nix.settings = {
     trusted-substituters = [
@@ -139,10 +149,15 @@ We use flake-compat to allow using this Flake on a system that doesn't use flake
 Example:
 
 ```nix
-{pkgs, ...}: {
-  nixpkgs.overlays = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz")).overlays.default];
+{ pkgs, ... }:
+{
+  nixpkgs.overlays = [
+    (import (
+      builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz"
+    )).overlays.default
+  ];
 
-  environment.systemPackages = [pkgs.prismlauncher];
+  environment.systemPackages = [ pkgs.prismlauncher ];
 }
 ```
 
@@ -154,8 +169,13 @@ This way the installed package is fully reproducible.
 Example:
 
 ```nix
-{pkgs, ...}: {
-  environment.systemPackages = [(import (builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz")).packages.${pkgs.system}.prismlauncher];
+{ pkgs, ... }:
+{
+  environment.systemPackages = [
+    (import (
+      builtins.fetchTarball "https://github.com/PrismLauncher/PrismLauncher/archive/develop.tar.gz"
+    )).packages.${pkgs.system}.prismlauncher
+  ];
 }
 ```
 

@@ -2,8 +2,8 @@
   description = "A custom launcher for Minecraft that allows you to easily manage multiple installations of Minecraft at once (Fork of MultiMC)";
 
   nixConfig = {
-    extra-substituters = ["https://cache.garnix.io"];
-    extra-trusted-public-keys = ["cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="];
+    extra-substituters = [ "https://cache.garnix.io" ];
+    extra-trusted-public-keys = [ "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=" ];
   };
 
   inputs = {
@@ -30,12 +30,9 @@
     };
   };
 
-  outputs = {
-    flake-parts,
-    pre-commit-hooks,
-    ...
-  } @ inputs:
-    flake-parts.lib.mkFlake {inherit inputs;} {
+  outputs =
+    { flake-parts, pre-commit-hooks, ... }@inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         pre-commit-hooks.flakeModule
 
