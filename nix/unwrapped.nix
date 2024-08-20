@@ -28,9 +28,9 @@ stdenv.mkDerivation {
   inherit version;
 
   src = lib.fileset.toSource {
-    root = ../../.;
+    root = ../.;
     fileset = lib.fileset.unions (
-      map (fileName: ../../${fileName}) [
+      map (fileName: ../${fileName}) [
         "buildconfig"
         "cmake"
         "launcher"

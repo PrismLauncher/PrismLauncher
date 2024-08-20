@@ -44,11 +44,14 @@ Example:
       # Optional: Override the nixpkgs input of prismlauncher to use the same revision as the rest of your flake
       # Note that overriding any input of prismlauncher may break reproducibility
       # inputs.nixpkgs.follows = "nixpkgs";
+
+      # This is not required for Flakes
+      inputs.flake-compat.follows = "";
     };
   };
 
   outputs =
-    { nixpkgs, prismlauncher }:
+    { nixpkgs, prismlauncher, ... }:
     {
       nixosConfigurations.foo = nixpkgs.lib.nixosSystem {
         modules = [
@@ -85,11 +88,14 @@ Example:
       # Optional: Override the nixpkgs input of prismlauncher to use the same revision as the rest of your flake
       # Note that overriding any input of prismlauncher may break reproducibility
       # inputs.nixpkgs.follows = "nixpkgs";
+
+      # This is not required for Flakes
+      inputs.flake-compat.follows = "";
     };
   };
 
   outputs =
-    { nixpkgs, prismlauncher }:
+    { nixpkgs, prismlauncher, ... }:
     {
       nixosConfigurations.foo = nixpkgs.lib.nixosSystem {
         modules = [

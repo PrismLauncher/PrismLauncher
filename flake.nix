@@ -8,10 +8,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
+
     libnbtplusplus = {
       url = "github:PrismLauncher/libnbtplusplus";
       flake = false;
@@ -39,18 +36,64 @@
   };
 
   outputs =
-    inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [
-        ./nix/dev.nix
-        ./nix/distribution.nix
-      ];
+    {
+      self,
+      nixpkgs,
+      libnbtplusplus,
+      ...
+    }:
+    let
+      inherit (nixpkgs) lib;
 
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
+      # While we only officially support aarch and x86_64 on Linux and MacOS,
+      # we expose a reasonable amount of other systems for users who want to
+      # build for most exotic platforms
+      systems = lib.systems.flakeExposed;
+
+      forAllSystems = lib.genAttrs systems;
+      nixpkgsFor = forAllSystems (system: nixpkgs.legacyPackages.${system});
+    in
+    {
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgsFor.${system};
+        in
+        {
+          default = pkgs.mkShell {
+            inputsFrom = [ self.packages.${system}.prismlauncher-unwrapped ];
+            buildInputs = with pkgs; [
+              ccache
+              ninja
+            ];
+          };
+        }
+      );
+
+      formatter = forAllSystems (system: nixpkgsFor.${system}.nixfmt-rfc-style);
+
+      overlays.default =
+        final: prev:
+        let
+          version = builtins.substring 0 8 self.lastModifiedDate or "dirty";
+        in
+        {
+          prismlauncher-unwrapped = prev.callPackage ./nix/unwrapped.nix { inherit libnbtplusplus version; };
+
+          prismlauncher = final.callPackage ./nix/wrapper.nix { };
+        };
+
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgsFor.${system};
+
+          prismPackages = lib.makeScope pkgs.newScope (final: self.overlays.default final pkgs);
+        in
+        {
+          inherit (prismPackages) prismlauncher-unwrapped prismlauncher;
+          default = prismPackages.prismlauncher;
+        }
+      );
     };
 }
