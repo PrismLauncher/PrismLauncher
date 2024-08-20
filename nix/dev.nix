@@ -9,9 +9,9 @@
       hooks = {
         markdownlint.enable = true;
 
-        alejandra.enable = true;
         deadnix.enable = true;
         nil.enable = true;
+        nixfmt.enable = true;
 
         clang-format = {
           enable = true;
@@ -31,6 +31,6 @@
       buildInputs = with pkgs; [ccache ninja];
     };
 
-    formatter = pkgs.alejandra;
+    formatter = pkgs.nixfmt-rfc-style;
   };
 }
