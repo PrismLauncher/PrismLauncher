@@ -12,30 +12,36 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
-    pre-commit-hooks = {
-      url = "github:cachix/pre-commit-hooks.nix";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        nixpkgs-stable.follows = "nixpkgs";
-        flake-compat.follows = "flake-compat";
-      };
-    };
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
     libnbtplusplus = {
       url = "github:PrismLauncher/libnbtplusplus";
+      flake = false;
+    };
+
+    /*
+      Inputs below this are optional and can be removed
+
+      ```
+      {
+        inputs.prismlauncher = {
+          url = "github:PrismLauncher/PrismLauncher";
+          inputs = {
+      	    flake-compat.follows = "";
+          };
+        };
+      }
+      ```
+    */
+
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
       flake = false;
     };
   };
 
   outputs =
-    { flake-parts, pre-commit-hooks, ... }@inputs:
-    flake-parts.lib.mkFlake { inherit inputs; } {
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
-        pre-commit-hooks.flakeModule
-
         ./nix/dev.nix
         ./nix/distribution.nix
       ];
