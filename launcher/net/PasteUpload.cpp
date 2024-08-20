@@ -49,6 +49,27 @@
 
 #include "net/Logging.h"
 
+constexpr int MaxMclogsLines = 25000;
+constexpr int InitialMclogsLines = 10000;
+constexpr int FinalMclogsLines = 14900;
+
+QString truncateLogForMclogs(const QString &logContent) {
+    QStringList lines = logContent.split("\n");
+    if (lines.size() > MaxMclogsLines) {
+        QString truncatedLog = lines.mid(0, InitialMclogsLines).join("\n");
+        truncatedLog += "\n\n\n\n\n\n\n\n\n\n"
+                        "------------------------------------------------------------\n"
+                        "--------------------- Log truncated by ---------------------\n"
+                        "---------------------- Prism Launcher ----------------------\n"
+                        "----- Middle portion omitted to fit mclo.gs size limits ----\n"
+                        "------------------------------------------------------------\n"
+                        "\n\n\n\n\n\n\n\n\n\n";
+        truncatedLog += lines.mid(lines.size() - FinalMclogsLines, FinalMclogsLines).join("\n");
+        return truncatedLog;
+    }
+    return logContent;
+}
+
 std::array<PasteUpload::PasteTypeInfo, 4> PasteUpload::PasteTypes = { { { "0x0.st", "https://0x0.st", "" },
                                                                         { "hastebin", "https://hst.sh", "/documents" },
                                                                         { "paste.gg", "https://paste.gg", "/api/v1/pastes" },
@@ -98,6 +119,7 @@ void PasteUpload::executeTask()
         }
         case Mclogs: {
             QUrlQuery postData;
+            m_text = truncateLogForMclogs(m_text).toUtf8();
             postData.addQueryItem("content", m_text);
             request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
             rep = APPLICATION->network()->post(request, postData.toString().toUtf8());
