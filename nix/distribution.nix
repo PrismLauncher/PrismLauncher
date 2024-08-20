@@ -5,7 +5,7 @@
     {
       packages =
         let
-          ourPackages = lib.fix (final: self.overlays.default final pkgs);
+          ourPackages = lib.makeScope pkgs.newScope (final: self.overlays.default final pkgs);
         in
         {
           inherit (ourPackages) prismlauncher-unwrapped prismlauncher;
@@ -25,9 +25,7 @@
           inherit version;
         };
 
-        prismlauncher = prev.qt6Packages.callPackage ./pkg/wrapper.nix {
-          inherit (final) prismlauncher-unwrapped;
-        };
+        prismlauncher = final.callPackage ./pkg/wrapper.nix { };
       };
   };
 }
