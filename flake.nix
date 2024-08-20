@@ -54,6 +54,14 @@
       nixpkgsFor = forAllSystems (system: nixpkgs.legacyPackages.${system});
     in
     {
+      checks = forAllSystems (
+        system:
+        let
+          checks' = nixpkgsFor.${system}.callPackage ./nix/checks.nix { inherit self; };
+        in
+        lib.filterAttrs (_: lib.isDerivation) checks'
+      );
+
       devShells = forAllSystems (
         system:
         let
@@ -88,12 +96,17 @@
         let
           pkgs = nixpkgsFor.${system};
 
+          # Build a scope from our overlay
           prismPackages = lib.makeScope pkgs.newScope (final: self.overlays.default final pkgs);
+
+          # Grab our packages from it and set the default
+          packages = {
+            inherit (prismPackages) prismlauncher-unwrapped prismlauncher;
+            default = prismPackages.prismlauncher;
+          };
         in
-        {
-          inherit (prismPackages) prismlauncher-unwrapped prismlauncher;
-          default = prismPackages.prismlauncher;
-        }
+        # Only output them if they're available on the current system
+        lib.filterAttrs (_: lib.meta.availableOn pkgs.stdenv.hostPlatform) packages
       );
     };
 }
