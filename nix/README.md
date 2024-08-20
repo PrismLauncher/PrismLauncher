@@ -197,18 +197,20 @@ nix-env -iA prismlauncher.prismlauncher
 
 Both Nixpkgs and this repository offer the following packages:
 
-- `prismlauncher` - Preferred build using Qt 6
-- `prismlauncher-qt5` - Legacy build using Qt 5 (i.e. for Qt 5 theming support)
-
-Both of these packages also have `-unwrapped` counterparts, that are not wrapped and can therefore be customized even further than what the wrapper packages offer.
+- `prismlauncher` - The preferred build, wrapped with everything necessary to run the launcher and Minecraft
+- `prismlauncher-unwrapped` - A minimal build that allows for advanced customization of the launcher's runtime environment
 
 ### Customizing wrapped packages
 
-The wrapped packages (`prismlauncher` and `prismlauncher-qt5`) offer some build parameters to further customize the launcher's environment.
+The wrapped package (`prismlauncher`) offers some build parameters to further customize the launcher's environment.
 
 The following parameters can be overridden:
 
-- `msaClientID` (default: `null`, requires full rebuild!) Client ID used for Microsoft Authentication
-- `gamemodeSupport` (default: `true`) Turn on/off support for [Feral GameMode](https://github.com/FeralInteractive/gamemode)
-- `jdks` (default: `[ jdk17 jdk8 ]`) Java runtimes added to `PRISMLAUNCHER_JAVA_PATHS` variable
 - `additionalLibs` (default: `[ ]`) Additional libraries that will be added to `LD_LIBRARY_PATH`
+- `additionalPrograms` (default: `[ ]`) Additional libraries that will be added to `PATH`
+- `controllerSupport` (default: `isLinux`) Turn on/off support for controllers on Linux (macOS will always have this)
+- `gamemodeSupport` (default: `isLinux`) Turn on/off support for [Feral GameMode](https://github.com/FeralInteractive/gamemode) on Linux
+- `jdks` (default: `[ jdk21 jdk17 jdk8 ]`) Java runtimes added to `PRISMLAUNCHER_JAVA_PATHS` variable
+- `msaClientID` (default: `null`, requires full rebuild!) Client ID used for Microsoft Authentication
+- `textToSpeechSupport` (default: `isLinux`) Turn on/off support for text-to-speech on Linux (macOS will always have this)
+- `withWaylandGLFW` (default: `isLinux`) Build with support for native Wayland via a custom GLFW
