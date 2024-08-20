@@ -53,17 +53,19 @@ constexpr int MaxMclogsLines = 25000;
 constexpr int InitialMclogsLines = 10000;
 constexpr int FinalMclogsLines = 14900;
 
-QString truncateLogForMclogs(const QString &logContent) {
+QString truncateLogForMclogs(const QString &logContent)
+{
     QStringList lines = logContent.split("\n");
     if (lines.size() > MaxMclogsLines) {
         QString truncatedLog = lines.mid(0, InitialMclogsLines).join("\n");
-        truncatedLog += "\n\n\n\n\n\n\n\n\n\n"
-                        "------------------------------------------------------------\n"
-                        "--------------------- Log truncated by ---------------------\n"
-                        "---------------------- Prism Launcher ----------------------\n"
-                        "----- Middle portion omitted to fit mclo.gs size limits ----\n"
-                        "------------------------------------------------------------\n"
-                        "\n\n\n\n\n\n\n\n\n\n";
+        truncatedLog +=
+            "\n\n\n\n\n\n\n\n\n\n"
+            "------------------------------------------------------------\n"
+            "--------------------- Log truncated by ---------------------\n"
+            "---------------------- Prism Launcher ----------------------\n"
+            "----- Middle portion omitted to fit mclo.gs size limits ----\n"
+            "------------------------------------------------------------\n"
+            "\n\n\n\n\n\n\n\n\n\n";
         truncatedLog += lines.mid(lines.size() - FinalMclogsLines, FinalMclogsLines).join("\n");
         return truncatedLog;
     }
