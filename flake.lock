@@ -32,6 +32,21 @@
         "type": "github"
       }
     },
+    "nix-filter": {
+      "locked": {
+        "lastModified": 1710156097,
+        "narHash": "sha256-1Wvk8UP7PXdf8bCCaEoMnOT1qe5/Duqgj+rL8sRQsSM=",
+        "owner": "numtide",
+        "repo": "nix-filter",
+        "rev": "3342559a24e85fc164b295c3444e8a139924675b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "nix-filter",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1723637854,
@@ -52,6 +67,7 @@
       "inputs": {
         "flake-compat": "flake-compat",
         "libnbtplusplus": "libnbtplusplus",
+        "nix-filter": "nix-filter",
         "nixpkgs": "nixpkgs"
       }
     }

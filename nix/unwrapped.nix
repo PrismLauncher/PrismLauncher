@@ -10,6 +10,8 @@
   jdk17,
   kdePackages,
   ninja,
+  nix-filter,
+  self,
   stripJavaArchivesHook,
   tomlplusplus,
   zlib,
@@ -27,20 +29,18 @@ stdenv.mkDerivation {
   pname = "prismlauncher-unwrapped";
   inherit version;
 
-  src = lib.fileset.toSource {
-    root = ../.;
-    fileset = lib.fileset.unions (
-      map (fileName: ../${fileName}) [
-        "buildconfig"
-        "cmake"
-        "launcher"
-        "libraries"
-        "program_info"
-        "tests"
-        "COPYING.md"
-        "CMakeLists.txt"
-      ]
-    );
+  src = nix-filter.lib {
+    root = self;
+    include = [
+      "buildconfig"
+      "cmake"
+      "launcher"
+      "libraries"
+      "program_info"
+      "tests"
+      ../COPYING.md
+      ../CMakeLists.txt
+    ];
   };
 
   postUnpack = ''
