@@ -51,11 +51,35 @@
 #include <settings/SettingsObject.h>
 #include "Application.h"
 
+constexpr int MaxMclogsLines = 25000;
+constexpr int InitialMclogsLines = 10000;
+constexpr int FinalMclogsLines = 14900;
+
+QString truncateLogForMclogs(const QString& logContent)
+{
+    QStringList lines = logContent.split("\n");
+    if (lines.size() > MaxMclogsLines) {
+        QString truncatedLog = lines.mid(0, InitialMclogsLines).join("\n");
+        truncatedLog +=
+            "\n\n\n\n\n\n\n\n\n\n"
+            "------------------------------------------------------------\n"
+            "--------------------- Log truncated by ---------------------\n"
+            "---------------------- Prism Launcher ----------------------\n"
+            "----- Middle portion omitted to fit mclo.gs size limits ----\n"
+            "------------------------------------------------------------\n"
+            "\n\n\n\n\n\n\n\n\n\n";
+        truncatedLog += lines.mid(lines.size() - FinalMclogsLines, FinalMclogsLines).join("\n");
+        return truncatedLog;
+    }
+    return logContent;
+}
+
 std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& text, QWidget* parentWidget)
 {
     ProgressDialog dialog(parentWidget);
     auto pasteTypeSetting = static_cast<PasteUpload::PasteType>(APPLICATION->settings()->get("PastebinType").toInt());
     auto pasteCustomAPIBaseSetting = APPLICATION->settings()->get("PastebinCustomAPIBase").toString();
+    bool shouldTruncate = false;
 
     {
         QUrl baseUrl;
@@ -75,10 +99,35 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
 
             if (response != QMessageBox::Yes)
                 return {};
+
+            if (baseUrl.toString() == "https://api.mclo.gs" && text.count("\n") > MaxMclogsLines) {
+                auto truncateResponse =
+                    CustomMessageBox::selectable(parentWidget, QObject::tr("Confirm Truncate"),
+                                                 QObject::tr("The log exceeds mclo.gs' limit: %1 lines (max %2).\n"
+                                                             "Prism can keep the first %3 and last %4 lines, trimming the middle.\n\n"
+                                                             "If you choose 'No', mclo.gs will only keep the first %2 lines, cutting off "
+                                                             "potentially useful info like crashes at the end.\n\n"
+                                                             "Proceed with Prism's truncation?")
+                                                     .arg(text.count("\n"))
+                                                     .arg(MaxMclogsLines)
+                                                     .arg(InitialMclogsLines)
+                                                     .arg(FinalMclogsLines),
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                        ->exec();
+
+                if (truncateResponse == QMessageBox::Yes)
+                    shouldTruncate = true;
+            }
         }
     }
 
-    std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, text, pasteCustomAPIBaseSetting, pasteTypeSetting));
+    QString textToUpload;
+    if (shouldTruncate)
+        textToUpload = truncateLogForMclogs(text);
+    else
+        textToUpload = text;
+
+    std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, textToUpload, pasteCustomAPIBaseSetting, pasteTypeSetting));
 
     dialog.execWithTask(paste.get());
     if (!paste->wasSuccessful()) {
