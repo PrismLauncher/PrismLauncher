@@ -112,9 +112,10 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
                                                      .arg(MaxMclogsLines)
                                                      .arg(InitialMclogsLines)
                                                      .arg(FinalMclogsLines),
-                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::No)
                         ->exec();
 
+                if (truncateResponse == QMessageBox::Cancel) { return {} ; }
                 shouldTruncate = truncateResponse == QMessageBox::Yes;
             }
         }
