@@ -101,21 +101,23 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
                 return {};
 
             if (baseUrl.toString() == "https://api.mclo.gs" && text.count("\n") > MaxMclogsLines) {
-                auto truncateResponse =
-                    CustomMessageBox::selectable(parentWidget, QObject::tr("Confirm Truncate"),
-                                                 QObject::tr("The log exceeds mclo.gs' limit: %1 lines (max %2).\n"
-                                                             "Prism can keep the first %3 and last %4 lines, trimming the middle.\n\n"
-                                                             "If you choose 'No', mclo.gs will only keep the first %2 lines, cutting off "
-                                                             "potentially useful info like crashes at the end.\n\n"
-                                                             "Proceed with Prism's truncation?")
-                                                     .arg(text.count("\n"))
-                                                     .arg(MaxMclogsLines)
-                                                     .arg(InitialMclogsLines)
-                                                     .arg(FinalMclogsLines),
-                                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::No)
-                        ->exec();
+                auto truncateResponse = CustomMessageBox::selectable(
+                                            parentWidget, QObject::tr("Confirm Truncate"),
+                                            QObject::tr("The log exceeds mclo.gs' limit: %1 lines (max %2).\n"
+                                                        "Prism can keep the first %3 and last %4 lines, trimming the middle.\n\n"
+                                                        "If you choose 'No', mclo.gs will only keep the first %2 lines, cutting off "
+                                                        "potentially useful info like crashes at the end.\n\n"
+                                                        "Proceed with Prism's truncation?")
+                                                .arg(text.count("\n"))
+                                                .arg(MaxMclogsLines)
+                                                .arg(InitialMclogsLines)
+                                                .arg(FinalMclogsLines),
+                                            QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::No)
+                                            ->exec();
 
-                if (truncateResponse == QMessageBox::Cancel) { return {} ; }
+                if (truncateResponse == QMessageBox::Cancel) {
+                    return {};
+                }
                 shouldTruncate = truncateResponse == QMessageBox::Yes;
             }
         }
