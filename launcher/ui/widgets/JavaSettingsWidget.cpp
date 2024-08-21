@@ -186,13 +186,9 @@ void JavaSettingsWidget::initialize()
                                              .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
                                          QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes)
                 ->exec();
-        if (button == QMessageBox::Yes) {
-            m_autodetectJavaCheckBox->setChecked(true);
-            m_autodownloadCheckBox->setChecked(true);
-        } else {
-            m_autodetectJavaCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool());
-            m_autodownloadCheckBox->setChecked(s->get("AutomaticJavaSwitch").toBool() && s->get("AutomaticJavaDownload").toBool());
-        }
+        auto checked = button == QMessageBox::Yes;
+        m_autodetectJavaCheckBox->setChecked(checked);
+        m_autodownloadCheckBox->setChecked(checked);
     }
 }
 
