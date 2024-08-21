@@ -115,17 +115,15 @@ std::optional<QString> GuiUtil::uploadPaste(const QString& name, const QString& 
                                                  QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
                         ->exec();
 
-                if (truncateResponse == QMessageBox::Yes)
-                    shouldTruncate = true;
+                shouldTruncate = truncateResponse == QMessageBox::Yes;
             }
         }
     }
 
-    QString textToUpload;
-    if (shouldTruncate)
+    QString textToUpload = text;
+    if (shouldTruncate) {
         textToUpload = truncateLogForMclogs(text);
-    else
-        textToUpload = text;
+    }
 
     std::unique_ptr<PasteUpload> paste(new PasteUpload(parentWidget, textToUpload, pasteCustomAPIBaseSetting, pasteTypeSetting));
 
