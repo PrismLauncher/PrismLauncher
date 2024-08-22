@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   sodipodi:docname="Eclipse_Adoptium_Logo_A_only.svg"
+   sodipodi:docname="Eclipse_Adoptium_Logo_A_only_no_outline.svg"
    inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
    id="svg8"
    version="1.1"
@@ -98,17 +98,17 @@
   <sodipodi:namedview
      height="100mm"
      inkscape:window-maximized="1"
-     inkscape:window-y="802"
-     inkscape:window-x="3832"
-     inkscape:window-height="1369"
-     inkscape:window-width="2560"
+     inkscape:window-y="-8"
+     inkscape:window-x="1912"
+     inkscape:window-height="1057"
+     inkscape:window-width="1920"
      showgrid="false"
      inkscape:document-rotation="0"
-     inkscape:current-layer="g268"
+     inkscape:current-layer="g216"
      inkscape:document-units="px"
-     inkscape:cy="376.63599"
-     inkscape:cx="370.75871"
-     inkscape:zoom="1.0208796"
+     inkscape:cy="396.88538"
+     inkscape:cx="322.07976"
+     inkscape:zoom="0.72187089"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      borderopacity="1.0"
@@ -138,13 +138,9 @@
        inkscape:export-xdpi="96"
        transform="matrix(0.0826697,0,0,-0.0826697,-36.864228,126.62103)"
        id="g216">
-      <path
-         id="path234"
-         style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:11.4"
-         d="m 5283.6904,1025.6724 c -717.755,0 -1367.0981,-397.74554 -1694.6316,-1037.741161 l -7.3416,-14.478004 -6.9084,-14.820004 L 1318.5,-4932.4297 l -16.473,-35.8986 -12.9162,-37.2666 c -44.5283,-128.8311 -148.291,-457.4701 -148.291,-730.0439 0,-1049.8252 854.11,-1903.7983 1903.8438,-1903.7983 728.3114,0 1388.9297,414.3554 1708.2204,1063.3566 l 1958.8146,-881.5382 c 255.3595,-120.6348 528.7316,-181.8184 812.5911,-181.8184 1049.7114,0 1903.7986,853.9731 1903.7986,1903.7983 0,272.5738 -103.7395,601.2128 -148.3135,730.0439 l -12.882,37.2666 -16.644,36.024 C 7069.0882,-206.89482 6978.6861,-11.04276 6960.1041,24.18325 v 0 C 6627.2017,641.83487 5984.8351,1025.6724 5283.6904,1025.6724 v 0" />
       <g
          id="g236"
-         transform="matrix(11.39999,0,0,11.39999,-4751.9037,-13909.569)">
+         transform="matrix(13.679999,0,0,13.679976,-6760.5652,-16025.746)">
         <g
            clip-path="url(#clipPath242)"
            id="g238">
@@ -156,7 +152,7 @@
       </g>
       <g
          id="g252"
-         transform="matrix(11.39999,0,0,11.39999,-4751.9037,-13909.569)">
+         transform="matrix(13.679999,0,0,13.679976,-6760.5652,-16025.746)">
         <g
            clip-path="url(#clipPath258)"
            id="g254">
@@ -168,7 +164,7 @@
       </g>
       <g
          id="g268"
-         transform="translate(170.35581,-0.00448371)">
+         transform="matrix(1.2000009,0,0,1.1999989,-853.84911,665.71675)">
         <g
            clip-path="url(#clipPath274)"
            id="g270"
