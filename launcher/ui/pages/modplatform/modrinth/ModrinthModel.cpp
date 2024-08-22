@@ -140,6 +140,10 @@ void ModpackListModel::performPaginatedSearch()
 
             callbacks.on_fail = [this](QString reason) { searchRequestFailed(reason); };
             callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
+            callbacks.on_abort = [this] {
+                qCritical() << "Search task aborted by an unknown reason!";
+                searchRequestFailed("Aborted");
+            };
             static const ModrinthAPI api;
             if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {
                 jobPtr = job;
@@ -250,6 +254,7 @@ void ModpackListModel::requestLogo(QString logo, QString url)
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(m_parent->metaEntryBase(), QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("%1 Icon Download %2").arg(m_parent->debugName()).arg(logo), APPLICATION->network());
+    job->setAskRetry(false);
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -348,10 +353,10 @@ void ModpackListModel::searchRequestForOneSucceeded(QJsonDocument& doc)
 void ModpackListModel::searchRequestFailed(QString reason)
 {
     auto failed_action = dynamic_cast<NetJob*>(jobPtr.get())->getFailedActions().at(0);
-    if (!failed_action->m_reply) {
+    if (failed_action->replyStatusCode() == -1) {
         // Network error
         QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load modpacks."));
-    } else if (failed_action->m_reply && failed_action->m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 409) {
+    } else if (failed_action->replyStatusCode() == 409) {
         // 409 Gone, notify user to update
         QMessageBox::critical(nullptr, tr("Error"),
                               //: %1 refers to the launcher itself

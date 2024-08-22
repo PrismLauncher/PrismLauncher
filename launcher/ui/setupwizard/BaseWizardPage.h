@@ -6,7 +6,7 @@
 class BaseWizardPage : public QWizardPage {
    public:
     explicit BaseWizardPage(QWidget* parent = Q_NULLPTR) : QWizardPage(parent) {}
-    virtual ~BaseWizardPage(){};
+    virtual ~BaseWizardPage() {};
 
     virtual bool wantsRefreshButton() { return false; }
     virtual void refresh() {}

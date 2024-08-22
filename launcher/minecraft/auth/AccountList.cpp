@@ -35,7 +35,7 @@
 
 #include "AccountList.h"
 #include "AccountData.h"
-#include "AccountTask.h"
+#include "tasks/Task.h"
 
 #include <QDir>
 #include <QFile>
@@ -51,8 +51,6 @@
 
 #include <FileSystem.h>
 #include <QSaveFile>
-
-#include <chrono>
 
 enum AccountListVersion { MojangMSA = 3 };
 
@@ -283,9 +281,15 @@ QVariant AccountList::data(const QModelIndex& index, int role) const
                     return account->accountDisplayString();
 
                 case TypeColumn: {
-                    auto typeStr = account->typeString();
-                    typeStr[0] = typeStr[0].toUpper();
-                    return typeStr;
+                    switch (account->accountType()) {
+                        case AccountType::MSA: {
+                            return tr("MSA", "Account type");
+                        }
+                        case AccountType::Offline: {
+                            return tr("Offline", "Account type");
+                        }
+                    }
+                    return tr("Unknown", "Account type");
                 }
 
                 case StatusColumn: {
@@ -635,8 +639,8 @@ void AccountList::tryNext()
             if (account->internalId() == accountId) {
                 m_currentTask = account->refresh();
                 if (m_currentTask) {
-                    connect(m_currentTask.get(), &AccountTask::succeeded, this, &AccountList::authSucceeded);
-                    connect(m_currentTask.get(), &AccountTask::failed, this, &AccountList::authFailed);
+                    connect(m_currentTask.get(), &Task::succeeded, this, &AccountList::authSucceeded);
+                    connect(m_currentTask.get(), &Task::failed, this, &AccountList::authFailed);
                     m_currentTask->start();
                     qDebug() << "RefreshSchedule: Processing account " << account->accountDisplayString() << " with internal ID "
                              << accountId;

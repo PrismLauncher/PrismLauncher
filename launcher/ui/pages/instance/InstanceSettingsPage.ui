@@ -155,7 +155,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -177,7 +177,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -199,7 +199,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>64</number>
+             <number>4</number>
             </property>
             <property name="maximum">
              <number>999999999</number>
@@ -567,6 +567,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="useZink">
+            <property name="toolTip">
+             <string>Use Zink, a Mesa OpenGL driver that implements OpenGL on top of Vulkan. Performance may vary depending on the situation. Note: If no suitable Vulkan driver is found, software rendering will be used.</string>
+            </property>
+            <property name="text">
+             <string>Use Zink</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -605,7 +615,7 @@
           <item>
            <widget class="QCheckBox" name="onlineFixes">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;This currently allows modern skins to be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;Current fixes include: skin and online mode support.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Enable online fixes (experimental)</string>
@@ -650,7 +660,7 @@
        <item>
         <widget class="QGroupBox" name="serverJoinGroupBox">
          <property name="title">
-          <string>Set a server to join on launch</string>
+          <string>Set a target to join on launch</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -658,26 +668,26 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <item>
-           <layout class="QGridLayout" name="serverJoinLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="serverJoinAddressLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Server address:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="serverJoinAddress"/>
-            </item>
-           </layout>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="serverJoinAddressButton">
+            <property name="text">
+             <string>Server address:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="serverJoinAddress"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="worldJoinButton">
+            <property name="text">
+             <string>Singleplayer world</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QComboBox" name="worldsCb"/>
           </item>
          </layout>
         </widget>

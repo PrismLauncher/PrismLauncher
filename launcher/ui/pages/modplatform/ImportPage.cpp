@@ -40,6 +40,7 @@
 #include "ui_ImportPage.h"
 
 #include <QFileDialog>
+#include <QMimeDatabase>
 #include <QValidator>
 #include <utility>
 
@@ -51,6 +52,7 @@
 #include "Json.h"
 
 #include "InstanceImportTask.h"
+#include "net/NetJob.h"
 
 class UrlValidator : public QValidator {
    public:
@@ -102,7 +104,7 @@ void ImportPage::updateState()
         return;
     }
     if (ui->modpackEdit->hasAcceptableInput()) {
-        QString input = ui->modpackEdit->text();
+        QString input = ui->modpackEdit->text().trimmed();
         auto url = QUrl::fromUserInput(input);
         if (url.isLocalFile()) {
             // FIXME: actually do some validation of what's inside here... this is fake AF
@@ -123,6 +125,10 @@ void ImportPage::updateState()
             // need to find the download link for the modpack
             // format of url curseforge://install?addonId=IDHERE&fileId=IDHERE
             QUrlQuery query(url);
+            if (query.allQueryItemValues("addonId").isEmpty() || query.allQueryItemValues("fileId").isEmpty()) {
+                qDebug() << "Invalid curseforge link:" << url;
+                return;
+            }
             auto addonId = query.allQueryItemValues("addonId")[0];
             auto fileId = query.allQueryItemValues("fileId")[0];
             auto array = std::make_shared<QByteArray>();
@@ -200,7 +206,9 @@ void ImportPage::setExtraInfo(const QMap<QString, QString>& extra_info)
 
 void ImportPage::on_modpackBtn_clicked()
 {
-    auto filter = QMimeDatabase().mimeTypeForName("application/zip").filterString();
+    const QMimeType zip = QMimeDatabase().mimeTypeForName("application/zip");
+    auto filter = tr("Supported files") + QString(" (%1 *.mrpack)").arg(zip.globPatterns().join(" "));
+    filter += ";;" + zip.filterString();
     //: Option for filtering for *.mrpack files when importing
     filter += ";;" + tr("Modrinth pack") + " (*.mrpack)";
     const QUrl url = QFileDialog::getOpenFileUrl(this, tr("Choose modpack"), modpackUrl(), filter);

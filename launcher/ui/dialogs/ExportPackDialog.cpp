@@ -47,11 +47,18 @@ ExportPackDialog::ExportPackDialog(InstancePtr instance, QWidget* parent, ModPla
 
     if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
         setWindowTitle(tr("Export Modrinth Pack"));
-        ui->summary->setText(instance->settings()->get("ExportSummary").toString());
+
+        ui->authorLabel->hide();
+        ui->author->hide();
+
+        ui->summary->setPlainText(instance->settings()->get("ExportSummary").toString());
     } else {
         setWindowTitle(tr("Export CurseForge Pack"));
-        ui->summaryLabel->setText(tr("&Author"));
-        ui->summary->setText(instance->settings()->get("ExportAuthor").toString());
+
+        ui->summaryLabel->hide();
+        ui->summary->hide();
+
+        ui->author->setText(instance->settings()->get("ExportAuthor").toString());
     }
 
     // ensure a valid pack is generated
@@ -108,8 +115,12 @@ void ExportPackDialog::done(int result)
     auto settings = instance->settings();
     settings->set("ExportName", ui->name->text());
     settings->set("ExportVersion", ui->version->text());
-    settings->set(m_provider == ModPlatform::ResourceProvider::FLAME ? "ExportAuthor" : "ExportSummary", ui->summary->text());
     settings->set("ExportOptionalFiles", ui->optionalFiles->isChecked());
+
+    if (m_provider == ModPlatform::ResourceProvider::MODRINTH)
+        settings->set("ExportSummary", ui->summary->toPlainText());
+    else
+        settings->set("ExportAuthor", ui->author->text());
 
     if (result == Accepted) {
         const QString name = ui->name->text().isEmpty() ? instance->name() : ui->name->text();
@@ -118,14 +129,14 @@ void ExportPackDialog::done(int result)
         QString output;
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
             output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".mrpack"),
-                                                  "Modrinth pack (*.mrpack *.zip)", nullptr);
+                                                  tr("Modrinth pack") + " (*.mrpack *.zip)", nullptr);
             if (output.isEmpty())
                 return;
             if (!(output.endsWith(".zip") || output.endsWith(".mrpack")))
                 output.append(".mrpack");
         } else {
             output = QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + ".zip"),
-                                                  "CurseForge pack (*.zip)", nullptr);
+                                                  tr("CurseForge pack") + " (*.zip)", nullptr);
             if (output.isEmpty())
                 return;
             if (!output.endsWith(".zip"))
@@ -134,10 +145,10 @@ void ExportPackDialog::done(int result)
 
         Task* task;
         if (m_provider == ModPlatform::ResourceProvider::MODRINTH) {
-            task = new ModrinthPackExportTask(name, ui->version->text(), ui->summary->text(), ui->optionalFiles->isChecked(), instance,
-                                              output, std::bind(&FileIgnoreProxy::filterFile, proxy, std::placeholders::_1));
+            task = new ModrinthPackExportTask(name, ui->version->text(), ui->summary->toPlainText(), ui->optionalFiles->isChecked(),
+                                              instance, output, std::bind(&FileIgnoreProxy::filterFile, proxy, std::placeholders::_1));
         } else {
-            task = new FlamePackExportTask(name, ui->version->text(), ui->summary->text(), ui->optionalFiles->isChecked(), instance, output,
+            task = new FlamePackExportTask(name, ui->version->text(), ui->author->text(), ui->optionalFiles->isChecked(), instance, output,
                                            std::bind(&FileIgnoreProxy::filterFile, proxy, std::placeholders::_1));
         }
 

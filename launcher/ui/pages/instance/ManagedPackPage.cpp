@@ -20,6 +20,7 @@
 #include "InstanceTask.h"
 #include "Json.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 
@@ -131,6 +132,22 @@ ManagedPackPage::~ManagedPackPage()
 
 void ManagedPackPage::openedImpl()
 {
+    if (m_inst->getManagedPackID().isEmpty()) {
+        ui->packVersion->hide();
+        ui->packVersionLabel->hide();
+        ui->packOrigin->hide();
+        ui->packOriginLabel->hide();
+        ui->versionsComboBox->hide();
+        ui->updateButton->hide();
+        ui->updateToVersionLabel->hide();
+        ui->updateFromFileButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        ui->packName->setText(m_inst->name());
+        ui->changelogTextBrowser->setText(tr("This is a local modpack.\n"
+                                             "This can be updated only using a file in %1 format\n")
+                                              .arg(displayName()));
+        return;
+    }
     ui->packName->setText(m_inst->getManagedPackName());
     ui->packVersion->setText(m_inst->getManagedPackVersionName());
     ui->packOrigin->setText(tr("Website: <a href=%1>%2</a>    |    Pack ID: %3    |    Version ID: %4")
@@ -316,7 +333,7 @@ void ModrinthManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(markdownToHTML(version.changelog.toUtf8()));
+    ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(markdownToHTML(version.changelog.toUtf8())));
 
     ManagedPackPage::suggestVersion();
 }
@@ -354,7 +371,9 @@ void ModrinthManagedPackPage::update()
 
 void ModrinthManagedPackPage::updateFromFile()
 {
-    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "Modrinth pack (*.mrpack *.zip)");
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), tr("Modrinth pack") + " (*.mrpack *.zip)");
+    if (output.isEmpty())
+        return;
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", m_inst->getManagedPackID());
     extra_info.insert("pack_version_id", QString());
@@ -402,7 +421,7 @@ void FlameManagedPackPage::parseManagedPack()
                "Don't worry though, it will ask you to update this instance instead, so you'll not lose this instance!"
                "</h4>");
 
-        ui->changelogTextBrowser->setHtml(message);
+        ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(message));
         return;
     }
 
@@ -472,7 +491,7 @@ void FlameManagedPackPage::parseManagedPack()
 QString FlameManagedPackPage::url() const
 {
     // FIXME: We should display the websiteUrl field, but this requires doing the API request first :(
-    return {};
+    return "https://www.curseforge.com/projects/" + m_inst->getManagedPackID();
 }
 
 void FlameManagedPackPage::suggestVersion()
@@ -484,7 +503,8 @@ void FlameManagedPackPage::suggestVersion()
     }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId));
+    ui->changelogTextBrowser->setHtml(
+        StringUtils::htmlListPatch(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId)));
 
     ManagedPackPage::suggestVersion();
 }
@@ -518,7 +538,9 @@ void FlameManagedPackPage::update()
 
 void FlameManagedPackPage::updateFromFile()
 {
-    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), "CurseForge pack (*.zip)");
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), tr("CurseForge pack") + " (*.zip)");
+    if (output.isEmpty())
+        return;
 
     QMap<QString, QString> extra_info;
     extra_info.insert("pack_id", m_inst->getManagedPackID());

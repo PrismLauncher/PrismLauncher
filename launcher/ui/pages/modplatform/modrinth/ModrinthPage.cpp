@@ -35,6 +35,7 @@
  */
 
 #include "ModrinthPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ModrinthPage.h"
 
 #include "ModrinthModel.h"
@@ -43,6 +44,7 @@
 #include "InstanceImportTask.h"
 #include "Json.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 
 #include "ui/widgets/ProjectItem.h"
 
@@ -57,7 +59,6 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
 {
     ui->setupUi(this);
 
-    connect(ui->searchButton, &QPushButton::clicked, this, &ModrinthPage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
     m_model = new Modrinth::ModpackListModel(this);
     ui->packView->setModel(m_model);
@@ -74,7 +75,7 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
+    ui->verticalLayout->insertWidget(1, &m_fetch_progress);
 
     ui->sortByBox->addItem(tr("Sort by Relevance"));
     ui->sortByBox->addItem(tr("Sort by Total Downloads"));
@@ -84,7 +85,7 @@ ModrinthPage::ModrinthPage(NewInstanceDialog* dialog, QWidget* parent)
 
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthPage::onSelectionChanged);
-    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthPage::onVersionSelectionChanged);
+    connect(ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModrinthPage::onVersionSelectionChanged);
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     ui->packDescription->setMetaEntry(metaEntryBase());
@@ -103,6 +104,7 @@ void ModrinthPage::retranslate()
 void ModrinthPage::openedImpl()
 {
     BasePage::openedImpl();
+    suggestCurrent();
     triggerSearch();
 }
 
@@ -182,6 +184,8 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
     } else
         updateUI();
@@ -219,11 +223,12 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             }
             for (auto version : current.versions) {
                 auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
-                if (!version.name.contains(version.version))
-                    ui->versionSelectionBox->addItem(QString("%1 — %2%3").arg(version.name, version.version, release_type),
-                                                     QVariant(version.id));
-                else
-                    ui->versionSelectionBox->addItem(QString("%1%2").arg(version.name, release_type), QVariant(version.id));
+                auto mcVersion = !version.gameVersion.isEmpty() && !version.name.contains(version.gameVersion)
+                                     ? QString(" for %1").arg(version.gameVersion)
+                                     : "";
+                auto versionStr = !version.name.contains(version.version) ? version.version : "";
+                ui->versionSelectionBox->addItem(QString("%1%2 — %3%4").arg(version.name, mcVersion, versionStr, release_type),
+                                                 QVariant(version.id));
             }
 
             QVariant current_updated;
@@ -235,6 +240,8 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
         });
         QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
 
     } else {
@@ -262,6 +269,11 @@ void ModrinthPage::updateUI()
     text += "<br>" + tr(" by ") + QString("<a href=%1>%2</a>").arg(std::get<1>(current.author).toString(), std::get<0>(current.author));
 
     if (current.extraInfoLoaded) {
+        if (current.extra.status == "archived") {
+            text += "<br><br>" + tr("<b>This project has been archived. It will not receive any further updates unless the author decides "
+                                    "to unarchive the project.</b>");
+        }
+
         if (!current.extra.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
             auto donateToStr = [](Modrinth::DonationData& donate) -> QString {
@@ -293,7 +305,7 @@ void ModrinthPage::updateUI()
 
     text += markdownToHTML(current.extra.body.toUtf8());
 
-    ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
     ui->packDescription->flush();
 }
 
@@ -330,9 +342,9 @@ void ModrinthPage::triggerSearch()
     m_fetch_progress.watch(m_model->activeSearchJob().get());
 }
 
-void ModrinthPage::onVersionSelectionChanged(QString version)
+void ModrinthPage::onVersionSelectionChanged(int index)
 {
-    if (version.isNull() || version.isEmpty()) {
+    if (index == -1) {
         selectedVersion = "";
         return;
     }

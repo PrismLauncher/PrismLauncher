@@ -3,7 +3,6 @@
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceAPI.h"
 #include "tasks/Task.h"
 
 class ResourceDownloadTask;
@@ -15,9 +14,9 @@ class CheckUpdateTask : public Task {
    public:
     CheckUpdateTask(QList<Mod*>& mods,
                     std::list<Version>& mcVersions,
-                    std::optional<ModPlatform::ModLoaderTypes> loaders,
+                    QList<ModPlatform::ModLoaderType> loadersList,
                     std::shared_ptr<ModFolderModel> mods_folder)
-        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders(loaders), m_mods_folder(mods_folder){};
+        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders_list(loadersList), m_mods_folder(mods_folder) {};
 
     struct UpdatableMod {
         QString name;
@@ -28,6 +27,7 @@ class CheckUpdateTask : public Task {
         QString changelog;
         ModPlatform::ResourceProvider provider;
         shared_qobject_ptr<ResourceDownloadTask> download;
+        bool enabled = true;
 
        public:
         UpdatableMod(QString name,
@@ -37,7 +37,8 @@ class CheckUpdateTask : public Task {
                      std::optional<ModPlatform::IndexedVersionType> new_v_type,
                      QString changelog,
                      ModPlatform::ResourceProvider p,
-                     shared_qobject_ptr<ResourceDownloadTask> t)
+                     shared_qobject_ptr<ResourceDownloadTask> t,
+                     bool enabled = true)
             : name(name)
             , old_hash(old_h)
             , old_version(old_v)
@@ -46,6 +47,7 @@ class CheckUpdateTask : public Task {
             , changelog(changelog)
             , provider(p)
             , download(t)
+            , enabled(enabled)
         {}
     };
 
@@ -64,7 +66,7 @@ class CheckUpdateTask : public Task {
    protected:
     QList<Mod*>& m_mods;
     std::list<Version>& m_game_versions;
-    std::optional<ModPlatform::ModLoaderTypes> m_loaders;
+    QList<ModPlatform::ModLoaderType> m_loaders_list;
     std::shared_ptr<ModFolderModel> m_mods_folder;
 
     std::vector<UpdatableMod> m_updatable;

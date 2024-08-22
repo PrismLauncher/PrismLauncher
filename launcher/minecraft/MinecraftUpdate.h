@@ -15,43 +15,19 @@
 
 #pragma once
 
-#include <QList>
-#include <QObject>
-#include <QUrl>
+#include "tasks/SequentialTask.h"
 
-#include <quazip/quazip.h>
-#include "minecraft/VersionFilterData.h"
-#include "net/NetJob.h"
-#include "tasks/Task.h"
-
-class MinecraftVersion;
 class MinecraftInstance;
 
-// FIXME: This looks very similar to a SequentialTask. Maybe we can reduce code duplications? :^)
-
-class MinecraftUpdate : public Task {
+// this needs to be a task because components->reload does stuff that may block
+class MinecraftUpdate : public SequentialTask {
     Q_OBJECT
    public:
     explicit MinecraftUpdate(MinecraftInstance* inst, QObject* parent = 0);
-    virtual ~MinecraftUpdate(){};
+    virtual ~MinecraftUpdate() = default;
 
     void executeTask() override;
-    bool canAbort() const override;
-
-   private slots:
-    bool abort() override;
-    void subtaskSucceeded();
-    void subtaskFailed(QString error);
-
-   private:
-    void next();
 
    private:
     MinecraftInstance* m_inst = nullptr;
-    QList<Task::Ptr> m_tasks;
-    QString m_preFailure;
-    int m_currentTask = -1;
-    bool m_abort = false;
-    bool m_failed_out_of_order = false;
-    QString m_fail_reason;
 };

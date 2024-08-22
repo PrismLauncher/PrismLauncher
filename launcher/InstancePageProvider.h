@@ -22,7 +22,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
    public:
     explicit InstancePageProvider(InstancePtr parent) { inst = parent; }
 
-    virtual ~InstancePageProvider(){};
+    virtual ~InstancePageProvider() = default;
     virtual QList<BasePage*> getPages() override
     {
         QList<BasePage*> values;
@@ -39,7 +39,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         values.append(new TexturePackPage(onesix.get(), onesix->texturePackList()));
         values.append(new ShaderPackPage(onesix.get(), onesix->shaderPackList()));
         values.append(new NotesPage(onesix.get()));
-        values.append(new WorldListPage(onesix.get(), onesix->worldList()));
+        values.append(new WorldListPage(onesix, onesix->worldList()));
         values.append(new ServersPage(onesix));
         // values.append(new GameOptionsPage(onesix.get()));
         values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));

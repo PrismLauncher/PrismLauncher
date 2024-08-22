@@ -1,6 +1,10 @@
 #include "InstanceTask.h"
 
+#include "Application.h"
+#include "settings/SettingsObject.h"
 #include "ui/dialogs/CustomMessageBox.h"
+
+#include <QPushButton>
 
 InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& old_name, const QString& new_name)
 {
@@ -20,6 +24,9 @@ InstanceNameChange askForChangingInstanceName(QWidget* parent, const QString& ol
 
 ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name)
 {
+    if (APPLICATION->settings()->get("SkipModpackUpdatePrompt").toBool())
+        return ShouldUpdate::SkipUpdating;
+
     auto info = CustomMessageBox::selectable(
         parent, QObject::tr("Similar modpack was found!"),
         QObject::tr(
@@ -27,16 +34,15 @@ ShouldUpdate askIfShouldUpdate(QWidget* parent, QString original_version_name)
             "separate instance, or update the existing one?\n\nNOTE: Make sure you made a backup of your important instance data before "
             "updating, as worlds can be corrupted and some configuration may be lost (due to pack overrides).")
             .arg(original_version_name),
-        QMessageBox::Information, QMessageBox::Ok | QMessageBox::Reset | QMessageBox::Abort);
-    info->setButtonText(QMessageBox::Ok, QObject::tr("Update existing instance"));
-    info->setButtonText(QMessageBox::Abort, QObject::tr("Create new instance"));
-    info->setButtonText(QMessageBox::Reset, QObject::tr("Cancel"));
+        QMessageBox::Information, QMessageBox::Cancel);
+    QAbstractButton* update = info->addButton(QObject::tr("Update existing instance"), QMessageBox::AcceptRole);
+    QAbstractButton* skip = info->addButton(QObject::tr("Create new instance"), QMessageBox::ResetRole);
 
     info->exec();
 
-    if (info->clickedButton() == info->button(QMessageBox::Ok))
+    if (info->clickedButton() == update)
         return ShouldUpdate::Update;
-    if (info->clickedButton() == info->button(QMessageBox::Abort))
+    if (info->clickedButton() == skip)
         return ShouldUpdate::SkipUpdating;
     return ShouldUpdate::Cancel;
 }

@@ -34,6 +34,7 @@
  */
 
 #include "TechnicPage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ProjectItem.h"
 #include "ui_TechnicPage.h"
 
@@ -43,6 +44,7 @@
 
 #include "BuildConfig.h"
 #include "Json.h"
+#include "StringUtils.h"
 #include "TechnicModel.h"
 #include "modplatform/technic/SingleZipPackInstallTask.h"
 #include "modplatform/technic/SolderPackInstallTask.h"
@@ -56,7 +58,6 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), ui(new Ui::TechnicPage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
-    connect(ui->searchButton, &QPushButton::clicked, this, &TechnicPage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
     model = new Technic::ListModel(this);
     ui->packView->setModel(model);
@@ -70,7 +71,7 @@ TechnicPage::TechnicPage(NewInstanceDialog* dialog, QWidget* parent)
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
+    ui->verticalLayout->insertWidget(1, &m_fetch_progress);
 
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &TechnicPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &TechnicPage::onVersionSelectionChanged);
@@ -208,6 +209,8 @@ void TechnicPage::suggestCurrent()
 
         metadataLoaded();
     });
+    connect(jobPtr.get(), &NetJob::failed,
+            [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
     jobPtr = netJob;
     jobPtr->start();
@@ -230,7 +233,7 @@ void TechnicPage::metadataLoaded()
 
     text += "<br><br>";
 
-    ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
 
     // Strip trailing forward-slashes from Solder URL's
     if (current.isSolder) {
@@ -258,6 +261,8 @@ void TechnicPage::metadataLoaded()
         netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(url), response));
 
         QObject::connect(netJob.get(), &NetJob::succeeded, this, &TechnicPage::onSolderLoaded);
+        connect(jobPtr.get(), &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
 
         jobPtr = netJob;
         jobPtr->start();

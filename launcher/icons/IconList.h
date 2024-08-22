@@ -52,7 +52,7 @@ class IconList : public QAbstractListModel {
     Q_OBJECT
    public:
     explicit IconList(const QStringList& builtinPaths, QString path, QObject* parent = 0);
-    virtual ~IconList(){};
+    virtual ~IconList() {};
 
     QIcon getIcon(const QString& key) const;
     int getIconIndex(const QString& key) const;
@@ -67,7 +67,7 @@ class IconList : public QAbstractListModel {
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     bool addThemeIcon(const QString& key);
-    bool addIcon(const QString& key, const QString& name, const QString& path, const IconType type);
+    bool addIcon(const QString& key, const QString& name, const QString& path, IconType type);
     void saveIcon(const QString& key, const QString& path, const char* format) const;
     bool deleteIcon(const QString& key);
     bool trashIcon(const QString& key);

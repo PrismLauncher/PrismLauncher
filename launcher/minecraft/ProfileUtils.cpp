@@ -57,7 +57,7 @@ bool readOverrideOrders(QString path, PatchOrder& order)
     }
     if (!orderFile.open(QFile::ReadOnly)) {
         qCritical() << "Couldn't open" << orderFile.fileName() << " for reading:" << orderFile.errorString();
-        qWarning() << "Ignoring overriden order";
+        qWarning() << "Ignoring overridden order";
         return false;
     }
 
@@ -66,7 +66,7 @@ bool readOverrideOrders(QString path, PatchOrder& order)
     QJsonDocument doc = QJsonDocument::fromJson(orderFile.readAll(), &error);
     if (error.error != QJsonParseError::NoError) {
         qCritical() << "Couldn't parse" << orderFile.fileName() << ":" << error.errorString();
-        qWarning() << "Ignoring overriden order";
+        qWarning() << "Ignoring overridden order";
         return false;
     }
 
@@ -84,7 +84,7 @@ bool readOverrideOrders(QString path, PatchOrder& order)
         }
     } catch ([[maybe_unused]] const JSONValidationError& err) {
         qCritical() << "Couldn't parse" << orderFile.fileName() << ": bad file format";
-        qWarning() << "Ignoring overriden order";
+        qWarning() << "Ignoring overridden order";
         order.clear();
         return false;
     }
@@ -140,7 +140,7 @@ VersionFilePtr parseJsonFile(const QFileInfo& fileInfo, const bool requireOrder)
     return guardedParseJson(doc, fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), requireOrder);
 }
 
-bool saveJsonFile(const QJsonDocument doc, const QString& filename)
+bool saveJsonFile(const QJsonDocument& doc, const QString& filename)
 {
     auto data = doc.toJson();
     QSaveFile jsonFile(filename);

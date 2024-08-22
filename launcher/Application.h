@@ -47,8 +47,7 @@
 
 #include <BaseInstance.h>
 
-#include "minecraft/launch/MinecraftServerTarget.h"
-#include "ui/themes/CatPack.h"
+#include "minecraft/launch/MinecraftTarget.h"
 
 class LaunchController;
 class LocalPeer;
@@ -193,6 +192,8 @@ class Application : public QApplication {
     void globalSettingsClosed();
     int currentCatChanged(int index);
 
+    void oauthReplyRecieved(QVariantMap);
+
 #ifdef Q_OS_MACOS
     void clickedOnDock();
 #endif
@@ -201,7 +202,7 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
-                MinecraftServerTargetPtr serverToJoin = nullptr,
+                MinecraftTarget::Ptr targetToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);
     void closeCurrentWindow();
@@ -289,6 +290,7 @@ class Application : public QApplication {
     QString m_detectedOpenALPath;
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
+    QString m_worldToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
     QList<QUrl> m_urlsToImport;

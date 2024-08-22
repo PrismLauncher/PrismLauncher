@@ -35,21 +35,18 @@
  */
 
 #include "AccountListPage.h"
+#include "ui/dialogs/skins/SkinManageDialog.h"
 #include "ui_AccountListPage.h"
 
 #include <QItemSelectionModel>
 #include <QMenu>
+#include <QPushButton>
 
 #include <QDebug>
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/MSALoginDialog.h"
 #include "ui/dialogs/OfflineLoginDialog.h"
-#include "ui/dialogs/ProgressDialog.h"
-#include "ui/dialogs/SkinUploadDialog.h"
-
-#include "minecraft/services/SkinDelete.h"
-#include "tasks/Task.h"
 
 #include "Application.h"
 
@@ -133,9 +130,7 @@ void AccountListPage::listChanged()
 
 void AccountListPage::on_actionAddMicrosoft_triggered()
 {
-    MinecraftAccountPtr account =
-        MSALoginDialog::newAccount(this, tr("Please enter your Mojang account email and password to add your account."));
-
+    auto account = MSALoginDialog::newAccount(this);
     if (account) {
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {
@@ -216,12 +211,11 @@ void AccountListPage::updateButtonStates()
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
         accountIsReady = !account->isActive();
-        accountIsOnline = !account->isOffline();
+        accountIsOnline = account->accountType() != AccountType::Offline;
     }
     ui->actionRemove->setEnabled(accountIsReady);
     ui->actionSetDefault->setEnabled(accountIsReady);
-    ui->actionUploadSkin->setEnabled(accountIsReady && accountIsOnline);
-    ui->actionDeleteSkin->setEnabled(accountIsReady && accountIsOnline);
+    ui->actionManageSkins->setEnabled(accountIsReady && accountIsOnline);
     ui->actionRefresh->setEnabled(accountIsReady && accountIsOnline);
 
     if (m_accounts->defaultAccount().get() == nullptr) {
@@ -234,29 +228,13 @@ void AccountListPage::updateButtonStates()
     ui->listView->resizeColumnToContents(3);
 }
 
-void AccountListPage::on_actionUploadSkin_triggered()
+void AccountListPage::on_actionManageSkins_triggered()
 {
     QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
     if (selection.size() > 0) {
         QModelIndex selected = selection.first();
         MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
-        SkinUploadDialog dialog(account, this);
+        SkinManageDialog dialog(this, account);
         dialog.exec();
-    }
-}
-
-void AccountListPage::on_actionDeleteSkin_triggered()
-{
-    QModelIndexList selection = ui->listView->selectionModel()->selectedIndexes();
-    if (selection.size() <= 0)
-        return;
-
-    QModelIndex selected = selection.first();
-    MinecraftAccountPtr account = selected.data(AccountList::PointerRole).value<MinecraftAccountPtr>();
-    ProgressDialog prog(this);
-    auto deleteSkinTask = std::make_shared<SkinDelete>(this, account->accessToken());
-    if (prog.execWithTask((Task*)deleteSkinTask.get()) != QDialog::Accepted) {
-        CustomMessageBox::selectable(this, tr("Skin Delete"), tr("Failed to delete current skin!"), QMessageBox::Warning)->exec();
-        return;
     }
 }

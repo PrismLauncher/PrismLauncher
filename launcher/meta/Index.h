@@ -16,10 +16,10 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include <memory>
 
 #include "BaseEntity.h"
 #include "meta/VersionList.h"
+#include "net/Mode.h"
 
 class Task;
 
@@ -30,6 +30,7 @@ class Index : public QAbstractListModel, public BaseEntity {
    public:
     explicit Index(QObject* parent = nullptr);
     explicit Index(const QVector<VersionList::Ptr>& lists, QObject* parent = nullptr);
+    virtual ~Index() = default;
 
     enum { UidRole = Qt::UserRole, NameRole, ListPtrRole };
 
@@ -47,14 +48,21 @@ class Index : public QAbstractListModel, public BaseEntity {
 
     QVector<VersionList::Ptr> lists() const { return m_lists; }
 
+    Task::Ptr loadVersion(const QString& uid, const QString& version = {}, Net::Mode mode = Net::Mode::Online, bool force = false);
+
+    // this blocks until the version is loaded
+    Version::Ptr getLoadedVersion(const QString& uid, const QString& version);
+
    public:  // for usage by parsers only
     void merge(const std::shared_ptr<Index>& other);
+
+   protected:
     void parse(const QJsonObject& obj) override;
 
    private:
     QVector<VersionList::Ptr> m_lists;
     QHash<QString, VersionList::Ptr> m_uids;
 
-    void connectVersionList(const int row, const VersionList::Ptr& list);
+    void connectVersionList(int row, const VersionList::Ptr& list);
 };
 }  // namespace Meta

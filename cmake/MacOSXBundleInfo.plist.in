@@ -6,6 +6,8 @@
     <string>A Minecraft mod wants to access your camera.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>A Minecraft mod wants to access your microphone.</string>
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>Prism uses access to your Downloads folder to help you more quickly add mods that can't be automatically downloaded to your instance. You can change where Prism scans for downloaded mods in Settings or the prompt that appears.</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
     <key>NSHighResolutionCapable</key>
@@ -75,6 +77,14 @@
             <key>CFBundleURLSchemes</key>
             <array>
             <string>curseforge</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>Prismlauncher</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+            <string>prismlauncher</string>
             </array>
         </dict>
     </array>

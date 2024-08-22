@@ -16,7 +16,6 @@ namespace ResourceDownload {
 
 ShaderPackResourcePage::ShaderPackResourcePage(ShaderPackDownloadDialog* dialog, BaseInstance& instance) : ResourcePage(dialog, instance)
 {
-    connect(m_ui->searchButton, &QPushButton::clicked, this, &ShaderPackResourcePage::triggerSearch);
     connect(m_ui->packView, &QListView::doubleClicked, this, &ShaderPackResourcePage::onResourceSelected);
 }
 
@@ -24,6 +23,7 @@ ShaderPackResourcePage::ShaderPackResourcePage(ShaderPackDownloadDialog* dialog,
 
 void ShaderPackResourcePage::triggerSearch()
 {
+    m_ui->packView->selectionModel()->setCurrentIndex({}, QItemSelectionModel::SelectionFlag::ClearAndSelect);
     m_ui->packView->clearSelection();
     m_ui->packDescription->clear();
     m_ui->versionSelectionBox->clear();

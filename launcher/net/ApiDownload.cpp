@@ -18,49 +18,29 @@
  */
 
 #include "net/ApiDownload.h"
-#include "ByteArraySink.h"
-#include "ChecksumValidator.h"
-#include "MetaCacheSink.h"
-#include "net/NetAction.h"
+#include "net/ApiHeaderProxy.h"
 
 namespace Net {
 
-auto ApiDownload::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
+Download::Ptr ApiDownload::makeCached(QUrl url, MetaEntryPtr entry, Download::Options options)
 {
-    auto dl = makeShared<ApiDownload>();
-    dl->m_url = url;
-    dl->setObjectName(QString("CACHE:") + url.toString());
-    dl->m_options = options;
-    auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
-    auto cachedNode = new MetaCacheSink(entry, md5Node, options.testFlag(Option::MakeEternal));
-    dl->m_sink.reset(cachedNode);
+    auto dl = Download::makeCached(url, entry, options);
+    dl->addHeaderProxy(new ApiHeaderProxy());
     return dl;
 }
 
-auto ApiDownload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
+Download::Ptr ApiDownload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Download::Options options)
 {
-    auto dl = makeShared<ApiDownload>();
-    dl->m_url = url;
-    dl->setObjectName(QString("BYTES:") + url.toString());
-    dl->m_options = options;
-    dl->m_sink.reset(new ByteArraySink(output));
+    auto dl = Download::makeByteArray(url, output, options);
+    dl->addHeaderProxy(new ApiHeaderProxy());
     return dl;
 }
 
-auto ApiDownload::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
+Download::Ptr ApiDownload::makeFile(QUrl url, QString path, Download::Options options)
 {
-    auto dl = makeShared<ApiDownload>();
-    dl->m_url = url;
-    dl->setObjectName(QString("FILE:") + url.toString());
-    dl->m_options = options;
-    dl->m_sink.reset(new FileSink(path));
+    auto dl = Download::makeFile(url, path, options);
+    dl->addHeaderProxy(new ApiHeaderProxy());
     return dl;
 }
 
-void ApiDownload::init()
-{
-    qDebug() << "Setting up api download";
-    auto api_headers = new ApiHeaderProxy();
-    addHeaderProxy(api_headers);
-}
 }  // namespace Net

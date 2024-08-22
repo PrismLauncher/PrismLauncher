@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 Tayou <git@tayou.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,8 @@
 #include <QDirIterator>
 #include <QIcon>
 #include <QImageReader>
+#include <QStyle>
+#include <QStyleFactory>
 #include "Exception.h"
 #include "ui/themes/BrightTheme.h"
 #include "ui/themes/CatPack.h"
@@ -119,14 +121,30 @@ void ThemeManager::initializeIcons()
 
 void ThemeManager::initializeWidgets()
 {
+    themeDebugLog() << "Determining System Widget Theme...";
+    const auto& style = QApplication::style();
+    currentlySelectedSystemTheme = style->objectName();
+    themeDebugLog() << "System theme seems to be:" << currentlySelectedSystemTheme;
+
     themeDebugLog() << "<> Initializing Widget Themes";
-    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>());
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>(currentlySelectedSystemTheme, true));
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
 
-    // TODO: need some way to differentiate same name themes in different subdirectories (maybe smaller grey text next to theme name in
-    // dropdown?)
+    themeDebugLog() << "<> Initializing System Widget Themes";
+    QStringList styles = QStyleFactory::keys();
+    for (auto& st : styles) {
+#ifdef Q_OS_WINDOWS
+        if (QSysInfo::productVersion() != "11" && st == "windows11") {
+            continue;
+        }
+#endif
+        themeDebugLog() << "Loading System Theme:" << addTheme(std::make_unique<SystemTheme>(st));
+    }
+
+    // TODO: need some way to differentiate same name themes in different subdirectories
+    //  (maybe smaller grey text next to theme name in dropdown?)
 
     if (!m_applicationThemeFolder.mkpath("."))
         themeWarningLog() << "Couldn't create theme folder";
@@ -178,8 +196,8 @@ QList<ITheme*> ThemeManager::getValidApplicationThemes()
 QList<CatPack*> ThemeManager::getValidCatPacks()
 {
     QList<CatPack*> ret;
-    ret.reserve(m_catPacks.size());
-    for (auto&& [id, theme] : m_catPacks) {
+    ret.reserve(m_cat_packs.size());
+    for (auto&& [id, theme] : m_cat_packs) {
         ret.append(theme.get());
     }
     return ret;
@@ -238,14 +256,18 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
     auto settings = APPLICATION->settings();
     setIconTheme(settings->get("IconTheme").toString());
     themeDebugLog() << "<> Icon theme set.";
-    setApplicationTheme(settings->get("ApplicationTheme").toString(), initial);
+    auto applicationTheme = settings->get("ApplicationTheme").toString();
+    if (applicationTheme == "") {
+        applicationTheme = currentlySelectedSystemTheme;
+    }
+    setApplicationTheme(applicationTheme, initial);
     themeDebugLog() << "<> Application theme set.";
 }
 
 QString ThemeManager::getCatPack(QString catName)
 {
-    auto catIter = m_catPacks.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
-    if (catIter != m_catPacks.end()) {
+    auto catIter = m_cat_packs.find(!catName.isEmpty() ? catName : APPLICATION->settings()->get("BackgroundCat").toString());
+    if (catIter != m_cat_packs.end()) {
         auto& catPack = catIter->second;
         themeDebugLog() << "applying catpack" << catPack->id();
         return catPack->path();
@@ -253,14 +275,14 @@ QString ThemeManager::getCatPack(QString catName)
         themeWarningLog() << "Tried to get invalid catPack:" << catName;
     }
 
-    return m_catPacks.begin()->second->path();
+    return m_cat_packs.begin()->second->path();
 }
 
 QString ThemeManager::addCatPack(std::unique_ptr<CatPack> catPack)
 {
     QString id = catPack->id();
-    if (m_catPacks.find(id) == m_catPacks.end())
-        m_catPacks.emplace(id, std::move(catPack));
+    if (m_cat_packs.find(id) == m_cat_packs.end())
+        m_cat_packs.emplace(id, std::move(catPack));
     else
         themeWarningLog() << "CatPack(" << id << ") not added to prevent id duplication";
     return id;
@@ -313,3 +335,13 @@ void ThemeManager::initializeCatPacks()
         }
     }
 }
+
+void ThemeManager::refresh()
+{
+    m_themes.clear();
+    m_icons.clear();
+    m_cat_packs.clear();
+
+    initializeThemes();
+    initializeCatPacks();
+};

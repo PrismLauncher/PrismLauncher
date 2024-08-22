@@ -89,13 +89,13 @@ class PackProfile : public QAbstractListModel {
 
     enum MoveDirection { MoveUp, MoveDown };
     /// move component file # up or down the list
-    void move(const int index, const MoveDirection direction);
+    void move(int index, MoveDirection direction);
 
     /// remove component file # - including files/records
-    bool remove(const int index);
+    bool remove(int index);
 
     /// remove component file by id - including files/records
-    bool remove(const QString id);
+    bool remove(const QString& id);
 
     bool customize(int index);
 
@@ -146,6 +146,7 @@ class PackProfile : public QAbstractListModel {
     std::optional<ModPlatform::ModLoaderTypes> getModLoaders();
     // this returns aditional loaders(Quilt supports fabric and NeoForge supports Forge)
     std::optional<ModPlatform::ModLoaderTypes> getSupportedModLoaders();
+    QList<ModPlatform::ModLoaderType> getModLoadersList();
 
    private:
     void scheduleSave();

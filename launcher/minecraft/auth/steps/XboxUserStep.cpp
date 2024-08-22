@@ -2,22 +2,16 @@
 
 #include <QNetworkRequest>
 
-#include "minecraft/auth/AuthRequest.h"
+#include "Application.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
+#include "net/RawHeaderProxy.h"
 
 XboxUserStep::XboxUserStep(AccountData* data) : AuthStep(data) {}
-
-XboxUserStep::~XboxUserStep() noexcept = default;
 
 QString XboxUserStep::describe()
 {
     return tr("Logging in as an Xbox user.");
-}
-
-void XboxUserStep::rehydrate()
-{
-    // NOOP, for now. We only save bools and there's nothing to check.
 }
 
 void XboxUserStep::perform()
@@ -35,36 +29,42 @@ void XboxUserStep::perform()
 )XXX";
     auto xbox_auth_data = xbox_auth_template.arg(m_data->msaToken.token);
 
-    QNetworkRequest request = QNetworkRequest(QUrl("https://user.auth.xboxlive.com/user/authenticate"));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Accept", "application/json");
-    // set contract-version header (prevent err 400 bad-request?)
-    // https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/reference/live/rest/additional/httpstandardheaders
-    request.setRawHeader("x-xbl-contract-version", "1");
+    QUrl url("https://user.auth.xboxlive.com/user/authenticate");
+    auto headers = QList<Net::HeaderPair>{
+        { "Content-Type", "application/json" },
+        { "Accept", "application/json" },
+        // set contract-version header (prevent err 400 bad-request?)
+        // https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/reference/live/rest/additional/httpstandardheaders
+        { "x-xbl-contract-version", "1" }
+    };
+    m_response.reset(new QByteArray());
+    m_request = Net::Upload::makeByteArray(url, m_response, xbox_auth_data.toUtf8());
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
-    auto* requestor = new AuthRequest(this);
-    connect(requestor, &AuthRequest::finished, this, &XboxUserStep::onRequestDone);
-    requestor->post(request, xbox_auth_data.toUtf8());
+    m_task.reset(new NetJob("XboxUserStep", APPLICATION->network()));
+    m_task->setAskRetry(false);
+    m_task->addNetAction(m_request);
+
+    connect(m_task.get(), &Task::finished, this, &XboxUserStep::onRequestDone);
+
+    m_task->start();
     qDebug() << "First layer of XBox auth ... commencing.";
 }
 
-void XboxUserStep::onRequestDone(QNetworkReply::NetworkError error, QByteArray data, QList<QNetworkReply::RawHeaderPair> headers)
+void XboxUserStep::onRequestDone()
 {
-    auto requestor = qobject_cast<AuthRequest*>(QObject::sender());
-    requestor->deleteLater();
-
-    if (error != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << error;
-        if (Net::isApplicationError(error)) {
-            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication failed: %1").arg(requestor->errorString_));
+    if (m_request->error() != QNetworkReply::NoError) {
+        qWarning() << "Reply error:" << m_request->error();
+        if (Net::isApplicationError(m_request->error())) {
+            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication failed: %1").arg(m_request->errorString()));
         } else {
-            emit finished(AccountTaskState::STATE_OFFLINE, tr("XBox user authentication failed: %1").arg(requestor->errorString_));
+            emit finished(AccountTaskState::STATE_OFFLINE, tr("XBox user authentication failed: %1").arg(m_request->errorString()));
         }
         return;
     }
 
-    Katabasis::Token temp;
-    if (!Parsers::parseXTokenResponse(data, temp, "UToken")) {
+    Token temp;
+    if (!Parsers::parseXTokenResponse(*m_response, temp, "UToken")) {
         qWarning() << "Could not parse user authentication response...";
         emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication response could not be understood."));
         return;

@@ -57,7 +57,7 @@ class OtherLogsPage : public QWidget, public BasePage {
     QString id() const override { return "logs"; }
     QString displayName() const override { return tr("Other logs"); }
     QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
-    QString helpPage() const override { return "Minecraft-Logs"; }
+    QString helpPage() const override { return "other-Logs"; }
     void retranslate() override;
 
     void openedImpl() override;
@@ -65,7 +65,7 @@ class OtherLogsPage : public QWidget, public BasePage {
 
    private slots:
     void populateSelectLogBox();
-    void on_selectLogBox_currentIndexChanged(const int index);
+    void on_selectLogBox_currentIndexChanged(int index);
     void on_btnReload_clicked();
     void on_btnPaste_clicked();
     void on_btnCopy_clicked();
@@ -78,7 +78,7 @@ class OtherLogsPage : public QWidget, public BasePage {
     void findPreviousActivated();
 
    private:
-    void setControlsEnabled(const bool enabled);
+    void setControlsEnabled(bool enabled);
 
    private:
     Ui::OtherLogsPage* ui;

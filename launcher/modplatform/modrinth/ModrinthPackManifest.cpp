@@ -95,6 +95,8 @@ void loadIndexedInfo(Modpack& pack, QJsonObject& obj)
         pack.extra.donate.append(donate);
     }
 
+    pack.extra.status = Json::ensureString(obj, "status");
+
     pack.extraInfoLoaded = true;
 }
 
@@ -129,6 +131,10 @@ auto loadIndexedVersion(QJsonObject& obj) -> ModpackVersion
 
     file.name = Json::requireString(obj, "name");
     file.version = Json::requireString(obj, "version_number");
+    auto gameVersions = Json::ensureArray(obj, "game_versions");
+    if (!gameVersions.isEmpty()) {
+        file.gameVersion = Json::ensureString(gameVersions[0]);
+    }
     file.version_type = ModPlatform::IndexedVersionType(Json::requireString(obj, "version_type"));
     file.changelog = Json::ensureString(obj, "changelog");
 

@@ -14,7 +14,7 @@ class VersionProxyModel : public QAbstractProxyModel {
 
    public:
     VersionProxyModel(QObject* parent = 0);
-    virtual ~VersionProxyModel(){};
+    virtual ~VersionProxyModel() {};
 
     virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -28,7 +28,7 @@ class VersionProxyModel : public QAbstractProxyModel {
 
     const FilterMap& filters() const;
     const QString& search() const;
-    void setFilter(const BaseVersionList::ModelRoles column, Filter* filter);
+    void setFilter(BaseVersionList::ModelRoles column, Filter* filter);
     void setSearch(const QString& search);
     void clearFilters();
     QModelIndex getRecommended() const;

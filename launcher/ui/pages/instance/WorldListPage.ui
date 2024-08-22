@@ -81,6 +81,7 @@
    </attribute>
    <addaction name="actionAdd"/>
    <addaction name="separator"/>
+   <addaction name="actionJoin"/>
    <addaction name="actionRename"/>
    <addaction name="actionCopy"/>
    <addaction name="actionRemove"/>
@@ -95,6 +96,11 @@
   <action name="actionAdd">
    <property name="text">
     <string>Add</string>
+   </property>
+  </action>
+  <action name="actionJoin">
+   <property name="text">
+    <string>Join</string>
    </property>
   </action>
   <action name="actionRename">

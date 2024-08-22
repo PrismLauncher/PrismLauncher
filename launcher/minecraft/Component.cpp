@@ -56,18 +56,6 @@ Component::Component(PackProfile* parent, const QString& uid)
     m_uid = uid;
 }
 
-Component::Component(PackProfile* parent, std::shared_ptr<Meta::Version> version)
-{
-    assert(parent);
-    m_parent = parent;
-
-    m_metaVersion = version;
-    m_uid = version->uid();
-    m_version = m_cachedVersion = version->version();
-    m_cachedName = version->name();
-    m_loaded = version->isLoaded();
-}
-
 Component::Component(PackProfile* parent, const QString& uid, std::shared_ptr<VersionFile> file)
 {
     assert(parent);
@@ -102,9 +90,6 @@ void Component::applyTo(LaunchProfile* profile)
 std::shared_ptr<class VersionFile> Component::getVersionFile() const
 {
     if (m_metaVersion) {
-        if (!m_metaVersion->isLoaded()) {
-            m_metaVersion->load(Net::Mode::Online);
-        }
         return m_metaVersion->data();
     } else {
         return m_file;
@@ -131,29 +116,35 @@ int Component::getOrder()
     }
     return 0;
 }
+
 void Component::setOrder(int order)
 {
     m_orderOverride = true;
     m_order = order;
 }
+
 QString Component::getID()
 {
     return m_uid;
 }
+
 QString Component::getName()
 {
     if (!m_cachedName.isEmpty())
         return m_cachedName;
     return m_uid;
 }
+
 QString Component::getVersion()
 {
     return m_cachedVersion;
 }
+
 QString Component::getFilename()
 {
     return m_parent->patchFilePathForUid(m_uid);
 }
+
 QDateTime Component::getReleaseDateTime()
 {
     if (m_metaVersion) {
@@ -198,17 +189,14 @@ bool Component::isCustom()
 
 bool Component::isCustomizable()
 {
-    if (m_metaVersion) {
-        if (getVersionFile()) {
-            return true;
-        }
-    }
-    return false;
+    return m_metaVersion && getVersionFile();
 }
+
 bool Component::isRemovable()
 {
     return !m_important;
 }
+
 bool Component::isRevertible()
 {
     if (isCustom()) {
@@ -218,18 +206,18 @@ bool Component::isRevertible()
     }
     return false;
 }
+
 bool Component::isMoveable()
 {
     // HACK, FIXME: this was too dumb and wouldn't follow dependency constraints anyway. For now hardcoded to 'true'.
     return true;
 }
+
 bool Component::isVersionChangeable()
 {
     auto list = getVersionList();
     if (list) {
-        if (!list->isLoaded()) {
-            list->load(Net::Mode::Online);
-        }
+        list->waitToLoad();
         return list->count() != 0;
     }
     return false;
@@ -336,7 +324,7 @@ bool Component::revert()
     bool result = true;
     // just kill the file and reload
     if (QFile::exists(filename)) {
-        result = QFile::remove(filename);
+        result = FS::deletePath(filename);
     }
     if (result) {
         // file gone...

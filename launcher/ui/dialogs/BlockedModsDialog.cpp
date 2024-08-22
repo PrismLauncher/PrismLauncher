@@ -40,6 +40,7 @@
 #include <QMimeData>
 #include <QPushButton>
 #include <QStandardPaths>
+#include <QTimer>
 
 BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods, QString hash_type)
     : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods), m_hash_type(hash_type)
@@ -60,8 +61,13 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
 
     qDebug() << "[Blocked Mods Dialog] Mods List: " << mods;
 
-    setupWatch();
-    scanPaths();
+    // defer setup of file system watchers until after the dialog is shown
+    // this allows OS (namely macOS) permission prompts to show after the relevant dialog appears
+    QTimer::singleShot(0, this, [this] {
+        setupWatch();
+        scanPaths();
+        update();
+    });
 
     this->setWindowTitle(title);
     ui->labelDescription->setText(text);
@@ -158,7 +164,8 @@ void BlockedModsDialog::update()
 
     QString watching;
     for (auto& dir : m_watcher.directories()) {
-        watching += QString("<a href=\"%1\">%1</a><br/>").arg(dir);
+        QUrl fileURL = QUrl::fromLocalFile(dir);
+        watching += QString("<a href=\"%1\">%2</a><br/>").arg(fileURL.toString(), dir);
     }
 
     ui->textBrowserWatched->setText(watching);
@@ -194,6 +201,10 @@ void BlockedModsDialog::setupWatch()
 void BlockedModsDialog::watchPath(QString path, bool watch_recursive)
 {
     auto to_watch = QFileInfo(path);
+    if (!to_watch.isReadable()) {
+        qWarning() << "[Blocked Mods Dialog] Failed to add Watch Path (unable to read):" << path;
+        return;
+    }
     auto to_watch_path = to_watch.canonicalFilePath();
     if (m_watcher.directories().contains(to_watch_path))
         return;  // don't watch the same path twice (no loops!)
@@ -255,7 +266,7 @@ void BlockedModsDialog::addHashTask(QString path)
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::buildHashTask(QString path)
 {
-    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::ResourceProvider::FLAME, m_hash_type);
+    auto hash_task = Hashing::createHasher(path, m_hash_type);
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
 

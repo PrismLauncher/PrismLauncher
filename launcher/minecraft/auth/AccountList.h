@@ -36,6 +36,7 @@
 #pragma once
 
 #include "MinecraftAccount.h"
+#include "minecraft/auth/AuthFlow.h"
 
 #include <QAbstractListModel>
 #include <QObject>
@@ -75,7 +76,7 @@ class AccountList : public QAbstractListModel {
     virtual Qt::ItemFlags flags(const QModelIndex& index) const override;
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
-    void addAccount(const MinecraftAccountPtr account);
+    void addAccount(MinecraftAccountPtr account);
     void removeAccount(QModelIndex index);
     int findAccountByProfileId(const QString& profileId) const;
     MinecraftAccountPtr getAccountByProfileName(const QString& profileName) const;
@@ -144,7 +145,7 @@ class AccountList : public QAbstractListModel {
     QList<QString> m_refreshQueue;
     QTimer* m_refreshTimer;
     QTimer* m_nextTimer;
-    shared_qobject_ptr<AccountTask> m_currentTask;
+    shared_qobject_ptr<AuthFlow> m_currentTask;
 
     /*!
      * Called whenever the list changes.

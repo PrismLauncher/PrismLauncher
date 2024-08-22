@@ -1,9 +1,12 @@
 #include "Resource.h"
 
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QRegularExpression>
+#include <tuple>
 
 #include "FileSystem.h"
+#include "StringUtils.h"
 
 Resource::Resource(QObject* parent) : QObject(parent) {}
 
@@ -18,6 +21,20 @@ void Resource::setFile(QFileInfo file_info)
     parseFile();
 }
 
+std::tuple<QString, qint64> calculateFileSize(const QFileInfo& file)
+{
+    if (file.isDir()) {
+        auto dir = QDir(file.absoluteFilePath());
+        dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
+        auto count = dir.count();
+        auto str = QObject::tr("item");
+        if (count != 1)
+            str = QObject::tr("items");
+        return { QString("%1 %2").arg(QString::number(count), str), count };
+    }
+    return { StringUtils::humanReadableFileSize(file.size(), true), file.size() };
+}
+
 void Resource::parseFile()
 {
     QString file_name{ m_file_info.fileName() };
@@ -26,6 +43,7 @@ void Resource::parseFile()
 
     m_internal_id = file_name;
 
+    std::tie(m_size_str, m_size_info) = calculateFileSize(m_file_info);
     if (m_file_info.isDir()) {
         m_type = ResourceType::FOLDER;
         m_name = file_name;
@@ -61,15 +79,15 @@ static void removeThePrefix(QString& string)
     string = string.trimmed();
 }
 
-std::pair<int, bool> Resource::compare(const Resource& other, SortType type) const
+int Resource::compare(const Resource& other, SortType type) const
 {
     switch (type) {
         default:
         case SortType::ENABLED:
             if (enabled() && !other.enabled())
-                return { 1, type == SortType::ENABLED };
+                return 1;
             if (!enabled() && other.enabled())
-                return { -1, type == SortType::ENABLED };
+                return -1;
             break;
         case SortType::NAME: {
             QString this_name{ name() };
@@ -78,20 +96,31 @@ std::pair<int, bool> Resource::compare(const Resource& other, SortType type) con
             removeThePrefix(this_name);
             removeThePrefix(other_name);
 
-            auto compare_result = QString::compare(this_name, other_name, Qt::CaseInsensitive);
-            if (compare_result != 0)
-                return { compare_result, type == SortType::NAME };
-            break;
+            return QString::compare(this_name, other_name, Qt::CaseInsensitive);
         }
         case SortType::DATE:
             if (dateTimeChanged() > other.dateTimeChanged())
-                return { 1, type == SortType::DATE };
+                return 1;
             if (dateTimeChanged() < other.dateTimeChanged())
-                return { -1, type == SortType::DATE };
+                return -1;
             break;
+        case SortType::SIZE: {
+            if (this->type() != other.type()) {
+                if (this->type() == ResourceType::FOLDER)
+                    return -1;
+                if (other.type() == ResourceType::FOLDER)
+                    return 1;
+            }
+
+            if (sizeInfo() > other.sizeInfo())
+                return 1;
+            if (sizeInfo() < other.sizeInfo())
+                return -1;
+            break;
+        }
     }
 
-    return { 0, false };
+    return 0;
 }
 
 bool Resource::applyFilter(QRegularExpression filter) const
@@ -130,15 +159,14 @@ bool Resource::enable(EnableAction action)
         if (!path.endsWith(".disabled"))
             return false;
         path.chop(9);
-
-        if (!file.rename(path))
-            return false;
     } else {
         path += ".disabled";
-
-        if (!file.rename(path))
-            return false;
+        if (QFile::exists(path)) {
+            path = FS::getUniqueResourceName(path);
+        }
     }
+    if (!file.rename(path))
+        return false;
 
     setFile(QFileInfo(path));
 
@@ -168,4 +196,12 @@ bool Resource::isSymLinkUnder(const QString& instPath) const
 bool Resource::isMoreThanOneHardLink() const
 {
     return FS::hardLinkCount(m_file_info.absoluteFilePath()) > 1;
+}
+
+auto Resource::getOriginalFileName() const -> QString
+{
+    auto fileName = m_file_info.fileName();
+    if (!m_enabled)
+        fileName.chop(9);
+    return fileName;
 }

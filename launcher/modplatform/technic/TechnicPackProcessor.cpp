@@ -33,7 +33,7 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
                                         const QString& minecraftVersion,
                                         [[maybe_unused]] const bool isSolder)
 {
-    QString minecraftPath = FS::PathCombine(stagingPath, ".minecraft");
+    QString minecraftPath = FS::PathCombine(stagingPath, "minecraft");
     QString configPath = FS::PathCombine(stagingPath, "instance.cfg");
     auto instanceSettings = std::make_shared<INISettingsObject>(configPath);
     MinecraftInstance instance(globalSettings, instanceSettings, stagingPath);
@@ -83,8 +83,10 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
             data = file.readAll();
             file.close();
         } else {
-            if (minecraftVersion.isEmpty())
+            if (minecraftVersion.isEmpty()) {
                 emit failed(tr("Could not find \"version.json\" inside \"bin/modpack.jar\", but Minecraft version is unknown"));
+                return;
+            }
             components->setComponentVersion("net.minecraft", minecraftVersion, true);
             components->installJarMods({ modpackJar });
 
@@ -131,7 +133,9 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
         file.close();
     } else {
         // This is the "Vanilla" modpack, excluded by the search code
-        emit failed(tr("Unable to find a \"version.json\"!"));
+        components->setComponentVersion("net.minecraft", minecraftVersion, true);
+        components->saveNow();
+        emit succeeded();
         return;
     }
 
@@ -155,8 +159,26 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
             auto libraryObject = Json::ensureObject(library, {}, "");
             auto libraryName = Json::ensureString(libraryObject, "name", "", "");
 
-            if ((libraryName.startsWith("net.minecraftforge:forge:") || libraryName.startsWith("net.minecraftforge:fmlloader:")) &&
-                libraryName.contains('-')) {
+            if (libraryName.startsWith("net.neoforged.fancymodloader:")) {  // it is neoforge
+                // no easy way to get the version from the libs so use the arguments
+                auto arguments = Json::ensureObject(root, "arguments", {});
+                bool isVersionArg = false;
+                QString neoforgeVersion;
+                for (auto arg : Json::ensureArray(arguments, "game", {})) {
+                    auto argument = Json::ensureString(arg, "");
+                    if (isVersionArg) {
+                        neoforgeVersion = argument;
+                        break;
+                    } else {
+                        isVersionArg = "--fml.neoForgeVersion" == argument || "--fml.forgeVersion" == argument;
+                    }
+                }
+                if (!neoforgeVersion.isEmpty()) {
+                    components->setComponentVersion("net.neoforged", neoforgeVersion);
+                }
+                break;
+            } else if ((libraryName.startsWith("net.minecraftforge:forge:") || libraryName.startsWith("net.minecraftforge:fmlloader:")) &&
+                       libraryName.contains('-')) {
                 QString libraryVersion = libraryName.section(':', 2);
                 if (!libraryVersion.startsWith("1.7.10-")) {
                     components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1));
@@ -164,6 +186,7 @@ void Technic::TechnicPackProcessor::run(SettingsObjectPtr globalSettings,
                     // 1.7.10 versions sometimes look like 1.7.10-10.13.4.1614-1.7.10, this filters out the 10.13.4.1614 part
                     components->setComponentVersion("net.minecraftforge", libraryName.section('-', 1, 1));
                 }
+                break;
             } else {
                 // <Technic library name prefix> -> <our component name>
                 static QMap<QString, QString> loaderMap{ { "net.minecraftforge:minecraftforge:", "net.minecraftforge" },

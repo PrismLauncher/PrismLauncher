@@ -114,8 +114,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
 
         auto dl = Net::ApiDownload::makeFile(mod.url, path);
         if (!mod.md5.isEmpty()) {
-            auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
         }
         m_filesNetJob->addNetAction(dl);
 
@@ -140,7 +139,7 @@ void Technic::SolderPackInstallTask::downloadSucceeded()
     m_filesNetJob.reset();
     m_extractFuture = QtConcurrent::run([this]() {
         int i = 0;
-        QString extractDir = FS::PathCombine(m_stagingPath, ".minecraft");
+        QString extractDir = FS::PathCombine(m_stagingPath, "minecraft");
         FS::ensureFolderPathExists(extractDir);
 
         while (m_modCount > i) {
