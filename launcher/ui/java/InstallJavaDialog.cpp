@@ -259,14 +259,14 @@ InstallDialog::InstallDialog(const QString& uid, BaseInstance* instance, QWidget
 
         auto cast = pageCast(page);
         cast->setRecomend(true);
-        connect(cast, &InstallJavaPage::selectionChanged, this, [this] { validate(); });
+        connect(cast, &InstallJavaPage::selectionChanged, this, [this, cast] { validate(cast); });
         if (!recommendedJavas.isEmpty()) {
             cast->setRecommendedMajors(recommendedJavas);
         }
     }
-    connect(container, &PageContainer::selectedPageChanged, this, [this] { validate(); });
+    connect(container, &PageContainer::selectedPageChanged, this, [this](BasePage* previous, BasePage* selected) { validate(selected); });
     pageCast(container->selectedPage())->selectSearch();
-    validate();
+    validate(container->selectedPage());
 }
 
 QList<BasePage*> InstallDialog::getPages()
@@ -286,10 +286,9 @@ QString InstallDialog::dialogTitle()
     return tr("Install Java");
 }
 
-void InstallDialog::validate()
+void InstallDialog::validate(BasePage* selected)
 {
-    buttons->button(QDialogButtonBox::Ok)
-        ->setEnabled(!!std::dynamic_pointer_cast<Java::Metadata>(pageCast(container->selectedPage())->selectedVersion()));
+    buttons->button(QDialogButtonBox::Ok)->setEnabled(!!std::dynamic_pointer_cast<Java::Metadata>(pageCast(selected)->selectedVersion()));
 }
 
 void InstallDialog::done(int result)
