@@ -63,8 +63,8 @@ QString truncateLogForMclogs(const QString& logContent)
         truncatedLog +=
             "\n\n\n\n\n\n\n\n\n\n"
             "------------------------------------------------------------\n"
-            "--------------------- Log truncated by ---------------------\n"
-            "---------------------- Prism Launcher ----------------------\n"
+            "----------------------- Log truncated ----------------------\n"
+            "------------------------------------------------------------\n"
             "----- Middle portion omitted to fit mclo.gs size limits ----\n"
             "------------------------------------------------------------\n"
             "\n\n\n\n\n\n\n\n\n\n";
