@@ -121,7 +121,7 @@ QVariant VersionProxyModel::headerData(int section, Qt::Orientation orientation,
             case JavaName:
                 return tr("Java Name");
             case JavaMajor:
-                return tr("Major");
+                return tr("Major Version");
             case Time:
                 return tr("Released");
         }
