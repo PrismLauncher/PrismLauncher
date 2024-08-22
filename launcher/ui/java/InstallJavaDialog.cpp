@@ -273,11 +273,11 @@ QList<BasePage*> InstallDialog::getPages()
 {
     return {
         // Mojang
-        new InstallJavaPage("net.minecraft.java", "", tr("Mojang")),
+        new InstallJavaPage("net.minecraft.java", "mojang", tr("Mojang")),
         // Adoptium
-        new InstallJavaPage("net.adoptium.java", "", tr("Adoptium")),
+        new InstallJavaPage("net.adoptium.java", "adoptium", tr("Adoptium")),
         // Azul
-        new InstallJavaPage("com.azul.java", "", tr("Azul")),
+        new InstallJavaPage("com.azul.java", "azul", tr("Azul Zulu")),
     };
 }
 
