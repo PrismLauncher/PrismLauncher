@@ -125,8 +125,3 @@ bool SystemTheme::hasStyleSheet()
 {
     return false;
 }
-
-bool SystemTheme::hasColorScheme()
-{
-    return true;
-}

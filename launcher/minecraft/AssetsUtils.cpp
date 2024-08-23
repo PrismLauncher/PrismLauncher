@@ -283,8 +283,7 @@ Net::NetRequest::Ptr AssetObject::getDownloadAction()
     if ((!objectFile.isFile()) || (objectFile.size() != size)) {
         auto objectDL = Net::ApiDownload::makeFile(getUrl(), objectFile.filePath());
         if (hash.size()) {
-            auto rawHash = QByteArray::fromHex(hash.toLatin1());
-            objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawHash));
+            objectDL->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, hash));
         }
         objectDL->setProgress(objectDL->getProgress(), size);
         return objectDL;

@@ -72,7 +72,7 @@ void appendSafe(const QString& filename, const QByteArray& data);
 void append(const QString& filename, const QByteArray& data);
 
 /**
- * read data from a file safely\
+ * read data from a file safely
  */
 QByteArray read(const QString& filename);
 

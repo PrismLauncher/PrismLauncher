@@ -47,7 +47,7 @@
 
 #include <BaseInstance.h>
 
-#include "minecraft/launch/MinecraftServerTarget.h"
+#include "minecraft/launch/MinecraftTarget.h"
 
 class LaunchController;
 class LocalPeer;
@@ -160,6 +160,9 @@ class Application : public QApplication {
     /// the data path the application is using
     const QString& dataRoot() { return m_dataPath; }
 
+    /// the java installed path the application is using
+    const QString javaPath();
+
     bool isPortable() { return m_portable; }
 
     const Capabilities capabilities() { return m_capabilities; }
@@ -177,8 +180,6 @@ class Application : public QApplication {
     bool updatesAreAllowed();
 
     void ShowGlobalSettings(class QWidget* parent, QString open_page = QString());
-
-    int suitableMaxMem();
 
     bool updaterEnabled();
     QString updaterBinaryName();
@@ -201,7 +202,7 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
-                MinecraftServerTargetPtr serverToJoin = nullptr,
+                MinecraftTarget::Ptr targetToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);
     void closeCurrentWindow();
@@ -289,6 +290,7 @@ class Application : public QApplication {
     QString m_detectedOpenALPath;
     QString m_instanceIdToLaunch;
     QString m_serverToJoin;
+    QString m_worldToJoin;
     QString m_profileToUse;
     bool m_liveCheck = false;
     QList<QUrl> m_urlsToImport;

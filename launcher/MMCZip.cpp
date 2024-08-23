@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2023-2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -344,6 +344,17 @@ std::optional<QStringList> extractSubDir(QuaZip* zip, const QString& subdir, con
                     qWarning() << (QObject::tr("Could not fix permissions for %1").arg(target_file_path));
                 }
             }
+        } else if (fileInfo.isDir()) {
+            // Ensure the folder has the minimal required permissions
+            QFile::Permissions minimalPermissions = QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner | QFile::ReadGroup |
+                                                    QFile::ExeGroup | QFile::ReadOther | QFile::ExeOther;
+
+            QFile::Permissions currentPermissions = fileInfo.permissions();
+            if ((currentPermissions & minimalPermissions) != minimalPermissions) {
+                if (!QFile::setPermissions(target_file_path, minimalPermissions)) {
+                    qWarning() << (QObject::tr("Could not fix permissions for %1").arg(target_file_path));
+                }
+            }
         }
         qDebug() << "Extracted file" << relative_file_name << "to" << target_file_path;
     } while (zip->goToNextFile());
@@ -525,6 +536,10 @@ bool ExportToZipTask::abort()
 
 void ExtractZipTask::executeTask()
 {
+    if (!m_input->isOpen() && !m_input->open(QuaZip::mdUnzip)) {
+        emitFailed(tr("Unable to open supplied zip file."));
+        return;
+    }
     m_zip_future = QtConcurrent::run(QThreadPool::globalInstance(), [this]() { return extractZip(); });
     connect(&m_zip_watcher, &QFutureWatcher<ZipResult>::finished, this, &ExtractZipTask::finish);
     m_zip_watcher.setFuture(m_zip_future);
@@ -560,7 +575,7 @@ auto ExtractZipTask::extractZip() -> ZipResult
         if (!file_name.startsWith(m_subdirectory))
             continue;
 
-        auto relative_file_name = QDir::fromNativeSeparators(file_name.remove(0, m_subdirectory.size()));
+        auto relative_file_name = QDir::fromNativeSeparators(file_name.mid(m_subdirectory.size()));
         auto original_name = relative_file_name;
         setStatus("Unziping: " + relative_file_name);
 
@@ -607,6 +622,17 @@ auto ExtractZipTask::extractZip() -> ZipResult
             auto newPermisions = (permissions & maxPermisions) | minPermisions;
             if (newPermisions != permissions) {
                 if (!QFile::setPermissions(target_file_path, newPermisions)) {
+                    logWarning(tr("Could not fix permissions for %1").arg(target_file_path));
+                }
+            }
+        } else if (fileInfo.isDir()) {
+            // Ensure the folder has the minimal required permissions
+            QFile::Permissions minimalPermissions = QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner | QFile::ReadGroup |
+                                                    QFile::ExeGroup | QFile::ReadOther | QFile::ExeOther;
+
+            QFile::Permissions currentPermissions = fileInfo.permissions();
+            if ((currentPermissions & minimalPermissions) != minimalPermissions) {
+                if (!QFile::setPermissions(target_file_path, minimalPermissions)) {
                     logWarning(tr("Could not fix permissions for %1").arg(target_file_path));
                 }
             }

@@ -4,6 +4,7 @@
 #include <BaseVersion.h>
 #include <QObjectPtr.h>
 #include <java/JavaChecker.h>
+#include <qcheckbox.h>
 #include <QIcon>
 
 class QLineEdit;
@@ -25,7 +26,7 @@ class JavaSettingsWidget : public QWidget {
 
    public:
     explicit JavaSettingsWidget(QWidget* parent);
-    virtual ~JavaSettingsWidget() {};
+    virtual ~JavaSettingsWidget() = default;
 
     enum class JavaStatus { NotSet, Pending, Good, DoesNotExist, DoesNotStart, ReturnedInvalidData } javaStatus = JavaStatus::NotSet;
 
@@ -41,6 +42,8 @@ class JavaSettingsWidget : public QWidget {
     int minHeapSize() const;
     int maxHeapSize() const;
     QString javaPath() const;
+    bool autoDetectJava() const;
+    bool autoDownloadJava() const;
 
     void updateThresholds();
 
@@ -50,7 +53,8 @@ class JavaSettingsWidget : public QWidget {
     void javaVersionSelected(BaseVersion::Ptr version);
     void on_javaBrowseBtn_clicked();
     void on_javaStatusBtn_clicked();
-    void checkFinished(JavaCheckResult result);
+    void javaDownloadBtn_clicked();
+    void checkFinished(const JavaChecker::Result& result);
 
    protected: /* methods */
     void checkJavaPathOnEdit(const QString& path);
@@ -76,9 +80,17 @@ class JavaSettingsWidget : public QWidget {
     QSpinBox* m_minMemSpinBox = nullptr;
     QLabel* m_labelPermGen = nullptr;
     QSpinBox* m_permGenSpinBox = nullptr;
+
+    QHBoxLayout* m_horizontalBtnLayout = nullptr;
+    QPushButton* m_javaDownloadBtn = nullptr;
     QIcon goodIcon;
     QIcon yellowIcon;
     QIcon badIcon;
+
+    QGroupBox* m_autoJavaGroupBox = nullptr;
+    QVBoxLayout* m_veriticalJavaLayout = nullptr;
+    QCheckBox* m_autodetectJavaCheckBox = nullptr;
+    QCheckBox* m_autodownloadCheckBox = nullptr;
 
     unsigned int observedMinMemory = 0;
     unsigned int observedMaxMemory = 0;
@@ -86,5 +98,5 @@ class JavaSettingsWidget : public QWidget {
     QString queuedCheck;
     uint64_t m_availableMemory = 0ull;
     shared_qobject_ptr<JavaChecker> m_checker;
-    JavaCheckResult m_result;
+    JavaChecker::Result m_result;
 };

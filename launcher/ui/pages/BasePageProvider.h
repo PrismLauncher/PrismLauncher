@@ -16,7 +16,6 @@
 #pragma once
 
 #include <functional>
-#include <memory>
 #include "ui/pages/BasePage.h"
 
 class BasePageProvider {
