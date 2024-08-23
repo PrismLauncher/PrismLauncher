@@ -784,8 +784,6 @@ SET(LAUNCHER_SOURCES
     # GUI - windows
     ui/GuiUtil.h
     ui/GuiUtil.cpp
-    ui/ColorCache.h
-    ui/ColorCache.cpp
     ui/MainWindow.h
     ui/MainWindow.cpp
     ui/InstanceWindow.h
