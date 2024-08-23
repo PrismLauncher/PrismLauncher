@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2024 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,14 +48,16 @@ class CustomTheme : public ITheme {
     QString tooltip() override;
     bool hasStyleSheet() override;
     QString appStyleSheet() override;
-    bool hasColorScheme() override;
     QPalette colorScheme() override;
     double fadeAmount() override;
     QColor fadeColor() override;
     QString qtTheme() override;
+    LogColors logColorScheme() override { return m_logColors; }
     QStringList searchPaths() override;
 
-   private: /* data */
+   private:
+    bool read(const QString& path, bool& hasCustomLogColors);
+
     QPalette m_palette;
     QColor m_fadeColor;
     double m_fadeAmount;
@@ -63,6 +66,7 @@ class CustomTheme : public ITheme {
     QString m_id;
     QString m_widgets;
     QString m_qssFilePath;
+    LogColors m_logColors;
     /**
      * The tooltip could be defined in the theme json,
      * or composed of other fields that could be in there.

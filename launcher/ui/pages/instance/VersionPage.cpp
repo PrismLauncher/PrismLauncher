@@ -393,6 +393,11 @@ void VersionPage::on_actionChange_version_triggered()
     bool important = false;
     if (uid == "net.minecraft") {
         important = true;
+        if (APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() && m_inst->settings()->get("AutomaticJava").toBool() &&
+            m_inst->settings()->get("OverrideJavaLocation").toBool()) {
+            m_inst->settings()->set("OverrideJavaLocation", false);
+            m_inst->settings()->set("JavaPath", "");
+        }
     }
     m_profile->setComponentVersion(uid, vselect.selectedVersion()->descriptor(), important);
     m_profile->resolve(Net::Mode::Online);

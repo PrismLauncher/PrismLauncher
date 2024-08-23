@@ -12,12 +12,8 @@
 
 #include <sys.h>
 
-#include "FileSystem.h"
 #include "JavaCommon.h"
-#include "java/JavaInstall.h"
-#include "java/JavaUtils.h"
 
-#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/JavaSettingsWidget.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
@@ -57,6 +53,8 @@ bool JavaWizardPage::validatePage()
 {
     auto settings = APPLICATION->settings();
     auto result = m_java_widget->validate();
+    settings->set("AutomaticJavaSwitch", m_java_widget->autoDetectJava());
+    settings->set("AutomaticJavaDownload", m_java_widget->autoDownloadJava());
     switch (result) {
         default:
         case JavaSettingsWidget::ValidationStatus::Bad: {

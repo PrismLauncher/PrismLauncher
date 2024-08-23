@@ -114,8 +114,7 @@ void Technic::SolderPackInstallTask::fileListSucceeded()
 
         auto dl = Net::ApiDownload::makeFile(mod.url, path);
         if (!mod.md5.isEmpty()) {
-            auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+            dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
         }
         m_filesNetJob->addNetAction(dl);
 
