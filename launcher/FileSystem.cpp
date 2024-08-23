@@ -1737,4 +1737,5 @@ QString getSymLinkTarget(const QString& path)
 {
     return QFileInfo(path).symLinkTarget();
 }
+
 }  // namespace FS
