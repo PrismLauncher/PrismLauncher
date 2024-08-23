@@ -1,7 +1,10 @@
 builds:
   exclude:
+    # Currently broken on Garnix's end
     - "*.x86_64-darwin.*"
   include:
     - "checks.x86_64-linux.*"
-    - "devShells.*.*"
-    - "packages.*.*"
+    - "packages.x86_64-linux.*"
+    - "packages.aarch64-linux.*"
+    - "packages.x86_64-darwin.*"
+    - "packages.aarch64-darwin.*"
