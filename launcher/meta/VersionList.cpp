@@ -100,6 +100,13 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
             return QVariant::fromValue(version);
         case RecommendedRole:
             return version->isRecommended();
+        case JavaMajorRole: {
+            auto major = version->version();
+            if (major.startsWith("java")) {
+                major = "Java " + major.mid(4);
+            }
+            return major;
+        }
         // FIXME: this should be determined in whatever view/proxy is used...
         // case LatestRole: return version == getLatestStable();
         default:
@@ -109,9 +116,13 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
 
 BaseVersionList::RoleList VersionList::providesRoles() const
 {
-    return { VersionPointerRole, VersionRole,  VersionIdRole, ParentVersionRole, TypeRole,   UidRole,
-             TimeRole,           RequiresRole, SortRole,      RecommendedRole,   LatestRole, VersionPtrRole };
+    return m_provided_roles;
 }
+
+void VersionList::setProvidedRoles(RoleList roles)
+{
+    m_provided_roles = roles;
+};
 
 QHash<int, QByteArray> VersionList::roleNames() const
 {

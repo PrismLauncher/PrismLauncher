@@ -38,7 +38,7 @@
 #include <Application.h>
 #include <QObjectPtr.h>
 #include <QDialog>
-#include <memory>
+#include <QStringListModel>
 #include "JavaCommon.h"
 #include "ui/pages/BasePage.h"
 
@@ -72,6 +72,9 @@ class JavaPage : public QWidget, public BasePage {
     void on_javaDetectBtn_clicked();
     void on_javaTestBtn_clicked();
     void on_javaBrowseBtn_clicked();
+    void on_downloadJavaButton_clicked();
+    void on_removeJavaButton_clicked();
+    void on_refreshJavaButton_clicked();
     void on_maxMemSpinBox_valueChanged(int i);
     void checkerFinished();
 

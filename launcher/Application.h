@@ -161,6 +161,9 @@ class Application : public QApplication {
     /// the data path the application is using
     const QString& dataRoot() { return m_dataPath; }
 
+    /// the java installed path the application is using
+    const QString javaPath();
+
     bool isPortable() { return m_portable; }
 
     const Capabilities capabilities() { return m_capabilities; }
@@ -178,8 +181,6 @@ class Application : public QApplication {
     bool updatesAreAllowed();
 
     void ShowGlobalSettings(class QWidget* parent, QString open_page = QString());
-
-    int suitableMaxMem();
 
     bool updaterEnabled();
     QString updaterBinaryName();

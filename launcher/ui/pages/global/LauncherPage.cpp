@@ -173,6 +173,16 @@ void LauncherPage::on_downloadsDirBrowseBtn_clicked()
     }
 }
 
+void LauncherPage::on_javaDirBrowseBtn_clicked()
+{
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Java Folder"), ui->javaDirTextBox->text());
+
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
+        QString cooked_dir = FS::NormalizePath(raw_dir);
+        ui->javaDirTextBox->setText(cooked_dir);
+    }
+}
+
 void LauncherPage::on_skinsDirBrowseBtn_clicked()
 {
     QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Skins Folder"), ui->skinsDirTextBox->text());
@@ -223,6 +233,7 @@ void LauncherPage::applySettings()
     s->set("IconsDir", ui->iconsDirTextBox->text());
     s->set("DownloadsDir", ui->downloadsDirTextBox->text());
     s->set("SkinsDir", ui->skinsDirTextBox->text());
+    s->set("JavaDir", ui->javaDirTextBox->text());
     s->set("DownloadsDirWatchRecursive", ui->downloadsDirWatchRecursiveCheckBox->isChecked());
 
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
@@ -289,6 +300,7 @@ void LauncherPage::loadSettings()
     ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
     ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
     ui->skinsDirTextBox->setText(s->get("SkinsDir").toString());
+    ui->javaDirTextBox->setText(s->get("JavaDir").toString());
     ui->downloadsDirWatchRecursiveCheckBox->setChecked(s->get("DownloadsDirWatchRecursive").toBool());
 
     QString sortMode = s->get("InstSortMode").toString();

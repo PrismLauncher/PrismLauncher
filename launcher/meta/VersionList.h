@@ -48,6 +48,8 @@ class VersionList : public BaseVersionList, public BaseEntity {
     RoleList providesRoles() const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    void setProvidedRoles(RoleList roles);
+
     QString localFilename() const override;
 
     QString uid() const { return m_uid; }
@@ -82,6 +84,9 @@ class VersionList : public BaseVersionList, public BaseEntity {
     QString m_name;
 
     Version::Ptr m_recommended;
+
+    RoleList m_provided_roles = { VersionPointerRole, VersionRole,  VersionIdRole, ParentVersionRole, TypeRole,   UidRole,
+                                  TimeRole,           RequiresRole, SortRole,      RecommendedRole,   LatestRole, VersionPtrRole };
 
     void setupAddedVersion(int row, const Version::Ptr& version);
 };
