@@ -105,14 +105,14 @@ bool VersionSelectWidget::eventFilter(QObject* watched, QEvent* event)
     return QObject::eventFilter(watched, event);
 }
 
-void VersionSelectWidget::initialize(BaseVersionList* vlist)
+void VersionSelectWidget::initialize(BaseVersionList* vlist, bool forceLoad)
 {
     m_vlist = vlist;
     m_proxyModel->setSourceModel(vlist);
     listView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     listView->header()->setSectionResizeMode(resizeOnColumn, QHeaderView::Stretch);
 
-    if (!m_vlist->isLoaded()) {
+    if (!m_vlist->isLoaded() || forceLoad) {
         loadList();
     } else {
         if (m_proxyModel->rowCount() == 0) {
