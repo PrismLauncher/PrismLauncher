@@ -45,20 +45,23 @@ void CheckJava::executeTask()
 {
     auto instance = m_parent->instance();
     auto settings = instance->settings();
-    m_javaPath = FS::ResolveExecutable(settings->get("JavaPath").toString());
+
+    QString javaPathSetting = settings->get("JavaPath").toString();
+    m_javaPath = FS::ResolveExecutable(javaPathSetting);
+
     bool perInstance = settings->get("OverrideJava").toBool() || settings->get("OverrideJavaLocation").toBool();
 
     auto realJavaPath = QStandardPaths::findExecutable(m_javaPath);
     if (realJavaPath.isEmpty()) {
         if (perInstance) {
-            emit logLine(QString("The java binary \"%1\" couldn't be found. Please fix the java path "
+            emit logLine(QString("The Java binary \"%1\" couldn't be found. Please fix the Java path "
                                  "override in the instance's settings or disable it.")
-                             .arg(m_javaPath),
+                             .arg(javaPathSetting),
                          MessageLevel::Warning);
         } else {
-            emit logLine(QString("The java binary \"%1\" couldn't be found. Please set up java in "
+            emit logLine(QString("The Java binary \"%1\" couldn't be found. Please set up Java in "
                                  "the settings.")
-                             .arg(m_javaPath),
+                             .arg(javaPathSetting),
                          MessageLevel::Warning);
         }
         emitFailed(QString("Java path is not valid."));
