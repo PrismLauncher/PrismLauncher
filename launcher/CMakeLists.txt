@@ -140,7 +140,6 @@ set(NET_SOURCES
     net/HeaderProxy.h
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
-    net/StaticHeaderProxy.h
     net/ApiDownload.h
     net/ApiDownload.cpp
     net/ApiUpload.cpp
@@ -265,8 +264,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ExtractNatives.h
     minecraft/launch/LauncherPartLaunch.cpp
     minecraft/launch/LauncherPartLaunch.h
-    minecraft/launch/MinecraftServerTarget.cpp
-    minecraft/launch/MinecraftServerTarget.h
+    minecraft/launch/MinecraftTarget.cpp
+    minecraft/launch/MinecraftTarget.h
     minecraft/launch/PrintInstanceInfo.cpp
     minecraft/launch/PrintInstanceInfo.h
     minecraft/launch/ReconstructAssets.cpp
@@ -801,8 +800,6 @@ SET(LAUNCHER_SOURCES
     # GUI - windows
     ui/GuiUtil.h
     ui/GuiUtil.cpp
-    ui/ColorCache.h
-    ui/ColorCache.cpp
     ui/MainWindow.h
     ui/MainWindow.cpp
     ui/InstanceWindow.h

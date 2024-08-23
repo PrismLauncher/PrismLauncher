@@ -204,7 +204,7 @@ void JavaPage::on_javaTestBtn_clicked()
 
 void JavaPage::on_downloadJavaButton_clicked()
 {
-    auto jdialog = new Java::InstallDialog({}, this);
+    auto jdialog = new Java::InstallDialog({}, nullptr, this);
     jdialog->exec();
     ui->managedJavaList->loadList();
 }
@@ -291,7 +291,7 @@ void JavaPage::on_removeJavaButton_clicked()
     for (auto& entry : entries) {
         if (dcast->path.startsWith(entry.canonicalFilePath())) {
             auto response = CustomMessageBox::selectable(this, tr("Confirm Deletion"),
-                                                         tr("You are about to remove \"%1\" java version.\n"
+                                                         tr("You are about to remove  the Java installation named \"%1\".\n"
                                                             "Are you sure?")
                                                              .arg(entry.fileName()),
                                                          QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)

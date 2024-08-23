@@ -124,6 +124,7 @@ void ArchiveDownloadTask::extractJava(QString input)
             stepProgress(*progressStep);
         });
         m_task->start();
+        return;
     }
 
     emitFailed(tr("Could not determine archive type!"));

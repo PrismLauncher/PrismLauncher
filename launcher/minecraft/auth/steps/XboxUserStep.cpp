@@ -5,7 +5,7 @@
 #include "Application.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/RawHeaderProxy.h"
 
 XboxUserStep::XboxUserStep(AccountData* data) : AuthStep(data) {}
 
@@ -38,24 +38,27 @@ void XboxUserStep::perform()
         { "x-xbl-contract-version", "1" }
     };
     m_response.reset(new QByteArray());
-    m_task = Net::Upload::makeByteArray(url, m_response, xbox_auth_data.toUtf8());
-    m_task->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_request = Net::Upload::makeByteArray(url, m_response, xbox_auth_data.toUtf8());
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+
+    m_task.reset(new NetJob("XboxUserStep", APPLICATION->network()));
+    m_task->setAskRetry(false);
+    m_task->addNetAction(m_request);
 
     connect(m_task.get(), &Task::finished, this, &XboxUserStep::onRequestDone);
 
-    m_task->setNetwork(APPLICATION->network());
     m_task->start();
     qDebug() << "First layer of XBox auth ... commencing.";
 }
 
 void XboxUserStep::onRequestDone()
 {
-    if (m_task->error() != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << m_task->error();
-        if (Net::isApplicationError(m_task->error())) {
-            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication failed: %1").arg(m_task->errorString()));
+    if (m_request->error() != QNetworkReply::NoError) {
+        qWarning() << "Reply error:" << m_request->error();
+        if (Net::isApplicationError(m_request->error())) {
+            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("XBox user authentication failed: %1").arg(m_request->errorString()));
         } else {
-            emit finished(AccountTaskState::STATE_OFFLINE, tr("XBox user authentication failed: %1").arg(m_task->errorString()));
+            emit finished(AccountTaskState::STATE_OFFLINE, tr("XBox user authentication failed: %1").arg(m_request->errorString()));
         }
         return;
     }

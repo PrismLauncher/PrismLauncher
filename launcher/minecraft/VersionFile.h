@@ -101,7 +101,7 @@ class VersionFile : public ProblemContainer {
     /// Mojang: list of compatible java majors
     QList<int> compatibleJavaMajors;
 
-    /// Mojang: the name of recomended java version
+    /// Mojang: the name of recommended java version
     QString compatibleJavaName;
 
     /// Mojang: type of the Minecraft version

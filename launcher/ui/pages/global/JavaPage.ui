@@ -253,6 +253,9 @@
           </item>
           <item row="6" column="0">
            <widget class="QCheckBox" name="autodetectJavaCheckBox">
+            <property name="toolTip">
+             <string>Automatically selects the Java version that is compatible with the current Minecraft instance, based on the major version required.</string>
+            </property>
             <property name="text">
              <string>Autodetect Java version</string>
             </property>
@@ -298,6 +301,9 @@
            <widget class="QCheckBox" name="autodownloadCheckBox">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Automatically downloads and selects the Java version recommended by Mojang.</string>
             </property>
             <property name="text">
              <string>Auto-download Mojang Java</string>

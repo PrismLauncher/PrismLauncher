@@ -121,6 +121,9 @@ void AutoInstallJava::executeTask()
     connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
     connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
     connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
+    if (!m_current_task->isRunning()) {
+        m_current_task->start();
+    }
     emit progressReportingRequest();
 }
 
@@ -129,6 +132,7 @@ void AutoInstallJava::setJavaPath(QString path)
     auto settings = m_instance->settings();
     settings->set("OverrideJavaLocation", true);
     settings->set("JavaPath", path);
+    settings->set("AutomaticJava", true);
     emit logLine(tr("Compatible Java found at: %1.").arg(path), MessageLevel::Info);
     emitSucceeded();
 }
@@ -213,11 +217,11 @@ void AutoInstallJava::tryNextMajorJava()
     m_majorJavaVersionIndex++;
 
     auto javaMajor = versionList->getVersion(QString("java%1").arg(majorJavaVersion));
-    javaMajor->load(Net::Mode::Online);
-    m_current_task = javaMajor->getCurrentTask();
-    if (javaMajor->isLoaded() || !m_current_task) {
+
+    if (javaMajor->isLoaded()) {
         downloadJava(javaMajor, wantedJavaName);
     } else {
+        m_current_task = APPLICATION->metadataIndex()->loadVersion("net.minecraft.java", javaMajor->version(), Net::Mode::Online);
         connect(m_current_task.get(), &Task::succeeded, this,
                 [this, javaMajor, wantedJavaName] { downloadJava(javaMajor, wantedJavaName); });
         connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);
@@ -225,6 +229,9 @@ void AutoInstallJava::tryNextMajorJava()
         connect(m_current_task.get(), &Task::stepProgress, this, &AutoInstallJava::propagateStepProgress);
         connect(m_current_task.get(), &Task::status, this, &AutoInstallJava::setStatus);
         connect(m_current_task.get(), &Task::details, this, &AutoInstallJava::setDetails);
+        if (!m_current_task->isRunning()) {
+            m_current_task->start();
+        }
     }
 }
 bool AutoInstallJava::abort()

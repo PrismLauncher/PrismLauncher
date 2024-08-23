@@ -36,6 +36,9 @@
  */
 
 #include "InstanceSettingsPage.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/WorldList.h"
+#include "settings/Setting.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/java/InstallJavaDialog.h"
 #include "ui_InstanceSettingsPage.h"
@@ -74,6 +77,22 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance* inst, QWidget* parent)
 
     connect(ui->useNativeGLFWCheck, &QAbstractButton::toggled, this, &InstanceSettingsPage::onUseNativeGLFWChanged);
     connect(ui->useNativeOpenALCheck, &QAbstractButton::toggled, this, &InstanceSettingsPage::onUseNativeOpenALChanged);
+
+    auto mInst = dynamic_cast<MinecraftInstance*>(inst);
+    m_world_quickplay_supported = mInst && mInst->traits().contains("feature:is_quick_play_singleplayer");
+    if (m_world_quickplay_supported) {
+        auto worlds = mInst->worldList();
+        worlds->update();
+        for (const auto& world : worlds->allWorlds()) {
+            ui->worldsCb->addItem(world.folderName());
+        }
+    } else {
+        ui->worldsCb->hide();
+        ui->worldJoinButton->hide();
+        ui->serverJoinAddressButton->setChecked(true);
+        ui->serverJoinAddress->setEnabled(true);
+        ui->serverJoinAddressButton->setStyleSheet("QRadioButton::indicator { width: 0px; height: 0px; }");
+    }
 
     loadSettings();
 
@@ -257,9 +276,16 @@ void InstanceSettingsPage::applySettings()
     bool joinServerOnLaunch = ui->serverJoinGroupBox->isChecked();
     m_settings->set("JoinServerOnLaunch", joinServerOnLaunch);
     if (joinServerOnLaunch) {
-        m_settings->set("JoinServerOnLaunchAddress", ui->serverJoinAddress->text());
+        if (ui->serverJoinAddressButton->isChecked() || !m_world_quickplay_supported) {
+            m_settings->set("JoinServerOnLaunchAddress", ui->serverJoinAddress->text());
+            m_settings->reset("JoinWorldOnLaunch");
+        } else {
+            m_settings->set("JoinWorldOnLaunch", ui->worldsCb->currentText());
+            m_settings->reset("JoinServerOnLaunchAddress");
+        }
     } else {
         m_settings->reset("JoinServerOnLaunchAddress");
+        m_settings->reset("JoinWorldOnLaunch");
     }
 
     // Use an account for this instance
@@ -321,6 +347,8 @@ void InstanceSettingsPage::loadSettings()
     bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool();
     bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool();
 
+    connect(m_settings->getSetting("OverrideJavaLocation").get(), &Setting::SettingChanged, ui->javaSettingsGroupBox,
+            [this] { ui->javaSettingsGroupBox->setChecked(m_settings->get("OverrideJavaLocation").toBool()); });
     ui->javaSettingsGroupBox->setChecked(overrideLocation);
     ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString());
     ui->skipCompatibilityCheckbox->setChecked(m_settings->get("IgnoreJavaCompatibility").toBool());
@@ -379,7 +407,25 @@ void InstanceSettingsPage::loadSettings()
     ui->recordGameTime->setChecked(m_settings->get("RecordGameTime").toBool());
 
     ui->serverJoinGroupBox->setChecked(m_settings->get("JoinServerOnLaunch").toBool());
-    ui->serverJoinAddress->setText(m_settings->get("JoinServerOnLaunchAddress").toString());
+
+    if (auto server = m_settings->get("JoinServerOnLaunchAddress").toString(); !server.isEmpty()) {
+        ui->serverJoinAddress->setText(server);
+        ui->serverJoinAddressButton->setChecked(true);
+        ui->worldJoinButton->setChecked(false);
+        ui->serverJoinAddress->setEnabled(true);
+        ui->worldsCb->setEnabled(false);
+    } else if (auto world = m_settings->get("JoinWorldOnLaunch").toString(); !world.isEmpty() && m_world_quickplay_supported) {
+        ui->worldsCb->setCurrentText(world);
+        ui->serverJoinAddressButton->setChecked(false);
+        ui->worldJoinButton->setChecked(true);
+        ui->serverJoinAddress->setEnabled(false);
+        ui->worldsCb->setEnabled(true);
+    } else {
+        ui->serverJoinAddressButton->setChecked(true);
+        ui->worldJoinButton->setChecked(false);
+        ui->serverJoinAddress->setEnabled(true);
+        ui->worldsCb->setEnabled(false);
+    }
 
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
@@ -390,7 +436,7 @@ void InstanceSettingsPage::loadSettings()
 
 void InstanceSettingsPage::on_javaDownloadBtn_clicked()
 {
-    auto jdialog = new Java::InstallDialog({}, this);
+    auto jdialog = new Java::InstallDialog({}, m_instance, this);
     jdialog->exec();
 }
 
@@ -548,4 +594,14 @@ void InstanceSettingsPage::updateThresholds()
         QPixmap pix = icon.pixmap(height, height);
         ui->labelMaxMemIcon->setPixmap(pix);
     }
+}
+
+void InstanceSettingsPage::on_serverJoinAddressButton_toggled(bool checked)
+{
+    ui->serverJoinAddress->setEnabled(checked);
+}
+
+void InstanceSettingsPage::on_worldJoinButton_toggled(bool checked)
+{
+    ui->worldsCb->setEnabled(checked);
 }

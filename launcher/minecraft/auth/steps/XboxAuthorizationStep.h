@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "minecraft/auth/AuthStep.h"
+#include "net/NetJob.h"
 #include "net/Upload.h"
 
 class XboxAuthorizationStep : public AuthStep {
@@ -28,5 +29,6 @@ class XboxAuthorizationStep : public AuthStep {
     QString m_authorizationKind;
 
     std::shared_ptr<QByteArray> m_response;
-    Net::Upload::Ptr m_task;
+    Net::Upload::Ptr m_request;
+    NetJob::Ptr m_task;
 };
