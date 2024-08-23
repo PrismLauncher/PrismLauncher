@@ -219,6 +219,19 @@ set(Launcher_SUBREDDIT_URL "https://prismlauncher.org/reddit" CACHE STRING "URL 
 set(Launcher_FORCE_BUNDLED_LIBS OFF CACHE BOOL "Prevent using system libraries, if they are available as submodules")
 set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build against")
 
+# Java downloader
+set(ENABLE_JAVA_DOWNLOADER_DEFAULT ON)
+
+# Although we recommend enabling this, we cannot guarantee binary compatibility on 
+# differing Linux/BSD/etc distributions. Downstream packagers should be explicitly opt-ing into this
+# feature if they know it will work with their distribution.
+if(UNIX AND NOT APPLE)
+  set(ENABLE_JAVA_DOWNLOADER_DEFAULT OFF)
+endif()
+
+# Java downloader
+option(ENABLE_JAVA_DOWNLOADER "Build the java downloader feature" ${ENABLE_JAVA_DOWNLOADER_DEFAULT})
+
 # Native libraries
 if(UNIX AND APPLE)
     set(Launcher_GLFW_LIBRARY_NAME "libglfw.dylib" CACHE STRING "Name of native glfw library")
