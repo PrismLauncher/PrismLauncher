@@ -38,6 +38,9 @@
 #include "InstanceSettingsPage.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/WorldList.h"
+#include "settings/Setting.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/java/InstallJavaDialog.h"
 #include "ui_InstanceSettingsPage.h"
 
 #include <QDialog>
@@ -63,6 +66,8 @@ InstanceSettingsPage::InstanceSettingsPage(BaseInstance* inst, QWidget* parent)
 {
     m_settings = inst->settings();
     ui->setupUi(this);
+
+    ui->javaDownloadBtn->setHidden(!BuildConfig.JAVA_DOWNLOADER_ENABLED);
 
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
@@ -204,9 +209,6 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("JvmArgs");
     }
 
-    // old generic 'override both' is removed.
-    m_settings->reset("OverrideJava");
-
     // Custom Commands
     bool custcmd = ui->customCommands->checked();
     m_settings->set("OverrideCommands", custcmd);
@@ -342,10 +344,11 @@ void InstanceSettingsPage::loadSettings()
     ui->labelPermgenNote->setVisible(permGenVisible);
 
     // Java Settings
-    bool overrideJava = m_settings->get("OverrideJava").toBool();
-    bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool() || overrideJava;
-    bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool() || overrideJava;
+    bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool();
+    bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool();
 
+    connect(m_settings->getSetting("OverrideJavaLocation").get(), &Setting::SettingChanged, ui->javaSettingsGroupBox,
+            [this] { ui->javaSettingsGroupBox->setChecked(m_settings->get("OverrideJavaLocation").toBool()); });
     ui->javaSettingsGroupBox->setChecked(overrideLocation);
     ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString());
     ui->skipCompatibilityCheckbox->setChecked(m_settings->get("IgnoreJavaCompatibility").toBool());
@@ -431,6 +434,12 @@ void InstanceSettingsPage::loadSettings()
     ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
 }
 
+void InstanceSettingsPage::on_javaDownloadBtn_clicked()
+{
+    auto jdialog = new Java::InstallDialog({}, m_instance, this);
+    jdialog->exec();
+}
+
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
 {
     if (JavaUtils::getJavaCheckPath().isEmpty()) {
@@ -452,6 +461,15 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
         ui->labelPermGen->setVisible(visible);
         ui->labelPermgenNote->setVisible(visible);
         m_settings->set("PermGenVisible", visible);
+
+        if (!java->is_64bit && m_settings->get("MaxMemAlloc").toInt() > 2048) {
+            CustomMessageBox::selectable(this, tr("Confirm Selection"),
+                                         tr("You selected a 32-bit version of Java.\n"
+                                            "This installation does not support more than 2048MiB of RAM.\n"
+                                            "Please make sure that the maximum memory value is lower."),
+                                         QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
+                ->exec();
+        }
     }
 }
 

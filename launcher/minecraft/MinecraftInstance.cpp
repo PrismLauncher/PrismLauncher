@@ -38,6 +38,8 @@
 #include "MinecraftInstance.h"
 #include "Application.h"
 #include "BuildConfig.h"
+#include "QObjectPtr.h"
+#include "minecraft/launch/AutoInstallJava.h"
 #include "minecraft/launch/CreateGameFolders.h"
 #include "minecraft/launch/ExtractNatives.h"
 #include "minecraft/launch/PrintInstanceInfo.h"
@@ -134,25 +136,21 @@ void MinecraftInstance::loadSpecificSettings()
         return;
 
     // Java Settings
-    auto javaOverride = m_settings->registerSetting("OverrideJava", false);
     auto locationOverride = m_settings->registerSetting("OverrideJavaLocation", false);
     auto argsOverride = m_settings->registerSetting("OverrideJavaArgs", false);
-
-    // combinations
-    auto javaOrLocation = std::make_shared<OrSetting>("JavaOrLocationOverride", javaOverride, locationOverride);
-    auto javaOrArgs = std::make_shared<OrSetting>("JavaOrArgsOverride", javaOverride, argsOverride);
+    m_settings->registerSetting("AutomaticJava", false);
 
     if (auto global_settings = globalSettings()) {
-        m_settings->registerOverride(global_settings->getSetting("JavaPath"), javaOrLocation);
-        m_settings->registerOverride(global_settings->getSetting("JvmArgs"), javaOrArgs);
-        m_settings->registerOverride(global_settings->getSetting("IgnoreJavaCompatibility"), javaOrLocation);
+        m_settings->registerOverride(global_settings->getSetting("JavaPath"), locationOverride);
+        m_settings->registerOverride(global_settings->getSetting("JvmArgs"), argsOverride);
+        m_settings->registerOverride(global_settings->getSetting("IgnoreJavaCompatibility"), locationOverride);
 
         // special!
-        m_settings->registerPassthrough(global_settings->getSetting("JavaSignature"), javaOrLocation);
-        m_settings->registerPassthrough(global_settings->getSetting("JavaArchitecture"), javaOrLocation);
-        m_settings->registerPassthrough(global_settings->getSetting("JavaRealArchitecture"), javaOrLocation);
-        m_settings->registerPassthrough(global_settings->getSetting("JavaVersion"), javaOrLocation);
-        m_settings->registerPassthrough(global_settings->getSetting("JavaVendor"), javaOrLocation);
+        m_settings->registerPassthrough(global_settings->getSetting("JavaSignature"), locationOverride);
+        m_settings->registerPassthrough(global_settings->getSetting("JavaArchitecture"), locationOverride);
+        m_settings->registerPassthrough(global_settings->getSetting("JavaRealArchitecture"), locationOverride);
+        m_settings->registerPassthrough(global_settings->getSetting("JavaVersion"), locationOverride);
+        m_settings->registerPassthrough(global_settings->getSetting("JavaVendor"), locationOverride);
 
         // Window Size
         auto windowSetting = m_settings->registerSetting("OverrideWindow", false);
@@ -1060,11 +1058,6 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         process->appendStep(makeShared<TextPrint>(pptr, "Minecraft folder is:\n" + gameRoot() + "\n\n", MessageLevel::Launcher));
     }
 
-    // check java
-    {
-        process->appendStep(makeShared<CheckJava>(pptr));
-    }
-
     // create the .minecraft folder and server-resource-packs (workaround for Minecraft bug MCL-3732)
     {
         process->appendStep(makeShared<CreateGameFolders>(pptr));
@@ -1105,6 +1098,12 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         process->appendStep(makeShared<Update>(pptr, Net::Mode::Online));
     } else {
         process->appendStep(makeShared<Update>(pptr, Net::Mode::Offline));
+    }
+
+    // check java
+    {
+        process->appendStep(makeShared<AutoInstallJava>(pptr));
+        process->appendStep(makeShared<CheckJava>(pptr));
     }
 
     // if there are any jar mods
