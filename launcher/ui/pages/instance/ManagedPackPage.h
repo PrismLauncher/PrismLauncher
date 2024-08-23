@@ -119,6 +119,7 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
 
     void parseManagedPack() override;
     [[nodiscard]] QString url() const override;
+    [[nodiscard]] QString helpPage() const override { return "modrinth-managed-pack"; }
 
    public slots:
     void suggestVersion() override;
@@ -142,6 +143,7 @@ class FlameManagedPackPage final : public ManagedPackPage {
 
     void parseManagedPack() override;
     [[nodiscard]] QString url() const override;
+    [[nodiscard]] QString helpPage() const override { return "curseforge-managed-pack"; }
 
    public slots:
     void suggestVersion() override;

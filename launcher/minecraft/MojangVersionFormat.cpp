@@ -185,6 +185,9 @@ void MojangVersionFormat::readVersionProperties(const QJsonObject& in, VersionFi
             out->compatibleJavaMajors.append(requireInteger(compatible));
         }
     }
+    if (in.contains("compatibleJavaName")) {
+        out->compatibleJavaName = requireString(in.value("compatibleJavaName"));
+    }
 
     if (in.contains("downloads")) {
         auto downloadsObj = requireObject(in, "downloads");
@@ -258,6 +261,9 @@ void MojangVersionFormat::writeVersionProperties(const VersionFile* in, QJsonObj
             compatibleJavaMajorsOut.append(compatibleJavaMajor);
         }
         out.insert("compatibleJavaMajors", compatibleJavaMajorsOut);
+    }
+    if (!in->compatibleJavaName.isEmpty()) {
+        writeString(out, "compatibleJavaName", in->compatibleJavaName);
     }
 }
 

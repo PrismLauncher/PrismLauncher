@@ -80,6 +80,7 @@ class Resource : public QObject {
     [[nodiscard]] auto internal_id() const -> QString { return m_internal_id; }
     [[nodiscard]] auto type() const -> ResourceType { return m_type; }
     [[nodiscard]] bool enabled() const { return m_enabled; }
+    [[nodiscard]] auto getOriginalFileName() const -> QString;
     [[nodiscard]] QString sizeStr() const { return m_size_str; }
     [[nodiscard]] qint64 sizeInfo() const { return m_size_info; }
 

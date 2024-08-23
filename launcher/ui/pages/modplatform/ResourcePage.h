@@ -89,7 +89,7 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void triggerSearch() = 0;
 
     void onSelectionChanged(QModelIndex first, QModelIndex second);
-    void onVersionSelectionChanged(QString data);
+    void onVersionSelectionChanged(int index);
     void onResourceSelected();
 
     // NOTE: Can't use [[nodiscard]] here because of https://bugreports.qt.io/browse/QTBUG-58628 on Qt 5.12

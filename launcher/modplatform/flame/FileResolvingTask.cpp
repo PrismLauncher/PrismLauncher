@@ -74,6 +74,7 @@ void Flame::FileResolvingTask::netJobFinished()
     setProgress(1, 3);
     // job to check modrinth for blocked projects
     m_checkJob.reset(new NetJob("Modrinth check", m_network));
+    m_checkJob->setAskRetry(false);
     blockedProjects = QMap<File*, std::shared_ptr<QByteArray>>();
 
     QJsonDocument doc;
@@ -103,7 +104,7 @@ void Flame::FileResolvingTask::netJobFinished()
                 auto url = QString("https://api.modrinth.com/v2/version_file/%1?algorithm=sha1").arg(hash);
                 auto output = std::make_shared<QByteArray>();
                 auto dl = Net::ApiDownload::makeByteArray(QUrl(url), output);
-                QObject::connect(dl.get(), &Net::ApiDownload::succeeded, [&out]() { out.resolved = true; });
+                QObject::connect(dl.get(), &Task::succeeded, [&out]() { out.resolved = true; });
 
                 m_checkJob->addNetAction(dl);
                 blockedProjects.insert(&out, output);
@@ -175,7 +176,7 @@ void Flame::FileResolvingTask::modrinthCheckFinished()
             auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(projectId);
             auto dl = Net::ApiDownload::makeByteArray(url, output);
             qDebug() << "Fetching url slug for file:" << mod->fileName;
-            QObject::connect(dl.get(), &Net::ApiDownload::succeeded, [block, index, output]() {
+            QObject::connect(dl.get(), &Task::succeeded, [block, index, output]() {
                 auto mod = block->at(index);  // use the shared_ptr so it is captured and only freed when we are done
                 auto json = QJsonDocument::fromJson(*output);
                 auto base =

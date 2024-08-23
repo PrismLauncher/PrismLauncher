@@ -4,6 +4,7 @@
 
 #include "minecraft/auth/AuthStep.h"
 #include "net/Download.h"
+#include "net/NetJob.h"
 
 class MinecraftProfileStep : public AuthStep {
     Q_OBJECT
@@ -21,5 +22,6 @@ class MinecraftProfileStep : public AuthStep {
 
    private:
     std::shared_ptr<QByteArray> m_response;
-    Net::Download::Ptr m_task;
+    Net::Download::Ptr m_request;
+    NetJob::Ptr m_task;
 };

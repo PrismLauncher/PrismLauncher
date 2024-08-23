@@ -74,10 +74,12 @@ class NetJob : public ConcurrentTask {
 
    protected:
     void updateState() override;
+    bool isOnline();
 
    private:
     shared_qobject_ptr<QNetworkAccessManager> m_network;
 
     int m_try = 1;
     bool m_ask_retry = true;
+    int m_manual_try = 0;
 };

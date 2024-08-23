@@ -72,7 +72,7 @@ void appendSafe(const QString& filename, const QByteArray& data);
 void append(const QString& filename, const QByteArray& data);
 
 /**
- * read data from a file safely\
+ * read data from a file safely
  */
 QByteArray read(const QString& filename);
 
@@ -559,5 +559,7 @@ uintmax_t hardLinkCount(const QString& path);
 #ifdef Q_OS_WIN
 QString getPathNameInLocal8bit(const QString& file);
 #endif
+
+QString getUniqueResourceName(const QString& filePath);
 
 }  // namespace FS

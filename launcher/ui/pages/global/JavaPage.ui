@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>545</width>
-    <height>580</height>
+    <width>559</width>
+    <height>659</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -34,9 +34,9 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="general">
       <attribute name="title">
-       <string notr="true">Tab 1</string>
+       <string notr="true">General</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
@@ -160,25 +160,6 @@
           <string>Java Runtime</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="7" column="0" colspan="3">
-           <widget class="QPlainTextEdit" name="jvmArgsTextBox">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>100</height>
-             </size>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="0">
            <widget class="QCheckBox" name="skipCompatibilityCheckbox">
             <property name="sizePolicy">
@@ -225,7 +206,7 @@
             </item>
            </layout>
           </item>
-          <item row="6" column="0">
+          <item row="8" column="0">
            <widget class="QLabel" name="labelJVMArgs">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -238,6 +219,45 @@
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QCheckBox" name="skipJavaWizardCheckbox">
+            <property name="toolTip">
+             <string>If enabled, the launcher will not prompt you to choose a Java version if one isn't found.</string>
+            </property>
+            <property name="text">
+             <string>Skip Java &amp;Wizard</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0" colspan="3">
+           <widget class="QPlainTextEdit" name="jvmArgsTextBox">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>100</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="autodetectJavaCheckBox">
+            <property name="toolTip">
+             <string>Automatically selects the Java version that is compatible with the current Minecraft instance, based on the major version required.</string>
+            </property>
+            <property name="text">
+             <string>Autodetect Java version</string>
             </property>
            </widget>
           </item>
@@ -277,13 +297,16 @@
             </item>
            </layout>
           </item>
-          <item row="5" column="0">
-           <widget class="QCheckBox" name="skipJavaWizardCheckbox">
+          <item row="7" column="0">
+           <widget class="QCheckBox" name="autodownloadCheckBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="toolTip">
-             <string>If enabled, the launcher will not prompt you to choose a Java version if one isn't found.</string>
+             <string>Automatically downloads and selects the Java version recommended by Mojang.</string>
             </property>
             <property name="text">
-             <string>Skip Java &amp;Wizard</string>
+             <string>Auto-download Mojang Java</string>
             </property>
            </widget>
           </item>
@@ -305,16 +328,106 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="management">
+      <attribute name="title">
+       <string>Management</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Downloaded Java Versions</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="VersionSelectWidget" name="managedJavaList" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="managedJavaBtnLayout">
+            <item>
+             <widget class="QPushButton" name="downloadJavaButton">
+              <property name="text">
+               <string>Download</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="removeJavaButton">
+              <property name="text">
+               <string>Remove</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="refreshJavaButton">
+              <property name="text">
+               <string>Refresh</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="managementSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>VersionSelectWidget</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/VersionSelectWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>
   <tabstop>permGenSpinBox</tabstop>
-  <tabstop>javaBrowseBtn</tabstop>
   <tabstop>javaPathTextBox</tabstop>
+  <tabstop>javaBrowseBtn</tabstop>
+  <tabstop>javaDetectBtn</tabstop>
+  <tabstop>javaTestBtn</tabstop>
+  <tabstop>skipCompatibilityCheckbox</tabstop>
+  <tabstop>skipJavaWizardCheckbox</tabstop>
+  <tabstop>jvmArgsTextBox</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>

@@ -24,6 +24,8 @@ set(CORE_SOURCES
     NullInstance.h
     MMCZip.h
     MMCZip.cpp
+    Untar.h
+    Untar.cpp
     StringUtils.h
     StringUtils.cpp
     QVariantUtils.h
@@ -138,7 +140,6 @@ set(NET_SOURCES
     net/HeaderProxy.h
     net/RawHeaderProxy.h
     net/ApiHeaderProxy.h
-    net/StaticHeaderProxy.h
     net/ApiDownload.h
     net/ApiDownload.cpp
     net/ApiUpload.cpp
@@ -263,8 +264,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ExtractNatives.h
     minecraft/launch/LauncherPartLaunch.cpp
     minecraft/launch/LauncherPartLaunch.h
-    minecraft/launch/MinecraftServerTarget.cpp
-    minecraft/launch/MinecraftServerTarget.h
+    minecraft/launch/MinecraftTarget.cpp
+    minecraft/launch/MinecraftTarget.h
     minecraft/launch/PrintInstanceInfo.cpp
     minecraft/launch/PrintInstanceInfo.h
     minecraft/launch/ReconstructAssets.cpp
@@ -273,6 +274,8 @@ set(MINECRAFT_SOURCES
     minecraft/launch/ScanModFolders.h
     minecraft/launch/VerifyJavaInstall.cpp
     minecraft/launch/VerifyJavaInstall.h
+    minecraft/launch/AutoInstallJava.cpp
+    minecraft/launch/AutoInstallJava.h
 
     minecraft/GradleSpecifier.h
     minecraft/MinecraftInstance.cpp
@@ -418,8 +421,6 @@ set(SETTINGS_SOURCES
 set(JAVA_SOURCES
     java/JavaChecker.h
     java/JavaChecker.cpp
-    java/JavaCheckerJob.h
-    java/JavaCheckerJob.cpp
     java/JavaInstall.h
     java/JavaInstall.cpp
     java/JavaInstallList.h
@@ -428,6 +429,18 @@ set(JAVA_SOURCES
     java/JavaUtils.cpp
     java/JavaVersion.h
     java/JavaVersion.cpp
+
+    java/JavaMetadata.h
+    java/JavaMetadata.cpp
+    java/download/ArchiveDownloadTask.cpp
+    java/download/ArchiveDownloadTask.h
+    java/download/ManifestDownloadTask.cpp
+    java/download/ManifestDownloadTask.h
+
+    ui/java/InstallJavaDialog.h
+    ui/java/InstallJavaDialog.cpp
+    ui/java/VersionList.h
+    ui/java/VersionList.cpp
 )
 
 set(TRANSLATIONS_SOURCES
@@ -747,6 +760,8 @@ SET(LAUNCHER_SOURCES
     DataMigrationTask.cpp
     ApplicationMessage.h
     ApplicationMessage.cpp
+    SysInfo.h
+    SysInfo.cpp
 
     # GUI - general utilities
     DesktopServices.h
@@ -785,8 +800,6 @@ SET(LAUNCHER_SOURCES
     # GUI - windows
     ui/GuiUtil.h
     ui/GuiUtil.cpp
-    ui/ColorCache.h
-    ui/ColorCache.cpp
     ui/MainWindow.h
     ui/MainWindow.cpp
     ui/InstanceWindow.h
