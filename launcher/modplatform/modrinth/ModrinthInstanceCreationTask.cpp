@@ -384,11 +384,11 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                 hash = Json::ensureString(hashes, "sha512");
                 hashAlgorithm = QCryptographicHash::Sha512;
                 if (hash.isEmpty()) {
-                    hash = Json::ensureString(hashes, "sha1");
-                    hashAlgorithm = QCryptographicHash::Sha1;
+                    hash = Json::ensureString(hashes, "sha256");
+                    hashAlgorithm = QCryptographicHash::Sha256;
                     if (hash.isEmpty()) {
-                        hash = Json::ensureString(hashes, "sha256");
-                        hashAlgorithm = QCryptographicHash::Sha256;
+                        hash = Json::ensureString(hashes, "sha1");
+                        hashAlgorithm = QCryptographicHash::Sha1;
                         if (hash.isEmpty()) {
                             throw JSONValidationError("No hash found for: " + file.path);
                         }
