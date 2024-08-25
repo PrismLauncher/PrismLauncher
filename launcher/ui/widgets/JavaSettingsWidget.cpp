@@ -504,7 +504,7 @@ void JavaSettingsWidget::updateThresholds()
     } else if (observedMaxMemory < observedMinMemory) {
         iconName = "status-yellow";
         m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
-    } else if (observedMaxMemory > 2048 && m_result.is_64bit) {
+    } else if (observedMaxMemory > 2048 && !m_result.is_64bit) {
         iconName = "status-bad";
         m_labelMaxMemIcon->setToolTip(tr("You are exceeding the maximum allocation supported by 32-bit installations of Java."));
     } else {
