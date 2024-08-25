@@ -68,7 +68,7 @@ QString truncateLogForMclogs(const QString& logContent)
             "----- Middle portion omitted to fit mclo.gs size limits ----\n"
             "------------------------------------------------------------\n"
             "\n\n\n\n\n\n\n\n\n\n";
-        truncatedLog += lines.mid(lines.size() - FinalMclogsLines, FinalMclogsLines).join("\n");
+        truncatedLog += lines.mid(lines.size() - FinalMclogsLines - 1).join("\n");
         return truncatedLog;
     }
     return logContent;
