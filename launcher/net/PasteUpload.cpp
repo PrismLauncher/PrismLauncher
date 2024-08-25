@@ -58,7 +58,7 @@ class PasteSink : public Net::ByteArraySink {
     auto finalize(QNetworkReply& reply) -> Task::State override
     {
         if (!finalizeAllValidators(reply)) {
-            m_fail_reason = "failed to finalize validators";
+            m_fail_reason = "Failed to finalize validators";
             return Task::State::Failed;
         }
 

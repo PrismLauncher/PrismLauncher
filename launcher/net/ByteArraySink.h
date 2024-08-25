@@ -58,7 +58,7 @@ class ByteArraySink : public Sink {
             qWarning() << "ByteArraySink did not initialize the buffer because it's not addressable";
         if (initAllValidators(request))
             return Task::State::Running;
-        m_fail_reason = "failed to initialize validators";
+        m_fail_reason = "Failed to initialize validators";
         return Task::State::Failed;
     };
 
@@ -70,7 +70,7 @@ class ByteArraySink : public Sink {
             qWarning() << "ByteArraySink did not write the buffer because it's not addressable";
         if (writeAllValidators(data))
             return Task::State::Running;
-        m_fail_reason = "failed to write validators";
+        m_fail_reason = "Failed to write validators";
         return Task::State::Failed;
     }
 
@@ -85,7 +85,7 @@ class ByteArraySink : public Sink {
     {
         if (finalizeAllValidators(reply))
             return Task::State::Succeeded;
-        m_fail_reason = "failed to finalize validators";
+        m_fail_reason = "Failed to finalize validators";
         return Task::State::Failed;
     }
 

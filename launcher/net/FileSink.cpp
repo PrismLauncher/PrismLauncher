@@ -51,7 +51,7 @@ Task::State FileSink::init(QNetworkRequest& request)
     // create a new save file and open it for writing
     if (!FS::ensureFilePathExists(m_filename)) {
         qCCritical(taskNetLogC) << "Could not create folder for " + m_filename;
-        m_fail_reason = "could not create folder";
+        m_fail_reason = "Could not create folder";
         return Task::State::Failed;
     }
 
@@ -59,13 +59,13 @@ Task::State FileSink::init(QNetworkRequest& request)
     m_output_file.reset(new QSaveFile(m_filename));
     if (!m_output_file->open(QIODevice::WriteOnly)) {
         qCCritical(taskNetLogC) << "Could not open " + m_filename + " for writing";
-        m_fail_reason = "could not open file";
+        m_fail_reason = "Could not open file";
         return Task::State::Failed;
     }
 
     if (initAllValidators(request))
         return Task::State::Running;
-    m_fail_reason = "failed to initialize validators";
+    m_fail_reason = "Failed to initialize validators";
     return Task::State::Failed;
 }
 
@@ -76,7 +76,7 @@ Task::State FileSink::write(QByteArray& data)
         m_output_file->cancelWriting();
         m_output_file.reset();
         wroteAnyData = false;
-        m_fail_reason = "failed to write validators";
+        m_fail_reason = "Failed to write validators";
         return Task::State::Failed;
     }
 
@@ -108,7 +108,7 @@ Task::State FileSink::finalize(QNetworkReply& reply)
         // ask validators for data consistency
         // we only do this for actual downloads, not 'your data is still the same' cache hits
         if (!finalizeAllValidators(reply)) {
-            m_fail_reason = "failed to finalize validators";
+            m_fail_reason = "Failed to finalize validators";
             return Task::State::Failed;
         }
 
@@ -116,7 +116,7 @@ Task::State FileSink::finalize(QNetworkReply& reply)
         if (!m_output_file->commit()) {
             qCCritical(taskNetLogC) << "Failed to commit changes to " << m_filename;
             m_output_file->cancelWriting();
-            m_fail_reason = "failed to commit changes";
+            m_fail_reason = "Failed to commit changes";
             return Task::State::Failed;
         }
     }
