@@ -468,6 +468,7 @@ void JavaSettingsWidget::checkFinished(const JavaChecker::Result& result)
             break;
         }
     }
+    updateThresholds();
     m_checker.reset();
     if (!queuedCheck.isNull()) {
         checkJavaPath(queuedCheck);
