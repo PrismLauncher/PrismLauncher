@@ -108,24 +108,31 @@ QString getLibraryString()
         if (filePath.isEmpty()) {
             continue;
         }
+        try {
+            auto conf = Json::requireDocument(filePath, vkLayer);
+            auto confObject = Json::requireObject(conf, vkLayer);
+            auto layer = Json::ensureObject(confObject, "layer");
+            QString libraryName = Json::ensureString(layer, "library_path");
 
-        auto conf = Json::requireDocument(filePath, vkLayer);
-        auto confObject = Json::requireObject(conf, vkLayer);
-        auto layer = Json::ensureObject(confObject, "layer");
-        QString libraryName = Json::ensureString(layer, "library_path");
+            if (libraryName.isEmpty()) {
+                continue;
+            }
+            if (QFileInfo(libraryName).isAbsolute()) {
+                return libraryName;
+            }
 
 #ifdef __GLIBC__
-        // Check whether mangohud is usable on a glibc based system
-        if (!libraryName.isEmpty()) {
+            // Check whether mangohud is usable on a glibc based system
             QString libraryPath = findLibrary(libraryName);
             if (!libraryPath.isEmpty()) {
                 return libraryPath;
             }
-        }
 #else
-        // Without glibc return recorded shared library as-is.
-        return libraryName;
+            // Without glibc return recorded shared library as-is.
+            return libraryName;
 #endif
+        } catch (const Exception& e) {
+        }
     }
 
     return {};
