@@ -36,6 +36,13 @@
 
 ThemeManager::ThemeManager()
 {
+    themeDebugLog() << "Determining System Widget Theme...";
+    const auto& style = QApplication::style();
+    m_defaultStyle = style->objectName();
+    themeDebugLog() << "System theme seems to be:" << m_defaultStyle;
+
+    m_defaultPalette = QApplication::palette();
+
     initializeThemes();
     initializeCatPacks();
 }
@@ -121,13 +128,8 @@ void ThemeManager::initializeIcons()
 
 void ThemeManager::initializeWidgets()
 {
-    themeDebugLog() << "Determining System Widget Theme...";
-    const auto& style = QApplication::style();
-    m_currentlySelectedSystemTheme = style->objectName();
-    themeDebugLog() << "System theme seems to be:" << m_currentlySelectedSystemTheme;
-
     themeDebugLog() << "<> Initializing Widget Themes";
-    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>(m_currentlySelectedSystemTheme, true));
+    themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<SystemTheme>(m_defaultStyle, m_defaultPalette, true));
     auto darkThemeId = addTheme(std::make_unique<DarkTheme>());
     themeDebugLog() << "Loading Built-in Theme:" << darkThemeId;
     themeDebugLog() << "Loading Built-in Theme:" << addTheme(std::make_unique<BrightTheme>());
@@ -140,7 +142,7 @@ void ThemeManager::initializeWidgets()
             continue;
         }
 #endif
-        themeDebugLog() << "Loading System Theme:" << addTheme(std::make_unique<SystemTheme>(st));
+        themeDebugLog() << "Loading System Theme:" << addTheme(std::make_unique<SystemTheme>(st, m_defaultPalette, false));
     }
 
     // TODO: need some way to differentiate same name themes in different subdirectories
@@ -260,7 +262,7 @@ void ThemeManager::applyCurrentlySelectedTheme(bool initial)
     themeDebugLog() << "<> Icon theme set.";
     auto applicationTheme = settings->get("ApplicationTheme").toString();
     if (applicationTheme == "") {
-        applicationTheme = m_currentlySelectedSystemTheme;
+        applicationTheme = m_defaultStyle;
     }
     setApplicationTheme(applicationTheme, initial);
     themeDebugLog() << "<> Application theme set.";
