@@ -29,6 +29,8 @@ class FileConflictDialog : public QDialog {
     void cancel();
 
    private:
+    QString GetFileInfoText(const QString& filePath) const;
+
     Ui::FileConflictDialog* ui;
     Result m_result;
 };

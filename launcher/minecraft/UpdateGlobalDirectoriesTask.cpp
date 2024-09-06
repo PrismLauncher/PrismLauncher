@@ -26,11 +26,8 @@ bool interactiveMove(const QString& source, const QString& destination, bool rec
     if (!sourceInfo.exists())
         return false;
 
-    if (recursive) {
-        // Recursive doesn't make sense if the source isn't a directory.
-        if (!sourceInfo.isDir())
-            return false;
-
+    // Recursive doesn't make sense if the source isn't a directory.
+    if (recursive && sourceInfo.isDir()) {
         QDirIterator sourceIt(source, QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden | QDir::Filter::NoDotAndDotDot);
 
         while (sourceIt.hasNext()) {
@@ -49,6 +46,8 @@ bool interactiveMove(const QString& source, const QString& destination, bool rec
             return false;
         else if (result == FileConflictDialog::ChooseDestination)
             return FS::deletePath(source);
+        else if (result == FileConflictDialog::ChooseSource)
+            FS::deletePath(destination);
     }
 
     return FS::move(source, destination);
@@ -118,9 +117,15 @@ class TryCreateSymlinkTask : public Task {
 
         FS::create_link folderLink(m_source, m_destination);
         folderLink.linkRecursively(false);
-        folderLink();  // TODO: Error check
 
-        emitSucceeded();
+        if (folderLink()) {
+            emitSucceeded();
+        } else {
+            fail(tr("Failed to create global folder. Error %1: %2")
+                     .arg(folderLink.getOSError().value())
+                     .arg(folderLink.getOSError().message().c_str()));
+        }
+
         return;
     }
 
