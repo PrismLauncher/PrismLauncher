@@ -44,9 +44,18 @@
 #include "OneSixVersionFormat.h"
 #include "VersionFile.h"
 #include "meta/Version.h"
+#include "minecraft/Component.h"
 #include "minecraft/PackProfile.h"
 
 #include <assert.h>
+
+const QMap<QString, ModloaderMapEntry> Component::KNOWN_MODLOADERS = {
+    { "net.neoforged", { ModPlatform::NeoForge, { "net.minecraftforge", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
+    { "net.minecraftforge", { ModPlatform::Forge, { "net.neoforged", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
+    { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, { "net.minecraftforge", "net.neoforged", "org.quiltmc.quilt-loader" } } },
+    { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, { "net.minecraftforge", "net.neoforged", "net.fabricmc.fabric-loader" } } },
+    { "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
+};
 
 Component::Component(PackProfile* parent, const QString& uid)
 {
@@ -223,6 +232,22 @@ bool Component::isVersionChangeable()
     return false;
 }
 
+bool Component::isKnownModloader()
+{
+    auto iter = KNOWN_MODLOADERS.find(m_uid);
+    return iter != KNOWN_MODLOADERS.cend();
+}
+
+QStringList Component::knownConflictingComponents()
+{
+    auto iter = KNOWN_MODLOADERS.find(m_uid);
+    if (iter != KNOWN_MODLOADERS.cend()) {
+        return (*iter).knownConflictingComponents;
+    } else {
+        return {};
+    }
+}
+
 void Component::setImportant(bool state)
 {
     if (m_important != state) {
@@ -235,7 +260,8 @@ ProblemSeverity Component::getProblemSeverity() const
 {
     auto file = getVersionFile();
     if (file) {
-        return file->getProblemSeverity();
+        auto severity = file->getProblemSeverity();
+        return m_componentProblemSeverity > severity ? m_componentProblemSeverity : severity;
     }
     return ProblemSeverity::Error;
 }
@@ -244,9 +270,29 @@ const QList<PatchProblem> Component::getProblems() const
 {
     auto file = getVersionFile();
     if (file) {
-        return file->getProblems();
+        auto problems = file->getProblems();
+        problems.append(m_componentProblems);
+        return problems;
     }
     return { { ProblemSeverity::Error, QObject::tr("Patch is not loaded yet.") } };
+}
+
+void Component::addComponentProblem(ProblemSeverity severity, const QString& description)
+{
+    if (severity > m_componentProblemSeverity) {
+        m_componentProblemSeverity = severity;
+    }
+    m_componentProblems.append({ severity, description });
+
+    emit dataChanged();
+}
+
+void Component::resetComponentProblems()
+{
+    m_componentProblems.clear();
+    m_componentProblemSeverity = ProblemSeverity::None;
+
+    emit dataChanged();
 }
 
 void Component::setVersion(const QString& version)
@@ -401,4 +447,37 @@ void Component::updateCachedData()
         m_cachedConflicts.clear();
         emit dataChanged();
     }
+}
+
+void Component::waitLoadMeta()
+{
+    if (!m_loaded) {
+        if (!m_metaVersion || !m_metaVersion->isLoaded()) {
+            // wait for the loaded version from meta
+            m_metaVersion = APPLICATION->metadataIndex()->getLoadedVersion(m_uid, m_version);
+        }
+        m_loaded = true;
+        updateCachedData();
+    }
+}
+
+void Component::setUpdateAction(UpdateAction action)
+{
+    m_updateAction = action;
+}
+
+UpdateAction Component::getUpdateAction()
+{
+    return m_updateAction;
+}
+
+void Component::clearUpdateAction()
+{
+    m_updateAction = UpdateAction{ UpdateActionNone{} };
+}
+
+QDebug operator<<(QDebug d, const Component& comp)
+{
+    d << "Component(" << comp.m_uid << " : " << comp.m_cachedVersion << ")";
+    return d;
 }
