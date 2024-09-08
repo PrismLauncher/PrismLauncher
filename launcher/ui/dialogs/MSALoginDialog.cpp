@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,139 +34,135 @@
  */
 
 #include "MSALoginDialog.h"
+#include "Application.h"
+
 #include "ui_MSALoginDialog.h"
 
 #include "DesktopServices.h"
-#include "minecraft/auth/AccountTask.h"
+#include "minecraft/auth/AuthFlow.h"
 
-#include <QtWidgets/QPushButton>
-#include <QUrl>
 #include <QApplication>
 #include <QClipboard>
+#include <QPixmap>
+#include <QUrl>
+#include <QtWidgets/QPushButton>
 
-MSALoginDialog::MSALoginDialog(QWidget *parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
+MSALoginDialog::MSALoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::MSALoginDialog)
 {
     ui->setupUi(this);
-    ui->progressBar->setVisible(false);
-    ui->actionButton->setVisible(false);
-    // ui->buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
 
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    // make font monospace
+    QFont font;
+    font.setPixelSize(ui->code->fontInfo().pixelSize());
+    font.setFamily(APPLICATION->settings()->get("ConsoleFont").toString());
+    font.setStyleHint(QFont::Monospace);
+    font.setFixedPitch(true);
+    ui->code->setFont(font);
+
+    connect(ui->copyCode, &QPushButton::clicked, this, [this] { QApplication::clipboard()->setText(ui->code->text()); });
+    ui->qr->setPixmap(QIcon((":/documents/login-qr.svg")).pixmap(QSize(150, 150)));
+    connect(ui->loginButton, &QPushButton::clicked, this, [this] {
+        if (m_url.isValid()) {
+            if (!DesktopServices::openUrl(m_url)) {
+                QApplication::clipboard()->setText(m_url.toString());
+            }
+        }
+    });
 }
 
-int MSALoginDialog::exec() {
-    setUserInputsEnabled(false);
-    ui->progressBar->setVisible(true);
-
+int MSALoginDialog::exec()
+{
     // Setup the login task and start it
     m_account = MinecraftAccount::createBlankMSA();
-    m_loginTask = m_account->loginMSA();
-    connect(m_loginTask.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
-    connect(m_loginTask.get(), &Task::succeeded, this, &MSALoginDialog::onTaskSucceeded);
-    connect(m_loginTask.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
-    connect(m_loginTask.get(), &Task::progress, this, &MSALoginDialog::onTaskProgress);
-    connect(m_loginTask.get(), &AccountTask::showVerificationUriAndCode, this, &MSALoginDialog::showVerificationUriAndCode);
-    connect(m_loginTask.get(), &AccountTask::hideVerificationUriAndCode, this, &MSALoginDialog::hideVerificationUriAndCode);
-    connect(&m_externalLoginTimer, &QTimer::timeout, this, &MSALoginDialog::externalLoginTick);
-    m_loginTask->start();
+    m_authflow_task = m_account->login(false);
+    connect(m_authflow_task.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
+    connect(m_authflow_task.get(), &Task::succeeded, this, &QDialog::accept);
+    connect(m_authflow_task.get(), &Task::aborted, this, &MSALoginDialog::reject);
+    connect(m_authflow_task.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
+    connect(m_authflow_task.get(), &AuthFlow::authorizeWithBrowser, this, &MSALoginDialog::authorizeWithBrowser);
+    connect(m_authflow_task.get(), &AuthFlow::authorizeWithBrowserWithExtra, this, &MSALoginDialog::authorizeWithBrowserWithExtra);
+    connect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_authflow_task.get(), &Task::abort);
+
+    m_devicecode_task.reset(new AuthFlow(m_account->accountData(), AuthFlow::Action::DeviceCode, this));
+    connect(m_devicecode_task.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
+    connect(m_devicecode_task.get(), &Task::succeeded, this, &QDialog::accept);
+    connect(m_devicecode_task.get(), &Task::aborted, this, &MSALoginDialog::reject);
+    connect(m_devicecode_task.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
+    connect(m_devicecode_task.get(), &AuthFlow::authorizeWithBrowser, this, &MSALoginDialog::authorizeWithBrowser);
+    connect(m_devicecode_task.get(), &AuthFlow::authorizeWithBrowserWithExtra, this, &MSALoginDialog::authorizeWithBrowserWithExtra);
+    connect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_devicecode_task.get(), &Task::abort);
+    QMetaObject::invokeMethod(m_authflow_task.get(), &Task::start, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(m_devicecode_task.get(), &Task::start, Qt::QueuedConnection);
 
     return QDialog::exec();
 }
-
 
 MSALoginDialog::~MSALoginDialog()
 {
     delete ui;
 }
 
-void MSALoginDialog::externalLoginTick() {
-    m_externalLoginElapsed++;
-    ui->progressBar->setValue(m_externalLoginElapsed);
-    ui->progressBar->repaint();
-
-    if(m_externalLoginElapsed >= m_externalLoginTimeout) {
-        m_externalLoginTimer.stop();
-    }
-}
-
-
-void MSALoginDialog::showVerificationUriAndCode(const QUrl& uri, const QString& code, int expiresIn) {
-    m_externalLoginElapsed = 0;
-    m_externalLoginTimeout = expiresIn;
-
-    m_externalLoginTimer.setInterval(1000);
-    m_externalLoginTimer.setSingleShot(false);
-    m_externalLoginTimer.start();
-
-    ui->progressBar->setMaximum(expiresIn);
-    ui->progressBar->setValue(m_externalLoginElapsed);
-
-    QString urlString = uri.toString();
-    QString linkString = QString("<a href=\"%1\">%2</a>").arg(urlString, urlString);
-    ui->label->setText(tr("<p>Please open up %1 in a browser and put in the code <b>%2</b> to proceed with login.</p>").arg(linkString, code));
-    ui->actionButton->setVisible(true);
-    connect(ui->actionButton, &QPushButton::clicked, [=]() {
-        DesktopServices::openUrl(uri);
-        QClipboard* cb = QApplication::clipboard();
-        cb->setText(code);
-    });
-}
-
-void MSALoginDialog::hideVerificationUriAndCode() {
-    m_externalLoginTimer.stop();
-    ui->actionButton->setVisible(false);
-}
-
-void MSALoginDialog::setUserInputsEnabled(bool enable)
-{
-    ui->buttonBox->setEnabled(enable);
-}
-
-void MSALoginDialog::onTaskFailed(const QString &reason)
+void MSALoginDialog::onTaskFailed(QString reason)
 {
     // Set message
+    m_authflow_task->disconnect();
+    m_devicecode_task->disconnect();
+    ui->stackedWidget->setCurrentIndex(0);
     auto lines = reason.split('\n');
     QString processed;
-    for(auto line: lines) {
-        if(line.size()) {
+    for (auto line : lines) {
+        if (line.size()) {
             processed += "<font color='red'>" + line + "</font><br />";
-        }
-        else {
+        } else {
             processed += "<br />";
         }
     }
-    ui->label->setText(processed);
-
-    // Re-enable user-interaction
-    setUserInputsEnabled(true);
-    ui->progressBar->setVisible(false);
-    ui->actionButton->setVisible(false);
+    ui->status->setText(processed);
+    auto task = m_authflow_task;
+    if (task->failReason().isEmpty()) {
+        task = m_devicecode_task;
+    }
+    if (task) {
+        ui->loadingLabel->setText(task->getStatus());
+    }
+    disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_authflow_task.get(), &Task::abort);
+    disconnect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_devicecode_task.get(), &Task::abort);
+    connect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, this, &MSALoginDialog::reject);
 }
 
-void MSALoginDialog::onTaskSucceeded()
+void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
 {
-    QDialog::accept();
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->loginButton->setToolTip(QString("<div style='width: 200px;'>%1</div>").arg(url.toString()));
+    m_url = url;
 }
 
-void MSALoginDialog::onTaskStatus(const QString &status)
+void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn)
 {
-    ui->label->setText(status);
+    ui->stackedWidget->setCurrentIndex(1);
+
+    const auto linkString = QString("<a href=\"%1\">%2</a>").arg(url, url);
+    ui->code->setText(code);
+    auto isDefaultUrl = url == "https://www.microsoft.com/link";
+    ui->qr->setVisible(isDefaultUrl);
+    if (isDefaultUrl) {
+        ui->qrMessage->setText(tr("Open %1 or scan the QR and enter the above code.").arg(linkString));
+    } else {
+        ui->qrMessage->setText(tr("Open %1 and enter the above code.").arg(linkString));
+    }
 }
 
-void MSALoginDialog::onTaskProgress(qint64 current, qint64 total)
+void MSALoginDialog::onTaskStatus(QString status)
 {
-    ui->progressBar->setMaximum(total);
-    ui->progressBar->setValue(current);
+    ui->stackedWidget->setCurrentIndex(0);
+    ui->status->setText(status);
 }
 
 // Public interface
-MinecraftAccountPtr MSALoginDialog::newAccount(QWidget *parent, QString msg)
+MinecraftAccountPtr MSALoginDialog::newAccount(QWidget* parent)
 {
     MSALoginDialog dlg(parent);
-    dlg.ui->label->setText(msg);
-    if (dlg.exec() == QDialog::Accepted)
-    {
+    if (dlg.exec() == QDialog::Accepted) {
         return dlg.m_account;
     }
     return nullptr;

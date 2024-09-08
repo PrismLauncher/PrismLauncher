@@ -2,8 +2,7 @@
 
 #include <QDebug>
 #include <QFile>
-
-InstanceCreationTask::InstanceCreationTask() = default;
+#include "FileSystem.h"
 
 void InstanceCreationTask::executeTask()
 {
@@ -47,7 +46,7 @@ void InstanceCreationTask::executeTask()
             if (!QFile::exists(path))
                 continue;
             qDebug() << "Removing" << path;
-            if (!QFile::remove(path)) {
+            if (!FS::deletePath(path)) {
                 qCritical() << "Couldn't remove the old conflicting files.";
                 emitFailed(tr("Failed to remove old conflicting files."));
                 return;

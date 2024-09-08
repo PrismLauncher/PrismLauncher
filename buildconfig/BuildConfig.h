@@ -36,8 +36,8 @@
  */
 
 #pragma once
-#include <QString>
 #include <QList>
+#include <QString>
 
 /**
  * \brief The Config class holds all the build-time information passed from the build system.
@@ -67,15 +67,34 @@ class Config {
     QString VERSION_CHANNEL;
 
     bool UPDATER_ENABLED = false;
+    bool JAVA_DOWNLOADER_ENABLED = false;
 
-    /// A short string identifying this build's platform. For example, "lin64" or "win32".
+    /// A short string identifying this build's platform or distribution.
     QString BUILD_PLATFORM;
+
+    /// A short string identifying this build's valid artifacts int he updater. For example, "lin64" or "win32".
+    QString BUILD_ARTIFACT;
 
     /// A string containing the build timestamp
     QString BUILD_DATE;
 
+    /// A string identifying the compiler use to build
+    QString COMPILER_NAME;
+
+    /// A string identifying the compiler version used to build
+    QString COMPILER_VERSION;
+
+    /// A string identifying the compiler target system os
+    QString COMPILER_TARGET_SYSTEM;
+
+    /// A String identifying the compiler target system version
+    QString COMPILER_TARGET_SYSTEM_VERSION;
+
+    /// A String identifying the compiler target processor
+    QString COMPILER_TARGET_SYSTEM_PROCESSOR;
+
     /// URL for the updater's channel
-    QString UPDATER_BASE;
+    QString UPDATER_GITHUB_REPO;
 
     /// The public key used to sign releases for the Sparkle updater appcast
     QString MAC_SPARKLE_PUB_KEY;
@@ -134,6 +153,9 @@ class Config {
      */
     QString META_URL;
 
+    QString GLFW_LIBRARY_NAME;
+    QString OPENAL_LIBRARY_NAME;
+
     QString BUG_TRACKER_URL;
     QString TRANSLATIONS_URL;
     QString MATRIX_URL;
@@ -149,10 +171,9 @@ class Config {
 
     QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
     QString LIBRARY_BASE = "https://libraries.minecraft.net/";
-    QString AUTH_BASE = "https://authserver.mojang.com/";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
     QString FMLLIBS_BASE_URL = "https://files.prismlauncher.org/fmllibs/";  // FIXME: move into CMakeLists
-    QString TRANSLATIONS_BASE_URL = "https://i18n.prismlauncher.org/";  // FIXME: move into CMakeLists
+    QString TRANSLATIONS_BASE_URL = "https://i18n.prismlauncher.org/";      // FIXME: move into CMakeLists
 
     QString MODPACKSCH_API_BASE_URL = "https://api.modpacks.ch/";
 
@@ -169,7 +190,7 @@ class Config {
 
     QString MODRINTH_STAGING_URL = "https://staging-api.modrinth.com/v2";
     QString MODRINTH_PROD_URL = "https://api.modrinth.com/v2";
-    QStringList MODRINTH_MRPACK_HOSTS{"cdn.modrinth.com", "github.com", "raw.githubusercontent.com", "gitlab.com"};
+    QStringList MODRINTH_MRPACK_HOSTS{ "cdn.modrinth.com", "github.com", "raw.githubusercontent.com", "gitlab.com" };
 
     QString FLAME_BASE_URL = "https://api.curseforge.com/v1";
 
@@ -179,6 +200,18 @@ class Config {
      * \return The version number in string format (major.minor.revision.build).
      */
     QString printableVersionString() const;
+
+    /**
+     * \brief Compiler ID String
+     * \return a string of the form "Name - Version"  of just "Name" if the version is empty
+     */
+    QString compilerID() const;
+
+    /**
+     * \brief System ID String
+     * \return a string of the form "OS Verison Processor"
+     */
+    QString systemID() const;
 };
 
 extern const Config BuildConfig;

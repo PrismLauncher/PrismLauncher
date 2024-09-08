@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -43,8 +43,11 @@
 namespace Net {
 class ChecksumValidator : public Validator {
    public:
+    ChecksumValidator(QCryptographicHash::Algorithm algorithm, QString expectedHex)
+        : Net::ChecksumValidator(algorithm, QByteArray::fromHex(expectedHex.toLatin1()))
+    {}
     ChecksumValidator(QCryptographicHash::Algorithm algorithm, QByteArray expected = QByteArray())
-        : m_checksum(algorithm), m_expected(expected){};
+        : m_checksum(algorithm), m_expected(expected) {};
     virtual ~ChecksumValidator() = default;
 
    public:
@@ -60,7 +63,11 @@ class ChecksumValidator : public Validator {
         return true;
     }
 
-    auto abort() -> bool override { return true; }
+    auto abort() -> bool override
+    {
+        m_checksum.reset();
+        return true;
+    }
 
     auto validate(QNetworkReply&) -> bool override
     {

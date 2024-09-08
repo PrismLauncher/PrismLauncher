@@ -40,11 +40,13 @@
 #include <QMimeData>
 #include <QPushButton>
 #include <QStandardPaths>
+#include <QTimer>
 
-BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods)
-    : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods)
+BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, const QString& text, QList<BlockedMod>& mods, QString hash_type)
+    : QDialog(parent), ui(new Ui::BlockedModsDialog), m_mods(mods), m_hash_type(hash_type)
 {
-    m_hashing_task = shared_qobject_ptr<ConcurrentTask>(new ConcurrentTask(this, "MakeHashesTask", 10));
+    m_hashing_task = shared_qobject_ptr<ConcurrentTask>(
+        new ConcurrentTask(this, "MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt()));
     connect(m_hashing_task.get(), &Task::finished, this, &BlockedModsDialog::hashTaskFinished);
 
     ui->setupUi(this);
@@ -59,8 +61,13 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
 
     qDebug() << "[Blocked Mods Dialog] Mods List: " << mods;
 
-    setupWatch();
-    scanPaths();
+    // defer setup of file system watchers until after the dialog is shown
+    // this allows OS (namely macOS) permission prompts to show after the relevant dialog appears
+    QTimer::singleShot(0, this, [this] {
+        setupWatch();
+        scanPaths();
+        update();
+    });
 
     this->setWindowTitle(title);
     ui->labelDescription->setText(text);
@@ -157,7 +164,8 @@ void BlockedModsDialog::update()
 
     QString watching;
     for (auto& dir : m_watcher.directories()) {
-        watching += QString("<a href=\"%1\">%1</a><br/>").arg(dir);
+        QUrl fileURL = QUrl::fromLocalFile(dir);
+        watching += QString("<a href=\"%1\">%2</a><br/>").arg(fileURL.toString(), dir);
     }
 
     ui->textBrowserWatched->setText(watching);
@@ -193,6 +201,10 @@ void BlockedModsDialog::setupWatch()
 void BlockedModsDialog::watchPath(QString path, bool watch_recursive)
 {
     auto to_watch = QFileInfo(path);
+    if (!to_watch.isReadable()) {
+        qWarning() << "[Blocked Mods Dialog] Failed to add Watch Path (unable to read):" << path;
+        return;
+    }
     auto to_watch_path = to_watch.canonicalFilePath();
     if (m_watcher.directories().contains(to_watch_path))
         return;  // don't watch the same path twice (no loops!)
@@ -254,7 +266,7 @@ void BlockedModsDialog::addHashTask(QString path)
 /// @param path the path to the local file being hashed
 void BlockedModsDialog::buildHashTask(QString path)
 {
-    auto hash_task = Hashing::createBlockedModHasher(path, ModPlatform::ResourceProvider::FLAME, "sha1");
+    auto hash_task = Hashing::createHasher(path, m_hash_type);
 
     qDebug() << "[Blocked Mods Dialog] Creating Hash task for path: " << path;
 
@@ -313,7 +325,7 @@ bool BlockedModsDialog::checkValidPath(QString path)
     // efectivly compare two strings ignoring all separators and case
     auto laxCompare = [](QString fsfilename, QString metadataFilename) {
         // allowed character seperators
-        QList<QChar> allowedSeperators = { '-', '+', '.' , '_'};
+        QList<QChar> allowedSeperators = { '-', '+', '.', '_' };
 
         // copy in lowercase
         auto fsName = fsfilename.toLower();
@@ -334,6 +346,13 @@ bool BlockedModsDialog::checkValidPath(QString path)
 
     for (auto& mod : m_mods) {
         if (compare(filename, mod.name)) {
+            // if the mod is not yet matched and doesn't have a hash then
+            // just match it with the file that has the exact same name
+            if (!mod.matched && mod.hash.isEmpty()) {
+                mod.matched = true;
+                mod.localPath = path;
+                return false;
+            }
             qDebug() << "[Blocked Mods Dialog] Name match found:" << mod.name << "| From path:" << path;
             return true;
         }

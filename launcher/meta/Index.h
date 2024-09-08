@@ -16,53 +16,53 @@
 #pragma once
 
 #include <QAbstractListModel>
-#include <memory>
 
 #include "BaseEntity.h"
 #include "meta/VersionList.h"
+#include "net/Mode.h"
 
 class Task;
 
-namespace Meta
-{
+namespace Meta {
 
-class Index : public QAbstractListModel, public BaseEntity
-{
+class Index : public QAbstractListModel, public BaseEntity {
     Q_OBJECT
-public:
-    explicit Index(QObject *parent = nullptr);
-    explicit Index(const QVector<VersionList::Ptr> &lists, QObject *parent = nullptr);
+   public:
+    explicit Index(QObject* parent = nullptr);
+    explicit Index(const QVector<VersionList::Ptr>& lists, QObject* parent = nullptr);
+    virtual ~Index() = default;
 
-    enum
-    {
-        UidRole = Qt::UserRole,
-        NameRole,
-        ListPtrRole
-    };
+    enum { UidRole = Qt::UserRole, NameRole, ListPtrRole };
 
-    QVariant data(const QModelIndex &index, int role) const override;
-    int rowCount(const QModelIndex &parent) const override;
-    int columnCount(const QModelIndex &parent) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    int rowCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
     QString localFilename() const override { return "index.json"; }
 
     // queries
-    VersionList::Ptr get(const QString &uid);
-    Version::Ptr get(const QString &uid, const QString &version);
-    bool hasUid(const QString &uid) const;
+    VersionList::Ptr get(const QString& uid);
+    Version::Ptr get(const QString& uid, const QString& version);
+    bool hasUid(const QString& uid) const;
 
     QVector<VersionList::Ptr> lists() const { return m_lists; }
 
-public: // for usage by parsers only
-    void merge(const std::shared_ptr<Index> &other);
-    void parse(const QJsonObject &obj) override;
+    Task::Ptr loadVersion(const QString& uid, const QString& version = {}, Net::Mode mode = Net::Mode::Online, bool force = false);
 
-private:
+    // this blocks until the version is loaded
+    Version::Ptr getLoadedVersion(const QString& uid, const QString& version);
+
+   public:  // for usage by parsers only
+    void merge(const std::shared_ptr<Index>& other);
+
+   protected:
+    void parse(const QJsonObject& obj) override;
+
+   private:
     QVector<VersionList::Ptr> m_lists;
     QHash<QString, VersionList::Ptr> m_uids;
 
-    void connectVersionList(const int row, const VersionList::Ptr &list);
+    void connectVersionList(int row, const VersionList::Ptr& list);
 };
-}
-
+}  // namespace Meta

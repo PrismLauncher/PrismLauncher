@@ -10,13 +10,13 @@
         <file>scalable/copy.svg</file>
         <file>scalable/coremods.svg</file>
         <file>scalable/custom-commands.svg</file>
+        <file>scalable/environment-variables.svg</file>
         <file>scalable/externaltools.svg</file>
         <file>scalable/help.svg</file>
         <file>scalable/instance-settings.svg</file>
         <file>scalable/jarmods.svg</file>
         <file>scalable/java.svg</file>
         <file>scalable/language.svg</file>
-        <file>scalable/launcher.svg</file>
         <file>scalable/loadermods.svg</file>
         <file>scalable/log.svg</file>
         <file>scalable/minecraft.svg</file>

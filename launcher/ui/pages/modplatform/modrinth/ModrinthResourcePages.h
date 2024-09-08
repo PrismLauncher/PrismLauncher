@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,18 +44,33 @@
 
 #include "ui/pages/modplatform/ModPage.h"
 #include "ui/pages/modplatform/ResourcePackPage.h"
-#include "ui/pages/modplatform/TexturePackPage.h"
 #include "ui/pages/modplatform/ShaderPackPage.h"
+#include "ui/pages/modplatform/TexturePackPage.h"
 
 namespace ResourceDownload {
 
 namespace Modrinth {
-static inline QString displayName() { return "Modrinth"; }
-static inline QIcon icon() { return APPLICATION->getThemedIcon("modrinth"); }
-static inline QString id() { return "modrinth"; }
-static inline QString debugName() { return "Modrinth"; }
-static inline QString metaEntryBase() { return "ModrinthPacks"; }
+static inline QString displayName()
+{
+    return "Modrinth";
 }
+static inline QIcon icon()
+{
+    return APPLICATION->getThemedIcon("modrinth");
+}
+static inline QString id()
+{
+    return "modrinth";
+}
+static inline QString debugName()
+{
+    return "Modrinth";
+}
+static inline QString metaEntryBase()
+{
+    return "ModrinthPacks";
+}
+}  // namespace Modrinth
 
 class ModrinthModPage : public ModPage {
     Q_OBJECT
@@ -78,7 +94,10 @@ class ModrinthModPage : public ModPage {
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
-    auto validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const -> bool override;
+    unique_qobject_ptr<ModFilterWidget> createFilterWidget() override;
+
+   protected:
+    virtual void prepareProviderCategories() override;
 };
 
 class ModrinthResourcePackPage : public ResourcePackResourcePage {

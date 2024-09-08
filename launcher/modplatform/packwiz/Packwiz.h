@@ -1,20 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
-*  PolyMC - Minecraft Launcher
-*  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
-*
-*  This program is free software: you can redistribute it and/or modify
-*  it under the terms of the GNU General Public License as published by
-*  the Free Software Foundation, version 3.
-*
-*  This program is distributed in the hope that it will be useful,
-*  but WITHOUT ANY WARRANTY; without even the implied warranty of
-*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*  GNU General Public License for more details.
-*
-*  You should have received a copy of the GNU General Public License
-*  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #pragma once
 
@@ -35,23 +36,26 @@ auto getRealIndexName(QDir& index_dir, QString normalized_index_name, bool shoul
 
 class V1 {
    public:
+    enum class Side { ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
     struct Mod {
-        QString slug {};
-        QString name {};
-        QString filename {};
-        // FIXME: make side an enum
-        QString side {"both"};
+        QString slug{};
+        QString name{};
+        QString filename{};
+        Side side{ Side::UniversalSide };
+        ModPlatform::ModLoaderTypes loaders;
+        QStringList mcVersions;
+        ModPlatform::IndexedVersionType releaseType;
 
         // [download]
-        QString mode {};
-        QUrl url {};
-        QString hash_format {};
-        QString hash {};
+        QString mode{};
+        QUrl url{};
+        QString hash_format{};
+        QString hash{};
 
         // [update]
-        ModPlatform::ResourceProvider provider {};
-        QVariant file_id {};
-        QVariant project_id {};
+        ModPlatform::ResourceProvider provider{};
+        QVariant file_id{};
+        QVariant project_id{};
 
        public:
         // This is a totally heuristic, but should work for now.
@@ -93,6 +97,9 @@ class V1 {
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
     static auto getIndexForMod(QDir& index_dir, QVariant& mod_id) -> Mod;
+
+    static auto sideToString(Side side) -> QString;
+    static auto stringToSide(QString side) -> Side;
 };
 
-} // namespace Packwiz
+}  // namespace Packwiz

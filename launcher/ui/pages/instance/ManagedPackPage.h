@@ -50,7 +50,7 @@ class ManagedPackPage : public QWidget, public BasePage {
 
     /** Gets the necessary information about the managed pack, such as
      *  available versions*/
-    virtual void parseManagedPack(){};
+    virtual void parseManagedPack() {};
 
     /** URL of the managed pack.
      *  Not the version-specific one.
@@ -64,7 +64,8 @@ class ManagedPackPage : public QWidget, public BasePage {
      */
     virtual void suggestVersion();
 
-    virtual void update(){};
+    virtual void update() {};
+    virtual void updateFromFile() {};
 
    protected slots:
     /** Does the necessary UI changes for when something failed.
@@ -118,11 +119,13 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
 
     void parseManagedPack() override;
     [[nodiscard]] QString url() const override;
+    [[nodiscard]] QString helpPage() const override { return "modrinth-managed-pack"; }
 
    public slots:
     void suggestVersion() override;
 
     void update() override;
+    void updateFromFile() override;
 
    private:
     NetJob::Ptr m_fetch_job = nullptr;
@@ -140,11 +143,13 @@ class FlameManagedPackPage final : public ManagedPackPage {
 
     void parseManagedPack() override;
     [[nodiscard]] QString url() const override;
+    [[nodiscard]] QString helpPage() const override { return "curseforge-managed-pack"; }
 
    public slots:
     void suggestVersion() override;
 
     void update() override;
+    void updateFromFile() override;
 
    private:
     NetJob::Ptr m_fetch_job = nullptr;

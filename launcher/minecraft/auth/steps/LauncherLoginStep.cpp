@@ -1,25 +1,25 @@
 #include "LauncherLoginStep.h"
 
 #include <QNetworkRequest>
+#include <QUrl>
 
+#include "Application.h"
 #include "Logging.h"
-#include "minecraft/auth/AccountTask.h"
-#include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/NetUtils.h"
+#include "net/RawHeaderProxy.h"
+#include "net/Upload.h"
 
-LauncherLoginStep::LauncherLoginStep(AccountData* data) : AuthStep(data) {
+LauncherLoginStep::LauncherLoginStep(AccountData* data) : AuthStep(data) {}
 
-}
-
-LauncherLoginStep::~LauncherLoginStep() noexcept = default;
-
-QString LauncherLoginStep::describe() {
+QString LauncherLoginStep::describe()
+{
     return tr("Accessing Mojang services.");
 }
 
-void LauncherLoginStep::perform() {
-    auto requestURL = "https://api.minecraftservices.com/launcher/login";
+void LauncherLoginStep::perform()
+{
+    QUrl url("https://api.minecraftservices.com/launcher/login");
     auto uhs = m_data->mojangservicesToken.extra["uhs"].toString();
     auto xToken = m_data->mojangservicesToken.token;
 
@@ -31,53 +31,42 @@ void LauncherLoginStep::perform() {
 )XXX";
     auto requestBody = mc_auth_template.arg(uhs, xToken);
 
-    QNetworkRequest request = QNetworkRequest(QUrl(requestURL));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Accept", "application/json");
-    AuthRequest *requestor = new AuthRequest(this);
-    connect(requestor, &AuthRequest::finished, this, &LauncherLoginStep::onRequestDone);
-    requestor->post(request, requestBody.toUtf8());
+    auto headers = QList<Net::HeaderPair>{
+        { "Content-Type", "application/json" },
+        { "Accept", "application/json" },
+    };
+
+    m_response.reset(new QByteArray());
+    m_request = Net::Upload::makeByteArray(url, m_response, requestBody.toUtf8());
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+
+    m_task.reset(new NetJob("LauncherLoginStep", APPLICATION->network()));
+    m_task->setAskRetry(false);
+    m_task->addNetAction(m_request);
+
+    connect(m_task.get(), &Task::finished, this, &LauncherLoginStep::onRequestDone);
+
+    m_task->start();
     qDebug() << "Getting Minecraft access token...";
 }
 
-void LauncherLoginStep::rehydrate() {
-    // TODO: check the token validity
-}
-
-void LauncherLoginStep::onRequestDone(
-    QNetworkReply::NetworkError error,
-    QByteArray data,
-    QList<QNetworkReply::RawHeaderPair> headers
-) {
-    auto requestor = qobject_cast<AuthRequest *>(QObject::sender());
-    requestor->deleteLater();
-
-    qCDebug(authCredentials()) << data;
-    if (error != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << error;
-        qCDebug(authCredentials()) << data;
-        if (Net::isApplicationError(error)) {
-            emit finished(
-                AccountTaskState::STATE_FAILED_SOFT,
-                tr("Failed to get Minecraft access token: %1").arg(requestor->errorString_)
-            );
-        }
-        else {
-            emit finished(
-                AccountTaskState::STATE_OFFLINE,
-                tr("Failed to get Minecraft access token: %1").arg(requestor->errorString_)
-            );
+void LauncherLoginStep::onRequestDone()
+{
+    qCDebug(authCredentials()) << *m_response;
+    if (m_request->error() != QNetworkReply::NoError) {
+        qWarning() << "Reply error:" << m_request->error();
+        if (Net::isApplicationError(m_request->error())) {
+            emit finished(AccountTaskState::STATE_FAILED_SOFT,
+                          tr("Failed to get Minecraft access token: %1").arg(m_request->errorString()));
+        } else {
+            emit finished(AccountTaskState::STATE_OFFLINE, tr("Failed to get Minecraft access token: %1").arg(m_request->errorString()));
         }
         return;
     }
 
-    if(!Parsers::parseMojangResponse(data, m_data->yggdrasilToken)) {
+    if (!Parsers::parseMojangResponse(*m_response, m_data->yggdrasilToken)) {
         qWarning() << "Could not parse login_with_xbox response...";
-        qCDebug(authCredentials()) << data;
-        emit finished(
-            AccountTaskState::STATE_FAILED_SOFT,
-            tr("Failed to parse the Minecraft access token response.")
-        );
+        emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Failed to parse the Minecraft access token response."));
         return;
     }
     emit finished(AccountTaskState::STATE_WORKING, tr(""));

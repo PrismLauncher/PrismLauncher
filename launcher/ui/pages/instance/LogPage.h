@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,46 +37,32 @@
 
 #include <QWidget>
 
+#include <Application.h>
 #include "BaseInstance.h"
 #include "launch/LaunchTask.h"
 #include "ui/pages/BasePage.h"
-#include <Application.h>
 
-namespace Ui
-{
+namespace Ui {
 class LogPage;
 }
 class QTextCharFormat;
 class LogFormatProxyModel;
 
-class LogPage : public QWidget, public BasePage
-{
+class LogPage : public QWidget, public BasePage {
     Q_OBJECT
 
-public:
-    explicit LogPage(InstancePtr instance, QWidget *parent = 0);
+   public:
+    explicit LogPage(InstancePtr instance, QWidget* parent = 0);
     virtual ~LogPage();
-    virtual QString displayName() const override
-    {
-        return tr("Minecraft Log");
-    }
-    virtual QIcon icon() const override
-    {
-        return APPLICATION->getThemedIcon("log");
-    }
-    virtual QString id() const override
-    {
-        return "console";
-    }
+    virtual QString displayName() const override { return tr("Minecraft Log"); }
+    virtual QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
+    virtual QString id() const override { return "console"; }
     virtual bool apply() override;
-    virtual QString helpPage() const override
-    {
-        return "Minecraft-Logs";
-    }
+    virtual QString helpPage() const override { return "Minecraft-Logs"; }
     virtual bool shouldDisplay() const override;
     void retranslate() override;
 
-private slots:
+   private slots:
     void on_btnPaste_clicked();
     void on_btnCopy_clicked();
     void on_btnClear_clicked();
@@ -92,16 +78,16 @@ private slots:
 
     void onInstanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc);
 
-private:
+   private:
     void modelStateToUI();
     void UIToModelState();
     void setInstanceLaunchTaskChanged(shared_qobject_ptr<LaunchTask> proc, bool initial);
 
-private:
-    Ui::LogPage *ui;
+   private:
+    Ui::LogPage* ui;
     InstancePtr m_instance;
     shared_qobject_ptr<LaunchTask> m_process;
 
-    LogFormatProxyModel * m_proxy;
-    shared_qobject_ptr <LogModel> m_model;
+    LogFormatProxyModel* m_proxy;
+    shared_qobject_ptr<LogModel> m_model;
 };

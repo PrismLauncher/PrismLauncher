@@ -1,7 +1,7 @@
 #include "AuthSession.h"
-#include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QStringList>
 
 QString AuthSession::serializeUserProperties()
@@ -16,22 +16,27 @@ QString AuthSession::serializeUserProperties()
     */
     QJsonDocument value(userAttrs);
     return value.toJson(QJsonDocument::Compact);
-
 }
 
 bool AuthSession::MakeOffline(QString offline_playername)
 {
-    if (status != PlayableOffline && status != PlayableOnline)
-    {
+    if (status != PlayableOffline && status != PlayableOnline) {
         return false;
     }
     session = "-";
+    access_token = "0";
     player_name = offline_playername;
     status = PlayableOffline;
     return true;
 }
 
-void AuthSession::MakeDemo() {
-    player_name = "Player";
+void AuthSession::MakeDemo(QString name, QString u)
+{
+    wants_online = false;
     demo = true;
-}
+    uuid = u;
+    session = "-";
+    access_token = "0";
+    player_name = name;
+    status = PlayableOnline;  // needs online to download the assets
+};

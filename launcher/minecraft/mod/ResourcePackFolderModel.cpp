@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -35,6 +35,8 @@
  */
 
 #include "ResourcePackFolderModel.h"
+#include <qnamespace.h>
+#include <qsize.h>
 
 #include <QIcon>
 #include <QStyle>
@@ -42,13 +44,19 @@
 #include "Application.h"
 #include "Version.h"
 
+#include "minecraft/mod/Resource.h"
 #include "minecraft/mod/tasks/BasicFolderLoadTask.h"
 #include "minecraft/mod/tasks/LocalResourcePackParseTask.h"
 
-ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, BaseInstance* instance)
-    : ResourceFolderModel(QDir(dir), instance)
+ResourcePackFolderModel::ResourcePackFolderModel(const QString& dir, BaseInstance* instance) : ResourceFolderModel(QDir(dir), instance)
 {
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE };
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Pack Format", "Last Modified", "Size" });
+    m_column_names_translated = QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified"), tr("Size") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE, SortType::SIZE };
+    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,
+                              QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
+    m_columnsHideable = { false, true, false, true, true, true };
+    m_columnsHiddenByDefault = { false, false, false, false, false, false };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
@@ -79,14 +87,18 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                 }
                 case DateColumn:
                     return m_resources[row]->dateTimeChanged();
+                case SizeColumn:
+                    return m_resources[row]->sizeStr();
 
                 default:
                     return {};
             }
         case Qt::DecorationRole: {
-            if (column == NAME_COLUMN && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
+            if (column == NameColumn && (at(row)->isSymLinkUnder(instDirPath()) || at(row)->isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
-
+            if (column == ImageColumn) {
+                return at(row)->image({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
+            }
             return {};
         }
         case Qt::ToolTipRole: {
@@ -94,20 +106,26 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                 //: The string being explained by this is in the format: ID (Lower version - Upper version)
                 return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");
             }
-            if (column == NAME_COLUMN) {
+            if (column == NameColumn) {
                 if (at(row)->isSymLinkUnder(instDirPath())) {
                     return m_resources[row]->internal_id() +
-                        tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
-                           "\nCanonical Path: %1")
-                            .arg(at(row)->fileinfo().canonicalFilePath());;
+                           tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
+                              "\nCanonical Path: %1")
+                               .arg(at(row)->fileinfo().canonicalFilePath());
+                    ;
                 }
                 if (at(row)->isMoreThanOneHardLink()) {
                     return m_resources[row]->internal_id() +
-                        tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
+                           tr("\nWarning: This resource is hard linked elsewhere. Editing it will also change the original.");
                 }
             }
             return m_resources[row]->internal_id();
         }
+        case Qt::SizeHintRole:
+            if (column == ImageColumn) {
+                return QSize(32, 32);
+            }
+            return {};
         case Qt::CheckStateRole:
             switch (column) {
                 case ActiveColumn:
@@ -120,19 +138,18 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
     }
 }
 
-QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::Orientation orientation, int role) const
 {
     switch (role) {
         case Qt::DisplayRole:
             switch (section) {
                 case ActiveColumn:
-                    return QString();
                 case NameColumn:
-                    return tr("Name");
                 case PackFormatColumn:
-                    return tr("Pack Format");
                 case DateColumn:
-                    return tr("Last changed");
+                case ImageColumn:
+                case SizeColumn:
+                    return columnNames().at(section);
                 default:
                     return {};
             }
@@ -148,13 +165,19 @@ QVariant ResourcePackFolderModel::headerData(int section, Qt::Orientation orient
                     return tr("The resource pack format ID, as well as the Minecraft versions it was designed for.");
                 case DateColumn:
                     return tr("The date and time this resource pack was last changed (or added).");
+                case SizeColumn:
+                    return tr("The size of the resource pack.");
                 default:
                     return {};
             }
+        case Qt::SizeHintRole:
+            if (section == ImageColumn) {
+                return QSize(64, 0);
+            }
+            return {};
         default:
             return {};
     }
-    return {};
 }
 
 int ResourcePackFolderModel::columnCount(const QModelIndex& parent) const

@@ -4,7 +4,8 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,10 +45,8 @@
 #include <QKeyEvent>
 
 #include "Markdown.h"
-#include "ResourceDownloadTask.h"
 
-#include "minecraft/MinecraftInstance.h"
-
+#include "StringUtils.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 #include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/widgets/ProjectItem.h"
@@ -69,11 +68,13 @@ ResourcePage::ResourcePage(ResourceDownloadDialog* parent, BaseInstance& base_in
 
     connect(&m_search_timer, &QTimer::timeout, this, &ResourcePage::triggerSearch);
 
+    // hide progress bar to prevent weird artifact
+    m_fetch_progress.hide();
     m_fetch_progress.hideIfInactive(true);
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    m_ui->gridLayout_3->addWidget(&m_fetch_progress, 0, 0, 1, m_ui->gridLayout_3->columnCount());
+    m_ui->verticalLayout->insertWidget(1, &m_fetch_progress);
 
     m_ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     m_ui->packView->installEventFilter(this);
@@ -95,8 +96,10 @@ void ResourcePage::retranslate()
 
 void ResourcePage::openedImpl()
 {
-    if (!supportsFiltering())
+    if (!supportsFiltering()) {
         m_ui->resourceFilterButton->setVisible(false);
+        m_ui->filterWidget->hide();
+    }
 
     //: String in the search bar of the mod downloading dialog
     m_ui->searchEdit->setPlaceholderText(tr("Search for %1...").arg(resourcesString()));
@@ -104,6 +107,7 @@ void ResourcePage::openedImpl()
 
     updateSelectionButton();
     triggerSearch();
+    m_ui->searchEdit->setFocus();
 }
 
 auto ResourcePage::eventFilter(QObject* watched, QEvent* event) -> bool
@@ -174,7 +178,11 @@ ModPlatform::IndexedPack::Ptr ResourcePage::getCurrentPack() const
 void ResourcePage::updateUi()
 {
     auto current_pack = getCurrentPack();
-
+    if (!current_pack) {
+        m_ui->packDescription->setHtml({});
+        m_ui->packDescription->flush();
+        return;
+    }
     QString text = "";
     QString name = current_pack->name;
 
@@ -198,6 +206,11 @@ void ResourcePage::updateUi()
     }
 
     if (current_pack->extraDataLoaded) {
+        if (current_pack->extraData.status == "archived") {
+            text += "<br><br>" + tr("<b>This project has been archived. It will not receive any further updates unless the author decides "
+                                    "to unarchive the project.</b>");
+        }
+
         if (!current_pack->extraData.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
             auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
@@ -227,8 +240,8 @@ void ResourcePage::updateUi()
 
     text += "<hr>";
 
-    m_ui->packDescription->setHtml(
-        text + (current_pack->extraData.body.isEmpty() ? current_pack->description : markdownToHTML(current_pack->extraData.body)));
+    m_ui->packDescription->setHtml(StringUtils::htmlListPatch(
+        text + (current_pack->extraData.body.isEmpty() ? current_pack->description : markdownToHTML(current_pack->extraData.body))));
     m_ui->packDescription->flush();
 }
 
@@ -240,8 +253,8 @@ void ResourcePage::updateSelectionButton()
     }
 
     m_ui->resourceSelectionButton->setEnabled(true);
-    if (getCurrentPack()) {
-        if (!getCurrentPack()->isVersionSelected(m_selected_version_index))
+    if (auto current_pack = getCurrentPack(); current_pack) {
+        if (!current_pack->isVersionSelected(m_selected_version_index))
             m_ui->resourceSelectionButton->setText(tr("Select %1 for download").arg(resourceString()));
         else
             m_ui->resourceSelectionButton->setText(tr("Deselect %1 for download").arg(resourceString()));
@@ -258,14 +271,21 @@ void ResourcePage::updateVersionList()
     m_ui->versionSelectionBox->clear();
     m_ui->versionSelectionBox->blockSignals(false);
 
-    for (int i = 0; i < current_pack->versions.size(); i++) {
-        auto& version = current_pack->versions[i];
-        if (optedOut(version))
-            continue;
+    if (current_pack) {
+        auto installedVersion = m_model->getInstalledPackVersion(current_pack);
 
-        m_ui->versionSelectionBox->addItem(current_pack->versions[i].version, QVariant(i));
+        for (int i = 0; i < current_pack->versions.size(); i++) {
+            auto& version = current_pack->versions[i];
+            if (!m_model->checkVersionFilters(version))
+                continue;
+
+            auto release_type = current_pack->versions[i].version_type.isValid()
+                                    ? QString(" [%1]").arg(current_pack->versions[i].version_type.toString())
+                                    : "";
+
+            m_ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(i));
+        }
     }
-
     if (m_ui->versionSelectionBox->count() == 0) {
         m_ui->versionSelectionBox->addItem(tr("No valid version found."), QVariant(-1));
         m_ui->resourceSelectionButton->setText(tr("Cannot select invalid version :("));
@@ -274,7 +294,7 @@ void ResourcePage::updateVersionList()
     updateSelectionButton();
 }
 
-void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void ResourcePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     if (!curr.isValid()) {
         return;
@@ -283,7 +303,7 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     auto current_pack = getCurrentPack();
 
     bool request_load = false;
-    if (!current_pack->versionsLoaded) {
+    if (!current_pack || !current_pack->versionsLoaded) {
         m_ui->resourceSelectionButton->setText(tr("Loading versions..."));
         m_ui->resourceSelectionButton->setEnabled(false);
 
@@ -292,7 +312,7 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
         updateVersionList();
     }
 
-    if (!current_pack->extraDataLoaded)
+    if (current_pack && !current_pack->extraDataLoaded)
         request_load = true;
 
     if (request_load)
@@ -301,14 +321,9 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     updateUi();
 }
 
-void ResourcePage::onVersionSelectionChanged(QString data)
+void ResourcePage::onVersionSelectionChanged(int index)
 {
-    if (data.isNull() || data.isEmpty()) {
-        m_selected_version_index = -1;
-        return;
-    }
-
-    m_selected_version_index = m_ui->versionSelectionBox->currentData().toInt();
+    m_selected_version_index = index;
     updateSelectionButton();
 }
 
@@ -340,7 +355,7 @@ void ResourcePage::onResourceSelected()
         return;
 
     auto current_pack = getCurrentPack();
-    if (!current_pack->versionsLoaded)
+    if (!current_pack || !current_pack->versionsLoaded)
         return;
 
     auto& version = current_pack->versions[m_selected_version_index];
@@ -382,14 +397,14 @@ void ResourcePage::openUrl(const QUrl& url)
         }
     }
 
-    if (!page.isNull()) {
+    if (!page.isNull() && !m_do_not_jump_to_mod) {
         const QString slug = match.captured(1);
 
         // ensure the user isn't opening the same mod
-        if (slug != getCurrentPack()->slug) {
+        if (auto current_pack = getCurrentPack(); current_pack && slug != current_pack->slug) {
             m_parent_dialog->selectPage(page);
 
-            auto newPage = m_parent_dialog->getSelectedPage();
+            auto newPage = m_parent_dialog->selectedPage();
 
             QLineEdit* searchEdit = newPage->m_ui->searchEdit;
             auto model = newPage->m_model;
@@ -398,9 +413,9 @@ void ResourcePage::openUrl(const QUrl& url)
             auto jump = [url, slug, model, view] {
                 for (int row = 0; row < model->rowCount({}); row++) {
                     const QModelIndex index = model->index(row);
-                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack>();
+                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
-                    if (pack.slug == slug) {
+                    if (pack->slug == slug) {
                         view->setCurrentIndex(index);
                         return;
                     }
@@ -426,4 +441,52 @@ void ResourcePage::openUrl(const QUrl& url)
     QDesktopServices::openUrl(url);
 }
 
+void ResourcePage::openProject(QVariant projectID)
+{
+    m_ui->sortByBox->hide();
+    m_ui->searchEdit->hide();
+    m_ui->resourceFilterButton->hide();
+    m_ui->packView->hide();
+    m_ui->resourceSelectionButton->hide();
+    m_do_not_jump_to_mod = true;
+
+    auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+
+    auto okBtn = buttonBox->button(QDialogButtonBox::Ok);
+    okBtn->setDefault(true);
+    okBtn->setAutoDefault(true);
+    okBtn->setText(tr("Reinstall"));
+    okBtn->setShortcut(tr("Ctrl+Return"));
+    okBtn->setEnabled(false);
+
+    auto cancelBtn = buttonBox->button(QDialogButtonBox::Cancel);
+    cancelBtn->setDefault(false);
+    cancelBtn->setAutoDefault(false);
+
+    connect(okBtn, &QPushButton::clicked, this, [this] {
+        onResourceSelected();
+        m_parent_dialog->accept();
+    });
+
+    connect(cancelBtn, &QPushButton::clicked, m_parent_dialog, &ResourceDownloadDialog::reject);
+    m_ui->gridLayout_4->addWidget(buttonBox, 1, 2);
+
+    auto jump = [this, okBtn] {
+        for (int row = 0; row < m_model->rowCount({}); row++) {
+            const QModelIndex index = m_model->index(row);
+            m_ui->packView->setCurrentIndex(index);
+            okBtn->setEnabled(true);
+            return;
+        }
+        m_ui->packDescription->setText(tr("The resource was not found"));
+    };
+
+    m_ui->searchEdit->setText("#" + projectID.toString());
+    triggerSearch();
+
+    if (m_model->hasActiveSearchJob())
+        connect(m_model->activeSearchJob().get(), &Task::finished, jump);
+    else
+        jump();
+}
 }  // namespace ResourceDownload

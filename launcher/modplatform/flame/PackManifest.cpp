@@ -46,7 +46,7 @@ static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
         Flame::File file;
         loadFileV1(file, obj);
 
-        pack.files.insert(file.fileId,file);
+        pack.files.insert(file.fileId, file);
     }
 
     pack.overrides = Json::ensureString(manifest, "overrides", "overrides");
@@ -69,24 +69,19 @@ void Flame::loadManifest(Flame::Manifest& m, const QString& filepath)
     loadManifestV1(m, obj);
 }
 
-bool Flame::File::parseFromObject(const QJsonObject& obj,  bool throw_on_blocked)
+bool Flame::File::parseFromObject(const QJsonObject& obj, bool throw_on_blocked)
 {
     fileName = Json::requireString(obj, "fileName");
     // This is a piece of a Flame project JSON pulled out into the file metadata (here) for convenience
     // It is also optional
     type = File::Type::SingleFile;
 
-    if (fileName.endsWith(".zip")) {
-        // this is probably a resource pack
-        targetFolder = "resourcepacks";
-    } else {
-        // this is probably a mod, dunno what else could modpacks download
-        targetFolder = "mods";
-    }
+    targetFolder = "mods";
+
     // get the hash
     hash = QString();
     auto hashes = Json::ensureArray(obj, "hashes");
-    for(QJsonValueRef item : hashes) {
+    for (QJsonValueRef item : hashes) {
         auto hobj = Json::requireObject(item);
         auto algo = Json::requireInteger(hobj, "algo");
         auto value = Json::requireString(hobj, "value");
@@ -94,7 +89,6 @@ bool Flame::File::parseFromObject(const QJsonObject& obj,  bool throw_on_blocked
             hash = value;
         }
     }
-
 
     // may throw, if the project is blocked
     QString rawUrl = Json::ensureString(obj, "downloadUrl");

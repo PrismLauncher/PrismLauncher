@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "ui/pages/modplatform/ResourcePage.h"
 #include "ui/pages/modplatform/ResourcePackModel.h"
+#include "ui/pages/modplatform/ResourcePage.h"
 
 namespace Ui {
 class ResourcePage;
@@ -39,6 +39,8 @@ class ResourcePackResourcePage : public ResourcePage {
     [[nodiscard]] bool supportsFiltering() const override { return false; };
 
     [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return "resourcepack-platform"; }
 
    protected:
     ResourcePackResourcePage(ResourceDownloadDialog* dialog, BaseInstance& instance);

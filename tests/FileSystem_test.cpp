@@ -1,7 +1,7 @@
-#include <QTest>
 #include <QDir>
-#include <QTemporaryDir>
 #include <QStandardPaths>
+#include <QTemporaryDir>
+#include <QTest>
 
 #include <tasks/Task.h>
 
@@ -11,16 +11,16 @@
 // Snippet from https://github.com/gulrak/filesystem#using-it-as-single-file-header
 
 #ifdef __APPLE__
-#include <Availability.h> // for deployment target to support pre-catalina targets without std::fs
-#endif // __APPLE__
+#include <Availability.h>  // for deployment target to support pre-catalina targets without std::fs
+#endif                     // __APPLE__
 
 #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201703L) || (defined(__cplusplus) && __cplusplus >= 201703L)) && defined(__has_include)
 #if __has_include(<filesystem>) && (!defined(__MAC_OS_X_VERSION_MIN_REQUIRED) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 101500)
 #define GHC_USE_STD_FS
 #include <filesystem>
 namespace fs = std::filesystem;
-#endif // MacOS min version check
-#endif // Other OSes version check
+#endif  // MacOS min version check
+#endif  // Other OSes version check
 
 #ifndef GHC_USE_STD_FS
 #include <ghc/filesystem.hpp>
@@ -28,8 +28,6 @@ namespace fs = ghc::filesystem;
 #endif
 
 #include <pathmatcher/RegexpMatcher.h>
-
-
 
 class LinkTask : public Task {
     Q_OBJECT
@@ -42,37 +40,30 @@ class LinkTask : public Task {
         m_lnk->debug(true);
     }
 
-    void matcher(const IPathMatcher *filter)
-    {
-        m_lnk->matcher(filter);
-    }
+    ~LinkTask() { delete m_lnk; }
 
-    void linkRecursively(bool recursive) 
+    void matcher(const IPathMatcher* filter) { m_lnk->matcher(filter); }
+
+    void linkRecursively(bool recursive)
     {
         m_lnk->linkRecursively(recursive);
         m_linkRecursive = recursive;
     }
 
-    void whitelist(bool b)
-    {
-        m_lnk->whitelist(b);
-    }
+    void whitelist(bool b) { m_lnk->whitelist(b); }
 
-    void setMaxDepth(int depth)
-    {
-        m_lnk->setMaxDepth(depth);
-    }
+    void setMaxDepth(int depth) { m_lnk->setMaxDepth(depth); }
 
    private:
     void executeTask() override
     {
-        if(!(*m_lnk)()){
+        if (!(*m_lnk)()) {
 #if defined Q_OS_WIN32
             if (!m_useHard) {
                 qDebug() << "EXPECTED: Link failure, Windows requires permissions for symlinks";
 
                 qDebug() << "atempting to run with privelage";
-                connect(m_lnk, &FS::create_link::finishedPrivileged, this, [&](bool gotResults){
+                connect(m_lnk, &FS::create_link::finishedPrivileged, this, [&](bool gotResults) {
                     if (gotResults) {
                         emitSucceeded();
                     } else {
@@ -83,32 +74,28 @@ class LinkTask : public Task {
                 m_lnk->runPrivileged();
             } else {
                 qDebug() << "Link Failed!" << m_lnk->getOSError().value() << m_lnk->getOSError().message().c_str();
-            }      
+            }
 #else
             qDebug() << "Link Failed!" << m_lnk->getOSError().value() << m_lnk->getOSError().message().c_str();
 #endif
         } else {
             emitSucceeded();
         }
-        
-    };
+    }
 
-    FS::create_link *m_lnk;
-    bool m_useHard = false;
+    FS::create_link* m_lnk;
+    [[maybe_unused]] bool m_useHard = false;
     bool m_linkRecursive = true;
 };
 
-
-class FileSystemTest : public QObject
-{
+class FileSystemTest : public QObject {
     Q_OBJECT
 
     const QString bothSlash = "/foo/";
     const QString trailingSlash = "foo/";
     const QString leadingSlash = "/foo";
 
-private
-slots:
+   private slots:
     void test_pathCombine()
     {
         QCOMPARE(QString("/foo/foo"), FS::PathCombine(bothSlash, bothSlash));
@@ -126,12 +113,22 @@ slots:
         QTest::addColumn<QString>("path1");
         QTest::addColumn<QString>("path2");
 
-        QTest::newRow("qt 1") << "/abc/def/ghi/jkl" << "/abc/def" << "ghi/jkl";
-        QTest::newRow("qt 2") << "/abc/def/ghi/jkl" << "/abc/def/" << "ghi/jkl";
+        QTest::newRow("qt 1") << "/abc/def/ghi/jkl"
+                              << "/abc/def"
+                              << "ghi/jkl";
+        QTest::newRow("qt 2") << "/abc/def/ghi/jkl"
+                              << "/abc/def/"
+                              << "ghi/jkl";
 #if defined(Q_OS_WIN)
-        QTest::newRow("win native, from C:") << "C:/abc" << "C:" << "abc";
-        QTest::newRow("win native 1") << "C:/abc/def/ghi/jkl" << "C:\\abc\\def" << "ghi\\jkl";
-        QTest::newRow("win native 2") << "C:/abc/def/ghi/jkl" << "C:\\abc\\def\\" << "ghi\\jkl";
+        QTest::newRow("win native, from C:") << "C:/abc"
+                                             << "C:"
+                                             << "abc";
+        QTest::newRow("win native 1") << "C:/abc/def/ghi/jkl"
+                                      << "C:\\abc\\def"
+                                      << "ghi\\jkl";
+        QTest::newRow("win native 2") << "C:/abc/def/ghi/jkl"
+                                      << "C:\\abc\\def\\"
+                                      << "ghi\\jkl";
 #endif
     }
 
@@ -151,15 +148,39 @@ slots:
         QTest::addColumn<QString>("path2");
         QTest::addColumn<QString>("path3");
 
-        QTest::newRow("qt 1") << "/abc/def/ghi/jkl" << "/abc" << "def" << "ghi/jkl";
-        QTest::newRow("qt 2") << "/abc/def/ghi/jkl" << "/abc/" << "def" << "ghi/jkl";
-        QTest::newRow("qt 3") << "/abc/def/ghi/jkl" << "/abc" << "def/" << "ghi/jkl";
-        QTest::newRow("qt 4") << "/abc/def/ghi/jkl" << "/abc/" << "def/" << "ghi/jkl";
+        QTest::newRow("qt 1") << "/abc/def/ghi/jkl"
+                              << "/abc"
+                              << "def"
+                              << "ghi/jkl";
+        QTest::newRow("qt 2") << "/abc/def/ghi/jkl"
+                              << "/abc/"
+                              << "def"
+                              << "ghi/jkl";
+        QTest::newRow("qt 3") << "/abc/def/ghi/jkl"
+                              << "/abc"
+                              << "def/"
+                              << "ghi/jkl";
+        QTest::newRow("qt 4") << "/abc/def/ghi/jkl"
+                              << "/abc/"
+                              << "def/"
+                              << "ghi/jkl";
 #if defined(Q_OS_WIN)
-        QTest::newRow("win 1") << "C:/abc/def/ghi/jkl" << "C:\\abc" << "def" << "ghi\\jkl";
-        QTest::newRow("win 2") << "C:/abc/def/ghi/jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
-        QTest::newRow("win 3") << "C:/abc/def/ghi/jkl" << "C:\\abc" << "def\\" << "ghi\\jkl";
-        QTest::newRow("win 4") << "C:/abc/def/ghi/jkl" << "C:\\abc\\" << "def" << "ghi\\jkl";
+        QTest::newRow("win 1") << "C:/abc/def/ghi/jkl"
+                               << "C:\\abc"
+                               << "def"
+                               << "ghi\\jkl";
+        QTest::newRow("win 2") << "C:/abc/def/ghi/jkl"
+                               << "C:\\abc\\"
+                               << "def"
+                               << "ghi\\jkl";
+        QTest::newRow("win 3") << "C:/abc/def/ghi/jkl"
+                               << "C:\\abc"
+                               << "def\\"
+                               << "ghi\\jkl";
+        QTest::newRow("win 4") << "C:/abc/def/ghi/jkl"
+                               << "C:\\abc\\"
+                               << "def"
+                               << "ghi\\jkl";
 #endif
     }
 
@@ -176,8 +197,7 @@ slots:
     void test_copy()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -188,8 +208,7 @@ slots:
             FS::copy c(folder, target_dir.path());
             c();
 
-            for(auto entry: target_dir.entryList())
-            {
+            for (auto entry : target_dir.entryList()) {
                 qDebug() << entry;
             }
             QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
@@ -209,8 +228,7 @@ slots:
     void test_copy_with_blacklist()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -219,11 +237,11 @@ slots:
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
             FS::copy c(folder, target_dir.path());
-            c.matcher(new RegexpMatcher("[.]?mcmeta"));
+            RegexpMatcher re("[.]?mcmeta");
+            c.matcher(&re);
             c();
 
-            for(auto entry: target_dir.entryList())
-            {
+            for (auto entry : target_dir.entryList()) {
                 qDebug() << entry;
             }
             QVERIFY(!target_dir.entryList().contains("pack.mcmeta"));
@@ -243,8 +261,7 @@ slots:
     void test_copy_with_whitelist()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -253,12 +270,12 @@ slots:
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
             FS::copy c(folder, target_dir.path());
-            c.matcher(new RegexpMatcher("[.]?mcmeta"));
+            RegexpMatcher re("[.]?mcmeta");
+            c.matcher(&re);
             c.whitelist(true);
             c();
 
-            for(auto entry: target_dir.entryList())
-            {
+            for (auto entry : target_dir.entryList()) {
                 qDebug() << entry;
             }
             QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
@@ -278,8 +295,7 @@ slots:
     void test_copy_with_dot_hidden()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -292,7 +308,7 @@ slots:
 
             auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
 
-            for (auto entry: target_dir.entryList(filter)) {
+            for (auto entry : target_dir.entryList(filter)) {
                 qDebug() << entry;
             }
 
@@ -329,7 +345,7 @@ slots:
 
             auto filter = QDir::Filter::Files;
 
-            for (auto entry: target_dir.entryList(filter)) {
+            for (auto entry : target_dir.entryList(filter)) {
                 qDebug() << entry;
             }
 
@@ -337,17 +353,12 @@ slots:
         }
     }
 
-    void test_getDesktop()
-    {
-        QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation));
-    }
-
+    void test_getDesktop() { QCOMPARE(FS::getDesktopDir(), QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)); }
 
     void test_link()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder, this]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -358,17 +369,13 @@ slots:
 
             LinkTask lnk_tsk(folder, target_dir.path());
             lnk_tsk.linkRecursively(false);
-            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
-                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
-            });
+            QObject::connect(&lnk_tsk, &Task::finished,
+                             [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
-            QVERIFY2(QTest::qWaitFor([&]() {
-                return lnk_tsk.isFinished();
-            }, 100000), "Task didn't finish as it should.");
+            QVERIFY2(QTest::qWaitFor([&]() { return lnk_tsk.isFinished(); }, 100000), "Task didn't finish as it should.");
 
-            for(auto entry: target_dir.entryList())
-            {
+            for (auto entry : target_dir.entryList()) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
                 if (!entry_lnk_info.isDir())
@@ -396,10 +403,9 @@ slots:
     void test_hard_link()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
-        {   
+        auto f = [&folder]() {
             // use working dir to prevent makeing a hard link to a tmpfs or across devices
-            QTemporaryDir tempDir("./tmp"); 
+            QTemporaryDir tempDir("./tmp");
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
 
@@ -409,23 +415,20 @@ slots:
             FS::create_link lnk(folder, target_dir.path());
             lnk.useHardLinks(true);
             lnk.debug(true);
-            if(!lnk()){
+            if (!lnk()) {
                 qDebug() << "Link Failed!" << lnk.getOSError().value() << lnk.getOSError().message().c_str();
             }
 
-            for(auto entry: target_dir.entryList())
-            {
+            for (auto entry : target_dir.entryList()) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
                 QVERIFY(!entry_lnk_info.isSymLink());
                 QFileInfo entry_orig_info(QDir(folder).filePath(entry));
                 if (!entry_lnk_info.isDir()) {
                     qDebug() << "hard link equivalency?" << entry_lnk_info.absoluteFilePath() << "vs" << entry_orig_info.absoluteFilePath();
-                    QVERIFY(fs::equivalent(
-                        fs::path(StringUtils::toStdString(entry_lnk_info.absoluteFilePath())),
-                        fs::path(StringUtils::toStdString(entry_orig_info.absoluteFilePath()))
-                    ));
-                } 
+                    QVERIFY(fs::equivalent(fs::path(StringUtils::toStdString(entry_lnk_info.absoluteFilePath())),
+                                           fs::path(StringUtils::toStdString(entry_orig_info.absoluteFilePath()))));
+                }
             }
 
             QFileInfo lnk_info(target_dir.path());
@@ -449,8 +452,7 @@ slots:
     void test_link_with_blacklist()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -460,20 +462,16 @@ slots:
             qDebug() << target_dir.path();
 
             LinkTask lnk_tsk(folder, target_dir.path());
-            lnk_tsk.matcher(new RegexpMatcher("[.]?mcmeta"));
+            RegexpMatcher re("[.]?mcmeta");
+            lnk_tsk.matcher(&re);
             lnk_tsk.linkRecursively(true);
-            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
-                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
-            });
+            QObject::connect(&lnk_tsk, &Task::finished,
+                             [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
-            QVERIFY2(QTest::qWaitFor([&]() {
-                return lnk_tsk.isFinished();
-            }, 100000), "Task didn't finish as it should.");
+            QVERIFY2(QTest::qWaitFor([&]() { return lnk_tsk.isFinished(); }, 100000), "Task didn't finish as it should.");
 
-
-            for(auto entry: target_dir.entryList())
-            {
+            for (auto entry : target_dir.entryList()) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
                 if (!entry_lnk_info.isDir())
@@ -500,8 +498,7 @@ slots:
     void test_link_with_whitelist()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -511,20 +508,17 @@ slots:
             qDebug() << target_dir.path();
 
             LinkTask lnk_tsk(folder, target_dir.path());
-            lnk_tsk.matcher(new RegexpMatcher("[.]?mcmeta"));
+            RegexpMatcher re("[.]?mcmeta");
+            lnk_tsk.matcher(&re);
             lnk_tsk.linkRecursively(true);
             lnk_tsk.whitelist(true);
-            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
-                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
-            });
+            QObject::connect(&lnk_tsk, &Task::finished,
+                             [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
-            QVERIFY2(QTest::qWaitFor([&]() {
-                return lnk_tsk.isFinished();
-            }, 100000), "Task didn't finish as it should.");
+            QVERIFY2(QTest::qWaitFor([&]() { return lnk_tsk.isFinished(); }, 100000), "Task didn't finish as it should.");
 
-            for(auto entry: target_dir.entryList())
-            {
+            for (auto entry : target_dir.entryList()) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
                 if (!entry_lnk_info.isDir())
@@ -551,8 +545,7 @@ slots:
     void test_link_with_dot_hidden()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -563,18 +556,15 @@ slots:
 
             LinkTask lnk_tsk(folder, target_dir.path());
             lnk_tsk.linkRecursively(true);
-            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
-                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
-            });
+            QObject::connect(&lnk_tsk, &Task::finished,
+                             [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
-            QVERIFY2(QTest::qWaitFor([&]() {
-                return lnk_tsk.isFinished();
-            }, 100000), "Task didn't finish as it should.");
+            QVERIFY2(QTest::qWaitFor([&]() { return lnk_tsk.isFinished(); }, 100000), "Task didn't finish as it should.");
 
             auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
 
-            for (auto entry: target_dir.entryList(filter)) {
+            for (auto entry : target_dir.entryList(filter)) {
                 qDebug() << entry;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
                 if (!entry_lnk_info.isDir())
@@ -613,19 +603,16 @@ slots:
             qDebug() << tempDir.path();
             qDebug() << target_dir.path();
 
-            LinkTask lnk_tsk(file,  target_dir.filePath("pack.mcmeta"));
-            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
-                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
-            });
+            LinkTask lnk_tsk(file, target_dir.filePath("pack.mcmeta"));
+            QObject::connect(&lnk_tsk, &Task::finished,
+                             [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
-            QVERIFY2(QTest::qWaitFor([&]() {
-                return lnk_tsk.isFinished();
-            }, 100000), "Task didn't finish as it should.");
+            QVERIFY2(QTest::qWaitFor([&]() { return lnk_tsk.isFinished(); }, 100000), "Task didn't finish as it should.");
 
             auto filter = QDir::Filter::Files;
 
-            for (auto entry: target_dir.entryList(filter)) {
+            for (auto entry : target_dir.entryList(filter)) {
                 qDebug() << entry;
             }
 
@@ -640,8 +627,7 @@ slots:
     void test_link_with_max_depth()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder, this]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -653,22 +639,19 @@ slots:
             LinkTask lnk_tsk(folder, target_dir.path());
             lnk_tsk.linkRecursively(true);
             lnk_tsk.setMaxDepth(0);
-            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
-                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
-            });
+            QObject::connect(&lnk_tsk, &Task::finished,
+                             [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
-            QVERIFY2(QTest::qWaitFor([&]() {
-                return lnk_tsk.isFinished();
-            }, 100000), "Task didn't finish as it should.");
+            QVERIFY2(QTest::qWaitFor([&]() { return lnk_tsk.isFinished(); }, 100000), "Task didn't finish as it should.");
 
             QVERIFY(!QFileInfo(target_dir.path()).isSymLink());
 
             auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
-            for(auto entry: target_dir.entryList(filter))
-            {
+            for (auto entry : target_dir.entryList(filter)) {
                 qDebug() << entry;
-                if (entry == "." || entry == "..") continue;
+                if (entry == "." || entry == "..")
+                    continue;
                 QFileInfo entry_lnk_info(target_dir.filePath(entry));
                 QVERIFY(entry_lnk_info.isSymLink());
             }
@@ -679,8 +662,6 @@ slots:
 
             QVERIFY(target_dir.entryList().contains("pack.mcmeta"));
             QVERIFY(target_dir.entryList().contains("assets"));
-
-
         };
 
         // first try variant without trailing /
@@ -696,8 +677,7 @@ slots:
     void test_link_with_no_max_depth()
     {
         QString folder = QFINDTESTDATA("testdata/FileSystem/test_folder");
-        auto f = [&folder]()
-        {
+        auto f = [&folder]() {
             QTemporaryDir tempDir;
             tempDir.setAutoRemove(true);
             qDebug() << "From:" << folder << "To:" << tempDir.path();
@@ -709,24 +689,19 @@ slots:
             LinkTask lnk_tsk(folder, target_dir.path());
             lnk_tsk.linkRecursively(true);
             lnk_tsk.setMaxDepth(-1);
-            QObject::connect(&lnk_tsk, &Task::finished, [&]{ 
-                QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); 
-            });
+            QObject::connect(&lnk_tsk, &Task::finished,
+                             [&] { QVERIFY2(lnk_tsk.wasSuccessful(), "Task finished but was not successful when it should have been."); });
             lnk_tsk.start();
 
-            QVERIFY2(QTest::qWaitFor([&]() {
-                return lnk_tsk.isFinished();
-            }, 100000), "Task didn't finish as it should.");
-
+            QVERIFY2(QTest::qWaitFor([&]() { return lnk_tsk.isFinished(); }, 100000), "Task didn't finish as it should.");
 
             std::function<void(QString)> verify_check = [&](QString check_path) {
                 QDir check_dir(check_path);
                 auto filter = QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden;
-                for(auto entry: check_dir.entryList(filter))
-                {
+                for (auto entry : check_dir.entryList(filter)) {
                     QFileInfo entry_lnk_info(check_dir.filePath(entry));
                     qDebug() << entry << check_dir.filePath(entry);
-                    if (!entry_lnk_info.isDir()){
+                    if (!entry_lnk_info.isDir()) {
                         QVERIFY(entry_lnk_info.isSymLink());
                     } else if (entry != "." && entry != "..") {
                         qDebug() << "Decending tree to verify symlinks:" << check_dir.filePath(entry);
@@ -734,9 +709,8 @@ slots:
                     }
                 }
             };
-            
+
             verify_check(target_dir.path());
-            
 
             QFileInfo lnk_info(target_dir.path());
             QVERIFY(lnk_info.exists());
@@ -755,7 +729,8 @@ slots:
         f();
     }
 
-    void test_path_depth() {
+    void test_path_depth()
+    {
         QCOMPARE(FS::pathDepth(""), 0);
         QCOMPARE(FS::pathDepth("."), 0);
         QCOMPARE(FS::pathDepth("foo.txt"), 0);
@@ -769,7 +744,8 @@ slots:
         QCOMPARE(FS::pathDepth("/baz/../bar/foo.txt"), 1);
     }
 
-    void test_path_trunc() {
+    void test_path_trunc()
+    {
         QCOMPARE(FS::pathTruncate("", 0), QDir::toNativeSeparators(""));
         QCOMPARE(FS::pathTruncate("foo.txt", 0), QDir::toNativeSeparators(""));
         QCOMPARE(FS::pathTruncate("foo.txt", 1), QDir::toNativeSeparators(""));

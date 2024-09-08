@@ -5,6 +5,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -44,17 +45,33 @@
 
 #include "ui/pages/modplatform/ModPage.h"
 #include "ui/pages/modplatform/ResourcePackPage.h"
+#include "ui/pages/modplatform/ShaderPackPage.h"
 #include "ui/pages/modplatform/TexturePackPage.h"
 
 namespace ResourceDownload {
 
 namespace Flame {
-static inline QString displayName() { return "CurseForge"; }
-static inline QIcon icon() { return APPLICATION->getThemedIcon("flame"); }
-static inline QString id() { return "curseforge"; }
-static inline QString debugName() { return "Flame"; }
-static inline QString metaEntryBase() { return "FlameMods"; }
+static inline QString displayName()
+{
+    return "CurseForge";
 }
+static inline QIcon icon()
+{
+    return APPLICATION->getThemedIcon("flame");
+}
+static inline QString id()
+{
+    return "curseforge";
+}
+static inline QString debugName()
+{
+    return "Flame";
+}
+static inline QString metaEntryBase()
+{
+    return "FlameMods";
+}
+}  // namespace Flame
 
 class FlameModPage : public ModPage {
     Q_OBJECT
@@ -78,10 +95,11 @@ class FlameModPage : public ModPage {
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return "Mod-platform"; }
 
-    bool validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders = {}) const override;
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
-
     void openUrl(const QUrl& url) override;
+    unique_qobject_ptr<ModFilterWidget> createFilterWidget() override;
+
+   protected:
+    virtual void prepareProviderCategories() override;
 };
 
 class FlameResourcePackPage : public ResourcePackResourcePage {
@@ -105,8 +123,6 @@ class FlameResourcePackPage : public ResourcePackResourcePage {
     [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
-
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
 
     void openUrl(const QUrl& url) override;
 };
@@ -133,7 +149,30 @@ class FlameTexturePackPage : public TexturePackResourcePage {
 
     [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
 
-    bool optedOut(ModPlatform::IndexedVersion& ver) const override;
+    void openUrl(const QUrl& url) override;
+};
+
+class FlameShaderPackPage : public ShaderPackResourcePage {
+    Q_OBJECT
+
+   public:
+    static FlameShaderPackPage* create(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
+    {
+        return ShaderPackResourcePage::create<FlameShaderPackPage>(dialog, instance);
+    }
+
+    FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance);
+    ~FlameShaderPackPage() override = default;
+
+    [[nodiscard]] bool shouldDisplay() const override;
+
+    [[nodiscard]] inline auto displayName() const -> QString override { return Flame::displayName(); }
+    [[nodiscard]] inline auto icon() const -> QIcon override { return Flame::icon(); }
+    [[nodiscard]] inline auto id() const -> QString override { return Flame::id(); }
+    [[nodiscard]] inline auto debugName() const -> QString override { return Flame::debugName(); }
+    [[nodiscard]] inline auto metaEntryBase() const -> QString override { return Flame::metaEntryBase(); }
+
+    [[nodiscard]] inline auto helpPage() const -> QString override { return ""; }
 
     void openUrl(const QUrl& url) override;
 };

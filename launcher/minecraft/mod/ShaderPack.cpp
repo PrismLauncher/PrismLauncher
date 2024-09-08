@@ -22,7 +22,7 @@
 
 #include "ShaderPack.h"
 
-#include "minecraft/mod/tasks/LocalShaderPackParseTask.h"
+#include <QRegularExpression>
 
 void ShaderPack::setPackFormat(ShaderPackFormat new_format)
 {

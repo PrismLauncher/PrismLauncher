@@ -84,6 +84,7 @@ auto HttpMetaCache::getEntry(QString base, QString resource_path) -> MetaEntryPt
 
 auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString expected_etag) -> MetaEntryPtr
 {
+    resource_path = FS::RemoveInvalidPathChars(resource_path);
     auto entry = getEntry(base, resource_path);
     // it's not present? generate a default stale entry
     if (!entry) {
@@ -125,8 +126,9 @@ auto HttpMetaCache::resolveEntry(QString base, QString resource_path, QString ex
 
     // Get rid of old entries, to prevent cache problems
     auto current_time = QDateTime::currentSecsSinceEpoch();
-    if (entry->isExpired(current_time - ( file_last_changed / 1000 ))) {
-        qCWarning(taskNetLogC) << "[HttpMetaCache]" << "Removing cache entry because of old age!";
+    if (entry->isExpired(current_time - (file_last_changed / 1000))) {
+        qCWarning(taskNetLogC) << "[HttpMetaCache]"
+                               << "Removing cache entry because of old age!";
         selected_base.entry_list.remove(resource_path);
         return staleEntry(base, resource_path);
     }
@@ -173,6 +175,8 @@ void HttpMetaCache::evictAll()
             if (!evictEntry(entry))
                 qCWarning(taskHttpMetaCacheLogC) << "Unexpected missing cache entry" << entry->m_basePath;
         }
+        map.entry_list.clear();
+        FS::deletePath(map.base_path);
     }
 }
 
@@ -217,9 +221,24 @@ void HttpMetaCache::Load()
     if (!index.open(QIODevice::ReadOnly))
         return;
 
-    QJsonDocument json = QJsonDocument::fromJson(index.readAll());
+    QJsonParseError parseError;
+    QJsonDocument json = QJsonDocument::fromJson(index.readAll(), &parseError);
 
-    auto root = Json::requireObject(json, "HttpMetaCache root");
+    // Fail if the JSON is invalid.
+    if (parseError.error != QJsonParseError::NoError) {
+        qCritical() << QString("Failed to parse HttpMetaCache file: %1 at offset %2")
+                           .arg(parseError.errorString(), QString::number(parseError.offset))
+                           .toUtf8();
+        return;
+    }
+
+    // Make sure the root is an object.
+    if (!json.isObject()) {
+        qCritical() << "HttpMetaCache root should be an object.";
+        return;
+    }
+
+    auto root = json.object();
 
     // check file version first
     auto version_val = Json::ensureString(root, "version");

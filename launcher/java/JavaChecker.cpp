@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,57 +35,54 @@
 
 #include "JavaChecker.h"
 
-#include <QFile>
-#include <QProcess>
-#include <QMap>
 #include <QDebug>
+#include <QFile>
+#include <QMap>
+#include <QProcess>
 
-#include "JavaUtils.h"
-#include "FileSystem.h"
 #include "Commandline.h"
-#include "Application.h"
+#include "FileSystem.h"
+#include "java/JavaUtils.h"
 
-JavaChecker::JavaChecker(QObject *parent) : QObject(parent)
-{
-}
+JavaChecker::JavaChecker(QString path, QString args, int minMem, int maxMem, int permGen, int id, QObject* parent)
+    : Task(parent), m_path(path), m_args(args), m_minMem(minMem), m_maxMem(maxMem), m_permGen(permGen), m_id(id)
+{}
 
-void JavaChecker::performCheck()
+void JavaChecker::executeTask()
 {
     QString checkerJar = JavaUtils::getJavaCheckPath();
 
-    if (checkerJar.isEmpty())
-    {
+    if (checkerJar.isEmpty()) {
         qDebug() << "Java checker library could not be found. Please check your installation.";
         return;
     }
+#ifdef Q_OS_WIN
+    checkerJar = FS::getPathNameInLocal8bit(checkerJar);
+#endif
 
     QStringList args;
 
     process.reset(new QProcess());
-    if(m_args.size())
-    {
+    if (m_args.size()) {
         auto extraArgs = Commandline::splitArgs(m_args);
         args.append(extraArgs);
     }
-    if(m_minMem != 0)
-    {
+    if (m_minMem != 0) {
         args << QString("-Xms%1m").arg(m_minMem);
     }
-    if(m_maxMem != 0)
-    {
+    if (m_maxMem != 0) {
         args << QString("-Xmx%1m").arg(m_maxMem);
     }
-    if(m_permGen != 64)
-    {
+    if (m_permGen != 64 && m_permGen != 0) {
         args << QString("-XX:PermSize=%1m").arg(m_permGen);
     }
 
-    args.append({"-jar", checkerJar});
+    args.append({ "-jar", checkerJar });
     process->setArguments(args);
     process->setProgram(m_path);
     process->setProcessChannelMode(QProcess::SeparateChannels);
     process->setProcessEnvironment(CleanEnviroment());
-    qDebug() << "Running java checker: " + m_path + args.join(" ");;
+    qDebug() << "Running java checker:" << m_path << args.join(" ");
 
     connect(process.get(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &JavaChecker::finished);
     connect(process.get(), &QProcess::errorOccurred, this, &JavaChecker::error);
@@ -119,21 +116,20 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     QProcessPtr _process = process;
     process.reset();
 
-    JavaCheckResult result;
-    {
-        result.path = m_path;
-        result.id = m_id;
-    }
+    Result result = {
+        m_path,
+        m_id,
+    };
     result.errorLog = m_stderr;
     result.outLog = m_stdout;
     qDebug() << "STDOUT" << m_stdout;
     qWarning() << "STDERR" << m_stderr;
-    qDebug() << "Java checker finished with status " << status << " exit code " << exitcode;
+    qDebug() << "Java checker finished with status" << status << "exit code" << exitcode;
 
-    if (status == QProcess::CrashExit || exitcode == 1)
-    {
-        result.validity = JavaCheckResult::Validity::Errored;
+    if (status == QProcess::CrashExit || exitcode == 1) {
+        result.validity = Result::Validity::Errored;
         emit checkFinished(result);
+        emitSucceeded();
         return;
     }
 
@@ -146,8 +142,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 #else
     QStringList lines = m_stdout.split("\n", QString::SkipEmptyParts);
 #endif
-    for(QString line : lines)
-    {
+    for (QString line : lines) {
         line = line.trimmed();
         // NOTE: workaround for GH-4125, where garbage is getting printed into stdout on bedrock linux
         if (line.contains("/bedrock/strata")) {
@@ -159,20 +154,17 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
 #else
         auto parts = line.split('=', QString::SkipEmptyParts);
 #endif
-        if(parts.size() != 2 || parts[0].isEmpty() || parts[1].isEmpty())
-        {
+        if (parts.size() != 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
             continue;
-        }
-        else
-        {
+        } else {
             results.insert(parts[0], parts[1]);
         }
     }
 
-    if(!results.contains("os.arch") || !results.contains("java.version") || !results.contains("java.vendor") || !success)
-    {
-        result.validity = JavaCheckResult::Validity::ReturnedInvalidData;
+    if (!results.contains("os.arch") || !results.contains("java.version") || !results.contains("java.vendor") || !success) {
+        result.validity = Result::Validity::ReturnedInvalidData;
         emit checkFinished(result);
+        emitSucceeded();
         return;
     }
 
@@ -181,8 +173,7 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     auto java_vendor = results["java.vendor"];
     bool is_64 = os_arch == "x86_64" || os_arch == "amd64" || os_arch == "aarch64" || os_arch == "arm64";
 
-
-    result.validity = JavaCheckResult::Validity::Valid;
+    result.validity = Result::Validity::Valid;
     result.is_64bit = is_64;
     result.mojangPlatform = is_64 ? "64" : "32";
     result.realPlatform = os_arch;
@@ -190,34 +181,27 @@ void JavaChecker::finished(int exitcode, QProcess::ExitStatus status)
     result.javaVendor = java_vendor;
     qDebug() << "Java checker succeeded.";
     emit checkFinished(result);
+    emitSucceeded();
 }
 
 void JavaChecker::error(QProcess::ProcessError err)
 {
-    if(err == QProcess::FailedToStart)
-    {
+    if (err == QProcess::FailedToStart) {
         qDebug() << "Java checker has failed to start.";
         qDebug() << "Process environment:";
         qDebug() << process->environment();
         qDebug() << "Native environment:";
         qDebug() << QProcessEnvironment::systemEnvironment().toStringList();
         killTimer.stop();
-        JavaCheckResult result;
-        {
-            result.path = m_path;
-            result.id = m_id;
-        }
-
-        emit checkFinished(result);
-        return;
+        emit checkFinished({ m_path, m_id });
     }
+    emitSucceeded();
 }
 
 void JavaChecker::timeout()
 {
     // NO MERCY. NO ABUSE.
-    if(process)
-    {
+    if (process) {
         qDebug() << "Java checker has been killed by timeout.";
         process->kill();
     }

@@ -153,6 +153,19 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="updateFromFileButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Update from file</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>
@@ -168,9 +181,12 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTextBrowser" name="changelogTextBrowser">
+         <widget class="ProjectDescriptionPage" name="changelogTextBrowser">
           <property name="placeholderText">
            <string>No changelog available for this version!</string>
+          </property>
+          <property name="openLinks">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -188,6 +204,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ProjectDescriptionPage</class>
+   <extends>QTextBrowser</extends>
+   <header>ui/widgets/ProjectDescriptionPage.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

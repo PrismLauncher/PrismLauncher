@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -46,8 +47,7 @@
 
 namespace ResourceDownload {
 
-ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance)
-    : ModPage(dialog, instance)
+ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
     m_model = new ModrinthModModel(instance);
     m_ui->packView->setModel(m_model);
@@ -58,28 +58,11 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instan
     // so it's best not to connect them in the parent's constructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthModPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthModPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &ModrinthModPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthModPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
-}
-
-auto ModrinthModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders) const -> bool
-{
-    auto loaderCompatible = !loaders.has_value();
-
-    if (!loaderCompatible) {
-        auto loaderStrings = ModrinthAPI::getModLoaderStrings(loaders.value());
-        for (auto remoteLoader : ver.loaders)
-        {
-            if (loaderStrings.contains(remoteLoader)) {
-                loaderCompatible = true;
-                break;
-            }
-        }
-    }
-
-    return ver.mcVersion.contains(mineVer) && loaderCompatible;
 }
 
 ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
@@ -94,7 +77,8 @@ ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* d
     // so it's best not to connect them in the parent's constructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthResourcePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthResourcePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &ModrinthResourcePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthResourcePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -112,7 +96,8 @@ ModrinthTexturePackPage::ModrinthTexturePackPage(TexturePackDownloadDialog* dial
     // so it's best not to connect them in the parent's constructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthTexturePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthTexturePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &ModrinthTexturePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthTexturePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -130,7 +115,8 @@ ModrinthShaderPackPage::ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog,
     // so it's best not to connect them in the parent's constructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ModrinthShaderPackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &ModrinthShaderPackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &ModrinthShaderPackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &ModrinthShaderPackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -139,9 +125,36 @@ ModrinthShaderPackPage::ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog,
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
-auto ModrinthModPage::shouldDisplay() const -> bool { return true; }
-auto ModrinthResourcePackPage::shouldDisplay() const -> bool { return true; }
-auto ModrinthTexturePackPage::shouldDisplay() const -> bool { return true; }
-auto ModrinthShaderPackPage::shouldDisplay() const -> bool { return true; }
+auto ModrinthModPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto ModrinthResourcePackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto ModrinthTexturePackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto ModrinthShaderPackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
 
+unique_qobject_ptr<ModFilterWidget> ModrinthModPage::createFilterWidget()
+{
+    return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_base_instance), true, this);
+}
+
+void ModrinthModPage::prepareProviderCategories()
+{
+    auto response = std::make_shared<QByteArray>();
+    auto task = ModrinthAPI::getModCategories(response);
+    QObject::connect(task.get(), &Task::succeeded, [this, response]() {
+        auto categories = ModrinthAPI::loadModCategories(response);
+        m_filter_widget->setCategories(categories);
+    });
+    task->start();
+};
 }  // namespace ResourceDownload

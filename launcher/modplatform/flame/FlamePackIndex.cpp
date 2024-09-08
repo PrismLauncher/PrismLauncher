@@ -1,4 +1,6 @@
 #include "FlamePackIndex.h"
+#include <QFileInfo>
+#include <QUrl>
 
 #include "Json.h"
 
@@ -9,8 +11,8 @@ void Flame::loadIndexedPack(Flame::IndexedPack& pack, QJsonObject& obj)
     pack.description = Json::ensureString(obj, "summary", "");
 
     auto logo = Json::requireObject(obj, "logo");
-    pack.logoName = Json::requireString(logo, "title");
     pack.logoUrl = Json::requireString(logo, "thumbnailUrl");
+    pack.logoName = Json::requireString(obj, "slug") + "." + QFileInfo(QUrl(pack.logoUrl).fileName()).suffix();
 
     auto authors = Json::requireArray(obj, "authors");
     for (auto authorIter : authors) {
@@ -54,23 +56,22 @@ void Flame::loadIndexedInfo(IndexedPack& pack, QJsonObject& obj)
     auto links_obj = Json::ensureObject(obj, "links");
 
     pack.extra.websiteUrl = Json::ensureString(links_obj, "websiteUrl");
-    if(pack.extra.websiteUrl.endsWith('/'))
+    if (pack.extra.websiteUrl.endsWith('/'))
         pack.extra.websiteUrl.chop(1);
 
     pack.extra.issuesUrl = Json::ensureString(links_obj, "issuesUrl");
-    if(pack.extra.issuesUrl.endsWith('/'))
+    if (pack.extra.issuesUrl.endsWith('/'))
         pack.extra.issuesUrl.chop(1);
 
     pack.extra.sourceUrl = Json::ensureString(links_obj, "sourceUrl");
-    if(pack.extra.sourceUrl.endsWith('/'))
+    if (pack.extra.sourceUrl.endsWith('/'))
         pack.extra.sourceUrl.chop(1);
 
     pack.extra.wikiUrl = Json::ensureString(links_obj, "wikiUrl");
-    if(pack.extra.wikiUrl.endsWith('/'))
+    if (pack.extra.wikiUrl.endsWith('/'))
         pack.extra.wikiUrl.chop(1);
 
     pack.extraInfoLoaded = true;
-
 }
 
 void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
@@ -90,6 +91,22 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
         // pick the latest version supported
         file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(version, "displayName");
+
+        ModPlatform::IndexedVersionType::VersionType ver_type;
+        switch (Json::requireInteger(version, "releaseType")) {
+            case 1:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Release;
+                break;
+            case 2:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Beta;
+                break;
+            case 3:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Alpha;
+                break;
+            default:
+                ver_type = ModPlatform::IndexedVersionType::VersionType::Unknown;
+        }
+        file.version_type = ModPlatform::IndexedVersionType(ver_type);
         file.downloadUrl = Json::ensureString(version, "downloadUrl");
 
         // only add if we have a download URL (third party distribution is enabled)

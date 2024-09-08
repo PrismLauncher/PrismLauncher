@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,42 +35,38 @@
 
 #pragma once
 
-#include "net/NetAction.h"
 #include "Screenshot.h"
+#include "net/NetRequest.h"
 
-typedef shared_qobject_ptr<class ImgurAlbumCreation> ImgurAlbumCreationPtr;
-class ImgurAlbumCreation : public NetAction
-{
-public:
-    explicit ImgurAlbumCreation(QList<ScreenShot::Ptr> screenshots);
-    static ImgurAlbumCreationPtr make(QList<ScreenShot::Ptr> screenshots)
-    {
-        return ImgurAlbumCreationPtr(new ImgurAlbumCreation(screenshots));
-    }
+class ImgurAlbumCreation : public Net::NetRequest {
+   public:
+    virtual ~ImgurAlbumCreation() = default;
 
-    QString deleteHash() const
-    {
-        return m_deleteHash;
-    }
-    QString id() const
-    {
-        return m_id;
-    }
+    struct Result {
+        QString deleteHash;
+        QString id;
+    };
 
-protected
-slots:
-    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal) override;
-    void downloadError(QNetworkReply::NetworkError error) override;
-    void downloadFinished() override;
-    void downloadReadyRead() override {}
+    class Sink : public Net::Sink {
+       public:
+        Sink(std::shared_ptr<Result> res) : m_result(res) {};
+        virtual ~Sink() = default;
 
-public
-slots:
-    void executeTask() override;
+       public:
+        auto init(QNetworkRequest& request) -> Task::State override;
+        auto write(QByteArray& data) -> Task::State override;
+        auto abort() -> Task::State override;
+        auto finalize(QNetworkReply& reply) -> Task::State override;
+        auto hasLocalData() -> bool override { return false; }
 
-private:
+       private:
+        std::shared_ptr<Result> m_result;
+        QByteArray m_output;
+    };
+
+    static NetRequest::Ptr make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots);
+    QNetworkReply* getReply(QNetworkRequest& request) override;
+
+   private:
     QList<ScreenShot::Ptr> m_screenshots;
-
-    QString m_deleteHash;
-    QString m_id;
 };

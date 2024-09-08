@@ -1,17 +1,19 @@
 #include "FlameCheckUpdate.h"
+#include "Application.h"
 #include "FlameAPI.h"
 #include "FlameModIndex.h"
 
 #include <MurmurHash2.h>
 #include <memory>
 
-#include "FileSystem.h"
 #include "Json.h"
 
 #include "ResourceDownloadTask.h"
 
 #include "minecraft/mod/ModFolderModel.h"
-#include "minecraft/mod/ResourceFolderModel.h"
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
+
+#include "net/ApiDownload.h"
 
 static FlameAPI api;
 
@@ -23,7 +25,7 @@ bool FlameCheckUpdate::abort()
     return true;
 }
 
-ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
+ModPlatform::IndexedPack FlameCheckUpdate::getProjectInfo(ModPlatform::IndexedVersion& ver_info)
 {
     ModPlatform::IndexedPack pack;
 
@@ -31,9 +33,9 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
 
     auto get_project_job = new NetJob("Flame::GetProjectJob", APPLICATION->network());
 
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto url = QString("https://api.curseforge.com/v1/mods/%1").arg(ver_info.addonId.toString());
-    auto dl = Net::Download::makeByteArray(url, response);
+    auto dl = Net::ApiDownload::makeByteArray(url, response);
     get_project_job->addNetAction(dl);
 
     QObject::connect(get_project_job, &NetJob::succeeded, [response, &pack]() {
@@ -56,6 +58,7 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
         }
     });
 
+    connect(get_project_job, &NetJob::failed, this, &FlameCheckUpdate::emitFailed);
     QObject::connect(get_project_job, &NetJob::finished, [&loop, get_project_job] {
         get_project_job->deleteLater();
         loop.quit();
@@ -67,7 +70,7 @@ ModPlatform::IndexedPack getProjectInfo(ModPlatform::IndexedVersion& ver_info)
     return pack;
 }
 
-ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
+ModPlatform::IndexedVersion FlameCheckUpdate::getFileInfo(int addonId, int fileId)
 {
     ModPlatform::IndexedVersion ver;
 
@@ -75,9 +78,9 @@ ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
 
     auto get_file_info_job = new NetJob("Flame::GetFileInfoJob", APPLICATION->network());
 
-    auto response = new QByteArray();
+    auto response = std::make_shared<QByteArray>();
     auto url = QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(QString::number(addonId), QString::number(fileId));
-    auto dl = Net::Download::makeByteArray(url, response);
+    auto dl = Net::ApiDownload::makeByteArray(url, response);
     get_file_info_job->addNetAction(dl);
 
     QObject::connect(get_file_info_job, &NetJob::succeeded, [response, &ver]() {
@@ -99,7 +102,7 @@ ModPlatform::IndexedVersion getFileInfo(int addonId, int fileId)
             qDebug() << doc;
         }
     });
-
+    connect(get_file_info_job, &NetJob::failed, this, &FlameCheckUpdate::emitFailed);
     QObject::connect(get_file_info_job, &NetJob::finished, [&loop, get_file_info_job] {
         get_file_info_job->deleteLater();
         loop.quit();
@@ -122,61 +125,57 @@ void FlameCheckUpdate::executeTask()
 
     int i = 0;
     for (auto* mod : m_mods) {
-        if (!mod->enabled()) {
-            emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
-            continue;
-        }
-
         setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
         setProgress(i++, m_mods.size());
 
-        auto latest_ver = api.getLatestVersion({ { mod->metadata()->project_id.toString() }, m_game_versions, m_loaders });
+        auto latest_vers = api.getLatestVersions({ { mod->metadata()->project_id.toString() }, m_game_versions });
 
         // Check if we were aborted while getting the latest version
         if (m_was_aborted) {
             aborted();
             return;
         }
+        auto latest_ver = api.getLatestVersion(latest_vers, m_loaders_list, mod->loaders());
 
         setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(mod->name()));
 
-        if (!latest_ver.addonId.isValid()) {
+        if (!latest_ver.has_value() || !latest_ver->addonId.isValid()) {
             emit checkFailed(mod, tr("No valid version found for this mod. It's probably unavailable for the current game "
                                      "version / mod loader."));
             continue;
         }
 
-        if (latest_ver.downloadUrl.isEmpty() && latest_ver.fileId != mod->metadata()->file_id) {
-            auto pack = getProjectInfo(latest_ver);
-            auto recover_url = QString("%1/download/%2").arg(pack.websiteUrl, latest_ver.fileId.toString());
+        if (latest_ver->downloadUrl.isEmpty() && latest_ver->fileId != mod->metadata()->file_id) {
+            auto pack = getProjectInfo(latest_ver.value());
+            auto recover_url = QString("%1/download/%2").arg(pack.websiteUrl, latest_ver->fileId.toString());
             emit checkFailed(mod, tr("Mod has a new update available, but is not downloadable using CurseForge."), recover_url);
 
             continue;
         }
 
-        if (!latest_ver.hash.isEmpty() && (mod->metadata()->hash != latest_ver.hash || mod->status() == ModStatus::NotInstalled)) {
-            // Fake pack with the necessary info to pass to the download task :)
-            auto pack = std::make_shared<ModPlatform::IndexedPack>();
-            pack->name = mod->name();
-            pack->slug = mod->metadata()->slug;
-            pack->addonId = mod->metadata()->project_id;
-            pack->websiteUrl = mod->homeurl();
-            for (auto& author : mod->authors())
-                pack->authors.append({ author });
-            pack->description = mod->description();
-            pack->provider = ModPlatform::ResourceProvider::FLAME;
-
+        // Fake pack with the necessary info to pass to the download task :)
+        auto pack = std::make_shared<ModPlatform::IndexedPack>();
+        pack->name = mod->name();
+        pack->slug = mod->metadata()->slug;
+        pack->addonId = mod->metadata()->project_id;
+        pack->websiteUrl = mod->homeurl();
+        for (auto& author : mod->authors())
+            pack->authors.append({ author });
+        pack->description = mod->description();
+        pack->provider = ModPlatform::ResourceProvider::FLAME;
+        if (!latest_ver->hash.isEmpty() && (mod->metadata()->hash != latest_ver->hash || mod->status() == ModStatus::NotInstalled)) {
             auto old_version = mod->version();
             if (old_version.isEmpty() && mod->status() != ModStatus::NotInstalled) {
-                auto current_ver = getFileInfo(latest_ver.addonId.toInt(), mod->metadata()->file_id.toInt());
+                auto current_ver = getFileInfo(latest_ver->addonId.toInt(), mod->metadata()->file_id.toInt());
                 old_version = current_ver.version;
             }
 
-            auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver, m_mods_folder);
-            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver.version,
-                                     api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
-                                     ModPlatform::ResourceProvider::FLAME, download_task);
+            auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver.value(), m_mods_folder);
+            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver->version, latest_ver->version_type,
+                                     api.getModFileChangelog(latest_ver->addonId.toInt(), latest_ver->fileId.toInt()),
+                                     ModPlatform::ResourceProvider::FLAME, download_task, mod->enabled());
         }
+        m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latest_ver.value()));
     }
 
     emitSucceeded();

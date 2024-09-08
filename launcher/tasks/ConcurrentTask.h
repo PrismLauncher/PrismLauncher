@@ -51,9 +51,12 @@ class ConcurrentTask : public Task {
     explicit ConcurrentTask(QObject* parent = nullptr, QString task_name = "", int max_concurrent = 6);
     ~ConcurrentTask() override;
 
+    // safe to call before starting the task
+    void setMaxConcurrent(int max_concurrent) { m_total_max_size = max_concurrent; }
+
     bool canAbort() const override { return true; }
 
-    inline auto isMultiStep() const -> bool override { return totalSize() > 1; };
+    inline auto isMultiStep() const -> bool override { return totalSize() > 1; }
     auto getStepProgress() const -> TaskStepProgressList override;
 
     void addTask(Task::Ptr task);
@@ -69,10 +72,11 @@ class ConcurrentTask : public Task {
    protected slots:
     void executeTask() override;
 
-    virtual void startNext();
+    virtual void executeNextSubTask();
 
     void subTaskSucceeded(Task::Ptr);
-    void subTaskFailed(Task::Ptr, const QString& msg);
+    virtual void subTaskFailed(Task::Ptr, const QString& msg);
+    void subTaskFinished(Task::Ptr, TaskStepState);
     void subTaskStatus(Task::Ptr task, const QString& msg);
     void subTaskDetails(Task::Ptr task, const QString& msg);
     void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
@@ -80,12 +84,14 @@ class ConcurrentTask : public Task {
 
    protected:
     // NOTE: This is not thread-safe.
-    [[nodiscard]] unsigned int totalSize() const { return m_queue.size() + m_doing.size() + m_done.size(); }
+    [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
 
     enum class Operation { ADDED, REMOVED, CHANGED };
     void updateStepProgress(TaskStepProgress const& changed_progress, Operation);
 
     virtual void updateState();
+
+    void startSubTask(Task::Ptr task);
 
    protected:
     QString m_name;
@@ -104,6 +110,4 @@ class ConcurrentTask : public Task {
 
     qint64 m_stepProgress = 0;
     qint64 m_stepTotalProgress = 100;
-
-    bool m_aborted = false;
 };

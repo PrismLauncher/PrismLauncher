@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -26,9 +26,9 @@ class PackwizTest : public QObject {
     Q_OBJECT
 
    private slots:
-   // Files taken from https://github.com/packwiz/packwiz-example-pack
-   void loadFromFile_Modrinth()
-   {
+    // Files taken from https://github.com/packwiz/packwiz-example-pack
+    void loadFromFile_Modrinth()
+    {
         QString source = QFINDTESTDATA("testdata/Packwiz");
 
         QDir index_dir(source);
@@ -42,16 +42,18 @@ class PackwizTest : public QObject {
 
         QCOMPARE(metadata.name, "Borderless Mining");
         QCOMPARE(metadata.filename, "borderless-mining-1.1.1+1.18.jar");
-        QCOMPARE(metadata.side, "client");
-        
+        QCOMPARE(metadata.side, Packwiz::V1::Side::ClientSide);
+
         QCOMPARE(metadata.url, QUrl("https://cdn.modrinth.com/data/kYq5qkSL/versions/1.1.1+1.18/borderless-mining-1.1.1+1.18.jar"));
         QCOMPARE(metadata.hash_format, "sha512");
-        QCOMPARE(metadata.hash, "c8fe6e15ddea32668822dddb26e1851e5f03834be4bcb2eff9c0da7fdc086a9b6cead78e31a44d3bc66335cba11144ee0337c6d5346f1ba63623064499b3188d");
+        QCOMPARE(metadata.hash,
+                 "c8fe6e15ddea32668822dddb26e1851e5f03834be4bcb2eff9c0da7fdc086a9b6cead78e31a44d3bc66335cba11144ee0337c6d5346f1ba6362306449"
+                 "9b3188d");
 
         QCOMPARE(metadata.provider, ModPlatform::ResourceProvider::MODRINTH);
         QCOMPARE(metadata.version(), "ug2qKTPR");
         QCOMPARE(metadata.mod_id(), "kYq5qkSL");
-   }
+    }
 
     void loadFromFile_Curseforge()
     {
@@ -70,8 +72,8 @@ class PackwizTest : public QObject {
 
         QCOMPARE(metadata.name, "Screenshot to Clipboard (Fabric)");
         QCOMPARE(metadata.filename, "screenshot-to-clipboard-1.0.7-fabric.jar");
-        QCOMPARE(metadata.side, "both");
-        
+        QCOMPARE(metadata.side, Packwiz::V1::Side::UniversalSide);
+
         QCOMPARE(metadata.url, QUrl("https://edge.forgecdn.net/files/3509/43/screenshot-to-clipboard-1.0.7-fabric.jar"));
         QCOMPARE(metadata.hash_format, "murmur2");
         QCOMPARE(metadata.hash, "1781245820");

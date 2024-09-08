@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -37,24 +37,22 @@
 #include "Library.h"
 #include "VersionFile.h"
 
-namespace ProfileUtils
-{
-typedef QStringList PatchOrder;
+namespace ProfileUtils {
+using PatchOrder = QStringList;
 
 /// Read and parse a OneSix format order file
-bool readOverrideOrders(QString path, PatchOrder &order);
+bool readOverrideOrders(QString path, PatchOrder& order);
 
 /// Write a OneSix format order file
-bool writeOverrideOrders(QString path, const PatchOrder &order);
-
+bool writeOverrideOrders(QString path, const PatchOrder& order);
 
 /// Parse a version file in JSON format
-VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder);
+VersionFilePtr parseJsonFile(const QFileInfo& fileInfo, bool requireOrder);
 
 /// Save a JSON file (in any format)
-bool saveJsonFile(const QJsonDocument doc, const QString & filename);
+bool saveJsonFile(const QJsonDocument& doc, const QString& filename);
 
 /// Remove LWJGL from a patch file. This is applied to all Mojang-like profile files.
 void removeLwjglFromPatch(VersionFilePtr patch);
 
-}
+}  // namespace ProfileUtils

@@ -1,22 +1,20 @@
 #pragma once
 
-#include <QString>
 #include <QMultiMap>
+#include <QString>
 #include <memory>
 #include "QObjectPtr.h"
 
 class MinecraftAccount;
 class QNetworkAccessManager;
 
-struct AuthSession
-{
+struct AuthSession {
     bool MakeOffline(QString offline_playername);
-    void MakeDemo();
+    void MakeDemo(QString name, QString uuid);
 
     QString serializeUserProperties();
 
-    enum Status
-    {
+    enum Status {
         Undetermined,
         RequiresOAuth,
         RequiresPassword,
@@ -26,10 +24,6 @@ struct AuthSession
         GoneOrMigrated
     } status = Undetermined;
 
-    // client token
-    QString client_token;
-    // account user name
-    QString username;
     // combined session ID
     QString session;
     // volatile auth token
@@ -45,8 +39,8 @@ struct AuthSession
     // Did the user request online mode?
     bool wants_online = true;
 
-    //Is this a demo session?
+    // Is this a demo session?
     bool demo = false;
 };
 
-typedef std::shared_ptr<AuthSession> AuthSessionPtr;
+using AuthSessionPtr = std::shared_ptr<AuthSession>;

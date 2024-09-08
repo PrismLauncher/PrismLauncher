@@ -16,13 +16,14 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
- 
-#pragma  once
+
+#pragma once
 
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(taskNetLogC)
 Q_DECLARE_LOGGING_CATEGORY(taskDownloadLogC)
 Q_DECLARE_LOGGING_CATEGORY(taskUploadLogC)
+Q_DECLARE_LOGGING_CATEGORY(taskMCSkinsLogC)
 Q_DECLARE_LOGGING_CATEGORY(taskMetaCacheLogC)
 Q_DECLARE_LOGGING_CATEGORY(taskHttpMetaCacheLogC)

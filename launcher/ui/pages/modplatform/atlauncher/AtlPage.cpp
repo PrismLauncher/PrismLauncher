@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -35,21 +35,19 @@
  */
 
 #include "AtlPage.h"
+#include "ui/widgets/ProjectItem.h"
 #include "ui_AtlPage.h"
 
 #include "BuildConfig.h"
+#include "StringUtils.h"
 
-#include "AtlOptionalModDialog.h"
 #include "AtlUserInteractionSupportImpl.h"
 #include "modplatform/atlauncher/ATLPackInstallTask.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 
 #include <QMessageBox>
 
-AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent)
-    : QWidget(parent)
-    , ui(new Ui::AtlPage)
-    , dialog(dialog)
+AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::AtlPage), dialog(dialog)
 {
     ui->setupUi(this);
 
@@ -65,8 +63,7 @@ AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent)
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
 
-    for(int i = 0; i < filterModel->getAvailableSortings().size(); i++)
-    {
+    for (int i = 0; i < filterModel->getAvailableSortings().size(); i++) {
         ui->sortByBox->addItem(filterModel->getAvailableSortings().keys().at(i));
     }
     ui->sortByBox->setCurrentText(filterModel->translateCurrentSorting());
@@ -75,6 +72,8 @@ AtlPage::AtlPage(NewInstanceDialog* dialog, QWidget* parent)
     connect(ui->sortByBox, &QComboBox::currentTextChanged, this, &AtlPage::onSortingSelectionChanged);
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &AtlPage::onSelectionChanged);
     connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &AtlPage::onVersionSelectionChanged);
+
+    ui->packView->setItemDelegate(new ProjectItemDelegate(this));
 }
 
 AtlPage::~AtlPage()
@@ -94,8 +93,7 @@ void AtlPage::retranslate()
 
 void AtlPage::openedImpl()
 {
-    if(!initialized)
-    {
+    if (!initialized) {
         listModel->request();
         initialized = true;
     }
@@ -105,13 +103,11 @@ void AtlPage::openedImpl()
 
 void AtlPage::suggestCurrent()
 {
-    if(!isOpened)
-    {
+    if (!isOpened) {
         return;
     }
 
-    if (selectedVersion.isEmpty())
-    {
+    if (selectedVersion.isEmpty()) {
         dialog->setSuggestedPack();
         return;
     }
@@ -119,12 +115,10 @@ void AtlPage::suggestCurrent()
     auto uiSupport = new AtlUserInteractionSupportImpl(this);
     dialog->setSuggestedPack(selected.name, selectedVersion, new ATLauncher::PackInstallTask(uiSupport, selected.name, selectedVersion));
 
-    auto editedLogoName = selected.safeName;
-    auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1.png").arg(selected.safeName.toLower());
-    listModel->getLogo(selected.safeName, url, [this, editedLogoName](QString logo)
-    {
-        dialog->setSuggestedIconFromFile(logo, editedLogoName);
-    });
+    auto editedLogoName = "atl_" + selected.safeName;
+    auto url = QString(BuildConfig.ATL_DOWNLOAD_SERVER_URL + "launcher/images/%1").arg(selected.safeName);
+    listModel->getLogo(selected.safeName, url,
+                       [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }
 
 void AtlPage::triggerSearch()
@@ -132,20 +126,18 @@ void AtlPage::triggerSearch()
     filterModel->setSearchTerm(ui->searchEdit->text());
 }
 
-void AtlPage::onSortingSelectionChanged(QString data)
+void AtlPage::onSortingSelectionChanged(QString sort)
 {
-    auto toSet = filterModel->getAvailableSortings().value(data);
+    auto toSet = filterModel->getAvailableSortings().value(sort);
     filterModel->setSorting(toSet);
 }
 
-void AtlPage::onSelectionChanged(QModelIndex first, QModelIndex second)
+void AtlPage::onSelectionChanged(QModelIndex first, [[maybe_unused]] QModelIndex second)
 {
     ui->versionSelectionBox->clear();
 
-    if(!first.isValid())
-    {
-        if(isOpened)
-        {
+    if (!first.isValid()) {
+        if (isOpened) {
             dialog->setSuggestedPack();
         }
         return;
@@ -153,23 +145,22 @@ void AtlPage::onSelectionChanged(QModelIndex first, QModelIndex second)
 
     selected = filterModel->data(first, Qt::UserRole).value<ATLauncher::IndexedPack>();
 
-    ui->packDescription->setHtml(selected.description.replace("\n", "<br>"));
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(selected.description.replace("\n", "<br>")));
 
-    for(const auto& version : selected.versions) {
+    for (const auto& version : selected.versions) {
         ui->versionSelectionBox->addItem(version.version);
     }
 
     suggestCurrent();
 }
 
-void AtlPage::onVersionSelectionChanged(QString data)
+void AtlPage::onVersionSelectionChanged(QString version)
 {
-    if(data.isNull() || data.isEmpty())
-    {
+    if (version.isNull() || version.isEmpty()) {
         selectedVersion = "";
         return;
     }
 
-    selectedVersion = data;
+    selectedVersion = version;
     suggestCurrent();
 }

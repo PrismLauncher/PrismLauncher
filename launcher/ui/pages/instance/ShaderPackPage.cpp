@@ -46,7 +46,6 @@
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
-
 ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<ShaderPackFolderModel> model, QWidget* parent)
     : ExternalResourcesPage(instance, model, parent)
 {
@@ -61,14 +60,12 @@ ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<Shad
 
 void ShaderPackPage::downloadShaders()
 {
-    if (!m_controlsEnabled)
-        return;
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
     ResourceDownload::ShaderPackDownloadDialog mdownload(this, std::static_pointer_cast<ShaderPackFolderModel>(m_model), m_instance);
     if (mdownload.exec()) {
-        auto tasks = new ConcurrentTask(this);
+        auto tasks = new ConcurrentTask(this, "Download Shaders", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
         connect(tasks, &Task::failed, [this, tasks](QString reason) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
             tasks->deleteLater();

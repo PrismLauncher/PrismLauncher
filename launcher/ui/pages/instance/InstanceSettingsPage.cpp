@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,10 +36,15 @@
  */
 
 #include "InstanceSettingsPage.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/WorldList.h"
+#include "settings/Setting.h"
+#include "ui/dialogs/CustomMessageBox.h"
+#include "ui/java/InstallJavaDialog.h"
 #include "ui_InstanceSettingsPage.h"
 
-#include <QFileDialog>
 #include <QDialog>
+#include <QFileDialog>
 #include <QMessageBox>
 
 #include <sys.h>
@@ -46,30 +52,49 @@
 #include "ui/dialogs/VersionSelectDialog.h"
 #include "ui/widgets/CustomCommands.h"
 
-#include "JavaCommon.h"
 #include "Application.h"
+#include "BuildConfig.h"
+#include "JavaCommon.h"
 #include "minecraft/auth/AccountList.h"
 
+#include "FileSystem.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
-#include "FileSystem.h"
 
-InstanceSettingsPage::InstanceSettingsPage(BaseInstance *inst, QWidget *parent)
+InstanceSettingsPage::InstanceSettingsPage(BaseInstance* inst, QWidget* parent)
     : QWidget(parent), ui(new Ui::InstanceSettingsPage), m_instance(inst)
 {
     m_settings = inst->settings();
     ui->setupUi(this);
 
-    // As the signal will (probably) not be triggered once we click edit, let's update it manually instead.
-    updateRunningStatus(m_instance->isRunning());
+    ui->javaDownloadBtn->setHidden(!BuildConfig.JAVA_DOWNLOADER_ENABLED);
 
-    connect(m_instance, &BaseInstance::runningStatusChanged, this, &InstanceSettingsPage::updateRunningStatus);
     connect(ui->openGlobalJavaSettingsButton, &QCommandLinkButton::clicked, this, &InstanceSettingsPage::globalSettingsButtonClicked);
     connect(APPLICATION, &Application::globalSettingsAboutToOpen, this, &InstanceSettingsPage::applySettings);
     connect(APPLICATION, &Application::globalSettingsClosed, this, &InstanceSettingsPage::loadSettings);
-    connect(ui->instanceAccountSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &InstanceSettingsPage::changeInstanceAccount);
-    loadSettings();
+    connect(ui->instanceAccountSelector, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &InstanceSettingsPage::changeInstanceAccount);
 
+    connect(ui->useNativeGLFWCheck, &QAbstractButton::toggled, this, &InstanceSettingsPage::onUseNativeGLFWChanged);
+    connect(ui->useNativeOpenALCheck, &QAbstractButton::toggled, this, &InstanceSettingsPage::onUseNativeOpenALChanged);
+
+    auto mInst = dynamic_cast<MinecraftInstance*>(inst);
+    m_world_quickplay_supported = mInst && mInst->traits().contains("feature:is_quick_play_singleplayer");
+    if (m_world_quickplay_supported) {
+        auto worlds = mInst->worldList();
+        worlds->update();
+        for (const auto& world : worlds->allWorlds()) {
+            ui->worldsCb->addItem(world.folderName());
+        }
+    } else {
+        ui->worldsCb->hide();
+        ui->worldJoinButton->hide();
+        ui->serverJoinAddressButton->setChecked(true);
+        ui->serverJoinAddress->setEnabled(true);
+        ui->serverJoinAddressButton->setStyleSheet("QRadioButton::indicator { width: 0px; height: 0px; }");
+    }
+
+    loadSettings();
 
     updateThresholds();
 }
@@ -81,15 +106,18 @@ InstanceSettingsPage::~InstanceSettingsPage()
 
 void InstanceSettingsPage::globalSettingsButtonClicked(bool)
 {
-    switch(ui->settingsTabs->currentIndex()) {
+    switch (ui->settingsTabs->currentIndex()) {
         case 0:
             APPLICATION->ShowGlobalSettings(this, "java-settings");
             return;
-        case 1:
-            APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
-            return;
         case 2:
             APPLICATION->ShowGlobalSettings(this, "custom-commands");
+            return;
+        case 3:
+            APPLICATION->ShowGlobalSettings(this, "environment-variables");
+            return;
+        default:
+            APPLICATION->ShowGlobalSettings(this, "minecraft-settings");
             return;
     }
 }
@@ -107,13 +135,10 @@ void InstanceSettingsPage::applySettings()
     // Miscellaneous
     bool miscellaneous = ui->miscellaneousSettingsBox->isChecked();
     m_settings->set("OverrideMiscellaneous", miscellaneous);
-    if (miscellaneous)
-    {
+    if (miscellaneous) {
         m_settings->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
         m_settings->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
-    }
-    else
-    {
+    } else {
         m_settings->reset("CloseAfterLaunch");
         m_settings->reset("QuitAfterGameStop");
     }
@@ -121,14 +146,11 @@ void InstanceSettingsPage::applySettings()
     // Console
     bool console = ui->consoleSettingsBox->isChecked();
     m_settings->set("OverrideConsole", console);
-    if (console)
-    {
+    if (console) {
         m_settings->set("ShowConsole", ui->showConsoleCheck->isChecked());
         m_settings->set("AutoCloseConsole", ui->autoCloseConsoleCheck->isChecked());
         m_settings->set("ShowConsoleOnError", ui->showConsoleErrorCheck->isChecked());
-    }
-    else
-    {
+    } else {
         m_settings->reset("ShowConsole");
         m_settings->reset("AutoCloseConsole");
         m_settings->reset("ShowConsoleOnError");
@@ -137,14 +159,11 @@ void InstanceSettingsPage::applySettings()
     // Window Size
     bool window = ui->windowSizeGroupBox->isChecked();
     m_settings->set("OverrideWindow", window);
-    if (window)
-    {
+    if (window) {
         m_settings->set("LaunchMaximized", ui->maximizedCheckBox->isChecked());
         m_settings->set("MinecraftWinWidth", ui->windowWidthSpinBox->value());
         m_settings->set("MinecraftWinHeight", ui->windowHeightSpinBox->value());
-    }
-    else
-    {
+    } else {
         m_settings->reset("LaunchMaximized");
         m_settings->reset("MinecraftWinWidth");
         m_settings->reset("MinecraftWinHeight");
@@ -153,24 +172,18 @@ void InstanceSettingsPage::applySettings()
     // Memory
     bool memory = ui->memoryGroupBox->isChecked();
     m_settings->set("OverrideMemory", memory);
-    if (memory)
-    {
+    if (memory) {
         int min = ui->minMemSpinBox->value();
         int max = ui->maxMemSpinBox->value();
-        if(min < max)
-        {
+        if (min < max) {
             m_settings->set("MinMemAlloc", min);
             m_settings->set("MaxMemAlloc", max);
-        }
-        else
-        {
+        } else {
             m_settings->set("MinMemAlloc", max);
             m_settings->set("MaxMemAlloc", min);
         }
         m_settings->set("PermGen", ui->permGenSpinBox->value());
-    }
-    else
-    {
+    } else {
         m_settings->reset("MinMemAlloc");
         m_settings->reset("MaxMemAlloc");
         m_settings->reset("PermGen");
@@ -179,13 +192,10 @@ void InstanceSettingsPage::applySettings()
     // Java Install Settings
     bool javaInstall = ui->javaSettingsGroupBox->isChecked();
     m_settings->set("OverrideJavaLocation", javaInstall);
-    if (javaInstall)
-    {
+    if (javaInstall) {
         m_settings->set("JavaPath", ui->javaPathTextBox->text());
         m_settings->set("IgnoreJavaCompatibility", ui->skipCompatibilityCheckbox->isChecked());
-    }
-    else
-    {
+    } else {
         m_settings->reset("JavaPath");
         m_settings->reset("IgnoreJavaCompatibility");
     }
@@ -193,74 +203,71 @@ void InstanceSettingsPage::applySettings()
     // Java arguments
     bool javaArgs = ui->javaArgumentsGroupBox->isChecked();
     m_settings->set("OverrideJavaArgs", javaArgs);
-    if(javaArgs)
-    {
+    if (javaArgs) {
         m_settings->set("JvmArgs", ui->jvmArgsTextBox->toPlainText().replace("\n", " "));
-    }
-    else
-    {
+    } else {
         m_settings->reset("JvmArgs");
     }
-
-    // old generic 'override both' is removed.
-    m_settings->reset("OverrideJava");
 
     // Custom Commands
     bool custcmd = ui->customCommands->checked();
     m_settings->set("OverrideCommands", custcmd);
-    if (custcmd)
-    {
+    if (custcmd) {
         m_settings->set("PreLaunchCommand", ui->customCommands->prelaunchCommand());
         m_settings->set("WrapperCommand", ui->customCommands->wrapperCommand());
         m_settings->set("PostExitCommand", ui->customCommands->postexitCommand());
-    }
-    else
-    {
+    } else {
         m_settings->reset("PreLaunchCommand");
         m_settings->reset("WrapperCommand");
         m_settings->reset("PostExitCommand");
     }
 
+    // Environment Variables
+    auto env = ui->environmentVariables->override();
+    m_settings->set("OverrideEnv", env);
+    if (env)
+        m_settings->set("Env", ui->environmentVariables->value());
+    else
+        m_settings->reset("Env");
+
     // Workarounds
     bool workarounds = ui->nativeWorkaroundsGroupBox->isChecked();
     m_settings->set("OverrideNativeWorkarounds", workarounds);
-    if(workarounds)
-    {
-        m_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
+    if (workarounds) {
         m_settings->set("UseNativeGLFW", ui->useNativeGLFWCheck->isChecked());
-    }
-    else
-    {
-        m_settings->reset("UseNativeOpenAL");
+        m_settings->set("CustomGLFWPath", ui->lineEditGLFWPath->text());
+        m_settings->set("UseNativeOpenAL", ui->useNativeOpenALCheck->isChecked());
+        m_settings->set("CustomOpenALPath", ui->lineEditOpenALPath->text());
+    } else {
         m_settings->reset("UseNativeGLFW");
+        m_settings->reset("CustomGLFWPath");
+        m_settings->reset("UseNativeOpenAL");
+        m_settings->reset("CustomOpenALPath");
     }
 
     // Performance
     bool performance = ui->perfomanceGroupBox->isChecked();
     m_settings->set("OverridePerformance", performance);
-    if(performance)
-    {
+    if (performance) {
         m_settings->set("EnableFeralGamemode", ui->enableFeralGamemodeCheck->isChecked());
         m_settings->set("EnableMangoHud", ui->enableMangoHud->isChecked());
         m_settings->set("UseDiscreteGpu", ui->useDiscreteGpuCheck->isChecked());
-    }
-    else
-    {
+        m_settings->set("UseZink", ui->useZink->isChecked());
+
+    } else {
         m_settings->reset("EnableFeralGamemode");
         m_settings->reset("EnableMangoHud");
         m_settings->reset("UseDiscreteGpu");
+        m_settings->reset("UseZink");
     }
 
     // Game time
     bool gameTime = ui->gameTimeGroupBox->isChecked();
     m_settings->set("OverrideGameTime", gameTime);
-    if (gameTime)
-    {
+    if (gameTime) {
         m_settings->set("ShowGameTime", ui->showGameTime->isChecked());
         m_settings->set("RecordGameTime", ui->recordGameTime->isChecked());
-    }
-    else
-    {
+    } else {
         m_settings->reset("ShowGameTime");
         m_settings->reset("RecordGameTime");
     }
@@ -268,13 +275,17 @@ void InstanceSettingsPage::applySettings()
     // Join server on launch
     bool joinServerOnLaunch = ui->serverJoinGroupBox->isChecked();
     m_settings->set("JoinServerOnLaunch", joinServerOnLaunch);
-    if (joinServerOnLaunch)
-    {
-        m_settings->set("JoinServerOnLaunchAddress", ui->serverJoinAddress->text());
-    }
-    else
-    {
+    if (joinServerOnLaunch) {
+        if (ui->serverJoinAddressButton->isChecked() || !m_world_quickplay_supported) {
+            m_settings->set("JoinServerOnLaunchAddress", ui->serverJoinAddress->text());
+            m_settings->reset("JoinWorldOnLaunch");
+        } else {
+            m_settings->set("JoinWorldOnLaunch", ui->worldsCb->currentText());
+            m_settings->reset("JoinServerOnLaunchAddress");
+        }
+    } else {
         m_settings->reset("JoinServerOnLaunchAddress");
+        m_settings->reset("JoinWorldOnLaunch");
     }
 
     // Use an account for this instance
@@ -293,6 +304,14 @@ void InstanceSettingsPage::applySettings()
     } else {
         m_settings->reset("EnableSandboxing");
         m_settings->reset("BwrapExtraArgs");
+    }
+
+    bool overrideLegacySettings = ui->legacySettingsGroupBox->isChecked();
+    m_settings->set("OverrideLegacySettings", overrideLegacySettings);
+    if (overrideLegacySettings) {
+        m_settings->set("OnlineFixes", ui->onlineFixes->isChecked());
+    } else {
+        m_settings->reset("OnlineFixes");
     }
 
     // FIXME: This should probably be called by a signal instead
@@ -322,13 +341,10 @@ void InstanceSettingsPage::loadSettings()
     ui->memoryGroupBox->setChecked(m_settings->get("OverrideMemory").toBool());
     int min = m_settings->get("MinMemAlloc").toInt();
     int max = m_settings->get("MaxMemAlloc").toInt();
-    if(min < max)
-    {
+    if (min < max) {
         ui->minMemSpinBox->setValue(min);
         ui->maxMemSpinBox->setValue(max);
-    }
-    else
-    {
+    } else {
         ui->minMemSpinBox->setValue(max);
         ui->maxMemSpinBox->setValue(min);
     }
@@ -338,12 +354,12 @@ void InstanceSettingsPage::loadSettings()
     ui->labelPermGen->setVisible(permGenVisible);
     ui->labelPermgenNote->setVisible(permGenVisible);
 
-
     // Java Settings
-    bool overrideJava = m_settings->get("OverrideJava").toBool();
-    bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool() || overrideJava;
-    bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool() || overrideJava;
+    bool overrideLocation = m_settings->get("OverrideJavaLocation").toBool();
+    bool overrideArgs = m_settings->get("OverrideJavaArgs").toBool();
 
+    connect(m_settings->getSetting("OverrideJavaLocation").get(), &Setting::SettingChanged, ui->javaSettingsGroupBox,
+            [this] { ui->javaSettingsGroupBox->setChecked(m_settings->get("OverrideJavaLocation").toBool()); });
     ui->javaSettingsGroupBox->setChecked(overrideLocation);
     ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString());
     ui->skipCompatibilityCheckbox->setChecked(m_settings->get("IgnoreJavaCompatibility").toBool());
@@ -352,24 +368,35 @@ void InstanceSettingsPage::loadSettings()
     ui->jvmArgsTextBox->setPlainText(m_settings->get("JvmArgs").toString());
 
     // Custom commands
-    ui->customCommands->initialize(
-        true,
-        m_settings->get("OverrideCommands").toBool(),
-        m_settings->get("PreLaunchCommand").toString(),
-        m_settings->get("WrapperCommand").toString(),
-        m_settings->get("PostExitCommand").toString()
-    );
+    ui->customCommands->initialize(true, m_settings->get("OverrideCommands").toBool(), m_settings->get("PreLaunchCommand").toString(),
+                                   m_settings->get("WrapperCommand").toString(), m_settings->get("PostExitCommand").toString());
+
+    // Environment variables
+    ui->environmentVariables->initialize(true, m_settings->get("OverrideEnv").toBool(), m_settings->get("Env").toMap());
 
     // Workarounds
     ui->nativeWorkaroundsGroupBox->setChecked(m_settings->get("OverrideNativeWorkarounds").toBool());
     ui->useNativeGLFWCheck->setChecked(m_settings->get("UseNativeGLFW").toBool());
+    ui->lineEditGLFWPath->setText(m_settings->get("CustomGLFWPath").toString());
+#ifdef Q_OS_LINUX
+    ui->lineEditGLFWPath->setPlaceholderText(APPLICATION->m_detectedGLFWPath);
+#else
+    ui->lineEditGLFWPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.GLFW_LIBRARY_NAME));
+#endif
     ui->useNativeOpenALCheck->setChecked(m_settings->get("UseNativeOpenAL").toBool());
+    ui->lineEditOpenALPath->setText(m_settings->get("CustomOpenALPath").toString());
+#ifdef Q_OS_LINUX
+    ui->lineEditOpenALPath->setPlaceholderText(APPLICATION->m_detectedOpenALPath);
+#else
+    ui->lineEditOpenALPath->setPlaceholderText(tr("Path to %1 library file").arg(BuildConfig.OPENAL_LIBRARY_NAME));
+#endif
 
     // Performance
     ui->perfomanceGroupBox->setChecked(m_settings->get("OverridePerformance").toBool());
     ui->enableFeralGamemodeCheck->setChecked(m_settings->get("EnableFeralGamemode").toBool());
     ui->enableMangoHud->setChecked(m_settings->get("EnableMangoHud").toBool());
     ui->useDiscreteGpuCheck->setChecked(m_settings->get("UseDiscreteGpu").toBool());
+    ui->useZink->setChecked(m_settings->get("UseZink").toBool());
 
 #if !defined(Q_OS_LINUX)
     ui->settingsTabs->setTabVisible(ui->settingsTabs->indexOf(ui->performancePage), false);
@@ -391,7 +418,25 @@ void InstanceSettingsPage::loadSettings()
     ui->recordGameTime->setChecked(m_settings->get("RecordGameTime").toBool());
 
     ui->serverJoinGroupBox->setChecked(m_settings->get("JoinServerOnLaunch").toBool());
-    ui->serverJoinAddress->setText(m_settings->get("JoinServerOnLaunchAddress").toString());
+
+    if (auto server = m_settings->get("JoinServerOnLaunchAddress").toString(); !server.isEmpty()) {
+        ui->serverJoinAddress->setText(server);
+        ui->serverJoinAddressButton->setChecked(true);
+        ui->worldJoinButton->setChecked(false);
+        ui->serverJoinAddress->setEnabled(true);
+        ui->worldsCb->setEnabled(false);
+    } else if (auto world = m_settings->get("JoinWorldOnLaunch").toString(); !world.isEmpty() && m_world_quickplay_supported) {
+        ui->worldsCb->setCurrentText(world);
+        ui->serverJoinAddressButton->setChecked(false);
+        ui->worldJoinButton->setChecked(true);
+        ui->serverJoinAddress->setEnabled(false);
+        ui->worldsCb->setEnabled(true);
+    } else {
+        ui->serverJoinAddressButton->setChecked(true);
+        ui->worldJoinButton->setChecked(false);
+        ui->serverJoinAddress->setEnabled(true);
+        ui->worldsCb->setEnabled(false);
+    }
 
     ui->instanceAccountGroupBox->setChecked(m_settings->get("UseAccountForInstance").toBool());
     updateAccountsMenu();
@@ -402,6 +447,15 @@ void InstanceSettingsPage::loadSettings()
 #ifndef Q_OS_LINUX
     ui->sandboxingGroupBox->setVisible(false);
 #endif
+
+    ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
+    ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
+}
+
+void InstanceSettingsPage::on_javaDownloadBtn_clicked()
+{
+    auto jdialog = new Java::InstallDialog({}, m_instance, this);
+    jdialog->exec();
 }
 
 void InstanceSettingsPage::on_javaDetectBtn_clicked()
@@ -417,8 +471,7 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
     vselect.setResizeOn(2);
     vselect.exec();
 
-    if (vselect.result() == QDialog::Accepted && vselect.selectedVersion())
-    {
+    if (vselect.result() == QDialog::Accepted && vselect.selectedVersion()) {
         java = std::dynamic_pointer_cast<JavaInstall>(vselect.selectedVersion());
         ui->javaPathTextBox->setText(java->path);
         bool visible = java->id.requiresPermGen() && m_settings->get("OverrideMemory").toBool();
@@ -426,6 +479,15 @@ void InstanceSettingsPage::on_javaDetectBtn_clicked()
         ui->labelPermGen->setVisible(visible);
         ui->labelPermgenNote->setVisible(visible);
         m_settings->set("PermGenVisible", visible);
+
+        if (!java->is_64bit && m_settings->get("MaxMemAlloc").toInt() > 2048) {
+            CustomMessageBox::selectable(this, tr("Confirm Selection"),
+                                         tr("You selected a 32-bit version of Java.\n"
+                                            "This installation does not support more than 2048MiB of RAM.\n"
+                                            "Please make sure that the maximum memory value is lower."),
+                                         QMessageBox::Warning, QMessageBox::Ok, QMessageBox::Ok)
+                ->exec();
+        }
     }
 }
 
@@ -434,15 +496,13 @@ void InstanceSettingsPage::on_javaBrowseBtn_clicked()
     QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"));
 
     // do not allow current dir - it's dirty. Do not allow dirs that don't exist
-    if(raw_path.isEmpty())
-    {
+    if (raw_path.isEmpty()) {
         return;
     }
     QString cooked_path = FS::NormalizePath(raw_path);
 
     QFileInfo javaInfo(cooked_path);
-    if(!javaInfo.exists() || !javaInfo.isExecutable())
-    {
+    if (!javaInfo.exists() || !javaInfo.isExecutable()) {
         return;
     }
     ui->javaPathTextBox->setText(cooked_path);
@@ -456,15 +516,23 @@ void InstanceSettingsPage::on_javaBrowseBtn_clicked()
 
 void InstanceSettingsPage::on_javaTestBtn_clicked()
 {
-    if(checker)
-    {
+    if (checker) {
         return;
     }
-    checker.reset(new JavaCommon::TestCheck(
-        this, ui->javaPathTextBox->text(), ui->jvmArgsTextBox->toPlainText().replace("\n", " "),
-        ui->minMemSpinBox->value(), ui->maxMemSpinBox->value(), ui->permGenSpinBox->value()));
+    checker.reset(new JavaCommon::TestCheck(this, ui->javaPathTextBox->text(), ui->jvmArgsTextBox->toPlainText().replace("\n", " "),
+                                            ui->minMemSpinBox->value(), ui->maxMemSpinBox->value(), ui->permGenSpinBox->value()));
     connect(checker.get(), SIGNAL(finished()), SLOT(checkerFinished()));
     checker->run();
+}
+
+void InstanceSettingsPage::onUseNativeGLFWChanged(bool checked)
+{
+    ui->lineEditGLFWPath->setEnabled(checked);
+}
+
+void InstanceSettingsPage::onUseNativeOpenALChanged(bool checked)
+{
+    ui->lineEditOpenALPath->setEnabled(checked);
 }
 
 void InstanceSettingsPage::updateAccountsMenu()
@@ -479,7 +547,6 @@ void InstanceSettingsPage::updateAccountsMenu()
         if (i == accountIndex)
             ui->instanceAccountSelector->setCurrentIndex(i);
     }
-
 }
 
 QIcon InstanceSettingsPage::getFaceForAccount(MinecraftAccountPtr account)
@@ -500,7 +567,7 @@ void InstanceSettingsPage::changeInstanceAccount(int index)
     }
 }
 
-void InstanceSettingsPage::on_maxMemSpinBox_valueChanged(int i)
+void InstanceSettingsPage::on_maxMemSpinBox_valueChanged([[maybe_unused]] int i)
 {
     updateThresholds();
 }
@@ -514,12 +581,14 @@ void InstanceSettingsPage::retranslate()
 {
     ui->retranslateUi(this);
     ui->customCommands->retranslate();  // TODO: why is this seperate from the others?
+    ui->environmentVariables->retranslate();
 }
 
 void InstanceSettingsPage::updateThresholds()
 {
     auto sysMiB = Sys::getSystemRam() / Sys::mebibyte;
     unsigned int maxMem = ui->maxMemSpinBox->value();
+    unsigned int minMem = ui->minMemSpinBox->value();
 
     QString iconName;
 
@@ -529,6 +598,9 @@ void InstanceSettingsPage::updateThresholds()
     } else if (maxMem > (sysMiB * 0.9)) {
         iconName = "status-yellow";
         ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation approaches your system memory capacity."));
+    } else if (maxMem < minMem) {
+        iconName = "status-yellow";
+        ui->labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
     } else {
         iconName = "status-good";
         ui->labelMaxMemIcon->setToolTip("");
@@ -542,7 +614,12 @@ void InstanceSettingsPage::updateThresholds()
     }
 }
 
-void InstanceSettingsPage::updateRunningStatus(bool running)
+void InstanceSettingsPage::on_serverJoinAddressButton_toggled(bool checked)
 {
-    setEnabled(!running);
+    ui->serverJoinAddress->setEnabled(checked);
+}
+
+void InstanceSettingsPage::on_worldJoinButton_toggled(bool checked)
+{
+    ui->worldsCb->setEnabled(checked);
 }

@@ -3,8 +3,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ManagedPackPage.h"
+#include <QDesktopServices>
+#include <QUrl>
+#include <QUrlQuery>
 #include "ui_ManagedPackPage.h"
 
+#include <QFileDialog>
 #include <QListView>
 #include <QProxyStyle>
 #include <QStyleFactory>
@@ -16,12 +20,15 @@
 #include "InstanceTask.h"
 #include "Json.h"
 #include "Markdown.h"
+#include "StringUtils.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 
 #include "ui/InstanceWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
+
+#include "net/ApiDownload.h"
 
 /** This is just to override the combo box popup behavior so that the combo box doesn't take the whole screen.
  *  ... thanks Qt.
@@ -69,7 +76,6 @@ class NoBigComboBoxStyle : public QProxyStyle {
 
    private:
     NoBigComboBoxStyle(QStyle* style) : QProxyStyle(style) {}
-
 };
 
 ManagedPackPage* ManagedPackPage::createPage(BaseInstance* inst, QString type, QWidget* parent)
@@ -91,18 +97,31 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
 
     // NOTE: GTK2 themes crash with the proxy style.
     // This seems like an upstream bug, so there's not much else that can be done.
-    if (!QStyleFactory::keys().contains("gtk2")){
+    if (!QStyleFactory::keys().contains("gtk2")) {
         auto comboStyle = NoBigComboBoxStyle::getInstance(ui->versionsComboBox->style());
         ui->versionsComboBox->setStyle(comboStyle);
     }
 
     ui->reloadButton->setVisible(false);
-    connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool){
+    connect(ui->reloadButton, &QPushButton::clicked, this, [this](bool) {
         ui->reloadButton->setVisible(false);
 
         m_loaded = false;
         // Pretend we're opening the page again
         openedImpl();
+    });
+
+    connect(ui->changelogTextBrowser, &QTextBrowser::anchorClicked, this, [](const QUrl url) {
+        if (url.scheme().isEmpty()) {
+            auto querry =
+                QUrlQuery(url.query()).queryItemValue("remoteUrl", QUrl::FullyDecoded);  // curseforge workaround for linkout?remoteUrl=
+            auto decoded = QUrl::fromPercentEncoding(querry.toUtf8());
+            auto newUrl = QUrl(decoded);
+            if (newUrl.isValid() && (newUrl.scheme() == "http" || newUrl.scheme() == "https"))
+                QDesktopServices ::openUrl(newUrl);
+            return;
+        }
+        QDesktopServices::openUrl(url);
     });
 }
 
@@ -113,6 +132,22 @@ ManagedPackPage::~ManagedPackPage()
 
 void ManagedPackPage::openedImpl()
 {
+    if (m_inst->getManagedPackID().isEmpty()) {
+        ui->packVersion->hide();
+        ui->packVersionLabel->hide();
+        ui->packOrigin->hide();
+        ui->packOriginLabel->hide();
+        ui->versionsComboBox->hide();
+        ui->updateButton->hide();
+        ui->updateToVersionLabel->hide();
+        ui->updateFromFileButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        ui->packName->setText(m_inst->name());
+        ui->changelogTextBrowser->setText(tr("This is a local modpack.\n"
+                                             "This can be updated only using a file in %1 format\n")
+                                              .arg(displayName()));
+        return;
+    }
     ui->packName->setText(m_inst->getManagedPackName());
     ui->packVersion->setText(m_inst->getManagedPackVersionName());
     ui->packOrigin->setText(tr("Website: <a href=%1>%2</a>    |    Pack ID: %3    |    Version ID: %4")
@@ -205,7 +240,8 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
-    connect(ui->updateButton, &QPushButton::pressed, this, &ModrinthManagedPackPage::update);
+    connect(ui->updateButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::update);
+    connect(ui->updateFromFileButton, &QPushButton::clicked, this, &ModrinthManagedPackPage::updateFromFile);
 }
 
 // MODRINTH
@@ -226,7 +262,8 @@ void ModrinthManagedPackPage::parseManagedPack()
 
     QString id = m_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response.get()));
+    m_fetch_job->addNetAction(
+        Net::ApiDownload::makeByteArray(QString("%1/project/%2/version").arg(BuildConfig.MODRINTH_PROD_URL, id), response));
 
     QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
@@ -267,7 +304,6 @@ void ModrinthManagedPackPage::parseManagedPack()
             if (version.version == m_inst->getManagedPackVersionName())
                 name = tr("%1 (Current)").arg(name);
 
-
             ui->versionsComboBox->addItem(name, QVariant(version.id));
         }
 
@@ -291,9 +327,13 @@ QString ModrinthManagedPackPage::url() const
 void ModrinthManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(markdownToHTML(version.changelog.toUtf8()));
+    ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(markdownToHTML(version.changelog.toUtf8())));
 
     ManagedPackPage::suggestVersion();
 }
@@ -301,6 +341,10 @@ void ModrinthManagedPackPage::suggestVersion()
 void ModrinthManagedPackPage::update()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     QMap<QString, QString> extra_info;
@@ -325,6 +369,29 @@ void ModrinthManagedPackPage::update()
         m_instance_window->close();
 }
 
+void ModrinthManagedPackPage::updateFromFile()
+{
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), tr("Modrinth pack") + " (*.mrpack *.zip)");
+    if (output.isEmpty())
+        return;
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", m_inst->getManagedPackID());
+    extra_info.insert("pack_version_id", QString());
+    extra_info.insert("original_instance_id", m_inst->id());
+
+    auto extracted = new InstanceImportTask(output, this, std::move(extra_info));
+
+    extracted->setName(m_inst->name());
+    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
+    extracted->setIcon(m_inst->iconKey());
+    extracted->setConfirmUpdate(false);
+
+    auto did_succeed = runUpdateTask(extracted);
+
+    if (m_instance_window && did_succeed)
+        m_instance_window->close();
+}
+
 // FLAME
 
 FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
@@ -332,7 +399,8 @@ FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* i
 {
     Q_ASSERT(inst->isManagedPack());
     connect(ui->versionsComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(suggestVersion()));
-    connect(ui->updateButton, &QPushButton::pressed, this, &FlameManagedPackPage::update);
+    connect(ui->updateButton, &QPushButton::clicked, this, &FlameManagedPackPage::update);
+    connect(ui->updateFromFileButton, &QPushButton::clicked, this, &FlameManagedPackPage::updateFromFile);
 }
 
 void FlameManagedPackPage::parseManagedPack()
@@ -353,7 +421,7 @@ void FlameManagedPackPage::parseManagedPack()
                "Don't worry though, it will ask you to update this instance instead, so you'll not lose this instance!"
                "</h4>");
 
-        ui->changelogTextBrowser->setHtml(message);
+        ui->changelogTextBrowser->setHtml(StringUtils::htmlListPatch(message));
         return;
     }
 
@@ -369,7 +437,7 @@ void FlameManagedPackPage::parseManagedPack()
 
     QString id = m_inst->getManagedPackID();
 
-    m_fetch_job->addNetAction(Net::Download::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response.get()));
+    m_fetch_job->addNetAction(Net::ApiDownload::makeByteArray(QString("%1/mods/%2/files").arg(BuildConfig.FLAME_BASE_URL, id), response));
 
     QObject::connect(m_fetch_job.get(), &NetJob::succeeded, this, [this, response, id] {
         QJsonParseError parse_error{};
@@ -423,15 +491,20 @@ void FlameManagedPackPage::parseManagedPack()
 QString FlameManagedPackPage::url() const
 {
     // FIXME: We should display the websiteUrl field, but this requires doing the API request first :(
-    return {};
+    return "https://www.curseforge.com/projects/" + m_inst->getManagedPackID();
 }
 
 void FlameManagedPackPage::suggestVersion()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
-    ui->changelogTextBrowser->setHtml(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId));
+    ui->changelogTextBrowser->setHtml(
+        StringUtils::htmlListPatch(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId)));
 
     ManagedPackPage::suggestVersion();
 }
@@ -439,6 +512,10 @@ void FlameManagedPackPage::suggestVersion()
 void FlameManagedPackPage::update()
 {
     auto index = ui->versionsComboBox->currentIndex();
+    if (m_pack.versions.length() == 0) {
+        setFailState();
+        return;
+    }
     auto version = m_pack.versions.at(index);
 
     QMap<QString, QString> extra_info;
@@ -459,4 +536,27 @@ void FlameManagedPackPage::update()
         m_instance_window->close();
 }
 
+void FlameManagedPackPage::updateFromFile()
+{
+    auto output = QFileDialog::getOpenFileUrl(this, tr("Choose update file"), QDir::homePath(), tr("CurseForge pack") + " (*.zip)");
+    if (output.isEmpty())
+        return;
+
+    QMap<QString, QString> extra_info;
+    extra_info.insert("pack_id", m_inst->getManagedPackID());
+    extra_info.insert("pack_version_id", QString());
+    extra_info.insert("original_instance_id", m_inst->id());
+
+    auto extracted = new InstanceImportTask(output, this, std::move(extra_info));
+
+    extracted->setName(m_inst->name());
+    extracted->setGroup(APPLICATION->instances()->getInstanceGroup(m_inst->id()));
+    extracted->setIcon(m_inst->iconKey());
+    extracted->setConfirmUpdate(false);
+
+    auto did_succeed = runUpdateTask(extracted);
+
+    if (m_instance_window && did_succeed)
+        m_instance_window->close();
+}
 #include "ManagedPackPage.moc"

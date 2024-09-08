@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "FileSystem.h"
 #include "minecraft/mod/Resource.h"
 
 #include "tasks/Task.h"
@@ -26,12 +27,14 @@ class BasicFolderLoadTask : public Task {
    public:
     BasicFolderLoadTask(QDir dir) : Task(nullptr, false), m_dir(dir), m_result(new Result), m_thread_to_spawn_into(thread())
     {
-        m_create_func = [](QFileInfo const& entry) -> Resource::Ptr {
-                return makeShared<Resource>(entry);
-            };
+        m_create_func = [](QFileInfo const& entry) -> Resource::Ptr { return makeShared<Resource>(entry); };
     }
     BasicFolderLoadTask(QDir dir, std::function<Resource::Ptr(QFileInfo const&)> create_function)
-        : Task(nullptr, false), m_dir(dir), m_result(new Result), m_create_func(std::move(create_function)), m_thread_to_spawn_into(thread())
+        : Task(nullptr, false)
+        , m_dir(dir)
+        , m_result(new Result)
+        , m_create_func(std::move(create_function))
+        , m_thread_to_spawn_into(thread())
     {}
 
     [[nodiscard]] bool canAbort() const override { return true; }
@@ -48,6 +51,12 @@ class BasicFolderLoadTask : public Task {
 
         m_dir.refresh();
         for (auto entry : m_dir.entryInfoList()) {
+            auto filePath = entry.absoluteFilePath();
+            auto newFilePath = FS::getUniqueResourceName(filePath);
+            if (newFilePath != filePath) {
+                FS::move(filePath, newFilePath);
+                entry = QFileInfo(newFilePath);
+            }
             auto resource = m_create_func(entry);
             resource->moveToThread(m_thread_to_spawn_into);
             m_result->resources.insert(resource->internal_id(), resource);
@@ -59,7 +68,7 @@ class BasicFolderLoadTask : public Task {
             emitSucceeded();
     }
 
-private:
+   private:
     QDir m_dir;
     ResultPtr m_result;
 

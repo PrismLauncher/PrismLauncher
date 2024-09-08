@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
@@ -23,6 +23,8 @@
 #include <QMap>
 #include <QRegularExpression>
 
+#include "MTPixmapCache.h"
+
 #include "minecraft/mod/tasks/LocalTexturePackParseTask.h"
 
 void TexturePack::setDescription(QString new_description)
@@ -32,34 +34,42 @@ void TexturePack::setDescription(QString new_description)
     m_description = new_description;
 }
 
-void TexturePack::setImage(QImage new_image)
+void TexturePack::setImage(QImage new_image) const
 {
     QMutexLocker locker(&m_data_lock);
 
     Q_ASSERT(!new_image.isNull());
 
     if (m_pack_image_cache_key.key.isValid())
-        QPixmapCache::remove(m_pack_image_cache_key.key);
+        PixmapCache::remove(m_pack_image_cache_key.key);
 
-    m_pack_image_cache_key.key = QPixmapCache::insert(QPixmap::fromImage(new_image));
+    // scale the image to avoid flooding the pixmapcache
+    auto pixmap =
+        QPixmap::fromImage(new_image.scaled({ 64, 64 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+
+    m_pack_image_cache_key.key = PixmapCache::insert(pixmap);
     m_pack_image_cache_key.was_ever_used = true;
 }
 
-QPixmap TexturePack::image(QSize size)
+QPixmap TexturePack::image(QSize size, Qt::AspectRatioMode mode) const
 {
     QPixmap cached_image;
-    if (QPixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
+    if (PixmapCache::find(m_pack_image_cache_key.key, &cached_image)) {
         if (size.isNull())
             return cached_image;
-        return cached_image.scaled(size);
+        return cached_image.scaled(size, mode, Qt::SmoothTransformation);
     }
 
     // No valid image we can get
-    if (!m_pack_image_cache_key.was_ever_used)
+    if (!m_pack_image_cache_key.was_ever_used) {
         return {};
+    } else {
+        qDebug() << "Texture Pack" << name() << "Had it's image evicted from the cache. reloading...";
+        PixmapCache::markCacheMissByEviciton();
+    }
 
     // Imaged got evicted from the cache. Re-process it and retry.
-    TexturePackUtils::process(*this);
+    TexturePackUtils::processPackPNG(*this);
     return image(size);
 }
 

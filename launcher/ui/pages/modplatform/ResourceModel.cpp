@@ -17,7 +17,7 @@
 #include "BuildConfig.h"
 #include "Json.h"
 
-#include "net/Download.h"
+#include "net/ApiDownload.h"
 #include "net/NetJob.h"
 
 #include "modplatform/ModIndex.h"
@@ -31,6 +31,9 @@ QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 ResourceModel::ResourceModel(ResourceAPI* api) : QAbstractListModel(), m_api(api)
 {
     s_running_models.insert(this, true);
+#ifndef LAUNCHER_TEST
+    m_current_info_job.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+#endif
 }
 
 ResourceModel::~ResourceModel()
@@ -77,6 +80,8 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
             return pack->description;
         case UserDataTypes::SELECTED:
             return pack->isAnyVersionSelected();
+        case UserDataTypes::INSTALLED:
+            return this->isPackInstalled(pack);
         default:
             break;
     }
@@ -95,11 +100,12 @@ QHash<int, QByteArray> ResourceModel::roleNames() const
     roles[UserDataTypes::TITLE] = "title";
     roles[UserDataTypes::DESCRIPTION] = "description";
     roles[UserDataTypes::SELECTED] = "selected";
+    roles[UserDataTypes::INSTALLED] = "installed";
 
     return roles;
 }
 
-bool ResourceModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool ResourceModel::setData(const QModelIndex& index, const QVariant& value, [[maybe_unused]] int role)
 {
     int pos = index.row();
     if (pos >= m_packs.size() || pos < 0 || !index.isValid())
@@ -129,6 +135,32 @@ void ResourceModel::search()
     if (hasActiveSearchJob())
         return;
 
+    if (m_search_term.startsWith("#")) {
+        auto projectId = m_search_term.mid(1);
+        if (!projectId.isEmpty()) {
+            ResourceAPI::ProjectInfoCallbacks callbacks;
+
+            callbacks.on_fail = [this](QString reason) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                searchRequestFailed(reason, -1);
+            };
+            callbacks.on_abort = [this] {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                searchRequestAborted();
+            };
+
+            callbacks.on_succeed = [this](auto& doc, auto& pack) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                searchRequestForOneSucceeded(doc);
+            };
+            if (auto job = m_api->getProjectInfo({ projectId }, std::move(callbacks)); job)
+                runSearchJob(job);
+            return;
+        }
+    }
     auto args{ createSearchArguments() };
 
     auto callbacks{ createSearchCallbacks() };
@@ -175,6 +207,11 @@ void ResourceModel::loadEntry(QModelIndex& entry)
                     return;
                 versionRequestSucceeded(doc, pack, entry);
             };
+        if (!callbacks.on_fail)
+            callbacks.on_fail = [](QString reason, int) {
+                QMessageBox::critical(nullptr, tr("Error"),
+                                      tr("A network error occurred. Could not load project versions: %1").arg(reason));
+            };
 
         if (auto job = m_api->getProjectVersions(std::move(args), std::move(callbacks)); job)
             runInfoJob(job);
@@ -186,10 +223,23 @@ void ResourceModel::loadEntry(QModelIndex& entry)
 
         // Use default if no callbacks are set
         if (!callbacks.on_succeed)
-            callbacks.on_succeed = [this, entry](auto& doc, auto pack) {
+            callbacks.on_succeed = [this, entry](auto& doc, auto& newpack) {
                 if (!s_running_models.constFind(this).value())
                     return;
+                auto pack = newpack;
                 infoRequestSucceeded(doc, pack, entry);
+            };
+        if (!callbacks.on_fail)
+            callbacks.on_fail = [this](QString reason) {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info: %1").arg(reason));
+            };
+        if (!callbacks.on_abort)
+            callbacks.on_abort = [this] {
+                if (!s_running_models.constFind(this).value())
+                    return;
+                qCritical() << tr("The request was aborted for an unknown reason");
             };
 
         if (auto job = m_api->getProjectInfo(std::move(args), std::move(callbacks)); job)
@@ -267,8 +317,10 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     if (QPixmapCache::find(url.toString(), &pixmap))
         return { pixmap };
 
-    if (!m_current_icon_job)
+    if (!m_current_icon_job) {
         m_current_icon_job.reset(new NetJob("IconJob", APPLICATION->network()));
+        m_current_icon_job->setAskRetry(false);
+    }
 
     if (m_currently_running_icon_actions.contains(url))
         return {};
@@ -278,10 +330,10 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     auto cache_entry = APPLICATION->metacache()->resolveEntry(
         metaEntryBase(),
         QString("logos/%1").arg(QString(QCryptographicHash::hash(url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
-    auto icon_fetch_action = Net::Download::makeCached(url, cache_entry);
+    auto icon_fetch_action = Net::ApiDownload::makeCached(url, cache_entry);
 
     auto full_file_path = cache_entry->getFullPath();
-    connect(icon_fetch_action.get(), &NetAction::succeeded, this, [=] {
+    connect(icon_fetch_action.get(), &Task::succeeded, this, [=] {
         auto icon = QIcon(full_file_path);
         QPixmapCache::insert(url.toString(), icon.pixmap(icon.actualSize({ 64, 64 })));
 
@@ -289,7 +341,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
 
         emit dataChanged(index, index, { Qt::DecorationRole });
     });
-    connect(icon_fetch_action.get(), &NetAction::failed, this, [=] {
+    connect(icon_fetch_action.get(), &Task::failed, this, [=] {
         m_currently_running_icon_actions.remove(url);
         m_failed_icon_actions.insert(url);
     });
@@ -307,7 +359,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
 #define NEED_FOR_CALLBACK_ASSERT(name) \
     Q_ASSERT_X(0 != 0, #name, "You NEED to re-implement this if you intend on using the default callbacks.")
 
-QJsonArray ResourceModel::documentToArray(QJsonDocument& doc) const
+QJsonArray ResourceModel::documentToArray([[maybe_unused]] QJsonDocument& doc) const
 {
     NEED_FOR_CALLBACK_ASSERT("documentToArray");
     return {};
@@ -360,16 +412,42 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
         m_search_state = SearchState::CanFetchMore;
     }
 
+    QList<ModPlatform::IndexedPack::Ptr> filteredNewList;
+    for (auto p : newList)
+        if (checkFilters(p))
+            filteredNewList << p;
+
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.size() == 0)
+    if (filteredNewList.size() == 0)
         return;
 
-    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + newList.size() - 1);
-    m_packs.append(newList);
+    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + filteredNewList.size() - 1);
+    m_packs.append(filteredNewList);
     endInsertRows();
 }
 
-void ResourceModel::searchRequestFailed(QString reason, int network_error_code)
+void ResourceModel::searchRequestForOneSucceeded(QJsonDocument& doc)
+{
+    ModPlatform::IndexedPack::Ptr pack = std::make_shared<ModPlatform::IndexedPack>();
+
+    try {
+        auto obj = Json::requireObject(doc);
+        if (obj.contains("data"))
+            obj = Json::requireObject(obj, "data");
+        loadIndexedPack(*pack, obj);
+    } catch (const JSONValidationError& e) {
+        qDebug() << doc;
+        qWarning() << "Error while reading " << debugName() << " resource info: " << e.cause();
+    }
+
+    m_search_state = SearchState::Finished;
+
+    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + 1);
+    m_packs.append(pack);
+    endInsertRows();
+}
+
+void ResourceModel::searchRequestFailed([[maybe_unused]] QString reason, int network_error_code)
 {
     switch (network_error_code) {
         default:
@@ -487,4 +565,8 @@ void ResourceModel::removePack(const QString& rem)
         ver.is_currently_selected = false;
 }
 
+bool ResourceModel::checkVersionFilters(const ModPlatform::IndexedVersion& v)
+{
+    return (!optedOut(v));
+}
 }  // namespace ResourceDownload

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,6 +34,7 @@
  */
 
 #include "FlamePage.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_FlamePage.h"
 
 #include <QKeyEvent>
@@ -42,22 +43,36 @@
 #include "FlameModel.h"
 #include "InstanceImportTask.h"
 #include "Json.h"
+#include "StringUtils.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
-#include "modplatform/flame/FlameAPI.h"
+
+#include "net/ApiDownload.h"
 
 static FlameAPI api;
 
-FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog)
+FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
+    : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
-    connect(ui->searchButton, &QPushButton::clicked, this, &FlamePage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
     listModel = new Flame::ListModel(this);
     ui->packView->setModel(listModel);
 
     ui->versionSelectionBox->view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->versionSelectionBox->view()->parentWidget()->setMaximumHeight(300);
+
+    m_search_timer.setTimerType(Qt::TimerType::CoarseTimer);
+    m_search_timer.setSingleShot(true);
+
+    connect(&m_search_timer, &QTimer::timeout, this, &FlamePage::triggerSearch);
+
+    m_fetch_progress.hideIfInactive(true);
+    m_fetch_progress.setFixedHeight(24);
+    m_fetch_progress.progressFormat("");
+
+    ui->verticalLayout->insertWidget(2, &m_fetch_progress);
 
     // index is used to set the sorting with the curseforge api
     ui->sortByBox->addItem(tr("Sort by Featured"));
@@ -69,7 +84,7 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent) : QWidget(paren
 
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlamePage::onSelectionChanged);
-    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlamePage::onVersionSelectionChanged);
+    connect(ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlamePage::onVersionSelectionChanged);
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     ui->packDescription->setMetaEntry("FlamePacks");
@@ -88,6 +103,11 @@ bool FlamePage::eventFilter(QObject* watched, QEvent* event)
             triggerSearch();
             keyEvent->accept();
             return true;
+        } else {
+            if (m_search_timer.isActive())
+                m_search_timer.stop();
+
+            m_search_timer.start(350);
         }
     }
     return QWidget::eventFilter(watched, event);
@@ -112,9 +132,10 @@ void FlamePage::openedImpl()
 void FlamePage::triggerSearch()
 {
     listModel->searchWithTerm(ui->searchEdit->text(), ui->sortByBox->currentIndex());
+    m_fetch_progress.watch(listModel->activeSearchJob().get());
 }
 
-void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
+void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
 {
     ui->versionSelectionBox->clear();
 
@@ -130,9 +151,10 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
     if (current.versionsLoaded == false) {
         qDebug() << "Loading flame modpack versions";
         auto netJob = new NetJob(QString("Flame::PackVersions(%1)").arg(current.name), APPLICATION->network());
-        auto response = new QByteArray();
+        auto response = std::make_shared<QByteArray>();
         int addonId = current.addonId;
-        netJob->addNetAction(Net::Download::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
+        netJob->addNetAction(
+            Net::ApiDownload::makeByteArray(QString("https://api.curseforge.com/v1/mods/%1/files").arg(addonId), response));
 
         QObject::connect(netJob, &NetJob::succeeded, this, [this, response, addonId, curr] {
             if (addonId != current.addonId) {
@@ -155,7 +177,12 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             }
 
             for (auto version : current.versions) {
-                ui->versionSelectionBox->addItem(version.version, QVariant(version.downloadUrl));
+                auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
+                auto mcVersion = !version.mcVersion.isEmpty() && !version.version.contains(version.mcVersion)
+                                     ? QString(" for %1").arg(version.mcVersion)
+                                     : "";
+                ui->versionSelectionBox->addItem(QString("%1%2%3").arg(version.version, mcVersion, release_type),
+                                                 QVariant(version.downloadUrl));
             }
 
             QVariant current_updated;
@@ -170,10 +197,9 @@ void FlamePage::onSelectionChanged(QModelIndex curr, QModelIndex prev)
             }
             suggestCurrent();
         });
-        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] {
-            netJob->deleteLater();
-            delete response;
-        });
+        QObject::connect(netJob, &NetJob::finished, this, [response, netJob] { netJob->deleteLater(); });
+        connect(netJob, &NetJob::failed,
+                [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
         netJob->start();
     } else {
         for (auto version : current.versions) {
@@ -209,23 +235,22 @@ void FlamePage::suggestCurrent()
     extra_info.insert("pack_version_id", QString::number(version.fileId));
 
     dialog->setSuggestedPack(current.name, new InstanceImportTask(version.downloadUrl, this, std::move(extra_info)));
-    QString editedLogoName;
-    editedLogoName = "curseforge_" + current.logoName.section(".", 0, 0);
+    QString editedLogoName = "curseforge_" + current.logoName;
     listModel->getLogo(current.logoName, current.logoUrl,
                        [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }
 
-void FlamePage::onVersionSelectionChanged(QString data)
+void FlamePage::onVersionSelectionChanged(int index)
 {
     bool is_blocked = false;
     ui->versionSelectionBox->currentData().toInt(&is_blocked);
 
-    if (data.isNull() || data.isEmpty() || is_blocked) {
+    if (index == -1 || is_blocked) {
         m_selected_version_index = -1;
         return;
     }
 
-    m_selected_version_index = ui->versionSelectionBox->currentIndex();
+    m_selected_version_index = index;
 
     Q_ASSERT(current.versions.at(m_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
 
@@ -255,10 +280,8 @@ void FlamePage::updateUi()
         text += "<br>" + tr(" by ") + authorStrs.join(", ");
     }
 
-    if(current.extraInfoLoaded) {
-        if (!current.extra.issuesUrl.isEmpty()
-         || !current.extra.sourceUrl.isEmpty()
-         || !current.extra.wikiUrl.isEmpty()) {
+    if (current.extraInfoLoaded) {
+        if (!current.extra.issuesUrl.isEmpty() || !current.extra.sourceUrl.isEmpty() || !current.extra.wikiUrl.isEmpty()) {
             text += "<br><br>" + tr("External links:") + "<br>";
         }
 
@@ -270,10 +293,9 @@ void FlamePage::updateUi()
             text += "- " + tr("Source code: <a href=%1>%1</a>").arg(current.extra.sourceUrl) + "<br>";
     }
 
-
     text += "<hr>";
     text += api.getModDescription(current.addonId).toUtf8();
 
-    ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
     ui->packDescription->flush();
 }

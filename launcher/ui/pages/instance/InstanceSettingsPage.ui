@@ -35,13 +35,10 @@
    </item>
    <item>
     <widget class="QTabWidget" name="settingsTabs">
-     <property name="tabShape">
-      <enum>QTabWidget::Rounded</enum>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="minecraftTab">
+     <widget class="QWidget" name="minecraftPage">
       <attribute name="title">
        <string notr="true">Java</string>
       </attribute>
@@ -61,31 +58,7 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0" colspan="3">
-           <widget class="QLineEdit" name="javaPathTextBox"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="javaDetectBtn">
-            <property name="text">
-             <string>Auto-detect...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="javaBrowseBtn">
-            <property name="text">
-             <string>Browse...</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="javaTestBtn">
-            <property name="text">
-             <string>Test</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
+          <item row="4" column="0">
            <widget class="QCheckBox" name="skipCompatibilityCheckbox">
             <property name="toolTip">
              <string>If enabled, the launcher will not check if an instance is compatible with the selected Java version.</string>
@@ -94,6 +67,45 @@
              <string>Skip Java compatibility checks</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLineEdit" name="javaPathTextBox"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaBrowseBtn">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QPushButton" name="javaDownloadBtn">
+              <property name="text">
+               <string>Download Java</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaDetectBtn">
+              <property name="text">
+               <string>Auto-detect...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="javaTestBtn">
+              <property name="text">
+               <string>Test</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -116,7 +128,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelPermGen">
             <property name="text">
-             <string notr="true">PermGen:</string>
+             <string>PermGen:</string>
             </property>
            </widget>
           </item>
@@ -150,7 +162,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -172,7 +184,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>128</number>
+             <number>8</number>
             </property>
             <property name="maximum">
              <number>1048576</number>
@@ -194,7 +206,7 @@
              <string notr="true"> MiB</string>
             </property>
             <property name="minimum">
-             <number>64</number>
+             <number>4</number>
             </property>
             <property name="maximum">
              <number>999999999</number>
@@ -246,7 +258,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="javaTab">
+     <widget class="QWidget" name="javaPage">
       <attribute name="title">
        <string>Game windows</string>
       </attribute>
@@ -269,7 +281,7 @@
           <item>
            <widget class="QCheckBox" name="maximizedCheckBox">
             <property name="text">
-             <string>Start Minecraft maximized?</string>
+             <string>Start Minecraft maximized</string>
             </property>
            </widget>
           </item>
@@ -341,21 +353,21 @@
           <item>
            <widget class="QCheckBox" name="showConsoleCheck">
             <property name="text">
-             <string>Show console while the game is running?</string>
+             <string>Show console while the game is running</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="autoCloseConsoleCheck">
             <property name="text">
-             <string>Automatically close console when the game quits?</string>
+             <string>Automatically close console when the game quits</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QCheckBox" name="showConsoleErrorCheck">
             <property name="text">
-             <string>Show console when the game crashes?</string>
+             <string>Show console when the game crashes</string>
             </property>
            </widget>
           </item>
@@ -406,13 +418,23 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="customCommandsPage">
       <attribute name="title">
        <string>Custom commands</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="CustomCommands" name="customCommands" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="environmentVariablesPage">
+      <attribute name="title">
+       <string>Environment variables</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_16">
+       <item>
+        <widget class="EnvironmentVariables" name="environmentVariables" native="true"/>
        </item>
       </layout>
      </widget>
@@ -435,18 +457,52 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_7">
-          <item>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="useNativeOpenALCheck">
+            <property name="text">
+             <string>Use system installation of OpenAL</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelGLFWPath">
+            <property name="text">
+             <string>&amp;GLFW library path</string>
+            </property>
+            <property name="buddy">
+             <cstring>lineEditGLFWPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
            <widget class="QCheckBox" name="useNativeGLFWCheck">
             <property name="text">
              <string>Use system installation of GLFW</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QCheckBox" name="useNativeOpenALCheck">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEditGLFWPath">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelOpenALPath">
             <property name="text">
-             <string>Use system installation of OpenAL</string>
+             <string>&amp;OpenAL library path</string>
+            </property>
+            <property name="buddy">
+             <cstring>lineEditOpenALPath</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="lineEditOpenALPath">
+            <property name="enabled">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -518,6 +574,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="useZink">
+            <property name="toolTip">
+             <string>Use Zink, a Mesa OpenGL driver that implements OpenGL on top of Vulkan. Performance may vary depending on the situation. Note: If no suitable Vulkan driver is found, software rendering will be used.</string>
+            </property>
+            <property name="text">
+             <string>Use Zink</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -541,6 +607,31 @@
        <string>Miscellaneous</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QGroupBox" name="legacySettingsGroupBox">
+         <property name="title">
+          <string>Legacy settings</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_17">
+          <item>
+           <widget class="QCheckBox" name="onlineFixes">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Emulates usages of old online services which are no longer operating.&lt;/p&gt;&lt;p&gt;Current fixes include: skin and online mode support.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable online fixes (experimental)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <widget class="QGroupBox" name="gameTimeGroupBox">
          <property name="enabled">
@@ -576,7 +667,7 @@
        <item>
         <widget class="QGroupBox" name="serverJoinGroupBox">
          <property name="title">
-          <string>Set a server to join on launch</string>
+          <string>Set a target to join on launch</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -584,26 +675,26 @@
          <property name="checked">
           <bool>false</bool>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_11">
-          <item>
-           <layout class="QGridLayout" name="serverJoinLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="serverJoinAddressLabel">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Server address:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="serverJoinAddress"/>
-            </item>
-           </layout>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="serverJoinAddressButton">
+            <property name="text">
+             <string>Server address:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="serverJoinAddress"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="worldJoinButton">
+            <property name="text">
+             <string>Singleplayer world</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QComboBox" name="worldsCb"/>
           </item>
          </layout>
         </widget>
@@ -708,15 +799,23 @@
    <header>ui/widgets/CustomCommands.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>EnvironmentVariables</class>
+   <extends>QWidget</extends>
+   <header>ui/widgets/EnvironmentVariables.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>openGlobalJavaSettingsButton</tabstop>
   <tabstop>settingsTabs</tabstop>
   <tabstop>javaSettingsGroupBox</tabstop>
   <tabstop>javaPathTextBox</tabstop>
-  <tabstop>javaDetectBtn</tabstop>
   <tabstop>javaBrowseBtn</tabstop>
+  <tabstop>javaDownloadBtn</tabstop>
+  <tabstop>javaDetectBtn</tabstop>
   <tabstop>javaTestBtn</tabstop>
+  <tabstop>skipCompatibilityCheckbox</tabstop>
   <tabstop>memoryGroupBox</tabstop>
   <tabstop>minMemSpinBox</tabstop>
   <tabstop>maxMemSpinBox</tabstop>
@@ -736,6 +835,18 @@
   <tabstop>useNativeOpenALCheck</tabstop>
   <tabstop>showGameTime</tabstop>
   <tabstop>recordGameTime</tabstop>
+  <tabstop>miscellaneousSettingsBox</tabstop>
+  <tabstop>closeAfterLaunchCheck</tabstop>
+  <tabstop>quitAfterGameStopCheck</tabstop>
+  <tabstop>perfomanceGroupBox</tabstop>
+  <tabstop>enableFeralGamemodeCheck</tabstop>
+  <tabstop>enableMangoHud</tabstop>
+  <tabstop>useDiscreteGpuCheck</tabstop>
+  <tabstop>gameTimeGroupBox</tabstop>
+  <tabstop>serverJoinGroupBox</tabstop>
+  <tabstop>serverJoinAddress</tabstop>
+  <tabstop>instanceAccountGroupBox</tabstop>
+  <tabstop>instanceAccountSelector</tabstop>
  </tabstops>
  <resources/>
  <connections/>

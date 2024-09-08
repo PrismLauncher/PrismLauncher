@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <QLayout>
 
 #include "QObjectPtr.h"
+#include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "ui/pages/BasePageProvider.h"
 
@@ -49,7 +50,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
    public:
     using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
 
-    ResourceDownloadDialog(QWidget* parent, const std::shared_ptr<ResourceFolderModel> base_model);
+    ResourceDownloadDialog(QWidget* parent, std::shared_ptr<ResourceFolderModel> base_model);
 
     void initializeContainer();
     void connectButtons();
@@ -60,7 +61,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     QString dialogTitle() override { return tr("Download %1").arg(resourcesString()); };
 
     bool selectPage(QString pageId);
-    ResourcePage* getSelectedPage();
+    ResourcePage* selectedPage();
 
     void addResource(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
     void removeResource(const QString&);
@@ -81,11 +82,12 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     [[nodiscard]] virtual QString geometrySaveKey() const { return ""; }
     void setButtonStatus();
 
+    [[nodiscard]] virtual GetModDependenciesTask::Ptr getModDependenciesTask() { return nullptr; }
+
    protected:
     const std::shared_ptr<ResourceFolderModel> m_base_model;
 
     PageContainer* m_container = nullptr;
-    ResourcePage* m_selectedPage = nullptr;
 
     QDialogButtonBox m_buttons;
     QVBoxLayout m_vertical_layout;
@@ -103,6 +105,9 @@ class ModDownloadDialog final : public ResourceDownloadDialog {
     [[nodiscard]] QString geometrySaveKey() const override { return "ModDownloadGeometry"; }
 
     QList<BasePage*> getPages() override;
+    GetModDependenciesTask::Ptr getModDependenciesTask() override;
+
+    void setModMetadata(std::shared_ptr<Metadata::ModStruct>);
 
    private:
     BaseInstance* m_instance;

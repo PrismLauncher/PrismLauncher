@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -34,11 +34,28 @@
  */
 
 #pragma once
-#include <QString>
 #include <QByteArray>
-#include <QVector>
-#include <katabasis/Bits.h>
 #include <QJsonObject>
+#include <QString>
+#include <QVector>
+
+#include <QDateTime>
+#include <QMap>
+#include <QString>
+#include <QVariantMap>
+
+enum class Validity { None, Assumed, Certain };
+
+struct Token {
+    QDateTime issueInstant;
+    QDateTime notAfter;
+    QString token;
+    QString refresh_token;
+    QVariantMap extra;
+
+    Validity validity = Validity::None;
+    bool persistent = true;
+};
 
 struct Skin {
     QString id;
@@ -59,7 +76,7 @@ struct Cape {
 struct MinecraftEntitlement {
     bool ownsMinecraft = false;
     bool canPlayMinecraft = false;
-    Katabasis::Validity validity = Katabasis::Validity::None;
+    Validity validity = Validity::None;
 };
 
 struct MinecraftProfile {
@@ -68,42 +85,19 @@ struct MinecraftProfile {
     Skin skin;
     QString currentCape;
     QMap<QString, Cape> capes;
-    Katabasis::Validity validity = Katabasis::Validity::None;
+    Validity validity = Validity::None;
 };
 
-enum class AccountType {
-    MSA,
-    Mojang,
-    Offline
-};
+enum class AccountType { MSA, Offline };
 
-enum class AccountState {
-    Unchecked,
-    Offline,
-    Working,
-    Online,
-    Disabled,
-    Errored,
-    Expired,
-    Gone
-};
+enum class AccountState { Unchecked, Offline, Working, Online, Disabled, Errored, Expired, Gone };
 
 struct AccountData {
     QJsonObject saveState() const;
-    bool resumeStateFromV2(QJsonObject data);
     bool resumeStateFromV3(QJsonObject data);
 
     //! userName for Mojang accounts, gamertag for MSA
     QString accountDisplayString() const;
-
-    //! Only valid for Mojang accounts. MSA does not preserve this information
-    QString userName() const;
-
-    //! Only valid for Mojang accounts.
-    QString clientToken() const;
-    void setClientToken(QString clientToken);
-    void invalidateClientToken();
-    void generateClientTokenIfMissing();
 
     //! Yggdrasil access token, as passed to the game.
     QString accessToken() const;
@@ -114,19 +108,17 @@ struct AccountData {
     QString lastError() const;
 
     AccountType type = AccountType::MSA;
-    bool legacy = false;
-    bool canMigrateToMSA = false;
 
     QString msaClientID;
-    Katabasis::Token msaToken;
-    Katabasis::Token userToken;
-    Katabasis::Token xboxApiToken;
-    Katabasis::Token mojangservicesToken;
+    Token msaToken;
+    Token userToken;
+    Token xboxApiToken;
+    Token mojangservicesToken;
 
-    Katabasis::Token yggdrasilToken;
+    Token yggdrasilToken;
     MinecraftProfile minecraftProfile;
     MinecraftEntitlement minecraftEntitlement;
-    Katabasis::Validity validity_ = Katabasis::Validity::None;
+    Validity validity_ = Validity::None;
 
     // runtime only information (not saved with the account)
     QString internalId;

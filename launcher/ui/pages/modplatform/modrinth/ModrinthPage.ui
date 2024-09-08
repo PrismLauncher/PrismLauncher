@@ -10,42 +10,13 @@
     <height>600</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label_2">
-     <property name="font">
-      <font>
-       <italic>true</italic>
-      </font>
-     </property>
-     <property name="text">
-      <string>Note: Modrinth modpacks are still in alpha phase. Some things may be rough on the edges, or not working at all! Use it with caution.</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
+    <widget class="QLineEdit" name="searchEdit">
+     <property name="placeholderText">
+      <string>Search and filter ...</string>
      </property>
     </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout">
-     <item>
-      <widget class="QLineEdit" name="searchEdit">
-       <property name="placeholderText">
-        <string>Search and filter ...</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="searchButton">
-       <property name="text">
-        <string>Search</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout">
@@ -107,8 +78,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>searchEdit</tabstop>
-  <tabstop>searchButton</tabstop>
   <tabstop>packView</tabstop>
   <tabstop>packDescription</tabstop>
   <tabstop>sortByBox</tabstop>

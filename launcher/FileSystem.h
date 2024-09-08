@@ -46,6 +46,7 @@
 #include <QFlags>
 #include <QLocalServer>
 #include <QObject>
+#include <QPair>
 #include <QThread>
 
 namespace FS {
@@ -61,7 +62,17 @@ class FileSystemException : public ::Exception {
 void write(const QString& filename, const QByteArray& data);
 
 /**
- * read data from a file safely\
+ * append data to a file safely
+ */
+void appendSafe(const QString& filename, const QByteArray& data);
+
+/**
+ * append data to a file
+ */
+void append(const QString& filename, const QByteArray& data);
+
+/**
+ * read data from a file safely
  */
 QByteArray read(const QString& filename);
 
@@ -80,7 +91,13 @@ bool ensureFilePathExists(QString filenamepath);
  * Creates all the folders in a path for the specified path
  * last segment of the path is treated as a folder name and is created!
  */
-bool ensureFolderPathExists(QString filenamepath);
+bool ensureFolderPathExists(const QFileInfo folderPath);
+
+/**
+ * Creates all the folders in a path for the specified path
+ * last segment of the path is treated as a folder name and is created!
+ */
+bool ensureFolderPathExists(const QString folderPathName);
 
 /**
  * @brief Copies a directory and it's contents from src to dest
@@ -108,13 +125,21 @@ class copy : public QObject {
         m_whitelist = whitelist;
         return *this;
     }
+    copy& overwrite(const bool overwrite)
+    {
+        m_overwrite = overwrite;
+        return *this;
+    }
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    int totalCopied() { return m_copied; }
+    qsizetype totalCopied() { return m_copied; }
+    qsizetype totalFailed() { return m_failedPaths.length(); }
+    QStringList failed() { return m_failedPaths; }
 
    signals:
     void fileCopied(const QString& relativeName);
+    void copyFailed(const QString& relativeName);
     // TODO: maybe add a "shouldCopy" signal in the future?
 
    private:
@@ -124,9 +149,11 @@ class copy : public QObject {
     bool m_followSymlinks = true;
     const IPathMatcher* m_matcher = nullptr;
     bool m_whitelist = false;
+    bool m_overwrite = false;
     QDir m_src;
     QDir m_dst;
-    int m_copied;
+    qsizetype m_copied;
+    QStringList m_failedPaths;
 };
 
 struct LinkPair {
@@ -213,6 +240,7 @@ class create_link : public QObject {
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
     int totalLinked() { return m_linked; }
+    int totalToLink() { return static_cast<int>(m_links_to_make.size()); }
 
     void runPrivileged() { runPrivileged(QString()); }
     void runPrivileged(const QString& offset);
@@ -315,6 +343,8 @@ QString NormalizePath(QString path);
 
 QString RemoveInvalidFilenameChars(QString string, QChar replaceWith = '-');
 
+QString RemoveInvalidPathChars(QString string, QChar replaceWith = '-');
+
 QString DirNameFromString(QString string, QString inDir = ".");
 
 /// Checks if the a given Path contains "!"
@@ -349,6 +379,7 @@ enum class FilesystemType {
     HFSX,
     FUSEBLK,
     F2FS,
+    BCACHEFS,
     UNKNOWN
 };
 
@@ -360,25 +391,25 @@ enum class FilesystemType {
  * QMap is ordered
  *
  */
-static const QMap<FilesystemType, QStringList> s_filesystem_type_names = {
-    {FilesystemType::FAT,        { "FAT" }},
-    {FilesystemType::NTFS,       { "NTFS" }},
-    {FilesystemType::REFS,       { "REFS" }},
-    {FilesystemType::EXT_2_OLD,  { "EXT_2_OLD", "EXT2_OLD" }},
-    {FilesystemType::EXT_2_3_4,  { "EXT2/3/4", "EXT_2_3_4", "EXT2", "EXT3", "EXT4" }},
-    {FilesystemType::EXT,        { "EXT" }},
-    {FilesystemType::XFS,        { "XFS" }},
-    {FilesystemType::BTRFS,      { "BTRFS" }},
-    {FilesystemType::NFS,        { "NFS" }},
-    {FilesystemType::ZFS,        { "ZFS" }},
-    {FilesystemType::APFS,       { "APFS" }},
-    {FilesystemType::HFS,        { "HFS" }},
-    {FilesystemType::HFSPLUS,    { "HFSPLUS" }},
-    {FilesystemType::HFSX,       { "HFSX" }},
-    {FilesystemType::FUSEBLK,    { "FUSEBLK" }},
-    {FilesystemType::F2FS,       { "F2FS" }},
-    {FilesystemType::UNKNOWN,    { "UNKNOWN" }}
-};
+static const QMap<FilesystemType, QStringList> s_filesystem_type_names = { { FilesystemType::FAT, { "FAT" } },
+                                                                           { FilesystemType::NTFS, { "NTFS" } },
+                                                                           { FilesystemType::REFS, { "REFS" } },
+                                                                           { FilesystemType::EXT_2_OLD, { "EXT_2_OLD", "EXT2_OLD" } },
+                                                                           { FilesystemType::EXT_2_3_4,
+                                                                             { "EXT2/3/4", "EXT_2_3_4", "EXT2", "EXT3", "EXT4" } },
+                                                                           { FilesystemType::EXT, { "EXT" } },
+                                                                           { FilesystemType::XFS, { "XFS" } },
+                                                                           { FilesystemType::BTRFS, { "BTRFS" } },
+                                                                           { FilesystemType::NFS, { "NFS" } },
+                                                                           { FilesystemType::ZFS, { "ZFS" } },
+                                                                           { FilesystemType::APFS, { "APFS" } },
+                                                                           { FilesystemType::HFS, { "HFS" } },
+                                                                           { FilesystemType::HFSPLUS, { "HFSPLUS" } },
+                                                                           { FilesystemType::HFSX, { "HFSX" } },
+                                                                           { FilesystemType::FUSEBLK, { "FUSEBLK" } },
+                                                                           { FilesystemType::F2FS, { "F2FS" } },
+                                                                           { FilesystemType::BCACHEFS, { "BCACHEFS" } },
+                                                                           { FilesystemType::UNKNOWN, { "UNKNOWN" } } };
 
 /**
  * @brief Get the string name of Filesystem enum object
@@ -430,7 +461,7 @@ QString nearestExistentAncestor(const QString& path);
 FilesystemInfo statFS(const QString& path);
 
 static const QList<FilesystemType> s_clone_filesystems = { FilesystemType::BTRFS, FilesystemType::APFS, FilesystemType::ZFS,
-                                                           FilesystemType::XFS, FilesystemType::REFS };
+                                                           FilesystemType::XFS,   FilesystemType::REFS, FilesystemType::BCACHEFS };
 
 /**
  * @brief if the Filesystem is reflink/clone capable
@@ -470,7 +501,10 @@ class clone : public QObject {
 
     bool operator()(bool dryRun = false) { return operator()(QString(), dryRun); }
 
-    int totalCloned() { return m_cloned; }
+    qsizetype totalCloned() { return m_cloned; }
+    qsizetype totalFailed() { return m_failedClones.length(); }
+
+    QList<QPair<QString, QString>> failed() { return m_failedClones; }
 
    signals:
     void fileCloned(const QString& src, const QString& dst);
@@ -484,7 +518,8 @@ class clone : public QObject {
     bool m_whitelist = false;
     QDir m_src;
     QDir m_dst;
-    int m_cloned;
+    qsizetype m_cloned;
+    QList<QPair<QString, QString>> m_failedClones;
 };
 
 /**
@@ -520,5 +555,11 @@ bool canLinkOnFS(FilesystemType type);
 bool canLink(const QString& src, const QString& dst);
 
 uintmax_t hardLinkCount(const QString& path);
+
+#ifdef Q_OS_WIN
+QString getPathNameInLocal8bit(const QString& file);
+#endif
+
+QString getUniqueResourceName(const QString& filePath);
 
 }  // namespace FS

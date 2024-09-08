@@ -15,33 +15,31 @@
 
 #pragma once
 
+#include <QDomElement>
 #include <QObject>
 #include <QString>
-#include <QDomElement>
 #include <memory>
 
-class NewsEntry : public QObject
-{
+class NewsEntry : public QObject {
     Q_OBJECT
 
-public:
+   public:
     /*!
      * Constructs an empty news entry.
      */
-    explicit NewsEntry(QObject* parent=0);
+    explicit NewsEntry(QObject* parent = 0);
 
     /*!
      * Constructs a new news entry.
      * Note that content may contain HTML.
      */
-    NewsEntry(const QString& title, const QString& content, const QString& link, QObject* parent=0);
+    NewsEntry(const QString& title, const QString& content, const QString& link, QObject* parent = 0);
 
     /*!
      * Attempts to load information from the given XML element into the given news entry pointer.
      * If this fails, the function will return false and store an error message in the errorMsg pointer.
      */
-    static bool fromXmlElement(const QDomElement& element, NewsEntry* entry, QString* errorMsg=0);
-
+    static bool fromXmlElement(const QDomElement& element, NewsEntry* entry, QString* errorMsg = 0);
 
     //! The post title.
     QString title;
@@ -53,5 +51,4 @@ public:
     QString link;
 };
 
-typedef std::shared_ptr<NewsEntry> NewsEntryPtr;
-
+using NewsEntryPtr = std::shared_ptr<NewsEntry>;

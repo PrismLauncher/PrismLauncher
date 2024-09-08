@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
- *  PolyMC - Minecraft Launcher
+ *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -36,32 +36,24 @@
 #pragma once
 #include <QObject>
 
-#include "QObjectPtr.h"
 #include "minecraft/auth/AuthStep.h"
 
-#include <katabasis/DeviceFlow.h>
-
+#include <QtNetworkAuth/qoauth2authorizationcodeflow.h>
 class MSAStep : public AuthStep {
     Q_OBJECT
-public:
-    enum Action {
-        Refresh,
-        Login
-    };
-public:
-    explicit MSAStep(AccountData *data, Action action);
-    virtual ~MSAStep() noexcept;
+   public:
+    explicit MSAStep(AccountData* data, bool silent = false);
+    virtual ~MSAStep() noexcept = default;
 
     void perform() override;
-    void rehydrate() override;
 
     QString describe() override;
 
-private slots:
-    void onOAuthActivityChanged(Katabasis::Activity activity);
+   signals:
+    void authorizeWithBrowser(const QUrl& url);
 
-private:
-    Katabasis::DeviceFlow *m_oauth2 = nullptr;
-    Action m_action;
+   private:
+    bool m_silent;
     QString m_clientId;
+    QOAuth2AuthorizationCodeFlow oauth2;
 };

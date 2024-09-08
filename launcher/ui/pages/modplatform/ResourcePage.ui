@@ -10,48 +10,55 @@
     <height>685</height>
    </rect>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0" colspan="4">
-    <layout class="QGridLayout" name="gridLayout_3">
-     <item row="1" column="2">
-      <widget class="ProjectDescriptionPage" name="packDescription">
-       <property name="openExternalLinks">
-        <bool>false</bool>
-       </property>
-       <property name="openLinks">
-        <bool>false</bool>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="resourceFilterButton">
+       <property name="text">
+        <string>Filter options</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QListView" name="packView">
-       <property name="horizontalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="alternatingRowColors">
-        <bool>true</bool>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>48</width>
-         <height>48</height>
-        </size>
-       </property>
-      </widget>
+     <item>
+      <widget class="QLineEdit" name="searchEdit"/>
      </item>
     </layout>
    </item>
-   <item row="0" column="3">
-    <widget class="QPushButton" name="searchButton">
-     <property name="text">
-      <string>Search</string>
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
+     </property>
+     <widget class="QWidget" name="filterWidget" native="true"/>
+     <widget class="QListView" name="packView">
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>48</width>
+        <height>48</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="ProjectDescriptionPage" name="packDescription">
+      <property name="openExternalLinks">
+       <bool>false</bool>
+      </property>
+      <property name="openLinks">
+       <bool>false</bool>
+      </property>
+     </widget>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QLineEdit" name="searchEdit"/>
-   </item>
-   <item row="2" column="0" colspan="4">
+   <item>
     <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0,0">
      <item row="0" column="2">
       <widget class="QComboBox" name="versionSelectionBox"/>
@@ -74,20 +81,6 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="1">
-    <widget class="QPushButton" name="resourceFilterButton">
-     <property name="text">
-      <string>Filter options</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="2">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -98,8 +91,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>searchEdit</tabstop>
-  <tabstop>searchButton</tabstop>
   <tabstop>packView</tabstop>
   <tabstop>packDescription</tabstop>
   <tabstop>sortByBox</tabstop>

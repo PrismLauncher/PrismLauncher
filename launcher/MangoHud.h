@@ -25,6 +25,8 @@
 namespace MangoHud {
 
 QString getLibraryString();
+QString findLibrary(QString libName);
 QString getBwrapBinary();
 QString getXDGDbusProxyBinary();
+
 }  // namespace MangoHud

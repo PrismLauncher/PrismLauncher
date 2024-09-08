@@ -56,14 +56,14 @@ class DataPack : public Resource {
 
     bool valid() const override;
 
-    [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
+    [[nodiscard]] int compare(Resource const& other, SortType type) const override;
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
 
    protected:
     mutable QMutex m_data_lock;
 
     /* The 'version' of a data pack, as defined in the pack.mcmeta file.
-     * See https://minecraft.fandom.com/wiki/Data_pack#pack.mcmeta
+     * See https://minecraft.wiki/w/Data_pack#pack.mcmeta
      */
     int m_pack_format = 0;
 

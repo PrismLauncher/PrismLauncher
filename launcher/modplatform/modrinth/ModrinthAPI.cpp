@@ -6,22 +6,22 @@
 
 #include "Application.h"
 #include "Json.h"
+#include "net/ApiDownload.h"
+#include "net/ApiUpload.h"
 #include "net/NetJob.h"
 #include "net/Upload.h"
 
-Task::Ptr ModrinthAPI::currentVersion(QString hash, QString hash_format, QByteArray* response)
+Task::Ptr ModrinthAPI::currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersion"), APPLICATION->network());
 
-    netJob->addNetAction(Net::Download::makeByteArray(
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(
         QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1?algorithm=%2").arg(hash, hash_format), response));
-
-    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
 
     return netJob;
 }
 
-Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format, QByteArray* response)
+Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format, std::shared_ptr<QByteArray> response)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersions"), APPLICATION->network());
 
@@ -33,9 +33,7 @@ Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_f
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), response, body_raw));
-
-    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), response, body_raw));
 
     return netJob;
 }
@@ -43,8 +41,8 @@ Task::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_f
 Task::Ptr ModrinthAPI::latestVersion(QString hash,
                                      QString hash_format,
                                      std::optional<std::list<Version>> mcVersions,
-                                     std::optional<ModLoaderTypes> loaders,
-                                     QByteArray* response)
+                                     std::optional<ModPlatform::ModLoaderTypes> loaders,
+                                     std::shared_ptr<QByteArray> response)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
 
@@ -64,10 +62,8 @@ Task::Ptr ModrinthAPI::latestVersion(QString hash,
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(
+    netJob->addNetAction(Net::ApiUpload::makeByteArray(
         QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hash_format), response, body_raw));
-
-    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
 
     return netJob;
 }
@@ -75,8 +71,8 @@ Task::Ptr ModrinthAPI::latestVersion(QString hash,
 Task::Ptr ModrinthAPI::latestVersions(const QStringList& hashes,
                                       QString hash_format,
                                       std::optional<std::list<Version>> mcVersions,
-                                      std::optional<ModLoaderTypes> loaders,
-                                      QByteArray* response)
+                                      std::optional<ModPlatform::ModLoaderTypes> loaders,
+                                      std::shared_ptr<QByteArray> response)
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersions"), APPLICATION->network());
 
@@ -99,35 +95,66 @@ Task::Ptr ModrinthAPI::latestVersions(const QStringList& hashes,
     QJsonDocument body(body_obj);
     auto body_raw = body.toJson();
 
-    netJob->addNetAction(Net::Upload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), response, body_raw));
-
-    QObject::connect(netJob.get(), &NetJob::finished, [response] { delete response; });
+    netJob->addNetAction(
+        Net::ApiUpload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files/update"), response, body_raw));
 
     return netJob;
 }
 
-Task::Ptr ModrinthAPI::getProjects(QStringList addonIds, QByteArray* response) const
+Task::Ptr ModrinthAPI::getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const
 {
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetProjects"), APPLICATION->network());
     auto searchUrl = getMultipleModInfoURL(addonIds);
 
-    netJob->addNetAction(Net::Download::makeByteArray(QUrl(searchUrl), response));
-
-    QObject::connect(netJob.get(), &NetJob::finished, [response, netJob] {
-        delete response;
-    });
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
 
     return netJob;
 }
 
-// https://docs.modrinth.com/api-spec/#tag/projects/operation/searchProjects
-static QList<ResourceAPI::SortingMethod> s_sorts = { { 1, "relevance", QObject::tr("Sort by Relevance") },
-                                                     { 2, "downloads", QObject::tr("Sort by Downloads") },
-                                                     { 3, "follows", QObject::tr("Sort by Follows") },
-                                                     { 4, "newest", QObject::tr("Sort by Last Updated") },
-                                                     { 5, "updated", QObject::tr("Sort by Newest") } };
-
 QList<ResourceAPI::SortingMethod> ModrinthAPI::getSortingMethods() const
 {
-    return s_sorts;
+    // https://docs.modrinth.com/api-spec/#tag/projects/operation/searchProjects
+    return { { 1, "relevance", QObject::tr("Sort by Relevance") },
+             { 2, "downloads", QObject::tr("Sort by Downloads") },
+             { 3, "follows", QObject::tr("Sort by Follows") },
+             { 4, "newest", QObject::tr("Sort by Newest") },
+             { 5, "updated", QObject::tr("Sort by Last Updated") } };
 }
+
+Task::Ptr ModrinthAPI::getModCategories(std::shared_ptr<QByteArray> response)
+{
+    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCategories"), APPLICATION->network());
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(BuildConfig.MODRINTH_PROD_URL + "/tag/category"), response));
+    QObject::connect(netJob.get(), &Task::failed, [](QString msg) { qDebug() << "Modrinth failed to get categories:" << msg; });
+    return netJob;
+}
+
+QList<ModPlatform::Category> ModrinthAPI::loadModCategories(std::shared_ptr<QByteArray> response)
+{
+    QList<ModPlatform::Category> categories;
+    QJsonParseError parse_error{};
+    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+    if (parse_error.error != QJsonParseError::NoError) {
+        qWarning() << "Error while parsing JSON response from categories at " << parse_error.offset
+                   << " reason: " << parse_error.errorString();
+        qWarning() << *response;
+        return categories;
+    }
+
+    try {
+        auto arr = Json::requireArray(doc);
+
+        for (auto val : arr) {
+            auto cat = Json::requireObject(val);
+            auto name = Json::requireString(cat, "name");
+            if (Json::ensureString(cat, "project_type", "") == "mod")
+                categories.push_back({ name, name });
+        }
+
+    } catch (Json::JsonException& e) {
+        qCritical() << "Failed to parse response from a version request.";
+        qCritical() << e.what();
+        qDebug() << doc;
+    }
+    return categories;
+};

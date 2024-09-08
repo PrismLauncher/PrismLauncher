@@ -15,35 +15,32 @@
 
 #pragma once
 
-#include <launch/LaunchStep.h>
 #include <QObjectPtr.h>
+#include <launch/LaunchStep.h>
 #include <QDnsLookup>
 
-#include "minecraft/launch/MinecraftServerTarget.h"
+#include "minecraft/launch/MinecraftTarget.h"
 
-class LookupServerAddress: public LaunchStep {
-Q_OBJECT
-public:
-    explicit LookupServerAddress(LaunchTask *parent);
-    virtual ~LookupServerAddress() {};
+class LookupServerAddress : public LaunchStep {
+    Q_OBJECT
+   public:
+    explicit LookupServerAddress(LaunchTask* parent);
+    virtual ~LookupServerAddress() = default;
 
     virtual void executeTask();
     virtual bool abort();
-    virtual bool canAbort() const
-    {
-        return true;
-    }
+    virtual bool canAbort() const { return true; }
 
-    void setLookupAddress(const QString &lookupAddress);
-    void setOutputAddressPtr(MinecraftServerTargetPtr output);
+    void setLookupAddress(const QString& lookupAddress);
+    void setOutputAddressPtr(MinecraftTarget::Ptr output);
 
-private slots:
+   private slots:
     void on_dnsLookupFinished();
 
-private:
-    void resolve(const QString &address, quint16 port);
+   private:
+    void resolve(const QString& address, quint16 port);
 
-    QDnsLookup *m_dnsLookup;
+    QDnsLookup* m_dnsLookup;
     QString m_lookupAddress;
-    MinecraftServerTargetPtr m_output;
+    MinecraftTarget::Ptr m_output;
 };

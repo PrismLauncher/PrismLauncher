@@ -5,6 +5,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +38,10 @@
  */
 
 #include "FlameResourcePages.h"
+#include <QList>
+#include <memory>
+#include "modplatform/ModIndex.h"
+#include "modplatform/flame/FlameAPI.h"
 #include "ui_ResourcePage.h"
 
 #include "FlameResourceModels.h"
@@ -44,13 +49,7 @@
 
 namespace ResourceDownload {
 
-static bool isOptedOut(ModPlatform::IndexedVersion const& ver)
-{
-    return ver.downloadUrl.isEmpty();
-}
-
-FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
-    : ModPage(dialog, instance)
+FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
     m_model = new FlameModModel(instance);
     m_ui->packView->setModel(m_model);
@@ -61,21 +60,10 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance)
     // so it's best not to connect them in the parent's contructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameModPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlameModPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameModPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
-}
-
-auto FlameModPage::validateVersion(ModPlatform::IndexedVersion& ver, QString mineVer, std::optional<ResourceAPI::ModLoaderTypes> loaders) const -> bool
-{
-    Q_UNUSED(loaders);
-    return ver.mcVersion.contains(mineVer) && !ver.downloadUrl.isEmpty();
-}
-
-bool FlameModPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
 }
 
 void FlameModPage::openUrl(const QUrl& url)
@@ -86,7 +74,7 @@ void FlameModPage::openUrl(const QUrl& url)
         if (query.startsWith("remoteUrl=")) {
             // attempt to resolve url from warning page
             query.remove(0, 10);
-            ModPage::openUrl({QUrl::fromPercentEncoding(query.toUtf8())}); // double decoding is necessary
+            ModPage::openUrl({ QUrl::fromPercentEncoding(query.toUtf8()) });  // double decoding is necessary
             return;
         }
     }
@@ -106,15 +94,11 @@ FlameResourcePackPage::FlameResourcePackPage(ResourcePackDownloadDialog* dialog,
     // so it's best not to connect them in the parent's contructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameResourcePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameResourcePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &FlameResourcePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameResourcePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
-}
-
-bool FlameResourcePackPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
 }
 
 void FlameResourcePackPage::openUrl(const QUrl& url)
@@ -125,7 +109,7 @@ void FlameResourcePackPage::openUrl(const QUrl& url)
         if (query.startsWith("remoteUrl=")) {
             // attempt to resolve url from warning page
             query.remove(0, 10);
-            ResourcePackResourcePage::openUrl({QUrl::fromPercentEncoding(query.toUtf8())}); // double decoding is necessary
+            ResourcePackResourcePage::openUrl({ QUrl::fromPercentEncoding(query.toUtf8()) });  // double decoding is necessary
             return;
         }
     }
@@ -145,15 +129,11 @@ FlameTexturePackPage::FlameTexturePackPage(TexturePackDownloadDialog* dialog, Ba
     // so it's best not to connect them in the parent's contructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameTexturePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameTexturePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &FlameTexturePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameTexturePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
-}
-
-bool FlameTexturePackPage::optedOut(ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
 }
 
 void FlameTexturePackPage::openUrl(const QUrl& url)
@@ -164,7 +144,7 @@ void FlameTexturePackPage::openUrl(const QUrl& url)
         if (query.startsWith("remoteUrl=")) {
             // attempt to resolve url from warning page
             query.remove(0, 10);
-            ResourcePackResourcePage::openUrl({QUrl::fromPercentEncoding(query.toUtf8())}); // double decoding is necessary
+            ResourcePackResourcePage::openUrl({ QUrl::fromPercentEncoding(query.toUtf8()) });  // double decoding is necessary
             return;
         }
     }
@@ -172,11 +152,74 @@ void FlameTexturePackPage::openUrl(const QUrl& url)
     TexturePackResourcePage::openUrl(url);
 }
 
+FlameShaderPackPage::FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
+    : ShaderPackResourcePage(dialog, instance)
+{
+    m_model = new FlameShaderPackModel(instance);
+    m_ui->packView->setModel(m_model);
+
+    addSortings();
+
+    // sometimes Qt just ignores virtual slots and doesn't work as intended it seems,
+    // so it's best not to connect them in the parent's constructor...
+    connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
+    connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameShaderPackPage::onSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &FlameShaderPackPage::onVersionSelectionChanged);
+    connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameShaderPackPage::onResourceSelected);
+
+    m_ui->packDescription->setMetaEntry(metaEntryBase());
+}
+
+void FlameShaderPackPage::openUrl(const QUrl& url)
+{
+    if (url.scheme().isEmpty()) {
+        QString query = url.query(QUrl::FullyDecoded);
+
+        if (query.startsWith("remoteUrl=")) {
+            // attempt to resolve url from warning page
+            query.remove(0, 10);
+            ShaderPackResourcePage::openUrl({ QUrl::fromPercentEncoding(query.toUtf8()) });  // double decoding is necessary
+            return;
+        }
+    }
+
+    ShaderPackResourcePage::openUrl(url);
+}
+
 // I don't know why, but doing this on the parent class makes it so that
 // other mod providers start loading before being selected, at least with
 // my Qt, so we need to implement this in every derived class...
-auto FlameModPage::shouldDisplay() const -> bool { return true; }
-auto FlameResourcePackPage::shouldDisplay() const -> bool { return true; }
-auto FlameTexturePackPage::shouldDisplay() const -> bool { return true; }
+auto FlameModPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto FlameResourcePackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto FlameTexturePackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
+auto FlameShaderPackPage::shouldDisplay() const -> bool
+{
+    return true;
+}
 
+unique_qobject_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
+{
+    return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_base_instance), false, this);
+}
+
+void FlameModPage::prepareProviderCategories()
+{
+    auto response = std::make_shared<QByteArray>();
+    auto task = FlameAPI::getModCategories(response);
+    QObject::connect(task.get(), &Task::succeeded, [this, response]() {
+        auto categories = FlameAPI::loadModCategories(response);
+        m_filter_widget->setCategories(categories);
+    });
+    task->start();
+};
 }  // namespace ResourceDownload

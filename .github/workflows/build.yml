@@ -21,8 +21,29 @@ on:
       WINDOWS_CODESIGN_PASSWORD:
         description: Password for signing Windows builds
         required: false
-      CACHIX_AUTH_TOKEN:
-        description: Private token for authenticating against Cachix cache
+      APPLE_CODESIGN_CERT:
+        description: Certificate for signing macOS builds
+        required: false
+      APPLE_CODESIGN_PASSWORD:
+        description: Password for signing macOS builds
+        required: false
+      APPLE_CODESIGN_ID:
+        description: Certificate ID for signing macOS builds
+        required: false
+      APPLE_NOTARIZE_APPLE_ID:
+        description: Apple ID used for notarizing macOS builds
+        required: false
+      APPLE_NOTARIZE_TEAM_ID:
+        description: Team ID used for notarizing macOS builds
+        required: false
+      APPLE_NOTARIZE_PASSWORD:
+        description: Password used for notarizing macOS builds
+        required: false
+      GPG_PRIVATE_KEY:
+        description: Private key for AppImage signing
+        required: false
+      GPG_PRIVATE_KEY_ID:
+        description: ID for the GPG_PRIVATE_KEY, to select the signing key
         required: false
 
 jobs:
@@ -31,77 +52,63 @@ jobs:
       fail-fast: false
       matrix:
         include:
-
           - os: ubuntu-20.04
             qt_ver: 5
+            qt_host: linux
+            qt_arch: ""
+            qt_version: "5.12.8"
+            qt_modules: "qtnetworkauth"
 
           - os: ubuntu-20.04
             qt_ver: 6
             qt_host: linux
-            qt_arch: ''
-            qt_version: '6.2.4'
-            qt_modules: 'qt5compat qtimageformats'
-            qt_tools: ''
+            qt_arch: ""
+            qt_version: "6.2.4"
+            qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: windows-2022
             name: "Windows-MinGW-w64"
             msystem: clang64
-            vcvars_arch: 'amd64_x86'
-
-          - os: windows-2022
-            name: "Windows-MSVC-Legacy"
-            msystem: ''
-            architecture: 'win32'
-            vcvars_arch: 'amd64_x86'
-            qt_ver: 5
-            qt_host: windows
-            qt_arch: 'win32_msvc2019'
-            qt_version: '5.15.2'
-            qt_modules: ''
-            qt_tools: 'tools_openssl_x86'
+            vcvars_arch: "amd64_x86"
 
           - os: windows-2022
             name: "Windows-MSVC"
-            msystem: ''
-            architecture: 'x64'
-            vcvars_arch: 'amd64'
+            msystem: ""
+            architecture: "x64"
+            vcvars_arch: "amd64"
             qt_ver: 6
             qt_host: windows
-            qt_arch: ''
-            qt_version: '6.5.1'
-            qt_modules: 'qt5compat qtimageformats'
-            qt_tools: ''
+            qt_arch: ""
+            qt_version: "6.7.2"
+            qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: windows-2022
             name: "Windows-MSVC-arm64"
-            msystem: ''
-            architecture: 'arm64'
-            vcvars_arch: 'amd64_arm64'
+            msystem: ""
+            architecture: "arm64"
+            vcvars_arch: "amd64_arm64"
             qt_ver: 6
             qt_host: windows
-            qt_arch: 'win64_msvc2019_arm64'
-            qt_version: '6.5.1'
-            qt_modules: 'qt5compat qtimageformats'
-            qt_tools: ''
+            qt_arch: "win64_msvc2019_arm64"
+            qt_version: "6.7.2"
+            qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: macos-12
             name: macOS
             macosx_deployment_target: 11.0
             qt_ver: 6
             qt_host: mac
-            qt_arch: ''
-            qt_version: '6.5.0'
-            qt_modules: 'qt5compat qtimageformats'
-            qt_tools: ''
+            qt_arch: ""
+            qt_version: "6.7.2"
+            qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: macos-12
             name: macOS-Legacy
             macosx_deployment_target: 10.13
             qt_ver: 5
             qt_host: mac
-            qt_version: '5.15.2'
-            qt_modules: ''
-            qt_tools: ''
+            qt_version: "5.15.2"
+            qt_modules: "qtnetworkauth"
 
     runs-on: ${{ matrix.os }}
 
@@ -119,11 +126,11 @@ jobs:
       # PREPARE
       ##
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          submodules: 'true'
+          submodules: "true"
 
-      - name: 'Setup MSYS2'
+      - name: "Setup MSYS2"
         if: runner.os == 'Windows' && matrix.msystem != ''
         uses: msys2/setup-msys2@v2
         with:
@@ -143,6 +150,7 @@ jobs:
             quazip-qt6:p
             ccache:p
             qt6-5compat:p
+            qt6-networkauth:p
             cmark:p
 
       - name: Force newer ccache
@@ -152,18 +160,18 @@ jobs:
 
       - name: Setup ccache
         if: (runner.os != 'Windows' || matrix.msystem == '') && inputs.build_type == 'Debug'
-        uses: hendrikmuhs/ccache-action@v1.2.9
+        uses: hendrikmuhs/ccache-action@v1.2.14
         with:
           key: ${{ matrix.os }}-qt${{ matrix.qt_ver }}-${{ matrix.architecture }}
 
       - name: Retrieve ccache cache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v4.0.2
         with:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
           restore-keys: |
-              ${{ matrix.os }}-mingw-w64-ccache
+            ${{ matrix.os }}-mingw-w64-ccache
 
       - name: Setup ccache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
@@ -191,7 +199,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y update
-          sudo apt-get -y install ninja-build extra-cmake-modules scdoc
+          sudo apt-get -y install ninja-build extra-cmake-modules scdoc appstream
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
@@ -199,44 +207,37 @@ jobs:
           brew update
           brew install ninja extra-cmake-modules
 
-      - name: Install Qt (Linux)
-        if: runner.os == 'Linux' && matrix.qt_ver != 6
-        run: |
-          sudo apt-get -y install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools libqt5core5a libqt5network5 libqt5gui5
-
       - name: Install host Qt (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         uses: jurplel/install-qt-action@v3
         with:
-           aqtversion: '==3.1.*'
-           py7zrversion: '>=0.20.2'
-           version: ${{ matrix.qt_version }}
-           host: 'windows'
-           target: 'desktop'
-           arch: ''
-           modules: ${{ matrix.qt_modules }}
-           tools: ${{ matrix.qt_tools }}
-           cache: ${{ inputs.is_qt_cached }}
-           cache-key-prefix: host-qt-arm64-windows
-           dir: ${{ github.workspace }}\HostQt
-           set-env: false
+          aqtversion: "==3.1.*"
+          py7zrversion: ">=0.20.2"
+          version: ${{ matrix.qt_version }}
+          host: "windows"
+          target: "desktop"
+          arch: ""
+          modules: ${{ matrix.qt_modules }}
+          cache: ${{ inputs.is_qt_cached }}
+          cache-key-prefix: host-qt-arm64-windows
+          dir: ${{ github.workspace }}\HostQt
+          set-env: false
 
-      - name: Install Qt (macOS, Linux, Qt 6 & Windows MSVC)
-        if: runner.os == 'Linux' && matrix.qt_ver == 6 || runner.os == 'macOS' || (runner.os == 'Windows' && matrix.msystem == '')
+      - name: Install Qt (macOS, Linux & Windows MSVC)
+        if: matrix.msystem == ''
         uses: jurplel/install-qt-action@v3
         with:
-           aqtversion: '==3.1.*'
-           py7zrversion: '>=0.20.2'
-           version: ${{ matrix.qt_version }}
-           host: ${{ matrix.qt_host }}
-           target: 'desktop'
-           arch: ${{ matrix.qt_arch }}
-           modules: ${{ matrix.qt_modules }}
-           tools: ${{ matrix.qt_tools }}
-           cache: ${{ inputs.is_qt_cached }}
+          aqtversion: "==3.1.*"
+          py7zrversion: ">=0.20.2"
+          version: ${{ matrix.qt_version }}
+          target: "desktop"
+          arch: ${{ matrix.qt_arch }}
+          modules: ${{ matrix.qt_modules }}
+          tools: ${{ matrix.qt_tools }}
+          cache: ${{ inputs.is_qt_cached }}
 
       - name: Install MSVC (Windows MSVC)
-        if: runner.os == 'Windows'  # We want this for MinGW builds as well, as we need SignTool
+        if: runner.os == 'Windows' # We want this for MinGW builds as well, as we need SignTool
         uses: ilammy/msvc-dev-cmd@v1
         with:
           vsversion: 2022
@@ -249,7 +250,9 @@ jobs:
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage"
           wget "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage"
 
-          ${{ github.workspace }}/.github/scripts/prepare_JREs.sh
+          wget "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-x86_64.AppImage"
+
+          sudo apt install libopengl0
 
       - name: Add QT_HOST_PATH var (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
@@ -263,23 +266,23 @@ jobs:
       - name: Configure CMake (macOS)
         if: runner.os == 'macOS' && matrix.qt_ver == 6
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DENABLE_JAVA_DOWNLOADER=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G Ninja
 
       - name: Configure CMake (macOS-Legacy)
         if: runner.os == 'macOS' && matrix.qt_ver == 5
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DMACOSX_SPARKLE_UPDATE_PUBLIC_KEY="" -DMACOSX_SPARKLE_UPDATE_FEED_URL="" -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DENABLE_JAVA_DOWNLOADER=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DMACOSX_SPARKLE_UPDATE_PUBLIC_KEY="" -DMACOSX_SPARKLE_UPDATE_FEED_URL="" -G Ninja
 
       - name: Configure CMake (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != ''
         shell: msys2 {0}
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=6 -DCMAKE_OBJDUMP=/mingw64/bin/objdump.exe -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DENABLE_JAVA_DOWNLOADER=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=6 -DCMAKE_OBJDUMP=/mingw64/bin/objdump.exe -DLauncher_BUILD_ARTIFACT=${{ matrix.name }}-Qt${{ matrix.qt_ver }} -G Ninja
 
       - name: Configure CMake (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=${{ matrix.name }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" -A${{ matrix.architecture}} -DLauncher_FORCE_BUNDLED_LIBS=ON
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DENABLE_JAVA_DOWNLOADER=ON -DLauncher_BUILD_PLATFORM=official -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreadedDLL" -A${{ matrix.architecture}} -DLauncher_FORCE_BUNDLED_LIBS=ON  -DLauncher_BUILD_ARTIFACT=${{ matrix.name }}-Qt${{ matrix.qt_ver }}
           # https://github.com/ccache/ccache/wiki/MS-Visual-Studio (I coudn't figure out the compiler prefix)
           if ("${{ env.CCACHE_VAR }}")
           {
@@ -294,7 +297,7 @@ jobs:
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=Linux -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -G Ninja
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DENABLE_JAVA_DOWNLOADER=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DLauncher_BUILD_ARTIFACT=Linux-Qt${{ matrix.qt_ver }} -G Ninja
 
       ##
       # BUILD
@@ -334,11 +337,25 @@ jobs:
       - name: Test (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == '' && matrix.architecture != 'arm64'
         run: |
-          ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }} 
+          ctest -E "^example64|example$" --test-dir build --output-on-failure -C ${{ inputs.build_type }}
 
       ##
       # PACKAGE BUILDS
       ##
+
+      - name: Fetch codesign certificate (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          echo '${{ secrets.APPLE_CODESIGN_CERT }}' | base64 --decode > codesign.p12
+          if [ -n '${{ secrets.APPLE_CODESIGN_ID }}' ]; then
+            security create-keychain -p '${{ secrets.APPLE_CODESIGN_PASSWORD }}' build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p '${{ secrets.APPLE_CODESIGN_PASSWORD }}' build.keychain
+            security import codesign.p12 -k build.keychain -P '${{ secrets.APPLE_CODESIGN_PASSWORD }}' -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k '${{ secrets.APPLE_CODESIGN_PASSWORD }}' build.keychain
+          else
+            echo ":warning: Using ad-hoc code signing for macOS, as certificate was not present." >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Package (macOS)
         if: runner.os == 'macOS'
@@ -347,9 +364,34 @@ jobs:
 
           cd ${{ env.INSTALL_DIR }}
           chmod +x "PrismLauncher.app/Contents/MacOS/prismlauncher"
-          sudo codesign --sign - --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
+
+          if [ -n '${{ secrets.APPLE_CODESIGN_ID }}' ]; then
+            APPLE_CODESIGN_ID='${{ secrets.APPLE_CODESIGN_ID }}'
+          else
+            APPLE_CODESIGN_ID='-'
+          fi
+
+          sudo codesign --sign "$APPLE_CODESIGN_ID" --deep --force --entitlements "../program_info/App.entitlements" --options runtime "PrismLauncher.app/Contents/MacOS/prismlauncher"
           mv "PrismLauncher.app" "Prism Launcher.app"
-          tar -czf ../PrismLauncher.tar.gz *
+
+      - name: Notarize (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          cd ${{ env.INSTALL_DIR }}
+
+          if [ -n '${{ secrets.APPLE_NOTARIZE_PASSWORD }}' ]; then
+            ditto -c -k --sequesterRsrc --keepParent "Prism Launcher.app" ../PrismLauncher.zip
+            xcrun notarytool submit ../PrismLauncher.zip \
+              --wait --progress \
+              --apple-id '${{ secrets.APPLE_NOTARIZE_APPLE_ID }}' \
+              --team-id '${{ secrets.APPLE_NOTARIZE_TEAM_ID }}' \
+              --password '${{ secrets.APPLE_NOTARIZE_PASSWORD }}'
+
+            xcrun stapler staple "Prism Launcher.app"
+          else
+            echo ":warning: Skipping notarization as credentials are not present." >> $GITHUB_STEP_SUMMARY
+          fi
+          ditto -c -k --sequesterRsrc --keepParent "Prism Launcher.app" ../PrismLauncher.zip
 
       - name: Make Sparkle signature (macOS)
         if: matrix.name == 'macOS'
@@ -357,7 +399,7 @@ jobs:
           if [ '${{ secrets.SPARKLE_ED25519_KEY }}' != '' ]; then
             brew install openssl@3
             echo '${{ secrets.SPARKLE_ED25519_KEY }}' > ed25519-priv.pem
-            signature=$(/usr/local/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.tar.gz -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
+            signature=$(/usr/local/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
             rm ed25519-priv.pem
             cat >> $GITHUB_STEP_SUMMARY << EOF
           ### Artifact Information :information_source:
@@ -376,27 +418,20 @@ jobs:
         run: |
           cmake --install ${{ env.BUILD_DIR }}
           touch ${{ env.INSTALL_DIR }}/manifest.txt
-          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt 
+          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=$(cygpath -u $l); l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done >> ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Package (Windows MSVC)
         if: runner.os == 'Windows' && matrix.msystem == ''
         run: |
           cmake --install ${{ env.BUILD_DIR }} --config ${{ inputs.build_type }}
 
-          cd ${{ env.INSTALL_DIR }}
-          if ("${{ matrix.qt_ver }}" -eq "5")
-          {
-            Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libcrypto-1_1.dll -Destination libcrypto-1_1.dll
-            Copy-Item D:/a/PrismLauncher/Qt/Tools/OpenSSL/Win_x86/bin/libssl-1_1.dll -Destination libssl-1_1.dll
-          }
           cd ${{ github.workspace }}
 
           Get-ChildItem ${{ env.INSTALL_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
-
       - name: Fetch codesign certificate (Windows)
         if: runner.os == 'Windows'
-        shell: bash  # yes, we are not using MSYS2 or PowerShell here
+        shell: bash # yes, we are not using MSYS2 or PowerShell here
         run: |
           echo '${{ secrets.WINDOWS_CODESIGN_CERT }}' | base64 --decode > codesign.pfx
 
@@ -406,7 +441,7 @@ jobs:
           if (Get-Content ./codesign.pfx){
             cd ${{ env.INSTALL_DIR }}
             # We ship the exact same executable for portable and non-portable editions, so signing just once is fine
-            SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com prismlauncher.exe prismlauncher_filelink.exe
+            SignTool sign /fd sha256 /td sha256 /f ../codesign.pfx /p '${{ secrets.WINDOWS_CODESIGN_PASSWORD }}' /tr http://timestamp.digicert.com prismlauncher.exe prismlauncher_updater.exe prismlauncher_filelink.exe 
           } else {
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
@@ -424,7 +459,7 @@ jobs:
         run: |
           cp -r ${{ env.INSTALL_DIR }} ${{ env.INSTALL_PORTABLE_DIR }}  # cmake install on Windows is slow, let's just copy instead
           cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
-          
+
           Get-ChildItem ${{ env.INSTALL_PORTABLE_DIR }} -Recurse | ForEach FullName | Resolve-Path -Relative | %{ $_.TrimStart('.\') } | %{ $_.TrimStart('${{ env.INSTALL_PORTABLE_DIR }}') } | %{ $_.TrimStart('\') } | Out-File -FilePath ${{ env.INSTALL_DIR }}/manifest.txt
 
       - name: Package (Windows, installer)
@@ -442,56 +477,70 @@ jobs:
             ":warning: Skipped code signing for Windows, as certificate was not present." >> $env:GITHUB_STEP_SUMMARY
           }
 
-      - name: Package (Linux)
-        if: runner.os == 'Linux'
+      - name: Package AppImage (Linux)
+        if: runner.os == 'Linux' && matrix.qt_ver != 5
+        shell: bash
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_DIR }}
-          for l in $(find ${{ env.INSTALL_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_DIR }}/manifest.txt
+          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
 
-          cd ${{ env.INSTALL_DIR }}
-          tar --owner root --group root -czf ../PrismLauncher.tar.gz *
+          mv ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.metainfo.xml ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/metainfo/org.prismlauncher.PrismLauncher.appdata.xml
+          export "NO_APPSTREAM=1" # we have to skip appstream checking because appstream on ubuntu 20.04 is outdated
+
+          export OUTPUT="PrismLauncher-Linux-x86_64.AppImage"
+
+          chmod +x linuxdeploy-*.AppImage
+
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib
+          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
+
+          cp -r ${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
+
+          cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+          cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+          cp /usr/lib/x86_64-linux-gnu/libOpenGL.so.0* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+
+          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib"
+          export LD_LIBRARY_PATH
+
+          chmod +x AppImageUpdate-x86_64.AppImage
+          cp AppImageUpdate-x86_64.AppImage ${{ env.INSTALL_APPIMAGE_DIR }}/usr/bin
+
+          export UPDATE_INFORMATION="gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|latest|PrismLauncher-Linux-x86_64.AppImage.zsync" 
+
+          if [ '${{ secrets.GPG_PRIVATE_KEY_ID }}' != '' ]; then
+            export SIGN=1
+            export SIGN_KEY=${{ secrets.GPG_PRIVATE_KEY_ID }}
+            mkdir -p ~/.gnupg/
+            echo "$GPG_PRIVATE_KEY" > ~/.gnupg/private.key
+            gpg --import ~/.gnupg/private.key
+          else
+            echo ":warning: Skipped code signing for Linux AppImage, as gpg key was not present." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
+
+          mv "PrismLauncher-Linux-x86_64.AppImage" "PrismLauncher-Linux-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
 
       - name: Package (Linux, portable)
         if: runner.os == 'Linux'
         run: |
-          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }}
-          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_PORTABLE_DIR }} --component portable
+          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_PORTABLE_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DLauncher_BUILD_ARTIFACT=Linux-Qt${{ matrix.qt_ver }} -DINSTALL_BUNDLE=full -G Ninja
+          cmake --install ${{ env.BUILD_DIR }}
+          cmake --install ${{ env.BUILD_DIR }} --component portable
+
+          mkdir  ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /lib/x86_64-linux-gnu/libbz2.so.1.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /usr/lib/x86_64-linux-gnu/libffi.so.7 ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          mv ${{ env.INSTALL_PORTABLE_DIR }}/bin/*.so* ${{ env.INSTALL_PORTABLE_DIR }}/lib
+
           for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
-
-
           cd ${{ env.INSTALL_PORTABLE_DIR }}
           tar -czf ../PrismLauncher-portable.tar.gz *
-
-      - name: Package AppImage (Linux)
-        if: runner.os == 'Linux' && matrix.qt_ver != 5
-        shell: bash
-        run: |
-          cmake --install ${{ env.BUILD_DIR }} --prefix ${{ env.INSTALL_APPIMAGE_DIR }}/usr
-
-          export OUTPUT="PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage"
-
-          chmod +x linuxdeploy-*.AppImage
-
-          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-{8,17}-openjdk
-          mkdir -p ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
-
-          cp -r ${{ github.workspace }}/JREs/jre8/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk
-
-          cp -r ${{ github.workspace }}/JREs/jre17/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk
-
-          cp -r /home/runner/work/PrismLauncher/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
-          
-          cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
-          cp /usr/lib/x86_64-linux-gnu/libssl.so.1.1 ${{ env.INSTALL_APPIMAGE_DIR }}//usr/lib/
-
-          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib"
-          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk/lib/amd64/server"
-          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-8-openjdk/lib/amd64"
-          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib/server"
-          LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/jvm/java-17-openjdk/lib"
-          export LD_LIBRARY_PATH
-
-          ./linuxdeploy-x86_64.AppImage --appdir ${{ env.INSTALL_APPIMAGE_DIR }} --output appimage --plugin qt -i ${{ env.INSTALL_APPIMAGE_DIR }}/usr/share/icons/hicolor/scalable/apps/org.prismlauncher.PrismLauncher.svg
 
       ##
       # UPLOAD BUILDS
@@ -499,66 +548,59 @@ jobs:
 
       - name: Upload binary tarball (macOS)
         if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PrismLauncher-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PrismLauncher.tar.gz
+          path: PrismLauncher.zip
 
       - name: Upload binary zip (Windows)
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PrismLauncher-${{ matrix.name }}-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_DIR }}/**
 
       - name: Upload binary zip (Windows, portable)
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PrismLauncher-${{ matrix.name }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: ${{ env.INSTALL_PORTABLE_DIR }}/**
 
       - name: Upload installer (Windows)
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PrismLauncher-${{ matrix.name }}-Setup-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher-Setup.exe
 
-      - name: Upload binary tarball (Linux, Qt 5)
-        if: runner.os == 'Linux' && matrix.qt_ver != 6
-        uses: actions/upload-artifact@v3
-        with:
-          name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PrismLauncher.tar.gz
-
       - name: Upload binary tarball (Linux, portable, Qt 5)
         if: runner.os == 'Linux' && matrix.qt_ver != 6
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: PrismLauncher-${{ runner.os }}-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
+          name: PrismLauncher-${{ runner.os }}-Qt5-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher-portable.tar.gz
-
-      - name: Upload binary tarball (Linux, Qt 6)
-        if: runner.os == 'Linux' && matrix.qt_ver !=5
-        uses: actions/upload-artifact@v3
-        with:
-          name: PrismLauncher-${{ runner.os }}-Qt6-${{ env.VERSION }}-${{ inputs.build_type }}
-          path: PrismLauncher.tar.gz
 
       - name: Upload binary tarball (Linux, portable, Qt 6)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PrismLauncher-${{ runner.os }}-Qt6-Portable-${{ env.VERSION }}-${{ inputs.build_type }}
           path: PrismLauncher-portable.tar.gz
 
       - name: Upload AppImage (Linux)
         if: runner.os == 'Linux' && matrix.qt_ver != 5
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
           path: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage
+
+      - name: Upload AppImage Zsync (Linux)
+        if: runner.os == 'Linux' && matrix.qt_ver != 5
+        uses: actions/upload-artifact@v4
+        with:
+          name: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-${{ inputs.build_type }}-x86_64.AppImage.zsync
+          path: PrismLauncher-Linux-x86_64.AppImage.zsync
 
       - name: ccache stats (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != ''
@@ -569,47 +611,17 @@ jobs:
   flatpak:
     runs-on: ubuntu-latest
     container:
-      image: bilelmoussaoui/flatpak-github-actions:kde-5.15-22.08
+      image: bilelmoussaoui/flatpak-github-actions:kde-6.7
       options: --privileged
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: inputs.build_type == 'Debug'
         with:
-          submodules: 'true'
+          submodules: "true"
       - name: Build Flatpak (Linux)
         if: inputs.build_type == 'Debug'
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: "Prism Launcher.flatpak"
-          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml 
-
-  nix:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package:
-          - prismlauncher
-          - prismlauncher-qt5
-    steps:
-      - name: Clone repository
-        if: inputs.build_type == 'Debug'
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-      - name: Install nix
-        if: inputs.build_type == 'Debug'
-        uses: cachix/install-nix-action@v21
-        with:
-          install_url: https://nixos.org/nix/install
-          extra_nix_config: |
-            auto-optimise-store = true
-            experimental-features = nix-command flakes
-      - uses: cachix/cachix-action@v12
-        if: inputs.build_type == 'Debug'
-        with:
-          name: prismlauncher
-          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Build
-        if: inputs.build_type == 'Debug'
-        run: nix build .#${{ matrix.package }} --print-build-logs
+          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml
