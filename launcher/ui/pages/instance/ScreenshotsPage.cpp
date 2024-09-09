@@ -246,6 +246,7 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(pa
     // considering screenshots aren't modified after creation.
     constexpr int file_modified_column_index = 3;
     m_model->sort(file_modified_column_index, Qt::DescendingOrder);
+
     m_folder = path;
     m_valid = FS::ensureFolderPathExists(m_folder);
 
