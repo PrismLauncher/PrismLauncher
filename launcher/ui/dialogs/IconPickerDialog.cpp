@@ -16,6 +16,8 @@
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QPushButton>
+#include <QSortFilterProxyModel>
+#include <QLineEdit>
 
 #include "Application.h"
 
@@ -32,6 +34,15 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
 {
     ui->setupUi(this);
     setWindowModality(Qt::WindowModal);
+
+    searchBar = new QLineEdit(this);
+    searchBar->setPlaceholderText(tr("Search..."));
+    ui->verticalLayout->insertWidget(0, searchBar);
+
+    proxyModel = new QSortFilterProxyModel(this);
+    proxyModel->setSourceModel(APPLICATION->icons().get());
+    proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    ui->iconView->setModel(proxyModel);
 
     auto contentsWidget = ui->iconView;
     contentsWidget->setViewMode(QListView::IconMode);
@@ -57,7 +68,7 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
 
     contentsWidget->installEventFilter(this);
 
-    contentsWidget->setModel(APPLICATION->icons().get());
+    contentsWidget->setModel(proxyModel);
 
     // NOTE: ResetRole forces the button to be on the left, while the OK/Cancel ones are on the right. We win.
     auto buttonAdd = ui->buttonBox->addButton(tr("Add Icon"), QDialogButtonBox::ResetRole);
@@ -73,6 +84,9 @@ IconPickerDialog::IconPickerDialog(QWidget* parent) : QDialog(parent), ui(new Ui
 
     auto buttonFolder = ui->buttonBox->addButton(tr("Open Folder"), QDialogButtonBox::ResetRole);
     connect(buttonFolder, &QPushButton::clicked, this, &IconPickerDialog::openFolder);
+    connect(searchBar, &QLineEdit::textChanged, this, &IconPickerDialog::filterIcons);
+    // Prevent incorrect indices from e.g. filesystem changes
+    connect(APPLICATION->icons().get(), &IconList::iconUpdated, this, [this]() { proxyModel->invalidate(); });
 }
 
 bool IconPickerDialog::eventFilter(QObject* obj, QEvent* evt)
@@ -159,5 +173,10 @@ IconPickerDialog::~IconPickerDialog()
 
 void IconPickerDialog::openFolder()
 {
-    DesktopServices::openPath(APPLICATION->icons()->getDirectory(), true);
+    DesktopServices::openPath(APPLICATION->icons()->iconDirectory(selectedIconKey), true);
+}
+
+void IconPickerDialog::filterIcons(const QString& query)
+{
+    proxyModel->setFilterFixedString(query);
 }

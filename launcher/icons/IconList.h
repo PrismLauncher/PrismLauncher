@@ -72,6 +72,7 @@ class IconList : public QAbstractListModel {
     bool deleteIcon(const QString& key);
     bool trashIcon(const QString& key);
     bool iconFileExists(const QString& key) const;
+    QString iconDirectory(const QString& key) const;
 
     void installIcons(const QStringList& iconFiles);
     void installIcon(const QString& file, const QString& name);
@@ -91,6 +92,9 @@ class IconList : public QAbstractListModel {
     IconList& operator=(const IconList&) = delete;
     void reindex();
     void sortIconList();
+    bool addPathRecursively(const QString& path);
+    void removePathRecursively(const QString& path);
+    QStringList getIconFilePaths() const;
 
    public slots:
     void directoryChanged(const QString& path);

@@ -56,7 +56,7 @@ IconList::IconList(const QStringList& builtinPaths, QString path, QObject* paren
         QDir instance_icons(builtinPath);
         auto file_info_list = instance_icons.entryInfoList(QDir::Files, QDir::Name);
         for (auto file_info : file_info_list) {
-            builtinNames.insert(file_info.completeBaseName());
+            builtinNames.insert(file_info.baseName());
         }
     }
     for (auto& builtinName : builtinNames) {
@@ -77,8 +77,93 @@ IconList::IconList(const QStringList& builtinPaths, QString path, QObject* paren
 void IconList::sortIconList()
 {
     qDebug() << "Sorting icon list...";
-    std::sort(icons.begin(), icons.end(), [](const MMCIcon& a, const MMCIcon& b) { return a.m_key.localeAwareCompare(b.m_key) < 0; });
+    std::sort(icons.begin(), icons.end(), [](const MMCIcon& a, const MMCIcon& b) {
+        bool aIsSubdir = a.m_key.contains(std::filesystem::path::preferred_separator);
+        bool bIsSubdir = b.m_key.contains(std::filesystem::path::preferred_separator);
+        if (aIsSubdir != bIsSubdir) {
+            return !aIsSubdir; // root-level icons come first
+        }
+        return a.m_key.localeAwareCompare(b.m_key) < 0;
+    });
     reindex();
+}
+
+// Helper function to add directories recursively
+bool IconList::addPathRecursively(const QString& path)
+{
+    QDir dir(path);
+    if (!dir.exists())
+        return false;
+
+    bool watching = false;
+
+    // Add the directory itself
+    watching = m_watcher->addPath(path);
+
+    // Add all subdirectories
+    QFileInfoList entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QFileInfo& entry : entries)
+    {
+        if (addPathRecursively(entry.absoluteFilePath()))
+        {
+            watching = true;
+        }
+    }
+    return watching;
+}
+
+void IconList::removePathRecursively(const QString& path)
+{
+    QFileInfo file_info(path);
+    if (file_info.isFile()) {
+        // Remove the icon belonging to the file
+        QString key = m_dir.relativeFilePath(file_info.absoluteFilePath());
+        int idx = getIconIndex(key);
+        if (idx == -1)
+            return;
+
+    }
+    else if (file_info.isDir()) {
+        // Remove the directory itself
+        m_watcher->removePath(path);
+
+        const QDir dir(path);
+        // Remove all files within the directory
+        for (const QFileInfo& file : dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot))
+        {
+            removePathRecursively(file.absoluteFilePath());
+        }
+    }
+}
+
+QStringList IconList::getIconFilePaths() const
+{
+    QStringList icon_files {};
+    QStringList directories {m_dir.absolutePath()};
+    while (!directories.isEmpty()) {
+        QString first = directories.takeFirst();
+        QDir dir(first);
+        for (QString& file_name : dir.entryList(QDir::AllDirs | QDir::Files |QDir::NoDotAndDotDot, QDir::Name)) {
+            QString full_path = dir.filePath(file_name); // Convert to full path
+            QFileInfo file_info(full_path);
+            if (file_info.isDir())
+                directories.push_back(full_path);
+            else
+                icon_files.push_back(full_path);
+        }
+    }
+    return icon_files;
+}
+
+QString formatName(const QDir& icons_dir, const QFileInfo& file)
+{
+    if (file.dir() == icons_dir) {
+        return file.baseName();
+    }
+    else {
+        const QString delimiter = " » ";
+        return (icons_dir.relativeFilePath(file.dir().path()) + std::filesystem::path::preferred_separator + file.baseName()).replace(std::filesystem::path::preferred_separator, delimiter);
+    }
 }
 
 void IconList::directoryChanged(const QString& path)
@@ -95,13 +180,9 @@ void IconList::directoryChanged(const QString& path)
         if (!FS::ensureFolderPathExists(m_dir.absolutePath()))
             return;
     m_dir.refresh();
-    auto new_list = m_dir.entryList(QDir::Files, QDir::Name);
-    for (auto it = new_list.begin(); it != new_list.end(); it++) {
-        QString& foo = (*it);
-        foo = m_dir.filePath(foo);
-    }
+    QStringList new_file_names_list = getIconFilePaths();
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    QSet<QString> new_set(new_list.begin(), new_list.end());
+    QSet<QString> new_set(new_file_names_list.begin(), new_file_names_list.end());
 #else
     auto new_set = new_list.toSet();
 #endif
@@ -123,21 +204,16 @@ void IconList::directoryChanged(const QString& path)
     QSet<QString> to_add = new_set;
     to_add -= current_set;
 
-    for (auto remove : to_remove) {
+    for (const auto& remove : to_remove) {
         qDebug() << "Removing " << remove;
-        QFileInfo rmfile(remove);
-        QString key = rmfile.completeBaseName();
-
-        QString suffix = rmfile.suffix();
-        // The icon doesnt have a suffix, but it can have other .s in the name, so we account for those as well
-        if (!IconUtils::isIconSuffix(suffix))
-            key = rmfile.fileName();
+        QFileInfo removed_file(remove);
+        QString key = m_dir.relativeFilePath(removed_file.absoluteFilePath());
 
         int idx = getIconIndex(key);
         if (idx == -1)
             continue;
-        icons[idx].remove(IconType::FileBased);
-        if (icons[idx].type() == IconType::ToBeDeleted) {
+        icons[idx].remove(FileBased);
+        if (icons[idx].type() == ToBeDeleted) {
             beginRemoveRows(QModelIndex(), idx, idx);
             icons.remove(idx);
             reindex();
@@ -149,18 +225,14 @@ void IconList::directoryChanged(const QString& path)
         emit iconUpdated(key);
     }
 
-    for (auto add : to_add) {
+    for (const auto& add : to_add) {
         qDebug() << "Adding " << add;
 
         QFileInfo addfile(add);
-        QString key = addfile.completeBaseName();
+        QString key = m_dir.relativeFilePath(addfile.absoluteFilePath());
+        QString name = formatName(m_dir, addfile);
 
-        QString suffix = addfile.suffix();
-        // The icon doesnt have a suffix, but it can have other .s in the name, so we account for those as well
-        if (!IconUtils::isIconSuffix(suffix))
-            key = addfile.fileName();
-
-        if (addIcon(key, QString(), addfile.filePath(), IconType::FileBased)) {
+        if (addIcon(key, name, addfile.filePath(), IconType::FileBased)) {
             m_watcher->addPath(add);
             emit iconUpdated(key);
         }
@@ -175,7 +247,7 @@ void IconList::fileChanged(const QString& path)
     QFileInfo checkfile(path);
     if (!checkfile.exists())
         return;
-    QString key = checkfile.completeBaseName();
+    QString key = m_dir.relativeFilePath(checkfile.absoluteFilePath());
     int idx = getIconIndex(key);
     if (idx == -1)
         return;
@@ -200,7 +272,7 @@ void IconList::startWatching()
 {
     auto abs_path = m_dir.absolutePath();
     FS::ensureFolderPathExists(abs_path);
-    is_watching = m_watcher->addPath(abs_path);
+    is_watching = addPathRecursively(abs_path);
     if (is_watching) {
         qDebug() << "Started watching " << abs_path;
     } else {
@@ -312,6 +384,7 @@ bool IconList::iconFileExists(const QString& key) const
     return iconEntry && iconEntry->has(IconType::FileBased);
 }
 
+/// Returns the icon with the given key or nullptr if it doesn't exist.
 const MMCIcon* IconList::icon(const QString& key) const
 {
     int iconIdx = getIconIndex(key);
@@ -394,6 +467,7 @@ void IconList::reindex()
     for (auto& iter : icons) {
         name_index[iter.m_key] = i;
         i++;
+        emit iconUpdated(iter.m_key); // prevents incorrect indices with proxy model
     }
 }
 
@@ -424,4 +498,16 @@ int IconList::getIconIndex(const QString& key) const
 QString IconList::getDirectory() const
 {
     return m_dir.absolutePath();
+}
+
+/// Returns the directory of the icon with the given key or the default directory if it's a builtin icon.
+QString IconList::iconDirectory(const QString& key) const
+{
+    for (auto mmc_icon : icons) {
+        if (mmc_icon.m_key == key && mmc_icon.has(IconType::FileBased)) {
+            QFileInfo icon_file(mmc_icon.getFilePath());
+            return icon_file.dir().path();
+        }
+    }
+    return getDirectory();
 }
