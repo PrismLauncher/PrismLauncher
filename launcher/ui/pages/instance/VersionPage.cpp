@@ -51,8 +51,10 @@
 #include <QUrl>
 #include <algorithm>
 
+#include "QObjectPtr.h"
 #include "VersionPage.h"
 #include "meta/JsonFormat.h"
+#include "tasks/SequentialTask.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
 #include "ui_VersionPage.h"
 
@@ -429,14 +431,18 @@ void VersionPage::on_actionDownload_All_triggered()
         return;
     }
 
-    auto updateTask = m_inst->createUpdateTask(Net::Mode::Online);
-    if (!updateTask) {
+    auto updateTasks = m_inst->createUpdateTask();
+    if (updateTasks.isEmpty()) {
         return;
     }
+    auto task = makeShared<SequentialTask>(this);
+    for (auto t : updateTasks) {
+        task->addTask(t);
+    }
     ProgressDialog tDialog(this);
-    connect(updateTask.get(), &Task::failed, this, &VersionPage::onGameUpdateError);
+    connect(task.get(), &Task::failed, this, &VersionPage::onGameUpdateError);
     // FIXME: unused return value
-    tDialog.execWithTask(updateTask.get());
+    tDialog.execWithTask(task.get());
     updateButtons();
     m_container->refreshContainer();
 }

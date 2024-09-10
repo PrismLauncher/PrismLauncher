@@ -160,8 +160,6 @@ set(LAUNCH_SOURCES
     launch/steps/PreLaunchCommand.h
     launch/steps/TextPrint.cpp
     launch/steps/TextPrint.h
-    launch/steps/Update.cpp
-    launch/steps/Update.h
     launch/steps/QuitAfterGameStop.cpp
     launch/steps/QuitAfterGameStop.h
     launch/steps/PrintServers.cpp
@@ -172,6 +170,8 @@ set(LAUNCH_SOURCES
     launch/LaunchTask.h
     launch/LogModel.cpp
     launch/LogModel.h
+    launch/TaskStepWrapper.cpp
+    launch/TaskStepWrapper.h
 )
 
 # Old update system
@@ -295,8 +295,6 @@ set(MINECRAFT_SOURCES
     minecraft/ComponentUpdateTask.h
     minecraft/MinecraftLoadAndCheck.h
     minecraft/MinecraftLoadAndCheck.cpp
-    minecraft/MinecraftUpdate.h
-    minecraft/MinecraftUpdate.cpp
     minecraft/MojangVersionFormat.cpp
     minecraft/MojangVersionFormat.h
     minecraft/Rule.cpp
