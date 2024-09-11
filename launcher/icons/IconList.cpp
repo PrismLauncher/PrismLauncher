@@ -35,7 +35,6 @@
  */
 
 #include "IconList.h"
-#include <filesystem>
 #include <FileSystem.h>
 #include <QDebug>
 #include <QEventLoop>
@@ -79,8 +78,8 @@ void IconList::sortIconList()
 {
     qDebug() << "Sorting icon list...";
     std::sort(icons.begin(), icons.end(), [](const MMCIcon& a, const MMCIcon& b) {
-        bool aIsSubdir = a.m_key.contains(std::filesystem::path::preferred_separator);
-        bool bIsSubdir = b.m_key.contains(std::filesystem::path::preferred_separator);
+        bool aIsSubdir = a.m_key.contains(QDir::separator());
+        bool bIsSubdir = b.m_key.contains(QDir::separator());
         if (aIsSubdir != bIsSubdir) {
             return !aIsSubdir;  // root-level icons come first
         }
@@ -158,9 +157,8 @@ QString formatName(const QDir& icons_dir, const QFileInfo& file)
         return file.baseName();
 
     constexpr auto delimiter = " » ";
-    constexpr auto fs_separator = std::filesystem::path::preferred_separator;
-    QString relative_path_without_extension = icons_dir.relativeFilePath(file.dir().path()) + fs_separator + file.baseName();
-    return relative_path_without_extension.replace(fs_separator, delimiter);
+    QString relative_path_without_extension = icons_dir.relativeFilePath(file.dir().path()) + QDir::separator() + file.baseName();
+    return relative_path_without_extension.replace(QDir::separator(), delimiter);
 }
 
 void IconList::directoryChanged(const QString& path)
