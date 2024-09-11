@@ -35,6 +35,7 @@
  */
 
 #include "IconList.h"
+#include <filesystem>
 #include <FileSystem.h>
 #include <QDebug>
 #include <QEventLoop>
