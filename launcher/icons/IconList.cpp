@@ -35,6 +35,7 @@
  */
 
 #include "IconList.h"
+#include <filesystem>
 #include <FileSystem.h>
 #include <QDebug>
 #include <QEventLoop>
@@ -180,7 +181,7 @@ void IconList::directoryChanged(const QString& path)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QSet<QString> new_set(new_file_names_list.begin(), new_file_names_list.end());
 #else
-    auto new_set = new_list.toSet();
+    auto new_set = new_file_names_list.toSet();
 #endif
     QList<QString> current_list;
     for (auto& it : icons) {
