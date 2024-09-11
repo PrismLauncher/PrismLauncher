@@ -15,9 +15,9 @@
 
 #include <QFileDialog>
 #include <QKeyEvent>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QSortFilterProxyModel>
-#include <QLineEdit>
 
 #include "Application.h"
 
