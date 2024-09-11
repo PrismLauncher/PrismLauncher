@@ -35,7 +35,6 @@
  */
 
 #include "IconList.h"
-#include <filesystem>
 #include <FileSystem.h>
 #include <QDebug>
 #include <QEventLoop>
@@ -154,13 +153,13 @@ QStringList IconList::getIconFilePaths() const
 
 QString formatName(const QDir& icons_dir, const QFileInfo& file)
 {
-    if (file.dir() == icons_dir) {
+    if (file.dir() == icons_dir)
         return file.baseName();
-    } else {
-        const QString delimiter = " » ";
-        return (icons_dir.relativeFilePath(file.dir().path()) + std::filesystem::path::preferred_separator + file.baseName())
-            .replace(std::filesystem::path::preferred_separator, delimiter);
-    }
+
+    constexpr auto delimiter = " » ";
+    constexpr auto fs_separator = std::filesystem::path::preferred_separator;
+    QString relative_path_without_extension = icons_dir.relativeFilePath(file.dir().path()) + fs_separator + file.baseName();
+    return relative_path_without_extension.replace(fs_separator, delimiter);
 }
 
 void IconList::directoryChanged(const QString& path)
@@ -311,7 +310,7 @@ bool IconList::dropMimeData(const QMimeData* data,
     if (data->hasUrls()) {
         auto urls = data->urls();
         QStringList iconFiles;
-        for (auto url : urls) {
+        for (const auto& url : urls) {
             // only local files may be dropped...
             if (!url.isLocalFile())
                 continue;
