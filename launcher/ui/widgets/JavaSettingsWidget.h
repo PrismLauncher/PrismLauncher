@@ -17,6 +17,7 @@ class QGroupBox;
 class QGridLayout;
 class QLabel;
 class QToolButton;
+class QSpacerItem;
 
 /**
  * This is a widget for all the Java settings dialogs and pages.
@@ -26,7 +27,7 @@ class JavaSettingsWidget : public QWidget {
 
    public:
     explicit JavaSettingsWidget(QWidget* parent);
-    virtual ~JavaSettingsWidget() = default;
+    virtual ~JavaSettingsWidget();
 
     enum class JavaStatus { NotSet, Pending, Good, DoesNotExist, DoesNotStart, ReturnedInvalidData } javaStatus = JavaStatus::NotSet;
 
@@ -48,7 +49,8 @@ class JavaSettingsWidget : public QWidget {
     void updateThresholds();
 
    protected slots:
-    void memoryValueChanged(int);
+    void onSpinBoxValueChanged(int);
+    void memoryValueChanged();
     void javaPathEdited(const QString& path);
     void javaVersionSelected(BaseVersion::Ptr version);
     void on_javaBrowseBtn_clicked();
@@ -65,6 +67,7 @@ class JavaSettingsWidget : public QWidget {
    private: /* data */
     VersionSelectWidget* m_versionWidget = nullptr;
     QVBoxLayout* m_verticalLayout = nullptr;
+    QSpacerItem* m_verticalSpacer = nullptr;
 
     QLineEdit* m_javaPathTextBox = nullptr;
     QPushButton* m_javaBrowseBtn = nullptr;
@@ -99,4 +102,5 @@ class JavaSettingsWidget : public QWidget {
     uint64_t m_availableMemory = 0ull;
     shared_qobject_ptr<JavaChecker> m_checker;
     JavaChecker::Result m_result;
+    QTimer* m_memoryTimer;
 };
