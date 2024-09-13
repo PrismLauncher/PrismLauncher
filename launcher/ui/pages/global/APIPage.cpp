@@ -143,7 +143,7 @@ void APIPage::loadSettings()
     ui->modrinthToken->setText(modrinthToken);
     QString customUserAgent = s->get("UserAgentOverride").toString();
     ui->userAgentLineEdit->setText(customUserAgent);
-    ui->techicClientID->setText(s->get("TechnicClientID").toString());
+    ui->technicClientID->setText(s->get("TechnicClientID").toString());
 }
 
 void APIPage::applySettings()
