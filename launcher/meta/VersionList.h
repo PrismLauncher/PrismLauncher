@@ -43,6 +43,8 @@ class VersionList : public BaseVersionList, public BaseEntity {
     void sortVersions() override;
 
     BaseVersion::Ptr getRecommended() const override;
+    Version::Ptr getRecommendedForParent(const QString& uid, const QString& version);
+    Version::Ptr getLatestForParent(const QString& uid, const QString& version);
 
     QVariant data(const QModelIndex& index, int role) const override;
     RoleList providesRoles() const override;
@@ -70,6 +72,8 @@ class VersionList : public BaseVersionList, public BaseEntity {
     void merge(const VersionList::Ptr& other);
     void mergeFromIndex(const VersionList::Ptr& other);
     void parse(const QJsonObject& obj) override;
+    void addExternalRecommends(const QStringList& recommends);
+    void clearExternalRecommends();
 
    signals:
     void nameChanged(const QString& name);
@@ -79,6 +83,7 @@ class VersionList : public BaseVersionList, public BaseEntity {
 
    private:
     QVector<Version::Ptr> m_versions;
+    QStringList m_externalRecommendsVersions;
     QHash<QString, Version::Ptr> m_lookup;
     QString m_uid;
     QString m_name;

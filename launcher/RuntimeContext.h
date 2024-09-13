@@ -20,13 +20,13 @@
 
 #include <QSet>
 #include <QString>
+#include "SysInfo.h"
 #include "settings/SettingsObject.h"
 
 struct RuntimeContext {
     QString javaArchitecture;
     QString javaRealArchitecture;
-    QString javaPath;
-    QString system;
+    QString system = SysInfo::currentSystem();
 
     QString mappedJavaRealArchitecture() const
     {
@@ -45,8 +45,6 @@ struct RuntimeContext {
     {
         javaArchitecture = instanceSettings->get("JavaArchitecture").toString();
         javaRealArchitecture = instanceSettings->get("JavaRealArchitecture").toString();
-        javaPath = instanceSettings->get("JavaPath").toString();
-        system = currentSystem();
     }
 
     QString getClassifier() const { return system + "-" + mappedJavaRealArchitecture(); }
@@ -67,22 +65,5 @@ struct RuntimeContext {
             x = target == system;
 
         return x;
-    }
-
-    static QString currentSystem()
-    {
-#if defined(Q_OS_LINUX)
-        return "linux";
-#elif defined(Q_OS_MACOS)
-        return "osx";
-#elif defined(Q_OS_WINDOWS)
-        return "windows";
-#elif defined(Q_OS_FREEBSD)
-        return "freebsd";
-#elif defined(Q_OS_OPENBSD)
-        return "openbsd";
-#else
-        return "unknown";
-#endif
     }
 };

@@ -1,5 +1,6 @@
 #include "AssetUpdateTask.h"
 
+#include "launch/LaunchStep.h"
 #include "minecraft/AssetsUtils.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
@@ -13,8 +14,6 @@ AssetUpdateTask::AssetUpdateTask(MinecraftInstance* inst)
 {
     m_inst = inst;
 }
-
-AssetUpdateTask::~AssetUpdateTask() {}
 
 void AssetUpdateTask::executeTask()
 {

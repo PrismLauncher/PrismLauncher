@@ -43,6 +43,9 @@
 #include "minecraft/launch/CreateGameFolders.h"
 #include "minecraft/launch/ExtractNatives.h"
 #include "minecraft/launch/PrintInstanceInfo.h"
+#include "minecraft/update/AssetUpdateTask.h"
+#include "minecraft/update/FMLLibrariesTask.h"
+#include "minecraft/update/LibrariesTask.h"
 #include "settings/Setting.h"
 #include "settings/SettingsObject.h"
 
@@ -53,13 +56,13 @@
 #include "pathmatcher/RegexpMatcher.h"
 
 #include "launch/LaunchTask.h"
+#include "launch/TaskStepWrapper.h"
 #include "launch/steps/CheckJava.h"
 #include "launch/steps/LookupServerAddress.h"
 #include "launch/steps/PostLaunchCommand.h"
 #include "launch/steps/PreLaunchCommand.h"
 #include "launch/steps/QuitAfterGameStop.h"
 #include "launch/steps/TextPrint.h"
-#include "launch/steps/Update.h"
 
 #include "minecraft/launch/ClaimAccount.h"
 #include "minecraft/launch/LauncherPartLaunch.h"
@@ -69,9 +72,6 @@
 #include "minecraft/launch/VerifyJavaInstall.h"
 
 #include "java/JavaUtils.h"
-
-#include "meta/Index.h"
-#include "meta/VersionList.h"
 
 #include "icons/IconList.h"
 
@@ -84,7 +84,6 @@
 
 #include "AssetsUtils.h"
 #include "MinecraftLoadAndCheck.h"
-#include "MinecraftUpdate.h"
 #include "PackProfile.h"
 #include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
@@ -218,6 +217,7 @@ void MinecraftInstance::loadSpecificSettings()
 void MinecraftInstance::updateRuntimeContext()
 {
     m_runtimeContext.updateFromInstanceSettings(m_settings);
+    m_components->invalidateLaunchProfile();
 }
 
 QString MinecraftInstance::typeName() const
@@ -1030,18 +1030,18 @@ QString MinecraftInstance::getStatusbarDescription()
     return description;
 }
 
-Task::Ptr MinecraftInstance::createUpdateTask(Net::Mode mode)
+QList<LaunchStep::Ptr> MinecraftInstance::createUpdateTask()
 {
-    updateRuntimeContext();
-    switch (mode) {
-        case Net::Mode::Offline: {
-            return Task::Ptr(new MinecraftLoadAndCheck(this));
-        }
-        case Net::Mode::Online: {
-            return Task::Ptr(new MinecraftUpdate(this));
-        }
-    }
-    return nullptr;
+    return {
+        // create folders
+        makeShared<FoldersTask>(this),
+        // libraries download
+        makeShared<LibrariesTask>(this),
+        // FML libraries download and copy into the instance
+        makeShared<FMLLibrariesTask>(this),
+        // assets update
+        makeShared<AssetUpdateTask>(this),
+    };
 }
 
 shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin)
@@ -1090,20 +1090,26 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         process->appendStep(step);
     }
 
-    // if we aren't in offline mode,.
-    if (session->status != AuthSession::PlayableOffline) {
-        if (!session->demo) {
-            process->appendStep(makeShared<ClaimAccount>(pptr, session));
-        }
-        process->appendStep(makeShared<Update>(pptr, Net::Mode::Online));
-    } else {
-        process->appendStep(makeShared<Update>(pptr, Net::Mode::Offline));
+    // load meta
+    {
+        auto mode = session->status != AuthSession::PlayableOffline ? Net::Mode::Online : Net::Mode::Offline;
+        process->appendStep(makeShared<TaskStepWrapper>(pptr, makeShared<MinecraftLoadAndCheck>(this, mode, pptr)));
     }
 
     // check java
     {
         process->appendStep(makeShared<AutoInstallJava>(pptr));
         process->appendStep(makeShared<CheckJava>(pptr));
+    }
+
+    // if we aren't in offline mode,.
+    if (session->status != AuthSession::PlayableOffline) {
+        if (!session->demo) {
+            process->appendStep(makeShared<ClaimAccount>(pptr, session));
+        }
+        for (auto t : createUpdateTask()) {
+            process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
+        }
     }
 
     // if there are any jar mods

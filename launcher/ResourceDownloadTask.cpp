@@ -24,7 +24,9 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourceFolderModel.h"
 
+#include "modplatform/helpers/HashUtils.h"
 #include "net/ApiDownload.h"
+#include "net/ChecksumValidator.h"
 
 ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            ModPlatform::IndexedVersion version,
@@ -53,7 +55,29 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
         }
     }
 
-    m_filesNetJob->addNetAction(Net::ApiDownload::makeFile(m_pack_version.downloadUrl, dir.absoluteFilePath(getFilename())));
+    auto action = Net::ApiDownload::makeFile(m_pack_version.downloadUrl, dir.absoluteFilePath(getFilename()));
+    if (!m_pack_version.hash_type.isEmpty() && !m_pack_version.hash.isEmpty()) {
+        switch (Hashing::algorithmFromString(m_pack_version.hash_type)) {
+            case Hashing::Algorithm::Md4:
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Md4, m_pack_version.hash));
+                break;
+            case Hashing::Algorithm::Md5:
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Md5, m_pack_version.hash));
+                break;
+            case Hashing::Algorithm::Sha1:
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha1, m_pack_version.hash));
+                break;
+            case Hashing::Algorithm::Sha256:
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha256, m_pack_version.hash));
+                break;
+            case Hashing::Algorithm::Sha512:
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha512, m_pack_version.hash));
+                break;
+            default:
+                break;
+        }
+    }
+    m_filesNetJob->addNetAction(action);
     connect(m_filesNetJob.get(), &NetJob::succeeded, this, &ResourceDownloadTask::downloadSucceeded);
     connect(m_filesNetJob.get(), &NetJob::progress, this, &ResourceDownloadTask::downloadProgressChanged);
     connect(m_filesNetJob.get(), &NetJob::stepProgress, this, &ResourceDownloadTask::propagateStepProgress);
