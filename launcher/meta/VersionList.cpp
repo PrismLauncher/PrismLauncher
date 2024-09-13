@@ -16,6 +16,7 @@
 #include "VersionList.h"
 
 #include <QDateTime>
+#include <algorithm>
 
 #include "Application.h"
 #include "Index.h"
@@ -99,7 +100,7 @@ QVariant VersionList::data(const QModelIndex& index, int role) const
         case VersionPtrRole:
             return QVariant::fromValue(version);
         case RecommendedRole:
-            return version->isRecommended();
+            return version->isRecommended() || m_externalRecommendsVersions.contains(version->version());
         case JavaMajorRole: {
             auto major = version->version();
             if (major.startsWith("java")) {
@@ -192,6 +193,16 @@ void VersionList::parse(const QJsonObject& obj)
     parseVersionList(obj, this);
 }
 
+void VersionList::addExternalRecommends(const QStringList& recommends)
+{
+    m_externalRecommendsVersions.append(recommends);
+}
+
+void VersionList::clearExternalRecommends()
+{
+    m_externalRecommendsVersions.clear();
+}
+
 // FIXME: this is dumb, we have 'recommended' as part of the metadata already...
 static const Meta::Version::Ptr& getBetterVersion(const Meta::Version::Ptr& a, const Meta::Version::Ptr& b)
 {
@@ -276,4 +287,35 @@ void VersionList::waitToLoad()
     task->start();
     ev.exec();
 }
+
+Version::Ptr VersionList::getRecommendedForParent(const QString& uid, const QString& version)
+{
+    auto foundExplicit = std::find_if(m_versions.begin(), m_versions.end(), [uid, version](Version::Ptr ver) -> bool {
+        auto& reqs = ver->requiredSet();
+        auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
+            return req.uid == uid && req.equalsVersion == version;
+        });
+        return parentReq != reqs.end() && ver->isRecommended();
+    });
+    if (foundExplicit != m_versions.end()) {
+        return *foundExplicit;
+    }
+    return nullptr;
+}
+
+Version::Ptr VersionList::getLatestForParent(const QString& uid, const QString& version)
+{
+    Version::Ptr latestCompat = nullptr;
+    for (auto ver : m_versions) {
+        auto& reqs = ver->requiredSet();
+        auto parentReq = std::find_if(reqs.begin(), reqs.end(), [uid, version](const Require& req) -> bool {
+            return req.uid == uid && req.equalsVersion == version;
+        });
+        if (parentReq != reqs.end()) {
+            latestCompat = getBetterVersion(latestCompat, ver);
+        }
+    }
+    return latestCompat;
+}
+
 }  // namespace Meta
