@@ -57,5 +57,5 @@ class ExactListFilter : public Filter {
     bool accepts(const QString& value) override;
 
    private:
-    const QStringList& m_pattern;
+    QStringList m_pattern;
 };
