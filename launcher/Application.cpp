@@ -777,6 +777,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // FTBApp instances
         m_settings->registerSetting("FTBAppInstancesPath", "");
 
+        // Custom Techinc Client ID
+        m_settings->registerSetting("TechincClientID", "");
+
         // Init page provider
         {
             m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));
