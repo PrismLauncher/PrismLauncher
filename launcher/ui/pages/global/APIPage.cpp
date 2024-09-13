@@ -173,7 +173,7 @@ void APIPage::applySettings()
     QString modrinthToken = ui->modrinthToken->text();
     s->set("ModrinthToken", modrinthToken);
     s->set("UserAgentOverride", ui->userAgentLineEdit->text());
-    s->set("TechincClientID", ui->technicClientID->text());
+    s->set("TechnicClientID", ui->technicClientID->text());
 }
 
 bool APIPage::apply()
