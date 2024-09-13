@@ -777,8 +777,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // FTBApp instances
         m_settings->registerSetting("FTBAppInstancesPath", "");
 
-        // Custom Techinc Client ID
-        m_settings->registerSetting("TechincClientID", "");
+        // Custom Technic Client ID
+        m_settings->registerSetting("TechnicClientID", "");
 
         // Init page provider
         {

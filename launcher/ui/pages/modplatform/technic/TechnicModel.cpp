@@ -154,7 +154,7 @@ void Technic::ListModel::performSearch()
             QString("%1search?build=%2&q=%3").arg(BuildConfig.TECHNIC_API_BASE_URL, BuildConfig.TECHNIC_API_BUILD, currentSearchTerm);
         searchMode = List;
     }
-    auto clientId = APPLICATION->settings()->get("TechincClientID").toString();
+    auto clientId = APPLICATION->settings()->get("TechnicClientID").toString();
     if (!clientId.isEmpty()) {
         searchUrl += "?cid=" + clientId;
     }

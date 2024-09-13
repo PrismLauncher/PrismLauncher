@@ -291,7 +291,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Techinc Client ID</string>
+          <string>Technic Client ID</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
@@ -302,7 +302,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="techicClientID">
+           <widget class="QLineEdit" name="technicClientID">
             <property name="placeholderText">
              <string>(None)</string>
             </property>
@@ -311,7 +311,7 @@
           <item>
            <widget class="QLabel" name="label_12">
             <property name="text">
-             <string>Enter a custom GUID client ID for Techinc here.</string>
+             <string>Enter a custom GUID client ID for Technic here.</string>
             </property>
            </widget>
           </item>
