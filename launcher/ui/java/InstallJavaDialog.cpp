@@ -31,10 +31,12 @@
 #include "Filter.h"
 #include "java/download/ArchiveDownloadTask.h"
 #include "java/download/ManifestDownloadTask.h"
+#include "java/download/SymlinkTask.h"
 #include "meta/Index.h"
 #include "meta/VersionList.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "tasks/SequentialTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/java/VersionList.h"
@@ -313,6 +315,12 @@ void InstallDialog::done(int result)
                         CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
                         deletePath();
                 }
+#if defined(Q_OS_MACOS)
+                auto seq = makeShared<SequentialTask>(this, tr("Install Java"));
+                seq->addTask(task);
+                seq->addTask(makeShared<Java::SymlinkTask>(final_path));
+                task = seq;
+#endif
                 connect(task.get(), &Task::failed, this, [this, &deletePath](QString reason) {
                     QString error = QString("Java download failed: %1").arg(reason);
                     CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();

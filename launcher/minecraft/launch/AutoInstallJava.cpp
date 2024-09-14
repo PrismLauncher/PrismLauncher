@@ -41,6 +41,7 @@
 #include "Application.h"
 #include "FileSystem.h"
 #include "MessageLevel.h"
+#include "QObjectPtr.h"
 #include "SysInfo.h"
 #include "java/JavaInstall.h"
 #include "java/JavaInstallList.h"
@@ -48,10 +49,12 @@
 #include "java/JavaVersion.h"
 #include "java/download/ArchiveDownloadTask.h"
 #include "java/download/ManifestDownloadTask.h"
+#include "java/download/SymlinkTask.h"
 #include "meta/Index.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "net/Mode.h"
+#include "tasks/SequentialTask.h"
 
 AutoInstallJava::AutoInstallJava(LaunchTask* parent)
     : LaunchStep(parent)
@@ -175,6 +178,12 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
                     emitFailed(tr("Could not determine Java download type!"));
                     return;
             }
+#if defined(Q_OS_MACOS)
+            auto seq = makeShared<SequentialTask>(this, tr("Install Java"));
+            seq->addTask(m_current_task);
+            seq->addTask(makeShared<Java::SymlinkTask>(final_path));
+            m_current_task = seq;
+#endif
             auto deletePath = [final_path] { FS::deletePath(final_path); };
             connect(m_current_task.get(), &Task::failed, this, [this, deletePath](QString reason) {
                 deletePath();
