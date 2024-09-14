@@ -234,7 +234,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
             ui->mainToolBar->addAction(ui->actionCloseWindow);
         }
 
-        ui->actionViewJavaFolder->setVisible(BuildConfig.JAVA_DOWNLOADER_ENABLED);
+        ui->actionViewJavaFolder->setEnabled(BuildConfig.JAVA_DOWNLOADER_ENABLED);
+
     }
 
     // add the toolbar toggles to the view menu
