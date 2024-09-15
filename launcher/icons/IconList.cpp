@@ -95,10 +95,8 @@ bool IconList::addPathRecursively(const QString& path)
     if (!dir.exists())
         return false;
 
-    bool watching = false;
-
     // Add the directory itself
-    watching = m_watcher->addPath(path);
+    bool watching = m_watcher->addPath(path);
 
     // Add all subdirectories
     QFileInfoList entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -134,21 +132,19 @@ void IconList::removePathRecursively(const QString& path)
 
 QStringList IconList::getIconFilePaths() const
 {
-    QStringList icon_files{};
+    QStringList iconFiles{};
     QStringList directories{ m_dir.absolutePath() };
     while (!directories.isEmpty()) {
         QString first = directories.takeFirst();
         QDir dir(first);
-        for (QString& file_name : dir.entryList(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Name)) {
-            QString full_path = dir.filePath(file_name);  // Convert to full path
-            QFileInfo file_info(full_path);
-            if (file_info.isDir())
-                directories.push_back(full_path);
+        for (QFileInfo& fileInfo : dir.entryInfoList(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot, QDir::Name)) {
+            if (fileInfo.isDir())
+                directories.push_back(fileInfo.absoluteFilePath());
             else
-                icon_files.push_back(full_path);
+                iconFiles.push_back(fileInfo.absoluteFilePath());
         }
     }
-    return icon_files;
+    return iconFiles;
 }
 
 QString formatName(const QDir& icons_dir, const QFileInfo& file)
@@ -157,8 +153,8 @@ QString formatName(const QDir& icons_dir, const QFileInfo& file)
         return file.baseName();
 
     constexpr auto delimiter = " » ";
-    QString relative_path_without_extension = icons_dir.relativeFilePath(file.dir().path()) + QDir::separator() + file.baseName();
-    return relative_path_without_extension.replace(QDir::separator(), delimiter);
+    QString relativePathWithoutExtension = icons_dir.relativeFilePath(file.dir().path()) + QDir::separator() + file.baseName();
+    return relativePathWithoutExtension.replace(QDir::separator(), delimiter);
 }
 
 void IconList::directoryChanged(const QString& path)
