@@ -93,7 +93,7 @@ jobs:
             qt_version: "6.7.2"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
-          - os: macos-12
+          - os: macos-14
             name: macOS
             macosx_deployment_target: 11.0
             qt_ver: 6
@@ -102,7 +102,7 @@ jobs:
             qt_version: "6.7.2"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
-          - os: macos-12
+          - os: macos-14
             name: macOS-Legacy
             macosx_deployment_target: 10.13
             qt_ver: 5
@@ -204,17 +204,6 @@ jobs:
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
-          rm '/usr/local/bin/2to3'
-          rm '/usr/local/bin/2to3-3.12'
-          rm '/usr/local/bin/idle3.12'
-          rm '/usr/local/bin/idle3'
-          rm '/usr/local/bin/pydoc3.12'
-          rm '/usr/local/bin/pydoc3'
-          rm '/usr/local/bin/python3'
-          rm '/usr/local/bin/python3-config'
-          rm '/usr/local/bin/python3.12'
-          rm '/usr/local/bin/python3.12-config'
-          brew unlink python@3.12
           brew update
           brew install ninja extra-cmake-modules
 
@@ -270,6 +259,12 @@ jobs:
         run: |
           echo "QT_HOST_PATH=${{ github.workspace }}\HostQt\Qt\${{ matrix.qt_version }}\msvc2019_64" >> $env:GITHUB_ENV
 
+      - name: Setup java (macOS)
+        if: runner.os == 'macOS'
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
       ##
       # CONFIGURE
       ##
