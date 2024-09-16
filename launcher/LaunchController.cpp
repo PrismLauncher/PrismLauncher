@@ -194,7 +194,8 @@ void LaunchController::login()
     bool tryagain = true;
     unsigned int tries = 0;
 
-    if (m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) {
+    if ((m_accountToUse->accountType() != AccountType::Offline && m_accountToUse->accountState() == AccountState::Offline) ||
+        m_accountToUse->shouldRefresh()) {
         // Force account refresh on the account used to launch the instance updating the AccountState
         //  only on first try and if it is not meant to be offline
         auto accounts = APPLICATION->accounts();
@@ -323,7 +324,7 @@ void LaunchController::launchInstance()
         return;
     }
 
-    m_launcher = m_instance->createLaunchTask(m_session, m_serverToJoin);
+    m_launcher = m_instance->createLaunchTask(m_session, m_targetToJoin);
     if (!m_launcher) {
         emitFailed(tr("Couldn't instantiate a launcher."));
         return;

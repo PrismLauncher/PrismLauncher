@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2023-2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,26 +14,32 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
  */
 
 #pragma once
 
-#include "net/HeaderProxy.h"
+#include <QUrl>
+#include "tasks/Task.h"
 
-namespace Net {
-
-class StaticHeaderProxy : public HeaderProxy {
+namespace Java {
+class ArchiveDownloadTask : public Task {
+    Q_OBJECT
    public:
-    StaticHeaderProxy(QList<HeaderPair> hdrs = {}) : HeaderProxy(), m_hdrs(hdrs) {};
-    virtual ~StaticHeaderProxy() = default;
+    ArchiveDownloadTask(QUrl url, QString final_path, QString checksumType = "", QString checksumHash = "");
+    virtual ~ArchiveDownloadTask() = default;
 
-   public:
-    virtual QList<HeaderPair> headers(const QNetworkRequest&) const override { return m_hdrs; };
-    void setHeaders(QList<HeaderPair> hdrs) { m_hdrs = hdrs; };
+    [[nodiscard]] bool canAbort() const override { return true; }
+    void executeTask() override;
+    virtual bool abort() override;
 
-   private:
-    QList<HeaderPair> m_hdrs;
+   private slots:
+    void extractJava(QString input);
+
+   protected:
+    QUrl m_url;
+    QString m_final_path;
+    QString m_checksum_type;
+    QString m_checksum_hash;
+    Task::Ptr m_task;
 };
-
-}  // namespace Net
+}  // namespace Java

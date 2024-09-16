@@ -36,6 +36,8 @@
 #pragma once
 
 #include <QDateTime>
+#include <QHash>
+#include <QList>
 #include <QSet>
 #include <QString>
 #include <QStringList>
@@ -45,6 +47,7 @@
 #include "Agent.h"
 #include "Library.h"
 #include "ProblemProvider.h"
+#include "java/JavaMetadata.h"
 #include "minecraft/Rule.h"
 
 class PackProfile;
@@ -98,6 +101,9 @@ class VersionFile : public ProblemContainer {
     /// Mojang: list of compatible java majors
     QList<int> compatibleJavaMajors;
 
+    /// Mojang: the name of recommended java version
+    QString compatibleJavaName;
+
     /// Mojang: type of the Minecraft version
     QString type;
 
@@ -148,6 +154,8 @@ class VersionFile : public ProblemContainer {
 
     /// is volatile -- may be removed as soon as it is no longer needed by something else
     bool m_volatile = false;
+
+    QList<Java::MetadataPtr> runtimes;
 
    public:
     // Mojang: DEPRECATED list of 'downloads' - client jar, server jar, windows server exe, maybe more.

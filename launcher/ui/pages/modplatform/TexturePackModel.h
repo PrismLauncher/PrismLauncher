@@ -22,6 +22,7 @@ class TexturePackResourceModel : public ResourcePackResourceModel {
 
    protected:
     Meta::VersionList::Ptr m_version_list;
+    Task::Ptr m_task;
 };
 
 }  // namespace ResourceDownload
