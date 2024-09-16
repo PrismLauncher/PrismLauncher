@@ -80,23 +80,16 @@ class ConcurrentTask : public Task {
     void subTaskStatus(Task::Ptr task, const QString& msg);
     void subTaskDetails(Task::Ptr task, const QString& msg);
     void subTaskProgress(Task::Ptr task, qint64 current, qint64 total);
-    void subTaskStepProgress(Task::Ptr task, TaskStepProgress const& task_step_progress);
 
    protected:
     // NOTE: This is not thread-safe.
     [[nodiscard]] unsigned int totalSize() const { return static_cast<unsigned int>(m_queue.size() + m_doing.size() + m_done.size()); }
-
-    enum class Operation { ADDED, REMOVED, CHANGED };
-    void updateStepProgress(TaskStepProgress const& changed_progress, Operation);
 
     virtual void updateState();
 
     void startSubTask(Task::Ptr task);
 
    protected:
-    QString m_name;
-    QString m_step_status;
-
     QQueue<Task::Ptr> m_queue;
 
     QHash<Task*, Task::Ptr> m_doing;
@@ -107,7 +100,4 @@ class ConcurrentTask : public Task {
     QHash<QUuid, std::shared_ptr<TaskStepProgress>> m_task_progress;
 
     int m_total_max_size;
-
-    qint64 m_stepProgress = 0;
-    qint64 m_stepTotalProgress = 100;
 };

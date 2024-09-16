@@ -49,8 +49,12 @@
 #include <QMessageBox>
 #include <QString>
 #include <QUrl>
+#include <algorithm>
 
+#include "QObjectPtr.h"
 #include "VersionPage.h"
+#include "meta/JsonFormat.h"
+#include "tasks/SequentialTask.h"
 #include "ui/dialogs/InstallLoaderDialog.h"
 #include "ui_VersionPage.h"
 
@@ -63,11 +67,9 @@
 
 #include "DesktopServices.h"
 #include "Exception.h"
-#include "Version.h"
 #include "icons/IconList.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/auth/AccountList.h"
-#include "minecraft/mod/Mod.h"
 
 #include "meta/Index.h"
 #include "meta/VersionList.h"
@@ -370,10 +372,24 @@ void VersionPage::on_actionChange_version_triggered()
     auto patch = m_profile->getComponent(versionRow);
     auto name = patch->getName();
     auto list = patch->getVersionList();
+    list->clearExternalRecommends();
     if (!list) {
         return;
     }
     auto uid = list->uid();
+
+    // recommend the correct lwjgl version for the current minecraft version
+    if (uid == "org.lwjgl" || uid == "org.lwjgl3") {
+        auto minecraft = m_profile->getComponent("net.minecraft");
+        auto lwjglReq = std::find_if(minecraft->m_cachedRequires.cbegin(), minecraft->m_cachedRequires.cend(),
+                                     [uid](const Meta::Require& req) -> bool { return req.uid == uid; });
+        if (lwjglReq != minecraft->m_cachedRequires.cend()) {
+            auto lwjglVersion = !lwjglReq->equalsVersion.isEmpty() ? lwjglReq->equalsVersion : lwjglReq->suggests;
+            if (!lwjglVersion.isEmpty()) {
+                list->addExternalRecommends({ lwjglVersion });
+            }
+        }
+    }
 
     VersionSelectDialog vselect(list.get(), tr("Change %1 version").arg(name), this);
     if (uid == "net.fabricmc.intermediary" || uid == "org.quiltmc.hashed") {
@@ -415,14 +431,18 @@ void VersionPage::on_actionDownload_All_triggered()
         return;
     }
 
-    auto updateTask = m_inst->createUpdateTask(Net::Mode::Online);
-    if (!updateTask) {
+    auto updateTasks = m_inst->createUpdateTask();
+    if (updateTasks.isEmpty()) {
         return;
     }
+    auto task = makeShared<SequentialTask>(this);
+    for (auto t : updateTasks) {
+        task->addTask(t);
+    }
     ProgressDialog tDialog(this);
-    connect(updateTask.get(), &Task::failed, this, &VersionPage::onGameUpdateError);
+    connect(task.get(), &Task::failed, this, &VersionPage::onGameUpdateError);
     // FIXME: unused return value
-    tDialog.execWithTask(updateTask.get());
+    tDialog.execWithTask(task.get());
     updateButtons();
     m_container->refreshContainer();
 }

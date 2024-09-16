@@ -2,41 +2,44 @@
 #include "MinecraftInstance.h"
 #include "PackProfile.h"
 
-MinecraftLoadAndCheck::MinecraftLoadAndCheck(MinecraftInstance* inst, QObject* parent) : Task(parent), m_inst(inst) {}
+MinecraftLoadAndCheck::MinecraftLoadAndCheck(MinecraftInstance* inst, Net::Mode netmode, QObject* parent)
+    : Task(parent), m_inst(inst), m_netmode(netmode)
+{}
 
 void MinecraftLoadAndCheck::executeTask()
 {
     // add offline metadata load task
     auto components = m_inst->getPackProfile();
-    components->reload(Net::Mode::Offline);
+    components->reload(m_netmode);
     m_task = components->getCurrentTask();
 
     if (!m_task) {
         emitSucceeded();
         return;
     }
-    connect(m_task.get(), &Task::succeeded, this, &MinecraftLoadAndCheck::subtaskSucceeded);
-    connect(m_task.get(), &Task::failed, this, &MinecraftLoadAndCheck::subtaskFailed);
-    connect(m_task.get(), &Task::aborted, this, [this] { subtaskFailed(tr("Aborted")); });
-    connect(m_task.get(), &Task::progress, this, &MinecraftLoadAndCheck::progress);
+    connect(m_task.get(), &Task::succeeded, this, &MinecraftLoadAndCheck::emitSucceeded);
+    connect(m_task.get(), &Task::failed, this, &MinecraftLoadAndCheck::emitFailed);
+    connect(m_task.get(), &Task::aborted, this, [this] { emitFailed(tr("Aborted")); });
+    connect(m_task.get(), &Task::progress, this, &MinecraftLoadAndCheck::setProgress);
     connect(m_task.get(), &Task::stepProgress, this, &MinecraftLoadAndCheck::propagateStepProgress);
     connect(m_task.get(), &Task::status, this, &MinecraftLoadAndCheck::setStatus);
+    connect(m_task.get(), &Task::details, this, &MinecraftLoadAndCheck::setDetails);
 }
 
-void MinecraftLoadAndCheck::subtaskSucceeded()
+bool MinecraftLoadAndCheck::canAbort() const
 {
-    if (isFinished()) {
-        qCritical() << "MinecraftUpdate: Subtask" << sender() << "succeeded, but work was already done!";
-        return;
+    if (m_task) {
+        return m_task->canAbort();
     }
-    emitSucceeded();
+    return true;
 }
 
-void MinecraftLoadAndCheck::subtaskFailed(QString error)
+bool MinecraftLoadAndCheck::abort()
 {
-    if (isFinished()) {
-        qCritical() << "MinecraftUpdate: Subtask" << sender() << "failed, but work was already done!";
-        return;
+    if (m_task && m_task->canAbort()) {
+        auto status = m_task->abort();
+        emitFailed("Aborted.");
+        return status;
     }
-    emitFailed(error);
+    return Task::abort();
 }

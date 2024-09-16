@@ -37,7 +37,6 @@
 
 #include <launch/LaunchStep.h>
 #include <launch/LaunchTask.h>
-#include "java/JavaMetadata.h"
 #include "meta/Version.h"
 #include "minecraft/MinecraftInstance.h"
 #include "tasks/Task.h"

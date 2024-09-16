@@ -55,6 +55,7 @@ bool JavaWizardPage::validatePage()
     auto result = m_java_widget->validate();
     settings->set("AutomaticJavaSwitch", m_java_widget->autoDetectJava());
     settings->set("AutomaticJavaDownload", m_java_widget->autoDownloadJava());
+    settings->set("UserAskedAboutAutomaticJavaDownload", true);
     switch (result) {
         default:
         case JavaSettingsWidget::ValidationStatus::Bad: {
@@ -82,7 +83,6 @@ void JavaWizardPage::retranslate()
 {
     setTitle(tr("Java"));
     setSubTitle(
-        tr("You do not have a working Java set up yet or it went missing.\n"
-           "Please select one of the following or browse for a Java executable."));
+        tr("Please select how much memory to allocate to instances and if Prism Launcher should manage java automatically or manually."));
     m_java_widget->retranslate();
 }
