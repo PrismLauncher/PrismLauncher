@@ -57,7 +57,7 @@ class OtherLogsPage : public QWidget, public BasePage {
     QString id() const override { return "logs"; }
     QString displayName() const override { return tr("Other logs"); }
     QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
-    QString helpPage() const override { return "Minecraft-Logs"; }
+    QString helpPage() const override { return "other-Logs"; }
     void retranslate() override;
 
     void openedImpl() override;

@@ -6,7 +6,7 @@
 #include "Application.h"
 #include "Logging.h"
 #include "net/NetUtils.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/RawHeaderProxy.h"
 
 XboxProfileStep::XboxProfileStep(AccountData* data) : AuthStep(data) {}
 
@@ -34,25 +34,28 @@ void XboxProfileStep::perform()
     };
 
     m_response.reset(new QByteArray());
-    m_task = Net::Download::makeByteArray(url, m_response);
-    m_task->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_request = Net::Download::makeByteArray(url, m_response);
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+
+    m_task.reset(new NetJob("XboxProfileStep", APPLICATION->network()));
+    m_task->setAskRetry(false);
+    m_task->addNetAction(m_request);
 
     connect(m_task.get(), &Task::finished, this, &XboxProfileStep::onRequestDone);
 
-    m_task->setNetwork(APPLICATION->network());
     m_task->start();
     qDebug() << "Getting Xbox profile...";
 }
 
 void XboxProfileStep::onRequestDone()
 {
-    if (m_task->error() != QNetworkReply::NoError) {
-        qWarning() << "Reply error:" << m_task->error();
+    if (m_request->error() != QNetworkReply::NoError) {
+        qWarning() << "Reply error:" << m_request->error();
         qCDebug(authCredentials()) << *m_response;
-        if (Net::isApplicationError(m_task->error())) {
-            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Failed to retrieve the Xbox profile: %1").arg(m_task->errorString()));
+        if (Net::isApplicationError(m_request->error())) {
+            emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Failed to retrieve the Xbox profile: %1").arg(m_request->errorString()));
         } else {
-            emit finished(AccountTaskState::STATE_OFFLINE, tr("Failed to retrieve the Xbox profile: %1").arg(m_task->errorString()));
+            emit finished(AccountTaskState::STATE_OFFLINE, tr("Failed to retrieve the Xbox profile: %1").arg(m_request->errorString()));
         }
         return;
     }

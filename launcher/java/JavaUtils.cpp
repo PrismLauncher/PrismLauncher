@@ -182,56 +182,58 @@ QList<JavaInstallPtr> JavaUtils::FindJavaFromRegistryKey(DWORD keyType, QString 
     else if (keyType == KEY_WOW64_32KEY)
         archType = "32";
 
-    HKEY jreKey;
-    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, keyName.toStdWString().c_str(), 0, KEY_READ | keyType | KEY_ENUMERATE_SUB_KEYS, &jreKey) ==
-        ERROR_SUCCESS) {
-        // Read the current type version from the registry.
-        // This will be used to find any key that contains the JavaHome value.
+    for (HKEY baseRegistry : { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE }) {
+        HKEY jreKey;
+        if (RegOpenKeyExW(baseRegistry, keyName.toStdWString().c_str(), 0, KEY_READ | keyType | KEY_ENUMERATE_SUB_KEYS, &jreKey) ==
+            ERROR_SUCCESS) {
+            // Read the current type version from the registry.
+            // This will be used to find any key that contains the JavaHome value.
 
-        WCHAR subKeyName[255];
-        DWORD subKeyNameSize, numSubKeys, retCode;
+            WCHAR subKeyName[255];
+            DWORD subKeyNameSize, numSubKeys, retCode;
 
-        // Get the number of subkeys
-        RegQueryInfoKeyW(jreKey, NULL, NULL, NULL, &numSubKeys, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+            // Get the number of subkeys
+            RegQueryInfoKeyW(jreKey, NULL, NULL, NULL, &numSubKeys, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-        // Iterate until RegEnumKeyEx fails
-        if (numSubKeys > 0) {
-            for (DWORD i = 0; i < numSubKeys; i++) {
-                subKeyNameSize = 255;
-                retCode = RegEnumKeyExW(jreKey, i, subKeyName, &subKeyNameSize, NULL, NULL, NULL, NULL);
-                QString newSubkeyName = QString::fromWCharArray(subKeyName);
-                if (retCode == ERROR_SUCCESS) {
-                    // Now open the registry key for the version that we just got.
-                    QString newKeyName = keyName + "\\" + newSubkeyName + subkeySuffix;
+            // Iterate until RegEnumKeyEx fails
+            if (numSubKeys > 0) {
+                for (DWORD i = 0; i < numSubKeys; i++) {
+                    subKeyNameSize = 255;
+                    retCode = RegEnumKeyExW(jreKey, i, subKeyName, &subKeyNameSize, NULL, NULL, NULL, NULL);
+                    QString newSubkeyName = QString::fromWCharArray(subKeyName);
+                    if (retCode == ERROR_SUCCESS) {
+                        // Now open the registry key for the version that we just got.
+                        QString newKeyName = keyName + "\\" + newSubkeyName + subkeySuffix;
 
-                    HKEY newKey;
-                    if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, newKeyName.toStdWString().c_str(), 0, KEY_READ | keyType, &newKey) ==
-                        ERROR_SUCCESS) {
-                        // Read the JavaHome value to find where Java is installed.
-                        DWORD valueSz = 0;
-                        if (RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, NULL, &valueSz) == ERROR_SUCCESS) {
-                            WCHAR* value = new WCHAR[valueSz];
-                            RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, (BYTE*)value, &valueSz);
+                        HKEY newKey;
+                        if (RegOpenKeyExW(baseRegistry, newKeyName.toStdWString().c_str(), 0, KEY_READ | keyType, &newKey) ==
+                            ERROR_SUCCESS) {
+                            // Read the JavaHome value to find where Java is installed.
+                            DWORD valueSz = 0;
+                            if (RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, NULL, &valueSz) == ERROR_SUCCESS) {
+                                WCHAR* value = new WCHAR[valueSz];
+                                RegQueryValueExW(newKey, keyJavaDir.toStdWString().c_str(), NULL, NULL, (BYTE*)value, &valueSz);
 
-                            QString newValue = QString::fromWCharArray(value);
-                            delete[] value;
+                                QString newValue = QString::fromWCharArray(value);
+                                delete[] value;
 
-                            // Now, we construct the version object and add it to the list.
-                            JavaInstallPtr javaVersion(new JavaInstall());
+                                // Now, we construct the version object and add it to the list.
+                                JavaInstallPtr javaVersion(new JavaInstall());
 
-                            javaVersion->id = newSubkeyName;
-                            javaVersion->arch = archType;
-                            javaVersion->path = QDir(FS::PathCombine(newValue, "bin")).absoluteFilePath("javaw.exe");
-                            javas.append(javaVersion);
+                                javaVersion->id = newSubkeyName;
+                                javaVersion->arch = archType;
+                                javaVersion->path = QDir(FS::PathCombine(newValue, "bin")).absoluteFilePath("javaw.exe");
+                                javas.append(javaVersion);
+                            }
+
+                            RegCloseKey(newKey);
                         }
-
-                        RegCloseKey(newKey);
                     }
                 }
             }
-        }
 
-        RegCloseKey(jreKey);
+            RegCloseKey(jreKey);
+        }
     }
 
     return javas;
@@ -394,7 +396,7 @@ QList<QString> JavaUtils::FindJavaPaths()
     return javas;
 }
 
-#elif defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX) || defined(Q_OS_OPENBSD) || defined(Q_OS_FREEBSD)
 QList<QString> JavaUtils::FindJavaPaths()
 {
     QList<QString> javas;
@@ -419,6 +421,7 @@ QList<QString> JavaUtils::FindJavaPaths()
             scanJavaDir(snap + dirPath);
         }
     };
+#if defined(Q_OS_LINUX)
     // oracle RPMs
     scanJavaDirs("/usr/java");
     // general locations used by distro packaging
@@ -437,7 +440,10 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs("/opt/ibm");  // IBM Semeru Certified Edition
     // flatpak
     scanJavaDirs("/app/jdk");
-
+#elif defined(Q_OS_OPENBSD) || defined(Q_OS_FREEBSD)
+    // ports install to /usr/local on OpenBSD & FreeBSD
+    scanJavaDirs("/usr/local");
+#endif
     auto home = qEnvironmentVariable("HOME");
 
     // javas downloaded by IntelliJ
