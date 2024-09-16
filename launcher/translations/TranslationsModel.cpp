@@ -550,7 +550,7 @@ void TranslationsModel::downloadIndex()
     d->m_index_job.reset(new NetJob("Translations Index", APPLICATION->network()));
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "index_v2.json");
     entry->setStale(true);
-    auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + "index_v2.json"), entry);
+    auto task = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + "index_v2.json"), entry);
     d->m_index_task = task.get();
     d->m_index_job->addNetAction(task);
     d->m_index_job->setAskRetry(false);
@@ -591,7 +591,7 @@ void TranslationsModel::downloadTranslation(QString key)
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("translations", "mmc_" + key + ".qm");
     entry->setStale(true);
 
-    auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATIONS_BASE_URL + lang->file_name), entry);
+    auto dl = Net::Download::makeCached(QUrl(BuildConfig.TRANSLATION_FILES_URL + lang->file_name), entry);
     dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, lang->file_sha1));
     dl->setProgress(dl->getProgress(), lang->file_size);
 
