@@ -323,8 +323,7 @@ bool LaunchController::reauthenticateCurrentAccount()
         bool isDefault = accounts->defaultAccount() == m_accountToUse;
         accounts->removeAccount(accounts->index(accounts->findAccountByProfileId(m_accountToUse->profileId())));
         if (m_accountToUse->accountType() == AccountType::MSA) {
-            auto newAccount =
-                MSALoginDialog::newAccount(m_parentWidget, tr("Please enter your Mojang account email and password to add your account."));
+            auto newAccount = MSALoginDialog::newAccount(m_parentWidget);
             accounts->addAccount(newAccount);
             if (isDefault) {
                 accounts->setDefaultAccount(newAccount);
