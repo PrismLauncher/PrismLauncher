@@ -5,14 +5,14 @@
 
 class Filter {
    public:
-    virtual ~Filter();
+    virtual ~Filter() = default;
     virtual bool accepts(const QString& value) = 0;
 };
 
 class ContainsFilter : public Filter {
    public:
     ContainsFilter(const QString& pattern);
-    virtual ~ContainsFilter();
+    virtual ~ContainsFilter() = default;
     bool accepts(const QString& value) override;
 
    private:
@@ -22,7 +22,7 @@ class ContainsFilter : public Filter {
 class ExactFilter : public Filter {
    public:
     ExactFilter(const QString& pattern);
-    virtual ~ExactFilter();
+    virtual ~ExactFilter() = default;
     bool accepts(const QString& value) override;
 
    private:
@@ -32,7 +32,7 @@ class ExactFilter : public Filter {
 class ExactIfPresentFilter : public Filter {
    public:
     ExactIfPresentFilter(const QString& pattern);
-    ~ExactIfPresentFilter() override = default;
+    virtual ~ExactIfPresentFilter() override = default;
     bool accepts(const QString& value) override;
 
    private:
@@ -42,10 +42,20 @@ class ExactIfPresentFilter : public Filter {
 class RegexpFilter : public Filter {
    public:
     RegexpFilter(const QString& regexp, bool invert);
-    virtual ~RegexpFilter();
+    virtual ~RegexpFilter() = default;
     bool accepts(const QString& value) override;
 
    private:
     QRegularExpression pattern;
     bool invert = false;
+};
+
+class ExactListFilter : public Filter {
+   public:
+    ExactListFilter(const QStringList& pattern = {});
+    virtual ~ExactListFilter() = default;
+    bool accepts(const QString& value) override;
+
+   private:
+    QStringList m_pattern;
 };

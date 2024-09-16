@@ -110,6 +110,7 @@ void ListModel::requestLogo(QString logo, QString url)
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry("FlamePacks", QString("logos/%1").arg(logo));
     auto job = new NetJob(QString("Flame Icon Download %1").arg(logo), APPLICATION->network());
+    job->setAskRetry(false);
     job->addNetAction(Net::ApiDownload::makeCached(QUrl(url), entry));
 
     auto fullPath = entry->getFullPath();
@@ -172,7 +173,7 @@ void ListModel::performPaginatedSearch()
             callbacks.on_succeed = [this](auto& doc, auto& pack) { searchRequestForOneSucceeded(doc); };
             callbacks.on_abort = [this] {
                 qCritical() << "Search task aborted by an unknown reason!";
-                searchRequestFailed("Abborted");
+                searchRequestFailed("Aborted");
             };
             static const FlameAPI api;
             if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {

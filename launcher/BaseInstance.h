@@ -56,7 +56,7 @@
 #include "net/Mode.h"
 
 #include "RuntimeContext.h"
-#include "minecraft/launch/MinecraftServerTarget.h"
+#include "minecraft/launch/MinecraftTarget.h"
 
 class QDir;
 class Task;
@@ -181,10 +181,10 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     virtual void loadSpecificSettings() = 0;
 
     /// returns a valid update task
-    virtual Task::Ptr createUpdateTask(Net::Mode mode) = 0;
+    virtual QList<Task::Ptr> createUpdateTask() = 0;
 
     /// returns a valid launcher (task container)
-    virtual shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account, MinecraftServerTargetPtr serverToJoin) = 0;
+    virtual shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr account, MinecraftTarget::Ptr targetToJoin) = 0;
 
     /// returns the current launch task (if any)
     shared_qobject_ptr<LaunchTask> getLaunchTask();
@@ -215,7 +215,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
 
     virtual QString typeName() const = 0;
 
-    void updateRuntimeContext();
+    virtual void updateRuntimeContext();
     RuntimeContext runtimeContext() const { return m_runtimeContext; }
 
     bool hasVersionBroken() const { return m_hasBrokenVersion; }
@@ -256,7 +256,7 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     /**
      * 'print' a verbose description of the instance into a QStringList
      */
-    virtual QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) = 0;
+    virtual QStringList verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) = 0;
 
     Status currentStatus() const;
 

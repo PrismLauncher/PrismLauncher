@@ -10,7 +10,8 @@
 #include "Logging.h"
 #include "minecraft/auth/Parsers.h"
 #include "net/Download.h"
-#include "net/StaticHeaderProxy.h"
+#include "net/NetJob.h"
+#include "net/RawHeaderProxy.h"
 #include "tasks/Task.h"
 
 EntitlementsStep::EntitlementsStep(AccountData* data) : AuthStep(data) {}
@@ -31,12 +32,15 @@ void EntitlementsStep::perform()
                                            { "Authorization", QString("Bearer %1").arg(m_data->yggdrasilToken.token).toUtf8() } };
 
     m_response.reset(new QByteArray());
-    m_task = Net::Download::makeByteArray(url, m_response);
-    m_task->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_request = Net::Download::makeByteArray(url, m_response);
+    m_request->addHeaderProxy(new Net::RawHeaderProxy(headers));
+
+    m_task.reset(new NetJob("EntitlementsStep", APPLICATION->network()));
+    m_task->setAskRetry(false);
+    m_task->addNetAction(m_request);
 
     connect(m_task.get(), &Task::finished, this, &EntitlementsStep::onRequestDone);
 
-    m_task->setNetwork(APPLICATION->network());
     m_task->start();
     qDebug() << "Getting entitlements...";
 }

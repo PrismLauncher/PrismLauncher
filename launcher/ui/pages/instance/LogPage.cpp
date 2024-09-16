@@ -3,7 +3,7 @@
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (C) 2022 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,8 +47,8 @@
 #include "launch/LaunchTask.h"
 #include "settings/Setting.h"
 
-#include "ui/ColorCache.h"
 #include "ui/GuiUtil.h"
+#include "ui/themes/ThemeManager.h"
 
 #include <BuildConfig.h>
 
@@ -57,25 +57,35 @@ class LogFormatProxyModel : public QIdentityProxyModel {
     LogFormatProxyModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
     QVariant data(const QModelIndex& index, int role) const override
     {
+        const LogColors& colors = APPLICATION->themeManager()->getLogColors();
+
         switch (role) {
             case Qt::FontRole:
                 return m_font;
             case Qt::ForegroundRole: {
-                MessageLevel::Enum level = (MessageLevel::Enum)QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
-                return m_colors->getFront(level);
+                auto level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
+                QColor result = colors.foreground.value(level);
+
+                if (result.isValid())
+                    return result;
+
+                break;
             }
             case Qt::BackgroundRole: {
-                MessageLevel::Enum level = (MessageLevel::Enum)QIdentityProxyModel::data(index, LogModel::LevelRole).toInt();
-                return m_colors->getBack(level);
+                auto level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
+                QColor result = colors.background.value(level);
+
+                if (result.isValid())
+                    return result;
+
+                break;
             }
-            default:
-                return QIdentityProxyModel::data(index, role);
         }
+
+        return QIdentityProxyModel::data(index, role);
     }
 
     void setFont(QFont font) { m_font = font; }
-
-    void setColors(LogColorCache* colors) { m_colors.reset(colors); }
 
     QModelIndex find(const QModelIndex& start, const QString& value, bool reverse) const
     {
@@ -125,7 +135,6 @@ class LogFormatProxyModel : public QIdentityProxyModel {
 
    private:
     QFont m_font;
-    std::unique_ptr<LogColorCache> m_colors;
 };
 
 LogPage::LogPage(InstancePtr instance, QWidget* parent) : QWidget(parent), ui(new Ui::LogPage), m_instance(instance)
@@ -134,12 +143,6 @@ LogPage::LogPage(InstancePtr instance, QWidget* parent) : QWidget(parent), ui(ne
     ui->tabWidget->tabBar()->hide();
 
     m_proxy = new LogFormatProxyModel(this);
-    // set up text colors in the log proxy and adapt them to the current theme foreground and background
-    {
-        auto origForeground = ui->text->palette().color(ui->text->foregroundRole());
-        auto origBackground = ui->text->palette().color(ui->text->backgroundRole());
-        m_proxy->setColors(new LogColorCache(origForeground, origBackground));
-    }
 
     // set up fonts in the log proxy
     {

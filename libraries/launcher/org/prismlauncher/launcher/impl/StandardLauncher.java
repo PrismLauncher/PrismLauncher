@@ -62,13 +62,15 @@ import java.util.Collections;
 import java.util.List;
 
 public final class StandardLauncher extends AbstractLauncher {
-    private final boolean quickPlaySupported;
+    private final boolean quickPlayMultiplayerSupported;
+    private final boolean quickPlaySingleplayerSupported;
 
     public StandardLauncher(Parameters params) {
         super(params);
 
         List<String> traits = params.getList("traits", Collections.<String>emptyList());
-        quickPlaySupported = traits.contains("feature:is_quick_play_multiplayer");
+        quickPlayMultiplayerSupported = traits.contains("feature:is_quick_play_multiplayer");
+        quickPlaySingleplayerSupported = traits.contains("feature:is_quick_play_singleplayer");
     }
 
     @Override
@@ -80,7 +82,7 @@ public final class StandardLauncher extends AbstractLauncher {
         gameArgs.add(Integer.toString(height));
 
         if (serverAddress != null) {
-            if (quickPlaySupported) {
+            if (quickPlayMultiplayerSupported) {
                 // as of 23w14a
                 gameArgs.add("--quickPlayMultiplayer");
                 gameArgs.add(serverAddress + ':' + serverPort);
@@ -90,6 +92,9 @@ public final class StandardLauncher extends AbstractLauncher {
                 gameArgs.add("--port");
                 gameArgs.add(serverPort);
             }
+        } else if (worldName != null && quickPlaySingleplayerSupported) {
+            gameArgs.add("--quickPlaySingleplayer");
+            gameArgs.add(worldName);
         }
 
         // find and invoke the main method
