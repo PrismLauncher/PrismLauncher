@@ -597,6 +597,7 @@ void TranslationsModel::downloadTranslation(QString key)
 
     d->m_dl_job.reset(new NetJob("Translation for " + key, APPLICATION->network()));
     d->m_dl_job->addNetAction(dl);
+    d->m_dl_job->setAskRetry(false);
 
     connect(d->m_dl_job.get(), &NetJob::succeeded, this, &TranslationsModel::dlGood);
     connect(d->m_dl_job.get(), &NetJob::failed, this, &TranslationsModel::dlFailed);
