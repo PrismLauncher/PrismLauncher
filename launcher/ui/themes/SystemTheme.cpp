@@ -40,11 +40,11 @@
 #include "HintOverrideProxyStyle.h"
 #include "ThemeManager.h"
 
-SystemTheme::SystemTheme(QString& styleName, bool isSystemTheme)
+SystemTheme::SystemTheme(const QString& styleName, const QPalette& palette, bool isDefaultTheme)
 {
-    themeName = isSystemTheme ? "system" : styleName;
+    themeName = isDefaultTheme ? "system" : styleName;
     widgetTheme = styleName;
-    colorPalette = QApplication::palette();
+    colorPalette = palette;
 }
 
 void SystemTheme::apply(bool initial)
@@ -124,9 +124,4 @@ QColor SystemTheme::fadeColor()
 bool SystemTheme::hasStyleSheet()
 {
     return false;
-}
-
-bool SystemTheme::hasColorScheme()
-{
-    return true;
 }

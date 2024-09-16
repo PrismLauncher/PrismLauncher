@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2024 Tayou <git@tayou.org>
- *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -55,6 +55,8 @@ class ThemeManager {
     QString getCatPack(QString catName = "");
     QList<CatPack*> getValidCatPacks();
 
+    const LogColors& getLogColors() { return m_logColors; }
+
     void refresh();
 
    private:
@@ -63,8 +65,10 @@ class ThemeManager {
     QDir m_iconThemeFolder{ "iconthemes" };
     QDir m_applicationThemeFolder{ "themes" };
     QDir m_catPacksFolder{ "catpacks" };
-    std::map<QString, std::unique_ptr<CatPack>> m_cat_packs;
-    QString currentlySelectedSystemTheme;
+    std::map<QString, std::unique_ptr<CatPack>> m_catPacks;
+    QString m_defaultStyle;
+    QPalette m_defaultPalette;
+    LogColors m_logColors;
 
     void initializeThemes();
     void initializeCatPacks();

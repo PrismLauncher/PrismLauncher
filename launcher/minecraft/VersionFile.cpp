@@ -73,6 +73,7 @@ void VersionFile::applyTo(LaunchProfile* profile, const RuntimeContext& runtimeC
     profile->applyMods(mods);
     profile->applyTraits(traits);
     profile->applyCompatibleJavaMajors(compatibleJavaMajors);
+    profile->applyCompatibleJavaName(compatibleJavaName);
 
     for (auto library : libraries) {
         profile->applyLibrary(library, runtimeContext);

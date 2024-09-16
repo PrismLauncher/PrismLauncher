@@ -44,10 +44,10 @@
 #include "BuildConfig.h"
 
 #include "DataMigrationTask.h"
+#include "java/JavaInstallList.h"
 #include "net/PasteUpload.h"
 #include "pathmatcher/MultiMatcher.h"
 #include "pathmatcher/SimplePrefixMatcher.h"
-#include "settings/INIFile.h"
 #include "tools/GenericProfiler.h"
 #include "ui/InstanceWindow.h"
 #include "ui/MainWindow.h"
@@ -67,8 +67,10 @@
 #include "ui/pages/global/MinecraftPage.h"
 #include "ui/pages/global/ProxyPage.h"
 
+#include "ui/setupwizard/AutoJavaWizardPage.h"
 #include "ui/setupwizard/JavaWizardPage.h"
 #include "ui/setupwizard/LanguageWizardPage.h"
+#include "ui/setupwizard/LoginWizardPage.h"
 #include "ui/setupwizard/PasteWizardPage.h"
 #include "ui/setupwizard/SetupWizard.h"
 #include "ui/setupwizard/ThemeWizardPage.h"
@@ -106,7 +108,7 @@
 #include "icons/IconList.h"
 #include "net/HttpMetaCache.h"
 
-#include "java/JavaUtils.h"
+#include "java/JavaInstallList.h"
 
 #include "updater/ExternalUpdater.h"
 
@@ -126,6 +128,7 @@
 
 #include <stdlib.h>
 #include <sys.h>
+#include "SysInfo.h"
 
 #ifdef Q_OS_LINUX
 #include <dlfcn.h>
@@ -151,6 +154,7 @@
 #endif
 
 #if defined Q_OS_WIN32
+#include <windows.h>
 #include "WindowsConsole.h"
 #endif
 
@@ -602,6 +606,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("DownloadsDir", QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
         m_settings->registerSetting("DownloadsDirWatchRecursive", false);
         m_settings->registerSetting("SkinsDir", "skins");
+        m_settings->registerSetting("JavaDir", "java");
 
         // Editors
         m_settings->registerSetting("JsonEditor", QString());
@@ -630,7 +635,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
         // Memory
         m_settings->registerSetting({ "MinMemAlloc", "MinMemoryAlloc" }, 512);
-        m_settings->registerSetting({ "MaxMemAlloc", "MaxMemoryAlloc" }, suitableMaxMem());
+        m_settings->registerSetting({ "MaxMemAlloc", "MaxMemoryAlloc" }, SysInfo::suitableMaxMem());
         m_settings->registerSetting("PermGen", 128);
 
         // Java Settings
@@ -644,6 +649,10 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("JvmArgs", "");
         m_settings->registerSetting("IgnoreJavaCompatibility", false);
         m_settings->registerSetting("IgnoreJavaWizard", false);
+        auto defaultEnableAutoJava = m_settings->get("JavaPath").toString().isEmpty();
+        m_settings->registerSetting("AutomaticJavaSwitch", defaultEnableAutoJava);
+        m_settings->registerSetting("AutomaticJavaDownload", defaultEnableAutoJava);
+        m_settings->registerSetting("UserAskedAboutAutomaticJavaDownload", false);
 
         // Legacy settings
         m_settings->registerSetting("OnlineFixes", false);
@@ -873,6 +882,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_metacache->addBase("ModrinthModpacks", QDir("cache/ModrinthModpacks").absolutePath());
         m_metacache->addBase("translations", QDir("translations").absolutePath());
         m_metacache->addBase("meta", QDir("meta").absolutePath());
+        m_metacache->addBase("java", QDir("cache/java").absolutePath());
         m_metacache->Load();
         qDebug() << "<> Cache initialized.";
     }
@@ -1070,13 +1080,15 @@ bool Application::createSetupWizard()
         }
         return false;
     }();
+    bool askjava = BuildConfig.JAVA_DOWNLOADER_ENABLED && !javaRequired && !m_settings->get("AutomaticJavaDownload").toBool() &&
+                   !m_settings->get("AutomaticJavaSwitch").toBool() && !m_settings->get("UserAskedAboutAutomaticJavaDownload").toBool();
     bool languageRequired = settings()->get("Language").toString().isEmpty();
     bool pasteInterventionRequired = settings()->get("PastebinURL") != "";
     bool validWidgets = m_themeManager->isValidApplicationTheme(settings()->get("ApplicationTheme").toString());
     bool validIcons = m_themeManager->isValidIconTheme(settings()->get("IconTheme").toString());
+    bool login = !m_accounts->anyAccountIsValid() && capabilities() & Application::SupportsMSA;
     bool themeInterventionRequired = !validWidgets || !validIcons;
-    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired;
-
+    bool wizardRequired = javaRequired || languageRequired || pasteInterventionRequired || themeInterventionRequired || askjava || login;
     if (wizardRequired) {
         // set default theme after going into theme wizard
         if (!validIcons)
@@ -1093,6 +1105,8 @@ bool Application::createSetupWizard()
 
         if (javaRequired) {
             m_setupWizard->addPage(new JavaWizardPage(m_setupWizard));
+        } else if (askjava) {
+            m_setupWizard->addPage(new AutoJavaWizardPage(m_setupWizard));
         }
 
         if (pasteInterventionRequired) {
@@ -1103,11 +1117,14 @@ bool Application::createSetupWizard()
             m_setupWizard->addPage(new ThemeWizardPage(m_setupWizard));
         }
 
+        if (login) {
+            m_setupWizard->addPage(new LoginWizardPage(m_setupWizard));
+        }
         connect(m_setupWizard, &QDialog::finished, this, &Application::setupWizardFinished);
         m_setupWizard->show();
-        return true;
     }
-    return false;
+
+    return wizardRequired || login;
 }
 
 bool Application::updaterEnabled()
@@ -1252,15 +1269,22 @@ Application::~Application()
 
 void Application::messageReceived(const QByteArray& message)
 {
-    if (status() != Initialized) {
-        qDebug() << "Received message" << message << "while still initializing. It will be ignored.";
-        return;
-    }
-
     ApplicationMessage received;
     received.parse(message);
 
     auto& command = received.command;
+
+    if (status() != Initialized) {
+        bool isLoginAtempt = false;
+        if (command == "import") {
+            QString url = received.args["url"];
+            isLoginAtempt = !url.isEmpty() && normalizeImportUrl(url).scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME;
+        }
+        if (!isLoginAtempt) {
+            qDebug() << "Received message" << message << "while still initializing. It will be ignored.";
+            return;
+        }
+    }
 
     if (command == "activate") {
         showMainWindow();
@@ -1744,20 +1768,6 @@ QString Application::getUserAgentUncached()
     return BuildConfig.USER_AGENT_UNCACHED;
 }
 
-int Application::suitableMaxMem()
-{
-    float totalRAM = (float)Sys::getSystemRam() / (float)Sys::mebibyte;
-    int maxMemoryAlloc;
-
-    // If totalRAM < 6GB, use (totalRAM / 1.5), else 4GB
-    if (totalRAM < (4096 * 1.5))
-        maxMemoryAlloc = (int)(totalRAM / 1.5);
-    else
-        maxMemoryAlloc = 4096;
-
-    return maxMemoryAlloc;
-}
-
 bool Application::handleDataMigration(const QString& currentData,
                                       const QString& oldData,
                                       const QString& name,
@@ -1863,4 +1873,8 @@ QUrl Application::normalizeImportUrl(QString const& url)
     } else {
         return QUrl::fromUserInput(url);
     }
+}
+const QString Application::javaPath()
+{
+    return m_settings->get("JavaDir").toString();
 }
