@@ -207,7 +207,7 @@ set(Launcher_BUG_TRACKER_URL "https://github.com/PrismLauncher/PrismLauncher/iss
 
 # Translations Platform URL
 set(Launcher_TRANSLATIONS_URL "https://hosted.weblate.org/projects/prismlauncher/launcher/" CACHE STRING "URL for the translations platform.")
-set(Launcher_TRANSLATIONS_BASE_URL "https://i18n.prismlauncher.org/" CACHE STRING "URL for the translations files.")
+set(Launcher_TRANSLATION_FILES_URL "https://i18n.prismlauncher.org/" CACHE STRING "URL for the translations files.")
 
 # Matrix Space
 set(Launcher_MATRIX_URL "https://prismlauncher.org/matrix" CACHE STRING "URL to the Matrix Space")
