@@ -80,8 +80,8 @@ Config::Config()
         UPDATER_ENABLED = true;
     }
 
-    #cmakedefine01 ENABLE_JAVA_DOWNLOADER
-    JAVA_DOWNLOADER_ENABLED = ENABLE_JAVA_DOWNLOADER;
+    #cmakedefine01 Launcher_ENABLE_JAVA_DOWNLOADER
+    JAVA_DOWNLOADER_ENABLED = Launcher_ENABLE_JAVA_DOWNLOADER;
 
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
     GIT_TAG = "@Launcher_GIT_TAG@";
