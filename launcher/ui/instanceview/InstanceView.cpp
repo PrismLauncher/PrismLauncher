@@ -848,7 +848,7 @@ QRegion InstanceView::visualRegionForSelection(const QItemSelection& selection) 
     return region;
 }
 
-QModelIndex InstanceView::moveCursor(QAbstractItemView::CursorAction cursorAction, [[maybe_unused]] Qt::KeyboardModifiers modifiers)
+QModelIndex InstanceView::moveCursor(QAbstractItemView::CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
 {
     auto current = currentIndex();
     if (!current.isValid()) {
@@ -865,6 +865,7 @@ QModelIndex InstanceView::moveCursor(QAbstractItemView::CursorAction cursorActio
     if (m_currentCursorColumn < 0) {
         m_currentCursorColumn = column;
     }
+    // Handle different movement actions.
     switch (cursorAction) {
         case MoveUp: {
             if (row == 0) {
@@ -925,16 +926,47 @@ QModelIndex InstanceView::moveCursor(QAbstractItemView::CursorAction cursorActio
             if (column > 0) {
                 m_currentCursorColumn = column - 1;
                 return cat->rows[row][column - 1];
+            } else if (row > 0) {
+                row -= 1;
+                int newRowSize = cat->rows[row].size();
+                m_currentCursorColumn = newRowSize - 1;
+                return cat->rows[row][m_currentCursorColumn];
+            } else {
+                int prevGroupIndex = group_index - 1;
+                while (prevGroupIndex >= 0) {
+                    auto prevGroup = m_groups[prevGroupIndex];
+                    if (prevGroup->collapsed) {
+                        prevGroupIndex--;
+                        continue;
+                    }
+                    int lastRow = prevGroup->numRows() - 1;
+                    int lastCol = prevGroup->rows[lastRow].size() - 1;
+                    m_currentCursorColumn = lastCol;
+                    return prevGroup->rows[lastRow][lastCol];
+                }
             }
-            // TODO: moving to previous line
             return current;
         }
         case MoveRight: {
             if (column < cat->rows[row].size() - 1) {
                 m_currentCursorColumn = column + 1;
                 return cat->rows[row][column + 1];
+            } else if (row < cat->rows.size() - 1) {
+                row += 1;
+                m_currentCursorColumn = 0;
+                return cat->rows[row][m_currentCursorColumn];
+            } else {
+                int nextGroupIndex = group_index + 1;
+                while (nextGroupIndex < m_groups.size()) {
+                    auto nextGroup = m_groups[nextGroupIndex];
+                    if (nextGroup->collapsed) {
+                        nextGroupIndex++;
+                        continue;
+                    }
+                    m_currentCursorColumn = 0;
+                    return nextGroup->rows[0][0];
+                }
             }
-            // TODO: moving to next line
             return current;
         }
         case MoveHome: {
@@ -947,6 +979,7 @@ QModelIndex InstanceView::moveCursor(QAbstractItemView::CursorAction cursorActio
             return cat->rows[row][last];
         }
         default:
+            // For unsupported cursor actions, return the current index.
             break;
     }
     return current;

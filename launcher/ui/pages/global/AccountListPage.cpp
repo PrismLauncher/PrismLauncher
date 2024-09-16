@@ -130,20 +130,7 @@ void AccountListPage::listChanged()
 
 void AccountListPage::on_actionAddMicrosoft_triggered()
 {
-    QMessageBox box(this);
-    box.setWindowTitle(tr("Add account"));
-    box.setText(tr("How do you want to login?"));
-    box.setIcon(QMessageBox::Question);
-    auto deviceCode = box.addButton(tr("Legacy"), QMessageBox::ButtonRole::YesRole);
-    auto authCode = box.addButton(tr("Recommended"), QMessageBox::ButtonRole::NoRole);
-    auto cancel = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::RejectRole);
-    box.setDefaultButton(authCode);
-    box.exec();
-    if ((box.clickedButton() != deviceCode && box.clickedButton() != authCode) || box.clickedButton() == cancel)
-        return;
-    MinecraftAccountPtr account = MSALoginDialog::newAccount(
-        this, tr("Please enter your Mojang account email and password to add your account."), box.clickedButton() == deviceCode);
-
+    auto account = MSALoginDialog::newAccount(this);
     if (account) {
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {

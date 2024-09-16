@@ -3,20 +3,27 @@
 #include <QFileDialog>
 #include <QGroupBox>
 #include <QLabel>
+#include <QLayoutItem>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
+#include <QSizePolicy>
 #include <QSpinBox>
 #include <QToolButton>
 #include <QVBoxLayout>
 
 #include <sys.h>
 
+#include "DesktopServices.h"
 #include "FileSystem.h"
 #include "JavaCommon.h"
+#include "java/JavaChecker.h"
 #include "java/JavaInstall.h"
+#include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
 
 #include "ui/dialogs/CustomMessageBox.h"
+#include "ui/java/InstallJavaDialog.h"
 #include "ui/widgets/VersionSelectWidget.h"
 
 #include "Application.h"
@@ -29,15 +36,20 @@ JavaSettingsWidget::JavaSettingsWidget(QWidget* parent) : QWidget(parent)
     goodIcon = APPLICATION->getThemedIcon("status-good");
     yellowIcon = APPLICATION->getThemedIcon("status-yellow");
     badIcon = APPLICATION->getThemedIcon("status-bad");
+    m_memoryTimer = new QTimer(this);
     setupUi();
 
-    connect(m_minMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
-    connect(m_maxMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
-    connect(m_permGenSpinBox, SIGNAL(valueChanged(int)), this, SLOT(memoryValueChanged(int)));
+    connect(m_minMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
+    connect(m_maxMemSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
+    connect(m_permGenSpinBox, SIGNAL(valueChanged(int)), this, SLOT(onSpinBoxValueChanged(int)));
+    connect(m_memoryTimer, &QTimer::timeout, this, &JavaSettingsWidget::memoryValueChanged);
     connect(m_versionWidget, &VersionSelectWidget::selectedVersionChanged, this, &JavaSettingsWidget::javaVersionSelected);
     connect(m_javaBrowseBtn, &QPushButton::clicked, this, &JavaSettingsWidget::on_javaBrowseBtn_clicked);
     connect(m_javaPathTextBox, &QLineEdit::textEdited, this, &JavaSettingsWidget::javaPathEdited);
     connect(m_javaStatusBtn, &QToolButton::clicked, this, &JavaSettingsWidget::on_javaStatusBtn_clicked);
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        connect(m_javaDownloadBtn, &QPushButton::clicked, this, &JavaSettingsWidget::javaDownloadBtn_clicked);
+    }
 }
 
 void JavaSettingsWidget::setupUi()
@@ -47,7 +59,6 @@ void JavaSettingsWidget::setupUi()
     m_verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
 
     m_versionWidget = new VersionSelectWidget(this);
-    m_verticalLayout->addWidget(m_versionWidget);
 
     m_horizontalLayout = new QHBoxLayout();
     m_horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
@@ -64,8 +75,6 @@ void JavaSettingsWidget::setupUi()
     m_javaStatusBtn = new QToolButton(this);
     m_javaStatusBtn->setIcon(yellowIcon);
     m_horizontalLayout->addWidget(m_javaStatusBtn);
-
-    m_verticalLayout->addLayout(m_horizontalLayout);
 
     m_memoryGroupBox = new QGroupBox(this);
     m_memoryGroupBox->setObjectName(QStringLiteral("memoryGroupBox"));
@@ -120,6 +129,57 @@ void JavaSettingsWidget::setupUi()
 
     m_verticalLayout->addWidget(m_memoryGroupBox);
 
+    m_horizontalBtnLayout = new QHBoxLayout();
+    m_horizontalBtnLayout->setObjectName(QStringLiteral("horizontalBtnLayout"));
+
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        m_javaDownloadBtn = new QPushButton(tr("Download Java"), this);
+        m_horizontalBtnLayout->addWidget(m_javaDownloadBtn);
+    }
+
+    m_autoJavaGroupBox = new QGroupBox(this);
+    m_autoJavaGroupBox->setObjectName(QStringLiteral("autoJavaGroupBox"));
+    m_veriticalJavaLayout = new QVBoxLayout(m_autoJavaGroupBox);
+    m_veriticalJavaLayout->setObjectName(QStringLiteral("veriticalJavaLayout"));
+
+    m_autodetectJavaCheckBox = new QCheckBox(m_autoJavaGroupBox);
+    m_autodetectJavaCheckBox->setObjectName("autodetectJavaCheckBox");
+    m_autodetectJavaCheckBox->setChecked(true);
+    m_veriticalJavaLayout->addWidget(m_autodetectJavaCheckBox);
+
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        m_autodownloadCheckBox = new QCheckBox(m_autoJavaGroupBox);
+        m_autodownloadCheckBox->setObjectName("autodownloadCheckBox");
+        m_autodownloadCheckBox->setEnabled(m_autodetectJavaCheckBox->isChecked());
+        m_veriticalJavaLayout->addWidget(m_autodownloadCheckBox);
+        connect(m_autodetectJavaCheckBox, &QCheckBox::stateChanged, this, [this] {
+            m_autodownloadCheckBox->setEnabled(m_autodetectJavaCheckBox->isChecked());
+            if (!m_autodetectJavaCheckBox->isChecked())
+                m_autodownloadCheckBox->setChecked(false);
+        });
+
+        connect(m_autodownloadCheckBox, &QCheckBox::stateChanged, this, [this] {
+            auto isChecked = m_autodownloadCheckBox->isChecked();
+            m_versionWidget->setVisible(!isChecked);
+            m_javaStatusBtn->setVisible(!isChecked);
+            m_javaBrowseBtn->setVisible(!isChecked);
+            m_javaPathTextBox->setVisible(!isChecked);
+            m_javaDownloadBtn->setVisible(!isChecked);
+            if (!isChecked) {
+                m_verticalLayout->removeItem(m_verticalSpacer);
+            } else {
+                m_verticalLayout->addSpacerItem(m_verticalSpacer);
+            }
+        });
+    }
+    m_verticalLayout->addWidget(m_autoJavaGroupBox);
+
+    m_verticalLayout->addLayout(m_horizontalBtnLayout);
+
+    m_verticalLayout->addWidget(m_versionWidget);
+    m_verticalLayout->addLayout(m_horizontalLayout);
+    m_verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+
     retranslate();
 }
 
@@ -137,10 +197,16 @@ void JavaSettingsWidget::initialize()
     m_maxMemSpinBox->setValue(observedMaxMemory);
     m_permGenSpinBox->setValue(observedPermGenMemory);
     updateThresholds();
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        m_autodownloadCheckBox->setChecked(true);
+    }
 }
 
 void JavaSettingsWidget::refresh()
 {
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED && m_autodownloadCheckBox->isChecked()) {
+        return;
+    }
     if (JavaUtils::getJavaCheckPath().isEmpty()) {
         JavaCommon::javaCheckNotFound(this);
         return;
@@ -153,20 +219,52 @@ JavaSettingsWidget::ValidationStatus JavaSettingsWidget::validate()
     switch (javaStatus) {
         default:
         case JavaStatus::NotSet:
+            /* fallthrough */
         case JavaStatus::DoesNotExist:
+            /* fallthrough */
         case JavaStatus::DoesNotStart:
+            /* fallthrough */
         case JavaStatus::ReturnedInvalidData: {
-            int button = CustomMessageBox::selectable(this, tr("No Java version selected"),
-                                                      tr("You didn't select a Java version or selected something that doesn't work.\n"
-                                                         "%1 will not be able to start Minecraft.\n"
-                                                         "Do you wish to proceed without any Java?"
-                                                         "\n\n"
-                                                         "You can change the Java version in the settings later.\n")
-                                                          .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
-                                                      QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::NoButton)
-                             ->exec();
-            if (button == QMessageBox::No) {
-                return ValidationStatus::Bad;
+            if (!(BuildConfig.JAVA_DOWNLOADER_ENABLED && m_autodownloadCheckBox->isChecked())) {  // the java will not be autodownloaded
+                int button = QMessageBox::No;
+                if (m_result.mojangPlatform == "32" && maxHeapSize() > 2048) {
+                    button = CustomMessageBox::selectable(
+                                 this, tr("32-bit Java detected"),
+                                 tr("You selected a 32-bit installation of Java, but allocated more than 2048MiB as maximum memory.\n"
+                                    "%1 will not be able to start Minecraft.\n"
+                                    "Do you wish to proceed?"
+                                    "\n\n"
+                                    "You can change the Java version in the settings later.\n")
+                                     .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                                 QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Help, QMessageBox::NoButton)
+                                 ->exec();
+
+                } else {
+                    button = CustomMessageBox::selectable(this, tr("No Java version selected"),
+                                                          tr("You either didn't select a Java version or selected one that does not work.\n"
+                                                             "%1 will not be able to start Minecraft.\n"
+                                                             "Do you wish to proceed without a functional version of Java?"
+                                                             "\n\n"
+                                                             "You can change the Java version in the settings later.\n")
+                                                              .arg(BuildConfig.LAUNCHER_DISPLAYNAME),
+                                                          QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No | QMessageBox::Help,
+                                                          QMessageBox::NoButton)
+                                 ->exec();
+                }
+                switch (button) {
+                    case QMessageBox::Yes:
+                        return ValidationStatus::JavaBad;
+                    case QMessageBox::Help:
+                        DesktopServices::openUrl(QUrl(BuildConfig.HELP_URL.arg("java-wizard")));
+                    /* fallthrough */
+                    case QMessageBox::No:
+                    /* fallthrough */
+                    default:
+                        return ValidationStatus::Bad;
+                }
+                if (button == QMessageBox::No) {
+                    return ValidationStatus::Bad;
+                }
             }
             return ValidationStatus::JavaBad;
         } break;
@@ -212,20 +310,21 @@ int JavaSettingsWidget::permGenSize() const
     return m_permGenSpinBox->value();
 }
 
-void JavaSettingsWidget::memoryValueChanged(int)
+void JavaSettingsWidget::memoryValueChanged()
 {
     bool actuallyChanged = false;
     unsigned int min = m_minMemSpinBox->value();
     unsigned int max = m_maxMemSpinBox->value();
     unsigned int permgen = m_permGenSpinBox->value();
-    QObject* obj = sender();
-    if (obj == m_minMemSpinBox && min != observedMinMemory) {
+    if (min != observedMinMemory) {
         observedMinMemory = min;
         actuallyChanged = true;
-    } else if (obj == m_maxMemSpinBox && max != observedMaxMemory) {
+    }
+    if (max != observedMaxMemory) {
         observedMaxMemory = max;
         actuallyChanged = true;
-    } else if (obj == m_permGenSpinBox && permgen != observedPermGenMemory) {
+    }
+    if (permgen != observedPermGenMemory) {
         observedPermGenMemory = permgen;
         actuallyChanged = true;
     }
@@ -250,19 +349,20 @@ void JavaSettingsWidget::javaVersionSelected(BaseVersion::Ptr version)
 
 void JavaSettingsWidget::on_javaBrowseBtn_clicked()
 {
-    QString filter;
-#if defined Q_OS_WIN32
-    filter = "Java (javaw.exe)";
-#else
-    filter = "Java (java)";
-#endif
-    QString raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"), QString(), filter);
+    auto filter = QString("Java (%1)").arg(JavaUtils::javaExecutable);
+    auto raw_path = QFileDialog::getOpenFileName(this, tr("Find Java executable"), QString(), filter);
     if (raw_path.isEmpty()) {
         return;
     }
-    QString cooked_path = FS::NormalizePath(raw_path);
+    auto cooked_path = FS::NormalizePath(raw_path);
     m_javaPathTextBox->setText(cooked_path);
     checkJavaPath(cooked_path);
+}
+
+void JavaSettingsWidget::javaDownloadBtn_clicked()
+{
+    auto jdialog = new Java::InstallDialog({}, nullptr, this);
+    jdialog->exec();
 }
 
 void JavaSettingsWidget::on_javaStatusBtn_clicked()
@@ -359,34 +459,30 @@ void JavaSettingsWidget::checkJavaPath(const QString& path)
         return;
     }
     setJavaStatus(JavaStatus::Pending);
-    m_checker.reset(new JavaChecker());
-    m_checker->m_path = path;
-    m_checker->m_minMem = minHeapSize();
-    m_checker->m_maxMem = maxHeapSize();
-    if (m_permGenSpinBox->isVisible()) {
-        m_checker->m_permGen = m_permGenSpinBox->value();
-    }
+    m_checker.reset(
+        new JavaChecker(path, "", minHeapSize(), maxHeapSize(), m_permGenSpinBox->isVisible() ? m_permGenSpinBox->value() : 0, 0, this));
     connect(m_checker.get(), &JavaChecker::checkFinished, this, &JavaSettingsWidget::checkFinished);
-    m_checker->performCheck();
+    m_checker->start();
 }
 
-void JavaSettingsWidget::checkFinished(JavaCheckResult result)
+void JavaSettingsWidget::checkFinished(const JavaChecker::Result& result)
 {
     m_result = result;
     switch (result.validity) {
-        case JavaCheckResult::Validity::Valid: {
+        case JavaChecker::Result::Validity::Valid: {
             setJavaStatus(JavaStatus::Good);
             break;
         }
-        case JavaCheckResult::Validity::ReturnedInvalidData: {
+        case JavaChecker::Result::Validity::ReturnedInvalidData: {
             setJavaStatus(JavaStatus::ReturnedInvalidData);
             break;
         }
-        case JavaCheckResult::Validity::Errored: {
+        case JavaChecker::Result::Validity::Errored: {
             setJavaStatus(JavaStatus::DoesNotStart);
             break;
         }
     }
+    updateThresholds();
     m_checker.reset();
     if (!queuedCheck.isNull()) {
         checkJavaPath(queuedCheck);
@@ -403,6 +499,11 @@ void JavaSettingsWidget::retranslate()
     m_minMemSpinBox->setToolTip(tr("The amount of memory Minecraft is started with."));
     m_permGenSpinBox->setToolTip(tr("The amount of memory available to store loaded Java classes."));
     m_javaBrowseBtn->setText(tr("Browse"));
+    if (BuildConfig.JAVA_DOWNLOADER_ENABLED) {
+        m_autodownloadCheckBox->setText(tr("Auto-download Mojang Java"));
+    }
+    m_autodetectJavaCheckBox->setText(tr("Autodetect Java version"));
+    m_autoJavaGroupBox->setTitle(tr("Autodetect Java"));
 }
 
 void JavaSettingsWidget::updateThresholds()
@@ -418,6 +519,12 @@ void JavaSettingsWidget::updateThresholds()
     } else if (observedMaxMemory < observedMinMemory) {
         iconName = "status-yellow";
         m_labelMaxMemIcon->setToolTip(tr("Your maximum memory allocation is smaller than the minimum value"));
+    } else if (BuildConfig.JAVA_DOWNLOADER_ENABLED && m_autodownloadCheckBox->isChecked()) {
+        iconName = "status-good";
+        m_labelMaxMemIcon->setToolTip("");
+    } else if (observedMaxMemory > 2048 && !m_result.is_64bit) {
+        iconName = "status-bad";
+        m_labelMaxMemIcon->setToolTip(tr("You are exceeding the maximum allocation supported by 32-bit installations of Java."));
     } else {
         iconName = "status-good";
         m_labelMaxMemIcon->setToolTip("");
@@ -430,3 +537,23 @@ void JavaSettingsWidget::updateThresholds()
         m_labelMaxMemIcon->setPixmap(pix);
     }
 }
+
+bool JavaSettingsWidget::autoDownloadJava() const
+{
+    return m_autodownloadCheckBox && m_autodownloadCheckBox->isChecked();
+}
+
+bool JavaSettingsWidget::autoDetectJava() const
+{
+    return m_autodetectJavaCheckBox->isChecked();
+}
+
+void JavaSettingsWidget::onSpinBoxValueChanged(int)
+{
+    m_memoryTimer->start(500);
+}
+
+JavaSettingsWidget::~JavaSettingsWidget()
+{
+    delete m_verticalSpacer;
+};

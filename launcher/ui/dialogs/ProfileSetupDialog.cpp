@@ -34,6 +34,7 @@
  */
 
 #include "ProfileSetupDialog.h"
+#include "net/RawHeaderProxy.h"
 #include "ui_ProfileSetupDialog.h"
 
 #include <QAction>
@@ -46,7 +47,6 @@
 
 #include <Application.h>
 #include "minecraft/auth/Parsers.h"
-#include "net/StaticHeaderProxy.h"
 #include "net/Upload.h"
 
 ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidget* parent)
@@ -160,7 +160,7 @@ void ProfileSetupDialog::checkName(const QString& name)
     if (m_check_task)
         disconnect(m_check_task.get(), nullptr, this, nullptr);
     m_check_task = Net::Download::makeByteArray(url, m_check_response);
-    m_check_task->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_check_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     connect(m_check_task.get(), &Task::finished, this, &ProfileSetupDialog::checkFinished);
 
@@ -204,7 +204,7 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
 
     m_profile_response.reset(new QByteArray());
     m_profile_task = Net::Upload::makeByteArray(url, m_profile_response, payloadTemplate.arg(profileName).toUtf8());
-    m_profile_task->addHeaderProxy(new Net::StaticHeaderProxy(headers));
+    m_profile_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
     connect(m_profile_task.get(), &Task::finished, this, &ProfileSetupDialog::setupProfileFinished);
 
