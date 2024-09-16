@@ -353,5 +353,11 @@
         <file>scalable/instances/neoforged.svg</file>
         <file>128x128/instances/forge.png</file>  <!-- LGPL3 Forge Development LLC -->
         <file>128x128/instances/liteloader.png</file>  <!-- CC-BY-SA 4.0 LiteLoader -->
+
+        <!-- java providers -->
+        <file>scalable/adoptium.svg</file>  <!-- The Adoptium Logo is a registered trademark of the Eclipse Foundation. -->
+        <file>scalable/azul.svg</file>  <!-- Azul, Zulu, Azul Systems, the Azul Systems logo, Azul Zulu are either registered trademarks or trademarks of Azul Systems, registered in the U.S. and elsewhere. -->
+        <file>scalable/mojang.svg</file>  <!-- The Mojang Logo is a registered trademark of Mojang AB. -->
+
     </qresource>
 </RCC>

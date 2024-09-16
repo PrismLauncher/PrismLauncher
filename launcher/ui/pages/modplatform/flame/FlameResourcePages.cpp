@@ -60,7 +60,7 @@ FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : 
     // so it's best not to connect them in the parent's contructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameModPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameModPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlameModPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameModPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -94,7 +94,8 @@ FlameResourcePackPage::FlameResourcePackPage(ResourcePackDownloadDialog* dialog,
     // so it's best not to connect them in the parent's contructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameResourcePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameResourcePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &FlameResourcePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameResourcePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -128,7 +129,8 @@ FlameTexturePackPage::FlameTexturePackPage(TexturePackDownloadDialog* dialog, Ba
     // so it's best not to connect them in the parent's contructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameTexturePackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameTexturePackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &FlameTexturePackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameTexturePackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());
@@ -162,7 +164,8 @@ FlameShaderPackPage::FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseI
     // so it's best not to connect them in the parent's constructor...
     connect(m_ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(m_ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlameShaderPackPage::onSelectionChanged);
-    connect(m_ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlameShaderPackPage::onVersionSelectionChanged);
+    connect(m_ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &FlameShaderPackPage::onVersionSelectionChanged);
     connect(m_ui->resourceSelectionButton, &QPushButton::clicked, this, &FlameShaderPackPage::onResourceSelected);
 
     m_ui->packDescription->setMetaEntry(metaEntryBase());

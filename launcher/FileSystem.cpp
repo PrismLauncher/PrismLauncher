@@ -276,6 +276,9 @@ bool ensureFolderPathExists(const QFileInfo folderPath)
 {
     QDir dir;
     QString ensuredPath = folderPath.filePath();
+    if (folderPath.exists())
+        return true;
+
     bool success = dir.mkpath(ensuredPath);
     return success;
 }
@@ -917,6 +920,10 @@ bool createShortcut(QString destination, QString target, QStringList args, QStri
 {
     if (destination.isEmpty()) {
         destination = PathCombine(getDesktopDir(), RemoveInvalidFilenameChars(name));
+    }
+    if (!ensureFilePathExists(destination)) {
+        qWarning() << "Destination path can't be created!";
+        return false;
     }
 #if defined(Q_OS_MACOS)
     // Create the Application

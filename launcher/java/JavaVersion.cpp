@@ -43,12 +43,12 @@ QString JavaVersion::toString() const
     return m_string;
 }
 
-bool JavaVersion::requiresPermGen()
+bool JavaVersion::requiresPermGen() const
 {
     return !m_parseable || m_major < 8;
 }
 
-bool JavaVersion::isModular()
+bool JavaVersion::isModular() const
 {
     return m_parseable && m_major >= 9;
 }
@@ -58,12 +58,6 @@ bool JavaVersion::operator<(const JavaVersion& rhs)
     if (m_parseable && rhs.m_parseable) {
         auto major = m_major;
         auto rmajor = rhs.m_major;
-
-        // HACK: discourage using java 9
-        if (major > 8)
-            major = -major;
-        if (rmajor > 8)
-            rmajor = -rmajor;
 
         if (major < rmajor)
             return true;
@@ -108,4 +102,25 @@ bool JavaVersion::operator==(const JavaVersion& rhs)
 bool JavaVersion::operator>(const JavaVersion& rhs)
 {
     return (!operator<(rhs)) && (!operator==(rhs));
+}
+
+JavaVersion::JavaVersion(int major, int minor, int security, int build, QString name)
+    : m_major(major), m_minor(minor), m_security(security), m_name(name), m_parseable(true)
+{
+    QStringList versions;
+    if (build != 0) {
+        m_prerelease = QString::number(build);
+        versions.push_front(m_prerelease);
+    }
+    if (m_security != 0)
+        versions.push_front(QString::number(m_security));
+    else if (!versions.isEmpty())
+        versions.push_front("0");
+
+    if (m_minor != 0)
+        versions.push_front(QString::number(m_minor));
+    else if (!versions.isEmpty())
+        versions.push_front("0");
+    versions.push_front(QString::number(m_major));
+    m_string = versions.join(".");
 }

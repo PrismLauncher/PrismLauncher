@@ -321,14 +321,9 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
     updateUi();
 }
 
-void ResourcePage::onVersionSelectionChanged(QString versionData)
+void ResourcePage::onVersionSelectionChanged(int index)
 {
-    if (versionData.isNull() || versionData.isEmpty()) {
-        m_selected_version_index = -1;
-        return;
-    }
-
-    m_selected_version_index = m_ui->versionSelectionBox->currentData().toInt();
+    m_selected_version_index = index;
     updateSelectionButton();
 }
 

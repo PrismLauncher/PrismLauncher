@@ -17,9 +17,9 @@ TexturePackResourceModel::TexturePackResourceModel(BaseInstance const& inst, Res
 {
     if (!m_version_list->isLoaded()) {
         qDebug() << "Loading version list...";
-        auto task = m_version_list->getLoadTask();
-        if (!task->isRunning())
-            task->start();
+        m_task = m_version_list->getLoadTask();
+        if (!m_task->isRunning())
+            m_task->start();
     }
 }
 
@@ -35,7 +35,8 @@ void waitOnVersionListLoad(Meta::VersionList::Ptr version_list)
 
     auto task = version_list->getLoadTask();
     QObject::connect(task.get(), &Task::finished, &load_version_list_loop, &QEventLoop::quit);
-
+    if (!task->isRunning())
+        task->start();
     load_version_list_loop.exec();
     if (time_limit_for_list_load.isActive())
         time_limit_for_list_load.stop();

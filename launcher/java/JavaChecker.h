@@ -3,49 +3,51 @@
 #include <QTimer>
 #include <memory>
 
-#include "QObjectPtr.h"
-
 #include "JavaVersion.h"
+#include "QObjectPtr.h"
+#include "tasks/Task.h"
 
-class JavaChecker;
-
-struct JavaCheckResult {
-    QString path;
-    QString mojangPlatform;
-    QString realPlatform;
-    JavaVersion javaVersion;
-    QString javaVendor;
-    QString outLog;
-    QString errorLog;
-    bool is_64bit = false;
-    int id;
-    enum class Validity { Errored, ReturnedInvalidData, Valid } validity = Validity::Errored;
-};
-
-using QProcessPtr = shared_qobject_ptr<QProcess>;
-using JavaCheckerPtr = shared_qobject_ptr<JavaChecker>;
-class JavaChecker : public QObject {
+class JavaChecker : public Task {
     Q_OBJECT
    public:
-    explicit JavaChecker(QObject* parent = 0);
-    void performCheck();
+    using QProcessPtr = shared_qobject_ptr<QProcess>;
+    using Ptr = shared_qobject_ptr<JavaChecker>;
 
-    QString m_path;
-    QString m_args;
-    int m_id = 0;
-    int m_minMem = 0;
-    int m_maxMem = 0;
-    int m_permGen = 64;
+    struct Result {
+        QString path;
+        int id;
+        QString mojangPlatform;
+        QString realPlatform;
+        JavaVersion javaVersion;
+        QString javaVendor;
+        QString outLog;
+        QString errorLog;
+        bool is_64bit = false;
+        enum class Validity { Errored, ReturnedInvalidData, Valid } validity = Validity::Errored;
+    };
+
+    explicit JavaChecker(QString path, QString args, int minMem = 0, int maxMem = 0, int permGen = 0, int id = 0, QObject* parent = 0);
 
    signals:
-    void checkFinished(JavaCheckResult result);
+    void checkFinished(const Result& result);
+
+   protected:
+    virtual void executeTask() override;
 
    private:
     QProcessPtr process;
     QTimer killTimer;
     QString m_stdout;
     QString m_stderr;
-   public slots:
+
+    QString m_path;
+    QString m_args;
+    int m_minMem = 0;
+    int m_maxMem = 0;
+    int m_permGen = 64;
+    int m_id = 0;
+
+   private slots:
     void timeout();
     void finished(int exitcode, QProcess::ExitStatus);
     void error(QProcess::ProcessError);

@@ -44,7 +44,6 @@
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include "MessageLevel.h"
-#include "java/JavaChecker.h"
 #include "tasks/Task.h"
 
 void LaunchTask::init()
