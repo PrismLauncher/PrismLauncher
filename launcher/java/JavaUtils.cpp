@@ -405,12 +405,17 @@ QList<QString> JavaUtils::FindJavaPaths()
 {
     QList<QString> javas;
     javas.append(this->GetDefaultJava()->path);
-    auto scanJavaDir = [&](const QString& dirPath) {
+    auto scanJavaDir = [&](
+                           const QString& dirPath,
+                           const std::function<bool(const QFileInfo&)>& filter = [](const QFileInfo&) { return true; }) {
         QDir dir(dirPath);
         if (!dir.exists())
             return;
         auto entries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
         for (auto& entry : entries) {
+            if (!filter(entry))
+                continue;
+
             QString prefix;
             prefix = entry.canonicalFilePath();
             javas.append(FS::PathCombine(prefix, "jre/bin/java"));
@@ -433,9 +438,13 @@ QList<QString> JavaUtils::FindJavaPaths()
     scanJavaDirs("/usr/lib64/jvm");
     scanJavaDirs("/usr/lib32/jvm");
     // Gentoo's locations for openjdk and openjdk-bin respectively
-    scanJavaDir("/usr/lib64");
-    scanJavaDir("/usr/lib");
-    scanJavaDir("/opt");
+    auto gentooFilter = [](const QFileInfo& info) {
+        QString fileName = info.fileName();
+        return fileName.startsWith("openjdk-") || fileName.startsWith("openj9-");
+    };
+    scanJavaDir("/usr/lib64", gentooFilter);
+    scanJavaDir("/usr/lib", gentooFilter);
+    scanJavaDir("/opt", gentooFilter);
     // javas stored in Prism Launcher's folder
     scanJavaDirs("java");
     // manually installed JDKs in /opt

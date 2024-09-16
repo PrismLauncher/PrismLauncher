@@ -180,10 +180,7 @@ void AutoInstallJava::downloadJava(Meta::Version::Ptr version, QString javaName)
                 deletePath();
                 emitFailed(reason);
             });
-            connect(this, &Task::aborted, this, [this, deletePath] {
-                m_current_task->abort();
-                deletePath();
-            });
+            connect(m_current_task.get(), &Task::aborted, this, [deletePath] { deletePath(); });
             connect(m_current_task.get(), &Task::succeeded, this, &AutoInstallJava::setJavaPathFromPartial);
             connect(m_current_task.get(), &Task::failed, this, &AutoInstallJava::tryNextMajorJava);
             connect(m_current_task.get(), &Task::progress, this, &AutoInstallJava::setProgress);
@@ -236,7 +233,10 @@ void AutoInstallJava::tryNextMajorJava()
 }
 bool AutoInstallJava::abort()
 {
-    if (m_current_task && m_current_task->canAbort())
-        return m_current_task->abort();
-    return true;
+    if (m_current_task && m_current_task->canAbort()) {
+        auto status = m_current_task->abort();
+        emitFailed("Aborted.");
+        return status;
+    }
+    return Task::abort();
 }

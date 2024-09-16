@@ -351,6 +351,9 @@ void InstanceSettingsPage::loadSettings()
             [this] { ui->javaSettingsGroupBox->setChecked(m_settings->get("OverrideJavaLocation").toBool()); });
     ui->javaSettingsGroupBox->setChecked(overrideLocation);
     ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString());
+    connect(m_settings->getSetting("JavaPath").get(), &Setting::SettingChanged, ui->javaSettingsGroupBox,
+            [this] { ui->javaPathTextBox->setText(m_settings->get("JavaPath").toString()); });
+
     ui->skipCompatibilityCheckbox->setChecked(m_settings->get("IgnoreJavaCompatibility").toBool());
 
     ui->javaArgumentsGroupBox->setChecked(overrideArgs);

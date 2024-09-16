@@ -38,7 +38,7 @@
 
 class SystemTheme : public ITheme {
    public:
-    SystemTheme(QString& themeName, bool isSystemTheme = false);
+    SystemTheme(const QString& styleName, const QPalette& palette, bool isDefaultTheme);
     virtual ~SystemTheme() {}
     void apply(bool initial) override;
 
