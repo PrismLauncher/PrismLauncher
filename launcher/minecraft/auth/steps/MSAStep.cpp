@@ -99,7 +99,7 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
       window.location.replace("%1");
     </script>
     )XXX")
-                                          .arg(BuildConfig.SUCCESSFULL_LOGIN_URL));
+                                          .arg(BuildConfig.LOGIN_CALLBACK_URL));
         oauth2.setReplyHandler(replyHandler);
     } else {
         oauth2.setReplyHandler(new CustomOAuthOobReplyHandler(this));

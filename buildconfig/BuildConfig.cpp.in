@@ -116,7 +116,7 @@ Config::Config()
     NEWS_RSS_URL = "@Launcher_NEWS_RSS_URL@";
     NEWS_OPEN_URL = "@Launcher_NEWS_OPEN_URL@";
     HELP_URL = "@Launcher_HELP_URL@";
-    SUCCESSFULL_LOGIN_URL = "@Launcher_SUCCESSFULL_LOGIN_URL@";
+    LOGIN_CALLBACK_URL = "@Launcher_LOGIN_CALLBACK_URL@";
     IMGUR_CLIENT_ID = "@Launcher_IMGUR_CLIENT_ID@";
     MSA_CLIENT_ID = "@Launcher_MSA_CLIENT_ID@";
     FLAME_API_KEY = "@Launcher_CURSEFORGE_API_KEY@";

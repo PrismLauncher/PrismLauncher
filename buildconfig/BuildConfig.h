@@ -136,7 +136,7 @@ class Config {
     /**
      * URL that gets opened when the user succesfully logins.
      */
-    QString SUCCESSFULL_LOGIN_URL;
+    QString LOGIN_CALLBACK_URL;
 
     /**
      * Client ID you can get from Imgur when you register an application
