@@ -1870,6 +1870,7 @@ QUrl Application::normalizeImportUrl(QString const& url)
         return QUrl::fromUserInput(url);
     }
 }
+
 const QString Application::javaPath()
 {
     return m_settings->get("JavaDir").toString();
