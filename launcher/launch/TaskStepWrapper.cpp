@@ -59,7 +59,9 @@ bool TaskStepWrapper::canAbort() const
 bool TaskStepWrapper::abort()
 {
     if (m_task && m_task->canAbort()) {
-        return m_task->abort();
+        auto status = m_task->abort();
+        emitFailed("Aborted.");
+        return status;
     }
     return Task::abort();
 }
