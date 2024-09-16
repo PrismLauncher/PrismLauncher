@@ -90,15 +90,16 @@ MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(sile
 
     {
         auto replyHandler = new QOAuthHttpServerReplyHandler(this);
-        replyHandler->setCallbackText(R"XXX(
+        replyHandler->setCallbackText(QString(R"XXX(
     <noscript>
-      <meta http-equiv="Refresh" content="0; URL=https://prismlauncher.org/successful-login" />
+      <meta http-equiv="Refresh" content="0; URL=%1" />
     </noscript>
     Login Successful, redirecting...
     <script>
-      window.location.replace("https://prismlauncher.org/successful-login");
+      window.location.replace("%1");
     </script>
-    )XXX");
+    )XXX")
+                                          .arg(BuildConfig.SUCCESSFULL_LOGIN_URL));
         oauth2.setReplyHandler(replyHandler);
     } else {
         oauth2.setReplyHandler(new CustomOAuthOobReplyHandler(this));
