@@ -16,9 +16,8 @@
 #include "LaunchStep.h"
 #include "LaunchTask.h"
 
-void LaunchStep::bind(LaunchTask* parent)
+LaunchStep::LaunchStep(LaunchTask* parent) : Task(parent), m_parent(parent)
 {
-    m_parent = parent;
     connect(this, &LaunchStep::readyForLaunch, parent, &LaunchTask::onReadyForLaunch);
     connect(this, &LaunchStep::logLine, parent, &LaunchTask::onLogLine);
     connect(this, &LaunchStep::logLines, parent, &LaunchTask::onLogLines);

@@ -38,7 +38,7 @@ class Version : public QObject, public BaseVersion, public BaseEntity {
     using Ptr = std::shared_ptr<Version>;
 
     explicit Version(const QString& uid, const QString& version);
-    virtual ~Version();
+    virtual ~Version() = default;
 
     QString descriptor() override;
     QString name() override;
@@ -52,7 +52,7 @@ class Version : public QObject, public BaseVersion, public BaseEntity {
     const Meta::RequireSet& requiredSet() const { return m_requires; }
     VersionFilePtr data() const { return m_data; }
     bool isRecommended() const { return m_recommended; }
-    bool isLoaded() const { return m_data != nullptr; }
+    bool isLoaded() const { return m_data != nullptr && BaseEntity::isLoaded(); }
 
     void merge(const Version::Ptr& other);
     void mergeFromList(const Version::Ptr& other);

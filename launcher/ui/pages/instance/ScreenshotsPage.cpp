@@ -242,6 +242,11 @@ ScreenshotsPage::ScreenshotsPage(QString path, QWidget* parent) : QMainWindow(pa
     m_model->setReadOnly(false);
     m_model->setNameFilters({ "*.png" });
     m_model->setNameFilterDisables(false);
+    // Sorts by modified date instead of creation date because that column is not available and would require subclassing, this should work
+    // considering screenshots aren't modified after creation.
+    constexpr int file_modified_column_index = 3;
+    m_model->sort(file_modified_column_index, Qt::DescendingOrder);
+
     m_folder = path;
     m_valid = FS::ensureFolderPathExists(m_folder);
 

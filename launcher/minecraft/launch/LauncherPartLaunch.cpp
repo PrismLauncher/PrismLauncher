@@ -90,7 +90,7 @@ void LauncherPartLaunch::executeTask()
         }
     }
 
-    m_launchScript = minecraftInstance->createLaunchScript(m_session, m_serverToJoin);
+    m_launchScript = minecraftInstance->createLaunchScript(m_session, m_targetToJoin);
     QStringList args = minecraftInstance->javaArguments();
     QString allArgs = args.join(", ");
     emit logLine("Java Arguments:\n[" + m_parent->censorPrivateInfo(allArgs) + "]\n\n", MessageLevel::Launcher);

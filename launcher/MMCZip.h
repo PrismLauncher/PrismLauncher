@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2023-2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -208,6 +208,9 @@ class ExportToZipTask : public Task {
 
 class ExtractZipTask : public Task {
    public:
+    ExtractZipTask(QString input, QDir outputDir, QString subdirectory = "")
+        : ExtractZipTask(std::make_shared<QuaZip>(input), outputDir, subdirectory)
+    {}
     ExtractZipTask(std::shared_ptr<QuaZip> input, QDir outputDir, QString subdirectory = "")
         : m_input(input), m_output_dir(outputDir), m_subdirectory(subdirectory)
     {}

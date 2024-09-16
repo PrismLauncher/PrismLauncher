@@ -32,29 +32,23 @@ class MSALoginDialog : public QDialog {
    public:
     ~MSALoginDialog();
 
-    static MinecraftAccountPtr newAccount(QWidget* parent, QString message, bool usingDeviceCode = false);
+    static MinecraftAccountPtr newAccount(QWidget* parent);
     int exec() override;
 
    private:
     explicit MSALoginDialog(QWidget* parent = 0);
 
    protected slots:
-    void onTaskFailed(const QString& reason);
-    void onTaskSucceeded();
-    void onTaskStatus(const QString& status);
+    void onTaskFailed(QString reason);
+    void onTaskStatus(QString status);
     void authorizeWithBrowser(const QUrl& url);
     void authorizeWithBrowserWithExtra(QString url, QString code, int expiresIn);
-    void copyUrl();
-    void externalLoginTick();
 
    private:
     Ui::MSALoginDialog* ui;
     MinecraftAccountPtr m_account;
-    shared_qobject_ptr<AuthFlow> m_task;
+    shared_qobject_ptr<AuthFlow> m_devicecode_task;
+    shared_qobject_ptr<AuthFlow> m_authflow_task;
 
-    int m_external_elapsed;
-    int m_external_timeout;
-    QTimer m_external_timer;
-
-    bool m_using_device_code = false;
+    QUrl m_url;
 };

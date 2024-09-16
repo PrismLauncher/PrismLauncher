@@ -58,6 +58,7 @@ void NewsChecker::reloadNews()
 
     NetJob::Ptr job{ new NetJob("News RSS Feed", m_network) };
     job->addNetAction(Net::Download::makeByteArray(m_feedUrl, newsData));
+    job->setAskRetry(false);
     QObject::connect(job.get(), &NetJob::succeeded, this, &NewsChecker::rssDownloadFinished);
     QObject::connect(job.get(), &NetJob::failed, this, &NewsChecker::rssDownloadFailed);
     m_newsNetJob.reset(job);
