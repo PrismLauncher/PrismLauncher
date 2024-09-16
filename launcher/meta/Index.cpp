@@ -16,7 +16,10 @@
 #include "Index.h"
 
 #include "JsonFormat.h"
+#include "QObjectPtr.h"
 #include "VersionList.h"
+#include "meta/BaseEntity.h"
+#include "tasks/SequentialTask.h"
 
 namespace Meta {
 Index::Index(QObject* parent) : QAbstractListModel(parent) {}
@@ -51,14 +54,17 @@ QVariant Index::data(const QModelIndex& index, int role) const
     }
     return QVariant();
 }
+
 int Index::rowCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : m_lists.size();
 }
+
 int Index::columnCount(const QModelIndex& parent) const
 {
     return parent.isValid() ? 0 : 1;
 }
+
 QVariant Index::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
@@ -79,6 +85,7 @@ VersionList::Ptr Index::get(const QString& uid)
     if (!out) {
         out = std::make_shared<VersionList>(uid);
         m_uids[uid] = out;
+        m_lists.append(out);
     }
     return out;
 }
@@ -96,7 +103,7 @@ void Index::parse(const QJsonObject& obj)
 
 void Index::merge(const std::shared_ptr<Index>& other)
 {
-    const QVector<VersionList::Ptr> lists = std::dynamic_pointer_cast<Index>(other)->m_lists;
+    const QVector<VersionList::Ptr> lists = other->m_lists;
     // initial load, no need to merge
     if (m_lists.isEmpty()) {
         beginResetModel();
@@ -123,7 +130,33 @@ void Index::merge(const std::shared_ptr<Index>& other)
 
 void Index::connectVersionList(const int row, const VersionList::Ptr& list)
 {
-    connect(list.get(), &VersionList::nameChanged, this,
-            [this, row]() { emit dataChanged(index(row), index(row), QVector<int>() << Qt::DisplayRole); });
+    connect(list.get(), &VersionList::nameChanged, this, [this, row] { emit dataChanged(index(row), index(row), { Qt::DisplayRole }); });
+}
+
+Task::Ptr Index::loadVersion(const QString& uid, const QString& version, Net::Mode mode, bool force)
+{
+    if (mode == Net::Mode::Offline) {
+        return get(uid, version)->loadTask(mode);
+    }
+
+    auto versionList = get(uid);
+    auto loadTask = makeShared<SequentialTask>(
+        this, tr("Load meta for %1:%2", "This is for the task name that loads the meta index.").arg(uid, version));
+    if (status() != BaseEntity::LoadStatus::Remote || force) {
+        loadTask->addTask(this->loadTask(mode));
+    }
+    loadTask->addTask(versionList->loadTask(mode));
+    loadTask->addTask(versionList->getVersion(version)->loadTask(mode));
+    return loadTask;
+}
+
+Version::Ptr Index::getLoadedVersion(const QString& uid, const QString& version)
+{
+    QEventLoop ev;
+    auto task = loadVersion(uid, version);
+    QObject::connect(task.get(), &Task::finished, &ev, &QEventLoop::quit);
+    task->start();
+    ev.exec();
+    return get(uid, version);
 }
 }  // namespace Meta

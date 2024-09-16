@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "FileSystem.h"
 #include "minecraft/mod/Resource.h"
 
 #include "tasks/Task.h"
@@ -50,6 +51,12 @@ class BasicFolderLoadTask : public Task {
 
         m_dir.refresh();
         for (auto entry : m_dir.entryInfoList()) {
+            auto filePath = entry.absoluteFilePath();
+            auto newFilePath = FS::getUniqueResourceName(filePath);
+            if (newFilePath != filePath) {
+                FS::move(filePath, newFilePath);
+                entry = QFileInfo(newFilePath);
+            }
             auto resource = m_create_func(entry);
             resource->moveToThread(m_thread_to_spawn_into);
             m_result->resources.insert(resource->internal_id(), resource);

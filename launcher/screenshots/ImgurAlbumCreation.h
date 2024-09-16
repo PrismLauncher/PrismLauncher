@@ -67,8 +67,6 @@ class ImgurAlbumCreation : public Net::NetRequest {
     static NetRequest::Ptr make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots);
     QNetworkReply* getReply(QNetworkRequest& request) override;
 
-    void init() override;
-
    private:
     QList<ScreenShot::Ptr> m_screenshots;
 };

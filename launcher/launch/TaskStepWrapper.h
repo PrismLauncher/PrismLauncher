@@ -21,12 +21,11 @@
 #include <launch/LaunchStep.h>
 #include <net/Mode.h>
 
-// FIXME: stupid. should be defined by the instance type? or even completely abstracted away...
-class Update : public LaunchStep {
+class TaskStepWrapper : public LaunchStep {
     Q_OBJECT
    public:
-    explicit Update(LaunchTask* parent, Net::Mode mode) : LaunchStep(parent), m_mode(mode) {};
-    virtual ~Update() {};
+    explicit TaskStepWrapper(LaunchTask* parent, Task::Ptr task) : LaunchStep(parent), m_task(task) {};
+    virtual ~TaskStepWrapper() = default;
 
     void executeTask() override;
     bool canAbort() const override;
@@ -38,7 +37,5 @@ class Update : public LaunchStep {
     void updateFinished();
 
    private:
-    Task::Ptr m_updateTask;
-    bool m_aborted = false;
-    Net::Mode m_mode = Net::Mode::Offline;
+    Task::Ptr m_task;
 };

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -151,6 +151,10 @@ void ThemeCustomizationWidget::loadSettings()
         int idx = 0;
         for (auto& theme : themes) {
             ui->widgetStyleComboBox->addItem(theme->name(), theme->id());
+            if (theme->tooltip() != "") {
+                int index = ui->widgetStyleComboBox->count() - 1;
+                ui->widgetStyleComboBox->setItemData(index, theme->tooltip(), Qt::ToolTipRole);
+            }
             if (currentTheme == theme->id()) {
                 ui->widgetStyleComboBox->setCurrentIndex(idx);
             }

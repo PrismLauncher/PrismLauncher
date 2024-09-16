@@ -1,5 +1,6 @@
 #include "AssetUpdateTask.h"
 
+#include "launch/LaunchStep.h"
 #include "minecraft/AssetsUtils.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
@@ -13,8 +14,6 @@ AssetUpdateTask::AssetUpdateTask(MinecraftInstance* inst)
 {
     m_inst = inst;
 }
-
-AssetUpdateTask::~AssetUpdateTask() {}
 
 void AssetUpdateTask::executeTask()
 {
@@ -32,8 +31,7 @@ void AssetUpdateTask::executeTask()
     auto hexSha1 = assets->sha1.toLatin1();
     qDebug() << "Asset index SHA1:" << hexSha1;
     auto dl = Net::ApiDownload::makeCached(indexUrl, entry);
-    auto rawSha1 = QByteArray::fromHex(assets->sha1.toLatin1());
-    dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+    dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, assets->sha1));
     job->addNetAction(dl);
 
     downloadJob.reset(job);

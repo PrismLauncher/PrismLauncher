@@ -346,23 +346,8 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
                 }
 
                 QJsonObject hashes = Json::requireObject(modInfo, "hashes");
-                QString hash;
-                QCryptographicHash::Algorithm hashAlgorithm;
-                hash = Json::ensureString(hashes, "sha1");
-                hashAlgorithm = QCryptographicHash::Sha1;
-                if (hash.isEmpty()) {
-                    hash = Json::ensureString(hashes, "sha512");
-                    hashAlgorithm = QCryptographicHash::Sha512;
-                    if (hash.isEmpty()) {
-                        hash = Json::ensureString(hashes, "sha256");
-                        hashAlgorithm = QCryptographicHash::Sha256;
-                        if (hash.isEmpty()) {
-                            throw JSONValidationError("No hash found for: " + file.path);
-                        }
-                    }
-                }
-                file.hash = QByteArray::fromHex(hash.toLatin1());
-                file.hashAlgorithm = hashAlgorithm;
+                file.hash = QByteArray::fromHex(Json::requireString(hashes, "sha512").toLatin1());
+                file.hashAlgorithm = QCryptographicHash::Sha512;
 
                 // Do not use requireUrl, which uses StrictMode, instead use QUrl's default TolerantMode
                 // (as Modrinth seems to incorrectly handle spaces)

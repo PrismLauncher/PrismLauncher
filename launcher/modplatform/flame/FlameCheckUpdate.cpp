@@ -1,4 +1,5 @@
 #include "FlameCheckUpdate.h"
+#include "Application.h"
 #include "FlameAPI.h"
 #include "FlameModIndex.h"
 
@@ -124,33 +125,29 @@ void FlameCheckUpdate::executeTask()
 
     int i = 0;
     for (auto* mod : m_mods) {
-        if (!mod->enabled()) {
-            emit checkFailed(mod, tr("Disabled mods won't be updated, to prevent mod duplication issues!"));
-            continue;
-        }
-
         setStatus(tr("Getting API response from CurseForge for '%1'...").arg(mod->name()));
         setProgress(i++, m_mods.size());
 
-        auto latest_ver = api.getLatestVersion({ { mod->metadata()->project_id.toString() }, m_game_versions, m_loaders });
+        auto latest_vers = api.getLatestVersions({ { mod->metadata()->project_id.toString() }, m_game_versions });
 
         // Check if we were aborted while getting the latest version
         if (m_was_aborted) {
             aborted();
             return;
         }
+        auto latest_ver = api.getLatestVersion(latest_vers, m_loaders_list, mod->loaders());
 
         setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(mod->name()));
 
-        if (!latest_ver.addonId.isValid()) {
+        if (!latest_ver.has_value() || !latest_ver->addonId.isValid()) {
             emit checkFailed(mod, tr("No valid version found for this mod. It's probably unavailable for the current game "
                                      "version / mod loader."));
             continue;
         }
 
-        if (latest_ver.downloadUrl.isEmpty() && latest_ver.fileId != mod->metadata()->file_id) {
-            auto pack = getProjectInfo(latest_ver);
-            auto recover_url = QString("%1/download/%2").arg(pack.websiteUrl, latest_ver.fileId.toString());
+        if (latest_ver->downloadUrl.isEmpty() && latest_ver->fileId != mod->metadata()->file_id) {
+            auto pack = getProjectInfo(latest_ver.value());
+            auto recover_url = QString("%1/download/%2").arg(pack.websiteUrl, latest_ver->fileId.toString());
             emit checkFailed(mod, tr("Mod has a new update available, but is not downloadable using CurseForge."), recover_url);
 
             continue;
@@ -166,19 +163,19 @@ void FlameCheckUpdate::executeTask()
             pack->authors.append({ author });
         pack->description = mod->description();
         pack->provider = ModPlatform::ResourceProvider::FLAME;
-        if (!latest_ver.hash.isEmpty() && (mod->metadata()->hash != latest_ver.hash || mod->status() == ModStatus::NotInstalled)) {
+        if (!latest_ver->hash.isEmpty() && (mod->metadata()->hash != latest_ver->hash || mod->status() == ModStatus::NotInstalled)) {
             auto old_version = mod->version();
             if (old_version.isEmpty() && mod->status() != ModStatus::NotInstalled) {
-                auto current_ver = getFileInfo(latest_ver.addonId.toInt(), mod->metadata()->file_id.toInt());
+                auto current_ver = getFileInfo(latest_ver->addonId.toInt(), mod->metadata()->file_id.toInt());
                 old_version = current_ver.version;
             }
 
-            auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver, m_mods_folder);
-            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver.version, latest_ver.version_type,
-                                     api.getModFileChangelog(latest_ver.addonId.toInt(), latest_ver.fileId.toInt()),
-                                     ModPlatform::ResourceProvider::FLAME, download_task);
+            auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver.value(), m_mods_folder);
+            m_updatable.emplace_back(pack->name, mod->metadata()->hash, old_version, latest_ver->version, latest_ver->version_type,
+                                     api.getModFileChangelog(latest_ver->addonId.toInt(), latest_ver->fileId.toInt()),
+                                     ModPlatform::ResourceProvider::FLAME, download_task, mod->enabled());
         }
-        m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latest_ver));
+        m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latest_ver.value()));
     }
 
     emitSucceeded();
