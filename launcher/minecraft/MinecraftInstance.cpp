@@ -193,7 +193,7 @@ void MinecraftInstance::loadSpecificSettings()
     }
 
     // Join server on launch, this does not have a global override
-    m_settings->registerSetting({ "JoinServerOnLaunch", "JoinOnLaunch" }, false);
+    m_settings->registerSetting("JoinServerOnLaunch", false);
     m_settings->registerSetting("JoinServerOnLaunchAddress", "");
     m_settings->registerSetting("JoinWorldOnLaunch", "");
 
@@ -1063,7 +1063,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
         process->appendStep(makeShared<CreateGameFolders>(pptr));
     }
 
-    if (!targetToJoin && settings()->get("JoinOnLaunch").toBool()) {
+    if (!targetToJoin && settings()->get("JoinServerOnLaunch").toBool()) {
         QString fullAddress = settings()->get("JoinServerOnLaunchAddress").toString();
         if (!fullAddress.isEmpty()) {
             targetToJoin.reset(new MinecraftTarget(MinecraftTarget::parse(fullAddress, false)));
