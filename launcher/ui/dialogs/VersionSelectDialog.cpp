@@ -121,7 +121,7 @@ void VersionSelectDialog::setResizeOn(int column)
 int VersionSelectDialog::exec()
 {
     QDialog::open();
-    m_versionWidget->initialize(m_vlist);
+    m_versionWidget->initialize(m_vlist, true);
     m_versionWidget->selectSearch();
     if (resizeOnColumn != -1) {
         m_versionWidget->setResizeOn(resizeOnColumn);

@@ -148,12 +148,12 @@ class PackProfile : public QAbstractListModel {
     std::optional<ModPlatform::ModLoaderTypes> getSupportedModLoaders();
     QList<ModPlatform::ModLoaderType> getModLoadersList();
 
+    /// apply the component patches. Catches all the errors and returns true/false for success/failure
+    void invalidateLaunchProfile();
+
    private:
     void scheduleSave();
     bool saveIsScheduled() const;
-
-    /// apply the component patches. Catches all the errors and returns true/false for success/failure
-    void invalidateLaunchProfile();
 
     /// insert component so that its index is ideally the specified one (returns real index)
     void insertComponent(size_t index, ComponentPtr component);

@@ -33,7 +33,7 @@ jobs:
           host: "linux"
           target: "desktop"
           arch: ""
-          modules: "qt5compat qtimageformats"
+          modules: "qt5compat qtimageformats qtnetworkauth"
           tools: ""
 
       - name: Configure and Build
