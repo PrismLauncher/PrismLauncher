@@ -104,7 +104,7 @@ QString unescape(QString orig)
 QString unquote(QString str)
 {
     if ((str.contains(QChar(';')) || str.contains(QChar('=')) || str.contains(QChar(','))) && str.endsWith("\"") && str.startsWith("\"")) {
-        str = str.removeFirst().removeLast();
+        str = str.mid(1, str.length() - 2);
     }
     return str;
 }
