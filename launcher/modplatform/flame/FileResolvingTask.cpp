@@ -26,8 +26,6 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
-#include "net/ApiDownload.h"
-#include "net/ApiUpload.h"
 
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "net/NetJob.h"
@@ -120,7 +118,6 @@ void Flame::FileResolvingTask::netJobFinished()
     // job to check modrinth for blocked projects
     QJsonDocument doc;
     QJsonArray array;
-    QHash<int, PackedResourceType> resourceTypes;
 
     try {
         doc = Json::requireDocument(*m_result);
@@ -254,14 +251,13 @@ void Flame::FileResolvingTask::getFlameProjects()
                 auto id = Json::requireInteger(entry_obj, "id");
                 auto file = std::find_if(m_manifest.files.begin(), m_manifest.files.end(),
                                          [id](const Flame::File& file) { return file.projectId == id; });
-                auto classId = Json::requireInteger(entry_obj, "classId", "modClassId");
                 if (file == m_manifest.files.end()) {
                     continue;
                 }
 
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
                 FlameMod::loadIndexedPack(file->pack, entry_obj);
-                file->resourceType = getResourceType(classId);
+                file->resourceType = getResourceType(Json::requireInteger(entry_obj, "classId", "modClassId"));
                 if (file->resourceType == PackedResourceType::WorldSave) {
                     file->targetFolder = "saves";
                 }
