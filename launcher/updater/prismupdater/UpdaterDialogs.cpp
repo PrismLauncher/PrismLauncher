@@ -24,6 +24,7 @@
 
 #include "ui_SelectReleaseDialog.h"
 
+#include <QPushButton>
 #include <QTextBrowser>
 #include "Markdown.h"
 #include "StringUtils.h"
