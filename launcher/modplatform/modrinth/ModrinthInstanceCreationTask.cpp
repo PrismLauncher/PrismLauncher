@@ -5,8 +5,12 @@
 #include "InstanceList.h"
 #include "Json.h"
 
+#include "QObjectPtr.h"
+#include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
+#include "minecraft/mod/Mod.h"
+#include "modplatform/EnsureMetadataTask.h"
 #include "modplatform/helpers/OverrideUtils.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
@@ -21,6 +25,7 @@
 
 #include <QAbstractButton>
 #include <QFileInfo>
+#include <QHash>
 #include <vector>
 
 bool ModrinthCreationTask::abort()
@@ -29,8 +34,8 @@ bool ModrinthCreationTask::abort()
         return false;
 
     m_abort = true;
-    if (m_files_job)
-        m_files_job->abort();
+    if (m_task)
+        m_task->abort();
     return Task::abort();
 }
 
@@ -234,11 +239,11 @@ bool ModrinthCreationTask::createInstance()
     instance.setName(name());
     instance.saveNow();
 
-    m_files_job.reset(new NetJob(tr("Mod Download Modrinth"), APPLICATION->network()));
+    auto downloadMods = makeShared<NetJob>(tr("Mod Download Modrinth"), APPLICATION->network());
 
     auto root_modpack_path = FS::PathCombine(m_stagingPath, m_root_path);
     auto root_modpack_url = QUrl::fromLocalFile(root_modpack_path);
-
+    QHash<QString, Mod*> mods;
     for (auto file : m_files) {
         auto fileName = file.path;
         fileName = FS::RemoveInvalidPathChars(fileName);
@@ -249,20 +254,27 @@ bool ModrinthCreationTask::createInstance()
                          .arg(fileName));
             return false;
         }
+        if (fileName.startsWith("mods/")) {
+            auto mod = new Mod(file_path);
+            ModDetails d;
+            d.mod_id = file_path;
+            mod->setDetails(d);
+            mods[file.hash.toHex()] = mod;
+        }
 
         qDebug() << "Will try to download" << file.downloads.front() << "to" << file_path;
         auto dl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
         dl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
-        m_files_job->addNetAction(dl);
+        downloadMods->addNetAction(dl);
 
         if (!file.downloads.empty()) {
             // FIXME: This really needs to be put into a ConcurrentTask of
             // MultipleOptionsTask's , once those exist :)
             auto param = dl.toWeakRef();
-            connect(dl.get(), &Task::failed, [this, &file, file_path, param] {
+            connect(dl.get(), &Task::failed, [&file, file_path, param, downloadMods] {
                 auto ndl = Net::ApiDownload::makeFile(file.downloads.dequeue(), file_path);
                 ndl->addValidator(new Net::ChecksumValidator(file.hashAlgorithm, file.hash));
-                m_files_job->addNetAction(ndl);
+                downloadMods->addNetAction(ndl);
                 if (auto shared = param.lock())
                     shared->succeeded();
             });
@@ -271,22 +283,43 @@ bool ModrinthCreationTask::createInstance()
 
     bool ended_well = false;
 
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() { ended_well = true; });
-    connect(m_files_job.get(), &NetJob::failed, [&](const QString& reason) {
+    connect(downloadMods.get(), &NetJob::succeeded, this, [&]() { ended_well = true; });
+    connect(downloadMods.get(), &NetJob::failed, [&](const QString& reason) {
         ended_well = false;
         setError(reason);
     });
-    connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
-    connect(m_files_job.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
+    connect(downloadMods.get(), &NetJob::finished, &loop, &QEventLoop::quit);
+    connect(downloadMods.get(), &NetJob::progress, [&](qint64 current, qint64 total) {
         setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
         setProgress(current, total);
     });
-    connect(m_files_job.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propagateStepProgress);
+    connect(downloadMods.get(), &NetJob::stepProgress, this, &ModrinthCreationTask::propagateStepProgress);
 
     setStatus(tr("Downloading mods..."));
-    m_files_job->start();
+    downloadMods->start();
+    m_task = downloadMods;
 
     loop.exec();
+
+    QEventLoop ensureMetaLoop;
+    QDir folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
+    auto ensureMetadataTask = makeShared<EnsureMetadataTask>(mods, folder, ModPlatform::ResourceProvider::MODRINTH);
+    connect(ensureMetadataTask.get(), &Task::succeeded, this, [&]() { ended_well = true; });
+    connect(ensureMetadataTask.get(), &Task::finished, &ensureMetaLoop, &QEventLoop::quit);
+    connect(ensureMetadataTask.get(), &Task::progress, [&](qint64 current, qint64 total) {
+        setDetails(tr("%1 out of %2 complete").arg(current).arg(total));
+        setProgress(current, total);
+    });
+    connect(ensureMetadataTask.get(), &Task::stepProgress, this, &ModrinthCreationTask::propagateStepProgress);
+
+    ensureMetadataTask->start();
+    m_task = ensureMetadataTask;
+
+    ensureMetaLoop.exec();
+    for (auto m : mods) {
+        delete m;
+    }
+    mods.clear();
 
     // Update information of the already installed instance, if any.
     if (m_instance && ended_well) {
