@@ -39,6 +39,8 @@ PageDialog::PageDialog(BasePageProvider* pageProvider, QString defaultId, QWidge
 
     QDialogButtonBox* buttons = new QDialogButtonBox(QDialogButtonBox::Help | QDialogButtonBox::Close);
     buttons->button(QDialogButtonBox::Close)->setDefault(true);
+    buttons->button(QDialogButtonBox::Close)->setText(tr("Close"));
+    buttons->button(QDialogButtonBox::Help)->setText(tr("Help"));
     buttons->setContentsMargins(6, 0, 6, 0);
     m_container->addButtons(buttons);
 

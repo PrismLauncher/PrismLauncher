@@ -462,6 +462,7 @@ void ResourcePage::openProject(QVariant projectID)
     auto cancelBtn = buttonBox->button(QDialogButtonBox::Cancel);
     cancelBtn->setDefault(false);
     cancelBtn->setAutoDefault(false);
+    cancelBtn->setText(tr("Cancel"));
 
     connect(okBtn, &QPushButton::clicked, this, [this] {
         onResourceSelected();

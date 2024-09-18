@@ -20,6 +20,9 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ReviewMessageBox::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ReviewMessageBox::reject);
+
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
 
 ReviewMessageBox::~ReviewMessageBox()
