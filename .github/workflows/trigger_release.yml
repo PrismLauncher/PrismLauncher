@@ -4,6 +4,25 @@ on:
   push:
     tags:
       - "*"
+    branches-ignore:
+      - "renovate/**"
+    paths-ignore:
+      - "**.md"
+      - "**/LICENSE"
+      - "flake.lock"
+      - "packages/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".markdownlint**"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "**/LICENSE"
+      - "flake.lock"
+      - "packages/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".markdownlint**"
+  workflow_dispatch:
+
 
 jobs:
   build_release:
@@ -12,18 +31,6 @@ jobs:
     with:
       build_type: Release
       is_qt_cached: false
-    secrets:
-      SPARKLE_ED25519_KEY: ${{ secrets.SPARKLE_ED25519_KEY }}
-      WINDOWS_CODESIGN_CERT: ${{ secrets.WINDOWS_CODESIGN_CERT }}
-      WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
-      APPLE_CODESIGN_CERT: ${{ secrets.APPLE_CODESIGN_CERT }}
-      APPLE_CODESIGN_PASSWORD: ${{ secrets.APPLE_CODESIGN_PASSWORD }}
-      APPLE_CODESIGN_ID: ${{ secrets.APPLE_CODESIGN_ID }}
-      APPLE_NOTARIZE_APPLE_ID: ${{ secrets.APPLE_NOTARIZE_APPLE_ID }}
-      APPLE_NOTARIZE_TEAM_ID: ${{ secrets.APPLE_NOTARIZE_TEAM_ID }}
-      APPLE_NOTARIZE_PASSWORD: ${{ secrets.APPLE_NOTARIZE_PASSWORD }}
-      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-      GPG_PRIVATE_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY_ID }}
 
   create_release:
     needs: build_release
