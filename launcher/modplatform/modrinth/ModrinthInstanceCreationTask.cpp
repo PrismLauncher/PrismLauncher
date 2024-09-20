@@ -302,7 +302,7 @@ bool ModrinthCreationTask::createInstance()
     loop.exec();
 
     QEventLoop ensureMetaLoop;
-    QDir folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
+    QDir folder = FS::PathCombine(instance.modsRoot(), ".index");
     auto ensureMetadataTask = makeShared<EnsureMetadataTask>(mods, folder, ModPlatform::ResourceProvider::MODRINTH);
     connect(ensureMetadataTask.get(), &Task::succeeded, this, [&]() { ended_well = true; });
     connect(ensureMetadataTask.get(), &Task::finished, &ensureMetaLoop, &QEventLoop::quit);
