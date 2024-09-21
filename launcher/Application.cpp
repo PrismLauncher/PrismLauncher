@@ -765,6 +765,14 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         // FTBApp instances
         m_settings->registerSetting("FTBAppInstancesPath", "");
 
+        // Global folders
+        m_settings->registerSetting("UseGlobalScreenshotsFolder", false);
+        m_settings->registerSetting("GlobalScreenshotsPath", FS::PathCombine(APPLICATION->dataRoot(), "screenshots"));
+        m_settings->registerSetting("UseGlobalSavesFolder", false);
+        m_settings->registerSetting("GlobalSavesPath", FS::PathCombine(APPLICATION->dataRoot(), "saves"));
+        m_settings->registerSetting("UseGlobalResourcePacksFolder", false);
+        m_settings->registerSetting("GlobalResourcePacksPath", FS::PathCombine(APPLICATION->dataRoot(), "resourcepacks"));
+
         // Init page provider
         {
             m_globalSettingsProvider = std::make_shared<GenericPageProvider>(tr("Settings"));

@@ -108,12 +108,15 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("Profiler", "");
 
     // Global folders
-    m_settings->registerSetting("UseGlobalScreenshotsFolder", false);
-    m_settings->registerSetting("GlobalScreenshotsPath", FS::PathCombine(APPLICATION->dataRoot(), "screenshots"));
-    m_settings->registerSetting("UseGlobalSavesFolder", false);
-    m_settings->registerSetting("GlobalSavesPath", FS::PathCombine(APPLICATION->dataRoot(), "saves"));
-    m_settings->registerSetting("UseGlobalResourcePacksFolder", false);
-    m_settings->registerSetting("GlobalResourcePacksPath", FS::PathCombine(APPLICATION->dataRoot(), "resourcepacks"));
+    auto globalScreenshotsSetting = m_settings->registerSetting("OverrideGlobalScreenshots", false);
+    m_settings->registerOverride(globalSettings->getSetting("UseGlobalScreenshotsFolder"), globalScreenshotsSetting);
+    m_settings->registerOverride(globalSettings->getSetting("GlobalScreenshotsPath"), globalScreenshotsSetting);
+    auto globalSavesSetting = m_settings->registerSetting("OverrideGlobalSaves", false);
+    m_settings->registerOverride(globalSettings->getSetting("UseGlobalSavesFolder"), globalSavesSetting);
+    m_settings->registerOverride(globalSettings->getSetting("GlobalSavesPath"), globalSavesSetting);
+    auto globalResourcePacksSetting = m_settings->registerSetting("OverrideGlobalResourcePacks", false);
+    m_settings->registerOverride(globalSettings->getSetting("UseGlobalResourcePacksFolder"), globalResourcePacksSetting);
+    m_settings->registerOverride(globalSettings->getSetting("GlobalResourcePacksPath"), globalResourcePacksSetting);
 }
 
 QString BaseInstance::getPreLaunchCommand()

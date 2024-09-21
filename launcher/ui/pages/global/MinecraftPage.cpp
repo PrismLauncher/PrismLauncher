@@ -42,6 +42,7 @@
 #include <QTabBar>
 
 #include "Application.h"
+#include "InstanceList.h"
 #include "settings/SettingsObject.h"
 
 #ifdef Q_OS_LINUX
@@ -123,6 +124,19 @@ void MinecraftPage::applySettings()
 
     // Legacy settings
     s->set("OnlineFixes", ui->onlineFixes->isChecked());
+
+    // Global folders
+    s->set("UseGlobalScreenshotsFolder", ui->globalScreenshotsFolder->isEnabled());
+    s->set("GlobalScreenshotsPath", ui->globalScreenshotsFolder->getPath());
+    s->set("UseGlobalSavesFolder", ui->globalSavesFolder->isEnabled());
+    s->set("GlobalSavesPath", ui->globalSavesFolder->getPath());
+    s->set("UseGlobalResourcePacksFolder", ui->globalResourcePacksFolder->isEnabled());
+    s->set("GlobalResourcePacksPath", ui->globalResourcePacksFolder->getPath());
+
+    // Run applySettings for each instance
+    for (int i = 0; i < APPLICATION->instances()->count(); i++) {
+        APPLICATION->instances()->at(i)->applySettings();
+    }
 }
 
 void MinecraftPage::loadSettings()
@@ -177,6 +191,12 @@ void MinecraftPage::loadSettings()
     ui->quitAfterGameStopCheck->setChecked(s->get("QuitAfterGameStop").toBool());
 
     ui->onlineFixes->setChecked(s->get("OnlineFixes").toBool());
+
+    // Global folders
+    ui->globalScreenshotsFolder->initialize(s->get("UseGlobalScreenshotsFolder").toBool(), s->get("GlobalScreenshotsPath").toString());
+    ui->globalSavesFolder->initialize(s->get("UseGlobalSavesFolder").toBool(), s->get("GlobalSavesPath").toString());
+    ui->globalResourcePacksFolder->initialize(s->get("UseGlobalResourcePacksFolder").toBool(),
+                                              s->get("GlobalResourcePacksPath").toString());
 }
 
 void MinecraftPage::retranslate()

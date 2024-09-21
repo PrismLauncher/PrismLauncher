@@ -750,13 +750,58 @@
            </widget>
           </item>
           <item>
-           <widget class="GlobalFolderWidget" name="globalScreenshotsFolder" native="true"/>
+           <widget class="QGroupBox" name="globalScreenshotsGroupBox">
+            <property name="title">
+             <string>Override global screenshots setting</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <widget class="GlobalFolderWidget" name="globalScreenshotsFolder" native="true"/>
+             </item>
+            </layout>
+           </widget>
           </item>
           <item>
-           <widget class="GlobalFolderWidget" name="globalSavesFolder" native="true"/>
+           <widget class="QGroupBox" name="globalSavesGroupBox">
+            <property name="title">
+             <string>Override global saves setting</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_9">
+             <item>
+              <widget class="GlobalFolderWidget" name="globalSavesFolder" native="true"/>
+             </item>
+            </layout>
+           </widget>
           </item>
           <item>
-           <widget class="GlobalFolderWidget" name="globalResourcePackFolder" native="true"/>
+           <widget class="QGroupBox" name="globalResourcePackGroupBox">
+            <property name="title">
+             <string>Override global resource pack setting</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_10">
+             <item>
+              <widget class="GlobalFolderWidget" name="globalResourcePackFolder" native="true"/>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </widget>
