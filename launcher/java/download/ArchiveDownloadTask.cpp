@@ -95,7 +95,7 @@ void ArchiveDownloadTask::extractJava(QString input)
         }
         auto files = zip->getFileNameList();
         if (files.isEmpty()) {
-            emitFailed(tr("No files were found in the supplied zip file,"));
+            emitFailed(tr("No files were found in the supplied zip file."));
             return;
         }
         m_task = makeShared<MMCZip::ExtractZipTask>(zip, m_final_path, files[0]);
