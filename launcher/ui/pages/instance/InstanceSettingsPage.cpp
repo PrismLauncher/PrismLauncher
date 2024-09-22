@@ -303,6 +303,37 @@ void InstanceSettingsPage::applySettings()
         m_settings->reset("OnlineFixes");
     }
 
+    // Global folders
+    bool overrideGlobalScreenshotsSetting = ui->globalScreenshotsGroupBox->isChecked();
+    m_settings->set("OverrideGlobalScreenshots", overrideGlobalScreenshotsSetting);
+    if (overrideGlobalScreenshotsSetting) {
+        m_settings->set("UseGlobalScreenshotsFolder", ui->globalScreenshotsFolder->isEnabled());
+        m_settings->set("GlobalScreenshotsPath", ui->globalScreenshotsFolder->getPath());
+    } else {
+        m_settings->reset("UseGlobalScreenshotsFolder");
+        m_settings->reset("GlobalScreenshotsPath");
+    }
+    bool overrideGlobalSavesSetting = ui->globalSavesGroupBox->isChecked();
+    m_settings->set("OverrideGlobalSaves", overrideGlobalSavesSetting);
+    if (overrideGlobalSavesSetting) {
+        m_settings->set("UseGlobalSavesFolder", ui->globalSavesFolder->isEnabled());
+        m_settings->set("GlobalSavesPath", ui->globalSavesFolder->getPath());
+    } else {
+        m_settings->reset("UseGlobalSavesFolder");
+        m_settings->reset("GlobalSavesPath");
+    }
+    bool overrideGlobalResourcePacksSetting = ui->globalResourcePackGroupBox->isChecked();
+    m_settings->set("OverrideGlobalResourcePacks", overrideGlobalResourcePacksSetting);
+    if (overrideGlobalResourcePacksSetting) {
+        m_settings->set("UseGlobalResourcePacksFolder", ui->globalResourcePackFolder->isEnabled());
+        m_settings->set("GlobalResourcePacksPath", ui->globalResourcePackFolder->getPath());
+    } else {
+        m_settings->reset("UseGlobalResourcePacksFolder");
+        m_settings->reset("GlobalResourcePacksPath");
+    }
+
+    m_instance->applySettings();
+
     // FIXME: This should probably be called by a signal instead
     m_instance->updateRuntimeContext();
 }
@@ -435,6 +466,17 @@ void InstanceSettingsPage::loadSettings()
 
     ui->legacySettingsGroupBox->setChecked(m_settings->get("OverrideLegacySettings").toBool());
     ui->onlineFixes->setChecked(m_settings->get("OnlineFixes").toBool());
+
+    // Global folders
+    ui->globalScreenshotsGroupBox->setChecked(m_settings->get("OverrideGlobalScreenshots").toBool());
+    ui->globalScreenshotsFolder->initialize(m_settings->get("UseGlobalScreenshotsFolder").toBool(),
+                                            m_settings->get("GlobalScreenshotsPath").toString(), "Use global screenshots folder");
+    ui->globalSavesGroupBox->setChecked(m_settings->get("OverrideGlobalSaves").toBool());
+    ui->globalSavesFolder->initialize(m_settings->get("UseGlobalSavesFolder").toBool(), m_settings->get("GlobalSavesPath").toString(),
+                                      "Use global saves folder");
+    ui->globalResourcePackGroupBox->setChecked(m_settings->get("OverrideGlobalResourcePacks").toBool());
+    ui->globalResourcePackFolder->initialize(m_settings->get("UseGlobalResourcePacksFolder").toBool(),
+                                             m_settings->get("GlobalResourcePacksPath").toString(), "Use global resource packs folder");
 }
 
 void InstanceSettingsPage::on_javaDownloadBtn_clicked()

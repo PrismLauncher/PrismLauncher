@@ -308,6 +308,8 @@ set(MINECRAFT_SOURCES
     minecraft/Library.cpp
     minecraft/Library.h
     minecraft/MojangDownloadInfo.h
+    minecraft/UpdateGlobalDirectoriesTask.cpp
+    minecraft/UpdateGlobalDirectoriesTask.h
     minecraft/VanillaInstanceCreationTask.cpp
     minecraft/VanillaInstanceCreationTask.h
     minecraft/VersionFile.cpp
@@ -1035,6 +1037,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ExportPackDialog.h
     ui/dialogs/ExportToModListDialog.cpp
     ui/dialogs/ExportToModListDialog.h
+    ui/dialogs/FileConflictDialog.cpp
+    ui/dialogs/FileConflictDialog.h
     ui/dialogs/IconPickerDialog.cpp
     ui/dialogs/IconPickerDialog.h
     ui/dialogs/ImportResourceDialog.cpp
@@ -1086,6 +1090,8 @@ SET(LAUNCHER_SOURCES
     ui/widgets/DropLabel.h
     ui/widgets/FocusLineEdit.cpp
     ui/widgets/FocusLineEdit.h
+    ui/widgets/GlobalFolderWidget.cpp
+    ui/widgets/GlobalFolderWidget.h
     ui/widgets/IconLabel.cpp
     ui/widgets/IconLabel.h
     ui/widgets/JavaSettingsWidget.cpp
@@ -1195,6 +1201,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/widgets/InstanceCardWidget.ui
     ui/widgets/CustomCommands.ui
     ui/widgets/EnvironmentVariables.ui
+    ui/widgets/GlobalFolderWidget.ui
     ui/widgets/InfoFrame.ui
     ui/widgets/ModFilterWidget.ui
     ui/widgets/SubTaskProgressBar.ui
@@ -1209,6 +1216,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ExportInstanceDialog.ui
     ui/dialogs/ExportPackDialog.ui
     ui/dialogs/ExportToModListDialog.ui
+    ui/dialogs/FileConflictDialog.ui
     ui/dialogs/IconPickerDialog.ui
     ui/dialogs/ImportResourceDialog.ui
     ui/dialogs/MSALoginDialog.ui

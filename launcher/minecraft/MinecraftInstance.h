@@ -51,6 +51,7 @@ class WorldList;
 class GameOptions;
 class LaunchStep;
 class PackProfile;
+class UpdateGlobalDirectoriesTask;
 
 class MinecraftInstance : public BaseInstance {
     Q_OBJECT
@@ -74,6 +75,7 @@ class MinecraftInstance : public BaseInstance {
 
     ////// Directories and files //////
     QString jarModsDir() const;
+    QString screenshotsDir() const;
     QString resourcePacksDir() const;
     QString texturePacksDir() const;
     QString shaderPacksDir() const;
@@ -159,11 +161,14 @@ class MinecraftInstance : public BaseInstance {
 
     virtual JavaVersion getJavaVersion();
 
+    virtual void applySettings() override;
+
    protected:
     QMap<QString, QString> createCensorFilterFromSession(AuthSessionPtr session);
 
    protected:  // data
     std::shared_ptr<PackProfile> m_components;
+    std::shared_ptr<UpdateGlobalDirectoriesTask> m_update_global_directories_task;
     mutable std::shared_ptr<ModFolderModel> m_loader_mod_list;
     mutable std::shared_ptr<ModFolderModel> m_core_mod_list;
     mutable std::shared_ptr<ModFolderModel> m_nil_mod_list;

@@ -48,6 +48,7 @@
 #include "settings/OverrideSetting.h"
 #include "settings/Setting.h"
 
+#include "Application.h"
 #include "BuildConfig.h"
 #include "Commandline.h"
 #include "FileSystem.h"
@@ -105,6 +106,17 @@ BaseInstance::BaseInstance(SettingsObjectPtr globalSettings, SettingsObjectPtr s
     m_settings->registerSetting("ManagedPackVersionName", "");
 
     m_settings->registerSetting("Profiler", "");
+
+    // Global folders
+    auto globalScreenshotsSetting = m_settings->registerSetting("OverrideGlobalScreenshots", false);
+    m_settings->registerOverride(globalSettings->getSetting("UseGlobalScreenshotsFolder"), globalScreenshotsSetting);
+    m_settings->registerOverride(globalSettings->getSetting("GlobalScreenshotsPath"), globalScreenshotsSetting);
+    auto globalSavesSetting = m_settings->registerSetting("OverrideGlobalSaves", false);
+    m_settings->registerOverride(globalSettings->getSetting("UseGlobalSavesFolder"), globalSavesSetting);
+    m_settings->registerOverride(globalSettings->getSetting("GlobalSavesPath"), globalSavesSetting);
+    auto globalResourcePacksSetting = m_settings->registerSetting("OverrideGlobalResourcePacks", false);
+    m_settings->registerOverride(globalSettings->getSetting("UseGlobalResourcePacksFolder"), globalResourcePacksSetting);
+    m_settings->registerOverride(globalSettings->getSetting("GlobalResourcePacksPath"), globalResourcePacksSetting);
 }
 
 QString BaseInstance::getPreLaunchCommand()

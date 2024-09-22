@@ -85,6 +85,7 @@
 #include "AssetsUtils.h"
 #include "MinecraftLoadAndCheck.h"
 #include "PackProfile.h"
+#include "minecraft/UpdateGlobalDirectoriesTask.h"
 #include "minecraft/gameoptions/GameOptions.h"
 #include "minecraft/update/FoldersTask.h"
 
@@ -347,6 +348,11 @@ QString MinecraftInstance::coreModsDir() const
 QString MinecraftInstance::nilModsDir() const
 {
     return FS::PathCombine(gameRoot(), "nilmods");
+}
+
+QString MinecraftInstance::screenshotsDir() const
+{
+    return FS::PathCombine(gameRoot(), "screenshots");
 }
 
 QString MinecraftInstance::resourcePacksDir() const
@@ -1251,6 +1257,13 @@ QList<Mod*> MinecraftInstance::getJarMods() const
         mods.push_back(new Mod(QFileInfo(jar[0])));
     }
     return mods;
+}
+
+void MinecraftInstance::applySettings()
+{
+    // Global directories
+    m_update_global_directories_task = std::make_shared<UpdateGlobalDirectoriesTask>(this, nullptr);
+    m_update_global_directories_task->start();
 }
 
 #include "MinecraftInstance.moc"
