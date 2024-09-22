@@ -214,7 +214,7 @@ void ModrinthCheckUpdate::checkNextLoader()
     }
     for (auto m : m_mappings) {
         emit checkFailed(m,
-                         tr("No valid version found for this mod. It's probably unavailable for the current game version / mod loader."));
+                         tr("No valid version found for this mod."));
     }
     emitSucceeded();
     return;
