@@ -140,15 +140,14 @@ void FlameCheckUpdate::executeTask()
         setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(mod->name()));
 
         if (!latest_ver.has_value() || !latest_ver->addonId.isValid()) {
-            emit checkFailed(mod, tr("No valid version found for this mod. It's probably unavailable for the current game "
-                                     "version / mod loader."));
+            emit checkFailed(mod, tr("No valid version found for this mod."));
             continue;
         }
 
         if (latest_ver->downloadUrl.isEmpty() && latest_ver->fileId != mod->metadata()->file_id) {
             auto pack = getProjectInfo(latest_ver.value());
             auto recover_url = QString("%1/download/%2").arg(pack.websiteUrl, latest_ver->fileId.toString());
-            emit checkFailed(mod, tr("Mod has a new update available, but is not downloadable using CurseForge."), recover_url);
+            emit checkFailed(mod, tr("Mod update is not downloadable using Prism."), recover_url);
 
             continue;
         }
