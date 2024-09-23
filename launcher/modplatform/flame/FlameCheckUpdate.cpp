@@ -147,7 +147,7 @@ void FlameCheckUpdate::executeTask()
         if (latest_ver->downloadUrl.isEmpty() && latest_ver->fileId != mod->metadata()->file_id) {
             auto pack = getProjectInfo(latest_ver.value());
             auto recover_url = QString("%1/download/%2").arg(pack.websiteUrl, latest_ver->fileId.toString());
-            emit checkFailed(mod, tr("Mod update is not downloadable using Prism."), recover_url);
+            emit checkFailed(mod, tr("Cannot download update due to author restrictions."), recover_url);
 
             continue;
         }
