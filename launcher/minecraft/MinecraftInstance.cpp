@@ -207,6 +207,8 @@ void MinecraftInstance::loadSpecificSettings()
     m_settings->registerSetting("ExportAuthor", "");
     m_settings->registerSetting("ExportOptionalFiles", true);
 
+    m_settings->registerSetting("LastDirectConnectAddress", "");
+
     qDebug() << "Instance-type specific settings were loaded!";
 
     setSpecificSettingsLoaded(true);
@@ -252,12 +254,15 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
     QAction* normalLaunchDemo = menu->addAction(tr("Launch &Demo"));
     normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
+    QAction *directConnectLaunch = menu->addAction(tr("Direct &Connect"));
+    directConnectLaunch->setShortcut(QKeySequence(tr("Ctrl+Alt+Shift+O")));
 
     normalLaunchDemo->setEnabled(supportsDemo());
 
     connect(normalLaunch, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this()); });
-    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, false); });
-    connect(normalLaunchDemo, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, true); });
+    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, false, false); });
+    connect(normalLaunchDemo, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, true, false); });
+    connect(directConnectLaunch, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), true, false, true); });
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);

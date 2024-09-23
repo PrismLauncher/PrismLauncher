@@ -1201,7 +1201,7 @@ void Application::performMainStartupAction()
                 qDebug() << "   Launching with account" << m_profileToUse;
             }
 
-            launch(inst, true, false, targetToJoin, accountToUse);
+            launch(inst, true, false, false, targetToJoin, accountToUse);
             return;
         }
     }
@@ -1329,7 +1329,7 @@ void Application::messageReceived(const QByteArray& message)
             }
         }
 
-        launch(instance, true, false, serverObject, accountObject);
+        launch(instance, true, false, false, serverObject, accountObject);
     } else {
         qWarning() << "Received invalid message" << message;
     }
@@ -1367,7 +1367,7 @@ bool Application::openJsonEditor(const QString& filename)
     }
 }
 
-bool Application::launch(InstancePtr instance, bool online, bool demo, MinecraftTarget::Ptr targetToJoin, MinecraftAccountPtr accountToUse)
+bool Application::launch(InstancePtr instance, bool online, bool demo, bool askServerAddress, MinecraftTarget::Ptr targetToJoin, MinecraftAccountPtr accountToUse)
 {
     if (m_updateRunning) {
         qDebug() << "Cannot launch instances while an update is running. Please try again when updates are completed.";
@@ -1384,6 +1384,7 @@ bool Application::launch(InstancePtr instance, bool online, bool demo, Minecraft
         controller->setInstance(instance);
         controller->setOnline(online);
         controller->setDemo(demo);
+        controller->setAskServerAddress(askServerAddress);
         controller->setProfiler(profilers().value(instance->settings()->get("Profiler").toString(), nullptr).get());
         controller->setTargetToJoin(targetToJoin);
         controller->setAccountToUse(accountToUse);

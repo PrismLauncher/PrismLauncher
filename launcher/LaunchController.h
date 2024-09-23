@@ -58,6 +58,8 @@ class LaunchController : public Task {
 
     void setDemo(bool demo) { m_demo = demo; }
 
+    void setAskServerAddress(bool askServerAddress) { m_askServerAddress = askServerAddress; }
+
     void setProfiler(BaseProfilerFactory* profiler) { m_profiler = profiler; }
 
     void setParentWidget(QWidget* widget) { m_parentWidget = widget; }
@@ -75,7 +77,8 @@ class LaunchController : public Task {
     void launchInstance();
     void decideAccount();
     bool askPlayDemo();
-    QString askOfflineName(QString playerName, bool demo, bool& ok);
+    QString askOfflineName(QString playerName, bool demo, bool* ok);
+    QString askServerAddress(bool* ok);
 
    private slots:
     void readyForLaunch();
@@ -88,6 +91,7 @@ class LaunchController : public Task {
     BaseProfilerFactory* m_profiler = nullptr;
     bool m_online = true;
     bool m_demo = false;
+    bool m_askServerAddress = false;
     InstancePtr m_instance;
     QWidget* m_parentWidget = nullptr;
     InstanceWindow* m_console = nullptr;
