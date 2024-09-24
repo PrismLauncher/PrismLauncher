@@ -157,6 +157,16 @@ QString formatName(const QDir& iconsDir, const QFileInfo& file)
     return relativePathWithoutExtension.replace(QDir::separator(), delimiter);
 }
 
+QSet<QString> toStringSet(const QList<QString>& list) // Split into a separate function because the preprocessing impedes readability
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+    QSet<QString> set(list.begin(), list.end());
+#else
+    auto set = list.toSet();
+#endif
+    return set;
+}
+
 void IconList::directoryChanged(const QString& path)
 {
     QDir new_dir(path);
@@ -171,31 +181,23 @@ void IconList::directoryChanged(const QString& path)
         if (!FS::ensureFolderPathExists(m_dir.absolutePath()))
             return;
     m_dir.refresh();
-    QStringList newFileNamesList = getIconFilePaths();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    QSet<QString> new_set(newFileNamesList.begin(), newFileNamesList.end());
-#else
-    auto new_set = new_file_names_list.toSet();
-#endif
+    const QStringList newFileNamesList = getIconFilePaths();
+    const QSet<QString> newSet = toStringSet(newFileNamesList);
     QList<QString> current_list;
     for (auto& it : icons) {
         if (!it.has(IconType::FileBased))
             continue;
         current_list.push_back(it.m_images[IconType::FileBased].filename);
     }
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-    QSet<QString> current_set(current_list.begin(), current_list.end());
-#else
-    QSet<QString> current_set = current_list.toSet();
-#endif
+    const QSet<QString> currentSet = toStringSet(current_list);
 
-    QSet<QString> to_remove = current_set;
-    to_remove -= new_set;
+    QSet<QString> toRemove = currentSet;
+    toRemove -= newSet;
 
-    QSet<QString> toAdd = new_set;
-    toAdd -= current_set;
+    QSet<QString> toAdd = newSet;
+    toAdd -= currentSet;
 
-    for (const auto& remove : to_remove) {
+    for (const auto& remove : toRemove) {
         qDebug() << "Removing " << remove;
         QFileInfo removedFile(remove);
         QString key = m_dir.relativeFilePath(removedFile.absoluteFilePath());
