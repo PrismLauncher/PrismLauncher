@@ -169,8 +169,8 @@ QSet<QString> toStringSet(const QList<QString>& list) // Split into a separate f
 
 void IconList::directoryChanged(const QString& path)
 {
-    QDir new_dir(path);
-    if (m_dir.absolutePath() != new_dir.absolutePath()) {
+    QDir newDir(path);
+    if (m_dir.absolutePath() != newDir.absolutePath()) {
         m_dir.setPath(path);
         m_dir.refresh();
         if (is_watching)
@@ -183,19 +183,14 @@ void IconList::directoryChanged(const QString& path)
     m_dir.refresh();
     const QStringList newFileNamesList = getIconFilePaths();
     const QSet<QString> newSet = toStringSet(newFileNamesList);
-    QList<QString> current_list;
-    for (auto& it : icons) {
+    QSet<QString> currentSet;
+    for (const MMCIcon& it : icons) {
         if (!it.has(IconType::FileBased))
             continue;
-        current_list.push_back(it.m_images[IconType::FileBased].filename);
+        currentSet.insert(it.m_images[IconType::FileBased].filename);
     }
-    const QSet<QString> currentSet = toStringSet(current_list);
-
-    QSet<QString> toRemove = currentSet;
-    toRemove -= newSet;
-
-    QSet<QString> toAdd = newSet;
-    toAdd -= currentSet;
+    QSet<QString> toRemove = currentSet - newSet;
+    QSet<QString> toAdd = newSet - currentSet;
 
     for (const auto& remove : toRemove) {
         qDebug() << "Removing " << remove;
@@ -456,11 +451,9 @@ void IconList::saveIcon(const QString& key, const QString& path, const char* for
 void IconList::reindex()
 {
     name_index.clear();
-    int i = 0;
-    for (auto& iter : icons) {
-        name_index[iter.m_key] = i;
-        i++;
-        emit iconUpdated(iter.m_key);  // prevents incorrect indices with proxy model
+    for (int i = 0; i < icons.size(); i++) {
+        name_index[icons[i].m_key] = i;
+        emit iconUpdated(icons[i].m_key);  // prevents incorrect indices with proxy model
     }
 }
 
@@ -471,7 +464,7 @@ QIcon IconList::getIcon(const QString& key) const
     if (iconIndex != -1)
         return icons[iconIndex].icon();
 
-    // Fallback for icons that don't exist.
+    // Fallback for icons that don't exist.b
     iconIndex = getIconIndex("grass");
 
     if (iconIndex != -1)
