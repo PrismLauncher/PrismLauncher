@@ -74,6 +74,7 @@ class ModFolderPage : public ExternalResourcesPage {
 };
 
 class CoreModFolderPage : public ModFolderPage {
+    Q_OBJECT
    public:
     explicit CoreModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent = 0);
     virtual ~CoreModFolderPage() = default;
@@ -87,6 +88,7 @@ class CoreModFolderPage : public ModFolderPage {
 };
 
 class NilModFolderPage : public ModFolderPage {
+    Q_OBJECT
    public:
     explicit NilModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel> mods, QWidget* parent = 0);
     virtual ~NilModFolderPage() = default;

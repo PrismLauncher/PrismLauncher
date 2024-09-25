@@ -153,6 +153,7 @@ bool collectFileListRecursively(const QString& rootDir, const QString& subDir, Q
 
 #if defined(LAUNCHER_APPLICATION)
 class ExportToZipTask : public Task {
+    Q_OBJECT
    public:
     ExportToZipTask(QString outputPath,
                     QDir dir,
@@ -207,6 +208,7 @@ class ExportToZipTask : public Task {
 };
 
 class ExtractZipTask : public Task {
+    Q_OBJECT
    public:
     ExtractZipTask(QString input, QDir outputDir, QString subdirectory = "")
         : ExtractZipTask(std::make_shared<QuaZip>(input), outputDir, subdirectory)
