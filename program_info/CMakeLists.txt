@@ -50,7 +50,7 @@ if(MSVC)
 Section \"Visual Studio Runtime\"
   SetOutPath \"$INSTDIR\\vc_redist\"
   File \"${Native_MSVC_REDIST_DIR}\\vc_redist.x64.exe\"
-  ExecWait \"$INSTDIR\\vc_redist\\vc_redist.x64.exe /install /passive\"
+  ExecWait \"$INSTDIR\\vc_redist\\vc_redist.x64.exe /install /passive /norestart\"
   ; Delete \"$INSTDIR\\vc_redist\\vc_redist.x64.exe\"
 SectionEnd\
 ")
