@@ -41,6 +41,21 @@ configure_file(org.prismlauncher.PrismLauncher.metainfo.xml.in org.prismlauncher
 configure_file(prismlauncher.rc.in prismlauncher.rc @ONLY)
 configure_file(prismlauncher.manifest.in prismlauncher.manifest @ONLY)
 configure_file(prismlauncher.ico prismlauncher.ico COPYONLY)
+
+if(MSVC)
+    set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION vc_redist)
+    include(InstallRequiredSystemLibraries)
+    file(TO_NATIVE_PATH ${MSVC_REDIST_DIR} Native_MSVC_REDIST_DIR)
+    set(Launcher_MSVC_Redist_NSIS_Section "\
+Section \"Visual Studio Runtime\"
+  SetOutPath \"$INSTDIR\\vc_redist\"
+  File \"${Native_MSVC_REDIST_DIR}\\vc_redist.x64.exe\"
+  ExecWait \"$INSTDIR\\vc_redist\\vc_redist.x64.exe /install /passive\"
+  ; Delete \"$INSTDIR\\vc_redist\\vc_redist.x64.exe\"
+SectionEnd\
+")
+endif()
+
 configure_file(win_install.nsi.in win_install.nsi @ONLY)
 
 if(SCDOC_FOUND)

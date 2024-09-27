@@ -396,6 +396,8 @@ Section "@Launcher_DisplayName@"
 
 SectionEnd
 
+@Launcher_MSVC_Redist_NSIS_Section@
+
 Section "Start Menu Shortcut" SM_SHORTCUTS
 
   CreateShortcut "$SMPROGRAMS\@Launcher_DisplayName@.lnk" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" "" "$INSTDIR\@Launcher_APP_BINARY_NAME@.exe" 0
