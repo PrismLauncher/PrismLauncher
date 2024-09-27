@@ -372,6 +372,11 @@ endif()
 if(NOT (UNIX AND APPLE))
     # Install "portable.txt" if selected component is "portable"
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${Launcher_Portable_File}" DESTINATION "." COMPONENT portable EXCLUDE_FROM_ALL)
+    if (MSVC)
+        set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP true)
+        include(InstallRequiredSystemLibraries)
+        install(FILES "${MSVC_REDIST_DIR}/vc_redist.x64.exe" DESTINATION "vc_redist/." COMPONENT portable EXCLUDE_FROM_ALL )
+    endif()
 endif()
 
 if(UNIX AND APPLE)
