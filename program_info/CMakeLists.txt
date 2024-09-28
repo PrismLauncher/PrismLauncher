@@ -43,16 +43,21 @@ configure_file(prismlauncher.manifest.in prismlauncher.manifest @ONLY)
 configure_file(prismlauncher.ico prismlauncher.ico COPYONLY)
 
 if(MSVC)
-    include(InstallRequiredSystemLibraries)
-    file(TO_NATIVE_PATH ${MSVC_REDIST_DIR} Native_MSVC_REDIST_DIR)
-    set(Launcher_MSVC_Redist_NSIS_Section "\
-Section \"Visual Studio Runtime\"
-  SetOutPath \"$INSTDIR\\vc_redist\"
-  File \"${Native_MSVC_REDIST_DIR}\\vc_redist.x64.exe\"
-  ExecWait \"$INSTDIR\\vc_redist\\vc_redist.x64.exe /install /passive /norestart\"
-  ; Delete \"$INSTDIR\\vc_redist\\vc_redist.x64.exe\"
-SectionEnd\
-")
+    set(Launcher_MSVC_Redist_NSIS_Section [=[
+!ifdef haveNSIScurl
+Section "Visual Studio Runtime"
+    DetailPrint 'Downloading Microsoft Visual C++ Redistributable...'
+    NScurl::http GET "https://aka.ms/vs/17/release/vc_redist.x64.exe" "$INSTDIR\vc_redist\vc_redist.x64.exe" /INSIST /CANCEL /Zone.Identifier /END
+    Pop $0
+    ${If} $0 == "OK"
+        DetailPrint "Download successful"
+        ExecWait "$INSTDIR\vc_redist\vc_redist.x64.exe /install /passive /norestart\"
+    ${Else}
+        DetailPrint "Download failed with error $0"
+    ${EndIf}
+SectionEnd
+!endif
+]=])
 endif()
 
 configure_file(win_install.nsi.in win_install.nsi @ONLY)

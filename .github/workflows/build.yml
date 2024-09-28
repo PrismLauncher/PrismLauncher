@@ -471,6 +471,9 @@ jobs:
       - name: Package (Windows, installer)
         if: runner.os == 'Windows'
         run: |
+          New-Item -Name NSISPlugins -ItemType Directory
+          Invoke-Webrequest https://github.com/negrutiu/nsis-nscurl/releases/latest/download/NScurl.zip -OutFile NSISPlugins\NScurl.zip
+          Expand-Archive -Path NSISPlugins\NScurl.zip -DestinationPath NSISPlugins\NSIScurl
           cd ${{ env.INSTALL_DIR }}
           makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
 

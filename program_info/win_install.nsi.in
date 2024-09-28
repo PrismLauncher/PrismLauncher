@@ -112,6 +112,16 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "@Launcher_Copyright@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@Launcher_VERSION_NAME4@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@"
 
+;--------------------------------
+; Conditional comp with file exist
+
+!macro CompileTimeIfFileExist path define
+!tempfile tmpinc
+!system 'IF EXIST "${path}" echo !define ${define} > "${tmpinc}"'
+!include "${tmpinc}"
+!delfile "${tmpinc}"
+!undef tmpinc
+!macroend
 
 ;--------------------------------
 ; Shell Associate Macros
@@ -336,6 +346,19 @@ Section "" UninstallPrevious
 
 SectionEnd
 
+;------------------------------------
+; include nice plugins
+
+; NSIScurl - curl in NSIS
+; used for MSVS redist download
+; extract to ../NSISPlugins/NSIScurl
+; https://github.com/negrutiu/nsis-nscurl/releases/latest/download/NScurl.zip
+!insertmacro CompileTimeIfFileExist "../NSISPlugins/NSIScurl/Plugins/" haveNSIScurl
+!ifdef haveNSIScurl
+!AddPluginDir /x86-unicode     "../NSISPlugins/NSIScurl/Plugins/x86-unicode"
+!AddPluginDir /x86-ansi        "../NSISPlugins/NSIScurl/Plugins/x86-ansi"
+!AddPluginDir /amd64-unicode   "../NSISPlugins/NSIScurl/Plugins/amd64-unicode"
+!endif
 
 ;------------------------------------
 
