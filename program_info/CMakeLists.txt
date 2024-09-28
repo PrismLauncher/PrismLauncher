@@ -43,7 +43,6 @@ configure_file(prismlauncher.manifest.in prismlauncher.manifest @ONLY)
 configure_file(prismlauncher.ico prismlauncher.ico COPYONLY)
 
 if(MSVC)
-    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP true)
     include(InstallRequiredSystemLibraries)
     file(TO_NATIVE_PATH ${MSVC_REDIST_DIR} Native_MSVC_REDIST_DIR)
     set(Launcher_MSVC_Redist_NSIS_Section "\
