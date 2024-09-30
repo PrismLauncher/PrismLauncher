@@ -164,3 +164,13 @@ void AtlPage::onVersionSelectionChanged(QString version)
     selectedVersion = version;
     suggestCurrent();
 }
+
+void AtlPage::setSearchTerm(QString term)
+{
+    ui->searchEdit->setText(term);
+}
+
+QString AtlPage::getSerachTerm() const
+{
+    return ui->searchEdit->text();
+}

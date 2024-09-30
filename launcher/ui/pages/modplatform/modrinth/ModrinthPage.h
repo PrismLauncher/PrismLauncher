@@ -38,9 +38,9 @@
 
 #include "Application.h"
 #include "ui/dialogs/NewInstanceDialog.h"
-#include "ui/pages/BasePage.h"
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
+#include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/widgets/ProgressWidget.h"
 
 #include <QTimer>
@@ -54,7 +54,7 @@ namespace Modrinth {
 class ModpackListModel;
 }
 
-class ModrinthPage : public QWidget, public BasePage {
+class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     Q_OBJECT
 
    public:
@@ -77,6 +77,11 @@ class ModrinthPage : public QWidget, public BasePage {
     void retranslate() override;
     void openedImpl() override;
     bool eventFilter(QObject* watched, QEvent* event) override;
+
+    /** Programatically set the term in the search bar. */
+    virtual void setSearchTerm(QString) override;
+    /** Get the current term in the search bar. */
+    [[nodiscard]] virtual QString getSerachTerm() const override;
 
    private slots:
     void onSelectionChanged(QModelIndex first, QModelIndex second);

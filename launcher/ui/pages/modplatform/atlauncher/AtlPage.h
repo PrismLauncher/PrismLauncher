@@ -42,8 +42,7 @@
 #include <QWidget>
 
 #include "Application.h"
-#include "tasks/Task.h"
-#include "ui/pages/BasePage.h"
+#include "ui/pages/modplatform/ModpackProviderBasePage.h"
 
 namespace Ui {
 class AtlPage;
@@ -51,7 +50,7 @@ class AtlPage;
 
 class NewInstanceDialog;
 
-class AtlPage : public QWidget, public BasePage {
+class AtlPage : public QWidget, public ModpackProviderBasePage {
     Q_OBJECT
 
    public:
@@ -65,6 +64,11 @@ class AtlPage : public QWidget, public BasePage {
     void retranslate() override;
 
     void openedImpl() override;
+
+    /** Programatically set the term in the search bar. */
+    virtual void setSearchTerm(QString) override;
+    /** Get the current term in the search bar. */
+    [[nodiscard]] virtual QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();

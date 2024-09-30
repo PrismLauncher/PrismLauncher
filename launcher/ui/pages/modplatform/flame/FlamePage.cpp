@@ -299,3 +299,12 @@ void FlamePage::updateUi()
     ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
     ui->packDescription->flush();
 }
+QString FlamePage::getSerachTerm() const
+{
+    return ui->searchEdit->text();
+}
+
+void FlamePage::setSearchTerm(QString term)
+{
+    ui->searchEdit->setText(term);
+}

@@ -965,6 +965,9 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/ShaderPackPage.cpp
     ui/pages/modplatform/ShaderPackModel.cpp
 
+
+    ui/pages/modplatform/ModpackProviderBasePage.h
+
     ui/pages/modplatform/atlauncher/AtlFilterModel.cpp
     ui/pages/modplatform/atlauncher/AtlFilterModel.h
     ui/pages/modplatform/atlauncher/AtlListModel.cpp

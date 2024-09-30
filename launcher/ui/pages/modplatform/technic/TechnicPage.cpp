@@ -342,3 +342,13 @@ void TechnicPage::onVersionSelectionChanged(QString version)
     selectedVersion = version;
     selectVersion();
 }
+
+void TechnicPage::setSearchTerm(QString term)
+{
+    ui->searchEdit->setText(term);
+}
+
+QString TechnicPage::getSerachTerm() const
+{
+    return ui->searchEdit->text();
+}

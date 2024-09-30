@@ -36,6 +36,7 @@
 
 #include "NewInstanceDialog.h"
 #include "Application.h"
+#include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/pages/modplatform/import_ftb/ImportFTBPage.h"
 #include "ui_NewInstanceDialog.h"
 
@@ -140,6 +141,8 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
         auto geometry = screen->availableSize();
         resize(width(), qMin(geometry.height() - 50, 710));
     }
+
+    connect(m_container, &PageContainer::selectedPageChanged, this, &NewInstanceDialog::selectedPageChanged);
 }
 
 void NewInstanceDialog::reject()
@@ -315,4 +318,17 @@ void NewInstanceDialog::importIconNow()
         importIcon = false;
     }
     APPLICATION->settings()->set("NewInstanceGeometry", saveGeometry().toBase64());
+}
+
+void NewInstanceDialog::selectedPageChanged(BasePage* previous, BasePage* selected)
+{
+    auto prevPage = dynamic_cast<ModpackProviderBasePage*>(previous);
+    if (prevPage) {
+        m_searchTerm = prevPage->getSerachTerm();
+    }
+
+    auto nextPage = dynamic_cast<ModpackProviderBasePage*>(selected);
+    if (nextPage) {
+        nextPage->setSearchTerm(m_searchTerm);
+    }
 }
