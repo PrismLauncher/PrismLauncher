@@ -118,4 +118,27 @@ auto ModrinthShaderPackModel::documentToArray(QJsonDocument& obj) const -> QJson
     return obj.object().value("hits").toArray();
 }
 
+ModrinthDataPackModel::ModrinthDataPackModel(const BaseInstance& base) : DataPackResourceModel(base, new ModrinthAPI) {}
+
+void ModrinthDataPackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
+{
+    ::Modrinth::loadIndexedPack(m, obj);
+}
+
+void ModrinthDataPackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
+{
+    ::Modrinth::loadExtraPackData(m, obj);
+}
+
+void ModrinthDataPackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
+{
+    ::Modrinth::loadIndexedPackVersions(m, arr, &m_base_instance);
+}
+
+auto ModrinthDataPackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
+{
+    return obj.object().value("hits").toArray();
+}
+
+
 }  // namespace ResourceDownload

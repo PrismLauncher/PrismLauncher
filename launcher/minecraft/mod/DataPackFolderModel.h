@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,51 +36,27 @@
 
 #pragma once
 
-#include <QFrame>
+#include "ResourceFolderModel.h"
 
-#include "minecraft/mod/DataPack.h"
-#include "minecraft/mod/Mod.h"
-#include "minecraft/mod/ResourcePack.h"
-#include "minecraft/mod/TexturePack.h"
+#include "DataPack.h"
+#include "ResourcePack.h"
 
-namespace Ui {
-class InfoFrame;
-}
-
-class InfoFrame : public QFrame {
+class DataPackFolderModel : public ResourceFolderModel {
     Q_OBJECT
-
    public:
-    InfoFrame(QWidget* parent = nullptr);
-    ~InfoFrame() override;
+    enum Columns { ActiveColumn = 0, ImageColumn, NameColumn, PackFormatColumn, DateColumn, NUM_COLUMNS };
 
-    void setName(QString text = {});
-    void setDescription(QString text = {});
-    void setImage(QPixmap img = {});
-    void setLicense(QString text = {});
-    void setIssueTracker(QString text = {});
+    explicit DataPackFolderModel(const QString& dir, BaseInstance* instance);
 
-    void clear();
+    virtual QString id() const override { return "datapacks"; }
 
-    void updateWithMod(Mod const& m);
-    void updateWithResource(Resource const& resource);
-    void updateWithResourcePack(ResourcePack& rp);
-    void updateWithDataPack(DataPack& rp);
-    void updateWithTexturePack(TexturePack& tp);
+    [[nodiscard]] QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-    static QString renderColorCodes(QString input);
+    [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    [[nodiscard]] int columnCount(const QModelIndex& parent) const override;
 
-   public slots:
-    void descriptionEllipsisHandler(QString link);
-    void licenseEllipsisHandler(QString link);
-    void boxClosed(int result);
+    [[nodiscard]] Task* createUpdateTask() override;
+    [[nodiscard]] Task* createParseTask(Resource&) override;
 
-   private:
-    void updateHiddenState();
-
-   private:
-    Ui::InfoFrame* ui;
-    QString m_description;
-    QString m_license;
-    class QMessageBox* m_current_box = nullptr;
+    RESOURCE_HELPERS(DataPack)
 };

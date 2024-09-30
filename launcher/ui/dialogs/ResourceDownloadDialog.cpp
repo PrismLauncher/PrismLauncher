@@ -58,7 +58,7 @@ ResourceDownloadDialog::ResourceDownloadDialog(QWidget* parent, const std::share
 {
     setObjectName(QStringLiteral("ResourceDownloadDialog"));
 
-    resize(std::max(0.5 * parent->width(), 400.0), std::max(0.75 * parent->height(), 400.0));
+    resize(static_cast<int>(std::max(0.5 * parent->width(), 400.0)), static_cast<int>(std::max(0.75 * parent->height(), 400.0)));
 
     setWindowIcon(APPLICATION->getThemedIcon("new"));
 
@@ -391,4 +391,27 @@ void ModDownloadDialog::setModMetadata(std::shared_ptr<Metadata::ModStruct> meta
     auto page = selectedPage();
     page->openProject(meta->project_id);
 }
+
+  
+DataPackDownloadDialog::DataPackDownloadDialog(QWidget* parent,
+                                                   const std::shared_ptr<DataPackFolderModel>& data_packs,
+                                                   BaseInstance* instance)
+    : ResourceDownloadDialog(parent, data_packs), m_instance(instance)
+{
+    setWindowTitle(dialogTitle());
+
+    initializeContainer();
+    connectButtons();
+
+    if (!geometrySaveKey().isEmpty())
+        restoreGeometry(QByteArray::fromBase64(APPLICATION->settings()->get(geometrySaveKey()).toByteArray()));
+}
+
+QList<BasePage*> DataPackDownloadDialog::getPages()
+{
+    QList<BasePage*> pages;
+    pages.append(ModrinthDataPackPage::create(this, *m_instance));
+    return pages;
+}
+  
 }  // namespace ResourceDownload

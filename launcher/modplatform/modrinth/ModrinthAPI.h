@@ -85,6 +85,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     {
         switch (type) {
             case ModPlatform::ResourceType::MOD:
+            case ModPlatform::ResourceType::DATA_PACK:
                 return "mod";
             case ModPlatform::ResourceType::RESOURCE_PACK:
                 return "resourcepack";
@@ -106,6 +107,8 @@ class ModrinthAPI : public NetworkResourceAPI {
             facets_list.append(QString("[%1]").arg(getModLoaderFilters(args.loaders.value())));
         if (args.versions.has_value())
             facets_list.append(QString("[%1]").arg(getGameVersionsArray(args.versions.value())));
+        if (args.type == ModPlatform::ResourceType::DATA_PACK)
+            facets_list.append("[\"categories:datapack\"]");
         if (args.side.has_value()) {
             auto side = getSideFilters(args.side.value());
             if (!side.isEmpty())

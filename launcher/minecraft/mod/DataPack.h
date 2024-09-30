@@ -24,6 +24,7 @@
 #include "Resource.h"
 
 #include <QMutex>
+#include <QPixmapCache>
 
 class Version;
 
@@ -48,11 +49,17 @@ class DataPack : public Resource {
     /** Gets the description of the data pack. */
     [[nodiscard]] QString description() const { return m_description; }
 
+    /** Gets the image of the resource pack, converted to a QPixmap for drawing, and scaled to size. */
+    [[nodiscard]] QPixmap image(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
+
     /** Thread-safe. */
     void setPackFormat(int new_format_id);
 
     /** Thread-safe. */
     void setDescription(QString new_description);
+
+    /** Thread-safe. */
+    void setImage(QImage new_image) const;
 
     bool valid() const override;
 
@@ -70,4 +77,14 @@ class DataPack : public Resource {
     /** The data pack's description, as defined in the pack.mcmeta file.
      */
     QString m_description;
+
+    /** The data pack's image file cache key, for access in the QPixmapCache global instance.
+     *
+     *  The 'was_ever_used' state simply identifies whether the key was never inserted on the cache (true),
+     *  so as to tell whether a cache entry is inexistent or if it was just evicted from the cache.
+     */
+    struct {
+        QPixmapCache::Key key;
+        bool was_ever_used = false;
+    } mutable m_pack_image_cache_key;
 };
