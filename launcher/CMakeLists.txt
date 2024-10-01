@@ -439,6 +439,8 @@ set(JAVA_SOURCES
     java/download/ArchiveDownloadTask.h
     java/download/ManifestDownloadTask.cpp
     java/download/ManifestDownloadTask.h
+    java/download/SymlinkTask.cpp
+    java/download/SymlinkTask.h
 
     ui/java/InstallJavaDialog.h
     ui/java/InstallJavaDialog.cpp
