@@ -336,7 +336,11 @@ void SkinList::save()
         arr << s.toJSON();
     }
     doc["skins"] = arr;
-    Json::write(doc, m_dir.absoluteFilePath("index.json"));
+    try {
+        Json::write(doc, m_dir.absoluteFilePath("index.json"));
+    } catch (const FS::FileSystemException& e) {
+        qCritical() << "Failed to write skin index file :" << e.cause();
+    }
 }
 
 int SkinList::getSelectedAccountSkin()

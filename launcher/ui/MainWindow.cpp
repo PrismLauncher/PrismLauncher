@@ -235,6 +235,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
             showFullScreen();
             setFixedSize(this->width(), this->height());
         }
+
+        ui->actionViewJavaFolder->setEnabled(BuildConfig.JAVA_DOWNLOADER_ENABLED);
     }
 
     // add the toolbar toggles to the view menu
@@ -1223,6 +1225,11 @@ void MainWindow::on_actionViewIconsFolder_triggered()
 void MainWindow::on_actionViewLogsFolder_triggered()
 {
     DesktopServices::openPath("logs", true);
+}
+
+void MainWindow::on_actionViewJavaFolder_triggered()
+{
+    DesktopServices::openPath(APPLICATION->javaPath(), true);
 }
 
 void MainWindow::refreshInstances()
