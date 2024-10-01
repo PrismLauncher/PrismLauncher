@@ -140,7 +140,7 @@ void FlameCheckUpdate::executeTask()
         setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(mod->name()));
 
         if (!latest_ver.has_value() || !latest_ver->addonId.isValid()) {
-            emit checkFailed(mod, tr("No valid version found for this mod."));
+            emit checkFailed(mod, tr("Mod and/or mod data could not be found in Curseforge."));
             continue;
         }
 
