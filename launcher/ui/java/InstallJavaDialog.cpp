@@ -31,10 +31,12 @@
 #include "Filter.h"
 #include "java/download/ArchiveDownloadTask.h"
 #include "java/download/ManifestDownloadTask.h"
+#include "java/download/SymlinkTask.h"
 #include "meta/Index.h"
 #include "meta/VersionList.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "tasks/SequentialTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/java/VersionList.h"
@@ -55,13 +57,13 @@ class InstallJavaPage : public QWidget, public BasePage {
 
         majorVersionSelect = new VersionSelectWidget(this);
         majorVersionSelect->selectCurrent();
-        majorVersionSelect->setEmptyString(tr("No java versions are currently available in the meta."));
-        majorVersionSelect->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
+        majorVersionSelect->setEmptyString(tr("No Java versions are currently available in the meta."));
+        majorVersionSelect->setEmptyErrorString(tr("Couldn't load or download the Java version lists!"));
         horizontalLayout->addWidget(majorVersionSelect, 1);
 
         javaVersionSelect = new VersionSelectWidget(this);
-        javaVersionSelect->setEmptyString(tr("No java versions are currently available for your OS."));
-        javaVersionSelect->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
+        javaVersionSelect->setEmptyString(tr("No Java versions are currently available for your OS."));
+        javaVersionSelect->setEmptyErrorString(tr("Couldn't load or download the Java version lists!"));
         horizontalLayout->addWidget(javaVersionSelect, 4);
         connect(majorVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::setSelectedVersion);
         connect(majorVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::selectionChanged);
@@ -313,6 +315,12 @@ void InstallDialog::done(int result)
                         CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
                         deletePath();
                 }
+#if defined(Q_OS_MACOS)
+                auto seq = makeShared<SequentialTask>(this, tr("Install Java"));
+                seq->addTask(task);
+                seq->addTask(makeShared<Java::SymlinkTask>(final_path));
+                task = seq;
+#endif
                 connect(task.get(), &Task::failed, this, [this, &deletePath](QString reason) {
                     QString error = QString("Java download failed: %1").arg(reason);
                     CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();

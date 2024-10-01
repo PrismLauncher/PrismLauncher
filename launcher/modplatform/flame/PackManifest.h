@@ -40,26 +40,20 @@
 #include <QString>
 #include <QUrl>
 #include <QVector>
+#include "modplatform/ModIndex.h"
 
 namespace Flame {
 struct File {
-    // NOTE: throws JSONValidationError
-    bool parseFromObject(const QJsonObject& object, bool throw_on_blocked = true);
-
     int projectId = 0;
     int fileId = 0;
     // NOTE: the opposite to 'optional'
     bool required = true;
-    QString hash;
-    // NOTE: only set on blocked files ! Empty otherwise.
-    QString websiteUrl;
+
+    ModPlatform::IndexedPack pack;
+    ModPlatform::IndexedVersion version;
 
     // our
-    bool resolved = false;
-    QString fileName;
-    QUrl url;
     QString targetFolder = QStringLiteral("mods");
-    enum class Type { Unknown, Folder, Ctoc, SingleFile, Cmod2, Modpack, Mod } type = Type::Mod;
 };
 
 struct Modloader {

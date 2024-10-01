@@ -140,9 +140,9 @@ QVariant VersionProxyModel::headerData(int section, Qt::Orientation orientation,
             case Path:
                 return tr("Filesystem path to this version");
             case JavaName:
-                return tr("The alternative name of the java version");
+                return tr("The alternative name of the Java version");
             case JavaMajor:
-                return tr("The java major version");
+                return tr("The Java major version");
             case Time:
                 return tr("Release date of this version");
         }

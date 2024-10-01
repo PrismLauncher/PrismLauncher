@@ -41,7 +41,7 @@ SkinModel::SkinModel(QDir skinDir, QJsonObject obj)
 
 QString SkinModel::name() const
 {
-    return QFileInfo(m_path).baseName();
+    return QFileInfo(m_path).completeBaseName();
 }
 
 bool SkinModel::rename(QString newName)

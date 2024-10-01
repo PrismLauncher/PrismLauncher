@@ -65,7 +65,7 @@ void ArchiveDownloadTask::executeTask()
 
 void ArchiveDownloadTask::extractJava(QString input)
 {
-    setStatus(tr("Extracting java"));
+    setStatus(tr("Extracting Java"));
     if (input.endsWith("tar")) {
         setStatus(tr("Extracting Java (Progress is not reported for tar archives)"));
         QFile in(input);
@@ -95,7 +95,7 @@ void ArchiveDownloadTask::extractJava(QString input)
         }
         auto files = zip->getFileNameList();
         if (files.isEmpty()) {
-            emitFailed(tr("No files were found in the supplied zip file,"));
+            emitFailed(tr("No files were found in the supplied zip file."));
             return;
         }
         m_task = makeShared<MMCZip::ExtractZipTask>(zip, m_final_path, files[0]);

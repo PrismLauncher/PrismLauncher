@@ -164,7 +164,12 @@ void ExportToModListDialog::done(int result)
 
         if (output.isEmpty())
             return;
-        FS::write(output, ui->finalText->toPlainText().toUtf8());
+
+        try {
+            FS::write(output, ui->finalText->toPlainText().toUtf8());
+        } catch (const FS::FileSystemException& e) {
+            qCritical() << "Failed to save mod list file :" << e.cause();
+        }
     }
 
     QDialog::done(result);
