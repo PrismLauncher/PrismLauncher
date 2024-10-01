@@ -31,6 +31,7 @@
 #include "ui/widgets/VersionSelectWidget.h"
 
 class InstallLoaderPage : public VersionSelectWidget, public BasePage {
+    Q_OBJECT
    public:
     InstallLoaderPage(const QString& id,
                       const QString& iconName,
@@ -164,3 +165,4 @@ void InstallLoaderDialog::done(int result)
 
     QDialog::done(result);
 }
+#include "InstallLoaderDialog.moc"

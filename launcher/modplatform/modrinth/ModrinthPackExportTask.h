@@ -27,6 +27,7 @@
 #include "tasks/Task.h"
 
 class ModrinthPackExportTask : public Task {
+    Q_OBJECT
    public:
     ModrinthPackExportTask(const QString& name,
                            const QString& version,
