@@ -8,8 +8,8 @@ See [Package variants](#package-variants) for a list of available packages.
 
 ## Installing a development release (flake)
 
-We use [garnix](https://garnix.io/) to build and cache our development builds.
-If you want to avoid rebuilds you may add the garnix cache to your substitutors, or use `--accept-flake-config`
+We use [cachix](https://cachix.org/) to cache our development and release builds.
+If you want to avoid rebuilds you may add the Cachix bucket to your substitutors, or use `--accept-flake-config`
 to temporarily enable it when using `nix` commands.
 
 Example (NixOS):
@@ -17,12 +17,10 @@ Example (NixOS):
 ```nix
 {
   nix.settings = {
-    trusted-substituters = [
-      "https://cache.garnix.io"
-    ];
+    trusted-substituters = [ "https://prismlauncher.cachix.org" ];
 
     trusted-public-keys = [
-      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+      "prismlauncher.cachix.org-1:9/n/FGyABA2jLUVfY+DEp4hKds/rwO+SCOtbOkDzd+c="
     ];
   };
 }
@@ -137,20 +135,18 @@ nix profile install github:PrismLauncher/PrismLauncher
 
 ## Installing a development release (without flakes)
 
-We use [garnix](https://garnix.io/) to build and cache our development builds.
-If you want to avoid rebuilds you may add the garnix cache to your substitutors.
+We use [Cachix](https://cachix.org/) to cache our development and release builds.
+If you want to avoid rebuilds you may add the Cachix bucket to your substitutors.
 
 Example (NixOS):
 
 ```nix
 {
   nix.settings = {
-    trusted-substituters = [
-      "https://cache.garnix.io"
-    ];
+    trusted-substituters = [ "https://prismlauncher.cachix.org" ];
 
     trusted-public-keys = [
-      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+      "prismlauncher.cachix.org-1:9/n/FGyABA2jLUVfY+DEp4hKds/rwO+SCOtbOkDzd+c="
     ];
   };
 }

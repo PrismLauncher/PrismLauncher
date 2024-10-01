@@ -74,7 +74,7 @@ class FlameCreationTask final : public InstanceCreationTask {
     void idResolverSucceeded(QEventLoop&);
     void setupDownloadJob(QEventLoop&);
     void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
-    void validateZIPResources();
+    void validateZIPResources(QEventLoop& loop);
     QString getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion);
 
    private:
