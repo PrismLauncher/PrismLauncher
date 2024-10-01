@@ -57,13 +57,13 @@ class InstallJavaPage : public QWidget, public BasePage {
 
         majorVersionSelect = new VersionSelectWidget(this);
         majorVersionSelect->selectCurrent();
-        majorVersionSelect->setEmptyString(tr("No java versions are currently available in the meta."));
-        majorVersionSelect->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
+        majorVersionSelect->setEmptyString(tr("No Java versions are currently available in the meta."));
+        majorVersionSelect->setEmptyErrorString(tr("Couldn't load or download the Java version lists!"));
         horizontalLayout->addWidget(majorVersionSelect, 1);
 
         javaVersionSelect = new VersionSelectWidget(this);
-        javaVersionSelect->setEmptyString(tr("No java versions are currently available for your OS."));
-        javaVersionSelect->setEmptyErrorString(tr("Couldn't load or download the java version lists!"));
+        javaVersionSelect->setEmptyString(tr("No Java versions are currently available for your OS."));
+        javaVersionSelect->setEmptyErrorString(tr("Couldn't load or download the Java version lists!"));
         horizontalLayout->addWidget(javaVersionSelect, 4);
         connect(majorVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::setSelectedVersion);
         connect(majorVersionSelect, &VersionSelectWidget::selectedVersionChanged, this, &InstallJavaPage::selectionChanged);
