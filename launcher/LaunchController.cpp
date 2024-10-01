@@ -54,6 +54,7 @@
 #include <QLineEdit>
 #include <QList>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QStringList>
 
 #include "BuildConfig.h"
