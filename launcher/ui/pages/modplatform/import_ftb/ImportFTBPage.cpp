@@ -135,4 +135,13 @@ void ImportFTBPage::triggerSearch()
     currentModel->setSearchTerm(ui->searchEdit->text());
 }
 
+void ImportFTBPage::setSearchTerm(QString term)
+{
+    ui->searchEdit->setText(term);
+}
+
+QString ImportFTBPage::getSerachTerm() const
+{
+    return ui->searchEdit->text();
+}
 }  // namespace FTBImportAPP

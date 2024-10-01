@@ -351,3 +351,13 @@ void ModrinthPage::onVersionSelectionChanged(int index)
     selectedVersion = ui->versionSelectionBox->currentData().toString();
     suggestCurrent();
 }
+
+void ModrinthPage::setSearchTerm(QString term)
+{
+    ui->searchEdit->setText(term);
+}
+
+QString ModrinthPage::getSerachTerm() const
+{
+    return ui->searchEdit->text();
+}

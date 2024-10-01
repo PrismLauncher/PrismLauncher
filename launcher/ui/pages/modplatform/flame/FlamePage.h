@@ -40,7 +40,7 @@
 #include <Application.h>
 #include <modplatform/flame/FlamePackIndex.h>
 #include <QTimer>
-#include "ui/pages/BasePage.h"
+#include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/widgets/ProgressWidget.h"
 
 namespace Ui {
@@ -53,7 +53,7 @@ namespace Flame {
 class ListModel;
 }
 
-class FlamePage : public QWidget, public BasePage {
+class FlamePage : public QWidget, public ModpackProviderBasePage {
     Q_OBJECT
 
    public:
@@ -71,6 +71,11 @@ class FlamePage : public QWidget, public BasePage {
     void openedImpl() override;
 
     bool eventFilter(QObject* watched, QEvent* event) override;
+
+    /** Programatically set the term in the search bar. */
+    virtual void setSearchTerm(QString) override;
+    /** Get the current term in the search bar. */
+    [[nodiscard]] virtual QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();
