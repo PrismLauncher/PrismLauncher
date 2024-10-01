@@ -35,7 +35,7 @@ Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
 
 enum class ResourceProvider { MODRINTH, FLAME };
 
-enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK };
+enum class ResourceType { MOD, RESOURCE_PACK, SHADER_PACK, MODPACK };
 
 enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 

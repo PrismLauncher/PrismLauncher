@@ -31,6 +31,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
 
     static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
+    static QList<ModPlatform::Category> loadCategories(std::shared_ptr<QByteArray> response, QString projectType);
     static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
 
    public:

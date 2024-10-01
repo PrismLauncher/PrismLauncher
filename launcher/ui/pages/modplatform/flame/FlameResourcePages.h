@@ -100,6 +100,9 @@ class FlameModPage : public ModPage {
 
    protected:
     virtual void prepareProviderCategories() override;
+
+   private:
+    Task::Ptr m_categoriesTask;
 };
 
 class FlameResourcePackPage : public ResourcePackResourcePage {

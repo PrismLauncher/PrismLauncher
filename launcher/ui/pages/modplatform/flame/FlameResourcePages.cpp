@@ -215,11 +215,11 @@ unique_qobject_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
 void FlameModPage::prepareProviderCategories()
 {
     auto response = std::make_shared<QByteArray>();
-    auto task = FlameAPI::getModCategories(response);
-    QObject::connect(task.get(), &Task::succeeded, [this, response]() {
+    m_categoriesTask = FlameAPI::getModCategories(response);
+    QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
         auto categories = FlameAPI::loadModCategories(response);
         m_filter_widget->setCategories(categories);
     });
-    task->start();
+    m_categoriesTask->start();
 };
 }  // namespace ResourceDownload

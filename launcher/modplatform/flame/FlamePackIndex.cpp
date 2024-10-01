@@ -3,6 +3,7 @@
 #include <QUrl>
 
 #include "Json.h"
+#include "modplatform/ModIndex.h"
 
 void Flame::loadIndexedPack(Flame::IndexedPack& pack, QJsonObject& obj)
 {
@@ -88,8 +89,27 @@ void Flame::loadIndexedPackVersions(Flame::IndexedPack& pack, QJsonArray& arr)
             continue;
         }
 
+        for (auto mcVer : versionArray) {
+            auto str = mcVer.toString();
+
+            if (str.contains('.'))
+                file.mcVersion.append(str);
+
+            if (auto loader = str.toLower(); loader == "neoforge")
+                file.loaders |= ModPlatform::NeoForge;
+            else if (loader == "forge")
+                file.loaders |= ModPlatform::Forge;
+            else if (loader == "cauldron")
+                file.loaders |= ModPlatform::Cauldron;
+            else if (loader == "liteloader")
+                file.loaders |= ModPlatform::LiteLoader;
+            else if (loader == "fabric")
+                file.loaders |= ModPlatform::Fabric;
+            else if (loader == "quilt")
+                file.loaders |= ModPlatform::Quilt;
+        }
+
         // pick the latest version supported
-        file.mcVersion = versionArray[0].toString();
         file.version = Json::requireString(version, "displayName");
 
         ModPlatform::IndexedVersionType::VersionType ver_type;
