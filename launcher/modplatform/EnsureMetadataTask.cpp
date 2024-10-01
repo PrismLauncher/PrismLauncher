@@ -42,6 +42,9 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Mod*>& mods, QDir dir, ModPlatform:
         m_hashing_task->addTask(hash_task);
     }
 }
+EnsureMetadataTask::EnsureMetadataTask(QHash<QString, Mod*>& mods, QDir dir, ModPlatform::ResourceProvider prov)
+    : Task(nullptr), m_mods(mods), m_index_dir(dir), m_provider(prov), m_current_task(nullptr)
+{}
 
 Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Mod* mod)
 {

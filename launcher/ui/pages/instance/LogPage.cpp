@@ -234,7 +234,7 @@ bool LogPage::apply()
 
 bool LogPage::shouldDisplay() const
 {
-    return m_instance->isRunning() || m_proxy->rowCount() > 0;
+    return true;
 }
 
 void LogPage::on_btnPaste_clicked()

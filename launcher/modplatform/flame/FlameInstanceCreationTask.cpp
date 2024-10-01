@@ -35,8 +35,11 @@
 
 #include "FlameInstanceCreationTask.h"
 
+#include "QObjectPtr.h"
+#include "minecraft/mod/tasks/LocalModUpdateTask.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/flame/PackManifest.h"
 
 #include "Application.h"
@@ -51,6 +54,7 @@
 
 #include "settings/INISettingsObject.h"
 
+#include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/BlockedModsDialog.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
@@ -58,7 +62,6 @@
 #include <QFileInfo>
 
 #include "meta/Index.h"
-#include "meta/VersionList.h"
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "net/ApiDownload.h"
@@ -208,8 +211,7 @@ bool FlameCreationTask::updateInstance()
 
                     Flame::File file;
                     // We don't care about blocked mods, we just need local data to delete the file
-                    file.parseFromObject(entry_obj, false);
-
+                    file.version = FlameMod::loadIndexedPackVersion(entry_obj);
                     auto id = Json::requireInteger(entry_obj, "id");
                     old_files.insert(id, file);
                 }
@@ -219,10 +221,10 @@ bool FlameCreationTask::updateInstance()
 
             // Delete the files
             for (auto& file : old_files) {
-                if (file.fileName.isEmpty() || file.targetFolder.isEmpty())
+                if (file.version.fileName.isEmpty() || file.targetFolder.isEmpty())
                     continue;
 
-                QString relative_path(FS::PathCombine(file.targetFolder, file.fileName));
+                QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
                 qDebug() << "Scheduling" << relative_path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
             }
@@ -471,15 +473,15 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
     QList<BlockedMod> blocked_mods;
     auto anyBlocked = false;
     for (const auto& result : results.files.values()) {
-        if (result.fileName.endsWith(".zip")) {
-            m_ZIP_resources.append(std::make_pair(result.fileName, result.targetFolder));
+        if (result.version.fileName.endsWith(".zip")) {
+            m_ZIP_resources.append(std::make_pair(result.version.fileName, result.targetFolder));
         }
 
-        if (!result.resolved || result.url.isEmpty()) {
+        if (result.version.downloadUrl.isEmpty()) {
             BlockedMod blocked_mod;
-            blocked_mod.name = result.fileName;
-            blocked_mod.websiteUrl = result.websiteUrl;
-            blocked_mod.hash = result.hash;
+            blocked_mod.name = result.version.fileName;
+            blocked_mod.websiteUrl = QString("%1/download/%2").arg(result.pack.websiteUrl, QString::number(result.fileId));
+            blocked_mod.hash = result.version.hash;
             blocked_mod.matched = false;
             blocked_mod.localPath = "";
             blocked_mod.targetFolder = result.targetFolder;
@@ -521,7 +523,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
     QStringList optionalFiles;
     for (auto& result : results) {
         if (!result.required) {
-            optionalFiles << FS::PathCombine(result.targetFolder, result.fileName);
+            optionalFiles << FS::PathCombine(result.targetFolder, result.version.fileName);
         }
     }
 
@@ -537,7 +539,7 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         selectedOptionalMods = optionalModDialog.getResult();
     }
     for (const auto& result : results) {
-        auto fileName = result.fileName;
+        auto fileName = result.version.fileName;
         fileName = FS::RemoveInvalidPathChars(fileName);
         auto relpath = FS::PathCombine(result.targetFolder, fileName);
 
@@ -548,36 +550,16 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         relpath = FS::PathCombine("minecraft", relpath);
         auto path = FS::PathCombine(m_stagingPath, relpath);
 
-        switch (result.type) {
-            case Flame::File::Type::Folder: {
-                logWarning(tr("This 'Folder' may need extracting: %1").arg(relpath));
-                // fallthrough intentional, we treat these as plain old mods and dump them wherever.
-            }
-            /* fallthrough */
-            case Flame::File::Type::SingleFile:
-            case Flame::File::Type::Mod: {
-                if (!result.url.isEmpty()) {
-                    qDebug() << "Will download" << result.url << "to" << path;
-                    auto dl = Net::ApiDownload::makeFile(result.url, path);
-                    m_files_job->addNetAction(dl);
-                }
-                break;
-            }
-            case Flame::File::Type::Modpack:
-                logWarning(tr("Nesting modpacks in modpacks is not implemented, nothing was downloaded: %1").arg(relpath));
-                break;
-            case Flame::File::Type::Cmod2:
-            case Flame::File::Type::Ctoc:
-            case Flame::File::Type::Unknown:
-                logWarning(tr("Unrecognized/unhandled PackageType for: %1").arg(relpath));
-                break;
+        if (!result.version.downloadUrl.isEmpty()) {
+            qDebug() << "Will download" << result.version.downloadUrl << "to" << path;
+            auto dl = Net::ApiDownload::makeFile(result.version.downloadUrl, path);
+            m_files_job->addNetAction(dl);
         }
     }
 
-    m_mod_id_resolver.reset();
-    connect(m_files_job.get(), &NetJob::succeeded, this, [&]() {
+    connect(m_files_job.get(), &NetJob::finished, this, [this, &loop]() {
         m_files_job.reset();
-        validateZIPResources();
+        validateZIPResources(loop);
     });
     connect(m_files_job.get(), &NetJob::failed, [&](QString reason) {
         m_files_job.reset();
@@ -588,7 +570,6 @@ void FlameCreationTask::setupDownloadJob(QEventLoop& loop)
         setProgress(current, total);
     });
     connect(m_files_job.get(), &NetJob::stepProgress, this, &FlameCreationTask::propagateStepProgress);
-    connect(m_files_job.get(), &NetJob::finished, &loop, &QEventLoop::quit);
 
     setStatus(tr("Downloading mods..."));
     m_files_job->start();
@@ -626,9 +607,10 @@ void FlameCreationTask::copyBlockedMods(QList<BlockedMod> const& blocked_mods)
     setAbortable(true);
 }
 
-void FlameCreationTask::validateZIPResources()
+void FlameCreationTask::validateZIPResources(QEventLoop& loop)
 {
     qDebug() << "Validating whether resources stored as .zip are in the right place";
+    QStringList zipMods;
     for (auto [fileName, targetFolder] : m_ZIP_resources) {
         qDebug() << "Checking" << fileName << "...";
         auto localPath = FS::PathCombine(m_stagingPath, "minecraft", targetFolder, fileName);
@@ -668,6 +650,7 @@ void FlameCreationTask::validateZIPResources()
         switch (type) {
             case PackedResourceType::Mod:
                 validatePath(fileName, targetFolder, "mods");
+                zipMods.push_back(fileName);
                 break;
             case PackedResourceType::ResourcePack:
                 validatePath(fileName, targetFolder, "resourcepacks");
@@ -693,4 +676,16 @@ void FlameCreationTask::validateZIPResources()
                 break;
         }
     }
+    auto task = makeShared<ConcurrentTask>(this, "CreateModMetadata", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+    auto results = m_mod_id_resolver->getResults().files;
+    auto folder = FS::PathCombine(m_stagingPath, "minecraft", "mods", ".index");
+    for (auto file : results) {
+        if (file.targetFolder != "mods" || (file.version.fileName.endsWith(".zip") && !zipMods.contains(file.version.fileName))) {
+            continue;
+        }
+        task->addTask(makeShared<LocalModUpdateTask>(folder, file.pack, file.version));
+    }
+    connect(task.get(), &Task::finished, &loop, &QEventLoop::quit);
+    m_process_update_file_info_job = task;
+    task->start();
 }
