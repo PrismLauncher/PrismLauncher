@@ -213,8 +213,7 @@ void ModrinthCheckUpdate::checkNextLoader()
         }
     }
     for (auto m : m_mappings) {
-        emit checkFailed(m,
-                         tr("No valid version found for this mod."));
+        emit checkFailed(m, tr("Mod and/or mod data could not be found in Modrinth."));
     }
     emitSucceeded();
     return;
