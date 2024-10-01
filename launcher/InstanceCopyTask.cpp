@@ -173,7 +173,11 @@ void InstanceCopyTask::copyFinished()
                 allowed_symlinks_file
                     .filePath());  // we dont want to modify the original. also make sure the resulting file is not itself a link.
 
-        FS::write(allowed_symlinks_file.filePath(), allowed_symlinks);
+        try {
+            FS::write(allowed_symlinks_file.filePath(), allowed_symlinks);
+        } catch (const FS::FileSystemException& e) {
+            qCritical() << "Failed to write symlink :" << e.cause();
+        }
     }
 
     emitSucceeded();

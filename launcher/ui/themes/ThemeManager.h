@@ -18,10 +18,12 @@
  */
 #pragma once
 
+#include <QDir>
+#include <QLoggingCategory>
 #include <QString>
+#include <memory>
 
 #include "IconTheme.h"
-#include "ui/MainWindow.h"
 #include "ui/themes/CatPack.h"
 #include "ui/themes/ITheme.h"
 

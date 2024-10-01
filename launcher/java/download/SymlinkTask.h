@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023-2024 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,30 +18,19 @@
 
 #pragma once
 
-#include <QDir>
-
-#include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
+namespace Java {
 
-class LocalModUpdateTask : public Task {
+class SymlinkTask : public Task {
     Q_OBJECT
    public:
-    using Ptr = shared_qobject_ptr<LocalModUpdateTask>;
+    SymlinkTask(QString final_path);
+    virtual ~SymlinkTask() = default;
 
-    explicit LocalModUpdateTask(QDir index_dir, ModPlatform::IndexedPack& mod, ModPlatform::IndexedVersion& mod_version);
-
-    auto canAbort() const -> bool override { return true; }
-    auto abort() -> bool override;
-
-   protected slots:
-    //! Entry point for tasks.
     void executeTask() override;
 
-   signals:
-    void hasOldMod(QString name, QString filename);
-
-   private:
-    QDir m_index_dir;
-    ModPlatform::IndexedPack m_mod;
-    ModPlatform::IndexedVersion m_mod_version;
+   protected:
+    QString m_path;
+    Task::Ptr m_task;
 };
+}  // namespace Java

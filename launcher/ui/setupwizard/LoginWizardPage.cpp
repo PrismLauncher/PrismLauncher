@@ -35,11 +35,10 @@ void LoginWizardPage::on_pushButton_clicked()
     if (account) {
         APPLICATION->accounts()->addAccount(account);
         APPLICATION->accounts()->setDefaultAccount(account);
-    }
-
-    if (wizard()->currentId() == wizard()->pageIds().last()) {
-        wizard()->accept();
-    } else {
-        wizard()->next();
+        if (wizard()->currentId() == wizard()->pageIds().last()) {
+            wizard()->accept();
+        } else {
+            wizard()->next();
+        }
     }
 }

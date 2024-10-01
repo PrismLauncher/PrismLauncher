@@ -134,6 +134,11 @@ class Config {
     QString HELP_URL;
 
     /**
+     * URL that gets opened when the user succesfully logins.
+     */
+    QString LOGIN_CALLBACK_URL;
+
+    /**
      * Client ID you can get from Imgur when you register an application
      */
     QString IMGUR_CLIENT_ID;
@@ -165,8 +170,8 @@ class Config {
     QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
     QString LIBRARY_BASE = "https://libraries.minecraft.net/";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";
-    QString FMLLIBS_BASE_URL = "https://files.prismlauncher.org/fmllibs/";  // FIXME: move into CMakeLists
-    QString TRANSLATIONS_BASE_URL = "https://i18n.prismlauncher.org/";      // FIXME: move into CMakeLists
+    QString FMLLIBS_BASE_URL;
+    QString TRANSLATION_FILES_URL;
 
     QString MODPACKSCH_API_BASE_URL = "https://api.modpacks.ch/";
 
