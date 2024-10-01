@@ -131,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -192,6 +192,7 @@
     <addaction name="actionViewInstanceFolder"/>
     <addaction name="actionViewCentralModsFolder"/>
     <addaction name="actionViewSkinsFolder"/>
+    <addaction name="actionViewJavaFolder"/>
     <addaction name="separator"/>
     <addaction name="actionViewIconThemeFolder"/>
     <addaction name="actionViewWidgetThemeFolder"/>
@@ -786,6 +787,18 @@
    </property>
    <property name="toolTip">
     <string>Open the cat packs folder in a file browser.</string>
+   </property>
+  </action>
+  <action name="actionViewJavaFolder">
+   <property name="icon">
+    <iconset theme="viewfolder">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Java</string>
+   </property>
+   <property name="toolTip">
+    <string>Open the Java folder in a file browser. Only available if the built-in Java downloader is used.</string>
    </property>
   </action>
  </widget>

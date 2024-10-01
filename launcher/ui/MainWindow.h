@@ -48,7 +48,6 @@
 
 #include "BaseInstance.h"
 #include "minecraft/auth/MinecraftAccount.h"
-#include "net/NetJob.h"
 
 class LaunchController;
 class NewsChecker;
@@ -119,6 +118,7 @@ class MainWindow : public QMainWindow {
     void on_actionViewCatPackFolder_triggered();
     void on_actionViewIconsFolder_triggered();
     void on_actionViewLogsFolder_triggered();
+    void on_actionViewJavaFolder_triggered();
 
     void on_actionViewSkinsFolder_triggered();
 
