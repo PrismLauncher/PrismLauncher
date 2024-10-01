@@ -1026,7 +1026,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 
     // notify user if /tmp is mounted with `noexec` (#1693)
     QString jvmArgs = m_settings->get("JvmArgs").toString();
-    if(jvmArgs.indexOf("java.io.tmpdir") == -1) { /* java.io.tmpdir is a valid workaround, so don't annoy */
+    if (jvmArgs.indexOf("java.io.tmpdir") == -1) { /* java.io.tmpdir is a valid workaround, so don't annoy */
         bool is_tmp_noexec = false;
 
 #if defined(Q_OS_LINUX)
