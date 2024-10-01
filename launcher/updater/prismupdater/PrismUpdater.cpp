@@ -1210,7 +1210,7 @@ std::optional<QDir> PrismUpdaterApp::unpackArchive(QFileInfo archive)
         QProcess proc = QProcess();
         proc.start(cmd, args);
         if (!proc.waitForStarted(5000)) {  // wait 5 seconds to start
-            auto msg = tr("Failed to launcher child process \"%1 %2\".").arg(cmd).arg(args.join(" "));
+            auto msg = tr("Failed to launch child process \"%1 %2\".").arg(cmd).arg(args.join(" "));
             logUpdate(msg);
             showFatalErrorMessage(tr("Failed extract archive"), msg);
             return std::nullopt;
@@ -1241,7 +1241,7 @@ bool PrismUpdaterApp::loadPrismVersionFromExe(const QString& exe_path)
     proc.setReadChannel(QProcess::StandardOutput);
     proc.start(exe_path, { "--version" });
     if (!proc.waitForStarted(5000)) {
-        showFatalErrorMessage(tr("Failed to Check Version"), tr("Failed to launcher child launcher process to read version."));
+        showFatalErrorMessage(tr("Failed to Check Version"), tr("Failed to launch child process to read version."));
         return false;
     }  // wait 5 seconds to start
     if (!proc.waitForFinished(5000)) {

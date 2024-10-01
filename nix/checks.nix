@@ -23,7 +23,7 @@
         cd ${self}
 
         echo "Running clang-format...."
-        clang-format -i --style='file' --Werror */**.{c,cc,cpp,h,hh,hpp}
+        clang-format --dry-run --style='file' --Werror */**.{c,cc,cpp,h,hh,hpp}
 
         echo "Running deadnix..."
         deadnix --fail
