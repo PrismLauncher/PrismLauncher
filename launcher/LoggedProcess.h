@@ -80,8 +80,8 @@ class LoggedProcess : public QProcess {
     QStringList reprocess(const QByteArray& data, QTextDecoder& decoder);
 
    private:
-    QTextDecoder m_err_decoder = QTextDecoder(QTextCodec::codecForLocale());
-    QTextDecoder m_out_decoder = QTextDecoder(QTextCodec::codecForLocale());
+    QTextDecoder m_err_decoder = QTextDecoder(QTextCodec::codecForName("UTF-8"));
+    QTextDecoder m_out_decoder = QTextDecoder(QTextCodec::codecForName("UTF-8"));
     QString m_leftover_line;
     bool m_killed = false;
     State m_state = NotRunning;
