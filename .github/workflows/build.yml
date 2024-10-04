@@ -480,7 +480,7 @@ jobs:
             Invoke-Webrequest https://github.com/negrutiu/nsis-nscurl/releases/download/${{ matrix.nscurl_tag }}/NScurl.zip -OutFile NSISPlugins\NScurl.zip
             $nscurl_hash = Get-FileHash NSISPlugins\NScurl.zip -Algorithm Sha256 | Select-Object -ExpandProperty Hash
             if ( $nscurl_hash -ne "${{ matrix.nscurl_sha256 }}") {
-              echo "::error:: NSCurl.zib sha256 mismatch"
+              echo "::error:: NSCurl.zip sha256 mismatch"
               exit 1
             }
             Expand-Archive -Path NSISPlugins\NScurl.zip -DestinationPath NSISPlugins\NScurl
