@@ -349,15 +349,15 @@ SectionEnd
 ;------------------------------------
 ; include nice plugins
 
-; NSIScurl - curl in NSIS
+; NScurl - curl in NSIS
 ; used for MSVS redist download
-; extract to ../NSISPlugins/NSIScurl
+; extract to ../NSISPlugins/NScurl
 ; https://github.com/negrutiu/nsis-nscurl/releases/latest/download/NScurl.zip
-!insertmacro CompileTimeIfFileExist "../NSISPlugins/NSIScurl/Plugins/" haveNSIScurl
-!ifdef haveNSIScurl
-!AddPluginDir /x86-unicode     "../NSISPlugins/NSIScurl/Plugins/x86-unicode"
-!AddPluginDir /x86-ansi        "../NSISPlugins/NSIScurl/Plugins/x86-ansi"
-!AddPluginDir /amd64-unicode   "../NSISPlugins/NSIScurl/Plugins/amd64-unicode"
+!insertmacro CompileTimeIfFileExist "../NSISPlugins/NScurl/Plugins/" haveNScurl
+!ifdef haveNScurl
+!AddPluginDir /x86-unicode     "../NSISPlugins/NScurl/Plugins/x86-unicode"
+!AddPluginDir /x86-ansi        "../NSISPlugins/NScurl/Plugins/x86-ansi"
+!AddPluginDir /amd64-unicode   "../NSISPlugins/NScurl/Plugins/amd64-unicode"
 !endif
 
 ;------------------------------------
