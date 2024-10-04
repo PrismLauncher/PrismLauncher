@@ -104,18 +104,6 @@ bool checkSide(QString filter, QString value)
     return filter.isEmpty() || value.isEmpty() || filter == "both" || value == "both" || filter == value;
 }
 
-bool checkMcVersions(std::list<Version> filter, QStringList value)
-{
-    bool valid = false;
-    for (auto mcVersion : filter) {
-        if (value.contains(mcVersion.toString())) {
-            valid = true;
-            break;
-        }
-    }
-    return filter.empty() || valid;
-}
-
 bool ModModel::checkFilters(ModPlatform::IndexedPack::Ptr pack)
 {
     if (!m_filter)

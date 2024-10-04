@@ -161,3 +161,5 @@ class Version {
 
     void parse();
 };
+
+bool checkMcVersions(std::list<Version> filter, QStringList value);

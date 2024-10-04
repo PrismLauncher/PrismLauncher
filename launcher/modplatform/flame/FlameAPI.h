@@ -88,9 +88,6 @@ class FlameAPI : public NetworkResourceAPI {
    public:
     static std::optional<QString> getStaticSearchURL(SearchArgs const& args)
     {
-        auto gameVersionStr =
-            args.versions.has_value() ? QString("gameVersion=%1").arg(args.versions.value().front().toString()) : QString();
-
         QStringList get_arguments;
         get_arguments.append(QString("classId=%1").arg(getClassId(args.type)));
         get_arguments.append(QString("index=%1").arg(args.offset));
@@ -100,12 +97,13 @@ class FlameAPI : public NetworkResourceAPI {
         if (args.sorting.has_value())
             get_arguments.append(QString("sortField=%1").arg(args.sorting.value().index));
         get_arguments.append("sortOrder=desc");
-        if (args.loaders.has_value())
+        if (args.loaders.has_value() && args.loaders.value() != 0)
             get_arguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(args.loaders.value())));
         if (args.categoryIds.has_value() && !args.categoryIds->empty())
             get_arguments.append(QString("categoryIds=[%1]").arg(args.categoryIds->join(",")));
 
-        get_arguments.append(gameVersionStr);
+        if (args.versions.has_value() && !args.versions.value().empty())
+            get_arguments.append(QString("gameVersion=%1").arg(args.versions.value().front().toString()));
 
         return "https://api.curseforge.com/v1/mods/search?gameId=432&" + get_arguments.join('&');
     }

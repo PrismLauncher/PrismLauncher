@@ -34,6 +34,7 @@
  */
 
 #include "FlamePage.h"
+#include "Version.h"
 #include "modplatform/flame/FlamePackIndex.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ModFilterWidget.h"
@@ -144,16 +145,6 @@ void FlamePage::triggerSearch()
     m_fetch_progress.watch(listModel->activeSearchJob().get());
 }
 
-bool checkMcVersions(std::list<Version> filter, QString value)
-{
-    for (auto mcVersion : filter) {
-        if (value == mcVersion.toString()) {
-            return true;
-        }
-    }
-    return filter.empty();
-}
-
 bool checkVersionFilters(const Flame::IndexedVersion& v, std::shared_ptr<ModFilterWidget::Filter> filter)
 {
     if (!filter)
@@ -161,7 +152,7 @@ bool checkVersionFilters(const Flame::IndexedVersion& v, std::shared_ptr<ModFilt
     return ((!filter->loaders || !v.loaders || filter->loaders & v.loaders) &&  // loaders
             (filter->releases.empty() ||                                        // releases
              std::find(filter->releases.cbegin(), filter->releases.cend(), v.version_type) != filter->releases.cend()) &&
-            checkMcVersions(filter->versions, v.mcVersion));  // mcVersions}
+            checkMcVersions(filter->versions, { v.mcVersion }));  // mcVersions}
 }
 
 void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)

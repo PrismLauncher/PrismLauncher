@@ -71,7 +71,7 @@ class ModpackListModel : public QAbstractListModel {
     /* Ask the API for more information */
     void fetchMore(const QModelIndex& parent) override;
     void refresh();
-    void searchWithTerm(const QString& term, int sort);
+    void searchWithTerm(const QString& term, int sort, std::shared_ptr<ModFilterWidget::Filter> filter, bool filterChanged);
 
     [[nodiscard]] bool hasActiveSearchJob() const { return jobPtr && jobPtr->isRunning(); }
     [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? jobPtr : nullptr; }
@@ -112,12 +112,13 @@ class ModpackListModel : public QAbstractListModel {
 
     QString currentSearchTerm;
     QString currentSort;
+    std::shared_ptr<ModFilterWidget::Filter> m_filter;
     int nextSearchOffset = 0;
     enum SearchState { None, CanPossiblyFetchMore, ResetRequested, Finished } searchState = None;
 
     Task::Ptr jobPtr;
 
-    std::shared_ptr<QByteArray> m_all_response = std::make_shared<QByteArray>();
+    std::shared_ptr<QByteArray> m_allResponse = std::make_shared<QByteArray>();
     QByteArray m_specific_response;
 
     int m_modpacks_per_page = 20;
