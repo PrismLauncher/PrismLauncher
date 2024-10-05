@@ -22,9 +22,6 @@ finish-args:
     # FTBApp import
   - --filesystem=~/.ftba:ro
 
-cleanup:
-  - /lib/libGLU*
-
 modules:
   # Might be needed by some Controller mods (see https://github.com/isXander/Controlify/issues/31)
   - shared-modules/libusb/libusb.json
