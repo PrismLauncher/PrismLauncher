@@ -74,6 +74,7 @@ void PackFetchTask::fetchPrivate(const QStringList& toFetch)
         auto data = std::make_shared<QByteArray>();
         NetJob* job = new NetJob("Fetching private pack", m_network);
         job->addNetAction(Net::ApiDownload::makeByteArray(privatePackBaseUrl.arg(packCode), data));
+        job->setAskRetry(false);
 
         QObject::connect(job, &NetJob::succeeded, this, [this, job, data, packCode] {
             ModpackList packs;
