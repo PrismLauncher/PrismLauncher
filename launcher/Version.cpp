@@ -127,15 +127,3 @@ QDebug operator<<(QDebug debug, const Version& v)
 
     return debug;
 }
-
-bool checkMcVersions(std::list<Version> filter, QStringList value)
-{
-    bool valid = false;
-    for (auto mcVersion : filter) {
-        if (value.contains(mcVersion.toString())) {
-            valid = true;
-            break;
-        }
-    }
-    return filter.empty() || valid;
-}

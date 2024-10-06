@@ -152,7 +152,7 @@ bool checkVersionFilters(const Flame::IndexedVersion& v, std::shared_ptr<ModFilt
     return ((!filter->loaders || !v.loaders || filter->loaders & v.loaders) &&  // loaders
             (filter->releases.empty() ||                                        // releases
              std::find(filter->releases.cbegin(), filter->releases.cend(), v.version_type) != filter->releases.cend()) &&
-            checkMcVersions(filter->versions, { v.mcVersion }));  // mcVersions}
+            filter->checkMcVersions({ v.mcVersion }));  // mcVersions}
 }
 
 void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)

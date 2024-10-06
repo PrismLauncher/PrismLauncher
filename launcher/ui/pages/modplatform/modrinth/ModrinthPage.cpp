@@ -136,7 +136,7 @@ bool checkVersionFilters(const Modrinth::ModpackVersion& v, std::shared_ptr<ModF
     return ((!filter->loaders || !v.loaders || filter->loaders & v.loaders) &&  // loaders
             (filter->releases.empty() ||                                        // releases
              std::find(filter->releases.cbegin(), filter->releases.cend(), v.version_type) != filter->releases.cend()) &&
-            checkMcVersions(filter->versions, { v.gameVersion }));  // gameVersion}
+            filter->checkMcVersions({ v.gameVersion }));  // gameVersion}
 }
 
 void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelIndex prev)
