@@ -2,6 +2,8 @@
 !include "LogicLib.nsh"
 !include "MUI2.nsh"
 
+!include "x64.nsh"
+
 Unicode true
 
 Name "@Launcher_DisplayName@"
@@ -112,6 +114,16 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "@Launcher_Copyright@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@Launcher_VERSION_NAME4@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@"
 
+;--------------------------------
+; Conditional comp with file exist
+
+!macro CompileTimeIfFileExist path define
+!tempfile tmpinc
+!system 'IF EXIST "${path}" echo !define ${define} > "${tmpinc}"'
+!include "${tmpinc}"
+!delfile "${tmpinc}"
+!undef tmpinc
+!macroend
 
 ;--------------------------------
 ; Shell Associate Macros
@@ -175,7 +187,7 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "@Launcher_VERSION_NAME4@
 
 !macroend
 
-!macro APP_UNASSOCIATE EXT APP_ID
+!macro APP_UNASSOCIATE EXT APP_ID APP_EXE
 
   # Unregister file type
   ClearErrors
@@ -336,6 +348,19 @@ Section "" UninstallPrevious
 
 SectionEnd
 
+;------------------------------------
+; include nice plugins
+
+; NScurl - curl in NSIS
+; used for MSVS redist download
+; extract to ../NSISPlugins/NScurl
+; https://github.com/negrutiu/nsis-nscurl/releases/latest/download/NScurl.zip
+!insertmacro CompileTimeIfFileExist "../NSISPlugins/NScurl/Plugins/" haveNScurl
+!ifdef haveNScurl
+!AddPluginDir /x86-unicode     "../NSISPlugins/NScurl/Plugins/x86-unicode"
+!AddPluginDir /x86-ansi        "../NSISPlugins/NScurl/Plugins/x86-ansi"
+!AddPluginDir /amd64-unicode   "../NSISPlugins/NScurl/Plugins/amd64-unicode"
+!endif
 
 ;------------------------------------
 
@@ -395,6 +420,8 @@ Section "@Launcher_DisplayName@"
   ${EndIf}
 
 SectionEnd
+
+@Launcher_MSVC_Redist_NSIS_Section@
 
 Section "Start Menu Shortcut" SM_SHORTCUTS
 
@@ -464,8 +491,8 @@ Section -un.ShellAssoc
   
   !insertmacro APP_TEARDOWN_DEFAULT `${APPID}` `${APPNAME}` `${APPEXE}`
 
-  !insertmacro APP_UNASSOCIATE ".zip" `${APPID}`
-  !insertmacro APP_UNASSOCIATE ".mrpack" `${APPID}`
+  !insertmacro APP_UNASSOCIATE ".zip" `${APPID}` `${APPEXE}`
+  !insertmacro APP_UNASSOCIATE ".mrpack" `${APPID}` `${APPEXE}`
 
   !insertmacro NotifyShell_AssocChanged
 SectionEnd

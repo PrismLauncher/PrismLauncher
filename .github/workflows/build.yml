@@ -84,6 +84,8 @@ jobs:
             qt_arch: ""
             qt_version: "6.7.2"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
+            nscurl_tag: "v24.9.26.122"
+            nscurl_sha256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
 
           - os: windows-2022
             name: "Windows-MSVC-arm64"
@@ -95,6 +97,8 @@ jobs:
             qt_arch: "win64_msvc2019_arm64"
             qt_version: "6.7.2"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
+            nscurl_tag: "v24.9.26.122"
+            nscurl_sha256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
 
           - os: macos-14
             name: macOS
@@ -474,6 +478,16 @@ jobs:
       - name: Package (Windows, installer)
         if: runner.os == 'Windows'
         run: |
+          if ('${{ matrix.nscurl_tag }}') {
+            New-Item -Name NSISPlugins -ItemType Directory
+            Invoke-Webrequest https://github.com/negrutiu/nsis-nscurl/releases/download/${{ matrix.nscurl_tag }}/NScurl.zip -OutFile NSISPlugins\NScurl.zip
+            $nscurl_hash = Get-FileHash NSISPlugins\NScurl.zip -Algorithm Sha256 | Select-Object -ExpandProperty Hash
+            if ( $nscurl_hash -ne "${{ matrix.nscurl_sha256 }}") {
+              echo "::error:: NSCurl.zip sha256 mismatch"
+              exit 1
+            }
+            Expand-Archive -Path NSISPlugins\NScurl.zip -DestinationPath NSISPlugins\NScurl
+          }
           cd ${{ env.INSTALL_DIR }}
           makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
 
