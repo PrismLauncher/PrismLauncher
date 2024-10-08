@@ -64,6 +64,8 @@ class VersionBasicModel : public QIdentityProxyModel {
     {
         if (role == Qt::DisplayRole)
             return QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole);
+        if (role == Qt::UserRole)
+            return QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole);
         return {};
     }
 };
@@ -85,6 +87,9 @@ class AllVersionProxyModel : public QSortFilterProxyModel {
         if (index.row() == 0) {
             if (role == Qt::DisplayRole) {
                 return tr("All Versions");
+            }
+            if (role == Qt::UserRole) {
+                return "all";
             }
             return {};
         }
@@ -113,17 +118,18 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended, QWi
     QAbstractProxyModel* proxy = new VersionBasicModel(this);
     proxy->setSourceModel(m_versions_proxy);
 
-    if (!m_instance && !extended) {
+    if (extended) {
+        if (!m_instance) {
+            ui->environmentGroup->hide();
+        }
+        ui->versions->setSourceModel(proxy);
+        ui->versions->setSeparator(", ");
+        ui->versions->setDefaultText(tr("All Versions"));
+        ui->version->hide();
+    } else {
         auto allVersions = new AllVersionProxyModel(this);
         allVersions->setSourceModel(proxy);
         proxy = allVersions;
-    }
-
-    if (extended) {
-        ui->versions->setSourceModel(proxy);
-        ui->versions->setSeparator(", ");
-        ui->version->hide();
-    } else {
         ui->version->setModel(proxy);
         ui->versions->hide();
         ui->showAllVersions->hide();
@@ -293,7 +299,7 @@ void ModFilterWidget::onHideInstalledFilterChanged()
 void ModFilterWidget::onVersionFilterTextChanged(const QString& version)
 {
     m_filter->versions.clear();
-    if (version != tr("All Versions")) {
+    if (ui->version->currentData(Qt::UserRole) != "all") {
         m_filter->versions.emplace_back(version);
     }
     m_filter_changed = true;
