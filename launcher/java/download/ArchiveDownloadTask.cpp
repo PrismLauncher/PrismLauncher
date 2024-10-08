@@ -65,7 +65,7 @@ void ArchiveDownloadTask::executeTask()
 
 void ArchiveDownloadTask::extractJava(QString input)
 {
-    setStatus(tr("Extracting java"));
+    setStatus(tr("Extracting Java"));
     if (input.endsWith("tar")) {
         setStatus(tr("Extracting Java (Progress is not reported for tar archives)"));
         QFile in(input);

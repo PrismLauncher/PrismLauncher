@@ -26,6 +26,7 @@
 #include "tasks/Task.h"
 
 class FlamePackExportTask : public Task {
+    Q_OBJECT
    public:
     FlamePackExportTask(const QString& name,
                         const QString& version,

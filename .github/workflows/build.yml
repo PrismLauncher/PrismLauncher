@@ -39,6 +39,9 @@ on:
       APPLE_NOTARIZE_PASSWORD:
         description: Password used for notarizing macOS builds
         required: false
+      CACHIX_AUTH_TOKEN:
+        description: Private token for authenticating against Cachix cache
+        required: false
       GPG_PRIVATE_KEY:
         description: Private key for AppImage signing
         required: false
@@ -79,8 +82,10 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ""
-            qt_version: "6.7.2"
+            qt_version: "6.7.3"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
+            nscurl_tag: "v24.9.26.122"
+            nscurl_sha256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
 
           - os: windows-2022
             name: "Windows-MSVC-arm64"
@@ -90,8 +95,10 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: "win64_msvc2019_arm64"
-            qt_version: "6.7.2"
+            qt_version: "6.7.3"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
+            nscurl_tag: "v24.9.26.122"
+            nscurl_sha256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
 
           - os: macos-14
             name: macOS
@@ -99,7 +106,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ""
-            qt_version: "6.7.2"
+            qt_version: "6.7.3"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: macos-14
@@ -471,6 +478,16 @@ jobs:
       - name: Package (Windows, installer)
         if: runner.os == 'Windows'
         run: |
+          if ('${{ matrix.nscurl_tag }}') {
+            New-Item -Name NSISPlugins -ItemType Directory
+            Invoke-Webrequest https://github.com/negrutiu/nsis-nscurl/releases/download/${{ matrix.nscurl_tag }}/NScurl.zip -OutFile NSISPlugins\NScurl.zip
+            $nscurl_hash = Get-FileHash NSISPlugins\NScurl.zip -Algorithm Sha256 | Select-Object -ExpandProperty Hash
+            if ( $nscurl_hash -ne "${{ matrix.nscurl_sha256 }}") {
+              echo "::error:: NSCurl.zip sha256 mismatch"
+              exit 1
+            }
+            Expand-Archive -Path NSISPlugins\NScurl.zip -DestinationPath NSISPlugins\NScurl
+          }
           cd ${{ env.INSTALL_DIR }}
           makensis -NOCD "${{ github.workspace }}/${{ env.BUILD_DIR }}/program_info/win_install.nsi"
 
@@ -631,3 +648,53 @@ jobs:
         with:
           bundle: "Prism Launcher.flatpak"
           manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml
+
+  nix:
+    name: Nix (${{ matrix.system }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            system: x86_64-linux
+
+          - os: macos-13
+            system: x86_64-darwin
+
+          - os: macos-14
+            system: aarch64-darwin
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v29
+
+        # For PRs
+      - name: Setup Nix Magic Cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+        # For in-tree builds
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v15
+        with:
+          name: prismlauncher
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Run flake checks
+        run: |
+          nix flake check --print-build-logs --show-trace
+
+      - name: Build debug package
+        if: ${{ inputs.build_type == 'Debug' }}
+        run: |
+          nix build --print-build-logs .#prismlauncher-debug
+
+      - name: Build release package
+        if: ${{ inputs.build_type != 'Debug' }}
+        run: |
+          nix build --print-build-logs .#prismlauncher

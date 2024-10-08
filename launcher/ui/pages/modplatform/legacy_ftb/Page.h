@@ -43,7 +43,7 @@
 #include "QObjectPtr.h"
 #include "modplatform/legacy_ftb/PackFetchTask.h"
 #include "modplatform/legacy_ftb/PackHelpers.h"
-#include "ui/pages/BasePage.h"
+#include "ui/pages/modplatform/ModpackProviderBasePage.h"
 
 class NewInstanceDialog;
 
@@ -57,7 +57,7 @@ class ListModel;
 class FilterModel;
 class PrivatePackManager;
 
-class Page : public QWidget, public BasePage {
+class Page : public QWidget, public ModpackProviderBasePage {
     Q_OBJECT
 
    public:
@@ -70,6 +70,11 @@ class Page : public QWidget, public BasePage {
     bool shouldDisplay() const override;
     void openedImpl() override;
     void retranslate() override;
+
+    /** Programatically set the term in the search bar. */
+    virtual void setSearchTerm(QString) override;
+    /** Get the current term in the search bar. */
+    [[nodiscard]] virtual QString getSerachTerm() const override;
 
    private:
     void suggestCurrent();

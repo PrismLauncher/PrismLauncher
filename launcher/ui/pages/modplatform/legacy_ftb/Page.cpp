@@ -369,4 +369,13 @@ void Page::triggerSearch()
     currentModel->setSearchTerm(ui->searchEdit->text());
 }
 
+void Page::setSearchTerm(QString term)
+{
+    ui->searchEdit->setText(term);
+}
+
+QString Page::getSerachTerm() const
+{
+    return ui->searchEdit->text();
+}
 }  // namespace LegacyFTB

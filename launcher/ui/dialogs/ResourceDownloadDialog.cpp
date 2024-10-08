@@ -258,7 +258,9 @@ void ResourceDownloadDialog::selectedPageChanged(BasePage* previous, BasePage* s
     }
 
     // Same effect as having a global search bar
-    selectedPage()->setSearchTerm(prev_page->getSearchTerm());
+    ResourcePage* result = dynamic_cast<ResourcePage*>(selected);
+    Q_ASSERT(result != nullptr);
+    result->setSearchTerm(prev_page->getSearchTerm());
 }
 
 ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModFolderModel>& mods, BaseInstance* instance)
