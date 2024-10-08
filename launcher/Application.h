@@ -202,7 +202,6 @@ class Application : public QApplication {
    public slots:
     bool launch(InstancePtr instance,
                 bool online = true,
-                bool demo = false,
                 MinecraftTarget::Ptr targetToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);

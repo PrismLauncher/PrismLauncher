@@ -130,29 +130,10 @@ void LaunchController::decideAccount()
     }
 }
 
-bool LaunchController::askPlayDemo()
-{
-    QMessageBox box(m_parentWidget);
-    box.setWindowTitle(tr("Play demo?"));
-    box.setText(
-        tr("This account does not own Minecraft.\nYou need to purchase the game first to play it.\n\nDo you want to play "
-           "the demo?"));
-    box.setIcon(QMessageBox::Warning);
-    auto demoButton = box.addButton(tr("Play Demo"), QMessageBox::ButtonRole::YesRole);
-    auto cancelButton = box.addButton(tr("Cancel"), QMessageBox::ButtonRole::NoRole);
-    box.setDefaultButton(cancelButton);
-
-    box.exec();
-    return box.clickedButton() == demoButton;
-}
-
-QString LaunchController::askOfflineName(QString playerName, bool demo, bool& ok)
+QString LaunchController::askOfflineName(QString playerName, bool& ok)
 {
     // we ask the user for a player name
     QString message = tr("Choose your offline mode player name.");
-    if (demo) {
-        message = tr("Choose your demo mode player name.");
-    }
 
     QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
     QString usedname = lastOfflinePlayerName.isEmpty() ? playerName : lastOfflinePlayerName;
@@ -171,21 +152,6 @@ void LaunchController::login()
     decideAccount();
 
     if (!m_accountToUse) {
-        // if no account is selected, ask about demo
-        if (!m_demo) {
-            m_demo = askPlayDemo();
-        }
-        if (m_demo) {
-            // we ask the user for a player name
-            bool ok = false;
-            auto name = askOfflineName("Player", m_demo, ok);
-            if (ok) {
-                m_session = std::make_shared<AuthSession>();
-                m_session->MakeDemo(name, MinecraftAccount::uuidFromUsername(name).toString().remove(QRegularExpression("[{}-]")));
-                launchInstance();
-                return;
-            }
-        }
         // if no account is selected, we bail
         emitFailed(tr("No account selected for launch."));
         return;
@@ -216,7 +182,6 @@ void LaunchController::login()
         tries++;
         m_session = std::make_shared<AuthSession>();
         m_session->wants_online = m_online;
-        m_session->demo = m_demo;
         m_accountToUse->fillSession(m_session);
 
         // Launch immediately in true offline mode
@@ -234,7 +199,7 @@ void LaunchController::login()
                 if (!m_session->wants_online) {
                     // we ask the user for a player name
                     bool ok = false;
-                    auto name = askOfflineName(m_session->player_name, m_session->demo, ok);
+                    auto name = askOfflineName(m_session->player_name, ok);
                     if (!ok) {
                         tryagain = false;
                         break;
@@ -258,15 +223,7 @@ void LaunchController::login()
                     launchInstance();
                     return;
                 } else {
-                    // play demo ?
-                    if (!m_session->demo) {
-                        m_session->demo = askPlayDemo();
-                    }
-                    if (m_session->demo) {  // play demo here
-                        launchInstance();
-                    } else {
-                        emitFailed(tr("Launch cancelled - account does not own Minecraft."));
-                    }
+                    emitFailed(tr("Launch cancelled - account does not own Minecraft."));
                 }
                 return;
             }
@@ -351,7 +308,7 @@ void LaunchController::launchInstance()
 
         m_launcher->prependStep(makeShared<PrintServers>(m_launcher.get(), servers));
     } else {
-        online_mode = m_demo ? "demo" : "offline";
+        online_mode = "offline";
     }
 
     m_launcher->prependStep(

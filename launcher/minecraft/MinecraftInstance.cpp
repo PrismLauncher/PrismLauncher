@@ -250,14 +250,9 @@ void MinecraftInstance::populateLaunchMenu(QMenu* menu)
     normalLaunch->setShortcut(QKeySequence::Open);
     QAction* normalLaunchOffline = menu->addAction(tr("Launch &Offline"));
     normalLaunchOffline->setShortcut(QKeySequence(tr("Ctrl+Shift+O")));
-    QAction* normalLaunchDemo = menu->addAction(tr("Launch &Demo"));
-    normalLaunchDemo->setShortcut(QKeySequence(tr("Ctrl+Alt+O")));
-
-    normalLaunchDemo->setEnabled(supportsDemo());
 
     connect(normalLaunch, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this()); });
-    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, false); });
-    connect(normalLaunchDemo, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false, true); });
+    connect(normalLaunchOffline, &QAction::triggered, [this] { APPLICATION->launch(shared_from_this(), false); });
 
     QString profilersTitle = tr("Profilers");
     menu->addSeparator()->setText(profilersTitle);
@@ -313,14 +308,6 @@ QString MinecraftInstance::getLocalLibraryPath() const
 {
     QDir libraries_dir(FS::PathCombine(instanceRoot(), "libraries/"));
     return libraries_dir.absolutePath();
-}
-
-bool MinecraftInstance::supportsDemo() const
-{
-    Version instance_ver{ getPackProfile()->getComponentVersion("net.minecraft") };
-    // Demo mode was introduced in 1.3.1: https://minecraft.wiki/w/Demo_mode#History
-    // FIXME: Due to Version constraints atm, this can't handle well non-release versions
-    return instance_ver >= Version("1.3.1");
 }
 
 QString MinecraftInstance::jarModsDir() const
@@ -685,9 +672,6 @@ QStringList MinecraftInstance::processMinecraftArgs(AuthSessionPtr session, Mine
         token_mapping["auth_uuid"] = session->uuid;
         token_mapping["user_properties"] = session->serializeUserProperties();
         token_mapping["user_type"] = session->user_type;
-        if (session->demo) {
-            args_pattern += " --demo";
-        }
     }
 
     token_mapping["profile_name"] = name();
@@ -1104,9 +1088,7 @@ shared_qobject_ptr<LaunchTask> MinecraftInstance::createLaunchTask(AuthSessionPt
 
     // if we aren't in offline mode,.
     if (session->status != AuthSession::PlayableOffline) {
-        if (!session->demo) {
-            process->appendStep(makeShared<ClaimAccount>(pptr, session));
-        }
+        process->appendStep(makeShared<ClaimAccount>(pptr, session));
         for (auto t : createUpdateTask()) {
             process->appendStep(makeShared<TaskStepWrapper>(pptr, t));
         }
