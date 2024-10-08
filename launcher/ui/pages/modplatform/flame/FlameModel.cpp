@@ -188,8 +188,8 @@ void ListModel::performPaginatedSearch()
     sort.index = currentSort + 1;
 
     auto netJob = makeShared<NetJob>("Flame::Search", APPLICATION->network());
-    auto searchUrl = FlameAPI::getStaticSearchURL({ ModPlatform::ResourceType::MODPACK, nextSearchOffset, currentSearchTerm, sort,
-                                                    m_filter->loaders, m_filter->versions, "", m_filter->categoryIds });
+    auto searchUrl = FlameAPI().getSearchURL({ ModPlatform::ResourceType::MODPACK, nextSearchOffset, currentSearchTerm, sort,
+                                               m_filter->loaders, m_filter->versions, "", m_filter->categoryIds });
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl.value()), response));
     jobPtr = netJob;

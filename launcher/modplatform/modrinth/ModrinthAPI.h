@@ -101,7 +101,7 @@ class ModrinthAPI : public NetworkResourceAPI {
         return "";
     }
 
-    [[nodiscard]] static QString createFacets(SearchArgs const& args)
+    [[nodiscard]] QString createFacets(SearchArgs const& args) const
     {
         QStringList facets_list;
 
@@ -123,7 +123,7 @@ class ModrinthAPI : public NetworkResourceAPI {
     }
 
    public:
-    static std::optional<QString> getStaticSearchURL(SearchArgs const& args)
+    [[nodiscard]] inline auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> override
     {
         if (args.loaders.has_value() && args.loaders.value() != 0) {
             if (!validateModLoaders(args.loaders.value())) {
@@ -143,11 +143,6 @@ class ModrinthAPI : public NetworkResourceAPI {
 
         return BuildConfig.MODRINTH_PROD_URL + "/search?" + get_arguments.join('&');
     };
-
-    [[nodiscard]] inline auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> override
-    {
-        return getStaticSearchURL(args);
-    }
 
     inline auto getInfoURL(QString const& id) const -> std::optional<QString> override
     {
@@ -171,7 +166,7 @@ class ModrinthAPI : public NetworkResourceAPI {
             .arg(BuildConfig.MODRINTH_PROD_URL, args.pack.addonId.toString(), get_arguments.isEmpty() ? "" : "?", get_arguments.join('&'));
     };
 
-    static QString getGameVersionsArray(std::list<Version> mcVersions)
+    QString getGameVersionsArray(std::list<Version> mcVersions) const
     {
         QString s;
         for (auto& ver : mcVersions) {

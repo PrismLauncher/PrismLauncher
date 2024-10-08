@@ -86,7 +86,7 @@ class FlameAPI : public NetworkResourceAPI {
     static const QString getModLoaderFilters(ModPlatform::ModLoaderTypes types) { return "[" + getModLoaderStrings(types).join(',') + "]"; }
 
    public:
-    static std::optional<QString> getStaticSearchURL(SearchArgs const& args)
+    [[nodiscard]] std::optional<QString> getSearchURL(SearchArgs const& args) const override
     {
         QStringList get_arguments;
         get_arguments.append(QString("classId=%1").arg(getClassId(args.type)));
@@ -107,7 +107,6 @@ class FlameAPI : public NetworkResourceAPI {
 
         return "https://api.curseforge.com/v1/mods/search?gameId=432&" + get_arguments.join('&');
     }
-    [[nodiscard]] std::optional<QString> getSearchURL(SearchArgs const& args) const override { return getStaticSearchURL(args); }
 
    private:
     [[nodiscard]] std::optional<QString> getInfoURL(QString const& id) const override
