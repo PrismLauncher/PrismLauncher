@@ -77,7 +77,6 @@
 #include <DesktopServices.h>
 #include <InstanceList.h>
 #include <MMCZip.h>
-#include <SkinUtils.h>
 #include <icons/IconList.h>
 #include <java/JavaInstallList.h>
 #include <java/JavaUtils.h>
@@ -96,7 +95,6 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ExportInstanceDialog.h"
 #include "ui/dialogs/ExportPackDialog.h"
-#include "ui/dialogs/ExportToModListDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
@@ -209,7 +207,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
         exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
-        exportInstanceMenu->addAction(ui->actionExportInstanceToModList);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
 
@@ -231,10 +228,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         setInstanceActionsEnabled(false);
 
         // add a close button at the end of the main toolbar when running on gamescope / steam deck
-        // FIXME: detect if we don't have server side decorations instead
+        // this is only needed on gamescope because it defaults to an X11/XWayland session and
+        // does not implement decorations
         if (qgetenv("XDG_CURRENT_DESKTOP") == "gamescope") {
             ui->mainToolBar->addAction(ui->actionCloseWindow);
         }
+
+        ui->actionViewJavaFolder->setEnabled(BuildConfig.JAVA_DOWNLOADER_ENABLED);
+
     }
 
     // add the toolbar toggles to the view menu
@@ -870,30 +871,6 @@ void MainWindow::on_actionCopyInstance_triggered()
     runModalTask(task.get());
 }
 
-void MainWindow::finalizeInstance(InstancePtr inst)
-{
-    view->updateGeometries();
-    setSelectedInstanceById(inst->id());
-    if (APPLICATION->accounts()->anyAccountIsValid()) {
-        ProgressDialog loadDialog(this);
-        auto update = inst->createUpdateTask(Net::Mode::Online);
-        connect(update.get(), &Task::failed, [this](QString reason) {
-            QString error = QString("Instance load failed: %1").arg(reason);
-            CustomMessageBox::selectable(this, tr("Error"), error, QMessageBox::Warning)->show();
-        });
-        if (update) {
-            loadDialog.setSkipButton(true, tr("Abort"));
-            loadDialog.execWithTask(update.get());
-        }
-    } else {
-        CustomMessageBox::selectable(this, tr("Error"),
-                                     tr("The launcher cannot download Minecraft or update instances unless you have at least "
-                                        "one account added.\nPlease add a Microsoft account."),
-                                     QMessageBox::Warning)
-            ->show();
-    }
-}
-
 void MainWindow::addInstance(const QString& url, const QMap<QString, QString>& extra_info)
 {
     QString groupName;
@@ -998,6 +975,14 @@ void MainWindow::processURLs(QList<QUrl> urls)
                     dlUrlDialod.execWithTask(job.get());
                 }
 
+            } else if (url.scheme() == BuildConfig.LAUNCHER_APP_BINARY_NAME) {
+                QVariantMap receivedData;
+                const QUrlQuery query(url.query());
+                const auto items = query.queryItems();
+                for (auto it = items.begin(), end = items.end(); it != end; ++it)
+                    receivedData.insert(it->first, it->second);
+                emit APPLICATION->oauthReplyRecieved(receivedData);
+                continue;
             } else {
                 dl_url = url;
             }
@@ -1211,6 +1196,11 @@ void MainWindow::on_actionViewCentralModsFolder_triggered()
     DesktopServices::openPath(APPLICATION->settings()->get("CentralModsDir").toString(), true);
 }
 
+void MainWindow::on_actionViewSkinsFolder_triggered()
+{
+    DesktopServices::openPath(APPLICATION->settings()->get("SkinsDir").toString(), true);
+}
+
 void MainWindow::on_actionViewIconThemeFolder_triggered()
 {
     DesktopServices::openPath(APPLICATION->themeManager()->getIconThemesFolder().path(), true);
@@ -1234,6 +1224,11 @@ void MainWindow::on_actionViewIconsFolder_triggered()
 void MainWindow::on_actionViewLogsFolder_triggered()
 {
     DesktopServices::openPath("logs", true);
+}
+
+void MainWindow::on_actionViewJavaFolder_triggered()
+{
+    DesktopServices::openPath(APPLICATION->javaPath(), true);
 }
 
 void MainWindow::refreshInstances()
@@ -1415,14 +1410,6 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
     }
 }
 
-void MainWindow::on_actionExportInstanceToModList_triggered()
-{
-    if (m_selectedInstance) {
-        ExportToModListDialog dlg(m_selectedInstance, this);
-        dlg.exec();
-    }
-}
-
 void MainWindow::on_actionExportInstanceFlamePack_triggered()
 {
     if (m_selectedInstance) {
@@ -1589,7 +1576,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
         QFileDialog fileDialog;
         // workaround to make sure the portal file dialog opens in the desktop directory
         fileDialog.setDirectoryUrl(desktopPath);
-        desktopFilePath = fileDialog.getSaveFileName(this, tr("Create Shortcut"), desktopFilePath, tr("Desktop Entries (*.desktop)"));
+        desktopFilePath = fileDialog.getSaveFileName(this, tr("Create Shortcut"), desktopFilePath, tr("Desktop Entries") + " (*.desktop)");
         if (desktopFilePath.isEmpty())
             return;  // file dialog canceled by user
         appPath = "flatpak";

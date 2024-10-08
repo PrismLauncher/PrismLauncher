@@ -34,6 +34,7 @@
  */
 
 #include "ProfileSetupDialog.h"
+#include "net/RawHeaderProxy.h"
 #include "ui_ProfileSetupDialog.h"
 
 #include <QAction>
@@ -45,8 +46,8 @@
 #include "ui/dialogs/ProgressDialog.h"
 
 #include <Application.h>
-#include "minecraft/auth/AuthRequest.h"
 #include "minecraft/auth/Parsers.h"
+#include "net/Upload.h"
 
 ProfileSetupDialog::ProfileSetupDialog(MinecraftAccountPtr accountToSetup, QWidget* parent)
     : QDialog(parent), m_accountToSetup(accountToSetup), ui(new Ui::ProfileSetupDialog)
@@ -150,28 +151,27 @@ void ProfileSetupDialog::checkName(const QString& name)
     currentCheck = name;
     isChecking = true;
 
-    auto token = m_accountToSetup->accessToken();
+    QUrl url(QString("https://api.minecraftservices.com/minecraft/profile/name/%1/available").arg(name));
+    auto headers = QList<Net::HeaderPair>{ { "Content-Type", "application/json" },
+                                           { "Accept", "application/json" },
+                                           { "Authorization", QString("Bearer %1").arg(m_accountToSetup->accessToken()).toUtf8() } };
 
-    auto url = QString("https://api.minecraftservices.com/minecraft/profile/name/%1/available").arg(name);
-    QNetworkRequest request = QNetworkRequest(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Accept", "application/json");
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(token).toUtf8());
+    m_check_response.reset(new QByteArray());
+    if (m_check_task)
+        disconnect(m_check_task.get(), nullptr, this, nullptr);
+    m_check_task = Net::Download::makeByteArray(url, m_check_response);
+    m_check_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
 
-    AuthRequest* requestor = new AuthRequest(this);
-    connect(requestor, &AuthRequest::finished, this, &ProfileSetupDialog::checkFinished);
-    requestor->get(request);
+    connect(m_check_task.get(), &Task::finished, this, &ProfileSetupDialog::checkFinished);
+
+    m_check_task->setNetwork(APPLICATION->network());
+    m_check_task->start();
 }
 
-void ProfileSetupDialog::checkFinished(QNetworkReply::NetworkError error,
-                                       QByteArray profileData,
-                                       [[maybe_unused]] QList<QNetworkReply::RawHeaderPair> headers)
+void ProfileSetupDialog::checkFinished()
 {
-    auto requestor = qobject_cast<AuthRequest*>(QObject::sender());
-    requestor->deleteLater();
-
-    if (error == QNetworkReply::NoError) {
-        auto doc = QJsonDocument::fromJson(profileData);
+    if (m_check_task->error() == QNetworkReply::NoError) {
+        auto doc = QJsonDocument::fromJson(*m_check_response);
         auto root = doc.object();
         auto statusValue = root.value("status").toString("INVALID");
         if (statusValue == "AVAILABLE") {
@@ -195,20 +195,22 @@ void ProfileSetupDialog::setupProfile(const QString& profileName)
         return;
     }
 
-    auto token = m_accountToSetup->accessToken();
-
-    auto url = QString("https://api.minecraftservices.com/minecraft/profile");
-    QNetworkRequest request = QNetworkRequest(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    request.setRawHeader("Accept", "application/json");
-    request.setRawHeader("Authorization", QString("Bearer %1").arg(token).toUtf8());
-
     QString payloadTemplate("{\"profileName\":\"%1\"}");
-    auto profileData = payloadTemplate.arg(profileName).toUtf8();
 
-    AuthRequest* requestor = new AuthRequest(this);
-    connect(requestor, &AuthRequest::finished, this, &ProfileSetupDialog::setupProfileFinished);
-    requestor->post(request, profileData);
+    QUrl url("https://api.minecraftservices.com/minecraft/profile");
+    auto headers = QList<Net::HeaderPair>{ { "Content-Type", "application/json" },
+                                           { "Accept", "application/json" },
+                                           { "Authorization", QString("Bearer %1").arg(m_accountToSetup->accessToken()).toUtf8() } };
+
+    m_profile_response.reset(new QByteArray());
+    m_profile_task = Net::Upload::makeByteArray(url, m_profile_response, payloadTemplate.arg(profileName).toUtf8());
+    m_profile_task->addHeaderProxy(new Net::RawHeaderProxy(headers));
+
+    connect(m_profile_task.get(), &Task::finished, this, &ProfileSetupDialog::setupProfileFinished);
+
+    m_profile_task->setNetwork(APPLICATION->network());
+    m_profile_task->start();
+
     isWorking = true;
 
     auto button = ui->buttonBox->button(QDialogButtonBox::Cancel);
@@ -244,22 +246,17 @@ struct MojangError {
 
 }  // namespace
 
-void ProfileSetupDialog::setupProfileFinished(QNetworkReply::NetworkError error,
-                                              QByteArray errorData,
-                                              [[maybe_unused]] QList<QNetworkReply::RawHeaderPair> headers)
+void ProfileSetupDialog::setupProfileFinished()
 {
-    auto requestor = qobject_cast<AuthRequest*>(QObject::sender());
-    requestor->deleteLater();
-
     isWorking = false;
-    if (error == QNetworkReply::NoError) {
+    if (m_profile_task->error() == QNetworkReply::NoError) {
         /*
          * data contains the profile in the response
          * ... we could parse it and update the account, but let's just return back to the normal login flow instead...
          */
         accept();
     } else {
-        auto parsedError = MojangError::fromJSON(errorData);
+        auto parsedError = MojangError::fromJSON(*m_profile_response);
         ui->errorLabel->setVisible(true);
         ui->errorLabel->setText(tr("The server returned the following error:") + "\n\n" + parsedError.errorMessage);
         qDebug() << parsedError.rawError;

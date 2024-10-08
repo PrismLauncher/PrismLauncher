@@ -50,13 +50,14 @@
 ResourcePackFolderModel::ResourcePackFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
     : ResourceFolderModel(dir, instance, is_indexed, create_dir, parent)
 {
-    m_column_names = QStringList({ "Enable", "Image", "Name", "Pack Format", "Last Modified", "Provider" });
+    m_column_names = QStringList({ "Enable", "Image", "Name", "Pack Format", "Last Modified", "Provider", "Size" });
     m_column_names_translated =
-        QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified"), tr("Provider") });
-    m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::NAME, SortType::PACK_FORMAT, SortType::DATE, SortType::PROVIDER };
-    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive,
-                              QHeaderView::Interactive };
-    m_columnsHideable = { false, true, false, true, true, true };
+        QStringList({ tr("Enable"), tr("Image"), tr("Name"), tr("Pack Format"), tr("Last Modified"), tr("Provider"), tr("Size") });
+    m_column_sort_keys = { SortType::ENABLED, SortType::NAME,     SortType::NAME, SortType::PACK_FORMAT,
+                           SortType::DATE,    SortType::PROVIDER, SortType::SIZE };
+    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,
+                              QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
+    m_columnsHideable = { false, true, false, true, true, true, true };
 }
 
 QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
@@ -89,6 +90,8 @@ QVariant ResourcePackFolderModel::data(const QModelIndex& index, int role) const
                     return m_resources[row]->dateTimeChanged();
                 case ProviderColumn:
                     return m_resources[row]->provider();
+                case SizeColumn:
+                    return m_resources[row]->sizeStr();
                 default:
                     return {};
             }
@@ -148,6 +151,7 @@ QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::O
                 case DateColumn:
                 case ImageColumn:
                 case ProviderColumn:
+                case SizeColumn:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -166,6 +170,8 @@ QVariant ResourcePackFolderModel::headerData(int section, [[maybe_unused]] Qt::O
                     return tr("The date and time this resource pack was last changed (or added).");
                 case ProviderColumn:
                     return tr("The source provider of the resource pack.");
+                case SizeColumn:
+                    return tr("The size of the resource pack.");
                 default:
                     return {};
             }

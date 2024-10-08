@@ -81,6 +81,9 @@ Config::Config()
         UPDATER_ENABLED = true;
     }
 
+    #cmakedefine01 Launcher_ENABLE_JAVA_DOWNLOADER
+    JAVA_DOWNLOADER_ENABLED = Launcher_ENABLE_JAVA_DOWNLOADER;
+
     GIT_COMMIT = "@Launcher_GIT_COMMIT@";
     GIT_TAG = "@Launcher_GIT_TAG@";
     GIT_REFSPEC = "@Launcher_GIT_REFSPEC@";
@@ -113,16 +116,19 @@ Config::Config()
     NEWS_RSS_URL = "@Launcher_NEWS_RSS_URL@";
     NEWS_OPEN_URL = "@Launcher_NEWS_OPEN_URL@";
     HELP_URL = "@Launcher_HELP_URL@";
+    LOGIN_CALLBACK_URL = "@Launcher_LOGIN_CALLBACK_URL@";
     IMGUR_CLIENT_ID = "@Launcher_IMGUR_CLIENT_ID@";
     MSA_CLIENT_ID = "@Launcher_MSA_CLIENT_ID@";
     FLAME_API_KEY = "@Launcher_CURSEFORGE_API_KEY@";
     META_URL = "@Launcher_META_URL@";
+    FMLLIBS_BASE_URL = "@Launcher_FMLLIBS_BASE_URL@";
 
     GLFW_LIBRARY_NAME = "@Launcher_GLFW_LIBRARY_NAME@";
     OPENAL_LIBRARY_NAME = "@Launcher_OPENAL_LIBRARY_NAME@";
 
     BUG_TRACKER_URL = "@Launcher_BUG_TRACKER_URL@";
     TRANSLATIONS_URL = "@Launcher_TRANSLATIONS_URL@";
+    TRANSLATION_FILES_URL = "@Launcher_TRANSLATION_FILES_URL@";
     MATRIX_URL = "@Launcher_MATRIX_URL@";
     DISCORD_URL = "@Launcher_DISCORD_URL@";
     SUBREDDIT_URL = "@Launcher_SUBREDDIT_URL@";

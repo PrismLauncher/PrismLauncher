@@ -63,4 +63,10 @@ inline auto get(const QDir& index_dir, QVariant& mod_id) -> ModStruct
 {
     return Packwiz::V1::getIndexForMod(index_dir, mod_id);
 }
+
+inline auto modSideToString(ModSide side) -> QString
+{
+    return Packwiz::V1::sideToString(side);
+}
+
 };  // namespace Metadata

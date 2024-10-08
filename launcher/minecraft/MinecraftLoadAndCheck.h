@@ -15,32 +15,24 @@
 
 #pragma once
 
-#include <QList>
-#include <QObject>
-#include <QUrl>
-
-#include <quazip/quazip.h>
+#include "net/Mode.h"
 #include "tasks/Task.h"
 
-#include "QObjectPtr.h"
-
-class MinecraftVersion;
 class MinecraftInstance;
 
 class MinecraftLoadAndCheck : public Task {
     Q_OBJECT
    public:
-    explicit MinecraftLoadAndCheck(MinecraftInstance* inst, QObject* parent = 0);
-    virtual ~MinecraftLoadAndCheck(){};
+    explicit MinecraftLoadAndCheck(MinecraftInstance* inst, Net::Mode netmode, QObject* parent = nullptr);
+    virtual ~MinecraftLoadAndCheck() = default;
     void executeTask() override;
 
-   private slots:
-    void subtaskSucceeded();
-    void subtaskFailed(QString error);
+    bool canAbort() const override;
+   public slots:
+    bool abort() override;
 
    private:
     MinecraftInstance* m_inst = nullptr;
     Task::Ptr m_task;
-    QString m_preFailure;
-    QString m_fail_reason;
+    Net::Mode m_netmode;
 };

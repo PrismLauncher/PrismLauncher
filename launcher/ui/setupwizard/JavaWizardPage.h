@@ -9,7 +9,7 @@ class JavaWizardPage : public BaseWizardPage {
    public:
     explicit JavaWizardPage(QWidget* parent = Q_NULLPTR);
 
-    virtual ~JavaWizardPage(){};
+    virtual ~JavaWizardPage() = default;
 
     bool wantsRefreshButton() override;
     void refresh() override;

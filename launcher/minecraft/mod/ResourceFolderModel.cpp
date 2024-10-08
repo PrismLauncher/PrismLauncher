@@ -17,6 +17,7 @@
 #include "FileSystem.h"
 
 #include "QVariantUtils.h"
+#include "StringUtils.h"
 #include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
 #include "Json.h"
@@ -119,7 +120,7 @@ bool ResourceFolderModel::installResource(QString original_path)
         case ResourceType::ZIPFILE:
         case ResourceType::LITEMOD: {
             if (QFile::exists(new_path) || QFile::exists(new_path + QString(".disabled"))) {
-                if (!QFile::remove(new_path)) {
+                if (!FS::deletePath(new_path)) {
                     qCritical() << "Cleaning up new location (" << new_path << ") was unsuccessful!";
                     return false;
                 }
@@ -280,9 +281,6 @@ bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, Ena
         }
 
         auto new_id = resource->internal_id();
-        if (m_resources_index.contains(new_id)) {
-            // FIXME: https://github.com/PolyMC/PolyMC/issues/550
-        }
 
         m_resources_index.remove(old_id);
         m_resources_index[new_id] = row;
@@ -350,7 +348,12 @@ void ResourceFolderModel::resolveResource(Resource* res)
     connect(
         task.get(), &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
     connect(
-        task.get(), &Task::finished, this, [=] { m_active_parse_tasks.remove(ticket); }, Qt::ConnectionType::QueuedConnection);
+        task.get(), &Task::finished, this,
+        [=] {
+            m_active_parse_tasks.remove(ticket);
+            emit parseFinished();
+        },
+        Qt::ConnectionType::QueuedConnection);
 
     m_helper_thread_task.addTask(task);
 
@@ -487,6 +490,8 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
                     return m_resources[row]->dateTimeChanged();
                 case PROVIDER_COLUMN:
                     return m_resources[row]->provider();
+                case SIZE_COLUMN:
+                    return m_resources[row]->sizeStr();
                 default:
                     return {};
             }
@@ -557,6 +562,7 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                 case NAME_COLUMN:
                 case DATE_COLUMN:
                 case PROVIDER_COLUMN:
+                case SIZE_COLUMN:
                     return columnNames().at(section);
                 default:
                     return {};
@@ -572,6 +578,8 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
                     return tr("The date and time this resource was last changed (or added).");
                 case PROVIDER_COLUMN:
                     return tr("The source provider of the resource.");
+                case SIZE_COLUMN:
+                    return tr("The size of the resource.");
                 default:
                     return {};
             }
@@ -601,6 +609,10 @@ void ResourceFolderModel::saveColumns(QTreeView* tree)
 
 void ResourceFolderModel::loadColumns(QTreeView* tree)
 {
+    for (auto i = 0; i < m_columnsHiddenByDefault.size(); ++i) {
+        tree->setColumnHidden(i, m_columnsHiddenByDefault[i]);
+    }
+
     auto const setting_name = QString("UI/%1_Page/Columns").arg(id());
     auto setting = (m_instance->settings()->contains(setting_name)) ? m_instance->settings()->getSetting(setting_name)
                                                                     : m_instance->settings()->registerSetting(setting_name);
@@ -678,15 +690,36 @@ SortType ResourceFolderModel::columnToSortKey(size_t column) const
     auto const& resource_right = model->at(source_right.row());
 
     auto compare_result = resource_left.compare(resource_right, column_sort_key);
-    if (compare_result.first == 0)
+    if (compare_result == 0)
         return QSortFilterProxyModel::lessThan(source_left, source_right);
 
-    if (compare_result.second || sortOrder() != Qt::DescendingOrder)
-        return (compare_result.first < 0);
-    return (compare_result.first > 0);
+    return compare_result < 0;
 }
 
 QString ResourceFolderModel::instDirPath() const
 {
     return QFileInfo(m_instance->instanceRoot()).absoluteFilePath();
+}
+
+void ResourceFolderModel::onParseFailed(int ticket, QString resource_id)
+{
+    auto iter = m_active_parse_tasks.constFind(ticket);
+    if (iter == m_active_parse_tasks.constEnd())
+        return;
+
+    auto removed_index = m_resources_index[resource_id];
+    auto removed_it = m_resources.begin() + removed_index;
+    Q_ASSERT(removed_it != m_resources.end());
+
+    beginRemoveRows(QModelIndex(), removed_index, removed_index);
+    m_resources.erase(removed_it);
+
+    // update index
+    m_resources_index.clear();
+    int idx = 0;
+    for (auto const& mod : qAsConst(m_resources)) {
+        m_resources_index[mod->internal_id()] = idx;
+        idx++;
+    }
+    endRemoveRows();
 }

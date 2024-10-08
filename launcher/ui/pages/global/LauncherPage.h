@@ -41,7 +41,6 @@
 #include <Application.h>
 #include <translations/TranslationsModel.h>
 #include "java/JavaChecker.h"
-#include "ui/ColorCache.h"
 #include "ui/pages/BasePage.h"
 
 class QTextCharFormat;
@@ -74,6 +73,8 @@ class LauncherPage : public QWidget, public BasePage {
     void on_modsDirBrowseBtn_clicked();
     void on_iconsDirBrowseBtn_clicked();
     void on_downloadsDirBrowseBtn_clicked();
+    void on_javaDirBrowseBtn_clicked();
+    void on_skinsDirBrowseBtn_clicked();
     void on_metadataDisableBtn_clicked();
 
     /*!
@@ -91,8 +92,6 @@ class LauncherPage : public QWidget, public BasePage {
 
     // default format for the font preview...
     QTextCharFormat* defaultFormat;
-
-    std::unique_ptr<LogColorCache> m_colors;
 
     std::shared_ptr<TranslationsModel> m_languageModel;
 };

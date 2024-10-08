@@ -4,6 +4,7 @@
  *  Copyright (c) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (c) 2022 dada513 <dada513@protonmail.com>
  *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -50,6 +51,7 @@
 #include "DesktopServices.h"
 #include "settings/SettingsObject.h"
 #include "ui/themes/ITheme.h"
+#include "ui/themes/ThemeManager.h"
 #include "updater/ExternalUpdater.h"
 
 #include <QApplication>
@@ -66,9 +68,6 @@ enum InstSortMode {
 LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::LauncherPage)
 {
     ui->setupUi(this);
-    auto origForeground = ui->fontPreview->palette().color(ui->fontPreview->foregroundRole());
-    auto origBackground = ui->fontPreview->palette().color(ui->fontPreview->backgroundRole());
-    m_colors.reset(new LogColorCache(origForeground, origBackground));
 
     ui->sortingModeGroup->setId(ui->sortByNameBtn, Sort_Name);
     ui->sortingModeGroup->setId(ui->sortLastLaunchedBtn, Sort_LastLaunch);
@@ -80,8 +79,9 @@ LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::Launch
 
     ui->updateSettingsBox->setHidden(!APPLICATION->updater());
 
-    connect(ui->fontSizeBox, SIGNAL(valueChanged(int)), SLOT(refreshFontPreview()));
-    connect(ui->consoleFont, SIGNAL(currentFontChanged(QFont)), SLOT(refreshFontPreview()));
+    connect(ui->fontSizeBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &LauncherPage::refreshFontPreview);
+    connect(ui->consoleFont, &QFontComboBox::currentFontChanged, this, &LauncherPage::refreshFontPreview);
+    connect(ui->themeCustomizationWidget, &ThemeCustomizationWidget::currentWidgetThemeChanged, this, &LauncherPage::refreshFontPreview);
 
     connect(ui->themeCustomizationWidget, &ThemeCustomizationWidget::currentCatChanged, APPLICATION, &Application::currentCatChanged);
 }
@@ -173,6 +173,27 @@ void LauncherPage::on_downloadsDirBrowseBtn_clicked()
     }
 }
 
+void LauncherPage::on_javaDirBrowseBtn_clicked()
+{
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Java Folder"), ui->javaDirTextBox->text());
+
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
+        QString cooked_dir = FS::NormalizePath(raw_dir);
+        ui->javaDirTextBox->setText(cooked_dir);
+    }
+}
+
+void LauncherPage::on_skinsDirBrowseBtn_clicked()
+{
+    QString raw_dir = QFileDialog::getExistingDirectory(this, tr("Skins Folder"), ui->skinsDirTextBox->text());
+
+    // do not allow current dir - it's dirty. Do not allow dirs that don't exist
+    if (!raw_dir.isEmpty() && QDir(raw_dir).exists()) {
+        QString cooked_dir = FS::NormalizePath(raw_dir);
+        ui->skinsDirTextBox->setText(cooked_dir);
+    }
+}
+
 void LauncherPage::on_metadataDisableBtn_clicked()
 {
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
@@ -185,12 +206,15 @@ void LauncherPage::applySettings()
     // Updates
     if (APPLICATION->updater()) {
         APPLICATION->updater()->setAutomaticallyChecksForUpdates(ui->autoUpdateCheckBox->isChecked());
+        APPLICATION->updater()->setUpdateCheckInterval(ui->updateIntervalSpinBox->value() * 3600);
     }
 
     s->set("MenuBarInsteadOfToolBar", ui->preferMenuBarCheckBox->isChecked());
 
     s->set("NumberOfConcurrentTasks", ui->numberOfConcurrentTasksSpinBox->value());
     s->set("NumberOfConcurrentDownloads", ui->numberOfConcurrentDownloadsSpinBox->value());
+    s->set("NumberOfManualRetries", ui->numberOfManualRetriesSpinBox->value());
+    s->set("RequestTimeout", ui->timeoutSecondsSpinBox->value());
 
     // Console settings
     s->set("ShowConsole", ui->showConsoleCheck->isChecked());
@@ -208,6 +232,8 @@ void LauncherPage::applySettings()
     s->set("CentralModsDir", ui->modsDirTextBox->text());
     s->set("IconsDir", ui->iconsDirTextBox->text());
     s->set("DownloadsDir", ui->downloadsDirTextBox->text());
+    s->set("SkinsDir", ui->skinsDirTextBox->text());
+    s->set("JavaDir", ui->javaDirTextBox->text());
     s->set("DownloadsDirWatchRecursive", ui->downloadsDirWatchRecursiveCheckBox->isChecked());
 
     auto sortMode = (InstSortMode)ui->sortingModeGroup->checkedId();
@@ -227,6 +253,7 @@ void LauncherPage::applySettings()
     // Mods
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
     s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
+    s->set("SkipModpackUpdatePrompt", ui->skipModpackUpdatePromptBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -234,6 +261,7 @@ void LauncherPage::loadSettings()
     // Updates
     if (APPLICATION->updater()) {
         ui->autoUpdateCheckBox->setChecked(APPLICATION->updater()->getAutomaticallyChecksForUpdates());
+        ui->updateIntervalSpinBox->setValue(APPLICATION->updater()->getUpdateCheckInterval() / 3600);
     }
 
     // Toolbar/menu bar settings (not applicable if native menu bar is present)
@@ -245,6 +273,8 @@ void LauncherPage::loadSettings()
 
     ui->numberOfConcurrentTasksSpinBox->setValue(s->get("NumberOfConcurrentTasks").toInt());
     ui->numberOfConcurrentDownloadsSpinBox->setValue(s->get("NumberOfConcurrentDownloads").toInt());
+    ui->numberOfManualRetriesSpinBox->setValue(s->get("NumberOfManualRetries").toInt());
+    ui->timeoutSecondsSpinBox->setValue(s->get("RequestTimeout").toInt());
 
     // Console settings
     ui->showConsoleCheck->setChecked(s->get("ShowConsole").toBool());
@@ -269,6 +299,8 @@ void LauncherPage::loadSettings()
     ui->modsDirTextBox->setText(s->get("CentralModsDir").toString());
     ui->iconsDirTextBox->setText(s->get("IconsDir").toString());
     ui->downloadsDirTextBox->setText(s->get("DownloadsDir").toString());
+    ui->skinsDirTextBox->setText(s->get("SkinsDir").toString());
+    ui->javaDirTextBox->setText(s->get("JavaDir").toString());
     ui->downloadsDirWatchRecursiveCheckBox->setChecked(s->get("DownloadsDirWatchRecursive").toBool());
 
     QString sortMode = s->get("InstSortMode").toString();
@@ -286,41 +318,52 @@ void LauncherPage::loadSettings()
     ui->metadataDisableBtn->setChecked(s->get("ModMetadataDisabled").toBool());
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
     ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
+    ui->skipModpackUpdatePromptBtn->setChecked(s->get("SkipModpackUpdatePrompt").toBool());
 }
 
 void LauncherPage::refreshFontPreview()
 {
+    const LogColors& colors = APPLICATION->themeManager()->getLogColors();
+
     int fontSize = ui->fontSizeBox->value();
     QString fontFamily = ui->consoleFont->currentFont().family();
     ui->fontPreview->clear();
     defaultFormat->setFont(QFont(fontFamily, fontSize));
-    {
+
+    auto print = [this, colors](const QString& message, MessageLevel::Enum level) {
         QTextCharFormat format(*defaultFormat);
-        format.setForeground(m_colors->getFront(MessageLevel::Error));
+
+        QColor bg = colors.background.value(level);
+        QColor fg = colors.foreground.value(level);
+
+        if (bg.isValid())
+            format.setBackground(bg);
+
+        if (fg.isValid())
+            format.setForeground(fg);
+
         // append a paragraph/line
         auto workCursor = ui->fontPreview->textCursor();
         workCursor.movePosition(QTextCursor::End);
-        workCursor.insertText(tr("[Something/ERROR] A spooky error!"), format);
+        workCursor.insertText(message, format);
         workCursor.insertBlock();
-    }
-    {
-        QTextCharFormat format(*defaultFormat);
-        format.setForeground(m_colors->getFront(MessageLevel::Message));
-        // append a paragraph/line
-        auto workCursor = ui->fontPreview->textCursor();
-        workCursor.movePosition(QTextCursor::End);
-        workCursor.insertText(tr("[Test/INFO] A harmless message..."), format);
-        workCursor.insertBlock();
-    }
-    {
-        QTextCharFormat format(*defaultFormat);
-        format.setForeground(m_colors->getFront(MessageLevel::Warning));
-        // append a paragraph/line
-        auto workCursor = ui->fontPreview->textCursor();
-        workCursor.movePosition(QTextCursor::End);
-        workCursor.insertText(tr("[Something/WARN] A not so spooky warning."), format);
-        workCursor.insertBlock();
-    }
+    };
+
+    print(QString("%1 version: %2 (%3)\n")
+              .arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString(), BuildConfig.BUILD_PLATFORM),
+          MessageLevel::Launcher);
+
+    QDate today = QDate::currentDate();
+
+    if (today.month() == 10 && today.day() == 31)
+        print(tr("[Test/ERROR] OOoooOOOoooo! A spooky error!"), MessageLevel::Error);
+    else
+        print(tr("[Test/ERROR] A spooky error!"), MessageLevel::Error);
+
+    print(tr("[Test/INFO] A harmless message..."), MessageLevel::Info);
+    print(tr("[Test/WARN] A not so spooky warning."), MessageLevel::Warning);
+    print(tr("[Test/DEBUG] A secret debugging message..."), MessageLevel::Debug);
+    print(tr("[Test/FATAL] A terrifying fatal error!"), MessageLevel::Fatal);
 }
 
 void LauncherPage::retranslate()

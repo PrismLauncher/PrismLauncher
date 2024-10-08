@@ -82,7 +82,7 @@ class WorldListProxyModel : public QSortFilterProxyModel {
     }
 };
 
-WorldListPage::WorldListPage(BaseInstance* inst, std::shared_ptr<WorldList> worlds, QWidget* parent)
+WorldListPage::WorldListPage(InstancePtr inst, std::shared_ptr<WorldList> worlds, QWidget* parent)
     : QMainWindow(parent), m_inst(inst), ui(new Ui::WorldListPage), m_worlds(worlds)
 {
     ui->setupUi(this);
@@ -112,6 +112,11 @@ WorldListPage::WorldListPage(BaseInstance* inst, std::shared_ptr<WorldList> worl
 void WorldListPage::openedImpl()
 {
     m_worlds->startWatching();
+
+    auto mInst = std::dynamic_pointer_cast<MinecraftInstance>(m_inst);
+    if (!mInst || !mInst->traits().contains("feature:is_quick_play_singleplayer")) {
+        ui->toolBar->removeAction(ui->actionJoin);
+    }
 
     auto const setting_name = QString("WideBarVisibility_%1").arg(id());
     if (!APPLICATION->settings()->contains(setting_name))
@@ -339,11 +344,19 @@ void WorldListPage::worldChanged([[maybe_unused]] const QModelIndex& current, [[
     ui->actionDatapacks->setEnabled(enable);
     bool hasIcon = !index.data(WorldList::IconFileRole).isNull();
     ui->actionReset_Icon->setEnabled(enable && hasIcon);
+
+    auto mInst = std::dynamic_pointer_cast<MinecraftInstance>(m_inst);
+    auto supportsJoin = mInst && mInst->traits().contains("feature:is_quick_play_singleplayer");
+    ui->actionJoin->setEnabled(enable && supportsJoin);
+
+    if (!supportsJoin) {
+        ui->toolBar->removeAction(ui->actionJoin);
+    }
 }
 
 void WorldListPage::on_actionAdd_triggered()
 {
-    auto list = GuiUtil::BrowseForFiles(displayName(), tr("Select a Minecraft world zip"), tr("Minecraft World Zip File (*.zip)"),
+    auto list = GuiUtil::BrowseForFiles(displayName(), tr("Select a Minecraft world zip"), tr("Minecraft World Zip File") + " (*.zip)",
                                         QString(), this->parentWidget());
     if (!list.empty()) {
         m_worlds->stopWatching();
@@ -416,6 +429,17 @@ void WorldListPage::on_actionRename_triggered()
 void WorldListPage::on_actionRefresh_triggered()
 {
     m_worlds->update();
+}
+
+void WorldListPage::on_actionJoin_triggered()
+{
+    QModelIndex index = getSelectedWorld();
+    if (!index.isValid()) {
+        return;
+    }
+    auto worldVariant = m_worlds->data(index, WorldList::ObjectRole);
+    auto world = (World*)worldVariant.value<void*>();
+    APPLICATION->launch(m_inst, true, false, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(world->folderName(), true)));
 }
 
 #include "WorldListPage.moc"

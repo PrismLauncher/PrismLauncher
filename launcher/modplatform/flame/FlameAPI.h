@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <algorithm>
+#include <QList>
 #include <memory>
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
@@ -12,19 +12,25 @@
 
 class FlameAPI : public NetworkResourceAPI {
    public:
-    auto getModFileChangelog(int modId, int fileId) -> QString;
-    auto getModDescription(int modId) -> QString;
+    QString getModFileChangelog(int modId, int fileId);
+    QString getModDescription(int modId);
 
-    auto getLatestVersion(VersionSearchArgs&& args) -> ModPlatform::IndexedVersion;
+    QList<ModPlatform::IndexedVersion> getLatestVersions(VersionSearchArgs&& args);
+    std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
+                                                                QList<ModPlatform::ModLoaderType> instanceLoaders,
+                                                                ModPlatform::ModLoaderTypes fallback);
 
     Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
     Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
     Task::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
     Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
 
-    [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
+    static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
+    static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
 
-    static inline auto validateModLoaders(ModPlatform::ModLoaderTypes loaders) -> bool
+    [[nodiscard]] QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
+
+    static inline bool validateModLoaders(ModPlatform::ModLoaderTypes loaders)
     {
         return loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
     }
@@ -63,7 +69,7 @@ class FlameAPI : public NetworkResourceAPI {
         return 0;
     }
 
-    static auto getModLoaderStrings(const ModPlatform::ModLoaderTypes types) -> const QStringList
+    static const QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
     {
         QStringList l;
         for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
@@ -74,10 +80,7 @@ class FlameAPI : public NetworkResourceAPI {
         return l;
     }
 
-    static auto getModLoaderFilters(ModPlatform::ModLoaderTypes types) -> const QString
-    {
-        return "[" + getModLoaderStrings(types).join(',') + "]";
-    }
+    static const QString getModLoaderFilters(ModPlatform::ModLoaderTypes types) { return "[" + getModLoaderStrings(types).join(',') + "]"; }
 
    private:
     [[nodiscard]] std::optional<QString> getSearchURL(SearchArgs const& args) const override
@@ -96,6 +99,9 @@ class FlameAPI : public NetworkResourceAPI {
         get_arguments.append("sortOrder=desc");
         if (args.loaders.has_value())
             get_arguments.append(QString("modLoaderTypes=%1").arg(getModLoaderFilters(args.loaders.value())));
+        if (args.categoryIds.has_value() && !args.categoryIds->empty())
+            get_arguments.append(QString("categoryIds=[%1]").arg(args.categoryIds->join(",")));
+
         get_arguments.append(gameVersionStr);
 
         return "https://api.curseforge.com/v1/mods/search?gameId=432&" + get_arguments.join('&');

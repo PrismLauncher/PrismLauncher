@@ -67,7 +67,10 @@ class Mod : public Resource {
     auto licenses() const -> const QList<ModLicense>&;
     auto issueTracker() const -> QString;
     auto metaurl() const -> QString;
-    void setDetails(const ModDetails& details);
+    auto side() const -> QString;
+    auto loaders() const -> QString;
+    auto mcVersions() const -> QString;
+    auto releaseType() const -> QString;
 
     /** Get the intneral path to the mod's icon file*/
     QString iconPath() const { return m_local_details.icon_file; }
@@ -76,10 +79,17 @@ class Mod : public Resource {
     /** Thread-safe. */
     void setIcon(QImage new_image) const;
 
+    void setDetails(const ModDetails& details);
+
     bool valid() const override;
 
-    [[nodiscard]] auto compare(Resource const& other, SortType type) const -> std::pair<int, bool> override;
+    [[nodiscard]] int compare(const Resource & other, SortType type) const override;
     [[nodiscard]] bool applyFilter(QRegularExpression filter) const override;
+
+    // Delete all the files of this mod
+    auto destroy(QDir& index_dir, bool preserve_metadata = false, bool attempt_trash = true) -> bool;
+    // Delete the metadata only
+    void destroyMetadata(QDir& index_dir);
 
     void finishResolvingWithDetails(ModDetails&& details);
 

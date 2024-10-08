@@ -36,6 +36,7 @@
 
 #include "ResourceFolderLoadTask.h"
 
+#include "FileSystem.h"
 #include "minecraft/mod/MetadataHandler.h"
 
 #include <QThread>
@@ -68,6 +69,13 @@ void ResourceFolderLoadTask::executeTask()
     // Read JAR files that don't have metadata
     m_resource_dir.refresh();
     for (auto entry : m_resource_dir.entryInfoList()) {
+        auto filePath = entry.absoluteFilePath();
+        auto newFilePath = FS::getUniqueResourceName(filePath);
+        if (newFilePath != filePath) {
+            FS::move(filePath, newFilePath);
+            entry = QFileInfo(newFilePath);
+        }
+
         Resource* resource = m_create_func(entry);
 
         if (resource->enabled()) {

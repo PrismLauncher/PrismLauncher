@@ -5,6 +5,7 @@
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *  Copyright (C) 2023 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,18 +38,17 @@
  */
 
 #include "NetRequest.h"
-#include <QUrl>
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <QNetworkReply>
+#include <QUrl>
 #include <memory>
 
 #if defined(LAUNCHER_APPLICATION)
 #include "Application.h"
 #endif
 #include "BuildConfig.h"
-
-#include "net/NetAction.h"
 
 #include "MMCTime.h"
 #include "StringUtils.h"
@@ -62,13 +62,12 @@ void NetRequest::addValidator(Validator* v)
 
 void NetRequest::executeTask()
 {
-    init();
-
     setStatus(tr("Requesting %1").arg(StringUtils::truncateUrlHumanFriendly(m_url, 80)));
 
     if (getState() == Task::State::AbortedByUser) {
         qCWarning(logCat) << getUid().toString() << "Attempt to start an aborted Request:" << m_url.toString();
-        emitAborted();
+        emit aborted();
+        emit finished();
         return;
     }
 
@@ -85,10 +84,12 @@ void NetRequest::executeTask()
             break;
         case State::Inactive:
         case State::Failed:
-            emitFailed();
+            emit failed("Failed to initialize sink");
+            emit finished();
             return;
         case State::AbortedByUser:
-            emitAborted();
+            emit aborted();
+            emit finished();
             return;
     }
 
@@ -102,20 +103,24 @@ void NetRequest::executeTask()
     for (auto& header_proxy : m_headerProxies) {
         header_proxy->writeHeaders(request);
     }
-    // TODO remove duplication
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+#if defined(LAUNCHER_APPLICATION)
+    request.setTransferTimeout(APPLICATION->settings()->get("RequestTimeout").toInt() * 1000);
+#else
     request.setTransferTimeout();
+#endif
 #endif
 
     m_last_progress_time = m_clock.now();
     m_last_progress_bytes = 0;
 
-    QNetworkReply* rep = getReply(request);
+    auto rep = getReply(request);
     if (rep == nullptr)  // it failed
         return;
     m_reply.reset(rep);
-    connect(rep, &QNetworkReply::downloadProgress, this, &NetRequest::downloadProgress);
+    connect(rep, &QNetworkReply::uploadProgress, this, &NetRequest::onProgress);
+    connect(rep, &QNetworkReply::downloadProgress, this, &NetRequest::onProgress);
     connect(rep, &QNetworkReply::finished, this, &NetRequest::downloadFinished);
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // QNetworkReply::errorOccurred added in 5.15
     connect(rep, &QNetworkReply::errorOccurred, this, &NetRequest::downloadError);
@@ -126,7 +131,7 @@ void NetRequest::executeTask()
     connect(rep, &QNetworkReply::readyRead, this, &NetRequest::downloadReadyRead);
 }
 
-void NetRequest::downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+void NetRequest::onProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     auto now = m_clock.now();
     auto elapsed = now - m_last_progress_time;
@@ -169,7 +174,9 @@ void NetRequest::downloadError(QNetworkReply::NetworkError error)
             }
         }
         // error happened during download.
-        qCCritical(logCat) << getUid().toString() << "Failed " << m_url.toString() << " with reason " << error;
+        qCCritical(logCat) << getUid().toString() << "Failed" << m_url.toString() << "with reason" << error;
+        if (m_reply)
+            qCCritical(logCat) << getUid().toString() << "HTTP Status" << replyStatusCode() << ";error" << errorString();
         m_state = State::Failed;
     }
 }
@@ -234,7 +241,7 @@ auto NetRequest::handleRedirect() -> bool
 
     m_url = QUrl(redirect.toString());
     qCDebug(logCat) << getUid().toString() << "Following redirect to " << m_url.toString();
-    startAction(m_network);
+    executeTask();
 
     return true;
 }
@@ -252,21 +259,18 @@ void NetRequest::downloadFinished()
     {
         qCDebug(logCat) << getUid().toString() << "Request failed but we are allowed to proceed:" << m_url.toString();
         m_sink->abort();
-        m_reply.reset();
         emit succeeded();
         emit finished();
         return;
     } else if (m_state == State::Failed) {
         qCDebug(logCat) << getUid().toString() << "Request failed in previous step:" << m_url.toString();
         m_sink->abort();
-        m_reply.reset();
-        emit failed("");
+        emit failed(m_reply->errorString());
         emit finished();
         return;
     } else if (m_state == State::AbortedByUser) {
         qCDebug(logCat) << getUid().toString() << "Request aborted in previous step:" << m_url.toString();
         m_sink->abort();
-        m_reply.reset();
         emit aborted();
         emit finished();
         return;
@@ -280,7 +284,7 @@ void NetRequest::downloadFinished()
         if (m_state != State::Succeeded) {
             qCDebug(logCat) << getUid().toString() << "Request failed to write:" << m_url.toString();
             m_sink->abort();
-            emit failed("");
+            emit failed("failed to write in sink");
             emit finished();
             return;
         }
@@ -291,13 +295,11 @@ void NetRequest::downloadFinished()
     if (m_state != State::Succeeded) {
         qCDebug(logCat) << getUid().toString() << "Request failed to finalize:" << m_url.toString();
         m_sink->abort();
-        m_reply.reset();
-        emit failed("");
+        emit failed("failed to finalize the request");
         emit finished();
         return;
     }
 
-    m_reply.reset();
     qCDebug(logCat) << getUid().toString() << "Request succeeded:" << m_url.toString();
     emit succeeded();
     emit finished();
@@ -331,4 +333,23 @@ auto NetRequest::abort() -> bool
     return true;
 }
 
+int NetRequest::replyStatusCode() const
+{
+    return m_reply ? m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() : -1;
+}
+
+QNetworkReply::NetworkError NetRequest::error() const
+{
+    return m_reply ? m_reply->error() : QNetworkReply::NoError;
+}
+
+QUrl NetRequest::url() const
+{
+    return m_url;
+}
+
+QString NetRequest::errorString() const
+{
+    return m_reply ? m_reply->errorString() : "";
+}
 }  // namespace Net

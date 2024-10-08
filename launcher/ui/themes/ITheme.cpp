@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,15 +37,14 @@
 #include <QDir>
 #include <QStyleFactory>
 #include "Application.h"
+#include "HintOverrideProxyStyle.h"
 #include "rainbow.h"
 
 void ITheme::apply(bool)
 {
     APPLICATION->setStyleSheet(QString());
-    QApplication::setStyle(QStyleFactory::create(qtTheme()));
-    if (hasColorScheme()) {
-        QApplication::setPalette(colorScheme());
-    }
+    QApplication::setStyle(new HintOverrideProxyStyle(QStyleFactory::create(qtTheme())));
+    QApplication::setPalette(colorScheme());
     APPLICATION->setStyleSheet(appStyleSheet());
     QDir::setSearchPaths("theme", searchPaths());
 }
@@ -70,4 +70,31 @@ QPalette ITheme::fadeInactive(QPalette in, qreal bias, QColor color)
     blend(QPalette::Highlight);
     blend(QPalette::HighlightedText);
     return in;
+}
+
+LogColors ITheme::defaultLogColors(const QPalette& palette)
+{
+    LogColors result;
+
+    const QColor& bg = palette.color(QPalette::Base);
+    const QColor& fg = palette.color(QPalette::Text);
+
+    auto blend = [bg, fg](QColor color) {
+        if (Rainbow::luma(fg) > Rainbow::luma(bg)) {
+            // for dark color schemes, produce a fitting color first
+            color = Rainbow::tint(fg, color, 0.5);
+        }
+        // adapt contrast
+        return Rainbow::mix(fg, color, 1);
+    };
+
+    result.background[MessageLevel::Fatal] = Qt::black;
+
+    result.foreground[MessageLevel::Launcher] = blend(QColor("purple"));
+    result.foreground[MessageLevel::Debug] = blend(QColor("green"));
+    result.foreground[MessageLevel::Warning] = blend(QColor("orange"));
+    result.foreground[MessageLevel::Error] = blend(QColor("red"));
+    result.foreground[MessageLevel::Fatal] = blend(QColor("red"));
+
+    return result;
 }

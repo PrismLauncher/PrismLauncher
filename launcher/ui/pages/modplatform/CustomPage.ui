@@ -24,29 +24,21 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string notr="true"/>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="2" column="0">
-        <widget class="Line" name="line">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
+     <widget class="QWidget" name="content">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>813</width>
+        <height>605</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
         <layout class="QHBoxLayout" name="minecraftLayout">
          <item>
           <widget class="VersionSelectWidget" name="versionList" native="true">
@@ -87,16 +79,6 @@
             <widget class="QCheckBox" name="snapshotFilter">
              <property name="text">
               <string>Snapshots</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="oldSnapshotFilter">
-             <property name="text">
-              <string>Old Snapshots</string>
              </property>
              <property name="checkable">
               <bool>true</bool>
@@ -157,7 +139,20 @@
          </item>
         </layout>
        </item>
-       <item row="4" column="0">
+       <item>
+        <widget class="Line" name="line">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="loaderLayout">
          <item>
           <widget class="VersionSelectWidget" name="loaderVersionList" native="true">
@@ -283,10 +278,8 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
   <tabstop>releaseFilter</tabstop>
   <tabstop>snapshotFilter</tabstop>
-  <tabstop>oldSnapshotFilter</tabstop>
   <tabstop>betaFilter</tabstop>
   <tabstop>alphaFilter</tabstop>
   <tabstop>experimentsFilter</tabstop>

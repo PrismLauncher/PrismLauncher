@@ -42,6 +42,6 @@ class LocalResourceUpdateTask : public Task {
 
    private:
     QDir m_index_dir;
-    ModPlatform::IndexedPack& m_project;
-    ModPlatform::IndexedVersion& m_version;
+    ModPlatform::IndexedPack m_project;
+    ModPlatform::IndexedVersion m_version;
 };

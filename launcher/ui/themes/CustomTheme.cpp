@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,121 +40,6 @@
 
 const char* themeFile = "theme.json";
 
-static bool readThemeJson(const QString& path,
-                          QPalette& palette,
-                          double& fadeAmount,
-                          QColor& fadeColor,
-                          QString& name,
-                          QString& widgets,
-                          QString& qssFilePath,
-                          bool& dataIncomplete)
-{
-    QFileInfo pathInfo(path);
-    if (pathInfo.exists() && pathInfo.isFile()) {
-        try {
-            auto doc = Json::requireDocument(path, "Theme JSON file");
-            const QJsonObject root = doc.object();
-            dataIncomplete = !root.contains("qssFilePath");
-            name = Json::requireString(root, "name", "Theme name");
-            widgets = Json::requireString(root, "widgets", "Qt widget theme");
-            qssFilePath = Json::ensureString(root, "qssFilePath", "themeStyle.css");
-            auto colorsRoot = Json::requireObject(root, "colors", "colors object");
-            auto readColor = [&](QString colorName) -> QColor {
-                auto colorValue = Json::ensureString(colorsRoot, colorName, QString());
-                if (!colorValue.isEmpty()) {
-                    QColor color(colorValue);
-                    if (!color.isValid()) {
-                        themeWarningLog() << "Color value" << colorValue << "for" << colorName << "was not recognized.";
-                        return QColor();
-                    }
-                    return color;
-                }
-                return QColor();
-            };
-            auto readAndSetColor = [&](QPalette::ColorRole role, QString colorName) {
-                auto color = readColor(colorName);
-                if (color.isValid()) {
-                    palette.setColor(role, color);
-                } else {
-                    themeDebugLog() << "Color value for" << colorName << "was not present.";
-                }
-            };
-
-            // palette
-            readAndSetColor(QPalette::Window, "Window");
-            readAndSetColor(QPalette::WindowText, "WindowText");
-            readAndSetColor(QPalette::Base, "Base");
-            readAndSetColor(QPalette::AlternateBase, "AlternateBase");
-            readAndSetColor(QPalette::ToolTipBase, "ToolTipBase");
-            readAndSetColor(QPalette::ToolTipText, "ToolTipText");
-            readAndSetColor(QPalette::Text, "Text");
-            readAndSetColor(QPalette::Button, "Button");
-            readAndSetColor(QPalette::ButtonText, "ButtonText");
-            readAndSetColor(QPalette::BrightText, "BrightText");
-            readAndSetColor(QPalette::Link, "Link");
-            readAndSetColor(QPalette::Highlight, "Highlight");
-            readAndSetColor(QPalette::HighlightedText, "HighlightedText");
-
-            // fade
-            fadeColor = readColor("fadeColor");
-            fadeAmount = Json::ensureDouble(colorsRoot, "fadeAmount", 0.5, "fade amount");
-
-        } catch (const Exception& e) {
-            themeWarningLog() << "Couldn't load theme json: " << e.cause();
-            return false;
-        }
-    } else {
-        themeDebugLog() << "No theme json present.";
-        return false;
-    }
-    return true;
-}
-
-static bool writeThemeJson(const QString& path,
-                           const QPalette& palette,
-                           double fadeAmount,
-                           QColor fadeColor,
-                           QString name,
-                           QString widgets,
-                           QString qssFilePath)
-{
-    QJsonObject rootObj;
-    rootObj.insert("name", name);
-    rootObj.insert("widgets", widgets);
-    rootObj.insert("qssFilePath", qssFilePath);
-
-    QJsonObject colorsObj;
-    auto insertColor = [&](QPalette::ColorRole role, QString colorName) { colorsObj.insert(colorName, palette.color(role).name()); };
-
-    // palette
-    insertColor(QPalette::Window, "Window");
-    insertColor(QPalette::WindowText, "WindowText");
-    insertColor(QPalette::Base, "Base");
-    insertColor(QPalette::AlternateBase, "AlternateBase");
-    insertColor(QPalette::ToolTipBase, "ToolTipBase");
-    insertColor(QPalette::ToolTipText, "ToolTipText");
-    insertColor(QPalette::Text, "Text");
-    insertColor(QPalette::Button, "Button");
-    insertColor(QPalette::ButtonText, "ButtonText");
-    insertColor(QPalette::BrightText, "BrightText");
-    insertColor(QPalette::Link, "Link");
-    insertColor(QPalette::Highlight, "Highlight");
-    insertColor(QPalette::HighlightedText, "HighlightedText");
-
-    // fade
-    colorsObj.insert("fadeColor", fadeColor.name());
-    colorsObj.insert("fadeAmount", fadeAmount);
-
-    rootObj.insert("colors", colorsObj);
-    try {
-        Json::write(rootObj, path);
-        return true;
-    } catch ([[maybe_unused]] const Exception& e) {
-        themeWarningLog() << "Failed to write theme json to" << path;
-        return false;
-    }
-}
-
 /// @param baseTheme Base Theme
 /// @param fileInfo FileInfo object for file to load
 /// @param isManifest whether to load a theme manifest or a qss file
@@ -176,21 +62,20 @@ CustomTheme::CustomTheme(ITheme* baseTheme, QFileInfo& fileInfo, bool isManifest
 
         auto themeFilePath = FS::PathCombine(path, themeFile);
 
-        bool jsonDataIncomplete = false;
-
         m_palette = baseTheme->colorScheme();
-        if (readThemeJson(themeFilePath, m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath, jsonDataIncomplete)) {
+
+        bool hasCustomLogColors = false;
+
+        if (read(themeFilePath, hasCustomLogColors)) {
             // If theme data was found, fade "Disabled" color of each role according to FadeAmount
             m_palette = fadeInactive(m_palette, m_fadeAmount, m_fadeColor);
+
+            if (!hasCustomLogColors)
+                m_logColors = defaultLogColors(m_palette);
         } else {
             themeDebugLog() << "Did not read theme json file correctly, not changing theme, keeping previous.";
+            m_logColors = defaultLogColors(m_palette);
             return;
-        }
-
-        // FIXME: This is kinda jank, it only actually checks if the qss file path is not present. It should actually check for any relevant
-        // missing data (e.g. name, colors)
-        if (jsonDataIncomplete) {
-            writeThemeJson(fileInfo.absoluteFilePath(), m_palette, m_fadeAmount, m_fadeColor, m_name, m_widgets, m_qssFilePath);
         }
 
         auto qssFilePath = FS::PathCombine(path, m_qssFilePath);
@@ -251,11 +136,6 @@ QString CustomTheme::name()
     return m_name;
 }
 
-bool CustomTheme::hasColorScheme()
-{
-    return true;
-}
-
 QPalette CustomTheme::colorScheme()
 {
     return m_palette;
@@ -284,4 +164,104 @@ QColor CustomTheme::fadeColor()
 QString CustomTheme::qtTheme()
 {
     return m_widgets;
+}
+QString CustomTheme::tooltip()
+{
+    return m_tooltip;
+}
+
+bool CustomTheme::read(const QString& path, bool& hasCustomLogColors)
+{
+    QFileInfo pathInfo(path);
+    if (pathInfo.exists() && pathInfo.isFile()) {
+        try {
+            auto doc = Json::requireDocument(path, "Theme JSON file");
+            const QJsonObject root = doc.object();
+            m_name = Json::requireString(root, "name", "Theme name");
+            m_widgets = Json::requireString(root, "widgets", "Qt widget theme");
+            m_qssFilePath = Json::ensureString(root, "qssFilePath", "themeStyle.css");
+
+            auto readColor = [&](const QJsonObject& colors, const QString& colorName) -> QColor {
+                auto colorValue = Json::ensureString(colors, colorName, QString());
+                if (!colorValue.isEmpty()) {
+                    QColor color(colorValue);
+                    if (!color.isValid()) {
+                        themeWarningLog() << "Color value" << colorValue << "for" << colorName << "was not recognized.";
+                        return {};
+                    }
+                    return color;
+                }
+                return {};
+            };
+
+            if (root.contains("colors")) {
+                auto colorsRoot = Json::requireObject(root, "colors");
+                auto readAndSetPaletteColor = [&](QPalette::ColorRole role, const QString& colorName) {
+                    auto color = readColor(colorsRoot, colorName);
+                    if (color.isValid()) {
+                        m_palette.setColor(role, color);
+                    } else {
+                        themeDebugLog() << "Color value for" << colorName << "was not present.";
+                    }
+                };
+
+                // palette
+                readAndSetPaletteColor(QPalette::Window, "Window");
+                readAndSetPaletteColor(QPalette::WindowText, "WindowText");
+                readAndSetPaletteColor(QPalette::Base, "Base");
+                readAndSetPaletteColor(QPalette::AlternateBase, "AlternateBase");
+                readAndSetPaletteColor(QPalette::ToolTipBase, "ToolTipBase");
+                readAndSetPaletteColor(QPalette::ToolTipText, "ToolTipText");
+                readAndSetPaletteColor(QPalette::Text, "Text");
+                readAndSetPaletteColor(QPalette::Button, "Button");
+                readAndSetPaletteColor(QPalette::ButtonText, "ButtonText");
+                readAndSetPaletteColor(QPalette::BrightText, "BrightText");
+                readAndSetPaletteColor(QPalette::Link, "Link");
+                readAndSetPaletteColor(QPalette::Highlight, "Highlight");
+                readAndSetPaletteColor(QPalette::HighlightedText, "HighlightedText");
+
+                // fade
+                m_fadeColor = readColor(colorsRoot, "fadeColor");
+                m_fadeAmount = Json::ensureDouble(colorsRoot, "fadeAmount", 0.5, "fade amount");
+            }
+
+            if (root.contains("logColors")) {
+                hasCustomLogColors = true;
+
+                auto logColorsRoot = Json::requireObject(root, "logColors");
+                auto readAndSetLogColor = [&](MessageLevel::Enum level, bool fg, const QString& colorName) {
+                    auto color = readColor(logColorsRoot, colorName);
+                    if (color.isValid()) {
+                        if (fg)
+                            m_logColors.foreground[level] = color;
+                        else
+                            m_logColors.background[level] = color;
+                    } else {
+                        themeDebugLog() << "Color value for" << colorName << "was not present.";
+                    }
+                };
+
+                readAndSetLogColor(MessageLevel::Message, false, "MessageHighlight");
+                readAndSetLogColor(MessageLevel::Launcher, false, "LauncherHighlight");
+                readAndSetLogColor(MessageLevel::Debug, false, "DebugHighlight");
+                readAndSetLogColor(MessageLevel::Warning, false, "WarningHighlight");
+                readAndSetLogColor(MessageLevel::Error, false, "ErrorHighlight");
+                readAndSetLogColor(MessageLevel::Fatal, false, "FatalHighlight");
+
+                readAndSetLogColor(MessageLevel::Message, true, "Message");
+                readAndSetLogColor(MessageLevel::Launcher, true, "Launcher");
+                readAndSetLogColor(MessageLevel::Debug, true, "Debug");
+                readAndSetLogColor(MessageLevel::Warning, true, "Warning");
+                readAndSetLogColor(MessageLevel::Error, true, "Error");
+                readAndSetLogColor(MessageLevel::Fatal, true, "Fatal");
+            }
+        } catch (const Exception& e) {
+            themeWarningLog() << "Couldn't load theme json: " << e.cause();
+            return false;
+        }
+    } else {
+        themeDebugLog() << "No theme json present.";
+        return false;
+    }
+    return true;
 }

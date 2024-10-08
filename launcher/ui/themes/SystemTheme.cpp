@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 Tayou <git@tayou.org>
+ *  Copyright (C) 2024 TheKodeToad <TheKodeToad@proton.me>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,59 +35,75 @@
  */
 #include "SystemTheme.h"
 #include <QApplication>
-#include <QDebug>
 #include <QStyle>
 #include <QStyleFactory>
+#include "HintOverrideProxyStyle.h"
 #include "ThemeManager.h"
 
-SystemTheme::SystemTheme()
+SystemTheme::SystemTheme(const QString& styleName, const QPalette& palette, bool isDefaultTheme)
 {
-    themeDebugLog() << "Determining System Theme...";
-    const auto& style = QApplication::style();
-    systemPalette = QApplication::palette();
-    QString lowerThemeName = style->objectName();
-    themeDebugLog() << "System theme seems to be:" << lowerThemeName;
-    QStringList styles = QStyleFactory::keys();
-    for (auto& st : styles) {
-        themeDebugLog() << "Considering theme from theme factory:" << st.toLower();
-        if (st.toLower() == lowerThemeName) {
-            systemTheme = st;
-            themeDebugLog() << "System theme has been determined to be:" << systemTheme;
-            return;
-        }
-    }
-    // fall back to fusion if we can't find the current theme.
-    systemTheme = "Fusion";
-    themeDebugLog() << "System theme not found, defaulted to Fusion";
+    themeName = isDefaultTheme ? "system" : styleName;
+    widgetTheme = styleName;
+    colorPalette = palette;
 }
 
 void SystemTheme::apply(bool initial)
 {
     // See https://github.com/MultiMC/Launcher/issues/1790
     // or https://github.com/PrismLauncher/PrismLauncher/issues/490
-    if (initial)
+    if (initial) {
+        QApplication::setStyle(new HintOverrideProxyStyle(QStyleFactory::create(qtTheme())));
         return;
+    }
+
     ITheme::apply(initial);
 }
 
 QString SystemTheme::id()
 {
-    return "system";
+    return themeName;
 }
 
 QString SystemTheme::name()
 {
-    return QObject::tr("System");
+    if (themeName.toLower() == "windowsvista") {
+        return QObject::tr("Windows Vista");
+    } else if (themeName.toLower() == "windows") {
+        return QObject::tr("Windows 9x");
+    } else if (themeName.toLower() == "windows11") {
+        return QObject::tr("Windows 11");
+    } else if (themeName.toLower() == "system") {
+        return QObject::tr("System");
+    } else {
+        return themeName;
+    }
+}
+
+QString SystemTheme::tooltip()
+{
+    if (themeName.toLower() == "windowsvista") {
+        return QObject::tr("Widget style trying to look like your win32 theme");
+    } else if (themeName.toLower() == "windows") {
+        return QObject::tr("Windows 9x inspired widget style");
+    } else if (themeName.toLower() == "windows11") {
+        return QObject::tr("WinUI 3 inspired Qt widget style");
+    } else if (themeName.toLower() == "fusion") {
+        return QObject::tr("The default Qt widget style");
+    } else if (themeName.toLower() == "system") {
+        return QObject::tr("Your current system theme");
+    } else {
+        return "";
+    }
 }
 
 QString SystemTheme::qtTheme()
 {
-    return systemTheme;
+    return widgetTheme;
 }
 
 QPalette SystemTheme::colorScheme()
 {
-    return systemPalette;
+    return colorPalette;
 }
 
 QString SystemTheme::appStyleSheet()
@@ -107,9 +124,4 @@ QColor SystemTheme::fadeColor()
 bool SystemTheme::hasStyleSheet()
 {
     return false;
-}
-
-bool SystemTheme::hasColorScheme()
-{
-    return true;
 }

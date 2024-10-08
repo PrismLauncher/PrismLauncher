@@ -40,6 +40,7 @@
 #include "ui_ImportPage.h"
 
 #include <QFileDialog>
+#include <QMimeDatabase>
 #include <QValidator>
 #include <utility>
 
@@ -51,6 +52,7 @@
 #include "Json.h"
 
 #include "InstanceImportTask.h"
+#include "net/NetJob.h"
 
 class UrlValidator : public QValidator {
    public:
@@ -102,7 +104,7 @@ void ImportPage::updateState()
         return;
     }
     if (ui->modpackEdit->hasAcceptableInput()) {
-        QString input = ui->modpackEdit->text();
+        QString input = ui->modpackEdit->text().trimmed();
         auto url = QUrl::fromUserInput(input);
         if (url.isLocalFile()) {
             // FIXME: actually do some validation of what's inside here... this is fake AF

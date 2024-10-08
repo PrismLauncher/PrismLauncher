@@ -9,7 +9,7 @@ class FMLLibrariesTask : public Task {
     Q_OBJECT
    public:
     FMLLibrariesTask(MinecraftInstance* inst);
-    virtual ~FMLLibrariesTask(){};
+    virtual ~FMLLibrariesTask() = default;
 
     void executeTask() override;
 

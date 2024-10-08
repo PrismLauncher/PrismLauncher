@@ -282,7 +282,7 @@ void PackInstallTask::deleteExistingFiles()
 
     // Delete the files
     for (const auto& item : filesToDelete) {
-        QFile::remove(item);
+        FS::deletePath(item);
     }
 }
 
@@ -343,9 +343,7 @@ QString PackInstallTask::getVersionForLoader(QString uid)
             return Q_NULLPTR;
         }
 
-        if (!vlist->isLoaded()) {
-            vlist->load(Net::Mode::Online);
-        }
+        vlist->waitToLoad();
 
         if (m_version.loader.recommended || m_version.loader.latest) {
             for (int i = 0; i < vlist->versions().size(); i++) {
@@ -638,8 +636,7 @@ void PackInstallTask::installConfigs()
 
     auto dl = Net::ApiDownload::makeCached(url, entry);
     if (!m_version.configs.sha1.isEmpty()) {
-        auto rawSha1 = QByteArray::fromHex(m_version.configs.sha1.toLatin1());
-        dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, rawSha1));
+        dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Sha1, m_version.configs.sha1));
     }
     jobPtr->addNetAction(dl);
     archivePath = entry->getFullPath();
@@ -758,8 +755,7 @@ void PackInstallTask::downloadMods()
 
             auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
-                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             jobPtr->addNetAction(dl);
         } else if (mod.type == ModType::Decomp) {
@@ -769,8 +765,7 @@ void PackInstallTask::downloadMods()
 
             auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
-                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             jobPtr->addNetAction(dl);
         } else {
@@ -783,8 +778,7 @@ void PackInstallTask::downloadMods()
 
             auto dl = Net::ApiDownload::makeCached(url, entry);
             if (!mod.md5.isEmpty()) {
-                auto rawMd5 = QByteArray::fromHex(mod.md5.toLatin1());
-                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, rawMd5));
+                dl->addValidator(new Net::ChecksumValidator(QCryptographicHash::Md5, mod.md5));
             }
             jobPtr->addNetAction(dl);
 
@@ -987,7 +981,7 @@ bool PackInstallTask::extractMods(const QMap<QString, VersionMod>& toExtract,
         // the copy from the Configs.zip
         QFileInfo fileInfo(to);
         if (fileInfo.exists()) {
-            if (!QFile::remove(to)) {
+            if (!FS::deletePath(to)) {
                 qWarning() << "Failed to delete" << to;
                 return false;
             }
@@ -1031,6 +1025,12 @@ void PackInstallTask::install()
             return;
 
         components->setComponentVersion("net.minecraftforge", version);
+    } else if (m_version.loader.type == QString("neoforge")) {
+        auto version = getVersionForLoader("net.neoforged");
+        if (version == Q_NULLPTR)
+            return;
+
+        components->setComponentVersion("net.neoforged", version);
     } else if (m_version.loader.type == QString("fabric")) {
         auto version = getVersionForLoader("net.fabricmc.fabric-loader");
         if (version == Q_NULLPTR)
@@ -1069,36 +1069,7 @@ void PackInstallTask::install()
 
 static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
 {
-    auto vlist = APPLICATION->metadataIndex()->get(uid);
-    if (!vlist)
-        return {};
-
-    if (!vlist->isLoaded()) {
-        QEventLoop loadVersionLoop;
-        auto task = vlist->getLoadTask();
-        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
-        if (!task->isRunning())
-            task->start();
-
-        loadVersionLoop.exec();
-    }
-
-    auto ver = vlist->getVersion(version);
-    if (!ver)
-        return {};
-
-    if (!ver->isLoaded()) {
-        QEventLoop loadVersionLoop;
-        ver->load(Net::Mode::Online);
-        auto task = ver->getCurrentTask();
-        QObject::connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
-        if (!task->isRunning())
-            task->start();
-
-        loadVersionLoop.exec();
-    }
-
-    return ver;
+    return APPLICATION->metadataIndex()->getLoadedVersion(uid, version);
 }
 
 }  // namespace ATLauncher

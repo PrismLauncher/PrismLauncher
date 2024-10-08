@@ -35,9 +35,8 @@
 
 #pragma once
 
-#include "net/NetAction.h"
-
 #include "Validator.h"
+#include "tasks/Task.h"
 
 namespace Net {
 class Sink {

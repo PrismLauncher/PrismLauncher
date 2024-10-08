@@ -1,18 +1,17 @@
 #pragma once
 
-#include "Application.h"
 #include "modplatform/CheckUpdateTask.h"
-#include "net/NetJob.h"
 
 class ModrinthCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
 
    public:
     ModrinthCheckUpdate(QList<Resource*>& resources,
-                        std::list<Version>& mcVersions,
-                        std::optional<ModPlatform::ModLoaderTypes> loaders,
-                        std::shared_ptr<ResourceFolderModel> resource_model)
-        : CheckUpdateTask(resources, mcVersions, loaders, resource_model)
+                                             std::list<Version>& mcVersions,
+                                             QList<ModPlatform::ModLoaderType> loadersList,
+                                             std::shared_ptr<ResourceFolderModel> resourceModel)
+        : CheckUpdateTask(resources, mcVersions, loadersList, resourceModel)
+        , m_hash_type(ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first())
     {}
 
    public slots:
@@ -20,7 +19,13 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
 
    protected slots:
     void executeTask() override;
+    void getUpdateModsForLoader(ModPlatform::ModLoaderTypes loader, bool forceModLoaderCheck = false);
+    void checkVersionsResponse(std::shared_ptr<QByteArray> response, ModPlatform::ModLoaderTypes loader, bool forceModLoaderCheck = false);
+    void checkNextLoader();
 
    private:
-    NetJob::Ptr m_net_job = nullptr;
+    Task::Ptr m_job = nullptr;
+    QHash<QString, Resource*> m_mappings;
+    QString m_hash_type;
+    int m_next_loader_idx = 0;
 };

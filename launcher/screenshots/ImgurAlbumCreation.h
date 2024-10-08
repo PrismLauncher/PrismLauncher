@@ -49,7 +49,7 @@ class ImgurAlbumCreation : public Net::NetRequest {
 
     class Sink : public Net::Sink {
        public:
-        Sink(std::shared_ptr<Result> res) : m_result(res){};
+        Sink(std::shared_ptr<Result> res) : m_result(res) {};
         virtual ~Sink() = default;
 
        public:
@@ -66,8 +66,6 @@ class ImgurAlbumCreation : public Net::NetRequest {
 
     static NetRequest::Ptr make(std::shared_ptr<Result> output, QList<ScreenShot::Ptr> screenshots);
     QNetworkReply* getReply(QNetworkRequest& request) override;
-
-    void init() override;
 
    private:
     QList<ScreenShot::Ptr> m_screenshots;

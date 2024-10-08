@@ -22,8 +22,7 @@
 #include <QTextEdit>
 #include "FileSystem.h"
 #include "Markdown.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/mod/ModFolderModel.h"
+#include "StringUtils.h"
 #include "modplatform/helpers/ExportToModList.h"
 #include "ui_ExportToModListDialog.h"
 
@@ -41,38 +40,31 @@ const QHash<ExportToModList::Formats, QString> ExportToModListDialog::exampleLin
     { ExportToModList::CSV, "{name},{url},{version},\"{authors}\"" },
 };
 
-ExportToModListDialog::ExportToModListDialog(InstancePtr instance, QWidget* parent)
-    : QDialog(parent), m_template_changed(false), name(instance->name()), ui(new Ui::ExportToModListDialog)
+ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWidget* parent)
+    : QDialog(parent), m_mods(mods), m_template_changed(false), m_name(name), ui(new Ui::ExportToModListDialog)
 {
     ui->setupUi(this);
     enableCustom(false);
-
-    MinecraftInstance* mcInstance = dynamic_cast<MinecraftInstance*>(instance.get());
-    if (mcInstance) {
-        mcInstance->loaderModList()->update();
-        connect(mcInstance->loaderModList().get(), &ModFolderModel::updateFinished, this, [this, mcInstance]() {
-            m_allMods = mcInstance->loaderModList()->allMods();
-            triggerImp();
-        });
-    }
 
     connect(ui->formatComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ExportToModListDialog::formatChanged);
     connect(ui->authorsCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->versionCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->urlCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
+    connect(ui->filenameCheckBox, &QCheckBox::stateChanged, this, &ExportToModListDialog::trigger);
     connect(ui->authorsButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Authors); });
     connect(ui->versionButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Version); });
     connect(ui->urlButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::Url); });
+    connect(ui->filenameButton, &QPushButton::clicked, this, [this](bool) { addExtra(ExportToModList::FileName); });
     connect(ui->templateText, &QTextEdit::textChanged, this, [this] {
-        if (ui->templateText->toPlainText() != exampleLines[format])
+        if (ui->templateText->toPlainText() != exampleLines[m_format])
             ui->formatComboBox->setCurrentIndex(5);
-        else
-            triggerImp();
+        triggerImp();
     });
     connect(ui->copyButton, &QPushButton::clicked, this, [this](bool) {
         this->ui->finalText->selectAll();
         this->ui->finalText->copy();
     });
+    triggerImp();
 }
 
 ExportToModListDialog::~ExportToModListDialog()
@@ -86,38 +78,38 @@ void ExportToModListDialog::formatChanged(int index)
         case 0: {
             enableCustom(false);
             ui->resultText->show();
-            format = ExportToModList::HTML;
+            m_format = ExportToModList::HTML;
             break;
         }
         case 1: {
             enableCustom(false);
             ui->resultText->show();
-            format = ExportToModList::MARKDOWN;
+            m_format = ExportToModList::MARKDOWN;
             break;
         }
         case 2: {
             enableCustom(false);
             ui->resultText->hide();
-            format = ExportToModList::PLAINTXT;
+            m_format = ExportToModList::PLAINTXT;
             break;
         }
         case 3: {
             enableCustom(false);
             ui->resultText->hide();
-            format = ExportToModList::JSON;
+            m_format = ExportToModList::JSON;
             break;
         }
         case 4: {
             enableCustom(false);
             ui->resultText->hide();
-            format = ExportToModList::CSV;
+            m_format = ExportToModList::CSV;
             break;
         }
         case 5: {
             m_template_changed = true;
             enableCustom(true);
             ui->resultText->hide();
-            format = ExportToModList::CUSTOM;
+            m_format = ExportToModList::CUSTOM;
             break;
         }
     }
@@ -126,8 +118,8 @@ void ExportToModListDialog::formatChanged(int index)
 
 void ExportToModListDialog::triggerImp()
 {
-    if (format == ExportToModList::CUSTOM) {
-        ui->finalText->setPlainText(ExportToModList::exportToModList(m_allMods, ui->templateText->toPlainText()));
+    if (m_format == ExportToModList::CUSTOM) {
+        ui->finalText->setPlainText(ExportToModList::exportToModList(m_mods, ui->templateText->toPlainText()));
         return;
     }
     auto opt = 0;
@@ -137,16 +129,18 @@ void ExportToModListDialog::triggerImp()
         opt |= ExportToModList::Version;
     if (ui->urlCheckBox->isChecked())
         opt |= ExportToModList::Url;
-    auto txt = ExportToModList::exportToModList(m_allMods, format, static_cast<ExportToModList::OptionalData>(opt));
+    if (ui->filenameCheckBox->isChecked())
+        opt |= ExportToModList::FileName;
+    auto txt = ExportToModList::exportToModList(m_mods, m_format, static_cast<ExportToModList::OptionalData>(opt));
     ui->finalText->setPlainText(txt);
-    switch (format) {
+    switch (m_format) {
         case ExportToModList::CUSTOM:
             return;
         case ExportToModList::HTML:
-            ui->resultText->setHtml(txt);
+            ui->resultText->setHtml(StringUtils::htmlListPatch(txt));
             break;
         case ExportToModList::MARKDOWN:
-            ui->resultText->setHtml(markdownToHTML(txt));
+            ui->resultText->setHtml(StringUtils::htmlListPatch(markdownToHTML(txt)));
             break;
         case ExportToModList::PLAINTXT:
             break;
@@ -155,7 +149,7 @@ void ExportToModListDialog::triggerImp()
         case ExportToModList::CSV:
             break;
     }
-    auto exampleLine = exampleLines[format];
+    auto exampleLine = exampleLines[m_format];
     if (!m_template_changed && ui->templateText->toPlainText() != exampleLine)
         ui->templateText->setPlainText(exampleLine);
 }
@@ -163,14 +157,19 @@ void ExportToModListDialog::triggerImp()
 void ExportToModListDialog::done(int result)
 {
     if (result == Accepted) {
-        const QString filename = FS::RemoveInvalidFilenameChars(name);
+        const QString filename = FS::RemoveInvalidFilenameChars(m_name);
         const QString output =
-            QFileDialog::getSaveFileName(this, tr("Export %1").arg(name), FS::PathCombine(QDir::homePath(), filename + extension()),
-                                         "File (*.txt *.html *.md *.json *.csv)", nullptr);
+            QFileDialog::getSaveFileName(this, tr("Export %1").arg(m_name), FS::PathCombine(QDir::homePath(), filename + extension()),
+                                         tr("File") + " (*.txt *.html *.md *.json *.csv)", nullptr);
 
         if (output.isEmpty())
             return;
-        FS::write(output, ui->finalText->toPlainText().toUtf8());
+
+        try {
+            FS::write(output, ui->finalText->toPlainText().toUtf8());
+        } catch (const FS::FileSystemException& e) {
+            qCritical() << "Failed to save mod list file :" << e.cause();
+        }
     }
 
     QDialog::done(result);
@@ -178,7 +177,7 @@ void ExportToModListDialog::done(int result)
 
 QString ExportToModListDialog::extension()
 {
-    switch (format) {
+    switch (m_format) {
         case ExportToModList::HTML:
             return ".html";
         case ExportToModList::MARKDOWN:
@@ -197,7 +196,7 @@ QString ExportToModListDialog::extension()
 
 void ExportToModListDialog::addExtra(ExportToModList::OptionalData option)
 {
-    if (format != ExportToModList::CUSTOM)
+    if (m_format != ExportToModList::CUSTOM)
         return;
     switch (option) {
         case ExportToModList::Authors:
@@ -208,6 +207,9 @@ void ExportToModListDialog::addExtra(ExportToModList::OptionalData option)
             break;
         case ExportToModList::Version:
             ui->templateText->insertPlainText("{version}");
+            break;
+        case ExportToModList::FileName:
+            ui->templateText->insertPlainText("{filename}");
             break;
     }
 }
@@ -221,4 +223,7 @@ void ExportToModListDialog::enableCustom(bool enabled)
 
     ui->urlCheckBox->setHidden(enabled);
     ui->urlButton->setHidden(!enabled);
+
+    ui->filenameCheckBox->setHidden(enabled);
+    ui->filenameButton->setHidden(!enabled);
 }

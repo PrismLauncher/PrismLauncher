@@ -19,13 +19,13 @@
 #include <launch/LaunchStep.h>
 #include <minecraft/auth/AuthSession.h>
 
-#include "MinecraftServerTarget.h"
+#include "MinecraftTarget.h"
 
 class LauncherPartLaunch : public LaunchStep {
     Q_OBJECT
    public:
     explicit LauncherPartLaunch(LaunchTask* parent);
-    virtual ~LauncherPartLaunch(){};
+    virtual ~LauncherPartLaunch() = default;
 
     virtual void executeTask();
     virtual bool abort();
@@ -34,7 +34,7 @@ class LauncherPartLaunch : public LaunchStep {
     void setWorkingDirectory(const QString& wd);
     void setAuthSession(AuthSessionPtr session) { m_session = session; }
 
-    void setServerToJoin(MinecraftServerTargetPtr serverToJoin) { m_serverToJoin = std::move(serverToJoin); }
+    void setTargetToJoin(MinecraftTarget::Ptr targetToJoin) { m_targetToJoin = std::move(targetToJoin); }
 
    private slots:
     void on_state(LoggedProcess::State state);
@@ -44,7 +44,7 @@ class LauncherPartLaunch : public LaunchStep {
     QString m_command;
     AuthSessionPtr m_session;
     QString m_launchScript;
-    MinecraftServerTargetPtr m_serverToJoin;
+    MinecraftTarget::Ptr m_targetToJoin;
 
     bool mayProceed = false;
 };

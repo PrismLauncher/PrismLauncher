@@ -98,6 +98,7 @@ ExternalResourcesPage::ExternalResourcesPage(BaseInstance* instance, std::shared
 
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, updateExtra);
     connect(model.get(), &ResourceFolderModel::updateFinished, this, updateExtra);
+    connect(model.get(), &ResourceFolderModel::parseFinished, this, updateExtra);
 
     connect(selection_model, &QItemSelectionModel::selectionChanged, this, [this] { updateActions(); });
     connect(m_model.get(), &ResourceFolderModel::rowsInserted, this, [this] { updateActions(); });

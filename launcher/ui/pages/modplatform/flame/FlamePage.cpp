@@ -43,6 +43,7 @@
 #include "FlameModel.h"
 #include "InstanceImportTask.h"
 #include "Json.h"
+#include "StringUtils.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
@@ -55,7 +56,6 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), ui(new Ui::FlamePage), dialog(dialog), m_fetch_progress(this, false)
 {
     ui->setupUi(this);
-    connect(ui->searchButton, &QPushButton::clicked, this, &FlamePage::triggerSearch);
     ui->searchEdit->installEventFilter(this);
     listModel = new Flame::ListModel(this);
     ui->packView->setModel(listModel);
@@ -72,7 +72,7 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     m_fetch_progress.setFixedHeight(24);
     m_fetch_progress.progressFormat("");
 
-    ui->gridLayout->addWidget(&m_fetch_progress, 2, 0, 1, ui->gridLayout->columnCount());
+    ui->verticalLayout->insertWidget(2, &m_fetch_progress);
 
     // index is used to set the sorting with the curseforge api
     ui->sortByBox->addItem(tr("Sort by Featured"));
@@ -84,7 +84,7 @@ FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
 
     connect(ui->sortByBox, SIGNAL(currentIndexChanged(int)), this, SLOT(triggerSearch()));
     connect(ui->packView->selectionModel(), &QItemSelectionModel::currentChanged, this, &FlamePage::onSelectionChanged);
-    connect(ui->versionSelectionBox, &QComboBox::currentTextChanged, this, &FlamePage::onVersionSelectionChanged);
+    connect(ui->versionSelectionBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &FlamePage::onVersionSelectionChanged);
 
     ui->packView->setItemDelegate(new ProjectItemDelegate(this));
     ui->packDescription->setMetaEntry("FlamePacks");
@@ -178,7 +178,11 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
             for (auto version : current.versions) {
                 auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
-                ui->versionSelectionBox->addItem(QString("%1%2").arg(version.version, release_type), QVariant(version.downloadUrl));
+                auto mcVersion = !version.mcVersion.isEmpty() && !version.version.contains(version.mcVersion)
+                                     ? QString(" for %1").arg(version.mcVersion)
+                                     : "";
+                ui->versionSelectionBox->addItem(QString("%1%2%3").arg(version.version, mcVersion, release_type),
+                                                 QVariant(version.downloadUrl));
             }
 
             QVariant current_updated;
@@ -236,17 +240,17 @@ void FlamePage::suggestCurrent()
                        [this, editedLogoName](QString logo) { dialog->setSuggestedIconFromFile(logo, editedLogoName); });
 }
 
-void FlamePage::onVersionSelectionChanged(QString version)
+void FlamePage::onVersionSelectionChanged(int index)
 {
     bool is_blocked = false;
     ui->versionSelectionBox->currentData().toInt(&is_blocked);
 
-    if (version.isNull() || version.isEmpty() || is_blocked) {
+    if (index == -1 || is_blocked) {
         m_selected_version_index = -1;
         return;
     }
 
-    m_selected_version_index = ui->versionSelectionBox->currentIndex();
+    m_selected_version_index = index;
 
     Q_ASSERT(current.versions.at(m_selected_version_index).downloadUrl == ui->versionSelectionBox->currentData().toString());
 
@@ -292,6 +296,6 @@ void FlamePage::updateUi()
     text += "<hr>";
     text += api.getModDescription(current.addonId).toUtf8();
 
-    ui->packDescription->setHtml(text + current.description);
+    ui->packDescription->setHtml(StringUtils::htmlListPatch(text + current.description));
     ui->packDescription->flush();
 }

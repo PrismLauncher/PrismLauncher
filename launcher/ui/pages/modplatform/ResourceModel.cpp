@@ -317,8 +317,10 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     if (QPixmapCache::find(url.toString(), &pixmap))
         return { pixmap };
 
-    if (!m_current_icon_job)
+    if (!m_current_icon_job) {
         m_current_icon_job.reset(new NetJob("IconJob", APPLICATION->network()));
+        m_current_icon_job->setAskRetry(false);
+    }
 
     if (m_currently_running_icon_actions.contains(url))
         return {};
@@ -331,7 +333,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     auto icon_fetch_action = Net::ApiDownload::makeCached(url, cache_entry);
 
     auto full_file_path = cache_entry->getFullPath();
-    connect(icon_fetch_action.get(), &NetAction::succeeded, this, [=] {
+    connect(icon_fetch_action.get(), &Task::succeeded, this, [=] {
         auto icon = QIcon(full_file_path);
         QPixmapCache::insert(url.toString(), icon.pixmap(icon.actualSize({ 64, 64 })));
 
@@ -339,7 +341,7 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
 
         emit dataChanged(index, index, { Qt::DecorationRole });
     });
-    connect(icon_fetch_action.get(), &NetAction::failed, this, [=] {
+    connect(icon_fetch_action.get(), &Task::failed, this, [=] {
         m_currently_running_icon_actions.remove(url);
         m_failed_icon_actions.insert(url);
     });
@@ -410,12 +412,17 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
         m_search_state = SearchState::CanFetchMore;
     }
 
+    QList<ModPlatform::IndexedPack::Ptr> filteredNewList;
+    for (auto p : newList)
+        if (checkFilters(p))
+            filteredNewList << p;
+
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
-    if (newList.size() == 0)
+    if (filteredNewList.size() == 0)
         return;
 
-    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + newList.size() - 1);
-    m_packs.append(newList);
+    beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + filteredNewList.size() - 1);
+    m_packs.append(filteredNewList);
     endInsertRows();
 }
 
@@ -558,4 +565,8 @@ void ResourceModel::removePack(const QString& rem)
         ver.is_currently_selected = false;
 }
 
+bool ResourceModel::checkVersionFilters(const ModPlatform::IndexedVersion& v)
+{
+    return (!optedOut(v));
+}
 }  // namespace ResourceDownload

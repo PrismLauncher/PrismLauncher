@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>511</width>
-    <height>629</height>
+    <height>726</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -58,6 +58,33 @@
             </property>
            </widget>
           </item>
+          <item>
+           <layout class="QFormLayout" name="updateSetingsLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="updateIntervalLabel">
+              <property name="text">
+               <string>Update interval</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="updateIntervalSpinBox">
+              <property name="toolTip">
+               <string>Set it to 0 to only check on launch</string>
+              </property>
+              <property name="suffix">
+               <string>h</string>
+              </property>
+              <property name="minimum">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <number>99999999</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>
@@ -67,7 +94,7 @@
           <string>Folders</string>
          </property>
          <layout class="QGridLayout" name="foldersBoxLayout">
-          <item row="3" column="0">
+          <item row="8" column="0">
            <widget class="QLabel" name="labelDownloadsDir">
             <property name="text">
              <string>&amp;Downloads:</string>
@@ -77,39 +104,59 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="labelInstDir">
-            <property name="text">
-             <string>I&amp;nstances:</string>
-            </property>
-            <property name="buddy">
-             <cstring>instDirTextBox</cstring>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="instDirTextBox"/>
-          </item>
-          <item row="3" column="1">
-           <widget class="QLineEdit" name="downloadsDirTextBox"/>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="iconsDirTextBox"/>
-          </item>
-          <item row="3" column="2">
+          <item row="8" column="2">
            <widget class="QToolButton" name="downloadsDirBrowseBtn">
             <property name="text">
              <string>Browse</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="modsDirTextBox"/>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="iconsDirTextBox"/>
           </item>
-          <item row="1" column="2">
-           <widget class="QToolButton" name="modsDirBrowseBtn">
+          <item row="3" column="1">
+           <widget class="QLineEdit" name="javaDirTextBox"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="labelSkinsDir">
             <property name="text">
-             <string>Browse</string>
+             <string>&amp;Skins:</string>
+            </property>
+            <property name="buddy">
+             <cstring>skinsDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelIconsDir">
+            <property name="text">
+             <string>&amp;Icons:</string>
+            </property>
+            <property name="buddy">
+             <cstring>iconsDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1" colspan="2">
+           <widget class="QCheckBox" name="downloadsDirWatchRecursiveCheckBox">
+            <property name="toolTip">
+             <string>When enabled, in addition to the downloads folder, its sub folders will also be searched when looking for resources (e.g. when looking for blocked mods on CurseForge).</string>
+            </property>
+            <property name="text">
+             <string>Check downloads folder recursively</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QLineEdit" name="downloadsDirTextBox"/>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="labelJavaDir">
+            <property name="text">
+             <string>&amp;Java:</string>
+            </property>
+            <property name="buddy">
+             <cstring>javaDirTextBox</cstring>
             </property>
            </widget>
           </item>
@@ -120,6 +167,22 @@
             </property>
             <property name="buddy">
              <cstring>modsDirTextBox</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="skinsDirTextBox"/>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="modsDirTextBox"/>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="instDirTextBox"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="QToolButton" name="modsDirBrowseBtn">
+            <property name="text">
+             <string>Browse</string>
             </property>
            </widget>
           </item>
@@ -137,23 +200,27 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelIconsDir">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelInstDir">
             <property name="text">
-             <string>&amp;Icons:</string>
+             <string>I&amp;nstances:</string>
             </property>
             <property name="buddy">
-             <cstring>iconsDirTextBox</cstring>
+             <cstring>instDirTextBox</cstring>
             </property>
            </widget>
           </item>
-          <item row="4" column="1" colspan="2">
-           <widget class="QCheckBox" name="downloadsDirWatchRecursiveCheckBox">
-            <property name="toolTip">
-             <string>When enabled, in addition to the downloads folder, its sub folders will also be searched when looking for resources (e.g. when looking for blocked mods on CurseForge).</string>
-            </property>
+          <item row="3" column="2">
+           <widget class="QToolButton" name="javaDirBrowseBtn">
             <property name="text">
-             <string>Check downloads folder recursively</string>
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QToolButton" name="skinsDirBrowseBtn">
+            <property name="text">
+             <string>Browse</string>
             </property>
            </widget>
           </item>
@@ -196,6 +263,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="skipModpackUpdatePromptBtn">
+            <property name="toolTip">
+             <string>When creating a new modpack instance, do not suggest updating existing instances instead.</string>
+            </property>
+            <property name="text">
+             <string>Skip modpack update prompt</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -205,6 +282,13 @@
           <string>Miscellaneous</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="numberOfConcurrentDownloadsSpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="numberOfConcurrentTasksLabel">
             <property name="text">
@@ -226,10 +310,34 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="numberOfConcurrentDownloadsSpinBox">
+          <item row="2" column="0">
+           <widget class="QLabel" name="numberOfManualRetriesLabel">
+            <property name="text">
+             <string>Number of manual retries</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="numberOfManualRetriesSpinBox">
             <property name="minimum">
-             <number>1</number>
+             <number>0</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="timeoutSecondsLabel">
+            <property name="toolTip">
+             <string>Seconds to wait until the requests are terminated</string>
+            </property>
+            <property name="text">
+             <string>Timeout for HTTP requests</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="timeoutSecondsSpinBox">
+            <property name="suffix">
+             <string>s</string>
             </property>
            </widget>
           </item>
@@ -237,7 +345,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2">
+        <spacer name="verticalSpacer_FeaturesTab">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -251,7 +359,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="generalTab">
+     <widget class="QWidget" name="userInterfaceTab">
       <attribute name="title">
        <string>User Interface</string>
       </attribute>
@@ -374,7 +482,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="generalTabSpacer">
+        <spacer name="verticalSpacer_UserInterfaceTab">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>

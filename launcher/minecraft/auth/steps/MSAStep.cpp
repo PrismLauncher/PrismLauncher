@@ -35,123 +35,152 @@
 
 #include "MSAStep.h"
 
+#include <QAbstractOAuth2>
 #include <QNetworkRequest>
-
-#include "BuildConfig.h"
-#include "minecraft/auth/AuthRequest.h"
-#include "minecraft/auth/Parsers.h"
+#include <QOAuthHttpServerReplyHandler>
+#include <QOAuthOobReplyHandler>
 
 #include "Application.h"
-#include "Logging.h"
+#include "BuildConfig.h"
+#include "FileSystem.h"
 
-using OAuth2 = Katabasis::DeviceFlow;
-using Activity = Katabasis::Activity;
+#include <QProcess>
+#include <QSettings>
+#include <QStandardPaths>
 
-MSAStep::MSAStep(AccountData* data, Action action) : AuthStep(data), m_action(action)
+bool isSchemeHandlerRegistered()
 {
-    m_clientId = APPLICATION->getMSAClientID();
-    OAuth2::Options opts;
-    opts.scope = "XboxLive.signin offline_access";
-    opts.clientIdentifier = m_clientId;
-    opts.authorizationUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode";
-    opts.accessTokenUrl = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
+#ifdef Q_OS_LINUX
+    QProcess process;
+    process.start("xdg-mime", { "query", "default", "x-scheme-handler/" + BuildConfig.LAUNCHER_APP_BINARY_NAME });
+    process.waitForFinished();
+    QString output = process.readAllStandardOutput().trimmed();
 
-    // FIXME: OAuth2 is not aware of our fancy shared pointers
-    m_oauth2 = new OAuth2(opts, m_data->msaToken, this, APPLICATION->network().get());
+    return output.contains(BuildConfig.LAUNCHER_APP_BINARY_NAME);
 
-    connect(m_oauth2, &OAuth2::activityChanged, this, &MSAStep::onOAuthActivityChanged);
-    connect(m_oauth2, &OAuth2::showVerificationUriAndCode, this, &MSAStep::showVerificationUriAndCode);
+#elif defined(Q_OS_WIN)
+    QString regPath = QString("HKEY_CURRENT_USER\\Software\\Classes\\%1").arg(BuildConfig.LAUNCHER_APP_BINARY_NAME);
+    QSettings settings(regPath, QSettings::NativeFormat);
+
+    return settings.contains("shell/open/command/.");
+#endif
+    return true;
 }
 
-MSAStep::~MSAStep() noexcept = default;
+class CustomOAuthOobReplyHandler : public QOAuthOobReplyHandler {
+    Q_OBJECT
+
+   public:
+    explicit CustomOAuthOobReplyHandler(QObject* parent = nullptr) : QOAuthOobReplyHandler(parent)
+    {
+        connect(APPLICATION, &Application::oauthReplyRecieved, this, &QOAuthOobReplyHandler::callbackReceived);
+    }
+    ~CustomOAuthOobReplyHandler() override
+    {
+        disconnect(APPLICATION, &Application::oauthReplyRecieved, this, &QOAuthOobReplyHandler::callbackReceived);
+    }
+    QString callback() const override { return BuildConfig.LAUNCHER_APP_BINARY_NAME + "://oauth/microsoft"; }
+};
+
+MSAStep::MSAStep(AccountData* data, bool silent) : AuthStep(data), m_silent(silent)
+{
+    m_clientId = APPLICATION->getMSAClientID();
+    if (QCoreApplication::applicationFilePath().startsWith("/tmp/.mount_") ||
+        QFile::exists(FS::PathCombine(APPLICATION->root(), "portable.txt")) || !isSchemeHandlerRegistered())
+
+    {
+        auto replyHandler = new QOAuthHttpServerReplyHandler(this);
+        replyHandler->setCallbackText(QString(R"XXX(
+    <noscript>
+      <meta http-equiv="Refresh" content="0; URL=%1" />
+    </noscript>
+    Login Successful, redirecting...
+    <script>
+      window.location.replace("%1");
+    </script>
+    )XXX")
+                                          .arg(BuildConfig.LOGIN_CALLBACK_URL));
+        oauth2.setReplyHandler(replyHandler);
+    } else {
+        oauth2.setReplyHandler(new CustomOAuthOobReplyHandler(this));
+    }
+    oauth2.setAuthorizationUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize"));
+    oauth2.setAccessTokenUrl(QUrl("https://login.microsoftonline.com/consumers/oauth2/v2.0/token"));
+    oauth2.setScope("XboxLive.SignIn XboxLive.offline_access");
+    oauth2.setClientIdentifier(m_clientId);
+    oauth2.setNetworkAccessManager(APPLICATION->network().get());
+
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::granted, this, [this] {
+        m_data->msaClientID = oauth2.clientIdentifier();
+        m_data->msaToken.issueInstant = QDateTime::currentDateTimeUtc();
+        m_data->msaToken.notAfter = oauth2.expirationAt();
+        m_data->msaToken.extra = oauth2.extraTokens();
+        m_data->msaToken.refresh_token = oauth2.refreshToken();
+        m_data->msaToken.token = oauth2.token();
+        emit finished(AccountTaskState::STATE_WORKING, tr("Got "));
+    });
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser, this, &MSAStep::authorizeWithBrowser);
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::requestFailed, this, [this, silent](const QAbstractOAuth2::Error err) {
+        auto state = AccountTaskState::STATE_FAILED_HARD;
+        if (oauth2.status() == QAbstractOAuth::Status::Granted || silent) {
+            if (err == QAbstractOAuth2::Error::NetworkError) {
+                state = AccountTaskState::STATE_OFFLINE;
+            } else {
+                state = AccountTaskState::STATE_FAILED_SOFT;
+            }
+        }
+        auto message = tr("Microsoft user authentication failed.");
+        if (silent) {
+            message = tr("Failed to refresh token.");
+        }
+        qWarning() << message;
+        emit finished(state, message);
+    });
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::error, this,
+            [this](const QString& error, const QString& errorDescription, const QUrl& uri) {
+                qWarning() << "Failed to login because" << error << errorDescription;
+                emit finished(AccountTaskState::STATE_FAILED_HARD, errorDescription);
+            });
+
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::extraTokensChanged, this,
+            [this](const QVariantMap& tokens) { m_data->msaToken.extra = tokens; });
+
+    connect(&oauth2, &QOAuth2AuthorizationCodeFlow::clientIdentifierChanged, this,
+            [this](const QString& clientIdentifier) { m_data->msaClientID = clientIdentifier; });
+}
 
 QString MSAStep::describe()
 {
     return tr("Logging in with Microsoft account.");
 }
 
-void MSAStep::rehydrate()
-{
-    switch (m_action) {
-        case Refresh: {
-            // TODO: check the tokens and see if they are old (older than a day)
-            return;
-        }
-        case Login: {
-            // NOOP
-            return;
-        }
-    }
-}
-
 void MSAStep::perform()
 {
-    switch (m_action) {
-        case Refresh: {
-            if (m_data->msaClientID != m_clientId) {
-                emit hideVerificationUriAndCode();
-                emit finished(AccountTaskState::STATE_DISABLED,
-                              tr("Microsoft user authentication failed - client identification has changed."));
-            }
-            m_oauth2->refresh();
+    if (m_silent) {
+        if (m_data->msaClientID != m_clientId) {
+            emit finished(AccountTaskState::STATE_DISABLED,
+                          tr("Microsoft user authentication failed - client identification has changed."));
             return;
         }
-        case Login: {
-            QVariantMap extraOpts;
-            extraOpts["prompt"] = "select_account";
-            m_oauth2->setExtraRequestParams(extraOpts);
+        if (m_data->msaToken.refresh_token.isEmpty()) {
+            emit finished(AccountTaskState::STATE_DISABLED, tr("Microsoft user authentication failed - refresh token is empty."));
+            return;
+        }
+        oauth2.setRefreshToken(m_data->msaToken.refresh_token);
+        oauth2.refreshAccessToken();
+    } else {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)  // QMultiMap param changed in 6.0
+        oauth2.setModifyParametersFunction(
+            [](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) { map->insert("prompt", "select_account"); });
+#else
+        oauth2.setModifyParametersFunction(
+            [](QAbstractOAuth::Stage stage, QMap<QString, QVariant>* map) { map->insert("prompt", "select_account"); });
+#endif
 
-            *m_data = AccountData();
-            m_data->msaClientID = m_clientId;
-            m_oauth2->login();
-            return;
-        }
+        *m_data = AccountData();
+        m_data->msaClientID = m_clientId;
+        oauth2.grant();
     }
 }
 
-void MSAStep::onOAuthActivityChanged(Katabasis::Activity activity)
-{
-    switch (activity) {
-        case Katabasis::Activity::Idle:
-        case Katabasis::Activity::LoggingIn:
-        case Katabasis::Activity::Refreshing:
-        case Katabasis::Activity::LoggingOut: {
-            // We asked it to do something, it's doing it. Nothing to act upon.
-            return;
-        }
-        case Katabasis::Activity::Succeeded: {
-            // Succeeded or did not invalidate tokens
-            emit hideVerificationUriAndCode();
-            QVariantMap extraTokens = m_oauth2->extraTokens();
-            if (!extraTokens.isEmpty()) {
-                qCDebug(authCredentials()) << "Extra tokens in response:";
-                foreach (QString key, extraTokens.keys()) {
-                    qCDebug(authCredentials()) << "\t" << key << ":" << extraTokens.value(key);
-                }
-            }
-            emit finished(AccountTaskState::STATE_WORKING, tr("Got "));
-            return;
-        }
-        case Katabasis::Activity::FailedSoft: {
-            // NOTE: soft error in the first step means 'offline'
-            emit hideVerificationUriAndCode();
-            emit finished(AccountTaskState::STATE_OFFLINE, tr("Microsoft user authentication ended with a network error."));
-            return;
-        }
-        case Katabasis::Activity::FailedGone: {
-            emit hideVerificationUriAndCode();
-            emit finished(AccountTaskState::STATE_FAILED_GONE, tr("Microsoft user authentication failed - user no longer exists."));
-            return;
-        }
-        case Katabasis::Activity::FailedHard: {
-            emit hideVerificationUriAndCode();
-            emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Microsoft user authentication failed."));
-            return;
-        }
-        default: {
-            emit hideVerificationUriAndCode();
-            emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Microsoft user authentication completed with an unrecognized result."));
-            return;
-        }
-    }
-}
+#include "MSAStep.moc"

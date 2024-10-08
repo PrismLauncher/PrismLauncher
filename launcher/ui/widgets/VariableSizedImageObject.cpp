@@ -22,6 +22,7 @@
 #include <QDebug>
 #include <QPainter>
 #include <QTextObject>
+#include <memory>
 
 #include "Application.h"
 
@@ -36,6 +37,30 @@ QSizeF VariableSizedImageObject::intrinsicSize(QTextDocument* doc, int posInDocu
 
     auto image = qvariant_cast<QImage>(format.property(ImageData));
     auto size = image.size();
+    if (size.isEmpty())  // can't resize an empty image
+        return { size };
+
+    // calculate the new image size based on the properties
+    int width = 0;
+    int height = 0;
+    auto widthVar = format.property(QTextFormat::ImageWidth);
+    if (widthVar.isValid()) {
+        width = widthVar.toInt();
+    }
+    auto heigthVar = format.property(QTextFormat::ImageHeight);
+    if (heigthVar.isValid()) {
+        height = heigthVar.toInt();
+    }
+    if (width != 0 && height != 0) {
+        size.setWidth(width);
+        size.setHeight(height);
+    } else if (width != 0) {
+        size.setHeight((width * size.height()) / size.width());
+        size.setWidth(width);
+    } else if (height != 0) {
+        size.setWidth((height * size.width()) / size.height());
+        size.setHeight(height);
+    }
 
     // Get the width of the text content to make the image similar sized.
     // doc->textWidth() includes the margin, so we need to remove it.
@@ -46,6 +71,7 @@ QSizeF VariableSizedImageObject::intrinsicSize(QTextDocument* doc, int posInDocu
 
     return { size };
 }
+
 void VariableSizedImageObject::drawObject(QPainter* painter,
                                           const QRectF& rect,
                                           QTextDocument* doc,
@@ -54,10 +80,23 @@ void VariableSizedImageObject::drawObject(QPainter* painter,
 {
     if (!format.hasProperty(ImageData)) {
         QUrl image_url{ qvariant_cast<QString>(format.property(QTextFormat::ImageName)) };
-        if (m_fetching_images.contains(image_url))
+        if (m_fetching_images.contains(image_url) || image_url.isEmpty())
             return;
 
-        loadImage(doc, image_url, posInDocument);
+        auto meta = std::make_shared<ImageMetadata>();
+        meta->posInDocument = posInDocument;
+        meta->url = image_url;
+
+        auto widthVar = format.property(QTextFormat::ImageWidth);
+        if (widthVar.isValid()) {
+            meta->width = widthVar.toInt();
+        }
+        auto heigthVar = format.property(QTextFormat::ImageHeight);
+        if (heigthVar.isValid()) {
+            meta->height = heigthVar.toInt();
+        }
+
+        loadImage(doc, meta);
         return;
     }
 
@@ -72,16 +111,19 @@ void VariableSizedImageObject::flush()
     m_fetching_images.clear();
 }
 
-void VariableSizedImageObject::parseImage(QTextDocument* doc, QImage image, int posInDocument)
+void VariableSizedImageObject::parseImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta)
 {
     QTextCursor cursor(doc);
-    cursor.setPosition(posInDocument);
+    cursor.setPosition(meta->posInDocument);
     cursor.setKeepPositionOnInsert(true);
 
     auto image_char_format = cursor.charFormat();
 
     image_char_format.setObjectType(QTextFormat::ImageObject);
-    image_char_format.setProperty(ImageData, image);
+    image_char_format.setProperty(ImageData, meta->image);
+    image_char_format.setProperty(QTextFormat::ImageName, meta->url.toDisplayString());
+    image_char_format.setProperty(QTextFormat::ImageWidth, meta->width);
+    image_char_format.setProperty(QTextFormat::ImageHeight, meta->height);
 
     // Qt doesn't allow us to modify the properties of an existing object in the document.
     // So we remove the old one and add the new one with the ImageData property set.
@@ -89,23 +131,25 @@ void VariableSizedImageObject::parseImage(QTextDocument* doc, QImage image, int 
     cursor.insertText(QString(QChar::ObjectReplacementCharacter), image_char_format);
 }
 
-void VariableSizedImageObject::loadImage(QTextDocument* doc, const QUrl& source, int posInDocument)
+void VariableSizedImageObject::loadImage(QTextDocument* doc, std::shared_ptr<ImageMetadata> meta)
 {
-    m_fetching_images.insert(source);
+    m_fetching_images.insert(meta->url);
 
     MetaEntryPtr entry = APPLICATION->metacache()->resolveEntry(
         m_meta_entry,
-        QString("images/%1").arg(QString(QCryptographicHash::hash(source.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
+        QString("images/%1").arg(QString(QCryptographicHash::hash(meta->url.toEncoded(), QCryptographicHash::Algorithm::Sha1).toHex())));
 
-    auto job = new NetJob(QString("Load Image: %1").arg(source.fileName()), APPLICATION->network());
-    job->addNetAction(Net::ApiDownload::makeCached(source, entry));
+    auto job = new NetJob(QString("Load Image: %1").arg(meta->url.fileName()), APPLICATION->network());
+    job->setAskRetry(false);
+    job->addNetAction(Net::ApiDownload::makeCached(meta->url, entry));
 
     auto full_entry_path = entry->getFullPath();
-    auto source_url = source;
-    auto loadImage = [this, doc, full_entry_path, source_url, posInDocument](const QImage& image) {
+    auto source_url = meta->url;
+    auto loadImage = [this, doc, full_entry_path, source_url, meta](const QImage& image) {
         doc->addResource(QTextDocument::ImageResource, source_url, image);
 
-        parseImage(doc, image, posInDocument);
+        meta->image = image;
+        parseImage(doc, meta);
 
         // This size hack is needed to prevent the content from being laid out in an area smaller
         // than the total width available (weird).

@@ -46,14 +46,14 @@ class NullInstance : public BaseInstance {
     {
         setVersionBroken(true);
     }
-    virtual ~NullInstance(){};
+    virtual ~NullInstance() = default;
     void saveNow() override {}
     void loadSpecificSettings() override { setSpecificSettingsLoaded(true); }
     QString getStatusbarDescription() override { return tr("Unknown instance type"); };
     QSet<QString> traits() const override { return {}; };
     QString instanceConfigFolder() const override { return instanceRoot(); };
-    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr, MinecraftServerTargetPtr) override { return nullptr; }
-    shared_qobject_ptr<Task> createUpdateTask([[maybe_unused]] Net::Mode mode) override { return nullptr; }
+    shared_qobject_ptr<LaunchTask> createLaunchTask(AuthSessionPtr, MinecraftTarget::Ptr) override { return nullptr; }
+    QList<Task::Ptr> createUpdateTask() override { return {}; }
     QProcessEnvironment createEnvironment() override { return QProcessEnvironment(); }
     QProcessEnvironment createLaunchEnvironment() override { return QProcessEnvironment(); }
     QMap<QString, QString> getVariables() override { return QMap<QString, QString>(); }
@@ -64,7 +64,7 @@ class NullInstance : public BaseInstance {
     bool canEdit() const override { return false; }
     bool canLaunch() const override { return false; }
     void populateLaunchMenu(QMenu* menu) override {}
-    QStringList verboseDescription(AuthSessionPtr session, MinecraftServerTargetPtr serverToJoin) override
+    QStringList verboseDescription(AuthSessionPtr session, MinecraftTarget::Ptr targetToJoin) override
     {
         QStringList out;
         out << "Null instance - placeholder.";

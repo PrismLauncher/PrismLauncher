@@ -57,7 +57,7 @@ void Mod::setDetails(const ModDetails& details)
     m_local_details = details;
 }
 
-std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
+int Mod::compare(const Resource& other, SortType type) const
 {
     auto cast_other = dynamic_cast<Mod const*>(&other);
     if (!cast_other)
@@ -67,29 +67,44 @@ std::pair<int, bool> Mod::compare(const Resource& other, SortType type) const
         default:
         case SortType::ENABLED:
         case SortType::NAME:
-        case SortType::DATE: {
-            auto res = Resource::compare(other, type);
-            if (res.first != 0)
-                return res;
-            break;
-        }
+        case SortType::DATE:
+        case SortType::SIZE:
+            return Resource::compare(other, type);
         case SortType::VERSION: {
             auto this_ver = Version(version());
             auto other_ver = Version(cast_other->version());
             if (this_ver > other_ver)
-                return { 1, type == SortType::VERSION };
+                return 1;
             if (this_ver < other_ver)
-                return { -1, type == SortType::VERSION };
+                return -1;
             break;
         }
-        case SortType::PROVIDER: {
-            auto compare_result = QString::compare(provider(), cast_other->provider(), Qt::CaseInsensitive);
+        case SortType::SIDE: {
+            auto compare_result = QString::compare(side(), cast_other->side(), Qt::CaseInsensitive);
             if (compare_result != 0)
-                return { compare_result, type == SortType::PROVIDER };
+                return compare_result;
+            break;
+        }
+        case SortType::MC_VERSIONS: {
+            auto compare_result = QString::compare(mcVersions(), cast_other->mcVersions(), Qt::CaseInsensitive);
+            if (compare_result != 0)
+                return compare_result;
+            break;
+        }
+        case SortType::LOADERS: {
+            auto compare_result = QString::compare(loaders(), cast_other->loaders(), Qt::CaseInsensitive);
+            if (compare_result != 0)
+                return compare_result;
+            break;
+        }
+        case SortType::RELEASE_TYPE: {
+            auto compare_result = QString::compare(releaseType(), cast_other->releaseType(), Qt::CaseInsensitive);
+            if (compare_result != 0)
+                return compare_result;
             break;
         }
     }
-    return { 0, false };
+    return 0;
 }
 
 bool Mod::applyFilter(QRegularExpression filter) const
@@ -135,6 +150,47 @@ auto Mod::metaurl() const -> QString
     if (metadata() == nullptr)
         return homeurl();
     return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
+}
+
+auto Mod::loaders() const -> QString
+{
+    if (metadata()) {
+        QStringList loaders;
+        auto modLoaders = metadata()->loaders;
+        for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Cauldron, ModPlatform::LiteLoader, ModPlatform::Fabric,
+                             ModPlatform::Quilt }) {
+            if (modLoaders & loader) {
+                loaders << getModLoaderAsString(loader);
+            }
+        }
+        return loaders.join(", ");
+    }
+
+    return {};
+}
+
+auto Mod::side() const -> QString
+{
+    if (metadata())
+        return Metadata::modSideToString(metadata()->side);
+
+    return Metadata::modSideToString(Metadata::ModSide::UniversalSide);
+}
+
+auto Mod::mcVersions() const -> QString
+{
+    if (metadata())
+        return metadata()->mcVersions.join(", ");
+
+    return {};
+}
+
+auto Mod::releaseType() const -> QString
+{
+    if (metadata())
+        return metadata()->releaseType.toString();
+
+    return ModPlatform::IndexedVersionType().toString();
 }
 
 auto Mod::description() const -> QString
@@ -200,7 +256,7 @@ QPixmap Mod::icon(QSize size, Qt::AspectRatioMode mode) const
         return {};
 
     if (m_pack_image_cache_key.was_ever_used) {
-        qDebug() << "Mod" << name() << "Had it's icon evicted form the cache. reloading...";
+        qDebug() << "Mod" << name() << "Had it's icon evicted from the cache. reloading...";
         PixmapCache::markCacheMissByEviciton();
     }
     // Image got evicted from the cache or an attempt to load it has not been made. load it and retry.

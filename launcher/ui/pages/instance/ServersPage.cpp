@@ -168,7 +168,7 @@ class ServersModel : public QAbstractListModel {
         m_saveTimer.setInterval(5000);
         connect(&m_saveTimer, &QTimer::timeout, this, &ServersModel::save_internal);
     }
-    virtual ~ServersModel(){};
+    virtual ~ServersModel() = default;
 
     void observe()
     {
@@ -731,7 +731,7 @@ void ServersPage::on_actionMove_Down_triggered()
 void ServersPage::on_actionJoin_triggered()
 {
     const auto& address = m_model->at(currentServer)->m_address;
-    APPLICATION->launch(m_inst, true, false, std::make_shared<MinecraftServerTarget>(MinecraftServerTarget::parse(address)));
+    APPLICATION->launch(m_inst, true, false, std::make_shared<MinecraftTarget>(MinecraftTarget::parse(address, false)));
 }
 
 #include "ServersPage.moc"

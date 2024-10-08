@@ -26,10 +26,6 @@ class QDialogButtonBox;
 class VersionSelectWidget;
 class QPushButton;
 
-namespace Ui {
-class VersionSelectDialog;
-}
-
 class VersionProxyModel;
 
 class VersionSelectDialog : public QDialog {
@@ -37,7 +33,7 @@ class VersionSelectDialog : public QDialog {
 
    public:
     explicit VersionSelectDialog(BaseVersionList* vlist, QString title, QWidget* parent = 0, bool cancelable = true);
-    virtual ~VersionSelectDialog(){};
+    virtual ~VersionSelectDialog() = default;
 
     int exec() override;
 

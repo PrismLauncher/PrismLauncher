@@ -3,6 +3,7 @@
 #include "CustomMessageBox.h"
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
+#include "StringUtils.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -29,9 +30,9 @@ static std::list<Version> mcVersions(BaseInstance* inst)
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
 
-static std::optional<ModPlatform::ModLoaderTypes> mcLoaders(BaseInstance* inst)
+static QList<ModPlatform::ModLoaderType> mcLoadersList(BaseInstance* inst)
 {
-    return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders() };
+    return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoadersList();
 }
 
 ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
@@ -40,7 +41,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
                                            QList<Resource*>& search_for,
                                            bool include_deps,
                                            bool filter_loaders)
-    : ReviewMessageBox(parent, tr("Confirm mods to update"), "")
+    : ReviewMessageBox(parent, tr("Confirm resources to update"), "")
     , m_parent(parent)
     , m_resource_model(resource_model)
     , m_candidates(search_for)
@@ -52,8 +53,8 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
 {
     ReviewMessageBox::setGeometry(0, 0, 800, 600);
 
-    ui->explainLabel->setText(tr("You're about to update the following mods:"));
-    ui->onlyCheckedLabel->setText(tr("Only mods with a check will be updated!"));
+    ui->explainLabel->setText(tr("You're about to update the following resources:"));
+    ui->onlyCheckedLabel->setText(tr("Only resources with a check will be updated!"));
 }
 
 void ResourceUpdateDialog::checkCandidates()
@@ -75,8 +76,8 @@ void ResourceUpdateDialog::checkCandidates()
         }
 
         ScrollMessageBox message_dialog(m_parent, tr("Metadata generation failed"),
-                                        tr("Could not generate metadata for the following mods:<br>"
-                                           "Do you wish to proceed without those mods?"),
+                                        tr("Could not generate metadata for the following resources:<br>"
+                                           "Do you wish to proceed without those resources?"),
                                         text);
         message_dialog.setModal(true);
         if (message_dialog.exec() == QDialog::Rejected) {
@@ -87,12 +88,12 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     auto versions = mcVersions(m_instance);
-    auto loaders = m_filter_loaders ? mcLoaders(m_instance) : std::optional<ModPlatform::ModLoaderTypes>();
+    auto loadersList = m_filter_loaders ? mcLoadersList(m_instance) : QList<ModPlatform::ModLoaderType>();
 
     SequentialTask check_task(m_parent, tr("Checking for updates"));
 
     if (!m_modrinth_to_update.empty()) {
-        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loaders, m_resource_model));
+        m_modrinth_check_task.reset(new ModrinthCheckUpdate(m_modrinth_to_update, versions, loadersList, m_resource_model));
         connect(m_modrinth_check_task.get(), &CheckUpdateTask::checkFailed, this,
                 [this](Resource* resource, QString reason, QUrl recover_url) {
                     m_failed_check_update.append({ resource, reason, recover_url });
@@ -101,7 +102,7 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     if (!m_flame_to_update.empty()) {
-        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loaders, m_resource_model));
+        m_flame_check_task.reset(new FlameCheckUpdate(m_flame_to_update, versions, loadersList, m_resource_model));
         connect(m_flame_check_task.get(), &CheckUpdateTask::checkFailed, this,
                 [this](Resource* resource, QString reason, QUrl recover_url) {
                     m_failed_check_update.append({ resource, reason, recover_url });
@@ -179,8 +180,8 @@ void ResourceUpdateDialog::checkCandidates()
         }
 
         ScrollMessageBox message_dialog(m_parent, tr("Failed to check for updates"),
-                                        tr("Could not check or get the following mods for updates:<br>"
-                                           "Do you wish to proceed without those mods?"),
+                                        tr("Could not check or get the following resources for updates:<br>"
+                                           "Do you wish to proceed without those resources?"),
                                         text);
         message_dialog.setModal(true);
         if (message_dialog.exec() == QDialog::Rejected) {
@@ -474,7 +475,7 @@ void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, Q
             break;
     }
 
-    changelog_area->setHtml(text);
+    changelog_area->setHtml(StringUtils::htmlListPatch(text));
     changelog_area->setOpenExternalLinks(true);
     changelog_area->setLineWrapMode(QTextBrowser::LineWrapMode::WidgetWidth);
     changelog_area->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);

@@ -43,6 +43,10 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, QDir dir, Mo
     }
 }
 
+EnsureMetadataTask::EnsureMetadataTask(QHash<QString, Resource*>& resources, QDir dir, ModPlatform::ResourceProvider prov)
+    : Task(nullptr), m_resources(resources), m_index_dir(dir), m_provider(prov), m_current_task(nullptr)
+{}
+
 Hashing::Hasher::Ptr EnsureMetadataTask::createNewHash(Resource* resource)
 {
     if (!resource || !resource->valid() || resource->type() == ResourceType::FOLDER)

@@ -44,9 +44,18 @@
 #include "OneSixVersionFormat.h"
 #include "VersionFile.h"
 #include "meta/Version.h"
+#include "minecraft/Component.h"
 #include "minecraft/PackProfile.h"
 
 #include <assert.h>
+
+const QMap<QString, ModloaderMapEntry> Component::KNOWN_MODLOADERS = {
+    { "net.neoforged", { ModPlatform::NeoForge, { "net.minecraftforge", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
+    { "net.minecraftforge", { ModPlatform::Forge, { "net.neoforged", "net.fabricmc.fabric-loader", "org.quiltmc.quilt-loader" } } },
+    { "net.fabricmc.fabric-loader", { ModPlatform::Fabric, { "net.minecraftforge", "net.neoforged", "org.quiltmc.quilt-loader" } } },
+    { "org.quiltmc.quilt-loader", { ModPlatform::Quilt, { "net.minecraftforge", "net.neoforged", "net.fabricmc.fabric-loader" } } },
+    { "com.mumfrey.liteloader", { ModPlatform::LiteLoader, {} } }
+};
 
 Component::Component(PackProfile* parent, const QString& uid)
 {
@@ -54,18 +63,6 @@ Component::Component(PackProfile* parent, const QString& uid)
     m_parent = parent;
 
     m_uid = uid;
-}
-
-Component::Component(PackProfile* parent, std::shared_ptr<Meta::Version> version)
-{
-    assert(parent);
-    m_parent = parent;
-
-    m_metaVersion = version;
-    m_uid = version->uid();
-    m_version = m_cachedVersion = version->version();
-    m_cachedName = version->name();
-    m_loaded = version->isLoaded();
 }
 
 Component::Component(PackProfile* parent, const QString& uid, std::shared_ptr<VersionFile> file)
@@ -102,9 +99,6 @@ void Component::applyTo(LaunchProfile* profile)
 std::shared_ptr<class VersionFile> Component::getVersionFile() const
 {
     if (m_metaVersion) {
-        if (!m_metaVersion->isLoaded()) {
-            m_metaVersion->load(Net::Mode::Online);
-        }
         return m_metaVersion->data();
     } else {
         return m_file;
@@ -131,29 +125,35 @@ int Component::getOrder()
     }
     return 0;
 }
+
 void Component::setOrder(int order)
 {
     m_orderOverride = true;
     m_order = order;
 }
+
 QString Component::getID()
 {
     return m_uid;
 }
+
 QString Component::getName()
 {
     if (!m_cachedName.isEmpty())
         return m_cachedName;
     return m_uid;
 }
+
 QString Component::getVersion()
 {
     return m_cachedVersion;
 }
+
 QString Component::getFilename()
 {
     return m_parent->patchFilePathForUid(m_uid);
 }
+
 QDateTime Component::getReleaseDateTime()
 {
     if (m_metaVersion) {
@@ -198,17 +198,14 @@ bool Component::isCustom()
 
 bool Component::isCustomizable()
 {
-    if (m_metaVersion) {
-        if (getVersionFile()) {
-            return true;
-        }
-    }
-    return false;
+    return m_metaVersion && getVersionFile();
 }
+
 bool Component::isRemovable()
 {
     return !m_important;
 }
+
 bool Component::isRevertible()
 {
     if (isCustom()) {
@@ -218,21 +215,37 @@ bool Component::isRevertible()
     }
     return false;
 }
+
 bool Component::isMoveable()
 {
     // HACK, FIXME: this was too dumb and wouldn't follow dependency constraints anyway. For now hardcoded to 'true'.
     return true;
 }
+
 bool Component::isVersionChangeable()
 {
     auto list = getVersionList();
     if (list) {
-        if (!list->isLoaded()) {
-            list->load(Net::Mode::Online);
-        }
+        list->waitToLoad();
         return list->count() != 0;
     }
     return false;
+}
+
+bool Component::isKnownModloader()
+{
+    auto iter = KNOWN_MODLOADERS.find(m_uid);
+    return iter != KNOWN_MODLOADERS.cend();
+}
+
+QStringList Component::knownConflictingComponents()
+{
+    auto iter = KNOWN_MODLOADERS.find(m_uid);
+    if (iter != KNOWN_MODLOADERS.cend()) {
+        return (*iter).knownConflictingComponents;
+    } else {
+        return {};
+    }
 }
 
 void Component::setImportant(bool state)
@@ -247,7 +260,8 @@ ProblemSeverity Component::getProblemSeverity() const
 {
     auto file = getVersionFile();
     if (file) {
-        return file->getProblemSeverity();
+        auto severity = file->getProblemSeverity();
+        return m_componentProblemSeverity > severity ? m_componentProblemSeverity : severity;
     }
     return ProblemSeverity::Error;
 }
@@ -256,9 +270,29 @@ const QList<PatchProblem> Component::getProblems() const
 {
     auto file = getVersionFile();
     if (file) {
-        return file->getProblems();
+        auto problems = file->getProblems();
+        problems.append(m_componentProblems);
+        return problems;
     }
     return { { ProblemSeverity::Error, QObject::tr("Patch is not loaded yet.") } };
+}
+
+void Component::addComponentProblem(ProblemSeverity severity, const QString& description)
+{
+    if (severity > m_componentProblemSeverity) {
+        m_componentProblemSeverity = severity;
+    }
+    m_componentProblems.append({ severity, description });
+
+    emit dataChanged();
+}
+
+void Component::resetComponentProblems()
+{
+    m_componentProblems.clear();
+    m_componentProblemSeverity = ProblemSeverity::None;
+
+    emit dataChanged();
 }
 
 void Component::setVersion(const QString& version)
@@ -336,7 +370,7 @@ bool Component::revert()
     bool result = true;
     // just kill the file and reload
     if (QFile::exists(filename)) {
-        result = QFile::remove(filename);
+        result = FS::deletePath(filename);
     }
     if (result) {
         // file gone...
@@ -413,4 +447,37 @@ void Component::updateCachedData()
         m_cachedConflicts.clear();
         emit dataChanged();
     }
+}
+
+void Component::waitLoadMeta()
+{
+    if (!m_loaded) {
+        if (!m_metaVersion || !m_metaVersion->isLoaded()) {
+            // wait for the loaded version from meta
+            m_metaVersion = APPLICATION->metadataIndex()->getLoadedVersion(m_uid, m_version);
+        }
+        m_loaded = true;
+        updateCachedData();
+    }
+}
+
+void Component::setUpdateAction(UpdateAction action)
+{
+    m_updateAction = action;
+}
+
+UpdateAction Component::getUpdateAction()
+{
+    return m_updateAction;
+}
+
+void Component::clearUpdateAction()
+{
+    m_updateAction = UpdateAction{ UpdateActionNone{} };
+}
+
+QDebug operator<<(QDebug d, const Component& comp)
+{
+    d << "Component(" << comp.m_uid << " : " << comp.m_cachedVersion << ")";
+    return d;
 }

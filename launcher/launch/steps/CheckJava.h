@@ -22,13 +22,13 @@
 class CheckJava : public LaunchStep {
     Q_OBJECT
    public:
-    explicit CheckJava(LaunchTask* parent) : LaunchStep(parent){};
-    virtual ~CheckJava(){};
+    explicit CheckJava(LaunchTask* parent) : LaunchStep(parent) {};
+    virtual ~CheckJava() = default;
 
     virtual void executeTask();
     virtual bool canAbort() const { return false; }
    private slots:
-    void checkJavaFinished(JavaCheckResult result);
+    void checkJavaFinished(const JavaChecker::Result& result);
 
    private:
     void printJavaInfo(const QString& version, const QString& architecture, const QString& realArchitecture, const QString& vendor);
@@ -37,5 +37,5 @@ class CheckJava : public LaunchStep {
    private:
     QString m_javaPath;
     QString m_javaSignature;
-    JavaCheckerPtr m_JavaChecker;
+    JavaChecker::Ptr m_JavaChecker;
 };
