@@ -299,7 +299,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
         mod.side = stringToSide(stringEntry(table, "side"));
-        mod.releaseType = ModPlatform::IndexedVersionType(stringEntry(table, "x-prismlauncher-release-type"));
+        mod.releaseType = ModPlatform::IndexedVersionType(table["x-prismlauncher-release-type"].value_or(""));
         if (auto loaders = table["x-prismlauncher-loaders"]; loaders && loaders.is_array()) {
             for (auto&& loader : *loaders.as_array()) {
                 if (loader.is_string()) {
@@ -352,7 +352,10 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
             mod.provider = Provider::MODRINTH;
             mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
             mod.version() = stringEntry(*mod_provider_table, "version");
-            mod.version_number = stringEntry(*mod_provider_table, "x-prismlauncher-version-number");
+
+            auto version_number_node = (*mod_provider_table)["x-prismlauncher-version-number"];
+            if (version_number_node)
+                mod.version_number = version_number_node.value_or("");
         } else {
             qCritical() << QString("No mod provider on mod metadata!");
             return {};
