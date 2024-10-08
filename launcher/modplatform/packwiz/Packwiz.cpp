@@ -120,7 +120,7 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
     mod.releaseType = mod_version.version_type;
 
     mod.version_number = mod_version.version_number;
-    if (mod.version_number.isNull()) // on CurseForge, there is only a version name - not a version number
+    if (mod.version_number.isNull())  // on CurseForge, there is only a version name - not a version number
         mod.version_number = mod_version.version;
 
     return mod;
@@ -172,9 +172,10 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                 qCritical() << QString("Did not write file %1 because missing information!").arg(normalized_fname);
                 return;
             }
-            update = toml::table{ { "file-id", mod.file_id.toInt() },
-                                  { "project-id", mod.project_id.toInt() },
-                                  { "x-prismlauncher-version-number", mod.version_number.toStdString() } };
+            update = toml::table{
+                { "file-id", mod.file_id.toInt() },
+                { "project-id", mod.project_id.toInt() },
+            };
             break;
         case (ModPlatform::ResourceProvider::MODRINTH):
             if (mod.mod_id().toString().isEmpty() || mod.version().toString().isEmpty()) {
@@ -184,7 +185,6 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
             update = toml::table{
                 { "mod-id", mod.mod_id().toString().toStdString() },
                 { "version", mod.version().toString().toStdString() },
-                { "x-prismlauncher-version-number", mod.version_number.toStdString() },
             };
             break;
     }
@@ -215,6 +215,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                                 { "x-prismlauncher-loaders", loaders },
                                 { "x-prismlauncher-mc-versions", mcVersions },
                                 { "x-prismlauncher-release-type", mod.releaseType.toString().toStdString() },
+                                { "x-prismlauncher-version-number", mod.version_number.toStdString() },
                                 { "download",
                                   toml::table{
                                       { "mode", mod.mode.toStdString() },
@@ -319,6 +320,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
             mod.mcVersions.sort();
         }
     }
+    mod.version_number = table["x-prismlauncher-version-number"].value_or("");
 
     {  // [download] info
         auto download_table = table["download"].as_table();
@@ -347,15 +349,10 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
             mod.provider = Provider::FLAME;
             mod.file_id = intEntry(*mod_provider_table, "file-id");
             mod.project_id = intEntry(*mod_provider_table, "project-id");
-            mod.version_number = stringEntry(*mod_provider_table, "x-prismlauncher-version-number");
         } else if ((mod_provider_table = update_table[ModPlatform::ProviderCapabilities::name(Provider::MODRINTH)].as_table())) {
             mod.provider = Provider::MODRINTH;
             mod.mod_id() = stringEntry(*mod_provider_table, "mod-id");
             mod.version() = stringEntry(*mod_provider_table, "version");
-
-            auto version_number_node = (*mod_provider_table)["x-prismlauncher-version-number"];
-            if (version_number_node)
-                mod.version_number = version_number_node.value_or("");
         } else {
             qCritical() << QString("No mod provider on mod metadata!");
             return {};
