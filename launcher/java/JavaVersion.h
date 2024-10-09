@@ -25,7 +25,7 @@ class JavaVersion {
     bool operator>(const JavaVersion& rhs);
 
     bool requiresPermGen() const;
-
+    bool defaultsToUtf8() const;
     bool isModular() const;
 
     QString toString() const;

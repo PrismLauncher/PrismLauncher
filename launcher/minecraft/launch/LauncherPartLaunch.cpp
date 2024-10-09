@@ -48,7 +48,9 @@
 #include "gamemode_client.h"
 #endif
 
-LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent) : LaunchStep(parent)
+LauncherPartLaunch::LauncherPartLaunch(LaunchTask* parent)
+    : LaunchStep(parent)
+    , m_process(parent->instance()->getJavaVersion().defaultsToUtf8() ? QTextCodec::codecForName("UTF-8") : QTextCodec::codecForLocale())
 {
     if (parent->instance()->settings()->get("CloseAfterLaunch").toBool()) {
         std::shared_ptr<QMetaObject::Connection> connection{ new QMetaObject::Connection };

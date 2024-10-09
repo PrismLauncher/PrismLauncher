@@ -48,6 +48,12 @@ bool JavaVersion::requiresPermGen() const
     return !m_parseable || m_major < 8;
 }
 
+bool JavaVersion::defaultsToUtf8() const
+{
+    // starting from Java 18, UTF-8 is the default charset: https://openjdk.org/jeps/400
+    return m_parseable && m_major >= 18;
+}
+
 bool JavaVersion::isModular() const
 {
     return m_parseable && m_major >= 9;
