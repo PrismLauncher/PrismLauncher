@@ -33,6 +33,8 @@
  *      limitations under the License.
  */
 
+#include <signal.h>
+#include <cpptrace/utils.hpp>
 #include "Application.h"
 
 // #define BREAK_INFINITE_LOOP
@@ -43,6 +45,20 @@
 #include <chrono>
 #include <thread>
 #endif
+
+void handler(int signo, siginfo_t* info, void* context)
+{
+    cpptrace::generate_trace().print();
+    _exit(1);
+}
+
+void warmup_cpptrace()
+{
+    cpptrace::frame_ptr buffer[10];
+    std::size_t count = cpptrace::safe_generate_raw_trace(buffer, 10);
+    cpptrace::safe_object_frame frame;
+    cpptrace::get_safe_object_frame(buffer[0], &frame);
+}
 
 int main(int argc, char* argv[])
 {
@@ -57,6 +73,22 @@ int main(int argc, char* argv[])
 #ifdef BREAK_RETURN
     return 42;
 #endif
+
+    // cpptrace::absorb_trace_exceptions(false);
+    cpptrace::register_terminate_handler();
+    warmup_cpptrace();
+
+    struct sigaction action = { 0 };
+    action.sa_flags = 0;
+    action.sa_sigaction = &handler;
+    if (sigaction(SIGSEGV, &action, NULL) == -1) {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
+    if (sigaction(SIGABRT, &action, NULL) == -1) {
+        perror("sigaction");
+        exit(EXIT_FAILURE);
+    }
 
 #if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
