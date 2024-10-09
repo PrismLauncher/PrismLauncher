@@ -51,14 +51,14 @@ void LaunchTask::init()
     m_instance->setRunning(true);
 }
 
-shared_qobject_ptr<LaunchTask> LaunchTask::create(InstancePtr inst)
+shared_qobject_ptr<LaunchTask> LaunchTask::create(MinecraftInstancePtr inst)
 {
     shared_qobject_ptr<LaunchTask> proc(new LaunchTask(inst));
     proc->init();
     return proc;
 }
 
-LaunchTask::LaunchTask(InstancePtr instance) : m_instance(instance) {}
+LaunchTask::LaunchTask(MinecraftInstancePtr instance) : m_instance(instance) {}
 
 void LaunchTask::appendStep(shared_qobject_ptr<LaunchStep> step)
 {

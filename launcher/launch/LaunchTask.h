@@ -37,6 +37,7 @@
 
 #pragma once
 #include <QObjectPtr.h>
+#include <minecraft/MinecraftInstance.h>
 #include <QProcess>
 #include "BaseInstance.h"
 #include "LaunchStep.h"
@@ -46,21 +47,21 @@
 class LaunchTask : public Task {
     Q_OBJECT
    protected:
-    explicit LaunchTask(InstancePtr instance);
+    explicit LaunchTask(MinecraftInstancePtr instance);
     void init();
 
    public:
     enum State { NotStarted, Running, Waiting, Failed, Aborted, Finished };
 
    public: /* methods */
-    static shared_qobject_ptr<LaunchTask> create(InstancePtr inst);
+    static shared_qobject_ptr<LaunchTask> create(MinecraftInstancePtr inst);
     virtual ~LaunchTask() = default;
 
     void appendStep(shared_qobject_ptr<LaunchStep> step);
     void prependStep(shared_qobject_ptr<LaunchStep> step);
     void setCensorFilter(QMap<QString, QString> filter);
 
-    InstancePtr instance() { return m_instance; }
+    MinecraftInstancePtr instance() { return m_instance; }
 
     void setPid(qint64 pid) { m_pid = pid; }
 
@@ -115,7 +116,7 @@ class LaunchTask : public Task {
     void finalizeSteps(bool successful, const QString& error);
 
    protected: /* data */
-    InstancePtr m_instance;
+    MinecraftInstancePtr m_instance;
     shared_qobject_ptr<LogModel> m_logModel;
     QList<shared_qobject_ptr<LaunchStep>> m_steps;
     QMap<QString, QString> m_censorFilter;
