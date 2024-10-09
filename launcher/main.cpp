@@ -33,8 +33,8 @@
  *      limitations under the License.
  */
 
-#include <signal.h>
 #include <cpptrace/utils.hpp>
+#include <csignal>
 #include "Application.h"
 
 // #define BREAK_INFINITE_LOOP
@@ -46,10 +46,17 @@
 #include <thread>
 #endif
 
-void handler(int signo, siginfo_t* info, void* context)
+void signal_handler(int)
 {
     cpptrace::generate_trace().print();
     QApplication::exit(1);
+}
+
+void setup_crash_handler()
+{
+    // Setup signal handler for common crash signals
+    std::signal(SIGSEGV, signal_handler);  // Segmentation fault
+    std::signal(SIGABRT, signal_handler);  // Abort signal
 }
 
 void warmup_cpptrace()
@@ -77,18 +84,7 @@ int main(int argc, char* argv[])
     // cpptrace::absorb_trace_exceptions(false);
     cpptrace::register_terminate_handler();
     warmup_cpptrace();
-
-    struct sigaction action;
-    action.sa_flags = 0;
-    action.sa_sigaction = &handler;
-    if (sigaction(SIGSEGV, &action, NULL) == -1) {
-        perror("sigaction");
-        exit(EXIT_FAILURE);
-    }
-    if (sigaction(SIGABRT, &action, NULL) == -1) {
-        perror("sigaction");
-        exit(EXIT_FAILURE);
-    }
+    setup_crash_handler();
 
 #if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
