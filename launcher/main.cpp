@@ -49,7 +49,7 @@
 void handler(int signo, siginfo_t* info, void* context)
 {
     cpptrace::generate_trace().print();
-    _exit(1);
+    QApplication::exit(1);
 }
 
 void warmup_cpptrace()
@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
     cpptrace::register_terminate_handler();
     warmup_cpptrace();
 
-    struct sigaction action = { 0 };
+    struct sigaction action;
     action.sa_flags = 0;
     action.sa_sigaction = &handler;
     if (sigaction(SIGSEGV, &action, NULL) == -1) {
