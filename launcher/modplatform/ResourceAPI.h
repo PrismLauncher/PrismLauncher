@@ -89,7 +89,6 @@ class ResourceAPI {
         std::optional<std::list<Version> > mcVersions;
         std::optional<ModPlatform::ModLoaderTypes> loaders;
 
-        VersionSearchArgs(VersionSearchArgs const&) = default;
         void operator=(VersionSearchArgs other)
         {
             pack = other.pack;
@@ -105,7 +104,6 @@ class ResourceAPI {
     struct ProjectInfoArgs {
         ModPlatform::IndexedPack pack;
 
-        ProjectInfoArgs(ProjectInfoArgs const&) = default;
         void operator=(ProjectInfoArgs other) { pack = other.pack; }
     };
     struct ProjectInfoCallbacks {
