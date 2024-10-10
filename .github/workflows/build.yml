@@ -80,8 +80,8 @@ jobs:
             architecture: "x64"
             vcvars_arch: "amd64"
             qt_ver: 6
-            qt_host: windows
-            qt_arch: ""
+            qt_host: "windows"
+            qt_arch: "win64_msvc2022_64"
             qt_version: "6.8.0"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
             nscurl_tag: "v24.9.26.122"
@@ -93,8 +93,8 @@ jobs:
             architecture: "arm64"
             vcvars_arch: "amd64_arm64"
             qt_ver: 6
-            qt_host: windows
-            qt_arch: "win64_msvc2019_arm64"
+            qt_host: "windows"
+            qt_arch: "win64_msvc2022_arm64_cross_compiled"
             qt_version: "6.8.0"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
             nscurl_tag: "v24.9.26.122"
@@ -223,7 +223,7 @@ jobs:
           version: ${{ matrix.qt_version }}
           host: "windows"
           target: "desktop"
-          arch: ""
+          arch: ${{ matrix.qt_arch }}
           modules: ${{ matrix.qt_modules }}
           cache: ${{ inputs.is_qt_cached }}
           cache-key-prefix: host-qt-arm64-windows
@@ -264,7 +264,7 @@ jobs:
       - name: Add QT_HOST_PATH var (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         run: |
-          echo "QT_HOST_PATH=${{ github.workspace }}\HostQt\Qt\${{ matrix.qt_version }}\msvc2019_64" >> $env:GITHUB_ENV
+          echo "QT_HOST_PATH=${{ github.workspace }}\HostQt\Qt\${{ matrix.qt_version }}\msvc2022_64" >> $env:GITHUB_ENV
 
       - name: Setup java (macOS)
         if: runner.os == 'macOS'
