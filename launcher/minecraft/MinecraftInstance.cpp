@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+ *  Copyright (C) 2022,2023 Sefa Eyeoglu <contact@scrumplex.net>
  *  Copyright (C) 2022 Jamie Mansfield <jmansfield@cadixdev.org>
  *  Copyright (C) 2023 TheKodeToad <TheKodeToad@proton.me>
  *
@@ -162,6 +162,11 @@ void MinecraftInstance::loadSpecificSettings()
         m_settings->registerOverride(global_settings->getSetting("MinMemAlloc"), memorySetting);
         m_settings->registerOverride(global_settings->getSetting("MaxMemAlloc"), memorySetting);
         m_settings->registerOverride(global_settings->getSetting("PermGen"), memorySetting);
+
+        // Sandboxing
+        auto sandboxingSetting = m_settings->registerSetting("OverrideSandboxing", false);
+        m_settings->registerOverride(global_settings->getSetting("EnableSandboxing"), sandboxingSetting);
+        m_settings->registerOverride(global_settings->getSetting("BwrapExtraArgs"), sandboxingSetting);
 
         // Native library workarounds
         auto nativeLibraryWorkaroundsOverride = m_settings->registerSetting("OverrideNativeWorkarounds", false);

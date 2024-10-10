@@ -121,6 +121,12 @@ void MinecraftPage::applySettings()
     s->set("CloseAfterLaunch", ui->closeAfterLaunchCheck->isChecked());
     s->set("QuitAfterGameStop", ui->quitAfterGameStopCheck->isChecked());
 
+    // Sandboxing
+    s->set("EnableSandboxing", ui->sandboxingCheckBox->isChecked());
+#ifdef Q_OS_LINUX
+    s->set("BwrapExtraArgs", ui->bwrapArgsLineEdit->text());
+#endif
+
     // Legacy settings
     s->set("OnlineFixes", ui->onlineFixes->isChecked());
 }
@@ -175,6 +181,13 @@ void MinecraftPage::loadSettings()
 
     ui->closeAfterLaunchCheck->setChecked(s->get("CloseAfterLaunch").toBool());
     ui->quitAfterGameStopCheck->setChecked(s->get("QuitAfterGameStop").toBool());
+
+    ui->sandboxingCheckBox->setChecked(s->get("EnableSandboxing").toBool());
+    ui->bwrapArgsLineEdit->setText(s->get("BwrapExtraArgs").toString());
+
+#ifndef Q_OS_LINUX
+    ui->sandboxingGroupBox->setVisible(false);
+#endif
 
     ui->onlineFixes->setChecked(s->get("OnlineFixes").toBool());
 }

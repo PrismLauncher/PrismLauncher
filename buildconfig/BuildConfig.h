@@ -167,6 +167,13 @@ class Config {
     QString DISCORD_URL;
     QString SUBREDDIT_URL;
 
+    /**
+     * Sandboxing options
+     */
+    QString LINUX_BWRAP_BINARY = "bwrap"; // TODO: CMake
+    QString LINUX_DBUSPROXY_BINARY = "xdg-dbus-proxy"; // TODO: CMake
+    QString LINUX_BWRAP_EXTRA_ARGS;
+
     QString RESOURCE_BASE = "https://resources.download.minecraft.net/";
     QString LIBRARY_BASE = "https://libraries.minecraft.net/";
     QString IMGUR_BASE_URL = "https://api.imgur.com/3/";

@@ -2,6 +2,7 @@
 /*
  *  PrismLauncher - Minecraft Launcher
  *  Copyright (C) 2022 Jan Drögehoff <sentrycraft123@gmail.com>
+ *  Copyright (C) 2023 Sefa Eyeoglu <contact@scrumplex.net>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,11 +19,13 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QStandardPaths>
 #include <QString>
 #include <QStringList>
 #include <QSysInfo>
 #include <QtGlobal>
 
+#include "BuildConfig.h"
 #include "FileSystem.h"
 #include "Json.h"
 #include "MangoHud.h"
@@ -36,6 +39,7 @@
 #include <linux/limits.h>
 #endif
 
+// FIXME: rename this to something generic
 namespace MangoHud {
 
 QString getLibraryString()
@@ -164,6 +168,46 @@ QString findLibrary(QString libName)
     qWarning() << "MangoHud::findLibrary is not implemented on this platform";
     return {};
 #endif
+}
+
+QString getBwrapBinary()
+{
+    QStringList binaries{ BuildConfig.LINUX_BWRAP_BINARY, "bwrap" };
+    for (const auto& binary : binaries) {
+        // return if an absolute path is specified (i.e. distribution override)
+        if (binary.startsWith('/') && QFileInfo(binary).isExecutable()) {
+            qDebug() << "Found absolute bwrap binary" << binary;
+            return binary;
+        }
+
+        // lookup otherwise
+        QString path = QStandardPaths::findExecutable(binary);
+        if (!path.isEmpty()) {
+            qDebug() << "Found bwrap binary" << binary << "at" << path;
+            return path;
+        }
+    }
+    return {};
+}
+
+QString getXDGDbusProxyBinary()
+{
+    QStringList binaries{ BuildConfig.LINUX_DBUSPROXY_BINARY, "xdg-dbus-proxy" };
+    for (const auto& binary : binaries) {
+        // return if an absolute path is specified (i.e. distribution override)
+        if (binary.startsWith('/') && QFileInfo(binary).isExecutable()) {
+            qDebug() << "Found absolute xdg-dbus-proxy binary" << binary;
+            return binary;
+        }
+
+        // lookup otherwise
+        QString path = QStandardPaths::findExecutable(binary);
+        if (!path.isEmpty()) {
+            qDebug() << "Found xdg-dbus-proxy binary" << binary << "at" << path;
+            return path;
+        }
+    }
+    return {};
 }
 }  // namespace MangoHud
 

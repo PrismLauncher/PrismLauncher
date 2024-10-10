@@ -38,6 +38,7 @@
 #include <QProcess>
 #include <QTextDecoder>
 #include "MessageLevel.h"
+#include "QObjectPtr.h"
 
 /*
  * This is a basic process.
