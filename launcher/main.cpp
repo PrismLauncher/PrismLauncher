@@ -33,9 +33,8 @@
  *      limitations under the License.
  */
 
+#include <cpptrace/utils.hpp>
 #include <csignal>
-#include <iostream>
-#include <stacktrace>
 #include "Application.h"
 
 // #define BREAK_INFINITE_LOOP
@@ -49,7 +48,7 @@
 
 void signal_handler(int)
 {
-    std::cout << std::stacktrace::current();
+    cpptrace::generate_trace().print();
     QApplication::exit(1);
 }
 
@@ -58,6 +57,14 @@ void setup_crash_handler()
     // Setup signal handler for common crash signals
     std::signal(SIGSEGV, signal_handler);  // Segmentation fault
     std::signal(SIGABRT, signal_handler);  // Abort signal
+}
+
+void warmup_cpptrace()
+{
+    cpptrace::frame_ptr buffer[10];
+    std::size_t count = cpptrace::safe_generate_raw_trace(buffer, 10);
+    cpptrace::safe_object_frame frame;
+    cpptrace::get_safe_object_frame(buffer[0], &frame);
 }
 
 int main(int argc, char* argv[])
@@ -74,6 +81,9 @@ int main(int argc, char* argv[])
     return 42;
 #endif
 
+    // cpptrace::absorb_trace_exceptions(false);
+    cpptrace::register_terminate_handler();
+    warmup_cpptrace();
     setup_crash_handler();
 
 #if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)

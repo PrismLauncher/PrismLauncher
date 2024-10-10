@@ -24,7 +24,7 @@ set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 ######## Set compiler flags ########
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_C_STANDARD_REQUIRED true)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
 if(MSVC)
@@ -548,6 +548,14 @@ else()
     message(STATUS "Using system ghc_filesystem")
 endif()
 add_subdirectory(libraries/qdcss) # css parser
+
+include(FetchContent)
+FetchContent_Declare(
+  cpptrace
+  GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git
+  GIT_TAG        v0.7.2 # <HASH or TAG>
+)
+FetchContent_MakeAvailable(cpptrace)
 
 ############################### Built Artifacts ###############################
 
