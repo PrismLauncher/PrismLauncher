@@ -1287,23 +1287,50 @@ target_link_libraries(Launcher_logic
     ghcFilesystem::ghc_filesystem
 )
 
-target_link_libraries(Launcher_logic cpptrace::cpptrace)
+target_link_libraries(Launcher_logic Backward::Interface)
 
-if(WIN32)
-  add_custom_command(
-    TARGET Launcher_logic POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_FILE:cpptrace::cpptrace>
-    $<TARGET_FILE_DIR:Launcher_logic>
-  )
+if (WIN32)
+    # Link against Debug Help Library for stack tracing
+    target_link_libraries(Launcher_logic DbgHelp)
 endif()
 
-if(APPLE)
-  add_custom_command(
-    TARGET Launcher_logic
-    POST_BUILD
-    COMMAND dsymutil $<TARGET_FILE:Launcher_logic>
-  )
+find_package(Unwind QUIET)
+if(Unwind_FOUND)
+    message(STATUS "Using libunwind for stack unwinding")
+    target_link_libraries(Launcher_logic Unwind::Unwind)
+    target_compile_definitions(Launcher_logic INTERFACE BACKWARD_HAS_UNWIND=1)
+else()
+    message(WARNING "libunwind not found, stack unwinding may be limited")
+endif()
+
+# Check if libbfd (Binary File Descriptor) is available for symbol resolution
+find_package(BFD QUIET)
+if(BFD_FOUND)
+    message(STATUS "Using libbfd for symbol resolution")
+    target_link_libraries(Launcher_logic BFD::BFD)
+    target_compile_definitions(Launcher_logic INTERFACE BACKWARD_HAS_BFD=1)
+else()
+    message(WARNING "libbfd not found, symbol resolution may be limited")
+endif()
+
+# Check if dwarf (DWARF debugging info) is available for symbol resolution
+find_package(Dwarf QUIET)
+if(Dwarf_FOUND)
+    message(STATUS "Using libdwarf for symbol resolution")
+    target_link_libraries(Launcher_logic Dwarf::Dwarf)
+    target_compile_definitions(Launcher_logic INTERFACE BACKWARD_HAS_DWARF=1)
+else()
+    message(WARNING "libdwarf not found, symbol resolution may be limited")
+endif()
+
+# Check if libdw (ELFutils DWARF support) is available for symbol resolution
+find_library(LIBDW_LIB QUIET)
+if(LIBDW_LIB)
+    message(STATUS "Using libdw for DWARF-based symbol resolution")
+    target_link_libraries(Launcher_logic ${LIBDW_LIB})
+    target_compile_definitions(Launcher_logic INTERFACE BACKWARD_HAS_DW=1)
+else()
+    message(WARNING "libdw not found, DWARF symbol resolution may be limited")
 endif()
 
 if (UNIX AND NOT CYGWIN AND NOT APPLE)

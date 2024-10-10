@@ -550,12 +550,13 @@ endif()
 add_subdirectory(libraries/qdcss) # css parser
 
 include(FetchContent)
-FetchContent_Declare(
-  cpptrace
-  GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git
-  GIT_TAG        v0.7.2 # <HASH or TAG>
+FetchContent_Declare(backward
+    GIT_REPOSITORY https://github.com/bombela/backward-cpp
+    GIT_TAG master  # or a version tag, such as v1.6
+    SYSTEM          # optional, the Backward include directory will be treated as system directory
 )
-FetchContent_MakeAvailable(cpptrace)
+FetchContent_MakeAvailable(backward)
+
 
 ############################### Built Artifacts ###############################
 
