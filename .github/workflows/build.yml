@@ -82,7 +82,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: ""
-            qt_version: "6.7.3"
+            qt_version: "6.8.0"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
             nscurl_tag: "v24.9.26.122"
             nscurl_sha256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
@@ -95,7 +95,7 @@ jobs:
             qt_ver: 6
             qt_host: windows
             qt_arch: "win64_msvc2019_arm64"
-            qt_version: "6.7.3"
+            qt_version: "6.8.0"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
             nscurl_tag: "v24.9.26.122"
             nscurl_sha256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
@@ -106,7 +106,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ""
-            qt_version: "6.7.3"
+            qt_version: "6.8.0"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: macos-14
