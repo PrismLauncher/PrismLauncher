@@ -164,6 +164,7 @@ bool FlameCreationTask::updateInstance()
         }
 
         QDir old_minecraft_dir(inst->gameRoot());
+        m_rootFolder = old_inst_dir.absolutePath();
 
         // We will remove all the previous overrides, to prevent duplicate files!
         // TODO: Currently 'overrides' will always override the stuff on update. How do we preserve unchanged overrides?

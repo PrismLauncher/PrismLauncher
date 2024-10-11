@@ -40,6 +40,7 @@ class InstanceCreationTask : public InstanceTask {
     bool m_abort = false;
 
     QStringList m_files_to_remove;
+    QString m_rootFolder;
 
    private:
     QString m_error_message;

@@ -112,6 +112,7 @@ bool ModrinthCreationTask::updateInstance()
         }
 
         QDir old_minecraft_dir(inst->gameRoot());
+        m_rootFolder = old_inst_dir.absolutePath();
 
         // Some files were removed from the old version, and some will be downloaded in an updated version,
         // so we're fine removing them!

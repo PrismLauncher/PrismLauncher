@@ -42,7 +42,12 @@ void InstanceCreationTask::executeTask()
         setStatus(tr("Removing old conflicting files..."));
         qDebug() << "Removing old files";
 
+        auto saves = FS::PathCombine(m_rootFolder, "saves");
         for (auto path : m_files_to_remove) {
+            if (path.startsWith(saves)) {
+                qWarning() << "Trying to removes file in saves folder. Skiping file:" << path;
+                continue;
+            }
             if (!QFile::exists(path))
                 continue;
             qDebug() << "Removing" << path;
