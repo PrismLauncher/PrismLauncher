@@ -71,6 +71,15 @@ class ModFilterWidget : public QTabWidget {
                    releases == other.releases && categoryIds == other.categoryIds;
         }
         bool operator!=(const Filter& other) const { return !(*this == other); }
+
+        bool checkMcVersions(QStringList value)
+        {
+            for (auto mcVersion : versions)
+                if (value.contains(mcVersion.toString()))
+                    return true;
+
+            return versions.empty();
+        }
     };
 
     static unique_qobject_ptr<ModFilterWidget> create(MinecraftInstance* instance, bool extended, QWidget* parent = nullptr);

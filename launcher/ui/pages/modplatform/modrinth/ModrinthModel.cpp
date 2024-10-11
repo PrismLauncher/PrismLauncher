@@ -152,33 +152,26 @@ void ModpackListModel::performPaginatedSearch()
             return;
         }
     }  // TODO: Move to standalone API
-    auto netJob = makeShared<NetJob>("Modrinth::SearchModpack", APPLICATION->network());
-    auto searchAllUrl = QString(BuildConfig.MODRINTH_PROD_URL +
-                                "/search?"
-                                "offset=%1&"
-                                "limit=%2&"
-                                "query=%3&"
-                                "index=%4&"
-                                "facets=[[\"project_type:modpack\"]]")
-                            .arg(nextSearchOffset)
-                            .arg(m_modpacks_per_page)
-                            .arg(currentSearchTerm)
-                            .arg(currentSort);
+    ResourceAPI::SortingMethod sort{};
+    sort.name = currentSort;
+    auto searchUrl = ModrinthAPI().getSearchURL({ ModPlatform::ResourceType::MODPACK, nextSearchOffset, currentSearchTerm, sort,
+                                                  m_filter->loaders, m_filter->versions, "", m_filter->categoryIds });
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchAllUrl), m_all_response));
+    auto netJob = makeShared<NetJob>("Modrinth::SearchModpack", APPLICATION->network());
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl.value()), m_allResponse));
 
     QObject::connect(netJob.get(), &NetJob::succeeded, this, [this] {
-        QJsonParseError parse_error_all{};
+        QJsonParseError parseError{};
 
-        QJsonDocument doc_all = QJsonDocument::fromJson(*m_all_response, &parse_error_all);
-        if (parse_error_all.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error_all.offset
-                       << " reason: " << parse_error_all.errorString();
-            qWarning() << *m_all_response;
+        QJsonDocument doc = QJsonDocument::fromJson(*m_allResponse, &parseError);
+        if (parseError.error != QJsonParseError::NoError) {
+            qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parseError.offset
+                       << " reason: " << parseError.errorString();
+            qWarning() << *m_allResponse;
             return;
         }
 
-        searchRequestFinished(doc_all);
+        searchRequestFinished(doc);
     });
     QObject::connect(netJob.get(), &NetJob::failed, this, &ModpackListModel::searchRequestFailed);
 
@@ -220,19 +213,23 @@ static auto sortFromIndex(int index) -> QString
     }
 }
 
-void ModpackListModel::searchWithTerm(const QString& term, const int sort)
+void ModpackListModel::searchWithTerm(const QString& term,
+                                      const int sort,
+                                      std::shared_ptr<ModFilterWidget::Filter> filter,
+                                      bool filterChanged)
 {
     if (sort > 5 || sort < 0)
         return;
 
     auto sort_str = sortFromIndex(sort);
 
-    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort_str) {
+    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort_str && !filterChanged) {
         return;
     }
 
     currentSearchTerm = term;
     currentSort = sort_str;
+    m_filter = filter;
 
     refresh();
 }

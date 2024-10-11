@@ -1,6 +1,7 @@
 #include "FlameModel.h"
 #include <Json.h>
 #include "Application.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "ui/widgets/ProjectItem.h"
@@ -183,34 +184,28 @@ void ListModel::performPaginatedSearch()
             return;
         }
     }
-    auto netJob = makeShared<NetJob>("Flame::Search", APPLICATION->network());
-    auto searchUrl = QString(
-                         "https://api.curseforge.com/v1/mods/search?"
-                         "gameId=432&"
-                         "classId=4471&"
-                         "index=%1&"
-                         "pageSize=25&"
-                         "searchFilter=%2&"
-                         "sortField=%3&"
-                         "sortOrder=desc")
-                         .arg(nextSearchOffset)
-                         .arg(currentSearchTerm)
-                         .arg(currentSort + 1);
+    ResourceAPI::SortingMethod sort{};
+    sort.index = currentSort + 1;
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl), response));
+    auto netJob = makeShared<NetJob>("Flame::Search", APPLICATION->network());
+    auto searchUrl = FlameAPI().getSearchURL({ ModPlatform::ResourceType::MODPACK, nextSearchOffset, currentSearchTerm, sort,
+                                               m_filter->loaders, m_filter->versions, "", m_filter->categoryIds });
+
+    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(searchUrl.value()), response));
     jobPtr = netJob;
     jobPtr->start();
     QObject::connect(netJob.get(), &NetJob::succeeded, this, &ListModel::searchRequestFinished);
     QObject::connect(netJob.get(), &NetJob::failed, this, &ListModel::searchRequestFailed);
 }
 
-void ListModel::searchWithTerm(const QString& term, int sort)
+void ListModel::searchWithTerm(const QString& term, int sort, std::shared_ptr<ModFilterWidget::Filter> filter, bool filterChanged)
 {
-    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort) {
+    if (currentSearchTerm == term && currentSearchTerm.isNull() == term.isNull() && currentSort == sort && !filterChanged) {
         return;
     }
     currentSearchTerm = term;
     currentSort = sort;
+    m_filter = filter;
     if (hasActiveSearchJob()) {
         jobPtr->abort();
         searchState = ResetRequested;
