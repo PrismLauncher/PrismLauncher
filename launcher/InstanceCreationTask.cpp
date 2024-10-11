@@ -42,11 +42,11 @@ void InstanceCreationTask::executeTask()
         setStatus(tr("Removing old conflicting files..."));
         qDebug() << "Removing old files";
 
-        for (auto path : m_files_to_remove) {
+        for (const QString& path : m_files_to_remove) {
             if (!QFile::exists(path))
                 continue;
             qDebug() << "Removing" << path;
-            if (!FS::deletePath(path)) {
+            if (!QFile::remove(path)) {
                 qCritical() << "Couldn't remove the old conflicting files.";
                 emitFailed(tr("Failed to remove old conflicting files."));
                 return;
@@ -55,5 +55,4 @@ void InstanceCreationTask::executeTask()
     }
 
     emitSucceeded();
-    return;
 }
