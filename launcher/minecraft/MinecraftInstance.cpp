@@ -657,7 +657,6 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
             env.insert("__GLX_VENDOR_LIBRARY_NAME", "nvidia");
         }
     }
-    }
 
     if (settings()->get("UseZink").toBool()) {
         // taken from https://wiki.archlinux.org/title/OpenGL#OpenGL_over_Vulkan_(Zink)
