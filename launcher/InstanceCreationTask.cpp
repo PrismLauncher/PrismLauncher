@@ -38,6 +38,8 @@ void InstanceCreationTask::executeTask()
     // files scheduled to, and we'd better not let the user abort in the middle of it, since it'd
     // put the instance in an invalid state.
     if (shouldOverride()) {
+        bool deleteFailed = false;
+
         setAbortable(false);
         setStatus(tr("Removing old conflicting files..."));
         qDebug() << "Removing old files";
@@ -45,12 +47,18 @@ void InstanceCreationTask::executeTask()
         for (const QString& path : m_files_to_remove) {
             if (!QFile::exists(path))
                 continue;
+
             qDebug() << "Removing" << path;
+
             if (!QFile::remove(path)) {
-                qCritical() << "Couldn't remove the old conflicting files.";
-                emitFailed(tr("Failed to remove old conflicting files."));
-                return;
+                qCritical() << "Could not remove" << path;
+                deleteFailed = true;
             }
+        }
+
+        if (deleteFailed) {
+            emitFailed(tr("Failed to remove old conflicting files."));
+            return;
         }
     }
 
