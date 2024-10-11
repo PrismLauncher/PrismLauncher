@@ -643,14 +643,16 @@ QProcessEnvironment MinecraftInstance::createLaunchEnvironment()
                 }
             }
         }
-#else
-        // Open Source Drivers
-        env.insert("DRI_PRIME", "1");
-        // Proprietary Nvidia Drivers
-        env.insert("__NV_PRIME_RENDER_OFFLOAD", "1");
-        env.insert("__VK_LAYER_NV_optimus", "NVIDIA_only");
-        env.insert("__GLX_VENDOR_LIBRARY_NAME", "nvidia");
+        else
 #endif
+        {
+            // Open Source Drivers
+            env.insert("DRI_PRIME", "1");
+            // Proprietary Nvidia Drivers
+            env.insert("__NV_PRIME_RENDER_OFFLOAD", "1");
+            env.insert("__VK_LAYER_NV_optimus", "NVIDIA_only");
+            env.insert("__GLX_VENDOR_LIBRARY_NAME", "nvidia");
+        }
     }
 
     if (settings()->get("UseZink").toBool()) {
