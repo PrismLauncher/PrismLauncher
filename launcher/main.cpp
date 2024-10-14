@@ -35,6 +35,7 @@
 
 #include <cpptrace/utils.hpp>
 #include <csignal>
+#include <fstream>
 #include "Application.h"
 #include "FileSystem.h"
 
@@ -51,9 +52,19 @@ void signal_handler(int)
 {
     auto trace = cpptrace::generate_trace();
     auto data = QString::fromStdString(trace.to_string());
-    qCritical() << "===============================";
-    qCritical() << data;
-    FS::write(FS::PathCombine(APPLICATION->dataRoot(), "logs", "crash.report"), data.toUtf8());
+    FS::write("crash.report", data.toUtf8());
+    QFile file("crash2.report");
+    if (file.open(QFile::WriteOnly)) {
+        file.write(data.toUtf8());
+        file.flush();
+        file.close();
+    }
+    std::ofstream MyFile("crash3.report");
+    // Write to the file
+    trace.print(MyFile);
+
+    // Close the file
+    MyFile.close();
     QApplication::exit(1);
 }
 
