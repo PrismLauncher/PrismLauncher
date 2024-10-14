@@ -36,6 +36,7 @@
 #include <cpptrace/utils.hpp>
 #include <csignal>
 #include "Application.h"
+#include "FileSystem.h"
 
 // #define BREAK_INFINITE_LOOP
 // #define BREAK_EXCEPTION
@@ -48,7 +49,8 @@
 
 void signal_handler(int)
 {
-    cpptrace::generate_trace().print();
+    auto trace = cpptrace::generate_trace();
+    FS::write("logs/crash.report", QString::fromStdString(trace.to_string()).toUtf8());
     QApplication::exit(1);
 }
 
