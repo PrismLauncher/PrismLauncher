@@ -50,7 +50,7 @@
 void signal_handler(int)
 {
     auto trace = cpptrace::generate_trace();
-    FS::write("logs/crash.report", QString::fromStdString(trace.to_string()).toUtf8());
+    FS::write(FS::PathCombine(APPLICATION->dataRoot(), "logs", "crash.report"), QString::fromStdString(trace.to_string()).toUtf8());
     QApplication::exit(1);
 }
 
