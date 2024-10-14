@@ -50,7 +50,10 @@
 void signal_handler(int)
 {
     auto trace = cpptrace::generate_trace();
-    FS::write(FS::PathCombine(APPLICATION->dataRoot(), "logs", "crash.report"), QString::fromStdString(trace.to_string()).toUtf8());
+    auto data = QString::fromStdString(trace.to_string());
+    qCritical() << "===============================";
+    qCritical() << data;
+    FS::write(FS::PathCombine(APPLICATION->dataRoot(), "logs", "crash.report"), data.toUtf8());
     QApplication::exit(1);
 }
 
