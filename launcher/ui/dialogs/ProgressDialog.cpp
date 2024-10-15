@@ -90,6 +90,9 @@ void ProgressDialog::on_skipButton_clicked(bool checked)
 
 ProgressDialog::~ProgressDialog()
 {
+    for (auto conn : this->m_taskConnections) {
+        disconnect(conn);
+    }   
     delete ui;
 }
 
@@ -140,15 +143,15 @@ int ProgressDialog::execWithTask(Task* task)
     }
 
     // Connect signals.
-    connect(task, &Task::started, this, &ProgressDialog::onTaskStarted);
-    connect(task, &Task::failed, this, &ProgressDialog::onTaskFailed);
-    connect(task, &Task::succeeded, this, &ProgressDialog::onTaskSucceeded);
-    connect(task, &Task::status, this, &ProgressDialog::changeStatus);
-    connect(task, &Task::details, this, &ProgressDialog::changeStatus);
-    connect(task, &Task::stepProgress, this, &ProgressDialog::changeStepProgress);
-    connect(task, &Task::progress, this, &ProgressDialog::changeProgress);
-    connect(task, &Task::aborted, this, &ProgressDialog::hide);
-    connect(task, &Task::abortStatusChanged, ui->skipButton, &QPushButton::setEnabled);
+    this->m_taskConnections.push_back(connect(task, &Task::started, this, &ProgressDialog::onTaskStarted));
+    this->m_taskConnections.push_back(connect(task, &Task::failed, this, &ProgressDialog::onTaskFailed));
+    this->m_taskConnections.push_back(connect(task, &Task::succeeded, this, &ProgressDialog::onTaskSucceeded));
+    this->m_taskConnections.push_back(connect(task, &Task::status, this, &ProgressDialog::changeStatus));
+    this->m_taskConnections.push_back(connect(task, &Task::details, this, &ProgressDialog::changeStatus));
+    this->m_taskConnections.push_back(connect(task, &Task::stepProgress, this, &ProgressDialog::changeStepProgress));
+    this->m_taskConnections.push_back(connect(task, &Task::progress, this, &ProgressDialog::changeProgress));
+    this->m_taskConnections.push_back(connect(task, &Task::aborted, this, &ProgressDialog::hide));
+    this->m_taskConnections.push_back(connect(task, &Task::abortStatusChanged, ui->skipButton, &QPushButton::setEnabled));
 
     m_is_multi_step = task->isMultiStep();
     ui->taskProgressScrollArea->setHidden(!m_is_multi_step);
