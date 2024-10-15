@@ -70,10 +70,33 @@ void signal_handler(int)
     QApplication::exit(1);
 }
 #if defined Q_OS_WIN32
+#include <dbghelp.h>
 #include <windows.h>
-void HandleException(DWORD exceptionCode)
+#include <iostream>
+
+LONG WINAPI CustomUnhandledExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
 {
-    signal_handler(int);
+    signal_handler(0);
+    if (exceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION) {
+        std::cerr << "Access violation caught! Writing minidump..." << std::endl;
+
+        HANDLE hFile = CreateFile(L"crashdump.dmp", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        if (hFile != INVALID_HANDLE_VALUE) {
+            MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
+            dumpInfo.ThreadId = GetCurrentThreadId();
+            dumpInfo.ExceptionPointers = exceptionInfo;
+            dumpInfo.ClientPointers = FALSE;
+
+            // Write the minidump to the file
+            MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &dumpInfo, nullptr, nullptr);
+            CloseHandle(hFile);
+
+            std::cerr << "Minidump written to crashdump.dmp" << std::endl;
+        }
+
+        return EXCEPTION_EXECUTE_HANDLER;  // Handle the exception
+    }
+    return EXCEPTION_CONTINUE_SEARCH;  // Continue searching for another handler
 }
 #endif
 
@@ -82,6 +105,10 @@ void setup_crash_handler()
     // Setup signal handler for common crash signals
     std::signal(SIGSEGV, signal_handler);  // Segmentation fault
     std::signal(SIGABRT, signal_handler);  // Abort signal
+
+#if defined Q_OS_WIN32
+    SetUnhandledExceptionFilter(CustomUnhandledExceptionFilter);
+#endif
 }
 
 void warmup_cpptrace()
@@ -111,48 +138,39 @@ int main(int argc, char* argv[])
     warmup_cpptrace();
     setup_crash_handler();
 
-#if defined Q_OS_WIN32
-    __try {
-#endif
-
 #if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
-        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-        QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 
-        // initialize Qt
-        Application app(argc, argv);
+    // initialize Qt
+    Application app(argc, argv);
 
-        switch (app.status()) {
-            case Application::StartingUp:
-            case Application::Initialized: {
-                Q_INIT_RESOURCE(multimc);
-                Q_INIT_RESOURCE(backgrounds);
-                Q_INIT_RESOURCE(documents);
-                Q_INIT_RESOURCE(prismlauncher);
+    switch (app.status()) {
+        case Application::StartingUp:
+        case Application::Initialized: {
+            Q_INIT_RESOURCE(multimc);
+            Q_INIT_RESOURCE(backgrounds);
+            Q_INIT_RESOURCE(documents);
+            Q_INIT_RESOURCE(prismlauncher);
 
-                Q_INIT_RESOURCE(pe_dark);
-                Q_INIT_RESOURCE(pe_light);
-                Q_INIT_RESOURCE(pe_blue);
-                Q_INIT_RESOURCE(pe_colored);
-                Q_INIT_RESOURCE(breeze_dark);
-                Q_INIT_RESOURCE(breeze_light);
-                Q_INIT_RESOURCE(OSX);
-                Q_INIT_RESOURCE(iOS);
-                Q_INIT_RESOURCE(flat);
-                Q_INIT_RESOURCE(flat_white);
-                return app.exec();
-            }
-            case Application::Failed:
-                return 1;
-            case Application::Succeeded:
-                return 0;
-            default:
-                return -1;
+            Q_INIT_RESOURCE(pe_dark);
+            Q_INIT_RESOURCE(pe_light);
+            Q_INIT_RESOURCE(pe_blue);
+            Q_INIT_RESOURCE(pe_colored);
+            Q_INIT_RESOURCE(breeze_dark);
+            Q_INIT_RESOURCE(breeze_light);
+            Q_INIT_RESOURCE(OSX);
+            Q_INIT_RESOURCE(iOS);
+            Q_INIT_RESOURCE(flat);
+            Q_INIT_RESOURCE(flat_white);
+            return app.exec();
         }
-#if defined Q_OS_WIN32
-    } __except (HandleException(GetExceptionCode()), EXCEPTION_EXECUTE_HANDLER) {
-        std::cout << "Exception handled!" << std::endl;
+        case Application::Failed:
+            return 1;
+        case Application::Succeeded:
+            return 0;
+        default:
+            return -1;
     }
-#endif
 }
