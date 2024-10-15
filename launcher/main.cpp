@@ -69,6 +69,13 @@ void signal_handler(int)
     MyFile.close();
     QApplication::exit(1);
 }
+#if defined Q_OS_WIN32
+#include <windows.h>
+void HandleException(DWORD exceptionCode)
+{
+    signal_handler(int);
+}
+#endif
 
 void setup_crash_handler()
 {
@@ -104,39 +111,48 @@ int main(int argc, char* argv[])
     warmup_cpptrace();
     setup_crash_handler();
 
-#if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#if defined Q_OS_WIN32
+    __try {
 #endif
 
-    // initialize Qt
-    Application app(argc, argv);
+#if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
+        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+        QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+#endif
 
-    switch (app.status()) {
-        case Application::StartingUp:
-        case Application::Initialized: {
-            Q_INIT_RESOURCE(multimc);
-            Q_INIT_RESOURCE(backgrounds);
-            Q_INIT_RESOURCE(documents);
-            Q_INIT_RESOURCE(prismlauncher);
+        // initialize Qt
+        Application app(argc, argv);
 
-            Q_INIT_RESOURCE(pe_dark);
-            Q_INIT_RESOURCE(pe_light);
-            Q_INIT_RESOURCE(pe_blue);
-            Q_INIT_RESOURCE(pe_colored);
-            Q_INIT_RESOURCE(breeze_dark);
-            Q_INIT_RESOURCE(breeze_light);
-            Q_INIT_RESOURCE(OSX);
-            Q_INIT_RESOURCE(iOS);
-            Q_INIT_RESOURCE(flat);
-            Q_INIT_RESOURCE(flat_white);
-            return app.exec();
+        switch (app.status()) {
+            case Application::StartingUp:
+            case Application::Initialized: {
+                Q_INIT_RESOURCE(multimc);
+                Q_INIT_RESOURCE(backgrounds);
+                Q_INIT_RESOURCE(documents);
+                Q_INIT_RESOURCE(prismlauncher);
+
+                Q_INIT_RESOURCE(pe_dark);
+                Q_INIT_RESOURCE(pe_light);
+                Q_INIT_RESOURCE(pe_blue);
+                Q_INIT_RESOURCE(pe_colored);
+                Q_INIT_RESOURCE(breeze_dark);
+                Q_INIT_RESOURCE(breeze_light);
+                Q_INIT_RESOURCE(OSX);
+                Q_INIT_RESOURCE(iOS);
+                Q_INIT_RESOURCE(flat);
+                Q_INIT_RESOURCE(flat_white);
+                return app.exec();
+            }
+            case Application::Failed:
+                return 1;
+            case Application::Succeeded:
+                return 0;
+            default:
+                return -1;
         }
-        case Application::Failed:
-            return 1;
-        case Application::Succeeded:
-            return 0;
-        default:
-            return -1;
+#if defined Q_OS_WIN32
+    } __except (HandleException(GetExceptionCode()), EXCEPTION_EXECUTE_HANDLER) {
+        std::cout << "Exception handled!" << std::endl;
     }
+#endif
 }
