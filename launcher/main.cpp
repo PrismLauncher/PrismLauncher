@@ -70,32 +70,11 @@ void signal_handler(int)
     QApplication::exit(1);
 }
 #if defined Q_OS_WIN32
-#include <dbghelp.h>
 #include <windows.h>
-#include <iostream>
 
 LONG WINAPI CustomUnhandledExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
 {
     signal_handler(0);
-    if (exceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION) {
-        std::cerr << "Access violation caught! Writing minidump..." << std::endl;
-
-        HANDLE hFile = CreateFile(L"crashdump.dmp", GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
-        if (hFile != INVALID_HANDLE_VALUE) {
-            MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
-            dumpInfo.ThreadId = GetCurrentThreadId();
-            dumpInfo.ExceptionPointers = exceptionInfo;
-            dumpInfo.ClientPointers = FALSE;
-
-            // Write the minidump to the file
-            MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal, &dumpInfo, nullptr, nullptr);
-            CloseHandle(hFile);
-
-            std::cerr << "Minidump written to crashdump.dmp" << std::endl;
-        }
-
-        return EXCEPTION_EXECUTE_HANDLER;  // Handle the exception
-    }
     return EXCEPTION_CONTINUE_SEARCH;  // Continue searching for another handler
 }
 #endif
