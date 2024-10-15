@@ -1177,7 +1177,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::loaderModList()
 {
     if (!m_loader_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_loader_mod_list.reset(new ModFolderModel(modsRoot(), this, is_indexed));
+        m_loader_mod_list.reset(new ModFolderModel(modsRoot(), this, is_indexed, true));
     }
     return m_loader_mod_list;
 }
@@ -1186,7 +1186,7 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::coreModList()
 {
     if (!m_core_mod_list) {
         bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-        m_core_mod_list.reset(new ModFolderModel(coreModsDir(), this, is_indexed));
+        m_core_mod_list.reset(new ModFolderModel(coreModsDir(), this, is_indexed, true));
     }
     return m_core_mod_list;
 }
@@ -1203,7 +1203,8 @@ std::shared_ptr<ModFolderModel> MinecraftInstance::nilModList()
 std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList()
 {
     if (!m_resource_pack_list) {
-        m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir(), this));
+        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        m_resource_pack_list.reset(new ResourcePackFolderModel(resourcePacksDir(), this, is_indexed, true));
     }
     return m_resource_pack_list;
 }
@@ -1211,7 +1212,8 @@ std::shared_ptr<ResourcePackFolderModel> MinecraftInstance::resourcePackList()
 std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList()
 {
     if (!m_texture_pack_list) {
-        m_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir(), this));
+        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        m_texture_pack_list.reset(new TexturePackFolderModel(texturePacksDir(), this, is_indexed, true));
     }
     return m_texture_pack_list;
 }
@@ -1219,7 +1221,8 @@ std::shared_ptr<TexturePackFolderModel> MinecraftInstance::texturePackList()
 std::shared_ptr<ShaderPackFolderModel> MinecraftInstance::shaderPackList()
 {
     if (!m_shader_pack_list) {
-        m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir(), this));
+        bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
+        m_shader_pack_list.reset(new ShaderPackFolderModel(shaderPacksDir(), this, is_indexed, true));
     }
     return m_shader_pack_list;
 }

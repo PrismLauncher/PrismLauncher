@@ -6,10 +6,13 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
     Q_OBJECT
 
    public:
-    ModrinthCheckUpdate(QList<Mod*>& mods,
-                        std::list<Version>& mcVersions,
-                        QList<ModPlatform::ModLoaderType> loadersList,
-                        std::shared_ptr<ModFolderModel> mods_folder);
+    ModrinthCheckUpdate(QList<Resource*>& resources,
+                                             std::list<Version>& mcVersions,
+                                             QList<ModPlatform::ModLoaderType> loadersList,
+                                             std::shared_ptr<ResourceFolderModel> resourceModel)
+        : CheckUpdateTask(resources, mcVersions, loadersList, resourceModel)
+        , m_hash_type(ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first())
+    {}
 
    public slots:
     bool abort() override;
@@ -22,7 +25,7 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
 
    private:
     Task::Ptr m_job = nullptr;
-    QHash<QString, Mod*> m_mappings;
+    QHash<QString, Resource*> m_mappings;
     QString m_hash_type;
     int m_next_loader_idx = 0;
 };

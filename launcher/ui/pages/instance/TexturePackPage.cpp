@@ -44,35 +44,47 @@
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
+#include "ui/dialogs/ResourceUpdateDialog.h"
 
 TexturePackPage::TexturePackPage(MinecraftInstance* instance, std::shared_ptr<TexturePackFolderModel> model, QWidget* parent)
-    : ExternalResourcesPage(instance, model, parent)
+    : ExternalResourcesPage(instance, model, parent), m_model(model)
 {
-    ui->actionDownloadItem->setText(tr("Download packs"));
-    ui->actionDownloadItem->setToolTip(tr("Download texture packs from online platforms"));
+    ui->actionDownloadItem->setText(tr("Download Packs"));
+    ui->actionDownloadItem->setToolTip(tr("Download texture packs from online mod platforms"));
     ui->actionDownloadItem->setEnabled(true);
-    connect(ui->actionDownloadItem, &QAction::triggered, this, &TexturePackPage::downloadTPs);
     ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionDownloadItem);
 
-    ui->actionViewConfigs->setVisible(false);
+    connect(ui->actionDownloadItem, &QAction::triggered, this, &TexturePackPage::downloadTexturePacks);
+
+    ui->actionUpdateItem->setToolTip(tr("Try to check or update all selected texture packs (all texture packs if none are selected)"));
+    connect(ui->actionUpdateItem, &QAction::triggered, this, &TexturePackPage::updateTexturePacks);
+    ui->actionsToolbar->insertActionBefore(ui->actionAddItem, ui->actionUpdateItem);
+
+    auto updateMenu = new QMenu(this);
+
+    auto update = updateMenu->addAction(ui->actionUpdateItem->text());
+    connect(update, &QAction::triggered, this, &TexturePackPage::updateTexturePacks);
+
+    updateMenu->addAction(ui->actionResetItemMetadata);
+    connect(ui->actionResetItemMetadata, &QAction::triggered, this, &TexturePackPage::deleteTexturePackMetadata);
+
+    ui->actionUpdateItem->setMenu(updateMenu);
 }
 
-bool TexturePackPage::onSelectionChanged(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
+void TexturePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)
 {
     auto sourceCurrent = m_filterModel->mapToSource(current);
     int row = sourceCurrent.row();
     auto& rp = static_cast<TexturePack&>(m_model->at(row));
     ui->frame->updateWithTexturePack(rp);
-
-    return true;
 }
 
-void TexturePackPage::downloadTPs()
+void TexturePackPage::downloadTexturePacks()
 {
     if (m_instance->typeName() != "Minecraft")
         return;  // this is a null instance or a legacy instance
 
-    ResourceDownload::TexturePackDownloadDialog mdownload(this, std::static_pointer_cast<TexturePackFolderModel>(m_model), m_instance);
+    ResourceDownload::TexturePackDownloadDialog mdownload(this, m_model, m_instance);
     if (mdownload.exec()) {
         auto tasks =
             new ConcurrentTask(this, "Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
@@ -102,4 +114,105 @@ void TexturePackPage::downloadTPs()
 
         m_model->update();
     }
+}
+
+void TexturePackPage::updateTexturePacks()
+{
+    if (m_instance->typeName() != "Minecraft")
+        return;  // this is a null instance or a legacy instance
+
+    auto profile = static_cast<MinecraftInstance*>(m_instance)->getPackProfile();
+    if (APPLICATION->settings()->get("ModMetadataDisabled").toBool()) {
+        QMessageBox::critical(this, tr("Error"), tr("Texture pack updates are unavailable when metadata is disabled!"));
+        return;
+    }
+    if (m_instance != nullptr && m_instance->isRunning()) {
+        auto response = CustomMessageBox::selectable(
+                            this, tr("Confirm Update"),
+                            tr("Updating texture packs while the game is running may cause pack duplication and game crashes.\n"
+                               "The old files may not be deleted as they are in use.\n"
+                               "Are you sure you want to do this?"),
+                            QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+
+    auto mods_list = m_model->selectedResources(selection);
+    bool use_all = mods_list.empty();
+    if (use_all)
+        mods_list = m_model->allResources();
+
+    ResourceUpdateDialog update_dialog(this, m_instance, m_model, mods_list, false, false);
+    update_dialog.checkCandidates();
+
+    if (update_dialog.aborted()) {
+        CustomMessageBox::selectable(this, tr("Aborted"), tr("The texture pack updater was aborted!"), QMessageBox::Warning)->show();
+        return;
+    }
+    if (update_dialog.noUpdates()) {
+        QString message{ tr("'%1' is up-to-date! :)").arg(mods_list.front()->name()) };
+        if (mods_list.size() > 1) {
+            if (use_all) {
+                message = tr("All texture packs are up-to-date! :)");
+            } else {
+                message = tr("All selected texture packs are up-to-date! :)");
+            }
+        }
+        CustomMessageBox::selectable(this, tr("Update checker"), message)->exec();
+        return;
+    }
+
+    if (update_dialog.exec()) {
+        auto tasks =
+            new ConcurrentTask(this, "Download Texture Packs", APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+        connect(tasks, &Task::failed, [this, tasks](QString reason) {
+            CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show();
+            tasks->deleteLater();
+        });
+        connect(tasks, &Task::aborted, [this, tasks]() {
+            CustomMessageBox::selectable(this, tr("Aborted"), tr("Download stopped by user."), QMessageBox::Information)->show();
+            tasks->deleteLater();
+        });
+        connect(tasks, &Task::succeeded, [this, tasks]() {
+            QStringList warnings = tasks->warnings();
+            if (warnings.count()) {
+                CustomMessageBox::selectable(this, tr("Warnings"), warnings.join('\n'), QMessageBox::Warning)->show();
+            }
+            tasks->deleteLater();
+        });
+
+        for (auto task : update_dialog.getTasks()) {
+            tasks->addTask(task);
+        }
+
+        ProgressDialog loadDialog(this);
+        loadDialog.setSkipButton(true, tr("Abort"));
+        loadDialog.execWithTask(tasks);
+
+        m_model->update();
+    }
+}
+
+void TexturePackPage::deleteTexturePackMetadata()
+{
+    auto selection = m_filterModel->mapSelectionToSource(ui->treeView->selectionModel()->selection()).indexes();
+    auto selectionCount = m_model->selectedTexturePacks(selection).length();
+    if (selectionCount == 0)
+        return;
+    if (selectionCount > 1) {
+        auto response = CustomMessageBox::selectable(this, tr("Confirm Removal"),
+                                                     tr("You are about to remove the metadata for %1 texture packs.\n"
+                                                        "Are you sure?")
+                                                         .arg(selectionCount),
+                                                     QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
+                            ->exec();
+
+        if (response != QMessageBox::Yes)
+            return;
+    }
+
+    m_model->deleteMetadata(selection);
 }

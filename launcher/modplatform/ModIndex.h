@@ -25,6 +25,7 @@
 #include <QVariant>
 #include <QVector>
 #include <memory>
+#include <optional>
 
 class QIODevice;
 
