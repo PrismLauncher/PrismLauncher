@@ -52,6 +52,8 @@ void signal_handler(int)
 {
     auto trace = cpptrace::generate_trace();
     auto data = QString::fromStdString(trace.to_string());
+    qCritical() << "==========================";
+    qCritical() << data;
     FS::write("crash.report", data.toUtf8());
     QFile file("crash2.report");
     if (file.open(QFile::WriteOnly)) {
