@@ -78,13 +78,17 @@ LONG WINAPI CustomUnhandledExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
     return EXCEPTION_CONTINUE_SEARCH;  // Continue searching for another handler
 }
 #endif
+void customTerminate()
+{
+    signal_handler(0);
+}
 
 void setup_crash_handler()
 {
     // Setup signal handler for common crash signals
     std::signal(SIGSEGV, signal_handler);  // Segmentation fault
     std::signal(SIGABRT, signal_handler);  // Abort signal
-
+    std::set_terminate(customTerminate);
 #if defined Q_OS_WIN32
     SetUnhandledExceptionFilter(CustomUnhandledExceptionFilter);
 #endif
