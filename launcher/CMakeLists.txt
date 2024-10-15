@@ -1287,6 +1287,25 @@ target_link_libraries(Launcher_logic
     ghcFilesystem::ghc_filesystem
 )
 
+target_link_libraries(Launcher_logic cpptrace::cpptrace)
+
+if(WIN32)
+  add_custom_command(
+    TARGET Launcher_logic POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:cpptrace::cpptrace>
+    $<TARGET_FILE_DIR:Launcher_logic>
+  )
+endif()
+
+if(APPLE)
+  add_custom_command(
+    TARGET Launcher_logic
+    POST_BUILD
+    COMMAND dsymutil $<TARGET_FILE:Launcher_logic>
+  )
+endif()
+
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
     target_link_libraries(Launcher_logic
         gamemode
