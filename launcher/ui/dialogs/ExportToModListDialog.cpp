@@ -20,6 +20,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QTextEdit>
+#include "DesktopServices.h"
 #include "FileSystem.h"
 #include "Markdown.h"
 #include "StringUtils.h"
@@ -65,6 +66,10 @@ ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWi
         this->ui->finalText->copy();
     });
     triggerImp();
+    if (DesktopServices::isGameScope()) {
+        showFullScreen();
+        setFixedSize(this->width(), this->height());
+    }
 }
 
 ExportToModListDialog::~ExportToModListDialog()
