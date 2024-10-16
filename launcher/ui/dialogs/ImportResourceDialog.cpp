@@ -45,6 +45,9 @@ ImportResourceDialog::ImportResourceDialog(QString file_path, PackedResourceType
     ui->label->setText(
         tr("Choose the instance you would like to import this %1 to.").arg(ResourceUtils::getPackedTypeName(m_resource_type)));
     ui->label_file_path->setText(tr("File: %1").arg(m_file_path));
+
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
 
 void ImportResourceDialog::activated(QModelIndex index)

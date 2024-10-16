@@ -43,6 +43,9 @@ OptionalModDialog::OptionalModDialog(QWidget* parent, const QStringList& mods) :
         else
             item->setCheckState(Qt::Checked);
     });
+
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
 
 OptionalModDialog::~OptionalModDialog()

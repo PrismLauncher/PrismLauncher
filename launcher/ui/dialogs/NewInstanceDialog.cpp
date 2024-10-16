@@ -109,16 +109,19 @@ NewInstanceDialog::NewInstanceDialog(const QString& initialGroup,
     auto OkButton = m_buttons->button(QDialogButtonBox::Ok);
     OkButton->setDefault(true);
     OkButton->setAutoDefault(true);
+    OkButton->setText(tr("OK"));
     connect(OkButton, &QPushButton::clicked, this, &NewInstanceDialog::accept);
 
     auto CancelButton = m_buttons->button(QDialogButtonBox::Cancel);
     CancelButton->setDefault(false);
     CancelButton->setAutoDefault(false);
+    CancelButton->setText(tr("Cancel"));
     connect(CancelButton, &QPushButton::clicked, this, &NewInstanceDialog::reject);
 
     auto HelpButton = m_buttons->button(QDialogButtonBox::Help);
     HelpButton->setDefault(false);
     HelpButton->setAutoDefault(false);
+    HelpButton->setText(tr("Help"));
     connect(HelpButton, &QPushButton::clicked, m_container, &PageContainer::help);
 
     if (!url.isEmpty()) {

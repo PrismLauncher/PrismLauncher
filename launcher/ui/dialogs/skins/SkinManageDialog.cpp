@@ -93,6 +93,9 @@ SkinManageDialog::SkinManageDialog(QWidget* parent, MinecraftAccountPtr acct)
     setupCapes();
 
     ui->listView->setCurrentIndex(m_list.index(m_list.getSelectedAccountSkin()));
+
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
 
 SkinManageDialog::~SkinManageDialog()

@@ -15,6 +15,7 @@
 
 #include "EditAccountDialog.h"
 #include <DesktopServices.h>
+#include <QPushButton>
 #include <QUrl>
 #include "ui_EditAccountDialog.h"
 
@@ -27,6 +28,9 @@ EditAccountDialog::EditAccountDialog(const QString& text, QWidget* parent, int f
 
     ui->userTextBox->setEnabled(flags & UsernameField);
     ui->passTextBox->setEnabled(flags & PasswordField);
+
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 }
 
 EditAccountDialog::~EditAccountDialog()
