@@ -56,18 +56,12 @@ jobs:
       matrix:
         include:
           - os: ubuntu-20.04
-            qt_ver: 5
-            qt_host: linux
-            qt_arch: ""
-            qt_version: "5.12.8"
-            qt_modules: "qtnetworkauth"
-
-          - os: ubuntu-20.04
             qt_ver: 6
             qt_host: linux
             qt_arch: ""
-            qt_version: "6.2.4"
+            qt_version: "6.7.0"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
+            qt_tools: ""
 
           - os: windows-2022
             name: "Windows-MinGW-w64"
@@ -112,10 +106,10 @@ jobs:
           - os: macos-14
             name: macOS-Legacy
             macosx_deployment_target: 10.13
-            qt_ver: 5
+            qt_ver: 6
             qt_host: mac
-            qt_version: "5.15.2"
-            qt_modules: "qtnetworkauth"
+            qt_version: "6.4.3"
+            qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
     runs-on: ${{ matrix.os }}
 
@@ -206,7 +200,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get -y update
-          sudo apt-get -y install ninja-build extra-cmake-modules scdoc appstream
+          sudo apt-get -y install ninja-build extra-cmake-modules scdoc appstream libxcb-cursor-dev
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
@@ -277,14 +271,9 @@ jobs:
       ##
 
       - name: Configure CMake (macOS)
-        if: runner.os == 'macOS' && matrix.qt_ver == 6
+        if: runner.os == 'macOS'
         run: |
           cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_ENABLE_JAVA_DOWNLOADER=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -G Ninja
-
-      - name: Configure CMake (macOS-Legacy)
-        if: runner.os == 'macOS' && matrix.qt_ver == 5
-        run: |
-          cmake -S . -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DCMAKE_BUILD_TYPE=${{ inputs.build_type }} -DENABLE_LTO=ON -DLauncher_ENABLE_JAVA_DOWNLOADER=ON -DLauncher_BUILD_PLATFORM=official -DCMAKE_C_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DCMAKE_CXX_COMPILER_LAUNCHER=${{ env.CCACHE_VAR }} -DLauncher_QT_VERSION_MAJOR=${{ matrix.qt_ver }} -DMACOSX_SPARKLE_UPDATE_PUBLIC_KEY="" -DMACOSX_SPARKLE_UPDATE_FEED_URL="" -DCMAKE_OSX_ARCHITECTURES="x86_64" -G Ninja
 
       - name: Configure CMake (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != ''
