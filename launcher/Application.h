@@ -81,6 +81,12 @@ class Index;
 #endif
 #define APPLICATION (static_cast<Application*>(QCoreApplication::instance()))
 
+// Used for checking if is a test
+#if defined(APPLICATION_DYN)
+#undef APPLICATION_DYN
+#endif
+#define APPLICATION_DYN (dynamic_cast<Application*>(QCoreApplication::instance()))
+
 class Application : public QApplication {
     // friends for the purpose of limiting access to deprecated stuff
     Q_OBJECT
