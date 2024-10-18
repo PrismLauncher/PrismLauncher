@@ -301,6 +301,13 @@ bool ModrinthCreationTask::createInstance()
 
     loop.exec();
 
+    if (!ended_well) {
+        for (auto m : mods) {
+            delete m;
+        }
+        return ended_well;
+    }
+
     QEventLoop ensureMetaLoop;
     QDir folder = FS::PathCombine(instance.modsRoot(), ".index");
     auto ensureMetadataTask = makeShared<EnsureMetadataTask>(mods, folder, ModPlatform::ResourceProvider::MODRINTH);
