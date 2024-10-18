@@ -36,7 +36,7 @@
    <item>
     <widget class="QTabWidget" name="settingsTabs">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="minecraftPage">
       <attribute name="title">
@@ -282,6 +282,16 @@
            <widget class="QCheckBox" name="maximizedCheckBox">
             <property name="text">
              <string>Start Minecraft maximized</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="maximizedWarning">
+            <property name="toolTip">
+             <string>The base game only supports resolution. In order to simulate the maximized behaviour the current implementation approximates the maximum display size..</string>
+            </property>
+            <property name="text">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#f5c211;&quot;&gt;Warning&lt;/span&gt;&lt;span style=&quot; color:#f5c211;&quot;&gt;: The maximized option may not be fully supported for the current minecraft version.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>

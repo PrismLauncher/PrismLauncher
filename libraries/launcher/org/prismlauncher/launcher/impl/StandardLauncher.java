@@ -76,13 +76,10 @@ public final class StandardLauncher extends AbstractLauncher {
     @Override
     public void launch() throws Throwable {
         // window size, title and state
-        // FIXME doesn't support maximisation
-        if (!maximize) {
-            gameArgs.add("--width");
-            gameArgs.add(Integer.toString(width));
-            gameArgs.add("--height");
-            gameArgs.add(Integer.toString(height));
-        }
+        gameArgs.add("--width");
+        gameArgs.add(Integer.toString(width));
+        gameArgs.add("--height");
+        gameArgs.add(Integer.toString(height));
 
         if (serverAddress != null) {
             if (quickPlayMultiplayerSupported) {
