@@ -180,6 +180,7 @@ bool parseMinecraftProfile(QByteArray& data, MinecraftProfile& output)
         if (!getString(skinObj.value("url"), skinOut.url)) {
             continue;
         }
+        skinOut.url.replace("http://textures.minecraft.net", "https://textures.minecraft.net");
         if (!getString(skinObj.value("variant"), skinOut.variant)) {
             continue;
         }
@@ -221,9 +222,9 @@ namespace {
 // these skin URLs are for the MHF_Steve and MHF_Alex accounts (made by a Mojang employee)
 // they are needed because the session server doesn't return skin urls for default skins
 static const QString SKIN_URL_STEVE =
-    "http://textures.minecraft.net/texture/1a4af718455d4aab528e7a61f86fa25e6a369d1768dcb13f7df319a713eb810b";
+    "https://textures.minecraft.net/texture/1a4af718455d4aab528e7a61f86fa25e6a369d1768dcb13f7df319a713eb810b";
 static const QString SKIN_URL_ALEX =
-    "http://textures.minecraft.net/texture/83cee5ca6afcdb171285aa00e8049c297b2dbeba0efb8ff970a5677a1b644032";
+    "https://textures.minecraft.net/texture/83cee5ca6afcdb171285aa00e8049c297b2dbeba0efb8ff970a5677a1b644032";
 
 bool isDefaultModelSteve(QString uuid)
 {
