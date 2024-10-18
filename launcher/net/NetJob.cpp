@@ -39,7 +39,7 @@
 #include <QNetworkReply>
 #include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
-#if defined(LAUNCHER_APPLICATION)
+#if defined(LAUNCHER_APPLICATION) && !defined(LAUNCHER_TEST)
 #include "Application.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #endif
@@ -47,7 +47,7 @@
 NetJob::NetJob(QString job_name, shared_qobject_ptr<QNetworkAccessManager> network, int max_concurrent)
     : ConcurrentTask(nullptr, job_name), m_network(network)
 {
-#if defined(LAUNCHER_APPLICATION)
+#if defined(LAUNCHER_APPLICATION) && !defined(LAUNCHER_TEST)
     if (max_concurrent < 0)
         max_concurrent = APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt();
 #endif
@@ -160,7 +160,7 @@ bool NetJob::isOnline()
 
 void NetJob::emitFailed(QString reason)
 {
-#if defined(LAUNCHER_APPLICATION)
+#if defined(LAUNCHER_APPLICATION) && !defined(LAUNCHER_TEST)
     if (m_ask_retry && m_manual_try < APPLICATION->settings()->get("NumberOfManualRetries").toInt() && isOnline()) {
         m_manual_try++;
         auto response = CustomMessageBox::selectable(nullptr, "Confirm retry",
