@@ -31,9 +31,9 @@ QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 ResourceModel::ResourceModel(ResourceAPI* api) : QAbstractListModel(), m_api(api)
 {
     s_running_models.insert(this, true);
-#ifndef LAUNCHER_TEST
-    m_current_info_job.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
-#endif
+    if (APPLICATION_DYN) {
+        m_current_info_job.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentDownloads").toInt());
+    }
 }
 
 ResourceModel::~ResourceModel()
@@ -60,11 +60,15 @@ auto ResourceModel::data(const QModelIndex& index, int role) const -> QVariant
             return pack->description;
         }
         case Qt::DecorationRole: {
-            if (auto icon_or_none = const_cast<ResourceModel*>(this)->getIcon(const_cast<QModelIndex&>(index), pack->logoUrl);
-                icon_or_none.has_value())
-                return icon_or_none.value();
+            if (APPLICATION_DYN) {
+                if (auto icon_or_none = const_cast<ResourceModel*>(this)->getIcon(const_cast<QModelIndex&>(index), pack->logoUrl);
+                    icon_or_none.has_value())
+                    return icon_or_none.value();
 
-            return APPLICATION->getThemedIcon("screenshot-placeholder");
+                return APPLICATION->getThemedIcon("screenshot-placeholder");
+            } else {
+                return {};
+            }
         }
         case Qt::SizeHintRole:
             return QSize(0, 58);

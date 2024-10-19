@@ -99,7 +99,7 @@ if ((CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebI
     message(STATUS "Address Sanitizer enabled for Debug builds, Turn it off with -DDEBUG_ADDRESS_SANITIZER=off")
     if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
         if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-            # using clang with clang-cl front end 
+            # using clang with clang-cl front end
             message(STATUS "Address Sanitizer available on Clang MSVC frontend")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /Oy-")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /fsanitize=address /Oy-")
@@ -225,7 +225,7 @@ set(Launcher_QT_VERSION_MAJOR "6" CACHE STRING "Major Qt version to build agains
 # Java downloader
 set(Launcher_ENABLE_JAVA_DOWNLOADER_DEFAULT ON)
 
-# Although we recommend enabling this, we cannot guarantee binary compatibility on 
+# Although we recommend enabling this, we cannot guarantee binary compatibility on
 # differing Linux/BSD/etc distributions. Downstream packagers should be explicitly opt-ing into this
 # feature if they know it will work with their distribution.
 if(UNIX AND NOT APPLE)
@@ -438,10 +438,10 @@ elseif(UNIX)
         set(PLUGIN_DEST_DIR "plugins")
         set(BUNDLE_DEST_DIR ".")
         set(RESOURCES_DEST_DIR ".")
-    
+
         # Apps to bundle
         set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${Launcher_APP_BINARY_NAME}")
-    
+
         # directories to look for dependencies
         set(DIRS ${QT_LIBS_DIR} ${QT_LIBEXECS_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     endif()
@@ -495,7 +495,7 @@ if(FORCE_BUNDLED_ZLIB)
     set(SKIP_INSTALL_ALL ON)
     add_subdirectory(libraries/zlib EXCLUDE_FROM_ALL)
 
-    # On OS where unistd.h exists, zlib's generated header defines `Z_HAVE_UNISTD_H`, while the included header does not. 
+    # On OS where unistd.h exists, zlib's generated header defines `Z_HAVE_UNISTD_H`, while the included header does not.
     # We cannot safely undo the rename on those systems, and they generally have packages for zlib anyway.
     check_include_file(unistd.h NEED_GENERATED_ZCONF)
     if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libraries/zlib/zconf.h.included" AND NOT NEED_GENERATED_ZCONF)
@@ -532,10 +532,12 @@ else()
 endif()
 if(NOT cmark_FOUND)
     message(STATUS "Using bundled cmark")
+    set(ORIGINAL_BUILD_TESTING ${BUILD_TESTING})
     set(BUILD_TESTING 0)
-    set(BUILD_SHARED_LIBS 0) 
+    set(BUILD_SHARED_LIBS 0)
     add_subdirectory(libraries/cmark EXCLUDE_FROM_ALL) # Markdown parser
     add_library(cmark::cmark ALIAS cmark)
+    set(BUILD_TESTING ${ORIGINAL_BUILD_TESTING})
 else()
     message(STATUS "Using system cmark")
 endif()
