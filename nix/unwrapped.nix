@@ -87,6 +87,8 @@ stdenv.mkDerivation {
       (lib.cmakeFeature "CMAKE_INSTALL_PREFIX" "${placeholder "out"}/Applications/")
     ];
 
+  doCheck = true;
+
   dontWrapQtApps = true;
 
   meta = {
