@@ -37,6 +37,7 @@ modules:
       env:
         JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
         JAVA_COMPILER: /usr/lib/sdk/openjdk17/jvm/openjdk-17/bin/javac
+    run-tests: true
     sources:
       - type: dir
         path: ../
