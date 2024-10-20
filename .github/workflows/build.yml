@@ -410,9 +410,8 @@ jobs:
         if: matrix.name == 'macOS'
         run: |
           if [ '${{ secrets.SPARKLE_ED25519_KEY }}' != '' ]; then
-            brew install openssl@3
             echo '${{ secrets.SPARKLE_ED25519_KEY }}' > ed25519-priv.pem
-            signature=$(/usr/local/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
+            signature=$(/opt/homebrew/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
             rm ed25519-priv.pem
             cat >> $GITHUB_STEP_SUMMARY << EOF
           ### Artifact Information :information_source:
