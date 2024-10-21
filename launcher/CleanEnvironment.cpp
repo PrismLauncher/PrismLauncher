@@ -16,7 +16,9 @@
 #include "CleanEnvironment.h"
 #include <QDebug>
 
+#ifdef Q_OS_LINUX
 constexpr char IBUS[] = "@im=ibus";
+#endif
 
 static QString stripVariableEntries(const QString& name, const QString& target, const QString& remove)
 {

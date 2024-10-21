@@ -600,6 +600,10 @@ set(LINKEXE_SOURCES
     Exception.h
     StringUtils.h
     StringUtils.cpp
+    DesktopServices.h
+    DesktopServices.cpp
+    CleanEnvironment.h
+    CleanEnvironment.cpp
 )
 
 set(PRISMUPDATER_SOURCES
