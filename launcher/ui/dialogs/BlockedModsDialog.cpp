@@ -51,6 +51,8 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
 
     ui->setupUi(this);
 
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
     m_openMissingButton = ui->buttonBox->addButton(tr("Open Missing"), QDialogButtonBox::ActionRole);
     connect(m_openMissingButton, &QPushButton::clicked, this, [this]() { openAll(true); });
 
