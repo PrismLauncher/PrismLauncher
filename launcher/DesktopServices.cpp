@@ -32,13 +32,13 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
+#include "CleanEnvironment.h"
 #include "DesktopServices.h"
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QProcess>
 #include "FileSystem.h"
-#include "java/JavaUtils.h"
 
 #ifdef Q_OS_LINUX
 // directly invokes xdg-open to remove environment variables
@@ -46,7 +46,7 @@ bool xdgOpen(const QString& url)
 {
     QProcess process;
 
-    process.setProcessEnvironment(CleanEnviroment());
+    process.setProcessEnvironment(cleanEnvironment());
     process.setProcessChannelMode(QProcess::ForwardedChannels);
 
     process.start("xdg-open", { url });
@@ -77,7 +77,7 @@ bool run(const QString& application, const QStringList& args, const QString& wor
 
     QProcess process;
 
-    process.setProcessEnvironment(CleanEnviroment());
+    process.setProcessEnvironment(cleanEnvironment());
 
     process.setProgram(application);
     process.setArguments(args);

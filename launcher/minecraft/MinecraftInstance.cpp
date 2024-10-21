@@ -71,7 +71,7 @@
 #include "minecraft/launch/ScanModFolders.h"
 #include "minecraft/launch/VerifyJavaInstall.h"
 
-#include "java/JavaUtils.h"
+#include "CleanEnvironment.h"
 
 #include "icons/IconList.h"
 
@@ -557,7 +557,7 @@ QMap<QString, QString> MinecraftInstance::getVariables()
 QProcessEnvironment MinecraftInstance::createEnvironment()
 {
     // prepare the process environment
-    QProcessEnvironment env = CleanEnviroment();
+    QProcessEnvironment env = cleanEnvironment();
 
     // export some infos
     auto variables = getVariables();
