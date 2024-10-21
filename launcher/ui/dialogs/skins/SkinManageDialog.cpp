@@ -139,7 +139,7 @@ void SkinManageDialog::on_fileBtn_clicked()
 {
     auto filter = QMimeDatabase().mimeTypeForName("image/png").filterString();
     QString raw_path = QFileDialog::getOpenFileName(this, tr("Select Skin Texture"), QString(), filter);
-    if (raw_path.isEmpty()) {
+    if (raw_path.isNull()) {
         return;
     }
     auto message = m_list.installSkin(raw_path, {});
