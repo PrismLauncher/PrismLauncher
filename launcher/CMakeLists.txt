@@ -1297,6 +1297,7 @@ target_link_libraries(Launcher_logic
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::NetworkAuth
+    ${Launcher_QT_DBUS}
     ${Launcher_QT_LIBS}
 )
 target_link_libraries(Launcher_logic
@@ -1305,6 +1306,10 @@ target_link_libraries(Launcher_logic
     LocalPeer
     Launcher_rainbow
 )
+if (TARGET ${Launcher_QT_DBUS})
+    add_compile_definitions(WITH_QTDBUS)
+endif()
+
 if(APPLE)
     set(CMAKE_MACOSX_RPATH 1)
     set(CMAKE_INSTALL_RPATH "@loader_path/../Frameworks/")
