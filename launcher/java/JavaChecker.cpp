@@ -40,7 +40,6 @@
 #include <QMap>
 #include <QProcess>
 
-#include "CleanEnvironment.h"
 #include "Commandline.h"
 #include "FileSystem.h"
 #include "java/JavaUtils.h"
@@ -82,7 +81,7 @@ void JavaChecker::executeTask()
     process->setArguments(args);
     process->setProgram(m_path);
     process->setProcessChannelMode(QProcess::SeparateChannels);
-    process->setProcessEnvironment(cleanEnvironment());
+    process->setProcessEnvironment(cleanJavaEnvironment());
     qDebug() << "Running java checker:" << m_path << args.join(" ");
 
     connect(process.get(), QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &JavaChecker::finished);

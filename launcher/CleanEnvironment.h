@@ -15,4 +15,4 @@
 
 #include <QProcessEnvironment>
 
-QProcessEnvironment cleanEnvironment();
+QProcessEnvironment cleanEnvironment(bool stripIBus = false, const QStringList& ignored = {});

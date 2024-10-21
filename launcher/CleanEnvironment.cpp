@@ -18,7 +18,7 @@
 
 constexpr char IBUS[] = "@im=ibus";
 
-static QString stripVariableEntries(QString name, QString target, QString remove)
+static QString stripVariableEntries(const QString& name, const QString& target, const QString& remove)
 {
     char delimiter = ':';
 #ifdef Q_OS_WIN32
@@ -28,7 +28,7 @@ static QString stripVariableEntries(QString name, QString target, QString remove
     auto targetItems = target.split(delimiter);
     auto toRemove = remove.split(delimiter);
 
-    for (QString item : toRemove) {
+    for (const QString& item : toRemove) {
         bool removed = targetItems.removeOne(item);
         if (!removed)
             qWarning() << "Entry" << item << "could not be stripped from variable" << name;
@@ -36,14 +36,11 @@ static QString stripVariableEntries(QString name, QString target, QString remove
     return targetItems.join(delimiter);
 }
 
-QProcessEnvironment cleanEnvironment()
+QProcessEnvironment cleanEnvironment(bool stripIBus, const QStringList& ignored)
 {
     // prepare the process environment
     QProcessEnvironment rawenv = QProcessEnvironment::systemEnvironment();
     QProcessEnvironment env;
-
-    QStringList ignored = { "JAVA_ARGS", "CLASSPATH",     "CONFIGPATH",   "JAVA_HOME",
-                            "JRE_HOME",  "_JAVA_OPTIONS", "JAVA_OPTIONS", "JAVA_TOOL_OPTIONS" };
 
     QStringList stripped = {
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
@@ -51,8 +48,8 @@ QProcessEnvironment cleanEnvironment()
 #endif
         "QT_PLUGIN_PATH", "QT_FONTPATH"
     };
-    for (auto key : rawenv.keys()) {
-        auto value = rawenv.value(key);
+    for (const QString& key : rawenv.keys()) {
+        QString value = rawenv.value(key);
         // filter out dangerous java crap
         if (ignored.contains(key)) {
             qDebug() << "Env: ignoring" << key << value;
@@ -74,7 +71,7 @@ QProcessEnvironment cleanEnvironment()
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD) || defined(Q_OS_OPENBSD)
         // Strip IBus
         // IBus is a Linux IME framework. For some reason, it breaks MC?
-        if (key == "XMODIFIERS" && value.contains(IBUS)) {
+        if (stripIBus && key == "XMODIFIERS" && value.contains(IBUS)) {
             QString save = value;
             value.replace(IBUS, "");
             qDebug() << "Env: stripped" << IBUS << "from" << save << ":" << value;

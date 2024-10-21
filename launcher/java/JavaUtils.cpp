@@ -42,6 +42,7 @@
 
 #include <QDebug>
 #include "Application.h"
+#include "CleanEnvironment.h"
 #include "FileSystem.h"
 #include "java/JavaInstallList.h"
 #include "java/JavaUtils.h"
@@ -411,6 +412,13 @@ QList<QString> JavaUtils::FindJavaPaths()
 QString JavaUtils::getJavaCheckPath()
 {
     return APPLICATION->getJarPath("JavaCheck.jar");
+}
+
+QProcessEnvironment cleanJavaEnvironment()
+{
+    const QStringList ignored{ "JAVA_ARGS", "CLASSPATH",     "CONFIGPATH",   "JAVA_HOME",
+                               "JRE_HOME",  "_JAVA_OPTIONS", "JAVA_OPTIONS", "JAVA_TOOL_OPTIONS" };
+    return cleanEnvironment(true, ignored);
 }
 
 QStringList getMinecraftJavaBundle()

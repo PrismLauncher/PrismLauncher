@@ -23,6 +23,7 @@
 #include <windows.h>
 #endif
 
+QProcessEnvironment cleanJavaEnvironment();
 QStringList getMinecraftJavaBundle();
 QStringList getPrismJavaBundle();
 
