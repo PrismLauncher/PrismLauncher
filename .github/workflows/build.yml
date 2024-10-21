@@ -500,7 +500,7 @@ jobs:
           }
 
       - name: Package AppImage (Linux)
-        if: runner.os == 'Linux' && matrix.qt_ver != 5
+        if: runner.os == 'Linux' && matrix.qt_ver != 5 && false
         shell: bash
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -552,7 +552,7 @@ jobs:
           cmake --install ${{ env.BUILD_DIR }}
           cmake --install ${{ env.BUILD_DIR }} --component portable
 
-          mkdir  ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          mkdir -p ${{ env.INSTALL_PORTABLE_DIR }}/lib
           cp /lib/x86_64-linux-gnu/libbz2.so.1.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
           cp /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
           cp /usr/lib/x86_64-linux-gnu/libcrypto.so.1.1 ${{ env.INSTALL_PORTABLE_DIR }}/lib

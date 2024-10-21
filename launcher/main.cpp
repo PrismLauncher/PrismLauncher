@@ -33,7 +33,11 @@
  *      limitations under the License.
  */
 
+#include <cpptrace/utils.hpp>
+#include <csignal>
+#include <fstream>
 #include "Application.h"
+#include "FileSystem.h"
 
 // #define BREAK_INFINITE_LOOP
 // #define BREAK_EXCEPTION
@@ -43,6 +47,60 @@
 #include <chrono>
 #include <thread>
 #endif
+
+void signal_handler(int)
+{
+    auto trace = cpptrace::generate_trace();
+    auto data = QString::fromStdString(trace.to_string());
+    qCritical() << "==========================";
+    qCritical() << data;
+    FS::write("crash.report", data.toUtf8());
+    QFile file("crash2.report");
+    if (file.open(QFile::WriteOnly)) {
+        file.write(data.toUtf8());
+        file.flush();
+        file.close();
+    }
+    std::ofstream MyFile("crash3.report");
+    // Write to the file
+    trace.print(MyFile);
+
+    // Close the file
+    MyFile.close();
+    QApplication::exit(1);
+}
+#if defined Q_OS_WIN32
+#include <windows.h>
+
+LONG WINAPI CustomUnhandledExceptionFilter(EXCEPTION_POINTERS* exceptionInfo)
+{
+    signal_handler(0);
+    return EXCEPTION_CONTINUE_SEARCH;  // Continue searching for another handler
+}
+#endif
+void customTerminate()
+{
+    signal_handler(0);
+}
+
+void setup_crash_handler()
+{
+    // Setup signal handler for common crash signals
+    std::signal(SIGSEGV, signal_handler);  // Segmentation fault
+    std::signal(SIGABRT, signal_handler);  // Abort signal
+    std::set_terminate(customTerminate);
+#if defined Q_OS_WIN32
+    SetUnhandledExceptionFilter(CustomUnhandledExceptionFilter);
+#endif
+}
+
+void warmup_cpptrace()
+{
+    cpptrace::frame_ptr buffer[10];
+    std::size_t count = cpptrace::safe_generate_raw_trace(buffer, 10);
+    cpptrace::safe_object_frame frame;
+    cpptrace::get_safe_object_frame(buffer[0], &frame);
+}
 
 int main(int argc, char* argv[])
 {
@@ -57,6 +115,11 @@ int main(int argc, char* argv[])
 #ifdef BREAK_RETURN
     return 42;
 #endif
+
+    // cpptrace::absorb_trace_exceptions(false);
+    cpptrace::register_terminate_handler();
+    warmup_cpptrace();
+    setup_crash_handler();
 
 #if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
