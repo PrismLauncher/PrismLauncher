@@ -110,7 +110,7 @@ final class LegacyLauncher extends AbstractLauncher {
             try {
                 LegacyFrame window = new LegacyFrame(title, createAppletClass(appletClass));
 
-                window.start(user, session, width, height, maximize, serverAddress, serverPort, gameArgs.contains("--demo"));
+                window.start(user, session, width, height, maximize, serverAddress, serverPort);
                 return;
             } catch (Throwable e) {
                 Log.error("Running applet wrapper failed with exception; falling back to main class", e);
