@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "Application.h"
 #include "FileSystem.h"
 #include "minecraft/mod/Resource.h"
 
@@ -52,6 +53,9 @@ class BasicFolderLoadTask : public Task {
         m_dir.refresh();
         for (auto entry : m_dir.entryInfoList()) {
             auto filePath = entry.absoluteFilePath();
+            if (auto app = APPLICATION_DYN; app && app->checkQSavePath(filePath)) {
+                continue;
+            }
             auto newFilePath = FS::getUniqueResourceName(filePath);
             if (newFilePath != filePath) {
                 FS::move(filePath, newFilePath);

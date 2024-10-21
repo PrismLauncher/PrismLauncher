@@ -1883,3 +1883,26 @@ const QString Application::javaPath()
 {
     return m_settings->get("JavaDir").toString();
 }
+
+void Application::addQSavePath(QString path)
+{
+    QMutexLocker locker(&m_qsaveResourcesMutex);
+    m_qsaveResources.insert(path);
+}
+
+void Application::removeQSavePath(QString path)
+{
+    QMutexLocker locker(&m_qsaveResourcesMutex);
+    m_qsaveResources.remove(path);
+}
+
+bool Application::checkQSavePath(QString path)
+{
+    QMutexLocker locker(&m_qsaveResourcesMutex);
+    for (auto r : m_qsaveResources) {
+        if (path.contains(r)) {
+            return true;
+        }
+    }
+    return false;
+}

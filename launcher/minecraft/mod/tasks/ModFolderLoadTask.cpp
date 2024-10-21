@@ -36,6 +36,7 @@
 
 #include "ModFolderLoadTask.h"
 
+#include "Application.h"
 #include "FileSystem.h"
 #include "minecraft/mod/MetadataHandler.h"
 
@@ -65,6 +66,9 @@ void ModFolderLoadTask::executeTask()
     m_mods_dir.refresh();
     for (auto entry : m_mods_dir.entryInfoList()) {
         auto filePath = entry.absoluteFilePath();
+        if (auto app = APPLICATION_DYN; app && app->checkQSavePath(filePath)) {
+            continue;
+        }
         auto newFilePath = FS::getUniqueResourceName(filePath);
         if (newFilePath != filePath) {
             FS::move(filePath, newFilePath);
