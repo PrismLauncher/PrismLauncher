@@ -1071,6 +1071,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 bool Application::createSetupWizard()
 {
     bool javaRequired = [&]() {
+        if (BuildConfig.JAVA_DOWNLOADER_ENABLED && m_settings->get("AutomaticJavaDownload").toBool()) {
+            return false;
+        }
         bool ignoreJavaWizard = m_settings->get("IgnoreJavaWizard").toBool();
         if (ignoreJavaWizard) {
             return false;
@@ -1083,10 +1086,7 @@ bool Application::createSetupWizard()
         }
         QString currentJavaPath = settings()->get("JavaPath").toString();
         QString actualPath = FS::ResolveExecutable(currentJavaPath);
-        if (actualPath.isNull()) {
-            return true;
-        }
-        return false;
+        return actualPath.isNull();
     }();
     bool askjava = BuildConfig.JAVA_DOWNLOADER_ENABLED && !javaRequired && !m_settings->get("AutomaticJavaDownload").toBool() &&
                    !m_settings->get("AutomaticJavaSwitch").toBool() && !m_settings->get("UserAskedAboutAutomaticJavaDownload").toBool();
