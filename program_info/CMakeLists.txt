@@ -57,7 +57,7 @@ Section "Visual Studio Runtime"
     Pop $0
     ${If} $0 == "OK"
         DetailPrint "Download successful"
-        ExecWait "$INSTDIR\vc_redist\$vc_redist_exe /install /passive /norestart\"
+        ExecWait "$INSTDIR\vc_redist\$vc_redist_exe /install /passive /norestart"
     ${Else}
         DetailPrint "Download failed with error $0"
     ${EndIf}
