@@ -38,6 +38,23 @@
 #include <QDir>
 #include <QProcess>
 #include "FileSystem.h"
+#include "java/JavaUtils.h"
+
+#ifdef Q_OS_LINUX
+// directly invokes xdg-open to remove environment variables
+bool xdgOpen(const QString& url)
+{
+    QProcess process;
+
+    process.setProcessEnvironment(CleanEnviroment());
+    process.setProcessChannelMode(QProcess::ForwardedChannels);
+
+    process.start("xdg-open", { url });
+    process.waitForFinished(-1);
+
+    return process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0;
+}
+#endif
 
 namespace DesktopServices {
 bool openPath(const QFileInfo& path, bool ensureFolderPathExists)
@@ -57,13 +74,26 @@ bool openPath(const QString& path, bool ensureFolderPathExists)
 bool run(const QString& application, const QStringList& args, const QString& workingDirectory, qint64* pid)
 {
     qDebug() << "Running" << application << "with args" << args.join(' ');
-    return QProcess::startDetached(application, args, workingDirectory, pid);
+
+    QProcess process;
+
+    process.setProcessEnvironment(CleanEnviroment());
+
+    process.setProgram(application);
+    process.setArguments(args);
+    process.setWorkingDirectory(workingDirectory);
+
+    return process.startDetached(pid);
 }
 
 bool openUrl(const QUrl& url)
 {
     qDebug() << "Opening URL" << url.toString();
+#ifdef Q_OS_LINUX
+    return xdgOpen(url.toString());
+#else
     return QDesktopServices::openUrl(url);
+#endif
 }
 
 bool isFlatpak()
