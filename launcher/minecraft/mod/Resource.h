@@ -40,6 +40,8 @@
 #include <QObject>
 #include <QPointer>
 
+#include "MetadataHandler.h"
+#include "ModDetails.h"
 #include "QObjectPtr.h"
 
 enum class ResourceType {
@@ -50,7 +52,14 @@ enum class ResourceType {
     LITEMOD,     //!< The resource is a litemod
 };
 
-enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER, SIZE, SIDE, LOADERS, MC_VERSIONS, RELEASE_TYPE };
+enum class ResourceStatus {
+    INSTALLED,      // Both JAR and Metadata are present
+    NOT_INSTALLED,  // Only the Metadata is present
+    NO_METADATA,    // Only the JAR is present
+    UNKNOWN,        // Default status
+};
+
+enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER, SIZE, SIDE, MC_VERSIONS, LOADERS, RELEASE_TYPE };
 
 enum class EnableAction { ENABLE, DISABLE, TOGGLE };
 
@@ -84,8 +93,17 @@ class Resource : public QObject {
     [[nodiscard]] QString sizeStr() const { return m_size_str; }
     [[nodiscard]] qint64 sizeInfo() const { return m_size_info; }
 
-    [[nodiscard]] virtual auto name() const -> QString { return m_name; }
+    [[nodiscard]] virtual auto name() const -> QString;
     [[nodiscard]] virtual bool valid() const { return m_type != ResourceType::UNKNOWN; }
+
+    [[nodiscard]] auto status() const -> ResourceStatus { return m_status; };
+    [[nodiscard]] auto metadata() -> std::shared_ptr<Metadata::ModStruct> { return m_metadata; }
+    [[nodiscard]] auto metadata() const -> std::shared_ptr<const Metadata::ModStruct> { return m_metadata; }
+    [[nodiscard]] auto provider() const -> QString;
+
+    void setStatus(ResourceStatus status) { m_status = status; }
+    void setMetadata(std::shared_ptr<Metadata::ModStruct>&& metadata);
+    void setMetadata(const Metadata::ModStruct& metadata) { setMetadata(std::make_shared<Metadata::ModStruct>(metadata)); }
 
     /** Compares two Resources, for sorting purposes, considering a ascending order, returning:
      *  > 0: 'this' comes after 'other'
@@ -117,7 +135,9 @@ class Resource : public QObject {
     }
 
     // Delete all files of this resource.
-    bool destroy(bool attemptTrash = true);
+    auto destroy(const QDir& index_dir, bool preserve_metadata = false, bool attempt_trash = true) -> bool;
+    // Delete the metadata only.
+    auto destroyMetadata(const QDir& index_dir) -> void;
 
     [[nodiscard]] auto isSymLink() const -> bool { return m_file_info.isSymLink(); }
 
@@ -145,6 +165,11 @@ class Resource : public QObject {
 
     /* The type of file we're dealing with. */
     ResourceType m_type = ResourceType::UNKNOWN;
+
+    /* Installation status of the resource. */
+    ResourceStatus m_status = ResourceStatus::UNKNOWN;
+
+    std::shared_ptr<Metadata::ModStruct> m_metadata = nullptr;
 
     /* Whether the resource is enabled (e.g. shows up in the game) or not. */
     bool m_enabled = true;

@@ -11,20 +11,25 @@
 #include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
+#include <utility>
 
 #include "Application.h"
 #include "FileSystem.h"
 
 #include "QVariantUtils.h"
 #include "StringUtils.h"
-#include "minecraft/mod/tasks/BasicFolderLoadTask.h"
+#include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
+#include "Json.h"
+#include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
+#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/flame/FlameModIndex.h"
 #include "settings/Setting.h"
 #include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
-ResourceFolderModel::ResourceFolderModel(QDir dir, BaseInstance* instance, QObject* parent, bool create_dir)
-    : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this)
+ResourceFolderModel::ResourceFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)
+    : QAbstractListModel(parent), m_dir(dir), m_instance(instance), m_watcher(this), m_is_indexed(is_indexed)
 {
     if (create_dir) {
         FS::ensureFolderPathExists(m_dir.absolutePath());
@@ -48,6 +53,9 @@ ResourceFolderModel::~ResourceFolderModel()
 
 bool ResourceFolderModel::startWatching(const QStringList& paths)
 {
+    // Remove orphaned metadata next time
+    m_first_folder_load = true;
+
     if (m_is_watching)
         return false;
 
@@ -158,11 +166,55 @@ bool ResourceFolderModel::installResource(QString original_path)
     return false;
 }
 
-bool ResourceFolderModel::uninstallResource(QString file_name)
+bool ResourceFolderModel::installResource(QString path, ModPlatform::IndexedVersion& vers)
+{
+    if (vers.addonId.isValid()) {
+        ModPlatform::IndexedPack pack{
+            vers.addonId,
+            ModPlatform::ResourceProvider::FLAME,
+        };
+
+        QEventLoop loop;
+
+        auto response = std::make_shared<QByteArray>();
+        auto job = FlameAPI().getProject(vers.addonId.toString(), response);
+
+        QObject::connect(job.get(), &Task::failed, [&loop] { loop.quit(); });
+        QObject::connect(job.get(), &Task::aborted, &loop, &QEventLoop::quit);
+        QObject::connect(job.get(), &Task::succeeded, [response, this, &vers, &loop, &pack] {
+            QJsonParseError parse_error{};
+            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
+            if (parse_error.error != QJsonParseError::NoError) {
+                qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
+                           << " reason: " << parse_error.errorString();
+                qDebug() << *response;
+                return;
+            }
+            try {
+                auto obj = Json::requireObject(Json::requireObject(doc), "data");
+                FlameMod::loadIndexedPack(pack, obj);
+            } catch (const JSONValidationError& e) {
+                qDebug() << doc;
+                qWarning() << "Error while reading mod info: " << e.cause();
+            }
+            LocalResourceUpdateTask update_metadata(indexDir(), pack, vers);
+            QObject::connect(&update_metadata, &Task::finished, &loop, &QEventLoop::quit);
+            update_metadata.start();
+        });
+
+        job->start();
+
+        loop.exec();
+    }
+
+    return installResource(std::move(path));
+}
+
+bool ResourceFolderModel::uninstallResource(QString file_name, bool preserve_metadata)
 {
     for (auto& resource : m_resources) {
         if (resource->fileinfo().fileName() == file_name) {
-            auto res = resource->destroy(false);
+            auto res = resource->destroy(indexDir(), preserve_metadata, false);
 
             update();
 
@@ -178,18 +230,32 @@ bool ResourceFolderModel::deleteResources(const QModelIndexList& indexes)
         return true;
 
     for (auto i : indexes) {
-        if (i.column() != 0) {
+        if (i.column() != 0)
             continue;
-        }
 
         auto& resource = m_resources.at(i.row());
-
-        resource->destroy();
+        resource->destroy(indexDir());
     }
 
     update();
 
     return true;
+}
+
+void ResourceFolderModel::deleteMetadata(const QModelIndexList& indexes)
+{
+    if (indexes.isEmpty())
+        return;
+
+    for (auto i : indexes) {
+        if (i.column() != 0)
+            continue;
+
+        auto& resource = m_resources.at(i.row());
+        resource->destroyMetadata(indexDir());
+    }
+
+    update();
 }
 
 bool ResourceFolderModel::setResourceEnabled(const QModelIndexList& indexes, EnableAction action)
@@ -278,7 +344,8 @@ void ResourceFolderModel::resolveResource(Resource* res)
 
     connect(
         task.get(), &Task::succeeded, this, [=] { onParseSucceeded(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
-    connect(task.get(), &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
+    connect(
+        task.get(), &Task::failed, this, [=] { onParseFailed(ticket, res->internal_id()); }, Qt::ConnectionType::QueuedConnection);
     connect(
         task.get(), &Task::finished, this,
         [=] {
@@ -296,7 +363,7 @@ void ResourceFolderModel::resolveResource(Resource* res)
 
 void ResourceFolderModel::onUpdateSucceeded()
 {
-    auto update_results = static_cast<BasicFolderLoadTask*>(m_current_update_task.get())->result();
+    auto update_results = static_cast<ResourceFolderLoadTask*>(m_current_update_task.get())->result();
 
     auto& new_resources = update_results->resources;
 
@@ -326,7 +393,11 @@ void ResourceFolderModel::onParseSucceeded(int ticket, QString resource_id)
 
 Task* ResourceFolderModel::createUpdateTask()
 {
-    return new BasicFolderLoadTask(m_dir);
+    auto index_dir = indexDir();
+    auto task = new ResourceFolderLoadTask(dir(), index_dir, m_is_indexed, m_first_folder_load,
+                                           [this](const QFileInfo& file) { return createResource(file); });
+    m_first_folder_load = false;
+    return task;
 }
 
 bool ResourceFolderModel::hasPendingParseTasks() const
@@ -412,17 +483,19 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
     switch (role) {
         case Qt::DisplayRole:
             switch (column) {
-                case NameColumn:
+                case NAME_COLUMN:
                     return m_resources[row]->name();
-                case DateColumn:
+                case DATE_COLUMN:
                     return m_resources[row]->dateTimeChanged();
-                case SizeColumn:
+                case PROVIDER_COLUMN:
+                    return m_resources[row]->provider();
+                case SIZE_COLUMN:
                     return m_resources[row]->sizeStr();
                 default:
                     return {};
             }
         case Qt::ToolTipRole:
-            if (column == NameColumn) {
+            if (column == NAME_COLUMN) {
                 if (at(row).isSymLinkUnder(instDirPath())) {
                     return m_resources[row]->internal_id() +
                            tr("\nWarning: This resource is symbolically linked from elsewhere. Editing it will also change the original."
@@ -438,14 +511,14 @@ QVariant ResourceFolderModel::data(const QModelIndex& index, int role) const
 
             return m_resources[row]->internal_id();
         case Qt::DecorationRole: {
-            if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
+            if (column == NAME_COLUMN && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
 
             return {};
         }
         case Qt::CheckStateRole:
             switch (column) {
-                case ActiveColumn:
+                case ACTIVE_COLUMN:
                     return m_resources[row]->enabled() ? Qt::Checked : Qt::Unchecked;
                 default:
                     return {};
@@ -484,26 +557,27 @@ QVariant ResourceFolderModel::headerData(int section, [[maybe_unused]] Qt::Orien
     switch (role) {
         case Qt::DisplayRole:
             switch (section) {
-                case ActiveColumn:
-                case NameColumn:
-                case DateColumn:
-                case SizeColumn:
+                case ACTIVE_COLUMN:
+                case NAME_COLUMN:
+                case DATE_COLUMN:
+                case PROVIDER_COLUMN:
+                case SIZE_COLUMN:
                     return columnNames().at(section);
                 default:
                     return {};
             }
         case Qt::ToolTipRole: {
+            //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
             switch (section) {
-                case ActiveColumn:
-                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
+                case ACTIVE_COLUMN:
                     return tr("Is the resource enabled?");
-                case NameColumn:
-                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
+                case NAME_COLUMN:
                     return tr("The name of the resource.");
-                case DateColumn:
-                    //: Here, resource is a generic term for external resources, like Mods, Resource Packs, Shader Packs, etc.
+                case DATE_COLUMN:
                     return tr("The date and time this resource was last changed (or added).");
-                case SizeColumn:
+                case PROVIDER_COLUMN:
+                    return tr("The source provider of the resource.");
+                case SIZE_COLUMN:
                     return tr("The size of the resource.");
                 default:
                     return {};

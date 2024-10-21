@@ -3,6 +3,7 @@
 #include "minecraft/mod/Mod.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceAPI.h"
 #include "tasks/Task.h"
 
 class ResourceDownloadTask;
@@ -12,13 +13,17 @@ class CheckUpdateTask : public Task {
     Q_OBJECT
 
    public:
-    CheckUpdateTask(QList<Mod*>& mods,
+    CheckUpdateTask(QList<Resource*>& resources,
                     std::list<Version>& mcVersions,
                     QList<ModPlatform::ModLoaderType> loadersList,
-                    std::shared_ptr<ModFolderModel> mods_folder)
-        : Task(nullptr), m_mods(mods), m_game_versions(mcVersions), m_loaders_list(loadersList), m_mods_folder(mods_folder) {};
+                    std::shared_ptr<ResourceFolderModel> resourceModel)
+        : Task(nullptr)
+        , m_resources(resources)
+        , m_game_versions(mcVersions)
+        , m_loaders_list(std::move(loadersList))
+        , m_resource_model(resourceModel){};
 
-    struct UpdatableMod {
+    struct Update {
         QString name;
         QString old_hash;
         QString old_version;
@@ -30,15 +35,15 @@ class CheckUpdateTask : public Task {
         bool enabled = true;
 
        public:
-        UpdatableMod(QString name,
-                     QString old_h,
-                     QString old_v,
-                     QString new_v,
-                     std::optional<ModPlatform::IndexedVersionType> new_v_type,
-                     QString changelog,
-                     ModPlatform::ResourceProvider p,
-                     shared_qobject_ptr<ResourceDownloadTask> t,
-                     bool enabled = true)
+        Update(QString name,
+               QString old_h,
+               QString old_v,
+               QString new_v,
+               std::optional<ModPlatform::IndexedVersionType> new_v_type,
+               QString changelog,
+               ModPlatform::ResourceProvider p,
+               shared_qobject_ptr<ResourceDownloadTask> t,
+               bool enabled = true)
             : name(name)
             , old_hash(old_h)
             , old_version(old_v)
@@ -51,7 +56,7 @@ class CheckUpdateTask : public Task {
         {}
     };
 
-    auto getUpdatable() -> std::vector<UpdatableMod>&& { return std::move(m_updatable); }
+    auto getUpdates() -> std::vector<Update>&& { return std::move(m_updates); }
     auto getDependencies() -> QList<std::shared_ptr<GetModDependenciesTask::PackDependency>>&& { return std::move(m_deps); }
 
    public slots:
@@ -61,14 +66,14 @@ class CheckUpdateTask : public Task {
     void executeTask() override = 0;
 
    signals:
-    void checkFailed(Mod* failed, QString reason, QUrl recover_url = {});
+    void checkFailed(Resource* failed, QString reason, QUrl recover_url = {});
 
    protected:
-    QList<Mod*>& m_mods;
+    QList<Resource*>& m_resources;
     std::list<Version>& m_game_versions;
     QList<ModPlatform::ModLoaderType> m_loaders_list;
-    std::shared_ptr<ModFolderModel> m_mods_folder;
+    std::shared_ptr<ResourceFolderModel> m_resource_model;
 
-    std::vector<UpdatableMod> m_updatable;
+    std::vector<Update> m_updates;
     QList<std::shared_ptr<GetModDependenciesTask::PackDependency>> m_deps;
 };
