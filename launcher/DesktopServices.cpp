@@ -32,12 +32,12 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
-#include "CleanEnvironment.h"
 #include "DesktopServices.h"
 #include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QProcess>
+#include "CleanEnvironment.h"
 #include "FileSystem.h"
 
 #ifdef Q_OS_LINUX
