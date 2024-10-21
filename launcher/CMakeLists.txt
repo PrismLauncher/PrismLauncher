@@ -656,6 +656,8 @@ set(PRISMUPDATER_SOURCES
     ui/widgets/SubTaskProgressBar.h
     ui/widgets/SubTaskProgressBar.cpp
 
+    CleanEnvironment.h
+    CleanEnvironment.cpp
 )
 
 ######## Logging categories ########
