@@ -42,6 +42,8 @@
 #include <QDebug>
 #include <QFlag>
 #include <QIcon>
+#include <QMutex>
+#include <QSet>
 #include <QUrl>
 #include <memory>
 
@@ -303,4 +305,13 @@ class Application : public QApplication {
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
+
+   public:
+    void addQSavePath(QString);
+    void removeQSavePath(QString);
+    bool checkQSavePath(QString);
+
+   private:
+    QSet<QString> m_qsaveResources;
+    mutable QMutex m_qsaveResourcesMutex;
 };
