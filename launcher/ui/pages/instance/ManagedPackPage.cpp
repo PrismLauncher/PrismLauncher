@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ManagedPackPage.h"
-#include <QDesktopServices>
+#include <DesktopServices.h>
 #include <QUrl>
 #include <QUrlQuery>
 #include "ui_ManagedPackPage.h"
@@ -118,10 +118,10 @@ ManagedPackPage::ManagedPackPage(BaseInstance* inst, InstanceWindow* instance_wi
             auto decoded = QUrl::fromPercentEncoding(querry.toUtf8());
             auto newUrl = QUrl(decoded);
             if (newUrl.isValid() && (newUrl.scheme() == "http" || newUrl.scheme() == "https"))
-                QDesktopServices ::openUrl(newUrl);
+                DesktopServices ::openUrl(newUrl);
             return;
         }
-        QDesktopServices::openUrl(url);
+        DesktopServices::openUrl(url);
     });
 }
 

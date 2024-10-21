@@ -41,7 +41,7 @@
 #include "modplatform/ModIndex.h"
 #include "ui_ResourcePage.h"
 
-#include <QDesktopServices>
+#include <DesktopServices.h>
 #include <QKeyEvent>
 
 #include "Markdown.h"
@@ -425,7 +425,7 @@ void ResourcePage::openUrl(const QUrl& url)
                 }
 
                 // The final fallback.
-                QDesktopServices::openUrl(url);
+                DesktopServices::openUrl(url);
             };
 
             searchEdit->setText(slug);
@@ -441,7 +441,7 @@ void ResourcePage::openUrl(const QUrl& url)
     }
 
     // open in the user's web browser
-    QDesktopServices::openUrl(url);
+    DesktopServices::openUrl(url);
 }
 
 void ResourcePage::openProject(QVariant projectID)

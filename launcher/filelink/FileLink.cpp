@@ -32,8 +32,6 @@
 
 #include <QDebug>
 
-#include <DesktopServices.h>
-
 #include <sys.h>
 
 #if defined Q_OS_WIN32

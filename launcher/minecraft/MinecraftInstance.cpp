@@ -71,7 +71,7 @@
 #include "minecraft/launch/ScanModFolders.h"
 #include "minecraft/launch/VerifyJavaInstall.h"
 
-#include "java/JavaUtils.h"
+#include "CleanEnvironment.h"
 
 #include "icons/IconList.h"
 
@@ -90,13 +90,12 @@
 
 #include "tools/BaseProfiler.h"
 
+#include <java/JavaUtils.h>
 #include <QActionGroup>
 
 #ifdef Q_OS_LINUX
 #include "MangoHud.h"
 #endif
-
-#define IBUS "@im=ibus"
 
 // all of this because keeping things compatible with deprecated old settings
 // if either of the settings {a, b} is true, this also resolves to true
@@ -557,7 +556,7 @@ QMap<QString, QString> MinecraftInstance::getVariables()
 QProcessEnvironment MinecraftInstance::createEnvironment()
 {
     // prepare the process environment
-    QProcessEnvironment env = CleanEnviroment();
+    QProcessEnvironment env = cleanJavaEnvironment();
 
     // export some infos
     auto variables = getVariables();

@@ -40,7 +40,6 @@
 #include "ModPage.h"
 #include "ui_ResourcePage.h"
 
-#include <QDesktopServices>
 #include <QKeyEvent>
 #include <QRegularExpression>
 

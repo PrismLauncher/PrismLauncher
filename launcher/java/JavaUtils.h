@@ -23,8 +23,7 @@
 #include <windows.h>
 #endif
 
-QString stripVariableEntries(QString name, QString target, QString remove);
-QProcessEnvironment CleanEnviroment();
+QProcessEnvironment cleanJavaEnvironment();
 QStringList getMinecraftJavaBundle();
 QStringList getPrismJavaBundle();
 

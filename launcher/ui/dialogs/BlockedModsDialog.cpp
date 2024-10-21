@@ -29,8 +29,8 @@
 #include "Application.h"
 #include "modplatform/helpers/HashUtils.h"
 
+#include <DesktopServices.h>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QDirIterator>
@@ -73,7 +73,7 @@ BlockedModsDialog::BlockedModsDialog(QWidget* parent, const QString& title, cons
     ui->labelDescription->setText(text);
 
     // force all URL handling as external
-    connect(ui->textBrowserWatched, &QTextBrowser::anchorClicked, this, [](const QUrl url) { QDesktopServices::openUrl(url); });
+    connect(ui->textBrowserWatched, &QTextBrowser::anchorClicked, this, [](const QUrl url) { DesktopServices::openUrl(url); });
 
     setAcceptDrops(true);
 
@@ -127,7 +127,7 @@ void BlockedModsDialog::openAll(bool missingOnly)
 {
     for (auto& mod : m_mods) {
         if (!missingOnly || !mod.matched) {
-            QDesktopServices::openUrl(mod.websiteUrl);
+            DesktopServices::openUrl(mod.websiteUrl);
         }
     }
 }

@@ -94,6 +94,9 @@ set(CORE_SOURCES
     MMCTime.cpp
 
     MTPixmapCache.h
+
+    CleanEnvironment.h
+    CleanEnvironment.cpp
 )
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
 set(CORE_SOURCES
@@ -597,8 +600,6 @@ set(LINKEXE_SOURCES
     Exception.h
     StringUtils.h
     StringUtils.cpp
-    DesktopServices.h
-    DesktopServices.cpp
 )
 
 set(PRISMUPDATER_SOURCES
