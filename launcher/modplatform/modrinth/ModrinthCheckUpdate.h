@@ -7,10 +7,10 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
 
    public:
     ModrinthCheckUpdate(QList<Resource*>& resources,
-                                             std::list<Version>& mcVersions,
-                                             QList<ModPlatform::ModLoaderType> loadersList,
-                                             std::shared_ptr<ResourceFolderModel> resourceModel)
-        : CheckUpdateTask(resources, mcVersions, loadersList, resourceModel)
+                        std::list<Version>& mcVersions,
+                        QList<ModPlatform::ModLoaderType> loadersList,
+                        std::shared_ptr<ResourceFolderModel> resourceModel)
+        : CheckUpdateTask(resources, mcVersions, std::move(loadersList), std::move(resourceModel))
         , m_hash_type(ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first())
     {}
 
@@ -19,13 +19,13 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
 
    protected slots:
     void executeTask() override;
-    void getUpdateModsForLoader(ModPlatform::ModLoaderTypes loader, bool forceModLoaderCheck = false);
-    void checkVersionsResponse(std::shared_ptr<QByteArray> response, ModPlatform::ModLoaderTypes loader, bool forceModLoaderCheck = false);
+    void getUpdateModsForLoader(std::optional<ModPlatform::ModLoaderTypes> loader);
+    void checkVersionsResponse(std::shared_ptr<QByteArray> response, std::optional<ModPlatform::ModLoaderTypes> loader);
     void checkNextLoader();
 
    private:
     Task::Ptr m_job = nullptr;
     QHash<QString, Resource*> m_mappings;
     QString m_hash_type;
-    int m_next_loader_idx = 0;
+    int m_loader_idx = 0;
 };

@@ -21,7 +21,8 @@ class CheckUpdateTask : public Task {
         , m_resources(resources)
         , m_game_versions(mcVersions)
         , m_loaders_list(std::move(loadersList))
-        , m_resource_model(resourceModel){};
+        , m_resource_model(std::move(resourceModel))
+    {}
 
     struct Update {
         QString name;

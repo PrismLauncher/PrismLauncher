@@ -29,7 +29,7 @@ bool ModrinthCheckUpdate::abort()
 void ModrinthCheckUpdate::executeTask()
 {
     setStatus(tr("Preparing resources for Modrinth..."));
-    setProgress(0, 9);
+    setProgress(0, (m_loaders_list.isEmpty() ? 1 : m_loaders_list.length()) * 2 + 1);
 
     auto hashing_task =
         makeShared<ConcurrentTask>(this, "MakeModrinthHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
@@ -54,10 +54,30 @@ void ModrinthCheckUpdate::executeTask()
     hashing_task->start();
 }
 
-void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> response,
-                                                ModPlatform::ModLoaderTypes loader,
-                                                bool forceModLoaderCheck)
+void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModLoaderTypes> loader)
 {
+    setStatus(tr("Waiting for the API response from Modrinth..."));
+    setProgress(m_progress + 1, m_progressTotal);
+
+    auto response = std::make_shared<QByteArray>();
+    QStringList hashes = m_mappings.keys();
+    auto job = api.latestVersions(hashes, m_hash_type, m_game_versions, loader, response);
+
+    connect(job.get(), &Task::succeeded, this,
+            [this, response, loader] { checkVersionsResponse(response, loader); });
+
+    connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::checkNextLoader);
+
+    m_job = job;
+    job->start();
+}
+
+void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> response,
+                                                std::optional<ModPlatform::ModLoaderTypes> loader)
+{
+    setStatus(tr("Parsing the API response from Modrinth..."));
+    setProgress(m_progress + 1, m_progressTotal);
+
     QJsonParseError parse_error{};
     QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
@@ -69,16 +89,10 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
         return;
     }
 
-    setStatus(tr("Parsing the API response from Modrinth..."));
-    setProgress(m_next_loader_idx * 2, 9);
-
     try {
         for (auto iter = m_mappings.begin(); iter != m_mappings.end(); iter++) {
             const QString& hash = iter.key();
             Resource* resource = iter.value();
-
-            if (forceModLoaderCheck && !(resource->metadata()->loaders & loader))
-                continue;
 
             auto project_obj = doc[hash].toObject();
 
@@ -97,7 +111,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             static auto flags = { ModPlatform::ModLoaderType::NeoForge, ModPlatform::ModLoaderType::Forge,
                                   ModPlatform::ModLoaderType::Quilt, ModPlatform::ModLoaderType::Fabric };
             for (auto flag : flags) {
-                if (loader.testFlag(flag)) {
+                if (loader.has_value() && loader->testFlag(flag)) {
                     loader_filter = ModPlatform::getModLoaderAsString(flag);
                     break;
                 }
@@ -153,63 +167,38 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
     checkNextLoader();
 }
 
-void ModrinthCheckUpdate::getUpdateModsForLoader(ModPlatform::ModLoaderTypes loader, bool forceModLoaderCheck)
-{
-    auto response = std::make_shared<QByteArray>();
-    QStringList hashes;
-    if (forceModLoaderCheck) {
-        for (auto hash : m_mappings.keys()) {
-            if (m_mappings[hash]->metadata()->loaders & loader) {
-                hashes.append(hash);
-            }
-        }
-    } else {
-        hashes = m_mappings.keys();
-    }
-    auto job = api.latestVersions(hashes, m_hash_type, m_game_versions, loader, response);
-
-    connect(job.get(), &Task::succeeded, this,
-            [this, response, loader, forceModLoaderCheck] { checkVersionsResponse(response, loader, forceModLoaderCheck); });
-
-    connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::checkNextLoader);
-
-    setStatus(tr("Waiting for the API response from Modrinth..."));
-    setProgress(m_next_loader_idx * 2 - 1, 9);
-
-    m_job = job;
-    job->start();
-}
-
 void ModrinthCheckUpdate::checkNextLoader()
 {
     if (m_mappings.isEmpty()) {
         emitSucceeded();
         return;
     }
-    if (m_next_loader_idx < m_loaders_list.size()) {
-        getUpdateModsForLoader(m_loaders_list.at(m_next_loader_idx));
-        m_next_loader_idx++;
-        return;
-    }
-    static auto flags = { ModPlatform::ModLoaderType::NeoForge, ModPlatform::ModLoaderType::Forge, ModPlatform::ModLoaderType::Quilt,
-                          ModPlatform::ModLoaderType::Fabric };
-    for (auto flag : flags) {
-        if (!m_loaders_list.contains(flag)) {
-            m_loaders_list.append(flag);
-            m_next_loader_idx++;
-            setProgress(m_next_loader_idx * 2 - 1, 9);
-            for (auto resource : m_mappings) {
-                if (resource->metadata()->loaders & flag) {
-                    getUpdateModsForLoader(flag, true);
-                    return;
-                }
-            }
-            setProgress(m_next_loader_idx * 2, 9);
+
+    if (m_loaders_list.size() == 0) {
+        if (m_loader_idx == 0) {
+            getUpdateModsForLoader({});
+            m_loader_idx++;
+            return;
         }
     }
-    for (auto m : m_mappings) {
-        emit checkFailed(m,
-                         tr("No valid version found for this mod. It's probably unavailable for the current game version / mod loader."));
+    if (m_loader_idx < m_loaders_list.size()) {
+        getUpdateModsForLoader(m_loaders_list.at(m_loader_idx));
+        m_loader_idx++;
+        return;
     }
+
+    for (auto resource : m_mappings) {
+        QString reason;
+
+        if (dynamic_cast<Mod*>(resource) != nullptr)
+            reason =
+                tr("No valid version found for this resource. It's probably unavailable for the current game "
+                   "version / mod loader.");
+        else
+            reason = tr("No valid version found for this resource. It's probably unavailable for the current game version.");
+
+        emit checkFailed(resource, reason);
+    }
+
     emitSucceeded();
 }

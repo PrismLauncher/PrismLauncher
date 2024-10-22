@@ -12,7 +12,7 @@ class FlameCheckUpdate : public CheckUpdateTask {
                      std::list<Version>& mcVersions,
                      QList<ModPlatform::ModLoaderType> loadersList,
                      std::shared_ptr<ResourceFolderModel> resourceModel)
-        : CheckUpdateTask(resources, mcVersions, loadersList, resourceModel)
+        : CheckUpdateTask(resources, mcVersions, std::move(loadersList), std::move(resourceModel))
     {}
 
    public slots:
