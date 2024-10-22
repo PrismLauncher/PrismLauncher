@@ -43,7 +43,6 @@
 #include <QFlag>
 #include <QIcon>
 #include <QMutex>
-#include <QSet>
 #include <QUrl>
 #include <memory>
 
@@ -312,6 +311,6 @@ class Application : public QApplication {
     bool checkQSavePath(QString);
 
    private:
-    QSet<QString> m_qsaveResources;
+    QHash<QString, int> m_qsaveResources;
     mutable QMutex m_qsaveResourcesMutex;
 };

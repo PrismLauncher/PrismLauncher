@@ -17,6 +17,7 @@
  */
 #pragma once
 
+#include <QFileInfo>
 #include <QSaveFile>
 #include "Application.h"
 
@@ -46,24 +47,24 @@
  */
 class PSaveFile : public QSaveFile {
    public:
-    PSaveFile(const QString& name) : QSaveFile(name)
-    {
-        if (auto app = APPLICATION_DYN) {
-            app->addQSavePath(name + ".");
-        }
-    }
-    PSaveFile(const QString& name, QObject* parent) : QSaveFile(name, parent)
-    {
-        if (auto app = APPLICATION_DYN) {
-            app->addQSavePath(name + ".");
-        }
-    }
+    PSaveFile(const QString& name) : QSaveFile(name) { addPath(name); }
+    PSaveFile(const QString& name, QObject* parent) : QSaveFile(name, parent) { addPath(name); }
     virtual ~PSaveFile()
     {
         if (auto app = APPLICATION_DYN) {
-            app->removeQSavePath(fileName() + ".");
+            app->removeQSavePath(m_absoluteFilePath);
         }
     }
+
+   private:
+    void addPath(const QString& path)
+    {
+        m_absoluteFilePath = QFileInfo(path).absoluteFilePath() + ".";  // add dot for tmp files only
+        if (auto app = APPLICATION_DYN) {
+            app->addQSavePath(m_absoluteFilePath);
+        }
+    }
+    QString m_absoluteFilePath;
 };
 #else
 #define PSaveFile QSaveFile

@@ -1887,20 +1887,25 @@ const QString Application::javaPath()
 void Application::addQSavePath(QString path)
 {
     QMutexLocker locker(&m_qsaveResourcesMutex);
-    m_qsaveResources.insert(path);
+    m_qsaveResources[path] = m_qsaveResources.value(path, 0) + 1;
 }
 
 void Application::removeQSavePath(QString path)
 {
     QMutexLocker locker(&m_qsaveResourcesMutex);
-    m_qsaveResources.remove(path);
+    auto count = m_qsaveResources.value(path, 0) - 1;
+    if (count <= 0) {
+        m_qsaveResources.remove(path);
+    } else {
+        m_qsaveResources[path] = count;
+    }
 }
 
 bool Application::checkQSavePath(QString path)
 {
     QMutexLocker locker(&m_qsaveResourcesMutex);
-    for (auto r : m_qsaveResources) {
-        if (path.contains(r)) {
+    for (auto partialPath : m_qsaveResources.keys()) {
+        if (path.startsWith(partialPath) && m_qsaveResources.value(partialPath, 0) > 0) {
             return true;
         }
     }
