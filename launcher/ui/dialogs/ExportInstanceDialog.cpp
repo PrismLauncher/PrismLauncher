@@ -51,7 +51,6 @@
 #include <icons/IconList.h>
 #include <QDebug>
 #include <QFileInfo>
-#include <QSaveFile>
 #include <QSortFilterProxyModel>
 #include <QStack>
 #include <functional>
