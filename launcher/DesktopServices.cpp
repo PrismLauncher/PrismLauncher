@@ -47,16 +47,12 @@ bool xdgOpen(const QString& url)
     QProcess process;
 
     process.setProcessEnvironment(cleanEnvironment());
+    process.setProcessChannelMode(QProcess::ForwardedChannels);
 
     process.start("xdg-open", { url });
     process.waitForFinished(-1);
 
-    if (process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0)
-        return true;
-
-    process.waitForReadyRead(-1);
-    qWarning() << "Running xdg-open failed. Output:" << QString::fromUtf8(process.readAllStandardError());
-    return false;
+    return process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0;
 }
 #endif
 
