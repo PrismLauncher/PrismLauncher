@@ -1633,6 +1633,7 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
 #endif
         args.append({ "--launch", m_selectedInstance->id() });
 
+        bool userDefinedShortcutPath = !shortcutFilePath.isEmpty();
         if (shortcutFilePath.isEmpty())
             shortcutFilePath = FS::PathCombine(shortcutDirPath, FS::RemoveInvalidFilenameChars(m_selectedInstance->name()));
         if (!FS::createShortcut(shortcutFilePath, appPath, args, m_selectedInstance->name(), iconPath)) {
@@ -1640,7 +1641,11 @@ void MainWindow::on_actionCreateInstanceShortcut_triggered()
             iconFile.remove();
 #endif
             QMessageBox::critical(this, tr("Create instance shortcut"), tr("Failed to create instance shortcut!"));
+            return;
         }
+
+        if(userDefinedShortcutPath)
+            break;
     }
 #if not defined(Q_OS_MACOS)
     QMessageBox::information(this, tr("Create instance shortcut"), tr("Created a shortcut to this instance!"));
