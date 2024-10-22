@@ -915,6 +915,11 @@ QString getDesktopDir()
     return QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
 }
 
+QString getApplicationsDir()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
+}
+
 // Cross-platform Shortcut creation
 bool createShortcut(QString destination, QString target, QStringList args, QString name, QString icon)
 {
