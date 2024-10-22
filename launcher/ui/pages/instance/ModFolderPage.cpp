@@ -124,7 +124,7 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
         ui->actionsToolbar->addAction(ui->actionVisitItemPage);
         connect(ui->actionVisitItemPage, &QAction::triggered, this, &ModFolderPage::visitModPages);
 
-        auto changeVersion = new QAction(tr("Change Version"));
+        auto changeVersion = new QAction(tr("Change Version"), this);
         changeVersion->setToolTip(tr("Change mod version"));
         changeVersion->setEnabled(false);
         ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, changeVersion);
