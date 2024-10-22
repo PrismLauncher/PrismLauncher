@@ -72,7 +72,7 @@ auto stringEntry(toml::table table, QString entry_name) -> QString
 {
     auto node = table[StringUtils::toStdString(entry_name)];
     if (!node) {
-        qCritical() << "Failed to read str property '" + entry_name + "' in mod metadata.";
+        qWarning() << "Failed to read str property '" + entry_name + "' in mod metadata.";
         return {};
     }
 
@@ -83,7 +83,7 @@ auto intEntry(toml::table table, QString entry_name) -> int
 {
     auto node = table[StringUtils::toStdString(entry_name)];
     if (!node) {
-        qCritical() << "Failed to read int property '" + entry_name + "' in mod metadata.";
+        qWarning() << "Failed to read int property '" + entry_name + "' in mod metadata.";
         return {};
     }
 
