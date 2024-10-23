@@ -55,7 +55,7 @@ Task::State FileSink::init(QNetworkRequest& request)
     }
 
     wroteAnyData = false;
-    m_output_file.reset(new QSaveFile(m_filename));
+    m_output_file.reset(new PSaveFile(m_filename));
     if (!m_output_file->open(QIODevice::WriteOnly)) {
         qCCritical(taskNetLogC) << "Could not open " + m_filename + " for writing";
         return Task::State::Failed;

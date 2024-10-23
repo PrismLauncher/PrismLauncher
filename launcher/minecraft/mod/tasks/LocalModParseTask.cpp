@@ -647,11 +647,11 @@ bool validate(QFileInfo file)
     return ModUtils::process(mod, ProcessingLevel::BasicInfoOnly) && mod.valid();
 }
 
-bool processIconPNG(const Mod& mod, QByteArray&& raw_data)
+bool processIconPNG(const Mod& mod, QByteArray&& raw_data, QPixmap* pixmap)
 {
     auto img = QImage::fromData(raw_data);
     if (!img.isNull()) {
-        mod.setIcon(img);
+        *pixmap = mod.setIcon(img);
     } else {
         qWarning() << "Failed to parse mod logo:" << mod.iconPath() << "from" << mod.name();
         return false;
@@ -659,15 +659,15 @@ bool processIconPNG(const Mod& mod, QByteArray&& raw_data)
     return true;
 }
 
-bool loadIconFile(const Mod& mod)
+bool loadIconFile(const Mod& mod, QPixmap* pixmap)
 {
     if (mod.iconPath().isEmpty()) {
         qWarning() << "No Iconfile set, be sure to parse the mod first";
         return false;
     }
 
-    auto png_invalid = [&mod]() {
-        qWarning() << "Mod at" << mod.fileinfo().filePath() << "does not have a valid icon";
+    auto png_invalid = [&mod](const QString& reason) {
+        qWarning() << "Mod at" << mod.fileinfo().filePath() << "does not have a valid icon:" << reason;
         return false;
     };
 
@@ -676,24 +676,26 @@ bool loadIconFile(const Mod& mod)
             QFileInfo icon_info(FS::PathCombine(mod.fileinfo().filePath(), mod.iconPath()));
             if (icon_info.exists() && icon_info.isFile()) {
                 QFile icon(icon_info.filePath());
-                if (!icon.open(QIODevice::ReadOnly))
-                    return false;
+                if (!icon.open(QIODevice::ReadOnly)) {
+                    return png_invalid("failed  to open file " + icon_info.filePath());
+                }
                 auto data = icon.readAll();
 
-                bool icon_result = ModUtils::processIconPNG(mod, std::move(data));
+                bool icon_result = ModUtils::processIconPNG(mod, std::move(data), pixmap);
 
                 icon.close();
 
                 if (!icon_result) {
-                    return png_invalid();  // icon invalid
+                    return png_invalid("invalid png image");  // icon invalid
                 }
+                return true;
             }
-            return false;
+            return png_invalid("file '" + icon_info.filePath() + "' does not exists or is not a file");
         }
         case ResourceType::ZIPFILE: {
             QuaZip zip(mod.fileinfo().filePath());
             if (!zip.open(QuaZip::mdUnzip))
-                return false;
+                return png_invalid("failed to open '" + mod.fileinfo().filePath() + "' as a zip archive");
 
             QuaZipFile file(&zip);
 
@@ -701,28 +703,27 @@ bool loadIconFile(const Mod& mod)
                 if (!file.open(QIODevice::ReadOnly)) {
                     qCritical() << "Failed to open file in zip.";
                     zip.close();
-                    return png_invalid();
+                    return png_invalid("Failed to open '" + mod.iconPath() + "' in zip archive");
                 }
 
                 auto data = file.readAll();
 
-                bool icon_result = ModUtils::processIconPNG(mod, std::move(data));
+                bool icon_result = ModUtils::processIconPNG(mod, std::move(data), pixmap);
 
                 file.close();
                 if (!icon_result) {
-                    return png_invalid();  // icon png invalid
+                    return png_invalid("invalid png image");  // icon png invalid
                 }
-            } else {
-                return png_invalid();  // could not set icon as current file.
+                return true;
             }
-            return false;
+            return png_invalid("Failed to set '" + mod.iconPath() +
+                               "' as current file in zip archive");  // could not set icon as current file.
         }
         case ResourceType::LITEMOD: {
-            return false;  // can lightmods even have icons?
+            return png_invalid("litemods do not have icons");  // can lightmods even have icons?
         }
         default:
-            qWarning() << "Invalid type for mod, can not load icon.";
-            return false;
+            return png_invalid("Invalid type for mod, can not load icon.");
     }
 }
 

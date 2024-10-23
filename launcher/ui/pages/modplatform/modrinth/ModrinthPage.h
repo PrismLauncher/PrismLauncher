@@ -41,6 +41,7 @@
 
 #include "modplatform/modrinth/ModrinthPackManifest.h"
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
+#include "ui/widgets/ModFilterWidget.h"
 #include "ui/widgets/ProgressWidget.h"
 
 #include <QTimer>
@@ -87,6 +88,7 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     void onSelectionChanged(QModelIndex first, QModelIndex second);
     void onVersionSelectionChanged(int index);
     void triggerSearch();
+    void createFilterWidget();
 
    private:
     Ui::ModrinthPage* ui;
@@ -100,4 +102,7 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
 
     // Used to do instant searching with a delay to cache quick changes
     QTimer m_search_timer;
+
+    unique_qobject_ptr<ModFilterWidget> m_filterWidget;
+    Task::Ptr m_categoriesTask;
 };

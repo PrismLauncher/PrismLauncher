@@ -77,7 +77,7 @@ class Mod : public Resource {
     /** Gets the icon of the mod, converted to a QPixmap for drawing, and scaled to size. */
     [[nodiscard]] QPixmap icon(QSize size, Qt::AspectRatioMode mode = Qt::AspectRatioMode::IgnoreAspectRatio) const;
     /** Thread-safe. */
-    void setIcon(QImage new_image) const;
+    QPixmap setIcon(QImage new_image) const;
 
     void setDetails(const ModDetails& details);
 
@@ -100,7 +100,7 @@ class Mod : public Resource {
 
     struct {
         QPixmapCache::Key key;
-        bool was_ever_used = false;
-        bool was_read_attempt = false;
-    } mutable m_pack_image_cache_key;
+        bool wasEverUsed = false;
+        bool wasReadAttempt = false;
+    } mutable m_packImageCacheKey;
 };

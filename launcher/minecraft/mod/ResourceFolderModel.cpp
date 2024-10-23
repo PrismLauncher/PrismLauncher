@@ -40,10 +40,9 @@ ResourceFolderModel::ResourceFolderModel(const QDir& dir, BaseInstance* instance
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &ResourceFolderModel::directoryChanged);
     connect(&m_helper_thread_task, &ConcurrentTask::finished, this, [this] { m_helper_thread_task.clear(); });
-#ifndef LAUNCHER_TEST
-    // in tests the application macro doesn't work
-    m_helper_thread_task.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
-#endif
+    if (APPLICATION_DYN) {  // in tests the application macro doesn't work
+        m_helper_thread_task.setMaxConcurrent(APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
+    }
 }
 
 ResourceFolderModel::~ResourceFolderModel()

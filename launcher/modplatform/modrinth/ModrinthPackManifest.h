@@ -87,6 +87,7 @@ struct ModpackVersion {
     QString gameVersion;
     ModPlatform::IndexedVersionType version_type;
     QString changelog;
+    ModPlatform::ModLoaderTypes loaders = {};
 
     QString id;
     QString project_id;

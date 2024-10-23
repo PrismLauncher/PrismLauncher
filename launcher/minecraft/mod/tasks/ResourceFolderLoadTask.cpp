@@ -36,6 +36,7 @@
 
 #include "ResourceFolderLoadTask.h"
 
+#include "Application.h"
 #include "FileSystem.h"
 #include "minecraft/mod/MetadataHandler.h"
 
@@ -70,6 +71,9 @@ void ResourceFolderLoadTask::executeTask()
     m_resource_dir.refresh();
     for (auto entry : m_resource_dir.entryInfoList()) {
         auto filePath = entry.absoluteFilePath();
+        if (auto app = APPLICATION_DYN; app && app->checkQSavePath(filePath)) {
+            continue;
+        }
         auto newFilePath = FS::getUniqueResourceName(filePath);
         if (newFilePath != filePath) {
             FS::move(filePath, newFilePath);

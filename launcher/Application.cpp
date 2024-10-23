@@ -1071,6 +1071,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
 bool Application::createSetupWizard()
 {
     bool javaRequired = [&]() {
+        if (BuildConfig.JAVA_DOWNLOADER_ENABLED && m_settings->get("AutomaticJavaDownload").toBool()) {
+            return false;
+        }
         bool ignoreJavaWizard = m_settings->get("IgnoreJavaWizard").toBool();
         if (ignoreJavaWizard) {
             return false;
@@ -1083,10 +1086,7 @@ bool Application::createSetupWizard()
         }
         QString currentJavaPath = settings()->get("JavaPath").toString();
         QString actualPath = FS::ResolveExecutable(currentJavaPath);
-        if (actualPath.isNull()) {
-            return true;
-        }
-        return false;
+        return actualPath.isNull();
     }();
     bool askjava = BuildConfig.JAVA_DOWNLOADER_ENABLED && !javaRequired && !m_settings->get("AutomaticJavaDownload").toBool() &&
                    !m_settings->get("AutomaticJavaSwitch").toBool() && !m_settings->get("UserAskedAboutAutomaticJavaDownload").toBool();
@@ -1882,4 +1882,32 @@ QUrl Application::normalizeImportUrl(QString const& url)
 const QString Application::javaPath()
 {
     return m_settings->get("JavaDir").toString();
+}
+
+void Application::addQSavePath(QString path)
+{
+    QMutexLocker locker(&m_qsaveResourcesMutex);
+    m_qsaveResources[path] = m_qsaveResources.value(path, 0) + 1;
+}
+
+void Application::removeQSavePath(QString path)
+{
+    QMutexLocker locker(&m_qsaveResourcesMutex);
+    auto count = m_qsaveResources.value(path, 0) - 1;
+    if (count <= 0) {
+        m_qsaveResources.remove(path);
+    } else {
+        m_qsaveResources[path] = count;
+    }
+}
+
+bool Application::checkQSavePath(QString path)
+{
+    QMutexLocker locker(&m_qsaveResourcesMutex);
+    for (auto partialPath : m_qsaveResources.keys()) {
+        if (path.startsWith(partialPath) && m_qsaveResources.value(partialPath, 0) > 0) {
+            return true;
+        }
+    }
+    return false;
 }

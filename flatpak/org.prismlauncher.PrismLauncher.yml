@@ -3,9 +3,7 @@ runtime: org.kde.Platform
 runtime-version: 6.7
 sdk: org.kde.Sdk
 sdk-extensions:
-  - org.freedesktop.Sdk.Extension.openjdk21
   - org.freedesktop.Sdk.Extension.openjdk17
-  - org.freedesktop.Sdk.Extension.openjdk8
 
 command: prismlauncher
 finish-args:
@@ -21,9 +19,6 @@ finish-args:
   - --filesystem=xdg-download:ro
     # FTBApp import
   - --filesystem=~/.ftba:ro
-
-cleanup:
-  - /lib/libGLU*
 
 modules:
   # Might be needed by some Controller mods (see https://github.com/isXander/Controlify/issues/31)
@@ -42,22 +37,10 @@ modules:
       env:
         JAVA_HOME: /usr/lib/sdk/openjdk17/jvm/openjdk-17
         JAVA_COMPILER: /usr/lib/sdk/openjdk17/jvm/openjdk-17/bin/javac
+    run-tests: true
     sources:
       - type: dir
         path: ../
-
-  - name: openjdk
-    buildsystem: simple
-    build-commands:
-      - mkdir -p /app/jdk/
-      - /usr/lib/sdk/openjdk21/install.sh
-      - mv /app/jre /app/jdk/21
-      - /usr/lib/sdk/openjdk17/install.sh
-      - mv /app/jre /app/jdk/17
-      - /usr/lib/sdk/openjdk8/install.sh
-      - mv /app/jre /app/jdk/8
-    cleanup:
-      - /jre
 
   - name: glfw
     buildsystem: cmake-ninja

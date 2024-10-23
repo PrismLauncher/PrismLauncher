@@ -64,7 +64,46 @@ class VersionBasicModel : public QIdentityProxyModel {
     {
         if (role == Qt::DisplayRole)
             return QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole);
+        if (role == Qt::UserRole)
+            return QIdentityProxyModel::data(index, BaseVersionList::VersionIdRole);
         return {};
+    }
+};
+
+class AllVersionProxyModel : public QSortFilterProxyModel {
+    Q_OBJECT
+
+   public:
+    AllVersionProxyModel(QObject* parent = nullptr) : QSortFilterProxyModel(parent) {}
+
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override { return QSortFilterProxyModel::rowCount(parent) + 1; }
+
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
+    {
+        if (!index.isValid()) {
+            return {};
+        }
+
+        if (index.row() == 0) {
+            if (role == Qt::DisplayRole) {
+                return tr("All Versions");
+            }
+            if (role == Qt::UserRole) {
+                return "all";
+            }
+            return {};
+        }
+
+        QModelIndex newIndex = QSortFilterProxyModel::index(index.row() - 1, index.column());
+        return QSortFilterProxyModel::data(newIndex, role);
+    }
+
+    Qt::ItemFlags flags(const QModelIndex& index) const override
+    {
+        if (index.row() == 0) {
+            return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+        }
+        return QSortFilterProxyModel::flags(index);
     }
 };
 
@@ -76,14 +115,21 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, bool extended, QWi
     m_versions_proxy = new VersionProxyModel(this);
     m_versions_proxy->setFilter(BaseVersionList::TypeRole, new ExactFilter("release"));
 
-    auto proxy = new VersionBasicModel(this);
+    QAbstractProxyModel* proxy = new VersionBasicModel(this);
     proxy->setSourceModel(m_versions_proxy);
 
     if (extended) {
+        if (!m_instance) {
+            ui->environmentGroup->hide();
+        }
         ui->versions->setSourceModel(proxy);
         ui->versions->setSeparator(", ");
+        ui->versions->setDefaultText(tr("All Versions"));
         ui->version->hide();
     } else {
+        auto allVersions = new AllVersionProxyModel(this);
+        allVersions->setSourceModel(proxy);
+        proxy = allVersions;
         ui->version->setModel(proxy);
         ui->versions->hide();
         ui->showAllVersions->hide();
@@ -162,18 +208,22 @@ void ModFilterWidget::loadVersionList()
 
 void ModFilterWidget::prepareBasicFilter()
 {
-    m_filter->hideInstalled = false;
-    m_filter->side = "";  // or "both"
-    auto loaders = m_instance->getPackProfile()->getSupportedModLoaders().value();
-    ui->neoForge->setChecked(loaders & ModPlatform::NeoForge);
-    ui->forge->setChecked(loaders & ModPlatform::Forge);
-    ui->fabric->setChecked(loaders & ModPlatform::Fabric);
-    ui->quilt->setChecked(loaders & ModPlatform::Quilt);
-    m_filter->loaders = loaders;
-    auto def = m_instance->getPackProfile()->getComponentVersion("net.minecraft");
-    m_filter->versions.emplace_front(def);
-    ui->versions->setCheckedItems({ def });
-    ui->version->setCurrentIndex(ui->version->findText(def));
+    if (m_instance) {
+        m_filter->hideInstalled = false;
+        m_filter->side = "";  // or "both"
+        auto loaders = m_instance->getPackProfile()->getSupportedModLoaders().value();
+        ui->neoForge->setChecked(loaders & ModPlatform::NeoForge);
+        ui->forge->setChecked(loaders & ModPlatform::Forge);
+        ui->fabric->setChecked(loaders & ModPlatform::Fabric);
+        ui->quilt->setChecked(loaders & ModPlatform::Quilt);
+        m_filter->loaders = loaders;
+        auto def = m_instance->getPackProfile()->getComponentVersion("net.minecraft");
+        m_filter->versions.emplace_front(def);
+        ui->versions->setCheckedItems({ def });
+        ui->version->setCurrentIndex(ui->version->findText(def));
+    } else {
+        ui->hideInstalled->hide();
+    }
 }
 
 void ModFilterWidget::onShowAllVersionsChanged()
@@ -249,7 +299,9 @@ void ModFilterWidget::onHideInstalledFilterChanged()
 void ModFilterWidget::onVersionFilterTextChanged(const QString& version)
 {
     m_filter->versions.clear();
-    m_filter->versions.emplace_back(version);
+    if (ui->version->currentData(Qt::UserRole) != "all") {
+        m_filter->versions.emplace_back(version);
+    }
     m_filter_changed = true;
     emit filterChanged();
 }

@@ -70,17 +70,16 @@ static bool unzipNatives(QString source, QString targetFolder, bool applyJnilibH
 void ExtractNatives::executeTask()
 {
     auto instance = m_parent->instance();
-    std::shared_ptr<MinecraftInstance> minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(instance);
-    auto toExtract = minecraftInstance->getNativeJars();
+    auto toExtract = instance->getNativeJars();
     if (toExtract.isEmpty()) {
         emitSucceeded();
         return;
     }
-    auto settings = minecraftInstance->settings();
+    auto settings = instance->settings();
 
-    auto outputPath = minecraftInstance->getNativePath();
+    auto outputPath = instance->getNativePath();
     FS::ensureFolderPathExists(outputPath);
-    auto javaVersion = minecraftInstance->getJavaVersion();
+    auto javaVersion = instance->getJavaVersion();
     bool jniHackEnabled = javaVersion.major() >= 8;
     for (const auto& source : toExtract) {
         if (!unzipNatives(source, outputPath, jniHackEnabled)) {

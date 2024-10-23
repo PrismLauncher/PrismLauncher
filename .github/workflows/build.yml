@@ -173,7 +173,7 @@ jobs:
 
       - name: Retrieve ccache cache (Windows MinGW-w64)
         if: runner.os == 'Windows' && matrix.msystem != '' && inputs.build_type == 'Debug'
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4.1.1
         with:
           path: '${{ github.workspace }}\.ccache'
           key: ${{ matrix.os }}-mingw-w64-ccache-${{ github.run_id }}
@@ -410,9 +410,8 @@ jobs:
         if: matrix.name == 'macOS'
         run: |
           if [ '${{ secrets.SPARKLE_ED25519_KEY }}' != '' ]; then
-            brew install openssl@3
             echo '${{ secrets.SPARKLE_ED25519_KEY }}' > ed25519-priv.pem
-            signature=$(/usr/local/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
+            signature=$(/opt/homebrew/opt/openssl@3/bin/openssl pkeyutl -sign -rawin -in ${{ github.workspace }}/PrismLauncher.zip -inkey ed25519-priv.pem | openssl base64 | tr -d \\n)
             rm ed25519-priv.pem
             cat >> $GITHUB_STEP_SUMMARY << EOF
           ### Artifact Information :information_source:
@@ -672,7 +671,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v29
+        uses: cachix/install-nix-action@v30
 
         # For PRs
       - name: Setup Nix Magic Cache

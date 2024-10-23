@@ -78,7 +78,7 @@ int MSALoginDialog::exec()
     connect(m_authflow_task.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
     connect(m_authflow_task.get(), &Task::succeeded, this, &QDialog::accept);
     connect(m_authflow_task.get(), &Task::aborted, this, &MSALoginDialog::reject);
-    connect(m_authflow_task.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
+    connect(m_authflow_task.get(), &Task::status, this, &MSALoginDialog::onAuthFlowStatus);
     connect(m_authflow_task.get(), &AuthFlow::authorizeWithBrowser, this, &MSALoginDialog::authorizeWithBrowser);
     connect(m_authflow_task.get(), &AuthFlow::authorizeWithBrowserWithExtra, this, &MSALoginDialog::authorizeWithBrowserWithExtra);
     connect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_authflow_task.get(), &Task::abort);
@@ -87,7 +87,7 @@ int MSALoginDialog::exec()
     connect(m_devicecode_task.get(), &Task::failed, this, &MSALoginDialog::onTaskFailed);
     connect(m_devicecode_task.get(), &Task::succeeded, this, &QDialog::accept);
     connect(m_devicecode_task.get(), &Task::aborted, this, &MSALoginDialog::reject);
-    connect(m_devicecode_task.get(), &Task::status, this, &MSALoginDialog::onTaskStatus);
+    connect(m_devicecode_task.get(), &Task::status, this, &MSALoginDialog::onDeviceFlowStatus);
     connect(m_devicecode_task.get(), &AuthFlow::authorizeWithBrowser, this, &MSALoginDialog::authorizeWithBrowser);
     connect(m_devicecode_task.get(), &AuthFlow::authorizeWithBrowserWithExtra, this, &MSALoginDialog::authorizeWithBrowserWithExtra);
     connect(ui->buttonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked, m_devicecode_task.get(), &Task::abort);
@@ -132,7 +132,7 @@ void MSALoginDialog::onTaskFailed(QString reason)
 
 void MSALoginDialog::authorizeWithBrowser(const QUrl& url)
 {
-    ui->stackedWidget->setCurrentIndex(1);
+    ui->stackedWidget2->setCurrentIndex(1);
     ui->loginButton->setToolTip(QString("<div style='width: 200px;'>%1</div>").arg(url.toString()));
     m_url = url;
 }
@@ -152,10 +152,16 @@ void MSALoginDialog::authorizeWithBrowserWithExtra(QString url, QString code, in
     }
 }
 
-void MSALoginDialog::onTaskStatus(QString status)
+void MSALoginDialog::onDeviceFlowStatus(QString status)
 {
     ui->stackedWidget->setCurrentIndex(0);
     ui->status->setText(status);
+}
+
+void MSALoginDialog::onAuthFlowStatus(QString status)
+{
+    ui->stackedWidget2->setCurrentIndex(0);
+    ui->status2->setText(status);
 }
 
 // Public interface

@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@9f70348d77d0422624097c4b7a75563948901306 # v29
+      - uses: cachix/install-nix-action@08dcb3a5e62fa31e2da3d490afc4176ef55ecd72 # v30
 
       - uses: DeterminateSystems/update-flake-lock@v24
         with:

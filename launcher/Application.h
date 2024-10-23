@@ -42,6 +42,7 @@
 #include <QDebug>
 #include <QFlag>
 #include <QIcon>
+#include <QMutex>
 #include <QUrl>
 #include <memory>
 
@@ -80,6 +81,12 @@ class Index;
 #undef APPLICATION
 #endif
 #define APPLICATION (static_cast<Application*>(QCoreApplication::instance()))
+
+// Used for checking if is a test
+#if defined(APPLICATION_DYN)
+#undef APPLICATION_DYN
+#endif
+#define APPLICATION_DYN (dynamic_cast<Application*>(QCoreApplication::instance()))
 
 class Application : public QApplication {
     // friends for the purpose of limiting access to deprecated stuff
@@ -297,4 +304,13 @@ class Application : public QApplication {
     QList<QUrl> m_urlsToImport;
     QString m_instanceIdToShowWindowOf;
     std::unique_ptr<QFile> logFile;
+
+   public:
+    void addQSavePath(QString);
+    void removeQSavePath(QString);
+    bool checkQSavePath(QString);
+
+   private:
+    QHash<QString, int> m_qsaveResources;
+    mutable QMutex m_qsaveResourcesMutex;
 };
