@@ -45,14 +45,14 @@ class CheckUpdateTask : public Task {
                ModPlatform::ResourceProvider p,
                shared_qobject_ptr<ResourceDownloadTask> t,
                bool enabled = true)
-            : name(name)
-            , old_hash(old_h)
-            , old_version(old_v)
-            , new_version(new_v)
-            , new_version_type(new_v_type)
-            , changelog(changelog)
+            : name(std::move(name))
+            , old_hash(std::move(old_h))
+            , old_version(std::move(old_v))
+            , new_version(std::move(new_v))
+            , new_version_type(std::move(new_v_type))
+            , changelog(std::move(changelog))
             , provider(p)
-            , download(t)
+            , download(std::move(t))
             , enabled(enabled)
         {}
     };
