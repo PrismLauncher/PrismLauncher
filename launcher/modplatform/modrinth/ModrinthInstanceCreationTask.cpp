@@ -303,8 +303,8 @@ bool ModrinthCreationTask::createInstance()
     loop.exec();
 
     if (!ended_well) {
-        for (auto m : mods) {
-            delete m;
+        for (auto resource : resources) {
+            delete resource;
         }
         return ended_well;
     }
@@ -324,8 +324,8 @@ bool ModrinthCreationTask::createInstance()
     m_task = ensureMetadataTask;
 
     ensureMetaLoop.exec();
-    for (auto m : resources) {
-        delete m;
+    for (auto resource : resources) {
+        delete resource;
     }
     resources.clear();
 
