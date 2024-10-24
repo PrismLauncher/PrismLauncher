@@ -38,7 +38,7 @@ if(MSVC)
     # without it memory leaks and a warning is printed
     # /EHc tells the compiler to assume that functions declared as extern "C" never throw a C++ exception
     # This appears to not always be a defualt compiler option in CMAKE
-    set(CMAKE_CXX_FLAGS "/EHsc ${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "/EHa ${CMAKE_CXX_FLAGS}")
 
     # LINK accepts /SUBSYSTEM whics sets if we are a WINDOWS (gui) or a CONSOLE programs
     # This implicitly selects an entrypoint specific to the subsystem selected
@@ -550,6 +550,14 @@ else()
     message(STATUS "Using system ghc_filesystem")
 endif()
 add_subdirectory(libraries/qdcss) # css parser
+
+include(FetchContent)
+FetchContent_Declare(
+  cpptrace
+  GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git
+  GIT_TAG        v0.7.2 # <HASH or TAG>
+)
+FetchContent_MakeAvailable(cpptrace)
 
 ############################### Built Artifacts ###############################
 
