@@ -78,7 +78,7 @@ void AutoInstallJava::executeTask()
                 auto java = std::dynamic_pointer_cast<JavaInstall>(javas->at(i));
                 if (java && packProfile->getProfile()->getCompatibleJavaMajors().contains(java->id.major())) {
                     if (!java->is_64bit) {
-                        emit logLine(tr("The automatic Java mechanism detected a 32-bit installation of Java."), MessageLevel::Info);
+                        emit logLine(tr("The automatic Java mechanism detected a 32-bit installation of Java."), MessageLevel::Launcher);
                     }
                     setJavaPath(java->path);
                     return;
@@ -136,7 +136,7 @@ void AutoInstallJava::setJavaPath(QString path)
     settings->set("OverrideJavaLocation", true);
     settings->set("JavaPath", path);
     settings->set("AutomaticJava", true);
-    emit logLine(tr("Compatible Java found at: %1.").arg(path), MessageLevel::Info);
+    emit logLine(tr("Compatible Java found at: %1.").arg(path), MessageLevel::Launcher);
     emitSucceeded();
 }
 
