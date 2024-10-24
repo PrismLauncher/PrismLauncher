@@ -63,8 +63,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     QStringList hashes = m_mappings.keys();
     auto job = api.latestVersions(hashes, m_hash_type, m_game_versions, loader, response);
 
-    connect(job.get(), &Task::succeeded, this,
-            [this, response, loader] { checkVersionsResponse(response, loader); });
+    connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 
     connect(job.get(), &Task::failed, this, &ModrinthCheckUpdate::checkNextLoader);
 
@@ -72,8 +71,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     job->start();
 }
 
-void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> response,
-                                                std::optional<ModPlatform::ModLoaderTypes> loader)
+void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> response, std::optional<ModPlatform::ModLoaderTypes> loader)
 {
     setStatus(tr("Parsing the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
@@ -90,8 +88,10 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
     }
 
     try {
-        for (auto iter = m_mappings.begin(); iter != m_mappings.end(); iter++) {
-            const QString& hash = iter.key();
+        auto iter = m_mappings.begin();
+
+        while (iter != m_mappings.end()) {
+            const QString hash = iter.key();
             Resource* resource = iter.value();
 
             auto project_obj = doc[hash].toObject();
@@ -101,7 +101,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             if (project_obj.isEmpty()) {
                 qDebug() << "Mod " << m_mappings.find(hash).value()->name() << " got an empty response."
                          << "Hash: " << hash;
-
+                ++iter;
                 continue;
             }
 
@@ -126,23 +126,15 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             auto project_ver = Modrinth::loadIndexedPackVersion(project_obj, m_hash_type, loader_filter);
             if (project_ver.downloadUrl.isEmpty()) {
                 qCritical() << "Modrinth mod without download url!" << project_ver.fileName;
-
+                ++iter;
                 continue;
             }
-
-            auto mod_iter = m_mappings.find(hash);
-            if (mod_iter == m_mappings.end()) {
-                qCritical() << "Failed to remap mod from Modrinth!";
-                continue;
-            }
-            auto mod = *mod_iter;
-            m_mappings.remove(hash);
 
             // Fake pack with the necessary info to pass to the download task :)
             auto pack = std::make_shared<ModPlatform::IndexedPack>();
-            pack->name = mod->name();
-            pack->slug = mod->metadata()->slug;
-            pack->addonId = mod->metadata()->project_id;
+            pack->name = resource->name();
+            pack->slug = resource->metadata()->slug;
+            pack->addonId = resource->metadata()->project_id;
             pack->provider = ModPlatform::ResourceProvider::MODRINTH;
             if ((project_ver.hash != hash && project_ver.is_preferred) || (resource->status() == ResourceStatus::NOT_INSTALLED)) {
                 auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resource_model);
@@ -159,6 +151,8 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
                                        project_ver.changelog, ModPlatform::ResourceProvider::MODRINTH, download_task);
             }
             m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, project_ver));
+
+            iter = m_mappings.erase(iter);
         }
     } catch (Json::JsonException& e) {
         emitFailed(e.cause() + ": " + e.what());
@@ -184,7 +178,7 @@ void ModrinthCheckUpdate::checkNextLoader()
     if (m_loader_idx < m_loaders_list.size()) {
         getUpdateModsForLoader(m_loaders_list.at(m_loader_idx));
         m_loader_idx++;
-        return;
+        return; 
     }
 
     for (auto resource : m_mappings) {
