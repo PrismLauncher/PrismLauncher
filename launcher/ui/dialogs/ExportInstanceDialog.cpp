@@ -41,6 +41,7 @@
 #include <QFileDialog>
 #include <QFileSystemModel>
 #include <QMessageBox>
+#include "DesktopServices.h"
 #include "FileIgnoreProxy.h"
 #include "QObjectPtr.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -84,6 +85,10 @@ ExportInstanceDialog::ExportInstanceDialog(InstancePtr instance, QWidget* parent
     auto headerView = ui->treeView->header();
     headerView->setSectionResizeMode(QHeaderView::ResizeToContents);
     headerView->setSectionResizeMode(0, QHeaderView::Stretch);
+    if (DesktopServices::isGameScope()) {
+        showFullScreen();
+        setFixedSize(this->width(), this->height());
+    }
 }
 
 ExportInstanceDialog::~ExportInstanceDialog()
