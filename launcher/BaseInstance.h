@@ -269,6 +269,8 @@ class BaseInstance : public QObject, public std::enable_shared_from_this<BaseIns
     bool removeLinkedInstanceId(const QString& id);
     bool isLinkedToInstanceId(const QString& id) const;
 
+    bool isLegacy();
+
    protected:
     void changeStatus(Status newStatus);
 
