@@ -282,41 +282,6 @@
           <string>Miscellaneous</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="numberOfConcurrentDownloadsSpinBox">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="numberOfConcurrentTasksLabel">
-            <property name="text">
-             <string>Number of concurrent tasks</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="numberOfConcurrentTasksSpinBox">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="numberOfConcurrentDownloadsLabel">
-            <property name="text">
-             <string>Number of concurrent downloads</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="numberOfManualRetriesLabel">
-            <property name="text">
-             <string>Number of manual retries</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="1">
            <widget class="QSpinBox" name="numberOfManualRetriesSpinBox">
             <property name="minimum">
@@ -334,11 +299,72 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="numberOfConcurrentDownloadsSpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
           <item row="3" column="1">
            <widget class="QSpinBox" name="timeoutSecondsSpinBox">
             <property name="suffix">
              <string>s</string>
             </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="numberOfConcurrentDownloadsLabel">
+            <property name="text">
+             <string>Number of concurrent downloads</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="numberOfManualRetriesLabel">
+            <property name="text">
+             <string>Number of manual retries</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="numberOfConcurrentTasksLabel">
+            <property name="text">
+             <string>Number of concurrent tasks</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="numberOfConcurrentTasksSpinBox">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="createShortcutActionLabel">
+            <property name="text">
+             <string>Create shortcut action</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QComboBox" name="createShortcutActionComboBox">
+            <item>
+             <property name="text">
+              <string>Applications only</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Applications &amp; Desktop</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Desktop only</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>

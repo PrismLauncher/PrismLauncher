@@ -701,6 +701,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("InstSortMode", "Name");
         m_settings->registerSetting("SelectedInstance", QString());
 
+        // Shortcut creation
+        m_settings->registerSetting("ShortcutCreationMode", "Desktop");
+
         // Window state and geometry
         m_settings->registerSetting("MainWindowState", "");
         m_settings->registerSetting("MainWindowGeometry", "");

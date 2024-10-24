@@ -65,6 +65,15 @@ enum InstSortMode {
     Sort_LastLaunch
 };
 
+enum ShortcutCreationMode {
+    // Create a shortcut in the applications
+    Shortcut_OnlyApplications,
+    // Create a shortcut in both locations
+    Shortcut_Both,
+    // Create a shortcut on the desktop
+    Shortcut_OnlyDesktop
+};
+
 LauncherPage::LauncherPage(QWidget* parent) : QWidget(parent), ui(new Ui::LauncherPage)
 {
     ui->setupUi(this);
@@ -254,6 +263,19 @@ void LauncherPage::applySettings()
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
     s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
     s->set("SkipModpackUpdatePrompt", ui->skipModpackUpdatePromptBtn->isChecked());
+
+    auto shortcutMode = (ShortcutCreationMode) ui->createShortcutActionComboBox->currentIndex();
+    switch (shortcutMode) {
+        case Shortcut_OnlyApplications:
+            s->set("ShortcutCreationMode", "Applications");
+            break;
+        case Shortcut_Both:
+            s->set("ShortcutCreationMode", "Both");
+            break;
+        case Shortcut_OnlyDesktop:
+            s->set("ShortcutCreationMode", "Desktop");
+            break;
+    }
 }
 void LauncherPage::loadSettings()
 {
@@ -319,6 +341,19 @@ void LauncherPage::loadSettings()
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
     ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
     ui->skipModpackUpdatePromptBtn->setChecked(s->get("SkipModpackUpdatePrompt").toBool());
+
+    QString shortcutModeStr = s->get("ShortcutCreationMode").toString();
+    ShortcutCreationMode shortcutMode = Shortcut_OnlyDesktop;
+    if(shortcutModeStr == "Applications") {
+        shortcutMode = Shortcut_OnlyApplications;
+    } else if(shortcutModeStr == "Desktop") {
+        // Guess we don't need that, but it's here for completeness
+        shortcutMode = Shortcut_OnlyDesktop;
+    } else if(shortcutModeStr == "Both") {
+        shortcutMode = Shortcut_Both;
+    }
+
+    ui->createShortcutActionComboBox->setCurrentIndex(shortcutMode);
 }
 
 void LauncherPage::refreshFontPreview()
