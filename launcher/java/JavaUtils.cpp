@@ -442,9 +442,15 @@ QList<QString> JavaUtils::FindJavaPaths()
         QString fileName = info.fileName();
         return fileName.startsWith("openjdk-") || fileName.startsWith("openj9-");
     };
+    // AOSC OS's locations for openjdk
+    auto aoscFilter = [](const QFileInfo& info) {
+        QString fileName = info.fileName();
+        return fileName == "java" || fileName.startsWith("java-");
+    };
     scanJavaDir("/usr/lib64", gentooFilter);
     scanJavaDir("/usr/lib", gentooFilter);
     scanJavaDir("/opt", gentooFilter);
+    scanJavaDir("/usr/lib", aoscFilter);
     // javas stored in Prism Launcher's folder
     scanJavaDirs("java");
     // manually installed JDKs in /opt
