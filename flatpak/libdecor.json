@@ -1,22 +1,18 @@
 {
-    "name": "libdecor",
-    "buildsystem": "meson",
-    "config-opts": [
-        "-Ddemo=false"
-    ],
-    "sources": [
-        {
-            "type": "git",
-            "url": "https://gitlab.freedesktop.org/libdecor/libdecor.git",
-            "commit": "73260393a97291c887e1074ab7f318e031be0ac6"
-        },
-        {
-            "type": "patch",
-            "path": "patches/weird_libdecor.patch"
-        }
-    ],
-    "cleanup": [
-        "/include",
-        "/lib/pkgconfig"
-    ]
+  "name": "libdecor",
+  "buildsystem": "meson",
+  "config-opts": [
+    "-Ddemo=false"
+  ],
+  "sources": [
+    {
+      "type": "git",
+      "url": "https://gitlab.freedesktop.org/libdecor/libdecor.git",
+      "commit": "c2bd8ad6fa42c0cb17553ce77ad8a87d1f543b1f"
+    }
+  ],
+  "cleanup": [
+    "/include",
+    "/lib/pkgconfig"
+  ]
 }
