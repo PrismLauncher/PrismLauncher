@@ -60,7 +60,7 @@
        <bool>true</bool>
       </property>
       <property name="dragDropMode">
-       <enum>QAbstractItemView::DropOnly</enum>
+       <enum>QAbstractItemView::DragDropMode::DropOnly</enum>
       </property>
       <property name="uniformRowHeights">
        <bool>true</bool>
@@ -74,7 +74,7 @@
     <string>Actions</string>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextOnly</enum>
+    <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
    </property>
    <property name="useDefaultAction" stdset="0">
     <bool>true</bool>
@@ -95,34 +95,43 @@
   </widget>
   <action name="actionAddItem">
    <property name="text">
-    <string>&amp;Add</string>
+    <string>&amp;Add File</string>
    </property>
    <property name="toolTip">
-    <string>Add</string>
+    <string>Add a locally downloaded file.</string>
    </property>
   </action>
   <action name="actionRemoveItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Remove</string>
    </property>
    <property name="toolTip">
-    <string>Remove selected item</string>
+    <string>Remove all selected items.</string>
    </property>
   </action>
   <action name="actionEnableItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Enable</string>
    </property>
    <property name="toolTip">
-    <string>Enable selected item</string>
+    <string>Enable all selected items.</string>
    </property>
   </action>
   <action name="actionDisableItem">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>&amp;Disable</string>
    </property>
    <property name="toolTip">
-    <string>Disable selected item</string>
+    <string>Disable all selected items.</string>
    </property>
   </action>
   <action name="actionViewConfigs">
@@ -137,6 +146,9 @@
    <property name="text">
     <string>View &amp;Folder</string>
    </property>
+   <property name="toolTip">
+    <string>Open the folder in the system file manager.</string>
+   </property>
   </action>
   <action name="actionDownloadItem">
    <property name="enabled">
@@ -146,29 +158,34 @@
     <string>&amp;Download</string>
    </property>
    <property name="toolTip">
-    <string>Download a new resource</string>
-   </property>
-  </action>
-  <action name="actionVisitItemPage">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Visit mod's page</string>
-   </property>
-   <property name="toolTip">
-    <string>Go to mods home page</string>
+    <string>Download resources from online mod platforms.</string>
    </property>
   </action>
   <action name="actionUpdateItem">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Check for &amp;Updates</string>
    </property>
    <property name="toolTip">
-    <string>Try to check or update all selected resources (all resources if none are selected)</string>
+    <string>Try to check or update all selected resources (all resources if none are selected).</string>
+   </property>
+  </action>
+  <action name="actionResetItemMetadata">
+   <property name="text">
+    <string>Reset Update Metadata</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionVerifyItemDependencies">
+   <property name="text">
+    <string>Verify Dependencies</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
   <action name="actionExportMetadata">
@@ -176,10 +193,21 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Export modlist</string>
+    <string>Export List</string>
    </property>
    <property name="toolTip">
-    <string>Export mod's metadata to text</string>
+    <string>Export resource's metadata to text.</string>
+   </property>
+  </action>
+  <action name="actionChangeVersion">
+   <property name="text">
+    <string>Change Version</string>
+   </property>
+   <property name="toolTip">
+    <string>Change a resource's version.</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
  </widget>

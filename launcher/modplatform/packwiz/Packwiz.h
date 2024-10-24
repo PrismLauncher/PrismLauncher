@@ -32,11 +32,13 @@ class Mod;
 
 namespace Packwiz {
 
-auto getRealIndexName(QDir& index_dir, QString normalized_index_name, bool should_match = false) -> QString;
+auto getRealIndexName(const QDir& index_dir, QString normalized_index_name, bool should_match = false) -> QString;
 
 class V1 {
    public:
     enum class Side { ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
+
+    // can also represent other resources beside loader mods - but this is what packwiz calls it
     struct Mod {
         QString slug{};
         QString name{};
@@ -56,6 +58,7 @@ class V1 {
         ModPlatform::ResourceProvider provider{};
         QVariant file_id{};
         QVariant project_id{};
+        QString version_number{};
 
        public:
         // This is a totally heuristic, but should work for now.
@@ -70,33 +73,33 @@ class V1 {
     /* Generates the object representing the information in a mod.pw.toml file via
      * its common representation in the launcher, when downloading mods.
      * */
-    static auto createModFormat(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod;
+    static auto createModFormat(const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod;
     /* Generates the object representing the information in a mod.pw.toml file via
      * its common representation in the launcher, plus a necessary slug.
      * */
-    static auto createModFormat(QDir& index_dir, ::Mod& internal_mod, QString slug) -> Mod;
+    static auto createModFormat(const QDir& index_dir, ::Mod& internal_mod, QString slug) -> Mod;
 
     /* Updates the mod index for the provided mod.
      * This creates a new index if one does not exist already
      * TODO: Ask the user if they want to override, and delete the old mod's files, or keep the old one.
      * */
-    static void updateModIndex(QDir& index_dir, Mod& mod);
+    static void updateModIndex(const QDir& index_dir, Mod& mod);
 
     /* Deletes the metadata for the mod with the given slug. If the metadata doesn't exist, it does nothing. */
-    static void deleteModIndex(QDir& index_dir, QString& mod_slug);
+    static void deleteModIndex(const QDir& index_dir, QString& mod_slug);
 
     /* Deletes the metadata for the mod with the given id. If the metadata doesn't exist, it does nothing. */
-    static void deleteModIndex(QDir& index_dir, QVariant& mod_id);
+    static void deleteModIndex(const QDir& index_dir, QVariant& mod_id);
 
     /* Gets the metadata for a mod with a particular file name.
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
-    static auto getIndexForMod(QDir& index_dir, QString slug) -> Mod;
+    static auto getIndexForMod(const QDir& index_dir, QString slug) -> Mod;
 
     /* Gets the metadata for a mod with a particular id.
      * If the mod doesn't have a metadata, it simply returns an empty Mod object.
      * */
-    static auto getIndexForMod(QDir& index_dir, QVariant& mod_id) -> Mod;
+    static auto getIndexForMod(const QDir& index_dir, QVariant& mod_id) -> Mod;
 
     static auto sideToString(Side side) -> QString;
     static auto stringToSide(QString side) -> Side;

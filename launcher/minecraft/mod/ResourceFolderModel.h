@@ -19,6 +19,58 @@
 
 class QSortFilterProxyModel;
 
+/* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
+#define RESOURCE_HELPERS(T)                                                                       \
+    [[nodiscard]] T& operator[](int index)                                                        \
+    {                                                                                             \
+        return *static_cast<T*>(m_resources[index].get());                                        \
+    }                                                                                             \
+    [[nodiscard]] T& at(int index)                                                                \
+    {                                                                                             \
+        return *static_cast<T*>(m_resources[index].get());                                        \
+    }                                                                                             \
+    [[nodiscard]] const T& at(int index) const                                                    \
+    {                                                                                             \
+        return *static_cast<const T*>(m_resources.at(index).get());                               \
+    }                                                                                             \
+    [[nodiscard]] T& first()                                                                      \
+    {                                                                                             \
+        return *static_cast<T*>(m_resources.first().get());                                       \
+    }                                                                                             \
+    [[nodiscard]] T& last()                                                                       \
+    {                                                                                             \
+        return *static_cast<T*>(m_resources.last().get());                                        \
+    }                                                                                             \
+    [[nodiscard]] T* find(QString id)                                                             \
+    {                                                                                             \
+        auto iter = std::find_if(m_resources.constBegin(), m_resources.constEnd(),                \
+                                 [&](Resource::Ptr const& r) { return r->internal_id() == id; }); \
+        if (iter == m_resources.constEnd())                                                       \
+            return nullptr;                                                                       \
+        return static_cast<T*>((*iter).get());                                                    \
+    }                                                                                             \
+    QList<T*> selected##T##s(const QModelIndexList& indexes)                                      \
+    {                                                                                             \
+        QList<T*> result;                                                                         \
+        for (const QModelIndex& index : indexes) {                                                \
+            if (index.column() != 0)                                                              \
+                continue;                                                                         \
+                                                                                                  \
+            result.append(&at(index.row()));                                                      \
+        }                                                                                         \
+        return result;                                                                            \
+    }                                                                                             \
+    QList<T*> all##T##s()                                                                         \
+    {                                                                                             \
+        QList<T*> result;                                                                         \
+        result.reserve(m_resources.size());                                                       \
+                                                                                                  \
+        for (const Resource::Ptr& resource : m_resources)                                         \
+            result.append(static_cast<T*>(resource.get()));                                       \
+                                                                                                  \
+        return result;                                                                            \
+    }
+
 /** A basic model for external resources.
  *
  *  This model manages a list of resources. As such, external users of such resources do not own them,
@@ -29,7 +81,7 @@ class QSortFilterProxyModel;
 class ResourceFolderModel : public QAbstractListModel {
     Q_OBJECT
    public:
-    ResourceFolderModel(QDir, BaseInstance* instance, QObject* parent = nullptr, bool create_dir = true);
+    ResourceFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent = nullptr);
     ~ResourceFolderModel() override;
 
     virtual QString id() const { return "resource"; }
@@ -49,8 +101,10 @@ class ResourceFolderModel : public QAbstractListModel {
     bool stopWatching(const QStringList& paths);
 
     /* Helper methods for subclasses, using a predetermined list of paths. */
-    virtual bool startWatching() { return startWatching({ m_dir.absolutePath() }); }
-    virtual bool stopWatching() { return stopWatching({ m_dir.absolutePath() }); }
+    virtual bool startWatching() { return startWatching({ indexDir().absolutePath(), m_dir.absolutePath() }); }
+    virtual bool stopWatching() { return stopWatching({ indexDir().absolutePath(), m_dir.absolutePath() }); }
+
+    QDir indexDir() { return { QString("%1/.index").arg(dir().absolutePath()) }; }
 
     /** Given a path in the system, install that resource, moving it to its place in the
      *  instance file hierarchy.
@@ -59,12 +113,15 @@ class ResourceFolderModel : public QAbstractListModel {
      */
     virtual bool installResource(QString path);
 
+    virtual bool installResource(QString path, ModPlatform::IndexedVersion& vers);
+
     /** Uninstall (i.e. remove all data about it) a resource, given its file name.
      *
      *  Returns whether the removal was successful.
      */
-    virtual bool uninstallResource(QString file_name);
+    virtual bool uninstallResource(QString file_name, bool preserve_metadata = false);
     virtual bool deleteResources(const QModelIndexList&);
+    virtual void deleteMetadata(const QModelIndexList&);
 
     /** Applies the given 'action' to the resources in 'indexes'.
      *
@@ -80,9 +137,7 @@ class ResourceFolderModel : public QAbstractListModel {
 
     [[nodiscard]] qsizetype size() const { return m_resources.size(); }
     [[nodiscard]] bool empty() const { return size() == 0; }
-    [[nodiscard]] Resource& at(int index) { return *m_resources.at(index); }
-    [[nodiscard]] Resource const& at(int index) const { return *m_resources.at(index); }
-    [[nodiscard]] QList<Resource::Ptr> const& all() const { return m_resources; }
+    RESOURCE_HELPERS(Resource)
 
     [[nodiscard]] QDir const& dir() const { return m_dir; }
 
@@ -96,7 +151,8 @@ class ResourceFolderModel : public QAbstractListModel {
     /* Qt behavior */
 
     /* Basic columns */
-    enum Columns { ActiveColumn = 0, NameColumn, DateColumn, SizeColumn, NUM_COLUMNS };
+    enum Columns { ACTIVE_COLUMN = 0, NAME_COLUMN, DATE_COLUMN, PROVIDER_COLUMN, SIZE_COLUMN, NUM_COLUMNS };
+
     QStringList columnNames(bool translated = true) const { return translated ? m_column_names_translated : m_column_names; }
 
     [[nodiscard]] int rowCount(const QModelIndex& parent = {}) const override { return parent.isValid() ? 0 : static_cast<int>(size()); }
@@ -153,7 +209,9 @@ class ResourceFolderModel : public QAbstractListModel {
      *  This Task is normally executed when opening a page, so it shouldn't contain much heavy work.
      *  If such work is needed, try using it in the Task create by createParseTask() instead!
      */
-    [[nodiscard]] virtual Task* createUpdateTask();
+    [[nodiscard]] Task* createUpdateTask();
+
+    [[nodiscard]] virtual Resource* createResource(const QFileInfo& info) { return new Resource(info); }
 
     /** This creates a new parse task to be executed by onUpdateSucceeded().
      *
@@ -195,18 +253,21 @@ class ResourceFolderModel : public QAbstractListModel {
    protected:
     // Represents the relationship between a column's index (represented by the list index), and it's sorting key.
     // As such, the order in with they appear is very important!
-    QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE, SortType::SIZE };
-    QStringList m_column_names = { "Enable", "Name", "Last Modified", "Size" };
-    QStringList m_column_names_translated = { tr("Enable"), tr("Name"), tr("Last Modified"), tr("Size") };
-    QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive,
+    QList<SortType> m_column_sort_keys = { SortType::ENABLED, SortType::NAME, SortType::DATE, SortType::PROVIDER, SortType::SIZE };
+    QStringList m_column_names = { "Enable", "Name", "Last Modified", "Provider", "Size" };
+    QStringList m_column_names_translated = { tr("Enable"), tr("Name"), tr("Last Modified"), tr("Provider"), tr("Size") };
+    QList<QHeaderView::ResizeMode> m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch, QHeaderView::Interactive,
                                                              QHeaderView::Interactive };
-    QList<bool> m_columnsHideable = { false, false, true, true };
-    QList<bool> m_columnsHiddenByDefault = { false, false, false, false };
+    QList<bool> m_columnsHideable = { false, false, true, true, true };
+    QList<bool> m_columnsHiddenByDefault = { false, false, false, false, true };
 
     QDir m_dir;
     BaseInstance* m_instance;
     QFileSystemWatcher m_watcher;
     bool m_is_watching = false;
+
+    bool m_is_indexed;
+    bool m_first_folder_load = true;
 
     Task::Ptr m_current_update_task = nullptr;
     bool m_scheduled_update = false;
@@ -220,37 +281,6 @@ class ResourceFolderModel : public QAbstractListModel {
     QMap<int, Task::Ptr> m_active_parse_tasks;
     std::atomic<int> m_next_resolution_ticket = 0;
 };
-
-/* A macro to define useful functions to handle Resource* -> T* more easily on derived classes */
-#define RESOURCE_HELPERS(T)                                                                       \
-    [[nodiscard]] T* operator[](int index)                                                        \
-    {                                                                                             \
-        return static_cast<T*>(m_resources[index].get());                                         \
-    }                                                                                             \
-    [[nodiscard]] T* at(int index)                                                                \
-    {                                                                                             \
-        return static_cast<T*>(m_resources[index].get());                                         \
-    }                                                                                             \
-    [[nodiscard]] const T* at(int index) const                                                    \
-    {                                                                                             \
-        return static_cast<const T*>(m_resources.at(index).get());                                \
-    }                                                                                             \
-    [[nodiscard]] T* first()                                                                      \
-    {                                                                                             \
-        return static_cast<T*>(m_resources.first().get());                                        \
-    }                                                                                             \
-    [[nodiscard]] T* last()                                                                       \
-    {                                                                                             \
-        return static_cast<T*>(m_resources.last().get());                                         \
-    }                                                                                             \
-    [[nodiscard]] T* find(QString id)                                                             \
-    {                                                                                             \
-        auto iter = std::find_if(m_resources.constBegin(), m_resources.constEnd(),                \
-                                 [&](Resource::Ptr const& r) { return r->internal_id() == id; }); \
-        if (iter == m_resources.constEnd())                                                       \
-            return nullptr;                                                                       \
-        return static_cast<T*>((*iter).get());                                                    \
-    }
 
 /* Template definition to avoid some code duplication */
 template <typename T>

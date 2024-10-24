@@ -48,11 +48,6 @@ class LocalModParseTask : public Task {
     [[nodiscard]] int token() const { return m_token; }
 
    private:
-    void processAsZip();
-    void processAsFolder();
-    void processAsLitemod();
-
-   private:
     int m_token;
     ResourceType m_type;
     QFileInfo m_modFile;

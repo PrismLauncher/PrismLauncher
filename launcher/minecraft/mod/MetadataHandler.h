@@ -2,7 +2,6 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,33 +25,48 @@
 // launcher/minecraft/mod/Mod.h
 class Mod;
 
-/* Abstraction file for easily changing the way metadata is stored / handled
- * Needs to be a class because of -Wunused-function and no C++17 [[maybe_unused]]
- * */
-class Metadata {
-   public:
-    using ModStruct = Packwiz::V1::Mod;
-    using ModSide = Packwiz::V1::Side;
+namespace Metadata {
+using ModStruct = Packwiz::V1::Mod;
+using ModSide = Packwiz::V1::Side;
 
-    static auto create(QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> ModStruct
-    {
-        return Packwiz::V1::createModFormat(index_dir, mod_pack, mod_version);
-    }
+inline auto create(const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> ModStruct
+{
+    return Packwiz::V1::createModFormat(index_dir, mod_pack, mod_version);
+}
 
-    static auto create(QDir& index_dir, Mod& internal_mod, QString mod_slug) -> ModStruct
-    {
-        return Packwiz::V1::createModFormat(index_dir, internal_mod, mod_slug);
-    }
+inline auto create(const QDir& index_dir, Mod& internal_mod, QString mod_slug) -> ModStruct
+{
+    return Packwiz::V1::createModFormat(index_dir, internal_mod, std::move(mod_slug));
+}
 
-    static void update(QDir& index_dir, ModStruct& mod) { Packwiz::V1::updateModIndex(index_dir, mod); }
+inline void update(const QDir& index_dir, ModStruct& mod)
+{
+    Packwiz::V1::updateModIndex(index_dir, mod);
+}
 
-    static void remove(QDir& index_dir, QString mod_slug) { Packwiz::V1::deleteModIndex(index_dir, mod_slug); }
+inline void remove(const QDir& index_dir, QString mod_slug)
+{
+    Packwiz::V1::deleteModIndex(index_dir, mod_slug);
+}
 
-    static void remove(QDir& index_dir, QVariant& mod_id) { Packwiz::V1::deleteModIndex(index_dir, mod_id); }
+inline void remove(const QDir& index_dir, QVariant& mod_id)
+{
+    Packwiz::V1::deleteModIndex(index_dir, mod_id);
+}
 
-    static auto get(QDir& index_dir, QString mod_slug) -> ModStruct { return Packwiz::V1::getIndexForMod(index_dir, mod_slug); }
+inline auto get(const QDir& index_dir, QString mod_slug) -> ModStruct
+{
+    return Packwiz::V1::getIndexForMod(index_dir, std::move(mod_slug));
+}
 
-    static auto get(QDir& index_dir, QVariant& mod_id) -> ModStruct { return Packwiz::V1::getIndexForMod(index_dir, mod_id); }
+inline auto get(const QDir& index_dir, QVariant& mod_id) -> ModStruct
+{
+    return Packwiz::V1::getIndexForMod(index_dir, mod_id);
+}
 
-    static auto modSideToString(ModSide side) -> QString { return Packwiz::V1::sideToString(side); }
-};
+inline auto modSideToString(ModSide side) -> QString
+{
+    return Packwiz::V1::sideToString(side);
+}
+
+};  // namespace Metadata

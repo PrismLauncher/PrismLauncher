@@ -86,7 +86,7 @@ class ResourceAPI {
     struct VersionSearchArgs {
         ModPlatform::IndexedPack pack;
 
-        std::optional<std::list<Version> > mcVersions;
+        std::optional<std::list<Version>> mcVersions;
         std::optional<ModPlatform::ModLoaderTypes> loaders;
 
         VersionSearchArgs(VersionSearchArgs const&) = default;

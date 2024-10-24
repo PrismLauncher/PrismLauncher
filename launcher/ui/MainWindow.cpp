@@ -1048,7 +1048,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
                 break;
             case PackedResourceType::Mod:
-                minecraftInst->loaderModList()->installMod(localFileName, version);
+                minecraftInst->loaderModList()->installResource(localFileName, version);
                 break;
             case PackedResourceType::ShaderPack:
                 minecraftInst->shaderPackList()->installResource(localFileName);

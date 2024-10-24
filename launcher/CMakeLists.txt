@@ -345,13 +345,12 @@ set(MINECRAFT_SOURCES
     minecraft/mod/TexturePackFolderModel.h
     minecraft/mod/TexturePackFolderModel.cpp
     minecraft/mod/ShaderPackFolderModel.h
-    minecraft/mod/tasks/BasicFolderLoadTask.h
-    minecraft/mod/tasks/ModFolderLoadTask.h
-    minecraft/mod/tasks/ModFolderLoadTask.cpp
+    minecraft/mod/tasks/ResourceFolderLoadTask.h
+    minecraft/mod/tasks/ResourceFolderLoadTask.cpp
     minecraft/mod/tasks/LocalModParseTask.h
     minecraft/mod/tasks/LocalModParseTask.cpp
-    minecraft/mod/tasks/LocalModUpdateTask.h
-    minecraft/mod/tasks/LocalModUpdateTask.cpp
+        minecraft/mod/tasks/LocalResourceUpdateTask.h
+        minecraft/mod/tasks/LocalResourceUpdateTask.cpp
     minecraft/mod/tasks/LocalDataPackParseTask.h
     minecraft/mod/tasks/LocalDataPackParseTask.cpp
     minecraft/mod/tasks/LocalResourcePackParseTask.h
@@ -1069,8 +1068,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/BlockedModsDialog.h
     ui/dialogs/ChooseProviderDialog.h
     ui/dialogs/ChooseProviderDialog.cpp
-    ui/dialogs/ModUpdateDialog.cpp
-    ui/dialogs/ModUpdateDialog.h
+        ui/dialogs/ResourceUpdateDialog.cpp
+        ui/dialogs/ResourceUpdateDialog.h
     ui/dialogs/InstallLoaderDialog.cpp
     ui/dialogs/InstallLoaderDialog.h
 

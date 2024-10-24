@@ -123,7 +123,7 @@ void ModrinthPackExportTask::collectHashes()
             modIter != allMods.end()) {
             const Mod* mod = *modIter;
             if (mod->metadata() != nullptr) {
-                QUrl& url = mod->metadata()->url;
+                const QUrl& url = mod->metadata()->url;
                 // ensure the url is permitted on modrinth.com
                 if (!url.isEmpty() && BuildConfig.MODRINTH_MRPACK_HOSTS.contains(url.host())) {
                     qDebug() << "Resolving" << relative << "from index";

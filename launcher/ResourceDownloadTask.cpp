@@ -35,9 +35,9 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
                                            QString custom_target_folder)
     : m_pack(std::move(pack)), m_pack_version(std::move(version)), m_pack_model(packs), m_custom_target_folder(custom_target_folder)
 {
-    if (auto model = dynamic_cast<ModFolderModel*>(m_pack_model.get()); model && is_indexed) {
-        m_update_task.reset(new LocalModUpdateTask(model->indexDir(), *m_pack, m_pack_version));
-        connect(m_update_task.get(), &LocalModUpdateTask::hasOldMod, this, &ResourceDownloadTask::hasOldResource);
+    if (is_indexed) {
+        m_update_task.reset(new LocalResourceUpdateTask(m_pack_model->indexDir(), *m_pack, m_pack_version));
+        connect(m_update_task.get(), &LocalResourceUpdateTask::hasOldResource, this, &ResourceDownloadTask::hasOldResource);
 
         addTask(m_update_task);
     }
@@ -91,12 +91,8 @@ void ResourceDownloadTask::downloadSucceeded()
     m_filesNetJob.reset();
     auto name = std::get<0>(to_delete);
     auto filename = std::get<1>(to_delete);
-    if (!name.isEmpty() && filename != m_pack_version.fileName) {
-        if (auto model = dynamic_cast<ModFolderModel*>(m_pack_model.get()); model)
-            model->uninstallMod(filename, true);
-        else
-            m_pack_model->uninstallResource(filename);
-    }
+    if (!name.isEmpty() && filename != m_pack_version.fileName)
+        m_pack_model->uninstallResource(filename, true);
 }
 
 void ResourceDownloadTask::downloadFailed(QString reason)
