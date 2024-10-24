@@ -39,6 +39,7 @@
 
 #include "ResourcePage.h"
 #include "modplatform/ModIndex.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ResourcePage.h"
 
 #include <QDesktopServices>
@@ -324,9 +325,9 @@ void ResourcePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
     updateUi();
 }
 
-void ResourcePage::onVersionSelectionChanged(int index)
+void ResourcePage::onVersionSelectionChanged(int)
 {
-    m_selected_version_index = index;
+    m_selected_version_index = m_ui->versionSelectionBox->currentData().toInt();
     updateSelectionButton();
 }
 
@@ -358,10 +359,18 @@ void ResourcePage::onResourceSelected()
         return;
 
     auto current_pack = getCurrentPack();
-    if (!current_pack || !current_pack->versionsLoaded)
+    if (!current_pack || !current_pack->versionsLoaded || current_pack->versions.size() < m_selected_version_index)
         return;
 
     auto& version = current_pack->versions[m_selected_version_index];
+    if (version.downloadUrl.isNull()) {
+        CustomMessageBox::selectable(this, tr("How?"),
+                                     "You managed to select a resource that doesn't have a download link. Because of this missing "
+                                     "information prism will not try to download it.",
+                                     QMessageBox::Warning)
+            ->show();
+        return;
+    }
     if (version.is_currently_selected)
         removeResourceFromDialog(current_pack->name);
     else
