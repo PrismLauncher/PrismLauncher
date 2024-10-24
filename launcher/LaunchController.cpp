@@ -133,7 +133,7 @@ void LaunchController::decideAccount()
 bool LaunchController::askPlayDemo()
 {
     QMessageBox box(m_parentWidget);
-    box.setWindowTitle(tr("Play demo?"));
+    box.setWindowTitle(tr("Play Demo?"));
     box.setText(
         tr("This account does not own Minecraft.\nYou need to purchase the game first to play it.\n\nDo you want to play "
            "the demo?"));
@@ -146,7 +146,7 @@ bool LaunchController::askPlayDemo()
     return box.clickedButton() == demoButton;
 }
 
-QString LaunchController::askOfflineName(QString playerName, bool demo, bool& ok)
+QString LaunchController::askOfflineName(QString playerName, bool demo, bool* ok)
 {
     // we ask the user for a player name
     QString message = tr("Choose your offline mode player name.");
@@ -156,18 +156,45 @@ QString LaunchController::askOfflineName(QString playerName, bool demo, bool& ok
 
     QString lastOfflinePlayerName = APPLICATION->settings()->get("LastOfflinePlayerName").toString();
     QString usedname = lastOfflinePlayerName.isEmpty() ? playerName : lastOfflinePlayerName;
-    QString name = QInputDialog::getText(m_parentWidget, tr("Player name"), message, QLineEdit::Normal, usedname, &ok);
+    QString name = QInputDialog::getText(m_parentWidget, tr("Player Name"), message, QLineEdit::Normal, usedname, ok);
     if (!ok)
         return {};
-    if (name.length()) {
+    if (!name.isEmpty()) {
         usedname = name;
         APPLICATION->settings()->set("LastOfflinePlayerName", usedname);
     }
     return usedname;
 }
 
+QString LaunchController::askServerAddress(bool* ok)
+{
+    const QString lastDirectConnectAddress = m_instance->settings()->get("LastDirectConnectAddress").toString();
+    const QString message = tr("Enter a server address.");
+
+    QString address = QInputDialog::getText(m_parentWidget, tr("Server Address"), message, QLineEdit::Normal, lastDirectConnectAddress, ok);
+
+    if (!ok)
+        return {};
+
+    if (!address.isEmpty())
+        m_instance->settings()->set("LastDirectConnectAddress", address);
+
+    return address;
+}
+
 void LaunchController::login()
 {
+    if (m_askServerAddress && m_targetToJoin == nullptr) {
+        bool ok = false;
+        QString address = askServerAddress(&ok);
+
+        if (!ok)
+            return;
+
+        if (!address.isEmpty())
+            m_targetToJoin = std::make_shared<MinecraftTarget>(MinecraftTarget::parse(address, false));
+    }
+
     decideAccount();
 
     if (!m_accountToUse) {
@@ -178,7 +205,7 @@ void LaunchController::login()
         if (m_demo) {
             // we ask the user for a player name
             bool ok = false;
-            auto name = askOfflineName("Player", m_demo, ok);
+            auto name = askOfflineName("Player", m_demo, &ok);
             if (ok) {
                 m_session = std::make_shared<AuthSession>();
                 m_session->MakeDemo(name, MinecraftAccount::uuidFromUsername(name).toString().remove(QRegularExpression("[{}-]")));
@@ -234,7 +261,7 @@ void LaunchController::login()
                 if (!m_session->wants_online) {
                     // we ask the user for a player name
                     bool ok = false;
-                    auto name = askOfflineName(m_session->player_name, m_session->demo, ok);
+                    auto name = askOfflineName(m_session->player_name, m_session->demo, &ok);
                     if (!ok) {
                         tryagain = false;
                         break;
@@ -316,7 +343,7 @@ void LaunchController::login()
 
 void LaunchController::launchInstance()
 {
-    Q_ASSERT_X(m_instance != NULL, "launchInstance", "instance is NULL");
+    Q_ASSERT_X(m_instance != nullptr, "launchInstance", "instance is NULL");
     Q_ASSERT_X(m_session.get() != nullptr, "launchInstance", "session is NULL");
 
     if (!m_instance->reloadSettings()) {

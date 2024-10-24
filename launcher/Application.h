@@ -210,6 +210,7 @@ class Application : public QApplication {
     bool launch(InstancePtr instance,
                 bool online = true,
                 bool demo = false,
+                bool askServerAddress = false,
                 MinecraftTarget::Ptr targetToJoin = nullptr,
                 MinecraftAccountPtr accountToUse = nullptr);
     bool kill(InstancePtr instance);
