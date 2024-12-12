@@ -409,6 +409,8 @@ if(UNIX AND APPLE)
     set(MACOSX_SPARKLE_SHA256 "fd5681ee92bf238aaac2d08214ceaf0cc8976e452d7f882d80bac1e61581f3b1" CACHE STRING "SHA256 checksum for Sparkle release archive")
     set(MACOSX_SPARKLE_DIR "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
 
+    set(MACOSX_CODESIGN_IDENTITY "-" CACHE STRING "The identity to use for codesigning (the name, not the secret)")
+
     if(NOT MACOSX_SPARKLE_UPDATE_PUBLIC_KEY STREQUAL "" AND NOT MACOSX_SPARKLE_UPDATE_FEED_URL STREQUAL "")
         set(Launcher_ENABLE_UPDATER YES)
     endif()

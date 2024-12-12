@@ -1,0 +1,8 @@
+execute_process(
+        COMMAND "@CMAKE_SOURCE_DIR@/program_info/macos_signature.sh" "@MACOSX_CODESIGN_IDENTITY@" "@MACOSX_ENTITLEMENTS@"
+        WORKING_DIRECTORY "@CMAKE_INSTALL_PREFIX@"
+        RESULT_VARIABLE CODESIGN_RESULT
+)
+if(NOT CODESIGN_RESULT EQUAL 0)
+    message(FATAL_ERROR "Failed to codesign the bundle")
+endif()

@@ -38,6 +38,14 @@ set(Launcher_Branding_LogoQRC "program_info/prismlauncher.qrc" PARENT_SCOPE)
 
 set(Launcher_Portable_File "program_info/portable.txt" PARENT_SCOPE)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(Launcher_DebugEntitlements "<key>com.apple.security.get-task-allow</key>\n    <true/>")
+else()
+    set(Launcher_DebugEntitlements "")
+endif()
+
+configure_file(App.entitlements App.entitlements)
+configure_file(AdhocSignedApp.entitlements AdhocSignedApp.entitlements)
 configure_file(${Launcher_AppID}.desktop.in ${Launcher_AppID}.desktop)
 configure_file(${Launcher_AppID}.metainfo.xml.in ${Launcher_AppID}.metainfo.xml)
 configure_file(prismlauncher.rc.in prismlauncher.rc @ONLY)
