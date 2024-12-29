@@ -58,7 +58,7 @@ enum class ResourceStatus {
     UNKNOWN,        // Default status
 };
 
-enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER, SIZE, SIDE, MC_VERSIONS, LOADERS, RELEASE_TYPE };
+enum class SortType { NAME, DATE, VERSION, ENABLED, PACK_FORMAT, PROVIDER, SIZE, SIDE, MC_VERSIONS, LOADERS, RELEASE_TYPE, LOCK_UPDATE };
 
 enum class EnableAction { ENABLE, DISABLE, TOGGLE };
 
