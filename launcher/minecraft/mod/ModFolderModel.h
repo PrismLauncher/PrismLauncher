@@ -69,6 +69,7 @@ class ModFolderModel : public ResourceFolderModel {
         LoadersColumn,
         McVersionsColumn,
         ReleaseTypeColumn,
+        CategoryColumn,
         LockUpdateCoumn,
         NUM_COLUMNS
     };

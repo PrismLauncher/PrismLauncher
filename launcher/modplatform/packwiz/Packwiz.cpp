@@ -198,6 +198,11 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
         mcVersions.push_back(version.toStdString());
     }
 
+    toml::array categories;
+    for (auto version : mod.categories) {
+        categories.push_back(version.toStdString());
+    }
+
     if (!index_file.open(QIODevice::ReadWrite)) {
         qCritical() << QString("Could not open file %1!").arg(normalized_fname);
         return;
@@ -214,6 +219,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                                 { "x-prismlauncher-release-type", mod.releaseType.toString().toStdString() },
                                 { "x-prismlauncher-version-number", mod.version_number.toStdString() },
                                 { "x-prismlauncher-lock-update", mod.lockUpdate },
+                                { "x-prismlauncher-categories", categories },
                                 { "download",
                                   toml::table{
                                       { "mode", mod.mode.toStdString() },
@@ -317,6 +323,17 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
                 }
             }
             mod.mcVersions.sort();
+        }
+        if (auto categories = table["x-prismlauncher-categories"]; categories && categories.is_array()) {
+            for (auto&& category : *categories.as_array()) {
+                if (category.is_string()) {
+                    auto ver = QString::fromStdString(category.as_string()->value_or(""));
+                    if (!ver.isEmpty()) {
+                        mod.categories << ver;
+                    }
+                }
+            }
+            mod.categories.sort();
         }
     }
     mod.version_number = table["x-prismlauncher-version-number"].value_or("");

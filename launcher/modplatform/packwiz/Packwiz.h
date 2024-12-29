@@ -60,6 +60,7 @@ class V1 {
         QVariant project_id{};
         QString version_number{};
 
+        QStringList categories;
         bool lockUpdate;
 
        public:

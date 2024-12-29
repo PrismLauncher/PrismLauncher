@@ -67,6 +67,10 @@ class ExternalResourcesPage : public QMainWindow, public BasePage {
     void enableUpdates();
     void disableUpdates();
 
+    void addCategory();
+    void removeCategory();
+    void removeAllCategories();
+
    protected:
     BaseInstance* m_instance = nullptr;
 

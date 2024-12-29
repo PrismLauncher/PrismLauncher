@@ -72,6 +72,10 @@ ResourcePackPage::ResourcePackPage(MinecraftInstance* instance, std::shared_ptr<
 
     ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionEnableUpdates);
     ui->actionsToolbar->insertActionAfter(ui->actionEnableUpdates, ui->actionDisableUpdates);
+
+    ui->actionsToolbar->insertActionAfter(ui->actionDisableUpdates, ui->actionAddCategory);
+    ui->actionsToolbar->insertActionAfter(ui->actionAddCategory, ui->actionRemoveCategory);
+    ui->actionsToolbar->insertActionAfter(ui->actionRemoveCategory, ui->actionRemoveAllCategory);
 }
 
 void ResourcePackPage::updateFrame(const QModelIndex& current, [[maybe_unused]] const QModelIndex& previous)

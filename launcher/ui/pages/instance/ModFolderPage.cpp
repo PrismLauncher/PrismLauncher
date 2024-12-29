@@ -109,6 +109,10 @@ ModFolderPage::ModFolderPage(BaseInstance* inst, std::shared_ptr<ModFolderModel>
 
     ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionEnableUpdates);
     ui->actionsToolbar->insertActionAfter(ui->actionEnableUpdates, ui->actionDisableUpdates);
+
+    ui->actionsToolbar->insertActionAfter(ui->actionDisableUpdates, ui->actionAddCategory);
+    ui->actionsToolbar->insertActionAfter(ui->actionAddCategory, ui->actionRemoveCategory);
+    ui->actionsToolbar->insertActionAfter(ui->actionRemoveCategory, ui->actionRemoveAllCategory);
 }
 
 bool ModFolderPage::shouldDisplay() const

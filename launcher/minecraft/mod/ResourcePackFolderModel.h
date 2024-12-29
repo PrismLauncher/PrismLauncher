@@ -15,6 +15,7 @@ class ResourcePackFolderModel : public ResourceFolderModel {
         DateColumn,
         ProviderColumn,
         SizeColumn,
+        CategoryColumn,
         LockUpdateCoumn,
         NUM_COLUMNS
     };

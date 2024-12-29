@@ -77,6 +77,10 @@ ShaderPackPage::ShaderPackPage(MinecraftInstance* instance, std::shared_ptr<Shad
 
     ui->actionsToolbar->insertActionAfter(ui->actionUpdateItem, ui->actionEnableUpdates);
     ui->actionsToolbar->insertActionAfter(ui->actionEnableUpdates, ui->actionDisableUpdates);
+
+    ui->actionsToolbar->insertActionAfter(ui->actionDisableUpdates, ui->actionAddCategory);
+    ui->actionsToolbar->insertActionAfter(ui->actionAddCategory, ui->actionRemoveCategory);
+    ui->actionsToolbar->insertActionAfter(ui->actionRemoveCategory, ui->actionRemoveAllCategory);
 }
 
 void ShaderPackPage::downloadShaderPack()
