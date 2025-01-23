@@ -562,6 +562,13 @@ It is most likely you will need to change the path - please refer to the mod's w
             </widget>
            </item>
            <item>
+            <widget class="QCheckBox" name="latestMCVersionCheckBox">
+             <property name="text">
+              <string>Allways use the latest minecraft version</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="verticalSpacer_2">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
