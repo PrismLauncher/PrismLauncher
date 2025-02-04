@@ -1023,6 +1023,14 @@ void MainWindow::processURLs(QList<QUrl> urls)
             continue;
         }
 
+        if (APPLICATION->instances()->count() <= 0) {
+            CustomMessageBox::selectable(this, tr("No instance!"),
+                                         tr("No instance available to add the resource to.\nPlease create a new instance before "
+                                            "attempting to install this resource again."),
+                                         QMessageBox::Critical)
+                ->show();
+            continue;
+        }
         ImportResourceDialog dlg(localFileName, type, this);
 
         if (dlg.exec() != QDialog::Accepted)

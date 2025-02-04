@@ -1,0 +1,62 @@
+name: Flatpak
+
+on:
+  push:
+    paths-ignore:
+      - "**.md"
+      - "**/LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".markdownlint**"
+      - "nix/**"
+    # We don't do anything with these artifacts on releases. They go to Flathub
+    tags-ignore:
+      - "*"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "**/LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".markdownlint**"
+      - "nix/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build (${{ matrix.arch }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            arch: x86_64
+
+          - os: ubuntu-22.04-arm
+            arch: aarch64
+
+    runs-on: ${{ matrix.os }}
+
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.8
+      options: --privileged
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set short version
+        shell: bash
+        run: |
+          echo "VERSION=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-Flatpak.flatpak
+          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml
+          arch: ${{ matrix.arch }}

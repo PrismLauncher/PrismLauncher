@@ -40,6 +40,7 @@
 #include <QString>
 #include <QUrl>
 #include <QVector>
+#include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "modplatform/ModIndex.h"
 
 namespace Flame {
@@ -54,6 +55,7 @@ struct File {
 
     // our
     QString targetFolder = QStringLiteral("mods");
+    PackedResourceType resourceType;
 };
 
 struct Modloader {

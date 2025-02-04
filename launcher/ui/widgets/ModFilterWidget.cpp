@@ -279,15 +279,16 @@ void ModFilterWidget::onSideFilterChanged()
 {
     QString side;
 
-    if (ui->clientSide->isChecked() != ui->serverSide->isChecked()) {
-        if (ui->clientSide->isChecked())
-            side = "client";
-        else
-            side = "server";
+    if (ui->clientSide->isChecked() && !ui->serverSide->isChecked()) {
+        side = "client";
+    } else if (!ui->clientSide->isChecked() && ui->serverSide->isChecked()) {
+        side = "server";
+    } else if (ui->clientSide->isChecked() && ui->serverSide->isChecked()) {
+        side = "both";
     } else {
-        // both are checked or none are checked; in either case no filtering will happen
         side = "";
     }
+
 
     m_filter_changed = side != m_filter->side;
     m_filter->side = side;

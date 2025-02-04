@@ -1,0 +1,45 @@
+name: Publish
+
+on:
+  release:
+    types: [ released ]
+
+permissions:
+  contents: read
+
+jobs:
+  flakehub:
+    name: FlakeHub
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+
+      - name: Publish on FlakeHub
+        uses: determinatesystems/flakehub-push@v5
+        with:
+          visibility: "public"
+
+  winget:
+    name: Winget
+
+    runs-on: windows-latest
+
+    steps:
+      - name: Publish on Winget
+        uses: vedantmgoyal2009/winget-releaser@v2
+        with:
+          identifier: PrismLauncher.PrismLauncher
+          version: ${{ github.event.release.tag_name }}
+          installers-regex: 'PrismLauncher-Windows-MSVC(:?-arm64|-Legacy)?-Setup-.+\.exe$'
+          token: ${{ secrets.WINGET_TOKEN }}

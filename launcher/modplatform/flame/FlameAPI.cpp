@@ -270,6 +270,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModP
                                                                       QList<ModPlatform::ModLoaderType> instanceLoaders,
                                                                       ModPlatform::ModLoaderTypes modLoaders)
 {
+    static const auto noLoader = ModPlatform::ModLoaderType(0);
     QHash<ModPlatform::ModLoaderType, ModPlatform::IndexedVersion> bestMatch;
     auto checkVersion = [&bestMatch](const ModPlatform::IndexedVersion& version, const ModPlatform::ModLoaderType& loader) {
         if (bestMatch.contains(loader)) {
@@ -284,7 +285,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModP
     for (auto file_tmp : versions) {
         auto loaders = ModPlatform::modLoaderTypesToList(file_tmp.loaders);
         if (loaders.isEmpty()) {
-            checkVersion(file_tmp, ModPlatform::ModLoaderType(0));
+            checkVersion(file_tmp, noLoader);
         } else {
             for (auto loader : loaders) {
                 checkVersion(file_tmp, loader);
@@ -293,11 +294,19 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModP
     }
     // edge case: mod has installed for forge but the instance is fabric => fabric version will be prioritizated on update
     auto currentLoaders = instanceLoaders + ModPlatform::modLoaderTypesToList(modLoaders);
-    currentLoaders.append(ModPlatform::ModLoaderType(0));  // add a fallback in case the versions do not define a loader
+    currentLoaders.append(noLoader);  // add a fallback in case the versions do not define a loader
 
     for (auto loader : currentLoaders) {
         if (bestMatch.contains(loader)) {
-            return bestMatch.value(loader);
+            auto bestForLoader = bestMatch.value(loader);
+            // awkward case where the mod has only two loaders and one of them is not specified
+            if (loader != noLoader && bestMatch.contains(noLoader) && bestMatch.size() == 2) {
+                auto bestForNoLoader = bestMatch.value(noLoader);
+                if (bestForNoLoader.date > bestForLoader.date) {
+                    return bestForNoLoader;
+                }
+            }
+            return bestForLoader;
         }
     }
     return {};

@@ -1,0 +1,92 @@
+name: Nix
+
+on:
+  push:
+    paths-ignore:
+      - "**.md"
+      - "**/LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".markdownlint**"
+      - "flatpak/**"
+    tags:
+      - "*"
+  pull_request_target:
+    paths-ignore:
+      - "**.md"
+      - "**/LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".markdownlint**"
+      - "flatpak/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DEBUG: ${{ github.ref_type != 'tag' }}
+  USE_DETERMINATE: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: Build (${{ matrix.system }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            system: x86_64-linux
+
+          - os: ubuntu-22.04-arm
+            system: aarch64-linux
+
+          - os: macos-13
+            system: x86_64-darwin
+
+          - os: macos-14
+            system: aarch64-darwin
+
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+        with:
+          determinate: ${{ env.USE_DETERMINATE }}
+
+        # For PRs
+      - name: Setup Nix Magic Cache
+        if: ${{ env.USE_DETERMINATE }}
+        uses: DeterminateSystems/flakehub-cache-action@v1
+
+        # For in-tree builds
+      - name: Setup Cachix
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        uses: cachix/cachix-action@v15
+        with:
+          name: prismlauncher
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Run Flake checks
+        run: |
+          nix flake check --print-build-logs --show-trace
+
+      - name: Build debug package
+        if: ${{ env.DEBUG }}
+        run: |
+          nix build \
+            --no-link --print-build-logs --print-out-paths \
+            .#prismlauncher-debug >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build release package
+        if: ${{ !env.DEBUG }}
+        run: |
+          nix build \
+            --no-link --print-build-logs --print-out-paths \
+            .#prismlauncher >> "$GITHUB_STEP_SUMMARY"

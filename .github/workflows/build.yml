@@ -39,9 +39,6 @@ on:
       APPLE_NOTARIZE_PASSWORD:
         description: Password used for notarizing macOS builds
         required: false
-      CACHIX_AUTH_TOKEN:
-        description: Private token for authenticating against Cachix cache
-        required: false
       GPG_PRIVATE_KEY:
         description: Private key for AppImage signing
         required: false
@@ -74,9 +71,9 @@ jobs:
             architecture: "x64"
             vcvars_arch: "amd64"
             qt_ver: 6
-            qt_host: windows
-            qt_arch: ""
-            qt_version: "6.7.3"
+            qt_host: "windows"
+            qt_arch: "win64_msvc2022_64"
+            qt_version: "6.8.1"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
             nscurl_tag: "v24.9.26.122"
             nscurl_sha256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
@@ -87,9 +84,9 @@ jobs:
             architecture: "arm64"
             vcvars_arch: "amd64_arm64"
             qt_ver: 6
-            qt_host: windows
-            qt_arch: "win64_msvc2019_arm64"
-            qt_version: "6.7.3"
+            qt_host: "windows"
+            qt_arch: "win64_msvc2022_arm64_cross_compiled"
+            qt_version: "6.8.1"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
             nscurl_tag: "v24.9.26.122"
             nscurl_sha256: "AEE6C4BE3CB6455858E9C1EE4B3AFE0DB9960FA03FE99CCDEDC28390D57CCBB0"
@@ -100,7 +97,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ""
-            qt_version: "6.7.3"
+            qt_version: "6.8.1"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: macos-14
@@ -210,14 +207,14 @@ jobs:
 
       - name: Install host Qt (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           aqtversion: "==3.1.*"
           py7zrversion: ">=0.20.2"
           version: ${{ matrix.qt_version }}
           host: "windows"
           target: "desktop"
-          arch: ""
+          arch: ${{ matrix.qt_arch }}
           modules: ${{ matrix.qt_modules }}
           cache: ${{ inputs.is_qt_cached }}
           cache-key-prefix: host-qt-arm64-windows
@@ -226,7 +223,7 @@ jobs:
 
       - name: Install Qt (macOS, Linux & Windows MSVC)
         if: matrix.msystem == ''
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           aqtversion: "==3.1.*"
           py7zrversion: ">=0.20.2"
@@ -258,7 +255,7 @@ jobs:
       - name: Add QT_HOST_PATH var (Windows MSVC arm64)
         if: runner.os == 'Windows' && matrix.architecture == 'arm64'
         run: |
-          echo "QT_HOST_PATH=${{ github.workspace }}\HostQt\Qt\${{ matrix.qt_version }}\msvc2019_64" >> $env:GITHUB_ENV
+          echo "QT_HOST_PATH=${{ github.workspace }}\HostQt\Qt\${{ matrix.qt_version }}\msvc2022_64" >> $env:GITHUB_ENV
 
       - name: Setup java (macOS)
         if: runner.os == 'macOS'
@@ -510,8 +507,8 @@ jobs:
 
           cp -r ${{ runner.workspace }}/Qt/${{ matrix.qt_version }}/gcc_64/plugins/iconengines/* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/plugins/iconengines
 
-          cp /usr/lib/x86_64-linux-gnu/libcrypto.so.3 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
-          cp /usr/lib/x86_64-linux-gnu/libssl.so.3 ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+          cp /usr/lib/x86_64-linux-gnu/libcrypto.so.* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
+          cp /usr/lib/x86_64-linux-gnu/libssl.so.* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
           cp /usr/lib/x86_64-linux-gnu/libOpenGL.so.0* ${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib/
 
           LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${{ env.INSTALL_APPIMAGE_DIR }}/usr/lib"
@@ -546,9 +543,9 @@ jobs:
           mkdir  ${{ env.INSTALL_PORTABLE_DIR }}/lib
           cp /lib/x86_64-linux-gnu/libbz2.so.1.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
           cp /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0 ${{ env.INSTALL_PORTABLE_DIR }}/lib
-          cp /usr/lib/x86_64-linux-gnu/libcrypto.so.3 ${{ env.INSTALL_PORTABLE_DIR }}/lib
-          cp /usr/lib/x86_64-linux-gnu/libssl.so.3 ${{ env.INSTALL_PORTABLE_DIR }}/lib
-          cp /usr/lib/x86_64-linux-gnu/libffi.so.8 ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /usr/lib/x86_64-linux-gnu/libcrypto.so.* ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /usr/lib/x86_64-linux-gnu/libssl.so.* ${{ env.INSTALL_PORTABLE_DIR }}/lib
+          cp /usr/lib/x86_64-linux-gnu/libffi.so.*.* ${{ env.INSTALL_PORTABLE_DIR }}/lib
           mv ${{ env.INSTALL_PORTABLE_DIR }}/bin/*.so* ${{ env.INSTALL_PORTABLE_DIR }}/lib
 
           for l in $(find ${{ env.INSTALL_PORTABLE_DIR }} -type f); do l=${l#$(pwd)/}; l=${l#${{ env.INSTALL_PORTABLE_DIR }}/}; l=${l#./}; echo $l; done > ${{ env.INSTALL_PORTABLE_DIR }}/manifest.txt
@@ -613,76 +610,3 @@ jobs:
         shell: msys2 {0}
         run: |
           ccache -s
-
-  flatpak:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:kde-6.8
-      options: --privileged
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        if: inputs.build_type == 'Debug'
-        with:
-          submodules: true
-
-      - name: Set short version
-        shell: bash
-        run: echo "VERSION=${GITHUB_SHA::7}" >> $GITHUB_ENV
-
-      - name: Build Flatpak (Linux)
-        if: inputs.build_type == 'Debug'
-        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
-        with:
-          bundle: PrismLauncher-${{ runner.os }}-${{ env.VERSION }}-Flatpak.flatpak
-          manifest-path: flatpak/org.prismlauncher.PrismLauncher.yml
-
-  nix:
-    name: Nix (${{ matrix.system }})
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-22.04
-            system: x86_64-linux
-
-          - os: macos-13
-            system: x86_64-darwin
-
-          - os: macos-14
-            system: aarch64-darwin
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Nix
-        uses: cachix/install-nix-action@v30
-
-        # For PRs
-      - name: Setup Nix Magic Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
-
-        # For in-tree builds
-      - name: Setup Cachix
-        uses: cachix/cachix-action@v15
-        with:
-          name: prismlauncher
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-
-      - name: Run flake checks
-        run: |
-          nix flake check --print-build-logs --show-trace
-
-      - name: Build debug package
-        if: ${{ inputs.build_type == 'Debug' }}
-        run: |
-          nix build --print-build-logs .#prismlauncher-debug
-
-      - name: Build release package
-        if: ${{ inputs.build_type != 'Debug' }}
-        run: |
-          nix build --print-build-logs .#prismlauncher
