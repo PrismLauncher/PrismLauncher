@@ -32,7 +32,7 @@ class LogModel : public QAbstractListModel {
 
    private /* types */:
     struct entry {
-        MessageLevel::Enum level;
+        MessageLevel::Enum level = MessageLevel::Enum::Unknown;
         QString line;
     };
 

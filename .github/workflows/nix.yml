@@ -8,8 +8,6 @@ on:
       - ".github/ISSUE_TEMPLATE/**"
       - ".markdownlint**"
       - "flatpak/**"
-    tags:
-      - "*"
   pull_request_target:
     paths-ignore:
       - "**.md"
