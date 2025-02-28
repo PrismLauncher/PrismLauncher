@@ -571,3 +571,16 @@ if(BUILD_TESTING)
 endif()
 # NOTE: this must always be last to appease the CMake deity of quirky install command evaluation order.
 add_subdirectory(launcher)
+
+##################################### Compile Options #####################################
+
+# Find and use ccache if available
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CCACHE_PROGRAM}")
+    MESSAGE("ccache found and enabled, compiler cache will be used")
+else(CCACHE_FOUND)
+    # Write a warning if ccache is not found
+    MESSAGE("ccache not found, compiler cache will not be used")
+endif(CCACHE_PROGRAM)
