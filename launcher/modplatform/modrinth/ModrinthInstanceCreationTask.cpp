@@ -121,6 +121,11 @@ bool ModrinthCreationTask::updateInstance()
                     continue;
                 qDebug() << "Scheduling" << file.path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path));
+                if (file.path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
+                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path.chopped(9)));
+                } else {
+                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(file.path + ".disabled"));
+                }
             }
         }
 
@@ -416,23 +421,30 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
             }
 
             if (!optionalFiles.empty()) {
-                QStringList oFiles;
-                for (auto file : optionalFiles)
-                    oFiles.push_back(file.path);
-                OptionalModDialog optionalModDialog(m_parent, oFiles);
-                if (optionalModDialog.exec() == QDialog::Rejected) {
-                    emitAborted();
-                    return false;
-                }
-
-                auto selectedMods = optionalModDialog.getResult();
-                for (auto file : optionalFiles) {
-                    if (selectedMods.contains(file.path)) {
-                        file.required = true;
-                    } else {
-                        file.path += ".disabled";
+                if (show_optional_dialog) {
+                    QStringList oFiles;
+                    for (auto file : optionalFiles)
+                        oFiles.push_back(file.path);
+                    OptionalModDialog optionalModDialog(m_parent, oFiles);
+                    if (optionalModDialog.exec() == QDialog::Rejected) {
+                        emitAborted();
+                        return false;
                     }
-                    files.push_back(file);
+
+                    auto selectedMods = optionalModDialog.getResult();
+                    for (auto file : optionalFiles) {
+                        if (selectedMods.contains(file.path)) {
+                            file.required = true;
+                        } else {
+                            file.path += ".disabled";
+                        }
+                        files.push_back(file);
+                    }
+                } else {
+                    for (auto file : optionalFiles) {
+                        file.path += ".disabled";
+                        files.push_back(file);
+                    }
                 }
             }
             if (set_internal_data) {

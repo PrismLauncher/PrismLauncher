@@ -225,8 +225,8 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     setApplicationName(BuildConfig.LAUNCHER_NAME);
     setApplicationDisplayName(QString("%1 %2").arg(BuildConfig.LAUNCHER_DISPLAYNAME, BuildConfig.printableVersionString()));
     setApplicationVersion(BuildConfig.printableVersionString() + "\n" + BuildConfig.GIT_COMMIT);
-    setDesktopFileName(BuildConfig.LAUNCHER_DESKTOPFILENAME);
-    startTime = QDateTime::currentDateTime();
+    setDesktopFileName(BuildConfig.LAUNCHER_APPID);
+    m_startTime = QDateTime::currentDateTime();
 
     // Don't quit on hiding the last window
     this->setQuitOnLastWindowClosed(false);
@@ -1186,6 +1186,9 @@ bool Application::event(QEvent* event)
 #endif
 
     if (event->type() == QEvent::FileOpen) {
+        if (!m_mainWindow) {
+            showMainWindow(false);
+        }
         auto ev = static_cast<QFileOpenEvent*>(event);
         m_mainWindow->processURLs({ ev->url() });
     }
@@ -1318,6 +1321,9 @@ void Application::messageReceived(const QByteArray& message)
         if (url.isEmpty()) {
             qWarning() << "Received" << command << "message without a zip path/URL.";
             return;
+        }
+        if (!m_mainWindow) {
+            showMainWindow(false);
         }
         m_mainWindow->processURLs({ normalizeImportUrl(url) });
     } else if (command == "launch") {

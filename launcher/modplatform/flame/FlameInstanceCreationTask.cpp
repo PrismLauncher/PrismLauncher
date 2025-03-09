@@ -227,6 +227,11 @@ bool FlameCreationTask::updateInstance()
                 QString relative_path(FS::PathCombine(file.targetFolder, file.version.fileName));
                 qDebug() << "Scheduling" << relative_path << "for removal";
                 m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path));
+                if (relative_path.endsWith(".disabled")) {  // remove it if it was enabled/disabled by user
+                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path.chopped(9)));
+                } else {
+                    m_files_to_remove.append(old_minecraft_dir.absoluteFilePath(relative_path + ".disabled"));
+                }
             }
         });
         connect(job.get(), &Task::failed, this, [](QString reason) { qCritical() << "Failed to get files: " << reason; });

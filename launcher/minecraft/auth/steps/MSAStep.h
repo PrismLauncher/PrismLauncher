@@ -55,5 +55,5 @@ class MSAStep : public AuthStep {
    private:
     bool m_silent;
     QString m_clientId;
-    QOAuth2AuthorizationCodeFlow oauth2;
+    QOAuth2AuthorizationCodeFlow m_oauth2;
 };
