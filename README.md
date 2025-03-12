@@ -11,6 +11,8 @@
   <br />This is a <b>fork</b> of the MultiMC Launcher and is <b>not</b> endorsed by it.
 </p>
 
+  a tests 1
+
 ## Installation
 
 <a href="https://repology.org/project/prismlauncher/versions">
