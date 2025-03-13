@@ -13,6 +13,7 @@
 
   a tests 1
   a test 2
+  a test 3
 
 ## Installation
 
