@@ -38,6 +38,7 @@
 
 #include "BuildConfig.h"
 #include "Json.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "net/NetJob.h"
 #include "ui/widgets/ProjectItem.h"
