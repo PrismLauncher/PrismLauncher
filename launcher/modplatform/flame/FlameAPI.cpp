@@ -181,7 +181,7 @@ Task::Ptr FlameAPI::getCategories(std::shared_ptr<QByteArray> response, ModPlatf
 
 Task::Ptr FlameAPI::getModCategories(std::shared_ptr<QByteArray> response)
 {
-    return getCategories(response, ModPlatform::ResourceType::MOD);
+    return getCategories(response, ModPlatform::ResourceType::Mod);
 }
 
 QList<ModPlatform::Category> FlameAPI::loadModCategories(std::shared_ptr<QByteArray> response)

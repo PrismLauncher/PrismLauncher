@@ -152,7 +152,7 @@ void ModpackListModel::performPaginatedSearch()
     }  // TODO: Move to standalone API
     ResourceAPI::SortingMethod sort{};
     sort.name = currentSort;
-    auto searchUrl = ModrinthAPI().getSearchURL({ ModPlatform::ResourceType::MODPACK, nextSearchOffset, currentSearchTerm, sort,
+    auto searchUrl = ModrinthAPI().getSearchURL({ ModPlatform::ResourceType::Modpack, nextSearchOffset, currentSearchTerm, sort,
                                                   m_filter->loaders, m_filter->versions, "", m_filter->categoryIds, m_filter->openSource });
 
     auto netJob = makeShared<NetJob>("Modrinth::SearchModpack", APPLICATION->network());

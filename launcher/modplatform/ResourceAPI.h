@@ -48,6 +48,7 @@
 #include "../Version.h"
 
 #include "modplatform/ModIndex.h"
+#include "modplatform/ResourceType.h"
 #include "tasks/Task.h"
 
 /* Simple class with a common interface for interacting with APIs */

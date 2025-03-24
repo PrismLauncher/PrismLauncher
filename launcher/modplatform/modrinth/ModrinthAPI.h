@@ -102,13 +102,13 @@ class ModrinthAPI : public NetworkResourceAPI {
     [[nodiscard]] static QString resourceTypeParameter(ModPlatform::ResourceType type)
     {
         switch (type) {
-            case ModPlatform::ResourceType::MOD:
+            case ModPlatform::ResourceType::Mod:
                 return "mod";
-            case ModPlatform::ResourceType::RESOURCE_PACK:
+            case ModPlatform::ResourceType::ResourcePack:
                 return "resourcepack";
-            case ModPlatform::ResourceType::SHADER_PACK:
+            case ModPlatform::ResourceType::ShaderPack:
                 return "shader";
-            case ModPlatform::ResourceType::MODPACK:
+            case ModPlatform::ResourceType::Modpack:
                 return "modpack";
             default:
                 qWarning() << "Invalid resource type for Modrinth API!";

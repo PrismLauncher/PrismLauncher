@@ -1033,7 +1033,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         auto type = ResourceUtils::identify(localFileInfo);
 
-        if (ResourceUtils::ValidResourceTypes.count(type) == 0) {  // probably instance/modpack
+        if (ModPlatform::ResourceTypeUtils::ValidResources.count(type) == 0) {  // probably instance/modpack
             addInstance(localFileName, extra_info);
             continue;
         }
@@ -1057,25 +1057,25 @@ void MainWindow::processURLs(QList<QUrl> urls)
         auto minecraftInst = std::dynamic_pointer_cast<MinecraftInstance>(inst);
 
         switch (type) {
-            case PackedResourceType::ResourcePack:
+            case ModPlatform::ResourceType::ResourcePack:
                 minecraftInst->resourcePackList()->installResourceWithFlameMetadata(localFileName, version);
                 break;
-            case PackedResourceType::TexturePack:
+            case ModPlatform::ResourceType::TexturePack:
                 minecraftInst->texturePackList()->installResourceWithFlameMetadata(localFileName, version);
                 break;
-            case PackedResourceType::DataPack:
+            case ModPlatform::ResourceType::DataPack:
                 qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
                 break;
-            case PackedResourceType::Mod:
+            case ModPlatform::ResourceType::Mod:
                 minecraftInst->loaderModList()->installResourceWithFlameMetadata(localFileName, version);
                 break;
-            case PackedResourceType::ShaderPack:
+            case ModPlatform::ResourceType::ShaderPack:
                 minecraftInst->shaderPackList()->installResourceWithFlameMetadata(localFileName, version);
                 break;
-            case PackedResourceType::WorldSave:
+            case ModPlatform::ResourceType::World:
                 minecraftInst->worldList()->installWorld(localFileInfo);
                 break;
-            case PackedResourceType::UNKNOWN:
+            case ModPlatform::ResourceType::Unknown:
             default:
                 qDebug() << "Can't Identify" << localFileName << "Ignoring it.";
                 break;
