@@ -150,4 +150,29 @@ auto getModLoaderFromString(QString type) -> ModLoaderType
     return {};
 }
 
+QString SideUtils::toString(Side side)
+{
+    switch (side) {
+        case Side::ClientSide:
+            return "client";
+        case Side::ServerSide:
+            return "server";
+        case Side::UniversalSide:
+            return "both";
+        case Side::NoSide:
+            break;
+    }
+    return {};
+}
+
+Side SideUtils::fromString(QString side)
+{
+    if (side == "client")
+        return Side::ClientSide;
+    if (side == "server")
+        return Side::ServerSide;
+    if (side == "both")
+        return Side::UniversalSide;
+    return Side::UniversalSide;
+}
 }  // namespace ModPlatform

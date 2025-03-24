@@ -7,6 +7,7 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
+#include "modplatform/ModIndex.h"
 
 #include <QMessageBox>
 #include <algorithm>
@@ -101,9 +102,10 @@ QVariant ModModel::getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) c
     return {};
 }
 
-bool checkSide(QString filter, QString value)
+bool checkSide(ModPlatform::Side filter, ModPlatform::Side value)
 {
-    return filter.isEmpty() || value.isEmpty() || filter == "both" || value == "both" || filter == value;
+    return filter == ModPlatform::Side::NoSide || value == ModPlatform::Side::NoSide || filter == ModPlatform::Side::UniversalSide ||
+           value == ModPlatform::Side::UniversalSide || filter == value;
 }
 
 bool ModModel::checkFilters(ModPlatform::IndexedPack::Ptr pack)

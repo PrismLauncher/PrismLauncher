@@ -4,6 +4,7 @@
 #include "Json.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 
 static FlameAPI api;
@@ -110,6 +111,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         if (str.contains('.'))
             file.mcVersion.append(str);
 
+        file.side = ModPlatform::Side::NoSide;
         if (auto loader = str.toLower(); loader == "neoforge")
             file.loaders |= ModPlatform::NeoForge;
         else if (loader == "forge")
@@ -123,10 +125,10 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         else if (loader == "quilt")
             file.loaders |= ModPlatform::Quilt;
         else if (loader == "server" || loader == "client") {
-            if (file.side.isEmpty())
-                file.side = loader;
-            else if (file.side != loader)
-                file.side = "both";
+            if (file.side == ModPlatform::Side::NoSide)
+                file.side = ModPlatform::SideUtils::fromString(loader);
+            else if (file.side != ModPlatform::SideUtils::fromString(loader))
+                file.side = ModPlatform::Side::UniversalSide;
         }
     }
 

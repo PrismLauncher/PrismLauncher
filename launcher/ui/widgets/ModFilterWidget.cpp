@@ -217,7 +217,7 @@ void ModFilterWidget::prepareBasicFilter()
     m_filter->openSource = false;
     if (m_instance) {
         m_filter->hideInstalled = false;
-        m_filter->side = "";  // or "both"
+        m_filter->side = ModPlatform::Side::NoSide;  // or "both"
         auto loaders = m_instance->getPackProfile()->getSupportedModLoaders().value();
         ui->neoForge->setChecked(loaders & ModPlatform::NeoForge);
         ui->forge->setChecked(loaders & ModPlatform::Forge);
@@ -279,16 +279,16 @@ void ModFilterWidget::onLoadersFilterChanged()
 
 void ModFilterWidget::onSideFilterChanged()
 {
-    QString side;
+    ModPlatform::Side side;
 
     if (ui->clientSide->isChecked() && !ui->serverSide->isChecked()) {
-        side = "client";
+        side = ModPlatform::Side::ClientSide;
     } else if (!ui->clientSide->isChecked() && ui->serverSide->isChecked()) {
-        side = "server";
+        side = ModPlatform::Side::ServerSide;
     } else if (ui->clientSide->isChecked() && ui->serverSide->isChecked()) {
-        side = "both";
+        side = ModPlatform::Side::UniversalSide;
     } else {
-        side = "";
+        side = ModPlatform::Side::NoSide;
     }
 
     m_filter_changed = side != m_filter->side;

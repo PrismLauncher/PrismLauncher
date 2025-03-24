@@ -23,6 +23,7 @@
 #include "BaseInstance.h"
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
@@ -45,7 +46,7 @@ class ModrinthPackExportTask : public Task {
     struct ResolvedFile {
         QString sha1, sha512, url;
         qint64 size;
-        Metadata::ModSide side;
+        ModPlatform::Side side;
     };
 
     static const QStringList PREFIXES;

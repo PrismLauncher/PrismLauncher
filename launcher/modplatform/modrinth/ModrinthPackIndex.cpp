@@ -63,11 +63,11 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     auto server = shouldDownloadOnSide(Json::ensureString(obj, "server_side"));
 
     if (server && client) {
-        pack.side = "both";
+        pack.side = ModPlatform::Side::UniversalSide;
     } else if (server) {
-        pack.side = "server";
+        pack.side = ModPlatform::Side::ServerSide;
     } else if (client) {
-        pack.side = "client";
+        pack.side = ModPlatform::Side::ClientSide;
     }
 
     // Modrinth can have more data than what's provided by the basic search :)

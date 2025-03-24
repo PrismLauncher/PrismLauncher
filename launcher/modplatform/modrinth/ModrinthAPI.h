@@ -69,18 +69,20 @@ class ModrinthAPI : public NetworkResourceAPI {
         return l.join(',');
     }
 
-    static auto getSideFilters(QString side) -> const QString
+    static QString getSideFilters(ModPlatform::Side side)
     {
-        if (side.isEmpty()) {
-            return {};
+        switch (side) {
+            case ModPlatform::Side::ClientSide:
+                return QString("\"client_side:required\",\"client_side:optional\"],[\"server_side:optional\",\"server_side:unsupported\"");
+            case ModPlatform::Side::ServerSide:
+                return QString("\"server_side:required\",\"server_side:optional\"],[\"client_side:optional\",\"client_side:unsupported\"");
+            case ModPlatform::Side::UniversalSide:
+                return QString("\"client_side:required\"],[\"server_side:required\"");
+            case ModPlatform::Side::NoSide:
+            // fallthrough
+            default:
+                return {};
         }
-        if (side == "both")
-            return QString("\"client_side:required\"],[\"server_side:required\"");
-        if (side == "client")
-            return QString("\"client_side:required\",\"client_side:optional\"],[\"server_side:optional\",\"server_side:unsupported\"");
-        if (side == "server")
-            return QString("\"server_side:required\",\"server_side:optional\"],[\"client_side:optional\",\"client_side:unsupported\"");
-        return {};
     }
 
     [[nodiscard]] static inline QString mapMCVersionFromModrinth(QString v)
