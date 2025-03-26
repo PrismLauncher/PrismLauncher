@@ -63,7 +63,7 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
     m_column_sort_keys = { SortType::ENABLED, SortType::NAME,        SortType::NAME,        SortType::VERSION,
                            SortType::DATE,    SortType::PROVIDER,    SortType::SIZE,        SortType::SIDE,
                            SortType::LOADERS, SortType::MC_VERSIONS, SortType::RELEASE_TYPE };
-    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Stretch,     QHeaderView::Interactive,
+    m_column_resize_modes = { QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,     QHeaderView::Interactive,
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true };
