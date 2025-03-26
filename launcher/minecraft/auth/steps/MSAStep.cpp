@@ -168,7 +168,7 @@ void MSAStep::perform()
         m_oauth2.setRefreshToken(m_data->msaToken.refresh_token);
         m_oauth2.refreshAccessToken();
     } else {
-        oauth2.setModifyParametersFunction(
+        m_oauth2.setModifyParametersFunction(
             [](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* map) { map->insert("prompt", "select_account"); });
 
         *m_data = AccountData();
