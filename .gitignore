@@ -21,6 +21,7 @@ CMakeCache.txt
 /.vs
 cmake-build-*/
 Debug
+compile_commands.json
 
 # Build dirs
 build

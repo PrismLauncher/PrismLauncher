@@ -23,7 +23,7 @@ jobs:
           ref: ${{ github.ref }}
           
       - name: Install Nix
-        uses: cachix/install-nix-action@v30
+        uses: cachix/install-nix-action@v31
 
       - name: Publish on FlakeHub
         uses: determinatesystems/flakehub-push@v5

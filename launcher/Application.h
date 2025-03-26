@@ -112,7 +112,7 @@ class Application : public QApplication {
 
     std::shared_ptr<SettingsObject> settings() const { return m_settings; }
 
-    qint64 timeSinceStart() const { return startTime.msecsTo(QDateTime::currentDateTime()); }
+    qint64 timeSinceStart() const { return m_startTime.msecsTo(QDateTime::currentDateTime()); }
 
     QIcon getThemedIcon(const QString& name);
 
@@ -237,7 +237,7 @@ class Application : public QApplication {
     bool shouldExitNow() const;
 
    private:
-    QDateTime startTime;
+    QDateTime m_startTime;
 
     shared_qobject_ptr<QNetworkAccessManager> m_network;
 

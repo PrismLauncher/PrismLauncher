@@ -223,6 +223,8 @@ void SkinManageDialog::on_capeCombo_currentIndexChanged(int index)
     auto cape = m_capes.value(id.toString(), {});
     if (!cape.isNull()) {
         m_ui->capeImage->setPixmap(previewCape(cape).scaled(size() * (1. / 3), Qt::KeepAspectRatio, Qt::FastTransformation));
+    } else {
+        m_ui->capeImage->clear();
     }
     m_skinPreview->updateCape(cape);
     if (auto skin = getSelectedSkin(); skin) {
@@ -522,6 +524,8 @@ void SkinManageDialog::resizeEvent(QResizeEvent* event)
     auto cape = m_capes.value(id.toString(), {});
     if (!cape.isNull()) {
         m_ui->capeImage->setPixmap(previewCape(cape).scaled(s, Qt::KeepAspectRatio, Qt::FastTransformation));
+    } else {
+        m_ui->capeImage->clear();
     }
 }
 

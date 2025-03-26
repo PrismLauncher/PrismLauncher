@@ -45,7 +45,7 @@ static void loadManifestV1(Flame::Manifest& pack, QJsonObject& manifest)
 
         Flame::File file;
         loadFileV1(file, obj);
-
+        Q_ASSERT(file.projectId != 0);
         pack.files.insert(file.fileId, file);
     }
 

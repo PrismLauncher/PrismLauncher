@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
-  <id>org.prismlauncher.PrismLauncher</id>
-  <launchable type="desktop-id">org.prismlauncher.PrismLauncher.desktop</launchable>
+  <id>@Launcher_AppID@</id>
+  <launchable type="desktop-id">@Launcher_AppID@.desktop</launchable>
   <name>Prism Launcher</name>
   <developer_name>Prism Launcher Contributors</developer_name>
   <summary>Custom Minecraft Launcher to easily manage multiple Minecraft installations at once</summary>

@@ -78,7 +78,7 @@ Task::State MetaCacheSink::finalizeCache(QNetworkReply& reply)
 {
     QFileInfo output_file_info(m_filename);
 
-    if (wroteAnyData) {
+    if (m_wroteAnyData) {
         m_entry->setMD5Sum(m_md5Node->hash().toHex().constData());
     }
 

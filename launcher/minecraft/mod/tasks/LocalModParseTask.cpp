@@ -293,86 +293,90 @@ ModDetails ReadFabricModInfo(QByteArray contents)
 // https://github.com/QuiltMC/rfcs/blob/master/specification/0002-quilt.mod.json.md
 ModDetails ReadQuiltModInfo(QByteArray contents)
 {
-    QJsonParseError jsonError;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
-    auto object = Json::requireObject(jsonDoc, "quilt.mod.json");
-    auto schemaVersion = Json::ensureInteger(object.value("schema_version"), 0, "Quilt schema_version");
-
     ModDetails details;
+    try {
+        QJsonParseError jsonError;
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(contents, &jsonError);
+        auto object = Json::requireObject(jsonDoc, "quilt.mod.json");
+        auto schemaVersion = Json::ensureInteger(object.value("schema_version"), 0, "Quilt schema_version");
 
-    // https://github.com/QuiltMC/rfcs/blob/be6ba280d785395fefa90a43db48e5bfc1d15eb4/specification/0002-quilt.mod.json.md
-    if (schemaVersion == 1) {
-        auto modInfo = Json::requireObject(object.value("quilt_loader"), "Quilt mod info");
+        // https://github.com/QuiltMC/rfcs/blob/be6ba280d785395fefa90a43db48e5bfc1d15eb4/specification/0002-quilt.mod.json.md
+        if (schemaVersion == 1) {
+            auto modInfo = Json::requireObject(object.value("quilt_loader"), "Quilt mod info");
 
-        details.mod_id = Json::requireString(modInfo.value("id"), "Mod ID");
-        details.version = Json::requireString(modInfo.value("version"), "Mod version");
+            details.mod_id = Json::requireString(modInfo.value("id"), "Mod ID");
+            details.version = Json::requireString(modInfo.value("version"), "Mod version");
 
-        auto modMetadata = Json::ensureObject(modInfo.value("metadata"));
+            auto modMetadata = Json::ensureObject(modInfo.value("metadata"));
 
-        details.name = Json::ensureString(modMetadata.value("name"), details.mod_id);
-        details.description = Json::ensureString(modMetadata.value("description"));
+            details.name = Json::ensureString(modMetadata.value("name"), details.mod_id);
+            details.description = Json::ensureString(modMetadata.value("description"));
 
-        auto modContributors = Json::ensureObject(modMetadata.value("contributors"));
+            auto modContributors = Json::ensureObject(modMetadata.value("contributors"));
 
-        // We don't really care about the role of a contributor here
-        details.authors += modContributors.keys();
+            // We don't really care about the role of a contributor here
+            details.authors += modContributors.keys();
 
-        auto modContact = Json::ensureObject(modMetadata.value("contact"));
+            auto modContact = Json::ensureObject(modMetadata.value("contact"));
 
-        if (modContact.contains("homepage")) {
-            details.homeurl = Json::requireString(modContact.value("homepage"));
-        }
-        if (modContact.contains("issues")) {
-            details.issue_tracker = Json::requireString(modContact.value("issues"));
-        }
+            if (modContact.contains("homepage")) {
+                details.homeurl = Json::requireString(modContact.value("homepage"));
+            }
+            if (modContact.contains("issues")) {
+                details.issue_tracker = Json::requireString(modContact.value("issues"));
+            }
 
-        if (modMetadata.contains("license")) {
-            auto license = modMetadata.value("license");
-            if (license.isArray()) {
-                for (auto l : license.toArray()) {
-                    if (l.isString()) {
-                        details.licenses.append(ModLicense(l.toString()));
-                    } else if (l.isObject()) {
-                        auto obj = l.toObject();
-                        details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
-                                                           obj.value("url").toString(), obj.value("description").toString()));
+            if (modMetadata.contains("license")) {
+                auto license = modMetadata.value("license");
+                if (license.isArray()) {
+                    for (auto l : license.toArray()) {
+                        if (l.isString()) {
+                            details.licenses.append(ModLicense(l.toString()));
+                        } else if (l.isObject()) {
+                            auto obj = l.toObject();
+                            details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
+                                                               obj.value("url").toString(), obj.value("description").toString()));
+                        }
                     }
+                } else if (license.isString()) {
+                    details.licenses.append(ModLicense(license.toString()));
+                } else if (license.isObject()) {
+                    auto obj = license.toObject();
+                    details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(),
+                                                       obj.value("url").toString(), obj.value("description").toString()));
                 }
-            } else if (license.isString()) {
-                details.licenses.append(ModLicense(license.toString()));
-            } else if (license.isObject()) {
-                auto obj = license.toObject();
-                details.licenses.append(ModLicense(obj.value("name").toString(), obj.value("id").toString(), obj.value("url").toString(),
-                                                   obj.value("description").toString()));
+            }
+
+            if (modMetadata.contains("icon")) {
+                auto icon = modMetadata.value("icon");
+                if (icon.isObject()) {
+                    auto obj = icon.toObject();
+                    // take the largest icon
+                    int largest = 0;
+                    for (auto key : obj.keys()) {
+                        auto size = key.split('x').first().toInt();
+                        if (size > largest) {
+                            largest = size;
+                        }
+                    }
+                    if (largest > 0) {
+                        auto key = QString::number(largest) + "x" + QString::number(largest);
+                        details.icon_file = obj.value(key).toString();
+                    } else {  // parsing the sizes failed
+                        // take the first
+                        for (auto i : obj) {
+                            details.icon_file = i.toString();
+                            break;
+                        }
+                    }
+                } else if (icon.isString()) {
+                    details.icon_file = icon.toString();
+                }
             }
         }
 
-        if (modMetadata.contains("icon")) {
-            auto icon = modMetadata.value("icon");
-            if (icon.isObject()) {
-                auto obj = icon.toObject();
-                // take the largest icon
-                int largest = 0;
-                for (auto key : obj.keys()) {
-                    auto size = key.split('x').first().toInt();
-                    if (size > largest) {
-                        largest = size;
-                    }
-                }
-                if (largest > 0) {
-                    auto key = QString::number(largest) + "x" + QString::number(largest);
-                    details.icon_file = obj.value(key).toString();
-                } else {  // parsing the sizes failed
-                    // take the first
-                    for (auto i : obj) {
-                        details.icon_file = i.toString();
-                        break;
-                    }
-                }
-            } else if (icon.isString()) {
-                details.icon_file = icon.toString();
-            }
-        }
+    } catch (const Exception& e) {
+        qWarning() << "Unable to parse mod info:" << e.cause();
     }
     return details;
 }

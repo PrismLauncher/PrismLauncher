@@ -66,7 +66,7 @@ jobs:
         # For in-tree builds
       - name: Setup Cachix
         if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
-        uses: cachix/cachix-action@v15
+        uses: cachix/cachix-action@v16
         with:
           name: prismlauncher
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}

@@ -78,7 +78,7 @@ class LaunchController : public Task {
     void decideAccount();
     bool askPlayDemo();
     QString askOfflineName(QString playerName, bool demo, bool& ok);
-    bool reauthenticateCurrentAccount();
+    bool reauthenticateAccount(MinecraftAccountPtr account);
 
    private slots:
     void readyForLaunch();

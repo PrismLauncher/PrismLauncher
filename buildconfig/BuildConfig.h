@@ -52,7 +52,7 @@ class Config {
     QString LAUNCHER_DOMAIN;
     QString LAUNCHER_CONFIGFILE;
     QString LAUNCHER_GIT;
-    QString LAUNCHER_DESKTOPFILENAME;
+    QString LAUNCHER_APPID;
     QString LAUNCHER_SVGFILENAME;
 
     /// The major version number.

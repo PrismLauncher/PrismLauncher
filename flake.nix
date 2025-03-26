@@ -78,7 +78,18 @@
             buildInputs = with pkgs; [
               ccache
               ninja
+              llvmPackages_19.clang-tools
             ];
+
+            cmakeFlags = self.packages.${system}.prismlauncher-unwrapped.cmakeFlags ++ [
+              "-GNinja"
+              "-Bbuild"
+            ];
+
+            shellHook = ''
+              cmake $cmakeFlags -D CMAKE_BUILD_TYPE=Debug
+              ln -s {build/,}compile_commands.json
+            '';
           };
         }
       );

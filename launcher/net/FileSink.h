@@ -58,7 +58,7 @@ class FileSink : public Sink {
 
    protected:
     QString m_filename;
-    bool wroteAnyData = false;
+    bool m_wroteAnyData = false;
     std::unique_ptr<PSaveFile> m_output_file;
 };
 }  // namespace Net
