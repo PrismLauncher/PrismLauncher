@@ -5,8 +5,10 @@
 #pragma once
 
 #include "BuildConfig.h"
+#include "Json.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/helpers/NetworkResourceAPI.h"
+#include "modplatform/modrinth/ModrinthPackIndex.h"
 
 #include <QDebug>
 
@@ -211,4 +213,12 @@ class ModrinthAPI : public NetworkResourceAPI {
                                                            .arg(mapMCVersionToModrinth(args.mcVersion))
                                                            .arg(getModLoaderStrings(args.loader).join("\",\""));
     };
+
+    QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object().value("hits").toArray(); }
+    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { Modrinth::loadIndexedPack(m, obj); }
+    ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const override
+    {
+        return Modrinth::loadIndexedPackVersion(obj);
+    };
+    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { Modrinth::loadExtraPackData(m, obj); }
 };

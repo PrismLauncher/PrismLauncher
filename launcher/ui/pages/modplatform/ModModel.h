@@ -29,9 +29,6 @@ class ModModel : public ResourceModel {
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
 
-    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override = 0;
-    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override = 0;
-    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override = 0;
     virtual ModPlatform::IndexedVersion loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) = 0;
 
     void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = filter; }
@@ -43,7 +40,6 @@ class ModModel : public ResourceModel {
     ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
 
    protected:
-    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override = 0;
     virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const override;
 
     virtual bool checkFilters(ModPlatform::IndexedPack::Ptr) override;

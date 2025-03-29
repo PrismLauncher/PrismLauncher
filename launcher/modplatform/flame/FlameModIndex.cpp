@@ -58,7 +58,7 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
         pack.extraDataLoaded = true;
 }
 
-void FlameMod::loadBody(ModPlatform::IndexedPack& pack, [[maybe_unused]] QJsonObject& obj)
+void FlameMod::loadBody(ModPlatform::IndexedPack& pack)
 {
     pack.extraData.body = api.getModDescription(pack.addonId.toInt());
 

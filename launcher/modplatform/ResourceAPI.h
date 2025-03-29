@@ -4,7 +4,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2023-2025 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -67,6 +67,8 @@ class ResourceAPI {
         QString readable_name;
     };
 
+    // Arguments
+
     struct SearchArgs {
         ModPlatform::ResourceType type{};
         int offset = 0;
@@ -79,8 +81,12 @@ class ResourceAPI {
         std::optional<QStringList> categoryIds;
         bool openSource;
     };
-    struct SearchCallbacks {
-        std::function<void(QJsonDocument&)> on_succeed;
+
+    // Callbacks
+
+    template <typename T>
+    struct Callback {
+        std::function<void(T&)> on_succeed;
         std::function<void(QString const& reason, int network_error_code)> on_fail;
         std::function<void()> on_abort;
     };
@@ -91,17 +97,16 @@ class ResourceAPI {
         std::optional<std::list<Version>> mcVersions;
         std::optional<ModPlatform::ModLoaderTypes> loaders;
 
+        ModPlatform::ResourceType resourceType;
+
         VersionSearchArgs(VersionSearchArgs const&) = default;
         void operator=(VersionSearchArgs other)
         {
             pack = other.pack;
             mcVersions = other.mcVersions;
             loaders = other.loaders;
+            resourceType = other.resourceType;
         }
-    };
-    struct VersionSearchCallbacks {
-        std::function<void(QJsonDocument&, ModPlatform::IndexedPack)> on_succeed;
-        std::function<void(QString const& reason, int network_error_code)> on_fail;
     };
 
     struct ProjectInfoArgs {
@@ -109,11 +114,6 @@ class ResourceAPI {
 
         ProjectInfoArgs(ProjectInfoArgs const&) = default;
         void operator=(ProjectInfoArgs other) { pack = other.pack; }
-    };
-    struct ProjectInfoCallbacks {
-        std::function<void(QJsonDocument&, const ModPlatform::IndexedPack&)> on_succeed;
-        std::function<void(QString const& reason)> on_fail;
-        std::function<void()> on_abort;
     };
 
     struct DependencySearchArgs {
@@ -132,40 +132,16 @@ class ResourceAPI {
     [[nodiscard]] virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
-    [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, SearchCallbacks&&) const
-    {
-        qWarning() << "TODO: ResourceAPI::searchProjects";
-        return nullptr;
-    }
+    [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, Callback<QList<ModPlatform::IndexedPack::Ptr>>&&) const;
+
     [[nodiscard]] virtual Task::Ptr getProject([[maybe_unused]] QString addonId,
-                                               [[maybe_unused]] std::shared_ptr<QByteArray> response) const
-    {
-        qWarning() << "TODO: ResourceAPI::getProject";
-        return nullptr;
-    }
+                                               [[maybe_unused]] std::shared_ptr<QByteArray> response) const = 0;
     [[nodiscard]] virtual Task::Ptr getProjects([[maybe_unused]] QStringList addonIds,
-                                                [[maybe_unused]] std::shared_ptr<QByteArray> response) const
-    {
-        qWarning() << "TODO: ResourceAPI::getProjects";
-        return nullptr;
-    }
+                                                [[maybe_unused]] std::shared_ptr<QByteArray> response) const = 0;
 
-    [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, ProjectInfoCallbacks&&) const
-    {
-        qWarning() << "TODO: ResourceAPI::getProjectInfo";
-        return nullptr;
-    }
-    [[nodiscard]] virtual Task::Ptr getProjectVersions(VersionSearchArgs&&, VersionSearchCallbacks&&) const
-    {
-        qWarning() << "TODO: ResourceAPI::getProjectVersions";
-        return nullptr;
-    }
-
-    [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const
-    {
-        qWarning() << "TODO";
-        return nullptr;
-    }
+    [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, Callback<ModPlatform::IndexedPack>&&) const;
+    [[nodiscard]] Task::Ptr getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const;
+    [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const = 0;
 
    protected:
     [[nodiscard]] inline QString debugName() const { return "External resource API"; }
@@ -191,4 +167,34 @@ class ResourceAPI {
         s.remove(s.length() - 1, 1);  // remove last comma
         return s;
     }
+
+   public:
+    [[nodiscard]] virtual auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> = 0;
+    [[nodiscard]] virtual auto getInfoURL(QString const& id) const -> std::optional<QString> = 0;
+    [[nodiscard]] virtual auto getVersionsURL(VersionSearchArgs const& args) const -> std::optional<QString> = 0;
+    [[nodiscard]] virtual auto getDependencyURL(DependencySearchArgs const& args) const -> std::optional<QString> = 0;
+
+    /** Functions to load data into a pack.
+     *
+     *  Those are needed for the same reason as documentToArray, and NEED to be re-implemented in the same way.
+     */
+
+    virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
+    // virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&);
+    // virtual void loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&);
+    virtual ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const = 0;
+
+    /** Converts a JSON document to a common array format.
+     *
+     *  This is needed so that different providers, with different JSON structures, can be parsed
+     *  uniformally. You NEED to re-implement this if you intend on using the default callbacks.
+     */
+    [[nodiscard]] virtual QJsonArray documentToArray(QJsonDocument& obj) const = 0;
+
+    /** Functions to load data into a pack.
+     *
+     *  Those are needed for the same reason as documentToArray, and NEED to be re-implemented in the same way.
+     */
+
+    virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
 };

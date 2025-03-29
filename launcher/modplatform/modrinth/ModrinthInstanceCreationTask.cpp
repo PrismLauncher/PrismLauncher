@@ -13,7 +13,6 @@
 #include "modplatform/EnsureMetadataTask.h"
 #include "modplatform/helpers/OverrideUtils.h"
 
-#include "modplatform/modrinth/ModrinthPackManifest.h"
 #include "net/ChecksumValidator.h"
 
 #include "net/ApiDownload.h"
@@ -85,7 +84,7 @@ bool ModrinthCreationTask::updateInstance()
     QString old_index_path(FS::PathCombine(old_index_folder, "modrinth.index.json"));
     QFileInfo old_index_file(old_index_path);
     if (old_index_file.exists()) {
-        std::vector<Modrinth::File> old_files;
+        std::vector<File> old_files;
         parseManifest(old_index_path, old_files, false, false);
 
         // Let's remove all duplicated, identical resources!
@@ -356,7 +355,7 @@ bool ModrinthCreationTask::createInstance()
 }
 
 bool ModrinthCreationTask::parseManifest(const QString& index_path,
-                                         std::vector<Modrinth::File>& files,
+                                         std::vector<File>& files,
                                          bool set_internal_data,
                                          bool show_optional_dialog)
 {
@@ -377,9 +376,9 @@ bool ModrinthCreationTask::parseManifest(const QString& index_path,
             }
 
             auto jsonFiles = Json::requireIsArrayOf<QJsonObject>(obj, "files", "modrinth.index.json");
-            std::vector<Modrinth::File> optionalFiles;
+            std::vector<File> optionalFiles;
             for (const auto& modInfo : jsonFiles) {
-                Modrinth::File file;
+                File file;
                 file.path = Json::requireString(modInfo, "path").replace("\\", "/");
 
                 auto env = Json::ensureObject(modInfo, "env");

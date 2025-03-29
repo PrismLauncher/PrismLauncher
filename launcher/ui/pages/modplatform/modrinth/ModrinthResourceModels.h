@@ -37,66 +37,7 @@ class ModrinthModModel : public ModModel {
     [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
     [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
 
-    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
-    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
-    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
     auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
-
-    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
-};
-
-class ModrinthResourcePackModel : public ResourcePackResourceModel {
-    Q_OBJECT
-
-   public:
-    ModrinthResourcePackModel(const BaseInstance&);
-    ~ModrinthResourcePackModel() override = default;
-
-   private:
-    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
-    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
-
-    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
-    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
-    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
-
-    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
-};
-
-class ModrinthTexturePackModel : public TexturePackResourceModel {
-    Q_OBJECT
-
-   public:
-    ModrinthTexturePackModel(const BaseInstance&);
-    ~ModrinthTexturePackModel() override = default;
-
-   private:
-    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
-    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
-
-    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
-    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
-    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
-
-    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
-};
-
-class ModrinthShaderPackModel : public ShaderPackResourceModel {
-    Q_OBJECT
-
-   public:
-    ModrinthShaderPackModel(const BaseInstance&);
-    ~ModrinthShaderPackModel() override = default;
-
-   private:
-    [[nodiscard]] QString debugName() const override { return Modrinth::debugName() + " (Model)"; }
-    [[nodiscard]] QString metaEntryBase() const override { return Modrinth::metaEntryBase(); }
-
-    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
-    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) override;
-    void loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr) override;
-
-    auto documentToArray(QJsonDocument& obj) const -> QJsonArray override;
 };
 
 }  // namespace ResourceDownload

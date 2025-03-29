@@ -6,11 +6,10 @@
 
 #include "BaseInstance.h"
 
+#include "modplatform/ModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
-#include "modplatform/modrinth/ModrinthPackManifest.h"
 
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlamePackIndex.h"
 
 #include "net/NetJob.h"
 
@@ -130,9 +129,9 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     void updateFromFile() override;
 
    private:
-    NetJob::Ptr m_fetch_job = nullptr;
+    Task::Ptr m_fetch_job = nullptr;
 
-    Modrinth::Modpack m_pack;
+    ModPlatform::IndexedPack m_pack;
     ModrinthAPI m_api;
 };
 
@@ -154,8 +153,8 @@ class FlameManagedPackPage final : public ManagedPackPage {
     void updateFromFile() override;
 
    private:
-    NetJob::Ptr m_fetch_job = nullptr;
+    Task::Ptr m_fetch_job = nullptr;
 
-    Flame::IndexedPack m_pack;
+    ModPlatform::IndexedPack m_pack;
     FlameAPI m_api;
 };

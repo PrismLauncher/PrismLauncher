@@ -38,8 +38,8 @@
 #include <QWidget>
 
 #include <Application.h>
-#include <modplatform/flame/FlamePackIndex.h>
 #include <QTimer>
+#include "modplatform/ModIndex.h"
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/widgets/ModFilterWidget.h"
 #include "ui/widgets/ProgressWidget.h"
@@ -88,10 +88,10 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
     void createFilterWidget();
 
    private:
-    Ui::FlamePage* ui = nullptr;
-    NewInstanceDialog* dialog = nullptr;
-    Flame::ListModel* listModel = nullptr;
-    Flame::IndexedPack current;
+    Ui::FlamePage* m_ui = nullptr;
+    NewInstanceDialog* m_dialog = nullptr;
+    Flame::ListModel* m_listModel = nullptr;
+    ModPlatform::IndexedPack::Ptr m_current;
 
     int m_selected_version_index = -1;
 
@@ -102,4 +102,5 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
 
     unique_qobject_ptr<ModFilterWidget> m_filterWidget;
     Task::Ptr m_categoriesTask;
+    Task::Ptr m_job;
 };

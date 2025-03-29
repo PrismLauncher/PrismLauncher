@@ -17,6 +17,7 @@
 #include "BuildConfig.h"
 #include "Json.h"
 
+#include "modplatform/ResourceAPI.h"
 #include "net/ApiDownload.h"
 #include "net/NetJob.h"
 
@@ -141,9 +142,9 @@ void ResourceModel::search()
     if (m_search_term.startsWith("#")) {
         auto projectId = m_search_term.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::ProjectInfoCallbacks callbacks;
+            ResourceAPI::Callback<ModPlatform::IndexedPack> callbacks;
 
-            callbacks.on_fail = [this](QString reason) {
+            callbacks.on_fail = [this](QString reason, int) {
                 if (!s_running_models.constFind(this).value())
                     return;
                 searchRequestFailed(reason, -1);
@@ -154,10 +155,10 @@ void ResourceModel::search()
                 searchRequestAborted();
             };
 
-            callbacks.on_succeed = [this](auto& doc, auto& pack) {
+            callbacks.on_succeed = [this](auto& pack) {
                 if (!s_running_models.constFind(this).value())
                     return;
-                searchRequestForOneSucceeded(doc);
+                searchRequestForOneSucceeded(pack);
             };
             if (auto job = m_api->getProjectInfo({ projectId }, std::move(callbacks)); job)
                 runSearchJob(job);
@@ -166,27 +167,23 @@ void ResourceModel::search()
     }
     auto args{ createSearchArguments() };
 
-    auto callbacks{ createSearchCallbacks() };
+    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
 
-    // Use defaults if no callbacks are set
-    if (!callbacks.on_succeed)
-        callbacks.on_succeed = [this](auto& doc) {
-            if (!s_running_models.constFind(this).value())
-                return;
-            searchRequestSucceeded(doc);
-        };
-    if (!callbacks.on_fail)
-        callbacks.on_fail = [this](QString reason, int network_error_code) {
-            if (!s_running_models.constFind(this).value())
-                return;
-            searchRequestFailed(reason, network_error_code);
-        };
-    if (!callbacks.on_abort)
-        callbacks.on_abort = [this] {
-            if (!s_running_models.constFind(this).value())
-                return;
-            searchRequestAborted();
-        };
+    callbacks.on_succeed = [this](auto& doc) {
+        if (!s_running_models.constFind(this).value())
+            return;
+        searchRequestSucceeded(doc);
+    };
+    callbacks.on_fail = [this](QString reason, int network_error_code) {
+        if (!s_running_models.constFind(this).value())
+            return;
+        searchRequestFailed(reason, network_error_code);
+    };
+    callbacks.on_abort = [this] {
+        if (!s_running_models.constFind(this).value())
+            return;
+        searchRequestAborted();
+    };
 
     if (auto job = m_api->searchProjects(std::move(args), std::move(callbacks)); job)
         runSearchJob(job);
@@ -201,14 +198,15 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
     if (!pack->versionsLoaded) {
         auto args{ createVersionsArguments(entry) };
-        auto callbacks{ createVersionsCallbacks(entry) };
+        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
 
+        auto addonId = pack->addonId;
         // Use default if no callbacks are set
         if (!callbacks.on_succeed)
-            callbacks.on_succeed = [this, entry](auto& doc, auto pack) {
+            callbacks.on_succeed = [this, entry, addonId](auto& doc) {
                 if (!s_running_models.constFind(this).value())
                     return;
-                versionRequestSucceeded(doc, pack, entry);
+                versionRequestSucceeded(doc, addonId, entry);
             };
         if (!callbacks.on_fail)
             callbacks.on_fail = [](QString reason, int) {
@@ -222,28 +220,23 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
     if (!pack->extraDataLoaded) {
         auto args{ createInfoArguments(entry) };
-        auto callbacks{ createInfoCallbacks(entry) };
+        ResourceAPI::Callback<ModPlatform::IndexedPack> callbacks{};
 
-        // Use default if no callbacks are set
-        if (!callbacks.on_succeed)
-            callbacks.on_succeed = [this, entry](auto& doc, auto& newpack) {
-                if (!s_running_models.constFind(this).value())
-                    return;
-                auto pack = newpack;
-                infoRequestSucceeded(doc, pack, entry);
-            };
-        if (!callbacks.on_fail)
-            callbacks.on_fail = [this](QString reason) {
-                if (!s_running_models.constFind(this).value())
-                    return;
-                QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info: %1").arg(reason));
-            };
-        if (!callbacks.on_abort)
-            callbacks.on_abort = [this] {
-                if (!s_running_models.constFind(this).value())
-                    return;
-                qCritical() << tr("The request was aborted for an unknown reason");
-            };
+        callbacks.on_succeed = [this, entry](auto& newpack) {
+            if (!s_running_models.constFind(this).value())
+                return;
+            infoRequestSucceeded(newpack, entry);
+        };
+        callbacks.on_fail = [this](QString reason, int) {
+            if (!s_running_models.constFind(this).value())
+                return;
+            QMessageBox::critical(nullptr, tr("Error"), tr("A network error occurred. Could not load project info: %1").arg(reason));
+        };
+        callbacks.on_abort = [this] {
+            if (!s_running_models.constFind(this).value())
+                return;
+            qCritical() << tr("The request was aborted for an unknown reason");
+        };
 
         if (auto job = m_api->getProjectInfo(std::move(args), std::move(callbacks)); job)
             runInfoJob(job);
@@ -358,67 +351,34 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
     return {};
 }
 
-// No 'forgor to implement' shall pass here :blobfox_knife:
-#define NEED_FOR_CALLBACK_ASSERT(name) \
-    Q_ASSERT_X(0 != 0, #name, "You NEED to re-implement this if you intend on using the default callbacks.")
-
-QJsonArray ResourceModel::documentToArray([[maybe_unused]] QJsonDocument& doc) const
-{
-    NEED_FOR_CALLBACK_ASSERT("documentToArray");
-    return {};
-}
-void ResourceModel::loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&)
-{
-    NEED_FOR_CALLBACK_ASSERT("loadIndexedPack");
-}
-void ResourceModel::loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&)
-{
-    NEED_FOR_CALLBACK_ASSERT("loadExtraPackInfo");
-}
-void ResourceModel::loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&)
-{
-    NEED_FOR_CALLBACK_ASSERT("loadIndexedPackVersions");
-}
-
 /* Default callbacks */
 
-void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
+void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>& newList)
 {
-    QList<ModPlatform::IndexedPack::Ptr> newList;
-    auto packs = documentToArray(doc);
-
-    for (auto packRaw : packs) {
-        auto packObj = packRaw.toObject();
-
-        ModPlatform::IndexedPack::Ptr pack = std::make_shared<ModPlatform::IndexedPack>();
-        try {
-            loadIndexedPack(*pack, packObj);
-            if (auto sel = std::find_if(m_selected.begin(), m_selected.end(),
-                                        [&pack](const DownloadTaskPtr i) {
-                                            const auto ipack = i->getPack();
-                                            return ipack->provider == pack->provider && ipack->addonId == pack->addonId;
-                                        });
-                sel != m_selected.end()) {
-                newList.append(sel->get()->getPack());
-            } else
-                newList.append(pack);
-        } catch (const JSONValidationError& e) {
-            qWarning() << "Error while loading resource from " << debugName() << ": " << e.cause();
-            continue;
+    QList<ModPlatform::IndexedPack::Ptr> filteredNewList;
+    for (auto pack : newList) {
+        ModPlatform::IndexedPack::Ptr p;
+        if (auto sel = std::find_if(m_selected.begin(), m_selected.end(),
+                                    [&pack](const DownloadTaskPtr i) {
+                                        const auto ipack = i->getPack();
+                                        return ipack->provider == pack->provider && ipack->addonId == pack->addonId;
+                                    });
+            sel != m_selected.end()) {
+            p = sel->get()->getPack();
+        } else {
+            p = pack;
+        }
+        if (checkFilters(p)) {
+            filteredNewList << p;
         }
     }
 
-    if (packs.size() < 25) {
+    if (newList.size() < 25) {
         m_search_state = SearchState::Finished;
     } else {
         m_next_search_offset += 25;
         m_search_state = SearchState::CanFetchMore;
     }
-
-    QList<ModPlatform::IndexedPack::Ptr> filteredNewList;
-    for (auto p : newList)
-        if (checkFilters(p))
-            filteredNewList << p;
 
     // When you have a Qt build with assertions turned on, proceeding here will abort the application
     if (filteredNewList.size() == 0)
@@ -429,24 +389,12 @@ void ResourceModel::searchRequestSucceeded(QJsonDocument& doc)
     endInsertRows();
 }
 
-void ResourceModel::searchRequestForOneSucceeded(QJsonDocument& doc)
+void ResourceModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack& pack)
 {
-    ModPlatform::IndexedPack::Ptr pack = std::make_shared<ModPlatform::IndexedPack>();
-
-    try {
-        auto obj = Json::requireObject(doc);
-        if (obj.contains("data"))
-            obj = Json::requireObject(obj, "data");
-        loadIndexedPack(*pack, obj);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " resource info: " << e.cause();
-    }
-
     m_search_state = SearchState::Finished;
 
     beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + 1);
-    m_packs.append(pack);
+    m_packs.append(std::make_shared<ModPlatform::IndexedPack>(pack));
     endInsertRows();
 }
 
@@ -479,21 +427,16 @@ void ResourceModel::searchRequestAborted()
     search();
 }
 
-void ResourceModel::versionRequestSucceeded(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
+void ResourceModel::versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>& doc, QVariant pack, const QModelIndex& index)
 {
     auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
     // Check if the index is still valid for this resource or not
-    if (pack.addonId != current_pack->addonId)
+    if (pack != current_pack->addonId)
         return;
 
-    try {
-        auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
-        loadIndexedPackVersions(*current_pack, arr);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
-    }
+    current_pack->versions = doc;
+    current_pack->versionsLoaded = true;
 
     // Cache info :^)
     QVariant new_pack;
@@ -506,7 +449,7 @@ void ResourceModel::versionRequestSucceeded(QJsonDocument& doc, ModPlatform::Ind
     emit versionListUpdated(index);
 }
 
-void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::IndexedPack& pack, const QModelIndex& index)
+void ResourceModel::infoRequestSucceeded(ModPlatform::IndexedPack& pack, const QModelIndex& index)
 {
     auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
@@ -514,14 +457,7 @@ void ResourceModel::infoRequestSucceeded(QJsonDocument& doc, ModPlatform::Indexe
     if (pack.addonId != current_pack->addonId)
         return;
 
-    try {
-        auto obj = Json::requireObject(doc);
-        loadExtraPackInfo(*current_pack, obj);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " resource info: " << e.cause();
-    }
-
+    *current_pack = pack;
     // Cache info :^)
     QVariant new_pack;
     new_pack.setValue(current_pack);

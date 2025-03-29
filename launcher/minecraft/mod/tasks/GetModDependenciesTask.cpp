@@ -160,7 +160,7 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
         try {
             auto obj = provider.name == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
                                                                              : Json::requireObject(doc);
-            provider.mod->loadIndexedPack(*pDep->pack, obj);
+            provider.api->loadIndexedPack(*pDep->pack, obj);
         } catch (const JSONValidationError& e) {
             removePack(pDep->pack->addonId);
             qDebug() << doc;

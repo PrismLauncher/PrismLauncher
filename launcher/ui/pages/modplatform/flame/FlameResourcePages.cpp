@@ -85,7 +85,7 @@ void FlameModPage::openUrl(const QUrl& url)
 FlameResourcePackPage::FlameResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePackResourcePage(dialog, instance)
 {
-    m_model = new FlameResourcePackModel(instance);
+    m_model = new ResourcePackResourceModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -155,7 +155,7 @@ void FlameTexturePackPage::openUrl(const QUrl& url)
 FlameShaderPackPage::FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
     : ShaderPackResourcePage(dialog, instance)
 {
-    m_model = new FlameShaderPackModel(instance);
+    m_model = new ShaderPackResourceModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();

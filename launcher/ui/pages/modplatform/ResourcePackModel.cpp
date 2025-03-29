@@ -8,8 +8,11 @@
 
 namespace ResourceDownload {
 
-ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_inst, ResourceAPI* api)
-    : ResourceModel(api), m_base_instance(base_inst)
+ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_inst,
+                                                     ResourceAPI* api,
+                                                     QString debugName,
+                                                     QString metaEntryBase)
+    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
 {}
 
 /******** Make data requests ********/
@@ -23,7 +26,7 @@ ResourceAPI::SearchArgs ResourcePackResourceModel::createSearchArguments()
 ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
-    return { *pack };
+    return { *pack, {}, {}, ModPlatform::ResourceType::RESOURCE_PACK };
 }
 
 ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)

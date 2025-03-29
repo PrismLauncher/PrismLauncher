@@ -27,95 +27,9 @@ namespace ResourceDownload {
 
 ModrinthModModel::ModrinthModModel(BaseInstance& base) : ModModel(base, new ModrinthAPI) {}
 
-void ModrinthModModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
-{
-    ::Modrinth::loadIndexedPack(m, obj);
-}
-
-void ModrinthModModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
-{
-    ::Modrinth::loadExtraPackData(m, obj);
-}
-
-void ModrinthModModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
-{
-    ::Modrinth::loadIndexedPackVersions(m, arr);
-}
-
 auto ModrinthModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
 {
     return ::Modrinth::loadDependencyVersions(m, arr, &m_base_instance);
-}
-
-auto ModrinthModModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
-{
-    return obj.object().value("hits").toArray();
-}
-
-ModrinthResourcePackModel::ModrinthResourcePackModel(const BaseInstance& base) : ResourcePackResourceModel(base, new ModrinthAPI) {}
-
-void ModrinthResourcePackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
-{
-    ::Modrinth::loadIndexedPack(m, obj);
-}
-
-void ModrinthResourcePackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
-{
-    ::Modrinth::loadExtraPackData(m, obj);
-}
-
-void ModrinthResourcePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
-{
-    ::Modrinth::loadIndexedPackVersions(m, arr);
-}
-
-auto ModrinthResourcePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
-{
-    return obj.object().value("hits").toArray();
-}
-
-ModrinthTexturePackModel::ModrinthTexturePackModel(const BaseInstance& base) : TexturePackResourceModel(base, new ModrinthAPI) {}
-
-void ModrinthTexturePackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
-{
-    ::Modrinth::loadIndexedPack(m, obj);
-}
-
-void ModrinthTexturePackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
-{
-    ::Modrinth::loadExtraPackData(m, obj);
-}
-
-void ModrinthTexturePackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
-{
-    ::Modrinth::loadIndexedPackVersions(m, arr);
-}
-
-auto ModrinthTexturePackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
-{
-    return obj.object().value("hits").toArray();
-}
-
-ModrinthShaderPackModel::ModrinthShaderPackModel(const BaseInstance& base) : ShaderPackResourceModel(base, new ModrinthAPI) {}
-
-void ModrinthShaderPackModel::loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj)
-{
-    ::Modrinth::loadIndexedPack(m, obj);
-}
-
-void ModrinthShaderPackModel::loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj)
-{
-    ::Modrinth::loadExtraPackData(m, obj);
-}
-
-void ModrinthShaderPackModel::loadIndexedPackVersions(ModPlatform::IndexedPack& m, QJsonArray& arr)
-{
-    ::Modrinth::loadIndexedPackVersions(m, arr);
-}
-
-auto ModrinthShaderPackModel::documentToArray(QJsonDocument& obj) const -> QJsonArray
-{
-    return obj.object().value("hits").toArray();
 }
 
 }  // namespace ResourceDownload
