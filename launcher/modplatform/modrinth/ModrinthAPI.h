@@ -7,12 +7,12 @@
 #include "BuildConfig.h"
 #include "Json.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/helpers/NetworkResourceAPI.h"
+#include "modplatform/ResourceAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
 #include <QDebug>
 
-class ModrinthAPI : public NetworkResourceAPI {
+class ModrinthAPI : public ResourceAPI {
    public:
     Task::Ptr currentVersion(QString hash, QString hash_format, std::shared_ptr<QByteArray> response);
 

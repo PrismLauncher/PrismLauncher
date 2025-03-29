@@ -8,7 +8,6 @@
 
 #include "minecraft/PackProfile.h"
 #include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 #include "ui/pages/modplatform/flame/FlameResourcePages.h"
 
 namespace ResourceDownload {
@@ -16,18 +15,6 @@ namespace ResourceDownload {
 static bool isOptedOut(const ModPlatform::IndexedVersion& ver)
 {
     return ver.downloadUrl.isEmpty();
-}
-
-FlameModModel::FlameModModel(BaseInstance& base) : ModModel(base, new FlameAPI) {}
-
-auto FlameModModel::loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion
-{
-    return FlameMod::loadDependencyVersions(m, arr, &m_base_instance);
-}
-
-bool FlameModModel::optedOut(const ModPlatform::IndexedVersion& ver) const
-{
-    return isOptedOut(ver);
 }
 
 FlameTexturePackModel::FlameTexturePackModel(const BaseInstance& base)

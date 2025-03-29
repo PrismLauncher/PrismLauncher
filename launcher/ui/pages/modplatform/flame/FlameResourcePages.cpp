@@ -40,7 +40,6 @@
 #include "FlameResourcePages.h"
 #include <QList>
 #include <memory>
-#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "ui_ResourcePage.h"
 
@@ -51,7 +50,7 @@ namespace ResourceDownload {
 
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
-    m_model = new FlameModModel(instance);
+    m_model = new ModModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();

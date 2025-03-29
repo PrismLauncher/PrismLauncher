@@ -15,7 +15,6 @@
 
 #include "Application.h"
 #include "BuildConfig.h"
-#include "Json.h"
 
 #include "modplatform/ResourceAPI.h"
 #include "net/ApiDownload.h"

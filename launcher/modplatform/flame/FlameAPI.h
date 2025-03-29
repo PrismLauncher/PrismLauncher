@@ -11,9 +11,8 @@
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
-#include "modplatform/helpers/NetworkResourceAPI.h"
 
-class FlameAPI : public NetworkResourceAPI {
+class FlameAPI : public ResourceAPI {
    public:
     QString getModFileChangelog(int modId, int fileId);
     QString getModDescription(int modId);

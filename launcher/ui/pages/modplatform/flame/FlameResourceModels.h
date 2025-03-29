@@ -5,26 +5,9 @@
 #pragma once
 
 #include "ui/pages/modplatform/ModModel.h"
-#include "ui/pages/modplatform/ResourcePackModel.h"
 #include "ui/pages/modplatform/flame/FlameResourcePages.h"
 
 namespace ResourceDownload {
-
-class FlameModModel : public ModModel {
-    Q_OBJECT
-
-   public:
-    FlameModModel(BaseInstance&);
-    ~FlameModModel() override = default;
-
-    bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
-
-   private:
-    [[nodiscard]] QString debugName() const override { return Flame::debugName() + " (Model)"; }
-    [[nodiscard]] QString metaEntryBase() const override { return Flame::metaEntryBase(); }
-
-    auto loadDependencyVersions(const ModPlatform::Dependency& m, QJsonArray& arr) -> ModPlatform::IndexedVersion override;
-};
 
 class FlameTexturePackModel : public TexturePackResourceModel {
     Q_OBJECT

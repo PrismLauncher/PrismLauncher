@@ -43,13 +43,11 @@
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
-#include "ui/pages/modplatform/modrinth/ModrinthResourceModels.h"
-
 namespace ResourceDownload {
 
 ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
-    m_model = new ModrinthModModel(instance);
+    m_model = new ModModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();

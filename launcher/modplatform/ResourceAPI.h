@@ -67,7 +67,12 @@ class ResourceAPI {
         QString readable_name;
     };
 
-    // Arguments
+    template <typename T>
+    struct Callback {
+        std::function<void(T&)> on_succeed;
+        std::function<void(QString const& reason, int network_error_code)> on_fail;
+        std::function<void()> on_abort;
+    };
 
     struct SearchArgs {
         ModPlatform::ResourceType type{};
@@ -80,15 +85,6 @@ class ResourceAPI {
         std::optional<ModPlatform::Side> side;
         std::optional<QStringList> categoryIds;
         bool openSource;
-    };
-
-    // Callbacks
-
-    template <typename T>
-    struct Callback {
-        std::function<void(T&)> on_succeed;
-        std::function<void(QString const& reason, int network_error_code)> on_fail;
-        std::function<void()> on_abort;
     };
 
     struct VersionSearchArgs {
@@ -122,11 +118,6 @@ class ResourceAPI {
         ModPlatform::ModLoaderTypes loader;
     };
 
-    struct DependencySearchCallbacks {
-        std::function<void(QJsonDocument&, const ModPlatform::Dependency&)> on_succeed;
-        std::function<void(QString const& reason, int network_error_code)> on_fail;
-    };
-
    public:
     /** Gets a list of available sorting methods for this API. */
     [[nodiscard]] virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
@@ -134,39 +125,19 @@ class ResourceAPI {
    public slots:
     [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, Callback<QList<ModPlatform::IndexedPack::Ptr>>&&) const;
 
-    [[nodiscard]] virtual Task::Ptr getProject([[maybe_unused]] QString addonId,
-                                               [[maybe_unused]] std::shared_ptr<QByteArray> response) const = 0;
-    [[nodiscard]] virtual Task::Ptr getProjects([[maybe_unused]] QStringList addonIds,
-                                                [[maybe_unused]] std::shared_ptr<QByteArray> response) const = 0;
+    [[nodiscard]] virtual Task::Ptr getProject(QString addonId, std::shared_ptr<QByteArray> response) const;
+    [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const = 0;
 
     [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, Callback<ModPlatform::IndexedPack>&&) const;
     [[nodiscard]] Task::Ptr getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const;
-    [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, DependencySearchCallbacks&&) const = 0;
+    [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<ModPlatform::IndexedVersion>&&) const;
 
    protected:
     [[nodiscard]] inline QString debugName() const { return "External resource API"; }
 
-    [[nodiscard]] inline QString mapMCVersionToModrinth(Version v) const
-    {
-        static const QString preString = " Pre-Release ";
-        auto verStr = v.toString();
+    [[nodiscard]] QString mapMCVersionToModrinth(Version v) const;
 
-        if (verStr.contains(preString)) {
-            verStr.replace(preString, "-pre");
-        }
-        verStr.replace(" ", "-");
-        return verStr;
-    }
-
-    [[nodiscard]] inline QString getGameVersionsString(std::list<Version> mcVersions) const
-    {
-        QString s;
-        for (auto& ver : mcVersions) {
-            s += QString("\"%1\",").arg(mapMCVersionToModrinth(ver));
-        }
-        s.remove(s.length() - 1, 1);  // remove last comma
-        return s;
-    }
+    [[nodiscard]] QString getGameVersionsString(std::list<Version> mcVersions) const;
 
    public:
     [[nodiscard]] virtual auto getSearchURL(SearchArgs const& args) const -> std::optional<QString> = 0;
@@ -180,8 +151,6 @@ class ResourceAPI {
      */
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
-    // virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&);
-    // virtual void loadIndexedPackVersions(ModPlatform::IndexedPack&, QJsonArray&);
     virtual ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const = 0;
 
     /** Converts a JSON document to a common array format.
