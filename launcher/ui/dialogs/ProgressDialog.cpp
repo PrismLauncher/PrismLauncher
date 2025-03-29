@@ -99,11 +99,6 @@ ProgressDialog::~ProgressDialog()
 
 void ProgressDialog::updateSize(bool recenterParent)
 {
-    if (DesktopServices::isGameScope()) {
-        this->showFullScreen();
-        this->setFixedSize(this->width(), this->height());
-        return;
-    }
     QSize lastSize = this->size();
     QPoint lastPos = this->pos();
     int minHeight = ui->globalStatusDetailsLabel->minimumSize().height() + (ui->verticalLayout->spacing() * 2);
