@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <QList>
-#include <QMetaType>
+#include <memory>
+
 #include <QString>
 #include <QVariant>
 #include <memory>
@@ -28,7 +28,7 @@
 #include "api/structures/Side.h"
 #include "api/structures/Version.h"
 
-namespace ModPlatform {
+namespace Platform {
 
 struct ModpackAuthor {
     QString name;
@@ -54,11 +54,11 @@ struct ExtraPackData {
     QString body;
 };
 
-struct IndexedPack {
-    using Ptr = std::shared_ptr<IndexedPack>;
+struct Project {
+    using Ptr = std::shared_ptr<Project>;
 
-    QVariant addonId;
-    Platform::Provider provider;
+    QVariant projectId;
+    Provider provider;
     QString name;
     QString slug;
     QString description;
@@ -66,10 +66,10 @@ struct IndexedPack {
     QString logoName;
     QString logoUrl;
     QString websiteUrl;
-    Platform::Side side;
+    Side side;
 
     bool versionsLoaded = false;
-    QList<Platform::Version> versions;
+    QList<Version> versions;
 
     // Don't load by default, since some modplatform don't have that info
     bool extraDataLoaded = true;
@@ -91,13 +91,7 @@ struct IndexedPack {
         return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }
 };
+}  // namespace Platform
 
-struct Category {
-    QString name;
-    QString id;
-};
-
-}  // namespace ModPlatform
-
-Q_DECLARE_METATYPE(ModPlatform::IndexedPack)
-Q_DECLARE_METATYPE(ModPlatform::IndexedPack::Ptr)
+Q_DECLARE_METATYPE(Platform::Project)
+Q_DECLARE_METATYPE(Platform::Project::Ptr)

@@ -22,15 +22,15 @@
 #include "net/NetJob.h"
 #include "tasks/SequentialTask.h"
 
+#include "api/structures/Project.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
-#include "modplatform/ModIndex.h"
 
 class ResourceFolderModel;
 
 class ResourceDownloadTask : public SequentialTask {
     Q_OBJECT
    public:
-    explicit ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
+    explicit ResourceDownloadTask(Platform::Project::Ptr pack,
                                   Platform::Version version,
                                   std::shared_ptr<ResourceFolderModel> packs,
                                   bool is_indexed = true,
@@ -41,10 +41,10 @@ class ResourceDownloadTask : public SequentialTask {
     const Platform::Version& getVersion() const { return m_pack_version; }
     const Platform::Provider& getProvider() const { return m_pack->provider; }
     const QString& getName() const { return m_pack->name; }
-    ModPlatform::IndexedPack::Ptr getPack() { return m_pack; }
+    Platform::Project::Ptr getPack() { return m_pack; }
 
    private:
-    ModPlatform::IndexedPack::Ptr m_pack;
+    Platform::Project::Ptr m_pack;
     Platform::Version m_pack_version;
     const std::shared_ptr<ResourceFolderModel> m_pack_model;
     QString m_custom_target_folder;
@@ -56,7 +56,7 @@ class ResourceDownloadTask : public SequentialTask {
     void downloadFailed(QString reason);
     void downloadSucceeded();
 
-    std::tuple<QString, QString> to_delete{ "", "" };
+    std::tuple<QString, QString> m_toDelete{ "", "" };
 
    private slots:
     void hasOldResource(QString name, QString filename);

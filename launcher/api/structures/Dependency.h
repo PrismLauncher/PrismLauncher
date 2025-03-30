@@ -28,7 +28,7 @@ namespace Platform {
 enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 
 struct Dependency {
-    QVariant addonId;
+    QVariant projectId;
     DependencyType type;
     QString version;
 };

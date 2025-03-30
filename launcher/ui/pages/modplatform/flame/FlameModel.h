@@ -48,15 +48,15 @@ class ListModel : public QAbstractListModel {
     void logoFailed(QString logo);
     void logoLoaded(QString logo, QIcon out);
 
-    void searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>&);
+    void searchRequestFinished(QList<Platform::Project::Ptr>&);
     void searchRequestFailed(QString reason);
-    void searchRequestForOneSucceeded(ModPlatform::IndexedPack&);
+    void searchRequestForOneSucceeded(Platform::Project&);
 
    private:
     void requestLogo(QString file, QString url);
 
    private:
-    QList<ModPlatform::IndexedPack::Ptr> m_modpacks;
+    QList<Platform::Project::Ptr> m_modpacks;
     QStringList m_failedLogos;
     QStringList m_loadingLogos;
     LogoMap m_logoMap;

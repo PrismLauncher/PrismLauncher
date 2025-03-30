@@ -13,7 +13,7 @@
 
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "net/ApiDownload.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
@@ -72,10 +72,10 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, std::shared_
     }
 
     // Fake pack with the necessary info to pass to the download task :)
-    auto pack = std::make_shared<ModPlatform::IndexedPack>();
+    auto pack = std::make_shared<Platform::Project>();
     pack->name = resource->name();
     pack->slug = resource->metadata()->slug;
-    pack->addonId = resource->metadata()->project_id;
+    pack->projectId = resource->metadata()->project_id;
     pack->provider = Platform::Provider::FLAME;
     try {
         auto obj = Json::requireObject(doc);
@@ -173,7 +173,7 @@ void FlameCheckUpdate::collectBlockedMods()
 
                 auto resource = quickSearch.find(id).value();
 
-                ModPlatform::IndexedPack pack;
+                Platform::Project pack;
                 try {
                     setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
 

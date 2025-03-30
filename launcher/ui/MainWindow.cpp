@@ -116,7 +116,7 @@
 #include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 

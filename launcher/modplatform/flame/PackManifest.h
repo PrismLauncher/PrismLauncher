@@ -40,8 +40,8 @@
 #include <QMap>
 #include <QString>
 #include <QUrl>
+#include "api/structures/Project.h"
 #include "api/structures/ResourceType.h"
-#include "modplatform/ModIndex.h"
 
 namespace Flame {
 struct File {
@@ -50,7 +50,7 @@ struct File {
     // NOTE: the opposite to 'optional'
     bool required = true;
 
-    ModPlatform::IndexedPack pack;
+    Platform::Project pack;
     Platform::Version version;
 
     // our

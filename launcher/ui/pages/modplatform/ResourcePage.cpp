@@ -38,9 +38,8 @@
  */
 
 #include "ResourcePage.h"
-#include "api/structures/Version.h"
+#include "api/structures/Project.h"
 #include "api/structures/VersionType.h"
-#include "modplatform/ModIndex.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ResourcePage.h"
 
@@ -175,16 +174,16 @@ void ResourcePage::addSortings()
         m_ui->sortByBox->addItem(sorting.readable_name, QVariant(sorting.index));
 }
 
-bool ResourcePage::setCurrentPack(ModPlatform::IndexedPack::Ptr pack)
+bool ResourcePage::setCurrentPack(Platform::Project::Ptr pack)
 {
     QVariant v;
     v.setValue(pack);
     return m_model->setData(m_ui->packView->currentIndex(), v, Qt::UserRole);
 }
 
-ModPlatform::IndexedPack::Ptr ResourcePage::getCurrentPack() const
+Platform::Project::Ptr ResourcePage::getCurrentPack() const
 {
-    return m_model->data(m_ui->packView->currentIndex(), Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
+    return m_model->data(m_ui->packView->currentIndex(), Qt::UserRole).value<Platform::Project::Ptr>();
 }
 
 void ResourcePage::updateUi(const QModelIndex& index)
@@ -207,7 +206,7 @@ void ResourcePage::updateUi(const QModelIndex& index)
         text = "<a href=\"" + current_pack->websiteUrl + "\">" + name + "</a>";
 
     if (!current_pack->authors.empty()) {
-        auto authorToStr = [](ModPlatform::ModpackAuthor& author) -> QString {
+        auto authorToStr = [](Platform::ModpackAuthor& author) -> QString {
             if (author.url.isEmpty()) {
                 return author.name;
             }
@@ -228,7 +227,7 @@ void ResourcePage::updateUi(const QModelIndex& index)
 
         if (!current_pack->extraData.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
-            auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
+            auto donateToStr = [](Platform::DonationData& donate) -> QString {
                 return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
             };
             QStringList donates;
@@ -362,7 +361,7 @@ void ResourcePage::onVersionSelectionChanged(int index)
     updateSelectionButton();
 }
 
-void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack::Ptr pack, Platform::Version& version)
+void ResourcePage::addResourceToDialog(Platform::Project::Ptr pack, Platform::Version& version)
 {
     m_parentDialog->addResource(pack, version);
 }
@@ -372,7 +371,7 @@ void ResourcePage::removeResourceFromDialog(const QString& pack_name)
     m_parentDialog->removeResource(pack_name);
 }
 
-void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
+void ResourcePage::addResourceToPage(Platform::Project::Ptr pack,
                                      Platform::Version& ver,
                                      const std::shared_ptr<ResourceFolderModel> base_model)
 {
@@ -419,7 +418,7 @@ void ResourcePage::onResourceSelected()
 void ResourcePage::onResourceToggle(const QModelIndex& index)
 {
     const bool isSelected = index == m_ui->packView->currentIndex();
-    auto pack = m_model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
+    auto pack = m_model->data(index, Qt::UserRole).value<Platform::Project::Ptr>();
 
     if (pack->versionsLoaded) {
         if (pack->isAnyVersionSelected())
@@ -496,7 +495,7 @@ void ResourcePage::openUrl(const QUrl& url)
             auto jump = [url, slug, model, view] {
                 for (int row = 0; row < model->rowCount({}); row++) {
                     const QModelIndex index = model->index(row);
-                    const auto pack = model->data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
+                    const auto pack = model->data(index, Qt::UserRole).value<Platform::Project::Ptr>();
 
                     if (pack->slug == slug) {
                         view->setCurrentIndex(index);

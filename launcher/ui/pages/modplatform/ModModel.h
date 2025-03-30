@@ -8,7 +8,7 @@
 
 #include "BaseInstance.h"
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/modplatform/ResourceModel.h"
@@ -30,7 +30,7 @@ class ModModel : public ResourceModel {
     void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);
 
     void setFilter(std::shared_ptr<ModFilterWidget::Filter> filter) { m_filter = filter; }
-    virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const override;
+    virtual QVariant getInstalledPackVersion(Platform::Project::Ptr) const override;
 
     [[nodiscard]] QString debugName() const override { return m_debugName; }
     [[nodiscard]] QString metaEntryBase() const override { return m_metaEntryBase; }
@@ -41,9 +41,9 @@ class ModModel : public ResourceModel {
     ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
 
    protected:
-    virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const override;
+    virtual bool isPackInstalled(Platform::Project::Ptr) const override;
 
-    virtual bool checkFilters(ModPlatform::IndexedPack::Ptr) override;
+    virtual bool checkFilters(Platform::Project::Ptr) override;
     virtual bool checkVersionFilters(const Platform::Version&) override;
 
    protected:

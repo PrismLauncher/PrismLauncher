@@ -38,7 +38,7 @@
 
 #include "BuildConfig.h"
 #include "Json.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "net/NetJob.h"
 #include "ui/widgets/ProjectItem.h"
@@ -122,7 +122,7 @@ bool ModpackListModel::setData(const QModelIndex& index, const QVariant& value, 
     if (pos >= m_modpacks.size() || pos < 0 || !index.isValid())
         return false;
 
-    m_modpacks[pos] = value.value<ModPlatform::IndexedPack::Ptr>();
+    m_modpacks[pos] = value.value<Platform::Project::Ptr>();
 
     return true;
 }
@@ -136,7 +136,7 @@ void ModpackListModel::performPaginatedSearch()
     if (m_currentSearchTerm.startsWith("#")) {
         auto projectId = m_currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<ModPlatform::IndexedPack> callbacks;
+            ResourceAPI::Callback<Platform::Project> callbacks;
 
             callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
             callbacks.on_succeed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
@@ -154,7 +154,7 @@ void ModpackListModel::performPaginatedSearch()
     ResourceAPI::SortingMethod sort{};
     sort.name = m_currentSort;
 
-    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
+    ResourceAPI::Callback<QList<Platform::Project::Ptr>> callbacks{};
 
     callbacks.on_succeed = [this](auto& doc) { searchRequestFinished(doc); };
     callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
@@ -279,7 +279,7 @@ void ModpackListModel::logoFailed(QString logo)
     m_loadingLogos.removeAll(logo);
 }
 
-void ModpackListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>& newList)
+void ModpackListModel::searchRequestFinished(QList<Platform::Project::Ptr>& newList)
 {
     m_jobPtr.reset();
 
@@ -299,12 +299,12 @@ void ModpackListModel::searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr
     endInsertRows();
 }
 
-void ModpackListModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack& pack)
+void ModpackListModel::searchRequestForOneSucceeded(Platform::Project& pack)
 {
     m_jobPtr.reset();
 
     beginInsertRows(QModelIndex(), m_modpacks.size(), m_modpacks.size() + 1);
-    m_modpacks.append(std::make_shared<ModPlatform::IndexedPack>(pack));
+    m_modpacks.append(std::make_shared<Platform::Project>(pack));
     endInsertRows();
 }
 

@@ -22,7 +22,7 @@
 #include "BaseInstance.h"
 #include "FastFileIconProvider.h"
 #include "FileIgnoreProxy.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 
 namespace Ui {
 class ExportPackDialog;

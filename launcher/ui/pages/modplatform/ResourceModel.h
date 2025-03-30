@@ -11,7 +11,7 @@
 #include "QObjectPtr.h"
 
 #include "ResourceDownloadTask.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "tasks/ConcurrentTask.h"
@@ -56,7 +56,7 @@ class ResourceModel : public QAbstractListModel {
 
     [[nodiscard]] auto getSortingMethods() const { return m_api->getSortingMethods(); }
 
-    virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const { return {}; }
+    virtual QVariant getInstalledPackVersion(Platform::Project::Ptr) const { return {}; }
     /** Whether the version is opted out or not. Currently only makes sense in CF. */
     virtual bool optedOut(const Platform::Version& ver) const
     {
@@ -64,7 +64,7 @@ class ResourceModel : public QAbstractListModel {
         return false;
     };
 
-    virtual bool checkFilters(ModPlatform::IndexedPack::Ptr) { return true; }
+    virtual bool checkFilters(Platform::Project::Ptr) { return true; }
     virtual bool checkVersionFilters(const Platform::Version&);
 
    public slots:
@@ -95,7 +95,7 @@ class ResourceModel : public QAbstractListModel {
     /** Gets the icon at the URL for the given index. If it's not fetched yet, fetch it and update when fisinhed. */
     std::optional<QIcon> getIcon(QModelIndex&, const QUrl&);
 
-    void addPack(ModPlatform::IndexedPack::Ptr pack,
+    void addPack(Platform::Project::Ptr pack,
                  Platform::Version& version,
                  std::shared_ptr<ResourceFolderModel> packs,
                  bool is_indexed = false,
@@ -112,7 +112,7 @@ class ResourceModel : public QAbstractListModel {
 
     [[nodiscard]] auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
 
-    virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const { return false; }
+    virtual bool isPackInstalled(Platform::Project::Ptr) const { return false; }
 
    protected:
     /* Basic search parameters */
@@ -132,7 +132,7 @@ class ResourceModel : public QAbstractListModel {
     QSet<QUrl> m_currently_running_icon_actions;
     QSet<QUrl> m_failed_icon_actions;
 
-    QList<ModPlatform::IndexedPack::Ptr> m_packs;
+    QList<Platform::Project::Ptr> m_packs;
     QList<DownloadTaskPtr> m_selected;
 
     // HACK: We need this to prevent callbacks from calling the model after it has already been deleted.
@@ -141,14 +141,14 @@ class ResourceModel : public QAbstractListModel {
 
    private:
     /* Default search request callbacks */
-    void searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&);
-    void searchRequestForOneSucceeded(ModPlatform::IndexedPack&);
+    void searchRequestSucceeded(QList<Platform::Project::Ptr>&);
+    void searchRequestForOneSucceeded(Platform::Project&);
     void searchRequestFailed(QString reason, int network_error_code);
     void searchRequestAborted();
 
     void versionRequestSucceeded(QVector<Platform::Version>&, QVariant, const QModelIndex&);
 
-    void infoRequestSucceeded(ModPlatform::IndexedPack&, const QModelIndex&);
+    void infoRequestSucceeded(Platform::Project&, const QModelIndex&);
 
    signals:
     void versionListUpdated(const QModelIndex& index);

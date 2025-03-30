@@ -1,15 +1,12 @@
 #pragma once
 
-#include "ModIndex.h"
-#include "net/NetJob.h"
+#include <QDir>
 
+#include "api/structures/Provider.h"
+#include "minecraft/mod/Resource.h"
 #include "modplatform/helpers/HashUtils.h"
 
-#include "minecraft/mod/Resource.h"
-#include "tasks/ConcurrentTask.h"
-
 class Mod;
-class QDir;
 
 class EnsureMetadataTask : public Task {
     Q_OBJECT
@@ -46,8 +43,8 @@ class EnsureMetadataTask : public Task {
     QString getExistingHash(Resource*);
 
    private slots:
-    void updateMetadata(ModPlatform::IndexedPack& pack, Platform::Version& ver, Resource*);
-    void updateMetadataCallback(ModPlatform::IndexedPack& pack, Resource* resource);
+    void updateMetadata(Platform::Project& pack, Platform::Version& ver, Resource*);
+    void updateMetadataCallback(Platform::Project& pack, Resource* resource);
 
    signals:
     void metadataReady(Resource*);

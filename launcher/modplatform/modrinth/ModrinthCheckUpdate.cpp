@@ -8,7 +8,7 @@
 #include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/helpers/HashUtils.h"
 
 #include "tasks/ConcurrentTask.h"
@@ -129,10 +129,10 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             }
 
             // Fake pack with the necessary info to pass to the download task :)
-            auto pack = std::make_shared<ModPlatform::IndexedPack>();
+            auto pack = std::make_shared<Platform::Project>();
             pack->name = resource->name();
             pack->slug = resource->metadata()->slug;
-            pack->addonId = resource->metadata()->project_id;
+            pack->projectId = resource->metadata()->project_id;
             pack->provider = Platform::Provider::MODRINTH;
             if ((project_ver.hash != hash && project_ver.is_preferred) || (resource->status() == ResourceStatus::NOT_INSTALLED)) {
                 auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resource_model);

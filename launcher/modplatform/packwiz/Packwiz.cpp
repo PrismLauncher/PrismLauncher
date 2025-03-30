@@ -29,8 +29,8 @@
 #include "StringUtils.h"
 
 #include "api/structures/ModLoader.h"
+#include "api/structures/Project.h"
 #include "api/structures/VersionType.h"
-#include "modplatform/ModIndex.h"
 
 #include <toml++/toml.h>
 
@@ -91,7 +91,7 @@ auto intEntry(toml::table table, QString entry_name) -> int
     return node.value_or(0);
 }
 
-auto V1::createModFormat([[maybe_unused]] const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Platform::Version& mod_version) -> Mod
+auto V1::createModFormat([[maybe_unused]] const QDir& index_dir, Platform::Project& mod_pack, Platform::Version& mod_version) -> Mod
 {
     Mod mod;
 
@@ -111,7 +111,7 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir, ModPlatform::In
 
     mod.provider = mod_pack.provider;
     mod.file_id = mod_version.fileId;
-    mod.project_id = mod_pack.addonId;
+    mod.project_id = mod_pack.projectId;
     mod.side = mod_version.side == Platform::Side::NoSide ? mod_pack.side : mod_version.side;
     mod.loaders = mod_version.loaders;
     mod.mcVersions = mod_version.mcVersion;

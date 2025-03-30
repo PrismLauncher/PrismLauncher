@@ -5,9 +5,9 @@
 #pragma once
 
 #include "BuildConfig.h"
-#include "Json.h"
+#include "api/structures/Category.h"
 #include "api/structures/ModLoader.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
@@ -34,8 +34,8 @@ class ModrinthAPI : public ResourceAPI {
     Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
 
     static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
-    static QList<ModPlatform::Category> loadCategories(std::shared_ptr<QByteArray> response, QString projectType);
-    static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
+    static QList<Platform::Category> loadCategories(std::shared_ptr<QByteArray> response, QString projectType);
+    static QList<Platform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
 
    public:
     [[nodiscard]] auto getSortingMethods() const -> QList<ResourceAPI::SortingMethod> override;
@@ -187,7 +187,8 @@ class ModrinthAPI : public ResourceAPI {
             get_arguments.append(QString("loaders=[\"%1\"]").arg(getModLoaderStrings(args.loaders.value()).join("\",\"")));
 
         return QString("%1/project/%2/version%3%4")
-            .arg(BuildConfig.MODRINTH_PROD_URL, args.pack.addonId.toString(), get_arguments.isEmpty() ? "" : "?", get_arguments.join('&'));
+            .arg(BuildConfig.MODRINTH_PROD_URL, args.pack.projectId.toString(), get_arguments.isEmpty() ? "" : "?",
+                 get_arguments.join('&'));
     };
 
     QString getGameVersionsArray(std::list<Version> mcVersions) const
@@ -211,16 +212,16 @@ class ModrinthAPI : public ResourceAPI {
         return args.dependency.version.length() != 0 ? QString("%1/version/%2").arg(BuildConfig.MODRINTH_PROD_URL, args.dependency.version)
                                                      : QString("%1/project/%2/version?game_versions=[\"%3\"]&loaders=[\"%4\"]")
                                                            .arg(BuildConfig.MODRINTH_PROD_URL)
-                                                           .arg(args.dependency.addonId.toString())
+                                                           .arg(args.dependency.projectId.toString())
                                                            .arg(mapMCVersionToModrinth(args.mcVersion))
                                                            .arg(getModLoaderStrings(args.loader).join("\",\""));
     };
 
     QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object().value("hits").toArray(); }
-    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { Modrinth::loadIndexedPack(m, obj); }
+    void loadIndexedPack(Platform::Project& m, QJsonObject& obj) const override { Modrinth::loadIndexedPack(m, obj); }
     Platform::Version loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType) const override
     {
         return Modrinth::loadIndexedPackVersion(obj);
     };
-    void loadExtraPackInfo(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { Modrinth::loadExtraPackData(m, obj); }
+    void loadExtraPackInfo(Platform::Project& m, QJsonObject& obj) const override { Modrinth::loadExtraPackData(m, obj); }
 };

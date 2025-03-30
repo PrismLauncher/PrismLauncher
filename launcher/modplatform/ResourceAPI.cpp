@@ -4,11 +4,11 @@
 #include "Json.h"
 #include "net/NetJob.h"
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 
 #include "net/ApiDownload.h"
 
-Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatform::IndexedPack::Ptr>>&& callbacks) const
+Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<Platform::Project::Ptr>>&& callbacks) const
 {
     auto search_url_optional = getSearchURL(args);
     if (!search_url_optional.has_value()) {
@@ -36,13 +36,13 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
             return;
         }
 
-        QList<ModPlatform::IndexedPack::Ptr> newList;
+        QList<Platform::Project::Ptr> newList;
         auto packs = documentToArray(doc);
 
         for (auto packRaw : packs) {
             auto packObj = packRaw.toObject();
 
-            ModPlatform::IndexedPack::Ptr pack = std::make_shared<ModPlatform::IndexedPack>();
+            Platform::Project::Ptr pack = std::make_shared<Platform::Project>();
             try {
                 loadIndexedPack(*pack, packObj);
                 newList << pack;
@@ -104,7 +104,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
 
                 auto file = loadIndexedPackVersion(obj, args.resourceType);
                 if (!file.projectId.isValid())
-                    file.projectId = args.pack.addonId;
+                    file.projectId = args.pack.projectId;
 
                 if (file.fileId.isValid() && !file.downloadUrl.isEmpty())  // Heuristic to check if the returned value is valid
                     unsortedVersions.append(file);
@@ -140,10 +140,10 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
     return netJob;
 }
 
-Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatform::IndexedPack>&& callbacks) const
+Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<Platform::Project>&& callbacks) const
 {
     auto response = std::make_shared<QByteArray>();
-    auto job = getProject(args.pack.addonId.toString(), response);
+    auto job = getProject(args.pack.projectId.toString(), response);
 
     QObject::connect(job.get(), &NetJob::succeeded, [this, response, callbacks, args] {
         auto pack = args.pack;
@@ -194,7 +194,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
 
     auto versions_url = versions_url_optional.value();
 
-    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.addonId.toString()), APPLICATION->network());
+    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.projectId.toString()), APPLICATION->network());
     auto response = std::make_shared<QByteArray>();
 
     netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
@@ -222,7 +222,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
 
             auto file = loadIndexedPackVersion(obj, Platform::ResourceType::Mod);
             if (!file.projectId.isValid())
-                file.projectId = args.dependency.addonId;
+                file.projectId = args.dependency.projectId;
 
             if (file.fileId.isValid() &&
                 (!file.loaders || args.loader & file.loaders))  // Heuristic to check if the returned value is valid

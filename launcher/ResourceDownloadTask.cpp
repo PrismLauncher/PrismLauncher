@@ -28,7 +28,7 @@
 #include "net/ApiDownload.h"
 #include "net/ChecksumValidator.h"
 
-ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
+ResourceDownloadTask::ResourceDownloadTask(Platform::Project::Ptr pack,
                                            Platform::Version version,
                                            const std::shared_ptr<ResourceFolderModel> packs,
                                            bool is_indexed,
@@ -89,8 +89,8 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
 void ResourceDownloadTask::downloadSucceeded()
 {
     m_filesNetJob.reset();
-    auto name = std::get<0>(to_delete);
-    auto filename = std::get<1>(to_delete);
+    auto name = std::get<0>(m_toDelete);
+    auto filename = std::get<1>(m_toDelete);
     if (!name.isEmpty() && filename != m_pack_version.fileName)
         m_pack_model->uninstallResource(filename, true);
 }
@@ -110,5 +110,5 @@ void ResourceDownloadTask::downloadProgressChanged(qint64 current, qint64 total)
 // downloaded successfully!
 void ResourceDownloadTask::hasOldResource(QString name, QString filename)
 {
-    to_delete = { name, filename };
+    m_toDelete = { name, filename };
 }

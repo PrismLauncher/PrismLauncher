@@ -22,8 +22,8 @@
 #include <QFutureWatcher>
 #include "BaseInstance.h"
 #include "MMCZip.h"
+#include "api/structures/Project.h"
 #include "minecraft/MinecraftInstance.h"
-#include "modplatform/ModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 

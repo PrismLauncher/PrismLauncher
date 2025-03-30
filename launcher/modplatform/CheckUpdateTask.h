@@ -1,9 +1,9 @@
 #pragma once
 
 #include "api/structures/ModLoader.h"
+#include "api/structures/Project.h"
 #include "api/structures/VersionType.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
-#include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
 
 class ResourceDownloadTask;

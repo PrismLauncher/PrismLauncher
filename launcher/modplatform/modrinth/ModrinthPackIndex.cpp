@@ -22,10 +22,10 @@
 #include "ModrinthAPI.h"
 
 #include "Json.h"
+#include "api/structures/Project.h"
 #include "api/structures/VersionType.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "modplatform/ModIndex.h"
 
 static ModrinthAPI api;
 
@@ -35,11 +35,11 @@ bool shouldDownloadOnSide(QString side)
 }
 
 // https://docs.modrinth.com/api-spec/#tag/projects/operation/getProject
-void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
+void Modrinth::loadIndexedPack(Platform::Project& pack, QJsonObject& obj)
 {
-    pack.addonId = Json::ensureString(obj, "project_id");
-    if (pack.addonId.toString().isEmpty())
-        pack.addonId = Json::requireString(obj, "id");
+    pack.projectId = Json::ensureString(obj, "project_id");
+    if (pack.projectId.toString().isEmpty())
+        pack.projectId = Json::requireString(obj, "id");
 
     pack.provider = Platform::Provider::MODRINTH;
     pack.name = Json::requireString(obj, "title");
@@ -53,9 +53,9 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     pack.description = Json::ensureString(obj, "description", "");
 
     pack.logoUrl = Json::ensureString(obj, "icon_url", "");
-    pack.logoName = pack.addonId.toString();
+    pack.logoName = pack.projectId.toString();
 
-    ModPlatform::ModpackAuthor modAuthor;
+    Platform::ModpackAuthor modAuthor;
     modAuthor.name = Json::ensureString(obj, "author", QObject::tr("No author(s)"));
     modAuthor.url = api.getAuthorURL(modAuthor.name);
     pack.authors.append(modAuthor);
@@ -75,7 +75,7 @@ void Modrinth::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     pack.extraDataLoaded = false;
 }
 
-void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& obj)
+void Modrinth::loadExtraPackData(Platform::Project& pack, QJsonObject& obj)
 {
     pack.extraData.issuesUrl = Json::ensureString(obj, "issues_url");
     if (pack.extraData.issuesUrl.endsWith('/'))
@@ -97,7 +97,7 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
     for (auto d : donate_arr) {
         auto d_obj = Json::requireObject(d);
 
-        ModPlatform::DonationData donate;
+        Platform::DonationData donate;
 
         donate.id = Json::ensureString(d_obj, "id");
         donate.platform = Json::ensureString(d_obj, "platform");
@@ -152,7 +152,7 @@ Platform::Version Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString pre
     for (auto d : dependencies) {
         auto dep = Json::ensureObject(d);
         Platform::Dependency dependency;
-        dependency.addonId = Json::ensureString(dep, "project_id");
+        dependency.projectId = Json::ensureString(dep, "project_id");
         dependency.version = Json::ensureString(dep, "version_id");
         auto depType = Json::requireString(dep, "dependency_type");
 

@@ -4,10 +4,10 @@
 
 #include "ModModel.h"
 
+#include "api/structures/Project.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
-#include "modplatform/ModIndex.h"
 
 #include <QMessageBox>
 #include <algorithm>
@@ -82,21 +82,21 @@ void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filte
     refresh();
 }
 
-bool ModModel::isPackInstalled(ModPlatform::IndexedPack::Ptr pack) const
+bool ModModel::isPackInstalled(Platform::Project::Ptr pack) const
 {
     auto allMods = static_cast<MinecraftInstance&>(m_base_instance).loaderModList()->allMods();
     return std::any_of(allMods.cbegin(), allMods.cend(), [pack](Mod* mod) {
         if (auto meta = mod->metadata(); meta)
-            return meta->provider == pack->provider && meta->project_id == pack->addonId;
+            return meta->provider == pack->provider && meta->project_id == pack->projectId;
         return false;
     });
 }
 
-QVariant ModModel::getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) const
+QVariant ModModel::getInstalledPackVersion(Platform::Project::Ptr pack) const
 {
     auto allMods = static_cast<MinecraftInstance&>(m_base_instance).loaderModList()->allMods();
     for (auto mod : allMods) {
-        if (auto meta = mod->metadata(); meta && meta->provider == pack->provider && meta->project_id == pack->addonId) {
+        if (auto meta = mod->metadata(); meta && meta->provider == pack->provider && meta->project_id == pack->projectId) {
             return meta->version();
         }
     }
@@ -109,7 +109,7 @@ bool checkSide(Platform::Side filter, Platform::Side value)
            value == Platform::Side::UniversalSide || filter == value;
 }
 
-bool ModModel::checkFilters(ModPlatform::IndexedPack::Ptr pack)
+bool ModModel::checkFilters(Platform::Project::Ptr pack)
 {
     if (!m_filter)
         return true;

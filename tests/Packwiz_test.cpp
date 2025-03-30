@@ -19,7 +19,7 @@
 
 #include <QTemporaryDir>
 #include <QTest>
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 
 #include <modplatform/packwiz/Packwiz.h>
 

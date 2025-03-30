@@ -39,7 +39,7 @@
 
 #include <Application.h>
 #include <QTimer>
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
 #include "ui/widgets/ModFilterWidget.h"
 #include "ui/widgets/ProgressWidget.h"
@@ -91,7 +91,7 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
     Ui::FlamePage* m_ui = nullptr;
     NewInstanceDialog* m_dialog = nullptr;
     Flame::ListModel* m_listModel = nullptr;
-    ModPlatform::IndexedPack::Ptr m_current;
+    Platform::Project::Ptr m_current;
 
     int m_selected_version_index = -1;
 

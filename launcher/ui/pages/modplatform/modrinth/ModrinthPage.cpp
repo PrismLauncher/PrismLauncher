@@ -36,8 +36,8 @@
 
 #include "ModrinthPage.h"
 #include "Version.h"
+#include "api/structures/Project.h"
 #include "api/structures/VersionType.h"
-#include "modplatform/ModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ModrinthPage.h"
@@ -142,19 +142,19 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
         return;
     }
 
-    m_current = m_model->data(curr, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
+    m_current = m_model->data(curr, Qt::UserRole).value<Platform::Project::Ptr>();
     auto name = m_current->name;
 
     if (!m_current->extraDataLoaded) {
         qDebug() << "Loading modrinth modpack information";
-        ResourceAPI::Callback<ModPlatform::IndexedPack> callbacks;
+        ResourceAPI::Callback<Platform::Project> callbacks;
 
-        auto id = m_current->addonId;
+        auto id = m_current->projectId;
         callbacks.on_fail = [this](QString reason, int) {
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
         callbacks.on_succeed = [this, id, curr](auto& pack) {
-            if (id != m_current->addonId) {
+            if (id != m_current->projectId) {
                 return;  // wrong request?
             }
 
@@ -169,7 +169,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
             updateUI();
         };
-        if (auto netJob = m_api.getProjectInfo({ { m_current->addonId } }, std::move(callbacks)); netJob) {
+        if (auto netJob = m_api.getProjectInfo({ { m_current->projectId } }, std::move(callbacks)); netJob) {
             m_job = netJob;
             m_job->start();
         }
@@ -182,10 +182,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
         ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
 
-        auto addonId = m_current->addonId;
+        auto addonId = m_current->projectId;
         // Use default if no callbacks are set
         callbacks.on_succeed = [this, curr, addonId](auto& doc) {
-            if (addonId != m_current->addonId) {
+            if (addonId != m_current->projectId) {
                 return;  // wrong request
             }
 
@@ -257,7 +257,7 @@ void ModrinthPage::updateUI()
         text = "<a href=\"" + m_current->websiteUrl + "\">" + m_current->name + "</a>";
 
     if (!m_current->authors.empty()) {
-        auto authorToStr = [](ModPlatform::ModpackAuthor& author) {
+        auto authorToStr = [](Platform::ModpackAuthor& author) {
             if (author.url.isEmpty()) {
                 return author.name;
             }
@@ -278,7 +278,7 @@ void ModrinthPage::updateUI()
 
         if (!m_current->extraData.donate.isEmpty()) {
             text += "<br><br>" + tr("Donate information: ");
-            auto donateToStr = [](ModPlatform::DonationData& donate) -> QString {
+            auto donateToStr = [](Platform::DonationData& donate) -> QString {
                 return QString("<a href=\"%1\">%2</a>").arg(donate.url, donate.platform);
             };
             QStringList donates;
@@ -325,7 +325,7 @@ void ModrinthPage::suggestCurrent()
     for (auto& ver : m_current->versions) {
         if (ver.projectId == m_selectedVersion) {
             QMap<QString, QString> extra_info;
-            extra_info.insert("pack_id", m_current->addonId.toString());
+            extra_info.insert("pack_id", m_current->projectId.toString());
             extra_info.insert("pack_version_id", ver.fileId.toString());
 
             m_dialog->setSuggestedPack(m_current->name, ver.version, new InstanceImportTask(ver.downloadUrl, this, std::move(extra_info)));

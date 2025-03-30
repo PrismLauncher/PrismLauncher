@@ -2,16 +2,16 @@
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "api/structures/Project.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
 
 static FlameAPI api;
 
-void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
+void FlameMod::loadIndexedPack(Platform::Project& pack, QJsonObject& obj)
 {
-    pack.addonId = Json::requireInteger(obj, "id");
+    pack.projectId = Json::requireInteger(obj, "id");
     pack.provider = Platform::Provider::FLAME;
     pack.name = Json::requireString(obj, "name");
     pack.slug = Json::requireString(obj, "slug");
@@ -28,7 +28,7 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     auto authors = Json::ensureArray(obj, "authors");
     for (auto authorIter : authors) {
         auto author = Json::requireObject(authorIter);
-        ModPlatform::ModpackAuthor packAuthor;
+        Platform::ModpackAuthor packAuthor;
         packAuthor.name = Json::requireString(author, "name");
         packAuthor.url = Json::requireString(author, "url");
         pack.authors.append(packAuthor);
@@ -38,7 +38,7 @@ void FlameMod::loadIndexedPack(ModPlatform::IndexedPack& pack, QJsonObject& obj)
     loadURLs(pack, obj);
 }
 
-void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
+void FlameMod::loadURLs(Platform::Project& pack, QJsonObject& obj)
 {
     auto links_obj = Json::ensureObject(obj, "links");
 
@@ -58,9 +58,9 @@ void FlameMod::loadURLs(ModPlatform::IndexedPack& pack, QJsonObject& obj)
         pack.extraDataLoaded = true;
 }
 
-void FlameMod::loadBody(ModPlatform::IndexedPack& pack)
+void FlameMod::loadBody(Platform::Project& pack)
 {
-    pack.extraData.body = api.getModDescription(pack.addonId.toInt());
+    pack.extraData.body = api.getModDescription(pack.projectId.toInt());
 
     if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty())
         pack.extraDataLoaded = true;
@@ -77,7 +77,7 @@ static QString enumToString(int hash_algorithm)
     }
 }
 
-void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr)
+void FlameMod::loadIndexedPackVersions(Platform::Project& pack, QJsonArray& arr)
 {
     QList<Platform::Version> unsortedVersions;
     for (auto versionIter : arr) {
@@ -85,7 +85,7 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArra
 
         auto file = loadIndexedPackVersion(obj);
         if (!file.projectId.isValid())
-            file.projectId = pack.addonId;
+            file.projectId = pack.projectId;
 
         if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
@@ -172,7 +172,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     for (auto d : dependencies) {
         auto dep = Json::ensureObject(d);
         Platform::Dependency dependency;
-        dependency.addonId = Json::requireInteger(dep, "modId");
+        dependency.projectId = Json::requireInteger(dep, "modId");
         switch (Json::requireInteger(dep, "relationType")) {
             case 1:  // EmbeddedLibrary
                 dependency.type = Platform::DependencyType::EMBEDDED;

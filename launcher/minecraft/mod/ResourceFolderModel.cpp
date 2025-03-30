@@ -168,7 +168,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(QString path, Platfor
 {
     auto install = [this, path] { installResource(std::move(path)); };
     if (vers.projectId.isValid()) {
-        ModPlatform::IndexedPack pack{
+        Platform::Project pack{
             vers.projectId,
             Platform::Provider::FLAME,
         };

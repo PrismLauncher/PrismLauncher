@@ -43,14 +43,12 @@
 #include <QString>
 
 #include "MTPixmapCache.h"
-#include "MetadataHandler.h"
 #include "Resource.h"
 #include "Version.h"
 #include "api/structures/ModLoader.h"
 #include "api/structures/VersionType.h"
 #include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
-#include "modplatform/ModIndex.h"
 
 Mod::Mod(const QFileInfo& file) : Resource(file), m_local_details()
 {

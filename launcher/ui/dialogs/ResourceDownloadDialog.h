@@ -25,8 +25,8 @@
 #include <QLayout>
 
 #include "QObjectPtr.h"
+#include "api/structures/Project.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
-#include "modplatform/ModIndex.h"
 #include "ui/pages/BasePageProvider.h"
 
 class BaseInstance;
@@ -63,7 +63,7 @@ class ResourceDownloadDialog : public QDialog, public BasePageProvider {
     bool selectPage(QString pageId);
     ResourcePage* selectedPage();
 
-    void addResource(ModPlatform::IndexedPack::Ptr, Platform::Version&);
+    void addResource(Platform::Project::Ptr, Platform::Version&);
     void removeResource(const QString&);
 
     const QList<DownloadTaskPtr> getTasks();

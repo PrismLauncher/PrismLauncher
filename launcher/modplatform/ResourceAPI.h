@@ -47,8 +47,8 @@
 
 #include "../Version.h"
 
+#include "api/structures/Project.h"
 #include "api/structures/ResourceType.h"
-#include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
 
 /* Simple class with a common interface for interacting with APIs */
@@ -88,7 +88,7 @@ class ResourceAPI {
     };
 
     struct VersionSearchArgs {
-        ModPlatform::IndexedPack pack;
+        Platform::Project pack;
 
         std::optional<std::list<Version>> mcVersions;
         std::optional<Platform::ModLoaders> loaders;
@@ -106,7 +106,7 @@ class ResourceAPI {
     };
 
     struct ProjectInfoArgs {
-        ModPlatform::IndexedPack pack;
+        Platform::Project pack;
 
         ProjectInfoArgs(ProjectInfoArgs const&) = default;
         void operator=(ProjectInfoArgs other) { pack = other.pack; }
@@ -123,12 +123,12 @@ class ResourceAPI {
     [[nodiscard]] virtual auto getSortingMethods() const -> QList<SortingMethod> = 0;
 
    public slots:
-    [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, Callback<QList<ModPlatform::IndexedPack::Ptr>>&&) const;
+    [[nodiscard]] virtual Task::Ptr searchProjects(SearchArgs&&, Callback<QList<Platform::Project::Ptr>>&&) const;
 
     [[nodiscard]] virtual Task::Ptr getProject(QString addonId, std::shared_ptr<QByteArray> response) const;
     [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const = 0;
 
-    [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, Callback<ModPlatform::IndexedPack>&&) const;
+    [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, Callback<Platform::Project>&&) const;
     [[nodiscard]] Task::Ptr getProjectVersions(VersionSearchArgs&& args, Callback<QVector<Platform::Version>>&& callbacks) const;
     [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<Platform::Version>&&) const;
 
@@ -150,7 +150,7 @@ class ResourceAPI {
      *  Those are needed for the same reason as documentToArray, and NEED to be re-implemented in the same way.
      */
 
-    virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
+    virtual void loadIndexedPack(Platform::Project&, QJsonObject&) const = 0;
     virtual Platform::Version loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType) const = 0;
 
     /** Converts a JSON document to a common array format.
@@ -165,5 +165,5 @@ class ResourceAPI {
      *  Those are needed for the same reason as documentToArray, and NEED to be re-implemented in the same way.
      */
 
-    virtual void loadExtraPackInfo(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
+    virtual void loadExtraPackInfo(Platform::Project&, QJsonObject&) const = 0;
 };

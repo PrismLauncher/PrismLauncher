@@ -31,9 +31,9 @@
 #include "Application.h"
 #include "Json.h"
 #include "MMCZip.h"
+#include "api/structures/Project.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
-#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
@@ -297,11 +297,11 @@ void FlamePackExportTask::getProjectsInfo()
                 try {
                     setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(Json::requireString(entryObj, "name")));
 
-                    ModPlatform::IndexedPack pack;
+                    Platform::Project pack;
                     FlameMod::loadIndexedPack(pack, entryObj);
                     for (auto key : resolvedFiles.keys()) {
                         auto val = resolvedFiles.value(key);
-                        if (val.addonId == pack.addonId) {
+                        if (val.addonId == pack.projectId) {
                             val.name = pack.name;
                             val.slug = pack.slug;
                             QStringList authors;

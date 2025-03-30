@@ -5,7 +5,7 @@
 #include <QFutureWatcher>
 #include <QString>
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "tasks/Task.h"
 
 namespace Hashing {

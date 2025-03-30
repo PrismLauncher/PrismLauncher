@@ -25,10 +25,10 @@
 #include <QtConcurrentRun>
 #include "Json.h"
 #include "MMCZip.h"
+#include "api/structures/Project.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
-#include "modplatform/ModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
 #include "tasks/Task.h"
 

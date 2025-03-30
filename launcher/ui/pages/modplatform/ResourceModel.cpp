@@ -20,7 +20,7 @@
 #include "net/ApiDownload.h"
 #include "net/NetJob.h"
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 
 #include "ui/widgets/ProjectItem.h"
 
@@ -114,7 +114,7 @@ bool ResourceModel::setData(const QModelIndex& index, const QVariant& value, [[m
     if (pos >= m_packs.size() || pos < 0 || !index.isValid())
         return false;
 
-    m_packs[pos] = value.value<ModPlatform::IndexedPack::Ptr>();
+    m_packs[pos] = value.value<Platform::Project::Ptr>();
     emit dataChanged(index, index);
 
     return true;
@@ -141,7 +141,7 @@ void ResourceModel::search()
     if (m_search_term.startsWith("#")) {
         auto projectId = m_search_term.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<ModPlatform::IndexedPack> callbacks;
+            ResourceAPI::Callback<Platform::Project> callbacks;
 
             callbacks.on_fail = [this](QString reason, int) {
                 if (!s_running_models.constFind(this).value())
@@ -166,7 +166,7 @@ void ResourceModel::search()
     }
     auto args{ createSearchArguments() };
 
-    ResourceAPI::Callback<QList<ModPlatform::IndexedPack::Ptr>> callbacks{};
+    ResourceAPI::Callback<QList<Platform::Project::Ptr>> callbacks{};
 
     callbacks.on_succeed = [this](auto& doc) {
         if (!s_running_models.constFind(this).value())
@@ -199,7 +199,7 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
         auto args{ createVersionsArguments(entry) };
         ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
 
-        auto addonId = pack->addonId;
+        auto addonId = pack->projectId;
         // Use default if no callbacks are set
         if (!callbacks.on_succeed)
             callbacks.on_succeed = [this, entry, addonId](auto& doc) {
@@ -219,7 +219,7 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
     if (!pack->extraDataLoaded) {
         auto args{ createInfoArguments(entry) };
-        ResourceAPI::Callback<ModPlatform::IndexedPack> callbacks{};
+        ResourceAPI::Callback<Platform::Project> callbacks{};
 
         callbacks.on_succeed = [this, entry](auto& newpack) {
             if (!s_running_models.constFind(this).value())
@@ -352,15 +352,15 @@ std::optional<QIcon> ResourceModel::getIcon(QModelIndex& index, const QUrl& url)
 
 /* Default callbacks */
 
-void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>& newList)
+void ResourceModel::searchRequestSucceeded(QList<Platform::Project::Ptr>& newList)
 {
-    QList<ModPlatform::IndexedPack::Ptr> filteredNewList;
+    QList<Platform::Project::Ptr> filteredNewList;
     for (auto pack : newList) {
-        ModPlatform::IndexedPack::Ptr p;
+        Platform::Project::Ptr p;
         if (auto sel = std::find_if(m_selected.begin(), m_selected.end(),
                                     [&pack](const DownloadTaskPtr i) {
                                         const auto ipack = i->getPack();
-                                        return ipack->provider == pack->provider && ipack->addonId == pack->addonId;
+                                        return ipack->provider == pack->provider && ipack->projectId == pack->projectId;
                                     });
             sel != m_selected.end()) {
             p = sel->get()->getPack();
@@ -388,12 +388,12 @@ void ResourceModel::searchRequestSucceeded(QList<ModPlatform::IndexedPack::Ptr>&
     endInsertRows();
 }
 
-void ResourceModel::searchRequestForOneSucceeded(ModPlatform::IndexedPack& pack)
+void ResourceModel::searchRequestForOneSucceeded(Platform::Project& pack)
 {
     m_search_state = SearchState::Finished;
 
     beginInsertRows(QModelIndex(), m_packs.size(), m_packs.size() + 1);
-    m_packs.append(std::make_shared<ModPlatform::IndexedPack>(pack));
+    m_packs.append(std::make_shared<Platform::Project>(pack));
     endInsertRows();
 }
 
@@ -428,10 +428,10 @@ void ResourceModel::searchRequestAborted()
 
 void ResourceModel::versionRequestSucceeded(QVector<Platform::Version>& doc, QVariant pack, const QModelIndex& index)
 {
-    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
+    auto current_pack = data(index, Qt::UserRole).value<Platform::Project::Ptr>();
 
     // Check if the index is still valid for this resource or not
-    if (pack != current_pack->addonId)
+    if (pack != current_pack->projectId)
         return;
 
     current_pack->versions = doc;
@@ -448,12 +448,12 @@ void ResourceModel::versionRequestSucceeded(QVector<Platform::Version>& doc, QVa
     emit versionListUpdated(index);
 }
 
-void ResourceModel::infoRequestSucceeded(ModPlatform::IndexedPack& pack, const QModelIndex& index)
+void ResourceModel::infoRequestSucceeded(Platform::Project& pack, const QModelIndex& index)
 {
-    auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
+    auto current_pack = data(index, Qt::UserRole).value<Platform::Project::Ptr>();
 
     // Check if the index is still valid for this resource or not
-    if (pack.addonId != current_pack->addonId)
+    if (pack.projectId != current_pack->projectId)
         return;
 
     *current_pack = pack;
@@ -468,7 +468,7 @@ void ResourceModel::infoRequestSucceeded(ModPlatform::IndexedPack& pack, const Q
     emit projectInfoUpdated(index);
 }
 
-void ResourceModel::addPack(ModPlatform::IndexedPack::Ptr pack,
+void ResourceModel::addPack(Platform::Project::Ptr pack,
                             Platform::Version& version,
                             const std::shared_ptr<ResourceFolderModel> packs,
                             bool is_indexed,
@@ -492,7 +492,7 @@ void ResourceModel::removePack(const QString& rem)
                 ++it;
     }
 #endif
-    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](const ModPlatform::IndexedPack::Ptr i) { return rem == i->name; });
+    auto pack = std::find_if(m_packs.begin(), m_packs.end(), [&rem](const Platform::Project::Ptr i) { return rem == i->name; });
     if (pack == m_packs.end()) {  // ignore it if is not in the current search
         return;
     }

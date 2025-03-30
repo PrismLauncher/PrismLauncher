@@ -17,8 +17,8 @@
  */
 
 #include "ExportPackDialog.h"
+#include "api/structures/Project.h"
 #include "minecraft/mod/ModFolderModel.h"
-#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlamePackExportTask.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"

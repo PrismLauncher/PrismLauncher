@@ -2,6 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
+ *  Copyright (c) 2023-2025 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,30 +19,13 @@
 
 #pragma once
 
-#include <QDir>
+#include <QString>
 
-#include "api/structures/Project.h"
-#include "tasks/Task.h"
+namespace Platform {
 
-class LocalResourceUpdateTask : public Task {
-    Q_OBJECT
-   public:
-    using Ptr = shared_qobject_ptr<LocalResourceUpdateTask>;
-
-    explicit LocalResourceUpdateTask(QDir index_dir, Platform::Project& project, Platform::Version& version);
-
-    auto canAbort() const -> bool override { return true; }
-    auto abort() -> bool override;
-
-   protected slots:
-    //! Entry point for tasks.
-    void executeTask() override;
-
-   signals:
-    void hasOldResource(QString name, QString filename);
-
-   private:
-    QDir m_index_dir;
-    Platform::Project m_project;
-    Platform::Version m_version;
+struct Category {
+    QString name;
+    QString id;
 };
+
+}  // namespace Platform

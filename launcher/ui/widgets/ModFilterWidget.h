@@ -43,10 +43,14 @@
 #include "Version.h"
 
 #include "VersionProxyModel.h"
+#include "api/structures/Category.h"
+#include "api/structures/ModLoader.h"
+#include "api/structures/Side.h"
+#include "api/structures/Version.h"
+#include "api/structures/VersionType.h"
 #include "meta/VersionList.h"
 
 #include "minecraft/MinecraftInstance.h"
-#include "modplatform/ModIndex.h"
 
 class MinecraftInstance;
 
@@ -101,7 +105,7 @@ class ModFilterWidget : public QTabWidget {
     void filterChanged();
 
    public slots:
-    void setCategories(const QList<ModPlatform::Category>&);
+    void setCategories(const QList<Platform::Category>&);
 
    private:
     ModFilterWidget(MinecraftInstance* instance, bool extendedSupport, QWidget* parent = nullptr);
@@ -120,7 +124,7 @@ class ModFilterWidget : public QTabWidget {
     void onReleaseFilterChanged();
 
    private:
-    Ui::ModFilterWidget* ui;
+    Ui::ModFilterWidget* m_ui;
 
     MinecraftInstance* m_instance = nullptr;
     std::shared_ptr<Filter> m_filter;
@@ -129,5 +133,5 @@ class ModFilterWidget : public QTabWidget {
     Meta::VersionList::Ptr m_version_list;
     VersionProxyModel* m_versions_proxy = nullptr;
 
-    QList<ModPlatform::Category> m_categories;
+    QList<Platform::Category> m_categories;
 };

@@ -8,8 +8,9 @@
 #include <memory>
 #include "Json.h"
 #include "Version.h"
+#include "api/structures/Category.h"
 #include "api/structures/ModLoader.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 
@@ -29,7 +30,7 @@ class FlameAPI : public ResourceAPI {
 
     static Task::Ptr getCategories(std::shared_ptr<QByteArray> response, Platform::ResourceType type);
     static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
-    static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
+    static QList<Platform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
 
     [[nodiscard]] QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 
@@ -114,7 +115,7 @@ class FlameAPI : public ResourceAPI {
 
     [[nodiscard]] std::optional<QString> getVersionsURL(VersionSearchArgs const& args) const override
     {
-        auto addonId = args.pack.addonId.toString();
+        auto addonId = args.pack.projectId.toString();
         QString url = QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000").arg(addonId);
 
         if (args.mcVersions.has_value())
@@ -128,7 +129,7 @@ class FlameAPI : public ResourceAPI {
     }
 
     QJsonArray documentToArray(QJsonDocument& obj) const override { return Json::ensureArray(obj.object(), "data"); }
-    void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { FlameMod::loadIndexedPack(m, obj); }
+    void loadIndexedPack(Platform::Project& m, QJsonObject& obj) const override { FlameMod::loadIndexedPack(m, obj); }
     Platform::Version loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType resourceType) const override
     {
         auto arr = FlameMod::loadIndexedPackVersion(obj);
@@ -144,7 +145,7 @@ class FlameAPI : public ResourceAPI {
         }
         return {};
     };
-    void loadExtraPackInfo(ModPlatform::IndexedPack& m, [[maybe_unused]] QJsonObject&) const override { FlameMod::loadBody(m); }
+    void loadExtraPackInfo(Platform::Project& m, [[maybe_unused]] QJsonObject&) const override { FlameMod::loadBody(m); }
 
    private:
     [[nodiscard]] std::optional<QString> getInfoURL(QString const& id) const override
@@ -153,7 +154,7 @@ class FlameAPI : public ResourceAPI {
     }
     [[nodiscard]] std::optional<QString> getDependencyURL(DependencySearchArgs const& args) const override
     {
-        auto addonId = args.dependency.addonId.toString();
+        auto addonId = args.dependency.projectId.toString();
         auto url =
             QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&gameVersion=%2").arg(addonId, args.mcVersion.toString());
         if (args.loader && Platform::ModloaderUtils::hasSingleSelected(args.loader)) {

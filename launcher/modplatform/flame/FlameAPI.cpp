@@ -10,7 +10,7 @@
 #include "Application.h"
 #include "Json.h"
 #include "api/structures/ModLoader.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
 #include "net/NetJob.h"
@@ -185,9 +185,9 @@ Task::Ptr FlameAPI::getModCategories(std::shared_ptr<QByteArray> response)
     return getCategories(response, Platform::ResourceType::Mod);
 }
 
-QList<ModPlatform::Category> FlameAPI::loadModCategories(std::shared_ptr<QByteArray> response)
+QList<Platform::Category> FlameAPI::loadModCategories(std::shared_ptr<QByteArray> response)
 {
-    QList<ModPlatform::Category> categories;
+    QList<Platform::Category> categories;
     QJsonParseError parse_error{};
     QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {

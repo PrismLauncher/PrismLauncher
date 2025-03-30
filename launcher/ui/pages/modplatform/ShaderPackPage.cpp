@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include "ShaderPackPage.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "ui_ResourcePage.h"
 
 #include "ShaderPackModel.h"
@@ -42,7 +42,7 @@ QMap<QString, QString> ShaderPackResourcePage::urlHandlers() const
     return map;
 }
 
-void ShaderPackResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
+void ShaderPackResourcePage::addResourceToPage(Platform::Project::Ptr pack,
                                                Platform::Version& version,
                                                const std::shared_ptr<ResourceFolderModel> base_model)
 {

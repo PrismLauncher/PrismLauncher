@@ -37,7 +37,7 @@
 
 #include <QAbstractListModel>
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "net/NetJob.h"
 #include "ui/pages/modplatform/modrinth/ModrinthPage.h"
 
@@ -84,9 +84,9 @@ class ModpackListModel : public QAbstractListModel {
     };
 
    public slots:
-    void searchRequestFinished(QList<ModPlatform::IndexedPack::Ptr>& doc_all);
+    void searchRequestFinished(QList<Platform::Project::Ptr>& doc_all);
     void searchRequestFailed(QString reason);
-    void searchRequestForOneSucceeded(ModPlatform::IndexedPack&);
+    void searchRequestForOneSucceeded(Platform::Project&);
 
    protected slots:
 
@@ -103,7 +103,7 @@ class ModpackListModel : public QAbstractListModel {
    protected:
     ModrinthPage* m_parent;
 
-    QList<ModPlatform::IndexedPack::Ptr> m_modpacks;
+    QList<Platform::Project::Ptr> m_modpacks;
 
     LogoMap m_logoMap;
     QMap<QString, LogoCallback> m_waitingCallbacks;

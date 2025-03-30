@@ -35,8 +35,8 @@
 
 #include "FlamePage.h"
 #include "Version.h"
+#include "api/structures/Project.h"
 #include "api/structures/VersionType.h"
-#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ModFilterWidget.h"
@@ -154,17 +154,17 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         return;
     }
 
-    m_current = m_listModel->data(curr, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
+    m_current = m_listModel->data(curr, Qt::UserRole).value<Platform::Project::Ptr>();
 
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading flame modpack versions";
 
         ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
 
-        auto addonId = m_current->addonId;
+        auto addonId = m_current->projectId;
         // Use default if no callbacks are set
         callbacks.on_succeed = [this, curr, addonId](auto& doc) {
-            if (addonId != m_current->addonId) {
+            if (addonId != m_current->projectId) {
                 return;  // wrong request
             }
 
@@ -245,7 +245,7 @@ void FlamePage::suggestCurrent()
     auto version = m_current->versions.at(m_selected_version_index);
 
     QMap<QString, QString> extra_info;
-    extra_info.insert("pack_id", m_current->addonId.toString());
+    extra_info.insert("pack_id", m_current->projectId.toString());
     extra_info.insert("pack_version_id", version.fileId.toString());
 
     m_dialog->setSuggestedPack(m_current->name, new InstanceImportTask(version.downloadUrl, this, std::move(extra_info)));
@@ -281,7 +281,7 @@ void FlamePage::updateUi()
     else
         text = "<a href=\"" + m_current->websiteUrl + "\">" + name + "</a>";
     if (!m_current->authors.empty()) {
-        auto authorToStr = [](ModPlatform::ModpackAuthor& author) {
+        auto authorToStr = [](Platform::ModpackAuthor& author) {
             if (author.url.isEmpty()) {
                 return author.name;
             }
@@ -309,7 +309,7 @@ void FlamePage::updateUi()
     }
 
     text += "<hr>";
-    text += api.getModDescription(m_current->addonId.toInt()).toUtf8();
+    text += api.getModDescription(m_current->projectId.toInt()).toUtf8();
 
     m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
     m_ui->packDescription->flush();

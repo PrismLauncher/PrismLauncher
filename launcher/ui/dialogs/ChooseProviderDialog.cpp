@@ -4,7 +4,7 @@
 #include <QPushButton>
 #include <QRadioButton>
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 
 ChooseProviderDialog::ChooseProviderDialog(QWidget* parent, bool single_choice, bool allow_skipping)
     : QDialog(parent), ui(new Ui::ChooseProviderDialog)

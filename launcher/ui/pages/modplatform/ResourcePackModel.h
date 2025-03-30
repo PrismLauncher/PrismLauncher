@@ -8,7 +8,7 @@
 
 #include "BaseInstance.h"
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 
 #include "ui/pages/modplatform/ResourceModel.h"
 

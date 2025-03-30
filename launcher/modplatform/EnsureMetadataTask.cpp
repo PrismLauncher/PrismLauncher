@@ -7,7 +7,6 @@
 #include "Json.h"
 
 #include "QObjectPtr.h"
-#include "minecraft/mod/Mod.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 
 #include "modplatform/flame/FlameAPI.h"
@@ -15,6 +14,7 @@
 #include "modplatform/helpers/HashUtils.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
+#include "tasks/ConcurrentTask.h"
 
 static ModrinthAPI modrinth_api;
 static FlameAPI flame_api;
@@ -305,7 +305,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
         }
 
         for (auto entry : entries) {
-            ModPlatform::IndexedPack pack;
+            Platform::Project pack;
 
             try {
                 auto entry_obj = Json::requireObject(entry);
@@ -319,7 +319,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
                 continue;
             }
 
-            auto hash = addonIds.find(pack.addonId.toString()).value();
+            auto hash = addonIds.find(pack.projectId.toString()).value();
 
             auto resource_iter = m_resources.find(hash);
             if (resource_iter == m_resources.end()) {
@@ -456,7 +456,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
                 auto hash = addonIds.find(id).value();
                 auto resource = m_resources.find(hash).value();
 
-                ModPlatform::IndexedPack pack;
+                Platform::Project pack;
                 try {
                     setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
 
@@ -479,7 +479,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     return proj_task;
 }
 
-void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, Platform::Version& ver, Resource* resource)
+void EnsureMetadataTask::updateMetadata(Platform::Project& pack, Platform::Version& ver, Resource* resource)
 {
     try {
         // Prevent file name mismatch
@@ -491,7 +491,7 @@ void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, Platform
 
         connect(task.get(), &Task::finished, this, [this, &pack, resource] { updateMetadataCallback(pack, resource); });
 
-        m_updateMetadataTasks[Platform::ProviderUtils::name(pack.provider) + pack.addonId.toString()] = task;
+        m_updateMetadataTasks[Platform::ProviderUtils::name(pack.provider) + pack.projectId.toString()] = task;
         task->start();
     } catch (Json::JsonException& e) {
         qDebug() << e.cause();
@@ -500,7 +500,7 @@ void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, Platform
     }
 }
 
-void EnsureMetadataTask::updateMetadataCallback(ModPlatform::IndexedPack& pack, Resource* resource)
+void EnsureMetadataTask::updateMetadataCallback(Platform::Project& pack, Resource* resource)
 {
     QDir tmpIndexDir(m_indexDir);
     auto metadata = Metadata::get(tmpIndexDir, pack.slug);

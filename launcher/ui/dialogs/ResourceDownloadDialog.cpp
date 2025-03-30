@@ -33,8 +33,8 @@
 #include "minecraft/mod/ShaderPackFolderModel.h"
 #include "minecraft/mod/TexturePackFolderModel.h"
 
+#include "api/structures/Project.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
-#include "modplatform/ModIndex.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui/dialogs/ReviewMessageBox.h"
@@ -185,7 +185,7 @@ void ResourceDownloadDialog::confirm()
         return QString::compare(a->getName(), b->getName(), Qt::CaseInsensitive) < 0;
     });
     for (auto& task : selected) {
-        auto extraInfo = dependencyExtraInfo.value(task->getPack()->addonId.toString());
+        auto extraInfo = dependencyExtraInfo.value(task->getPack()->projectId.toString());
         confirm_dialog->appendResource(
             { task->getName(), task->getFilename(), task->getCustomPath(), Platform::ProviderUtils::name(task->getProvider()),
               extraInfo.required_by, Platform::VersionTypeUtils::toString(task->getVersion().version_type), !extraInfo.maybe_installed });
@@ -218,7 +218,7 @@ ResourcePage* ResourceDownloadDialog::selectedPage()
     return result;
 }
 
-void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, Platform::Version& ver)
+void ResourceDownloadDialog::addResource(Platform::Project::Ptr pack, Platform::Version& ver)
 {
     removeResource(pack->name);
     selectedPage()->addResourceToPage(pack, ver, getBaseModel());

@@ -24,9 +24,9 @@
 #include <functional>
 #include <memory>
 
+#include "api/structures/Project.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
-#include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
@@ -41,10 +41,10 @@ class GetModDependenciesTask : public SequentialTask {
 
     struct PackDependency {
         Platform::Dependency dependency;
-        ModPlatform::IndexedPack::Ptr pack;
+        Platform::Project::Ptr pack;
         Platform::Version version;
         PackDependency() = default;
-        PackDependency(const ModPlatform::IndexedPack::Ptr p, const Platform::Version& v)
+        PackDependency(const Platform::Project::Ptr p, const Platform::Version& v)
         {
             pack = p;
             version = v;

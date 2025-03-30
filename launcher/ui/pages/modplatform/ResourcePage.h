@@ -8,7 +8,7 @@
 #include <QWidget>
 
 #include "ResourceDownloadTask.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/BasePage.h"
@@ -60,8 +60,8 @@ class ResourcePage : public QWidget, public BasePage {
     /** Programatically set the term in the search bar. */
     void setSearchTerm(QString);
 
-    [[nodiscard]] bool setCurrentPack(ModPlatform::IndexedPack::Ptr);
-    [[nodiscard]] auto getCurrentPack() const -> ModPlatform::IndexedPack::Ptr;
+    [[nodiscard]] bool setCurrentPack(Platform::Project::Ptr);
+    [[nodiscard]] auto getCurrentPack() const -> Platform::Project::Ptr;
     [[nodiscard]] auto getDialog() const -> const ResourceDownloadDialog* { return m_parentDialog; }
     [[nodiscard]] auto getModel() const -> ResourceModel* { return m_model; }
 
@@ -75,10 +75,10 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void updateSelectionButton();
     virtual void versionListUpdated(const QModelIndex& index);
 
-    void addResourceToDialog(ModPlatform::IndexedPack::Ptr, Platform::Version&);
+    void addResourceToDialog(Platform::Project::Ptr, Platform::Version&);
     void removeResourceFromDialog(const QString& pack_name);
     virtual void removeResourceFromPage(const QString& name);
-    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, Platform::Version&, std::shared_ptr<ResourceFolderModel>);
+    virtual void addResourceToPage(Platform::Project::Ptr, Platform::Version&, std::shared_ptr<ResourceFolderModel>);
 
     virtual void modelReset();
 

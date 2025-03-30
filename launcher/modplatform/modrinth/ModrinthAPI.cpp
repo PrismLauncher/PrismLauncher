@@ -129,9 +129,9 @@ Task::Ptr ModrinthAPI::getModCategories(std::shared_ptr<QByteArray> response)
     return netJob;
 }
 
-QList<ModPlatform::Category> ModrinthAPI::loadCategories(std::shared_ptr<QByteArray> response, QString projectType)
+QList<Platform::Category> ModrinthAPI::loadCategories(std::shared_ptr<QByteArray> response, QString projectType)
 {
-    QList<ModPlatform::Category> categories;
+    QList<Platform::Category> categories;
     QJsonParseError parse_error{};
     QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
     if (parse_error.error != QJsonParseError::NoError) {
@@ -159,7 +159,7 @@ QList<ModPlatform::Category> ModrinthAPI::loadCategories(std::shared_ptr<QByteAr
     return categories;
 }
 
-QList<ModPlatform::Category> ModrinthAPI::loadModCategories(std::shared_ptr<QByteArray> response)
+QList<Platform::Category> ModrinthAPI::loadModCategories(std::shared_ptr<QByteArray> response)
 {
     return loadCategories(response, "mod");
 };

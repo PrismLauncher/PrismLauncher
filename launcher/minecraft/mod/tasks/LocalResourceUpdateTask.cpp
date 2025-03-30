@@ -26,7 +26,7 @@
 #include <windows.h>
 #endif
 
-LocalResourceUpdateTask::LocalResourceUpdateTask(QDir index_dir, ModPlatform::IndexedPack& project, Platform::Version& version)
+LocalResourceUpdateTask::LocalResourceUpdateTask(QDir index_dir, Platform::Project& project, Platform::Version& version)
     : m_index_dir(index_dir), m_project(project), m_version(version)
 {
     // Ensure a '.index' folder exists in the mods folder, and create it if it does not
@@ -43,7 +43,7 @@ void LocalResourceUpdateTask::executeTask()
 {
     setStatus(tr("Updating index for resource:\n%1").arg(m_project.name));
 
-    auto old_metadata = Metadata::get(m_index_dir, m_project.addonId);
+    auto old_metadata = Metadata::get(m_index_dir, m_project.projectId);
     if (old_metadata.isValid()) {
         emit hasOldResource(old_metadata.name, old_metadata.filename);
         if (m_project.slug.isEmpty())

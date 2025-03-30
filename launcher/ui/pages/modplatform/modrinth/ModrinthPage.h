@@ -37,7 +37,7 @@
 #pragma once
 
 #include "Application.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 
@@ -71,7 +71,7 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     inline QString debugName() const { return "Modrinth"; }
     inline QString metaEntryBase() const { return "ModrinthModpacks"; };
 
-    ModPlatform::IndexedPack::Ptr getCurrent() { return m_current; }
+    Platform::Project::Ptr getCurrent() { return m_current; }
     void suggestCurrent();
 
     void updateUI();
@@ -96,7 +96,7 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     NewInstanceDialog* m_dialog;
     Modrinth::ModpackListModel* m_model;
 
-    ModPlatform::IndexedPack::Ptr m_current;
+    Platform::Project::Ptr m_current;
     QString m_selectedVersion;
 
     ProgressWidget m_fetch_progress;

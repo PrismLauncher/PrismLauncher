@@ -6,7 +6,7 @@
 
 #include "BaseInstance.h"
 
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "modplatform/flame/FlameAPI.h"
@@ -131,7 +131,7 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
    private:
     Task::Ptr m_fetch_job = nullptr;
 
-    ModPlatform::IndexedPack m_pack;
+    Platform::Project m_pack;
     ModrinthAPI m_api;
 };
 
@@ -155,6 +155,6 @@ class FlameManagedPackPage final : public ManagedPackPage {
    private:
     Task::Ptr m_fetch_job = nullptr;
 
-    ModPlatform::IndexedPack m_pack;
+    Platform::Project m_pack;
     FlameAPI m_api;
 };

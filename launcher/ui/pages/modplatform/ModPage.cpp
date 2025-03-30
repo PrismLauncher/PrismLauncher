@@ -112,7 +112,7 @@ QMap<QString, QString> ModPage::urlHandlers() const
 
 /******** Make changes to the UI ********/
 
-void ModPage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
+void ModPage::addResourceToPage(Platform::Project::Ptr pack,
                                 Platform::Version& version,
                                 const std::shared_ptr<ResourceFolderModel> base_model)
 {

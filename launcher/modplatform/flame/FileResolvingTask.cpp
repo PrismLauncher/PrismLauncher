@@ -20,7 +20,7 @@
 #include <algorithm>
 
 #include "Json.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/Project.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
