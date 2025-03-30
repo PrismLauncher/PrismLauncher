@@ -35,14 +35,12 @@ static Version mcVersion(BaseInstance* inst)
     return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion();
 }
 
-static ModPlatform::ModLoaderTypes mcLoaders(BaseInstance* inst)
+static Platform::ModLoaders mcLoaders(BaseInstance* inst)
 {
     return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getSupportedModLoaders().value();
 }
 
-static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDependency> sel,
-                              Version mcVersion,
-                              ModPlatform::ModLoaderTypes loaders)
+static bool checkDependencies(std::shared_ptr<GetModDependenciesTask::PackDependency> sel, Version mcVersion, Platform::ModLoaders loaders)
 {
     return (sel->pack->versions.isEmpty() || sel->version.mcVersion.contains(mcVersion.toString())) &&
            (!loaders || !sel->version.loaders || sel->version.loaders & loaders);
@@ -74,7 +72,7 @@ void GetModDependenciesTask::prepare()
 ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::Dependency& dep,
                                                             const ModPlatform::ResourceProvider providerName)
 {
-    if (auto isQuilt = m_loaderType & ModPlatform::Quilt; isQuilt || m_loaderType & ModPlatform::Fabric) {
+    if (auto isQuilt = m_loaderType & Platform::ModLoader::Quilt; isQuilt || m_loaderType & Platform::ModLoader::Fabric) {
         auto overide = ModPlatform::getOverrideDeps();
         auto over = std::find_if(overide.cbegin(), overide.cend(), [dep, providerName, isQuilt](auto o) {
             return o.provider == providerName && dep.addonId == (isQuilt ? o.fabric : o.quilt);
@@ -189,7 +187,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
     callbacks.on_succeed = [dep, provider, pDep, level, this](auto& pack) {
         pDep->version = pack;
         if (!pDep->version.addonId.isValid()) {
-            if (m_loaderType & ModPlatform::Quilt) {  // falback for quilt
+            if (m_loaderType & Platform::ModLoader::Quilt) {  // falback for quilt
                 auto overide = ModPlatform::getOverrideDeps();
                 auto over = std::find_if(overide.cbegin(), overide.cend(),
                                          [dep, provider](auto o) { return o.provider == provider && dep.addonId == o.quilt; });

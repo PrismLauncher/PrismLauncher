@@ -89,7 +89,7 @@ class GetModDependenciesTask : public SequentialTask {
     QStringList m_mods_file_names;
 
     Version m_version;
-    ModPlatform::ModLoaderTypes m_loaderType;
+    Platform::ModLoaders m_loaderType;
 
     ModrinthAPI m_modrinthAPI;
     FlameAPI m_flameAPI;

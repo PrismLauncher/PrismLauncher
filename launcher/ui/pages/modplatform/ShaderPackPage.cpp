@@ -48,7 +48,7 @@ void ShaderPackResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pac
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
     QString custom_target_folder;
-    if (version.loaders & ModPlatform::Cauldron)
+    if (version.loaders & Platform::ModLoader::Cauldron)
         custom_target_folder = QStringLiteral("resourcepacks");
     m_model->addPack(pack, version, base_model, is_indexed, custom_target_folder);
 }

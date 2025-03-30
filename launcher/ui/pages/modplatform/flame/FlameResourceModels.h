@@ -23,7 +23,7 @@ class FlameTexturePackModel : public TexturePackResourceModel {
     [[nodiscard]] QString metaEntryBase() const override { return Flame::metaEntryBase(); }
 
     ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) override;
+    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
 };
 
 }  // namespace ResourceDownload

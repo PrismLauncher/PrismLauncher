@@ -2,7 +2,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2023-2025 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,14 +24,11 @@
 #include <QString>
 #include <QVariant>
 #include <memory>
+#include "api/structures/ModLoader.h"
 
 class QIODevice;
 
 namespace ModPlatform {
-
-enum ModLoaderType { NeoForge = 1 << 0, Forge = 1 << 1, Cauldron = 1 << 2, LiteLoader = 1 << 3, Fabric = 1 << 4, Quilt = 1 << 5 };
-Q_DECLARE_FLAGS(ModLoaderTypes, ModLoaderType)
-QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags);
 
 enum class ResourceProvider { MODRINTH, FLAME };
 
@@ -105,7 +102,7 @@ struct IndexedVersion {
     QString downloadUrl;
     QString date;
     QString fileName;
-    ModLoaderTypes loaders = {};
+    Platform::ModLoaders loaders = {};
     QString hash_type;
     QString hash;
     bool is_preferred = true;
@@ -185,15 +182,6 @@ inline auto getOverrideDeps() -> QList<OverrideDep>
 }
 
 QString getMetaURL(ResourceProvider provider, QVariant projectID);
-
-auto getModLoaderAsString(ModLoaderType type) -> const QString;
-auto getModLoaderFromString(QString type) -> ModLoaderType;
-
-constexpr bool hasSingleModLoaderSelected(ModLoaderTypes l) noexcept
-{
-    auto x = static_cast<int>(l);
-    return x && !(x & (x - 1));
-}
 
 struct Category {
     QString name;

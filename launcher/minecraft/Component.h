@@ -8,8 +8,8 @@
 #include <variant>
 #include "ProblemProvider.h"
 #include "QObjectPtr.h"
+#include "api/structures/ModLoader.h"
 #include "meta/JsonFormat.h"
-#include "modplatform/ModIndex.h"
 
 class PackProfile;
 class LaunchProfile;
@@ -45,7 +45,7 @@ using UpdateAction = std::variant<UpdateActionNone,
                                   UpdateActionImportantChanged>;
 
 struct ModloaderMapEntry {
-    ModPlatform::ModLoaderType type;
+    Platform::ModLoader type;
     QStringList knownConflictingComponents;
 };
 

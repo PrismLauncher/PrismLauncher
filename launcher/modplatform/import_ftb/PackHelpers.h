@@ -40,7 +40,7 @@ struct Modpack {
     // not needed for instance creation
     QVariant jvmArgs;
 
-    std::optional<ModPlatform::ModLoaderType> loaderType;
+    std::optional<Platform::ModLoader> loaderType;
     QString loaderVersion;
 
     QIcon icon;

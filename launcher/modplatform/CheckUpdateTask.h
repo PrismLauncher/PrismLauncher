@@ -1,9 +1,8 @@
 #pragma once
 
-#include "minecraft/mod/Mod.h"
+#include "api/structures/ModLoader.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceAPI.h"
 #include "tasks/Task.h"
 
 class ResourceDownloadTask;
@@ -15,7 +14,7 @@ class CheckUpdateTask : public Task {
    public:
     CheckUpdateTask(QList<Resource*>& resources,
                     std::list<Version>& mcVersions,
-                    QList<ModPlatform::ModLoaderType> loadersList,
+                    QList<Platform::ModLoader> loadersList,
                     std::shared_ptr<ResourceFolderModel> resourceModel)
         : Task()
         , m_resources(resources)
@@ -72,7 +71,7 @@ class CheckUpdateTask : public Task {
    protected:
     QList<Resource*>& m_resources;
     std::list<Version>& m_game_versions;
-    QList<ModPlatform::ModLoaderType> m_loaders_list;
+    QList<Platform::ModLoader> m_loaders_list;
     std::shared_ptr<ResourceFolderModel> m_resource_model;
 
     std::vector<Update> m_updates;

@@ -184,7 +184,7 @@ void Flame::FileResolvingTask::netJobFinished()
                         // If there's more than one mod loader for this version, we can't know for sure
                         // which file is relative to each loader, so it's best to not use any one and
                         // let the user download it manually.
-                        if (!file.loaders || hasSingleModLoaderSelected(file.loaders)) {
+                        if (!file.loaders || Platform::ModloaderUtils::hasSingleSelected(file.loaders)) {
                             out.version.downloadUrl = file.downloadUrl;
                             qDebug() << "Found alternative on modrinth " << out.version.fileName;
                         }

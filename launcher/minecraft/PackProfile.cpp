@@ -55,6 +55,7 @@
 #include "Exception.h"
 #include "FileSystem.h"
 #include "Json.h"
+#include "api/structures/ModLoader.h"
 #include "meta/Index.h"
 #include "meta/JsonFormat.h"
 #include "minecraft/Component.h"
@@ -65,7 +66,6 @@
 #include "ComponentUpdateTask.h"
 #include "PackProfile.h"
 #include "PackProfile_p.h"
-#include "modplatform/ModIndex.h"
 
 #include "minecraft/Logging.h"
 
@@ -1008,9 +1008,9 @@ void PackProfile::disableInteraction(bool disable)
     }
 }
 
-std::optional<ModPlatform::ModLoaderTypes> PackProfile::getModLoaders()
+std::optional<Platform::ModLoaders> PackProfile::getModLoaders()
 {
-    ModPlatform::ModLoaderTypes result;
+    Platform::ModLoaders result;
     bool has_any_loader = false;
 
     QMapIterator<QString, ModloaderMapEntry> i(Component::KNOWN_MODLOADERS);
@@ -1028,23 +1028,23 @@ std::optional<ModPlatform::ModLoaderTypes> PackProfile::getModLoaders()
     return result;
 }
 
-std::optional<ModPlatform::ModLoaderTypes> PackProfile::getSupportedModLoaders()
+std::optional<Platform::ModLoaders> PackProfile::getSupportedModLoaders()
 {
     auto loadersOpt = getModLoaders();
     if (!loadersOpt.has_value())
         return loadersOpt;
     auto loaders = loadersOpt.value();
     // TODO: remove this or add version condition once Quilt drops official Fabric support
-    if (loaders & ModPlatform::Quilt)
-        loaders |= ModPlatform::Fabric;
-    if (getComponentVersion("net.minecraft") == "1.20.1" && (loaders & ModPlatform::NeoForge))
-        loaders |= ModPlatform::Forge;
+    if (loaders & Platform::ModLoader::Quilt)
+        loaders |= Platform::ModLoader::Fabric;
+    if (getComponentVersion("net.minecraft") == "1.20.1" && (loaders & Platform::ModLoader::NeoForge))
+        loaders |= Platform::ModLoader::Forge;
     return loaders;
 }
 
-QList<ModPlatform::ModLoaderType> PackProfile::getModLoadersList()
+QList<Platform::ModLoader> PackProfile::getModLoadersList()
 {
-    QList<ModPlatform::ModLoaderType> result;
+    QList<Platform::ModLoader> result;
     for (auto c : d->components) {
         if (c->isEnabled() && Component::KNOWN_MODLOADERS.contains(c->getID())) {
             result.append(Component::KNOWN_MODLOADERS[c->getID()].type);
@@ -1052,12 +1052,12 @@ QList<ModPlatform::ModLoaderType> PackProfile::getModLoadersList()
     }
 
     // TODO: remove this or add version condition once Quilt drops official Fabric support
-    if (result.contains(ModPlatform::Quilt) && !result.contains(ModPlatform::Fabric)) {
-        result.append(ModPlatform::Fabric);
+    if (result.contains(Platform::ModLoader::Quilt) && !result.contains(Platform::ModLoader::Fabric)) {
+        result.append(Platform::ModLoader::Fabric);
     }
-    if (getComponentVersion("net.minecraft") == "1.20.1" && result.contains(ModPlatform::NeoForge) &&
-        !result.contains(ModPlatform::Forge)) {
-        result.append(ModPlatform::Forge);
+    if (getComponentVersion("net.minecraft") == "1.20.1" && result.contains(Platform::ModLoader::NeoForge) &&
+        !result.contains(Platform::ModLoader::Forge)) {
+        result.append(Platform::ModLoader::Forge);
     }
     return result;
 }

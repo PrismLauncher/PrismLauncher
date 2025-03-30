@@ -80,7 +80,7 @@ class ResourceAPI {
 
         std::optional<QString> search;
         std::optional<SortingMethod> sorting;
-        std::optional<ModPlatform::ModLoaderTypes> loaders;
+        std::optional<Platform::ModLoaders> loaders;
         std::optional<std::list<Version>> versions;
         std::optional<ModPlatform::Side> side;
         std::optional<QStringList> categoryIds;
@@ -91,7 +91,7 @@ class ResourceAPI {
         ModPlatform::IndexedPack pack;
 
         std::optional<std::list<Version>> mcVersions;
-        std::optional<ModPlatform::ModLoaderTypes> loaders;
+        std::optional<Platform::ModLoaders> loaders;
 
         ModPlatform::ResourceType resourceType;
 
@@ -115,7 +115,7 @@ class ResourceAPI {
     struct DependencySearchArgs {
         ModPlatform::Dependency dependency;
         Version mcVersion;
-        ModPlatform::ModLoaderTypes loader;
+        Platform::ModLoaders loader;
     };
 
    public:

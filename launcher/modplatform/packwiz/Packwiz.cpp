@@ -28,6 +28,7 @@
 #include "FileSystem.h"
 #include "StringUtils.h"
 
+#include "api/structures/ModLoader.h"
 #include "modplatform/ModIndex.h"
 
 #include <toml++/toml.h>
@@ -177,8 +178,8 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
     }
 
     toml::array loaders;
-    for (auto loader : ModPlatform::modLoaderTypesToList(mod.loaders)) {
-        loaders.push_back(getModLoaderAsString(loader).toStdString());
+    for (auto loader : Platform::ModloaderUtils::toList(mod.loaders)) {
+        loaders.push_back(Platform::ModloaderUtils::toString(loader).toStdString());
     }
     toml::array mcVersions;
     for (auto version : mod.mcVersions) {
@@ -276,7 +277,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
         if (auto loaders = table["x-prismlauncher-loaders"]; loaders && loaders.is_array()) {
             for (auto&& loader : *loaders.as_array()) {
                 if (loader.is_string()) {
-                    mod.loaders |= ModPlatform::getModLoaderFromString(QString::fromStdString(loader.as_string()->value_or("")));
+                    mod.loaders |= Platform::ModloaderUtils::fromString(QString::fromStdString(loader.as_string()->value_or("")));
                 }
             }
         }

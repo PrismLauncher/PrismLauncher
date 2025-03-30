@@ -9,6 +9,7 @@
 
 #include "Application.h"
 #include "Json.h"
+#include "api/structures/ModLoader.h"
 #include "modplatform/ModIndex.h"
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
@@ -216,12 +217,12 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(std::shared_ptr<QByteAr
 };
 
 std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
-                                                                      QList<ModPlatform::ModLoaderType> instanceLoaders,
-                                                                      ModPlatform::ModLoaderTypes modLoaders)
+                                                                      QList<Platform::ModLoader> instanceLoaders,
+                                                                      Platform::ModLoaders modLoaders)
 {
-    static const auto noLoader = ModPlatform::ModLoaderType(0);
-    QHash<ModPlatform::ModLoaderType, ModPlatform::IndexedVersion> bestMatch;
-    auto checkVersion = [&bestMatch](const ModPlatform::IndexedVersion& version, const ModPlatform::ModLoaderType& loader) {
+    static const auto noLoader = Platform::ModLoader(0);
+    QHash<Platform::ModLoader, ModPlatform::IndexedVersion> bestMatch;
+    auto checkVersion = [&bestMatch](const ModPlatform::IndexedVersion& version, const Platform::ModLoader& loader) {
         if (bestMatch.contains(loader)) {
             auto best = bestMatch.value(loader);
             if (version.date > best.date) {
@@ -232,7 +233,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModP
         }
     };
     for (auto file_tmp : versions) {
-        auto loaders = ModPlatform::modLoaderTypesToList(file_tmp.loaders);
+        auto loaders = Platform::ModloaderUtils::toList(file_tmp.loaders);
         if (loaders.isEmpty()) {
             checkVersion(file_tmp, noLoader);
         } else {
@@ -242,7 +243,7 @@ std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModP
         }
     }
     // edge case: mod has installed for forge but the instance is fabric => fabric version will be prioritizated on update
-    auto currentLoaders = instanceLoaders + ModPlatform::modLoaderTypesToList(modLoaders);
+    auto currentLoaders = instanceLoaders + Platform::ModloaderUtils::toList(modLoaders);
     currentLoaders.append(noLoader);  // add a fallback in case the versions do not define a loader
 
     for (auto loader : currentLoaders) {

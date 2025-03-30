@@ -219,11 +219,11 @@ void ModFilterWidget::prepareBasicFilter()
         m_filter->hideInstalled = false;
         m_filter->side = ModPlatform::Side::NoSide;  // or "both"
         auto loaders = m_instance->getPackProfile()->getSupportedModLoaders().value();
-        ui->neoForge->setChecked(loaders & ModPlatform::NeoForge);
-        ui->forge->setChecked(loaders & ModPlatform::Forge);
-        ui->fabric->setChecked(loaders & ModPlatform::Fabric);
-        ui->quilt->setChecked(loaders & ModPlatform::Quilt);
-        ui->liteLoader->setChecked(loaders & ModPlatform::LiteLoader);
+        ui->neoForge->setChecked(loaders & Platform::ModLoader::NeoForge);
+        ui->forge->setChecked(loaders & Platform::ModLoader::Forge);
+        ui->fabric->setChecked(loaders & Platform::ModLoader::Fabric);
+        ui->quilt->setChecked(loaders & Platform::ModLoader::Quilt);
+        ui->liteLoader->setChecked(loaders & Platform::ModLoader::LiteLoader);
         m_filter->loaders = loaders;
         auto def = m_instance->getPackProfile()->getComponentVersion("net.minecraft");
         m_filter->versions.emplace_front(def);
@@ -260,17 +260,17 @@ void ModFilterWidget::onVersionFilterChanged(int)
 
 void ModFilterWidget::onLoadersFilterChanged()
 {
-    ModPlatform::ModLoaderTypes loaders;
+    Platform::ModLoaders loaders;
     if (ui->neoForge->isChecked())
-        loaders |= ModPlatform::NeoForge;
+        loaders |= Platform::ModLoader::NeoForge;
     if (ui->forge->isChecked())
-        loaders |= ModPlatform::Forge;
+        loaders |= Platform::ModLoader::Forge;
     if (ui->fabric->isChecked())
-        loaders |= ModPlatform::Fabric;
+        loaders |= Platform::ModLoader::Fabric;
     if (ui->quilt->isChecked())
-        loaders |= ModPlatform::Quilt;
+        loaders |= Platform::ModLoader::Quilt;
     if (ui->liteLoader->isChecked())
-        loaders |= ModPlatform::LiteLoader;
+        loaders |= Platform::ModLoader::LiteLoader;
     m_filter_changed = loaders != m_filter->loaders;
     m_filter->loaders = loaders;
     if (m_filter_changed)

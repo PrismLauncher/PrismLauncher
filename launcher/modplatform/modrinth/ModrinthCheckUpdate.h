@@ -8,7 +8,7 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
    public:
     ModrinthCheckUpdate(QList<Resource*>& resources,
                         std::list<Version>& mcVersions,
-                        QList<ModPlatform::ModLoaderType> loadersList,
+                        QList<Platform::ModLoader> loadersList,
                         std::shared_ptr<ResourceFolderModel> resourceModel)
         : CheckUpdateTask(resources, mcVersions, std::move(loadersList), std::move(resourceModel))
         , m_hash_type(ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first())
@@ -19,8 +19,8 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
 
    protected slots:
     void executeTask() override;
-    void getUpdateModsForLoader(std::optional<ModPlatform::ModLoaderTypes> loader);
-    void checkVersionsResponse(std::shared_ptr<QByteArray> response, std::optional<ModPlatform::ModLoaderTypes> loader);
+    void getUpdateModsForLoader(std::optional<Platform::ModLoaders> loader);
+    void checkVersionsResponse(std::shared_ptr<QByteArray> response, std::optional<Platform::ModLoaders> loader);
     void checkNextLoader();
 
    private:

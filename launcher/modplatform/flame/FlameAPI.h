@@ -8,6 +8,7 @@
 #include <memory>
 #include "Json.h"
 #include "Version.h"
+#include "api/structures/ModLoader.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
@@ -18,8 +19,8 @@ class FlameAPI : public ResourceAPI {
     QString getModDescription(int modId);
 
     std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
-                                                                QList<ModPlatform::ModLoaderType> instanceLoaders,
-                                                                ModPlatform::ModLoaderTypes fallback);
+                                                                QList<Platform::ModLoader> instanceLoaders,
+                                                                Platform::ModLoaders fallback);
 
     Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
     Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
@@ -32,9 +33,10 @@ class FlameAPI : public ResourceAPI {
 
     [[nodiscard]] QList<ResourceAPI::SortingMethod> getSortingMethods() const override;
 
-    static inline bool validateModLoaders(ModPlatform::ModLoaderTypes loaders)
+    static inline bool validateModLoaders(Platform::ModLoaders loaders)
     {
-        return loaders & (ModPlatform::NeoForge | ModPlatform::Forge | ModPlatform::Fabric | ModPlatform::Quilt);
+        return loaders &
+               (Platform::ModLoader::NeoForge | Platform::ModLoader::Forge | Platform::ModLoader::Fabric | Platform::ModLoader::Quilt);
     }
 
    private:
@@ -53,30 +55,31 @@ class FlameAPI : public ResourceAPI {
         }
     }
 
-    static int getMappedModLoader(ModPlatform::ModLoaderType loaders)
+    static int getMappedModLoader(Platform::ModLoader loaders)
     {
         // https://docs.curseforge.com/?http#tocS_ModLoaderType
         switch (loaders) {
-            case ModPlatform::Forge:
+            case Platform::ModLoader::Forge:
                 return 1;
-            case ModPlatform::Cauldron:
+            case Platform::ModLoader::Cauldron:
                 return 2;
-            case ModPlatform::LiteLoader:
+            case Platform::ModLoader::LiteLoader:
                 return 3;
-            case ModPlatform::Fabric:
+            case Platform::ModLoader::Fabric:
                 return 4;
-            case ModPlatform::Quilt:
+            case Platform::ModLoader::Quilt:
                 return 5;
-            case ModPlatform::NeoForge:
+            case Platform::ModLoader::NeoForge:
                 return 6;
         }
         return 0;
     }
 
-    static const QStringList getModLoaderStrings(const ModPlatform::ModLoaderTypes types)
+    static const QStringList getModLoaderStrings(const Platform::ModLoaders types)
     {
         QStringList l;
-        for (auto loader : { ModPlatform::NeoForge, ModPlatform::Forge, ModPlatform::Fabric, ModPlatform::Quilt }) {
+        for (auto loader :
+             { Platform::ModLoader::NeoForge, Platform::ModLoader::Forge, Platform::ModLoader::Fabric, Platform::ModLoader::Quilt }) {
             if (types & loader) {
                 l << QString::number(getMappedModLoader(loader));
             }
@@ -84,7 +87,7 @@ class FlameAPI : public ResourceAPI {
         return l;
     }
 
-    static const QString getModLoaderFilters(ModPlatform::ModLoaderTypes types) { return "[" + getModLoaderStrings(types).join(',') + "]"; }
+    static const QString getModLoaderFilters(Platform::ModLoaders types) { return "[" + getModLoaderStrings(types).join(',') + "]"; }
 
    public:
     [[nodiscard]] std::optional<QString> getSearchURL(SearchArgs const& args) const override
@@ -117,8 +120,8 @@ class FlameAPI : public ResourceAPI {
         if (args.mcVersions.has_value())
             url += QString("&gameVersion=%1").arg(args.mcVersions.value().front().toString());
 
-        if (args.loaders.has_value() && ModPlatform::hasSingleModLoaderSelected(args.loaders.value())) {
-            int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loaders.value())));
+        if (args.loaders.has_value() && Platform::ModloaderUtils::hasSingleSelected(args.loaders.value())) {
+            int mappedModLoader = getMappedModLoader(static_cast<Platform::ModLoader>(static_cast<int>(args.loaders.value())));
             url += QString("&modLoaderType=%1").arg(mappedModLoader);
         }
         return url;
@@ -153,8 +156,8 @@ class FlameAPI : public ResourceAPI {
         auto addonId = args.dependency.addonId.toString();
         auto url =
             QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000&gameVersion=%2").arg(addonId, args.mcVersion.toString());
-        if (args.loader && ModPlatform::hasSingleModLoaderSelected(args.loader)) {
-            int mappedModLoader = getMappedModLoader(static_cast<ModPlatform::ModLoaderType>(static_cast<int>(args.loader)));
+        if (args.loader && Platform::ModloaderUtils::hasSingleSelected(args.loader)) {
+            int mappedModLoader = getMappedModLoader(static_cast<Platform::ModLoader>(static_cast<int>(args.loader)));
             url += QString("&modLoaderType=%1").arg(mappedModLoader);
         }
         return url;

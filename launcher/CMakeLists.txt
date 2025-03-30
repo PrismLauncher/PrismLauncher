@@ -490,6 +490,9 @@ set(META_SOURCES
 )
 
 set(API_SOURCES
+    api/structures/ModLoader.h
+    api/structures/ModLoader.cpp
+
     modplatform/ModIndex.h
     modplatform/ModIndex.cpp
     modplatform/ResourceType.h

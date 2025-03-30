@@ -79,9 +79,9 @@ class ResourceModel : public QAbstractListModel {
 
     virtual ResourceAPI::SearchArgs createSearchArguments() = 0;
 
-    virtual ResourceAPI::VersionSearchArgs createVersionsArguments(QModelIndex&) = 0;
+    virtual ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) = 0;
 
-    virtual ResourceAPI::ProjectInfoArgs createInfoArguments(QModelIndex&) = 0;
+    virtual ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) = 0;
 
     /** Requests the API for more entries. */
     virtual void search();

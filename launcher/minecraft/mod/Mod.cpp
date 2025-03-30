@@ -46,6 +46,7 @@
 #include "MetadataHandler.h"
 #include "Resource.h"
 #include "Version.h"
+#include "api/structures/ModLoader.h"
 #include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "modplatform/ModIndex.h"
@@ -167,8 +168,8 @@ auto Mod::loaders() const -> QString
     if (metadata()) {
         QStringList loaders;
         auto modLoaders = metadata()->loaders;
-        for (auto loader : ModPlatform::modLoaderTypesToList(modLoaders)) {
-            loaders << getModLoaderAsString(loader);
+        for (auto loader : Platform::ModloaderUtils::toList(modLoaders)) {
+            loaders << Platform::ModloaderUtils::toString(loader);
         }
         return loaders.join(", ");
     }

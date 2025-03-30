@@ -31,19 +31,6 @@ static const QMap<QString, IndexedVersionType::VersionType> s_indexed_version_ty
     { "alpha", IndexedVersionType::VersionType::Alpha }
 };
 
-static const QList<ModLoaderType> loaderList = { NeoForge, Forge, Cauldron, LiteLoader, Quilt, Fabric };
-
-QList<ModLoaderType> modLoaderTypesToList(ModLoaderTypes flags)
-{
-    QList<ModLoaderType> flagList;
-    for (auto flag : loaderList) {
-        if (flags.testFlag(flag)) {
-            flagList.append(flag);
-        }
-    }
-    return flagList;
-}
-
 IndexedVersionType::IndexedVersionType(const QString& type) : IndexedVersionType(enumFromString(type)) {}
 
 IndexedVersionType::IndexedVersionType(const IndexedVersionType::VersionType& type)
@@ -110,44 +97,6 @@ QString getMetaURL(ResourceProvider provider, QVariant projectID)
 {
     return ((provider == ModPlatform::ResourceProvider::FLAME) ? "https://www.curseforge.com/projects/" : "https://modrinth.com/mod/") +
            projectID.toString();
-}
-
-auto getModLoaderAsString(ModLoaderType type) -> const QString
-{
-    switch (type) {
-        case NeoForge:
-            return "neoforge";
-        case Forge:
-            return "forge";
-        case Cauldron:
-            return "cauldron";
-        case LiteLoader:
-            return "liteloader";
-        case Fabric:
-            return "fabric";
-        case Quilt:
-            return "quilt";
-        default:
-            break;
-    }
-    return "";
-}
-
-auto getModLoaderFromString(QString type) -> ModLoaderType
-{
-    if (type == "neoforge")
-        return NeoForge;
-    if (type == "forge")
-        return Forge;
-    if (type == "cauldron")
-        return Cauldron;
-    if (type == "liteloader")
-        return LiteLoader;
-    if (type == "fabric")
-        return Fabric;
-    if (type == "quilt")
-        return Quilt;
-    return {};
 }
 
 QString SideUtils::toString(Side side)

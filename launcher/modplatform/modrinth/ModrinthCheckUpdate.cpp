@@ -55,7 +55,7 @@ void ModrinthCheckUpdate::executeTask()
     hashing_task->start();
 }
 
-void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModLoaderTypes> loader)
+void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<Platform::ModLoaders> loader)
 {
     setStatus(tr("Waiting for the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
@@ -72,7 +72,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<ModPlatform::ModL
     job->start();
 }
 
-void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> response, std::optional<ModPlatform::ModLoaderTypes> loader)
+void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> response, std::optional<Platform::ModLoaders> loader)
 {
     setStatus(tr("Parsing the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
@@ -109,8 +109,8 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             // so we may want to filter it
             QString loader_filter;
             if (loader.has_value()) {
-                for (auto flag : ModPlatform::modLoaderTypesToList(*loader)) {
-                    loader_filter = ModPlatform::getModLoaderAsString(flag);
+                for (auto flag : Platform::ModloaderUtils::toList(*loader)) {
+                    loader_filter = Platform::ModloaderUtils::toString(flag);
                     break;
                 }
             }

@@ -48,7 +48,7 @@
 
 #include "Component.h"
 #include "LaunchProfile.h"
-#include "modplatform/ModIndex.h"
+#include "api/structures/ModLoader.h"
 #include "net/Mode.h"
 
 class MinecraftInstance;
@@ -156,10 +156,10 @@ class PackProfile : public QAbstractListModel {
     // todo(merged): is this the best approach
     void appendComponent(ComponentPtr component);
 
-    std::optional<ModPlatform::ModLoaderTypes> getModLoaders();
+    std::optional<Platform::ModLoaders> getModLoaders();
     // this returns aditional loaders(Quilt supports fabric and NeoForge supports Forge)
-    std::optional<ModPlatform::ModLoaderTypes> getSupportedModLoaders();
-    QList<ModPlatform::ModLoaderType> getModLoadersList();
+    std::optional<Platform::ModLoaders> getSupportedModLoaders();
+    QList<Platform::ModLoader> getModLoadersList();
 
     /// apply the component patches. Catches all the errors and returns true/false for success/failure
     void invalidateLaunchProfile();

@@ -32,7 +32,7 @@ static std::list<Version> mcVersions(BaseInstance* inst)
     return { static_cast<MinecraftInstance*>(inst)->getPackProfile()->getComponent("net.minecraft")->getVersion() };
 }
 
-static QList<ModPlatform::ModLoaderType> mcLoadersList(BaseInstance* inst)
+static QList<Platform::ModLoader> mcLoadersList(BaseInstance* inst)
 {
     return static_cast<MinecraftInstance*>(inst)->getPackProfile()->getModLoadersList();
 }
@@ -89,7 +89,7 @@ void ResourceUpdateDialog::checkCandidates()
     }
 
     auto versions = mcVersions(m_instance);
-    auto loadersList = m_filter_loaders ? mcLoadersList(m_instance) : QList<ModPlatform::ModLoaderType>();
+    auto loadersList = m_filter_loaders ? mcLoadersList(m_instance) : QList<Platform::ModLoader>();
 
     SequentialTask check_task(tr("Checking for updates"));
 
