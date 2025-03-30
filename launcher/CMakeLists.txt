@@ -500,6 +500,7 @@ set(API_SOURCES
     api/structures/Side.cpp
     api/structures/VersionType.h
     api/structures/VersionType.cpp
+    api/structures/Dependency.h
 
     modplatform/ModIndex.h
 

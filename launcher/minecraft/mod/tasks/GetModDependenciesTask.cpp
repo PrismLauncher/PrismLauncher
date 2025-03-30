@@ -69,10 +69,10 @@ void GetModDependenciesTask::prepare()
     }
 }
 
-ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::Dependency& dep, const Platform::Provider providerName)
+Platform::Dependency GetModDependenciesTask::getOverride(const Platform::Dependency& dep, const Platform::Provider providerName)
 {
     if (auto isQuilt = m_loaderType & Platform::ModLoader::Quilt; isQuilt || m_loaderType & Platform::ModLoader::Fabric) {
-        auto overide = ModPlatform::getOverrideDeps();
+        auto overide = Platform::getOverrideDeps();
         auto over = std::find_if(overide.cbegin(), overide.cend(), [dep, providerName, isQuilt](auto o) {
             return o.provider == providerName && dep.addonId == (isQuilt ? o.fabric : o.quilt);
         });
@@ -83,17 +83,17 @@ ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::D
     return dep;
 }
 
-QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion(const ModPlatform::IndexedVersion& version,
-                                                                                 const Platform::Provider providerName)
+QList<Platform::Dependency> GetModDependenciesTask::getDependenciesForVersion(const ModPlatform::IndexedVersion& version,
+                                                                              const Platform::Provider providerName)
 {
-    QList<ModPlatform::Dependency> c_dependencies;
+    QList<Platform::Dependency> c_dependencies;
     for (auto ver_dep : version.dependencies) {
-        if (ver_dep.type != ModPlatform::DependencyType::REQUIRED)
+        if (ver_dep.type != Platform::DependencyType::REQUIRED)
             continue;
         ver_dep = getOverride(ver_dep, providerName);
         auto isOnlyVersion = providerName == Platform::Provider::MODRINTH && ver_dep.addonId.toString().isEmpty();
         if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
-                                    [&ver_dep, isOnlyVersion](const ModPlatform::Dependency& i) {
+                                    [&ver_dep, isOnlyVersion](const Platform::Dependency& i) {
                                         return isOnlyVersion ? i.version == ver_dep.version : i.addonId == ver_dep.addonId;
                                     });
             dep != c_dependencies.end())
@@ -157,9 +157,7 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
     return info;
 }
 
-Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Dependency& dep,
-                                                        const Platform::Provider providerName,
-                                                        int level)
+Task::Ptr GetModDependenciesTask::prepareDependencyTask(const Platform::Dependency& dep, const Platform::Provider providerName, int level)
 {
     auto pDep = std::make_shared<PackDependency>();
     pDep->dependency = dep;
@@ -187,7 +185,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Depen
         pDep->version = pack;
         if (!pDep->version.addonId.isValid()) {
             if (m_loaderType & Platform::ModLoader::Quilt) {  // falback for quilt
-                auto overide = ModPlatform::getOverrideDeps();
+                auto overide = Platform::getOverrideDeps();
                 auto over = std::find_if(overide.cbegin(), overide.cend(),
                                          [dep, provider](auto o) { return o.provider == provider && dep.addonId == o.quilt; });
                 if (over != overide.cend()) {
@@ -260,8 +258,8 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
                 continue;
             auto deps = smod->version.dependencies;
             if (auto dep = std::find_if(deps.begin(), deps.end(),
-                                        [addonId, provider, version](const ModPlatform::Dependency& d) {
-                                            return d.type == ModPlatform::DependencyType::REQUIRED &&
+                                        [addonId, provider, version](const Platform::Dependency& d) {
+                                            return d.type == Platform::DependencyType::REQUIRED &&
                                                    (provider == Platform::Provider::MODRINTH && d.addonId.toString().isEmpty()
                                                         ? version == d.version
                                                         : d.addonId == addonId);

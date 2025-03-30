@@ -151,21 +151,21 @@ ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj, Q
     auto dependencies = Json::ensureArray(obj, "dependencies");
     for (auto d : dependencies) {
         auto dep = Json::ensureObject(d);
-        ModPlatform::Dependency dependency;
+        Platform::Dependency dependency;
         dependency.addonId = Json::ensureString(dep, "project_id");
         dependency.version = Json::ensureString(dep, "version_id");
         auto depType = Json::requireString(dep, "dependency_type");
 
         if (depType == "required")
-            dependency.type = ModPlatform::DependencyType::REQUIRED;
+            dependency.type = Platform::DependencyType::REQUIRED;
         else if (depType == "optional")
-            dependency.type = ModPlatform::DependencyType::OPTIONAL;
+            dependency.type = Platform::DependencyType::OPTIONAL;
         else if (depType == "incompatible")
-            dependency.type = ModPlatform::DependencyType::INCOMPATIBLE;
+            dependency.type = Platform::DependencyType::INCOMPATIBLE;
         else if (depType == "embedded")
-            dependency.type = ModPlatform::DependencyType::EMBEDDED;
+            dependency.type = Platform::DependencyType::EMBEDDED;
         else
-            dependency.type = ModPlatform::DependencyType::UNKNOWN;
+            dependency.type = Platform::DependencyType::UNKNOWN;
 
         file.dependencies.append(dependency);
     }

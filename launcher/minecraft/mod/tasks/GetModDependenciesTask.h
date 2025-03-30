@@ -40,7 +40,7 @@ class GetModDependenciesTask : public SequentialTask {
     using Ptr = shared_qobject_ptr<GetModDependenciesTask>;
 
     struct PackDependency {
-        ModPlatform::Dependency dependency;
+        Platform::Dependency dependency;
         ModPlatform::IndexedPack::Ptr pack;
         ModPlatform::IndexedVersion version;
         PackDependency() = default;
@@ -71,11 +71,11 @@ class GetModDependenciesTask : public SequentialTask {
     }
 
    protected slots:
-    Task::Ptr prepareDependencyTask(const ModPlatform::Dependency&, Platform::Provider, int);
-    QList<ModPlatform::Dependency> getDependenciesForVersion(const ModPlatform::IndexedVersion&, Platform::Provider providerName);
+    Task::Ptr prepareDependencyTask(const Platform::Dependency&, Platform::Provider, int);
+    QList<Platform::Dependency> getDependenciesForVersion(const ModPlatform::IndexedVersion&, Platform::Provider providerName);
     void prepare();
     Task::Ptr getProjectInfoTask(std::shared_ptr<PackDependency> pDep);
-    ModPlatform::Dependency getOverride(const ModPlatform::Dependency&, Platform::Provider providerName);
+    Platform::Dependency getOverride(const Platform::Dependency&, Platform::Provider providerName);
     void removePack(const QVariant& addonId);
 
     bool isLocalyInstalled(std::shared_ptr<PackDependency> pDep);

@@ -171,29 +171,29 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     auto dependencies = Json::ensureArray(obj, "dependencies");
     for (auto d : dependencies) {
         auto dep = Json::ensureObject(d);
-        ModPlatform::Dependency dependency;
+        Platform::Dependency dependency;
         dependency.addonId = Json::requireInteger(dep, "modId");
         switch (Json::requireInteger(dep, "relationType")) {
             case 1:  // EmbeddedLibrary
-                dependency.type = ModPlatform::DependencyType::EMBEDDED;
+                dependency.type = Platform::DependencyType::EMBEDDED;
                 break;
             case 2:  // OptionalDependency
-                dependency.type = ModPlatform::DependencyType::OPTIONAL;
+                dependency.type = Platform::DependencyType::OPTIONAL;
                 break;
             case 3:  // RequiredDependency
-                dependency.type = ModPlatform::DependencyType::REQUIRED;
+                dependency.type = Platform::DependencyType::REQUIRED;
                 break;
             case 4:  // Tool
-                dependency.type = ModPlatform::DependencyType::TOOL;
+                dependency.type = Platform::DependencyType::TOOL;
                 break;
             case 5:  // Incompatible
-                dependency.type = ModPlatform::DependencyType::INCOMPATIBLE;
+                dependency.type = Platform::DependencyType::INCOMPATIBLE;
                 break;
             case 6:  // Include
-                dependency.type = ModPlatform::DependencyType::INCLUDE;
+                dependency.type = Platform::DependencyType::INCLUDE;
                 break;
             default:
-                dependency.type = ModPlatform::DependencyType::UNKNOWN;
+                dependency.type = Platform::DependencyType::UNKNOWN;
                 break;
         }
         file.dependencies.append(dependency);

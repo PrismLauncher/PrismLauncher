@@ -113,7 +113,7 @@ class ResourceAPI {
     };
 
     struct DependencySearchArgs {
-        ModPlatform::Dependency dependency;
+        Platform::Dependency dependency;
         Version mcVersion;
         Platform::ModLoaders loader;
     };

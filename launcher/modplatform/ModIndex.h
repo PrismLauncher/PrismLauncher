@@ -24,6 +24,7 @@
 #include <QString>
 #include <QVariant>
 #include <memory>
+#include "api/structures/Dependency.h"
 #include "api/structures/ModLoader.h"
 #include "api/structures/Provider.h"
 #include "api/structures/Side.h"
@@ -32,8 +33,6 @@
 class QIODevice;
 
 namespace ModPlatform {
-
-enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 
 struct ModpackAuthor {
     QString name;
@@ -44,12 +43,6 @@ struct DonationData {
     QString id;
     QString platform;
     QString url;
-};
-
-struct Dependency {
-    QVariant addonId;
-    DependencyType type;
-    QString version;
 };
 
 struct IndexedVersion {
@@ -67,7 +60,7 @@ struct IndexedVersion {
     QString hash;
     bool is_preferred = true;
     QString changelog;
-    QList<Dependency> dependencies;
+    QList<Platform::Dependency> dependencies;
     Platform::Side side;  // this is for flame API
 
     // For internal use, not provided by APIs
@@ -124,22 +117,6 @@ struct IndexedPack {
         return std::any_of(versions.constBegin(), versions.constEnd(), [](auto const& v) { return v.is_currently_selected; });
     }
 };
-
-struct OverrideDep {
-    QString quilt;
-    QString fabric;
-    QString slug;
-    Platform::Provider provider;
-};
-
-inline auto getOverrideDeps() -> QList<OverrideDep>
-{
-    return { { "634179", "306612", "API", Platform::Provider::FLAME },
-             { "720410", "308769", "KotlinLibraries", Platform::Provider::FLAME },
-
-             { "qvIfYCYJ", "P7dR8mSH", "API", Platform::Provider::MODRINTH },
-             { "lwVhp9o5", "Ha28R6CL", "KotlinLibraries", Platform::Provider::MODRINTH } };
-}
 
 struct Category {
     QString name;
