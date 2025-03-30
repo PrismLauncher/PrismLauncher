@@ -25,12 +25,11 @@
 #include <QVariant>
 #include <memory>
 #include "api/structures/ModLoader.h"
+#include "api/structures/Provider.h"
 
 class QIODevice;
 
 namespace ModPlatform {
-
-enum class ResourceProvider { MODRINTH, FLAME };
 
 enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
 
@@ -40,12 +39,6 @@ namespace SideUtils {
 QString toString(Side side);
 Side fromString(QString side);
 }  // namespace SideUtils
-
-namespace ProviderCapabilities {
-const char* name(ResourceProvider);
-QString readableName(ResourceProvider);
-QStringList hashType(ResourceProvider);
-}  // namespace ProviderCapabilities
 
 struct ModpackAuthor {
     QString name;
@@ -131,7 +124,7 @@ struct IndexedPack {
     using Ptr = std::shared_ptr<IndexedPack>;
 
     QVariant addonId;
-    ResourceProvider provider;
+    Platform::Provider provider;
     QString name;
     QString slug;
     QString description;
@@ -169,19 +162,17 @@ struct OverrideDep {
     QString quilt;
     QString fabric;
     QString slug;
-    ModPlatform::ResourceProvider provider;
+    Platform::Provider provider;
 };
 
 inline auto getOverrideDeps() -> QList<OverrideDep>
 {
-    return { { "634179", "306612", "API", ModPlatform::ResourceProvider::FLAME },
-             { "720410", "308769", "KotlinLibraries", ModPlatform::ResourceProvider::FLAME },
+    return { { "634179", "306612", "API", Platform::Provider::FLAME },
+             { "720410", "308769", "KotlinLibraries", Platform::Provider::FLAME },
 
-             { "qvIfYCYJ", "P7dR8mSH", "API", ModPlatform::ResourceProvider::MODRINTH },
-             { "lwVhp9o5", "Ha28R6CL", "KotlinLibraries", ModPlatform::ResourceProvider::MODRINTH } };
+             { "qvIfYCYJ", "P7dR8mSH", "API", Platform::Provider::MODRINTH },
+             { "lwVhp9o5", "Ha28R6CL", "KotlinLibraries", Platform::Provider::MODRINTH } };
 }
-
-QString getMetaURL(ResourceProvider provider, QVariant projectID);
 
 struct Category {
     QString name;
@@ -192,4 +183,4 @@ struct Category {
 
 Q_DECLARE_METATYPE(ModPlatform::IndexedPack)
 Q_DECLARE_METATYPE(ModPlatform::IndexedPack::Ptr)
-Q_DECLARE_METATYPE(ModPlatform::ResourceProvider)
+Q_DECLARE_METATYPE(Platform::Provider)

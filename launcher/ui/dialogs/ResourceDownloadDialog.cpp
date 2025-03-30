@@ -186,7 +186,7 @@ void ResourceDownloadDialog::confirm()
     for (auto& task : selected) {
         auto extraInfo = dependencyExtraInfo.value(task->getPack()->addonId.toString());
         confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         ModPlatform::ProviderCapabilities::name(task->getProvider()), extraInfo.required_by,
+                                         Platform::ProviderUtils::name(task->getProvider()), extraInfo.required_by,
                                          task->getVersion().version_type.toString(), !extraInfo.maybe_installed });
     }
 
@@ -383,10 +383,10 @@ QList<BasePage*> ShaderPackDownloadDialog::getPages()
 void ResourceDownloadDialog::setResourceMetadata(const std::shared_ptr<Metadata::ModStruct>& meta)
 {
     switch (meta->provider) {
-        case ModPlatform::ResourceProvider::MODRINTH:
+        case Platform::Provider::MODRINTH:
             selectPage(Modrinth::id());
             break;
-        case ModPlatform::ResourceProvider::FLAME:
+        case Platform::Provider::FLAME:
             selectPage(Flame::id());
             break;
     }

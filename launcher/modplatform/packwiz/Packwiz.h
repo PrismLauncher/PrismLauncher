@@ -50,7 +50,7 @@ class V1 {
         QString hash{};
 
         // [update]
-        ModPlatform::ResourceProvider provider{};
+        Platform::Provider provider{};
         QVariant file_id{};
         QVariant project_id{};
         QString version_number{};

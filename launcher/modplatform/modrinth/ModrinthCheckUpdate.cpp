@@ -41,7 +41,7 @@ void ModrinthCheckUpdate::executeTask()
         // need to generate a new hash if the current one is innadequate
         // (though it will rarely happen, if at all)
         if (resource->metadata()->hash_format != m_hash_type) {
-            auto hash_task = Hashing::createHasher(resource->fileinfo().absoluteFilePath(), ModPlatform::ResourceProvider::MODRINTH);
+            auto hash_task = Hashing::createHasher(resource->fileinfo().absoluteFilePath(), Platform::Provider::MODRINTH);
             connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, resource](QString hash) { m_mappings.insert(hash, resource); });
             connect(hash_task.get(), &Task::failed, [this] { failed("Failed to generate hash"); });
             hashing_task->addTask(hash_task);
@@ -133,7 +133,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             pack->name = resource->name();
             pack->slug = resource->metadata()->slug;
             pack->addonId = resource->metadata()->project_id;
-            pack->provider = ModPlatform::ResourceProvider::MODRINTH;
+            pack->provider = Platform::Provider::MODRINTH;
             if ((project_ver.hash != hash && project_ver.is_preferred) || (resource->status() == ResourceStatus::NOT_INSTALLED)) {
                 auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resource_model);
 
@@ -146,7 +146,7 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
                 }
 
                 m_updates.emplace_back(pack->name, hash, old_version, project_ver.version_number, project_ver.version_type,
-                                       project_ver.changelog, ModPlatform::ResourceProvider::MODRINTH, download_task, resource->enabled());
+                                       project_ver.changelog, Platform::Provider::MODRINTH, download_task, resource->enabled());
             }
             m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, project_ver));
 

@@ -19,7 +19,7 @@
 static ModrinthAPI modrinth_api;
 static FlameAPI flame_api;
 
-EnsureMetadataTask::EnsureMetadataTask(Resource* resource, QDir dir, ModPlatform::ResourceProvider prov)
+EnsureMetadataTask::EnsureMetadataTask(Resource* resource, QDir dir, Platform::Provider prov)
     : Task(), m_indexDir(dir), m_provider(prov), m_hashingTask(nullptr), m_currentTask(nullptr)
 {
     auto hashTask = createNewHash(resource);
@@ -30,7 +30,7 @@ EnsureMetadataTask::EnsureMetadataTask(Resource* resource, QDir dir, ModPlatform
     m_hashingTask = hashTask;
 }
 
-EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, QDir dir, ModPlatform::ResourceProvider prov)
+EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, QDir dir, Platform::Provider prov)
     : Task(), m_indexDir(dir), m_provider(prov), m_currentTask(nullptr)
 {
     auto hashTask = makeShared<ConcurrentTask>("MakeHashesTask", APPLICATION->settings()->get("NumberOfConcurrentTasks").toInt());
@@ -45,7 +45,7 @@ EnsureMetadataTask::EnsureMetadataTask(QList<Resource*>& resources, QDir dir, Mo
     }
 }
 
-EnsureMetadataTask::EnsureMetadataTask(QHash<QString, Resource*>& resources, QDir dir, ModPlatform::ResourceProvider prov)
+EnsureMetadataTask::EnsureMetadataTask(QHash<QString, Resource*>& resources, QDir dir, Platform::Provider prov)
     : Task(), m_resources(resources), m_indexDir(dir), m_provider(prov), m_currentTask(nullptr)
 {}
 
@@ -114,10 +114,10 @@ void EnsureMetadataTask::executeTask()
     Task::Ptr version_task;
 
     switch (m_provider) {
-        case (ModPlatform::ResourceProvider::MODRINTH):
+        case (Platform::Provider::MODRINTH):
             version_task = modrinthVersionsTask();
             break;
-        case (ModPlatform::ResourceProvider::FLAME):
+        case (Platform::Provider::FLAME):
             version_task = flameVersionsTask();
             break;
     }
@@ -134,10 +134,10 @@ void EnsureMetadataTask::executeTask()
         Task::Ptr project_task;
 
         switch (m_provider) {
-            case (ModPlatform::ResourceProvider::MODRINTH):
+            case (Platform::Provider::MODRINTH):
                 project_task = modrinthProjectsTask();
                 break;
-            case (ModPlatform::ResourceProvider::FLAME):
+            case (Platform::Provider::FLAME):
                 project_task = flameProjectsTask();
                 break;
         }
@@ -160,10 +160,10 @@ void EnsureMetadataTask::executeTask()
     });
 
     if (m_resources.size() > 1)
-        setStatus(tr("Requesting metadata information from %1...").arg(ModPlatform::ProviderCapabilities::readableName(m_provider)));
+        setStatus(tr("Requesting metadata information from %1...").arg(Platform::ProviderUtils::readableName(m_provider)));
     else if (!m_resources.empty())
         setStatus(tr("Requesting metadata information from %1 for '%2'...")
-                      .arg(ModPlatform::ProviderCapabilities::readableName(m_provider), m_resources.begin().value()->name()));
+                      .arg(Platform::ProviderUtils::readableName(m_provider), m_resources.begin().value()->name()));
 
     m_currentTask = version_task;
     version_task->start();
@@ -213,7 +213,7 @@ void EnsureMetadataTask::emitFail(Resource* resource, QString key, RemoveFromLis
 
 Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
 {
-    auto hash_type = ModPlatform::ProviderCapabilities::hashType(ModPlatform::ResourceProvider::MODRINTH).first();
+    auto hash_type = Platform::ProviderUtils::hashType(Platform::Provider::MODRINTH).first();
 
     auto response = std::make_shared<QByteArray>();
     auto ver_task = modrinth_api.currentVersions(m_resources.keys(), hash_type, response);
@@ -491,7 +491,7 @@ void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, ModPlatf
 
         connect(task.get(), &Task::finished, this, [this, &pack, resource] { updateMetadataCallback(pack, resource); });
 
-        m_updateMetadataTasks[ModPlatform::ProviderCapabilities::name(pack.provider) + pack.addonId.toString()] = task;
+        m_updateMetadataTasks[Platform::ProviderUtils::name(pack.provider) + pack.addonId.toString()] = task;
         task->start();
     } catch (Json::JsonException& e) {
         qDebug() << e.cause();

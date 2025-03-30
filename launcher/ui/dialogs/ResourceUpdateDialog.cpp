@@ -229,7 +229,7 @@ void ResourceUpdateDialog::checkCandidates()
 
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
-                if (dep->pack->provider == ModPlatform::ResourceProvider::FLAME)
+                if (dep->pack->provider == Platform::Provider::FLAME)
                     changelog = api.getModFileChangelog(dep->version.addonId.toInt(), dep->version.fileId.toInt());
                 auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resource_model);
                 auto extraInfo = dependencyExtraInfo.value(dep->version.addonId.toString());
@@ -280,15 +280,15 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
     bool confirm_rest = false;
     bool try_others_rest = false;
     bool skip_rest = false;
-    ModPlatform::ResourceProvider provider_rest = ModPlatform::ResourceProvider::MODRINTH;
+    Platform::Provider provider_rest = Platform::Provider::MODRINTH;
 
     // adds resource to list based on provider
-    auto addToTmp = [&modrinth_tmp, &flame_tmp](Resource* resource, ModPlatform::ResourceProvider p) {
+    auto addToTmp = [&modrinth_tmp, &flame_tmp](Resource* resource, Platform::Provider p) {
         switch (p) {
-            case ModPlatform::ResourceProvider::MODRINTH:
+            case Platform::Provider::MODRINTH:
                 modrinth_tmp.push_back(resource);
                 break;
-            case ModPlatform::ResourceProvider::FLAME:
+            case Platform::Provider::FLAME:
                 flame_tmp.push_back(resource);
                 break;
         }
@@ -339,10 +339,10 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // prepare task for the modrinth mods
     if (!modrinth_tmp.empty()) {
-        auto modrinth_task = makeShared<EnsureMetadataTask>(modrinth_tmp, index_dir, ModPlatform::ResourceProvider::MODRINTH);
+        auto modrinth_task = makeShared<EnsureMetadataTask>(modrinth_tmp, index_dir, Platform::Provider::MODRINTH);
         connect(modrinth_task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(modrinth_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Resource* candidate) {
-            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::MODRINTH);
+            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), Platform::Provider::MODRINTH);
         });
         connect(modrinth_task.get(), &EnsureMetadataTask::failed,
                 [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
@@ -355,10 +355,10 @@ auto ResourceUpdateDialog::ensureMetadata() -> bool
 
     // prepare task for the flame mods
     if (!flame_tmp.empty()) {
-        auto flame_task = makeShared<EnsureMetadataTask>(flame_tmp, index_dir, ModPlatform::ResourceProvider::FLAME);
+        auto flame_task = makeShared<EnsureMetadataTask>(flame_tmp, index_dir, Platform::Provider::FLAME);
         connect(flame_task.get(), &EnsureMetadataTask::metadataReady, [this](Resource* candidate) { onMetadataEnsured(candidate); });
         connect(flame_task.get(), &EnsureMetadataTask::metadataFailed, [this, &should_try_others](Resource* candidate) {
-            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), ModPlatform::ResourceProvider::FLAME);
+            onMetadataFailed(candidate, should_try_others.find(candidate->internal_id()).value(), Platform::Provider::FLAME);
         });
         connect(flame_task.get(), &EnsureMetadataTask::failed,
                 [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec(); });
@@ -387,28 +387,28 @@ void ResourceUpdateDialog::onMetadataEnsured(Resource* resource)
         return;
 
     switch (resource->metadata()->provider) {
-        case ModPlatform::ResourceProvider::MODRINTH:
+        case Platform::Provider::MODRINTH:
             m_modrinth_to_update.push_back(resource);
             break;
-        case ModPlatform::ResourceProvider::FLAME:
+        case Platform::Provider::FLAME:
             m_flame_to_update.push_back(resource);
             break;
     }
 }
 
-ModPlatform::ResourceProvider next(ModPlatform::ResourceProvider p)
+Platform::Provider next(Platform::Provider p)
 {
     switch (p) {
-        case ModPlatform::ResourceProvider::MODRINTH:
-            return ModPlatform::ResourceProvider::FLAME;
-        case ModPlatform::ResourceProvider::FLAME:
-            return ModPlatform::ResourceProvider::MODRINTH;
+        case Platform::Provider::MODRINTH:
+            return Platform::Provider::FLAME;
+        case Platform::Provider::FLAME:
+            return Platform::Provider::MODRINTH;
     }
 
-    return ModPlatform::ResourceProvider::FLAME;
+    return Platform::Provider::FLAME;
 }
 
-void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool try_others, ModPlatform::ResourceProvider first_choice)
+void ResourceUpdateDialog::onMetadataFailed(Resource* resource, bool try_others, Platform::Provider first_choice)
 {
     if (try_others) {
         auto index_dir = indexDir();
@@ -444,7 +444,7 @@ void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, Q
     item_top->setExpanded(true);
 
     auto provider_item = new QTreeWidgetItem(item_top);
-    provider_item->setText(0, tr("Provider: %1").arg(ModPlatform::ProviderCapabilities::readableName(info.provider)));
+    provider_item->setText(0, tr("Provider: %1").arg(Platform::ProviderUtils::readableName(info.provider)));
 
     auto old_version_item = new QTreeWidgetItem(item_top);
     old_version_item->setText(0, tr("Old version: %1").arg(info.old_version));
@@ -482,7 +482,7 @@ void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, Q
     auto changelog_area = new QTextBrowser();
 
     QString text = info.changelog;
-    if (info.provider == ModPlatform::ResourceProvider::MODRINTH) {
+    if (info.provider == Platform::Provider::MODRINTH) {
         text = markdownToHTML(info.changelog.toUtf8());
     }
 

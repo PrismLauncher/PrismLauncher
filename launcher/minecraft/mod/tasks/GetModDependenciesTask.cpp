@@ -69,8 +69,7 @@ void GetModDependenciesTask::prepare()
     }
 }
 
-ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::Dependency& dep,
-                                                            const ModPlatform::ResourceProvider providerName)
+ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::Dependency& dep, const Platform::Provider providerName)
 {
     if (auto isQuilt = m_loaderType & Platform::ModLoader::Quilt; isQuilt || m_loaderType & Platform::ModLoader::Fabric) {
         auto overide = ModPlatform::getOverrideDeps();
@@ -85,14 +84,14 @@ ModPlatform::Dependency GetModDependenciesTask::getOverride(const ModPlatform::D
 }
 
 QList<ModPlatform::Dependency> GetModDependenciesTask::getDependenciesForVersion(const ModPlatform::IndexedVersion& version,
-                                                                                 const ModPlatform::ResourceProvider providerName)
+                                                                                 const Platform::Provider providerName)
 {
     QList<ModPlatform::Dependency> c_dependencies;
     for (auto ver_dep : version.dependencies) {
         if (ver_dep.type != ModPlatform::DependencyType::REQUIRED)
             continue;
         ver_dep = getOverride(ver_dep, providerName);
-        auto isOnlyVersion = providerName == ModPlatform::ResourceProvider::MODRINTH && ver_dep.addonId.toString().isEmpty();
+        auto isOnlyVersion = providerName == Platform::Provider::MODRINTH && ver_dep.addonId.toString().isEmpty();
         if (auto dep = std::find_if(c_dependencies.begin(), c_dependencies.end(),
                                     [&ver_dep, isOnlyVersion](const ModPlatform::Dependency& i) {
                                         return isOnlyVersion ? i.version == ver_dep.version : i.addonId == ver_dep.addonId;
@@ -145,8 +144,8 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
             return;
         }
         try {
-            auto obj = provider == ModPlatform::ResourceProvider::FLAME ? Json::requireObject(Json::requireObject(doc), "data")
-                                                                        : Json::requireObject(doc);
+            auto obj =
+                provider == Platform::Provider::FLAME ? Json::requireObject(Json::requireObject(doc), "data") : Json::requireObject(doc);
 
             getAPI(provider)->loadIndexedPack(*pDep->pack, obj);
         } catch (const JSONValidationError& e) {
@@ -159,7 +158,7 @@ Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDepende
 }
 
 Task::Ptr GetModDependenciesTask::prepareDependencyTask(const ModPlatform::Dependency& dep,
-                                                        const ModPlatform::ResourceProvider providerName,
+                                                        const Platform::Provider providerName,
                                                         int level)
 {
     auto pDep = std::make_shared<PackDependency>();
@@ -263,7 +262,7 @@ auto GetModDependenciesTask::getExtraInfo() -> QHash<QString, PackDependencyExtr
             if (auto dep = std::find_if(deps.begin(), deps.end(),
                                         [addonId, provider, version](const ModPlatform::Dependency& d) {
                                             return d.type == ModPlatform::DependencyType::REQUIRED &&
-                                                   (provider == ModPlatform::ResourceProvider::MODRINTH && d.addonId.toString().isEmpty()
+                                                   (provider == Platform::Provider::MODRINTH && d.addonId.toString().isEmpty()
                                                         ? version == d.version
                                                         : d.addonId == addonId);
                                         });

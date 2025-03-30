@@ -170,7 +170,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlat
     if (vers.addonId.isValid()) {
         ModPlatform::IndexedPack pack{
             vers.addonId,
-            ModPlatform::ResourceProvider::FLAME,
+            Platform::Provider::FLAME,
         };
 
         auto response = std::make_shared<QByteArray>();

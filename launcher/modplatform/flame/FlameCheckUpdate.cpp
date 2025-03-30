@@ -76,7 +76,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, std::shared_
     pack->name = resource->name();
     pack->slug = resource->metadata()->slug;
     pack->addonId = resource->metadata()->project_id;
-    pack->provider = ModPlatform::ResourceProvider::FLAME;
+    pack->provider = Platform::Provider::FLAME;
     try {
         auto obj = Json::requireObject(doc);
         auto arr = Json::requireArray(obj, "data");
@@ -121,8 +121,8 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, std::shared_
 
         auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver.value(), m_resource_model);
         m_updates.emplace_back(pack->name, resource->metadata()->hash, old_version, latest_ver->version, latest_ver->version_type,
-                               api.getModFileChangelog(latest_ver->addonId.toInt(), latest_ver->fileId.toInt()),
-                               ModPlatform::ResourceProvider::FLAME, download_task, resource->enabled());
+                               api.getModFileChangelog(latest_ver->addonId.toInt(), latest_ver->fileId.toInt()), Platform::Provider::FLAME,
+                               download_task, resource->enabled());
     }
     m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latest_ver.value()));
 }

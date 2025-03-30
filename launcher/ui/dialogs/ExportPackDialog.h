@@ -32,9 +32,7 @@ class ExportPackDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ExportPackDialog(InstancePtr instance,
-                              QWidget* parent = nullptr,
-                              ModPlatform::ResourceProvider provider = ModPlatform::ResourceProvider::MODRINTH);
+    explicit ExportPackDialog(InstancePtr instance, QWidget* parent = nullptr, Platform::Provider provider = Platform::Provider::MODRINTH);
     ~ExportPackDialog();
 
     void done(int result) override;
@@ -48,5 +46,5 @@ class ExportPackDialog : public QDialog {
     Ui::ExportPackDialog* m_ui;
     FileIgnoreProxy* m_proxy;
     FastFileIconProvider m_icons;
-    const ModPlatform::ResourceProvider m_provider;
+    const Platform::Provider m_provider;
 };

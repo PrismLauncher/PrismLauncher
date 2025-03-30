@@ -2,13 +2,10 @@
 
 #include <QButtonGroup>
 #include <QDialog>
+#include "api/structures/Provider.h"
 
 namespace Ui {
 class ChooseProviderDialog;
-}
-
-namespace ModPlatform {
-enum class ResourceProvider;
 }
 
 class Mod;
@@ -23,7 +20,7 @@ class ChooseProviderDialog : public QDialog {
 
         bool try_others = false;
 
-        ModPlatform::ResourceProvider chosen;
+        Platform::Provider chosen;
     };
 
    public:
@@ -44,7 +41,7 @@ class ChooseProviderDialog : public QDialog {
     void addProviders();
     void disableInput();
 
-    auto getSelectedProvider() const -> ModPlatform::ResourceProvider;
+    auto getSelectedProvider() const -> Platform::Provider;
 
    private:
     Ui::ChooseProviderDialog* ui;

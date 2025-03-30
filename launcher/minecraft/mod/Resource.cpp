@@ -7,6 +7,7 @@
 
 #include "FileSystem.h"
 #include "StringUtils.h"
+#include "api/structures/Provider.h"
 
 Resource::Resource(QObject* parent) : QObject(parent) {}
 
@@ -90,7 +91,7 @@ static void removeThePrefix(QString& string)
 auto Resource::provider() const -> QString
 {
     if (metadata())
-        return ModPlatform::ProviderCapabilities::readableName(metadata()->provider);
+        return Platform::ProviderUtils::readableName(metadata()->provider);
 
     return tr("Unknown");
 }
@@ -98,7 +99,7 @@ auto Resource::provider() const -> QString
 auto Resource::homepage() const -> QString
 {
     if (metadata())
-        return ModPlatform::getMetaURL(metadata()->provider, metadata()->project_id);
+        return Platform::ProviderUtils::getMetaURL(metadata()->provider, metadata()->project_id);
 
     return {};
 }

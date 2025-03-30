@@ -30,7 +30,7 @@ class CheckUpdateTask : public Task {
         QString new_version;
         std::optional<ModPlatform::IndexedVersionType> new_version_type;
         QString changelog;
-        ModPlatform::ResourceProvider provider;
+        Platform::Provider provider;
         shared_qobject_ptr<ResourceDownloadTask> download;
         bool enabled = true;
 
@@ -41,7 +41,7 @@ class CheckUpdateTask : public Task {
                QString new_v,
                std::optional<ModPlatform::IndexedVersionType> new_v_type,
                QString changelog,
-               ModPlatform::ResourceProvider p,
+               Platform::Provider p,
                shared_qobject_ptr<ResourceDownloadTask> t,
                bool enabled = true)
             : name(std::move(name))
