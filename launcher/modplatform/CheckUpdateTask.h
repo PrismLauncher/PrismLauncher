@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api/structures/ModLoader.h"
+#include "api/structures/VersionType.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "tasks/Task.h"
@@ -28,7 +29,7 @@ class CheckUpdateTask : public Task {
         QString old_hash;
         QString old_version;
         QString new_version;
-        std::optional<ModPlatform::IndexedVersionType> new_version_type;
+        std::optional<Platform::VersionType> new_version_type;
         QString changelog;
         Platform::Provider provider;
         shared_qobject_ptr<ResourceDownloadTask> download;
@@ -39,7 +40,7 @@ class CheckUpdateTask : public Task {
                QString old_h,
                QString old_v,
                QString new_v,
-               std::optional<ModPlatform::IndexedVersionType> new_v_type,
+               std::optional<Platform::VersionType> new_v_type,
                QString changelog,
                Platform::Provider p,
                shared_qobject_ptr<ResourceDownloadTask> t,

@@ -47,6 +47,7 @@
 #include "Resource.h"
 #include "Version.h"
 #include "api/structures/ModLoader.h"
+#include "api/structures/VersionType.h"
 #include "minecraft/mod/ModDetails.h"
 #include "minecraft/mod/tasks/LocalModParseTask.h"
 #include "modplatform/ModIndex.h"
@@ -196,9 +197,9 @@ auto Mod::mcVersions() const -> QString
 auto Mod::releaseType() const -> QString
 {
     if (metadata())
-        return metadata()->releaseType.toString();
+        return Platform::VersionTypeUtils::toString(metadata()->releaseType);
 
-    return ModPlatform::IndexedVersionType().toString();
+    return Platform::VersionTypeUtils::toString(Platform::VersionType());
 }
 
 auto Mod::description() const -> QString

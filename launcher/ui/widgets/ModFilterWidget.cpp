@@ -358,15 +358,15 @@ void ModFilterWidget::onOpenSourceFilterChanged()
 
 void ModFilterWidget::onReleaseFilterChanged()
 {
-    std::list<ModPlatform::IndexedVersionType> releases;
+    std::list<Platform::VersionType> releases;
     if (ui->releaseCb->isChecked())
-        releases.push_back(ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::VersionType::Release));
+        releases.push_back(Platform::VersionType::Release);
     if (ui->betaCb->isChecked())
-        releases.push_back(ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::VersionType::Beta));
+        releases.push_back(Platform::VersionType::Beta);
     if (ui->alphaCb->isChecked())
-        releases.push_back(ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::VersionType::Alpha));
+        releases.push_back(Platform::VersionType::Alpha);
     if (ui->unknownCb->isChecked())
-        releases.push_back(ModPlatform::IndexedVersionType(ModPlatform::IndexedVersionType::VersionType::Unknown));
+        releases.push_back(Platform::VersionType::Unknown);
     m_filter_changed = releases != m_filter->releases;
     m_filter->releases = releases;
     if (m_filter_changed)

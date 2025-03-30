@@ -5,6 +5,7 @@
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
 #include "StringUtils.h"
+#include "api/structures/VersionType.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -454,7 +455,8 @@ void ResourceUpdateDialog::appendResource(CheckUpdateTask::Update const& info, Q
 
     if (info.new_version_type.has_value()) {
         auto new_version_type_itme = new QTreeWidgetItem(item_top);
-        new_version_type_itme->setText(0, tr("New Version Type: %1").arg(info.new_version_type.value().toString()));
+        new_version_type_itme->setText(0,
+                                       tr("New Version Type: %1").arg(Platform::VersionTypeUtils::toString(info.new_version_type.value())));
     }
 
     if (!requiredBy.isEmpty()) {

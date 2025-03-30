@@ -22,6 +22,7 @@
 #include "ModrinthAPI.h"
 
 #include "Json.h"
+#include "api/structures/VersionType.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/ModIndex.h"
@@ -143,7 +144,7 @@ ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj, Q
     }
     file.version = Json::requireString(obj, "name");
     file.version_number = Json::requireString(obj, "version_number");
-    file.version_type = ModPlatform::IndexedVersionType(Json::requireString(obj, "version_type"));
+    file.version_type = Platform::VersionTypeUtils::fromString(Json::requireString(obj, "version_type"));
 
     file.changelog = Json::requireString(obj, "changelog");
 

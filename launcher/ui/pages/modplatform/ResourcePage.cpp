@@ -38,6 +38,7 @@
  */
 
 #include "ResourcePage.h"
+#include "api/structures/VersionType.h"
 #include "modplatform/ModIndex.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ResourcePage.h"
@@ -297,8 +298,8 @@ void ResourcePage::versionListUpdated(const QModelIndex& index)
                     continue;
 
                 auto versionText = version.version;
-                if (version.version_type.isValid()) {
-                    versionText += QString(" [%1]").arg(version.version_type.toString());
+                if (version.version_type != Platform::VersionType::Unknown) {
+                    versionText += QString(" [%1]").arg(Platform::VersionTypeUtils::toString(version.version_type));
                 }
                 if (version.fileId == installedVersion) {
                     versionText += tr(" [installed]", "Mod version select");

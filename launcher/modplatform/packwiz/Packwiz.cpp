@@ -29,6 +29,7 @@
 #include "StringUtils.h"
 
 #include "api/structures/ModLoader.h"
+#include "api/structures/VersionType.h"
 #include "modplatform/ModIndex.h"
 
 #include <toml++/toml.h>
@@ -199,7 +200,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
                                 { "side", Platform::SideUtils::toString(mod.side).toStdString() },
                                 { "x-prismlauncher-loaders", loaders },
                                 { "x-prismlauncher-mc-versions", mcVersions },
-                                { "x-prismlauncher-release-type", mod.releaseType.toString().toStdString() },
+                                { "x-prismlauncher-release-type", Platform::VersionTypeUtils::toString(mod.releaseType).toStdString() },
                                 { "x-prismlauncher-version-number", mod.version_number.toStdString() },
                                 { "download",
                                   toml::table{
@@ -273,7 +274,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
         mod.side = Platform::SideUtils::fromString(stringEntry(table, "side"));
-        mod.releaseType = ModPlatform::IndexedVersionType(table["x-prismlauncher-release-type"].value_or(""));
+        mod.releaseType = Platform::VersionTypeUtils::fromString(table["x-prismlauncher-release-type"].value_or(""));
         if (auto loaders = table["x-prismlauncher-loaders"]; loaders && loaders.is_array()) {
             for (auto&& loader : *loaders.as_array()) {
                 if (loader.is_string()) {

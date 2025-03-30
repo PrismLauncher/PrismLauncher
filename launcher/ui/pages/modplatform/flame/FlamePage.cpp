@@ -35,6 +35,7 @@
 
 #include "FlamePage.h"
 #include "Version.h"
+#include "api/structures/VersionType.h"
 #include "modplatform/ModIndex.h"
 #include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -184,7 +185,9 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
                     ++it;
 #endif
             for (auto version : m_current->versions) {
-                auto release_type = version.version_type.isValid() ? QString(" [%1]").arg(version.version_type.toString()) : "";
+                auto release_type = version.version_type != Platform::VersionType::Unknown
+                                        ? QString(" [%1]").arg(Platform::VersionTypeUtils::toString(version.version_type))
+                                        : "";
                 auto mcVersion = !version.mcVersion.isEmpty() && !version.version.contains(version.mcVersion.first())
                                      ? QString(" for %1").arg(version.mcVersion.first())
                                      : "";

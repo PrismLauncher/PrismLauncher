@@ -41,7 +41,7 @@ class V1 {
         Platform::Side side{ Platform::Side::UniversalSide };
         Platform::ModLoaders loaders;
         QStringList mcVersions;
-        ModPlatform::IndexedVersionType releaseType;
+        Platform::VersionType releaseType;
 
         // [download]
         QString mode{};

@@ -22,12 +22,11 @@
 #include <QString>
 
 namespace Platform {
+enum class VersionType { Release = 1, Beta, Alpha, Unknown };
 
-enum class Side { NoSide = 0, ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
-
-namespace SideUtils {
-QString toString(Side side);
-Side fromString(QString side);
-}  // namespace SideUtils
+namespace VersionTypeUtils {
+QString toString(VersionType versionType);
+VersionType fromString(QString versionType);
+}  // namespace VersionTypeUtils
 
 }  // namespace Platform

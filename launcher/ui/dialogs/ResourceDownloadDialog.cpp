@@ -26,6 +26,7 @@
 #include "Application.h"
 #include "ResourceDownloadTask.h"
 
+#include "api/structures/VersionType.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "minecraft/mod/ResourcePackFolderModel.h"
@@ -185,9 +186,9 @@ void ResourceDownloadDialog::confirm()
     });
     for (auto& task : selected) {
         auto extraInfo = dependencyExtraInfo.value(task->getPack()->addonId.toString());
-        confirm_dialog->appendResource({ task->getName(), task->getFilename(), task->getCustomPath(),
-                                         Platform::ProviderUtils::name(task->getProvider()), extraInfo.required_by,
-                                         task->getVersion().version_type.toString(), !extraInfo.maybe_installed });
+        confirm_dialog->appendResource(
+            { task->getName(), task->getFilename(), task->getCustomPath(), Platform::ProviderUtils::name(task->getProvider()),
+              extraInfo.required_by, Platform::VersionTypeUtils::toString(task->getVersion().version_type), !extraInfo.maybe_installed });
     }
 
     if (confirm_dialog->exec()) {

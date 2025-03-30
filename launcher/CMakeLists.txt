@@ -498,9 +498,10 @@ set(API_SOURCES
     api/structures/Provider.cpp
     api/structures/Side.h
     api/structures/Side.cpp
+    api/structures/VersionType.h
+    api/structures/VersionType.cpp
 
     modplatform/ModIndex.h
-    modplatform/ModIndex.cpp
 
     modplatform/ResourceAPI.h
     modplatform/ResourceAPI.cpp

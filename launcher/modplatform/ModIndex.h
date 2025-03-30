@@ -27,6 +27,7 @@
 #include "api/structures/ModLoader.h"
 #include "api/structures/Provider.h"
 #include "api/structures/Side.h"
+#include "api/structures/VersionType.h"
 
 class QIODevice;
 
@@ -45,34 +46,6 @@ struct DonationData {
     QString url;
 };
 
-struct IndexedVersionType {
-    enum class VersionType { Release = 1, Beta, Alpha, Unknown };
-    IndexedVersionType(const QString& type);
-    IndexedVersionType(const IndexedVersionType::VersionType& type);
-    IndexedVersionType(const IndexedVersionType& type);
-    IndexedVersionType() : IndexedVersionType(IndexedVersionType::VersionType::Unknown) {}
-    static const QString toString(const IndexedVersionType::VersionType& type);
-    static IndexedVersionType::VersionType enumFromString(const QString& type);
-    bool isValid() const { return m_type != IndexedVersionType::VersionType::Unknown; }
-    IndexedVersionType& operator=(const IndexedVersionType& other);
-    bool operator==(const IndexedVersionType& other) const { return m_type == other.m_type; }
-    bool operator==(const IndexedVersionType::VersionType& type) const { return m_type == type; }
-    bool operator!=(const IndexedVersionType& other) const { return m_type != other.m_type; }
-    bool operator!=(const IndexedVersionType::VersionType& type) const { return m_type != type; }
-    bool operator<(const IndexedVersionType& other) const { return m_type < other.m_type; }
-    bool operator<(const IndexedVersionType::VersionType& type) const { return m_type < type; }
-    bool operator<=(const IndexedVersionType& other) const { return m_type <= other.m_type; }
-    bool operator<=(const IndexedVersionType::VersionType& type) const { return m_type <= type; }
-    bool operator>(const IndexedVersionType& other) const { return m_type > other.m_type; }
-    bool operator>(const IndexedVersionType::VersionType& type) const { return m_type > type; }
-    bool operator>=(const IndexedVersionType& other) const { return m_type >= other.m_type; }
-    bool operator>=(const IndexedVersionType::VersionType& type) const { return m_type >= type; }
-
-    QString toString() const { return toString(m_type); }
-
-    IndexedVersionType::VersionType m_type;
-};
-
 struct Dependency {
     QVariant addonId;
     DependencyType type;
@@ -84,7 +57,7 @@ struct IndexedVersion {
     QVariant fileId;
     QString version;
     QString version_number = {};
-    IndexedVersionType version_type;
+    Platform::VersionType version_type;
     QStringList mcVersion;
     QString downloadUrl;
     QString date;
