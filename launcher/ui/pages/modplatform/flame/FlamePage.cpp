@@ -208,7 +208,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = api.getProjectVersions({ *m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob = api.getProjectVersions({ *m_current, {}, {}, Platform::ResourceType::Modpack }, std::move(callbacks));
 
         m_job = netJob;
         netJob->start();
@@ -335,7 +335,7 @@ void FlamePage::createFilterWidget()
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &FlamePage::triggerSearch);
     auto response = std::make_shared<QByteArray>();
-    m_categoriesTask = FlameAPI::getCategories(response, ModPlatform::ResourceType::Modpack);
+    m_categoriesTask = FlameAPI::getCategories(response, Platform::ResourceType::Modpack);
     QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
         auto categories = FlameAPI::loadModCategories(response);
         m_filterWidget->setCategories(categories);

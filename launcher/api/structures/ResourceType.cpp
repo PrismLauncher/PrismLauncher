@@ -5,6 +5,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2025 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -21,7 +22,7 @@
 
 #include "ResourceType.h"
 
-namespace ModPlatform {
+namespace Platform::ResourceTypeUtils {
 static const QMap<ResourceType, QString> s_packedTypeNames = { { ResourceType::ResourcePack, QObject::tr("resource pack") },
                                                                { ResourceType::TexturePack, QObject::tr("texture pack") },
                                                                { ResourceType::DataPack, QObject::tr("data pack") },
@@ -30,12 +31,9 @@ static const QMap<ResourceType, QString> s_packedTypeNames = { { ResourceType::R
                                                                { ResourceType::Mod, QObject::tr("mod") },
                                                                { ResourceType::Unknown, QObject::tr("unknown") } };
 
-namespace ResourceTypeUtils {
-
 QString getName(ResourceType type)
 {
     return s_packedTypeNames.constFind(type).value();
 }
 
-}  // namespace ResourceTypeUtils
-}  // namespace ModPlatform
+}  // namespace Platform::ResourceTypeUtils

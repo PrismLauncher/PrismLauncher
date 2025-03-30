@@ -27,7 +27,7 @@ class FlameAPI : public ResourceAPI {
     Task::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
     Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
 
-    static Task::Ptr getCategories(std::shared_ptr<QByteArray> response, ModPlatform::ResourceType type);
+    static Task::Ptr getCategories(std::shared_ptr<QByteArray> response, Platform::ResourceType type);
     static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
     static QList<ModPlatform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
 
@@ -40,17 +40,17 @@ class FlameAPI : public ResourceAPI {
     }
 
    private:
-    static int getClassId(ModPlatform::ResourceType type)
+    static int getClassId(Platform::ResourceType type)
     {
         switch (type) {
             default:
-            case ModPlatform::ResourceType::Mod:
+            case Platform::ResourceType::Mod:
                 return 6;
-            case ModPlatform::ResourceType::ResourcePack:
+            case Platform::ResourceType::ResourcePack:
                 return 12;
-            case ModPlatform::ResourceType::ShaderPack:
+            case Platform::ResourceType::ShaderPack:
                 return 6552;
-            case ModPlatform::ResourceType::Modpack:
+            case Platform::ResourceType::Modpack:
                 return 4471;
         }
     }
@@ -129,10 +129,10 @@ class FlameAPI : public ResourceAPI {
 
     QJsonArray documentToArray(QJsonDocument& obj) const override { return Json::ensureArray(obj.object(), "data"); }
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { FlameMod::loadIndexedPack(m, obj); }
-    ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType resourceType) const override
+    ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType resourceType) const override
     {
         auto arr = FlameMod::loadIndexedPackVersion(obj);
-        if (resourceType != ModPlatform::ResourceType::TexturePack) {
+        if (resourceType != Platform::ResourceType::TexturePack) {
             return arr;
         }
         // FIXME: Client-side version filtering. This won't take into account any user-selected filtering.

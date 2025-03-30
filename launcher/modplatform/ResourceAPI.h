@@ -47,8 +47,8 @@
 
 #include "../Version.h"
 
+#include "api/structures/ResourceType.h"
 #include "modplatform/ModIndex.h"
-#include "modplatform/ResourceType.h"
 #include "tasks/Task.h"
 
 /* Simple class with a common interface for interacting with APIs */
@@ -75,7 +75,7 @@ class ResourceAPI {
     };
 
     struct SearchArgs {
-        ModPlatform::ResourceType type{};
+        Platform::ResourceType type{};
         int offset = 0;
 
         std::optional<QString> search;
@@ -93,7 +93,7 @@ class ResourceAPI {
         std::optional<std::list<Version>> mcVersions;
         std::optional<Platform::ModLoaders> loaders;
 
-        ModPlatform::ResourceType resourceType;
+        Platform::ResourceType resourceType;
 
         VersionSearchArgs(VersionSearchArgs const&) = default;
         void operator=(VersionSearchArgs other)
@@ -151,7 +151,7 @@ class ResourceAPI {
      */
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
-    virtual ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const = 0;
+    virtual ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType) const = 0;
 
     /** Converts a JSON document to a common array format.
      *

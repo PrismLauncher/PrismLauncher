@@ -3,7 +3,7 @@
 #include <QDialog>
 #include <QItemSelection>
 
-#include "modplatform/ResourceType.h"
+#include "api/structures/ResourceType.h"
 #include "ui/instanceview/InstanceProxyModel.h"
 
 namespace Ui {
@@ -14,13 +14,13 @@ class ImportResourceDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit ImportResourceDialog(QString file_path, ModPlatform::ResourceType type, QWidget* parent = nullptr);
+    explicit ImportResourceDialog(QString file_path, Platform::ResourceType type, QWidget* parent = nullptr);
     ~ImportResourceDialog() override;
     QString selectedInstanceKey;
 
    private:
     Ui::ImportResourceDialog* ui;
-    ModPlatform::ResourceType m_resource_type;
+    Platform::ResourceType m_resource_type;
     QString m_file_path;
     InstanceProxyModel* proxyModel;
 

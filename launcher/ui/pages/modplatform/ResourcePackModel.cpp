@@ -20,13 +20,13 @@ ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_in
 ResourceAPI::SearchArgs ResourcePackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return { ModPlatform::ResourceType::ResourcePack, m_next_search_offset, m_search_term, sort };
+    return { Platform::ResourceType::ResourcePack, m_next_search_offset, m_search_term, sort };
 }
 
 ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
-    return { *pack, {}, {}, ModPlatform::ResourceType::ResourcePack };
+    return { *pack, {}, {}, Platform::ResourceType::ResourcePack };
 }
 
 ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)

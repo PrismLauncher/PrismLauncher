@@ -1033,7 +1033,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
         auto type = ResourceUtils::identify(localFileInfo);
 
-        if (ModPlatform::ResourceTypeUtils::ValidResources.count(type) == 0) {  // probably instance/modpack
+        if (Platform::ResourceTypeUtils::ValidResources.count(type) == 0) {  // probably instance/modpack
             addInstance(localFileName, extra_info);
             continue;
         }
@@ -1057,25 +1057,25 @@ void MainWindow::processURLs(QList<QUrl> urls)
         auto minecraftInst = std::dynamic_pointer_cast<MinecraftInstance>(inst);
 
         switch (type) {
-            case ModPlatform::ResourceType::ResourcePack:
+            case Platform::ResourceType::ResourcePack:
                 minecraftInst->resourcePackList()->installResourceWithFlameMetadata(localFileName, version);
                 break;
-            case ModPlatform::ResourceType::TexturePack:
+            case Platform::ResourceType::TexturePack:
                 minecraftInst->texturePackList()->installResourceWithFlameMetadata(localFileName, version);
                 break;
-            case ModPlatform::ResourceType::DataPack:
+            case Platform::ResourceType::DataPack:
                 qWarning() << "Importing of Data Packs not supported at this time. Ignoring" << localFileName;
                 break;
-            case ModPlatform::ResourceType::Mod:
+            case Platform::ResourceType::Mod:
                 minecraftInst->loaderModList()->installResourceWithFlameMetadata(localFileName, version);
                 break;
-            case ModPlatform::ResourceType::ShaderPack:
+            case Platform::ResourceType::ShaderPack:
                 minecraftInst->shaderPackList()->installResourceWithFlameMetadata(localFileName, version);
                 break;
-            case ModPlatform::ResourceType::World:
+            case Platform::ResourceType::World:
                 minecraftInst->worldList()->installWorld(localFileInfo);
                 break;
-            case ModPlatform::ResourceType::Unknown:
+            case Platform::ResourceType::Unknown:
             default:
                 qDebug() << "Can't Identify" << localFileName << "Ignoring it.";
                 break;

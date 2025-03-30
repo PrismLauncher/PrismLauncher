@@ -17,13 +17,13 @@ ShaderPackResourceModel::ShaderPackResourceModel(BaseInstance const& base_inst, 
 ResourceAPI::SearchArgs ShaderPackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
-    return { ModPlatform::ResourceType::ShaderPack, m_next_search_offset, m_search_term, sort };
+    return { Platform::ResourceType::ShaderPack, m_next_search_offset, m_search_term, sort };
 }
 
 ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
-    return { *pack, {}, {}, ModPlatform::ResourceType::ShaderPack };
+    return { *pack, {}, {}, Platform::ResourceType::ShaderPack };
 }
 
 ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(const QModelIndex& entry)

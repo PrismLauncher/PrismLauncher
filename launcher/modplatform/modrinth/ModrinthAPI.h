@@ -104,16 +104,16 @@ class ModrinthAPI : public ResourceAPI {
     }
 
    private:
-    [[nodiscard]] static QString resourceTypeParameter(ModPlatform::ResourceType type)
+    [[nodiscard]] static QString resourceTypeParameter(Platform::ResourceType type)
     {
         switch (type) {
-            case ModPlatform::ResourceType::Mod:
+            case Platform::ResourceType::Mod:
                 return "mod";
-            case ModPlatform::ResourceType::ResourcePack:
+            case Platform::ResourceType::ResourcePack:
                 return "resourcepack";
-            case ModPlatform::ResourceType::ShaderPack:
+            case Platform::ResourceType::ShaderPack:
                 return "shader";
-            case ModPlatform::ResourceType::Modpack:
+            case Platform::ResourceType::Modpack:
                 return "modpack";
             default:
                 qWarning() << "Invalid resource type for Modrinth API!";
@@ -218,7 +218,7 @@ class ModrinthAPI : public ResourceAPI {
 
     QJsonArray documentToArray(QJsonDocument& obj) const override { return obj.object().value("hits").toArray(); }
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { Modrinth::loadIndexedPack(m, obj); }
-    ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, ModPlatform::ResourceType) const override
+    ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType) const override
     {
         return Modrinth::loadIndexedPackVersion(obj);
     };

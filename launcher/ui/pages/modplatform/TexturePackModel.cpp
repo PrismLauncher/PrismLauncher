@@ -73,7 +73,7 @@ ResourceAPI::SearchArgs TexturePackResourceModel::createSearchArguments()
 ResourceAPI::VersionSearchArgs TexturePackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto args = ResourcePackResourceModel::createVersionsArguments(entry);
-    args.resourceType = ModPlatform::ResourceType::TexturePack;
+    args.resourceType = Platform::ResourceType::TexturePack;
     if (!m_version_list->isLoaded()) {
         qCritical() << "The version list could not be loaded. Falling back to showing all entries.";
         return args;

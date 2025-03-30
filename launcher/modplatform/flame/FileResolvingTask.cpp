@@ -84,18 +84,18 @@ void Flame::FileResolvingTask::executeTask()
     m_task->start();
 }
 
-ModPlatform::ResourceType getResourceType(int classId)
+Platform::ResourceType getResourceType(int classId)
 {
     switch (classId) {
         case 17:  // Worlds
-            return ModPlatform::ResourceType::World;
+            return Platform::ResourceType::World;
         case 6:  // Mods
-            return ModPlatform::ResourceType::Mod;
+            return Platform::ResourceType::Mod;
         case 12:  // Resource Packs
-                  // return ModPlatform::ResourceType::ResourcePack; // not really a resourcepack
+                  // return Platform::ResourceType::ResourcePack; // not really a resourcepack
             /* fallthrough */
         case 4546:  // Customization
-                    // return ModPlatform::ResourceType::ShaderPack; // not really a shaderPack
+                    // return Platform::ResourceType::ShaderPack; // not really a shaderPack
             /* fallthrough */
         case 4471:  // Modpacks
             /* fallthrough */
@@ -104,7 +104,7 @@ ModPlatform::ResourceType getResourceType(int classId)
         case 4559:  // Addons
             /* fallthrough */
         default:
-            return ModPlatform::ResourceType::Unknown;
+            return Platform::ResourceType::Unknown;
     }
 }
 
@@ -256,7 +256,7 @@ void Flame::FileResolvingTask::getFlameProjects()
                 setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
                 FlameMod::loadIndexedPack(file->pack, entry_obj);
                 file->resourceType = getResourceType(Json::requireInteger(entry_obj, "classId", "modClassId"));
-                if (file->resourceType == ModPlatform::ResourceType::World) {
+                if (file->resourceType == Platform::ResourceType::World) {
                     file->targetFolder = "saves";
                 }
             }

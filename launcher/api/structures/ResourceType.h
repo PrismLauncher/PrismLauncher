@@ -5,6 +5,7 @@
 /*
  *  Prism Launcher - Minecraft Launcher
  *  Copyright (C) 2022 Rachel Powers <508861+Ryex@users.noreply.github.com>
+ *  Copyright (c) 2025 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,7 +28,7 @@
 #include <QFileInfo>
 #include <QObject>
 
-namespace ModPlatform {
+namespace Platform {
 
 enum class ResourceType { Mod, ResourcePack, ShaderPack, Modpack, DataPack, World, Screenshots, TexturePack, Unknown };
 
@@ -36,4 +37,4 @@ static const std::set<ResourceType> ValidResources = { ResourceType::DataPack,  
                                                        ResourceType::ShaderPack, ResourceType::World,        ResourceType::Mod };
 QString getName(ResourceType type);
 }  // namespace ResourceTypeUtils
-}  // namespace ModPlatform
+}  // namespace Platform

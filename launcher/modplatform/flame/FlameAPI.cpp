@@ -171,7 +171,7 @@ QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
              { 8, "GameVersion", QObject::tr("Sort by Game Version") } };
 }
 
-Task::Ptr FlameAPI::getCategories(std::shared_ptr<QByteArray> response, ModPlatform::ResourceType type)
+Task::Ptr FlameAPI::getCategories(std::shared_ptr<QByteArray> response, Platform::ResourceType type)
 {
     auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
     netJob->addNetAction(Net::ApiDownload::makeByteArray(
@@ -182,7 +182,7 @@ Task::Ptr FlameAPI::getCategories(std::shared_ptr<QByteArray> response, ModPlatf
 
 Task::Ptr FlameAPI::getModCategories(std::shared_ptr<QByteArray> response)
 {
-    return getCategories(response, ModPlatform::ResourceType::Mod);
+    return getCategories(response, Platform::ResourceType::Mod);
 }
 
 QList<ModPlatform::Category> FlameAPI::loadModCategories(std::shared_ptr<QByteArray> response)
