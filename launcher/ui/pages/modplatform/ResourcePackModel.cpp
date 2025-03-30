@@ -26,7 +26,7 @@ ResourceAPI::SearchArgs ResourcePackResourceModel::createSearchArguments()
 ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
-    return { *pack, {}, {}, ModPlatform::ResourceType::RESOURCE_PACK };
+    return { *pack, {}, {}, ModPlatform::ResourceType::ResourcePack };
 }
 
 ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)

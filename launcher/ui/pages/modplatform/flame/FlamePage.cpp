@@ -208,7 +208,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = api.getProjectVersions({ *m_current, {}, {}, ModPlatform::ResourceType::MODPACK }, std::move(callbacks));
+        auto netJob = api.getProjectVersions({ *m_current, {}, {}, ModPlatform::ResourceType::Modpack }, std::move(callbacks));
 
         m_job = netJob;
         netJob->start();

@@ -62,7 +62,7 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelInd
     if (m_filter->loaders)
         loaders = m_filter->loaders;
 
-    return { pack, versions, loaders, ModPlatform::ResourceType::MOD };
+    return { pack, versions, loaders, ModPlatform::ResourceType::Mod };
 }
 
 ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(const QModelIndex& entry)

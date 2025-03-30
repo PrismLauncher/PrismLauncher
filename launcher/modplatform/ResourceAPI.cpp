@@ -220,7 +220,7 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
         for (auto versionIter : arr) {
             auto obj = versionIter.toObject();
 
-            auto file = loadIndexedPackVersion(obj, ModPlatform::ResourceType::MOD);
+            auto file = loadIndexedPackVersion(obj, ModPlatform::ResourceType::Mod);
             if (!file.addonId.isValid())
                 file.addonId = args.dependency.addonId;
 

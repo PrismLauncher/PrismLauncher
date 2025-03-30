@@ -23,7 +23,7 @@ ResourceAPI::SearchArgs ShaderPackResourceModel::createSearchArguments()
 ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
-    return { *pack, {}, {}, ModPlatform::ResourceType::SHADER_PACK };
+    return { *pack, {}, {}, ModPlatform::ResourceType::ShaderPack };
 }
 
 ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(const QModelIndex& entry)
