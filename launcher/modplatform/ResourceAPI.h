@@ -82,7 +82,7 @@ class ResourceAPI {
         std::optional<SortingMethod> sorting;
         std::optional<Platform::ModLoaders> loaders;
         std::optional<std::list<Version>> versions;
-        std::optional<ModPlatform::Side> side;
+        std::optional<Platform::Side> side;
         std::optional<QStringList> categoryIds;
         bool openSource;
     };

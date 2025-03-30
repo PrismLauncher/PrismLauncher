@@ -46,7 +46,7 @@ class ModrinthPackExportTask : public Task {
     struct ResolvedFile {
         QString sha1, sha512, url;
         qint64 size;
-        ModPlatform::Side side;
+        Platform::Side side;
     };
 
     static const QStringList PREFIXES;

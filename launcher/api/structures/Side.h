@@ -20,17 +20,14 @@
 #pragma once
 
 #include <QStringList>
-#include <QVariant>
 
 namespace Platform {
 
-enum class Provider { MODRINTH, FLAME };
+enum class Side { NoSide = 0, ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
 
-namespace ProviderUtils {
-const char* name(Provider);
-QString readableName(Provider);
-QStringList hashType(Provider);
-QString getMetaURL(Provider provider, QVariant projectID);
-}  // namespace ProviderUtils
+namespace SideUtils {
+QString toString(Side side);
+Side fromString(QString side);
+}  // namespace SideUtils
 
 }  // namespace Platform

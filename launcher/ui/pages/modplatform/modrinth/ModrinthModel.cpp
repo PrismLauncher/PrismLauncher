@@ -160,7 +160,7 @@ void ModpackListModel::performPaginatedSearch()
     callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
 
     auto netJob = api.searchProjects({ Platform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders,
-                                       m_filter->versions, ModPlatform::Side::NoSide, m_filter->categoryIds, m_filter->openSource },
+                                       m_filter->versions, Platform::Side::NoSide, m_filter->categoryIds, m_filter->openSource },
                                      std::move(callbacks));
 
     m_jobPtr = netJob;

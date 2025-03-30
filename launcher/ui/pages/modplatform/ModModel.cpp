@@ -103,10 +103,10 @@ QVariant ModModel::getInstalledPackVersion(ModPlatform::IndexedPack::Ptr pack) c
     return {};
 }
 
-bool checkSide(ModPlatform::Side filter, ModPlatform::Side value)
+bool checkSide(Platform::Side filter, Platform::Side value)
 {
-    return filter == ModPlatform::Side::NoSide || value == ModPlatform::Side::NoSide || filter == ModPlatform::Side::UniversalSide ||
-           value == ModPlatform::Side::UniversalSide || filter == value;
+    return filter == Platform::Side::NoSide || value == Platform::Side::NoSide || filter == Platform::Side::UniversalSide ||
+           value == Platform::Side::UniversalSide || filter == value;
 }
 
 bool ModModel::checkFilters(ModPlatform::IndexedPack::Ptr pack)

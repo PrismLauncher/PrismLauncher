@@ -26,19 +26,13 @@
 #include <memory>
 #include "api/structures/ModLoader.h"
 #include "api/structures/Provider.h"
+#include "api/structures/Side.h"
 
 class QIODevice;
 
 namespace ModPlatform {
 
 enum class DependencyType { REQUIRED, OPTIONAL, INCOMPATIBLE, EMBEDDED, TOOL, INCLUDE, UNKNOWN };
-
-enum class Side { NoSide = 0, ClientSide = 1 << 0, ServerSide = 1 << 1, UniversalSide = ClientSide | ServerSide };
-
-namespace SideUtils {
-QString toString(Side side);
-Side fromString(QString side);
-}  // namespace SideUtils
 
 struct ModpackAuthor {
     QString name;
@@ -101,7 +95,7 @@ struct IndexedVersion {
     bool is_preferred = true;
     QString changelog;
     QList<Dependency> dependencies;
-    Side side;  // this is for flame API
+    Platform::Side side;  // this is for flame API
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
@@ -132,7 +126,7 @@ struct IndexedPack {
     QString logoName;
     QString logoUrl;
     QString websiteUrl;
-    Side side;
+    Platform::Side side;
 
     bool versionsLoaded = false;
     QList<IndexedVersion> versions;

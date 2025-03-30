@@ -113,7 +113,7 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
     mod.provider = mod_pack.provider;
     mod.file_id = mod_version.fileId;
     mod.project_id = mod_pack.addonId;
-    mod.side = mod_version.side == ModPlatform::Side::NoSide ? mod_pack.side : mod_version.side;
+    mod.side = mod_version.side == Platform::Side::NoSide ? mod_pack.side : mod_version.side;
     mod.loaders = mod_version.loaders;
     mod.mcVersions = mod_version.mcVersion;
     mod.mcVersions.sort();
@@ -196,7 +196,7 @@ void V1::updateModIndex(const QDir& index_dir, Mod& mod)
     {
         auto tbl = toml::table{ { "name", mod.name.toStdString() },
                                 { "filename", mod.filename.toStdString() },
-                                { "side", ModPlatform::SideUtils::toString(mod.side).toStdString() },
+                                { "side", Platform::SideUtils::toString(mod.side).toStdString() },
                                 { "x-prismlauncher-loaders", loaders },
                                 { "x-prismlauncher-mc-versions", mcVersions },
                                 { "x-prismlauncher-release-type", mod.releaseType.toString().toStdString() },
@@ -272,7 +272,7 @@ auto V1::getIndexForMod(const QDir& index_dir, QString slug) -> Mod
     {  // Basic info
         mod.name = stringEntry(table, "name");
         mod.filename = stringEntry(table, "filename");
-        mod.side = ModPlatform::SideUtils::fromString(stringEntry(table, "side"));
+        mod.side = Platform::SideUtils::fromString(stringEntry(table, "side"));
         mod.releaseType = ModPlatform::IndexedVersionType(table["x-prismlauncher-release-type"].value_or(""));
         if (auto loaders = table["x-prismlauncher-loaders"]; loaders && loaders.is_array()) {
             for (auto&& loader : *loaders.as_array()) {

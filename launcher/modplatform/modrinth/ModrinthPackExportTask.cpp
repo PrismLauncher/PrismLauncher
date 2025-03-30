@@ -290,7 +290,7 @@ QByteArray ModrinthPackExportTask::generateIndex()
 
         // a server side mod does not imply that the mod does not work on the client
         // however, if a mrpack mod is marked as server-only it will not install on the client
-        if (iterator->side == ModPlatform::Side::ClientSide)
+        if (iterator->side == Platform::Side::ClientSide)
             env["server"] = "unsupported";
 
         fileOut["env"] = env;
