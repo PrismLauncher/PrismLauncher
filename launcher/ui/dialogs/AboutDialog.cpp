@@ -181,7 +181,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDia
     connect(ui->closeButton, &QPushButton::clicked, this, &AboutDialog::close);
 
     connect(ui->aboutQt, &QPushButton::clicked, &QApplication::aboutQt);
-    if (DesktopServices::isGameScope()) {
+    if (DesktopServices::isSteamDeckGameScope()) {
         showFullScreen();
         setFixedSize(this->width(), this->height());
     }

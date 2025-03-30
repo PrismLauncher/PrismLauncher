@@ -45,5 +45,5 @@ bool isSnap();
 /**
  * Determine whether the launcher is running in a gamescope environment
  */
-bool isGameScope();
+bool isSteamDeckGameScope();
 }  // namespace DesktopServices

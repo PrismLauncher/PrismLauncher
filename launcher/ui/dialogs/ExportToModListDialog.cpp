@@ -69,7 +69,7 @@ ExportToModListDialog::ExportToModListDialog(QString name, QList<Mod*> mods, QWi
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     ui->buttonBox->button(QDialogButtonBox::Save)->setText(tr("Save"));
     triggerImp();
-    if (DesktopServices::isGameScope()) {
+    if (DesktopServices::isSteamDeckGameScope()) {
         showFullScreen();
         setFixedSize(this->width(), this->height());
     }

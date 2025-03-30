@@ -124,7 +124,7 @@ ExportPackDialog::ExportPackDialog(MinecraftInstancePtr instance, QWidget* paren
     m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
 
-    if (DesktopServices::isGameScope()) {
+    if (DesktopServices::isSteamDeckGameScope()) {
         showFullScreen();
         setFixedSize(this->width(), this->height());
     }

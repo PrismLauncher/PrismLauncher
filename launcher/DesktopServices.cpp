@@ -84,9 +84,9 @@ bool isSnap()
 #endif
 }
 
-bool isGameScope()
+bool isSteamDeckGameScope()
 {
-    return qgetenv("XDG_CURRENT_DESKTOP") == "gamescope";
+    return qgetenv("XDG_CURRENT_DESKTOP") == "gamescope" && qgetenv("STEAM_DECK") == "1";
 }
 
 }  // namespace DesktopServices

@@ -24,7 +24,7 @@ NewsDialog::NewsDialog(QList<NewsEntryPtr> entries, QWidget* parent) : QDialog(p
 
     ui->currentArticleContentBrowser->setText(article_entry->content);
     ui->currentArticleContentBrowser->flush();
-    if (DesktopServices::isGameScope()) {
+    if (DesktopServices::isSteamDeckGameScope()) {
         showFullScreen();
         setFixedSize(this->width(), this->height());
     }

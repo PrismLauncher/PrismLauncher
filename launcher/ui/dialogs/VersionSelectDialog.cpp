@@ -91,7 +91,7 @@ VersionSelectDialog::VersionSelectDialog(BaseVersionList* vlist, QString title, 
     if (!cancelable) {
         m_buttonBox->button(QDialogButtonBox::Cancel)->setEnabled(false);
     }
-    if (DesktopServices::isGameScope()) {
+    if (DesktopServices::isSteamDeckGameScope()) {
         this->showFullScreen();
         this->setFixedSize(this->width(), this->height());
     }

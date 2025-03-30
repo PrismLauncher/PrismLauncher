@@ -275,7 +275,7 @@ ModDownloadDialog::ModDownloadDialog(QWidget* parent, const std::shared_ptr<ModF
     initializeContainer();
     connectButtons();
 
-    if (DesktopServices::isGameScope()) {
+    if (DesktopServices::isSteamDeckGameScope()) {
         showFullScreen();
         setFixedSize(this->width(), this->height());
     } else if (!geometrySaveKey().isEmpty())
@@ -321,7 +321,7 @@ ResourcePackDownloadDialog::ResourcePackDownloadDialog(QWidget* parent,
     initializeContainer();
     connectButtons();
 
-    if (DesktopServices::isGameScope()) {
+    if (DesktopServices::isSteamDeckGameScope()) {
         showFullScreen();
         setFixedSize(this->width(), this->height());
     } else if (!geometrySaveKey().isEmpty())
@@ -349,7 +349,7 @@ TexturePackDownloadDialog::TexturePackDownloadDialog(QWidget* parent,
     initializeContainer();
     connectButtons();
 
-    if (DesktopServices::isGameScope()) {
+    if (DesktopServices::isSteamDeckGameScope()) {
         showFullScreen();
         setFixedSize(this->width(), this->height());
     } else if (!geometrySaveKey().isEmpty())
@@ -377,7 +377,7 @@ ShaderPackDownloadDialog::ShaderPackDownloadDialog(QWidget* parent,
     initializeContainer();
     connectButtons();
 
-    if (DesktopServices::isGameScope()) {
+    if (DesktopServices::isSteamDeckGameScope()) {
         showFullScreen();
         setFixedSize(this->width(), this->height());
     } else if (!geometrySaveKey().isEmpty())

@@ -119,7 +119,7 @@ InstanceWindow::InstanceWindow(InstancePtr instance, QWidget* parent) : QMainWin
     {
         auto base64State = APPLICATION->settings()->get("ConsoleWindowState").toString().toUtf8();
         restoreState(QByteArray::fromBase64(base64State));
-        if (DesktopServices::isGameScope()) {
+        if (DesktopServices::isSteamDeckGameScope()) {
             showFullScreen();
             setFixedSize(this->width(), this->height());
         } else {
