@@ -79,19 +79,19 @@ static QString enumToString(int hash_algorithm)
 
 void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArray& arr)
 {
-    QList<ModPlatform::IndexedVersion> unsortedVersions;
+    QList<Platform::Version> unsortedVersions;
     for (auto versionIter : arr) {
         auto obj = versionIter.toObject();
 
         auto file = loadIndexedPackVersion(obj);
-        if (!file.addonId.isValid())
-            file.addonId = pack.addonId;
+        if (!file.projectId.isValid())
+            file.projectId = pack.addonId;
 
         if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
             unsortedVersions.append(file);
     }
 
-    auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+    auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
         // dates are in RFC 3339 format
         return a.date > b.date;
     };
@@ -100,11 +100,11 @@ void FlameMod::loadIndexedPackVersions(ModPlatform::IndexedPack& pack, QJsonArra
     pack.versionsLoaded = true;
 }
 
-auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> ModPlatform::IndexedVersion
+auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> Platform::Version
 {
     auto versionArray = Json::requireArray(obj, "gameVersions");
 
-    ModPlatform::IndexedVersion file;
+    Platform::Version file;
     for (auto mcVer : versionArray) {
         auto str = mcVer.toString();
 
@@ -132,7 +132,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
         }
     }
 
-    file.addonId = Json::requireInteger(obj, "modId");
+    file.projectId = Json::requireInteger(obj, "modId");
     file.fileId = Json::requireInteger(obj, "id");
     file.date = Json::requireString(obj, "fileDate");
     file.version = Json::requireString(obj, "displayName");
@@ -200,7 +200,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     }
 
     if (load_changelog)
-        file.changelog = api.getModFileChangelog(file.addonId.toInt(), file.fileId.toInt());
+        file.changelog = api.getModFileChangelog(file.projectId.toInt(), file.fileId.toInt());
 
     return file;
 }

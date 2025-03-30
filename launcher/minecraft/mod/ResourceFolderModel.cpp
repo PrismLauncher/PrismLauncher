@@ -164,17 +164,17 @@ bool ResourceFolderModel::installResource(QString original_path)
     return false;
 }
 
-void ResourceFolderModel::installResourceWithFlameMetadata(QString path, ModPlatform::IndexedVersion& vers)
+void ResourceFolderModel::installResourceWithFlameMetadata(QString path, Platform::Version& vers)
 {
     auto install = [this, path] { installResource(std::move(path)); };
-    if (vers.addonId.isValid()) {
+    if (vers.projectId.isValid()) {
         ModPlatform::IndexedPack pack{
-            vers.addonId,
+            vers.projectId,
             Platform::Provider::FLAME,
         };
 
         auto response = std::make_shared<QByteArray>();
-        auto job = FlameAPI().getProject(vers.addonId.toString(), response);
+        auto job = FlameAPI().getProject(vers.projectId.toString(), response);
         QObject::connect(job.get(), &Task::failed, this, install);
         QObject::connect(job.get(), &Task::aborted, this, install);
         QObject::connect(job.get(), &Task::succeeded, [response, this, &vers, install, &pack] {

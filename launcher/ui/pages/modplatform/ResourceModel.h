@@ -58,14 +58,14 @@ class ResourceModel : public QAbstractListModel {
 
     virtual QVariant getInstalledPackVersion(ModPlatform::IndexedPack::Ptr) const { return {}; }
     /** Whether the version is opted out or not. Currently only makes sense in CF. */
-    virtual bool optedOut(const ModPlatform::IndexedVersion& ver) const
+    virtual bool optedOut(const Platform::Version& ver) const
     {
         Q_UNUSED(ver);
         return false;
     };
 
     virtual bool checkFilters(ModPlatform::IndexedPack::Ptr) { return true; }
-    virtual bool checkVersionFilters(const ModPlatform::IndexedVersion&);
+    virtual bool checkVersionFilters(const Platform::Version&);
 
    public slots:
     void fetchMore(const QModelIndex& parent) override;
@@ -96,7 +96,7 @@ class ResourceModel : public QAbstractListModel {
     std::optional<QIcon> getIcon(QModelIndex&, const QUrl&);
 
     void addPack(ModPlatform::IndexedPack::Ptr pack,
-                 ModPlatform::IndexedVersion& version,
+                 Platform::Version& version,
                  std::shared_ptr<ResourceFolderModel> packs,
                  bool is_indexed = false,
                  QString custom_target_folder = {});
@@ -146,7 +146,7 @@ class ResourceModel : public QAbstractListModel {
     void searchRequestFailed(QString reason, int network_error_code);
     void searchRequestAborted();
 
-    void versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>&, QVariant, const QModelIndex&);
+    void versionRequestSucceeded(QVector<Platform::Version>&, QVariant, const QModelIndex&);
 
     void infoRequestSucceeded(ModPlatform::IndexedPack&, const QModelIndex&);
 

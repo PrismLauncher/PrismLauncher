@@ -12,7 +12,7 @@
 
 namespace ResourceDownload {
 
-static bool isOptedOut(const ModPlatform::IndexedVersion& ver)
+static bool isOptedOut(const Platform::Version& ver)
 {
     return ver.downloadUrl.isEmpty();
 }
@@ -44,7 +44,7 @@ ResourceAPI::VersionSearchArgs FlameTexturePackModel::createVersionsArguments(co
     return args;
 }
 
-bool FlameTexturePackModel::optedOut(const ModPlatform::IndexedVersion& ver) const
+bool FlameTexturePackModel::optedOut(const Platform::Version& ver) const
 {
     return isOptedOut(ver);
 }

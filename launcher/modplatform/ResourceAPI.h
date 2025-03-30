@@ -129,8 +129,8 @@ class ResourceAPI {
     [[nodiscard]] virtual Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const = 0;
 
     [[nodiscard]] virtual Task::Ptr getProjectInfo(ProjectInfoArgs&&, Callback<ModPlatform::IndexedPack>&&) const;
-    [[nodiscard]] Task::Ptr getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const;
-    [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<ModPlatform::IndexedVersion>&&) const;
+    [[nodiscard]] Task::Ptr getProjectVersions(VersionSearchArgs&& args, Callback<QVector<Platform::Version>>&& callbacks) const;
+    [[nodiscard]] virtual Task::Ptr getDependencyVersion(DependencySearchArgs&&, Callback<Platform::Version>&&) const;
 
    protected:
     [[nodiscard]] inline QString debugName() const { return "External resource API"; }
@@ -151,7 +151,7 @@ class ResourceAPI {
      */
 
     virtual void loadIndexedPack(ModPlatform::IndexedPack&, QJsonObject&) const = 0;
-    virtual ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType) const = 0;
+    virtual Platform::Version loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType) const = 0;
 
     /** Converts a JSON document to a common array format.
      *

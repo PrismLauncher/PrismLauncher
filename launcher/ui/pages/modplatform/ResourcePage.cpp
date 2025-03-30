@@ -38,6 +38,7 @@
  */
 
 #include "ResourcePage.h"
+#include "api/structures/Version.h"
 #include "api/structures/VersionType.h"
 #include "modplatform/ModIndex.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -361,7 +362,7 @@ void ResourcePage::onVersionSelectionChanged(int index)
     updateSelectionButton();
 }
 
-void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& version)
+void ResourcePage::addResourceToDialog(ModPlatform::IndexedPack::Ptr pack, Platform::Version& version)
 {
     m_parentDialog->addResource(pack, version);
 }
@@ -372,7 +373,7 @@ void ResourcePage::removeResourceFromDialog(const QString& pack_name)
 }
 
 void ResourcePage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
-                                     ModPlatform::IndexedVersion& ver,
+                                     Platform::Version& ver,
                                      const std::shared_ptr<ResourceFolderModel> base_model)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
@@ -424,9 +425,8 @@ void ResourcePage::onResourceToggle(const QModelIndex& index)
         if (pack->isAnyVersionSelected())
             removeResourceFromDialog(pack->name);
         else {
-            auto version = std::find_if(pack->versions.begin(), pack->versions.end(), [this](const ModPlatform::IndexedVersion& version) {
-                return m_model->checkVersionFilters(version);
-            });
+            auto version = std::find_if(pack->versions.begin(), pack->versions.end(),
+                                        [this](const Platform::Version& version) { return m_model->checkVersionFilters(version); });
 
             if (version == pack->versions.end()) {
                 auto errorMessage = new QMessageBox(

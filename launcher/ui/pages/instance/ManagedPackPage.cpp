@@ -254,7 +254,7 @@ void ModrinthManagedPackPage::parseManagedPack()
     if (m_fetch_job && m_fetch_job->isRunning())
         m_fetch_job->abort();
 
-    ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
+    ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
     m_pack = { m_inst->getManagedPackID() };
 
     // Use default if no callbacks are set
@@ -431,7 +431,7 @@ void FlameManagedPackPage::parseManagedPack()
     QString id = m_inst->getManagedPackID();
     m_pack = { id };
 
-    ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
+    ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
 
     // Use default if no callbacks are set
     callbacks.on_succeed = [this](auto& doc) {

@@ -159,7 +159,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading flame modpack versions";
 
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
+        ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
 
         auto addonId = m_current->addonId;
         // Use default if no callbacks are set
@@ -170,7 +170,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
 
             m_current->versions = doc;
             m_current->versionsLoaded = true;
-            auto pred = [this](const ModPlatform::IndexedVersion& v) {
+            auto pred = [this](const Platform::Version& v) {
                 if (auto filter = m_filterWidget->getFilter())
                     return !filter->checkModpackFilters(v);
                 return false;

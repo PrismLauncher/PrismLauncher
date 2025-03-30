@@ -18,9 +18,9 @@ class FlameAPI : public ResourceAPI {
     QString getModFileChangelog(int modId, int fileId);
     QString getModDescription(int modId);
 
-    std::optional<ModPlatform::IndexedVersion> getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
-                                                                QList<Platform::ModLoader> instanceLoaders,
-                                                                Platform::ModLoaders fallback);
+    std::optional<Platform::Version> getLatestVersion(QList<Platform::Version> versions,
+                                                      QList<Platform::ModLoader> instanceLoaders,
+                                                      Platform::ModLoaders fallback);
 
     Task::Ptr getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const override;
     Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
@@ -129,7 +129,7 @@ class FlameAPI : public ResourceAPI {
 
     QJsonArray documentToArray(QJsonDocument& obj) const override { return Json::ensureArray(obj.object(), "data"); }
     void loadIndexedPack(ModPlatform::IndexedPack& m, QJsonObject& obj) const override { FlameMod::loadIndexedPack(m, obj); }
-    ModPlatform::IndexedVersion loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType resourceType) const override
+    Platform::Version loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType resourceType) const override
     {
         auto arr = FlameMod::loadIndexedPackVersion(obj);
         if (resourceType != Platform::ResourceType::TexturePack) {

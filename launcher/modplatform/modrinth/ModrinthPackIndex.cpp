@@ -113,11 +113,11 @@ void Modrinth::loadExtraPackData(ModPlatform::IndexedPack& pack, QJsonObject& ob
     pack.extraDataLoaded = true;
 }
 
-ModPlatform::IndexedVersion Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_type, QString preferred_file_name)
+Platform::Version Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_type, QString preferred_file_name)
 {
-    ModPlatform::IndexedVersion file;
+    Platform::Version file;
 
-    file.addonId = Json::requireString(obj, "project_id");
+    file.projectId = Json::requireString(obj, "project_id");
     file.fileId = Json::requireString(obj, "id");
     file.date = Json::requireString(obj, "date_published");
     auto versionArray = Json::requireArray(obj, "game_versions");

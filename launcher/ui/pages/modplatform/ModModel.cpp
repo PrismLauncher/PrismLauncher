@@ -116,7 +116,7 @@ bool ModModel::checkFilters(ModPlatform::IndexedPack::Ptr pack)
     return !(m_filter->hideInstalled && isPackInstalled(pack)) && checkSide(m_filter->side, pack->side);
 }
 
-bool ModModel::checkVersionFilters(const ModPlatform::IndexedVersion& v)
+bool ModModel::checkVersionFilters(const Platform::Version& v)
 {
     if (!m_filter)
         return true;

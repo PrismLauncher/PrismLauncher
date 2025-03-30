@@ -31,21 +31,21 @@ class ResourceDownloadTask : public SequentialTask {
     Q_OBJECT
    public:
     explicit ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
-                                  ModPlatform::IndexedVersion version,
+                                  Platform::Version version,
                                   std::shared_ptr<ResourceFolderModel> packs,
                                   bool is_indexed = true,
                                   QString custom_target_folder = {});
     const QString& getFilename() const { return m_pack_version.fileName; }
     const QString& getCustomPath() const { return m_custom_target_folder; }
     const QVariant& getVersionID() const { return m_pack_version.fileId; }
-    const ModPlatform::IndexedVersion& getVersion() const { return m_pack_version; }
+    const Platform::Version& getVersion() const { return m_pack_version; }
     const Platform::Provider& getProvider() const { return m_pack->provider; }
     const QString& getName() const { return m_pack->name; }
     ModPlatform::IndexedPack::Ptr getPack() { return m_pack; }
 
    private:
     ModPlatform::IndexedPack::Ptr m_pack;
-    ModPlatform::IndexedVersion m_pack_version;
+    Platform::Version m_pack_version;
     const std::shared_ptr<ResourceFolderModel> m_pack_model;
     QString m_custom_target_folder;
 

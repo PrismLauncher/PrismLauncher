@@ -501,6 +501,7 @@ set(API_SOURCES
     api/structures/VersionType.h
     api/structures/VersionType.cpp
     api/structures/Dependency.h
+    api/structures/Version.h
 
     modplatform/ModIndex.h
 

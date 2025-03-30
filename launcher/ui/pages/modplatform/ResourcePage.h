@@ -75,10 +75,10 @@ class ResourcePage : public QWidget, public BasePage {
     virtual void updateSelectionButton();
     virtual void versionListUpdated(const QModelIndex& index);
 
-    void addResourceToDialog(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&);
+    void addResourceToDialog(ModPlatform::IndexedPack::Ptr, Platform::Version&);
     void removeResourceFromDialog(const QString& pack_name);
     virtual void removeResourceFromPage(const QString& name);
-    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>);
+    virtual void addResourceToPage(ModPlatform::IndexedPack::Ptr, Platform::Version&, std::shared_ptr<ResourceFolderModel>);
 
     virtual void modelReset();
 

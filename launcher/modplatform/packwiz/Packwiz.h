@@ -68,7 +68,7 @@ class V1 {
     /* Generates the object representing the information in a mod.pw.toml file via
      * its common representation in the launcher, when downloading mods.
      * */
-    static auto createModFormat(const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version) -> Mod;
+    static auto createModFormat(const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Platform::Version& mod_version) -> Mod;
 
     /* Updates the mod index for the provided mod.
      * This creates a new index if one does not exist already

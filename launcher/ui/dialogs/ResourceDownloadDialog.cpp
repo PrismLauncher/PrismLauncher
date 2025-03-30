@@ -218,7 +218,7 @@ ResourcePage* ResourceDownloadDialog::selectedPage()
     return result;
 }
 
-void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, ModPlatform::IndexedVersion& ver)
+void ResourceDownloadDialog::addResource(ModPlatform::IndexedPack::Ptr pack, Platform::Version& ver)
 {
     removeResource(pack->name);
     selectedPage()->addResourceToPage(pack, ver, getBaseModel());

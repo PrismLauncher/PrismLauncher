@@ -24,7 +24,7 @@
 namespace Metadata {
 using ModStruct = Packwiz::V1::Mod;
 
-inline ModStruct create(const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, ModPlatform::IndexedVersion& mod_version)
+inline ModStruct create(const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Platform::Version& mod_version)
 {
     return Packwiz::V1::createModFormat(index_dir, mod_pack, mod_version);
 }

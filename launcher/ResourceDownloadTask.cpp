@@ -29,7 +29,7 @@
 #include "net/ChecksumValidator.h"
 
 ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
-                                           ModPlatform::IndexedVersion version,
+                                           Platform::Version version,
                                            const std::shared_ptr<ResourceFolderModel> packs,
                                            bool is_indexed,
                                            QString custom_target_folder)
@@ -47,7 +47,7 @@ ResourceDownloadTask::ResourceDownloadTask(ModPlatform::IndexedPack::Ptr pack,
 
     QDir dir{ m_pack_model->dir() };
     {
-        // FIXME: Make this more generic. May require adding additional info to IndexedVersion,
+        // FIXME: Make this more generic. May require adding additional info to Version,
         //        or adquiring a reference to the base instance.
         if (!m_custom_target_folder.isEmpty()) {
             dir.cdUp();

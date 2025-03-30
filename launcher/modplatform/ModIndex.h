@@ -24,13 +24,9 @@
 #include <QString>
 #include <QVariant>
 #include <memory>
-#include "api/structures/Dependency.h"
-#include "api/structures/ModLoader.h"
 #include "api/structures/Provider.h"
 #include "api/structures/Side.h"
-#include "api/structures/VersionType.h"
-
-class QIODevice;
+#include "api/structures/Version.h"
 
 namespace ModPlatform {
 
@@ -43,28 +39,6 @@ struct DonationData {
     QString id;
     QString platform;
     QString url;
-};
-
-struct IndexedVersion {
-    QVariant addonId;
-    QVariant fileId;
-    QString version;
-    QString version_number = {};
-    Platform::VersionType version_type;
-    QStringList mcVersion;
-    QString downloadUrl;
-    QString date;
-    QString fileName;
-    Platform::ModLoaders loaders = {};
-    QString hash_type;
-    QString hash;
-    bool is_preferred = true;
-    QString changelog;
-    QList<Platform::Dependency> dependencies;
-    Platform::Side side;  // this is for flame API
-
-    // For internal use, not provided by APIs
-    bool is_currently_selected = false;
 };
 
 struct ExtraPackData {
@@ -95,7 +69,7 @@ struct IndexedPack {
     Platform::Side side;
 
     bool versionsLoaded = false;
-    QList<IndexedVersion> versions;
+    QList<Platform::Version> versions;
 
     // Don't load by default, since some modplatform don't have that info
     bool extraDataLoaded = true;
@@ -127,4 +101,3 @@ struct Category {
 
 Q_DECLARE_METATYPE(ModPlatform::IndexedPack)
 Q_DECLARE_METATYPE(ModPlatform::IndexedPack::Ptr)
-Q_DECLARE_METATYPE(Platform::Provider)

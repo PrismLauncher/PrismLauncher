@@ -216,13 +216,13 @@ QList<ModPlatform::Category> FlameAPI::loadModCategories(std::shared_ptr<QByteAr
     return categories;
 };
 
-std::optional<ModPlatform::IndexedVersion> FlameAPI::getLatestVersion(QList<ModPlatform::IndexedVersion> versions,
-                                                                      QList<Platform::ModLoader> instanceLoaders,
-                                                                      Platform::ModLoaders modLoaders)
+std::optional<Platform::Version> FlameAPI::getLatestVersion(QList<Platform::Version> versions,
+                                                            QList<Platform::ModLoader> instanceLoaders,
+                                                            Platform::ModLoaders modLoaders)
 {
     static const auto noLoader = Platform::ModLoader(0);
-    QHash<Platform::ModLoader, ModPlatform::IndexedVersion> bestMatch;
-    auto checkVersion = [&bestMatch](const ModPlatform::IndexedVersion& version, const Platform::ModLoader& loader) {
+    QHash<Platform::ModLoader, Platform::Version> bestMatch;
+    auto checkVersion = [&bestMatch](const Platform::Version& version, const Platform::ModLoader& loader) {
         if (bestMatch.contains(loader)) {
             auto best = bestMatch.value(loader);
             if (version.date > best.date) {

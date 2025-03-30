@@ -49,7 +49,7 @@ class ModPage : public ResourcePage {
 
     [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
 
-    void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>) override;
+    void addResourceToPage(ModPlatform::IndexedPack::Ptr, Platform::Version&, std::shared_ptr<ResourceFolderModel>) override;
 
     virtual unique_qobject_ptr<ModFilterWidget> createFilterWidget() = 0;
 

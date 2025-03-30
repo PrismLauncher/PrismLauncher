@@ -72,7 +72,7 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<ModPlatf
     return netJob;
 }
 
-Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVector<ModPlatform::IndexedVersion>>&& callbacks) const
+Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVector<Platform::Version>>&& callbacks) const
 {
     auto versions_url_optional = getVersionsURL(args);
     if (!versions_url_optional.has_value())
@@ -95,7 +95,7 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
             return;
         }
 
-        QVector<ModPlatform::IndexedVersion> unsortedVersions;
+        QVector<Platform::Version> unsortedVersions;
         try {
             auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
 
@@ -103,14 +103,14 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
                 auto obj = versionIter.toObject();
 
                 auto file = loadIndexedPackVersion(obj, args.resourceType);
-                if (!file.addonId.isValid())
-                    file.addonId = args.pack.addonId;
+                if (!file.projectId.isValid())
+                    file.projectId = args.pack.addonId;
 
                 if (file.fileId.isValid() && !file.downloadUrl.isEmpty())  // Heuristic to check if the returned value is valid
                     unsortedVersions.append(file);
             }
 
-            auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+            auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
                 // dates are in RFC 3339 format
                 return a.date > b.date;
             };
@@ -186,7 +186,7 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<ModPlatfo
     return job;
 }
 
-Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callback<ModPlatform::IndexedVersion>&& callbacks) const
+Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callback<Platform::Version>&& callbacks) const
 {
     auto versions_url_optional = getDependencyURL(args);
     if (!versions_url_optional.has_value())
@@ -216,25 +216,25 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
             arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
         }
 
-        QVector<ModPlatform::IndexedVersion> versions;
+        QVector<Platform::Version> versions;
         for (auto versionIter : arr) {
             auto obj = versionIter.toObject();
 
             auto file = loadIndexedPackVersion(obj, Platform::ResourceType::Mod);
-            if (!file.addonId.isValid())
-                file.addonId = args.dependency.addonId;
+            if (!file.projectId.isValid())
+                file.projectId = args.dependency.addonId;
 
             if (file.fileId.isValid() &&
                 (!file.loaders || args.loader & file.loaders))  // Heuristic to check if the returned value is valid
                 versions.append(file);
         }
 
-        auto orderSortPredicate = [](const ModPlatform::IndexedVersion& a, const ModPlatform::IndexedVersion& b) -> bool {
+        auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
             // dates are in RFC 3339 format
             return a.date > b.date;
         };
         std::sort(versions.begin(), versions.end(), orderSortPredicate);
-        auto bestMatch = versions.size() != 0 ? versions.front() : ModPlatform::IndexedVersion();
+        auto bestMatch = versions.size() != 0 ? versions.front() : Platform::Version();
         callbacks.on_succeed(bestMatch);
     });
 

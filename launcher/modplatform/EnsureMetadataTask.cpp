@@ -265,7 +265,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
 {
     QHash<QString, QString> addonIds;
     for (auto const& data : m_tempVersions)
-        addonIds.insert(data.addonId.toString(), data.hash);
+        addonIds.insert(data.projectId.toString(), data.hash);
 
     auto response = std::make_shared<QByteArray>();
     Task::Ptr proj_task;
@@ -411,9 +411,9 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
         if (m_tempVersions.contains(hash)) {
             auto data = m_tempVersions.find(hash).value();
 
-            auto id_str = data.addonId.toString();
+            auto id_str = data.projectId.toString();
             if (!id_str.isEmpty())
-                addonIds.insert(data.addonId.toString(), hash);
+                addonIds.insert(data.projectId.toString(), hash);
         }
     }
 
@@ -479,7 +479,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     return proj_task;
 }
 
-void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Resource* resource)
+void EnsureMetadataTask::updateMetadata(ModPlatform::IndexedPack& pack, Platform::Version& ver, Resource* resource)
 {
     try {
         // Prevent file name mismatch

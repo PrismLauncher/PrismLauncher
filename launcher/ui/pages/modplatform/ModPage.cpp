@@ -113,7 +113,7 @@ QMap<QString, QString> ModPage::urlHandlers() const
 /******** Make changes to the UI ********/
 
 void ModPage::addResourceToPage(ModPlatform::IndexedPack::Ptr pack,
-                                ModPlatform::IndexedVersion& version,
+                                Platform::Version& version,
                                 const std::shared_ptr<ResourceFolderModel> base_model)
 {
     bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();

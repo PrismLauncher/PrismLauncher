@@ -16,7 +16,7 @@ class FlameTexturePackModel : public TexturePackResourceModel {
     FlameTexturePackModel(const BaseInstance&);
     ~FlameTexturePackModel() override = default;
 
-    bool optedOut(const ModPlatform::IndexedVersion& ver) const override;
+    bool optedOut(const Platform::Version& ver) const override;
 
    private:
     [[nodiscard]] QString debugName() const override { return Flame::debugName() + " (Model)"; }

@@ -91,7 +91,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, std::shared_
 
     setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(resource->name()));
 
-    if (!latest_ver.has_value() || !latest_ver->addonId.isValid()) {
+    if (!latest_ver.has_value() || !latest_ver->projectId.isValid()) {
         QString reason;
         if (dynamic_cast<Mod*>(resource) != nullptr)
             reason =
@@ -121,8 +121,8 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, std::shared_
 
         auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver.value(), m_resource_model);
         m_updates.emplace_back(pack->name, resource->metadata()->hash, old_version, latest_ver->version, latest_ver->version_type,
-                               api.getModFileChangelog(latest_ver->addonId.toInt(), latest_ver->fileId.toInt()), Platform::Provider::FLAME,
-                               download_task, resource->enabled());
+                               api.getModFileChangelog(latest_ver->projectId.toInt(), latest_ver->fileId.toInt()),
+                               Platform::Provider::FLAME, download_task, resource->enabled());
     }
     m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latest_ver.value()));
 }

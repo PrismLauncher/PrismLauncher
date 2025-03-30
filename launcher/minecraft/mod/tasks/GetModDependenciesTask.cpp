@@ -83,7 +83,7 @@ Platform::Dependency GetModDependenciesTask::getOverride(const Platform::Depende
     return dep;
 }
 
-QList<Platform::Dependency> GetModDependenciesTask::getDependenciesForVersion(const ModPlatform::IndexedVersion& version,
+QList<Platform::Dependency> GetModDependenciesTask::getDependenciesForVersion(const Platform::Version& version,
                                                                               const Platform::Provider providerName)
 {
     QList<Platform::Dependency> c_dependencies;
@@ -177,13 +177,13 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const Platform::Dependen
     }
 
     ResourceAPI::DependencySearchArgs args = { dep, m_version, m_loaderType };
-    ResourceAPI::Callback<ModPlatform::IndexedVersion> callbacks;
+    ResourceAPI::Callback<Platform::Version> callbacks;
     callbacks.on_fail = [](QString reason, int) {
         qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
     };
     callbacks.on_succeed = [dep, provider, pDep, level, this](auto& pack) {
         pDep->version = pack;
-        if (!pDep->version.addonId.isValid()) {
+        if (!pDep->version.projectId.isValid()) {
             if (m_loaderType & Platform::ModLoader::Quilt) {  // falback for quilt
                 auto overide = Platform::getOverrideDeps();
                 auto over = std::find_if(overide.cbegin(), overide.cend(),
@@ -206,18 +206,18 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const Platform::Dependen
             qWarning() << "Dependency cycle exceeded";
             return;
         }
-        if (dep.addonId.toString().isEmpty() && !pDep->version.addonId.toString().isEmpty()) {
-            pDep->pack->addonId = pDep->version.addonId;
-            auto dep_ = getOverride({ pDep->version.addonId, pDep->dependency.type }, provider);
-            if (dep_.addonId != pDep->version.addonId) {
-                removePack(pDep->version.addonId);
+        if (dep.addonId.toString().isEmpty() && !pDep->version.projectId.toString().isEmpty()) {
+            pDep->pack->addonId = pDep->version.projectId;
+            auto dep_ = getOverride({ pDep->version.projectId, pDep->dependency.type }, provider);
+            if (dep_.addonId != pDep->version.projectId) {
+                removePack(pDep->version.projectId);
                 addTask(prepareDependencyTask(dep_, provider, level));
             } else {
                 addTask(getProjectInfoTask(pDep));
             }
         }
         if (isLocalyInstalled(pDep)) {
-            removePack(pDep->version.addonId);
+            removePack(pDep->version.projectId);
             return;
         }
         for (auto dep_ : getDependenciesForVersion(pDep->version, provider)) {

@@ -44,7 +44,7 @@ class ModModel : public ResourceModel {
     virtual bool isPackInstalled(ModPlatform::IndexedPack::Ptr) const override;
 
     virtual bool checkFilters(ModPlatform::IndexedPack::Ptr) override;
-    virtual bool checkVersionFilters(const ModPlatform::IndexedVersion&) override;
+    virtual bool checkVersionFilters(const Platform::Version&) override;
 
    protected:
     BaseInstance& m_base_instance;

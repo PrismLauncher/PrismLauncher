@@ -91,9 +91,7 @@ auto intEntry(toml::table table, QString entry_name) -> int
     return node.value_or(0);
 }
 
-auto V1::createModFormat([[maybe_unused]] const QDir& index_dir,
-                         ModPlatform::IndexedPack& mod_pack,
-                         ModPlatform::IndexedVersion& mod_version) -> Mod
+auto V1::createModFormat([[maybe_unused]] const QDir& index_dir, ModPlatform::IndexedPack& mod_pack, Platform::Version& mod_version) -> Mod
 {
     Mod mod;
 

@@ -82,7 +82,7 @@ class ModFilterWidget : public QTabWidget {
             return versions.empty();
         }
 
-        bool checkModpackFilters(const ModPlatform::IndexedVersion& v)
+        bool checkModpackFilters(const Platform::Version& v)
         {
             return ((!loaders || !v.loaders || loaders & v.loaders) &&  // loaders
                     (releases.empty() ||                                // releases

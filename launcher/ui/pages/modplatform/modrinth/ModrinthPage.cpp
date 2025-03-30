@@ -180,7 +180,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading modrinth modpack versions";
 
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
+        ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
 
         auto addonId = m_current->addonId;
         // Use default if no callbacks are set
@@ -191,7 +191,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
             m_current->versions = doc;
             m_current->versionsLoaded = true;
-            auto pred = [this](const ModPlatform::IndexedVersion& v) {
+            auto pred = [this](const Platform::Version& v) {
                 if (auto filter = m_filterWidget->getFilter())
                     return !filter->checkModpackFilters(v);
                 return false;
@@ -214,7 +214,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
                                      : "";
                 auto versionStr = !version.version.contains(version.version_number) ? version.version_number : "";
                 m_ui->versionSelectionBox->addItem(QString("%1%2 — %3%4").arg(version.version, mcVersion, versionStr, release_type),
-                                                   QVariant(version.addonId));
+                                                   QVariant(version.projectId));
             }
 
             QVariant current_updated;
@@ -238,9 +238,9 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
         for (auto version : m_current->versions) {
             if (!version.version.contains(version.version))
                 m_ui->versionSelectionBox->addItem(QString("%1 - %2").arg(version.version, version.version_number),
-                                                   QVariant(version.addonId));
+                                                   QVariant(version.projectId));
             else
-                m_ui->versionSelectionBox->addItem(version.version, QVariant(version.addonId));
+                m_ui->versionSelectionBox->addItem(version.version, QVariant(version.projectId));
         }
 
         suggestCurrent();
@@ -323,7 +323,7 @@ void ModrinthPage::suggestCurrent()
     }
 
     for (auto& ver : m_current->versions) {
-        if (ver.addonId == m_selectedVersion) {
+        if (ver.projectId == m_selectedVersion) {
             QMap<QString, QString> extra_info;
             extra_info.insert("pack_id", m_current->addonId.toString());
             extra_info.insert("pack_version_id", ver.fileId.toString());

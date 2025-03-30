@@ -46,7 +46,7 @@ class EnsureMetadataTask : public Task {
     QString getExistingHash(Resource*);
 
    private slots:
-    void updateMetadata(ModPlatform::IndexedPack& pack, ModPlatform::IndexedVersion& ver, Resource*);
+    void updateMetadata(ModPlatform::IndexedPack& pack, Platform::Version& ver, Resource*);
     void updateMetadataCallback(ModPlatform::IndexedPack& pack, Resource* resource);
 
    signals:
@@ -58,7 +58,7 @@ class EnsureMetadataTask : public Task {
     QDir m_indexDir;
     Platform::Provider m_provider;
 
-    QHash<QString, ModPlatform::IndexedVersion> m_tempVersions;
+    QHash<QString, Platform::Version> m_tempVersions;
     Task::Ptr m_hashingTask;
     Task::Ptr m_currentTask;
     QHash<QString, Task::Ptr> m_updateMetadataTasks;

@@ -42,9 +42,9 @@ class GetModDependenciesTask : public SequentialTask {
     struct PackDependency {
         Platform::Dependency dependency;
         ModPlatform::IndexedPack::Ptr pack;
-        ModPlatform::IndexedVersion version;
+        Platform::Version version;
         PackDependency() = default;
-        PackDependency(const ModPlatform::IndexedPack::Ptr p, const ModPlatform::IndexedVersion& v)
+        PackDependency(const ModPlatform::IndexedPack::Ptr p, const Platform::Version& v)
         {
             pack = p;
             version = v;
@@ -72,7 +72,7 @@ class GetModDependenciesTask : public SequentialTask {
 
    protected slots:
     Task::Ptr prepareDependencyTask(const Platform::Dependency&, Platform::Provider, int);
-    QList<Platform::Dependency> getDependenciesForVersion(const ModPlatform::IndexedVersion&, Platform::Provider providerName);
+    QList<Platform::Dependency> getDependenciesForVersion(const Platform::Version&, Platform::Provider providerName);
     void prepare();
     Task::Ptr getProjectInfoTask(std::shared_ptr<PackDependency> pDep);
     Platform::Dependency getOverride(const Platform::Dependency&, Platform::Provider providerName);

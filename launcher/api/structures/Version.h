@@ -19,20 +19,34 @@
 
 #pragma once
 
-#include <QStringList>
+#include <QString>
 #include <QVariant>
+#include "api/structures/Dependency.h"
+#include "api/structures/ModLoader.h"
+#include "api/structures/Side.h"
+#include "api/structures/VersionType.h"
 
 namespace Platform {
 
-enum class Provider { MODRINTH, FLAME };
+struct Version {
+    QVariant projectId;
+    QVariant fileId;
+    QString version;
+    QString version_number = {};
+    VersionType version_type;
+    QStringList mcVersion;
+    QString downloadUrl;
+    QString date;
+    QString fileName;
+    ModLoaders loaders = {};
+    QString hash_type;
+    QString hash;
+    bool is_preferred = true;
+    QString changelog;
+    QList<Dependency> dependencies;
+    Platform::Side side;  // this is for flame API
 
-namespace ProviderUtils {
-const char* name(Provider);
-QString readableName(Provider);
-QStringList hashType(Provider);
-QString getMetaURL(Provider provider, QVariant projectID);
-}  // namespace ProviderUtils
-
+    // For internal use, not provided by APIs
+    bool is_currently_selected = false;
+};
 }  // namespace Platform
-
-Q_DECLARE_METATYPE(Platform::Provider)

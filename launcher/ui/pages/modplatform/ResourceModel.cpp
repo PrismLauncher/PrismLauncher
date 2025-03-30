@@ -197,7 +197,7 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
     if (!pack->versionsLoaded) {
         auto args{ createVersionsArguments(entry) };
-        ResourceAPI::Callback<QVector<ModPlatform::IndexedVersion>> callbacks{};
+        ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
 
         auto addonId = pack->addonId;
         // Use default if no callbacks are set
@@ -426,7 +426,7 @@ void ResourceModel::searchRequestAborted()
     search();
 }
 
-void ResourceModel::versionRequestSucceeded(QVector<ModPlatform::IndexedVersion>& doc, QVariant pack, const QModelIndex& index)
+void ResourceModel::versionRequestSucceeded(QVector<Platform::Version>& doc, QVariant pack, const QModelIndex& index)
 {
     auto current_pack = data(index, Qt::UserRole).value<ModPlatform::IndexedPack::Ptr>();
 
@@ -469,7 +469,7 @@ void ResourceModel::infoRequestSucceeded(ModPlatform::IndexedPack& pack, const Q
 }
 
 void ResourceModel::addPack(ModPlatform::IndexedPack::Ptr pack,
-                            ModPlatform::IndexedVersion& version,
+                            Platform::Version& version,
                             const std::shared_ptr<ResourceFolderModel> packs,
                             bool is_indexed,
                             QString custom_target_folder)
@@ -503,7 +503,7 @@ void ResourceModel::removePack(const QString& rem)
         ver.is_currently_selected = false;
 }
 
-bool ResourceModel::checkVersionFilters(const ModPlatform::IndexedVersion& v)
+bool ResourceModel::checkVersionFilters(const Platform::Version& v)
 {
     return (!optedOut(v));
 }
