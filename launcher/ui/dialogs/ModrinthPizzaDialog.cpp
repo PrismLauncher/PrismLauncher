@@ -73,7 +73,7 @@ void ModrinthPizzaDialog::updateFlavour()
 
     QRandomGenerator random(seed);
 
-    const QString craftyWord = craftyWords[qFloor(random.generateDouble() * craftyWords.length())];
-    const QString foodyWord = foodyWords[qFloor(random.generateDouble() * foodyWords.length())];
+    const QString craftyWord = craftyWords[static_cast<int>(random.generateDouble() * craftyWords.length())];
+    const QString foodyWord = foodyWords[static_cast<int>(random.generateDouble() * foodyWords.length())];
     m_ui->flavourResult->setText(tr("Your flavour is: %1 %2... delicious!").arg(craftyWord, foodyWord));
 }
