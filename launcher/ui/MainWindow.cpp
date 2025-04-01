@@ -97,6 +97,7 @@
 #include "ui/dialogs/ExportPackDialog.h"
 #include "ui/dialogs/IconPickerDialog.h"
 #include "ui/dialogs/ImportResourceDialog.h"
+#include "ui/dialogs/ModrinthPizzaDialog.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/dialogs/NewsDialog.h"
 #include "ui/dialogs/ProgressDialog.h"
@@ -206,6 +207,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
         auto exportInstanceMenu = new QMenu(this);
         exportInstanceMenu->addAction(ui->actionExportInstanceZip);
         exportInstanceMenu->addAction(ui->actionExportInstanceMrPack);
+        exportInstanceMenu->addAction(ui->actionExportMrPizza);
         exportInstanceMenu->addAction(ui->actionExportInstanceFlamePack);
         ui->actionExportInstance->setMenu(exportInstanceMenu);
     }
@@ -1414,6 +1416,17 @@ void MainWindow::on_actionExportInstanceMrPack_triggered()
     if (m_selectedInstance) {
         ExportPackDialog dlg(m_selectedInstance, this);
         dlg.exec();
+    }
+}
+
+void MainWindow::on_actionExportMrPizza_triggered()
+{
+    if (m_selectedInstance) {
+        auto minecraftInstance = std::dynamic_pointer_cast<MinecraftInstance>(m_selectedInstance);
+        if (minecraftInstance) {
+            ModrinthPizzaDialog dlg(minecraftInstance, this);
+            dlg.exec();
+        }
     }
 }
 

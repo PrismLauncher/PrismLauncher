@@ -131,7 +131,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>27</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="fileMenu">
@@ -799,6 +799,11 @@
    </property>
    <property name="toolTip">
     <string>Open the Java folder in a file browser. Only available if the built-in Java downloader is used.</string>
+   </property>
+  </action>
+  <action name="actionExportMrPizza">
+   <property name="text">
+    <string>Modrinth Pizza (mrpizza)</string>
    </property>
   </action>
  </widget>

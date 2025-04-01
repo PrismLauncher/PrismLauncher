@@ -1029,6 +1029,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/ExportInstanceDialog.h
     ui/dialogs/ExportPackDialog.cpp
     ui/dialogs/ExportPackDialog.h
+    ui/dialogs/ModrinthPizzaDialog.cpp
+    ui/dialogs/ModrinthPizzaDialog.h
     ui/dialogs/ExportToModListDialog.cpp
     ui/dialogs/ExportToModListDialog.h
     ui/dialogs/IconPickerDialog.cpp
@@ -1213,6 +1215,7 @@ qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/ProfileSelectDialog.ui
     ui/dialogs/ExportInstanceDialog.ui
     ui/dialogs/ExportPackDialog.ui
+    ui/dialogs/ModrinthPizzaDialog.ui
     ui/dialogs/ExportToModListDialog.ui
     ui/dialogs/IconPickerDialog.ui
     ui/dialogs/ImportResourceDialog.ui
