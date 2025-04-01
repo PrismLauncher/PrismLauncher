@@ -105,7 +105,7 @@ Using AI we are able to generate a pizza exactly to your tastes based on your Mi
        </item>
        <item>
         <property name="text">
-         <string>Panda of Endurance</string>
+         <string>Panda of Perseverance</string>
         </property>
        </item>
        <item>
@@ -116,6 +116,21 @@ Using AI we are able to generate a pizza exactly to your tastes based on your Mi
        <item>
         <property name="text">
          <string>Boar of Bravery</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Seal of Simplicity</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Deer of Determination</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Emu of Elegance</string>
         </property>
        </item>
       </widget>
