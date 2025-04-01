@@ -24,7 +24,7 @@ ModrinthPizzaDialog::ModrinthPizzaDialog(MinecraftInstancePtr instance, QWidget*
         m_ui->gameVersion->setText(tr("Game Version: %1").arg(minecraft->getVersion()));
 
     updateFlavour();
-    connect(m_ui->comboBox, &QComboBox::currentIndexChanged, this, &ModrinthPizzaDialog::updateFlavour);
+    connect(m_ui->comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ModrinthPizzaDialog::updateFlavour);
     connect(m_ui->checkBox, &QCheckBox::toggled, this, &ModrinthPizzaDialog::updateFlavour);
 }
 
