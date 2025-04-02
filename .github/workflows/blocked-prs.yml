@@ -163,6 +163,7 @@ jobs:
         if: fromJSON(steps.pr_ids.outputs.prs).numBlocking > 0
         continue-on-error: true
         env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
           BLOCKING_ISSUES: ${{ steps.blocking_data.outputs.current_blocking }}
         run: |
           while read -r pr ; do
