@@ -203,6 +203,7 @@ jobs:
         run: |
           COMMENT_PATH="$(pwd)/temp_comment_file.txt"
           echo '<h3> PR Dependencies :pushpin:</h3>' > "$COMMENT_PATH"
+          echo "" >> "$COMMENT_PATH"
           pr_head_label=$(jq -r '.prHeadLabel' <<< "$JOB_DATA")
           while read -r pr_data ; do
             base_pr=$(jq -r '.number' <<< "$pr_data")
