@@ -5,6 +5,7 @@
 #include "ModModel.h"
 
 #include "api/structures/Project.h"
+#include "api/structures/ResourceType.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
@@ -20,7 +21,7 @@ ModModel::ModModel(BaseInstance& base_inst, ResourceAPI* api, QString debugName,
 
 /******** Make data requests ********/
 
-ResourceAPI::SearchArgs ModModel::createSearchArguments()
+API::SearchArgs ModModel::createSearchArguments()
 {
     auto profile = static_cast<MinecraftInstance const&>(m_base_instance).getPackProfile();
 
@@ -46,7 +47,7 @@ ResourceAPI::SearchArgs ModModel::createSearchArguments()
              m_filter->openSource };
 }
 
-ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelIndex& entry)
+API::VersionSearchArgs ModModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto& pack = *m_packs[entry.row()];
     auto profile = static_cast<MinecraftInstance const&>(m_base_instance).getPackProfile();
@@ -64,10 +65,9 @@ ResourceAPI::VersionSearchArgs ModModel::createVersionsArguments(const QModelInd
     return { pack, versions, loaders, Platform::ResourceType::Mod };
 }
 
-ResourceAPI::ProjectInfoArgs ModModel::createInfoArguments(const QModelIndex& entry)
+API::ProjectInfoArgs ModModel::createInfoArguments(const QModelIndex& entry)
 {
-    auto& pack = *m_packs[entry.row()];
-    return { pack };
+    return { Platform::ResourceType::Mod, m_packs[entry.row()] };
 }
 
 void ModModel::searchWithTerm(const QString& term, unsigned int sort, bool filter_changed)

@@ -21,8 +21,10 @@
 #include <QDebug>
 #include <algorithm>
 #include <memory>
+#include "Application.h"
 #include "Json.h"
 #include "QObjectPtr.h"
+#include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
@@ -133,30 +135,12 @@ QList<Platform::Dependency> GetModDependenciesTask::getDependenciesForVersion(co
 Task::Ptr GetModDependenciesTask::getProjectInfoTask(std::shared_ptr<PackDependency> pDep)
 {
     auto provider = pDep->pack->provider;
-    auto responseInfo = std::make_shared<QByteArray>();
-    auto info = getAPI(provider)->getProject(pDep->pack->projectId.toString(), responseInfo);
-    QObject::connect(info.get(), &NetJob::succeeded, [this, responseInfo, provider, pDep] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*responseInfo, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            removePack(pDep->pack->projectId);
-            qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qDebug() << *responseInfo;
-            return;
-        }
-        try {
-            auto obj =
-                provider == Platform::Provider::FLAME ? Json::requireObject(Json::requireObject(doc), "data") : Json::requireObject(doc);
+    auto job = makeShared<NetJob>(QString("%1::GetProject").arg(pDep->pack->projectId.toString()), APPLICATION->network());
 
-            getAPI(provider)->loadIndexedPack(*pDep->pack, obj);
-        } catch (const JSONValidationError& e) {
-            removePack(pDep->pack->projectId);
-            qDebug() << doc;
-            qWarning() << "Error while reading mod info: " << e.cause();
-        }
-    });
-    return info;
+    auto info = API::ProviderAPI::get(provider)->makeGetProjectRequest(pDep->pack->projectId.toString(), pDep->pack);
+    job->addNetAction(info);
+    QObject::connect(job.get(), &NetJob::failed, [this, pDep] { removePack(pDep->pack->projectId); });
+    return job;
 }
 
 Task::Ptr GetModDependenciesTask::prepareDependencyTask(const Platform::Dependency& dep, const Platform::Provider providerName, int level)
@@ -178,8 +162,8 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const Platform::Dependen
         tasks->addTask(getProjectInfoTask(pDep));
     }
 
-    ResourceAPI::DependencySearchArgs args = { dep, m_version, m_loaderType };
-    ResourceAPI::Callback<Platform::Version> callbacks;
+    API::DependencySearchArgs args = { dep, m_loaderType, m_version };
+    API::Callback<Platform::Version> callbacks;
     callbacks.on_fail = [](QString reason, int) {
         qCritical() << tr("A network error occurred. Could not load project dependencies:%1").arg(reason);
     };

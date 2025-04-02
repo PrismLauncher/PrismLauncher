@@ -23,6 +23,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QtConcurrentRun>
+#include "BuildConfig.h"
 #include "Json.h"
 #include "MMCZip.h"
 #include "api/structures/Project.h"

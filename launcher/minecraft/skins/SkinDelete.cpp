@@ -41,7 +41,7 @@
 
 SkinDelete::SkinDelete() : NetRequest()
 {
-    logCat = taskMCSkinsLogC;
+    m_logCat = taskMCSkinsLogC;
 }
 
 QNetworkReply* SkinDelete::getReply(QNetworkRequest& request)

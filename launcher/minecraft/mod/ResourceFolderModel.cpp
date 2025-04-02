@@ -11,17 +11,22 @@
 #include <QStyle>
 #include <QThreadPool>
 #include <QUrl>
+#include <memory>
 #include <utility>
 
 #include "Application.h"
 #include "FileSystem.h"
 
+#include "QObjectPtr.h"
+#include "api/Api.h"
+#include "api/structures/Provider.h"
 #include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
 #include "Json.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
+#include "net/NetJob.h"
 #include "settings/Setting.h"
 #include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -168,32 +173,17 @@ void ResourceFolderModel::installResourceWithFlameMetadata(QString path, Platfor
 {
     auto install = [this, path] { installResource(std::move(path)); };
     if (vers.projectId.isValid()) {
-        Platform::Project pack{
-            vers.projectId,
-            Platform::Provider::FLAME,
-        };
+        auto pack = std::make_shared<Platform::Project>();
+        pack->projectId = vers.projectId;
+        pack->provider = Platform::Provider::FLAME;
 
-        auto response = std::make_shared<QByteArray>();
-        auto job = FlameAPI().getProject(vers.projectId.toString(), response);
+        auto job = makeShared<NetJob>(QString("%1::GetProject").arg(vers.projectId.toString()), APPLICATION->network());
+        auto getProjectJob = API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetProjectRequest(vers.projectId.toString(), pack);
+        job->addNetAction(getProjectJob);
         QObject::connect(job.get(), &Task::failed, this, install);
         QObject::connect(job.get(), &Task::aborted, this, install);
-        QObject::connect(job.get(), &Task::succeeded, [response, this, &vers, install, &pack] {
-            QJsonParseError parse_error{};
-            QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-            if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
-                           << " reason: " << parse_error.errorString();
-                qDebug() << *response;
-                return;
-            }
-            try {
-                auto obj = Json::requireObject(Json::requireObject(doc), "data");
-                FlameMod::loadIndexedPack(pack, obj);
-            } catch (const JSONValidationError& e) {
-                qDebug() << doc;
-                qWarning() << "Error while reading mod info: " << e.cause();
-            }
-            LocalResourceUpdateTask update_metadata(indexDir(), pack, vers);
+        QObject::connect(job.get(), &Task::succeeded, [this, &vers, install, pack] {
+            LocalResourceUpdateTask update_metadata(indexDir(), *pack, vers);
             QObject::connect(&update_metadata, &Task::finished, this, install);
             update_metadata.start();
         });

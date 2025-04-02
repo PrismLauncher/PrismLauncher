@@ -16,6 +16,7 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "api/structures/ResourceType.h"
 #include "modplatform/ResourceAPI.h"
 #include "net/ApiDownload.h"
 #include "net/NetJob.h"
@@ -141,7 +142,7 @@ void ResourceModel::search()
     if (m_search_term.startsWith("#")) {
         auto projectId = m_search_term.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<Platform::Project> callbacks;
+            API::Callback<Platform::Project> callbacks;
 
             callbacks.on_fail = [this](QString reason, int) {
                 if (!s_running_models.constFind(this).value())
@@ -159,14 +160,17 @@ void ResourceModel::search()
                     return;
                 searchRequestForOneSucceeded(pack);
             };
-            if (auto job = m_api->getProjectInfo({ projectId }, std::move(callbacks)); job)
+            if (auto job = m_api->getProjectInfo(
+                    { Platform::ResourceType::Mod, std::make_shared<Platform::Project>(Platform::Project{ projectId }) },
+                    std::move(callbacks));
+                job)
                 runSearchJob(job);
             return;
         }
     }
     auto args{ createSearchArguments() };
 
-    ResourceAPI::Callback<QList<Platform::Project::Ptr>> callbacks{};
+    API::Callback<QList<Platform::Project::Ptr>> callbacks{};
 
     callbacks.on_succeed = [this](auto& doc) {
         if (!s_running_models.constFind(this).value())
@@ -197,7 +201,7 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
     if (!pack->versionsLoaded) {
         auto args{ createVersionsArguments(entry) };
-        ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
+        API::Callback<QVector<Platform::Version>> callbacks{};
 
         auto addonId = pack->projectId;
         // Use default if no callbacks are set
@@ -219,7 +223,7 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
 
     if (!pack->extraDataLoaded) {
         auto args{ createInfoArguments(entry) };
-        ResourceAPI::Callback<Platform::Project> callbacks{};
+        API::Callback<Platform::Project> callbacks{};
 
         callbacks.on_succeed = [this, entry](auto& newpack) {
             if (!s_running_models.constFind(this).value())
@@ -291,9 +295,9 @@ void ResourceModel::runInfoJob(Task::Ptr ptr)
         m_current_info_job.run();
 }
 
-std::optional<ResourceAPI::SortingMethod> ResourceModel::getCurrentSortingMethodByIndex() const
+std::optional<API::SortingMethod> ResourceModel::getCurrentSortingMethodByIndex() const
 {
-    std::optional<ResourceAPI::SortingMethod> sort{};
+    std::optional<API::SortingMethod> sort{};
 
     {  // Find sorting method by ID
         auto sorting_methods = getSortingMethods();

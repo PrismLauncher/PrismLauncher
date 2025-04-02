@@ -26,6 +26,8 @@
 #include "Application.h"
 #include "ResourceDownloadTask.h"
 
+#include "api/Api.h"
+#include "api/structures/Provider.h"
 #include "api/structures/VersionType.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
@@ -285,9 +287,10 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
     auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getSupportedModLoaders().value();
 
-    if (ModrinthAPI::validateModLoaders(loaders))
+    if (API::ProviderAPI::get(Platform::Provider::MODRINTH)->validateModLoaders(loaders))
         pages.append(ModrinthModPage::create(this, *m_instance));
-    if (APPLICATION->capabilities() & Application::SupportsFlame && FlameAPI::validateModLoaders(loaders))
+    if (APPLICATION->capabilities() & Application::SupportsFlame &&
+        API::ProviderAPI::get(Platform::Provider::FLAME)->validateModLoaders(loaders))
         pages.append(FlameModPage::create(this, *m_instance));
 
     return pages;

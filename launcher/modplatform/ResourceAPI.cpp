@@ -1,59 +1,30 @@
 #include "modplatform/ResourceAPI.h"
+#include <memory>
 
 #include "Application.h"
 #include "Json.h"
+#include "api/Api.h"
+#include "api/structures/Arguments.h"
 #include "net/NetJob.h"
 
 #include "api/structures/Project.h"
 
 #include "net/ApiDownload.h"
 
-Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<Platform::Project::Ptr>>&& callbacks) const
+Task::Ptr ResourceAPI::searchProjects(API::SearchArgs&& args, API::Callback<QList<Platform::Project::Ptr>>&& callbacks) const
 {
-    auto search_url_optional = getSearchURL(args);
-    if (!search_url_optional.has_value()) {
+    std::shared_ptr<QList<Platform::Project::Ptr>> newList = std::make_shared<QList<Platform::Project::Ptr>>();
+    auto job = API::ProviderAPI::get(provider())->makeSearchRequest(args, newList);
+    if (!job) {
         callbacks.on_fail("Failed to create search URL", -1);
         return nullptr;
     }
 
-    auto search_url = search_url_optional.value();
-
-    auto response = std::make_shared<QByteArray>();
     auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(search_url), response));
+    netJob->addNetAction(job);
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from " << debugName() << " at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-
-            callbacks.on_fail(parse_error.errorString(), -1);
-
-            return;
-        }
-
-        QList<Platform::Project::Ptr> newList;
-        auto packs = documentToArray(doc);
-
-        for (auto packRaw : packs) {
-            auto packObj = packRaw.toObject();
-
-            Platform::Project::Ptr pack = std::make_shared<Platform::Project>();
-            try {
-                loadIndexedPack(*pack, packObj);
-                newList << pack;
-            } catch (const JSONValidationError& e) {
-                qWarning() << "Error while loading resource from " << debugName() << ": " << e.cause();
-                continue;
-            }
-        }
-
-        callbacks.on_succeed(newList);
-    });
+    QObject::connect(netJob.get(), &NetJob::succeeded, [newList, callbacks] { callbacks.on_succeed(*newList); });
 
     // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
     // This prevents the lambda from extending the lifetime of the shared resource,
@@ -72,56 +43,18 @@ Task::Ptr ResourceAPI::searchProjects(SearchArgs&& args, Callback<QList<Platform
     return netJob;
 }
 
-Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVector<Platform::Version>>&& callbacks) const
+Task::Ptr ResourceAPI::getProjectVersions(API::VersionSearchArgs&& args, API::Callback<QVector<Platform::Version>>&& callbacks) const
 {
-    auto versions_url_optional = getVersionsURL(args);
-    if (!versions_url_optional.has_value())
-        return nullptr;
-
-    auto versions_url = versions_url_optional.value();
+    auto response = std::make_shared<API::VersionSearchResponse>();
+    response->projectId = args.pack.projectId;
+    response->resourceType = args.resourceType;
+    auto versionJob = API::ProviderAPI::get(provider())->makeGetVersionsRequest(args, response);
 
     auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack.name), APPLICATION->network());
-    auto response = std::make_shared<QByteArray>();
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
+    netJob->addNetAction(versionJob);
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks, args] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
-        }
-
-        QVector<Platform::Version> unsortedVersions;
-        try {
-            auto arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
-
-            for (auto versionIter : arr) {
-                auto obj = versionIter.toObject();
-
-                auto file = loadIndexedPackVersion(obj, args.resourceType);
-                if (!file.projectId.isValid())
-                    file.projectId = args.pack.projectId;
-
-                if (file.fileId.isValid() && !file.downloadUrl.isEmpty())  // Heuristic to check if the returned value is valid
-                    unsortedVersions.append(file);
-            }
-
-            auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
-                // dates are in RFC 3339 format
-                return a.date > b.date;
-            };
-            std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
-        } catch (const JSONValidationError& e) {
-            qDebug() << doc;
-            qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
-        }
-
-        callbacks.on_succeed(unsortedVersions);
-    });
+    QObject::connect(netJob.get(), &NetJob::succeeded, [response, callbacks] { callbacks.on_succeed(response->versions); });
 
     // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
     // This prevents the lambda from extending the lifetime of the shared resource,
@@ -140,33 +73,19 @@ Task::Ptr ResourceAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVe
     return netJob;
 }
 
-Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<Platform::Project>&& callbacks) const
+Task::Ptr ResourceAPI::getProjectInfo(API::ProjectInfoArgs&& args, API::Callback<Platform::Project>&& callbacks) const
 {
-    auto response = std::make_shared<QByteArray>();
-    auto job = getProject(args.pack.projectId.toString(), response);
+    auto response = args.pack;
+    auto projectId = args.pack->projectId.toString();
+    auto job = makeShared<NetJob>(QString("%1::GetProject").arg(projectId), APPLICATION->network(), 1);
+    auto projectRequest = API::ProviderAPI::get(provider())->makeGetProjectRequest(projectId, response);
+    auto descriptionRequest = API::ProviderAPI::get(provider())->makeGetDescriptionRequest(projectId, response);
+    job->addNetAction(projectRequest);
+    if (descriptionRequest) {
+        job->addNetAction(descriptionRequest);
+    }
 
-    QObject::connect(job.get(), &NetJob::succeeded, [this, response, callbacks, args] {
-        auto pack = args.pack;
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for mod info at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
-        }
-        try {
-            auto obj = Json::requireObject(doc);
-            if (obj.contains("data"))
-                obj = Json::requireObject(obj, "data");
-            loadIndexedPack(pack, obj);
-            loadExtraPackInfo(pack, obj);
-        } catch (const JSONValidationError& e) {
-            qDebug() << doc;
-            qWarning() << "Error while reading " << debugName() << " resource info: " << e.cause();
-        }
-        callbacks.on_succeed(pack);
-    });
+    QObject ::connect(job.get(), &NetJob::succeeded, [response, callbacks] { callbacks.on_succeed(*response); });
     // Capture a weak_ptr instead of a shared_ptr to avoid circular dependency issues.
     // This prevents the lambda from extending the lifetime of the shared resource,
     // as it only temporarily locks the resource when needed.
@@ -186,55 +105,19 @@ Task::Ptr ResourceAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<Platform:
     return job;
 }
 
-Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callback<Platform::Version>&& callbacks) const
+Task::Ptr ResourceAPI::getDependencyVersion(API::DependencySearchArgs&& args, API::Callback<Platform::Version>&& callbacks) const
 {
-    auto versions_url_optional = getDependencyURL(args);
-    if (!versions_url_optional.has_value())
-        return nullptr;
-
-    auto versions_url = versions_url_optional.value();
+    auto response = std::make_shared<API::VersionSearchResponse>();
+    response->projectId = args.dependency.projectId;
+    response->resourceType = Platform::ResourceType::Mod;
+    auto versionJob = API::ProviderAPI::get(provider())->makeGetDependencyRequest(args, response);
 
     auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.projectId.toString()), APPLICATION->network());
-    auto response = std::make_shared<QByteArray>();
 
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(versions_url, response));
+    netJob->addNetAction(versionJob);
 
-    QObject::connect(netJob.get(), &NetJob::succeeded, [this, response, callbacks, args] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response for getting versions at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
-        }
-
-        QJsonArray arr;
-        if (args.dependency.version.length() != 0 && doc.isObject()) {
-            arr.append(doc.object());
-        } else {
-            arr = doc.isObject() ? Json::ensureArray(doc.object(), "data") : doc.array();
-        }
-
-        QVector<Platform::Version> versions;
-        for (auto versionIter : arr) {
-            auto obj = versionIter.toObject();
-
-            auto file = loadIndexedPackVersion(obj, Platform::ResourceType::Mod);
-            if (!file.projectId.isValid())
-                file.projectId = args.dependency.projectId;
-
-            if (file.fileId.isValid() &&
-                (!file.loaders || args.loader & file.loaders))  // Heuristic to check if the returned value is valid
-                versions.append(file);
-        }
-
-        auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
-            // dates are in RFC 3339 format
-            return a.date > b.date;
-        };
-        std::sort(versions.begin(), versions.end(), orderSortPredicate);
-        auto bestMatch = versions.size() != 0 ? versions.front() : Platform::Version();
+    QObject::connect(netJob.get(), &NetJob::succeeded, [response, callbacks] {
+        auto bestMatch = response->versions.size() != 0 ? response->versions.front() : Platform::Version();
         callbacks.on_succeed(bestMatch);
     });
 
@@ -253,16 +136,6 @@ Task::Ptr ResourceAPI::getDependencyVersion(DependencySearchArgs&& args, Callbac
     return netJob;
 }
 
-QString ResourceAPI::getGameVersionsString(std::list<Version> mcVersions) const
-{
-    QString s;
-    for (auto& ver : mcVersions) {
-        s += QString("\"%1\",").arg(mapMCVersionToModrinth(ver));
-    }
-    s.remove(s.length() - 1, 1);  // remove last comma
-    return s;
-}
-
 QString ResourceAPI::mapMCVersionToModrinth(Version v) const
 {
     static const QString preString = " Pre-Release ";
@@ -273,19 +146,4 @@ QString ResourceAPI::mapMCVersionToModrinth(Version v) const
     }
     verStr.replace(" ", "-");
     return verStr;
-}
-
-Task::Ptr ResourceAPI::getProject(QString addonId, std::shared_ptr<QByteArray> response) const
-{
-    auto project_url_optional = getInfoURL(addonId);
-    if (!project_url_optional.has_value())
-        return nullptr;
-
-    auto project_url = project_url_optional.value();
-
-    auto netJob = makeShared<NetJob>(QString("%1::GetProject").arg(addonId), APPLICATION->network());
-
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(QUrl(project_url), response));
-
-    return netJob;
 }

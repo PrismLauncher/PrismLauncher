@@ -37,6 +37,7 @@
 #include "ModrinthPage.h"
 #include "Version.h"
 #include "api/structures/Project.h"
+#include "api/structures/ResourceType.h"
 #include "api/structures/VersionType.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
@@ -147,7 +148,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
 
     if (!m_current->extraDataLoaded) {
         qDebug() << "Loading modrinth modpack information";
-        ResourceAPI::Callback<Platform::Project> callbacks;
+        API::Callback<Platform::Project> callbacks;
 
         auto id = m_current->projectId;
         callbacks.on_fail = [this](QString reason, int) {
@@ -169,7 +170,10 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
             updateUI();
         };
-        if (auto netJob = m_api.getProjectInfo({ { m_current->projectId } }, std::move(callbacks)); netJob) {
+        if (auto netJob = m_api.getProjectInfo(
+                { Platform::ResourceType::Mod, std::make_shared<Platform::Project>(Platform::Project{ m_current->projectId }) },
+                std::move(callbacks));
+            netJob) {
             m_job = netJob;
             m_job->start();
         }
@@ -180,7 +184,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading modrinth modpack versions";
 
-        ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
+        API::Callback<QVector<Platform::Version>> callbacks{};
 
         auto addonId = m_current->projectId;
         // Use default if no callbacks are set

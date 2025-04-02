@@ -87,7 +87,7 @@ class ByteArraySink : public Sink {
 
     auto hasLocalData() -> bool override { return false; }
 
-   private:
+   protected:
     std::shared_ptr<QByteArray> m_output;
 };
 }  // namespace Net

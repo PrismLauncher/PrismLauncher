@@ -9,6 +9,30 @@
 
 static FlameAPI api;
 
+Platform::ResourceType getResourceType(int classId)
+{
+    switch (classId) {
+        case 17:  // Worlds
+            return Platform::ResourceType::World;
+        case 6:  // Mods
+            return Platform::ResourceType::Mod;
+        case 12:  // Resource Packs
+                  // return Platform::ResourceType::ResourcePack; // not really a resourcepack
+            /* fallthrough */
+        case 4546:  // Customization
+                    // return Platform::ResourceType::ShaderPack; // not really a shaderPack
+            /* fallthrough */
+        case 4471:  // Modpacks
+            /* fallthrough */
+        case 5:  // Bukkit Plugins
+            /* fallthrough */
+        case 4559:  // Addons
+            /* fallthrough */
+        default:
+            return Platform::ResourceType::Unknown;
+    }
+}
+
 void FlameMod::loadIndexedPack(Platform::Project& pack, QJsonObject& obj)
 {
     pack.projectId = Json::requireInteger(obj, "id");
@@ -33,7 +57,9 @@ void FlameMod::loadIndexedPack(Platform::Project& pack, QJsonObject& obj)
         packAuthor.url = Json::requireString(author, "url");
         pack.authors.append(packAuthor);
     }
-
+    if (obj.contains("classId")) {
+        pack.resourceType = getResourceType(Json::ensureInteger(obj, "classId", 0, "modClassId"));
+    }
     pack.extraDataLoaded = false;
     loadURLs(pack, obj);
 }
@@ -53,17 +79,6 @@ void FlameMod::loadURLs(Platform::Project& pack, QJsonObject& obj)
     pack.extraData.wikiUrl = Json::ensureString(links_obj, "wikiUrl");
     if (pack.extraData.wikiUrl.endsWith('/'))
         pack.extraData.wikiUrl.chop(1);
-
-    if (!pack.extraData.body.isEmpty())
-        pack.extraDataLoaded = true;
-}
-
-void FlameMod::loadBody(Platform::Project& pack)
-{
-    pack.extraData.body = api.getModDescription(pack.projectId.toInt());
-
-    if (!pack.extraData.issuesUrl.isEmpty() || !pack.extraData.sourceUrl.isEmpty() || !pack.extraData.wikiUrl.isEmpty())
-        pack.extraDataLoaded = true;
 }
 
 static QString enumToString(int hash_algorithm)
@@ -75,29 +90,6 @@ static QString enumToString(int hash_algorithm)
         case 2:
             return "md5";
     }
-}
-
-void FlameMod::loadIndexedPackVersions(Platform::Project& pack, QJsonArray& arr)
-{
-    QList<Platform::Version> unsortedVersions;
-    for (auto versionIter : arr) {
-        auto obj = versionIter.toObject();
-
-        auto file = loadIndexedPackVersion(obj);
-        if (!file.projectId.isValid())
-            file.projectId = pack.projectId;
-
-        if (file.fileId.isValid())  // Heuristic to check if the returned value is valid
-            unsortedVersions.append(file);
-    }
-
-    auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
-        // dates are in RFC 3339 format
-        return a.date > b.date;
-    };
-    std::sort(unsortedVersions.begin(), unsortedVersions.end(), orderSortPredicate);
-    pack.versions = unsortedVersions;
-    pack.versionsLoaded = true;
 }
 
 auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> Platform::Version

@@ -43,4 +43,11 @@ Download::Ptr ApiDownload::makeFile(QUrl url, QString path, Download::Options op
     return dl;
 }
 
+Download::Ptr ApiDownload::makeCustomSink(QUrl url, Sink* sink, Download::Options options)
+{
+    auto dl = Download::makeCustomSink(url, sink, options);
+    dl->addHeaderProxy(new ApiHeaderProxy());
+    return dl;
+}
+
 }  // namespace Net

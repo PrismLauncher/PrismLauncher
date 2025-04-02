@@ -29,4 +29,11 @@ Upload::Ptr ApiUpload::makeByteArray(QUrl url, std::shared_ptr<QByteArray> outpu
     return up;
 }
 
+Upload::Ptr ApiUpload::makeCustomSink(QUrl url, Sink* sink, QByteArray m_post_data)
+{
+    auto up = Upload::makeCustomSink(url, sink, m_post_data);
+    up->addHeaderProxy(new ApiHeaderProxy());
+    return up;
+}
+
 }  // namespace Net

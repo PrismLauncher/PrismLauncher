@@ -77,11 +77,11 @@ class ResourceModel : public QAbstractListModel {
 
     void setSearchTerm(QString term) { m_search_term = term; }
 
-    virtual ResourceAPI::SearchArgs createSearchArguments() = 0;
+    virtual API::SearchArgs createSearchArguments() = 0;
 
-    virtual ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) = 0;
+    virtual API::VersionSearchArgs createVersionsArguments(const QModelIndex&) = 0;
 
-    virtual ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) = 0;
+    virtual API::ProjectInfoArgs createInfoArguments(const QModelIndex&) = 0;
 
     /** Requests the API for more entries. */
     virtual void search();
@@ -110,7 +110,7 @@ class ResourceModel : public QAbstractListModel {
     void runSearchJob(Task::Ptr);
     void runInfoJob(Task::Ptr);
 
-    [[nodiscard]] auto getCurrentSortingMethodByIndex() const -> std::optional<ResourceAPI::SortingMethod>;
+    [[nodiscard]] auto getCurrentSortingMethodByIndex() const -> std::optional<API::SortingMethod>;
 
     virtual bool isPackInstalled(Platform::Project::Ptr) const { return false; }
 

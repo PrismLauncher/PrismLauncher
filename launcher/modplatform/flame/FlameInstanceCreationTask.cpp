@@ -487,7 +487,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
         if (result.version.downloadUrl.isEmpty()) {
             BlockedMod blocked_mod;
             blocked_mod.name = result.version.fileName;
-            blocked_mod.websiteUrl = QString("%1/download/%2").arg(result.pack.websiteUrl, QString::number(result.fileId));
+            blocked_mod.websiteUrl = QString("%1/download/%2").arg(result.pack->websiteUrl, QString::number(result.fileId));
             blocked_mod.hash = result.version.hash;
             blocked_mod.matched = false;
             blocked_mod.localPath = "";
@@ -698,7 +698,7 @@ void FlameCreationTask::validateOtherResources(QEventLoop& loop)
         if (file.targetFolder != "mods" || (file.version.fileName.endsWith(".zip") && !zipMods.contains(file.version.fileName))) {
             continue;
         }
-        task->addTask(makeShared<LocalResourceUpdateTask>(folder, file.pack, file.version));
+        task->addTask(makeShared<LocalResourceUpdateTask>(folder, *file.pack, file.version));
     }
     connect(task.get(), &Task::finished, &loop, &QEventLoop::quit);
     m_processUpdateFileInfoJob = task;

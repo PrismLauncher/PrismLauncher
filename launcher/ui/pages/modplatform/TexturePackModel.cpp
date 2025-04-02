@@ -6,8 +6,11 @@
 
 #include "Application.h"
 
+#include "Version.h"
 #include "meta/Index.h"
 #include "meta/Version.h"
+#include "minecraft/MinecraftInstance.h"
+#include "minecraft/PackProfile.h"
 
 static std::list<Version> s_availableVersions = {};
 
@@ -42,35 +45,46 @@ void waitOnVersionListLoad(Meta::VersionList::Ptr version_list)
         time_limit_for_list_load.stop();
 }
 
-ResourceAPI::SearchArgs TexturePackResourceModel::createSearchArguments()
+API::SearchArgs TexturePackResourceModel::createSearchArguments()
 {
-    if (s_availableVersions.empty())
-        waitOnVersionListLoad(m_version_list);
-
     auto args = ResourcePackResourceModel::createSearchArguments();
+    if (m_instanceVersions.empty()) {
+        if (s_availableVersions.empty())
+            waitOnVersionListLoad(m_version_list);
 
-    if (!m_version_list->isLoaded()) {
-        qCritical() << "The version list could not be loaded. Falling back to showing all entries.";
-        return args;
-    }
+        if (!m_version_list->isLoaded()) {
+            qCritical() << "The version list could not be loaded. Falling back to showing all entries.";
+            return args;
+        }
 
-    if (s_availableVersions.empty()) {
-        for (auto&& version : m_version_list->versions()) {
-            // FIXME: This duplicates the logic in meta for the 'texturepacks' trait. However, we don't have access to that
-            //        information from the index file alone. Also, downloading every version's file isn't a very good idea.
-            if (auto ver = version->toComparableVersion(); ver <= maximumTexturePackVersion())
-                s_availableVersions.push_back(ver);
+        if (s_availableVersions.empty()) {
+            for (auto&& version : m_version_list->versions()) {
+                // FIXME: This duplicates the logic in meta for the 'texturepacks' trait. However, we don't have access to that
+                //        information from the index file alone. Also, downloading every version's file isn't a very good idea.
+                if (auto ver = version->toComparableVersion(); ver <= maximumTexturePackVersion())
+                    s_availableVersions.push_back(ver);
+            }
+        }
+
+        Q_ASSERT(!s_availableVersions.empty());
+
+        auto profile = static_cast<const MinecraftInstance&>(m_base_instance).getPackProfile();
+        QString instanceMinecraftVersion = profile->getComponentVersion("net.minecraft");
+        Version mcVersion(instanceMinecraftVersion);
+        m_instanceVersions = { mcVersion };
+        for (auto&& version : s_availableVersions) {
+            if (version != mcVersion) {
+                s_availableVersions.push_back(version);
+            }
         }
     }
 
-    Q_ASSERT(!s_availableVersions.empty());
-
-    args.versions = s_availableVersions;
+    args.versions = m_instanceVersions;
 
     return args;
 }
 
-ResourceAPI::VersionSearchArgs TexturePackResourceModel::createVersionsArguments(const QModelIndex& entry)
+API::VersionSearchArgs TexturePackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto args = ResourcePackResourceModel::createVersionsArguments(entry);
     args.resourceType = Platform::ResourceType::TexturePack;

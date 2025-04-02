@@ -505,6 +505,23 @@ set(API_SOURCES
     api/structures/Project.h
     api/structures/Category.h
 
+	api/structures/Arguments.h
+	api/structures/SortingMethod.h
+	api/structures/HttpRequest.h
+
+    api/Api.h
+    api/RPCSink.h
+
+    api/flame/FlameAPI.h
+    api/flame/FlameAPI.cpp
+    api/flame/FlameUtils.h
+    api/flame/FlameUtils.cpp
+
+    api/modrinth/ModrinthAPI.h
+    api/modrinth/ModrinthAPI.cpp
+    api/modrinth/ModrinthUtils.h
+    api/modrinth/ModrinthUtils.cpp
+
     modplatform/ResourceAPI.h
     modplatform/ResourceAPI.cpp
 
@@ -1016,8 +1033,6 @@ SET(LAUNCHER_SOURCES
     ui/pages/modplatform/flame/FlameModel.h
     ui/pages/modplatform/flame/FlamePage.cpp
     ui/pages/modplatform/flame/FlamePage.h
-    ui/pages/modplatform/flame/FlameResourceModels.cpp
-    ui/pages/modplatform/flame/FlameResourceModels.h
     ui/pages/modplatform/flame/FlameResourcePages.cpp
     ui/pages/modplatform/flame/FlameResourcePages.h
 

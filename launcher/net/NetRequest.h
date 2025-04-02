@@ -95,7 +95,7 @@ class NetRequest : public Task {
     Options m_options;
 
     using logCatFunc = const QLoggingCategory& (*)();
-    logCatFunc logCat = taskUploadLogC;
+    logCatFunc m_logCat = taskUploadLogC;
 
     std::chrono::steady_clock m_clock;
     std::chrono::time_point<std::chrono::steady_clock> m_last_progress_time;

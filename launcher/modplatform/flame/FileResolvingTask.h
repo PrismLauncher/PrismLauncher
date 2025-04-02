@@ -18,7 +18,8 @@
 #pragma once
 
 #include "PackManifest.h"
-#include "tasks/Task.h"
+#include "api/structures/Project.h"
+#include "net/NetJob.h"
 
 namespace Flame {
 class FileResolvingTask : public Task {
@@ -43,7 +44,8 @@ class FileResolvingTask : public Task {
 
    private: /* data */
     Flame::Manifest m_manifest;
-    std::shared_ptr<QByteArray> m_result;
-    Task::Ptr m_task;
+    std::shared_ptr<QList<Platform::Project::Ptr>> m_result;
+    std::shared_ptr<QByteArray> m_result2;
+    NetJob::Ptr m_task;
 };
 }  // namespace Flame

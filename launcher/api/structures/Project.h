@@ -23,8 +23,8 @@
 
 #include <QString>
 #include <QVariant>
-#include <memory>
-#include "api/structures/Provider.h"
+
+#include "api/structures/ResourceType.h"
 #include "api/structures/Side.h"
 #include "api/structures/Version.h"
 
@@ -67,6 +67,8 @@ struct Project {
     QString logoUrl;
     QString websiteUrl;
     Side side;
+
+    ResourceType resourceType;
 
     bool versionsLoaded = false;
     QList<Version> versions;

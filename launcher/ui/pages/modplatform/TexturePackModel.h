@@ -17,12 +17,13 @@ class TexturePackResourceModel : public ResourcePackResourceModel {
 
     [[nodiscard]] inline ::Version maximumTexturePackVersion() const { return { "1.6" }; }
 
-    ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
+    API::SearchArgs createSearchArguments() override;
+    API::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
 
    protected:
     Meta::VersionList::Ptr m_version_list;
     Task::Ptr m_task;
+    std::list<Version> m_instanceVersions;
 };
 
 }  // namespace ResourceDownload

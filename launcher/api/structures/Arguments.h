@@ -38,51 +38,66 @@
 
 #pragma once
 
-#include <QDebug>
-#include <QList>
 #include <QString>
 
-#include <list>
-#include <optional>
-
-#include "../Version.h"
-
-#include "api/Api.h"
-#include "api/flame/FlameAPI.h"
-#include "api/modrinth/ModrinthAPI.h"
-#include "api/structures/Arguments.h"
+#include "../../Version.h"
+#include "api/structures/ModLoader.h"
 #include "api/structures/Project.h"
-#include "api/structures/Provider.h"
 #include "api/structures/ResourceType.h"
+#include "api/structures/Side.h"
 #include "api/structures/SortingMethod.h"
-#include "tasks/Task.h"
+#include "modplatform/helpers/HashUtils.h"
 
-/* Simple class with a common interface for interacting with APIs */
-class ResourceAPI {
-   public:
-    ResourceAPI()
-    {
-        API::FlameAPI::registerClass();
-        API::ModrinthAPI::registerClass();
-    }
-    virtual ~ResourceAPI() = default;
-
-   public:
-    /** Gets a list of available sorting methods for this API. */
-    [[nodiscard]] QList<API::SortingMethod> getSortingMethods() const { return API::ProviderAPI::get(provider())->getSortingMethods(); }
-
-   public slots:
-    [[nodiscard]] virtual Task::Ptr searchProjects(API::SearchArgs&&, API::Callback<QList<Platform::Project::Ptr>>&&) const;
-
-    [[nodiscard]] virtual Task::Ptr getProjectInfo(API::ProjectInfoArgs&&, API::Callback<Platform::Project>&&) const;
-    [[nodiscard]] Task::Ptr getProjectVersions(API::VersionSearchArgs&& args, API::Callback<QVector<Platform::Version>>&& callbacks) const;
-    [[nodiscard]] virtual Task::Ptr getDependencyVersion(API::DependencySearchArgs&&, API::Callback<Platform::Version>&&) const;
-
-   protected:
-    [[nodiscard]] inline QString debugName() const { return "External resource API"; }
-
-    [[nodiscard]] QString mapMCVersionToModrinth(Version v) const;
-
-   public:
-    virtual Platform::Provider provider() const = 0;
+namespace API {
+template <typename T>
+struct Callback {
+    std::function<void(T&)> on_succeed;
+    std::function<void(QString const& reason, int network_error_code)> on_fail;
+    std::function<void()> on_abort;
 };
+
+struct SearchArgs {
+    Platform::ResourceType type{};
+    int offset = 0;
+
+    std::optional<QString> search;
+    std::optional<SortingMethod> sorting;
+    std::optional<Platform::ModLoaders> loaders;
+    std::optional<std::list<Version>> versions;
+    std::optional<Platform::Side> side;
+    std::optional<QStringList> categoryIds;
+    bool openSource;
+};
+
+struct VersionSearchArgs {
+    Platform::Project pack;
+
+    std::optional<std::list<::Version>> mcVersions;
+    std::optional<Platform::ModLoaders> loaders;
+
+    Platform::ResourceType resourceType{};
+};
+
+struct VersionSearchResponse {
+    QList<Platform::Version> versions;
+    QVariant projectId;
+    Platform::ResourceType resourceType{};
+};
+
+struct ProjectInfoArgs {
+    Platform::ResourceType resourceType{};
+    Platform::Project::Ptr pack;
+};
+
+struct DependencySearchArgs {
+    Platform::Dependency dependency;
+    Platform::ModLoaders loader;
+    Version mcVersion;
+};
+
+struct MatchHashesArgs {
+    QStringList hashes;
+    Hashing::Algorithm alg;
+};
+
+}  // namespace API

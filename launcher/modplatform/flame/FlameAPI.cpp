@@ -5,12 +5,13 @@
 #include "FlameAPI.h"
 #include <memory>
 #include <optional>
-#include "FlameModIndex.h"
 
 #include "Application.h"
 #include "Json.h"
+#include "api/Api.h"
 #include "api/structures/ModLoader.h"
 #include "api/structures/Project.h"
+#include "api/structures/Provider.h"
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
 #include "net/NetJob.h"
@@ -70,62 +71,7 @@ QString FlameAPI::getModFileChangelog(int modId, int fileId)
     return changelog;
 }
 
-QString FlameAPI::getModDescription(int modId)
-{
-    QEventLoop lock;
-    QString description;
-
-    auto netJob = makeShared<NetJob>(QString("Flame::ModDescription"), APPLICATION->network());
-    auto response = std::make_shared<QByteArray>();
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(
-        QString("https://api.curseforge.com/v1/mods/%1/description").arg(QString::number(modId)), response));
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, [&netJob, response, &description] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame::ModDescription at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-
-            netJob->failed(parse_error.errorString());
-            return;
-        }
-
-        description = Json::ensureString(doc.object(), "data");
-    });
-
-    QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
-
-    netJob->start();
-    lock.exec();
-
-    return description;
-}
-
-Task::Ptr FlameAPI::getProjects(QStringList addonIds, std::shared_ptr<QByteArray> response) const
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
-
-    QJsonObject body_obj;
-    QJsonArray addons_arr;
-    for (auto& addonId : addonIds) {
-        addons_arr.append(addonId);
-    }
-
-    body_obj["modIds"] = addons_arr;
-
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
-
-    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString("https://api.curseforge.com/v1/mods"), response, body_raw));
-
-    QObject::connect(netJob.get(), &NetJob::failed, [body_raw] { qDebug() << body_raw; });
-
-    return netJob;
-}
-
-Task::Ptr FlameAPI::getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const
+NetJob::Ptr FlameAPI::getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const
 {
     auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"), APPLICATION->network());
 
@@ -156,19 +102,6 @@ Task::Ptr FlameAPI::getFile(const QString& addonId, const QString& fileId, std::
     QObject::connect(netJob.get(), &NetJob::failed, [addonId, fileId] { qDebug() << "Flame API file failure" << addonId << fileId; });
 
     return netJob;
-}
-
-QList<ResourceAPI::SortingMethod> FlameAPI::getSortingMethods() const
-{
-    // https://docs.curseforge.com/?python#tocS_ModsSearchSortField
-    return { { 1, "Featured", QObject::tr("Sort by Featured") },
-             { 2, "Popularity", QObject::tr("Sort by Popularity") },
-             { 3, "LastUpdated", QObject::tr("Sort by Last Updated") },
-             { 4, "Name", QObject::tr("Sort by Name") },
-             { 5, "Author", QObject::tr("Sort by Author") },
-             { 6, "TotalDownloads", QObject::tr("Sort by Downloads") },
-             { 7, "Category", QObject::tr("Sort by Category") },
-             { 8, "GameVersion", QObject::tr("Sort by Game Version") } };
 }
 
 Task::Ptr FlameAPI::getCategories(std::shared_ptr<QByteArray> response, Platform::ResourceType type)

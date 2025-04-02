@@ -43,7 +43,6 @@
 #include "modplatform/flame/FlameAPI.h"
 #include "ui_ResourcePage.h"
 
-#include "FlameResourceModels.h"
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
 namespace ResourceDownload {
@@ -119,7 +118,7 @@ void FlameResourcePackPage::openUrl(const QUrl& url)
 FlameTexturePackPage::FlameTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance)
     : TexturePackResourcePage(dialog, instance)
 {
-    m_model = new FlameTexturePackModel(instance);
+    m_model = new TexturePackResourceModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();

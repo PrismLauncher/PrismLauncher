@@ -2,11 +2,15 @@
 
 #include <MurmurHash2.h>
 #include <QDebug>
+#include <QList>
 
 #include "Application.h"
 #include "Json.h"
 
 #include "QObjectPtr.h"
+#include "api/Api.h"
+#include "api/structures/Project.h"
+#include "api/structures/Provider.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 
 #include "modplatform/flame/FlameAPI.h"
@@ -14,6 +18,8 @@
 #include "modplatform/helpers/HashUtils.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
+#include "net/NetJob.h"
+#include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"
 
 static ModrinthAPI modrinth_api;
@@ -267,75 +273,43 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
     for (auto const& data : m_tempVersions)
         addonIds.insert(data.projectId.toString(), data.hash);
 
-    auto response = std::make_shared<QByteArray>();
-    Task::Ptr proj_task;
+    auto response = std::make_shared<Platform::Project>();
+    auto responses = std::make_shared<QList<Platform::Project::Ptr>>();
+    Net::NetRequest::Ptr proj_task;
 
+    auto api = API::ProviderAPI::get(Platform::Provider::MODRINTH);
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        proj_task = modrinth_api.getProject(*addonIds.keyBegin(), response);
+        proj_task = api->makeGetProjectRequest(*addonIds.keyBegin(), response);
     } else {
-        proj_task = modrinth_api.getProjects(addonIds.keys(), response);
+        proj_task = api->makeGetProjectsRequest(addonIds.keys(), responses);
     }
 
     // Prevents unfortunate timings when aborting the task
     if (!proj_task)
         return Task::Ptr{ nullptr };
 
-    connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
-        QJsonParseError parse_error{};
-        auto doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
-        }
-
-        QJsonArray entries;
-
-        try {
-            if (addonIds.size() == 1)
-                entries = { doc.object() };
-            else
-                entries = Json::requireArray(doc);
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
-        }
-
-        for (auto entry : entries) {
-            Platform::Project pack;
-
-            try {
-                auto entry_obj = Json::requireObject(entry);
-
-                Modrinth::loadIndexedPack(pack, entry_obj);
-            } catch (Json::JsonException& e) {
-                qDebug() << e.cause();
-                qDebug() << doc;
-
-                // Skip this entry, since it has problems
-                continue;
-            }
-
-            auto hash = addonIds.find(pack.projectId.toString()).value();
-
-            auto resource_iter = m_resources.find(hash);
-            if (resource_iter == m_resources.end()) {
-                qWarning() << "Invalid project id from the API response.";
-                continue;
-            }
-
-            auto* resource = resource_iter.value();
-
+    auto netJob = makeShared<NetJob>(QString("Modrinth::GetProjects"), APPLICATION->network());
+    netJob->addNetAction(proj_task);
+    connect(netJob.get(), &Task::succeeded, this, [this, response, responses, addonIds] {
+        auto update = [this, addonIds](Platform::Project::Ptr response) {
+            auto id = response->projectId.toString();
+            auto hash = addonIds.find(id).value();
+            auto resource = m_resources.find(hash).value();
             setStatus(tr("Parsing API response from Modrinth for '%1'...").arg(resource->name()));
-
-            updateMetadata(pack, m_tempVersions.find(hash).value(), resource);
+            updateMetadata(*response, m_tempVersions.find(hash).value(), resource);
+        };
+        if (addonIds.size() == 1) {
+            update(response);
+        } else {
+            for (auto response : *responses) {
+                update(response);
+            }
         }
     });
 
-    return proj_task;
+    return netJob;
 }
 
 // Flame
@@ -417,66 +391,43 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
         }
     }
 
-    auto response = std::make_shared<QByteArray>();
-    Task::Ptr proj_task;
+    auto response = std::make_shared<Platform::Project>();
+    auto responses = std::make_shared<QList<Platform::Project::Ptr>>();
+    Net::NetRequest::Ptr proj_task;
 
+    auto api = API::ProviderAPI::get(Platform::Provider::FLAME);
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
-        proj_task = flame_api.getProject(*addonIds.keyBegin(), response);
+        proj_task = api->makeGetProjectRequest(*addonIds.keyBegin(), response);
     } else {
-        proj_task = flame_api.getProjects(addonIds.keys(), response);
+        proj_task = api->makeGetProjectsRequest(addonIds.keys(), responses);
     }
 
     // Prevents unfortunate timings when aborting the task
     if (!proj_task)
         return Task::Ptr{ nullptr };
 
-    connect(proj_task.get(), &Task::succeeded, this, [this, response, addonIds] {
-        QJsonParseError parse_error{};
-        auto doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-            return;
-        }
-
-        try {
-            QJsonArray entries;
-            if (addonIds.size() == 1)
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            else
-                entries = Json::requireArray(Json::requireObject(doc), "data");
-
-            for (auto entry : entries) {
-                auto entry_obj = Json::requireObject(entry);
-
-                auto id = QString::number(Json::requireInteger(entry_obj, "id"));
-                auto hash = addonIds.find(id).value();
-                auto resource = m_resources.find(hash).value();
-
-                Platform::Project pack;
-                try {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(resource->name()));
-
-                    FlameMod::loadIndexedPack(pack, entry_obj);
-
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
-
-                    emitFail(resource);
-                }
-                updateMetadata(pack, m_tempVersions.find(hash).value(), resource);
+    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
+    netJob->addNetAction(proj_task);
+    connect(netJob.get(), &Task::succeeded, this, [this, response, responses, addonIds] {
+        auto update = [this, addonIds](Platform::Project::Ptr response) {
+            auto id = response->projectId.toString();
+            auto hash = addonIds.find(id).value();
+            auto resource = m_resources.find(hash).value();
+            setStatus(tr("Parsing API response from Curseforge for '%1'...").arg(resource->name()));
+            updateMetadata(*response, m_tempVersions.find(hash).value(), resource);
+        };
+        if (addonIds.size() == 1) {
+            update(response);
+        } else {
+            for (auto response : *responses) {
+                update(response);
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
         }
     });
 
-    return proj_task;
+    return netJob;
 }
 
 void EnsureMetadataTask::updateMetadata(Platform::Project& pack, Platform::Version& ver, Resource* resource)

@@ -19,8 +19,11 @@
 #include "FileResolvingTask.h"
 #include <algorithm>
 
+#include "Application.h"
 #include "Json.h"
+#include "api/Api.h"
 #include "api/structures/Project.h"
+#include "api/structures/Provider.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
@@ -51,13 +54,13 @@ void Flame::FileResolvingTask::executeTask()
     }
     setStatus(tr("Resolving mod IDs..."));
     setProgress(0, 3);
-    m_result.reset(new QByteArray());
+    m_result2.reset(new QByteArray());
 
     QStringList fileIds;
     for (auto file : m_manifest.files) {
         fileIds.push_back(QString::number(file.fileId));
     }
-    m_task = flameAPI.getFiles(fileIds, m_result);
+    m_task = flameAPI.getFiles(fileIds, m_result2);
 
     auto step_progress = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::finished, this, [this, step_progress]() {
@@ -84,30 +87,6 @@ void Flame::FileResolvingTask::executeTask()
     m_task->start();
 }
 
-Platform::ResourceType getResourceType(int classId)
-{
-    switch (classId) {
-        case 17:  // Worlds
-            return Platform::ResourceType::World;
-        case 6:  // Mods
-            return Platform::ResourceType::Mod;
-        case 12:  // Resource Packs
-                  // return Platform::ResourceType::ResourcePack; // not really a resourcepack
-            /* fallthrough */
-        case 4546:  // Customization
-                    // return Platform::ResourceType::ShaderPack; // not really a shaderPack
-            /* fallthrough */
-        case 4471:  // Modpacks
-            /* fallthrough */
-        case 5:  // Bukkit Plugins
-            /* fallthrough */
-        case 4559:  // Addons
-            /* fallthrough */
-        default:
-            return Platform::ResourceType::Unknown;
-    }
-}
-
 void Flame::FileResolvingTask::netJobFinished()
 {
     setProgress(1, 3);
@@ -116,7 +95,7 @@ void Flame::FileResolvingTask::netJobFinished()
     QJsonArray array;
 
     try {
-        doc = Json::requireDocument(*m_result);
+        doc = Json::requireDocument(*m_result2);
         array = Json::requireArray(doc.object()["data"]);
     } catch (Json::JsonException& e) {
         qCritical() << "Non-JSON data returned from the CF API";
@@ -153,19 +132,19 @@ void Flame::FileResolvingTask::netJobFinished()
         getFlameProjects();
         return;
     }
-    m_result.reset(new QByteArray());
-    m_task = modrinthAPI.currentVersions(hashes, "sha1", m_result);
+    m_result2.reset(new QByteArray());
+    m_task = modrinthAPI.currentVersions(hashes, "sha1", m_result2);
     (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
     auto step_progress = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::finished, this, [this, step_progress]() {
         step_progress->state = TaskStepState::Succeeded;
         stepProgress(*step_progress);
         QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*m_result, &parse_error);
+        QJsonDocument doc = QJsonDocument::fromJson(*m_result2, &parse_error);
         if (parse_error.error != QJsonParseError::NoError) {
             qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
                        << " reason: " << parse_error.errorString();
-            qWarning() << *m_result;
+            qWarning() << *m_result2;
 
             getFlameProjects();
             return;
@@ -221,49 +200,32 @@ void Flame::FileResolvingTask::netJobFinished()
 void Flame::FileResolvingTask::getFlameProjects()
 {
     setProgress(2, 3);
-    m_result.reset(new QByteArray());
+    m_result.reset(new QList<Platform::Project::Ptr>());
     QStringList addonIds;
     for (auto file : m_manifest.files) {
         addonIds.push_back(QString::number(file.projectId));
     }
 
-    m_task = flameAPI.getProjects(addonIds, m_result);
+    auto task = API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetProjectsRequest(addonIds, m_result);
+    m_task = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
+    m_task->addNetAction(task);
 
     auto step_progress = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::succeeded, this, [this, step_progress] {
-        QJsonParseError parse_error{};
-        auto doc = QJsonDocument::fromJson(*m_result, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth projects task at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *m_result;
-            return;
-        }
-
-        try {
-            QJsonArray entries;
-            entries = Json::requireArray(Json::requireObject(doc), "data");
-
-            for (auto entry : entries) {
-                auto entry_obj = Json::requireObject(entry);
-                auto id = Json::requireInteger(entry_obj, "id");
-                auto file = std::find_if(m_manifest.files.begin(), m_manifest.files.end(),
-                                         [id](const Flame::File& file) { return file.projectId == id; });
-                if (file == m_manifest.files.end()) {
-                    continue;
-                }
-
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
-                FlameMod::loadIndexedPack(file->pack, entry_obj);
-                file->resourceType = getResourceType(Json::requireInteger(entry_obj, "classId", "modClassId"));
-                if (file->resourceType == Platform::ResourceType::World) {
-                    file->targetFolder = "saves";
-                }
+        for (auto response : *m_result) {
+            auto id = response->projectId;
+            auto file = std::find_if(m_manifest.files.begin(), m_manifest.files.end(),
+                                     [id](const Flame::File& file) { return file.projectId == id; });
+            if (file == m_manifest.files.end()) {
+                continue;
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(file->version.fileName));
+            if (file->resourceType == Platform::ResourceType::World) {
+                file->targetFolder = "saves";
+            }
+            file->pack = response;
         }
+
         step_progress->state = TaskStepState::Succeeded;
         stepProgress(*step_progress);
         emitSucceeded();

@@ -110,14 +110,4 @@ QMap<QString, QString> ModPage::urlHandlers() const
     return map;
 }
 
-/******** Make changes to the UI ********/
-
-void ModPage::addResourceToPage(Platform::Project::Ptr pack,
-                                Platform::Version& version,
-                                const std::shared_ptr<ResourceFolderModel> base_model)
-{
-    bool is_indexed = !APPLICATION->settings()->get("ModMetadataDisabled").toBool();
-    m_model->addPack(pack, version, base_model, is_indexed);
-}
-
 }  // namespace ResourceDownload

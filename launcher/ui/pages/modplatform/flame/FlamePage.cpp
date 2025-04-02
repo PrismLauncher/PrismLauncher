@@ -34,10 +34,14 @@
  */
 
 #include "FlamePage.h"
+#include "QObjectPtr.h"
 #include "Version.h"
+#include "api/Api.h"
 #include "api/structures/Project.h"
+#include "api/structures/Provider.h"
 #include "api/structures/VersionType.h"
 #include "modplatform/ResourceAPI.h"
+#include "net/NetJob.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ModFilterWidget.h"
 #include "ui_FlamePage.h"
@@ -159,7 +163,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
     if (!m_current->versionsLoaded || m_filterWidget->changed()) {
         qDebug() << "Loading flame modpack versions";
 
-        ResourceAPI::Callback<QVector<Platform::Version>> callbacks{};
+        API::Callback<QVector<Platform::Version>> callbacks{};
 
         auto addonId = m_current->projectId;
         // Use default if no callbacks are set
@@ -221,6 +225,16 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         }
 
         suggestCurrent();
+    }
+    if (m_current->extraData.body.isEmpty()) {
+        auto descriptionJob =
+            API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetDescriptionRequest(m_current->projectId.toString(), m_current);
+
+        auto job = makeShared<NetJob>(QString("Flame::GetDescription"), APPLICATION->network());
+        job->addNetAction(descriptionJob);
+        m_descriptionJob = job;
+        m_descriptionJob->start();
+        connect(m_descriptionJob.get(), &Task::finished, this, &FlamePage::updateUi);
     }
 
     // TODO: Check whether it's a connection issue or the project disabled 3rd-party distribution.
@@ -309,7 +323,7 @@ void FlamePage::updateUi()
     }
 
     text += "<hr>";
-    text += api.getModDescription(m_current->projectId.toInt()).toUtf8();
+    text += m_current->extraData.body.toUtf8();
 
     m_ui->packDescription->setHtml(StringUtils::htmlListPatch(text + m_current->description));
     m_ui->packDescription->flush();

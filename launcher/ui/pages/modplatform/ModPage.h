@@ -49,8 +49,6 @@ class ModPage : public ResourcePage {
 
     [[nodiscard]] QMap<QString, QString> urlHandlers() const override;
 
-    void addResourceToPage(Platform::Project::Ptr, Platform::Version&, std::shared_ptr<ResourceFolderModel>) override;
-
     virtual unique_qobject_ptr<ModFilterWidget> createFilterWidget() = 0;
 
     [[nodiscard]] bool supportsFiltering() const override { return true; };

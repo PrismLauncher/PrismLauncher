@@ -5,6 +5,7 @@
 #include "ShaderPackModel.h"
 
 #include <QMessageBox>
+#include "api/structures/ResourceType.h"
 
 namespace ResourceDownload {
 
@@ -14,22 +15,21 @@ ShaderPackResourceModel::ShaderPackResourceModel(BaseInstance const& base_inst, 
 
 /******** Make data requests ********/
 
-ResourceAPI::SearchArgs ShaderPackResourceModel::createSearchArguments()
+API::SearchArgs ShaderPackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
     return { Platform::ResourceType::ShaderPack, m_next_search_offset, m_search_term, sort };
 }
 
-ResourceAPI::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(const QModelIndex& entry)
+API::VersionSearchArgs ShaderPackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
     return { *pack, {}, {}, Platform::ResourceType::ShaderPack };
 }
 
-ResourceAPI::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(const QModelIndex& entry)
+API::ProjectInfoArgs ShaderPackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
-    auto& pack = m_packs[entry.row()];
-    return { *pack };
+    return { Platform::ResourceType::ShaderPack, m_packs[entry.row()] };
 }
 
 void ShaderPackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

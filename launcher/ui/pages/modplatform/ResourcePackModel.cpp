@@ -5,6 +5,7 @@
 #include "ResourcePackModel.h"
 
 #include <QMessageBox>
+#include "api/structures/ResourceType.h"
 
 namespace ResourceDownload {
 
@@ -17,22 +18,21 @@ ResourcePackResourceModel::ResourcePackResourceModel(BaseInstance const& base_in
 
 /******** Make data requests ********/
 
-ResourceAPI::SearchArgs ResourcePackResourceModel::createSearchArguments()
+API::SearchArgs ResourcePackResourceModel::createSearchArguments()
 {
     auto sort = getCurrentSortingMethodByIndex();
     return { Platform::ResourceType::ResourcePack, m_next_search_offset, m_search_term, sort };
 }
 
-ResourceAPI::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(const QModelIndex& entry)
+API::VersionSearchArgs ResourcePackResourceModel::createVersionsArguments(const QModelIndex& entry)
 {
     auto& pack = m_packs[entry.row()];
     return { *pack, {}, {}, Platform::ResourceType::ResourcePack };
 }
 
-ResourceAPI::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
+API::ProjectInfoArgs ResourcePackResourceModel::createInfoArguments(const QModelIndex& entry)
 {
-    auto& pack = m_packs[entry.row()];
-    return { *pack };
+    return { Platform::ResourceType::ResourcePack, m_packs[entry.row()] };
 }
 
 void ResourcePackResourceModel::searchWithTerm(const QString& term, unsigned int sort)

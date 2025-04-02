@@ -1,8 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
- *  Copyright (c) 2023 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2025 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,37 +35,22 @@
  *      limitations under the License.
  */
 
-#include "CapeChange.h"
+#pragma once
 
-#include <memory>
+#include "api/structures/ModLoader.h"
+#include "api/structures/ResourceType.h"
+#include "api/structures/Version.h"
 
-#include "net/ByteArraySink.h"
-#include "net/RawHeaderProxy.h"
+namespace FlameUtils {
+int getClassId(Platform::ResourceType type);
 
-CapeChange::CapeChange(QString cape) : NetRequest(), m_capeId(cape)
-{
-    m_logCat = taskMCSkinsLogC;
-}
+Platform::ResourceType getResourceType(int classId);
 
-QNetworkReply* CapeChange::getReply(QNetworkRequest& request)
-{
-    if (m_capeId.isEmpty()) {
-        setStatus(tr("Removing cape"));
-        return m_network->deleteResource(request);
-    } else {
-        setStatus(tr("Equipping cape"));
-        return m_network->put(request, QString("{\"capeId\":\"%1\"}").arg(m_capeId).toUtf8());
-    }
-}
+int getMappedModLoader(Platform::ModLoader loaders);
 
-CapeChange::Ptr CapeChange::make(QString token, QString capeId)
-{
-    auto up = makeShared<CapeChange>(capeId);
-    up->m_url = QUrl("https://api.minecraftservices.com/minecraft/profile/capes/active");
-    up->setObjectName(QString("BYTES:") + up->m_url.toString());
-    up->m_sink.reset(new Net::ByteArraySink(std::make_shared<QByteArray>()));
-    up->addHeaderProxy(new Net::RawHeaderProxy(QList<Net::HeaderPair>{
-        { "Authorization", QString("Bearer %1").arg(token).toLocal8Bit() },
-    }));
-    return up;
-}
+QStringList getModLoaderStrings(Platform::ModLoaders types);
+
+QString getModLoaderFilters(Platform::ModLoaders types);
+
+Platform::Version loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType resourceType);
+}  // namespace FlameUtils

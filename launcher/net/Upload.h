@@ -45,9 +45,10 @@ class Upload : public NetRequest {
     Q_OBJECT
    public:
     using Ptr = shared_qobject_ptr<Upload>;
-    explicit Upload() : NetRequest() { logCat = taskUploadLogC; };
+    explicit Upload() : NetRequest() { m_logCat = taskUploadLogC; };
 
     static Upload::Ptr makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, QByteArray m_post_data);
+    static Upload::Ptr makeCustomSink(QUrl url, Sink* sink, QByteArray m_post_data);
 
    protected:
     virtual QNetworkReply* getReply(QNetworkRequest&) override;

@@ -39,6 +39,7 @@
 #include "BuildConfig.h"
 #include "Json.h"
 #include "api/structures/Project.h"
+#include "api/structures/ResourceType.h"
 #include "modplatform/modrinth/ModrinthAPI.h"
 #include "net/NetJob.h"
 #include "ui/widgets/ProjectItem.h"
@@ -136,7 +137,7 @@ void ModpackListModel::performPaginatedSearch()
     if (m_currentSearchTerm.startsWith("#")) {
         auto projectId = m_currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {
-            ResourceAPI::Callback<Platform::Project> callbacks;
+            API::Callback<Platform::Project> callbacks;
 
             callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
             callbacks.on_succeed = [this](auto& pack) { searchRequestForOneSucceeded(pack); };
@@ -144,17 +145,20 @@ void ModpackListModel::performPaginatedSearch()
                 qCritical() << "Search task aborted by an unknown reason!";
                 searchRequestFailed("Aborted");
             };
-            if (auto job = api.getProjectInfo({ projectId }, std::move(callbacks)); job) {
+            if (auto job =
+                    api.getProjectInfo({ Platform::ResourceType::Mod, std::make_shared<Platform::Project>(Platform::Project{ projectId }) },
+                                       std::move(callbacks));
+                job) {
                 m_jobPtr = job;
                 m_jobPtr->start();
             }
             return;
         }
     }  // TODO: Move to standalone API
-    ResourceAPI::SortingMethod sort{};
+    API::SortingMethod sort{};
     sort.name = m_currentSort;
 
-    ResourceAPI::Callback<QList<Platform::Project::Ptr>> callbacks{};
+    API::Callback<QList<Platform::Project::Ptr>> callbacks{};
 
     callbacks.on_succeed = [this](auto& doc) { searchRequestFinished(doc); };
     callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };

@@ -50,36 +50,36 @@
 namespace Net {
 
 #if defined(LAUNCHER_APPLICATION)
-auto Download::makeCached(QUrl url, MetaEntryPtr entry, Options options) -> Download::Ptr
+Download::Ptr Download::makeCached(QUrl url, MetaEntryPtr entry, Options options)
 {
-    auto dl = makeShared<Download>();
-    dl->m_url = url;
-    dl->setObjectName(QString("CACHE:") + url.toString());
-    dl->m_options = options;
     auto md5Node = new ChecksumValidator(QCryptographicHash::Md5);
     auto cachedNode = new MetaCacheSink(entry, md5Node, options.testFlag(Option::MakeEternal));
-    dl->m_sink.reset(cachedNode);
+    auto dl = makeCustomSink(url, cachedNode, options);
+    dl->setObjectName(QString("CACHE:") + url.toString());
     return dl;
 }
 #endif
 
-auto Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options) -> Download::Ptr
+Download::Ptr Download::makeByteArray(QUrl url, std::shared_ptr<QByteArray> output, Options options)
 {
-    auto dl = makeShared<Download>();
-    dl->m_url = url;
+    auto dl = makeCustomSink(url, new ByteArraySink(output), options);
     dl->setObjectName(QString("BYTES:") + url.toString());
-    dl->m_options = options;
-    dl->m_sink.reset(new ByteArraySink(output));
     return dl;
 }
 
-auto Download::makeFile(QUrl url, QString path, Options options) -> Download::Ptr
+Download::Ptr Download::makeFile(QUrl url, QString path, Options options)
+{
+    auto dl = makeCustomSink(url, new FileSink(path), options);
+    dl->setObjectName(QString("FILE:") + url.toString());
+    return dl;
+}
+
+Download::Ptr Download::makeCustomSink(QUrl url, Sink* sink, Options options)
 {
     auto dl = makeShared<Download>();
     dl->m_url = url;
-    dl->setObjectName(QString("FILE:") + url.toString());
     dl->m_options = options;
-    dl->m_sink.reset(new FileSink(path));
+    dl->m_sink.reset(sink);
     return dl;
 }
 

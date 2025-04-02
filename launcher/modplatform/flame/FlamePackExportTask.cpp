@@ -36,6 +36,7 @@
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
+#include "net/NetJob.h"
 #include "tasks/Task.h"
 
 const QString FlamePackExportTask::TEMPLATE = "<li><a href=\"{url}\">{name}{authors}</a></li>\n";
@@ -261,72 +262,52 @@ void FlamePackExportTask::getProjectsInfo()
         }
     }
 
-    auto response = std::make_shared<QByteArray>();
-    Task::Ptr projTask;
+    Net::NetRequest::Ptr projTask;
+    auto response = std::make_shared<Platform::Project>();
+    auto responses = std::make_shared<QList<Platform::Project::Ptr>>();
 
+    auto api = API::ProviderAPI::get(Platform::Provider::FLAME);
     if (addonIds.isEmpty()) {
         buildZip();
         return;
     } else if (addonIds.size() == 1) {
-        projTask = api.getProject(*addonIds.begin(), response);
+        projTask = api->makeGetProjectRequest(*addonIds.begin(), response);
     } else {
-        projTask = api.getProjects(addonIds, response);
+        projTask = api->makeGetProjectsRequest(addonIds, responses);
     }
+    auto netJob = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
+    netJob->addNetAction(projTask);
 
-    connect(projTask.get(), &Task::succeeded, this, [this, response, addonIds] {
-        QJsonParseError parseError{};
-        auto doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from CurseForge projects task at " << parseError.offset
-                       << " reason: " << parseError.errorString();
-            qWarning() << *response;
-            emitFailed(parseError.errorString());
-            return;
-        }
+    connect(netJob.get(), &Task::succeeded, this, [this, response, responses, addonIds] {
+        auto update = [this](Platform::Project::Ptr response) {
+            auto id = response->projectId.toString();
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(response->name));
+            for (auto key : resolvedFiles.keys()) {
+                auto val = resolvedFiles.value(key);
+                if (val.addonId == response->projectId) {
+                    val.name = response->name;
+                    val.slug = response->slug;
+                    QStringList authors;
+                    for (auto author : response->authors)
+                        authors << author.name;
 
-        try {
-            QJsonArray entries;
-            if (addonIds.size() == 1)
-                entries = { Json::requireObject(Json::requireObject(doc), "data") };
-            else
-                entries = Json::requireArray(Json::requireObject(doc), "data");
-
-            for (auto entry : entries) {
-                auto entryObj = Json::requireObject(entry);
-
-                try {
-                    setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(Json::requireString(entryObj, "name")));
-
-                    Platform::Project pack;
-                    FlameMod::loadIndexedPack(pack, entryObj);
-                    for (auto key : resolvedFiles.keys()) {
-                        auto val = resolvedFiles.value(key);
-                        if (val.addonId == pack.projectId) {
-                            val.name = pack.name;
-                            val.slug = pack.slug;
-                            QStringList authors;
-                            for (auto author : pack.authors)
-                                authors << author.name;
-
-                            val.authors = authors.join(", ");
-                            resolvedFiles[key] = val;
-                        }
-                    }
-
-                } catch (Json::JsonException& e) {
-                    qDebug() << e.cause();
-                    qDebug() << entries;
+                    val.authors = authors.join(", ");
+                    resolvedFiles[key] = val;
                 }
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+        };
+        if (addonIds.size() == 1) {
+            update(response);
+        } else {
+            for (auto respone : *responses) {
+                update(response);
+            }
         }
         buildZip();
     });
-    connect(projTask.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
-    connect(projTask.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
-    task.reset(projTask);
+    connect(netJob.get(), &Task::failed, this, &FlamePackExportTask::emitFailed);
+    connect(netJob.get(), &Task::aborted, this, &FlamePackExportTask::emitAborted);
+    task.reset(netJob);
     task->start();
 }
 

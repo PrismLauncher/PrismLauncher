@@ -29,9 +29,9 @@ class ShaderPackResourceModel : public ResourceModel {
     [[nodiscard]] QString metaEntryBase() const override { return m_metaEntryBase; }
 
    public slots:
-    ResourceAPI::SearchArgs createSearchArguments() override;
-    ResourceAPI::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
-    ResourceAPI::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
+    API::SearchArgs createSearchArguments() override;
+    API::VersionSearchArgs createVersionsArguments(const QModelIndex&) override;
+    API::ProjectInfoArgs createInfoArguments(const QModelIndex&) override;
 
    protected:
     const BaseInstance& m_base_instance;

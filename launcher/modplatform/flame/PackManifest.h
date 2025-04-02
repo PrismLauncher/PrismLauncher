@@ -50,7 +50,7 @@ struct File {
     // NOTE: the opposite to 'optional'
     bool required = true;
 
-    Platform::Project pack;
+    Platform::Project::Ptr pack;
     Platform::Version version;
 
     // our

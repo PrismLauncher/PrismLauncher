@@ -103,4 +103,5 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
     unique_qobject_ptr<ModFilterWidget> m_filterWidget;
     Task::Ptr m_categoriesTask;
     Task::Ptr m_job;
+    Task::Ptr m_descriptionJob;
 };
