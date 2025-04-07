@@ -106,7 +106,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ""
-            qt_version: "6.8.1"
+            qt_version: "6.7.3"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
           - os: macos-14
