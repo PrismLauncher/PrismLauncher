@@ -342,9 +342,6 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
     # Find toml++
     find_package(tomlplusplus 3.2.0 QUIET)
 
-    # Find ghc_filesystem
-    find_package(ghc_filesystem QUIET)
-
     # Find cmark
     find_package(cmark QUIET)
 endif()
@@ -539,12 +536,6 @@ else()
 endif()
 add_subdirectory(libraries/gamemode)
 add_subdirectory(libraries/murmur2) # Hash for usage with the CurseForge API
-if (NOT ghc_filesystem_FOUND)
-    message(STATUS "Using bundled ghc_filesystem")
-    add_subdirectory(libraries/filesystem) # Implementation of std::filesystem for old C++, for usage in old macOS
-else()
-    message(STATUS "Using system ghc_filesystem")
-endif()
 add_subdirectory(libraries/qdcss) # css parser
 
 ############################### Built Artifacts ###############################

@@ -1289,7 +1289,6 @@ target_link_libraries(Launcher_logic
     qdcss
     BuildConfig
     Qt${QT_VERSION_MAJOR}::Widgets
-    ghcFilesystem::ghc_filesystem
 )
 
 if (UNIX AND NOT CYGWIN AND NOT APPLE)
@@ -1376,7 +1375,6 @@ if(Launcher_BUILD_UPDATER)
         ${ZLIB_LIBRARIES}
         systeminfo
         BuildConfig
-        ghcFilesystem::ghc_filesystem
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network
@@ -1415,7 +1413,6 @@ if(WIN32 OR (DEFINED Launcher_BUILD_FILELINKER AND Launcher_BUILD_FILELINKER))
     target_link_libraries(filelink_logic
         systeminfo
         BuildConfig
-        ghcFilesystem::ghc_filesystem
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Network

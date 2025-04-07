@@ -2,14 +2,6 @@
 
 This folder has third-party or otherwise external libraries needed for other parts to work.
 
-## filesystem
-
-Gulrak's implementation of C++17 std::filesystem for C++11 /C++14/C++17/C++20 on Windows, macOS, Linux and FreeBSD.
-
-See [github repo](https://github.com/gulrak/filesystem).
-
-MIT licensed.
-
 ## gamemode
 
 A performance optimization daemon.
