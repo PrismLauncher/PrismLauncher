@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (C) 2024 Tayou <git@tayou.org>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,28 +31,13 @@
  *      See the License for the specific language governing permissions and
  *      limitations under the License.
  */
+
 #pragma once
 
-#include "ITheme.h"
+#include "BaseInstance.h"
 
-class SystemTheme : public ITheme {
-   public:
-    SystemTheme(const QString& styleName, const QPalette& defaultPalette, bool isDefaultTheme);
-    virtual ~SystemTheme() {}
-    void apply(bool initial) override;
+/// Update instanceRoot to make it sync with name/id; return newRoot if a directory rename happened
+QString askToUpdateInstanceDirName(InstancePtr instance, const QString& oldName, const QString& newName, QWidget* parent);
 
-    QString id() override;
-    QString name() override;
-    QString tooltip() override;
-    QString qtTheme() override;
-    bool hasStyleSheet() override;
-    QString appStyleSheet() override;
-    QPalette colorScheme() override;
-    double fadeAmount() override;
-    QColor fadeColor() override;
-
-   private:
-    QPalette m_colorPalette;
-    QString m_widgetTheme;
-    QString m_themeName;
-};
+/// Check if there are linked instances, and display a warning; return true if the operation should proceed
+bool checkLinkedInstances(const QString& id, QWidget* parent, const QString& verb);

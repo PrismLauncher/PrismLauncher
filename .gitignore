@@ -48,8 +48,12 @@ run/
 
 # Nix/NixOS
 .direnv/
-.pre-commit-config.yaml
+## Used when manually invoking stdenv phases
+outputs/
+## Regular artifacts
 result
+result-*
+repl-result-*
 
 # Flatpak
 .flatpak-builder

@@ -80,7 +80,7 @@ void NetRequest::executeTask()
             emit finished();
             return;
         case State::Running:
-            qCDebug(logCat) << getUid().toString() << "Runninng " << m_url.toString();
+            qCDebug(logCat) << getUid().toString() << "Running " << m_url.toString();
             break;
         case State::Inactive:
         case State::Failed:

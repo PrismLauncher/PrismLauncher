@@ -121,6 +121,13 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="liteLoader">
+            <property name="text">
+             <string>LiteLoader</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

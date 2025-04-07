@@ -123,6 +123,7 @@
 #include "KonamiCode.h"
 
 #include "InstanceCopyTask.h"
+#include "InstanceDirUpdate.h"
 
 #include "Json.h"
 
@@ -288,10 +289,27 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         view->setSelectionMode(QAbstractItemView::SingleSelection);
         // FIXME: leaks ListViewDelegate
-        view->setItemDelegate(new ListViewDelegate(this));
+        auto delegate = new ListViewDelegate(this);
+        view->setItemDelegate(delegate);
         view->setFrameShape(QFrame::NoFrame);
         // do not show ugly blue border on the mac
         view->setAttribute(Qt::WA_MacShowFocusRect, false);
+        connect(delegate, &ListViewDelegate::textChanged, this, [this](QString before, QString after) {
+            if (auto newRoot = askToUpdateInstanceDirName(m_selectedInstance, before, after, this); !newRoot.isEmpty()) {
+                auto oldID = m_selectedInstance->id();
+                auto newID = QFileInfo(newRoot).fileName();
+                QString origGroup(APPLICATION->instances()->getInstanceGroup(oldID));
+                bool syncGroup = origGroup != GroupId() && oldID != newID;
+                if (syncGroup)
+                    APPLICATION->instances()->setInstanceGroup(oldID, GroupId());
+
+                refreshInstances();
+                setSelectedInstanceById(newID);
+
+                if (syncGroup)
+                    APPLICATION->instances()->setInstanceGroup(newID, origGroup);
+            }
+        });
 
         view->installEventFilter(this);
         view->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -1373,20 +1391,8 @@ void MainWindow::on_actionDeleteInstance_triggered()
     if (response != QMessageBox::Yes)
         return;
 
-    auto linkedInstances = APPLICATION->instances()->getLinkedInstancesById(id);
-    if (!linkedInstances.empty()) {
-        response = CustomMessageBox::selectable(this, tr("There are linked instances"),
-                                                tr("The following instance(s) might reference files in this instance:\n\n"
-                                                   "%1\n\n"
-                                                   "Deleting it could break the other instance(s), \n\n"
-                                                   "Do you wish to proceed?",
-                                                   nullptr, linkedInstances.count())
-                                                    .arg(linkedInstances.join("\n")),
-                                                QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No, QMessageBox::No)
-                       ->exec();
-        if (response != QMessageBox::Yes)
-            return;
-    }
+    if (!checkLinkedInstances(id, this, tr("Deleting")))
+        return;
 
     if (APPLICATION->instances()->trashInstance(id)) {
         ui->actionUndoTrashInstance->setEnabled(APPLICATION->instances()->trashedSomething());

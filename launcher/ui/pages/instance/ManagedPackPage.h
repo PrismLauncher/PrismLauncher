@@ -94,6 +94,8 @@ class ManagedPackPage : public QWidget, public BasePage {
     BaseInstance* m_inst;
 
     bool m_loaded = false;
+
+    void onUpdateTaskCompleted(bool did_succeed) const;
 };
 
 /** Simple page for when we aren't a managed pack. */

@@ -21,6 +21,8 @@ set(CORE_SOURCES
     BaseVersion.h
     BaseInstance.h
     BaseInstance.cpp
+    InstanceDirUpdate.h
+    InstanceDirUpdate.cpp
     NullInstance.h
     MMCZip.h
     MMCZip.cpp

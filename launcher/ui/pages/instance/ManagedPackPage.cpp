@@ -245,7 +245,6 @@ ModrinthManagedPackPage::ModrinthManagedPackPage(BaseInstance* inst, InstanceWin
 }
 
 // MODRINTH
-
 void ModrinthManagedPackPage::parseManagedPack()
 {
     qDebug() << "Parsing Modrinth pack";
@@ -338,6 +337,25 @@ void ModrinthManagedPackPage::suggestVersion()
     ManagedPackPage::suggestVersion();
 }
 
+/// @brief Called when the update task has completed.
+/// Internally handles the closing of the instance window if the update was successful and shows a message box.
+/// @param did_succeed Whether the update task was successful.
+void ManagedPackPage::onUpdateTaskCompleted(bool did_succeed) const
+{
+    // Close the window if the update was successful
+    if (did_succeed) {
+        if (m_instance_window != nullptr)
+            m_instance_window->close();
+
+        CustomMessageBox::selectable(nullptr, tr("Update Successful"), tr("The instance updated to pack version %1 successfully.").arg(m_inst->getManagedPackVersionName()), QMessageBox::Information)
+           ->show();
+    } else {
+        CustomMessageBox::selectable(nullptr, tr("Update Failed"), tr("The instance failed to update to pack version %1. Please check launcher logs for more information.").arg(m_inst->getManagedPackVersionName()), QMessageBox::Critical)
+           ->show();
+    }
+
+}
+
 void ModrinthManagedPackPage::update()
 {
     auto index = ui->versionsComboBox->currentIndex();
@@ -363,10 +381,9 @@ void ModrinthManagedPackPage::update()
     extracted->setIcon(m_inst->iconKey());
     extracted->setConfirmUpdate(false);
 
+    // Run our task then handle the result
     auto did_succeed = runUpdateTask(extracted);
-
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    onUpdateTaskCompleted(did_succeed);
 }
 
 void ModrinthManagedPackPage::updateFromFile()
@@ -386,14 +403,12 @@ void ModrinthManagedPackPage::updateFromFile()
     extracted->setIcon(m_inst->iconKey());
     extracted->setConfirmUpdate(false);
 
+    // Run our task then handle the result
     auto did_succeed = runUpdateTask(extracted);
-
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    onUpdateTaskCompleted(did_succeed);
 }
 
 // FLAME
-
 FlameManagedPackPage::FlameManagedPackPage(BaseInstance* inst, InstanceWindow* instance_window, QWidget* parent)
     : ManagedPackPage(inst, instance_window, parent)
 {
@@ -531,9 +546,7 @@ void FlameManagedPackPage::update()
     extracted->setConfirmUpdate(false);
 
     auto did_succeed = runUpdateTask(extracted);
-
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    onUpdateTaskCompleted(did_succeed);
 }
 
 void FlameManagedPackPage::updateFromFile()
@@ -555,8 +568,6 @@ void FlameManagedPackPage::updateFromFile()
     extracted->setConfirmUpdate(false);
 
     auto did_succeed = runUpdateTask(extracted);
-
-    if (m_instance_window && did_succeed)
-        m_instance_window->close();
+    onUpdateTaskCompleted(did_succeed);
 }
 #include "ManagedPackPage.moc"
