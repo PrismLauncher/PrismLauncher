@@ -56,7 +56,7 @@ jobs:
             qt_ver: 6
             qt_host: linux
             qt_arch: ""
-            qt_version: "6.7.3"
+            qt_version: "6.8.1"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
             linuxdeploy_hash: "4648f278ab3ef31f819e67c30d50f462640e5365a77637d7e6f2ad9fd0b4522a linuxdeploy-x86_64.AppImage"
             linuxdeploy_qt_hash: "15106be885c1c48a021198e7e1e9a48ce9d02a86dd0a1848f00bdbf3c1c92724  linuxdeploy-plugin-qt-x86_64.AppImage"
@@ -99,7 +99,7 @@ jobs:
             qt_ver: 6
             qt_host: mac
             qt_arch: ""
-            qt_version: "6.7.3"
+            qt_version: "6.8.1"
             qt_modules: "qt5compat qtimageformats qtnetworkauth"
 
     runs-on: ${{ matrix.os }}
