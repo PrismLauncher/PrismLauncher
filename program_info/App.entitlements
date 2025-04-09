@@ -34,6 +34,10 @@
         <string>/Library/Java/JavaVirtualMachines/</string>
         <string>/Library/Application Support/Steam/Steam.AppBundle/Steam/</string>
     </array>
+    <key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
+    <array>
+        <string>/Library/Containers/@Launcher_Identifier@/JavaInstalls/</string>
+    </array>
     <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
     <array>
         <string>@Launcher_Identifier@-spks</string>

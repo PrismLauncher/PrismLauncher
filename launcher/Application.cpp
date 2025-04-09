@@ -1133,6 +1133,36 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
             QFile::link(unsandboxedTempDir + ipcName, ipcPathFull);
         }
     }
+
+    // setup storage of Java installs outside main sandbox container
+    // several issues exist with executables stored in the sandbox container as of writing
+    // e.g. crashes when using text-to-speech APIs, lack of execute permissions...
+    // storing the java executables outside of the main container works around this
+    QString defaultJavaDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/../JavaInstalls";
+    QString defaultJavaDirLink = m_dataPath + "/java";
+    if (!QDir().exists(defaultJavaDir)) {
+        bool success;
+        bool existingJavaNeedsMigration = QDir().exists(defaultJavaDirLink);
+        if (existingJavaNeedsMigration) {
+            qDebug() << "Migrating existing Java installs outside of sandbox container (migrating old non-sandboxed install to sandbox)";
+            success = QFile::rename(defaultJavaDirLink, defaultJavaDir);
+        } else {
+            success = QDir().mkdir(defaultJavaDir);
+        }
+
+        if (!success) {
+            qWarning()
+                << "Failed to create Java directory outside sandbox container. This may cause problems when using the Java downloader. "
+                << (existingJavaNeedsMigration ? "Existing Java installs may fail to launch." : "");
+        }
+
+        QFile defaultJavaDirFile(defaultJavaDir);
+        success = defaultJavaDirFile.link(m_dataPath + "/java");
+        if (!success) {
+            qWarning() << "Failed to create symbolic link to Java directory outside sandbox container. This may cause problems when using "
+                          "the Java downloader.";
+        }
+    }
 #endif
 
     if (createSetupWizard()) {
