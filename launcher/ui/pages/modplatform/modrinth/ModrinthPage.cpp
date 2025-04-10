@@ -391,7 +391,7 @@ QString ModrinthPage::getSerachTerm() const
 
 void ModrinthPage::createFilterWidget()
 {
-    auto widget = ModFilterWidget::create(nullptr, true, this);
+    auto widget = ModFilterWidget::create(nullptr, ModPlatform::ResourceProvider::MODRINTH, this);
     m_filterWidget.swap(widget);
     auto old = ui->splitter->replaceWidget(0, m_filterWidget.get());
     // because we replaced the widget we also need to delete it

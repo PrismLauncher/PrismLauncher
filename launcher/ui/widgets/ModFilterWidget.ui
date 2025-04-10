@@ -64,10 +64,24 @@
         <x>0</x>
         <y>0</y>
         <width>294</width>
-        <height>781</height>
+        <height>851</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QPushButton" name="resetButton">
+         <property name="text">
+          <string>Reset</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="saveFiltersCb">
+         <property name="text">
+          <string>Save filters</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QGroupBox" name="categoryGroup">
          <property name="title">

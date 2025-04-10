@@ -35,6 +35,7 @@
 
 #include "FlamePage.h"
 #include "Version.h"
+#include "modplatform/ModIndex.h"
 #include "modplatform/flame/FlamePackIndex.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ModFilterWidget.h"
@@ -341,7 +342,7 @@ void FlamePage::setSearchTerm(QString term)
 
 void FlamePage::createFilterWidget()
 {
-    auto widget = ModFilterWidget::create(nullptr, false, this);
+    auto widget = ModFilterWidget::create(nullptr, ModPlatform::ResourceProvider::FLAME, this);
     m_filterWidget.swap(widget);
     auto old = ui->splitter->replaceWidget(0, m_filterWidget.get());
     // because we replaced the widget we also need to delete it

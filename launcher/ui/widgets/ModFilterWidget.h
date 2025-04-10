@@ -36,6 +36,7 @@
 #pragma once
 
 #include <QButtonGroup>
+#include <QCheckBox>
 #include <QList>
 #include <QListWidgetItem>
 #include <QTabWidget>
@@ -83,7 +84,9 @@ class ModFilterWidget : public QTabWidget {
         }
     };
 
-    static unique_qobject_ptr<ModFilterWidget> create(MinecraftInstance* instance, bool extended, QWidget* parent = nullptr);
+    static unique_qobject_ptr<ModFilterWidget> create(MinecraftInstance* instance,
+                                                      ModPlatform::ResourceProvider provider,
+                                                      QWidget* parent = nullptr);
     virtual ~ModFilterWidget();
 
     auto getFilter() -> std::shared_ptr<Filter>;
@@ -96,10 +99,13 @@ class ModFilterWidget : public QTabWidget {
     void setCategories(const QList<ModPlatform::Category>&);
 
    private:
-    ModFilterWidget(MinecraftInstance* instance, bool extendedSupport, QWidget* parent = nullptr);
+    ModFilterWidget(MinecraftInstance* instance, ModPlatform::ResourceProvider provider, QWidget* parent = nullptr);
 
     void loadVersionList();
-    void prepareBasicFilter();
+    void saveSetting(QString id, QVariant value);
+    QVariant getSetting(QString id);
+
+    QString getSettingId(QString id = {});
 
    private slots:
     void onVersionFilterChanged(int);
@@ -111,8 +117,12 @@ class ModFilterWidget : public QTabWidget {
     void onOpenSourceFilterChanged();
     void onReleaseFilterChanged();
 
+    void clearFilter();
+    void saveFilters();
+    void loadFilters();
+
    private:
-    Ui::ModFilterWidget* ui;
+    Ui::ModFilterWidget* m_ui;
 
     MinecraftInstance* m_instance = nullptr;
     std::shared_ptr<Filter> m_filter;
@@ -122,4 +132,7 @@ class ModFilterWidget : public QTabWidget {
     VersionProxyModel* m_versions_proxy = nullptr;
 
     QList<ModPlatform::Category> m_categories;
+    QHash<QString, QCheckBox*> m_categoriesCB;
+
+    ModPlatform::ResourceProvider m_provider;
 };
