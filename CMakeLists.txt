@@ -410,6 +410,7 @@ if(UNIX AND APPLE)
     set(MACOSX_SPARKLE_DIR "${CMAKE_BINARY_DIR}/frameworks/Sparkle")
 
     set(MACOSX_CODESIGN_IDENTITY "-" CACHE STRING "The identity to use for codesigning (the name, not the secret)")
+    set(MACOSX_PREPARE_NOTARIZATION OFF CACHE BOOL "Whether to disable features incompatible with notarization (notably, do not request an entitlement that allows for attaching a debugger)")
 
     if(NOT MACOSX_SPARKLE_UPDATE_PUBLIC_KEY STREQUAL "" AND NOT MACOSX_SPARKLE_UPDATE_FEED_URL STREQUAL "")
         set(Launcher_ENABLE_UPDATER YES)

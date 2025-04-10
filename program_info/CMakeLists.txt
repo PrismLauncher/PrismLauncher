@@ -38,7 +38,7 @@ set(Launcher_Branding_LogoQRC "program_info/prismlauncher.qrc" PARENT_SCOPE)
 
 set(Launcher_Portable_File "program_info/portable.txt" PARENT_SCOPE)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT MACOSX_PREPARE_NOTARIZATION)
     set(Launcher_DebugEntitlements "<key>com.apple.security.get-task-allow</key>\n    <true/>")
 else()
     set(Launcher_DebugEntitlements "")
