@@ -124,3 +124,8 @@ void SettingsObject::connectSignals(const Setting& setting)
     connect(&setting, &Setting::settingReset, this, &SettingsObject::resetSetting);
     connect(&setting, SIGNAL(settingReset(Setting)), this, SIGNAL(settingReset(const Setting&)));
 }
+
+std::shared_ptr<Setting> SettingsObject::getOrRegisterSetting(const QString& id, QVariant defVal)
+{
+    return contains(id) ? getSetting(id) : registerSetting(id, defVal);
+}

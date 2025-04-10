@@ -176,10 +176,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
         // restore the instance toolbar settings
         auto const setting_name = QString("WideBarVisibility_%1").arg(ui->instanceToolBar->objectName());
-        if (!APPLICATION->settings()->contains(setting_name))
-            instanceToolbarSetting = APPLICATION->settings()->registerSetting(setting_name);
-        else
-            instanceToolbarSetting = APPLICATION->settings()->getSetting(setting_name);
+        instanceToolbarSetting = APPLICATION->settings()->getOrRegisterSetting(setting_name);
 
         ui->instanceToolBar->setVisibilityState(instanceToolbarSetting->get().toByteArray());
 
