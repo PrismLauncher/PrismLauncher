@@ -1549,11 +1549,7 @@ endif()
 
 if(UNIX AND APPLE)
     # Need to fix code signing for the bundle
-    if(MACOSX_CODESIGN_IDENTITY STREQUAL "-")
-        set(MACOSX_ENTITLEMENTS "${CMAKE_CURRENT_BINARY_DIR}/../program_info/AdhocSignedApp.entitlements")
-    else()
-        set(MACOSX_ENTITLEMENTS "${CMAKE_CURRENT_BINARY_DIR}/../program_info/App.entitlements")
-    endif()
+    set(MACOSX_ENTITLEMENTS "${CMAKE_CURRENT_BINARY_DIR}/../program_info/App.entitlements")
     configure_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/MacOSCodesign.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/MacOSCodesign.cmake"
