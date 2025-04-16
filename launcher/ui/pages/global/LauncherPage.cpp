@@ -276,6 +276,7 @@ void LauncherPage::applySettings()
     s->set("ModMetadataDisabled", ui->metadataDisableBtn->isChecked());
     s->set("ModDependenciesDisabled", ui->dependenciesDisableBtn->isChecked());
     s->set("SkipModpackUpdatePrompt", ui->skipModpackUpdatePromptBtn->isChecked());
+    s->set("SaveModFilters", ui->saveModFiltersBtn->isChecked());
 }
 void LauncherPage::loadSettings()
 {
@@ -350,6 +351,7 @@ void LauncherPage::loadSettings()
     ui->metadataWarningLabel->setHidden(!ui->metadataDisableBtn->isChecked());
     ui->dependenciesDisableBtn->setChecked(s->get("ModDependenciesDisabled").toBool());
     ui->skipModpackUpdatePromptBtn->setChecked(s->get("SkipModpackUpdatePrompt").toBool());
+    ui->saveModFiltersBtn->setChecked(s->get("SaveModFilters").toBool());
 }
 
 void LauncherPage::refreshFontPreview()

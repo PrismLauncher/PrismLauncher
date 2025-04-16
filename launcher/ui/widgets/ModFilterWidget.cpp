@@ -143,18 +143,6 @@ ModFilterWidget::ModFilterWidget(MinecraftInstance* instance, ModPlatform::Resou
     if (!m_instance) {
         m_ui->hideInstalled->hide();
         m_ui->resetButton->hide();
-        m_ui->saveFiltersCb->hide();
-    } else {
-        auto setting = m_instance->settings()->getOrRegisterSetting(getSettingId("filtersSaved"));
-        m_ui->saveFiltersCb->setChecked(setting->get().toBool());
-        connect(setting.get(), &Setting::SettingChanged, this,
-                [this](const Setting&, const QVariant& value) { m_ui->saveFiltersCb->setChecked(value.toBool()); });
-        connect(m_ui->saveFiltersCb, &QCheckBox::stateChanged, this, [this] {
-            saveSetting("filtersSaved", m_ui->saveFiltersCb->isChecked());
-            if (m_ui->saveFiltersCb->isChecked()) {
-                saveFilters();
-            }
-        });
     }
 
     m_ui->versions->setStyleSheet("combobox-popup: 0;");
@@ -427,7 +415,7 @@ QVariant ModFilterWidget::getSetting(QString id)
 
 void ModFilterWidget::saveFilters()
 {
-    if (!m_instance) {
+    if (!m_instance || !APPLICATION->settings()->get("SaveModFilters").toBool()) {
         return;
     }
     QStringList versionStrings;
@@ -453,7 +441,7 @@ void ModFilterWidget::saveFilters()
 
 void ModFilterWidget::loadFilters()
 {
-    if (!m_instance || !getSetting("filtersSaved").toBool()) {
+    if (!m_instance || !APPLICATION->settings()->get("SaveModFilters").toBool()) {
         clearFilter();
         return;
     }

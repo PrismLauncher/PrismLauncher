@@ -76,13 +76,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="saveFiltersCb">
-         <property name="text">
-          <string>Save filters</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QGroupBox" name="categoryGroup">
          <property name="title">
           <string>Categories</string>
