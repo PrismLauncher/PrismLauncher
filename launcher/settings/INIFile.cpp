@@ -116,9 +116,6 @@ QString unquote(QString str)
 bool parseOldFileFormat(QIODevice& device, QSettings::SettingsMap& map)
 {
     QTextStream in(device.readAll());
-#if QT_VERSION <= QT_VERSION_CHECK(6, 0, 0)
-    in.setCodec("UTF-8");
-#endif
 
     QStringList lines = in.readAll().split('\n');
     for (int i = 0; i < lines.count(); i++) {
