@@ -147,12 +147,14 @@ unique_qobject_ptr<ModFilterWidget> ModrinthModPage::createFilterWidget()
 
 void ModrinthModPage::prepareProviderCategories()
 {
-    auto response = std::make_shared<QByteArray>();
-    auto task = ModrinthAPI::getModCategories(response);
-    QObject::connect(task.get(), &Task::succeeded, [this, response]() {
-        auto categories = ModrinthAPI::loadModCategories(response);
-        m_filter_widget->setCategories(categories);
-    });
-    task->start();
+    auto response = std::make_shared<API::CategoriesResponse>();
+    response->resourceType = Platform::ResourceType::Mod;
+    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
+    auto task = API::ProviderAPI::get(Platform::Provider::MODRINTH)->makeGetCategoriesRequest(Platform::ResourceType::Mod, response);
+    netJob->addNetAction(task);
+    m_categoriesTask = netJob;
+    QObject::connect(m_categoriesTask.get(), &Task::succeeded,
+                     [this, response]() { m_filter_widget->setCategories(response->categories); });
+    m_categoriesTask->start();
 };
 }  // namespace ResourceDownload

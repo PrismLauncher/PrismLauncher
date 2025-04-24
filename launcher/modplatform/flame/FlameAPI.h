@@ -24,25 +24,5 @@ class FlameAPI : public ResourceAPI {
     NetJob::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
     Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
 
-    static Task::Ptr getCategories(std::shared_ptr<QByteArray> response, Platform::ResourceType type);
-    static Task::Ptr getModCategories(std::shared_ptr<QByteArray> response);
-    static QList<Platform::Category> loadModCategories(std::shared_ptr<QByteArray> response);
-
     Platform::Provider provider() const override { return Platform::Provider::FLAME; }
-
-   private:
-    static int getClassId(Platform::ResourceType type)
-    {
-        switch (type) {
-            default:
-            case Platform::ResourceType::Mod:
-                return 6;
-            case Platform::ResourceType::ResourcePack:
-                return 12;
-            case Platform::ResourceType::ShaderPack:
-                return 6552;
-            case Platform::ResourceType::Modpack:
-                return 4471;
-        }
-    }
 };

@@ -183,4 +183,29 @@ bool ModrinthAPI::handleGetProjectsResponse(const QJsonDocument& doc, QList<Plat
     return true;
 }
 
+std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetCategoriesRequest(Platform::ResourceType type) const
+{
+    return HttpRequest::GET(BuildConfig.MODRINTH_PROD_URL + "/tag/category");
+}
+
+bool ModrinthAPI::handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const
+{
+    try {
+        auto arr = Json::requireArray(doc);
+
+        for (auto val : arr) {
+            auto cat = Json::requireObject(val);
+            auto name = Json::requireString(cat, "name");
+            if (Json::ensureString(cat, "project_type", "") == ModrinthUtils::resourceTypeParameter(rsp.resourceType))
+                rsp.categories.push_back({ name, name });
+        }
+
+    } catch (Json::JsonException& e) {
+        qCritical() << "Failed to parse response from a version request.";
+        qCritical() << e.what();
+        qDebug() << doc;
+        return false;
+    }
+    return true;
+}
 }  // namespace API

@@ -104,51 +104,6 @@ Task::Ptr FlameAPI::getFile(const QString& addonId, const QString& fileId, std::
     return netJob;
 }
 
-Task::Ptr FlameAPI::getCategories(std::shared_ptr<QByteArray> response, Platform::ResourceType type)
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(
-        QUrl(QString("https://api.curseforge.com/v1/categories?gameId=432&classId=%1").arg(getClassId(type))), response));
-    QObject::connect(netJob.get(), &Task::failed, [](QString msg) { qDebug() << "Flame failed to get categories:" << msg; });
-    return netJob;
-}
-
-Task::Ptr FlameAPI::getModCategories(std::shared_ptr<QByteArray> response)
-{
-    return getCategories(response, Platform::ResourceType::Mod);
-}
-
-QList<Platform::Category> FlameAPI::loadModCategories(std::shared_ptr<QByteArray> response)
-{
-    QList<Platform::Category> categories;
-    QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from categories at " << parse_error.offset
-                   << " reason: " << parse_error.errorString();
-        qWarning() << *response;
-        return categories;
-    }
-
-    try {
-        auto obj = Json::requireObject(doc);
-        auto arr = Json::requireArray(obj, "data");
-
-        for (auto val : arr) {
-            auto cat = Json::requireObject(val);
-            auto id = Json::requireInteger(cat, "id");
-            auto name = Json::requireString(cat, "name");
-            categories.push_back({ name, QString::number(id) });
-        }
-
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << doc;
-    }
-    return categories;
-};
-
 std::optional<Platform::Version> FlameAPI::getLatestVersion(QList<Platform::Version> versions,
                                                             QList<Platform::ModLoader> instanceLoaders,
                                                             Platform::ModLoaders modLoaders)

@@ -220,4 +220,31 @@ bool FlameAPI::handleGetProjectsResponse(const QJsonDocument& doc, QList<Platfor
 {
     return handleSearchResponse(doc, rsp);
 }
+
+std::unique_ptr<HttpRequest> FlameAPI::prepareGetCategoriesRequest(Platform::ResourceType type) const
+{
+    return HttpRequest::GET(QString("https://api.curseforge.com/v1/categories?gameId=432&classId=%1").arg(FlameUtils::getClassId(type)));
+}
+
+bool FlameAPI::handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const
+{
+    try {
+        auto obj = Json::requireObject(doc);
+        auto arr = Json::requireArray(obj, "data");
+
+        for (auto val : arr) {
+            auto cat = Json::requireObject(val);
+            auto id = Json::requireInteger(cat, "id");
+            auto name = Json::requireString(cat, "name");
+            rsp.categories.push_back({ name, QString::number(id) });
+        }
+
+    } catch (Json::JsonException& e) {
+        qCritical() << "Failed to parse response from a version request.";
+        qCritical() << e.what();
+        qDebug() << doc;
+        return false;
+    }
+    return true;
+}
 }  // namespace API

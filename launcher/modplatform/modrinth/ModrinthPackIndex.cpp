@@ -27,12 +27,14 @@
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
-static ModrinthAPI api;
-
 bool shouldDownloadOnSide(QString side)
 {
     return side == "required" || side == "optional";
 }
+QString getAuthorURL(const QString& name)
+{
+    return "https://modrinth.com/user/" + name;
+};
 
 // https://docs.modrinth.com/api-spec/#tag/projects/operation/getProject
 void Modrinth::loadIndexedPack(Platform::Project& pack, QJsonObject& obj)
@@ -57,7 +59,7 @@ void Modrinth::loadIndexedPack(Platform::Project& pack, QJsonObject& obj)
 
     Platform::ModpackAuthor modAuthor;
     modAuthor.name = Json::ensureString(obj, "author", QObject::tr("No author(s)"));
-    modAuthor.url = api.getAuthorURL(modAuthor.name);
+    modAuthor.url = getAuthorURL(modAuthor.name);
     pack.authors.append(modAuthor);
 
     auto client = shouldDownloadOnSide(Json::ensureString(obj, "client_side"));
@@ -113,6 +115,21 @@ void Modrinth::loadExtraPackData(Platform::Project& pack, QJsonObject& obj)
     pack.extraDataLoaded = true;
 }
 
+QString mapMCVersionFromModrinth(QString v)
+{
+    static const QString preString = " Pre-Release ";
+    bool pre = false;
+    if (v.contains("-pre")) {
+        pre = true;
+        v.replace("-pre", preString);
+    }
+    v.replace("-", " ");
+    if (pre) {
+        v.replace(" Pre Release ", preString);
+    }
+    return v;
+}
+
 Platform::Version Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_type, QString preferred_file_name)
 {
     Platform::Version file;
@@ -125,7 +142,7 @@ Platform::Version Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString pre
         return {};
     }
     for (auto mcVer : versionArray) {
-        file.mcVersion.append(ModrinthAPI::mapMCVersionFromModrinth(mcVer.toString()));
+        file.mcVersion.append(mapMCVersionFromModrinth(mcVer.toString()));
     }
     auto loaders = Json::requireArray(obj, "loaders");
     for (auto loader : loaders) {

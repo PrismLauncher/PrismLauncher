@@ -37,6 +37,7 @@
 #include "QObjectPtr.h"
 #include "Version.h"
 #include "api/Api.h"
+#include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "api/structures/Provider.h"
 #include "api/structures/VersionType.h"
@@ -351,11 +352,13 @@ void FlamePage::createFilterWidget()
     connect(m_ui->filterButton, &QPushButton::clicked, this, [this] { m_filterWidget->setHidden(!m_filterWidget->isHidden()); });
 
     connect(m_filterWidget.get(), &ModFilterWidget::filterChanged, this, &FlamePage::triggerSearch);
-    auto response = std::make_shared<QByteArray>();
-    m_categoriesTask = FlameAPI::getCategories(response, Platform::ResourceType::Modpack);
-    QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
-        auto categories = FlameAPI::loadModCategories(response);
-        m_filterWidget->setCategories(categories);
-    });
+
+    auto response = std::make_shared<API::CategoriesResponse>();
+    response->resourceType = Platform::ResourceType::Modpack;
+    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
+    auto task = API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetCategoriesRequest(Platform::ResourceType::Modpack, response);
+    netJob->addNetAction(task);
+    m_categoriesTask = netJob;
+    QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() { m_filterWidget->setCategories(response->categories); });
     m_categoriesTask->start();
 }

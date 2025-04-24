@@ -54,6 +54,7 @@ int getClassId(Platform::ResourceType type)
             return 4471;
     }
 }
+
 Platform::ResourceType getResourceType(int classId)
 {
     switch (classId) {
@@ -77,6 +78,7 @@ Platform::ResourceType getResourceType(int classId)
             return Platform::ResourceType::Unknown;
     }
 }
+
 int getMappedModLoader(Platform::ModLoader loaders)
 {
     // https://docs.curseforge.com/rest-api/#tocS_ModLoaderType
@@ -96,6 +98,7 @@ int getMappedModLoader(Platform::ModLoader loaders)
     }
     return 0;
 }
+
 QStringList getModLoaderStrings(Platform::ModLoaders types)
 {
     QStringList l;
@@ -107,10 +110,12 @@ QStringList getModLoaderStrings(Platform::ModLoaders types)
     }
     return l;
 }
+
 QString getModLoaderFilters(Platform::ModLoaders types)
 {
     return "[" + getModLoaderStrings(types).join(',') + "]";
 }
+
 Platform::Version loadIndexedPackVersion(QJsonObject& obj, Platform::ResourceType resourceType)
 {
     auto arr = FlameMod::loadIndexedPackVersion(obj);

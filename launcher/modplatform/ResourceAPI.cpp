@@ -2,14 +2,11 @@
 #include <memory>
 
 #include "Application.h"
-#include "Json.h"
 #include "api/Api.h"
 #include "api/structures/Arguments.h"
 #include "net/NetJob.h"
 
 #include "api/structures/Project.h"
-
-#include "net/ApiDownload.h"
 
 Task::Ptr ResourceAPI::searchProjects(API::SearchArgs&& args, API::Callback<QList<Platform::Project::Ptr>>&& callbacks) const
 {
@@ -134,16 +131,4 @@ Task::Ptr ResourceAPI::getDependencyVersion(API::DependencySearchArgs&& args, AP
         callbacks.on_fail(reason, network_error_code);
     });
     return netJob;
-}
-
-QString ResourceAPI::mapMCVersionToModrinth(Version v) const
-{
-    static const QString preString = " Pre-Release ";
-    auto verStr = v.toString();
-
-    if (verStr.contains(preString)) {
-        verStr.replace(preString, "-pre");
-    }
-    verStr.replace(" ", "-");
-    return verStr;
 }

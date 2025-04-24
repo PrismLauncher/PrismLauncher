@@ -41,6 +41,7 @@
 #include <QString>
 
 #include "../../Version.h"
+#include "api/structures/Category.h"
 #include "api/structures/ModLoader.h"
 #include "api/structures/Project.h"
 #include "api/structures/ResourceType.h"
@@ -98,6 +99,11 @@ struct DependencySearchArgs {
 struct MatchHashesArgs {
     QStringList hashes;
     Hashing::Algorithm alg;
+};
+
+struct CategoriesResponse {
+    QList<Platform::Category> categories;
+    Platform::ResourceType resourceType{};
 };
 
 }  // namespace API

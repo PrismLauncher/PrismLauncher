@@ -72,16 +72,14 @@ class ResourceAPI {
     [[nodiscard]] QList<API::SortingMethod> getSortingMethods() const { return API::ProviderAPI::get(provider())->getSortingMethods(); }
 
    public slots:
-    [[nodiscard]] virtual Task::Ptr searchProjects(API::SearchArgs&&, API::Callback<QList<Platform::Project::Ptr>>&&) const;
+    [[nodiscard]] Task::Ptr searchProjects(API::SearchArgs&&, API::Callback<QList<Platform::Project::Ptr>>&&) const;
 
-    [[nodiscard]] virtual Task::Ptr getProjectInfo(API::ProjectInfoArgs&&, API::Callback<Platform::Project>&&) const;
+    [[nodiscard]] Task::Ptr getProjectInfo(API::ProjectInfoArgs&&, API::Callback<Platform::Project>&&) const;
     [[nodiscard]] Task::Ptr getProjectVersions(API::VersionSearchArgs&& args, API::Callback<QVector<Platform::Version>>&& callbacks) const;
-    [[nodiscard]] virtual Task::Ptr getDependencyVersion(API::DependencySearchArgs&&, API::Callback<Platform::Version>&&) const;
+    [[nodiscard]] Task::Ptr getDependencyVersion(API::DependencySearchArgs&&, API::Callback<Platform::Version>&&) const;
 
    protected:
     [[nodiscard]] inline QString debugName() const { return "External resource API"; }
-
-    [[nodiscard]] QString mapMCVersionToModrinth(Version v) const;
 
    public:
     virtual Platform::Provider provider() const = 0;

@@ -106,7 +106,7 @@ class ProviderAPI {
     [[nodiscard]] virtual bool handleGetDependencyResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const = 0;
     [[nodiscard]] virtual bool handleGetDescriptionResponse(const QJsonDocument& doc, Platform::Project& rsp) const = 0;
     [[nodiscard]] virtual bool handleMatchHashesResponse(const QJsonDocument& doc, QList<Platform::Version>& rsp) const = 0;
-    [[nodiscard]] virtual bool handleGetCategoriesResponse(const QJsonDocument& doc, QList<Platform::Category>& rsp) const = 0;
+    [[nodiscard]] virtual bool handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const = 0;
 #define DEFINE_REQUEST_HANDLER(FUNC_NAME, ARG_TYPE, RSP_TYPE, PREPARE_REQUEST, PARSE_RESPONSE)                                         \
     [[nodiscard]] inline Net::NetRequest::Ptr make##FUNC_NAME##Request(ARG_TYPE const& args, std::shared_ptr<RSP_TYPE> response) const \
     {                                                                                                                                  \
@@ -135,7 +135,7 @@ class ProviderAPI {
                            handleMatchHashesResponse)
     DEFINE_REQUEST_HANDLER(GetCategories,
                            Platform::ResourceType,
-                           QList<Platform::Category>,
+                           CategoriesResponse,
                            prepareGetCategoriesRequest,
                            handleGetCategoriesResponse)
 

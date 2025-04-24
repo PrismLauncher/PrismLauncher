@@ -43,7 +43,7 @@
 #include "api/structures/Side.h"
 namespace ModrinthUtils {
 
-QStringList getModLoaderStrings(const Platform::ModLoaders types);
+QStringList getModLoaderStrings(Platform::ModLoaders types);
 
 QString getModLoaderFilters(Platform::ModLoaders types);
 

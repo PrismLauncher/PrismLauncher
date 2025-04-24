@@ -62,7 +62,7 @@ class ModrinthAPI : public ProviderAPI {
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetDependencyRequest(DependencySearchArgs const& args) const;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetDescriptionRequest(QString const&) const { return nullptr; }
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareMatchHashesRequest(MatchHashesArgs const& args) const { return nullptr; }
-    [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetCategoriesRequest(Platform::ResourceType type) const { return nullptr; }
+    [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetCategoriesRequest(Platform::ResourceType type) const;
 
     // Parsers
     [[nodiscard]] virtual bool handleSearchResponse(const QJsonDocument& doc, QList<Platform::Project::Ptr>& rsp) const;
@@ -72,7 +72,7 @@ class ModrinthAPI : public ProviderAPI {
     [[nodiscard]] virtual bool handleGetDependencyResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const;
     [[nodiscard]] virtual bool handleGetDescriptionResponse(const QJsonDocument&, Platform::Project&) const { return false; }
     [[nodiscard]] virtual bool handleMatchHashesResponse(const QJsonDocument& doc, QList<Platform::Version>& rsp) const { return false; }
-    [[nodiscard]] virtual bool handleGetCategoriesResponse(const QJsonDocument& doc, QList<Platform::Category>& rsp) const { return false; }
+    [[nodiscard]] virtual bool handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const;
 };
 
 }  // namespace API

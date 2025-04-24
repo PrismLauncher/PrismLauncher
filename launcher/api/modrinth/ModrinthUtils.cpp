@@ -39,7 +39,7 @@
 
 namespace ModrinthUtils {
 
-QStringList getModLoaderStrings(const Platform::ModLoaders types)
+QStringList getModLoaderStrings(Platform::ModLoaders types)
 {
     QStringList l;
     for (auto loader : { Platform::ModLoader::NeoForge, Platform::ModLoader::Forge, Platform::ModLoader::Fabric, Platform::ModLoader::Quilt,

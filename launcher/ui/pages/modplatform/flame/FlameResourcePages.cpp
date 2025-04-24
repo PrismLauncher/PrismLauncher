@@ -40,6 +40,9 @@
 #include "FlameResourcePages.h"
 #include <QList>
 #include <memory>
+#include "api/Api.h"
+#include "api/structures/Arguments.h"
+#include "api/structures/Provider.h"
 #include "modplatform/flame/FlameAPI.h"
 #include "ui_ResourcePage.h"
 
@@ -212,12 +215,14 @@ unique_qobject_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
 
 void FlameModPage::prepareProviderCategories()
 {
-    auto response = std::make_shared<QByteArray>();
-    m_categoriesTask = FlameAPI::getModCategories(response);
-    QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() {
-        auto categories = FlameAPI::loadModCategories(response);
-        m_filter_widget->setCategories(categories);
-    });
+    auto response = std::make_shared<API::CategoriesResponse>();
+    response->resourceType = Platform::ResourceType::Mod;
+    auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
+    auto task = API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetCategoriesRequest(Platform::ResourceType::Mod, response);
+    netJob->addNetAction(task);
+    m_categoriesTask = netJob;
+    QObject::connect(m_categoriesTask.get(), &Task::succeeded,
+                     [this, response]() { m_filter_widget->setCategories(response->categories); });
     m_categoriesTask->start();
 };
 }  // namespace ResourceDownload
