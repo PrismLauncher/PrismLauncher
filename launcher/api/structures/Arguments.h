@@ -101,6 +101,8 @@ struct MatchHashesArgs {
     Hashing::Algorithm alg;
 };
 
+using MatchHashesResponse = QHash<QString, Platform::Version>;
+
 struct CategoriesResponse {
     QList<Platform::Category> categories;
     Platform::ResourceType resourceType{};

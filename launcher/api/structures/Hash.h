@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /*
  *  Prism Launcher - Minecraft Launcher
- *  Copyright (c) 2022 flowln <flowlnlnln@gmail.com>
- *  Copyright (c) 2023-2025 Trial97 <alexandru.tripon97@gmail.com>
+ *  Copyright (c) 2025 Trial97 <alexandru.tripon97@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,23 +18,13 @@
 
 #pragma once
 
-#include <QStringList>
-#include <QVariant>
-namespace Hashing {
-enum class Algorithm;
-}
+#include "modplatform/helpers/HashUtils.h"
+
 namespace Platform {
 
-enum class Provider { MODRINTH, FLAME };
-
-namespace ProviderUtils {
-const char* name(Provider);
-QString readableName(Provider);
-QStringList hashType(Provider);
-QList<Hashing::Algorithm> hashTypeAlg(Provider);
-QString getMetaURL(Provider provider, QVariant projectID);
-}  // namespace ProviderUtils
+struct Hash {
+    Hashing::Algorithm alg;
+    QString hash;
+};
 
 }  // namespace Platform
-
-Q_DECLARE_METATYPE(Platform::Provider)

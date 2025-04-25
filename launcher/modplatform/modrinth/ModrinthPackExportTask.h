@@ -61,7 +61,6 @@ class ModrinthPackExportTask : public Task {
     const QString output;
     const MMCZip::FilterFileFunction filter;
 
-    ModrinthAPI api;
     QFileInfoList files;
     QMap<QString, QString> pendingHashes;
     QMap<QString, ResolvedFile> resolvedFiles;
@@ -70,7 +69,7 @@ class ModrinthPackExportTask : public Task {
     void collectFiles();
     void collectHashes();
     void makeApiRequest();
-    void parseApiResponse(std::shared_ptr<QByteArray> response);
+    void parseApiResponse(std::shared_ptr<API::MatchHashesResponse> response);
     void buildZip();
 
     QByteArray generateIndex();

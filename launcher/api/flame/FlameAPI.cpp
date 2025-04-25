@@ -117,29 +117,17 @@ std::unique_ptr<HttpRequest> FlameAPI::prepareGetProjectRequest(QString const& i
 
 bool FlameAPI::handleGetProjectResponse(const QJsonDocument& doc, Platform::Project& rsp) const
 {
-    try {
-        auto obj = Json::requireObject(doc);
-        obj = Json::requireObject(obj, "data");
-        FlameMod::loadIndexedPack(rsp, obj);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " resource info: " << e.cause();
-        return false;
-    }
+    auto obj = Json::requireObject(doc);
+    obj = Json::requireObject(obj, "data");
+    FlameMod::loadIndexedPack(rsp, obj);
     return true;
 }
 
 bool FlameAPI::handleGetDescriptionResponse(const QJsonDocument& doc, Platform::Project& rsp) const
 {
-    try {
-        rsp.extraData.body = Json::ensureString(doc.object(), "data");
-        rsp.extraDataLoaded = !rsp.extraData.issuesUrl.isEmpty() || !rsp.extraData.sourceUrl.isEmpty() ||
-                              !rsp.extraData.wikiUrl.isEmpty() || !rsp.extraData.body.isEmpty();
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " resource description: " << e.cause();
-        return false;
-    }
+    rsp.extraData.body = Json::ensureString(doc.object(), "data");
+    rsp.extraDataLoaded = !rsp.extraData.issuesUrl.isEmpty() || !rsp.extraData.sourceUrl.isEmpty() || !rsp.extraData.wikiUrl.isEmpty() ||
+                          !rsp.extraData.body.isEmpty();
     return true;
 }
 std::unique_ptr<HttpRequest> FlameAPI::prepareGetDescriptionRequest(QString const& id) const
@@ -170,30 +158,24 @@ std::unique_ptr<HttpRequest> FlameAPI::prepareGetDependencyRequest(DependencySea
 
 bool FlameAPI::handleGetVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const
 {
-    try {
-        auto arr = Json::ensureArray(doc.object(), "data");
+    auto arr = Json::ensureArray(doc.object(), "data");
 
-        for (auto versionIter : arr) {
-            auto obj = versionIter.toObject();
+    for (auto versionIter : arr) {
+        auto obj = versionIter.toObject();
 
-            auto file = FlameUtils::loadIndexedPackVersion(obj, rsp.resourceType);
-            if (!file.projectId.isValid())
-                file.projectId = rsp.projectId;
+        auto file = FlameUtils::loadIndexedPackVersion(obj, rsp.resourceType);
+        if (!file.projectId.isValid())
+            file.projectId = rsp.projectId;
 
-            if (file.fileId.isValid() && !file.downloadUrl.isEmpty())  // Heuristic to check if the returned value is valid
-                rsp.versions.append(file);
-        }
-
-        auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
-            // dates are in RFC 3339 format
-            return a.date > b.date;
-        };
-        std::sort(rsp.versions.begin(), rsp.versions.end(), orderSortPredicate);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
-        return false;
+        if (file.fileId.isValid() && !file.downloadUrl.isEmpty())  // Heuristic to check if the returned value is valid
+            rsp.versions.append(file);
     }
+
+    auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
+        // dates are in RFC 3339 format
+        return a.date > b.date;
+    };
+    std::sort(rsp.versions.begin(), rsp.versions.end(), orderSortPredicate);
     return true;
 }
 
@@ -204,16 +186,9 @@ bool FlameAPI::handleGetDependencyResponse(const QJsonDocument& doc, VersionSear
 
 std::unique_ptr<HttpRequest> FlameAPI::prepareGetProjectsRequest(QStringList const& ids) const
 {
-    QJsonObject body_obj;
-    QJsonArray addons_arr;
-    for (auto& addonId : ids) {
-        addons_arr.append(addonId);
-    }
-
-    body_obj["modIds"] = addons_arr;
-
-    QJsonDocument body(body_obj);
-    return HttpRequest::POST(QString("https://api.curseforge.com/v1/mods"), body.toJson());
+    QJsonObject body;
+    Json::writeStringList(body, "modIds", ids);
+    return HttpRequest::POST(QString("https://api.curseforge.com/v1/mods"), QJsonDocument(body).toJson());
 }
 
 bool FlameAPI::handleGetProjectsResponse(const QJsonDocument& doc, QList<Platform::Project::Ptr>& rsp) const
@@ -228,22 +203,47 @@ std::unique_ptr<HttpRequest> FlameAPI::prepareGetCategoriesRequest(Platform::Res
 
 bool FlameAPI::handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const
 {
-    try {
-        auto obj = Json::requireObject(doc);
-        auto arr = Json::requireArray(obj, "data");
+    auto obj = Json::requireObject(doc);
+    auto arr = Json::requireArray(obj, "data");
 
-        for (auto val : arr) {
-            auto cat = Json::requireObject(val);
-            auto id = Json::requireInteger(cat, "id");
-            auto name = Json::requireString(cat, "name");
-            rsp.categories.push_back({ name, QString::number(id) });
+    for (auto val : arr) {
+        auto cat = Json::requireObject(val);
+        auto id = Json::requireInteger(cat, "id");
+        auto name = Json::requireString(cat, "name");
+        rsp.categories.push_back({ name, QString::number(id) });
+    }
+    return true;
+}
+
+std::unique_ptr<HttpRequest> FlameAPI::prepareMatchHashesRequest(MatchHashesArgs const& args) const
+{
+    QJsonObject body;
+    Json::writeStringList(body, "fingerprints", args.hashes);
+    return HttpRequest::POST(QString("https://api.curseforge.com/v1/fingerprints"), QJsonDocument(body).toJson());
+}
+
+bool FlameAPI::handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesResponse& rsp) const
+{
+    auto doc_obj = Json::requireObject(doc);
+    auto data_obj = Json::requireObject(doc_obj, "data");
+    auto data_arr = Json::requireArray(data_obj, "exactMatches");
+
+    if (data_arr.isEmpty()) {
+        qWarning() << "No matches found for fingerprint search!";
+        return true;
+    }
+
+    for (auto match : data_arr) {
+        auto match_obj = Json::ensureObject(match, {});
+        auto file_obj = Json::ensureObject(match_obj, "file", {});
+
+        if (match_obj.isEmpty() || file_obj.isEmpty()) {
+            qWarning() << "Fingerprint match is empty!";
+            continue;
         }
 
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << doc;
-        return false;
+        auto fingerprint = QString::number(Json::ensureVariant(file_obj, "fileFingerprint").toUInt());
+        rsp.insert(fingerprint, FlameMod::loadIndexedPackVersion(file_obj));
     }
     return true;
 }

@@ -488,7 +488,7 @@ void FlameCreationTask::idResolverSucceeded(QEventLoop& loop)
             BlockedMod blocked_mod;
             blocked_mod.name = result.version.fileName;
             blocked_mod.websiteUrl = QString("%1/download/%2").arg(result.pack->websiteUrl, QString::number(result.fileId));
-            blocked_mod.hash = result.version.hash;
+            blocked_mod.hash = result.version.hashes.first().hash;
             blocked_mod.matched = false;
             blocked_mod.localPath = "";
             blocked_mod.targetFolder = result.targetFolder;

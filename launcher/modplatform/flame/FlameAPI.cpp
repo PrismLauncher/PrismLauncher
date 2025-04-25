@@ -16,26 +16,6 @@
 #include "net/ApiUpload.h"
 #include "net/NetJob.h"
 
-Task::Ptr FlameAPI::matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response)
-{
-    auto netJob = makeShared<NetJob>(QString("Flame::MatchFingerprints"), APPLICATION->network());
-
-    QJsonObject body_obj;
-    QJsonArray fingerprints_arr;
-    for (auto& fp : fingerprints) {
-        fingerprints_arr.append(QString("%1").arg(fp));
-    }
-
-    body_obj["fingerprints"] = fingerprints_arr;
-
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
-
-    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString("https://api.curseforge.com/v1/fingerprints"), response, body_raw));
-
-    return netJob;
-}
-
 QString FlameAPI::getModFileChangelog(int modId, int fileId)
 {
     QEventLoop lock;

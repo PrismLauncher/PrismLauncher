@@ -22,6 +22,7 @@
 #include <QString>
 #include <QVariant>
 #include "api/structures/Dependency.h"
+#include "api/structures/Hash.h"
 #include "api/structures/ModLoader.h"
 #include "api/structures/Side.h"
 #include "api/structures/VersionType.h"
@@ -39,8 +40,7 @@ struct Version {
     QString date;
     QString fileName;
     ModLoaders loaders = {};
-    QString hash_type;
-    QString hash;
+    QList<Hash> hashes;
     bool is_preferred = true;
     QString changelog;
     QList<Dependency> dependencies;
@@ -48,5 +48,10 @@ struct Version {
 
     // For internal use, not provided by APIs
     bool is_currently_selected = false;
+    // addtional infromation that may not be on all providers
+    // CurseForge
+    bool isAvailable = false;
+    // Modrinth
+    qint64 size;
 };
 }  // namespace Platform

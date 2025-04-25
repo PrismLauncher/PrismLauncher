@@ -504,6 +504,7 @@ set(API_SOURCES
     api/structures/Version.h
     api/structures/Project.h
     api/structures/Category.h
+    api/structures/Hash.h
 
 	api/structures/Arguments.h
 	api/structures/SortingMethod.h

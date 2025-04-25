@@ -56,22 +56,23 @@ ResourceDownloadTask::ResourceDownloadTask(Platform::Project::Ptr pack,
     }
 
     auto action = Net::ApiDownload::makeFile(m_pack_version.downloadUrl, dir.absoluteFilePath(getFilename()));
-    if (!m_pack_version.hash_type.isEmpty() && !m_pack_version.hash.isEmpty()) {
-        switch (Hashing::algorithmFromString(m_pack_version.hash_type)) {
+    if (!m_pack_version.hashes.isEmpty()) {
+        auto hash = m_pack_version.hashes.first();
+        switch (hash.alg) {
             case Hashing::Algorithm::Md4:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Md4, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Md4, hash.hash));
                 break;
             case Hashing::Algorithm::Md5:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Md5, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Md5, hash.hash));
                 break;
             case Hashing::Algorithm::Sha1:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha1, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha1, hash.hash));
                 break;
             case Hashing::Algorithm::Sha256:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha256, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha256, hash.hash));
                 break;
             case Hashing::Algorithm::Sha512:
-                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha512, m_pack_version.hash));
+                action->addValidator(new Net::ChecksumValidator(QCryptographicHash::Algorithm::Sha512, hash.hash));
                 break;
             default:
                 break;

@@ -23,9 +23,11 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QtConcurrentRun>
+#include "Application.h"
 #include "BuildConfig.h"
 #include "Json.h"
 #include "MMCZip.h"
+#include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
@@ -155,8 +157,13 @@ void ModrinthPackExportTask::makeApiRequest()
         buildZip();
     else {
         setStatus(tr("Finding versions for hashes..."));
-        auto response = std::make_shared<QByteArray>();
-        task = api.currentVersions(pendingHashes.values(), "sha512", response);
+        auto response = std::make_shared<API::MatchHashesResponse>();
+        auto ver_task = API::ProviderAPI::get(Platform::Provider::MODRINTH)
+                            ->makeMatchHashesRequest({ pendingHashes.values(), Hashing::Algorithm::Sha512 }, response);
+        auto netJob = makeShared<NetJob>(QString("Modrinth::GetHashes"), APPLICATION->network());
+        netJob->addNetAction(ver_task);
+        netJob->setAskRetry(false);
+        task = netJob;
         connect(task.get(), &Task::succeeded, [this, response]() { parseApiResponse(response); });
         connect(task.get(), &Task::failed, this, &ModrinthPackExportTask::emitFailed);
         connect(task.get(), &Task::aborted, this, &ModrinthPackExportTask::emitAborted);
@@ -164,34 +171,29 @@ void ModrinthPackExportTask::makeApiRequest()
     }
 }
 
-void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<QByteArray> response)
+void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<API::MatchHashesResponse> response)
 {
     task = nullptr;
 
-    try {
-        const QJsonDocument doc = Json::requireDocument(*response);
+    QMapIterator<QString, QString> iterator(pendingHashes);
+    while (iterator.hasNext()) {
+        iterator.next();
 
-        QMapIterator<QString, QString> iterator(pendingHashes);
-        while (iterator.hasNext()) {
-            iterator.next();
-
-            const QJsonObject obj = doc[iterator.value()].toObject();
-            if (obj.isEmpty())
-                continue;
-
-            const QJsonArray files_array = obj["files"].toArray();
-            if (auto fileIter = std::find_if(files_array.begin(), files_array.end(),
-                                             [&iterator](const QJsonValue& file) { return file["hashes"]["sha512"] == iterator.value(); });
-                fileIter != files_array.end()) {
-                // map the file to the url
-                resolvedFiles[iterator.key()] =
-                    ResolvedFile{ fileIter->toObject()["hashes"].toObject()["sha1"].toString(), iterator.value(),
-                                  fileIter->toObject()["url"].toString(), fileIter->toObject()["size"].toInt() };
+        auto hash = iterator.value();
+        if (!response->contains(hash)) {
+            continue;
+        }
+        auto file = response->value(hash);
+        QString sha1;
+        for (auto hash : file.hashes) {
+            if (hash.alg == Hashing::Algorithm::Sha1) {
+                sha1 = hash.hash;
+                break;
             }
         }
-    } catch (const Json::JsonException& e) {
-        emitFailed(tr("Failed to parse versions response: %1").arg(e.what()));
-        return;
+
+        // map the file to the url
+        resolvedFiles[iterator.key()] = ResolvedFile{ sha1, hash, file.downloadUrl, file.size, file.side };
     }
     pendingHashes.clear();
     buildZip();

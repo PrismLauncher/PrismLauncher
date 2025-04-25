@@ -2,7 +2,9 @@
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "api/structures/Hash.h"
 #include "api/structures/Project.h"
+#include "api/structures/Provider.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -81,14 +83,14 @@ void FlameMod::loadURLs(Platform::Project& pack, QJsonObject& obj)
         pack.extraData.wikiUrl.chop(1);
 }
 
-static QString enumToString(int hash_algorithm)
+static Hashing::Algorithm enumToString(int hash_algorithm)
 {
     switch (hash_algorithm) {
         default:
         case 1:
-            return "sha1";
+            return Hashing::Algorithm::Sha1;
         case 2:
-            return "md5";
+            return Hashing::Algorithm::Md5;
     }
 }
 
@@ -131,6 +133,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     file.downloadUrl = Json::ensureString(obj, "downloadUrl");
     file.fileName = Json::requireString(obj, "fileName");
     file.fileName = FS::RemoveInvalidPathChars(file.fileName);
+    file.isAvailable = Json::ensureBoolean(obj, "isAvailable", false, "isAvailable");
 
     Platform::VersionType ver_type;
     switch (Json::requireInteger(obj, "releaseType")) {
@@ -149,14 +152,12 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     file.version_type = ver_type;
 
     auto hash_list = Json::ensureArray(obj, "hashes");
+    auto hash_types = Platform::ProviderUtils::hashTypeAlg(Platform::Provider::FLAME);
     for (auto h : hash_list) {
         auto hash_entry = Json::ensureObject(h);
-        auto hash_types = Platform::ProviderUtils::hashType(Platform::Provider::FLAME);
         auto hash_algo = enumToString(Json::ensureInteger(hash_entry, "algo", 1, "algorithm"));
         if (hash_types.contains(hash_algo)) {
-            file.hash = Json::requireString(hash_entry, "value");
-            file.hash_type = hash_algo;
-            break;
+            file.hashes << Platform::Hash{ hash_algo, Json::requireString(hash_entry, "value") };
         }
     }
 

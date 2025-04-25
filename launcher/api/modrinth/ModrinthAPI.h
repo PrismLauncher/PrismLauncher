@@ -61,7 +61,7 @@ class ModrinthAPI : public ProviderAPI {
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetVersionsRequest(VersionSearchArgs const& args) const;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetDependencyRequest(DependencySearchArgs const& args) const;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetDescriptionRequest(QString const&) const { return nullptr; }
-    [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareMatchHashesRequest(MatchHashesArgs const& args) const { return nullptr; }
+    [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareMatchHashesRequest(MatchHashesArgs const& args) const;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetCategoriesRequest(Platform::ResourceType type) const;
 
     // Parsers
@@ -71,7 +71,7 @@ class ModrinthAPI : public ProviderAPI {
     [[nodiscard]] virtual bool handleGetVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const;
     [[nodiscard]] virtual bool handleGetDependencyResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const;
     [[nodiscard]] virtual bool handleGetDescriptionResponse(const QJsonDocument&, Platform::Project&) const { return false; }
-    [[nodiscard]] virtual bool handleMatchHashesResponse(const QJsonDocument& doc, QList<Platform::Version>& rsp) const { return false; }
+    [[nodiscard]] virtual bool handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesResponse& rsp) const;
     [[nodiscard]] virtual bool handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const;
 };
 

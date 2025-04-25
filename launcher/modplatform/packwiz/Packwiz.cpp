@@ -31,6 +31,7 @@
 #include "api/structures/ModLoader.h"
 #include "api/structures/Project.h"
 #include "api/structures/VersionType.h"
+#include "modplatform/helpers/HashUtils.h"
 
 #include <toml++/toml.h>
 
@@ -106,8 +107,11 @@ auto V1::createModFormat([[maybe_unused]] const QDir& index_dir, Platform::Proje
         mod.url = mod_version.downloadUrl;
     }
 
-    mod.hash_format = mod_version.hash_type;
-    mod.hash = mod_version.hash;
+    if (!mod_version.hashes.isEmpty()) {
+        auto hash = mod_version.hashes.first();
+        mod.hash_format = Hashing::algorithmToString(hash.alg);
+        mod.hash = hash.hash;
+    }
 
     mod.provider = mod_pack.provider;
     mod.file_id = mod_version.fileId;

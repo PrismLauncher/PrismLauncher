@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/structures/Provider.h"
 #include "modplatform/CheckUpdateTask.h"
 
 class ModrinthCheckUpdate : public CheckUpdateTask {
@@ -11,7 +12,7 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
                         QList<Platform::ModLoader> loadersList,
                         std::shared_ptr<ResourceFolderModel> resourceModel)
         : CheckUpdateTask(resources, mcVersions, std::move(loadersList), std::move(resourceModel))
-        , m_hash_type(Platform::ProviderUtils::hashType(Platform::Provider::MODRINTH).first())
+        , m_hash_type(Platform::ProviderUtils::hashTypeAlg(Platform::Provider::MODRINTH).first())
     {}
 
    public slots:
@@ -26,6 +27,6 @@ class ModrinthCheckUpdate : public CheckUpdateTask {
    private:
     Task::Ptr m_job = nullptr;
     QHash<QString, Resource*> m_mappings;
-    QString m_hash_type;
+    Hashing::Algorithm m_hash_type;
     int m_loader_idx = 0;
 };

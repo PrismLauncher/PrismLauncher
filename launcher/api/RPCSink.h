@@ -50,6 +50,7 @@ class RPCSink : public Net::ByteArraySink {
         } catch (Json::JsonException& e) {
             qCritical() << "Failed to parse response request.";
             qCritical() << e.what();
+            qDebug() << e.cause();
             qDebug() << doc;
             return Task::State::Failed;
         }

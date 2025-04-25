@@ -234,10 +234,11 @@ void ResourceUpdateDialog::checkCandidates()
                     changelog = api.getModFileChangelog(dep->version.projectId.toInt(), dep->version.fileId.toInt());
                 auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resource_model);
                 auto extraInfo = dependencyExtraInfo.value(dep->version.projectId.toString());
-                CheckUpdateTask::Update updatable = {
-                    dep->pack->name, dep->version.hash,   tr("Not installed"), dep->version.version,      dep->version.version_type,
-                    changelog,       dep->pack->provider, download_task,       !extraInfo.maybe_installed
-                };
+                CheckUpdateTask::Update updatable = { dep->pack->name,           dep->version.hashes.first().hash,
+                                                      tr("Not installed"),       dep->version.version,
+                                                      dep->version.version_type, changelog,
+                                                      dep->pack->provider,       download_task,
+                                                      !extraInfo.maybe_installed };
 
                 appendResource(updatable, extraInfo.required_by);
                 m_tasks.insert(updatable.name, updatable.download);

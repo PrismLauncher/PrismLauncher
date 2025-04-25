@@ -70,8 +70,6 @@ class FlamePackExportTask : public Task {
         bool isMod;
     };
 
-    FlameAPI api;
-
     QFileInfoList files;
     QMap<QString, HashInfo> pendingHashes{};
     QMap<QString, ResolvedFile> resolvedFiles{};

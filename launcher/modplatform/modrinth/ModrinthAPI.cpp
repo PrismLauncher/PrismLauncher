@@ -13,23 +13,6 @@
 #include "net/NetJob.h"
 #include "net/Upload.h"
 
-NetJob::Ptr ModrinthAPI::currentVersions(const QStringList& hashes, QString hash_format, std::shared_ptr<QByteArray> response)
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetCurrentVersions"), APPLICATION->network());
-
-    QJsonObject body_obj;
-
-    Json::writeStringList(body_obj, "hashes", hashes);
-    Json::writeString(body_obj, "algorithm", hash_format);
-
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
-
-    netJob->addNetAction(Net::ApiUpload::makeByteArray(QString(BuildConfig.MODRINTH_PROD_URL + "/version_files"), response, body_raw));
-    netJob->setAskRetry(false);
-    return netJob;
-}
-
 QStringList getModLoaderStrings2(const Platform::ModLoaders types)
 {
     QStringList l;
@@ -52,36 +35,6 @@ QString mapMCVersionToModrinth(Version v)
     }
     verStr.replace(" ", "-");
     return verStr;
-}
-
-Task::Ptr ModrinthAPI::latestVersion(QString hash,
-                                     QString hash_format,
-                                     std::optional<std::list<Version>> mcVersions,
-                                     std::optional<Platform::ModLoaders> loaders,
-                                     std::shared_ptr<QByteArray> response)
-{
-    auto netJob = makeShared<NetJob>(QString("Modrinth::GetLatestVersion"), APPLICATION->network());
-
-    QJsonObject body_obj;
-
-    if (loaders.has_value())
-        Json::writeStringList(body_obj, "loaders", getModLoaderStrings2(loaders.value()));
-
-    if (mcVersions.has_value()) {
-        QStringList game_versions;
-        for (auto& ver : mcVersions.value()) {
-            game_versions.append(mapMCVersionToModrinth(ver));
-        }
-        Json::writeStringList(body_obj, "game_versions", game_versions);
-    }
-
-    QJsonDocument body(body_obj);
-    auto body_raw = body.toJson();
-
-    netJob->addNetAction(Net::ApiUpload::makeByteArray(
-        QString(BuildConfig.MODRINTH_PROD_URL + "/version_file/%1/update?algorithm=%2").arg(hash, hash_format), response, body_raw));
-
-    return netJob;
 }
 
 Task::Ptr ModrinthAPI::latestVersions(const QStringList& hashes,

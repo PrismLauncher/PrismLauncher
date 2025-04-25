@@ -33,7 +33,6 @@
 #include "tasks/Task.h"
 
 static const FlameAPI flameAPI;
-static ModrinthAPI modrinthAPI;
 
 Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess) : m_manifest(toProcess) {}
 
@@ -116,8 +115,12 @@ void Flame::FileResolvingTask::netJobFinished()
             Q_ASSERT(m_manifest.files.contains(fileid));
             m_manifest.files[fileid].version = version;
             auto url = QUrl(version.downloadUrl, QUrl::TolerantMode);
-            if (!url.isValid() && "sha1" == version.hash_type && !version.hash.isEmpty()) {
-                hashes.push_back(version.hash);
+            if (!url.isValid()) {
+                for (auto hash : version.hashes) {
+                    if (hash.alg == Hashing::Algorithm::Sha1 && !hash.hash.isEmpty()) {
+                        hashes.push_back(hash.hash);
+                    }
+                }
             }
         } catch (Json::JsonException& e) {
             qCritical() << "Non-JSON data returned from the CF API";
@@ -132,50 +135,38 @@ void Flame::FileResolvingTask::netJobFinished()
         getFlameProjects();
         return;
     }
-    m_result2.reset(new QByteArray());
-    m_task = modrinthAPI.currentVersions(hashes, "sha1", m_result2);
-    (dynamic_cast<NetJob*>(m_task.get()))->setAskRetry(false);
+
+    auto response = std::make_shared<API::MatchHashesResponse>();
+    auto ver_task =
+        API::ProviderAPI::get(Platform::Provider::MODRINTH)->makeMatchHashesRequest({ hashes, Hashing::Algorithm::Sha1 }, response);
+    auto netJob = makeShared<NetJob>(QString("Modrinth::GetHashes"), APPLICATION->network());
+    netJob->addNetAction(ver_task);
+
+    netJob->setAskRetry(false);
+    m_task = netJob;
     auto step_progress = std::make_shared<TaskStepProgress>();
-    connect(m_task.get(), &Task::finished, this, [this, step_progress]() {
+    connect(m_task.get(), &Task::finished, this, [this, step_progress, response]() {
         step_progress->state = TaskStepState::Succeeded;
         stepProgress(*step_progress);
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*m_result2, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Modrinth::CurrentVersions at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *m_result2;
+        for (auto& out : m_manifest.files) {
+            auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
+            if (!url.isValid()) {
+                for (auto hash : out.version.hashes) {
+                    if (hash.alg == Hashing::Algorithm::Sha1 && !hash.hash.isEmpty()) {
+                        if (response->contains(hash.hash)) {
+                            auto file = response->value(hash.hash);
 
-            getFlameProjects();
-            return;
-        }
-
-        try {
-            auto entries = Json::requireObject(doc);
-            for (auto& out : m_manifest.files) {
-                auto url = QUrl(out.version.downloadUrl, QUrl::TolerantMode);
-                if (!url.isValid() && "sha1" == out.version.hash_type && !out.version.hash.isEmpty()) {
-                    try {
-                        auto entry = Json::requireObject(entries, out.version.hash);
-
-                        auto file = Modrinth::loadIndexedPackVersion(entry);
-
-                        // If there's more than one mod loader for this version, we can't know for sure
-                        // which file is relative to each loader, so it's best to not use any one and
-                        // let the user download it manually.
-                        if (!file.loaders || Platform::ModloaderUtils::hasSingleSelected(file.loaders)) {
-                            out.version.downloadUrl = file.downloadUrl;
-                            qDebug() << "Found alternative on modrinth " << out.version.fileName;
+                            // If there's more than one mod loader for this version, we can't know for sure
+                            // which file is relative to each loader, so it's best to not use any one and
+                            // let the user download it manually.
+                            if (!file.loaders || Platform::ModloaderUtils::hasSingleSelected(file.loaders)) {
+                                out.version.downloadUrl = file.downloadUrl;
+                                qDebug() << "Found alternative on modrinth " << out.version.fileName;
+                            }
                         }
-                    } catch (Json::JsonException& e) {
-                        qDebug() << e.cause();
-                        qDebug() << entries;
                     }
                 }
             }
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
         }
         getFlameProjects();
     });

@@ -31,6 +31,7 @@
 #include "Application.h"
 #include "Json.h"
 #include "MMCZip.h"
+#include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/ModFolderModel.h"
@@ -184,65 +185,39 @@ void FlamePackExportTask::makeApiRequest()
 
     setStatus(tr("Finding versions for hashes..."));
     setProgress(2, 5);
-    auto response = std::make_shared<QByteArray>();
+    auto response = std::make_shared<API::MatchHashesResponse>();
 
-    QList<uint> fingerprints;
-    for (auto& murmur : pendingHashes.keys()) {
-        fingerprints.push_back(murmur.toUInt());
-    }
+    QStringList fingerprints = pendingHashes.keys();
 
-    task.reset(api.matchFingerprints(fingerprints, response));
+    auto hashTask = API::ProviderAPI::get(Platform::Provider::FLAME)->makeMatchHashesRequest({ fingerprints }, response);
+
+    auto ver_task = makeShared<NetJob>(QString("Flame::GetHashes"), APPLICATION->network());
+    ver_task->addNetAction(hashTask);
+    ver_task->setAskRetry(false);
+
+    task.reset(ver_task);
 
     connect(task.get(), &Task::succeeded, this, [this, response] {
-        QJsonParseError parseError{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parseError);
-        if (parseError.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from CurseForge::CurrentVersions at " << parseError.offset
-                       << " reason: " << parseError.errorString();
-            qWarning() << *response;
+        if (response->isEmpty()) {
+            qWarning() << "No matches found for fingerprint search!";
 
-            emitFailed(parseError.errorString());
+            getProjectsInfo();
             return;
         }
-
-        try {
-            auto docObj = Json::requireObject(doc);
-            auto dataObj = Json::requireObject(docObj, "data");
-            auto dataArr = Json::requireArray(dataObj, "exactMatches");
-
-            if (dataArr.isEmpty()) {
-                qWarning() << "No matches found for fingerprint search!";
-
-                getProjectsInfo();
-                return;
-            }
-            for (auto match : dataArr) {
-                auto matchObj = Json::ensureObject(match, {});
-                auto fileObj = Json::ensureObject(matchObj, "file", {});
-
-                if (matchObj.isEmpty() || fileObj.isEmpty()) {
-                    qWarning() << "Fingerprint match is empty!";
-
-                    return;
-                }
-
-                auto fingerprint = QString::number(Json::ensureVariant(fileObj, "fileFingerprint").toUInt());
-                auto mod = pendingHashes.find(fingerprint);
-                if (mod == pendingHashes.end()) {
-                    qWarning() << "Invalid fingerprint from the API response.";
-                    continue;
-                }
-
-                setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
-                if (Json::ensureBoolean(fileObj, "isAvailable", false, "isAvailable"))
-                    resolvedFiles.insert(mod->path, { Json::requireInteger(fileObj, "modId"), Json::requireInteger(fileObj, "id"),
-                                                      mod->enabled, mod->isMod });
+        for (auto fingerprint : response->keys()) {
+            auto mod = pendingHashes.find(fingerprint);
+            if (mod == pendingHashes.end()) {
+                qWarning() << "Invalid fingerprint from the API response.";
+                continue;
             }
 
-        } catch (Json::JsonException& e) {
-            qDebug() << e.cause();
-            qDebug() << doc;
+            setStatus(tr("Parsing API response from CurseForge for '%1'...").arg(mod->name));
+
+            auto file = response->value(fingerprint);
+            if (file.isAvailable)
+                resolvedFiles.insert(mod->path, { file.projectId.toInt(), file.fileId.toInt(), mod->enabled, mod->isMod });
         }
+
         pendingHashes.clear();
         getProjectsInfo();
     });

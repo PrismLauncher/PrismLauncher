@@ -40,6 +40,7 @@
 #include "Json.h"
 #include "api/modrinth/ModrinthUtils.h"
 #include "api/structures/HttpRequest.h"
+#include "modplatform/helpers/HashUtils.h"
 #include "modplatform/modrinth/ModrinthPackIndex.h"
 
 namespace API {
@@ -93,15 +94,9 @@ std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetProjectRequest(QString const
 
 bool ModrinthAPI::handleGetProjectResponse(const QJsonDocument& doc, Platform::Project& rsp) const
 {
-    try {
-        auto obj = Json::requireObject(doc);
-        Modrinth::loadIndexedPack(rsp, obj);
-        Modrinth::loadExtraPackData(rsp, obj);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << Platform::ProviderUtils::name(provider()) << " resource info: " << e.cause();
-        return false;
-    }
+    auto obj = Json::requireObject(doc);
+    Modrinth::loadIndexedPack(rsp, obj);
+    Modrinth::loadExtraPackData(rsp, obj);
     return true;
 }
 
@@ -128,30 +123,24 @@ std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetDependencyRequest(Dependency
 
 bool ModrinthAPI::handleGetVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const
 {
-    try {
-        auto arr = doc.array();
+    auto arr = doc.array();
 
-        for (auto versionIter : arr) {
-            auto obj = versionIter.toObject();
+    for (auto versionIter : arr) {
+        auto obj = versionIter.toObject();
 
-            auto file = Modrinth::loadIndexedPackVersion(obj);
-            if (!file.projectId.isValid())
-                file.projectId = rsp.projectId;
+        auto file = Modrinth::loadIndexedPackVersion(obj);
+        if (!file.projectId.isValid())
+            file.projectId = rsp.projectId;
 
-            if (file.fileId.isValid() && !file.downloadUrl.isEmpty())  // Heuristic to check if the returned value is valid
-                rsp.versions.append(file);
-        }
-
-        auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
-            // dates are in RFC 3339 format
-            return a.date > b.date;
-        };
-        std::sort(rsp.versions.begin(), rsp.versions.end(), orderSortPredicate);
-    } catch (const JSONValidationError& e) {
-        qDebug() << doc;
-        qWarning() << "Error while reading " << debugName() << " resource version: " << e.cause();
-        return false;
+        if (file.fileId.isValid() && !file.downloadUrl.isEmpty())  // Heuristic to check if the returned value is valid
+            rsp.versions.append(file);
     }
+
+    auto orderSortPredicate = [](const Platform::Version& a, const Platform::Version& b) -> bool {
+        // dates are in RFC 3339 format
+        return a.date > b.date;
+    };
+    std::sort(rsp.versions.begin(), rsp.versions.end(), orderSortPredicate);
     return true;
 }
 
@@ -190,21 +179,33 @@ std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetCategoriesRequest(Platform::
 
 bool ModrinthAPI::handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const
 {
-    try {
-        auto arr = Json::requireArray(doc);
+    auto arr = Json::requireArray(doc);
 
-        for (auto val : arr) {
-            auto cat = Json::requireObject(val);
-            auto name = Json::requireString(cat, "name");
-            if (Json::ensureString(cat, "project_type", "") == ModrinthUtils::resourceTypeParameter(rsp.resourceType))
-                rsp.categories.push_back({ name, name });
-        }
+    for (auto val : arr) {
+        auto cat = Json::requireObject(val);
+        auto name = Json::requireString(cat, "name");
+        if (Json::ensureString(cat, "project_type", "") == ModrinthUtils::resourceTypeParameter(rsp.resourceType))
+            rsp.categories.push_back({ name, name });
+    }
+    return true;
+}
 
-    } catch (Json::JsonException& e) {
-        qCritical() << "Failed to parse response from a version request.";
-        qCritical() << e.what();
-        qDebug() << doc;
-        return false;
+std::unique_ptr<HttpRequest> ModrinthAPI::prepareMatchHashesRequest(MatchHashesArgs const& args) const
+{
+    QJsonObject body;
+
+    Json::writeStringList(body, "hashes", args.hashes);
+    Json::writeString(body, "algorithm", Hashing::algorithmToString(args.alg));
+
+    return HttpRequest::POST(BuildConfig.MODRINTH_PROD_URL + "/version_files", QJsonDocument(body).toJson());
+}
+
+bool ModrinthAPI::handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesResponse& rsp) const
+{
+    auto entries = Json::requireObject(doc);
+    for (auto& hash : entries.keys()) {
+        auto entry = Json::requireObject(entries, hash);
+        rsp.insert(hash, Modrinth::loadIndexedPackVersion(entry));
     }
     return true;
 }

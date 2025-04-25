@@ -20,6 +20,7 @@
 #include "api/structures/Provider.h"
 
 #include <QVariant>
+#include "modplatform/helpers/HashUtils.h"
 
 namespace Platform {
 
@@ -54,6 +55,18 @@ QStringList hashType(Provider p)
         case Provider::FLAME:
             // Try newer formats first, fall back to old format
             return { "sha1", "md5", "murmur2" };
+    }
+    return {};
+}
+
+QList<Hashing::Algorithm> hashTypeAlg(Provider p)
+{
+    switch (p) {
+        case Provider::MODRINTH:
+            return { Hashing::Algorithm::Sha512, Hashing::Algorithm::Sha1 };
+        case Provider::FLAME:
+            // Try newer formats first, fall back to old format
+            return { Hashing::Algorithm::Sha1, Hashing::Algorithm::Md5, Hashing::Algorithm::Murmur2 };
     }
     return {};
 }

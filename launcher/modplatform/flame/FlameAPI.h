@@ -6,7 +6,6 @@
 
 #include <QList>
 #include <memory>
-#include "api/structures/Category.h"
 #include "api/structures/ModLoader.h"
 #include "api/structures/Provider.h"
 #include "modplatform/ResourceAPI.h"
@@ -20,7 +19,6 @@ class FlameAPI : public ResourceAPI {
                                                       QList<Platform::ModLoader> instanceLoaders,
                                                       Platform::ModLoaders fallback);
 
-    Task::Ptr matchFingerprints(const QList<uint>& fingerprints, std::shared_ptr<QByteArray> response);
     NetJob::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
     Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
 

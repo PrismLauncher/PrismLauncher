@@ -39,6 +39,7 @@
 
 #include <QByteArray>
 #include <QDebug>
+#include <QHash>
 #include <QList>
 #include <QString>
 #include <functional>
@@ -46,7 +47,6 @@
 
 #include "api/RPCSink.h"
 #include "api/structures/Arguments.h"
-#include "api/structures/Category.h"
 #include "api/structures/HttpRequest.h"
 #include "api/structures/Project.h"
 #include "api/structures/Provider.h"
@@ -105,7 +105,7 @@ class ProviderAPI {
     [[nodiscard]] virtual bool handleGetVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const = 0;
     [[nodiscard]] virtual bool handleGetDependencyResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const = 0;
     [[nodiscard]] virtual bool handleGetDescriptionResponse(const QJsonDocument& doc, Platform::Project& rsp) const = 0;
-    [[nodiscard]] virtual bool handleMatchHashesResponse(const QJsonDocument& doc, QList<Platform::Version>& rsp) const = 0;
+    [[nodiscard]] virtual bool handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesResponse& rsp) const = 0;
     [[nodiscard]] virtual bool handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const = 0;
 #define DEFINE_REQUEST_HANDLER(FUNC_NAME, ARG_TYPE, RSP_TYPE, PREPARE_REQUEST, PARSE_RESPONSE)                                         \
     [[nodiscard]] inline Net::NetRequest::Ptr make##FUNC_NAME##Request(ARG_TYPE const& args, std::shared_ptr<RSP_TYPE> response) const \
@@ -128,11 +128,7 @@ class ProviderAPI {
                            VersionSearchResponse,
                            prepareGetDependencyRequest,
                            handleGetDependencyResponse)
-    DEFINE_REQUEST_HANDLER(MatchHashes,
-                           API::MatchHashesArgs,
-                           QList<Platform::Version>,
-                           prepareMatchHashesRequest,
-                           handleMatchHashesResponse)
+    DEFINE_REQUEST_HANDLER(MatchHashes, API::MatchHashesArgs, MatchHashesResponse, prepareMatchHashesRequest, handleMatchHashesResponse)
     DEFINE_REQUEST_HANDLER(GetCategories,
                            Platform::ResourceType,
                            CategoriesResponse,

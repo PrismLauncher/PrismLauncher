@@ -17,6 +17,7 @@
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
 
 #include "api/structures/Project.h"
+#include "modplatform/helpers/HashUtils.h"
 #include "net/ApiDownload.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
@@ -95,8 +96,18 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QList<Platfo
         return;
     }
 
-    if (!latest_ver->hash.isEmpty() &&
-        (resource->metadata()->hash != latest_ver->hash || resource->status() == ResourceStatus::NOT_INSTALLED)) {
+    auto installed = resource->status() != ResourceStatus::NOT_INSTALLED;
+    if (installed) {
+        auto hashFormat = Hashing::algorithmFromString(resource->metadata()->hash_format);
+        for (auto hash : latest_ver->hashes) {
+            if (hash.alg == hashFormat && hash.hash != resource->metadata()->hash) {
+                installed = false;
+                break;
+            }
+        }
+    }
+
+    if (!installed) {
         auto old_version = resource->metadata()->version_number;
         if (old_version.isEmpty()) {
             if (resource->status() == ResourceStatus::NOT_INSTALLED)

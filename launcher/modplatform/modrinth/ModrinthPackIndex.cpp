@@ -22,10 +22,13 @@
 #include "ModrinthAPI.h"
 
 #include "Json.h"
+#include "api/structures/Hash.h"
 #include "api/structures/Project.h"
+#include "api/structures/Provider.h"
 #include "api/structures/VersionType.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
+#include "modplatform/helpers/HashUtils.h"
 
 bool shouldDownloadOnSide(QString side)
 {
@@ -130,7 +133,7 @@ QString mapMCVersionFromModrinth(QString v)
     return v;
 }
 
-Platform::Version Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString preferred_hash_type, QString preferred_file_name)
+Platform::Version Modrinth::loadIndexedPackVersion(QJsonObject& obj, Hashing::Algorithm preferred_hash_type, QString preferred_file_name)
 {
     Platform::Version file;
 
@@ -222,19 +225,17 @@ Platform::Version Modrinth::loadIndexedPackVersion(QJsonObject& obj, QString pre
         file.fileName = Json::requireString(parent, "filename");
         file.fileName = FS::RemoveInvalidPathChars(file.fileName);
         file.is_preferred = Json::requireBoolean(parent, "primary") || (files.count() == 1);
+        file.size = Json::ensureInteger("size", 0);
         auto hash_list = Json::requireObject(parent, "hashes");
-
-        if (hash_list.contains(preferred_hash_type)) {
-            file.hash = Json::requireString(hash_list, preferred_hash_type);
-            file.hash_type = preferred_hash_type;
-        } else {
-            auto hash_types = Platform::ProviderUtils::hashType(Platform::Provider::MODRINTH);
-            for (auto& hash_type : hash_types) {
-                if (hash_list.contains(hash_type)) {
-                    file.hash = Json::requireString(hash_list, hash_type);
-                    file.hash_type = hash_type;
-                    break;
-                }
+        auto preferred_hash_type_str = Hashing::algorithmToString(preferred_hash_type);
+        if (hash_list.contains(preferred_hash_type_str)) {
+            file.hashes << Platform::Hash{ preferred_hash_type, Json::requireString(hash_list, preferred_hash_type_str) };
+        }
+        auto hash_types = Platform::ProviderUtils::hashTypeAlg(Platform::Provider::MODRINTH);
+        for (auto& hash_type : hash_types) {
+            auto hashStr = Hashing::algorithmToString(hash_type);
+            if (hash_type != preferred_hash_type && hash_list.contains(hashStr)) {
+                file.hashes << Platform::Hash{ hash_type, Json::requireString(hash_list, hashStr) };
             }
         }
 

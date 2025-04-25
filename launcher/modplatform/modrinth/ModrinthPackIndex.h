@@ -19,12 +19,14 @@
 
 #include "api/structures/Project.h"
 
-#include "BaseInstance.h"
+#include "modplatform/helpers/HashUtils.h"
 
 namespace Modrinth {
 
 void loadIndexedPack(Platform::Project& m, QJsonObject& obj);
 void loadExtraPackData(Platform::Project& m, QJsonObject& obj);
-auto loadIndexedPackVersion(QJsonObject& obj, QString hash_type = "sha512", QString filename_prefer = "") -> Platform::Version;
+Platform::Version loadIndexedPackVersion(QJsonObject& obj,
+                                         Hashing::Algorithm hash_type = Hashing::Algorithm::Sha512,
+                                         QString filename_prefer = "");
 
 }  // namespace Modrinth

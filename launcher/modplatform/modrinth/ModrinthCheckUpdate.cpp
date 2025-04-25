@@ -40,7 +40,7 @@ void ModrinthCheckUpdate::executeTask()
         // Sadly the API can only handle one hash type per call, se we
         // need to generate a new hash if the current one is innadequate
         // (though it will rarely happen, if at all)
-        if (resource->metadata()->hash_format != m_hash_type) {
+        if (Hashing::algorithmFromString(resource->metadata()->hash_format) != m_hash_type) {
             auto hash_task = Hashing::createHasher(resource->fileinfo().absoluteFilePath(), Platform::Provider::MODRINTH);
             connect(hash_task.get(), &Hashing::Hasher::resultsReady, [this, resource](QString hash) { m_mappings.insert(hash, resource); });
             connect(hash_task.get(), &Task::failed, [this] { failed("Failed to generate hash"); });
@@ -62,7 +62,7 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<Platform::ModLoad
 
     auto response = std::make_shared<QByteArray>();
     QStringList hashes = m_mappings.keys();
-    auto job = api.latestVersions(hashes, m_hash_type, m_game_versions, loader, response);
+    auto job = api.latestVersions(hashes, Hashing::algorithmToString(m_hash_type), m_game_versions, loader, response);
 
     connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 
@@ -134,7 +134,16 @@ void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> resp
             pack->slug = resource->metadata()->slug;
             pack->projectId = resource->metadata()->project_id;
             pack->provider = Platform::Provider::MODRINTH;
-            if ((project_ver.hash != hash && project_ver.is_preferred) || (resource->status() == ResourceStatus::NOT_INSTALLED)) {
+            auto installed = resource->status() != ResourceStatus::NOT_INSTALLED;
+            if (installed) {
+                if (project_ver.hashes.empty()) {
+                    installed = false;
+                } else {
+                    auto h = project_ver.hashes.first();
+                    installed = h.hash == hash || !project_ver.is_preferred;
+                }
+            }
+            if (!installed) {
                 auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resource_model);
 
                 QString old_version = resource->metadata()->version_number;
