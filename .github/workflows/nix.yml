@@ -64,10 +64,10 @@ jobs:
       - name: Get merge commit
         if: ${{ github.event_name == 'pull_request_target' }}
         id: merge-commit
-        uses: ./.github/actions/get-merge-commit.yml
+        uses: ./.github/actions/get-merge-commit
         with:
           pull-request-id: ${{ github.event.pull_request.id }}
-    
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
