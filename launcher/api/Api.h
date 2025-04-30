@@ -97,6 +97,7 @@ class ProviderAPI {
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetDescriptionRequest(QString const& id) const = 0;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareMatchHashesRequest(MatchHashesArgs const& args) const = 0;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetCategoriesRequest(Platform::ResourceType type) const = 0;
+    [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetFileChangelogRequest(FileChangelogArgs type) const = 0;
 
     // Parsers
     [[nodiscard]] virtual bool handleSearchResponse(const QJsonDocument& doc, QList<Platform::Project::Ptr>& rsp) const = 0;
@@ -107,6 +108,7 @@ class ProviderAPI {
     [[nodiscard]] virtual bool handleGetDescriptionResponse(const QJsonDocument& doc, Platform::Project& rsp) const = 0;
     [[nodiscard]] virtual bool handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesResponse& rsp) const = 0;
     [[nodiscard]] virtual bool handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const = 0;
+    [[nodiscard]] virtual bool handleGetFileChangelogResponse(const QJsonDocument& doc, QString& rsp) const = 0;
 #define DEFINE_REQUEST_HANDLER(FUNC_NAME, ARG_TYPE, RSP_TYPE, PREPARE_REQUEST, PARSE_RESPONSE)                                         \
     [[nodiscard]] inline Net::NetRequest::Ptr make##FUNC_NAME##Request(ARG_TYPE const& args, std::shared_ptr<RSP_TYPE> response) const \
     {                                                                                                                                  \
@@ -118,22 +120,23 @@ class ProviderAPI {
 
    public:
     // API public interface
-    DEFINE_REQUEST_HANDLER(Search, API::SearchArgs, QList<Platform::Project::Ptr>, prepareSearchRequest, handleSearchResponse)
+    DEFINE_REQUEST_HANDLER(Search, SearchArgs, QList<Platform::Project::Ptr>, prepareSearchRequest, handleSearchResponse)
     DEFINE_REQUEST_HANDLER(GetProject, QString, Platform::Project, prepareGetProjectRequest, handleGetProjectResponse)
     DEFINE_REQUEST_HANDLER(GetProjects, QStringList, QList<Platform::Project::Ptr>, prepareGetProjectsRequest, handleGetProjectsResponse)
     DEFINE_REQUEST_HANDLER(GetDescription, QString, Platform::Project, prepareGetDescriptionRequest, handleGetDescriptionResponse)
-    DEFINE_REQUEST_HANDLER(GetVersions, API::VersionSearchArgs, VersionSearchResponse, prepareGetVersionsRequest, handleGetVersionsResponse)
+    DEFINE_REQUEST_HANDLER(GetVersions, VersionSearchArgs, VersionSearchResponse, prepareGetVersionsRequest, handleGetVersionsResponse)
     DEFINE_REQUEST_HANDLER(GetDependency,
-                           API::DependencySearchArgs,
+                           DependencySearchArgs,
                            VersionSearchResponse,
                            prepareGetDependencyRequest,
                            handleGetDependencyResponse)
-    DEFINE_REQUEST_HANDLER(MatchHashes, API::MatchHashesArgs, MatchHashesResponse, prepareMatchHashesRequest, handleMatchHashesResponse)
+    DEFINE_REQUEST_HANDLER(MatchHashes, MatchHashesArgs, MatchHashesResponse, prepareMatchHashesRequest, handleMatchHashesResponse)
     DEFINE_REQUEST_HANDLER(GetCategories,
                            Platform::ResourceType,
                            CategoriesResponse,
                            prepareGetCategoriesRequest,
                            handleGetCategoriesResponse)
+    DEFINE_REQUEST_HANDLER(GetFileChangelog, FileChangelogArgs, QString, prepareGetFileChangelogRequest, handleGetFileChangelogResponse)
 
    public:
     // Factory getter

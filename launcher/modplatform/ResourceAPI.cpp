@@ -132,3 +132,22 @@ Task::Ptr ResourceAPI::getDependencyVersion(API::DependencySearchArgs&& args, AP
     });
     return netJob;
 }
+
+QString ResourceAPI::getModFileChangelog(QVariant modId, QVariant fileId)
+{
+    QEventLoop lock;
+
+    auto netJob = makeShared<NetJob>(QString("%1::FileChangelog").arg(debugName()), APPLICATION->network());
+    auto response = std::make_shared<QString>();
+    auto task = API::ProviderAPI::get(provider())->makeGetFileChangelogRequest({ modId, fileId }, response);
+    if (task) {
+        netJob->addNetAction(task);
+
+        QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
+
+        netJob->start();
+        lock.exec();
+    }
+
+    return *response;
+}

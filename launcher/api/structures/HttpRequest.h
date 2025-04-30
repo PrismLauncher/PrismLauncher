@@ -25,14 +25,7 @@ namespace API {
 // we only handle GET and POST
 enum class HttpMethod {
     GET,
-    HEAD,
-    OPTIONS,
-    TRACE,
-    PUT,
-    DELETE,
     POST,
-    PATCH,
-    CONNECT,
 };
 
 struct HttpRequest {

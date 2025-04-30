@@ -247,4 +247,16 @@ bool FlameAPI::handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesRe
     }
     return true;
 }
+std::unique_ptr<HttpRequest> FlameAPI::prepareGetFileChangelogRequest(FileChangelogArgs args) const
+{
+    return HttpRequest::GET(
+        QString("https://api.curseforge.com/v1/mods/%1/files/%2/changelog").arg(args.projectId.toString(), args.fileId.toString()));
+}
+
+bool FlameAPI::handleGetFileChangelogResponse(const QJsonDocument& doc, QString& rsp) const
+{
+    rsp = Json::ensureString(doc.object(), "data");
+    return true;
+}
+
 }  // namespace API

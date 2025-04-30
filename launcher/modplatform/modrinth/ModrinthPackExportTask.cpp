@@ -179,11 +179,11 @@ void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<API::MatchHa
     while (iterator.hasNext()) {
         iterator.next();
 
-        auto hash = iterator.value();
-        if (!response->contains(hash)) {
+        auto sha512 = iterator.value();
+        if (!response->contains(sha512)) {
             continue;
         }
-        auto file = response->value(hash);
+        auto file = response->value(sha512);
         QString sha1;
         for (auto hash : file.hashes) {
             if (hash.alg == Hashing::Algorithm::Sha1) {
@@ -193,7 +193,7 @@ void ModrinthPackExportTask::parseApiResponse(const std::shared_ptr<API::MatchHa
         }
 
         // map the file to the url
-        resolvedFiles[iterator.key()] = ResolvedFile{ sha1, hash, file.downloadUrl, file.size, file.side };
+        resolvedFiles[iterator.key()] = ResolvedFile{ sha1, sha512, file.downloadUrl, file.size, file.side };
     }
     pendingHashes.clear();
     buildZip();

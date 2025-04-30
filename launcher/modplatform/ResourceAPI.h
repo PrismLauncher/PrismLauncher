@@ -78,6 +78,8 @@ class ResourceAPI {
     [[nodiscard]] Task::Ptr getProjectVersions(API::VersionSearchArgs&& args, API::Callback<QVector<Platform::Version>>&& callbacks) const;
     [[nodiscard]] Task::Ptr getDependencyVersion(API::DependencySearchArgs&&, API::Callback<Platform::Version>&&) const;
 
+    QString getModFileChangelog(QVariant modId, QVariant fileId);
+
    protected:
     [[nodiscard]] inline QString debugName() const { return "External resource API"; }
 

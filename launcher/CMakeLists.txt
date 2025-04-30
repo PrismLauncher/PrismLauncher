@@ -506,9 +506,9 @@ set(API_SOURCES
     api/structures/Category.h
     api/structures/Hash.h
 
-	api/structures/Arguments.h
-	api/structures/SortingMethod.h
-	api/structures/HttpRequest.h
+    api/structures/Arguments.h
+    api/structures/SortingMethod.h
+    api/structures/HttpRequest.h
 
     api/Api.h
     api/RPCSink.h

@@ -173,7 +173,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const Platform::Dependen
             if (m_loaderType & Platform::ModLoader::Quilt) {  // falback for quilt
                 auto overide = Platform::getOverrideDeps();
                 auto over = std::find_if(overide.cbegin(), overide.cend(),
-                                         [dep, provider](auto o) { return o.provider == provider && dep.projectId == o.quilt; });
+                                         [&dep, provider](const auto& o) { return o.provider == provider && dep.projectId == o.quilt; });
                 if (over != overide.cend()) {
                     removePack(dep.projectId);
                     addTask(prepareDependencyTask({ over->fabric, dep.type }, provider, level));

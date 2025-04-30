@@ -16,41 +16,6 @@
 #include "net/ApiUpload.h"
 #include "net/NetJob.h"
 
-QString FlameAPI::getModFileChangelog(int modId, int fileId)
-{
-    QEventLoop lock;
-    QString changelog;
-
-    auto netJob = makeShared<NetJob>(QString("Flame::FileChangelog"), APPLICATION->network());
-    auto response = std::make_shared<QByteArray>();
-    netJob->addNetAction(Net::ApiDownload::makeByteArray(
-        QString("https://api.curseforge.com/v1/mods/%1/files/%2/changelog")
-            .arg(QString::fromStdString(std::to_string(modId)), QString::fromStdString(std::to_string(fileId))),
-        response));
-
-    QObject::connect(netJob.get(), &NetJob::succeeded, [&netJob, response, &changelog] {
-        QJsonParseError parse_error{};
-        QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-        if (parse_error.error != QJsonParseError::NoError) {
-            qWarning() << "Error while parsing JSON response from Flame::FileChangelog at " << parse_error.offset
-                       << " reason: " << parse_error.errorString();
-            qWarning() << *response;
-
-            netJob->failed(parse_error.errorString());
-            return;
-        }
-
-        changelog = Json::ensureString(doc.object(), "data");
-    });
-
-    QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
-
-    netJob->start();
-    lock.exec();
-
-    return changelog;
-}
-
 NetJob::Ptr FlameAPI::getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const
 {
     auto netJob = makeShared<NetJob>(QString("Flame::GetFiles"), APPLICATION->network());
