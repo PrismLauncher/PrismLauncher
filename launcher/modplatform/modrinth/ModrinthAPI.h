@@ -14,11 +14,5 @@
 
 class ModrinthAPI : public ResourceAPI {
    public:
-    Task::Ptr latestVersions(const QStringList& hashes,
-                             QString hash_format,
-                             std::optional<std::list<Version>> mcVersions,
-                             std::optional<Platform::ModLoaders> loaders,
-                             std::shared_ptr<QByteArray> response);
-
     Platform::Provider provider() const override { return Platform::Provider::MODRINTH; }
 };

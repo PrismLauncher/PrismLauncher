@@ -202,12 +202,10 @@ std::unique_ptr<HttpRequest> ModrinthAPI::prepareMatchHashesRequest(MatchHashesA
 
 bool ModrinthAPI::handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesResponse& rsp) const
 {
-    auto entries = Json::requireObject(doc);
-    for (auto& hash : entries.keys()) {
-        auto entry = Json::requireObject(entries, hash);
-        rsp.insert(hash, Modrinth::loadIndexedPackVersion(entry));
-    }
-    return true;
+    GetLatestVersionsResponse v{ rsp, Hashing::Algorithm::Sha512, "" };
+    auto out = handleGetLatestVersionsResponse(doc, v);
+    rsp = v.versions;
+    return out;
 }
 
 std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetVersionRequest(VersionArgs const& args) const
@@ -239,4 +237,36 @@ bool ModrinthAPI::handleGetMultipleVersionsResponse(const QJsonDocument& doc, Ve
 {
     return handleGetVersionsResponse(doc, rsp);
 }
+
+std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetLatestVersionsRequest(GetLatestVersionsArgs const& args) const
+{
+    QJsonObject body;
+
+    Json::writeStringList(body, "hashes", args.hashes);
+    Json::writeString(body, "algorithm", Hashing::algorithmToString(args.hashFormat));
+
+    if (args.loaders.has_value())
+        Json::writeStringList(body, "loaders", ModrinthUtils::getModLoaderStrings(args.loaders.value()));
+
+    if (args.mcVersions.has_value()) {
+        QStringList game_versions;
+        for (auto& ver : args.mcVersions.value()) {
+            game_versions.append(ModrinthUtils::mapMCVersionToModrinth(ver));
+        }
+        Json::writeStringList(body, "game_versions", game_versions);
+    }
+
+    return HttpRequest::POST(BuildConfig.MODRINTH_PROD_URL + "/version_files/update", QJsonDocument(body).toJson());
+}
+
+bool ModrinthAPI::handleGetLatestVersionsResponse(const QJsonDocument& doc, GetLatestVersionsResponse& rsp) const
+{
+    auto entries = Json::requireObject(doc);
+    for (auto& hash : entries.keys()) {
+        auto entry = Json::requireObject(entries, hash);
+        rsp.versions.insert(hash, Modrinth::loadIndexedPackVersion(entry, rsp.hashFormat, rsp.filter));
+    }
+    return true;
+}
+
 }  // namespace API

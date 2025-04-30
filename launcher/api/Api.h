@@ -100,6 +100,7 @@ class ProviderAPI {
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetFileChangelogRequest(VersionArgs type) const = 0;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetVersionRequest(VersionArgs const& args) const = 0;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetMultipleVersionsRequest(QStringList const& ids) const = 0;
+    [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetLatestVersionsRequest(GetLatestVersionsArgs const& ids) const = 0;
 
     // Parsers
     [[nodiscard]] virtual bool handleSearchResponse(const QJsonDocument& doc, QList<Platform::Project::Ptr>& rsp) const = 0;
@@ -113,6 +114,7 @@ class ProviderAPI {
     [[nodiscard]] virtual bool handleGetFileChangelogResponse(const QJsonDocument& doc, QString& rsp) const = 0;
     [[nodiscard]] virtual bool handleGetVersionResponse(const QJsonDocument& doc, VersionResponse& rsp) const = 0;
     [[nodiscard]] virtual bool handleGetMultipleVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const = 0;
+    [[nodiscard]] virtual bool handleGetLatestVersionsResponse(const QJsonDocument& doc, GetLatestVersionsResponse& rsp) const = 0;
 #define DEFINE_REQUEST_HANDLER(FUNC_NAME, ARG_TYPE, RSP_TYPE, PREPARE_REQUEST, PARSE_RESPONSE)                                         \
     [[nodiscard]] inline Net::NetRequest::Ptr make##FUNC_NAME##Request(ARG_TYPE const& args, std::shared_ptr<RSP_TYPE> response) const \
     {                                                                                                                                  \
@@ -147,6 +149,11 @@ class ProviderAPI {
                            VersionSearchResponse,
                            prepareGetMultipleVersionsRequest,
                            handleGetMultipleVersionsResponse)
+    DEFINE_REQUEST_HANDLER(GetLatestVersions,
+                           GetLatestVersionsArgs,
+                           GetLatestVersionsResponse,
+                           prepareGetLatestVersionsRequest,
+                           handleGetLatestVersionsResponse)
 
    public:
     // Factory getter

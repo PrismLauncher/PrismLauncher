@@ -66,6 +66,10 @@ class FlameAPI : public ProviderAPI {
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetFileChangelogRequest(VersionArgs args) const;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetVersionRequest(VersionArgs const& args) const;
     [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetMultipleVersionsRequest(QStringList const& ids) const;
+    [[nodiscard]] virtual std::unique_ptr<HttpRequest> prepareGetLatestVersionsRequest(GetLatestVersionsArgs const&) const
+    {
+        return nullptr;
+    }
 
     // Parsers
     [[nodiscard]] virtual bool handleSearchResponse(const QJsonDocument& doc, QList<Platform::Project::Ptr>& rsp) const;
@@ -79,6 +83,7 @@ class FlameAPI : public ProviderAPI {
     [[nodiscard]] virtual bool handleGetFileChangelogResponse(const QJsonDocument& doc, QString& rsp) const;
     [[nodiscard]] virtual bool handleGetVersionResponse(const QJsonDocument& doc, VersionResponse& rsp) const;
     [[nodiscard]] virtual bool handleGetMultipleVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const;
+    [[nodiscard]] virtual bool handleGetLatestVersionsResponse(const QJsonDocument&, GetLatestVersionsResponse&) const { return false; }
 };
 
 }  // namespace API

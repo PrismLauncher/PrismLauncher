@@ -82,6 +82,7 @@ class ResourceAPI {
     QString getModFileChangelog(QVariant modId, QVariant fileId);
     Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<API::VersionResponse> response) const;
     NetJob::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<API::VersionSearchResponse> response) const;
+    Task::Ptr latestVersions(const API::GetLatestVersionsArgs& args, std::shared_ptr<API::GetLatestVersionsResponse> response);
 
    protected:
     [[nodiscard]] inline QString debugName() const { return "External resource API"; }

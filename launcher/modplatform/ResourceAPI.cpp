@@ -171,3 +171,13 @@ NetJob::Ptr ResourceAPI::getFiles(const QStringList& fileIds, std::shared_ptr<AP
 
     return netJob;
 }
+
+Task::Ptr ResourceAPI::latestVersions(const API::GetLatestVersionsArgs& args, std::shared_ptr<API::GetLatestVersionsResponse> response)
+{
+    auto netJob = makeShared<NetJob>(QString("%1::::GetLatestVersions").arg(debugName()), APPLICATION->network());
+    auto task = API::ProviderAPI::get(provider())->makeGetLatestVersionsRequest(args, response);
+    if (task) {
+        netJob->addNetAction(task);
+    }
+    return netJob;
+}

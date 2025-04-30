@@ -8,6 +8,7 @@
 #include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
 
+#include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "modplatform/helpers/HashUtils.h"
 
@@ -60,9 +61,26 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<Platform::ModLoad
     setStatus(tr("Waiting for the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
 
-    auto response = std::make_shared<QByteArray>();
+    auto response = std::make_shared<API::GetLatestVersionsResponse>();
+
+    // Sometimes a version may have multiple files, one with "forge" and one with "fabric",
+    // so we may want to filter it
+
+    // Currently, we rely on a couple heuristics to determine whether an update is actually available or not:
+    // - The file needs to be preferred: It is either the primary file, or the one found via (explicit) usage of the
+    // loader_filter
+    // - The version reported by the JAR is different from the version reported by the indexed version (it's usually the case)
+    // Such is the pain of having arbitrary files for a given version .-.
+    if (loader.has_value()) {
+        for (auto flag : Platform::ModloaderUtils::toList(*loader)) {
+            response->filter = Platform::ModloaderUtils::toString(flag);
+            break;
+        }
+    }
+    response->hashFormat = m_hash_type;
     QStringList hashes = m_mappings.keys();
-    auto job = api.latestVersions(hashes, Hashing::algorithmToString(m_hash_type), m_game_versions, loader, response);
+
+    auto job = api.latestVersions({ hashes, m_hash_type, m_game_versions, loader }, response);
 
     connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 
@@ -72,99 +90,61 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<Platform::ModLoad
     job->start();
 }
 
-void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<QByteArray> response, std::optional<Platform::ModLoaders> loader)
+void ModrinthCheckUpdate::checkVersionsResponse(std::shared_ptr<API::GetLatestVersionsResponse> response,
+                                                std::optional<Platform::ModLoaders> loader)
 {
     setStatus(tr("Parsing the API response from Modrinth..."));
     setProgress(m_progress + 1, m_progressTotal);
 
-    QJsonParseError parse_error{};
-    QJsonDocument doc = QJsonDocument::fromJson(*response, &parse_error);
-    if (parse_error.error != QJsonParseError::NoError) {
-        qWarning() << "Error while parsing JSON response from ModrinthCheckUpdate at " << parse_error.offset
-                   << " reason: " << parse_error.errorString();
-        qWarning() << *response;
+    auto iter = m_mappings.begin();
 
-        emitFailed(parse_error.errorString());
-        return;
-    }
+    while (iter != m_mappings.end()) {
+        const QString hash = iter.key();
+        Resource* resource = iter.value();
 
-    try {
-        auto iter = m_mappings.begin();
-
-        while (iter != m_mappings.end()) {
-            const QString hash = iter.key();
-            Resource* resource = iter.value();
-
-            auto project_obj = doc[hash].toObject();
-
-            // If the returned project is empty, but we have Modrinth metadata,
-            // it means this specific version is not available
-            if (project_obj.isEmpty()) {
-                qDebug() << "Mod " << m_mappings.find(hash).value()->name() << " got an empty response." << "Hash: " << hash;
-                ++iter;
-                continue;
-            }
-
-            // Sometimes a version may have multiple files, one with "forge" and one with "fabric",
-            // so we may want to filter it
-            QString loader_filter;
-            if (loader.has_value()) {
-                for (auto flag : Platform::ModloaderUtils::toList(*loader)) {
-                    loader_filter = Platform::ModloaderUtils::toString(flag);
-                    break;
-                }
-            }
-
-            // Currently, we rely on a couple heuristics to determine whether an update is actually available or not:
-            // - The file needs to be preferred: It is either the primary file, or the one found via (explicit) usage of the
-            // loader_filter
-            // - The version reported by the JAR is different from the version reported by the indexed version (it's usually the case)
-            // Such is the pain of having arbitrary files for a given version .-.
-
-            auto project_ver = Modrinth::loadIndexedPackVersion(project_obj, m_hash_type, loader_filter);
-            if (project_ver.downloadUrl.isEmpty()) {
-                qCritical() << "Modrinth mod without download url!" << project_ver.fileName;
-                ++iter;
-                continue;
-            }
-
-            // Fake pack with the necessary info to pass to the download task :)
-            auto pack = std::make_shared<Platform::Project>();
-            pack->name = resource->name();
-            pack->slug = resource->metadata()->slug;
-            pack->projectId = resource->metadata()->project_id;
-            pack->provider = Platform::Provider::MODRINTH;
-            auto installed = resource->status() != ResourceStatus::NOT_INSTALLED;
-            if (installed) {
-                if (project_ver.hashes.empty()) {
-                    installed = false;
-                } else {
-                    auto h = project_ver.hashes.first();
-                    installed = h.hash == hash || !project_ver.is_preferred;
-                }
-            }
-            if (!installed) {
-                auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resource_model);
-
-                QString old_version = resource->metadata()->version_number;
-                if (old_version.isEmpty()) {
-                    if (resource->status() == ResourceStatus::NOT_INSTALLED)
-                        old_version = tr("Not installed");
-                    else
-                        old_version = tr("Unknown");
-                }
-
-                m_updates.emplace_back(pack->name, hash, old_version, project_ver.version_number, project_ver.version_type,
-                                       project_ver.changelog, Platform::Provider::MODRINTH, download_task, resource->enabled());
-            }
-            m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, project_ver));
-
-            iter = m_mappings.erase(iter);
+        // If the returned project is empty, but we have Modrinth metadata,
+        // it means this specific version is not available
+        if (!response->versions.contains(hash)) {
+            qDebug() << "Mod " << m_mappings.find(hash).value()->name() << " got an empty response." << "Hash: " << hash;
+            ++iter;
+            continue;
         }
-    } catch (Json::JsonException& e) {
-        emitFailed(e.cause() + ": " + e.what());
-        return;
+        auto project_ver = response->versions.value(hash);
+
+        // Fake pack with the necessary info to pass to the download task :)
+        auto pack = std::make_shared<Platform::Project>();
+        pack->name = resource->name();
+        pack->slug = resource->metadata()->slug;
+        pack->projectId = resource->metadata()->project_id;
+        pack->provider = Platform::Provider::MODRINTH;
+        auto installed = resource->status() != ResourceStatus::NOT_INSTALLED;
+        if (installed) {
+            if (project_ver.hashes.empty()) {
+                installed = false;
+            } else {
+                auto h = project_ver.hashes.first();
+                installed = h.hash == hash || !project_ver.is_preferred;
+            }
+        }
+        if (!installed) {
+            auto download_task = makeShared<ResourceDownloadTask>(pack, project_ver, m_resource_model);
+
+            QString old_version = resource->metadata()->version_number;
+            if (old_version.isEmpty()) {
+                if (resource->status() == ResourceStatus::NOT_INSTALLED)
+                    old_version = tr("Not installed");
+                else
+                    old_version = tr("Unknown");
+            }
+
+            m_updates.emplace_back(pack->name, hash, old_version, project_ver.version_number, project_ver.version_type,
+                                   project_ver.changelog, Platform::Provider::MODRINTH, download_task, resource->enabled());
+        }
+        m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, project_ver));
+
+        iter = m_mappings.erase(iter);
     }
+
     checkNextLoader();
 }
 

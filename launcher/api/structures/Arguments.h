@@ -119,4 +119,17 @@ struct VersionResponse {
     Platform::ResourceType resourceType{};
 };
 
+struct GetLatestVersionsArgs {
+    QStringList hashes;
+    Hashing::Algorithm hashFormat;
+    std::optional<std::list<Version>> mcVersions;
+    std::optional<Platform::ModLoaders> loaders;
+};
+
+struct GetLatestVersionsResponse {
+    MatchHashesResponse versions;
+    Hashing::Algorithm hashFormat;
+    QString filter;
+};
+
 }  // namespace API
