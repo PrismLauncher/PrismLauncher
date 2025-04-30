@@ -37,6 +37,7 @@
 
 #include "api/flame/FlameAPI.h"
 #include <memory>
+#include "BuildConfig.h"
 #include "Json.h"
 #include "api/flame/FlameUtils.h"
 #include "api/structures/HttpRequest.h"
@@ -87,7 +88,7 @@ std::unique_ptr<HttpRequest> FlameAPI::prepareSearchRequest(API::SearchArgs cons
     if (args.versions.has_value() && !args.versions.value().empty())
         get_arguments.append(QString("gameVersion=%1").arg(args.versions.value().front().toString()));
 
-    auto url = "https://api.curseforge.com/v1/mods/search?gameId=432&" + get_arguments.join('&');
+    auto url = BuildConfig.FLAME_BASE_URL + "/mods/search?gameId=432&" + get_arguments.join('&');
     return HttpRequest::GET(url);
 }
 
@@ -112,7 +113,7 @@ bool FlameAPI::handleSearchResponse(const QJsonDocument& doc, QList<Platform::Pr
 
 std::unique_ptr<HttpRequest> FlameAPI::prepareGetProjectRequest(QString const& id) const
 {
-    return HttpRequest::GET(QString("https://api.curseforge.com/v1/mods/%1").arg(id));
+    return HttpRequest::GET(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1").arg(id));
 }
 
 bool FlameAPI::handleGetProjectResponse(const QJsonDocument& doc, Platform::Project& rsp) const
@@ -132,13 +133,13 @@ bool FlameAPI::handleGetDescriptionResponse(const QJsonDocument& doc, Platform::
 }
 std::unique_ptr<HttpRequest> FlameAPI::prepareGetDescriptionRequest(QString const& id) const
 {
-    return HttpRequest::GET(QString("https://api.curseforge.com/v1/mods/%1/description").arg(id));
+    return HttpRequest::GET(QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/description").arg(id));
 }
 
 std::unique_ptr<HttpRequest> FlameAPI::prepareGetVersionsRequest(VersionSearchArgs const& args) const
 {
     auto addonId = args.pack.projectId.toString();
-    QString url = QString("https://api.curseforge.com/v1/mods/%1/files?pageSize=10000").arg(addonId);
+    QString url = QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files?pageSize=10000").arg(addonId);
 
     if (args.mcVersions.has_value())
         url += QString("&gameVersion=%1").arg(args.mcVersions.value().front().toString());
@@ -188,7 +189,7 @@ std::unique_ptr<HttpRequest> FlameAPI::prepareGetProjectsRequest(QStringList con
 {
     QJsonObject body;
     Json::writeStringList(body, "modIds", ids);
-    return HttpRequest::POST(QString("https://api.curseforge.com/v1/mods"), QJsonDocument(body).toJson());
+    return HttpRequest::POST(QString(BuildConfig.FLAME_BASE_URL + "/mods"), QJsonDocument(body).toJson());
 }
 
 bool FlameAPI::handleGetProjectsResponse(const QJsonDocument& doc, QList<Platform::Project::Ptr>& rsp) const
@@ -198,7 +199,7 @@ bool FlameAPI::handleGetProjectsResponse(const QJsonDocument& doc, QList<Platfor
 
 std::unique_ptr<HttpRequest> FlameAPI::prepareGetCategoriesRequest(Platform::ResourceType type) const
 {
-    return HttpRequest::GET(QString("https://api.curseforge.com/v1/categories?gameId=432&classId=%1").arg(FlameUtils::getClassId(type)));
+    return HttpRequest::GET(QString(BuildConfig.FLAME_BASE_URL + "/categories?gameId=432&classId=%1").arg(FlameUtils::getClassId(type)));
 }
 
 bool FlameAPI::handleGetCategoriesResponse(const QJsonDocument& doc, CategoriesResponse& rsp) const
@@ -219,7 +220,7 @@ std::unique_ptr<HttpRequest> FlameAPI::prepareMatchHashesRequest(MatchHashesArgs
 {
     QJsonObject body;
     Json::writeStringList(body, "fingerprints", args.hashes);
-    return HttpRequest::POST(QString("https://api.curseforge.com/v1/fingerprints"), QJsonDocument(body).toJson());
+    return HttpRequest::POST(QString(BuildConfig.FLAME_BASE_URL + "/fingerprints"), QJsonDocument(body).toJson());
 }
 
 bool FlameAPI::handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesResponse& rsp) const
@@ -250,7 +251,7 @@ bool FlameAPI::handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesRe
 std::unique_ptr<HttpRequest> FlameAPI::prepareGetFileChangelogRequest(VersionArgs args) const
 {
     return HttpRequest::GET(
-        QString("https://api.curseforge.com/v1/mods/%1/files/%2/changelog").arg(args.projectId.toString(), args.fileId.toString()));
+        QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2/changelog").arg(args.projectId.toString(), args.fileId.toString()));
 }
 
 bool FlameAPI::handleGetFileChangelogResponse(const QJsonDocument& doc, QString& rsp) const
@@ -262,7 +263,7 @@ bool FlameAPI::handleGetFileChangelogResponse(const QJsonDocument& doc, QString&
 std::unique_ptr<HttpRequest> FlameAPI::prepareGetVersionRequest(VersionArgs const& args) const
 {
     return HttpRequest::GET(
-        QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(args.projectId.toString(), args.fileId.toString()));
+        QString(BuildConfig.FLAME_BASE_URL + "/mods/%1/files/%2").arg(args.projectId.toString(), args.fileId.toString()));
 }
 
 bool FlameAPI::handleGetVersionResponse(const QJsonDocument& doc, VersionResponse& rsp) const
@@ -280,7 +281,7 @@ std::unique_ptr<HttpRequest> FlameAPI::prepareGetMultipleVersionsRequest(QString
 {
     QJsonObject body;
     Json::writeStringList(body, "fileIds", ids);
-    return HttpRequest::POST(QString("https://api.curseforge.com/v1/mods/files"), QJsonDocument(body).toJson());
+    return HttpRequest::POST(QString(BuildConfig.FLAME_BASE_URL + "/mods/files"), QJsonDocument(body).toJson());
 }
 
 bool FlameAPI::handleGetMultipleVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const
