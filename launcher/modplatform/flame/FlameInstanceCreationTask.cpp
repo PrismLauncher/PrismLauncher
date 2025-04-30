@@ -36,6 +36,7 @@
 #include "FlameInstanceCreationTask.h"
 
 #include "QObjectPtr.h"
+#include "api/structures/Arguments.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -183,40 +184,16 @@ bool FlameCreationTask::updateInstance()
             fileIds.append(QString::number(file.fileId));
         }
 
-        auto raw_response = std::make_shared<QByteArray>();
+        auto raw_response = std::make_shared<API::VersionSearchResponse>();
         auto job = api.getFiles(fileIds, raw_response);
 
         QEventLoop loop;
-
         connect(job.get(), &Task::succeeded, this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {
-            // Parse the API response
-            QJsonParseError parse_error{};
-            auto doc = QJsonDocument::fromJson(*raw_response, &parse_error);
-            if (parse_error.error != QJsonParseError::NoError) {
-                qWarning() << "Error while parsing JSON response from Flame files task at " << parse_error.offset
-                           << " reason: " << parse_error.errorString();
-                qWarning() << *raw_response;
-                return;
-            }
-
-            try {
-                QJsonArray entries;
-                if (fileIds.size() == 1)
-                    entries = { Json::requireObject(Json::requireObject(doc), "data") };
-                else
-                    entries = Json::requireArray(Json::requireObject(doc), "data");
-
-                for (auto entry : entries) {
-                    auto entry_obj = Json::requireObject(entry);
-
-                    Flame::File file;
-                    // We don't care about blocked mods, we just need local data to delete the file
-                    file.version = FlameMod::loadIndexedPackVersion(entry_obj);
-                    auto id = Json::requireInteger(entry_obj, "id");
-                    old_files.insert(id, file);
-                }
-            } catch (Json::JsonException& e) {
-                qCritical() << e.cause() << e.what();
+            for (auto entry : raw_response->versions) {
+                Flame::File file;
+                // We don't care about blocked mods, we just need local data to delete the file
+                file.version = entry;
+                old_files.insert(entry.fileId.toInt(), file);
             }
 
             // Delete the files

@@ -13,12 +13,5 @@
 
 class FlameAPI : public ResourceAPI {
    public:
-    std::optional<Platform::Version> getLatestVersion(QList<Platform::Version> versions,
-                                                      QList<Platform::ModLoader> instanceLoaders,
-                                                      Platform::ModLoaders fallback);
-
-    NetJob::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<QByteArray> response) const;
-    Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<QByteArray> response) const;
-
     Platform::Provider provider() const override { return Platform::Provider::FLAME; }
 };

@@ -151,3 +151,23 @@ QString ResourceAPI::getModFileChangelog(QVariant modId, QVariant fileId)
 
     return *response;
 }
+
+Task::Ptr ResourceAPI::getFile(const QString& addonId, const QString& fileId, std::shared_ptr<API::VersionResponse> response) const
+{
+    auto netJob = makeShared<NetJob>(QString("%1::GetFile").arg(debugName()), APPLICATION->network());
+    auto task = API::ProviderAPI::get(provider())->makeGetVersionRequest({ addonId, fileId }, response);
+
+    netJob->addNetAction(task);
+
+    return netJob;
+}
+
+NetJob::Ptr ResourceAPI::getFiles(const QStringList& fileIds, std::shared_ptr<API::VersionSearchResponse> response) const
+{
+    auto netJob = makeShared<NetJob>(QString("%1::GetFiles").arg(debugName()), APPLICATION->network());
+    auto task = API::ProviderAPI::get(provider())->makeGetMultipleVersionsRequest(fileIds, response);
+
+    netJob->addNetAction(task);
+
+    return netJob;
+}

@@ -43,6 +43,7 @@
 #include "FileSystem.h"
 
 #include "MainWindow.h"
+#include "api/structures/Arguments.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -949,20 +950,17 @@ void MainWindow::processURLs(QList<QUrl> urls)
                 extra_info.insert("pack_id", addonId);
                 extra_info.insert("pack_version_id", fileId);
 
-                auto array = std::make_shared<QByteArray>();
+                auto versionResponse = std::make_shared<API::VersionResponse>();
 
                 auto api = FlameAPI();
-                auto job = api.getFile(addonId, fileId, array);
+                auto job = api.getFile(addonId, fileId, versionResponse);
 
                 connect(job.get(), &Task::failed, this,
                         [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-                connect(job.get(), &Task::succeeded, this, [this, array, addonId, fileId, &dl_url, &version] {
-                    qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
-                    auto doc = Json::requireDocument(*array);
-                    auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
+                connect(job.get(), &Task::succeeded, this, [this, versionResponse, addonId, fileId, &dl_url, &version] {
                     // No way to find out if it's a mod or a modpack before here
                     // And also we need to check if it ends with .zip, instead of any better way
-                    version = FlameMod::loadIndexedPackVersion(data);
+                    version = versionResponse->version;
                     auto fileName = version.fileName;
 
                     // Have to use ensureString then use QUrl to get proper url encoding

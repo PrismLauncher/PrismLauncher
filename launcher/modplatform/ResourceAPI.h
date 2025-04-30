@@ -55,6 +55,7 @@
 #include "api/structures/Provider.h"
 #include "api/structures/ResourceType.h"
 #include "api/structures/SortingMethod.h"
+#include "net/NetJob.h"
 #include "tasks/Task.h"
 
 /* Simple class with a common interface for interacting with APIs */
@@ -79,6 +80,8 @@ class ResourceAPI {
     [[nodiscard]] Task::Ptr getDependencyVersion(API::DependencySearchArgs&&, API::Callback<Platform::Version>&&) const;
 
     QString getModFileChangelog(QVariant modId, QVariant fileId);
+    Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<API::VersionResponse> response) const;
+    NetJob::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<API::VersionSearchResponse> response) const;
 
    protected:
     [[nodiscard]] inline QString debugName() const { return "External resource API"; }

@@ -247,7 +247,7 @@ bool FlameAPI::handleMatchHashesResponse(const QJsonDocument& doc, MatchHashesRe
     }
     return true;
 }
-std::unique_ptr<HttpRequest> FlameAPI::prepareGetFileChangelogRequest(FileChangelogArgs args) const
+std::unique_ptr<HttpRequest> FlameAPI::prepareGetFileChangelogRequest(VersionArgs args) const
 {
     return HttpRequest::GET(
         QString("https://api.curseforge.com/v1/mods/%1/files/%2/changelog").arg(args.projectId.toString(), args.fileId.toString()));
@@ -257,6 +257,35 @@ bool FlameAPI::handleGetFileChangelogResponse(const QJsonDocument& doc, QString&
 {
     rsp = Json::ensureString(doc.object(), "data");
     return true;
+}
+
+std::unique_ptr<HttpRequest> FlameAPI::prepareGetVersionRequest(VersionArgs const& args) const
+{
+    return HttpRequest::GET(
+        QString("https://api.curseforge.com/v1/mods/%1/files/%2").arg(args.projectId.toString(), args.fileId.toString()));
+}
+
+bool FlameAPI::handleGetVersionResponse(const QJsonDocument& doc, VersionResponse& rsp) const
+{
+    auto obj = Json::requireObject(doc.object(), "data");
+
+    rsp.version = FlameUtils::loadIndexedPackVersion(obj, rsp.resourceType);
+    if (!rsp.version.projectId.isValid())
+        rsp.version.projectId = rsp.projectId;
+
+    return rsp.version.fileId.isValid();  // Heuristic to check if the returned value is valid
+}
+
+std::unique_ptr<HttpRequest> FlameAPI::prepareGetMultipleVersionsRequest(QStringList const& ids) const
+{
+    QJsonObject body;
+    Json::writeStringList(body, "fileIds", ids);
+    return HttpRequest::POST(QString("https://api.curseforge.com/v1/mods/files"), QJsonDocument(body).toJson());
+}
+
+bool FlameAPI::handleGetMultipleVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const
+{
+    return handleGetVersionsResponse(doc, rsp);
 }
 
 }  // namespace API

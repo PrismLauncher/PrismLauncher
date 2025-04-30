@@ -63,6 +63,52 @@ void FlameCheckUpdate::executeTask()
     m_task->start();
 }
 
+std::optional<Platform::Version> getLatestVersion(QList<Platform::Version> versions,
+                                                  QList<Platform::ModLoader> instanceLoaders,
+                                                  Platform::ModLoaders modLoaders)
+{
+    static const auto noLoader = Platform::ModLoader(0);
+    QHash<Platform::ModLoader, Platform::Version> bestMatch;
+    auto checkVersion = [&bestMatch](const Platform::Version& version, const Platform::ModLoader& loader) {
+        if (bestMatch.contains(loader)) {
+            auto best = bestMatch.value(loader);
+            if (version.date > best.date) {
+                bestMatch[loader] = version;
+            }
+        } else {
+            bestMatch[loader] = version;
+        }
+    };
+    for (auto file_tmp : versions) {
+        auto loaders = Platform::ModloaderUtils::toList(file_tmp.loaders);
+        if (loaders.isEmpty()) {
+            checkVersion(file_tmp, noLoader);
+        } else {
+            for (auto loader : loaders) {
+                checkVersion(file_tmp, loader);
+            }
+        }
+    }
+    // edge case: mod has installed for forge but the instance is fabric => fabric version will be prioritizated on update
+    auto currentLoaders = instanceLoaders + Platform::ModloaderUtils::toList(modLoaders);
+    currentLoaders.append(noLoader);  // add a fallback in case the versions do not define a loader
+
+    for (auto loader : currentLoaders) {
+        if (bestMatch.contains(loader)) {
+            auto bestForLoader = bestMatch.value(loader);
+            // awkward case where the mod has only two loaders and one of them is not specified
+            if (loader != noLoader && bestMatch.contains(noLoader) && bestMatch.size() == 2) {
+                auto bestForNoLoader = bestMatch.value(noLoader);
+                if (bestForNoLoader.date > bestForLoader.date) {
+                    return bestForNoLoader;
+                }
+            }
+            return bestForLoader;
+        }
+    }
+    return {};
+}
+
 void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QList<Platform::Version> response)
 {
     // Fake pack with the necessary info to pass to the download task :)
@@ -74,7 +120,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QList<Platfo
     pack->versions = response;
     pack->versionsLoaded = true;
 
-    auto latest_ver = api.getLatestVersion(pack->versions, m_loaders_list, resource->metadata()->loaders);
+    auto latest_ver = getLatestVersion(pack->versions, m_loaders_list, resource->metadata()->loaders);
 
     setStatus(tr("Parsing the API response from CurseForge for '%1'...").arg(resource->name()));
 

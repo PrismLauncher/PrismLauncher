@@ -22,6 +22,7 @@
 #include "Application.h"
 #include "Json.h"
 #include "api/Api.h"
+#include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "api/structures/Provider.h"
 #include "modplatform/flame/FlameAPI.h"
@@ -53,7 +54,7 @@ void Flame::FileResolvingTask::executeTask()
     }
     setStatus(tr("Resolving mod IDs..."));
     setProgress(0, 3);
-    m_result2.reset(new QByteArray());
+    m_result2.reset(new API::VersionSearchResponse());
 
     QStringList fileIds;
     for (auto file : m_manifest.files) {
@@ -90,45 +91,19 @@ void Flame::FileResolvingTask::netJobFinished()
 {
     setProgress(1, 3);
     // job to check modrinth for blocked projects
-    QJsonDocument doc;
-    QJsonArray array;
-
-    try {
-        doc = Json::requireDocument(*m_result2);
-        array = Json::requireArray(doc.object()["data"]);
-    } catch (Json::JsonException& e) {
-        qCritical() << "Non-JSON data returned from the CF API";
-        qCritical() << e.cause();
-
-        emitFailed(tr("Invalid data returned from the API."));
-
-        return;
-    }
-
     QStringList hashes;
-    for (QJsonValueRef file : array) {
-        try {
-            auto obj = Json::requireObject(file);
-            auto version = FlameMod::loadIndexedPackVersion(obj);
-            auto fileid = version.fileId.toInt();
-            Q_ASSERT(fileid != 0);
-            Q_ASSERT(m_manifest.files.contains(fileid));
-            m_manifest.files[fileid].version = version;
-            auto url = QUrl(version.downloadUrl, QUrl::TolerantMode);
-            if (!url.isValid()) {
-                for (auto hash : version.hashes) {
-                    if (hash.alg == Hashing::Algorithm::Sha1 && !hash.hash.isEmpty()) {
-                        hashes.push_back(hash.hash);
-                    }
+    for (auto version : m_result2->versions) {
+        auto fileid = version.fileId.toInt();
+        Q_ASSERT(fileid != 0);
+        Q_ASSERT(m_manifest.files.contains(fileid));
+        m_manifest.files[fileid].version = version;
+        auto url = QUrl(version.downloadUrl, QUrl::TolerantMode);
+        if (!url.isValid()) {
+            for (auto hash : version.hashes) {
+                if (hash.alg == Hashing::Algorithm::Sha1 && !hash.hash.isEmpty()) {
+                    hashes.push_back(hash.hash);
                 }
             }
-        } catch (Json::JsonException& e) {
-            qCritical() << "Non-JSON data returned from the CF API";
-            qCritical() << e.cause();
-
-            emitFailed(tr("Invalid data returned from the API."));
-
-            return;
         }
     }
     if (hashes.isEmpty()) {

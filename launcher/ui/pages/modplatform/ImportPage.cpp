@@ -36,6 +36,7 @@
 
 #include "ImportPage.h"
 
+#include "api/structures/Arguments.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ImportPage.h"
 
@@ -48,8 +49,6 @@
 #include "ui/dialogs/NewInstanceDialog.h"
 
 #include "modplatform/flame/FlameAPI.h"
-
-#include "Json.h"
 
 #include "InstanceImportTask.h"
 #include "net/NetJob.h"
@@ -131,23 +130,20 @@ void ImportPage::updateState()
             }
             auto addonId = query.allQueryItemValues("addonId")[0];
             auto fileId = query.allQueryItemValues("fileId")[0];
-            auto array = std::make_shared<QByteArray>();
+            auto versionResponse = std::make_shared<API::VersionResponse>();
 
             auto api = FlameAPI();
-            auto job = api.getFile(addonId, fileId, array);
+            auto job = api.getFile(addonId, fileId, versionResponse);
 
             connect(job.get(), &NetJob::failed, this,
                     [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });
-            connect(job.get(), &NetJob::succeeded, this, [this, array, addonId, fileId] {
-                qDebug() << "Returned CFURL Json:\n" << array->toStdString().c_str();
-                auto doc = Json::requireDocument(*array);
-                auto data = Json::ensureObject(Json::ensureObject(doc.object()), "data");
+            connect(job.get(), &NetJob::succeeded, this, [this, versionResponse, addonId, fileId] {
                 // No way to find out if it's a mod or a modpack before here
                 // And also we need to check if it ends with .zip, instead of any better way
-                auto fileName = Json::ensureString(data, "fileName");
+                auto fileName = versionResponse->version.fileName;
                 if (fileName.endsWith(".zip")) {
                     // Have to use ensureString then use QUrl to get proper url encoding
-                    auto dl_url = QUrl(Json::ensureString(data, "downloadUrl", "", "downloadUrl"));
+                    auto dl_url = QUrl(versionResponse->version.downloadUrl);
                     if (!dl_url.isValid()) {
                         CustomMessageBox::selectable(
                             this, tr("Error"),
@@ -158,7 +154,7 @@ void ImportPage::updateState()
                     }
 
                     QFileInfo dl_file(dl_url.fileName());
-                    QString pack_name = Json::ensureString(data, "displayName", dl_file.completeBaseName(), "displayName");
+                    QString pack_name = versionResponse->version.version;
 
                     QMap<QString, QString> extra_info;
                     extra_info.insert("pack_id", addonId);

@@ -172,7 +172,7 @@ bool ModrinthAPI::handleGetProjectsResponse(const QJsonDocument& doc, QList<Plat
     return true;
 }
 
-std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetCategoriesRequest(Platform::ResourceType type) const
+std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetCategoriesRequest(Platform::ResourceType) const
 {
     return HttpRequest::GET(BuildConfig.MODRINTH_PROD_URL + "/tag/category");
 }
@@ -208,5 +208,35 @@ bool ModrinthAPI::handleMatchHashesResponse(const QJsonDocument& doc, MatchHashe
         rsp.insert(hash, Modrinth::loadIndexedPackVersion(entry));
     }
     return true;
+}
+
+std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetVersionRequest(VersionArgs const& args) const
+{
+    return HttpRequest::GET(BuildConfig.MODRINTH_PROD_URL + QString("/version/%1").arg(args.fileId.toString()));
+}
+
+bool ModrinthAPI::handleGetVersionResponse(const QJsonDocument& doc, VersionResponse& rsp) const
+{
+    auto obj = doc.object();
+
+    rsp.version = Modrinth::loadIndexedPackVersion(obj);
+    if (!rsp.version.projectId.isValid())
+        rsp.version.projectId = rsp.projectId;
+
+    return rsp.version.fileId.isValid();  // Heuristic to check if the returned value is valid
+}
+
+std::unique_ptr<HttpRequest> ModrinthAPI::prepareGetMultipleVersionsRequest(QStringList const& ids) const
+{
+    QJsonArray array;
+    for (auto value : ids) {
+        array.append(value);
+    }
+    return HttpRequest::GET(BuildConfig.MODRINTH_PROD_URL + QString("/versions?ids=%1").arg(QJsonDocument(array).toJson()));
+}
+
+bool ModrinthAPI::handleGetMultipleVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const
+{
+    return handleGetVersionsResponse(doc, rsp);
 }
 }  // namespace API

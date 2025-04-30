@@ -108,9 +108,15 @@ struct CategoriesResponse {
     Platform::ResourceType resourceType{};
 };
 
-struct FileChangelogArgs {
+struct VersionArgs {
     QVariant projectId;
     QVariant fileId;
+};
+
+struct VersionResponse {
+    Platform::Version version;
+    QVariant projectId;
+    Platform::ResourceType resourceType{};
 };
 
 }  // namespace API

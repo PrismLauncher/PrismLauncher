@@ -18,6 +18,7 @@
 #pragma once
 
 #include "PackManifest.h"
+#include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "net/NetJob.h"
 
@@ -45,7 +46,7 @@ class FileResolvingTask : public Task {
    private: /* data */
     Flame::Manifest m_manifest;
     std::shared_ptr<QList<Platform::Project::Ptr>> m_result;
-    std::shared_ptr<QByteArray> m_result2;
+    std::shared_ptr<API::VersionSearchResponse> m_result2;
     NetJob::Ptr m_task;
 };
 }  // namespace Flame
