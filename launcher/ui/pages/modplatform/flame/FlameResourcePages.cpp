@@ -51,7 +51,7 @@ namespace ResourceDownload {
 
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
-    m_model = new ModModel(instance, new ResourceAPI(Platform::Provider::FLAME), Flame::debugName(), Flame::metaEntryBase());
+    m_model = new ModModel(instance, Platform::Provider::FLAME, Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -85,8 +85,7 @@ void FlameModPage::openUrl(const QUrl& url)
 FlameResourcePackPage::FlameResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePackResourcePage(dialog, instance)
 {
-    m_model =
-        new ResourcePackResourceModel(instance, new ResourceAPI(Platform::Provider::FLAME), Flame::debugName(), Flame::metaEntryBase());
+    m_model = new ResourcePackResourceModel(instance, Platform::Provider::FLAME, Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -121,8 +120,7 @@ void FlameResourcePackPage::openUrl(const QUrl& url)
 FlameTexturePackPage::FlameTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance)
     : TexturePackResourcePage(dialog, instance)
 {
-    m_model =
-        new TexturePackResourceModel(instance, new ResourceAPI(Platform::Provider::FLAME), Flame::debugName(), Flame::metaEntryBase());
+    m_model = new TexturePackResourceModel(instance, Platform::Provider::FLAME, Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -157,7 +155,7 @@ void FlameTexturePackPage::openUrl(const QUrl& url)
 FlameShaderPackPage::FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
     : ShaderPackResourcePage(dialog, instance)
 {
-    m_model = new ShaderPackResourceModel(instance, new ResourceAPI(Platform::Provider::FLAME), Flame::debugName(), Flame::metaEntryBase());
+    m_model = new ShaderPackResourceModel(instance, Platform::Provider::FLAME, Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -219,7 +217,7 @@ void FlameModPage::prepareProviderCategories()
     auto response = std::make_shared<API::CategoriesResponse>();
     response->resourceType = Platform::ResourceType::Mod;
     auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
-    auto task = API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetCategoriesRequest(Platform::ResourceType::Mod, response);
+    auto task = API::getFlame()->makeGetCategoriesRequest(Platform::ResourceType::Mod, response);
     netJob->addNetAction(task);
     m_categoriesTask = netJob;
     QObject::connect(m_categoriesTask.get(), &Task::succeeded,

@@ -285,10 +285,9 @@ QList<BasePage*> ModDownloadDialog::getPages()
 
     auto loaders = static_cast<MinecraftInstance*>(m_instance)->getPackProfile()->getSupportedModLoaders().value();
 
-    if (API::ProviderAPI::get(Platform::Provider::MODRINTH)->validateModLoaders(loaders))
+    if (API::getModrinth()->validateModLoaders(loaders))
         pages.append(ModrinthModPage::create(this, *m_instance));
-    if (APPLICATION->capabilities() & Application::SupportsFlame &&
-        API::ProviderAPI::get(Platform::Provider::FLAME)->validateModLoaders(loaders))
+    if (APPLICATION->capabilities() & Application::SupportsFlame && API::getFlame()->validateModLoaders(loaders))
         pages.append(FlameModPage::create(this, *m_instance));
 
     return pages;

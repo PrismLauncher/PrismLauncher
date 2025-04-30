@@ -8,8 +8,7 @@
 
 #include "BaseInstance.h"
 
-#include "api/structures/Project.h"
-
+#include "api/structures/Provider.h"
 #include "ui/pages/modplatform/ResourceModel.h"
 
 class Version;
@@ -20,7 +19,7 @@ class ResourcePackResourceModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ResourcePackResourceModel(BaseInstance const&, ResourceAPI*, QString debugName, QString metaEntryBase);
+    ResourcePackResourceModel(BaseInstance const&, Platform::Provider provider, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort);

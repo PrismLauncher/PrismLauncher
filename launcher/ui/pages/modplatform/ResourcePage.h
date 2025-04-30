@@ -9,7 +9,6 @@
 
 #include "ResourceDownloadTask.h"
 #include "api/structures/Project.h"
-#include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/BasePage.h"
 #include "ui/pages/modplatform/ResourceModel.h"

@@ -36,9 +36,9 @@
 
 #include "ImportPage.h"
 
+#include "api/Api.h"
 #include "api/structures/Arguments.h"
 #include "api/structures/Provider.h"
-#include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ImportPage.h"
 
@@ -132,8 +132,7 @@ void ImportPage::updateState()
             auto fileId = query.allQueryItemValues("fileId")[0];
             auto versionResponse = std::make_shared<API::VersionResponse>();
 
-            auto api = ResourceAPI(Platform::Provider::FLAME);
-            auto job = api.getFile(addonId, fileId, versionResponse);
+            auto job = API::getFlame()->makeGetVersionRequest({ addonId, fileId }, versionResponse, { QString("GetFile::%1").arg(fileId) });
 
             connect(job.get(), &NetJob::failed, this,
                     [this](QString reason) { CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->show(); });

@@ -24,12 +24,9 @@
 #include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "api/structures/Provider.h"
-#include "modplatform/ResourceAPI.h"
 
 #include "net/NetJob.h"
 #include "tasks/Task.h"
-
-static const ResourceAPI flameAPI = ResourceAPI(Platform::Provider::FLAME);
 
 Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess) : m_manifest(toProcess) {}
 
@@ -56,7 +53,7 @@ void Flame::FileResolvingTask::executeTask()
     for (auto file : m_manifest.files) {
         fileIds.push_back(QString::number(file.fileId));
     }
-    m_task = flameAPI.getFiles(fileIds, m_result2);
+    m_task = API::getFlame()->makeGetMultipleVersionsRequest(fileIds, m_result2, { "GetFiles" });
 
     auto step_progress = std::make_shared<TaskStepProgress>();
     connect(m_task.get(), &Task::finished, this, [this, step_progress]() {
@@ -108,8 +105,7 @@ void Flame::FileResolvingTask::netJobFinished()
     }
 
     auto response = std::make_shared<API::MatchHashesResponse>();
-    auto ver_task =
-        API::ProviderAPI::get(Platform::Provider::MODRINTH)->makeMatchHashesRequest({ hashes, Hashing::Algorithm::Sha1 }, response);
+    auto ver_task = API::getModrinth()->makeMatchHashesRequest({ hashes, Hashing::Algorithm::Sha1 }, response);
     auto netJob = makeShared<NetJob>(QString("Modrinth::GetHashes"), APPLICATION->network());
     netJob->addNetAction(ver_task);
 
@@ -168,7 +164,7 @@ void Flame::FileResolvingTask::getFlameProjects()
         addonIds.push_back(QString::number(file.projectId));
     }
 
-    auto task = API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetProjectsRequest(addonIds, m_result);
+    auto task = API::getFlame()->makeGetProjectsRequest(addonIds, m_result);
     m_task = makeShared<NetJob>(QString("Flame::GetProjects"), APPLICATION->network());
     m_task->addNetAction(task);
 

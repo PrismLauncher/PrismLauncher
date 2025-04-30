@@ -7,8 +7,8 @@
 #include "StringUtils.h"
 #include "api/structures/VersionType.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
-#include "modplatform/ResourceAPI.h"
 #include "tasks/SequentialTask.h"
+#include "ui/dialogs/ReviewMessageBox.h"
 #include "ui_ReviewMessageBox.h"
 
 #include "Markdown.h"
@@ -223,14 +223,13 @@ void ResourceUpdateDialog::checkCandidates()
                 QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
                 return;
             }
-            static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
 
             auto dependencyExtraInfo = depTask->getExtraInfo();
 
             for (const auto& dep : depTask->getDependecies()) {
                 auto changelog = dep->version.changelog;
                 if (dep->pack->provider == Platform::Provider::FLAME)
-                    changelog = api.getModFileChangelog(dep->version.projectId.toInt(), dep->version.fileId.toInt());
+                    changelog = API::getFlame()->waitForModFileChangelog(dep->version.projectId.toInt(), dep->version.fileId.toInt());
                 auto download_task = makeShared<ResourceDownloadTask>(dep->pack, dep->version, m_resource_model);
                 auto extraInfo = dependencyExtraInfo.value(dep->version.projectId.toString());
                 CheckUpdateTask::Update updatable = { dep->pack->name,           dep->version.hashes.first().hash,

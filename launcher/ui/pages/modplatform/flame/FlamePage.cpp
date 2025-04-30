@@ -41,7 +41,6 @@
 #include "api/structures/Project.h"
 #include "api/structures/Provider.h"
 #include "api/structures/VersionType.h"
-#include "modplatform/ResourceAPI.h"
 #include "net/NetJob.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/widgets/ModFilterWidget.h"
@@ -55,8 +54,6 @@
 #include "StringUtils.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
-
-static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
 
 FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), m_ui(new Ui::FlamePage), m_dialog(dialog), m_fetch_progress(this, false)
@@ -215,7 +212,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = api.getProjectVersions({ *m_current, {}, {}, Platform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob = API::getFlame()->getProjectVersions({ *m_current, {}, {}, Platform::ResourceType::Modpack }, std::move(callbacks));
 
         m_job = netJob;
         netJob->start();
@@ -227,8 +224,7 @@ void FlamePage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelInde
         suggestCurrent();
     }
     if (m_current->extraData.body.isEmpty()) {
-        auto descriptionJob =
-            API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetDescriptionRequest(m_current->projectId.toString(), m_current);
+        auto descriptionJob = API::getFlame()->makeGetDescriptionRequest(m_current->projectId.toString(), m_current);
 
         auto job = makeShared<NetJob>(QString("Flame::GetDescription"), APPLICATION->network());
         job->addNetAction(descriptionJob);
@@ -355,7 +351,7 @@ void FlamePage::createFilterWidget()
     auto response = std::make_shared<API::CategoriesResponse>();
     response->resourceType = Platform::ResourceType::Modpack;
     auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
-    auto task = API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetCategoriesRequest(Platform::ResourceType::Modpack, response);
+    auto task = API::getFlame()->makeGetCategoriesRequest(Platform::ResourceType::Modpack, response);
     netJob->addNetAction(task);
     m_categoriesTask = netJob;
     QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() { m_filterWidget->setCategories(response->categories); });

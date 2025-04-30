@@ -36,9 +36,9 @@
 #include "FlameInstanceCreationTask.h"
 
 #include "QObjectPtr.h"
+#include "api/Api.h"
 #include "api/structures/Arguments.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
-#include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FileResolvingTask.h"
 #include "modplatform/flame/PackManifest.h"
 
@@ -66,8 +66,6 @@
 #include "net/ApiDownload.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
-
-static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
 
 bool FlameCreationTask::abort()
 {
@@ -184,7 +182,7 @@ bool FlameCreationTask::updateInstance()
         }
 
         auto raw_response = std::make_shared<API::VersionSearchResponse>();
-        auto job = api.getFiles(fileIds, raw_response);
+        auto job = API::getFlame()->makeGetMultipleVersionsRequest(fileIds, raw_response, { "GetFiles" });
 
         QEventLoop loop;
         connect(job.get(), &Task::succeeded, this, [this, raw_response, fileIds, old_inst_dir, &old_files, old_minecraft_dir] {

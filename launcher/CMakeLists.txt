@@ -511,6 +511,7 @@ set(API_SOURCES
     api/structures/HttpRequest.h
 
     api/Api.h
+    api/Api.cpp
     api/RPCSink.h
 
     api/flame/FlameAPI.h
@@ -522,9 +523,6 @@ set(API_SOURCES
     api/modrinth/ModrinthAPI.cpp
     api/modrinth/ModrinthUtils.h
     api/modrinth/ModrinthUtils.cpp
-
-    modplatform/ResourceAPI.h
-    modplatform/ResourceAPI.cpp
 
     modplatform/EnsureMetadataTask.h
     modplatform/EnsureMetadataTask.cpp

@@ -22,7 +22,7 @@
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
-#include "modplatform/ResourceAPI.h"
+#include "api/structures/ModLoader.h"
 
 namespace FTBImportAPP {
 

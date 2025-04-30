@@ -9,7 +9,6 @@
 #include "BaseInstance.h"
 
 #include "api/structures/Project.h"
-#include "modplatform/ResourceAPI.h"
 
 #include "ui/pages/modplatform/ResourceModel.h"
 #include "ui/widgets/ModFilterWidget.h"
@@ -24,7 +23,7 @@ class ModModel : public ResourceModel {
     Q_OBJECT
 
    public:
-    ModModel(BaseInstance&, ResourceAPI* api, QString debugName, QString metaEntryBase);
+    ModModel(BaseInstance&, Platform::Provider provider, QString metaEntryBase);
 
     /* Ask the API for more information */
     void searchWithTerm(const QString& term, unsigned int sort, bool filter_changed);

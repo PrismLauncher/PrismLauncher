@@ -174,7 +174,7 @@ void ResourceFolderModel::installResourceWithFlameMetadata(QString path, Platfor
         pack->provider = Platform::Provider::FLAME;
 
         auto job = makeShared<NetJob>(QString("%1::GetProject").arg(vers.projectId.toString()), APPLICATION->network());
-        auto getProjectJob = API::ProviderAPI::get(Platform::Provider::FLAME)->makeGetProjectRequest(vers.projectId.toString(), pack);
+        auto getProjectJob = API::getFlame()->makeGetProjectRequest(vers.projectId.toString(), pack);
         job->addNetAction(getProjectJob);
         QObject::connect(job.get(), &Task::failed, this, install);
         QObject::connect(job.get(), &Task::aborted, this, install);

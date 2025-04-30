@@ -26,7 +26,6 @@
 #include "api/structures/Project.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
-#include "modplatform/ResourceAPI.h"
 #include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
 #include "ui/pages/modplatform/ModModel.h"
@@ -59,14 +58,6 @@ class GetModDependenciesTask : public SequentialTask {
     QHash<QString, PackDependencyExtraInfo> getExtraInfo();
 
    private:
-    inline ResourceAPI* getAPI(Platform::Provider provider)
-    {
-        if (provider == Platform::Provider::FLAME)
-            return &m_flameAPI;
-        else
-            return &m_modrinthAPI;
-    }
-
    protected slots:
     Task::Ptr prepareDependencyTask(const Platform::Dependency&, Platform::Provider, int);
     QList<Platform::Dependency> getDependenciesForVersion(const Platform::Version&, Platform::Provider providerName);
@@ -86,7 +77,4 @@ class GetModDependenciesTask : public SequentialTask {
 
     Version m_version;
     Platform::ModLoaders m_loaderType;
-
-    ResourceAPI m_modrinthAPI = ResourceAPI(Platform::Provider::MODRINTH);
-    ResourceAPI m_flameAPI = ResourceAPI(Platform::Provider::FLAME);
 };

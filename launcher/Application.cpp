@@ -44,6 +44,8 @@
 #include "BuildConfig.h"
 
 #include "DataMigrationTask.h"
+#include "api/flame/FlameAPI.h"
+#include "api/modrinth/ModrinthAPI.h"
 #include "java/JavaInstallList.h"
 #include "net/PasteUpload.h"
 #include "pathmatcher/MultiMatcher.h"
@@ -318,6 +320,9 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
     // Don't quit on hiding the last window
     this->setQuitOnLastWindowClosed(false);
     this->setQuitLockEnabled(false);
+
+    API::FlameAPI::registerClass();
+    API::ModrinthAPI::registerClass();
 
     // Commandline parsing
     QCommandLineParser parser;

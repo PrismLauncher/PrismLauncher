@@ -16,8 +16,9 @@
 #include "Application.h"
 #include "BuildConfig.h"
 
+#include "api/Api.h"
+#include "api/structures/Provider.h"
 #include "api/structures/ResourceType.h"
-#include "modplatform/ResourceAPI.h"
 #include "net/ApiDownload.h"
 #include "net/NetJob.h"
 
@@ -29,7 +30,7 @@ namespace ResourceDownload {
 
 QHash<ResourceModel*, bool> ResourceModel::s_running_models;
 
-ResourceModel::ResourceModel(ResourceAPI* api) : QAbstractListModel(), m_api(api)
+ResourceModel::ResourceModel(Platform::Provider provider) : QAbstractListModel(), m_provider(provider)
 {
     s_running_models.insert(this, true);
     if (APPLICATION_DYN) {
@@ -160,9 +161,10 @@ void ResourceModel::search()
                     return;
                 searchRequestForOneSucceeded(pack);
             };
-            if (auto job = m_api->getProjectInfo(
-                    { Platform::ResourceType::Mod, std::make_shared<Platform::Project>(Platform::Project{ projectId }) },
-                    std::move(callbacks));
+            if (auto job = API::ProviderAPI::get(m_provider)
+                               ->getProjectInfo(
+                                   { Platform::ResourceType::Mod, std::make_shared<Platform::Project>(Platform::Project{ projectId }) },
+                                   std::move(callbacks));
                 job)
                 runSearchJob(job);
             return;
@@ -188,7 +190,7 @@ void ResourceModel::search()
         searchRequestAborted();
     };
 
-    if (auto job = m_api->searchProjects(std::move(args), std::move(callbacks)); job)
+    if (auto job = API::ProviderAPI::get(m_provider)->searchProjects(std::move(args), std::move(callbacks)); job)
         runSearchJob(job);
 }
 
@@ -217,7 +219,7 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
                                       tr("A network error occurred. Could not load project versions: %1").arg(reason));
             };
 
-        if (auto job = m_api->getProjectVersions(std::move(args), std::move(callbacks)); job)
+        if (auto job = API::ProviderAPI::get(m_provider)->getProjectVersions(std::move(args), std::move(callbacks)); job)
             runInfoJob(job);
     }
 
@@ -241,7 +243,7 @@ void ResourceModel::loadEntry(const QModelIndex& entry)
             qCritical() << tr("The request was aborted for an unknown reason");
         };
 
-        if (auto job = m_api->getProjectInfo(std::move(args), std::move(callbacks)); job)
+        if (auto job = API::ProviderAPI::get(m_provider)->getProjectInfo(std::move(args), std::move(callbacks)); job)
             runInfoJob(job);
     }
 }

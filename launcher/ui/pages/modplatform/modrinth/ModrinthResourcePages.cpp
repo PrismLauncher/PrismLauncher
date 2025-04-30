@@ -38,7 +38,6 @@
 
 #include "ModrinthResourcePages.h"
 #include "api/structures/Provider.h"
-#include "modplatform/ResourceAPI.h"
 #include "ui_ResourcePage.h"
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -47,7 +46,7 @@ namespace ResourceDownload {
 
 ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
-    m_model = new ModModel(instance, new ResourceAPI(Platform::Provider::MODRINTH), Modrinth::debugName(), Modrinth::metaEntryBase());
+    m_model = new ModModel(instance, Platform::Provider::MODRINTH, Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -66,8 +65,7 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instan
 ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePackResourcePage(dialog, instance)
 {
-    m_model = new ResourcePackResourceModel(instance, new ResourceAPI(Platform::Provider::MODRINTH), Modrinth::debugName(),
-                                            Modrinth::metaEntryBase());
+    m_model = new ResourcePackResourceModel(instance, Platform::Provider::MODRINTH, Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -86,8 +84,7 @@ ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* d
 ModrinthTexturePackPage::ModrinthTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance)
     : TexturePackResourcePage(dialog, instance)
 {
-    m_model = new TexturePackResourceModel(instance, new ResourceAPI(Platform::Provider::MODRINTH), Modrinth::debugName(),
-                                           Modrinth::metaEntryBase());
+    m_model = new TexturePackResourceModel(instance, Platform::Provider::MODRINTH, Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -106,8 +103,7 @@ ModrinthTexturePackPage::ModrinthTexturePackPage(TexturePackDownloadDialog* dial
 ModrinthShaderPackPage::ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
     : ShaderPackResourcePage(dialog, instance)
 {
-    m_model = new ShaderPackResourceModel(instance, new ResourceAPI(Platform::Provider::MODRINTH), Modrinth::debugName(),
-                                          Modrinth::metaEntryBase());
+    m_model = new ShaderPackResourceModel(instance, Platform::Provider::MODRINTH, Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -153,7 +149,7 @@ void ModrinthModPage::prepareProviderCategories()
     auto response = std::make_shared<API::CategoriesResponse>();
     response->resourceType = Platform::ResourceType::Mod;
     auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
-    auto task = API::ProviderAPI::get(Platform::Provider::MODRINTH)->makeGetCategoriesRequest(Platform::ResourceType::Mod, response);
+    auto task = API::getModrinth()->makeGetCategoriesRequest(Platform::ResourceType::Mod, response);
     netJob->addNetAction(task);
     m_categoriesTask = netJob;
     QObject::connect(m_categoriesTask.get(), &Task::succeeded,

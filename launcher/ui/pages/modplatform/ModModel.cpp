@@ -5,6 +5,7 @@
 #include "ModModel.h"
 
 #include "api/structures/Project.h"
+#include "api/structures/Provider.h"
 #include "api/structures/ResourceType.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
@@ -15,8 +16,11 @@
 
 namespace ResourceDownload {
 
-ModModel::ModModel(BaseInstance& base_inst, ResourceAPI* api, QString debugName, QString metaEntryBase)
-    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
+ModModel::ModModel(BaseInstance& base_inst, Platform::Provider provider, QString metaEntryBase)
+    : ResourceModel(provider)
+    , m_base_instance(base_inst)
+    , m_debugName(Platform::ProviderUtils::readableName(provider) + " (Model)")
+    , m_metaEntryBase(metaEntryBase)
 {}
 
 /******** Make data requests ********/

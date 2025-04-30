@@ -22,13 +22,11 @@
 #include <algorithm>
 #include <memory>
 #include "Application.h"
-#include "Json.h"
 #include "QObjectPtr.h"
 #include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "minecraft/PackProfile.h"
 #include "minecraft/mod/MetadataHandler.h"
-#include "modplatform/ResourceAPI.h"
 #include "tasks/SequentialTask.h"
 #include "ui/pages/modplatform/ModModel.h"
 
@@ -211,7 +209,7 @@ Task::Ptr GetModDependenciesTask::prepareDependencyTask(const Platform::Dependen
         }
     };
 
-    auto version = getAPI(provider)->getDependencyVersion(std::move(args), std::move(callbacks));
+    auto version = API::ProviderAPI::get(provider)->getDependencyVersion(std::move(args), std::move(callbacks));
     tasks->addTask(version);
     return tasks;
 }

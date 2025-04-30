@@ -6,6 +6,8 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QUrlQuery>
+#include "api/Api.h"
+#include "api/structures/Provider.h"
 #include "ui_ManagedPackPage.h"
 
 #include <QFileDialog>
@@ -14,19 +16,15 @@
 #include <QStyleFactory>
 
 #include "Application.h"
-#include "BuildConfig.h"
 #include "InstanceImportTask.h"
 #include "InstanceList.h"
 #include "InstanceTask.h"
-#include "Json.h"
 #include "Markdown.h"
 #include "StringUtils.h"
 
 #include "ui/InstanceWindow.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/ProgressDialog.h"
-
-#include "net/ApiDownload.h"
 
 /** This is just to override the combo box popup behavior so that the combo box doesn't take the whole screen.
  *  ... thanks Qt.
@@ -285,9 +283,9 @@ void ModrinthManagedPackPage::parseManagedPack()
 
         m_loaded = true;
     };
-    callbacks.on_fail = [this](QString reason, int) { setFailState(); };
+    callbacks.on_fail = [this](QString, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
-    m_fetch_job = m_api.getProjectVersions({ m_pack, {}, {}, Platform::ResourceType::Modpack }, std::move(callbacks));
+    m_fetch_job = API::getModrinth()->getProjectVersions({ m_pack, {}, {}, Platform::ResourceType::Modpack }, std::move(callbacks));
 
     ui->changelogTextBrowser->setText(tr("Fetching changelogs..."));
 
@@ -458,7 +456,7 @@ void FlameManagedPackPage::parseManagedPack()
     };
     callbacks.on_fail = [this](QString reason, int) { setFailState(); };
     callbacks.on_abort = [this]() { setFailState(); };
-    m_fetch_job = m_api.getProjectVersions({ m_pack, {}, {}, Platform::ResourceType::Modpack }, std::move(callbacks));
+    m_fetch_job = API::getFlame()->getProjectVersions({ m_pack, {}, {}, Platform::ResourceType::Modpack }, std::move(callbacks));
 
     m_fetch_job->start();
 }
@@ -479,7 +477,7 @@ void FlameManagedPackPage::suggestVersion()
     auto version = m_pack.versions.at(index);
 
     ui->changelogTextBrowser->setHtml(
-        StringUtils::htmlListPatch(m_api.getModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
+        StringUtils::htmlListPatch(API::getFlame()->waitForModFileChangelog(m_inst->getManagedPackID().toInt(), version.fileId.toInt())));
 
     ManagedPackPage::suggestVersion();
 }

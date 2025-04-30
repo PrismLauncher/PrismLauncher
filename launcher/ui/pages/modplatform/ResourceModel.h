@@ -11,13 +11,13 @@
 #include "QObjectPtr.h"
 
 #include "ResourceDownloadTask.h"
+#include "api/Api.h"
 #include "api/structures/Project.h"
-#include "modplatform/ResourceAPI.h"
 
+#include "api/structures/Provider.h"
 #include "tasks/ConcurrentTask.h"
 
 class NetJob;
-class ResourceAPI;
 
 namespace ModPlatform {
 struct IndexedPack;
@@ -33,7 +33,7 @@ class ResourceModel : public QAbstractListModel {
    public:
     using DownloadTaskPtr = shared_qobject_ptr<ResourceDownloadTask>;
 
-    ResourceModel(ResourceAPI* api);
+    ResourceModel(Platform::Provider);
     ~ResourceModel() override;
 
     [[nodiscard]] auto data(const QModelIndex&, int role) const -> QVariant override;
@@ -54,7 +54,7 @@ class ResourceModel : public QAbstractListModel {
     [[nodiscard]] bool hasActiveInfoJob() const { return m_current_info_job.isRunning(); }
     [[nodiscard]] Task::Ptr activeSearchJob() { return hasActiveSearchJob() ? m_current_search_job : nullptr; }
 
-    [[nodiscard]] auto getSortingMethods() const { return m_api->getSortingMethods(); }
+    [[nodiscard]] auto getSortingMethods() const { return API::ProviderAPI::get(m_provider)->getSortingMethods(); }
 
     virtual QVariant getInstalledPackVersion(Platform::Project::Ptr) const { return {}; }
     /** Whether the version is opted out or not. Currently only makes sense in CF. */
@@ -121,7 +121,7 @@ class ResourceModel : public QAbstractListModel {
     QString m_search_term;
     unsigned int m_current_sort_index = 0;
 
-    std::unique_ptr<ResourceAPI> m_api;
+    Platform::Provider m_provider;
 
     // Job for searching for new entries
     shared_qobject_ptr<Task> m_current_search_job;

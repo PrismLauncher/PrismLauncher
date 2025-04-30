@@ -157,8 +157,7 @@ void ModrinthPackExportTask::makeApiRequest()
     else {
         setStatus(tr("Finding versions for hashes..."));
         auto response = std::make_shared<API::MatchHashesResponse>();
-        auto ver_task = API::ProviderAPI::get(Platform::Provider::MODRINTH)
-                            ->makeMatchHashesRequest({ pendingHashes.values(), Hashing::Algorithm::Sha512 }, response);
+        auto ver_task = API::getModrinth()->makeMatchHashesRequest({ pendingHashes.values(), Hashing::Algorithm::Sha512 }, response);
         auto netJob = makeShared<NetJob>(QString("Modrinth::GetHashes"), APPLICATION->network());
         netJob->addNetAction(ver_task);
         netJob->setAskRetry(false);

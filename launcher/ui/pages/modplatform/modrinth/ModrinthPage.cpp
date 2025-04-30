@@ -36,6 +36,7 @@
 
 #include "ModrinthPage.h"
 #include "Version.h"
+#include "api/Api.h"
 #include "api/structures/Project.h"
 #include "api/structures/ResourceType.h"
 #include "api/structures/VersionType.h"
@@ -165,7 +166,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             suggestCurrent();
             updateUI();
         };
-        if (auto netJob = m_api.getProjectInfo(
+        if (auto netJob = API::getModrinth()->getProjectInfo(
                 { Platform::ResourceType::Mod, std::make_shared<Platform::Project>(Platform::Project{ m_current->projectId }) },
                 std::move(callbacks));
             netJob) {
@@ -228,7 +229,7 @@ void ModrinthPage::onSelectionChanged(QModelIndex curr, [[maybe_unused]] QModelI
             CustomMessageBox::selectable(this, tr("Error"), reason, QMessageBox::Critical)->exec();
         };
 
-        auto netJob = m_api.getProjectVersions({ *m_current, {}, {}, Platform::ResourceType::Modpack }, std::move(callbacks));
+        auto netJob = API::getModrinth()->getProjectVersions({ *m_current, {}, {}, Platform::ResourceType::Modpack }, std::move(callbacks));
 
         m_job2 = netJob;
         m_job2->start();
@@ -384,7 +385,7 @@ void ModrinthPage::createFilterWidget()
     auto response = std::make_shared<API::CategoriesResponse>();
     response->resourceType = Platform::ResourceType::Modpack;
     auto netJob = makeShared<NetJob>(QString("Flame::GetCategories"), APPLICATION->network());
-    auto task = API::ProviderAPI::get(Platform::Provider::MODRINTH)->makeGetCategoriesRequest(Platform::ResourceType::Modpack, response);
+    auto task = API::getModrinth()->makeGetCategoriesRequest(Platform::ResourceType::Modpack, response);
     netJob->addNetAction(task);
     m_categoriesTask = netJob;
     QObject::connect(m_categoriesTask.get(), &Task::succeeded, [this, response]() { m_filterWidget->setCategories(response->categories); });

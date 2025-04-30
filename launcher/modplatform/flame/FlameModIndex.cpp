@@ -2,12 +2,10 @@
 
 #include "FileSystem.h"
 #include "Json.h"
+#include "api/Api.h"
 #include "api/structures/Hash.h"
 #include "api/structures/Project.h"
 #include "api/structures/Provider.h"
-#include "modplatform/ResourceAPI.h"
-
-static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
 
 Platform::ResourceType getResourceType(int classId)
 {
@@ -191,7 +189,7 @@ auto FlameMod::loadIndexedPackVersion(QJsonObject& obj, bool load_changelog) -> 
     }
 
     if (load_changelog)
-        file.changelog = api.getModFileChangelog(file.projectId.toInt(), file.fileId.toInt());
+        file.changelog = API::getFlame()->waitForModFileChangelog(file.projectId.toInt(), file.fileId.toInt());
 
     return file;
 }

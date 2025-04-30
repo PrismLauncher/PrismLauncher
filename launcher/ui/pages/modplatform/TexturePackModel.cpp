@@ -15,8 +15,8 @@
 static std::list<Version> s_availableVersions = {};
 
 namespace ResourceDownload {
-TexturePackResourceModel::TexturePackResourceModel(BaseInstance const& inst, ResourceAPI* api, QString debugName, QString metaEntryBase)
-    : ResourcePackResourceModel(inst, api, debugName, metaEntryBase), m_version_list(APPLICATION->metadataIndex()->get("net.minecraft"))
+TexturePackResourceModel::TexturePackResourceModel(BaseInstance const& inst, Platform::Provider provider, QString metaEntryBase)
+    : ResourcePackResourceModel(inst, provider, metaEntryBase), m_version_list(APPLICATION->metadataIndex()->get("net.minecraft"))
 {
     if (!m_version_list->isLoaded()) {
         qDebug() << "Loading version list...";

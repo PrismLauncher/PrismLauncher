@@ -190,7 +190,7 @@ void FlamePackExportTask::makeApiRequest()
 
     QStringList fingerprints = pendingHashes.keys();
 
-    auto hashTask = API::ProviderAPI::get(Platform::Provider::FLAME)->makeMatchHashesRequest({ fingerprints }, response);
+    auto hashTask = API::getFlame()->makeMatchHashesRequest({ fingerprints }, response);
 
     auto ver_task = makeShared<NetJob>(QString("Flame::GetHashes"), APPLICATION->network());
     ver_task->addNetAction(hashTask);
@@ -242,7 +242,7 @@ void FlamePackExportTask::getProjectsInfo()
     auto response = std::make_shared<Platform::Project>();
     auto responses = std::make_shared<QList<Platform::Project::Ptr>>();
 
-    auto api = API::ProviderAPI::get(Platform::Provider::FLAME);
+    auto api = API::getFlame();
     if (addonIds.isEmpty()) {
         buildZip();
         return;

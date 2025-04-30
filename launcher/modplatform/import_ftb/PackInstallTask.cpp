@@ -24,7 +24,6 @@
 #include "FileSystem.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
-#include "modplatform/ResourceAPI.h"
 #include "modplatform/import_ftb/PackHelpers.h"
 #include "settings/INISettingsObject.h"
 

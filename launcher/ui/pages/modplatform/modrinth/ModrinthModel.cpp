@@ -37,6 +37,8 @@
 #include "ModrinthModel.h"
 
 #include "BuildConfig.h"
+#include "api/Api.h"
+#include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "api/structures/ResourceType.h"
 #include "net/NetJob.h"
@@ -130,7 +132,6 @@ void ModpackListModel::performPaginatedSearch()
 {
     if (hasActiveSearchJob())
         return;
-    static const ResourceAPI api = ResourceAPI(Platform::Provider::MODRINTH);
 
     if (m_currentSearchTerm.startsWith("#")) {
         auto projectId = m_currentSearchTerm.mid(1);
@@ -143,9 +144,9 @@ void ModpackListModel::performPaginatedSearch()
                 qCritical() << "Search task aborted by an unknown reason!";
                 searchRequestFailed("Aborted");
             };
-            if (auto job =
-                    api.getProjectInfo({ Platform::ResourceType::Mod, std::make_shared<Platform::Project>(Platform::Project{ projectId }) },
-                                       std::move(callbacks));
+            if (auto job = API::getModrinth()->getProjectInfo(
+                    { Platform::ResourceType::Mod, std::make_shared<Platform::Project>(Platform::Project{ projectId }) },
+                    std::move(callbacks));
                 job) {
                 m_jobPtr = job;
                 m_jobPtr->start();
@@ -161,9 +162,10 @@ void ModpackListModel::performPaginatedSearch()
     callbacks.on_succeed = [this](auto& doc) { searchRequestFinished(doc); };
     callbacks.on_fail = [this](QString reason, int) { searchRequestFailed(reason); };
 
-    auto netJob = api.searchProjects({ Platform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders,
-                                       m_filter->versions, Platform::Side::NoSide, m_filter->categoryIds, m_filter->openSource },
-                                     std::move(callbacks));
+    auto netJob = API::getModrinth()->searchProjects(
+        { Platform::ResourceType::Modpack, m_nextSearchOffset, m_currentSearchTerm, sort, m_filter->loaders, m_filter->versions,
+          Platform::Side::NoSide, m_filter->categoryIds, m_filter->openSource },
+        std::move(callbacks));
 
     m_jobPtr = netJob;
     m_jobPtr->start();

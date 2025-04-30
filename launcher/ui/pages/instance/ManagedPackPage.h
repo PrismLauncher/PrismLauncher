@@ -8,7 +8,6 @@
 
 #include "api/structures/Project.h"
 
-#include "modplatform/ResourceAPI.h"
 #include "ui/pages/BasePage.h"
 
 #include <QWidget>
@@ -128,7 +127,6 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     Task::Ptr m_fetch_job = nullptr;
 
     Platform::Project m_pack;
-    ResourceAPI m_api = ResourceAPI(Platform::Provider::MODRINTH);
 };
 
 class FlameManagedPackPage final : public ManagedPackPage {
@@ -152,5 +150,4 @@ class FlameManagedPackPage final : public ManagedPackPage {
     Task::Ptr m_fetch_job = nullptr;
 
     Platform::Project m_pack;
-    ResourceAPI m_api = ResourceAPI(Platform::Provider::FLAME);
 };

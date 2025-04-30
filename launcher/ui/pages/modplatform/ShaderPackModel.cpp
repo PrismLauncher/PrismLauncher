@@ -5,12 +5,16 @@
 #include "ShaderPackModel.h"
 
 #include <QMessageBox>
+#include "api/structures/Provider.h"
 #include "api/structures/ResourceType.h"
 
 namespace ResourceDownload {
 
-ShaderPackResourceModel::ShaderPackResourceModel(BaseInstance const& base_inst, ResourceAPI* api, QString debugName, QString metaEntryBase)
-    : ResourceModel(api), m_base_instance(base_inst), m_debugName(debugName + " (Model)"), m_metaEntryBase(metaEntryBase)
+ShaderPackResourceModel::ShaderPackResourceModel(BaseInstance const& base_inst, Platform::Provider provider, QString metaEntryBase)
+    : ResourceModel(provider)
+    , m_base_instance(base_inst)
+    , m_debugName(Platform::ProviderUtils::readableName(provider) + " (Model)")
+    , m_metaEntryBase(metaEntryBase)
 {}
 
 /******** Make data requests ********/

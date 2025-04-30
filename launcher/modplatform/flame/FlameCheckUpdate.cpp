@@ -17,8 +17,6 @@
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
-static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
-
 bool FlameCheckUpdate::abort()
 {
     bool result = false;
@@ -48,8 +46,7 @@ void FlameCheckUpdate::executeTask()
         auto response = std::make_shared<API::VersionSearchResponse>();
         response->projectId = resource->metadata()->project_id;
         response->resourceType = Platform::ResourceType::Mod;
-        auto task = API::ProviderAPI::get(Platform::Provider::FLAME)
-                        ->makeGetVersionsRequest({ { resource->metadata()->project_id.toString() }, m_game_versions }, response);
+        auto task = API::getFlame()->makeGetVersionsRequest({ { resource->metadata()->project_id.toString() }, m_game_versions }, response);
 
         connect(task.get(), &Task::succeeded, this, [this, resource, response] { getLatestVersionCallback(resource, response->versions); });
         netJob->addNetAction(task);
@@ -159,7 +156,7 @@ void FlameCheckUpdate::getLatestVersionCallback(Resource* resource, QList<Platfo
 
         auto download_task = makeShared<ResourceDownloadTask>(pack, latest_ver.value(), m_resource_model);
         m_updates.emplace_back(pack->name, resource->metadata()->hash, old_version, latest_ver->version, latest_ver->version_type,
-                               api.getModFileChangelog(latest_ver->projectId.toInt(), latest_ver->fileId.toInt()),
+                               API::getFlame()->waitForModFileChangelog(latest_ver->projectId.toInt(), latest_ver->fileId.toInt()),
                                Platform::Provider::FLAME, download_task, resource->enabled());
     }
     m_deps.append(std::make_shared<GetModDependenciesTask::PackDependency>(pack, latest_ver.value()));
@@ -179,7 +176,7 @@ void FlameCheckUpdate::collectBlockedMods()
     auto response = std::make_shared<Platform::Project>();
     auto responses = std::make_shared<QList<Platform::Project::Ptr>>();
 
-    auto api = API::ProviderAPI::get(Platform::Provider::FLAME);
+    auto api = API::getFlame();
     if (addonIds.isEmpty()) {
         emitSucceeded();
         return;

@@ -1,25 +1,66 @@
-#include "modplatform/ResourceAPI.h"
-#include <memory>
+// SPDX-FileCopyrightText: 2023 flowln <flowlnlnln@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only AND Apache-2.0
+/*
+ *  Prism Launcher - Minecraft Launcher
+ *  Copyright (c) 2025 Trial97 <alexandru.tripon97@gmail.com>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ * This file incorporates work covered by the following copyright and
+ * permission notice:
+ *
+ *      Copyright 2013-2021 MultiMC Contributors
+ *
+ *      Licensed under the Apache License, Version 2.0 (the "License");
+ *      you may not use this file except in compliance with the License.
+ *      You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *      Unless required by applicable law or agreed to in writing, software
+ *      distributed under the License is distributed on an "AS IS" BASIS,
+ *      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *      See the License for the specific language governing permissions and
+ *      limitations under the License.
+ */
 
-#include "Application.h"
 #include "api/Api.h"
-#include "api/structures/Arguments.h"
-#include "net/NetJob.h"
+namespace API {
 
-#include "api/structures/Project.h"
+QString ProviderAPI::waitForModFileChangelog(QVariant modId, QVariant fileId) const
+{
+    QEventLoop lock;
 
-Task::Ptr ResourceAPI::searchProjects(API::SearchArgs&& args, API::Callback<QList<Platform::Project::Ptr>>&& callbacks) const
+    auto response = std::make_shared<QString>();
+    auto netJob = makeGetFileChangelogRequest({ modId, fileId }, response, { QString("FileChangelog::%1").arg(fileId.toString()) });
+    if (netJob) {
+        QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
+
+        netJob->start();
+        lock.exec();
+    }
+
+    return *response;
+}
+Task::Ptr ProviderAPI::searchProjects(SearchArgs&& args, Callback<QList<Platform::Project::Ptr>>&& callbacks) const
 {
     std::shared_ptr<QList<Platform::Project::Ptr>> newList = std::make_shared<QList<Platform::Project::Ptr>>();
-    auto job = API::ProviderAPI::get(provider())->makeSearchRequest(args, newList);
-    if (!job) {
+    auto netJob = makeSearchRequest(args, newList, { "Search" });
+    if (!netJob) {
         callbacks.on_fail("Failed to create search URL", -1);
         return nullptr;
     }
-
-    auto netJob = makeShared<NetJob>(QString("%1::Search").arg(debugName()), APPLICATION->network());
-
-    netJob->addNetAction(job);
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [newList, callbacks] { callbacks.on_succeed(*newList); });
 
@@ -39,17 +80,12 @@ Task::Ptr ResourceAPI::searchProjects(API::SearchArgs&& args, API::Callback<QLis
 
     return netJob;
 }
-
-Task::Ptr ResourceAPI::getProjectVersions(API::VersionSearchArgs&& args, API::Callback<QVector<Platform::Version>>&& callbacks) const
+Task::Ptr ProviderAPI::getProjectVersions(VersionSearchArgs&& args, Callback<QVector<Platform::Version>>&& callbacks) const
 {
-    auto response = std::make_shared<API::VersionSearchResponse>();
+    auto response = std::make_shared<VersionSearchResponse>();
     response->projectId = args.pack.projectId;
     response->resourceType = args.resourceType;
-    auto versionJob = API::ProviderAPI::get(provider())->makeGetVersionsRequest(args, response);
-
-    auto netJob = makeShared<NetJob>(QString("%1::Versions").arg(args.pack.name), APPLICATION->network());
-
-    netJob->addNetAction(versionJob);
+    auto netJob = makeGetVersionsRequest(args, response, { QString("Versions::%1").arg(args.pack.name) });
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [response, callbacks] { callbacks.on_succeed(response->versions); });
 
@@ -69,15 +105,12 @@ Task::Ptr ResourceAPI::getProjectVersions(API::VersionSearchArgs&& args, API::Ca
 
     return netJob;
 }
-
-Task::Ptr ResourceAPI::getProjectInfo(API::ProjectInfoArgs&& args, API::Callback<Platform::Project>&& callbacks) const
+Task::Ptr ProviderAPI::getProjectInfo(ProjectInfoArgs&& args, Callback<Platform::Project>&& callbacks) const
 {
     auto response = args.pack;
     auto projectId = args.pack->projectId.toString();
-    auto job = makeShared<NetJob>(QString("%1::GetProject").arg(projectId), APPLICATION->network(), 1);
-    auto projectRequest = API::ProviderAPI::get(provider())->makeGetProjectRequest(projectId, response);
-    auto descriptionRequest = API::ProviderAPI::get(provider())->makeGetDescriptionRequest(projectId, response);
-    job->addNetAction(projectRequest);
+    auto job = makeGetProjectRequest(projectId, response, { QString("GetProject::%1").arg(projectId), 1 });
+    auto descriptionRequest = makeGetDescriptionRequest(projectId, response);
     if (descriptionRequest) {
         job->addNetAction(descriptionRequest);
     }
@@ -101,17 +134,12 @@ Task::Ptr ResourceAPI::getProjectInfo(API::ProjectInfoArgs&& args, API::Callback
     QObject::connect(job.get(), &NetJob::aborted, [callbacks] { callbacks.on_abort(); });
     return job;
 }
-
-Task::Ptr ResourceAPI::getDependencyVersion(API::DependencySearchArgs&& args, API::Callback<Platform::Version>&& callbacks) const
+Task::Ptr ProviderAPI::getDependencyVersion(DependencySearchArgs&& args, Callback<Platform::Version>&& callbacks) const
 {
-    auto response = std::make_shared<API::VersionSearchResponse>();
+    auto response = std::make_shared<VersionSearchResponse>();
     response->projectId = args.dependency.projectId;
     response->resourceType = Platform::ResourceType::Mod;
-    auto versionJob = API::ProviderAPI::get(provider())->makeGetDependencyRequest(args, response);
-
-    auto netJob = makeShared<NetJob>(QString("%1::Dependency").arg(args.dependency.projectId.toString()), APPLICATION->network());
-
-    netJob->addNetAction(versionJob);
+    auto netJob = makeGetDependencyRequest(args, response, { QString("Dependency::%1").arg(args.dependency.projectId.toString()) });
 
     QObject::connect(netJob.get(), &NetJob::succeeded, [response, callbacks] {
         auto bestMatch = response->versions.size() != 0 ? response->versions.front() : Platform::Version();
@@ -132,53 +160,4 @@ Task::Ptr ResourceAPI::getDependencyVersion(API::DependencySearchArgs&& args, AP
     });
     return netJob;
 }
-
-QString ResourceAPI::getModFileChangelog(QVariant modId, QVariant fileId) const
-{
-    QEventLoop lock;
-
-    auto netJob = makeShared<NetJob>(QString("%1::FileChangelog").arg(debugName()), APPLICATION->network());
-    auto response = std::make_shared<QString>();
-    auto task = API::ProviderAPI::get(provider())->makeGetFileChangelogRequest({ modId, fileId }, response);
-    if (task) {
-        netJob->addNetAction(task);
-
-        QObject::connect(netJob.get(), &NetJob::finished, [&lock] { lock.quit(); });
-
-        netJob->start();
-        lock.exec();
-    }
-
-    return *response;
-}
-
-Task::Ptr ResourceAPI::getFile(const QString& addonId, const QString& fileId, std::shared_ptr<API::VersionResponse> response) const
-{
-    auto netJob = makeShared<NetJob>(QString("%1::GetFile").arg(debugName()), APPLICATION->network());
-    auto task = API::ProviderAPI::get(provider())->makeGetVersionRequest({ addonId, fileId }, response);
-
-    netJob->addNetAction(task);
-
-    return netJob;
-}
-
-NetJob::Ptr ResourceAPI::getFiles(const QStringList& fileIds, std::shared_ptr<API::VersionSearchResponse> response) const
-{
-    auto netJob = makeShared<NetJob>(QString("%1::GetFiles").arg(debugName()), APPLICATION->network());
-    auto task = API::ProviderAPI::get(provider())->makeGetMultipleVersionsRequest(fileIds, response);
-
-    netJob->addNetAction(task);
-
-    return netJob;
-}
-
-Task::Ptr ResourceAPI::latestVersions(const API::GetLatestVersionsArgs& args,
-                                      std::shared_ptr<API::GetLatestVersionsResponse> response) const
-{
-    auto netJob = makeShared<NetJob>(QString("%1::::GetLatestVersions").arg(debugName()), APPLICATION->network());
-    auto task = API::ProviderAPI::get(provider())->makeGetLatestVersionsRequest(args, response);
-    if (task) {
-        netJob->addNetAction(task);
-    }
-    return netJob;
-}
+}  // namespace API

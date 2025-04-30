@@ -45,6 +45,7 @@
 #include <functional>
 #include <memory>
 
+#include "Application.h"
 #include "api/RPCSink.h"
 #include "api/structures/Arguments.h"
 #include "api/structures/HttpRequest.h"
@@ -54,6 +55,7 @@
 #include "api/structures/SortingMethod.h"
 #include "net/ApiDownload.h"
 #include "net/ApiUpload.h"
+#include "net/NetJob.h"
 #include "net/NetRequest.h"
 #include "net/Sink.h"
 
@@ -71,6 +73,23 @@ inline Net::NetRequest::Ptr makeRequest(const std::unique_ptr<API::HttpRequest> 
         default:
             return nullptr;
     }
+}
+
+struct NetJobArgs {
+    QString name = "";
+    int maxConcurrent = -1;
+};
+
+inline NetJob::Ptr wrapRequest(Net::NetRequest::Ptr job, NetJobArgs netjobArgs)
+{
+    if (!job) {
+        return nullptr;
+    }
+    auto netJob = makeShared<NetJob>(netjobArgs.name, APPLICATION->network(), netjobArgs.maxConcurrent);
+
+    netJob->addNetAction(job);
+
+    return netJob;
 }
 
 class ProviderAPI {
@@ -115,6 +134,8 @@ class ProviderAPI {
     [[nodiscard]] virtual bool handleGetVersionResponse(const QJsonDocument& doc, VersionResponse& rsp) const = 0;
     [[nodiscard]] virtual bool handleGetMultipleVersionsResponse(const QJsonDocument& doc, VersionSearchResponse& rsp) const = 0;
     [[nodiscard]] virtual bool handleGetLatestVersionsResponse(const QJsonDocument& doc, GetLatestVersionsResponse& rsp) const = 0;
+
+    // BoilerPlateGenerator
 #define DEFINE_REQUEST_HANDLER(FUNC_NAME, ARG_TYPE, RSP_TYPE, PREPARE_REQUEST, PARSE_RESPONSE)                                         \
     [[nodiscard]] inline Net::NetRequest::Ptr make##FUNC_NAME##Request(ARG_TYPE const& args, std::shared_ptr<RSP_TYPE> response) const \
     {                                                                                                                                  \
@@ -122,10 +143,16 @@ class ProviderAPI {
         auto bound = std::bind(&ProviderAPI::PARSE_RESPONSE, this, std::placeholders::_1, std::placeholders::_2);                      \
         auto sink = new API::RPCSink<RSP_TYPE>(bound, response);                                                                       \
         return makeRequest(std::move(req), sink);                                                                                      \
+    }                                                                                                                                  \
+    [[nodiscard]] inline NetJob::Ptr make##FUNC_NAME##Request(ARG_TYPE const& args, std::shared_ptr<RSP_TYPE> response,                \
+                                                              NetJobArgs netjobArgs) const                                             \
+    {                                                                                                                                  \
+        netjobArgs.name = debugName() + "::" + netjobArgs.name;                                                                        \
+        return wrapRequest(make##FUNC_NAME##Request(args, response), netjobArgs);                                                      \
     }
 
    public:
-    // API public interface
+    // API public interface (boiler plate)
     DEFINE_REQUEST_HANDLER(Search, SearchArgs, QList<Platform::Project::Ptr>, prepareSearchRequest, handleSearchResponse)
     DEFINE_REQUEST_HANDLER(GetProject, QString, Platform::Project, prepareGetProjectRequest, handleGetProjectResponse)
     DEFINE_REQUEST_HANDLER(GetProjects, QStringList, QList<Platform::Project::Ptr>, prepareGetProjectsRequest, handleGetProjectsResponse)
@@ -156,6 +183,14 @@ class ProviderAPI {
                            handleGetLatestVersionsResponse)
 
    public:
+    // extra functions that need to be refactored
+    QString waitForModFileChangelog(QVariant modId, QVariant fileId) const;
+    Task::Ptr searchProjects(API::SearchArgs&& args, API::Callback<QList<Platform::Project::Ptr>>&& callbacks) const;
+    Task::Ptr getProjectVersions(API::VersionSearchArgs&& args, API::Callback<QVector<Platform::Version>>&& callbacks) const;
+    Task::Ptr getProjectInfo(API::ProjectInfoArgs&& args, API::Callback<Platform::Project>&& callbacks) const;
+    Task::Ptr getDependencyVersion(API::DependencySearchArgs&& args, API::Callback<Platform::Version>&& callbacks) const;
+
+   public:
     // Factory getter
     static ProviderAPI* get(const Platform::Provider& key)
     {
@@ -175,4 +210,13 @@ class ProviderAPI {
     static void registerClass(std::unique_ptr<ProviderAPI> api) { getRegistry().emplace(api->provider(), std::move(api)); }
 };
 
+// helper function to not have the boiler plate
+static inline ProviderAPI* getFlame()
+{
+    return ProviderAPI::get(Platform::Provider::FLAME);
+}
+static inline ProviderAPI* getModrinth()
+{
+    return ProviderAPI::get(Platform::Provider::MODRINTH);
+}
 }  // namespace API

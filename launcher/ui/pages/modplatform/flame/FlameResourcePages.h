@@ -41,8 +41,6 @@
 
 #include "Application.h"
 
-#include "modplatform/ResourceAPI.h"
-
 #include "ui/pages/modplatform/ModPage.h"
 #include "ui/pages/modplatform/ResourcePackPage.h"
 #include "ui/pages/modplatform/ShaderPackPage.h"

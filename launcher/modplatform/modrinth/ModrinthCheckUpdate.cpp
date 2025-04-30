@@ -6,12 +6,10 @@
 
 #include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
-#include "modplatform/ResourceAPI.h"
+#include "api/structures/Provider.h"
 #include "modplatform/helpers/HashUtils.h"
 
 #include "tasks/ConcurrentTask.h"
-
-static ResourceAPI api = ResourceAPI(Platform::Provider::MODRINTH);
 
 bool ModrinthCheckUpdate::abort()
 {
@@ -77,7 +75,8 @@ void ModrinthCheckUpdate::getUpdateModsForLoader(std::optional<Platform::ModLoad
     response->hashFormat = m_hash_type;
     QStringList hashes = m_mappings.keys();
 
-    auto job = api.latestVersions({ hashes, m_hash_type, m_game_versions, loader }, response);
+    auto job = API::getModrinth()->makeGetLatestVersionsRequest({ hashes, m_hash_type, m_game_versions, loader }, response,
+                                                                { "GetLatestVersions" });
 
     connect(job.get(), &Task::succeeded, this, [this, response, loader] { checkVersionsResponse(response, loader); });
 

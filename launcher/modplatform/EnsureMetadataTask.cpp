@@ -216,7 +216,7 @@ Task::Ptr EnsureMetadataTask::modrinthVersionsTask()
     auto hashType = Platform::ProviderUtils::hashTypeAlg(Platform::Provider::MODRINTH).first();
 
     auto response = std::make_shared<API::MatchHashesResponse>();
-    auto ver_task = API::ProviderAPI::get(Platform::Provider::MODRINTH)->makeMatchHashesRequest({ m_resources.keys(), hashType }, response);
+    auto ver_task = API::getModrinth()->makeMatchHashesRequest({ m_resources.keys(), hashType }, response);
 
     // Prevents unfortunate timings when aborting the task
     if (!ver_task)
@@ -254,7 +254,7 @@ Task::Ptr EnsureMetadataTask::modrinthProjectsTask()
     auto responses = std::make_shared<QList<Platform::Project::Ptr>>();
     Net::NetRequest::Ptr proj_task;
 
-    auto api = API::ProviderAPI::get(Platform::Provider::MODRINTH);
+    auto api = API::getModrinth();
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
@@ -296,7 +296,7 @@ Task::Ptr EnsureMetadataTask::flameVersionsTask()
 
     QStringList fingerprints = m_resources.keys();
 
-    auto task = API::ProviderAPI::get(Platform::Provider::FLAME)->makeMatchHashesRequest({ fingerprints }, response);
+    auto task = API::getFlame()->makeMatchHashesRequest({ fingerprints }, response);
 
     auto ver_task = makeShared<NetJob>(QString("Flame::GetHashes"), APPLICATION->network());
     ver_task->addNetAction(task);
@@ -336,7 +336,7 @@ Task::Ptr EnsureMetadataTask::flameProjectsTask()
     auto responses = std::make_shared<QList<Platform::Project::Ptr>>();
     Net::NetRequest::Ptr proj_task;
 
-    auto api = API::ProviderAPI::get(Platform::Provider::FLAME);
+    auto api = API::getFlame();
     if (addonIds.isEmpty()) {
         qWarning() << "No addonId found!";
     } else if (addonIds.size() == 1) {
