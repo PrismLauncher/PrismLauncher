@@ -1,12 +1,8 @@
 #include "FlameCheckUpdate.h"
 #include "Application.h"
-#include "FlameAPI.h"
-#include "FlameModIndex.h"
 
 #include <QHash>
 #include <memory>
-
-#include "Json.h"
 
 #include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
@@ -18,11 +14,10 @@
 
 #include "api/structures/Project.h"
 #include "modplatform/helpers/HashUtils.h"
-#include "net/ApiDownload.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
-static FlameAPI api;
+static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
 
 bool FlameCheckUpdate::abort()
 {

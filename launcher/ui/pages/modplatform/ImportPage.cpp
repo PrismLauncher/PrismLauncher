@@ -37,6 +37,8 @@
 #include "ImportPage.h"
 
 #include "api/structures/Arguments.h"
+#include "api/structures/Provider.h"
+#include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/ProgressDialog.h"
 #include "ui_ImportPage.h"
 
@@ -47,8 +49,6 @@
 
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui/dialogs/NewInstanceDialog.h"
-
-#include "modplatform/flame/FlameAPI.h"
 
 #include "InstanceImportTask.h"
 #include "net/NetJob.h"
@@ -132,7 +132,7 @@ void ImportPage::updateState()
             auto fileId = query.allQueryItemValues("fileId")[0];
             auto versionResponse = std::make_shared<API::VersionResponse>();
 
-            auto api = FlameAPI();
+            auto api = ResourceAPI(Platform::Provider::FLAME);
             auto job = api.getFile(addonId, fileId, versionResponse);
 
             connect(job.get(), &NetJob::failed, this,

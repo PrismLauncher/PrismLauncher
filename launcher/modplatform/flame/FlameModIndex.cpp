@@ -5,11 +5,9 @@
 #include "api/structures/Hash.h"
 #include "api/structures/Project.h"
 #include "api/structures/Provider.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
-#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/ResourceAPI.h"
 
-static FlameAPI api;
+static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
 
 Platform::ResourceType getResourceType(int classId)
 {

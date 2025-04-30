@@ -4,7 +4,6 @@
 #include "api/structures/Project.h"
 #include "api/structures/ResourceType.h"
 #include "modplatform/ResourceAPI.h"
-#include "modplatform/flame/FlameAPI.h"
 #include "ui/widgets/ProjectItem.h"
 
 #include "net/ApiDownload.h"
@@ -164,7 +163,7 @@ void ListModel::fetchMore(const QModelIndex& parent)
 
 void ListModel::performPaginatedSearch()
 {
-    static const FlameAPI api;
+    static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
     if (m_currentSearchTerm.startsWith("#")) {
         auto projectId = m_currentSearchTerm.mid(1);
         if (!projectId.isEmpty()) {

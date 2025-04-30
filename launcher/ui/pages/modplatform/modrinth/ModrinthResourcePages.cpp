@@ -37,9 +37,9 @@
  */
 
 #include "ModrinthResourcePages.h"
+#include "api/structures/Provider.h"
+#include "modplatform/ResourceAPI.h"
 #include "ui_ResourcePage.h"
-
-#include "modplatform/modrinth/ModrinthAPI.h"
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
 
@@ -47,7 +47,7 @@ namespace ResourceDownload {
 
 ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
-    m_model = new ModModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
+    m_model = new ModModel(instance, new ResourceAPI(Platform::Provider::MODRINTH), Modrinth::debugName(), Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -66,7 +66,8 @@ ModrinthModPage::ModrinthModPage(ModDownloadDialog* dialog, BaseInstance& instan
 ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePackResourcePage(dialog, instance)
 {
-    m_model = new ResourcePackResourceModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
+    m_model = new ResourcePackResourceModel(instance, new ResourceAPI(Platform::Provider::MODRINTH), Modrinth::debugName(),
+                                            Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -85,7 +86,8 @@ ModrinthResourcePackPage::ModrinthResourcePackPage(ResourcePackDownloadDialog* d
 ModrinthTexturePackPage::ModrinthTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance)
     : TexturePackResourcePage(dialog, instance)
 {
-    m_model = new TexturePackResourceModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
+    m_model = new TexturePackResourceModel(instance, new ResourceAPI(Platform::Provider::MODRINTH), Modrinth::debugName(),
+                                           Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -104,7 +106,8 @@ ModrinthTexturePackPage::ModrinthTexturePackPage(TexturePackDownloadDialog* dial
 ModrinthShaderPackPage::ModrinthShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
     : ShaderPackResourcePage(dialog, instance)
 {
-    m_model = new ShaderPackResourceModel(instance, new ModrinthAPI(), Modrinth::debugName(), Modrinth::metaEntryBase());
+    m_model = new ShaderPackResourceModel(instance, new ResourceAPI(Platform::Provider::MODRINTH), Modrinth::debugName(),
+                                          Modrinth::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();

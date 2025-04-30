@@ -5,10 +5,9 @@
 #include "ProgressDialog.h"
 #include "ScrollMessageBox.h"
 #include "StringUtils.h"
-#include "api/structures/Project.h"
 #include "api/structures/VersionType.h"
 #include "minecraft/mod/tasks/GetModDependenciesTask.h"
-#include "modplatform/flame/FlameAPI.h"
+#include "modplatform/ResourceAPI.h"
 #include "tasks/SequentialTask.h"
 #include "ui_ReviewMessageBox.h"
 
@@ -224,7 +223,7 @@ void ResourceUpdateDialog::checkCandidates()
                 QMetaObject::invokeMethod(this, "reject", Qt::QueuedConnection);
                 return;
             }
-            static FlameAPI api;
+            static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
 
             auto dependencyExtraInfo = depTask->getExtraInfo();
 

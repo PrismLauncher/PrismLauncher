@@ -53,11 +53,10 @@
 #include "FlameModel.h"
 #include "InstanceImportTask.h"
 #include "StringUtils.h"
-#include "modplatform/flame/FlameAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 #include "ui/widgets/ProjectItem.h"
 
-static FlameAPI api;
+static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
 
 FlamePage::FlamePage(NewInstanceDialog* dialog, QWidget* parent)
     : QWidget(parent), m_ui(new Ui::FlamePage), m_dialog(dialog), m_fetch_progress(this, false)

@@ -22,13 +22,9 @@
 #include "api/structures/Provider.h"
 #include "minecraft/mod/tasks/ResourceFolderLoadTask.h"
 
-#include "Json.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
-#include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 #include "net/NetJob.h"
 #include "settings/Setting.h"
-#include "tasks/Task.h"
 #include "ui/dialogs/CustomMessageBox.h"
 
 ResourceFolderModel::ResourceFolderModel(const QDir& dir, BaseInstance* instance, bool is_indexed, bool create_dir, QObject* parent)

@@ -46,8 +46,6 @@
 #include "ui/pages/modplatform/flame/FlameResourcePages.h"
 #include "ui/pages/modplatform/modrinth/ModrinthResourcePages.h"
 
-#include "modplatform/flame/FlameAPI.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/widgets/PageContainer.h"
 
 namespace ResourceDownload {

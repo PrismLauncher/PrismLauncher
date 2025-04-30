@@ -39,21 +39,16 @@
 #include "api/structures/Project.h"
 #include "api/structures/ResourceType.h"
 #include "api/structures/VersionType.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 #include "ui/dialogs/CustomMessageBox.h"
 #include "ui_ModrinthPage.h"
 
 #include "ModrinthModel.h"
 
-#include "BuildConfig.h"
 #include "InstanceImportTask.h"
-#include "Json.h"
 #include "Markdown.h"
 #include "StringUtils.h"
 
 #include "ui/widgets/ProjectItem.h"
-
-#include "net/ApiDownload.h"
 
 #include <QComboBox>
 #include <QKeyEvent>

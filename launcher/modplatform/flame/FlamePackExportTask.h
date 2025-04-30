@@ -22,7 +22,6 @@
 #include "BaseInstance.h"
 #include "MMCZip.h"
 #include "minecraft/MinecraftInstance.h"
-#include "modplatform/flame/FlameAPI.h"
 #include "tasks/Task.h"
 
 class FlamePackExportTask : public Task {

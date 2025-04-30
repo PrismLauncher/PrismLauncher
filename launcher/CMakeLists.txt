@@ -531,10 +531,6 @@ set(API_SOURCES
 
     modplatform/CheckUpdateTask.h
 
-    modplatform/flame/FlameAPI.h
-    modplatform/flame/FlameAPI.cpp
-    modplatform/modrinth/ModrinthAPI.h
-    modplatform/modrinth/ModrinthAPI.cpp
     modplatform/helpers/HashUtils.h
     modplatform/helpers/HashUtils.cpp
     modplatform/helpers/OverrideUtils.h

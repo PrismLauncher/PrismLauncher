@@ -38,7 +38,8 @@
 
 #include "Application.h"
 #include "api/structures/Project.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
+#include "api/structures/Provider.h"
+#include "modplatform/ResourceAPI.h"
 #include "ui/dialogs/NewInstanceDialog.h"
 
 #include "ui/pages/modplatform/ModpackProviderBasePage.h"
@@ -107,7 +108,7 @@ class ModrinthPage : public QWidget, public ModpackProviderBasePage {
     unique_qobject_ptr<ModFilterWidget> m_filterWidget;
     Task::Ptr m_categoriesTask;
 
-    ModrinthAPI m_api;
+    ResourceAPI m_api = ResourceAPI(Platform::Provider::MODRINTH);
     Task::Ptr m_job;
     Task::Ptr m_job2;
 };

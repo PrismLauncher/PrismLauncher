@@ -44,6 +44,8 @@
 
 #include "MainWindow.h"
 #include "api/structures/Arguments.h"
+#include "api/structures/Provider.h"
+#include "modplatform/ResourceAPI.h"
 #include "ui_MainWindow.h"
 
 #include <QDir>
@@ -117,16 +119,10 @@
 #include "minecraft/mod/TexturePackFolderModel.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 
-#include "api/structures/Project.h"
-#include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
-
 #include "KonamiCode.h"
 
 #include "InstanceCopyTask.h"
 #include "InstanceDirUpdate.h"
-
-#include "Json.h"
 
 #include "MMCTime.h"
 
@@ -952,7 +948,7 @@ void MainWindow::processURLs(QList<QUrl> urls)
 
                 auto versionResponse = std::make_shared<API::VersionResponse>();
 
-                auto api = FlameAPI();
+                auto api = ResourceAPI(Platform::Provider::FLAME);
                 auto job = api.getFile(addonId, fileId, versionResponse);
 
                 connect(job.get(), &Task::failed, this,

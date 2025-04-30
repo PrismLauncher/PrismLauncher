@@ -61,7 +61,7 @@
 /* Simple class with a common interface for interacting with APIs */
 class ResourceAPI {
    public:
-    ResourceAPI()
+    ResourceAPI(Platform::Provider provider) : m_provider(provider)
     {
         API::FlameAPI::registerClass();
         API::ModrinthAPI::registerClass();
@@ -79,14 +79,17 @@ class ResourceAPI {
     [[nodiscard]] Task::Ptr getProjectVersions(API::VersionSearchArgs&& args, API::Callback<QVector<Platform::Version>>&& callbacks) const;
     [[nodiscard]] Task::Ptr getDependencyVersion(API::DependencySearchArgs&&, API::Callback<Platform::Version>&&) const;
 
-    QString getModFileChangelog(QVariant modId, QVariant fileId);
+    QString getModFileChangelog(QVariant modId, QVariant fileId) const;
     Task::Ptr getFile(const QString& addonId, const QString& fileId, std::shared_ptr<API::VersionResponse> response) const;
     NetJob::Ptr getFiles(const QStringList& fileIds, std::shared_ptr<API::VersionSearchResponse> response) const;
-    Task::Ptr latestVersions(const API::GetLatestVersionsArgs& args, std::shared_ptr<API::GetLatestVersionsResponse> response);
+    Task::Ptr latestVersions(const API::GetLatestVersionsArgs& args, std::shared_ptr<API::GetLatestVersionsResponse> response) const;
 
    protected:
     [[nodiscard]] inline QString debugName() const { return "External resource API"; }
 
    public:
-    virtual Platform::Provider provider() const = 0;
+    virtual Platform::Provider provider() const { return m_provider; }
+
+   private:
+    Platform::Provider m_provider;
 };

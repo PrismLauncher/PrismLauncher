@@ -37,10 +37,8 @@
 #include "ModrinthModel.h"
 
 #include "BuildConfig.h"
-#include "Json.h"
 #include "api/structures/Project.h"
 #include "api/structures/ResourceType.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 #include "net/NetJob.h"
 #include "ui/widgets/ProjectItem.h"
 
@@ -132,7 +130,7 @@ void ModpackListModel::performPaginatedSearch()
 {
     if (hasActiveSearchJob())
         return;
-    static const ModrinthAPI api;
+    static const ResourceAPI api = ResourceAPI(Platform::Provider::MODRINTH);
 
     if (m_currentSearchTerm.startsWith("#")) {
         auto projectId = m_currentSearchTerm.mid(1);

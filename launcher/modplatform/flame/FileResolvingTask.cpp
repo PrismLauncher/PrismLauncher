@@ -20,20 +20,16 @@
 #include <algorithm>
 
 #include "Application.h"
-#include "Json.h"
 #include "api/Api.h"
 #include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "api/structures/Provider.h"
-#include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
+#include "modplatform/ResourceAPI.h"
 
-#include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "net/NetJob.h"
 #include "tasks/Task.h"
 
-static const FlameAPI flameAPI;
+static const ResourceAPI flameAPI = ResourceAPI(Platform::Provider::FLAME);
 
 Flame::FileResolvingTask::FileResolvingTask(Flame::Manifest& toProcess) : m_manifest(toProcess) {}
 
@@ -145,7 +141,7 @@ void Flame::FileResolvingTask::netJobFinished()
         }
         getFlameProjects();
     });
-    connect(m_task.get(), &Task::failed, this, [this, step_progress](QString reason) {
+    connect(m_task.get(), &Task::failed, this, [this, step_progress](QString) {
         step_progress->state = TaskStepState::Failed;
         stepProgress(*step_progress);
     });

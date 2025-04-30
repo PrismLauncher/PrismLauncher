@@ -22,9 +22,8 @@
 #include <QFutureWatcher>
 #include "BaseInstance.h"
 #include "MMCZip.h"
-#include "api/structures/Project.h"
+#include "api/structures/Arguments.h"
 #include "minecraft/MinecraftInstance.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/Task.h"
 
 class ModrinthPackExportTask : public Task {

@@ -7,12 +7,8 @@
 #include "BaseInstance.h"
 
 #include "api/structures/Project.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 
-#include "modplatform/flame/FlameAPI.h"
-
-#include "net/NetJob.h"
-
+#include "modplatform/ResourceAPI.h"
 #include "ui/pages/BasePage.h"
 
 #include <QWidget>
@@ -132,7 +128,7 @@ class ModrinthManagedPackPage final : public ManagedPackPage {
     Task::Ptr m_fetch_job = nullptr;
 
     Platform::Project m_pack;
-    ModrinthAPI m_api;
+    ResourceAPI m_api = ResourceAPI(Platform::Provider::MODRINTH);
 };
 
 class FlameManagedPackPage final : public ManagedPackPage {
@@ -156,5 +152,5 @@ class FlameManagedPackPage final : public ManagedPackPage {
     Task::Ptr m_fetch_job = nullptr;
 
     Platform::Project m_pack;
-    FlameAPI m_api;
+    ResourceAPI m_api = ResourceAPI(Platform::Provider::FLAME);
 };

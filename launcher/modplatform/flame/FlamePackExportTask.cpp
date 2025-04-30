@@ -31,6 +31,7 @@
 #include "Application.h"
 #include "Json.h"
 #include "MMCZip.h"
+#include "api/Api.h"
 #include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
 #include "minecraft/PackProfile.h"

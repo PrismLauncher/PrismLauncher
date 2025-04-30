@@ -14,11 +14,7 @@
 #include "api/structures/Provider.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
 
-#include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/helpers/HashUtils.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
-#include "modplatform/modrinth/ModrinthPackIndex.h"
 #include "net/NetJob.h"
 #include "net/NetRequest.h"
 #include "tasks/ConcurrentTask.h"

@@ -43,7 +43,6 @@
 #include "api/Api.h"
 #include "api/structures/Arguments.h"
 #include "api/structures/Provider.h"
-#include "modplatform/flame/FlameAPI.h"
 #include "ui_ResourcePage.h"
 
 #include "ui/dialogs/ResourceDownloadDialog.h"
@@ -52,7 +51,7 @@ namespace ResourceDownload {
 
 FlameModPage::FlameModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ModPage(dialog, instance)
 {
-    m_model = new ModModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
+    m_model = new ModModel(instance, new ResourceAPI(Platform::Provider::FLAME), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -86,7 +85,8 @@ void FlameModPage::openUrl(const QUrl& url)
 FlameResourcePackPage::FlameResourcePackPage(ResourcePackDownloadDialog* dialog, BaseInstance& instance)
     : ResourcePackResourcePage(dialog, instance)
 {
-    m_model = new ResourcePackResourceModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
+    m_model =
+        new ResourcePackResourceModel(instance, new ResourceAPI(Platform::Provider::FLAME), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -121,7 +121,8 @@ void FlameResourcePackPage::openUrl(const QUrl& url)
 FlameTexturePackPage::FlameTexturePackPage(TexturePackDownloadDialog* dialog, BaseInstance& instance)
     : TexturePackResourcePage(dialog, instance)
 {
-    m_model = new TexturePackResourceModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
+    m_model =
+        new TexturePackResourceModel(instance, new ResourceAPI(Platform::Provider::FLAME), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();
@@ -156,7 +157,7 @@ void FlameTexturePackPage::openUrl(const QUrl& url)
 FlameShaderPackPage::FlameShaderPackPage(ShaderPackDownloadDialog* dialog, BaseInstance& instance)
     : ShaderPackResourcePage(dialog, instance)
 {
-    m_model = new ShaderPackResourceModel(instance, new FlameAPI(), Flame::debugName(), Flame::metaEntryBase());
+    m_model = new ShaderPackResourceModel(instance, new ResourceAPI(Platform::Provider::FLAME), Flame::debugName(), Flame::metaEntryBase());
     m_ui->packView->setModel(m_model);
 
     addSortings();

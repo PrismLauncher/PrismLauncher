@@ -1,20 +1,17 @@
 #include "ModrinthCheckUpdate.h"
 #include "Application.h"
-#include "ModrinthAPI.h"
-#include "ModrinthPackIndex.h"
-
-#include "Json.h"
 
 #include "QObjectPtr.h"
 #include "ResourceDownloadTask.h"
 
 #include "api/structures/Arguments.h"
 #include "api/structures/Project.h"
+#include "modplatform/ResourceAPI.h"
 #include "modplatform/helpers/HashUtils.h"
 
 #include "tasks/ConcurrentTask.h"
 
-static ModrinthAPI api;
+static ResourceAPI api = ResourceAPI(Platform::Provider::MODRINTH);
 
 bool ModrinthCheckUpdate::abort()
 {

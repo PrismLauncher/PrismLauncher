@@ -38,9 +38,8 @@
 #include "QObjectPtr.h"
 #include "api/structures/Arguments.h"
 #include "minecraft/mod/tasks/LocalResourceUpdateTask.h"
+#include "modplatform/ResourceAPI.h"
 #include "modplatform/flame/FileResolvingTask.h"
-#include "modplatform/flame/FlameAPI.h"
-#include "modplatform/flame/FlameModIndex.h"
 #include "modplatform/flame/PackManifest.h"
 
 #include "Application.h"
@@ -57,7 +56,6 @@
 
 #include "tasks/ConcurrentTask.h"
 #include "ui/dialogs/BlockedModsDialog.h"
-#include "ui/dialogs/CustomMessageBox.h"
 
 #include <QDebug>
 #include <QFileInfo>
@@ -66,9 +64,10 @@
 #include "minecraft/World.h"
 #include "minecraft/mod/tasks/LocalResourceParse.h"
 #include "net/ApiDownload.h"
+#include "ui/dialogs/CustomMessageBox.h"
 #include "ui/pages/modplatform/OptionalModDialog.h"
 
-static const FlameAPI api;
+static const ResourceAPI api = ResourceAPI(Platform::Provider::FLAME);
 
 bool FlameCreationTask::abort()
 {

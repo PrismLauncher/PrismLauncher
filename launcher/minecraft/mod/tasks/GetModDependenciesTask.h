@@ -21,15 +21,12 @@
 #include <QDir>
 #include <QList>
 #include <QVariant>
-#include <functional>
 #include <memory>
 
 #include "api/structures/Project.h"
 #include "minecraft/mod/MetadataHandler.h"
 #include "minecraft/mod/ModFolderModel.h"
 #include "modplatform/ResourceAPI.h"
-#include "modplatform/flame/FlameAPI.h"
-#include "modplatform/modrinth/ModrinthAPI.h"
 #include "tasks/SequentialTask.h"
 #include "tasks/Task.h"
 #include "ui/pages/modplatform/ModModel.h"
@@ -90,6 +87,6 @@ class GetModDependenciesTask : public SequentialTask {
     Version m_version;
     Platform::ModLoaders m_loaderType;
 
-    ModrinthAPI m_modrinthAPI;
-    FlameAPI m_flameAPI;
+    ResourceAPI m_modrinthAPI = ResourceAPI(Platform::Provider::MODRINTH);
+    ResourceAPI m_flameAPI = ResourceAPI(Platform::Provider::FLAME);
 };

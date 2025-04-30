@@ -19,15 +19,12 @@
 
 #include "ModrinthPackIndex.h"
 #include "FileSystem.h"
-#include "ModrinthAPI.h"
 
 #include "Json.h"
 #include "api/structures/Hash.h"
 #include "api/structures/Project.h"
 #include "api/structures/Provider.h"
 #include "api/structures/VersionType.h"
-#include "minecraft/MinecraftInstance.h"
-#include "minecraft/PackProfile.h"
 #include "modplatform/helpers/HashUtils.h"
 
 bool shouldDownloadOnSide(QString side)
