@@ -10,6 +10,7 @@
   kdePackages,
   libnbtplusplus,
   qt-qrcodegenerator,
+  jwt-cpp,
   ninja,
   self,
   stripJavaArchivesHook,
@@ -66,6 +67,9 @@ stdenv.mkDerivation {
 
     rm -rf source/libraries/qt-qrcodegenerator/QR-Code-generator
     ln -s ${qt-qrcodegenerator} source/libraries/qt-qrcodegenerator/QR-Code-generator
+
+    rm -rf source/libraries/jwt-cpp
+    ln -s ${jwt-cpp} source/libraries/jwt-cpp
   '';
 
   nativeBuildInputs = [

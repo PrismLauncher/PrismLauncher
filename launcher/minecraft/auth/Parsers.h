@@ -16,4 +16,6 @@ bool parseMinecraftProfile(QByteArray& data, MinecraftProfile& output);
 bool parseMinecraftProfileMojang(QByteArray& data, MinecraftProfile& output);
 bool parseMinecraftEntitlements(QByteArray& data, MinecraftEntitlement& output);
 bool parseRolloutResponse(QByteArray& data, bool& result);
+
+bool verifySignature(MinecraftEntitlement& output);
 }  // namespace Parsers

@@ -22,3 +22,6 @@
 [submodule "libraries/qt-qrcodegenerator/QR-Code-generator"]
 	path = libraries/qt-qrcodegenerator/QR-Code-generator
 	url = https://github.com/nayuki/QR-Code-generator
+[submodule "libraries/jwt-cpp"]
+	path = libraries/jwt-cpp
+	url = https://github.com/Thalhammer/jwt-cpp.git

@@ -338,6 +338,9 @@ if(NOT Launcher_FORCE_BUNDLED_LIBS)
 
     # Find cmark
     find_package(cmark QUIET)
+
+    # Find jwt-cpp
+    find_package(jwt-cpp QUIET)
 endif()
 
 include(ECMQtDeclareLoggingCategory)
@@ -517,6 +520,13 @@ if(NOT tomlplusplus_FOUND)
     add_subdirectory(libraries/tomlplusplus) # toml parser
 else()
     message(STATUS "Using system tomlplusplus")
+endif()
+if(NOT jwt-cpp_FOUND)
+    message(STATUS "Using bundled jwt-cpp")
+    set(JWT_BUILD_EXAMPLES OFF CACHE BOOL "disable building examples" FORCE)
+    add_subdirectory(libraries/jwt-cpp) # jwt-parser
+else()
+    message(STATUS "Using system jwt-cpp")
 endif()
 if(NOT cmark_FOUND)
     message(STATUS "Using bundled cmark")

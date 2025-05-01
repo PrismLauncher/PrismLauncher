@@ -20,6 +20,10 @@
       url = "github:nayuki/QR-Code-generator";
       flake = false;
     };
+    jwt-cpp = {
+      url = "github:Thalhammer/jwt-cpp";
+      flake = false;
+    };
   };
 
   outputs =
@@ -28,6 +32,7 @@
       nixpkgs,
       libnbtplusplus,
       qt-qrcodegenerator,
+      jwt-cpp,
     }:
 
     let
@@ -176,6 +181,7 @@
           inherit
             libnbtplusplus
             qt-qrcodegenerator
+            jwt-cpp
             self
             ;
         };

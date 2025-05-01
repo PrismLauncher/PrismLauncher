@@ -39,6 +39,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUuid>
+#include "Json.h"
+#include "minecraft/auth/Parsers.h"
 
 namespace {
 void tokenToJSONV3(QJsonObject& parent, Token t, const char* tokenName)
@@ -252,6 +254,7 @@ void entitlementToJSONV3(QJsonObject& parent, MinecraftEntitlement p)
     QJsonObject out;
     out["ownsMinecraft"] = QJsonValue(p.ownsMinecraft);
     out["canPlayMinecraft"] = QJsonValue(p.canPlayMinecraft);
+    out["signature"] = p.signature;
     parent["entitlement"] = out;
 }
 
@@ -261,18 +264,17 @@ bool entitlementFromJSONV3(const QJsonObject& parent, MinecraftEntitlement& out)
     if (entitlementObject.isEmpty()) {
         return false;
     }
-    {
-        auto ownsMinecraftV = entitlementObject.value("ownsMinecraft");
-        auto canPlayMinecraftV = entitlementObject.value("canPlayMinecraft");
-        if (!ownsMinecraftV.isBool() || !canPlayMinecraftV.isBool()) {
-            qWarning() << "mandatory attributes are missing or of unexpected type";
-            return false;
-        }
-        out.canPlayMinecraft = canPlayMinecraftV.toBool(false);
-        out.ownsMinecraft = ownsMinecraftV.toBool(false);
-        out.validity = Validity::Assumed;
+    auto ownsMinecraftV = entitlementObject.value("ownsMinecraft");
+    auto canPlayMinecraftV = entitlementObject.value("canPlayMinecraft");
+    if (!ownsMinecraftV.isBool() || !canPlayMinecraftV.isBool()) {
+        qWarning() << "mandatory attributes are missing or of unexpected type";
+        return false;
     }
-    return true;
+    out.canPlayMinecraft = canPlayMinecraftV.toBool(false);
+    out.ownsMinecraft = ownsMinecraftV.toBool(false);
+    out.signature = Json::ensureString(entitlementObject, "signature");
+    out.validity = Validity::Assumed;
+    return Parsers::verifySignature(out);
 }
 
 }  // namespace

@@ -1,10 +1,15 @@
 #include "Parsers.h"
 #include "Json.h"
 #include "Logging.h"
+#include "minecraft/auth/AccountData.h"
 
 #include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
+
+#include <jwt-cpp/jwt.h>
+#include <string>
+#include <system_error>
 
 namespace Parsers {
 
@@ -419,8 +424,9 @@ bool parseMinecraftEntitlements(QByteArray& data, MinecraftEntitlement& output)
             output.ownsMinecraft = true;
         }
     }
+    output.signature = Json::ensureString(obj, "signature", "", "signature");
     output.validity = Validity::Certain;
-    return true;
+    return verifySignature(output);
 }
 
 bool parseRolloutResponse(QByteArray& data, bool& result)
@@ -490,4 +496,40 @@ bool parseMojangResponse(QByteArray& data, Token& output)
     return true;
 }
 
+bool verifySignature(MinecraftEntitlement& output)
+{
+    if (output.signature.isEmpty()) {
+        output.ownsMinecraft = false;
+        output.canPlayMinecraft = false;
+        output.validity = Validity::None;
+        return false;
+    }
+    static const std::string publicKey = R"XXX(-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAtz7jy4jRH3psj5AbVS6W
+NHjniqlr/f5JDly2M8OKGK81nPEq765tJuSILOWrC3KQRvHJIhf84+ekMGH7iGlO
+4DPGDVb6hBGoMMBhCq2jkBjuJ7fVi3oOxy5EsA/IQqa69e55ugM+GJKUndLyHeNn
+X6RzRzDT4tX/i68WJikwL8rR8Jq49aVJlIEFT6F+1rDQdU2qcpfT04CBYLM5gMxE
+fWRl6u1PNQixz8vSOv8pA6hB2DU8Y08VvbK7X2ls+BiS3wqqj3nyVWqoxrwVKiXR
+kIqIyIAedYDFSaIq5vbmnVtIonWQPeug4/0spLQoWnTUpXRZe2/+uAKN1RY9mmaB
+pRFV/Osz3PDOoICGb5AZ0asLFf/qEvGJ+di6Ltt8/aaoBuVw+7fnTw2BhkhSq1S/
+va6LxHZGXE9wsLj4CN8mZXHfwVD9QG0VNQTUgEGZ4ngf7+0u30p7mPt5sYy3H+Fm
+sWXqFZn55pecmrgNLqtETPWMNpWc2fJu/qqnxE9o2tBGy/MqJiw3iLYxf7U+4le4
+jM49AUKrO16bD1rdFwyVuNaTefObKjEMTX9gyVUF6o7oDEItp5NHxFm3CqnQRmch
+HsMs+NxEnN4E9a8PDB23b4yjKOQ9VHDxBxuaZJU60GBCIOF9tslb7OAkheSJx5Xy
+EYblHbogFGPRFU++NrSQRX0CAwEAAQ==
+-----END PUBLIC KEY-----)XXX";
+
+    try {
+        auto verify = jwt::verify().allow_algorithm(jwt::algorithm::rs256(publicKey, "", "", ""));
+        auto decoded = jwt::decode(output.signature.toStdString());
+
+        verify.verify(decoded);
+    } catch (const std::exception& e) {
+        output.ownsMinecraft = false;
+        output.canPlayMinecraft = false;
+        output.validity = Validity::None;
+        return false;
+    }
+    return true;
+}
 }  // namespace Parsers
