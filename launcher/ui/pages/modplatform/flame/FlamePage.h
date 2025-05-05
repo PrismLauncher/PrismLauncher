@@ -100,6 +100,6 @@ class FlamePage : public QWidget, public ModpackProviderBasePage {
     // Used to do instant searching with a delay to cache quick changes
     QTimer m_search_timer;
 
-    unique_qobject_ptr<ModFilterWidget> m_filterWidget;
+    std::unique_ptr<ModFilterWidget> m_filterWidget;
     Task::Ptr m_categoriesTask;
 };

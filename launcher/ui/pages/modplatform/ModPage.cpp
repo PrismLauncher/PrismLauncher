@@ -61,7 +61,7 @@ ModPage::ModPage(ModDownloadDialog* dialog, BaseInstance& instance) : ResourcePa
     connect(m_ui->resourceFilterButton, &QPushButton::clicked, this, &ModPage::filterMods);
 }
 
-void ModPage::setFilterWidget(unique_qobject_ptr<ModFilterWidget>& widget)
+void ModPage::setFilterWidget(std::unique_ptr<ModFilterWidget>& widget)
 {
     if (m_filter_widget)
         disconnect(m_filter_widget.get(), nullptr, nullptr, nullptr);

@@ -207,7 +207,7 @@ auto FlameShaderPackPage::shouldDisplay() const -> bool
     return true;
 }
 
-unique_qobject_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
+std::unique_ptr<ModFilterWidget> FlameModPage::createFilterWidget()
 {
     return ModFilterWidget::create(&static_cast<MinecraftInstance&>(m_baseInstance), false, this);
 }

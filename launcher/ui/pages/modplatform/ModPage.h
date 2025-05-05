@@ -51,11 +51,11 @@ class ModPage : public ResourcePage {
 
     void addResourceToPage(ModPlatform::IndexedPack::Ptr, ModPlatform::IndexedVersion&, std::shared_ptr<ResourceFolderModel>) override;
 
-    virtual unique_qobject_ptr<ModFilterWidget> createFilterWidget() = 0;
+    virtual std::unique_ptr<ModFilterWidget> createFilterWidget() = 0;
 
     [[nodiscard]] bool supportsFiltering() const override { return true; };
     auto getFilter() const -> const std::shared_ptr<ModFilterWidget::Filter> { return m_filter; }
-    void setFilterWidget(unique_qobject_ptr<ModFilterWidget>&);
+    void setFilterWidget(std::unique_ptr<ModFilterWidget>&);
 
    protected:
     ModPage(ModDownloadDialog* dialog, BaseInstance& instance);
@@ -67,7 +67,7 @@ class ModPage : public ResourcePage {
     void triggerSearch() override;
 
    protected:
-    unique_qobject_ptr<ModFilterWidget> m_filter_widget;
+    std::unique_ptr<ModFilterWidget> m_filter_widget;
     std::shared_ptr<ModFilterWidget::Filter> m_filter;
 };
 
