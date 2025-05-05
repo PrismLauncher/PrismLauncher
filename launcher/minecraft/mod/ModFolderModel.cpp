@@ -67,7 +67,9 @@ ModFolderModel::ModFolderModel(const QDir& dir, BaseInstance* instance, bool is_
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive,
                               QHeaderView::Interactive, QHeaderView::Interactive, QHeaderView::Interactive };
     m_columnsHideable = { false, true, false, true, true, true, true, true, true, true, true };
-    m_columnsHiddenByDefault = { false, false, false, false, false, false, false, true, true, true, true };
+    m_columnsHiddenByDefault = {
+        false, APPLICATION->settings()->get("ModIconsDisabled").toBool(), false, false, false, false, false, true, true, true, true
+    };
 }
 
 QVariant ModFolderModel::data(const QModelIndex& index, int role) const
@@ -134,7 +136,7 @@ QVariant ModFolderModel::data(const QModelIndex& index, int role) const
         case Qt::DecorationRole: {
             if (column == NameColumn && (at(row).isSymLinkUnder(instDirPath()) || at(row).isMoreThanOneHardLink()))
                 return APPLICATION->getThemedIcon("status-yellow");
-            if (column == ImageColumn) {
+            if (!APPLICATION->settings()->get("ModIconsDisabled").toBool() && column == ImageColumn) {
                 return at(row).icon({ 32, 32 }, Qt::AspectRatioMode::KeepAspectRatioByExpanding);
             }
             return {};
