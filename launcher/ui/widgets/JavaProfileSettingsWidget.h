@@ -37,32 +37,34 @@
 #pragma once
 
 #include <QWidget>
-#include "JavaProfileSettingsWidget.h"
-#include "minecraft/MinecraftInstance.h"
+#include "BaseInstance.h"
+#include "JavaCommon.h"
 
 namespace Ui {
-class MinecraftSettingsWidget;
+class JavaProfileSettingsWidget;
 }
 
-class MinecraftSettingsWidget : public QWidget {
+class JavaProfileSettingsWidget : public QWidget {
+    Q_OBJECT
+
    public:
-    MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent = nullptr);
-    ~MinecraftSettingsWidget() override;
+    explicit JavaProfileSettingsWidget(InstancePtr instance, QString major, QWidget* parent = nullptr);
+    explicit JavaProfileSettingsWidget(QString major, QWidget* parent = nullptr);
+    explicit JavaProfileSettingsWidget(InstancePtr instance, QWidget* parent = nullptr);
+    ~JavaProfileSettingsWidget() override;
 
     void loadSettings();
     void saveSettings();
 
-   private:
-    void openGlobalSettings();
-    void updateAccountsMenu(SettingsObject& settings);
-    bool isQuickPlaySupported();
    private slots:
-    void saveSelectedLoaders();
-    void saveDataPacksPath();
-    void selectDataPacksFolder();
+    void onJavaBrowse();
+    void onJavaAutodetect();
+    void onJavaTest();
+    void updateThresholds();
 
-    MinecraftInstance* m_instance;
-    Ui::MinecraftSettingsWidget* m_ui;
-    JavaProfileSettingsWidget* m_javaSettings = nullptr;
-    bool m_quickPlaySingleplayer = false;
+   private:
+    QString m_major;
+    InstancePtr m_instance;
+    Ui::JavaProfileSettingsWidget* m_ui;
+    unique_qobject_ptr<JavaCommon::TestCheck> m_checker;
 };

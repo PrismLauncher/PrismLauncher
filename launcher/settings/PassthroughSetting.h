@@ -29,11 +29,14 @@ class PassthroughSetting : public Setting {
     Q_OBJECT
    public:
     explicit PassthroughSetting(std::shared_ptr<Setting> overridden, std::shared_ptr<Setting> gate);
+    PassthroughSetting(QString id, std::shared_ptr<Setting> overridden, std::shared_ptr<Setting> gate);
 
     virtual QVariant defValue() const;
     virtual QVariant get() const;
     virtual void set(QVariant value);
     virtual void reset();
+
+    void switchOveride(std::shared_ptr<Setting> overridden);
 
    private:
     bool isOverriding() const;

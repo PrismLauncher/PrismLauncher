@@ -47,6 +47,19 @@ std::shared_ptr<Setting> SettingsObject::registerOverride(std::shared_ptr<Settin
     return override;
 }
 
+std::shared_ptr<Setting> SettingsObject::registerOverride(QString id, std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate)
+{
+    if (contains(id)) {
+        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(id);
+        return nullptr;  // Fail
+    }
+    auto override = std::make_shared<OverrideSetting>(id, original, gate);
+    override->m_storage = this;
+    connectSignals(*override);
+    m_settings.insert(override->id(), override);
+    return override;
+}
+
 std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate)
 {
     if (contains(original->id())) {
@@ -54,6 +67,19 @@ std::shared_ptr<Setting> SettingsObject::registerPassthrough(std::shared_ptr<Set
         return nullptr;  // Fail
     }
     auto passthrough = std::make_shared<PassthroughSetting>(original, gate);
+    passthrough->m_storage = this;
+    connectSignals(*passthrough);
+    m_settings.insert(passthrough->id(), passthrough);
+    return passthrough;
+}
+
+std::shared_ptr<Setting> SettingsObject::registerPassthrough(QString id, std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate)
+{
+    if (contains(id)) {
+        qCritical() << QString("Failed to register setting %1. ID already exists.").arg(id);
+        return nullptr;  // Fail
+    }
+    auto passthrough = std::make_shared<PassthroughSetting>(id, original, gate);
     passthrough->m_storage = this;
     connectSignals(*passthrough);
     m_settings.insert(passthrough->id(), passthrough);

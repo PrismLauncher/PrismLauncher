@@ -62,8 +62,24 @@ AutoInstallJava::AutoInstallJava(LaunchTask* parent)
 void AutoInstallJava::executeTask()
 {
     auto settings = m_instance->settings();
-    if (!APPLICATION->settings()->get("AutomaticJavaSwitch").toBool() ||
-        (settings->get("OverrideJavaLocation").toBool() && QFileInfo::exists(settings->get("JavaPath").toString()))) {
+    if (!APPLICATION->settings()->get("AutomaticJavaSwitch").toBool()) {
+        emitSucceeded();
+        return;
+    }
+    // link the  instance settings with the correct java profile
+    // this will make the sure the profile settings are considered before global defaults
+    // instance>global profile>global default
+    auto profile = m_instance->updateOverrideJavaSettings();
+    if ((settings->get("OverrideJavaLocation").toBool() && QFileInfo::exists(settings->get("JavaPath").toString()))) {
+        // user already overriden the path so the profile will only be used for other settings
+        emitSucceeded();
+        return;
+    }
+    if (!profile.isEmpty()) {
+        // profile was found and user did not manage the java path so print a message about it
+        // this will also make sure we prioritizate the global profiles instead of selecting
+        // from users java or downloading new javas
+        emit logLine(tr("Using Java profile for Java %1.").arg(profile), MessageLevel::Launcher);
         emitSucceeded();
         return;
     }

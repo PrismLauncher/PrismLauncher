@@ -44,6 +44,7 @@
 #include "BuildConfig.h"
 
 #include "DataMigrationTask.h"
+#include "Json.h"
 #include "java/JavaInstallList.h"
 #include "net/PasteUpload.h"
 #include "tasks/Task.h"
@@ -762,6 +763,13 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_settings->registerSetting("AutomaticJavaSwitch", defaultEnableAutoJava);
         m_settings->registerSetting("AutomaticJavaDownload", defaultEnableAutoJava);
         m_settings->registerSetting("UserAskedAboutAutomaticJavaDownload", false);
+
+        m_settings->registerSetting("SupportedJavaMajors", Json::fromStringList({ "8", "16", "17", "21" }));
+
+        for (auto major :
+             Json::toStringList(m_settings->get("SupportedJavaMajors").toString())) {  // dynamically registers posible settings
+            registerJavaMajorSettings(major);
+        }
 
         // Legacy settings
         m_settings->registerSetting("OnlineFixes", false);
@@ -2091,4 +2099,29 @@ bool Application::checkQSavePath(QString path)
         }
     }
     return false;
+}
+
+void Application::registerJavaMajorSettings(QString major)
+{
+    auto locationOverride = m_settings->registerSetting(QString("OverrideJava%1Location").arg(major), false);
+    auto argsOverride = m_settings->registerSetting(QString("OverrideJava%1Args").arg(major), false);
+    auto memorySetting = m_settings->registerSetting(QString("OverrideMemory%1").arg(major), false);
+
+    m_settings->registerOverride(QString("Java%1Path").arg(major), m_settings->getSetting("JavaPath"), locationOverride);
+    m_settings->registerOverride(QString("Jvm%1Args").arg(major), m_settings->getSetting("JvmArgs"), argsOverride);
+
+    m_settings->registerOverride(QString("MinMemAlloc%1").arg(major), m_settings->getSetting("MinMemAlloc"), memorySetting);
+    m_settings->registerOverride(QString("MaxMemAlloc%1").arg(major), m_settings->getSetting("MaxMemAlloc"), memorySetting);
+    m_settings->registerOverride(QString("PermGen%1").arg(major), m_settings->getSetting("PermGen"), memorySetting);
+
+    m_settings->registerOverride(QString("IgnoreJava%1Compatibility").arg(major), m_settings->getSetting("IgnoreJavaCompatibility"),
+                                 locationOverride);
+
+    // special!
+    m_settings->registerPassthrough(QString("Java%1Signature").arg(major), m_settings->getSetting("JavaSignature"), locationOverride);
+    m_settings->registerPassthrough(QString("Java%1Architecture").arg(major), m_settings->getSetting("JavaArchitecture"), locationOverride);
+    m_settings->registerPassthrough(QString("Java%1RealArchitecture").arg(major), m_settings->getSetting("JavaRealArchitecture"),
+                                    locationOverride);
+    m_settings->registerPassthrough(QString("Java%1Version").arg(major), m_settings->getSetting("JavaVersion"), locationOverride);
+    m_settings->registerPassthrough(QString("Java%1Vendor").arg(major), m_settings->getSetting("JavaVendor"), locationOverride);
 }

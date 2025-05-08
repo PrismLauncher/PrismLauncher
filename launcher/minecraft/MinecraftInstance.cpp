@@ -47,6 +47,8 @@
 #include "minecraft/update/AssetUpdateTask.h"
 #include "minecraft/update/FMLLibrariesTask.h"
 #include "minecraft/update/LibrariesTask.h"
+#include "settings/OverrideSetting.h"
+#include "settings/PassthroughSetting.h"
 #include "settings/Setting.h"
 #include "settings/SettingsObject.h"
 
@@ -1323,6 +1325,78 @@ QList<Mod*> MinecraftInstance::getJarMods() const
         mods.push_back(new Mod(QFileInfo(jar[0])));
     }
     return mods;
+}
+
+// will set the correct override java settings for the current instance
+// needs to be called after the minecraft index is loaded
+QString MinecraftInstance::updateOverrideJavaSettings()
+{
+    auto settings = this->settings();
+    auto appSettings = APPLICATION->settings();
+    auto packProfile = getPackProfile();
+    if (!packProfile) {
+        return {};  // the profile is not there yet
+    }
+    auto neededJavaMajors = packProfile->getProfile()->getCompatibleJavaMajors();
+    if (neededJavaMajors.isEmpty()) {
+        return {};  // the info is not there yet
+    }
+    auto supportedJavaMajors = Json::toStringList(appSettings->get("SupportedJavaMajors").toString());
+    QStringList unsupportedJavas;
+    auto overideSetting = [settings, appSettings](QString id, QString overide) {
+        auto pathS = settings->getSetting(id);
+        if (auto s = dynamic_cast<OverrideSetting*>(pathS.get())) {
+            s->switchOveride(appSettings->getSetting(overide));
+        }
+    };
+    auto passSetting = [settings, appSettings](QString id, QString overide) {
+        auto pathS = settings->getSetting(id);
+        if (auto s = dynamic_cast<PassthroughSetting*>(pathS.get())) {
+            s->switchOveride(appSettings->getSetting(overide));
+        }
+    };
+    for (auto major : neededJavaMajors) {
+        auto majorStr = QString::number(major);
+        if (!supportedJavaMajors.contains(majorStr)) {
+            unsupportedJavas << majorStr;
+            continue;
+        }
+
+        if (appSettings->get(QString("OverrideJava%1Location").arg(major))
+                .toBool()) {  // only consider the profile if it has the java location overriden
+            overideSetting("JavaPath", QString("Java%1Path").arg(major));
+            overideSetting("IgnoreJavaCompatibility", QString("IgnoreJava%1Compatibility").arg(major));
+
+            // special!
+            passSetting("JavaSignature", QString("Java%1Signature").arg(major));
+            passSetting("JavaArchitecture", QString("Java%1Architecture").arg(major));
+            passSetting("JavaRealArchitecture", QString("Java%1RealArchitecture").arg(major));
+            passSetting("JavaVersion", QString("Java%1Version").arg(major));
+            passSetting("JavaVendor", QString("Java%1Vendor").arg(major));
+
+            overideSetting("JvmArgs", QString("Jvm%1Args").arg(major));
+
+            overideSetting("MinMemAlloc", QString("MinMemAlloc%1").arg(major));
+            overideSetting("MaxMemAlloc", QString("MaxMemAlloc%1").arg(major));
+            overideSetting("PermGen", QString("PermGen%1").arg(major));
+            return majorStr;
+        }
+    }
+    // save missing profiles and register the new settings
+    // this shhould not ussually happen
+    if (!unsupportedJavas.isEmpty()) {
+        auto nextSupported = supportedJavaMajors;
+        for (auto major : unsupportedJavas) {
+            if (!nextSupported.contains(major)) {
+                APPLICATION->registerJavaMajorSettings(major);
+                nextSupported << major;
+            }
+        }
+        std::sort(nextSupported.begin(), nextSupported.end(), [](const QString& a, const QString& b) { return a.toInt() < b.toInt(); });
+
+        appSettings->set("SupportedJavaMajors", nextSupported);
+    }
+    return {};
 }
 
 #include "MinecraftInstance.moc"

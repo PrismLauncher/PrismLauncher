@@ -23,6 +23,14 @@ PassthroughSetting::PassthroughSetting(std::shared_ptr<Setting> other, std::shar
     m_gate = gate;
 }
 
+PassthroughSetting::PassthroughSetting(QString id, std::shared_ptr<Setting> other, std::shared_ptr<Setting> gate)
+    : Setting({ id }, QVariant())
+{
+    Q_ASSERT(other);
+    m_other = other;
+    m_gate = gate;
+}
+
 bool PassthroughSetting::isOverriding() const
 {
     if (!m_gate) {
@@ -61,4 +69,9 @@ void PassthroughSetting::set(QVariant value)
         Setting::set(value);
     }
     m_other->set(value);
+}
+
+void PassthroughSetting::switchOveride(std::shared_ptr<Setting> overridden)
+{
+    m_other = overridden;
 }

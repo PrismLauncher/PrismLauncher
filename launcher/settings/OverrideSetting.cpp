@@ -23,6 +23,14 @@ OverrideSetting::OverrideSetting(std::shared_ptr<Setting> other, std::shared_ptr
     m_gate = gate;
 }
 
+OverrideSetting::OverrideSetting(QString id, std::shared_ptr<Setting> other, std::shared_ptr<Setting> gate) : Setting({ id }, QVariant())
+{
+    Q_ASSERT(other);
+    Q_ASSERT(gate);
+    m_other = other;
+    m_gate = gate;
+}
+
 bool OverrideSetting::isOverriding() const
 {
     return m_gate->get().toBool();
@@ -49,4 +57,8 @@ void OverrideSetting::reset()
 void OverrideSetting::set(QVariant value)
 {
     Setting::set(value);
+}
+void OverrideSetting::switchOveride(std::shared_ptr<Setting> overridden)
+{
+    m_other = overridden;
 }

@@ -61,6 +61,7 @@ class MinecraftInstance : public BaseInstance {
     virtual void saveNow() override;
 
     void loadSpecificSettings() override;
+    QString updateOverrideJavaSettings();
 
     // FIXME: remove
     QString typeName() const override;

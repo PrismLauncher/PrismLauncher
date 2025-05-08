@@ -66,6 +66,7 @@ class SettingsObject : public QObject {
      * \return A valid Setting shared pointer if successful.
      */
     std::shared_ptr<Setting> registerOverride(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate);
+    std::shared_ptr<Setting> registerOverride(QString id, std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate);
 
     /*!
      * Registers a passthorugh setting for the given original setting in this settings object
@@ -76,6 +77,7 @@ class SettingsObject : public QObject {
      * \return A valid Setting shared pointer if successful.
      */
     std::shared_ptr<Setting> registerPassthrough(std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate);
+    std::shared_ptr<Setting> registerPassthrough(QString id, std::shared_ptr<Setting> original, std::shared_ptr<Setting> gate);
 
     /*!
      * Registers the given setting with this SettingsObject and connects the necessary  signals.

@@ -47,6 +47,8 @@
 #include "minecraft/WorldList.h"
 #include "minecraft/auth/AccountList.h"
 #include "settings/Setting.h"
+#include "ui/widgets/JavaProfileSettingsWidget.h"
+#include "ui_MinecraftSettingsWidget.h"
 
 MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QWidget* parent)
     : QWidget(parent), m_instance(std::move(instance)), m_ui(new Ui::MinecraftSettingsWidget)
@@ -62,7 +64,7 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         m_ui->globalDataPacksGroupBox->hide();
         m_ui->loaderGroup->hide();
     } else {
-        m_javaSettings = new JavaSettingsWidget(m_instance, this);
+        m_javaSettings = new JavaProfileSettingsWidget(m_instance, this);
         m_ui->javaScrollArea->setWidget(m_javaSettings);
 
         m_ui->showGameTime->setText(tr("Show time &playing this instance"));
@@ -120,6 +122,22 @@ MinecraftSettingsWidget::MinecraftSettingsWidget(MinecraftInstance* instance, QW
         connect(m_ui->fabric, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
         connect(m_ui->quilt, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
         connect(m_ui->liteLoader, &QCheckBox::stateChanged, this, &MinecraftSettingsWidget::saveSelectedLoaders);
+        // just to update the settings to correct overrides
+        // needs "net.minecraft" to be loaded
+        auto version = m_instance->getPackProfile();
+        if (version && version->getComponent("net.minecraft")) {
+            auto minecraftCmp = version->getComponent("net.minecraft");
+            if (!minecraftCmp->m_loaded) {
+                version->reload(Net::Mode::Offline);
+                auto update = version->getCurrentTask();
+                if (update) {
+                    connect(update.get(), &Task::finished, this, [this] { m_instance->updateOverrideJavaSettings(); });
+                    update->start();
+                }
+            } else {
+                m_instance->updateOverrideJavaSettings();
+            }
+        }
     }
 
     m_ui->maximizedWarning->hide();
