@@ -69,11 +69,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-latest
             artifact-name: Linux
             base-cmake-preset: linux
 
-          - os: windows-2022
+          - os: windows-latest
             artifact-name: Windows-MinGW-w64
             base-cmake-preset: windows_mingw
             msystem: CLANG64
@@ -85,19 +85,19 @@ jobs:
             msystem: CLANGARM64
             vcvars-arch: arm64
 
-          - os: windows-2022
+          - os: windows-latest
             artifact-name: Windows-MSVC
             base-cmake-preset: windows_msvc
             # TODO(@getchoo): This is the default in setup-dependencies/windows. Why isn't it working?!?!
             vcvars-arch: amd64
 
-          - os: windows-2022
+          - os: windows-latest
             artifact-name: Windows-MSVC-arm64
             base-cmake-preset: windows_msvc_arm64_cross
             vcvars-arch: amd64_arm64
             qt-architecture: win64_msvc2022_arm64_cross_compiled
 
-          - os: macos-14
+          - os: macos-latest
             artifact-name: macOS
             base-cmake-preset: ${{ (inputs.build-type || 'Debug') == 'Debug' && 'macos_universal' || 'macos' }}
             macosx-deployment-target: 12.0
