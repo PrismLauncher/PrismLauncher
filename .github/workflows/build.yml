@@ -1,31 +1,6 @@
 name: Build
 
 on:
-  push:
-    branches-ignore:
-      - "renovate/**"
-    paths:
-      # File types
-      - "**.cpp"
-      - "**.h"
-      - "**.java"
-
-      # Directories
-      - "buildconfig/"
-      - "cmake/"
-      - "launcher/"
-      - "libraries/"
-      - "program_info/"
-      - "tests/"
-
-      # Files
-      - "CMakeLists.txt"
-      - "COPYING.md"
-
-      # Workflows
-      - ".github/workflows/build.yml"
-      - ".github/actions/package/"
-      - ".github/actions/setup-dependencies/"
   pull_request:
     paths:
       # File types
