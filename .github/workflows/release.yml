@@ -2,8 +2,6 @@ name: Build Application and Make Release
 
 on:
   push:
-    tags:
-      - "*"
 
 jobs:
   build_release:
@@ -24,12 +22,16 @@ jobs:
         with:
           submodules: "true"
           path: "PrismLauncher-source"
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
-      - name: Grab and store version
+
+      - name: Grab and store timestamp
+        id: timestamp
         run: |
-          tag_name=$(echo ${{ github.ref }} | grep -oE "[^/]+$")
-          echo "VERSION=$tag_name" >> $GITHUB_ENV
+          DATETIME=$(date +"%Y-%m-%dT%H:%M:%SZ")
+          echo "VERSION=$DATETIME" >> $GITHUB_ENV
+
       - name: Package artifacts properly
         run: |
           mv ${{ github.workspace }}/PrismLauncher-source PrismLauncher-${{ env.VERSION }}
@@ -37,7 +39,6 @@ jobs:
           mv PrismLauncher-*.AppImage/PrismLauncher-*.AppImage PrismLauncher-Linux-x86_64.AppImage
           mv PrismLauncher-*.AppImage.zsync/PrismLauncher-*.AppImage.zsync PrismLauncher-Linux-x86_64.AppImage.zsync
           mv PrismLauncher-macOS*/PrismLauncher.zip PrismLauncher-macOS-${{ env.VERSION }}.zip
-
           tar --exclude='.git' -czf PrismLauncher-${{ env.VERSION }}.tar.gz PrismLauncher-${{ env.VERSION }}
 
           for d in PrismLauncher-Windows-MSVC*; do
@@ -82,7 +83,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ env.VERSION }}
           name: Prism Launcher ${{ env.VERSION }}
           draft: true
           prerelease: false
