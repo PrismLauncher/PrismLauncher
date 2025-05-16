@@ -10,4 +10,4 @@
 
 ## Installation
 
-- Last build can be found in the [GitHub Releases](https://github.com/whytf/PrismLauncherCrack/releases) tab (this also includes the pull requests status) or [GitHub Actions](https://github.com/whytf/PrismLauncherCrack/actions).
+- Last build can be found in the [GitHub Releases](https://github.com/whytf/PrismLauncherCrack/releases) or [GitHub Actions](https://github.com/whytf/PrismLauncherCrack/actions).
