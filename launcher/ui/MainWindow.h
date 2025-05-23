@@ -167,10 +167,6 @@ class MainWindow : public QMainWindow {
 
     void on_actionCreateInstanceShortcut_triggered();
 
-    void on_actionCreateInstanceShortcutDesktop_triggered();
-    void on_actionCreateInstanceShortcutApplications_triggered();
-    void on_actionCreateInstanceShortcutOther_triggered();
-
     void taskEnd();
 
     /**
@@ -230,7 +226,6 @@ class MainWindow : public QMainWindow {
     void setSelectedInstanceById(const QString& id);
     void updateStatusCenter();
     void setInstanceActionsEnabled(bool enabled);
-    void createInstanceShortcut(QString shortcutDirPath);
 
     void runModalTask(Task* task);
     void instanceFromInstanceTask(InstanceTask* task);

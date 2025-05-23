@@ -771,39 +771,6 @@
     <string>Open the Java folder in a file browser. Only available if the built-in Java downloader is used.</string>
    </property>
   </action>
-  <action name="actionCreateInstanceShortcutDesktop">
-   <property name="text">
-    <string>Desktop</string>
-   </property>
-   <property name="toolTip">
-    <string>Creates an shortcut to this instance on your desktop</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::TextHeuristicRole</enum>
-   </property>
-  </action>
-  <action name="actionCreateInstanceShortcutApplications">
-   <property name="text">
-    <string>Applications</string>
-   </property>
-   <property name="toolTip">
-    <string>Create a shortcut of this instance on your start menu</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::TextHeuristicRole</enum>
-   </property>
-  </action>
-  <action name="actionCreateInstanceShortcutOther">
-   <property name="text">
-    <string>Other...</string>
-   </property>
-   <property name="toolTip">
-    <string>Creates a shortcut in a folder selected by you</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::TextHeuristicRole</enum>
-   </property>
-  </action>
  </widget>
  <customwidgets>
   <customwidget>
