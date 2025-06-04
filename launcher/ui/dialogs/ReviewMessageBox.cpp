@@ -23,6 +23,7 @@ ReviewMessageBox::ReviewMessageBox(QWidget* parent, [[maybe_unused]] QString con
 
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
+    ui->minimizeButton->setText(tr("Expand All"));
 }
 
 ReviewMessageBox::~ReviewMessageBox()
@@ -124,3 +125,23 @@ void ReviewMessageBox::on_toggleDepsButton_clicked()
     for (auto dep : m_deps)
         dep->setCheckState(0, state);
 };
+
+void ReviewMessageBox::on_minimizeButton_clicked()
+{
+    bool expanded = true;
+    for (int i = 0; i < ui->modTreeWidget->topLevelItemCount(); ++i) {
+        auto item = ui->modTreeWidget->topLevelItem(i);
+        expanded &= item->isExpanded();
+        if (!expanded)
+            break;
+    }
+
+    for (int i = 0; i < ui->modTreeWidget->topLevelItemCount(); ++i) {
+        auto item = ui->modTreeWidget->topLevelItem(i);
+        item->setExpanded(!expanded);
+    }
+    if (expanded)
+        ui->minimizeButton->setText(tr("Expand All"));
+    else
+        ui->minimizeButton->setText(tr("Collapse All"));
+}

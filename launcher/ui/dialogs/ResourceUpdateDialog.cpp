@@ -51,6 +51,7 @@ ResourceUpdateDialog::ResourceUpdateDialog(QWidget* parent,
 
     ui->explainLabel->setText(tr("You're about to update the following resources:"));
     ui->onlyCheckedLabel->setText(tr("Only resources with a check will be updated!"));
+    ui->minimizeButton->setText(tr("Collapse All"));
 }
 
 void ResourceUpdateDialog::checkCandidates()

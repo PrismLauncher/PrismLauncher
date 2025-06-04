@@ -32,6 +32,7 @@ class ReviewMessageBox : public QDialog {
 
    protected slots:
     void on_toggleDepsButton_clicked();
+    void on_minimizeButton_clicked();
 
    protected:
     ReviewMessageBox(QWidget* parent, const QString& title, const QString& icon);
