@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>LogsPage</class>
- <widget class="QWidget" name="OtherLogsPage">
+ <widget class="QWidget" name="LogsPage">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -29,7 +29,7 @@
         <string>Delete all the logs</string>
        </property>
        <property name="text">
-        <string>Clear &amp;All</string>
+        <string>&amp;Clean Up</string>
        </property>
       </widget>
      </item>
@@ -86,7 +86,7 @@
         <string>Scroll all the way to bottom</string>
        </property>
        <property name="text">
-        <string>Jump to &amp;Bottom</string>
+        <string>Jump to &amp;End</string>
        </property>
       </widget>
      </item>

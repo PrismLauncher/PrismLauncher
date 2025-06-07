@@ -68,6 +68,7 @@ class LogsPage : public QWidget, public BasePage {
    private slots:
     void populateSelectLogBox();
     void on_selectLogBox_currentIndexChanged(int index);
+    void launchTaskChanged(shared_qobject_ptr<LaunchTask> task);
     void on_btnReload_clicked();
     void on_btnPaste_clicked();
     void on_btnCopy_clicked();
@@ -86,9 +87,7 @@ class LogsPage : public QWidget, public BasePage {
 
    private:
     void reload();
-    void modelStateToUI();
-    void UIToModelState();
-    void setControlsEnabled(bool enabled);
+    void updateControls(bool enabled);
 
     QStringList getPaths();
 

@@ -39,6 +39,7 @@
 
 #include <QMessageBox>
 
+#include "launch/LaunchTask.h"
 #include "ui/GuiUtil.h"
 #include "ui/themes/ThemeManager.h"
 
@@ -151,12 +152,6 @@ LogsPage::LogsPage(QString id, QString displayName, QString helpPage, InstancePt
     ui->setupUi(this);
 
     m_proxy = new LogFormatProxyModel(this);
-    if (m_instance) {
-        m_model.reset(new LogModel(this));
-        ui->trackLogCheckbox->hide();
-    } else {
-        m_model = APPLICATION->logModel;
-    }
 
     // set up fonts in the log proxy
     {
@@ -171,15 +166,6 @@ LogsPage::LogsPage(QString id, QString displayName, QString helpPage, InstancePt
 
     ui->text->setModel(m_proxy);
 
-    if (m_instance) {
-        m_model->setMaxLines(getConsoleMaxLines(m_instance->settings()));
-        m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(m_instance->settings()));
-        m_model->setOverflowMessage(tr("Cannot display this log since the log length surpassed %1 lines.").arg(m_model->getMaxLines()));
-    } else {
-        modelStateToUI();
-    }
-    m_proxy->setSourceModel(m_model.get());
-
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &LogsPage::populateSelectLogBox);
 
     auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
@@ -192,44 +178,14 @@ LogsPage::LogsPage(QString id, QString displayName, QString helpPage, InstancePt
     connect(findPreviousShortcut, &QShortcut::activated, this, &LogsPage::findPreviousActivated);
 
     connect(ui->searchBar, &QLineEdit::returnPressed, this, &LogsPage::on_findButton_clicked);
+
+    if (instance != nullptr)
+        connect(instance.get(), &BaseInstance::launchTaskChanged, this, &LogsPage::launchTaskChanged);
 }
 
 LogsPage::~LogsPage()
 {
     delete ui;
-}
-
-void LogsPage::modelStateToUI()
-{
-    if (m_model->wrapLines()) {
-        ui->text->setWordWrap(true);
-        ui->wrapCheckbox->setCheckState(Qt::Checked);
-    } else {
-        ui->text->setWordWrap(false);
-        ui->wrapCheckbox->setCheckState(Qt::Unchecked);
-    }
-    if (m_model->colorLines()) {
-        ui->text->setColorLines(true);
-        ui->colorCheckbox->setCheckState(Qt::Checked);
-    } else {
-        ui->text->setColorLines(false);
-        ui->colorCheckbox->setCheckState(Qt::Unchecked);
-    }
-    if (m_model->suspended()) {
-        ui->trackLogCheckbox->setCheckState(Qt::Unchecked);
-    } else {
-        ui->trackLogCheckbox->setCheckState(Qt::Checked);
-    }
-}
-
-void LogsPage::UIToModelState()
-{
-    if (!m_model) {
-        return;
-    }
-    m_model->setLineWrap(ui->wrapCheckbox->checkState() == Qt::Checked);
-    m_model->setColorLines(ui->colorCheckbox->checkState() == Qt::Checked);
-    m_model->suspend(ui->trackLogCheckbox->checkState() != Qt::Checked);
 }
 
 void LogsPage::retranslate()
@@ -269,8 +225,7 @@ void LogsPage::populateSelectLogBox()
 
     ui->selectLogBox->blockSignals(true);
     ui->selectLogBox->clear();
-    if (!m_instance)
-        ui->selectLogBox->addItem("Current logs");
+    ui->selectLogBox->addItem(tr("Current Log"));
     ui->selectLogBox->addItems(getPaths());
     ui->selectLogBox->blockSignals(false);
 
@@ -280,41 +235,33 @@ void LogsPage::populateSelectLogBox()
             ui->selectLogBox->blockSignals(true);
             ui->selectLogBox->setCurrentIndex(index);
             ui->selectLogBox->blockSignals(false);
-            setControlsEnabled(true);
-            // don't refresh file
+            updateControls(true);
+            // don't refresh
             return;
         } else {
-            setControlsEnabled(false);
+            ui->selectLogBox->setCurrentIndex(0);
+            updateControls(true);
         }
-    } else if (!m_instance) {
-        ui->selectLogBox->setCurrentIndex(0);
-        setControlsEnabled(true);
-    }
+    } else if (m_model != nullptr)
+        return;  // don't refresh live updating log
 
     on_selectLogBox_currentIndexChanged(ui->selectLogBox->currentIndex());
 }
 
 void LogsPage::on_selectLogBox_currentIndexChanged(const int index)
 {
-    QString file;
-    if (index > 0 || (index == 0 && m_instance)) {
-        file = ui->selectLogBox->itemText(index);
-    }
-
-    if ((index != 0 || m_instance) && (file.isEmpty() || !QFile::exists(FS::PathCombine(m_basePath, file)))) {
+    if (index == 0)
         m_currentFile = QString();
-        ui->text->clear();
-        setControlsEnabled(false);
-    } else {
-        m_currentFile = file;
-        reload();
-        setControlsEnabled(true);
-    }
+    else
+        m_currentFile = ui->selectLogBox->itemText(index);
+
+    reload();
 }
+
 
 void LogsPage::on_btnReload_clicked()
 {
-    if (!m_instance && m_currentFile.isEmpty()) {
+    if (m_currentFile.isEmpty()) {
         if (!m_model)
             return;
         m_model->clear();
@@ -325,25 +272,39 @@ void LogsPage::on_btnReload_clicked()
     }
 }
 
+void LogsPage::launchTaskChanged(shared_qobject_ptr<LaunchTask> task) {
+    if (!m_currentFile.isEmpty())
+        return;
+
+    m_model.reset(task->getLogModel());
+    m_proxy->setSourceModel(m_model.get());
+}
+
 void LogsPage::reload()
 {
     if (m_currentFile.isEmpty()) {
-        if (m_instance) {
-            setControlsEnabled(false);
-        } else {
+        if (m_instance != nullptr) {
+            const auto launchTask = m_instance->getLaunchTask();
+
+            if (launchTask)
+                m_model.reset(launchTask->getLogModel());
+            else {
+                m_model.reset(new LogModel(this));
+                m_model->append(MessageLevel::Info, "The game log will appear here after launching.");
+            }
+        } else
             m_model = APPLICATION->logModel;
-            m_proxy->setSourceModel(m_model.get());
-            ui->text->setModel(m_proxy);
-            ui->text->scrollToBottom();
-            UIToModelState();
-            setControlsEnabled(true);
-        }
+
+        m_proxy->setSourceModel(m_model.get());
+        ui->text->setModel(m_proxy);
+        ui->text->scrollToBottom();
+        updateControls(true);
         return;
     }
 
     QFile file(FS::PathCombine(m_basePath, m_currentFile));
     if (!file.open(QFile::ReadOnly)) {
-        setControlsEnabled(false);
+        updateControls(false);
         ui->btnReload->setEnabled(true);  // allow reload
         m_currentFile = QString();
         QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2").arg(m_currentFile, file.errorString()));
@@ -395,13 +356,12 @@ void LogsPage::reload()
         // Try to determine a level for each line
         ui->text->clear();
         ui->text->setModel(nullptr);
-        if (!m_instance) {
-            m_model.reset(new LogModel(this));
-            m_model->setMaxLines(getConsoleMaxLines(APPLICATION->settings()));
-            m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(APPLICATION->settings()));
-            m_model->setOverflowMessage(tr("Cannot display this log since the log length surpassed %1 lines.").arg(m_model->getMaxLines()));
-        }
-        m_model->clear();
+
+        m_model.reset(new LogModel(this));
+        m_model->setMaxLines(getConsoleMaxLines(APPLICATION->settings()));
+        m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(APPLICATION->settings()));
+        m_model->setOverflowMessage(tr("Cannot display this log since the log length surpassed %1 lines.").arg(m_model->getMaxLines()));
+
         if (file.fileName().endsWith(".gz")) {
             QString line;
             auto error = GZip::readGzFileByBlocks(&file, [&line, handleLine](const QByteArray& d) {
@@ -431,22 +391,16 @@ void LogsPage::reload()
             }
         }
 
-        if (m_instance) {
-            ui->text->setModel(m_proxy);
-            ui->text->scrollToBottom();
-        } else {
-            m_proxy->setSourceModel(m_model.get());
-            ui->text->setModel(m_proxy);
-            ui->text->scrollToBottom();
-            UIToModelState();
-            setControlsEnabled(true);
-        }
+        m_proxy->setSourceModel(m_model.get());
+        ui->text->setModel(m_proxy);
+        ui->text->scrollToBottom();
+        updateControls(true);
     }
 }
 
 void LogsPage::on_btnPaste_clicked()
 {
-    QString name = m_currentFile.isEmpty() ? displayName() : m_currentFile;
+    QString name = m_currentFile.isEmpty() ? ui->selectLogBox->itemText(0) : m_currentFile;
     GuiUtil::uploadPaste(name, ui->text->toPlainText(), this);
 }
 
@@ -470,7 +424,7 @@ void LogsPage::on_trackLogCheckbox_clicked(bool checked)
 void LogsPage::on_btnDelete_clicked()
 {
     if (m_currentFile.isEmpty()) {
-        setControlsEnabled(false);
+        updateControls(false);
         return;
     }
     if (QMessageBox::question(this, tr("Confirm Deletion"),
@@ -550,7 +504,6 @@ void LogsPage::on_wrapCheckbox_clicked(bool checked)
     ui->text->setWordWrap(checked);
     if (!m_model)
         return;
-    m_model->setLineWrap(checked);
     ui->text->scrollToBottom();
 }
 
@@ -559,32 +512,29 @@ void LogsPage::on_colorCheckbox_clicked(bool checked)
     ui->text->setColorLines(checked);
     if (!m_model)
         return;
-    m_model->setColorLines(checked);
     ui->text->scrollToBottom();
 }
 
-void LogsPage::setControlsEnabled(const bool enabled)
+void LogsPage::updateControls(const bool enabled)
 {
-    if (m_instance) {
-        ui->btnDelete->setEnabled(enabled);
-        ui->btnClean->setEnabled(enabled);
-    } else if (!m_currentFile.isEmpty()) {
+    if (!m_currentFile.isEmpty()) {
         ui->btnReload->setText("&Reload");
         ui->btnReload->setToolTip("Reload the contents of the log from the disk");
-        ui->btnDelete->setEnabled(enabled);
-        ui->btnClean->setEnabled(enabled);
-        ui->trackLogCheckbox->setEnabled(false);
+        ui->btnDelete->setVisible(true);
+        ui->trackLogCheckbox->setVisible(false);
     } else {
         ui->btnReload->setText("Clear");
         ui->btnReload->setToolTip("Clear the log");
-        ui->btnDelete->setEnabled(false);
-        ui->btnClean->setEnabled(false);
-        ui->trackLogCheckbox->setEnabled(enabled);
+        ui->btnDelete->setVisible(false);
+        ui->trackLogCheckbox->setVisible(true);
     }
 
     ui->btnReload->setEnabled(enabled);
     ui->btnCopy->setEnabled(enabled);
     ui->btnPaste->setEnabled(enabled);
+    ui->btnDelete->setEnabled(enabled);
+    ui->btnClean->setEnabled(enabled);
+    ui->trackLogCheckbox->setEnabled(enabled);
     ui->text->setEnabled(enabled);
 }
 

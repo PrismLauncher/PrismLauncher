@@ -138,30 +138,6 @@ void LogModel::setOverflowMessage(const QString& overflowMessage)
     m_overflowMessage = overflowMessage;
 }
 
-void LogModel::setLineWrap(bool state)
-{
-    if (m_lineWrap != state) {
-        m_lineWrap = state;
-    }
-}
-
-bool LogModel::wrapLines() const
-{
-    return m_lineWrap;
-}
-
-void LogModel::setColorLines(bool state)
-{
-    if (m_colorLines != state) {
-        m_colorLines = state;
-    }
-}
-
-bool LogModel::colorLines() const
-{
-    return m_colorLines;
-}
-
 bool LogModel::isOverFlow()
 {
     return m_numLines >= m_maxLines && m_stopOnOverflow;
