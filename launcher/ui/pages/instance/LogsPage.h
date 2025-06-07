@@ -53,13 +53,13 @@ class LogsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit LogsPage(QString id, QString displayName, QString helpPage, InstancePtr instance = nullptr, QWidget* parent = 0);
+    explicit LogsPage(InstancePtr instance = nullptr, QWidget* parent = 0);
     ~LogsPage();
 
-    QString id() const override { return m_id; }
-    QString displayName() const override { return m_displayName; }
+    QString id() const override { return "logs"; }
+    QString displayName() const override { return tr("Logs"); }
     QIcon icon() const override { return APPLICATION->getThemedIcon("log"); }
-    QString helpPage() const override { return m_helpPage; }
+    QString helpPage() const override { return "Logs"; }
     void retranslate() override;
 
     void openedImpl() override;

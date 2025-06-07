@@ -26,7 +26,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
     virtual QList<BasePage*> getPages() override
     {
         QList<BasePage*> values;
-        values.append(new LogsPage("logs", tr("Logs"), "Logs", inst));
+        values.append(new LogsPage(inst));
         std::shared_ptr<MinecraftInstance> onesix = std::dynamic_pointer_cast<MinecraftInstance>(inst);
         values.append(new VersionPage(onesix.get()));
         values.append(ManagedPackPage::createPage(onesix.get()));

@@ -4,8 +4,7 @@
 
 #include "ui/pages/instance/LogsPage.h"
 
-ViewLogWindow::ViewLogWindow(QWidget* parent)
-    : QMainWindow(parent), m_page(new LogsPage("launcher-logs", tr("Launcher Logs"), "Launcher-Logs", nullptr, parent))
+ViewLogWindow::ViewLogWindow(QWidget* parent) : QMainWindow(parent), m_page(new LogsPage(nullptr, parent))
 {
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowIcon(APPLICATION->getThemedIcon("log"));

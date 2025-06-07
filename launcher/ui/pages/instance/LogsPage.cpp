@@ -139,11 +139,8 @@ class LogFormatProxyModel : public QIdentityProxyModel {
     QFont m_font;
 };
 
-LogsPage::LogsPage(QString id, QString displayName, QString helpPage, InstancePtr instance, QWidget* parent)
+LogsPage::LogsPage(InstancePtr instance, QWidget* parent)
     : QWidget(parent)
-    , m_id(id)
-    , m_displayName(displayName)
-    , m_helpPage(helpPage)
     , ui(new Ui::LogsPage)
     , m_instance(instance)
     , m_basePath(instance ? instance->gameRoot() : APPLICATION->dataRoot())
@@ -258,7 +255,6 @@ void LogsPage::on_selectLogBox_currentIndexChanged(const int index)
     reload();
 }
 
-
 void LogsPage::on_btnReload_clicked()
 {
     if (m_currentFile.isEmpty()) {
@@ -272,7 +268,8 @@ void LogsPage::on_btnReload_clicked()
     }
 }
 
-void LogsPage::launchTaskChanged(shared_qobject_ptr<LaunchTask> task) {
+void LogsPage::launchTaskChanged(shared_qobject_ptr<LaunchTask> task)
+{
     if (!m_currentFile.isEmpty())
         return;
 
