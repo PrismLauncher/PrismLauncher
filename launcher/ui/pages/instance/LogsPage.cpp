@@ -34,8 +34,8 @@
  *      limitations under the License.
  */
 
-#include "OtherLogsPage.h"
-#include "ui_OtherLogsPage.h"
+#include "LogsPage.h"
+#include "ui_LogsPage.h"
 
 #include <QMessageBox>
 
@@ -44,18 +44,106 @@
 
 #include <FileSystem.h>
 #include <GZip.h>
+#include <logs/LogParser.h>
 #include <QDir>
 #include <QDirIterator>
 #include <QFileSystemWatcher>
+#include <QIdentityProxyModel>
 #include <QShortcut>
 #include <QUrl>
 
-OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, InstancePtr instance, QWidget* parent)
+class LogFormatProxyModel : public QIdentityProxyModel {
+   public:
+    LogFormatProxyModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
+    QVariant data(const QModelIndex& index, int role) const override
+    {
+        const LogColors& colors = APPLICATION->themeManager()->getLogColors();
+
+        switch (role) {
+            case Qt::FontRole:
+                return m_font;
+            case Qt::ForegroundRole: {
+                auto level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
+                QColor result = colors.foreground.value(level);
+
+                if (result.isValid())
+                    return result;
+
+                break;
+            }
+            case Qt::BackgroundRole: {
+                auto level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
+                QColor result = colors.background.value(level);
+
+                if (result.isValid())
+                    return result;
+
+                break;
+            }
+        }
+
+        return QIdentityProxyModel::data(index, role);
+    }
+
+    void setFont(QFont font) { m_font = font; }
+    QFont getFont() { return m_font; }
+
+    QModelIndex find(const QModelIndex& start, const QString& value, bool reverse) const
+    {
+        QModelIndex parentIndex = parent(start);
+        auto compare = [&](int r) -> QModelIndex {
+            QModelIndex idx = index(r, start.column(), parentIndex);
+            if (!idx.isValid() || idx == start) {
+                return QModelIndex();
+            }
+            QVariant v = data(idx, Qt::DisplayRole);
+            QString t = v.toString();
+            if (t.contains(value, Qt::CaseInsensitive))
+                return idx;
+            return QModelIndex();
+        };
+        if (reverse) {
+            int from = start.row();
+            int to = 0;
+
+            for (int i = 0; i < 2; ++i) {
+                for (int r = from; (r >= to); --r) {
+                    auto idx = compare(r);
+                    if (idx.isValid())
+                        return idx;
+                }
+                // prepare for the next iteration
+                from = rowCount() - 1;
+                to = start.row();
+            }
+        } else {
+            int from = start.row();
+            int to = rowCount(parentIndex);
+
+            for (int i = 0; i < 2; ++i) {
+                for (int r = from; (r < to); ++r) {
+                    auto idx = compare(r);
+                    if (idx.isValid())
+                        return idx;
+                }
+                // prepare for the next iteration
+                from = 0;
+                to = start.row();
+            }
+        }
+        return QModelIndex();
+    }
+
+   private:
+    QFont m_font;
+};
+
+LogsPage::LogsPage(QString id, QString displayName, QString helpPage, InstancePtr instance, QWidget* parent)
     : QWidget(parent)
     , m_id(id)
     , m_displayName(displayName)
     , m_helpPage(helpPage)
-    , ui(new Ui::OtherLogsPage)
+    , ui(new Ui::LogsPage)
     , m_instance(instance)
     , m_basePath(instance ? instance->gameRoot() : APPLICATION->dataRoot())
     , m_logSearchPaths(instance ? instance->getLogFileSearchPaths() : QStringList{ "logs" })
@@ -92,26 +180,26 @@ OtherLogsPage::OtherLogsPage(QString id, QString displayName, QString helpPage, 
     }
     m_proxy->setSourceModel(m_model.get());
 
-    connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &OtherLogsPage::populateSelectLogBox);
+    connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &LogsPage::populateSelectLogBox);
 
     auto findShortcut = new QShortcut(QKeySequence(QKeySequence::Find), this);
-    connect(findShortcut, &QShortcut::activated, this, &OtherLogsPage::findActivated);
+    connect(findShortcut, &QShortcut::activated, this, &LogsPage::findActivated);
 
     auto findNextShortcut = new QShortcut(QKeySequence(QKeySequence::FindNext), this);
-    connect(findNextShortcut, &QShortcut::activated, this, &OtherLogsPage::findNextActivated);
+    connect(findNextShortcut, &QShortcut::activated, this, &LogsPage::findNextActivated);
 
     auto findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
-    connect(findPreviousShortcut, &QShortcut::activated, this, &OtherLogsPage::findPreviousActivated);
+    connect(findPreviousShortcut, &QShortcut::activated, this, &LogsPage::findPreviousActivated);
 
-    connect(ui->searchBar, &QLineEdit::returnPressed, this, &OtherLogsPage::on_findButton_clicked);
+    connect(ui->searchBar, &QLineEdit::returnPressed, this, &LogsPage::on_findButton_clicked);
 }
 
-OtherLogsPage::~OtherLogsPage()
+LogsPage::~LogsPage()
 {
     delete ui;
 }
 
-void OtherLogsPage::modelStateToUI()
+void LogsPage::modelStateToUI()
 {
     if (m_model->wrapLines()) {
         ui->text->setWordWrap(true);
@@ -134,7 +222,7 @@ void OtherLogsPage::modelStateToUI()
     }
 }
 
-void OtherLogsPage::UIToModelState()
+void LogsPage::UIToModelState()
 {
     if (!m_model) {
         return;
@@ -144,12 +232,12 @@ void OtherLogsPage::UIToModelState()
     m_model->suspend(ui->trackLogCheckbox->checkState() != Qt::Checked);
 }
 
-void OtherLogsPage::retranslate()
+void LogsPage::retranslate()
 {
     ui->retranslateUi(this);
 }
 
-void OtherLogsPage::openedImpl()
+void LogsPage::openedImpl()
 {
     const QStringList failedPaths = m_watcher.addPaths(m_logSearchPaths);
 
@@ -163,7 +251,7 @@ void OtherLogsPage::openedImpl()
     populateSelectLogBox();
 }
 
-void OtherLogsPage::closedImpl()
+void LogsPage::closedImpl()
 {
     const QStringList failedPaths = m_watcher.removePaths(m_logSearchPaths);
 
@@ -175,7 +263,7 @@ void OtherLogsPage::closedImpl()
     }
 }
 
-void OtherLogsPage::populateSelectLogBox()
+void LogsPage::populateSelectLogBox()
 {
     const QString prevCurrentFile = m_currentFile;
 
@@ -206,7 +294,7 @@ void OtherLogsPage::populateSelectLogBox()
     on_selectLogBox_currentIndexChanged(ui->selectLogBox->currentIndex());
 }
 
-void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
+void LogsPage::on_selectLogBox_currentIndexChanged(const int index)
 {
     QString file;
     if (index > 0 || (index == 0 && m_instance)) {
@@ -224,7 +312,7 @@ void OtherLogsPage::on_selectLogBox_currentIndexChanged(const int index)
     }
 }
 
-void OtherLogsPage::on_btnReload_clicked()
+void LogsPage::on_btnReload_clicked()
 {
     if (!m_instance && m_currentFile.isEmpty()) {
         if (!m_model)
@@ -237,7 +325,7 @@ void OtherLogsPage::on_btnReload_clicked()
     }
 }
 
-void OtherLogsPage::reload()
+void LogsPage::reload()
 {
     if (m_currentFile.isEmpty()) {
         if (m_instance) {
@@ -356,30 +444,30 @@ void OtherLogsPage::reload()
     }
 }
 
-void OtherLogsPage::on_btnPaste_clicked()
+void LogsPage::on_btnPaste_clicked()
 {
     QString name = m_currentFile.isEmpty() ? displayName() : m_currentFile;
     GuiUtil::uploadPaste(name, ui->text->toPlainText(), this);
 }
 
-void OtherLogsPage::on_btnCopy_clicked()
+void LogsPage::on_btnCopy_clicked()
 {
     GuiUtil::setClipboardText(ui->text->toPlainText());
 }
 
-void OtherLogsPage::on_btnBottom_clicked()
+void LogsPage::on_btnBottom_clicked()
 {
     ui->text->scrollToBottom();
 }
 
-void OtherLogsPage::on_trackLogCheckbox_clicked(bool checked)
+void LogsPage::on_trackLogCheckbox_clicked(bool checked)
 {
     if (!m_model)
         return;
     m_model->suspend(!checked);
 }
 
-void OtherLogsPage::on_btnDelete_clicked()
+void LogsPage::on_btnDelete_clicked()
 {
     if (m_currentFile.isEmpty()) {
         setControlsEnabled(false);
@@ -404,7 +492,7 @@ void OtherLogsPage::on_btnDelete_clicked()
     }
 }
 
-void OtherLogsPage::on_btnClean_clicked()
+void LogsPage::on_btnClean_clicked()
 {
     auto toDelete = getPaths();
     if (toDelete.isEmpty()) {
@@ -457,7 +545,7 @@ void OtherLogsPage::on_btnClean_clicked()
     }
 }
 
-void OtherLogsPage::on_wrapCheckbox_clicked(bool checked)
+void LogsPage::on_wrapCheckbox_clicked(bool checked)
 {
     ui->text->setWordWrap(checked);
     if (!m_model)
@@ -466,7 +554,7 @@ void OtherLogsPage::on_wrapCheckbox_clicked(bool checked)
     ui->text->scrollToBottom();
 }
 
-void OtherLogsPage::on_colorCheckbox_clicked(bool checked)
+void LogsPage::on_colorCheckbox_clicked(bool checked)
 {
     ui->text->setColorLines(checked);
     if (!m_model)
@@ -475,7 +563,7 @@ void OtherLogsPage::on_colorCheckbox_clicked(bool checked)
     ui->text->scrollToBottom();
 }
 
-void OtherLogsPage::setControlsEnabled(const bool enabled)
+void LogsPage::setControlsEnabled(const bool enabled)
 {
     if (m_instance) {
         ui->btnDelete->setEnabled(enabled);
@@ -500,7 +588,7 @@ void OtherLogsPage::setControlsEnabled(const bool enabled)
     ui->text->setEnabled(enabled);
 }
 
-QStringList OtherLogsPage::getPaths()
+QStringList LogsPage::getPaths()
 {
     QDir baseDir(m_basePath);
 
@@ -523,24 +611,24 @@ QStringList OtherLogsPage::getPaths()
     return result;
 }
 
-void OtherLogsPage::on_findButton_clicked()
+void LogsPage::on_findButton_clicked()
 {
     auto modifiers = QApplication::keyboardModifiers();
     bool reverse = modifiers & Qt::ShiftModifier;
     ui->text->findNext(ui->searchBar->text(), reverse);
 }
 
-void OtherLogsPage::findNextActivated()
+void LogsPage::findNextActivated()
 {
     ui->text->findNext(ui->searchBar->text(), false);
 }
 
-void OtherLogsPage::findPreviousActivated()
+void LogsPage::findPreviousActivated()
 {
     ui->text->findNext(ui->searchBar->text(), true);
 }
 
-void OtherLogsPage::findActivated()
+void LogsPage::findActivated()
 {
     // focus the search bar if it doesn't have focus
     if (!ui->searchBar->hasFocus()) {

@@ -4,7 +4,7 @@
 
 #include "Application.h"
 
-class OtherLogsPage;
+class LogsPage;
 
 class ViewLogWindow : public QMainWindow {
     Q_OBJECT
@@ -19,5 +19,5 @@ class ViewLogWindow : public QMainWindow {
     void closeEvent(QCloseEvent*) override;
 
    private:
-    OtherLogsPage* m_page;
+    LogsPage* m_page;
 };

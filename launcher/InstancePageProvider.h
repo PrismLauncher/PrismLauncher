@@ -5,11 +5,10 @@
 #include "ui/pages/BasePage.h"
 #include "ui/pages/BasePageProvider.h"
 #include "ui/pages/instance/InstanceSettingsPage.h"
-#include "ui/pages/instance/LogPage.h"
+#include "ui/pages/instance/LogsPage.h"
 #include "ui/pages/instance/ManagedPackPage.h"
 #include "ui/pages/instance/ModFolderPage.h"
 #include "ui/pages/instance/NotesPage.h"
-#include "ui/pages/instance/OtherLogsPage.h"
 #include "ui/pages/instance/ResourcePackPage.h"
 #include "ui/pages/instance/ScreenshotsPage.h"
 #include "ui/pages/instance/ServersPage.h"
@@ -27,7 +26,7 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
     virtual QList<BasePage*> getPages() override
     {
         QList<BasePage*> values;
-        values.append(new LogPage(inst));
+        values.append(new LogsPage("logs", tr("Logs"), "Logs", inst));
         std::shared_ptr<MinecraftInstance> onesix = std::dynamic_pointer_cast<MinecraftInstance>(inst);
         values.append(new VersionPage(onesix.get()));
         values.append(ManagedPackPage::createPage(onesix.get()));
@@ -46,7 +45,6 @@ class InstancePageProvider : protected QObject, public BasePageProvider {
         // values.append(new GameOptionsPage(onesix.get()));
         values.append(new ScreenshotsPage(FS::PathCombine(onesix->gameRoot(), "screenshots")));
         values.append(new InstanceSettingsPage(onesix));
-        values.append(new OtherLogsPage("logs", tr("Other logs"), "Other-Logs", inst));
         return values;
     }
 

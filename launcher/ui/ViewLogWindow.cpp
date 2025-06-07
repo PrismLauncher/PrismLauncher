@@ -2,10 +2,10 @@
 
 #include "ViewLogWindow.h"
 
-#include "ui/pages/instance/OtherLogsPage.h"
+#include "ui/pages/instance/LogsPage.h"
 
 ViewLogWindow::ViewLogWindow(QWidget* parent)
-    : QMainWindow(parent), m_page(new OtherLogsPage("launcher-logs", tr("Launcher Logs"), "Launcher-Logs", nullptr, parent))
+    : QMainWindow(parent), m_page(new LogsPage("launcher-logs", tr("Launcher Logs"), "Launcher-Logs", nullptr, parent))
 {
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowIcon(APPLICATION->getThemedIcon("log"));

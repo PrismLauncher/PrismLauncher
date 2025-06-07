@@ -933,13 +933,11 @@ SET(LAUNCHER_SOURCES
     ui/pages/instance/ModFolderPage.h
     ui/pages/instance/NotesPage.cpp
     ui/pages/instance/NotesPage.h
-    ui/pages/instance/LogPage.cpp
-    ui/pages/instance/LogPage.h
     ui/pages/instance/InstanceSettingsPage.h
     ui/pages/instance/ScreenshotsPage.cpp
     ui/pages/instance/ScreenshotsPage.h
-    ui/pages/instance/OtherLogsPage.cpp
-    ui/pages/instance/OtherLogsPage.h
+    ui/pages/instance/LogsPage.cpp
+    ui/pages/instance/LogsPage.h
     ui/pages/instance/ServersPage.cpp
     ui/pages/instance/ServersPage.h
     ui/pages/instance/WorldListPage.cpp
@@ -1208,10 +1206,9 @@ qt_wrap_ui(LAUNCHER_UI
     ui/pages/global/ExternalToolsPage.ui
     ui/pages/instance/ExternalResourcesPage.ui
     ui/pages/instance/NotesPage.ui
-    ui/pages/instance/LogPage.ui
     ui/pages/instance/ServersPage.ui
     ui/pages/instance/GameOptionsPage.ui
-    ui/pages/instance/OtherLogsPage.ui
+    ui/pages/instance/LogsPage.ui
     ui/pages/instance/VersionPage.ui
     ui/pages/instance/ManagedPackPage.ui
     ui/pages/instance/WorldListPage.ui

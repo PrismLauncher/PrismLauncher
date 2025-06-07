@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OtherLogsPage</class>
+ <class>LogsPage</class>
  <widget class="QWidget" name="OtherLogsPage">
   <property name="geometry">
    <rect>

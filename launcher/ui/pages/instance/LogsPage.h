@@ -40,21 +40,21 @@
 #include <Application.h>
 #include <pathmatcher/IPathMatcher.h>
 #include <QFileSystemWatcher>
-#include "LogPage.h"
 #include "ui/pages/BasePage.h"
 
 namespace Ui {
-class OtherLogsPage;
+class LogsPage;
 }
 
 class RecursiveFileSystemWatcher;
+class LogFormatProxyModel;
 
-class OtherLogsPage : public QWidget, public BasePage {
+class LogsPage : public QWidget, public BasePage {
     Q_OBJECT
 
    public:
-    explicit OtherLogsPage(QString id, QString displayName, QString helpPage, InstancePtr instance = nullptr, QWidget* parent = 0);
-    ~OtherLogsPage();
+    explicit LogsPage(QString id, QString displayName, QString helpPage, InstancePtr instance = nullptr, QWidget* parent = 0);
+    ~LogsPage();
 
     QString id() const override { return m_id; }
     QString displayName() const override { return m_displayName; }
@@ -97,7 +97,7 @@ class OtherLogsPage : public QWidget, public BasePage {
     QString m_displayName;
     QString m_helpPage;
 
-    Ui::OtherLogsPage* ui;
+    Ui::LogsPage* ui;
     InstancePtr m_instance;
     /** Path to display log paths relative to. */
     QString m_basePath;
