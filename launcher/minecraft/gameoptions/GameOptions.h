@@ -2,7 +2,7 @@
 
 #include <QAbstractListModel>
 #include <QString>
-#include <map>
+#include "minecraft/gameoptions/GameOptionsSchema.h"
 
 struct GameOptionItem {
     QString key;
@@ -20,12 +20,14 @@ class GameOptions : public QAbstractListModel {
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
     bool isLoaded() const;
     bool reload();
     bool save();
 
    private:
-    std::vector<GameOptionItem> contents;
+    std::vector<GameOption> contents;
     bool loaded = false;
     QString path;
     int version = 0;

@@ -1,12 +1,30 @@
 #include "GameOptions.h"
 #include <QDebug>
+#include <QFile>
 #include <QSaveFile>
-#include "FileSystem.h"
+#include "minecraft/gameoptions/GameOptionsSchema.h"
 
 namespace {
-bool load(const QString& path, std::vector<GameOptionItem>& contents, int& version)
+void upsertGameOption(std::vector<GameOption>& contents, const QString& key, const QString& value)
+{
+    for (auto& option : contents) {
+        if (option.key == key) {
+            QVariant converted = QVariant(value);
+            if (!converted.convert(option.value.metaType())) {
+                qWarning() << "Failed to convert" << value << "to type" << option.value.typeName();
+            }
+            option.value = converted;
+            return;
+        }
+    }
+    contents.emplace_back(GameOption{ key, value });  // Insert new
+}
+bool load(const QString& path, std::vector<GameOption>& contents, int& version)
 {
     contents.clear();
+    for (auto v : globalDelegateMap) {
+        contents.emplace_back(v);
+    }
     QFile file(path);
     if (!file.open(QFile::ReadOnly)) {
         qWarning() << "Failed to read options file.";
@@ -29,12 +47,12 @@ bool load(const QString& path, std::vector<GameOptionItem>& contents, int& versi
             version = value.toInt();
             continue;
         }
-        contents.emplace_back(GameOptionItem{ key, value });
+        upsertGameOption(contents, key, value);
     }
     qDebug() << "Loaded" << path << "with version:" << version;
     return true;
 }
-bool save(const QString& path, std::vector<GameOptionItem>& mapping, int version)
+bool save(const QString& path, std::vector<GameOption>& mapping, int version)
 {
     QSaveFile out(path);
     if (!out.open(QIODevice::WriteOnly)) {
@@ -48,7 +66,7 @@ bool save(const QString& path, std::vector<GameOptionItem>& mapping, int version
     while (iter != mapping.end()) {
         out.write(iter->key.toUtf8());
         out.write(":");
-        out.write(iter->value.toUtf8());
+        out.write(iter->value.toString().toUtf8());
         out.write("\n");
         iter++;
     }
@@ -71,6 +89,8 @@ QVariant GameOptions::headerData(int section, Qt::Orientation orientation, int r
             return tr("Key");
         case 1:
             return tr("Value");
+        case 2:
+            return tr("Description");
         default:
             return QVariant();
     }
@@ -87,12 +107,33 @@ QVariant GameOptions::data(const QModelIndex& index, int role) const
     if (row < 0 || row >= int(contents.size()))
         return QVariant();
 
-    if (role == Qt::DisplayRole) {
-        if (column == 0)
-            return contents[row].key;
-        return contents[row].value;
+    if (role == Qt::UserRole + 1) {
+        switch (column) {
+            case 0:
+                return contents[row].min;
+            case 1:
+                return contents[row].max;
+            case 2:
+                return contents[row].values;
+            default:
+                return QVariant();
+        }
     }
-    return QVariant();
+
+    if (role != Qt::DisplayRole && role != Qt::EditRole) {
+        return QVariant();
+    }
+
+    switch (column) {
+        case 0:
+            return contents[row].key;
+        case 1:
+            return contents[row].value;
+        case 2:
+            return contents[row].description;
+        default:
+            return QVariant();
+    }
 }
 
 int GameOptions::rowCount(const QModelIndex&) const
@@ -102,7 +143,7 @@ int GameOptions::rowCount(const QModelIndex&) const
 
 int GameOptions::columnCount(const QModelIndex&) const
 {
-    return 2;
+    return 3;
 }
 
 bool GameOptions::isLoaded() const
@@ -121,4 +162,19 @@ bool GameOptions::reload()
 bool GameOptions::save()
 {
     return ::save(path, contents, version);
+}
+
+bool GameOptions::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    if (role != Qt::EditRole)
+        return false;
+
+    if (index.column() == 1) {
+        contents[index.row()].value = value.toString();
+
+        emit dataChanged(index, index, { Qt::EditRole });
+        return true;
+    }
+
+    return false;
 }
