@@ -248,13 +248,13 @@ void LogsPage::loadLogFile(const QString& path)
     QFile file(FS::PathCombine(m_basePath, path));
     if (!file.open(QFile::ReadOnly)) {
         QString errorMessage = tr("Unable to open %1 for reading: %2").arg(path, file.errorString());
-        m_model->append(MessageLevel::Fatal, std::move(errorMessage));
+        m_model->append(MessageLevel::Error, std::move(errorMessage));
         return;
     }
 
     if (file.size() > (1024ll * 1024ll * 12ll)) {
         QString errorMessage = tr("The file (%1) is too big. Please open it in a viewer optimized for large files.").arg(file.fileName());
-        m_model->append(MessageLevel::Fatal, std::move(errorMessage));
+        m_model->append(MessageLevel::Error, std::move(errorMessage));
         return;
     }
 
@@ -297,7 +297,7 @@ void LogsPage::loadLogFile(const QString& path)
         });
         if (!error.isEmpty()) {
             QString errorMessage = tr("The file (%1) encountered an error when reading: %2.").arg(file.fileName(), error);
-            m_model->append(MessageLevel::Fatal, std::move(errorMessage));
+            m_model->append(MessageLevel::Error, std::move(errorMessage));
             return;
         }
         if (!line.isEmpty()) {
