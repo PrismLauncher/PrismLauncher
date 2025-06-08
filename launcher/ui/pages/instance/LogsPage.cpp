@@ -363,7 +363,7 @@ void LogsPage::clearClicked()
     if (!m_model)
         return;
 
-    m_model.clear();
+    m_model->clear();
 }
 
 void LogsPage::cleanUpClicked()
