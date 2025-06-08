@@ -141,12 +141,12 @@ class LogFormatProxyModel : public QIdentityProxyModel {
 
 LogsPage::LogsPage(InstancePtr instance, QWidget* parent)
     : QWidget(parent)
-    , ui(new Ui::LogsPage)
+    , m_ui(new Ui::LogsPage)
     , m_instance(instance)
     , m_basePath(instance ? instance->gameRoot() : APPLICATION->dataRoot())
     , m_logSearchPaths(instance ? instance->getLogFileSearchPaths() : QStringList{ "logs" })
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
     m_proxy = new LogFormatProxyModel(this);
 
@@ -161,7 +161,7 @@ LogsPage::LogsPage(InstancePtr instance, QWidget* parent)
         m_proxy->setFont(QFont(fontFamily, fontSize));
     }
 
-    ui->text->setModel(m_proxy);
+    m_ui->text->setModel(m_proxy);
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, &LogsPage::populateSelectLogBox);
 
@@ -174,20 +174,39 @@ LogsPage::LogsPage(InstancePtr instance, QWidget* parent)
     auto findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
     connect(findPreviousShortcut, &QShortcut::activated, this, &LogsPage::findPreviousActivated);
 
-    connect(ui->searchBar, &QLineEdit::returnPressed, this, &LogsPage::on_findButton_clicked);
+    connect(m_ui->searchBar, &QLineEdit::returnPressed, this, &LogsPage::findClicked);
 
-    if (instance != nullptr)
-        connect(instance.get(), &BaseInstance::launchTaskChanged, this, &LogsPage::launchTaskChanged);
+    connect(m_ui->selectLogBox, &QComboBox::currentIndexChanged, this, &LogsPage::loadLog);
+    connect(m_ui->cleanUpButton, &QAbstractButton::clicked, this, &LogsPage::cleanUpClicked);
+
+    connect(m_ui->copyButton, &QAbstractButton::clicked, this, &LogsPage::copyClicked);
+    connect(m_ui->uploadButton, &QAbstractButton::clicked, this, &LogsPage::uploadClicked);
+    connect(m_ui->deleteButton, &QAbstractButton::clicked, this, &LogsPage::deleteClicked);
+    connect(m_ui->reloadButton, &QAbstractButton::clicked, this, &LogsPage::loadLog);
+    connect(m_ui->clearButton, &QAbstractButton::clicked, this, &LogsPage::clearClicked);
+
+    connect(m_ui->keepUpdatingCheckbox, &QCheckBox::toggled, this, &LogsPage::keepUpdatingToggled);
+    connect(m_ui->wrapLinesCheckbox, &QCheckBox::toggled, this, &LogsPage::wrapCheckboxToggled);
+    connect(m_ui->colorLinesCheckbox, &QCheckBox::toggled, this, &LogsPage::colorLinesToggled);
+
+    if (instance != nullptr) {
+        connect(instance.get(), &BaseInstance::launchTaskChanged, this, [this] {
+            if (currentFile().isNull())
+                loadLog();
+        });
+    }
+
+    loadLog();
 }
 
 LogsPage::~LogsPage()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void LogsPage::retranslate()
 {
-    ui->retranslateUi(this);
+    m_ui->retranslateUi(this);
 }
 
 void LogsPage::openedImpl()
@@ -216,234 +235,219 @@ void LogsPage::closedImpl()
     }
 }
 
+void LogsPage::useModel(shared_qobject_ptr<LogModel> model)
+{
+    m_model.reset(model);
+    m_proxy->setSourceModel(model.get());
+}
+
+void LogsPage::useModel(LogModel* model)
+{
+    m_model.reset(model);
+    m_proxy->setSourceModel(model);
+}
+
+QString LogsPage::currentFile() const
+{
+    if (m_ui->selectLogBox->currentIndex() == 0)
+        return QString();
+    else
+        return m_ui->selectLogBox->currentText();
+}
+
 void LogsPage::populateSelectLogBox()
 {
-    const QString prevCurrentFile = m_currentFile;
+    const QString prevFile = currentFile();
 
-    ui->selectLogBox->blockSignals(true);
-    ui->selectLogBox->clear();
-    ui->selectLogBox->addItem(tr("Current Log"));
-    ui->selectLogBox->addItems(getPaths());
-    ui->selectLogBox->blockSignals(false);
+    m_ui->selectLogBox->blockSignals(true);
+    m_ui->selectLogBox->clear();
+    m_ui->selectLogBox->addItem(tr("Current Log"));
+    m_ui->selectLogBox->addItems(getPaths());
+    m_ui->selectLogBox->blockSignals(false);
 
-    if (!prevCurrentFile.isEmpty()) {
-        const int index = ui->selectLogBox->findText(prevCurrentFile);
+    if (!prevFile.isEmpty()) {
+        const int index = m_ui->selectLogBox->findText(prevFile);
         if (index != -1) {
-            ui->selectLogBox->blockSignals(true);
-            ui->selectLogBox->setCurrentIndex(index);
-            ui->selectLogBox->blockSignals(false);
-            updateControls(true);
-            // don't refresh
-            return;
-        } else {
-            ui->selectLogBox->setCurrentIndex(0);
-            updateControls(true);
-        }
-    } else if (m_model != nullptr)
-        return;  // don't refresh live updating log
-
-    on_selectLogBox_currentIndexChanged(ui->selectLogBox->currentIndex());
-}
-
-void LogsPage::on_selectLogBox_currentIndexChanged(const int index)
-{
-    if (index == 0)
-        m_currentFile = QString();
-    else
-        m_currentFile = ui->selectLogBox->itemText(index);
-
-    reload();
-}
-
-void LogsPage::on_btnReload_clicked()
-{
-    if (m_currentFile.isEmpty()) {
-        if (!m_model)
-            return;
-        m_model->clear();
-        if (m_container)
-            m_container->refreshContainer();
-    } else {
-        reload();
-    }
-}
-
-void LogsPage::launchTaskChanged(shared_qobject_ptr<LaunchTask> task)
-{
-    if (!m_currentFile.isEmpty())
-        return;
-
-    m_model.reset(task->getLogModel());
-    m_proxy->setSourceModel(m_model.get());
-}
-
-void LogsPage::reload()
-{
-    if (m_currentFile.isEmpty()) {
-        if (m_instance != nullptr) {
-            const auto launchTask = m_instance->getLaunchTask();
-
-            if (launchTask)
-                m_model.reset(launchTask->getLogModel());
-            else {
-                m_model.reset(new LogModel(this));
-                m_model->append(MessageLevel::Info, "The game log will appear here after launching.");
-            }
+            m_ui->selectLogBox->blockSignals(true);
+            m_ui->selectLogBox->setCurrentIndex(index);
+            m_ui->selectLogBox->blockSignals(false);
         } else
-            m_model = APPLICATION->logModel;
+            loadLog();
+    }
+}
 
-        m_proxy->setSourceModel(m_model.get());
-        ui->text->setModel(m_proxy);
-        ui->text->scrollToBottom();
-        updateControls(true);
+void LogsPage::loadLog()
+{
+    QString file = currentFile();
+
+    if (file.isNull())
+        loadCurrentLog();
+    else
+        loadLogFile(file);
+
+    m_ui->text->scrollToBottom();
+}
+
+void LogsPage::loadCurrentLog()
+{
+    if (m_instance != nullptr) {
+        const auto launchTask = m_instance->getLaunchTask();
+
+        if (launchTask) {
+            useModel(launchTask->getLogModel());
+        } else {
+            useModel(new LogModel(this));
+            m_model->append(MessageLevel::Info, "The game log will appear here after launching.");
+        }
+    } else
+        m_model = APPLICATION->logModel;
+
+    m_ui->clearButton->setVisible(true);
+    m_ui->keepUpdatingCheckbox->setVisible(true);
+    m_ui->keepUpdatingCheckbox->setChecked(!m_model->suspended());
+
+    m_ui->deleteButton->setVisible(false);
+    m_ui->reloadButton->setVisible(false);
+}
+
+void LogsPage::loadLogFile(const QString& path)
+{
+    m_ui->text->setModel(nullptr);
+    auto cleanup = qScopeGuard([this] { m_ui->text->setModel(m_proxy); });
+
+    useModel(new LogModel(this));
+    m_model->setMaxLines(getConsoleMaxLines(APPLICATION->settings()));
+    m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(APPLICATION->settings()));
+    m_model->setOverflowMessage(tr("Cannot display this log file since its length surpassed %1 lines.").arg(m_model->getMaxLines()));
+
+    m_ui->deleteButton->setVisible(true);
+    m_ui->reloadButton->setVisible(true);
+
+    m_ui->clearButton->setVisible(false);
+    m_ui->keepUpdatingCheckbox->setVisible(false);
+
+    QFile file(FS::PathCombine(m_basePath, path));
+    if (!file.open(QFile::ReadOnly)) {
+        QString errorMessage = tr("Unable to open %1 for reading: %2").arg(path, file.errorString());
+        m_model->append(MessageLevel::Fatal, std::move(errorMessage));
         return;
     }
 
-    QFile file(FS::PathCombine(m_basePath, m_currentFile));
-    if (!file.open(QFile::ReadOnly)) {
-        updateControls(false);
-        ui->btnReload->setEnabled(true);  // allow reload
-        m_currentFile = QString();
-        QMessageBox::critical(this, tr("Error"), tr("Unable to open %1 for reading: %2").arg(m_currentFile, file.errorString()));
-    } else {
-        auto setPlainText = [this](const QString& text) {
-            QTextDocument* doc = ui->text->document();
-            doc->setDefaultFont(m_proxy->getFont());
-            ui->text->setPlainText(text);
-        };
-        auto showTooBig = [setPlainText, &file]() {
-            setPlainText(tr("The file (%1) is too big. You may want to open it in a viewer optimized "
-                            "for large files.")
-                             .arg(file.fileName()));
-        };
-        if (file.size() > (1024ll * 1024ll * 12ll)) {
-            showTooBig();
-            return;
-        }
-        MessageLevel::Enum last = MessageLevel::Unknown;
+    if (file.size() > (1024ll * 1024ll * 12ll)) {
+        QString errorMessage = tr("The file (%1) is too big. Please open it in a viewer optimized for large files.").arg(file.fileName());
+        m_model->append(MessageLevel::Fatal, std::move(errorMessage));
+        return;
+    }
 
-        auto handleLine = [this, &last](QString line) {
-            if (line.isEmpty())
-                return false;
-            if (line.back() == '\n')
-                line = line.remove(line.size() - 1, 1);
-            MessageLevel::Enum level = MessageLevel::Unknown;
+    MessageLevel::Enum last = MessageLevel::Unknown;
 
-            QString lineTemp = line;  // don't edit out the time and level for clarity
-            if (!m_instance) {
-                level = MessageLevel::fromLauncherLine(lineTemp);
-            } else {
-                // if the launcher part set a log level, use it
-                auto innerLevel = MessageLevel::fromLine(lineTemp);
-                if (innerLevel != MessageLevel::Unknown) {
-                    level = innerLevel;
-                }
+    auto handleLine = [this, &last](QString line) {
+        if (line.isEmpty())
+            return false;
+        if (line.back() == '\n')
+            line = line.remove(line.size() - 1, 1);
+        MessageLevel::Enum level = MessageLevel::Unknown;
 
-                // If the level is still undetermined, guess level
-                if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown) {
-                    level = LogParser::guessLevel(line, last);
-                }
-            }
-
-            last = level;
-            m_model->append(level, line);
-            return m_model->isOverFlow();
-        };
-
-        // Try to determine a level for each line
-        ui->text->clear();
-        ui->text->setModel(nullptr);
-
-        m_model.reset(new LogModel(this));
-        m_model->setMaxLines(getConsoleMaxLines(APPLICATION->settings()));
-        m_model->setStopOnOverflow(shouldStopOnConsoleOverflow(APPLICATION->settings()));
-        m_model->setOverflowMessage(tr("Cannot display this log since the log length surpassed %1 lines.").arg(m_model->getMaxLines()));
-
-        if (file.fileName().endsWith(".gz")) {
-            QString line;
-            auto error = GZip::readGzFileByBlocks(&file, [&line, handleLine](const QByteArray& d) {
-                auto block = d;
-                int newlineIndex = block.indexOf('\n');
-                while (newlineIndex != -1) {
-                    line += QString::fromUtf8(block).left(newlineIndex);
-                    block.remove(0, newlineIndex + 1);
-                    if (handleLine(line)) {
-                        line.clear();
-                        return false;
-                    }
-                    line.clear();
-                    newlineIndex = block.indexOf('\n');
-                }
-                line += QString::fromUtf8(block);
-                return true;
-            });
-            if (!error.isEmpty()) {
-                setPlainText(tr("The file (%1) encountered an error when reading: %2.").arg(file.fileName(), error));
-                return;
-            } else if (!line.isEmpty()) {
-                handleLine(line);
-            }
+        QString lineTemp = line;  // don't edit out the time and level for clarity
+        if (!m_instance) {
+            level = MessageLevel::fromLauncherLine(lineTemp);
         } else {
-            while (!file.atEnd() && !handleLine(QString::fromUtf8(file.readLine()))) {
+            // if the launcher part set a log level, use it
+            auto innerLevel = MessageLevel::fromLine(lineTemp);
+            if (innerLevel != MessageLevel::Unknown) {
+                level = innerLevel;
+            }
+
+            // If the level is still undetermined, guess level
+            if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown) {
+                level = LogParser::guessLevel(line, last);
             }
         }
 
-        m_proxy->setSourceModel(m_model.get());
-        ui->text->setModel(m_proxy);
-        ui->text->scrollToBottom();
-        updateControls(true);
+        last = level;
+        m_model->append(level, line);
+        return m_model->isOverFlow();
+    };
+
+    if (file.fileName().endsWith(".gz")) {
+        QString line;
+        auto error = GZip::readGzFileByBlocks(&file, [&line, handleLine](const QByteArray& d) {
+            auto block = d;
+            int newlineIndex = block.indexOf('\n');
+            while (newlineIndex != -1) {
+                line += QString::fromUtf8(block).left(newlineIndex);
+                block.remove(0, newlineIndex + 1);
+                if (handleLine(line)) {
+                    line.clear();
+                    return false;
+                }
+                line.clear();
+                newlineIndex = block.indexOf('\n');
+            }
+            line += QString::fromUtf8(block);
+            return true;
+        });
+        if (!error.isEmpty()) {
+            QString errorMessage = tr("The file (%1) encountered an error when reading: %2.").arg(file.fileName(), error);
+            m_model->append(MessageLevel::Fatal, std::move(errorMessage));
+            return;
+        } else if (!line.isEmpty()) {
+            handleLine(line);
+        }
+    } else {
+        while (!file.atEnd() && !handleLine(QString::fromUtf8(file.readLine()))) {
+        }
     }
 }
 
-void LogsPage::on_btnPaste_clicked()
+void LogsPage::uploadClicked()
 {
-    QString name = m_currentFile.isEmpty() ? ui->selectLogBox->itemText(0) : m_currentFile;
-    GuiUtil::uploadPaste(name, ui->text->toPlainText(), this);
+    GuiUtil::uploadPaste(m_ui->selectLogBox->currentText(), m_ui->text->toPlainText(), this);
 }
 
-void LogsPage::on_btnCopy_clicked()
+void LogsPage::copyClicked()
 {
-    GuiUtil::setClipboardText(ui->text->toPlainText());
+    GuiUtil::setClipboardText(m_ui->text->toPlainText());
 }
 
-void LogsPage::on_btnBottom_clicked()
-{
-    ui->text->scrollToBottom();
-}
-
-void LogsPage::on_trackLogCheckbox_clicked(bool checked)
+void LogsPage::keepUpdatingToggled(bool checked)
 {
     if (!m_model)
         return;
     m_model->suspend(!checked);
 }
 
-void LogsPage::on_btnDelete_clicked()
+void LogsPage::deleteClicked()
 {
-    if (m_currentFile.isEmpty()) {
-        updateControls(false);
-        return;
-    }
+    QString current = m_ui->selectLogBox->currentText();
+
     if (QMessageBox::question(this, tr("Confirm Deletion"),
                               tr("You are about to delete \"%1\".\n"
                                  "This may be permanent and it will be gone from the logs folder.\n\n"
                                  "Are you sure?")
-                                  .arg(m_currentFile),
+                                  .arg(current),
                               QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
         return;
     }
-    QFile file(FS::PathCombine(m_basePath, m_currentFile));
+    QFile file(FS::PathCombine(m_basePath, current));
 
     if (FS::trash(file.fileName())) {
         return;
     }
 
-    if (!file.remove()) {
-        QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2").arg(m_currentFile, file.errorString()));
-    }
+    if (!file.remove())
+        QMessageBox::critical(this, tr("Error"), tr("Unable to delete %1: %2").arg(current, file.errorString()));
 }
 
-void LogsPage::on_btnClean_clicked()
+void LogsPage::clearClicked()
+{
+    if (!m_model)
+        return;
+
+    m_model.clear();
+}
+
+void LogsPage::cleanUpClicked()
 {
     auto toDelete = getPaths();
     if (toDelete.isEmpty()) {
@@ -496,46 +500,24 @@ void LogsPage::on_btnClean_clicked()
     }
 }
 
-void LogsPage::on_wrapCheckbox_clicked(bool checked)
+void LogsPage::wrapCheckboxToggled(bool checked)
 {
-    ui->text->setWordWrap(checked);
+    m_ui->text->setWordWrap(checked);
     if (!m_model)
         return;
-    ui->text->scrollToBottom();
+    m_model->setLineWrap(checked);
 }
 
-void LogsPage::on_colorCheckbox_clicked(bool checked)
+void LogsPage::colorLinesToggled(bool checked)
 {
-    ui->text->setColorLines(checked);
+    m_ui->text->setColorLines(checked);
     if (!m_model)
         return;
-    ui->text->scrollToBottom();
+    m_model->setColorLines(checked);
+    m_ui->text->scrollToBottom();
 }
 
-void LogsPage::updateControls(const bool enabled)
-{
-    if (!m_currentFile.isEmpty()) {
-        ui->btnReload->setText("&Reload");
-        ui->btnReload->setToolTip("Reload the contents of the log from the disk");
-        ui->btnDelete->setVisible(true);
-        ui->trackLogCheckbox->setVisible(false);
-    } else {
-        ui->btnReload->setText("Clear");
-        ui->btnReload->setToolTip("Clear the log");
-        ui->btnDelete->setVisible(false);
-        ui->trackLogCheckbox->setVisible(true);
-    }
-
-    ui->btnReload->setEnabled(enabled);
-    ui->btnCopy->setEnabled(enabled);
-    ui->btnPaste->setEnabled(enabled);
-    ui->btnDelete->setEnabled(enabled);
-    ui->btnClean->setEnabled(enabled);
-    ui->trackLogCheckbox->setEnabled(enabled);
-    ui->text->setEnabled(enabled);
-}
-
-QStringList LogsPage::getPaths()
+QStringList LogsPage::getPaths() const
 {
     QDir baseDir(m_basePath);
 
@@ -558,28 +540,28 @@ QStringList LogsPage::getPaths()
     return result;
 }
 
-void LogsPage::on_findButton_clicked()
+void LogsPage::findClicked()
 {
     auto modifiers = QApplication::keyboardModifiers();
     bool reverse = modifiers & Qt::ShiftModifier;
-    ui->text->findNext(ui->searchBar->text(), reverse);
+    m_ui->text->findNext(m_ui->searchBar->text(), reverse);
 }
 
 void LogsPage::findNextActivated()
 {
-    ui->text->findNext(ui->searchBar->text(), false);
+    m_ui->text->findNext(m_ui->searchBar->text(), false);
 }
 
 void LogsPage::findPreviousActivated()
 {
-    ui->text->findNext(ui->searchBar->text(), true);
+    m_ui->text->findNext(m_ui->searchBar->text(), true);
 }
 
 void LogsPage::findActivated()
 {
     // focus the search bar if it doesn't have focus
-    if (!ui->searchBar->hasFocus()) {
-        ui->searchBar->setFocus();
-        ui->searchBar->selectAll();
+    if (!m_ui->searchBar->hasFocus()) {
+        m_ui->searchBar->setFocus();
+        m_ui->searchBar->selectAll();
     }
 }

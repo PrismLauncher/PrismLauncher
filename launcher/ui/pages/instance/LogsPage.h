@@ -65,43 +65,42 @@ class LogsPage : public QWidget, public BasePage {
     void openedImpl() override;
     void closedImpl() override;
 
+   private:
+    void useModel(shared_qobject_ptr<LogModel> model);
+    void useModel(LogModel* model);
+
+    QString currentFile() const;
+
    private slots:
     void populateSelectLogBox();
-    void on_selectLogBox_currentIndexChanged(int index);
-    void launchTaskChanged(shared_qobject_ptr<LaunchTask> task);
-    void on_btnReload_clicked();
-    void on_btnPaste_clicked();
-    void on_btnCopy_clicked();
-    void on_btnDelete_clicked();
-    void on_btnClean_clicked();
-    void on_btnBottom_clicked();
+    void loadLog();
+    void loadCurrentLog();
+    void loadLogFile(const QString &path);
 
-    void on_trackLogCheckbox_clicked(bool checked);
-    void on_wrapCheckbox_clicked(bool checked);
-    void on_colorCheckbox_clicked(bool checked);
+    void copyClicked();
+    void uploadClicked();
+    void deleteClicked();
+    void clearClicked();
+    void cleanUpClicked();
 
-    void on_findButton_clicked();
+    void keepUpdatingToggled(bool checked);
+    void wrapCheckboxToggled(bool checked);
+    void colorLinesToggled(bool checked);
+
+    void findClicked();
     void findActivated();
     void findNextActivated();
     void findPreviousActivated();
 
    private:
-    void reload();
-    void updateControls(bool enabled);
-
-    QStringList getPaths();
+    QStringList getPaths() const;
 
    private:
-    QString m_id;
-    QString m_displayName;
-    QString m_helpPage;
-
-    Ui::LogsPage* ui;
+    Ui::LogsPage* m_ui;
     InstancePtr m_instance;
     /** Path to display log paths relative to. */
     QString m_basePath;
     QStringList m_logSearchPaths;
-    QString m_currentFile;
     QFileSystemWatcher m_watcher;
 
     LogFormatProxyModel* m_proxy;

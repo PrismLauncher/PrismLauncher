@@ -24,12 +24,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnClean">
+      <widget class="QPushButton" name="cleanUpButton">
        <property name="toolTip">
         <string>Delete all the logs</string>
        </property>
        <property name="text">
-        <string>&amp;Clean Up</string>
+        <string>&amp;Clear Old Logs</string>
        </property>
       </widget>
      </item>
@@ -38,7 +38,7 @@
    <item>
     <widget class="LogView" name="text">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="undoRedoEnabled">
       <bool>false</bool>
@@ -81,7 +81,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnBottom">
+      <widget class="QPushButton" name="jumpToEndButton">
        <property name="toolTip">
         <string>Scroll all the way to bottom</string>
        </property>
@@ -95,7 +95,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout1">
      <item>
-      <widget class="QPushButton" name="btnCopy">
+      <widget class="QPushButton" name="copyButton">
        <property name="toolTip">
         <string>Copy the whole log into the clipboard</string>
        </property>
@@ -105,9 +105,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnPaste">
+      <widget class="QPushButton" name="uploadButton">
        <property name="toolTip">
-        <string>Upload the log to the paste service configured in preferences</string>
+        <string>Upload the log to the pasteClicked service configured in preferences</string>
        </property>
        <property name="text">
         <string>&amp;Upload</string>
@@ -115,7 +115,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnReload">
+      <widget class="QPushButton" name="reloadButton">
        <property name="toolTip">
         <string>Reload the contents of the log from the disk</string>
        </property>
@@ -125,12 +125,19 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnDelete">
+      <widget class="QPushButton" name="deleteButton">
        <property name="toolTip">
         <string>Delete the selected log</string>
        </property>
        <property name="text">
         <string>&amp;Delete</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="clearButton">
+       <property name="text">
+        <string>&amp;Clear</string>
        </property>
       </widget>
      </item>
@@ -148,9 +155,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="trackLogCheckbox">
+      <widget class="QCheckBox" name="keepUpdatingCheckbox">
        <property name="text">
-        <string>Keep updating</string>
+        <string>Keep Updating</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -158,9 +165,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="wrapCheckbox">
+      <widget class="QCheckBox" name="wrapLinesCheckbox">
        <property name="text">
-        <string>Wrap lines</string>
+        <string>Wrap Lines</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -168,9 +175,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="colorCheckbox">
+      <widget class="QCheckBox" name="colorLinesCheckbox">
        <property name="text">
-        <string>Color lines</string>
+        <string>Color Lines</string>
        </property>
        <property name="checked">
         <bool>true</bool>
