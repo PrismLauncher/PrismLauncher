@@ -175,7 +175,12 @@ void InstanceWindow::runningStateChanged(bool running)
     updateButtons();
     m_container->refreshContainer();
     if (running) {
-        selectPage("log");
+        const QString pageID = "logs";
+
+        m_container->selectPage(pageID);
+
+        LogsPage* page = dynamic_cast<LogsPage*>(m_container->getPage(pageID));
+        page->selectCurrentLog();
     }
 }
 

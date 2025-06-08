@@ -65,6 +65,7 @@ class LogsPage : public QWidget, public BasePage {
     void openedImpl() override;
     void closedImpl() override;
 
+    void selectCurrentLog();
    private:
     void useModel(shared_qobject_ptr<LogModel> model);
     void useModel(LogModel* model);

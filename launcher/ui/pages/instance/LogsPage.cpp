@@ -149,6 +149,11 @@ void LogsPage::closedImpl()
     }
 }
 
+void LogsPage::selectCurrentLog()
+{
+    m_ui->selectLogBox->setCurrentIndex(0);
+}
+
 void LogsPage::useModel(shared_qobject_ptr<LogModel> model)
 {
     m_model.reset(model);
