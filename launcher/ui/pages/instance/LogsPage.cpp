@@ -86,10 +86,12 @@ LogsPage::LogsPage(InstancePtr instance, QWidget* parent)
     auto findPreviousShortcut = new QShortcut(QKeySequence(QKeySequence::FindPrevious), this);
     connect(findPreviousShortcut, &QShortcut::activated, this, &LogsPage::findPreviousActivated);
 
-    connect(m_ui->searchBar, &QLineEdit::returnPressed, this, &LogsPage::findClicked);
-
     connect(m_ui->selectLogBox, &QComboBox::currentIndexChanged, this, &LogsPage::loadLog);
     connect(m_ui->cleanUpButton, &QAbstractButton::clicked, this, &LogsPage::cleanUpClicked);
+
+    connect(m_ui->searchBar, &QLineEdit::returnPressed, this, &LogsPage::findClicked);
+    connect(m_ui->findButton, &QAbstractButton::clicked, this, &LogsPage::findClicked);
+    connect(m_ui->jumpToEndButton, &QAbstractButton::clicked, m_ui->text, &LogView::scrollToBottom);
 
     connect(m_ui->copyButton, &QAbstractButton::clicked, this, &LogsPage::copyClicked);
     connect(m_ui->uploadButton, &QAbstractButton::clicked, this, &LogsPage::uploadClicked);
