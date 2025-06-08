@@ -37,10 +37,9 @@
 #include "LogsPage.h"
 #include "ui_LogsPage.h"
 
-#include <QMessageBox>
-
 #include "launch/LaunchTask.h"
 #include "ui/GuiUtil.h"
+#include "ui/LogFormatProxyModel.h"
 #include "ui/themes/ThemeManager.h"
 
 #include <FileSystem.h>
@@ -50,94 +49,9 @@
 #include <QDirIterator>
 #include <QFileSystemWatcher>
 #include <QIdentityProxyModel>
+#include <QMessageBox>
 #include <QShortcut>
 #include <QUrl>
-
-class LogFormatProxyModel : public QIdentityProxyModel {
-   public:
-    LogFormatProxyModel(QObject* parent = nullptr) : QIdentityProxyModel(parent) {}
-    QVariant data(const QModelIndex& index, int role) const override
-    {
-        const LogColors& colors = APPLICATION->themeManager()->getLogColors();
-
-        switch (role) {
-            case Qt::FontRole:
-                return m_font;
-            case Qt::ForegroundRole: {
-                auto level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
-                QColor result = colors.foreground.value(level);
-
-                if (result.isValid())
-                    return result;
-
-                break;
-            }
-            case Qt::BackgroundRole: {
-                auto level = static_cast<MessageLevel::Enum>(QIdentityProxyModel::data(index, LogModel::LevelRole).toInt());
-                QColor result = colors.background.value(level);
-
-                if (result.isValid())
-                    return result;
-
-                break;
-            }
-        }
-
-        return QIdentityProxyModel::data(index, role);
-    }
-
-    void setFont(QFont font) { m_font = font; }
-    QFont getFont() { return m_font; }
-
-    QModelIndex find(const QModelIndex& start, const QString& value, bool reverse) const
-    {
-        QModelIndex parentIndex = parent(start);
-        auto compare = [&](int r) -> QModelIndex {
-            QModelIndex idx = index(r, start.column(), parentIndex);
-            if (!idx.isValid() || idx == start) {
-                return QModelIndex();
-            }
-            QVariant v = data(idx, Qt::DisplayRole);
-            QString t = v.toString();
-            if (t.contains(value, Qt::CaseInsensitive))
-                return idx;
-            return QModelIndex();
-        };
-        if (reverse) {
-            int from = start.row();
-            int to = 0;
-
-            for (int i = 0; i < 2; ++i) {
-                for (int r = from; (r >= to); --r) {
-                    auto idx = compare(r);
-                    if (idx.isValid())
-                        return idx;
-                }
-                // prepare for the next iteration
-                from = rowCount() - 1;
-                to = start.row();
-            }
-        } else {
-            int from = start.row();
-            int to = rowCount(parentIndex);
-
-            for (int i = 0; i < 2; ++i) {
-                for (int r = from; (r < to); ++r) {
-                    auto idx = compare(r);
-                    if (idx.isValid())
-                        return idx;
-                }
-                // prepare for the next iteration
-                from = 0;
-                to = start.row();
-            }
-        }
-        return QModelIndex();
-    }
-
-   private:
-    QFont m_font;
-};
 
 LogsPage::LogsPage(InstancePtr instance, QWidget* parent)
     : QWidget(parent)

@@ -1174,6 +1174,9 @@ SET(LAUNCHER_SOURCES
     ui/instanceview/InstanceDelegate.h
     ui/instanceview/VisualGroup.cpp
     ui/instanceview/VisualGroup.h
+
+    ui/LogFormatProxyModel.cpp
+    ui/LogFormatProxyModel.h
 )
 
 if (NOT Apple)
