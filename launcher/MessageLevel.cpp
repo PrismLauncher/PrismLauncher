@@ -55,7 +55,7 @@ MessageLevel::Enum MessageLevel::fromLine(QString& line)
     return MessageLevel::Unknown;
 }
 
-MessageLevel::Enum MessageLevel::fromLauncherLine(QString& line)
+MessageLevel::Enum MessageLevel::fromLauncherLine(QString line)
 {
     // Level prefix
     int startMark = 0;

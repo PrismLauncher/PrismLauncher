@@ -65,15 +65,13 @@ LogsPage::LogsPage(InstancePtr instance, QWidget* parent)
     m_proxy = new LogFormatProxyModel(this);
 
     // set up fonts in the log proxy
-    {
-        QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
-        bool conversionOk = false;
-        int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
-        if (!conversionOk) {
-            fontSize = 11;
-        }
-        m_proxy->setFont(QFont(fontFamily, fontSize));
+    QString fontFamily = APPLICATION->settings()->get("ConsoleFont").toString();
+    bool conversionOk = false;
+    int fontSize = APPLICATION->settings()->get("ConsoleFontSize").toInt(&conversionOk);
+    if (!conversionOk) {
+        fontSize = 11;
     }
+    m_proxy->setFont(QFont(fontFamily, fontSize));
 
     m_ui->text->setModel(m_proxy);
 
@@ -267,21 +265,10 @@ void LogsPage::loadLogFile(const QString& path)
             line = line.remove(line.size() - 1, 1);
         MessageLevel::Enum level = MessageLevel::Unknown;
 
-        QString lineTemp = line;  // don't edit out the time and level for clarity
-        if (!m_instance) {
-            level = MessageLevel::fromLauncherLine(lineTemp);
-        } else {
-            // if the launcher part set a log level, use it
-            auto innerLevel = MessageLevel::fromLine(lineTemp);
-            if (innerLevel != MessageLevel::Unknown) {
-                level = innerLevel;
-            }
-
-            // If the level is still undetermined, guess level
-            if (level == MessageLevel::StdErr || level == MessageLevel::StdOut || level == MessageLevel::Unknown) {
-                level = LogParser::guessLevel(line, last);
-            }
-        }
+        if (!m_instance)
+            level = MessageLevel::fromLauncherLine(line);
+        else
+            level = LogParser::guessLevel(line, last);
 
         last = level;
         m_model->append(level, line);
@@ -310,7 +297,8 @@ void LogsPage::loadLogFile(const QString& path)
             QString errorMessage = tr("The file (%1) encountered an error when reading: %2.").arg(file.fileName(), error);
             m_model->append(MessageLevel::Fatal, std::move(errorMessage));
             return;
-        } else if (!line.isEmpty()) {
+        }
+        if (!line.isEmpty()) {
             handleLine(line);
         }
     } else {

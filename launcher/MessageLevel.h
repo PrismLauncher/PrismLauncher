@@ -27,6 +27,6 @@ MessageLevel::Enum getLevel(QtMsgType type);
 /* Get message level from a line. Line is modified if it was successful. */
 MessageLevel::Enum fromLine(QString& line);
 
-/* Get message level from a line from the launcher log. Line is modified if it was successful. */
-MessageLevel::Enum fromLauncherLine(QString& line);
+/* Get message level from a line from the launcher log. */
+MessageLevel::Enum fromLauncherLine(QString line);
 }  // namespace MessageLevel
