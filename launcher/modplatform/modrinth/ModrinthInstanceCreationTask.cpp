@@ -6,6 +6,7 @@
 #include "Json.h"
 
 #include "QObjectPtr.h"
+#include "meta/Index.h"
 #include "minecraft/MinecraftInstance.h"
 #include "minecraft/PackProfile.h"
 
@@ -220,15 +221,36 @@ bool ModrinthCreationTask::createInstance()
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", m_minecraft_version, true);
 
-    if (!m_fabric_version.isEmpty())
-        components->setComponentVersion("net.fabricmc.fabric-loader", m_fabric_version);
-    if (!m_quilt_version.isEmpty())
-        components->setComponentVersion("org.quiltmc.quilt-loader", m_quilt_version);
-    if (!m_forge_version.isEmpty())
-        components->setComponentVersion("net.minecraftforge", m_forge_version);
-    if (!m_neoForge_version.isEmpty())
-        components->setComponentVersion("net.neoforged", m_neoForge_version);
-
+    QString loaderUid, loaderVersion, loaderType;
+    if (!m_fabric_version.isEmpty()) {
+        loaderUid = "net.fabricmc.fabric-loader";
+        loaderVersion = m_fabric_version;
+        loaderType = "fabric";
+    }
+    if (!m_quilt_version.isEmpty()) {
+        loaderUid = "org.quiltmc.quilt-loader";
+        loaderVersion = m_quilt_version;
+        loaderType = "quilt";
+    }
+    if (!m_forge_version.isEmpty()) {
+        loaderUid = "net.minecraftforge";
+        loaderVersion = m_forge_version;
+        loaderType = "forge";
+    }
+    if (!m_neoForge_version.isEmpty()) {
+        loaderUid = "net.neoforged";
+        loaderVersion = m_neoForge_version;
+        loaderType = "neoforge";
+    }
+    if (!loaderUid.isEmpty()) {
+        QString err;
+        loaderVersion = APPLICATION->metadataIndex()->getVersionForLoader(loaderUid, loaderType, loaderVersion, m_minecraft_version, err);
+        if (!err.isEmpty()) {
+            setError(err);
+            return false;
+        }
+        components->setComponentVersion(loaderUid, loaderVersion);
+    }
     if (m_instIcon != "default") {
         instance.setIconKey(m_instIcon);
     } else if (!m_managed_id.isEmpty()) {

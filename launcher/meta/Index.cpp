@@ -159,4 +159,50 @@ Version::Ptr Index::getLoadedVersion(const QString& uid, const QString& version)
     ev.exec();
     return get(uid, version);
 }
+
+QString Index::getVersionForLoader(QString uid, QString loaderType, QString loaderVersion, QString mcVersion, QString& err)
+{
+    auto vlist = get(uid);
+    if (!vlist) {
+        err = tr("Failed to get local metadata index for %1").arg(uid);
+        return {};
+    }
+
+    vlist->waitToLoad();
+    if (!loaderVersion.isEmpty()) {
+        if (!vlist->hasVersion(loaderVersion)) {
+            loaderVersion = "recommended";  // use latest/recommended
+        }
+    }
+    if (loaderVersion == "recommended" || loaderVersion == "latest") {
+        for (auto version : vlist->versions()) {
+            // first recommended build we find, we use.
+            if (loaderVersion == "recommended" && !version->isRecommended())
+                continue;
+            auto reqs = version->requiredSet();
+
+            // filter by minecraft version, if the loader depends on a certain version.
+            // not all mod loaders depend on a given Minecraft version, so we won't do this
+            // filtering for those loaders.
+            if (loaderType == "forge" || loaderType == "neoforge") {
+                auto iter = std::find_if(reqs.begin(), reqs.end(), [mcVersion](const Meta::Require& req) {
+                    return req.uid == "net.minecraft" && req.equalsVersion == mcVersion;
+                });
+                if (iter == reqs.end())
+                    continue;
+            }
+            return version->descriptor();
+        }
+
+        err = tr("Failed to find version for %1 loader").arg(loaderType);
+        return {};
+    }
+
+    if (loaderVersion.isEmpty()) {
+        err = tr("No loader version set for modpack!");
+        return {};
+    }
+
+    return loaderVersion;
+}
 }  // namespace Meta

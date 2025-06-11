@@ -53,6 +53,9 @@ class Index : public QAbstractListModel, public BaseEntity {
     // this blocks until the version is loaded
     Version::Ptr getLoadedVersion(const QString& uid, const QString& version);
 
+    // this blocks until the versions is loaded
+    QString getVersionForLoader(QString uid, QString loaderType, QString loaderVersion, QString mcVersion, QString& err);
+
    public:  // for usage by parsers only
     void merge(const std::shared_ptr<Index>& other);
 

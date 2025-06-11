@@ -961,6 +961,7 @@ std::shared_ptr<LaunchProfile> PackProfile::getProfile() const
 bool PackProfile::setComponentVersion(const QString& uid, const QString& version, bool important)
 {
     auto iter = d->componentIndex.find(uid);
+
     if (iter != d->componentIndex.end()) {
         ComponentPtr component = *iter;
         // set existing

@@ -75,7 +75,6 @@ class FlameCreationTask final : public InstanceCreationTask {
     void setupDownloadJob(QEventLoop&);
     void copyBlockedMods(QList<BlockedMod> const& blocked_mods);
     void validateOtherResources(QEventLoop& loop);
-    QString getVersionForLoader(QString uid, QString loaderType, QString version, QString mcVersion);
 
    private:
     QWidget* m_parent = nullptr;

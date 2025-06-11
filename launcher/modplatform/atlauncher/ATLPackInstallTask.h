@@ -106,6 +106,7 @@ class PackInstallTask : public InstanceTask {
     QString getDirForModType(ModType type, QString raw);
     QString getVersionForLoader(QString uid);
     QString detectLibrary(const VersionLibrary& library);
+    Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version);
 
     bool createLibrariesComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile);
     bool createPackComponent(QString instanceRoot, std::shared_ptr<PackProfile> profile);

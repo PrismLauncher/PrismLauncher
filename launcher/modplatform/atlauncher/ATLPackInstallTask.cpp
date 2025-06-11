@@ -63,8 +63,6 @@
 
 namespace ATLauncher {
 
-static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version);
-
 PackInstallTask::PackInstallTask(UserInteractionSupport* support, QString packName, QString version, InstallMode installMode)
 {
     m_support = support;
@@ -337,58 +335,30 @@ QString PackInstallTask::getDirForModType(ModType type, QString raw)
 
 QString PackInstallTask::getVersionForLoader(QString uid)
 {
-    if (m_version.loader.recommended || m_version.loader.latest || m_version.loader.choose) {
+    if (m_version.loader.choose) {
         auto vlist = APPLICATION->metadataIndex()->get(uid);
-        if (!vlist) {
-            emitFailed(tr("Failed to get local metadata index for %1").arg(uid));
-            return Q_NULLPTR;
+        // Fabric Loader doesn't depend on a given Minecraft version.
+        if (m_version.loader.type == "fabric" || m_version.loader.type == "quilt") {
+            return m_support->chooseVersion(vlist, Q_NULLPTR);
         }
 
-        vlist->waitToLoad();
-
-        if (m_version.loader.recommended || m_version.loader.latest) {
-            for (int i = 0; i < vlist->versions().size(); i++) {
-                auto version = vlist->versions().at(i);
-                auto reqs = version->requiredSet();
-
-                // filter by minecraft version, if the loader depends on a certain version.
-                // not all mod loaders depend on a given Minecraft version, so we won't do this
-                // filtering for those loaders.
-                if (m_version.loader.type != "fabric") {
-                    auto iter = std::find_if(reqs.begin(), reqs.end(), [](const Meta::Require& req) { return req.uid == "net.minecraft"; });
-                    if (iter == reqs.end())
-                        continue;
-                    if (iter->equalsVersion != m_version.minecraft)
-                        continue;
-                }
-
-                if (m_version.loader.recommended) {
-                    // first recommended build we find, we use.
-                    if (!version->isRecommended())
-                        continue;
-                }
-
-                return version->descriptor();
-            }
-
-            emitFailed(tr("Failed to find version for %1 loader").arg(m_version.loader.type));
-            return Q_NULLPTR;
-        } else if (m_version.loader.choose) {
-            // Fabric Loader doesn't depend on a given Minecraft version.
-            if (m_version.loader.type == "fabric") {
-                return m_support->chooseVersion(vlist, Q_NULLPTR);
-            }
-
-            return m_support->chooseVersion(vlist, m_version.minecraft);
-        }
+        return m_support->chooseVersion(vlist, m_version.minecraft);
     }
-
-    if (m_version.loader.version == Q_NULLPTR || m_version.loader.version.isEmpty()) {
-        emitFailed(tr("No loader version set for modpack!"));
+    QString loaderVersion;
+    if (m_version.loader.recommended) {
+        loaderVersion = "recommended";
+    } else if (m_version.loader.latest) {
+        loaderVersion = "latest";
+    } else {
+        loaderVersion = m_version.loader.version;
+    }
+    QString err;
+    auto version = APPLICATION->metadataIndex()->getVersionForLoader(uid, m_version.loader.type, loaderVersion, m_version.minecraft, err);
+    if (!err.isEmpty()) {
+        emitFailed(err);
         return Q_NULLPTR;
     }
-
-    return m_version.loader.version;
+    return version;
 }
 
 QString PackInstallTask::detectLibrary(const VersionLibrary& library)
@@ -1062,9 +1032,18 @@ void PackInstallTask::install()
     emitSucceeded();
 }
 
-static Meta::Version::Ptr getComponentVersion(const QString& uid, const QString& version)
+Meta::Version::Ptr PackInstallTask::getComponentVersion(const QString& uid, const QString& version)
 {
-    return APPLICATION->metadataIndex()->getLoadedVersion(uid, version);
+    auto newVersion = version;
+    if (uid == "net.minecraftforge") {
+        QString err;
+        newVersion = APPLICATION->metadataIndex()->getVersionForLoader(uid, "forge", version, m_version.minecraft, err);
+        if (!err.isEmpty()) {
+            emitFailed(err);
+            return Q_NULLPTR;
+        }
+    }
+    return APPLICATION->metadataIndex()->getLoadedVersion(uid, newVersion);
 }
 
 }  // namespace ATLauncher

@@ -266,56 +266,6 @@ bool FlameCreationTask::updateInstance()
     return false;
 }
 
-QString FlameCreationTask::getVersionForLoader(QString uid, QString loaderType, QString loaderVersion, QString mcVersion)
-{
-    if (loaderVersion == "recommended") {
-        auto vlist = APPLICATION->metadataIndex()->get(uid);
-        if (!vlist) {
-            setError(tr("Failed to get local metadata index for %1").arg(uid));
-            return {};
-        }
-
-        if (!vlist->isLoaded()) {
-            QEventLoop loadVersionLoop;
-            auto task = vlist->getLoadTask();
-            connect(task.get(), &Task::finished, &loadVersionLoop, &QEventLoop::quit);
-            if (!task->isRunning())
-                task->start();
-
-            loadVersionLoop.exec();
-        }
-
-        for (auto version : vlist->versions()) {
-            // first recommended build we find, we use.
-            if (!version->isRecommended())
-                continue;
-            auto reqs = version->requiredSet();
-
-            // filter by minecraft version, if the loader depends on a certain version.
-            // not all mod loaders depend on a given Minecraft version, so we won't do this
-            // filtering for those loaders.
-            if (loaderType == "forge" || loaderType == "neoforge") {
-                auto iter = std::find_if(reqs.begin(), reqs.end(), [mcVersion](const Meta::Require& req) {
-                    return req.uid == "net.minecraft" && req.equalsVersion == mcVersion;
-                });
-                if (iter == reqs.end())
-                    continue;
-            }
-            return version->descriptor();
-        }
-
-        setError(tr("Failed to find version for %1 loader").arg(loaderType));
-        return {};
-    }
-
-    if (loaderVersion.isEmpty()) {
-        emitFailed(tr("No loader version set for modpack!"));
-        return {};
-    }
-
-    return loaderVersion;
-}
-
 bool FlameCreationTask::createInstance()
 {
     QEventLoop loop;
@@ -401,9 +351,12 @@ bool FlameCreationTask::createInstance()
     components->buildingFromScratch();
     components->setComponentVersion("net.minecraft", mcVersion, true);
     if (!loaderType.isEmpty()) {
-        auto version = getVersionForLoader(loaderUid, loaderType, loaderVersion, mcVersion);
-        if (version.isEmpty())
+        QString err;
+        auto version = APPLICATION->metadataIndex()->getVersionForLoader(loaderUid, loaderType, loaderVersion, mcVersion, err);
+        if (!err.isEmpty()) {
+            setError(err);
             return false;
+        }
         components->setComponentVersion(loaderUid, version);
     }
 
