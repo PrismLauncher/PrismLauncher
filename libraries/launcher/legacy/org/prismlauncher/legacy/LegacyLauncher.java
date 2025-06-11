@@ -96,11 +96,12 @@ final class LegacyLauncher extends AbstractLauncher {
 
     @Override
     public void launch() throws Throwable {
+        Class<?> applet = ClassLoader.getSystemClassLoader().loadClass(appletClass);
         Class<?> main;
         try {
             main = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
         } catch (ClassNotFoundException e) {
-            main = findClientClass(ClassLoader.getSystemClassLoader().loadClass(appletClass));
+            main = findClientClass(applet);
         }
 
         Field gameDirField = findMinecraftGameDirField(main);
@@ -114,7 +115,7 @@ final class LegacyLauncher extends AbstractLauncher {
             System.setProperty("minecraft.applet.TargetDirectory", gameDir);
 
             try {
-                LegacyFrame window = new LegacyFrame(title, createAppletClass(appletClass));
+                LegacyFrame window = new LegacyFrame(title, createAppletInstance(applet));
 
                 window.start(user, session, width, height, maximize, serverAddress, serverPort, gameArgs.contains("--demo"));
                 return;
@@ -129,10 +130,8 @@ final class LegacyLauncher extends AbstractLauncher {
         method.invokeExact(gameArgs.toArray(new String[0]));
     }
 
-    private static Applet createAppletClass(String clazz) throws Throwable {
-        Class<?> appletClass = ClassLoader.getSystemClassLoader().loadClass(clazz);
-
-        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(appletClass, MethodType.methodType(void.class));
+    private static Applet createAppletInstance(Class<?> clazz) throws Throwable {
+        MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(clazz, MethodType.methodType(void.class));
         return (Applet) appletConstructor.invoke();
     }
 
