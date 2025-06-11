@@ -28,6 +28,7 @@ struct AssetObject {
 
     QString hash;
     qint64 size;
+    QString customUrl;
 };
 
 struct AssetsIndex {

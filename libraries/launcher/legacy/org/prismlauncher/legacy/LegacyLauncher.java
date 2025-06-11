@@ -96,7 +96,13 @@ final class LegacyLauncher extends AbstractLauncher {
 
     @Override
     public void launch() throws Throwable {
-        Class<?> main = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
+        Class<?> main;
+        try {
+            main = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
+        } catch (ClassNotFoundException e) {
+            main = findClientClass(ClassLoader.getSystemClassLoader().loadClass(appletClass));
+        }
+
         Field gameDirField = findMinecraftGameDirField(main);
 
         if (gameDirField != null) {
@@ -128,6 +134,16 @@ final class LegacyLauncher extends AbstractLauncher {
 
         MethodHandle appletConstructor = MethodHandles.lookup().findConstructor(appletClass, MethodType.methodType(void.class));
         return (Applet) appletConstructor.invoke();
+    }
+
+    private static Class<?> findClientClass(Class<?> appletClass) {
+        for (Field field : appletClass.getDeclaredFields()) {
+            if (Runnable.class.isAssignableFrom(field.getType())) {
+                return field.getType();
+            }
+        }
+
+        throw new RuntimeException("Failed to find client class in applet class " + appletClass.getName());
     }
 
     private static Field findMinecraftGameDirField(Class<?> clazz) {
