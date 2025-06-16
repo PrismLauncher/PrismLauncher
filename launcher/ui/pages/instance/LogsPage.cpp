@@ -46,12 +46,10 @@
 #include <GZip.h>
 #include <logs/LogParser.h>
 #include <QDir>
-#include <QDirIterator>
 #include <QFileSystemWatcher>
 #include <QIdentityProxyModel>
 #include <QMessageBox>
 #include <QShortcut>
-#include <QUrl>
 
 LogsPage::LogsPage(InstancePtr instance, QWidget* parent)
     : QWidget(parent)
