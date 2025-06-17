@@ -99,8 +99,11 @@ final class LegacyLauncher extends AbstractLauncher {
         Class<?> applet = ClassLoader.getSystemClassLoader().loadClass(appletClass);
         Class<?> main;
         try {
+            // Try the main class given by parameters
             main = ClassLoader.getSystemClassLoader().loadClass(mainClassName);
         } catch (ClassNotFoundException e) {
+            // If it failed (net.minecraft.client.Minecraft was typically obfuscated when the Applet existed),
+            // detect from the Applet. Required for meta sources that strip or omit the main class, such as OmniArchive.
             main = findClientClass(applet);
         }
 
