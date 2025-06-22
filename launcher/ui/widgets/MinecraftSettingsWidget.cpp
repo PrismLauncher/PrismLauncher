@@ -284,7 +284,8 @@ void MinecraftSettingsWidget::loadSettings()
         m_ui->liteLoader->blockSignals(false);
 
         // Shared folders
-        m_ui->sharedScreenshotsFolder->initialize(settings->get("UseSharedScreenshotsFolder").toBool(), settings->get("SharedScreenshotsPath").toString());
+        m_ui->sharedScreenshotsFolder->initialize(settings->get("UseSharedScreenshotsFolder").toBool(),
+                                                  settings->get("SharedScreenshotsPath").toString());
         m_ui->sharedSavesFolder->initialize(settings->get("UseSharedSavesFolder").toBool(), settings->get("SharedSavesPath").toString());
         m_ui->sharedResourcePacksFolder->initialize(settings->get("UseSharedResourcePacksFolder").toBool(),
                                                     settings->get("SharedResourcePacksPath").toString());

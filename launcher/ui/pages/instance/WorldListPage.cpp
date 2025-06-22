@@ -48,10 +48,10 @@
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QTreeView>
 #include <Qt>
-#include <QPushButton>
 
 #include "FileSystem.h"
 #include "tools/MCEditTool.h"

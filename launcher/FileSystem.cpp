@@ -680,11 +680,11 @@ bool interactiveMove(const QString& source, const QString& destination, bool rec
 {
     const QFileInfo sourceInfo(source);
 
-            // Make sure the source exists.
+    // Make sure the source exists.
     if (!sourceInfo.exists())
         return false;
 
-            // Recursive doesn't make sense if the source isn't a directory.
+    // Recursive doesn't make sense if the source isn't a directory.
     if (recursive && sourceInfo.isDir()) {
         QDirIterator sourceIt(source, QDir::Filter::Files | QDir::Filter::Dirs | QDir::Filter::Hidden | QDir::Filter::NoDotAndDotDot);
 
@@ -700,7 +700,7 @@ bool interactiveMove(const QString& source, const QString& destination, bool rec
         FileConflictDialog dialog(source, destination, true, parent);
         FileConflictDialog::Result result = dialog.execWithResult();
 
-        switch(result) {
+        switch (result) {
             case FileConflictDialog::Cancel:
                 return false;
             case FileConflictDialog::ChooseDestination:
@@ -1751,10 +1751,15 @@ QString getSymLinkTarget(const QString& path)
     return QFileInfo(path).symLinkTarget();
 }
 
-bool tryCreateSymlink(const QString& source, const QString& destination, const QString& symlinkName /* = "symbolic link" */) {
+bool tryCreateSymlink(const QString& source, const QString& destination, const QString& symlinkName /* = "symbolic link" */)
+{
     // Make sure that symbolic links are supported.
     if (!FS::canLink(source, destination)) {
-        CustomMessageBox::selectable(nullptr, QObject::tr("Failed"), QObject::tr("Failed to create %1.\nSymbolic links are not supported on the filesystem").arg(symlinkName), QMessageBox::Warning, QMessageBox::Ok)->exec();
+        CustomMessageBox::selectable(
+            nullptr, QObject::tr("Failed"),
+            QObject::tr("Failed to create %1.\nSymbolic links are not supported on the filesystem").arg(symlinkName), QMessageBox::Warning,
+            QMessageBox::Ok)
+            ->exec();
         return false;
     }
 
@@ -1770,7 +1775,11 @@ bool tryCreateSymlink(const QString& source, const QString& destination, const Q
     } else if (QFileInfo::exists(destination)) {
         if (!FS::checkFolderPathEmpty(destination)) {
             if (!interactiveMove(destination, source, true)) {
-                CustomMessageBox::selectable(nullptr, QObject::tr("Failed"), QObject::tr("Failed to create %1.\nEnsure that \"%2\" is empty.").arg(symlinkName).arg(destination), QMessageBox::Warning, QMessageBox::Ok)->exec();
+                CustomMessageBox::selectable(
+                    nullptr, QObject::tr("Failed"),
+                    QObject::tr("Failed to create %1.\nEnsure that \"%2\" is empty.").arg(symlinkName).arg(destination),
+                    QMessageBox::Warning, QMessageBox::Ok)
+                    ->exec();
                 return false;
             }
         }
@@ -1780,7 +1789,10 @@ bool tryCreateSymlink(const QString& source, const QString& destination, const Q
 
     // Make sure the source folder exists
     if (!FS::ensureFolderPathExists(source)) {
-        CustomMessageBox::selectable(nullptr, QObject::tr("Failed"), QObject::tr("Failed to create %1.\nEnsure that \"%2\" exists.").arg(symlinkName).arg(source), QMessageBox::Warning, QMessageBox::Ok)->exec();
+        CustomMessageBox::selectable(nullptr, QObject::tr("Failed"),
+                                     QObject::tr("Failed to create %1.\nEnsure that \"%2\" exists.").arg(symlinkName).arg(source),
+                                     QMessageBox::Warning, QMessageBox::Ok)
+            ->exec();
         return false;
     }
 
@@ -1788,11 +1800,13 @@ bool tryCreateSymlink(const QString& source, const QString& destination, const Q
     folderLink.linkRecursively(false);
 
     if (!folderLink()) {
-        CustomMessageBox::selectable(nullptr, QObject::tr("Failed"), QObject::tr("Failed to create %1. Error %2: %3")
-            .arg(symlinkName)
-            .arg(folderLink.getOSError().value())
-            .arg(folderLink.getOSError().message().c_str()),
-        QMessageBox::Warning, QMessageBox::Ok)->exec();
+        CustomMessageBox::selectable(nullptr, QObject::tr("Failed"),
+                                     QObject::tr("Failed to create %1. Error %2: %3")
+                                         .arg(symlinkName)
+                                         .arg(folderLink.getOSError().value())
+                                         .arg(folderLink.getOSError().message().c_str()),
+                                     QMessageBox::Warning, QMessageBox::Ok)
+            ->exec();
     }
 
     return true;

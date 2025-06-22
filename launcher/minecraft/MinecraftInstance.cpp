@@ -1331,15 +1331,13 @@ bool MinecraftInstance::updateSharedDirectories()
     bool success = true;
     for (const auto& [useSetting, source, destination] : sharedDirectories) {
         // Create symlink if useSetting is true, remove symlink if false.
-        if (m_settings->get(useSetting).toBool())
-        {
+        if (m_settings->get(useSetting).toBool()) {
             // Try to create symlink, set setting to false if failed.
-            if(!FS::tryCreateSymlink(source, destination, tr("shared folder"))) {
+            if (!FS::tryCreateSymlink(source, destination, tr("shared folder"))) {
                 m_settings->set(useSetting, false);
                 success = false;
             }
-        }
-        else {
+        } else {
             // Safety check
             if (FS::isSymLink(destination)) {
                 success = FS::deletePath(destination) && success;
